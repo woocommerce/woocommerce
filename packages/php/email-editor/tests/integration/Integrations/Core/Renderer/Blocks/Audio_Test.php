@@ -37,18 +37,6 @@ class Audio_Test extends \Email_Editor_Integration_Test_Case {
 		'innerHTML' => '<figure class="wp-block-audio"><audio controls src="https://example.com/podcast.mp3"></audio></figure>',
 	);
 
-	/**
-	 * Audio block configuration with attachment ID
-	 *
-	 * @var array
-	 */
-	private $parsed_audio_with_id = array(
-		'blockName' => 'core/audio',
-		'attrs'     => array(
-			'id' => 159,
-		),
-		'innerHTML' => '<figure class="wp-block-audio"><audio controls src="https://example.com/audio.mp3"></audio></figure>',
-	);
 
 	/**
 	 * Rendering context instance.
@@ -172,36 +160,6 @@ class Audio_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'Listen to the audio', $rendered );
 	}
 
-	/**
-	 * Test that audio block handles attachment ID and extracts URL
-	 */
-	public function test_handles_attachment_id_and_extracts_url(): void {
-		// Mock wp_get_attachment_url to return a test URL.
-		$this->mock_wp_get_attachment_url( 159, 'https://example.com/audio-from-library.mp3' );
-
-		// Mock get_post_meta to return empty metadata (no duration).
-		$this->mock_get_post_meta( 159, '_wp_attachment_metadata', true, array() );
-
-		$rendered = $this->audio_renderer->render( $this->parsed_audio_with_id['innerHTML'], $this->parsed_audio_with_id, $this->rendering_context );
-
-		$this->assertStringContainsString( 'https://example.com/audio-from-library.mp3', $rendered );
-		$this->assertStringContainsString( 'Listen to the audio', $rendered );
-	}
-
-	/**
-	 * Test that audio block includes duration when available
-	 */
-	public function test_includes_duration_when_available(): void {
-		// Mock wp_get_attachment_url to return a test URL.
-		$this->mock_wp_get_attachment_url( 159, 'https://example.com/audio-from-library.mp3' );
-
-		// Mock get_post_meta to return metadata with duration.
-		$this->mock_get_post_meta( 159, '_wp_attachment_metadata', true, array( 'length_formatted' => '2:30' ) );
-
-		$rendered = $this->audio_renderer->render( $this->parsed_audio_with_id['innerHTML'], $this->parsed_audio_with_id, $this->rendering_context );
-
-		$this->assertStringContainsString( 'Listen to the audio (2:30)', $rendered );
-	}
 
 	/**
 	 * Test that audio block handles external URLs without duration
@@ -212,31 +170,5 @@ class Audio_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'https://example.com/podcast.mp3', $rendered );
 		$this->assertStringContainsString( 'Listen to the audio', $rendered );
 		$this->assertStringNotContainsString( 'Listen to the audio (', $rendered );
-	}
-
-	/**
-	 * Mock wp_get_attachment_url function
-	 *
-	 * @param int    $attachment_id Attachment ID.
-	 * @param string $url URL to return.
-	 */
-	private function mock_wp_get_attachment_url( int $attachment_id, string $url ): void {
-		// This would need to be implemented based on the testing framework.
-		// For now, we'll skip these tests that require WordPress function mocking.
-		$this->markTestSkipped( 'WordPress function mocking not implemented in this test framework' );
-	}
-
-	/**
-	 * Mock get_post_meta function
-	 *
-	 * @param int    $post_id Post ID.
-	 * @param string $key Meta key.
-	 * @param bool   $single Single value.
-	 * @param mixed  $value Value to return.
-	 */
-	private function mock_get_post_meta( int $post_id, string $key, bool $single, $value ): void {
-		// This would need to be implemented based on the testing framework.
-		// For now, we'll skip these tests that require WordPress function mocking.
-		$this->markTestSkipped( 'WordPress function mocking not implemented in this test framework' );
 	}
 }

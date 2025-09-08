@@ -16,6 +16,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
@@ -66,6 +67,7 @@ class Initializer {
 	const RENDER_ONLY_BLOCK_TYPES = array(
 		'core/media-text',
 		'core/audio',
+		'core/embed',
 	);
 
 	/**
@@ -217,6 +219,9 @@ class Initializer {
 				break;
 			case 'core/audio':
 				$renderer = new Audio();
+				break;
+			case 'core/embed':
+				$renderer = new Embed();
 				break;
 			default:
 				$renderer = new Fallback();
