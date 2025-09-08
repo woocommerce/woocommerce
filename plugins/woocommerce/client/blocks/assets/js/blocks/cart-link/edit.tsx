@@ -72,6 +72,8 @@ const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 				className="wc-block-cart-link"
 				href={ '#cart-pseudo-link' }
 				onClick={ ( event ) => event.preventDefault() }
+				aria-disabled={ true }
+				tabIndex={ -1 }
 			>
 				<QuantityBadge
 					icon={ cartIcon }
