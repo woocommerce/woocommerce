@@ -253,6 +253,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					$variation_data[ $variation->get_id() ] = array(
 						'is_in_stock' => $variation->is_in_stock(),
 						'attributes'  => $variation->get_variation_attributes(),
+						'type'        => $variation->get_type(),
 					);
 				}
 

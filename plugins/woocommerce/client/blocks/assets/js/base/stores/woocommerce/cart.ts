@@ -48,6 +48,9 @@ export type ProductData = {
 	step?: number;
 	variations?: {
 		[ variationId: number ]: {
+			attributes: Record< string, string >;
+			is_in_stock: boolean;
+			type: string;
 			price_html?: string;
 			image_id?: number;
 			availability?: string;
@@ -57,8 +60,6 @@ export type ProductData = {
 			min?: number;
 			max?: number;
 			step?: number;
-			attributes: Record< string, string >;
-			is_in_stock: boolean;
 		};
 	};
 };
