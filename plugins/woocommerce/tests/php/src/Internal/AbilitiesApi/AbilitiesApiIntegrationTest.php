@@ -27,7 +27,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		 * WordPress context, which may require manual loading in test environments.
 		 */
 		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
+			$bootstrap_file = __DIR__ . '/../../../../../vendor/wordpress/abilities-api/includes/bootstrap.php';
 			if ( file_exists( $bootstrap_file ) ) {
 				require $bootstrap_file;
 			}

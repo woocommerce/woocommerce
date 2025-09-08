@@ -36,6 +36,10 @@
 		{
 			"type": "vcs",
 			"url": "https://github.com/WordPress/mcp-adapter.git"
+		},
+		{
+			"type": "vcs",
+			"url": "https://github.com/WordPress/abilities-api"
 		}
 	],
 	"require": {
