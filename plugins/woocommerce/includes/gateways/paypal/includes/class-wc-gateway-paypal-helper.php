@@ -44,4 +44,13 @@ class WC_Gateway_Paypal_Helper {
 
 		return empty( $api_username ) && empty( $api_password ) && empty( $api_signature );
 	}
+
+	/**
+	 * Feature flag for Orders v2.
+	 *
+	 * @return bool
+	 */
+	public static function is_orders_v2_feature_flag_enabled() {
+		return false;
+	}
 }

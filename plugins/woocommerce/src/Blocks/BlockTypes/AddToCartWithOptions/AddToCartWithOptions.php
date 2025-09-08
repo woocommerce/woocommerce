@@ -90,12 +90,12 @@ class AddToCartWithOptions extends AbstractBlock {
 	 */
 	private function is_child_product_purchasable( \WC_Product $product ) {
 		// Skip variable products.
-		if ( $product->is_type( 'variable' ) ) {
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			return false;
 		}
 
 		// Skip grouped products.
-		if ( $product->is_type( 'grouped' ) ) {
+		if ( $product->is_type( ProductType::GROUPED ) ) {
 			return false;
 		}
 
@@ -187,7 +187,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						$context = wp_interactivity_get_context();
 						$product = wc_get_product( $context['productId'] );
 
-						if ( $product instanceof \WC_Product && ( $product->is_type( 'grouped' ) || $product->has_options() ) ) {
+						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
 						}
 						return true;
@@ -200,6 +200,10 @@ class AddToCartWithOptions extends AbstractBlock {
 				'woocommerce/add-to-cart-with-options',
 				array(
 					'errorMessages' => array(
+						'invalidQuantities'                => esc_html__(
+							'Please select a valid quantity to add to the cart.',
+							'woocommerce'
+						),
 						'groupedProductAddToCartMissingItems' => esc_html__(
 							'Please select some products to add to the cart.',
 							'woocommerce'
@@ -227,12 +231,14 @@ class AddToCartWithOptions extends AbstractBlock {
 				'validationErrors' => array(),
 			);
 
-			if ( $product->is_type( 'variable' ) ) {
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
-					$default_variation_quantity                  = $variation->get_min_purchase_quantity();
-					$context['quantity'][ $variation->get_id() ] = $default_variation_quantity;
+					// We intentionally set the default quantity to the product's min purchase quantity
+					// instead of the variation's min purchase quantity. That's because we use the same
+					// input for all variations, so we want quantities to be in sync.
+					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 					$context['availableVariations'][]            = array(
 						'variation_id' => $variation->get_id(),
 						'attributes'   => $variation->get_variation_attributes(),
@@ -241,7 +247,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 			}
 
-			if ( $product->is_type( 'grouped' ) ) {
+			if ( $product->is_type( ProductType::GROUPED ) ) {
 				// Add context for purchasable child products.
 				$children_product_data = array();
 				foreach ( $product->get_children() as $child_product_id ) {
@@ -258,7 +264,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				}
 
 				$context['groupedProductIds'] = array_keys( $children_product_data );
-				wp_interactivity_state(
+				wp_interactivity_config(
 					'woocommerce',
 					array(
 						'products' => $children_product_data,
@@ -286,21 +292,6 @@ class AddToCartWithOptions extends AbstractBlock {
 						}
 					}
 				}
-			} else {
-				$product_quantity_constraints = Utils::get_product_quantity_constraints( $product );
-
-				wp_interactivity_state(
-					'woocommerce',
-					array(
-						'products' => array(
-							$product->get_id() => array(
-								'min'  => $product_quantity_constraints['min'],
-								'max'  => $product_quantity_constraints['max'],
-								'step' => $product_quantity_constraints['step'],
-							),
-						),
-					)
-				);
 			}
 
 			$hooks_before = '';
@@ -483,11 +474,8 @@ class AddToCartWithOptions extends AbstractBlock {
 				'style'                     => esc_attr( $classes_and_styles['styles'] ),
 				'data-wp-interactive'       => 'woocommerce/add-to-cart-with-options',
 				'data-wp-class--is-invalid' => '!state.isFormValid',
-				'data-wp-context'           => wp_json_encode(
-					$context,
-					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-				),
 			);
+			$context_directive  = wp_interactivity_data_wp_context( $context );
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
@@ -535,7 +523,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			}
 
 			$form_html = sprintf(
-				'<form %1$s>%2$s%3$s%4$s%5$s</form>',
+				'<form %1$s %2$s>%3$s%4$s%5$s%6$s</form>',
 				get_block_wrapper_attributes(
 					array_merge(
 						$wrapper_attributes,
@@ -553,6 +541,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						)
 					)
 				),
+				$context_directive,
 				$hooks_before,
 				$template_part_blocks,
 				$hooks_after,
@@ -612,13 +601,15 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @return string The rendered store notices HTML.
 	 */
 	protected function render_interactivity_notices_region( $form_html ) {
-		$context = array(
-			'notices' => array(),
+		$context_directive = wp_interactivity_data_wp_context(
+			array(
+				'notices' => array(),
+			)
 		);
 
 		ob_start();
 		?>
-		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide" data-wp-context='<?php echo wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ); ?>'>
+		<div data-wp-interactive="woocommerce/store-notices" class="wc-block-components-notices alignwide" <?php echo $context_directive; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
 				<div
 					class="wc-block-components-notice-banner"

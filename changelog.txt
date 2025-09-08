@@ -1,5 +1,13 @@
 == Changelog ==
 
+= 10.1.2 2025-08-27 =
+
+**WooCommerce**
+
+* Fix - Prevent woocommerce_cancel_unpaid_orders being queued as unique so it recurs after the stock hold limit [#60626](https://github.com/woocommerce/woocommerce/pull/60626)
+* Fix - Revert to using usermeta to store persistent carts [#60605](https://github.com/woocommerce/woocommerce/pull/60605)
+
+
 = 10.1.1 2025-08-20 =
 
 **WooCommerce**

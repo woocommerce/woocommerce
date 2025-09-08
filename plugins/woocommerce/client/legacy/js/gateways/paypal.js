@@ -8,15 +8,7 @@ jQuery(function ($) {
 		}
 
 		const buttons = paypal.Buttons( {
-			style: {
-				layout: 'vertical',
-				color: 'gold',
-				shape: 'rect',
-				label: 'paypal'
-			},
-
 			async createOrder() {
-				// form data
 				const formData = new FormData();
 				formData.append( 'security', paypal_standard.create_order_nonce );
 				
@@ -64,8 +56,8 @@ jQuery(function ($) {
 		});
 	}
 
-	// Re-render when WooCommerce updates the checkout.
-	$( document.body ).on( 'updated_checkout payment_method_selected', function () {
+	// Re-render when cart is updated and the html is rerendered on the Cart page.
+	$( document.body ).on( 'updated_cart_totals', function () {
 		// If the container was replaced, re-render PayPal buttons
 		const buttonsContainer = document.getElementById( containerSelector );
 		if ( buttonsContainer && ! buttonsContainer.querySelector( 'iframe' ) ) {

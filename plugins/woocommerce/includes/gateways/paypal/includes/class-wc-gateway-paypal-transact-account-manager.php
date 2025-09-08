@@ -150,7 +150,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * Get the Transact provider account data. Performs a fetch if the account
 	 * is not in cache or expired.
 	 *
-	 * @return array|null Returns null if the provider account cannot be retrieved.
+	 * @return bool|null Returns null if the provider account cannot be retrieved.
 	 */
 	public function get_provider_account_data() {
 		// Get provider account from cache. If not found, fetch/create it.
@@ -343,13 +343,13 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		return $merchant_account;
+		return $merchant_account['account'] ?? null;
 	}
 
 	/**
 	 * Get the provider account from the database cache.
 	 *
-	 * @return array|null The provider account data, or null if the cache is
+	 * @return bool|null The provider account data, or null if the cache is
 	 *                    empty or expired.
 	 */
 	private function get_provider_account_from_cache() {
@@ -360,7 +360,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			return null;
 		}
 
-		return $provider_account;
+		return $provider_account['account'] ?? null;
 	}
 
 	/**

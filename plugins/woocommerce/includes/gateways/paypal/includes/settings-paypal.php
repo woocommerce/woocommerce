@@ -65,6 +65,13 @@ $settings = array(
 			'authorization' => __( 'Authorize', 'woocommerce' ),
 		),
 	),
+	'paypal_buttons'   => array(
+		'title'       => __( 'PayPal Buttons', 'woocommerce' ),
+		'type'        => 'checkbox',
+		'label'       => __( 'Enable PayPal Buttons', 'woocommerce' ),
+		'default'     => 'yes',
+		'description' => __( 'Enable PayPal buttons to offer PayPal, Venmo and Pay Later as express checkout options on product, cart, and checkout pages.', 'woocommerce' ),
+	),
 	'invoice_prefix'   => array(
 		'title'       => __( 'Invoice prefix', 'woocommerce' ),
 		'type'        => 'text',
@@ -109,6 +116,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'ipn_notification'      => array(
 		'title'       => __( 'IPN email notifications', 'woocommerce' ),
@@ -116,6 +124,7 @@ $legacy_settings = array(
 		'label'       => __( 'Enable IPN email notifications', 'woocommerce' ),
 		'default'     => 'yes',
 		'description' => __( 'Send notifications when an IPN is received from PayPal indicating refunds, chargebacks and cancellations.', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'receiver_email'        => array(
 		'title'       => __( 'Receiver email', 'woocommerce' ),
@@ -124,6 +133,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => 'you@youremail.com',
+		'is_legacy'   => true,
 	),
 	'identity_token'        => array(
 		'title'       => __( 'PayPal identity token', 'woocommerce' ),
@@ -132,12 +142,14 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => '',
+		'is_legacy'   => true,
 	),
 	'api_details'           => array(
 		'title'       => __( 'API credentials', 'woocommerce' ),
 		'type'        => 'title',
 		/* translators: %s: URL */
 		'description' => sprintf( __( 'Enter your PayPal API credentials to process refunds via PayPal. Learn how to access your <a href="%s">PayPal API Credentials</a>.', 'woocommerce' ), 'https://developer.paypal.com/webapps/developer/docs/classic/api/apiCredentials/#create-an-api-signature' ),
+		'is_legacy'   => true,
 	),
 	'api_username'          => array(
 		'title'       => __( 'Live API username', 'woocommerce' ),
@@ -146,6 +158,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'api_password'          => array(
 		'title'       => __( 'Live API password', 'woocommerce' ),
@@ -154,6 +167,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'api_signature'         => array(
 		'title'       => __( 'Live API signature', 'woocommerce' ),
@@ -162,6 +176,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'sandbox_api_username'  => array(
 		'title'       => __( 'Sandbox API username', 'woocommerce' ),
@@ -170,6 +185,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'sandbox_api_password'  => array(
 		'title'       => __( 'Sandbox API password', 'woocommerce' ),
@@ -178,6 +194,7 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 	'sandbox_api_signature' => array(
 		'title'       => __( 'Sandbox API signature', 'woocommerce' ),
@@ -186,18 +203,8 @@ $legacy_settings = array(
 		'default'     => '',
 		'desc_tip'    => true,
 		'placeholder' => __( 'Optional', 'woocommerce' ),
+		'is_legacy'   => true,
 	),
 );
 
-/**
- * Filters whether to show legacy settings.
- *
- * @param bool $show_legacy_settings Whether to show legacy settings.
- * @since 10.2.0
- */
-if ( apply_filters( 'woocommerce_paypal_show_legacy_settings', true ) ) {
-	$settings = array_merge( $settings, $legacy_settings );
-}
-
-
-return $settings;
+return array_merge( $settings, $legacy_settings );

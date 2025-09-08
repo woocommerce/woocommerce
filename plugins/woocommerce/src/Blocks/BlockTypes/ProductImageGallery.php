@@ -53,9 +53,9 @@ class ProductImageGallery extends AbstractBlock {
 	 */
 	public function enqueue_legacy_assets() {
 		// Legacy script dependencies for backward compatibility.
-		wp_enqueue_script( 'zoom' );
-		wp_enqueue_script( 'flexslider' );
-		wp_enqueue_script( 'photoswipe-ui-default' );
+		wp_enqueue_script( 'wc-zoom' );
+		wp_enqueue_script( 'wc-flexslider' );
+		wp_enqueue_script( 'wc-photoswipe-ui-default' );
 		wp_enqueue_style( 'photoswipe-default-skin' );
 		wp_enqueue_script( 'wc-single-product' );
 

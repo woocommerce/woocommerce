@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select, dispatch } from '@wordpress/data';
 import {
 	StrictMode,
 	createRoot,
@@ -10,6 +10,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
 /**
@@ -32,6 +33,7 @@ import {
 	useRemoveSavingFailedNotices,
 	useFilterEditorContentStylesheets,
 } from './hooks';
+import { cleanupConfigurationChanges } from './config-tools';
 
 function Editor( {
 	postId,
@@ -44,8 +46,8 @@ function Editor( {
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
-		( select ) => ( {
-			settings: select( storeName ).getInitialEditorSettings(),
+		( sel ) => ( {
+			settings: sel( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
@@ -138,8 +140,19 @@ export function ExperimentalEmailEditor( {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
+		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		onInit();
 		setIsInitialized( true );
+		// Cleanup global editor settings
+		return () => {
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
+		};
 	}, [] );
 
 	const WrappedEditor = applyFilters(
