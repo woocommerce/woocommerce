@@ -74,10 +74,12 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						Number( id ),
 						productDataState.selectedAttributes
 					);
+					if ( ! productObject ) {
+						return false;
+					}
 					return (
 						qty !== 0 &&
-						( qty < ( productObject?.min ?? 0 ) ||
-							qty > ( productObject?.max ?? Infinity ) )
+						( qty < productObject.min || qty > productObject.max )
 					);
 				} );
 
