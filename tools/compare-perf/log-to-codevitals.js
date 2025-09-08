@@ -30,11 +30,11 @@ const keys = [
 	// 'totalBlockingTime',
 	'largestContentfulPaint',
 	'serverResponse',
-	// 'firstPaint',
-	// 'domContentLoaded',
-	// 'loaded',
-	// 'firstContentfulPaint',
-	// 'firstBlock',
+	'firstPaint',
+	'domContentLoaded',
+	'loaded',
+	'firstContentfulPaint',
+	'firstBlock',
 ];
 
 const data = JSON.stringify( {
