@@ -19,6 +19,7 @@
 	"devDependencies": {
 		"@types/node": "20.x.x",
 		"@wordpress/stylelint-config": "^21.36.0",
+		"@wordpress/scripts": "^30.23.0",
 		"autoprefixer": "9.8.6",
 		"browserslist": "4.19.3",
 		"caniuse-lite": "1.0.30001146",
