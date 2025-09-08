@@ -200,31 +200,32 @@ class FeaturesController {
 	 * @param string $slug The ID slug of the feature.
 	 * @param string $name The name of the feature that will appear on the Features screen and elsewhere.
 	 * @param array  $args {
-	 *     Optional. Properties that make up the feature definition. Each of these properties can also be set as a
+	 *     Properties that make up the feature definition. Each of these properties can also be set as a
 	 *     callback function, as long as that function returns the specified type.
-	 *
-	 *     @type array[] $additional_settings An array of definitions for additional settings controls related to
-	 *                                        the feature that will display on the Features screen. See the Settings API
-	 *                                        for the schema of these props.
-	 *     @type string  $description         A brief description of the feature, used as an input label if the feature
-	 *                                        setting is a checkbox.
-	 *     @type bool    $disabled            True to disable the setting field for this feature on the Features screen,
-	 *                                        so it can't be changed.
-	 *     @type bool    $disable_ui          Set to true to hide the setting field for this feature on the
-	 *                                        Features screen. Defaults to false.
-	 *     @type bool    $enabled_by_default  Set to true to have this feature by opt-out instead of opt-in.
-	 *                                        Defaults to false.
-	 *     @type bool    $is_experimental     Set to true to display this feature under the "Experimental" heading on
-	 *                                        the Features screen. Features set to experimental are also omitted from
-	 *                                        the features list in some cases. Defaults to true.
-	 *     @type bool    $is_legacy           Set to true if this feature existed before the FeaturesController class
-	 *                                        was introduced. Features set to legacy also do not produce warnings about
-	 *                                        incompatible plugins. Defaults to false.
-	 *     @type string  $option_key          The key name for the option that enables/disables the feature.
-	 *     @type int     $order               The order that the feature will appear in the list on the Features screen.
-	 *                                        Higher number = higher in the list. Defaults to 10.
-	 *     @type array   $setting             The properties used by the Settings API to render the setting control on
-	 *                                        the Features screen. See the Settings API for the schema of these props.
+     *
+	 *     @type string  $default_plugin_compatibility The default plugin compatibility for the feature: either 'compatible' or 'incompatible'. Required.
+	 *     @type array[] $additional_settings          An array of definitions for additional settings controls related to
+	 *                                                 the feature that will display on the Features screen. See the Settings API
+	 *                                                 for the schema of these props.
+	 *     @type string  $description                  A brief description of the feature, used as an input label if the feature
+	 *                                                 setting is a checkbox.
+	 *     @type bool    $disabled                     True to disable the setting field for this feature on the Features screen,
+	 *                                                 so it can't be changed.
+	 *     @type bool    $disable_ui                   Set to true to hide the setting field for this feature on the
+	 *                                                 Features screen. Defaults to false.
+	 *     @type bool    $enabled_by_default           Set to true to have this feature by opt-out instead of opt-in.
+	 *                                                 Defaults to false.
+	 *     @type bool    $is_experimental              Set to true to display this feature under the "Experimental" heading on
+	 *                                                 the Features screen. Features set to experimental are also omitted from
+	 *                                                 the features list in some cases. Defaults to true.
+	 *     @type bool    $skip_compatibility_checks    Set to true if the feature should not produce warnings about incompatible plugins.
+	 *                                                 Defaults to false.
+	 *     @type string  $learn_more_url               The URL to the learn more page for the feature.
+	 *     @type string  $option_key                   The key name for the option that enables/disables the feature.
+	 *     @type int     $order                        The order that the feature will appear in the list on the Features screen.
+	 *                                                 Higher number = higher in the list. Defaults to 10.
+	 *     @type array   $setting                      The properties used by the Settings API to render the setting control on
+	 *                                                 the Features screen. See the Settings API for the schema of these props.
 	 * }
 	 *
 	 * @return void
