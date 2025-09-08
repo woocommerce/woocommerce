@@ -19,10 +19,7 @@ import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import {
-	getMatchedVariation,
-	type AvailableVariation,
-} from '../../../base/utils/variations/get-matched-variation';
+import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {
@@ -256,7 +253,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
-				const { quantity } = getContext< Context >();
 				const { ref } = getElement();
 
 				if ( ! ( ref instanceof HTMLInputElement ) ) {
@@ -274,6 +270,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				);
 
 				if ( productObject ) {
+					const { quantity } = getContext< Context >();
 					const currentValue = quantity[ productObject?.id ];
 					const { min, max } = productObject;
 
