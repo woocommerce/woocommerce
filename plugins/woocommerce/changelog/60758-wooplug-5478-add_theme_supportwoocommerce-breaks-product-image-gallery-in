@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: ensure we only dequeue legacy assets for block themes.

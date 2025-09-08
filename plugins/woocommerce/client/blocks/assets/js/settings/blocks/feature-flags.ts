@@ -22,10 +22,10 @@ export const isExperimentalBlocksEnabled = (): boolean => {
 	return experimentalBlocksEnabled;
 };
 
-export const isExperimentalWcRestApiEnabled = (): boolean => {
-	const { experimentalWcRestApi } = getSetting( 'wcBlocksConfig', {
-		experimentalWcRestApi: false,
+export const isExperimentalWcRestApiV4Enabled = (): boolean => {
+	const { experimentalWcRestApiV4 } = getSetting( 'wcBlocksConfig', {
+		experimentalWcRestApiV4: false,
 	} ) as WcBlocksConfig;
 
-	return experimentalWcRestApi;
+	return experimentalWcRestApiV4;
 };

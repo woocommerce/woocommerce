@@ -21,7 +21,7 @@ export interface WcBlocksConfig {
 	restApiRoutes: Record< string, string[] >;
 	wordCountType: WordCountType;
 	experimentalBlocksEnabled?: boolean;
-	experimentalWcRestApi?: boolean;
+	experimentalWcRestApiV4?: boolean;
 }
 
 export const blocksConfig = getSetting( 'wcBlocksConfig', {

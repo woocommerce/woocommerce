@@ -1,15 +1,11 @@
 /**
- * External dependencies
- */
-import { addAction } from '@wordpress/hooks';
-
-/**
  * Internal dependencies
  */
 import {
 	registerEntityAction,
 	unregisterEntityAction,
 } from '../../private-apis';
+import { addActionForEmail } from '../../config-tools/filters';
 import getTrashEmailPostAction from '../../components/header/trash-email-post';
 
 const removeDefaultMoveToTrashActionAddCustom = ( postType: string ) => {
@@ -22,7 +18,7 @@ const removeDefaultMoveToTrashActionAddCustom = ( postType: string ) => {
 
 function modifyMoveToTrashAction() {
 	// Available in WordPress 6.8+
-	addAction(
+	addActionForEmail(
 		'core.registerPostTypeSchema',
 		'woocommerce-email-editor/modify-move-to-trash-action',
 		( postType ) => {
@@ -31,7 +27,7 @@ function modifyMoveToTrashAction() {
 	);
 
 	// Support for WordPress 6.7+
-	addAction(
+	addActionForEmail(
 		'core.registerPostTypeActions',
 		'woocommerce-email-editor/modify-move-to-trash-action',
 		( postType ) => {
