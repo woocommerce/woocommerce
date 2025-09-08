@@ -56,7 +56,6 @@ const data = JSON.stringify( {
 							? value.q50
 							: Number( value ).toFixed( 3 ),
 					] )
-
 			),
 		};
 	}, {} ),
