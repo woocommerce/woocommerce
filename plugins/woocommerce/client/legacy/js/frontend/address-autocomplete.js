@@ -165,6 +165,9 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			addressInputs[ type ][ 'address_1' ] = document.getElementById(
 				`${ type }_address_1`
 			);
+			addressInputs[ type ][ 'address_2' ] = document.getElementById(
+				`${ type }_address_2`
+			);
 			addressInputs[ type ][ 'city' ] = document.getElementById(
 				`${ type }_city`
 			);
@@ -183,6 +186,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		addressTypes.forEach( ( type ) => {
 			cacheAddressFields( type );
 			const addressInput = addressInputs[ type ][ 'address_1' ];
+			const address2Input = addressInputs[ type ][ 'address_2' ];
 			const cityInput = addressInputs[ type ][ 'city' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
 			const postcodeInput = addressInputs[ type ][ 'postcode' ];
@@ -218,6 +222,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 				addressInputs[ type ] = {};
 				addressInputs[ type ][ 'address_1' ] = addressInput;
+				addressInputs[ type ][ 'address_2' ] = address2Input;
 				addressInputs[ type ][ 'city' ] = cityInput;
 				addressInputs[ type ][ 'country' ] = countryInput;
 				addressInputs[ type ][ 'postcode' ] = postcodeInput;
@@ -738,6 +743,9 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 						addressInputs[ type ][ 'address_2' ],
 						addressData.address_2
 					);
+				} else {
+					// Clear address_2 if not provided in address data
+					setFieldValue( addressInputs[ type ][ 'address_2' ], '' );
 				}
 				if ( addressData.city ) {
 					setFieldValue(
