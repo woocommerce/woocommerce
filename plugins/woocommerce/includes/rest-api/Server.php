@@ -208,6 +208,7 @@ class Server {
 			'ping'         => 'WC_REST_Ping_V4_Controller',
 			'fulfillments' => 'WC_REST_Fulfillments_V4_Controller',
 			'products'     => 'WC_REST_Products_V4_Controller',
+			'orders'       => 'Automattic\WooCommerce\RestApi\V4\Orders\Controller',
 		);
 	}
 
