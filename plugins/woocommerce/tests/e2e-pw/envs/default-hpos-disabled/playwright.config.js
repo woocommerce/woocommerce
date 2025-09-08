@@ -2,7 +2,7 @@ let config = require( '../../playwright.config.js' );
 const { tags } = require( '../../fixtures/fixtures' );
 
 process.env.USE_WP_ENV = 'true';
-process.env.DISABLE_HPOS = '1';
+process.env.ORDER_DATASTORE = 'posts';
 
 config = {
 	...config.default,
