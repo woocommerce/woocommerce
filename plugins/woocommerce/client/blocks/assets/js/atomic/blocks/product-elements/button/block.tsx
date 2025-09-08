@@ -20,6 +20,7 @@ import {
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -32,7 +33,6 @@ import type {
 	AddToCartProductDetails,
 } from './types';
 import { useProductTypeSelector } from '../../../../shared/stores/product-type-template-state';
-import { ProductEntityResponse } from '@woocommerce/entities';
 
 const getButtonText = ( {
 	cartQuantity,

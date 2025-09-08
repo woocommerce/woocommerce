@@ -18,13 +18,13 @@ import {
 import type { BlockEditProps } from '@wordpress/blocks';
 import { useEffect } from '@wordpress/element';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
 import { BlockAttributes } from './types';
-import { useProduct } from '@woocommerce/entities';
 
 function WidthPanel( {
 	selectedWidth,

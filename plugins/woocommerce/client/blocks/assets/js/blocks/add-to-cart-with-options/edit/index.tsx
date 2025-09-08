@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-
 import { Disabled } from '@wordpress/components';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import {
@@ -48,8 +47,6 @@ const AddToCartOptionsEdit = (
 	const isCoreProductType =
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
-
-	console.log( product );
 
 	return (
 		<>
