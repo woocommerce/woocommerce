@@ -47,15 +47,16 @@ const data = JSON.stringify( {
 			...result,
 			...Object.fromEntries(
 				Object.entries( performanceResults[ index ][ hash ] ?? {} )
+					.filter( ( [ key ] ) => {
+						return keys.includes( key );
+					} )
 					.map( ( [ key, value ] ) => [
 						metricsPrefix + key,
 						typeof value === 'object'
 							? value.q50
 							: Number( value ).toFixed( 3 ),
 					] )
-					.filter( ( [ key ] ) => {
-						return keys.includes( key );
-					} )
+
 			),
 		};
 	}, {} ),
@@ -64,15 +65,15 @@ const data = JSON.stringify( {
 			...result,
 			...Object.fromEntries(
 				Object.entries( performanceResults[ index ][ baseHash ] ?? {} )
+					.filter( ( [ key ] ) => {
+						return keys.includes( key );
+					} )
 					.map( ( [ key, value ] ) => [
 						metricsPrefix + key,
 						typeof value === 'object'
 							? value.q50
 							: Number( value ).toFixed( 3 ),
 					] )
-					.filter( ( [ key ] ) => {
-						return keys.includes( key );
-					} )
 			),
 		};
 	}, {} ),
