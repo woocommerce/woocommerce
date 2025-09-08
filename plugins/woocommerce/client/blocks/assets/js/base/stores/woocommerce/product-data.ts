@@ -105,8 +105,15 @@ const productDataStore = store< {
 			setSelectedVariationId: () => {
 				const { products } = getConfig( 'woocommerce' );
 
+				if (
+					! products ||
+					! products[ productDataStore.state.productId ]
+				) {
+					return;
+				}
+
 				const variations =
-					products?.[ productDataStore.state.productId ].variations;
+					products[ productDataStore.state.productId ].variations;
 
 				const matchedVariation = getMatchedVariation(
 					variations,

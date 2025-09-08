@@ -76,7 +76,10 @@ export const getProductData = (
 	const { products } = getConfig( 'woocommerce' );
 
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
-		const variations = products?.[ id ].variations;
+		if ( ! products || ! products[ id ] ) {
+			return null;
+		}
+		const variations = products[ id ].variations;
 		const matchedVariation = getMatchedVariation(
 			variations,
 			selectedAttributes

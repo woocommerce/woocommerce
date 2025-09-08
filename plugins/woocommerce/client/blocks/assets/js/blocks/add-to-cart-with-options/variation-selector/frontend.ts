@@ -80,8 +80,13 @@ const isAttributeValueValid = ( {
 		: selectedAttributes.length;
 
 	const { products } = getConfig( 'woocommerce' );
+
+	if ( ! products || ! products[ productDataState.productId ] ) {
+		return false;
+	}
+
 	const availableVariations = Object.values(
-		products?.[ productDataState.productId ].variations
+		products[ productDataState.productId ].variations || {}
 	);
 
 	// Check if there is at least one available variation matching the current
@@ -221,8 +226,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { products } = getConfig( 'woocommerce' );
 
+				if ( ! products || ! products[ productDataState.productId ] ) {
+					return;
+				}
+
 				const variations =
-					products?.[ productDataState.productId ].variations;
+					products[ productDataState.productId ].variations;
 
 				const matchedVariation = getMatchedVariation(
 					variations,
