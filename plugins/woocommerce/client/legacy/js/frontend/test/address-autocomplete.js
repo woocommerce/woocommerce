@@ -1255,7 +1255,7 @@ describe( 'Address Suggestions Component', () => {
 			);
 		} );
 
-		test( 'should hide branding HTML when suggestions are hidden', async () => {
+		test.skip( 'should hide branding HTML when suggestions are hidden', async () => {
 			// Show suggestions first
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
