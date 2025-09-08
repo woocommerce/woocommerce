@@ -24,7 +24,6 @@ import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {
-	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
 	tempQuantity: number;
@@ -292,20 +291,21 @@ const { actions, state } = store<
 			},
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+				const variationIds = Object.keys(
+					products?.[ productDataState.productId ].variations
+				);
 
-				if ( context.availableVariations ) {
+				if ( variationIds ) {
 					// Set the quantity for all variations, so when switching
 					// variations the quantity persists.
-					const variationIds = context.availableVariations.map(
-						( variation ) => variation.variation_id
-					);
 					const idsToUpdate = [
 						productDataState.productId,
 						...variationIds,
 					];
 
 					idsToUpdate.forEach( ( id ) => {
-						context.quantity[ id ] = value;
+						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
 					const id =

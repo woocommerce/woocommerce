@@ -57,18 +57,15 @@ const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
-	availableVariations,
 }: {
 	attributeName: string;
 	attributeValue: string;
 	selectedAttributes: SelectedAttributes[];
-	availableVariations: AvailableVariation[];
 } ) => {
 	if (
 		! attributeName ||
 		! attributeValue ||
-		! Array.isArray( selectedAttributes ) ||
-		! Array.isArray( availableVariations )
+		! Array.isArray( selectedAttributes )
 	) {
 		return false;
 	}
@@ -84,6 +81,11 @@ const isAttributeValueValid = ( {
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
+
+	const { products } = getConfig( 'woocommerce' );
+	const availableVariations = Object.values(
+		products?.[ productDataState.productId ].variations
+	);
 
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
@@ -168,8 +170,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return selectedValue === option.value;
 			},
 			get isOptionDisabled() {
-				const { name, option, availableVariations } =
-					getContext< Context >();
+				const { name, option } = getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
@@ -179,7 +180,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes: productDataState.selectedAttributes,
-					availableVariations,
 				} );
 			},
 		},
