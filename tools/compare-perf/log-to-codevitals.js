@@ -6,14 +6,14 @@ const https = require( 'https' );
 const [ token, branch, hash, baseHash, timestamp ] = process.argv.slice( 2 );
 
 const resultsFiles = [
-	{
-		file: 'editor.performance-results.json',
-		metricsPrefix: 'editor-',
-	},
-	{
-		file: 'product-editor.performance-results.json',
-		metricsPrefix: 'product-editor-',
-	},
+	// {
+	// 	file: 'editor.performance-results.json',
+	// 	metricsPrefix: 'editor-',
+	// },
+	// {
+	// 	file: 'product-editor.performance-results.json',
+	// 	metricsPrefix: 'product-editor-',
+	// },
 	{
 		file: 'frontend.performance-results.json',
 		metricsPrefix: 'frontend-',
