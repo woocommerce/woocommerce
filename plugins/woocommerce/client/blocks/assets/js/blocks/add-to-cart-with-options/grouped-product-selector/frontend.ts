@@ -119,9 +119,9 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					}
 
 					addedItems.push( {
-						id: childProductId,
+						id: Number( childProductId ),
 						quantity: newQuantity,
-						variation: productDataState.selectedAttributes,
+						variation: productDataState.selectedAttributes || [],
 						type: productObject.type,
 					} );
 				}
