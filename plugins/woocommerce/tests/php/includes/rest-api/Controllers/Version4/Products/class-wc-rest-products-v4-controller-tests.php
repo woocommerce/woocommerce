@@ -12,31 +12,6 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
-	/**
-	 * Enable the experimental REST API feature.
-	 */
-	private function enable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features[] = 'experimental-wc-rest-api';
-				return $features;
-			}
-		);
-	}
-
-	/**
-	 * Disable the experimental REST API feature.
-	 */
-	private function disable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'experimental-wc-rest-api' ) );
-				return $features;
-			}
-		);
-	}
 
 	/**
 	 * Runs after each test.
@@ -158,9 +133,8 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * Get all expected fields.
 	 *
 	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
-	 * @param bool $with_experimental_rest_api True to get the fields expected when the experimental REST API feature is enabled.
 	 */
-	public function get_expected_response_fields( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
 			'id',
 			'name',
@@ -232,15 +206,12 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 			'menu_order',
 			'meta_data',
 			'post_password',
+			'min_price',
+			'max_price',
 		);
 
 		if ( $with_cogs_enabled ) {
 			$fields[] = 'cost_of_goods_sold';
-		}
-
-		if ( $with_experimental_rest_api ) {
-			$fields[] = '__experimental_min_price';
-			$fields[] = '__experimental_max_price';
 		}
 
 		return $fields;
@@ -250,24 +221,17 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * Test that all expected response fields are present.
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
 	 *
-	 * @testWith [true, true]
-	 *           [false, false]
+	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
-	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_product_api_get_all_fields( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
 		}
 
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
-		} else {
-			$this->disable_experimental_rest_api_feature();
-		}
-
-		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
@@ -301,22 +265,17 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test that all fields are returned when requested one by one.
 	 *
-	 * @testWith [true, true]
-	 *           [false, false]
+	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
-	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
 		}
 
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
-		}
-
-		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
@@ -1980,16 +1939,34 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		$this->assertArrayHasKey( '__experimental_min_price', $data );
-		$this->assertArrayHasKey( '__experimental_max_price', $data );
-		$this->assertEquals( '1', $data['__experimental_min_price'] );
-		$this->assertEquals( '10', $data['__experimental_max_price'] );
+		$this->assertArrayHasKey( 'min_price', $data );
+		$this->assertArrayHasKey( 'max_price', $data );
+		$this->assertEquals( '1', $data['min_price'] );
+		$this->assertEquals( '10', $data['max_price'] );
+	}
 
-		$this->disable_experimental_rest_api_feature();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $grouped_product->get_id() ) );
+	/**
+	 * Test that simple product return correct min_price and max_price values.
+	 *
+	 * @return void
+	 */
+	public function test_simple_product_min_max_price() {
+		$simple_product = array_filter(
+			self::$products,
+			function ( $product ) {
+				return $product->get_type() === ProductType::SIMPLE;
+			}
+		);
+		$simple_product = reset( $simple_product );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $simple_product->get_id() ) );
 		$this->assertEquals( 200, $response->get_status() );
+
 		$data = $response->get_data();
-		$this->assertArrayNotHasKey( '__experimental_min_price', $data );
-		$this->assertArrayNotHasKey( '__experimental_max_price', $data );
+
+		$this->assertArrayHasKey( 'min_price', $data );
+		$this->assertArrayHasKey( 'max_price', $data );
+		$this->assertEquals( '', $data['min_price'] );
+		$this->assertEquals( '', $data['max_price'] );
 	}
 }
