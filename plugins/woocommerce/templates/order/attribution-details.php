@@ -136,7 +136,7 @@ defined( 'ABSPATH' ) || exit;
 		</span>
 	<?php endif; ?>
 	<!-- A placeholder for the OA install banner React component. -->
-	<?php if ( \WC_Marketplace_Suggestions::allow_suggestions() ) : ?>
+	<?php if ( class_exists( 'WC_Marketplace_Suggestions' ) && \WC_Marketplace_Suggestions::allow_suggestions() ) : ?>
 		<div id="order-attribution-install-banner-slotfill"></div>
 	<?php endif; ?>
 </div>
