@@ -988,10 +988,10 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => false,
-						'enabled_by_default' => false,
-						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => false,
+						'enabled_by_default'           => false,
+						'option_key'                   => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
 						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
