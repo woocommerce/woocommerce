@@ -199,8 +199,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_spotify_by_slug['innerHTML'], $parsed_spotify_by_slug, $this->rendering_context );
 
-		// Should return empty since no URL is available.
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available.
+		$this->assertStringContainsString( '<a href="https://open.spotify.com/"', $rendered );
+		$this->assertStringContainsString( 'Listen on Spotify', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**
@@ -268,8 +271,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_soundcloud_by_slug['innerHTML'], $parsed_soundcloud_by_slug, $this->rendering_context );
 
-		// Should return empty since no URL is available.
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available.
+		$this->assertStringContainsString( '<a href="https://soundcloud.com/"', $rendered );
+		$this->assertStringContainsString( 'Listen on SoundCloud', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**
@@ -282,8 +288,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_pocket_casts_by_slug['innerHTML'], $parsed_pocket_casts_by_slug, $this->rendering_context );
 
-		// Should return empty since no URL is available.
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available.
+		$this->assertStringContainsString( '<a href="https://pca.st/"', $rendered );
+		$this->assertStringContainsString( 'Listen on Pocket Casts', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**

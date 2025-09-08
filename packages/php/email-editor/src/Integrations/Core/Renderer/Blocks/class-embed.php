@@ -42,14 +42,13 @@ class Embed extends Abstract_Block_Renderer {
 
 		$url = $this->extract_provider_url( $attr, $block_content, $provider );
 		if ( empty( $url ) ) {
-			return '';
+			// Provider was detected but URL extraction failed - provide graceful fallback.
+			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
 		}
 
 		// If we have a valid audio provider embed, proceed with normal rendering.
-		return $this->add_spacer(
-			$this->render_content( $block_content, $parsed_block, $rendering_context ),
-			$parsed_block['email_attrs'] ?? array()
-		);
+		// Note: Audio::render already wraps its output with add_spacer, so we return directly.
+		return $this->render_content( $block_content, $parsed_block, $rendering_context );
 	}
 
 	/**
@@ -206,13 +205,18 @@ class Embed extends Abstract_Block_Renderer {
 			}
 		}
 
+		// If still no URL, try to use provider-specific base URL if we have a provider.
+		if ( empty( $url ) && isset( $attr['providerNameSlug'] ) ) {
+			$url = $this->get_provider_base_url( $attr['providerNameSlug'] );
+		}
+
 		// Validate URL with both filter_var and wp_http_validate_url.
 		if ( empty( $url ) || ! filter_var( $url, FILTER_VALIDATE_URL ) || ! wp_http_validate_url( $url ) ) {
 			return '';
 		}
 
-		// Get link text - use custom label if provided, otherwise use URL.
-		$link_text = ! empty( $attr['label'] ) ? $attr['label'] : $url;
+		// Get link text - use custom label if provided, otherwise use provider-specific label or URL.
+		$link_text = ! empty( $attr['label'] ) ? $attr['label'] : $this->get_provider_label( $attr['providerNameSlug'] ?? '', $attr );
 
 		// Create a simple link.
 		$link_html = sprintf(
@@ -226,5 +230,24 @@ class Embed extends Abstract_Block_Renderer {
 			$link_html,
 			$parsed_block['email_attrs'] ?? array()
 		);
+	}
+
+	/**
+	 * Get base URL for a provider when specific URL extraction fails.
+	 *
+	 * @param string $provider Provider name.
+	 * @return string Base URL for the provider or empty string.
+	 */
+	private function get_provider_base_url( string $provider ): string {
+		switch ( $provider ) {
+			case 'spotify':
+				return 'https://open.spotify.com/';
+			case 'soundcloud':
+				return 'https://soundcloud.com/';
+			case 'pocket-casts':
+				return 'https://pca.st/';
+			default:
+				return '';
+		}
 	}
 }
