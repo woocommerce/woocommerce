@@ -126,6 +126,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					if ( wrapper ) {
 						wrapper.classList.add( 'autocomplete-available' );
 					}
+					// Add combobox role and ARIA attributes for accessibility
+					addressInput.setAttribute( 'role', 'combobox' );
+					addressInput.setAttribute( 'aria-autocomplete', 'list' );
+					addressInput.setAttribute( 'aria-expanded', 'false' );
+					addressInput.setAttribute( 'aria-haspopup', 'listbox' );
 				}
 				return;
 			}
@@ -816,6 +821,16 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			const countryInput = addressInputs[ type ][ 'country' ];
 			if ( addressInput && countryInput ) {
 				addressInput.addEventListener( 'input', function () {
+					// Unset any active suggestion when user types
+					if ( suggestionsLists[ type ] ) {
+						const activeLi = suggestionsLists[ type ].querySelector( 'li.active' );
+						if ( activeLi ) {
+							activeLi.classList.remove( 'active' );
+							activeLi.setAttribute( 'aria-selected', 'false' );
+						}
+						addressInput.removeAttribute( 'aria-activedescendant' );
+						activeSuggestionIndices[ type ] = -1;
+					}
 					displaySuggestions( this.value, countryInput.value, type );
 				} );
 
