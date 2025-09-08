@@ -108,25 +108,25 @@ class Embed extends Abstract_Block_Renderer {
 		// Check URL for supported domains.
 		$url = $attr['url'] ?? '';
 		if ( ! empty( $url ) ) {
-			if ( str_contains( $url, 'open.spotify.com' ) ) {
+			if ( strpos( $url, 'open.spotify.com' ) !== false ) {
 				return 'spotify';
 			}
-			if ( str_contains( $url, 'soundcloud.com' ) ) {
+			if ( strpos( $url, 'soundcloud.com' ) !== false ) {
 				return 'soundcloud';
 			}
-			if ( str_contains( $url, 'pca.st' ) ) {
+			if ( strpos( $url, 'pca.st' ) !== false ) {
 				return 'pocket-casts';
 			}
 		}
 
 		// Check block content for supported URLs.
-		if ( str_contains( $block_content, 'open.spotify.com' ) ) {
+		if ( strpos( $block_content, 'open.spotify.com' ) !== false ) {
 			return 'spotify';
 		}
-		if ( str_contains( $block_content, 'soundcloud.com' ) ) {
+		if ( strpos( $block_content, 'soundcloud.com' ) !== false ) {
 			return 'soundcloud';
 		}
-		if ( str_contains( $block_content, 'pca.st' ) ) {
+		if ( strpos( $block_content, 'pca.st' ) !== false ) {
 			return 'pocket-casts';
 		}
 
