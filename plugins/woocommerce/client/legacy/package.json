@@ -66,5 +66,28 @@
 				"package.json"
 			]
 		}
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": [
+					"js/**/*.{js,ts,tsx,scss}"
+				]
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"js/**/*.{js,ts,tsx,scss,json}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
 	}
 }
