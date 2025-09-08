@@ -823,7 +823,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				addressInput.addEventListener( 'input', function () {
 					// Unset any active suggestion when user types
 					if ( suggestionsLists[ type ] ) {
-						const activeLi = suggestionsLists[ type ].querySelector( 'li.active' );
+						const activeLi =
+							suggestionsLists[ type ].querySelector(
+								'li.active'
+							);
 						if ( activeLi ) {
 							activeLi.classList.remove( 'active' );
 							activeLi.setAttribute( 'aria-selected', 'false' );
