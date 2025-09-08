@@ -11,7 +11,7 @@ import {
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { isExternalProduct, useProduct } from '@woocommerce/entities';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -69,9 +69,8 @@ const AddToCartOptionsEdit = (
 						<button
 							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
 						>
-							{ product && isExternalProduct( product )
-								? product.button_text
-								: __( 'Add to cart', 'woocommerce' ) }
+							{ ( product && product.add_to_cart?.single_text ) ||
+								__( 'Add to cart', 'woocommerce' ) }
 						</button>
 					</Disabled>
 				</div>
