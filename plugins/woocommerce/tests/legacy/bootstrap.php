@@ -102,7 +102,8 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		if ( getenv( 'HPOS' ) ) {
+		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
+		if ( 'posts' !== getenv( 'ORDER_DATASTORE' ) ) {
 			$this->initialize_hpos();
 		}
 
@@ -240,9 +241,11 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		if ( ! getenv( 'HPOS' ) ) {
-			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
-		}
+		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
+		add_filter(
+			'woocommerce_enable_hpos_by_default_for_new_shops',
+			'posts' === getenv( 'ORDER_DATASTORE' ) ? '__return_false' : '__return_true',
+		);
 
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
