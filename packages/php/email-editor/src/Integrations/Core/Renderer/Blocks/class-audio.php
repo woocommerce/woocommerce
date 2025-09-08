@@ -49,7 +49,7 @@ class Audio extends Abstract_Block_Renderer {
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param Rendering_Context $rendering_context Rendering context (required by parent contract but unused in this implementation).
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
@@ -63,7 +63,7 @@ class Audio extends Abstract_Block_Renderer {
 			$length = ( is_array( $meta ) && isset( $meta['length_formatted'] ) && is_string( $meta['length_formatted'] ) ) ? $meta['length_formatted'] : '';
 		} else {
 			// Audio file from external URL.
-			preg_match( '#<audio.*src="(.*)".*></audio>#', $block_content, $audio );
+			preg_match( '#<audio[^>]*\ssrc=["\']([^"\']*)["\'][^>]*/?>#', $block_content, $audio );
 			$url    = isset( $audio[1] ) ? $audio[1] : $attr['src'] ?? '';
 			$length = null;
 		}
@@ -73,16 +73,22 @@ class Audio extends Abstract_Block_Renderer {
 			return '';
 		}
 
+		// Additional security: prefer HTTPS for external URLs.
+		if ( strpos( $url, 'https://' ) !== 0 && strpos( $url, 'data:' ) !== 0 && strpos( $url, '/' ) !== 0 ) {
+			// For non-HTTPS external URLs, return empty to fail securely.
+			return '';
+		}
+
 		// Get spacing from email_attrs for better consistency with core blocks.
 		$email_attrs        = $parsed_block['email_attrs'] ?? array();
 		$table_margin_style = '';
 
 		if ( ! empty( $email_attrs ) && class_exists( '\WP_Style_Engine' ) ) {
 			// Get margin for table styling.
-			$table_margin_style = \WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin' ) ) ), '' ) ?? '';
+			$table_margin_style = \WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin' ) ) ), '' );
 
 			// Validate CSS output to prevent injection.
-			if ( ! empty( $table_margin_style ) && ! preg_match( '/^[a-zA-Z0-9\s:;()-]+$/', $table_margin_style ) ) {
+			if ( ! empty( $table_margin_style ) && ! preg_match( '/^[a-zA-Z0-9\s:;().,pxemremvwvh%+-]+$/', $table_margin_style ) ) {
 				$table_margin_style = '';
 			}
 		}

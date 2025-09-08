@@ -41,7 +41,7 @@ class Embed extends Abstract_Block_Renderer {
 		}
 
 		$url = $this->extract_provider_url( $attr, $block_content, $provider );
-		if ( empty( $url ) || ! wp_http_validate_url( $url ) ) {
+		if ( empty( $url ) ) {
 			return '';
 		}
 
@@ -57,10 +57,10 @@ class Embed extends Abstract_Block_Renderer {
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param Rendering_Context $rendering_context Rendering context (required by parent contract but unused in this implementation).
 	 * @return string
 	 */
-	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$attr = $parsed_block['attrs'] ?? array();
 
 		// Get provider and URL (validation already done in render method).
@@ -105,28 +105,17 @@ class Embed extends Abstract_Block_Renderer {
 			return $attr['providerNameSlug'];
 		}
 
-		// Check URL for supported domains.
-		$url = $attr['url'] ?? '';
-		if ( ! empty( $url ) ) {
-			if ( strpos( $url, 'open.spotify.com' ) !== false ) {
-				return 'spotify';
-			}
-			if ( strpos( $url, 'soundcloud.com' ) !== false ) {
-				return 'soundcloud';
-			}
-			if ( strpos( $url, 'pca.st' ) !== false ) {
-				return 'pocket-casts';
-			}
-		}
+		// Check for supported domains in URL or content.
+		$url              = $attr['url'] ?? '';
+		$content_to_check = ! empty( $url ) ? $url : $block_content;
 
-		// Check block content for supported URLs.
-		if ( strpos( $block_content, 'open.spotify.com' ) !== false ) {
+		if ( strpos( $content_to_check, 'open.spotify.com' ) !== false ) {
 			return 'spotify';
 		}
-		if ( strpos( $block_content, 'soundcloud.com' ) !== false ) {
+		if ( strpos( $content_to_check, 'soundcloud.com' ) !== false ) {
 			return 'soundcloud';
 		}
-		if ( strpos( $block_content, 'pca.st' ) !== false ) {
+		if ( strpos( $content_to_check, 'pca.st' ) !== false ) {
 			return 'pocket-casts';
 		}
 
@@ -144,18 +133,27 @@ class Embed extends Abstract_Block_Renderer {
 	private function extract_provider_url( array $attr, string $block_content, string $provider ): string {
 		// First, try to get URL from attributes.
 		if ( ! empty( $attr['url'] ) ) {
-			return $attr['url'];
+			$url = $attr['url'];
+			// Validate the URL from attributes.
+			if ( filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url ) ) {
+				return $url;
+			}
+			return '';
 		}
 
 		// If not in attributes, extract from block content based on provider.
 		$patterns = array(
-			'spotify'      => '/https:\/\/open\.spotify\.com\/[^\s<>"]+/',
-			'soundcloud'   => '/https:\/\/soundcloud\.com\/[^\s<>"]+/',
-			'pocket-casts' => '/https:\/\/pca\.st\/[^\s<>"]+/',
+			'spotify'      => '/(?<![a-zA-Z0-9.-])https:\/\/open\.spotify\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
+			'soundcloud'   => '/(?<![a-zA-Z0-9.-])https:\/\/soundcloud\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
+			'pocket-casts' => '/(?<![a-zA-Z0-9.-])https:\/\/pca\.st\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
 		);
 
 		if ( isset( $patterns[ $provider ] ) && preg_match( $patterns[ $provider ], $block_content, $matches ) ) {
-			return $matches[0];
+			$url = $matches[0];
+			// Validate the extracted URL.
+			if ( filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url ) ) {
+				return $url;
+			}
 		}
 
 		return '';
@@ -202,14 +200,14 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If no URL in attributes, try to extract from block content.
 		if ( empty( $url ) ) {
-			// Look for any HTTP/HTTPS URL in the content.
-			if ( preg_match( '/https?:\/\/[^\s<>"]+/', $block_content, $matches ) ) {
+			// Look for any HTTP/HTTPS URL in the content with proper boundaries.
+			if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%-]*(?![a-zA-Z0-9.-])/', $block_content, $matches ) ) {
 				$url = $matches[0];
 			}
 		}
 
-		// Validate URL.
-		if ( empty( $url ) || ! wp_http_validate_url( $url ) ) {
+		// Validate URL with both filter_var and wp_http_validate_url.
+		if ( empty( $url ) || ! filter_var( $url, FILTER_VALIDATE_URL ) || ! wp_http_validate_url( $url ) ) {
 			return '';
 		}
 
