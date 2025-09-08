@@ -57,10 +57,11 @@ const productDataStore = store< {
 					'woocommerce/single-product'
 				);
 
-				return (
+				const attributes =
 					context?.selectedAttributes ||
-					productDataStore?.state?.templateState?.selectedAttributes
-				);
+					productDataStore?.state?.templateState?.selectedAttributes;
+
+				return Array.isArray( attributes ) ? attributes : [];
 			},
 		},
 		actions: {
