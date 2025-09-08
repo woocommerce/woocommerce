@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
@@ -64,6 +65,7 @@ class Initializer {
 	 */
 	const RENDER_ONLY_BLOCK_TYPES = array(
 		'core/media-text',
+		'core/audio',
 	);
 
 	/**
@@ -212,6 +214,9 @@ class Initializer {
 				break;
 			case 'core/media-text':
 				$renderer = new Media_Text();
+				break;
+			case 'core/audio':
+				$renderer = new Audio();
 				break;
 			default:
 				$renderer = new Fallback();
