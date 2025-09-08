@@ -32,25 +32,7 @@ jQuery(function ($) {
 			},
 
 			async onApprove( data ) {
-				console.log( 'PayPal onApprove:', data );
-				const formData = new FormData();
-				
-				formData.append( 'security', paypal_standard.capture_order_nonce );
-				try {
-					const url = paypal_standard.wc_ajax_url
-					.toString()
-					.replace( '%%endpoint%%', 'capture_order' );
-					
-					const response = await fetch( url, {
-						method: 'POST',
-						body: formData,
-					});
-					const responseData = await response.json();
-					console.log( 'PayPal capture order:', responseData );
-				} catch (error) {
-					console.error('Error capturing order:', error);
-					return null;
-				}
+				// TODO: Add onApprove logic here
 			},
 
 			onError: function ( err ) {
@@ -59,7 +41,7 @@ jQuery(function ($) {
 			},
 
 			onCancel( data ) {
-				console.log( 'PayPal onCancel:', data );
+				// TODO: Add onCancel logic here
 			},
 
 			onInit( data, actions ) {
@@ -67,7 +49,7 @@ jQuery(function ($) {
 			},
 
 			onClick() {
-				console.log( 'PayPal onClick:' );
+				// TODO: Add onClick logic here
 			},
 
 		});
