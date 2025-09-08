@@ -29,7 +29,7 @@ const performanceResults = resultsFiles.map( ( { file } ) =>
 const keys = [
 	// 'totalBlockingTime',
 	'largestContentfulPaint',
-	// 'serverResponse',
+	'serverResponse',
 	// 'firstPaint',
 	// 'domContentLoaded',
 	// 'loaded',
