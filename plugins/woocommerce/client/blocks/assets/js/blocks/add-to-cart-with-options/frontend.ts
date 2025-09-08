@@ -478,17 +478,13 @@ const { actions, state } = store<
 				const id =
 					productDataState.variationId || productDataState.productId;
 
-				let productType = 'simple';
-				if ( productDataState.variationId ) {
-					productType = 'variation';
-				} else {
-					const productObject = getProductData(
-						id,
-						productDataState.selectedAttributes
-					);
-					if ( productObject ) {
-						productType = productObject.type;
-					}
+				const productType = productDataState.variationId
+					? 'variation'
+					: getProductData( id, productDataState.selectedAttributes )
+							?.type;
+
+				if ( ! productType ) {
+					return;
 				}
 
 				const newQuantity = getNewQuantity(
