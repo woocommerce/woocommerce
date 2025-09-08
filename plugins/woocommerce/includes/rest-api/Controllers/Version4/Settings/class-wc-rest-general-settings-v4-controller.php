@@ -497,7 +497,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$currencies       = get_woocommerce_currencies();
 
 		foreach ( $currencies as $code => $name ) {
-			$currency_options[ $code ] = esc_html( $name ) . ' (' . esc_html( get_woocommerce_currency_symbol( $code ) ) . ') — ' . esc_html( $code );
+			$label  = wp_specialchars_decode( (string) $name );
+			$symbol = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
+			$currency_options[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
 		}
 
 		return $currency_options;
