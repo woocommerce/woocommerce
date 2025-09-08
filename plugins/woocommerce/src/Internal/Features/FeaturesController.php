@@ -234,10 +234,10 @@ class FeaturesController {
 			'disable_ui'                          => false,
 			'enabled_by_default'                  => false,
 			'is_experimental'                     => true,
-			'is_legacy'                           => false,
 			'name'                                => $name,
 			'order'                               => 10,
 			'default_plugin_compatibility' => 'compatible',
+			'skip_compatibility_checks'    => false,
 		);
 
 		if ( empty( $args['default_plugin_compatibility'] ) ) {
@@ -256,6 +256,11 @@ class FeaturesController {
 		// Sanitize 'default_plugin_compatibility'.
 		if ( ! in_array( $args['default_plugin_compatibility'], array( 'compatible', 'incompatible' ), true ) ) {
 			$args['default_plugin_compatibility'] = wc_string_to_bool( $args['default_plugin_compatibility'] ) ? 'compatible' : 'incompatible';
+		}
+
+		// Support 'is_legacy' flag for backwards compatibility.
+		if ( ! empty( $args['is_legacy'] ) ) {
+			$args['skip_compatibility_checks'] = true;
 		}
 
 		$this->features[ $slug ] = $args;
@@ -308,15 +313,15 @@ class FeaturesController {
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
-				'is_legacy'          => true,
+				'skip_compatibility_checks' => true,
 			),
 			'product_block_editor'        => array(
 				'name'            => __( 'New product editor', 'woocommerce' ),
 				'description'     => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental' => true,
 				'disable_ui'      => false,
-				'is_legacy'       => true,
 				'disabled'        => function () {
+				'skip_compatibility_checks' => true,
 					return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
 				},
 				'desc_tip'        => function () {
@@ -347,7 +352,7 @@ class FeaturesController {
 				'is_experimental'    => false,
 				'disable_ui'         => false,
 				'enabled_by_default' => false,
-				'is_legacy'          => true,
+				'skip_compatibility_checks' => true,
 			),
 			'marketplace'                 => array(
 				'name'               => __( 'Marketplace', 'woocommerce' ),
@@ -358,7 +363,7 @@ class FeaturesController {
 				'is_experimental'    => false,
 				'enabled_by_default' => true,
 				'disable_ui'         => true,
-				'is_legacy'          => true,
+				'skip_compatibility_checks' => true,
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
@@ -370,8 +375,8 @@ class FeaturesController {
 				),
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
-				'is_legacy'          => true,
 				'is_experimental'    => false,
+				'skip_compatibility_checks' => true,
 			),
 			'site_visibility_badge'       => array(
 				'name'               => __( 'Site visibility badge', 'woocommerce' ),
@@ -381,9 +386,9 @@ class FeaturesController {
 				),
 				'enabled_by_default' => true,
 				'disable_ui'         => false,
-				'is_legacy'          => true,
 				'is_experimental'    => false,
 				'disabled'           => false,
+				'skip_compatibility_checks' => true,
 			),
 			'hpos_fts_indexes'            => array(
 				'name'               => __( 'HPOS Full text search indexes', 'woocommerce' ),
@@ -393,8 +398,8 @@ class FeaturesController {
 				),
 				'is_experimental'    => true,
 				'enabled_by_default' => false,
-				'is_legacy'          => true,
 				'option_key'         => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
+				'skip_compatibility_checks' => true,
 			),
 			'hpos_datastore_caching'      => array(
 				'name'               => __( 'HPOS Data Caching', 'woocommerce' ),
@@ -404,9 +409,9 @@ class FeaturesController {
 				),
 				'is_experimental'    => true,
 				'enabled_by_default' => false,
-				'is_legacy'          => true,
 				'disable_ui'         => false,
 				'option_key'         => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
+				'skip_compatibility_checks' => true,
 			),
 			'remote_logging'              => array(
 				'name'               => __( 'Remote Logging', 'woocommerce' ),
@@ -427,9 +432,9 @@ class FeaturesController {
 				 *
 				 * @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				 */
-				'is_legacy'          => true,
 				'is_experimental'    => false,
 				'setting'            => array(
+				'skip_compatibility_checks' => true,
 					'disabled' => function () use ( $tracking_enabled ) {
 						return ! $tracking_enabled;
 					},
@@ -457,8 +462,8 @@ class FeaturesController {
 				 * @see https://github.com/woocommerce/woocommerce/issues/39147
 				 * @see https://github.com/woocommerce/woocommerce/issues/55540
 				 */
-				'is_legacy'       => true,
 				'is_experimental' => false,
+				'skip_compatibility_checks' => true,
 			),
 			'blueprint'                   => array(
 				'name'               => __( 'Blueprint (beta)', 'woocommerce' ),
@@ -477,8 +482,8 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'is_legacy'          => true,
 				'is_experimental'    => false,
+				'skip_compatibility_checks' => true,
 			),
 			'block_email_editor'          => array(
 				'name'               => __( 'Block Email Editor (alpha)', 'woocommerce' ),
@@ -495,8 +500,8 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'is_legacy'          => true,
 				'enabled_by_default' => false,
+				'skip_compatibility_checks' => true,
 			),
 			'point_of_sale'               => array(
 				'name'               => __( 'Point of Sale', 'woocommerce' ),
@@ -515,8 +520,8 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'is_legacy'          => true,
 				'is_experimental'    => true,
+				'skip_compatibility_checks' => true,
 			),
 			'fulfillments'                => array(
 				'name'               => __( 'Order Fulfillments', 'woocommerce' ),
@@ -1003,13 +1008,27 @@ class FeaturesController {
 	 * Checks whether a feature id corresponds to a legacy feature
 	 * (a feature that existed prior to the implementation of the features engine).
 	 *
+	 * @deprecated since 10.3.0, use {@see FeaturesController::skip_compatibility_checks()} instead.
+	 *
 	 * @param string $feature_id The feature id to check.
 	 * @return bool True if the id corresponds to a legacy feature.
 	 */
 	public function is_legacy_feature( string $feature_id ): bool {
+		return $this->skip_compatibility_checks( $feature_id );
+	}
+
+	/**
+	 * Check if the compatibility checks should be skipped for a given feature.
+	 *
+	 * @since 10.3.0
+	 *
+	 * @param string $feature_id The feature id to check.
+	 * @return bool TRUE if the compatibility checks should be skipped.
+	 */
+	public function skip_compatibility_checks( string $feature_id ): bool {
 		$features = $this->get_feature_definitions();
 
-		return ! empty( $features[ $feature_id ]['is_legacy'] );
+		return ! empty( $features[ $feature_id ]['skip_compatibility_checks'] );
 	}
 
 	/**
@@ -1302,7 +1321,7 @@ class FeaturesController {
 			}
 		}
 
-		if ( ! $this->is_legacy_feature( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
+		if ( ! $this->skip_compatibility_checks( $feature_id ) && ! $disabled && $this->verify_did_woocommerce_init() ) {
 			$plugin_info_for_feature = $this->get_compatible_plugins_for_feature( $feature_id, true );
 			$desc_tip                = $this->plugin_util->generate_incompatible_plugin_feature_warning( $feature_id, $plugin_info_for_feature );
 		}
@@ -1425,8 +1444,8 @@ class FeaturesController {
 				$features_considered_incompatible = array_filter(
 					$this->plugin_util->get_items_considered_incompatible( $feature_id, $compatibility_info ),
 					$only_enabled_features ?
-						fn( $feature_id ) => $this->feature_is_enabled( $feature_id ) && ! $this->is_legacy_feature( $feature_id ) :
-						fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id )
+						fn( $feature_id ) => $this->feature_is_enabled( $feature_id ) && ! $this->skip_compatibility_checks( $feature_id ) :
+						fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id )
 				);
 				if ( in_array( $feature_id, $features_considered_incompatible, true ) ) {
 					$incompatibles[] = $plugin_name;
@@ -1469,13 +1488,13 @@ class FeaturesController {
 		foreach ( $relevant_plugins as $plugin ) {
 			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin, true );
 
-			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id ) );
+			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id ) );
 			if ( ! empty( $incompatibles ) ) {
 				$incompatible_plugins = true;
 				break;
 			}
 
-			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id ) );
+			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id ) );
 			foreach ( $uncertains as $feature_id ) {
 				if ( ! $this->are_plugins_compatible_by_default( $feature_id ) ) {
 					$incompatible_plugins = true;
@@ -1618,7 +1637,7 @@ class FeaturesController {
 			array_filter(
 				$incompatible_features,
 				function ( $feature_id ) {
-					return ! $this->is_legacy_feature( $feature_id );
+					return ! $this->skip_compatibility_checks( $feature_id );
 				}
 			)
 		);
