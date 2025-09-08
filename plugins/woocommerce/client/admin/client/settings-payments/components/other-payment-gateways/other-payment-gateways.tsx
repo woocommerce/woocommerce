@@ -367,9 +367,7 @@ export const OtherPaymentGateways = ( {
 				aria-expanded={ isExpanded }
 			>
 				<div className="other-payment-gateways__header__title">
-					<span>
-						{ __( 'Other payment options', 'woocommerce' ) }
-					</span>
+					<span>{ __( 'More payment options', 'woocommerce' ) }</span>
 					{ ! isExpanded && <>{ collapsedImages }</> }
 				</div>
 				<Gridicon
