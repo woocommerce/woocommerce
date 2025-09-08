@@ -324,6 +324,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Enhancement - Product Gallery: allow changing Product Image aspect ratio [#59790](https://github.com/woocommerce/woocommerce/pull/59790)
 * Enhancement - Refined RTL styles on the NOX page to provide a more consistent user experience. [#60500](https://github.com/woocommerce/woocommerce/pull/60500)
 * Enhancement - Use store's locale when rendering email preview in settings [#60499](https://github.com/woocommerce/woocommerce/pull/60499)
+* Fix - Fix: ensure we only dequeue legacy assets for block themes. [#60781](https://github.com/woocommerce/woocommerce/pull/60781)
+* Fix - Fix Cart and Checkout blocks layout issues when parent element has flexbox properties [#60737](https://github.com/woocommerce/woocommerce/pull/60737)
+* Fix - Support variations and custom data in iAPI-powered minicart [#60709](https://github.com/woocommerce/woocommerce/pull/60709)
+* Tweak - Update More payment options link to open the WooCommerce.com marketplace instead of in-app [#60736](https://github.com/woocommerce/woocommerce/pull/60736)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
