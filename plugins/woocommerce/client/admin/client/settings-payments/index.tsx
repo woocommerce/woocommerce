@@ -176,7 +176,7 @@ const SettingsPaymentsMain = () => {
 									<div className="other-payment-gateways__header__title">
 										<span>
 											{ __(
-												'Other payment options',
+												'More payment options',
 												'woocommerce'
 											) }
 										</span>
