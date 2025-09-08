@@ -475,7 +475,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$is_full_refund_without_line_items = false;
 		$partial_refund_product_revenue    = array();
 		$refund_type                       = $order->get_meta( '_refund_type' );
-		$uses_new_full_refund_data 		   = OrderUtil::uses_new_full_refund_data();
+		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
 
 		$parent_order = null;
 
