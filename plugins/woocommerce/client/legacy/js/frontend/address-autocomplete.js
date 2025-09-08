@@ -884,6 +884,8 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 								type,
 								selectedItem.dataset.id
 							);
+							// Return focus to the address input after selection
+							addressInput.focus();
 						}
 					} else if ( e.key === 'Escape' ) {
 						hideSuggestions( type );
