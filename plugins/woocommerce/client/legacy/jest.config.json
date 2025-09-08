@@ -2,7 +2,7 @@
 	"rootDir": "./js",
 	"collectCoverageFrom": [
 		"js/**/*.js",
-		"!**/node_modules/**",
+		"!**/node_modules/**"
 	],
 	"moduleDirectories": [ "node_modules" ],
 	"preset": "@wordpress/jest-preset-default",
