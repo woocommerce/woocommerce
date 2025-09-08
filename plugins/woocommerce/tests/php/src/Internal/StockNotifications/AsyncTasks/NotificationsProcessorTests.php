@@ -30,7 +30,12 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	 * Set up test case
 	 */
 	public function setUp(): void {
+		if ( ! \Automattic\Jetpack\Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			$this->markTestSkipped( 'Back In Stock is not enabled.' );
+		}
+
 		parent::setUp();
+
 		\WC()->queue()->cancel_all( JobManager::AS_JOB_SEND_STOCK_NOTIFICATIONS );
 
 		$eligibility_service = new EligibilityService();
@@ -50,6 +55,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		unset( $this->sut );
 		// Clean up all notifications.
 		global $wpdb;
+		$wpdb->hide_errors(); // Truncate tables can fail if the tables don't exist.
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
 	}
