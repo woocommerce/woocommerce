@@ -38,7 +38,7 @@ const productDataStore = store< {
 				);
 
 				return (
-					context?.productId ||
+					context?.productId ??
 					productDataStore?.state?.templateState?.productId
 				);
 			},
@@ -48,7 +48,7 @@ const productDataStore = store< {
 				);
 
 				return (
-					context?.variationId ||
+					context?.variationId ??
 					productDataStore?.state?.templateState?.variationId
 				);
 			},
@@ -58,7 +58,7 @@ const productDataStore = store< {
 				);
 
 				const attributes =
-					context?.selectedAttributes ||
+					context?.selectedAttributes ??
 					productDataStore?.state?.templateState?.selectedAttributes;
 
 				return Array.isArray( attributes ) ? attributes : [];
