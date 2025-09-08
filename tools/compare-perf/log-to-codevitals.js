@@ -48,7 +48,10 @@ const data = JSON.stringify( {
 			...Object.fromEntries(
 				Object.entries( performanceResults[ index ][ hash ] ?? {} )
 					.filter( ( [ key ] ) => {
-						return keys.includes( key );
+						return (
+							metricsPrefix !== 'frontend-' ||
+							keys.includes( key )
+						);
 					} )
 					.map( ( [ key, value ] ) => [
 						metricsPrefix + key,
@@ -65,7 +68,10 @@ const data = JSON.stringify( {
 			...Object.fromEntries(
 				Object.entries( performanceResults[ index ][ baseHash ] ?? {} )
 					.filter( ( [ key ] ) => {
-						return keys.includes( key );
+						return (
+							metricsPrefix !== 'frontend-' ||
+							keys.includes( key )
+						);
 					} )
 					.map( ( [ key, value ] ) => [
 						metricsPrefix + key,
