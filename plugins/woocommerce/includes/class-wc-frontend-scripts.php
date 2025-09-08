@@ -384,7 +384,7 @@ class WC_Frontend_Scripts {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$scripts['wc-address-autocomplete'] = array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+				'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
 				'version' => $version,
 			);
 		}
@@ -667,8 +667,12 @@ class WC_Frontend_Scripts {
 						function ( $provider ) {
 							// Sanitize provider data before sending to frontend.
 							return array(
-								'id'   => sanitize_key( $provider->id ),
-								'name' => sanitize_text_field( $provider->name ),
+								'id'            => sanitize_key( $provider->id ),
+								'name'          => sanitize_text_field( $provider->name ),
+								'branding_html' => wp_kses(
+									trim( (string) ( $provider->branding_html ?? '' ) ),
+									'post'
+								),
 							);
 						},
 						$providers
