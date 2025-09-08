@@ -97,7 +97,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
 		// Avoid ambiguous columns in SQL query.
-		$refunds        = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
+		$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total + {$table_name}.tax_total + {$table_name}.shipping_total ELSE 0 END ) )";
+		if ( ! OrderUtil::uses_new_full_refund_data() ) {
+			$refunds = "ABS( SUM( CASE WHEN {$table_name}.net_total < 0 THEN {$table_name}.net_total ELSE 0 END ) )";
+		}
 		$gross_sale_sum = "{$table_name}.total_sales - {$table_name}.tax_total - {$table_name}.shipping_total";
 		$gross_sales    = "SUM( CASE WHEN {$table_name}.parent_id = 0 THEN {$gross_sale_sum} ELSE 0 END ) + COALESCE( SUM(discount_amount), 0 ) as gross_sales";
 
