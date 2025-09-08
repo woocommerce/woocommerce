@@ -63,12 +63,26 @@ const getButtonText = ( {
 	return productCartDetails?.text || __( 'Add to cart', 'woocommerce' );
 };
 
+/**
+ * This is used to render the button for the admin side.
+ */
 const AddToCartButtonAdminSide = ( {
 	product,
+	isDescendantOfAddToCartWithOptions,
 }: {
 	product: ProductEntityResponse;
+	isDescendantOfAddToCartWithOptions: boolean | undefined;
 } ): JSX.Element => {
 	const isExternal = product.type === 'external';
+	// We need to use the button_text for external products
+	const singleTextToRender = isExternal
+		? product.button_text
+		: product.add_to_cart?.single_text;
+
+	const buttonText = isDescendantOfAddToCartWithOptions
+		? singleTextToRender
+		: product.add_to_cart?.text;
+
 	return (
 		<button
 			disabled={ false }
@@ -80,10 +94,10 @@ const AddToCartButtonAdminSide = ( {
 			) }
 			style={ {} }
 		>
+			{ /* We need to use the button_text for external products*/ }
 			{ isExternal
 				? product.button_text
-				: product.add_to_cart?.single_text ||
-				  __( 'Add to cart', 'woocommerce' ) }
+				: buttonText || __( 'Add to cart', 'woocommerce' ) }
 		</button>
 	);
 };
@@ -267,6 +281,11 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 					{ showNewAddToCartButton && (
 						<AddToCartButtonAdminSide
 							product={ product as ProductEntityResponse }
+							isDescendantOfAddToCartWithOptions={
+								props[
+									'woocommerce/isDescendantOfAddToCartWithOptions'
+								]
+							}
 						/>
 					) }
 					{ ! showNewAddToCartButton &&
