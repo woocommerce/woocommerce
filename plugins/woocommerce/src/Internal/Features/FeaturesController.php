@@ -202,7 +202,7 @@ class FeaturesController {
 	 * @param array  $args {
 	 *     Properties that make up the feature definition. Each of these properties can also be set as a
 	 *     callback function, as long as that function returns the specified type.
-     *
+	 *
 	 *     @type string  $default_plugin_compatibility The default plugin compatibility for the feature: either 'compatible' or 'incompatible'. Required.
 	 *     @type array[] $additional_settings          An array of definitions for additional settings controls related to
 	 *                                                 the feature that will display on the Features screen. See the Settings API
@@ -348,8 +348,8 @@ class FeaturesController {
 				'default_plugin_compatibility' => 'compatible',
 			),
 			'rate_limit_checkout'         => array(
-				'name'                        => __( 'Rate limit Checkout', 'woocommerce' ),
-				'description'                 => sprintf(
+				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
+				'description'                  => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
 					__( 'Enables rate limiting for Checkout place order and Store API /checkout endpoint. To further control this, refer to <a href="%s" target="_blank">rate limiting documentation</a>.', 'woocommerce' ),
 					'https://developer.woocommerce.com/docs/apis/store-api/rate-limiting/'
@@ -375,66 +375,65 @@ class FeaturesController {
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
 			'order_attribution'           => array(
-				'name'                      => __( 'Order Attribution', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Order Attribution', 'woocommerce' ),
+				'description'                  => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
 					'woocommerce'
 				),
-				'enabled_by_default'        => true,
-				'disable_ui'                => false,
-				'skip_compatibility_checks' => true,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => false,
+				'is_experimental'              => false,
 			),
 			'site_visibility_badge'       => array(
-				'name'                      => __( 'Site visibility badge', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
+				'description'                  => __(
 					'Enable the site visibility badge in the WordPress admin bar',
 					'woocommerce'
 				),
-				'enabled_by_default'        => true,
-				'disable_ui'                => false,
-				'skip_compatibility_checks' => true,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => false,
-				'disabled'                  => false,
+				'is_experimental'              => false,
+				'disabled'                     => false,
 			),
 			'hpos_fts_indexes'            => array(
-				'name'                      => __( 'HPOS Full text search indexes', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'HPOS Full text search indexes', 'woocommerce' ),
+				'description'                  => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
 					'woocommerce'
 				),
-				'is_experimental'           => true,
-				'enabled_by_default'        => false,
-				'skip_compatibility_checks' => true,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'option_key'                => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
+				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
 			'hpos_datastore_caching'      => array(
-				'name'                      => __( 'HPOS Data Caching', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
+				'description'                  => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
 					'woocommerce'
 				),
-				'is_experimental'           => true,
-				'enabled_by_default'        => false,
-				'skip_compatibility_checks' => true,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'disable_ui'                => false,
-				'option_key'                => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
+				'disable_ui'                   => false,
+				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
 			'remote_logging'              => array(
-				'name'                      => __( 'Remote Logging', 'woocommerce' ),
-				'description'               => sprintf(
+				'name'                         => __( 'Remote Logging', 'woocommerce' ),
+				'description'                  => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
 					__( 'Allow WooCommerce to send error logs and non-sensitive diagnostic data to help improve WooCommerce. This feature requires %1$susage tracking%2$s to be enabled.', 'woocommerce' ),
 					'<a href="' . admin_url( 'admin.php?page=wc-settings&tab=advanced&section=woocommerce_com' ) . '">',
 					'</a>'
 				),
-				'enabled_by_default'        => true,
-				'disable_ui'                => false,
-				'default_plugin_compatibility' => 'compatible',
+				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
 
 				/*
 				 * This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -444,14 +443,14 @@ class FeaturesController {
 				 *
 				 * @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				 */
-				'skip_compatibility_checks' => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => false,
-				'setting'                   => array(
+				'is_experimental'              => false,
+				'setting'                      => array(
 					'disabled' => function () use ( $tracking_enabled ) {
 						return ! $tracking_enabled;
 					},
-				'desc_tip'                  => function () use ( $tracking_enabled ) {
+					'desc_tip' => function () use ( $tracking_enabled ) {
 						if ( ! $tracking_enabled ) {
 							return __( '⚠ Usage tracking must be enabled to use remote logging.', 'woocommerce' );
 						}
@@ -460,8 +459,8 @@ class FeaturesController {
 				),
 			),
 			'email_improvements'          => array(
-				'name'                      => __( 'Email improvements', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Email improvements', 'woocommerce' ),
+				'description'                  => __(
 					'Enable modern email design for transactional emails',
 					'woocommerce'
 				),
@@ -475,18 +474,18 @@ class FeaturesController {
 				 * @see https://github.com/woocommerce/woocommerce/issues/39147
 				 * @see https://github.com/woocommerce/woocommerce/issues/55540
 				 */
-				'skip_compatibility_checks' => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => false,
+				'is_experimental'              => false,
 			),
 			'blueprint'                   => array(
-				'name'                      => __( 'Blueprint (beta)', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Blueprint (beta)', 'woocommerce' ),
+				'description'                  => __(
 					'Enable blueprint to import and export settings in bulk',
 					'woocommerce'
 				),
-				'enabled_by_default'        => true,
-				'disable_ui'                => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -496,17 +495,17 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'skip_compatibility_checks' => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => false,
+				'is_experimental'              => false,
 			),
 			'block_email_editor'          => array(
-				'name'                      => __( 'Block Email Editor (alpha)', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
+				'description'                  => __(
 					'Enable the block-based email editor for transactional emails.',
 					'woocommerce'
 				),
-				'learn_more_url'            => 'https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256',
+				'learn_more_url'               => 'https://github.com/woocommerce/woocommerce/discussions/52897#discussioncomment-11630256',
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -516,18 +515,18 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'skip_compatibility_checks' => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'enabled_by_default'        => false,
+				'enabled_by_default'           => false,
 			),
 			'point_of_sale'               => array(
-				'name'                      => __( 'Point of Sale', 'woocommerce' ),
-				'description'               => __(
+				'name'                         => __( 'Point of Sale', 'woocommerce' ),
+				'description'                  => __(
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
 					'woocommerce'
 				),
-				'enabled_by_default'        => true,
-				'disable_ui'                => false,
+				'enabled_by_default'           => true,
+				'disable_ui'                   => false,
 
 				/*
 				* This is not truly a legacy feature (it is not a feature that pre-dates the FeaturesController),
@@ -537,25 +536,25 @@ class FeaturesController {
 				*
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
-				'skip_compatibility_checks' => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'is_experimental'           => true,
+				'is_experimental'              => true,
 			),
 			'fulfillments'                => array(
-				'name'               => __( 'Order Fulfillments', 'woocommerce' ),
-				'description'        => __(
+				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
+				'description'                  => __(
 					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
 					'woocommerce'
 				),
-				'enabled_by_default' => false,
-				'disable_ui'         => true,
-				'is_experimental'    => false,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => true,
+				'is_experimental'              => false,
 				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental-iapi-mini-cart' => array(
-				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
-				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
-				'is_experimental' => true,
+				'name'                         => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
+				'description'                  => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
+				'is_experimental'              => true,
 				'default_plugin_compatibility' => 'compatible',
 			),
 		);
@@ -709,7 +708,7 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Feature id to check.
 	 * @return string Either 'compatible' or 'incompatible'.
-	 * @throws InvalidArgumentException If the feature doesn't exist.
+	 * @throws \InvalidArgumentException If the feature doesn't exist.
 	 */
 	public function get_default_plugin_compatibility( string $feature_id ): string {
 		$feature_definition = $this->get_feature_definitions()[ $feature_id ] ?? null;

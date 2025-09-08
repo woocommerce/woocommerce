@@ -131,9 +131,20 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 						case 'plugin1':
 							return array();
 						case 'plugin2':
-							return array( 'compatible' => array( 'feature1' ), 'incompatible' => array( 'feature2' ), 'uncertain' => array( 'feature3' ) );
+							return array(
+								'compatible'   => array( 'feature1' ),
+								'incompatible' => array( 'feature2' ),
+								'uncertain'    => array( 'feature3' ),
+							);
 						case 'plugin3':
-							return array( 'compatible' => array( 'feature2' ), 'incompatible' => array(), 'uncertain' => array( 'feature1', 'feature3' ) );
+							return array(
+								'compatible'   => array( 'feature2' ),
+								'incompatible' => array(),
+								'uncertain'    => array(
+									'feature1',
+									'feature3',
+								),
+							);
 					}
 				}
 			);
