@@ -12,12 +12,12 @@ import { skipOnboardingWizard } from '../utils/onboarding';
 
 setup( 'setup site', async ( { baseURL, restApi } ) => {
 	await setup.step( 'configure HPOS', async () => {
-		const { DISABLE_HPOS } = process.env;
-		console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
+		const ORDER_DATASTORE = process.env.ORDER_DATASTORE || 'hpos';
+		console.log( `ORDER_DATASTORE: ${ ORDER_DATASTORE }` );
 
-		if ( DISABLE_HPOS ) {
+		if ( 'posts' === ORDER_DATASTORE ) {
 			const hposSettingRetries = 5;
-			const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
+			const value = 'posts' === ORDER_DATASTORE ? 'no' : 'yes';
 			let hposConfigured = false;
 
 			for ( let i = 0; i < hposSettingRetries; i++ ) {
@@ -50,7 +50,7 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 
 			if ( ! hposConfigured ) {
 				console.error(
-					'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
+					'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct ORDER_DATASTORE value was used and the test site has been setup correctly.'
 				);
 				process.exit( 1 );
 			}
