@@ -283,6 +283,27 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					);
 				}
 				break;
+
+			case 'woocommerce_specific_allowed_countries':
+			case 'woocommerce_specific_ship_to_countries':
+				if ( ! is_array( $value ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Expected an array of country codes.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				$valid = array_keys( WC()->countries->get_countries() );
+				foreach ( $value as $code ) {
+					if ( ! is_string( $code ) || ! in_array( $code, $valid, true ) ) {
+						return new WP_Error(
+							'rest_invalid_param',
+							__( 'Invalid country code in list.', 'woocommerce' ),
+							array( 'status' => 400 )
+						);
+					}
+				}
+				break;
 		}
 
 		return true;
@@ -497,8 +518,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$currencies       = get_woocommerce_currencies();
 
 		foreach ( $currencies as $code => $name ) {
-			$label  = wp_specialchars_decode( (string) $name );
-			$symbol = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
+			$label                     = wp_specialchars_decode( (string) $name );
+			$symbol                    = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
 			$currency_options[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
 		}
 
