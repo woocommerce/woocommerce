@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Strip the `rel=self` link from the report response as it is built by the Reports/Controller to avoid the performance penalty from building target hints.
