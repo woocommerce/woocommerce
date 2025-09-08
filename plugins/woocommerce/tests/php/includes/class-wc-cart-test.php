@@ -615,6 +615,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -648,6 +650,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
@@ -677,6 +681,8 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+
+		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
 
 	/**
