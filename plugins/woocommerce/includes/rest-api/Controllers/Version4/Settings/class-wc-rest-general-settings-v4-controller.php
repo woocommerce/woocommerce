@@ -607,7 +607,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				),
 				'value'   => array(
 					'description' => __( 'Setting field value.', 'woocommerce' ),
-					'type'        => array( 'string', 'number', 'array' ),
+					'type'        => array( 'string', 'number', 'array', 'boolean' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'options' => array(
