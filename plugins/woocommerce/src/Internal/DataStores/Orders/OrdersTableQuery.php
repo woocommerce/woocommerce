@@ -690,19 +690,17 @@ class OrdersTableQuery {
 		// Sanitize status.
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
-		if ( empty( $this->args['status'] ) || 'any' === $this->args['status'] ) {
-			$this->args['status'] = $valid_statuses;
-		} elseif ( 'all' === $this->args['status'] ) {
+		$this->args['status'] = is_array( $this->args['status'] ) ? $this->args['status'] : array( $this->args['status'] );
+
+		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) || in_array( 'all', $this->args['status'], true ) ) {
 			$this->args['status'] = array();
-		} else {
-			$this->args['status'] = is_array( $this->args['status'] ) ? $this->args['status'] : array( $this->args['status'] );
-
-			foreach ( $this->args['status'] as &$status ) {
-				$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
-			}
-
-			$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
 		}
+
+		foreach ( $this->args['status'] as &$status ) {
+			$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
+		}
+
+		$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
 	}
 
 	/**
