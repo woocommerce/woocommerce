@@ -23,9 +23,9 @@ import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 
 const AddToCartOptionsEdit = (
-	props: BlockEditProps< Attributes > & { context: { postId?: number } }
+	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
 ) => {
-	const { product } = useProduct( props.context.postId );
+	const { product } = useProduct( props.context?.postId );
 	const blockProps = useBlockProps();
 	const blockClientId = blockProps?.id;
 
