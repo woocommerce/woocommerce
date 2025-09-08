@@ -209,6 +209,19 @@ jQuery( function ( $ ) {
 				return true;
 			}
 
+			// Check if we're in an address_1 field with active autocomplete suggestions
+			var target = e.target || e.srcElement;
+			if ( target && ( target.id === 'billing_address_1' || target.id === 'shipping_address_1' ) ) {
+				// Check if suggestions are currently visible for this field
+				var type = target.id.replace( '_address_1', '' );
+				var suggestionsContainer = document.getElementById( 'address_suggestions_' + type );
+				
+				if ( suggestionsContainer && suggestionsContainer.style.display !== 'none' ) {
+					// Suggestions are visible - don't queue any updates while typing/navigating
+					return true;
+				}
+			}
+
 			wc_checkout_form.dirtyInput = this;
 			wc_checkout_form.reset_update_checkout_timer();
 			wc_checkout_form.updateTimer = setTimeout(
