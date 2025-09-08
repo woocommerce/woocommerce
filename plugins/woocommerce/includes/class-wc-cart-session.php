@@ -661,8 +661,10 @@ final class WC_Cart_Session {
 	private function remove_shipping_for_package_from_session() {
 		$wc_session = WC()->session;
 
-		foreach ( array_keys( WC()->cart->get_shipping_packages() ) as $package_key ) {
-			$wc_session->set( 'shipping_for_package_' . $package_key, null );
+		foreach ( array_keys( $wc_session->get_session_data() ) as $key ) {
+			if ( 0 === strpos( $key, 'shipping_for_package_' ) ) {
+				$wc_session->set( $key, null );
+			}
 		}
 	}
 }
