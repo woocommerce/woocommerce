@@ -195,9 +195,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		// @todo, figure out why this ever worked with the definition as an `array` type, why lazy loading corrects it, and if the bug needs to be supported for backward compatibility
-		// $this->assertEquals( 'woo', $data['test_profile_datum'] );
-		$this->assertEquals( array( 'woo' ), $data['test_profile_datum'] );
+		$this->assertEquals( 'woo', $data['test_profile_datum'] );
 	}
 
 	/**

@@ -59,7 +59,10 @@ class Init {
 	 * @return void
 	 */
 	public function rest_api_init() {
-		wc_rest_lazy_load_namespace( 'wc-admin', array( $this, 'rest_api_init_wc_admin' ) );
+		if ( wc_rest_should_load_namespace( 'wc-admin' ) ) {
+			$this->rest_api_init_wc_admin();
+		}
+
 		wc_rest_lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
@@ -116,6 +119,13 @@ class Init {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
 		}
+
+		/**
+		 * Fires immediately after the WooCommerce core `wc-admin` routes have been registered.
+		 *
+		 * @since 10.3.0
+		 */
+		do_action( 'woocommerce_wc-admin_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -139,7 +149,6 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ProductCategories',
 			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'Automattic\WooCommerce\Admin\API\ProductReviews',
-			'Automattic\WooCommerce\Admin\API\ProductVariations',
 			'Automattic\WooCommerce\Admin\API\ProductsLowInStock',
 			'Automattic\WooCommerce\Admin\API\SettingOptions',
 			'Automattic\WooCommerce\Admin\API\Taxes',
@@ -175,25 +184,32 @@ class Init {
 
 			// The performance indicators controllerq must be registered last, after other /stats endpoints have been registered.
 			$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\PerformanceIndicators\Controller';
-
-			$controllers = array_merge( $analytics_controllers, $controllers );
-
-			if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
-				/**
-				 * Filter for the WooCommerce Admin REST controllers.
-				 *
-				 * @param array $controllers List of rest API controllers.
-				 *
-				 * @since 3.5.0
-				 */
-				$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
-			}
-
-			foreach ( $controllers as $controller ) {
-				$this->$controller = new $controller();
-				$this->$controller->register_routes();
-			}
 		}
+
+		$controllers = array_merge( $analytics_controllers, $controllers );
+
+		if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
+			/**
+			 * Filter for the WooCommerce Admin REST controllers.
+			 *
+			 * @param array $controllers List of rest API controllers.
+			 *
+			 * @since 3.5.0
+			 */
+			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+		}
+
+		foreach ( $controllers as $controller ) {
+			$this->$controller = new $controller();
+			$this->$controller->register_routes();
+		}
+
+		/**
+		 * Fires immediately after the WooCommerce core `wc-analytics` routes have been registered.
+		 *
+		 * @since 10.3.0
+		 */
+		do_action( 'woocommerce_wc-analytics_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**

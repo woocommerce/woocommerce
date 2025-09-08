@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2f744c421d4cd35b5683380aed6445fe",
+    "content-hash": "41e229864536946c8f7731eb30d57f2a",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1561,6 +1561,80 @@
                 "symlink": false,
                 "relative": true
             }
+        },
+        {
+            "name": "wordpress/abilities-api",
+            "version": "v0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/WordPress/abilities-api.git",
+                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/21af812bc2dc3677aa71b3a6875dc5407a477adf",
+                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4 | ^8"
+            },
+            "require-dev": {
+                "automattic/vipwpcs": "^3.0",
+                "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+                "php-coveralls/php-coveralls": "^2.5",
+                "phpcompatibility/php-compatibility": "10.x-dev as 9.99.99",
+                "phpcompatibility/phpcompatibility-wp": "^2.1",
+                "phpstan/extension-installer": "^1.3",
+                "phpstan/phpstan": "^2.1.22",
+                "phpstan/phpstan-deprecation-rules": "^2.0.3",
+                "phpstan/phpstan-phpunit": "^2.0.3",
+                "phpunit/phpunit": "^8.5|^9.6",
+                "slevomat/coding-standard": "^8.0",
+                "squizlabs/php_codesniffer": "^3.9",
+                "szepeviktor/phpstan-wordpress": "^2.0.2",
+                "wp-coding-standards/wpcs": "^3.1",
+                "wp-phpunit/wp-phpunit": "^6.5",
+                "wpackagist-plugin/plugin-check": "^1.6",
+                "yoast/phpunit-polyfills": "^4.0"
+            },
+            "type": "library",
+            "extra": {
+                "installer-paths": {
+                    "vendor/{$vendor}/{$name}/": [
+                        "wpackagist-plugin/plugin-check"
+                    ]
+                }
+            },
+            "autoload": {
+                "files": [
+                    "includes/bootstrap.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "WordPress AI Team",
+                    "homepage": "https://make.wordpress.org/ai/"
+                }
+            ],
+            "description": "AI Abilities for WordPress.",
+            "homepage": "https://github.com/WordPress/abilities-api",
+            "keywords": [
+                "abilities",
+                "ai",
+                "api",
+                "llm",
+                "wordpress"
+            ],
+            "support": {
+                "issues": "https://github.com/WordPress/abilities-api/issues",
+                "source": "https://github.com/WordPress/abilities-api"
+            },
+            "time": "2025-09-05T07:28:21+00:00"
         }
     ],
     "packages-dev": [

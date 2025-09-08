@@ -151,6 +151,9 @@
 			"@woocommerce/entities": [
 				"assets/js/entities"
 			],
+			"@woocommerce/sanitize": [
+				"node_modules/@woocommerce/sanitize/src/index.ts"
+			],
 		}
 	}
 }

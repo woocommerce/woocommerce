@@ -549,6 +549,7 @@ final class BlockTypesController {
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
 			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+			$block_types[] = 'AddToCartWithOptions\VariationDescription';
 			$block_types[] = 'AddToCartWithOptions\VariationSelector';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
