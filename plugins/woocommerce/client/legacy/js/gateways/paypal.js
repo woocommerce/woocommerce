@@ -1,5 +1,6 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
+	let returnUrl = null;
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -24,6 +25,7 @@ jQuery(function ($) {
 						body: formData,
 					});
 					const data = await response.json();
+					returnUrl = data.return_url;
 					return data.paypal_order_id;
 				} catch (error) {
 					console.error('Error creating order:', error);
@@ -32,24 +34,15 @@ jQuery(function ($) {
 			},
 
 			async onApprove( data ) {
-				// TODO: Add onApprove logic here
+				// Redirect to the order received page.
+				if ( data.paymentID && returnUrl ) {
+					window.location.href = returnUrl;
+				}
 			},
 
 			onError: function ( err ) {
 				// TODO: Add onError logic here
 				console.error( 'PayPal error:', err );
-			},
-
-			onCancel( data ) {
-				// TODO: Add onCancel logic here
-			},
-
-			onInit( data, actions ) {
-				// TODO: Add onInit logic here
-			},
-
-			onClick() {
-				// TODO: Add onClick logic here
 			},
 
 		});

@@ -52,7 +52,7 @@ class WC_Gateway_Paypal_Ajax_Handler {
         $order = wc_get_order( $order_id );
 
         if ( $order->get_meta( '_paypal_order_id' ) ) {
-            wp_send_json( [ 'paypal_order_id' => $order->get_meta( '_paypal_order_id' ) ] );
+            wp_send_json( [ 'paypal_order_id' => $order->get_meta( '_paypal_order_id' ), 'order_id' => $order_id, 'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ) ] );
         }
 
         // Set the order as awaiting payment in the current session.
@@ -73,6 +73,6 @@ class WC_Gateway_Paypal_Ajax_Handler {
         $order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
         $order->save();
 
-		wp_send_json( [ 'paypal_order_id' => $paypal_order['id'] ?? null ] );
+		wp_send_json( [ 'paypal_order_id' => $paypal_order['id'] ?? null, 'order_id' => $order_id, 'return_url' => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ) ] );
     }
 }
