@@ -473,8 +473,6 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { quantity } = getContext< Context >();
-
 				const id =
 					productDataState.variationId || productDataState.productId;
 
@@ -486,6 +484,8 @@ const { actions, state } = store<
 				if ( ! productType ) {
 					return;
 				}
+
+				const { quantity } = getContext< Context >();
 
 				const newQuantity = getNewQuantity(
 					id,
