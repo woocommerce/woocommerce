@@ -908,9 +908,10 @@ class FeaturesController {
 	 *
 	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
 	 * @param bool   $enabled_features_only True to return only names of enabled plugins.
+	 * @param bool   $resolve_uncertain True to resolve the uncertain features to compatible or incompatible.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
-	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
+	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false, bool $resolve_uncertain = false ): array {
 		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
@@ -934,7 +935,18 @@ class FeaturesController {
 		$info                 = $this->compatibility_info_by_plugin[ $plugin_name ];
 		$info['compatible']   = array_values( array_intersect( array_keys( $features ), $info['compatible'] ) );
 		$info['incompatible'] = array_values( array_intersect( array_keys( $features ), $info['incompatible'] ) );
-		$info['uncertain']    = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
+		$info['uncertain']    = array();
+
+		$uncertain_features = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
+
+		if ( $resolve_uncertain ) {
+			foreach ( $uncertain_features as $feature_id ) {
+				$key = $this->get_default_plugin_compatibility( $feature_id );
+				$info[ $key ][] = $feature_id;
+			}
+		} else {
+			$info['uncertain'] = $uncertain_features;
+		}
 
 		return $info;
 	}
@@ -944,9 +956,10 @@ class FeaturesController {
 	 *
 	 * @param string $feature_id Feature id.
 	 * @param bool   $active_only True to return only active plugins.
+	 * @param bool   $resolve_uncertain True to resolve the uncertain plugins to compatible or incompatible.
 	 * @return array An array having a 'compatible', an 'incompatible' and an 'uncertain' key, each holding an array of plugin names.
 	 */
-	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false ): array {
+	public function get_compatible_plugins_for_feature( string $feature_id, bool $active_only = false, bool $resolve_uncertain = false ): array {
 		$this->process_pending_declarations();
 		$this->verify_did_woocommerce_init( __FUNCTION__ );
 
@@ -959,8 +972,13 @@ class FeaturesController {
 			);
 		}
 
-		$info              = $this->compatibility_info_by_feature[ $feature_id ];
-		$info['uncertain'] = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
+		$info = $this->compatibility_info_by_feature[ $feature_id ];
+		ArrayUtil::ensure_key_is_array( $info, 'uncertain' );
+
+		// Resolve uncertain plugin compatibility?
+		$uncertain_plugins = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
+		$key          = $resolve_uncertain ? $this->get_default_plugin_compatibility( $feature_id ) : 'uncertain';
+		$info[ $key ] = array_merge( $info[ $key ], $uncertain_plugins );
 
 		return $info;
 	}
