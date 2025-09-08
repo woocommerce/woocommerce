@@ -32,8 +32,6 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 		# chain rather than trunk.
 		git fetch --depth=1 --no-tags origin trunk
 		BASE_SHA=$(git rev-parse origin/trunk)
-
-		BASE_SHA=55f855a2e6d769b5ae44305b2772eb30d3e721df
 	fi
 	HEAD_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 	WP_VERSION=$(awk -F ': ' '/^Tested up to/{print $2}' readme.txt)
@@ -106,12 +104,12 @@ if [ "$GITHUB_EVENT_NAME" == "push" ] || [ "$GITHUB_EVENT_NAME" == "pull_request
 	echo "$PERF_RESULTS"
 	echo '##[endgroup]'
 
-	#if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
+	if [[ "$GITHUB_EVENT_NAME" == "push" ]]; then
 		title "##[group]Publish results to CodeVitals"
 		COMMITTED_AT=$(git show -s $GITHUB_SHA --format="%cI")
 		pnpm --filter="compare-perf" run log $CODEVITALS_PROJECT_TOKEN trunk $GITHUB_SHA $BASE_SHA $COMMITTED_AT
 		echo '##[endgroup]'
-	#fi
+	fi
 
 	# Compare server response delta compared to the base branch and fail if greater than 10% difference.
 	FRONTEND_DELTA=$(jq .serverResponse $ARTIFACTS_PATH/frontend.delta-results.json)
