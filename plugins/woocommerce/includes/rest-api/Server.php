@@ -208,7 +208,7 @@ class Server {
 	protected function get_v4_controllers() {
 		return array(
 			'ping'             => 'WC_REST_Ping_V4_Controller',
-			'fulfillments'    => 'WC_REST_Fulfillments_V4_Controller',
+			'fulfillments'     => 'WC_REST_Fulfillments_V4_Controller',
 			'products'         => 'WC_REST_Products_V4_Controller',
 			'settings-general' => 'WC_REST_General_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.

@@ -242,7 +242,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		// Custom validation rules for specific settings.
 		switch ( $setting_id ) {
 			case 'woocommerce_price_num_decimals':
-				if ( ! is_numeric( $value ) || $value < 0 || $value > 10 || intval( $value ) != $value ) {
+				if ( ! is_numeric( $value ) || $value < 0 || $value > 10 || intval( $value ) !== $value ) {
 					return new WP_Error(
 						'rest_invalid_param',
 						__( 'Number of decimals must be between 0 and 10.', 'woocommerce' ),
@@ -331,12 +331,14 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			case 'multiselect':
 			case 'multi_select_countries':
 				if ( is_array( $value ) ) {
-					return array_values( array_map(
-						static function( $v ) {
-							return strtoupper( sanitize_text_field( (string) $v ) );
-						},
-						$value
-					) );
+					return array_values(
+						array_map(
+							static function ( $v ) {
+								return strtoupper( sanitize_text_field( (string) $v ) );
+							},
+							$value
+						)
+					);
 				}
 
 				// Handle empty values and string inputs.
