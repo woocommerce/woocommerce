@@ -31,8 +31,10 @@ const keys = [
 	'largestContentfulPaint',
 	'serverResponse',
 	'firstPaint',
+	'domContentLoaded',
+	'loaded',
 ];
-// untested: "domContentLoaded", "loaded", "firstContentfulPaint","firstBlock"
+// untested: , "firstContentfulPaint", "firstBlock"
 
 const data = JSON.stringify( {
 	branch,
