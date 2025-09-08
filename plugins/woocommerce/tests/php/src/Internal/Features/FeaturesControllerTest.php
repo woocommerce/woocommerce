@@ -992,7 +992,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 						'is_experimental'    => false,
 						'enabled_by_default' => false,
 						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-						'plugins_are_incompatible_by_default' => true,
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
 						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),

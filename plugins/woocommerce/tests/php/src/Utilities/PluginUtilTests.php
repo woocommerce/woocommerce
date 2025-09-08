@@ -253,11 +253,11 @@ class PluginUtilTests extends \WC_Unit_Test_Case {
 				$features = array(
 					'test_feature_1' => array(
 						'name' => 'Test feature 1',
-						'plugins_are_incompatible_by_default' => true,
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'test_feature_2' => array(
 						'name' => 'Test feature 2',
-						'plugins_are_incompatible_by_default' => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'test_feature_3' => array(
 						'name' => 'Test feature 2',

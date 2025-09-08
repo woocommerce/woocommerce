@@ -581,7 +581,7 @@ class CustomOrdersTableController {
 			'enabled_by_default'                  => false,
 			'order'                               => 50,
 			'setting'                             => $this->get_hpos_setting_for_feature(),
-			'plugins_are_incompatible_by_default' => true,
+			'default_plugin_compatibility'        => 'incompatible',
 			'additional_settings'                 => array(
 				$this->get_hpos_setting_for_sync(),
 			),

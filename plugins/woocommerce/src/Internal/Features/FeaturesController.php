@@ -235,11 +235,28 @@ class FeaturesController {
 			'enabled_by_default'                  => false,
 			'is_experimental'                     => true,
 			'is_legacy'                           => false,
-			'plugins_are_incompatible_by_default' => false,
 			'name'                                => $name,
 			'order'                               => 10,
+			'default_plugin_compatibility' => 'compatible',
 		);
-		$args     = wp_parse_args( $args, $defaults );
+
+		if ( empty( $args['default_plugin_compatibility'] ) ) {
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				sprintf(
+					'Assuming positive compatibility by default will be deprecated in the future. Please set \'default_plugin_compatibility\' for feature "%s".',
+					esc_html( $slug )
+				),
+				'10.3.0'
+			);
+		}
+
+		$args = wp_parse_args( $args, $defaults );
+
+		// Sanitize 'default_plugin_compatibility'.
+		if ( ! in_array( $args['default_plugin_compatibility'], array( 'compatible', 'incompatible' ), true ) ) {
+			$args['default_plugin_compatibility'] = wc_string_to_bool( $args['default_plugin_compatibility'] ) ? 'compatible' : 'incompatible';
+		}
 
 		$this->features[ $slug ] = $args;
 	}
@@ -642,18 +659,44 @@ class FeaturesController {
 	 * Check if plugins that don't declare compatibility nor incompatibility with a given feature
 	 * are to be considered incompatible with that feature.
 	 *
+	 * @deprecated since 10.3.0. {@see FeaturesController::are_plugins_compatible_by_default()} and {@see FeaturesController::get_default_plugin_compatibility()}.
+	 *
 	 * @param string $feature_id Feature id to check.
 	 * @return bool True if plugins that don't declare compatibility nor incompatibility with the feature will be considered incompatible with the feature.
 	 * @throws \InvalidArgumentException The feature doesn't exist.
 	 */
 	public function get_plugins_are_incompatible_by_default( string $feature_id ): bool {
+		return ! $this->are_plugins_compatible_by_default( $feature_id );
+	}
+
+	/**
+	 * Check whether plugins that don't explicitly declare (in)compatibility are to be considered (in)compatible with a feature.
+	 *
+	 * @param string $feature_id Feature id to check.
+	 * @return bool TRUE if plugins that don't declare (in)compatibility are to be considered compatible with the feature.
+	 */
+	public function are_plugins_compatible_by_default( string $feature_id ): bool {
+		return 'compatible' === $this->get_default_plugin_compatibility( $feature_id );
+	}
+
+	/**
+	 * Get the default plugin compatibility for a given feature.
+	 *
+	 * @param string $feature_id
+	 * @return string
+	 * @throws Error
+	 * @throws ContainerException
+	 * @throws Exception
+	 */
+	public function get_default_plugin_compatibility( string $feature_id ): string {
 		$feature_definition = $this->get_feature_definitions()[ $feature_id ] ?? null;
 		if ( is_null( $feature_definition ) ) {
 			throw new \InvalidArgumentException( esc_html( "The WooCommerce feature '$feature_id' doesn't exist" ) );
 		}
 
-		$incompatible_by_default = $feature_definition['plugins_are_incompatible_by_default'] ?? false;
+		$default_plugin_compatibility = $feature_definition['default_plugin_compatibility'] ?? 'compatible';
 
+		// Filter below is only fired for backwards compatibility with get_plugins_are_incompatible_by_default().
 		/**
 		 * Filter to determine if plugins that don't declare compatibility nor incompatibility with a given feature
 		 * are to be considered incompatible with that feature.
@@ -663,7 +706,9 @@ class FeaturesController {
 		 *
 		 * @since 9.2.0
 		 */
-		return (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', $incompatible_by_default, $feature_id );
+		$incompatible_by_default = (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', 'incompatible' === $default_plugin_compatibility, $feature_id );
+
+		return $incompatible_by_default ? 'incompatible' : 'compatible';
 	}
 
 	/**
@@ -799,7 +844,6 @@ class FeaturesController {
 		}
 
 		// Register compatibility by feature.
-
 		$key = $positive_compatibility ? 'compatible' : 'incompatible';
 
 		if ( ! in_array( $plugin_id, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
@@ -1433,7 +1477,7 @@ class FeaturesController {
 
 			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->is_legacy_feature( $feature_id ) );
 			foreach ( $uncertains as $feature_id ) {
-				if ( $this->get_plugins_are_incompatible_by_default( $feature_id ) ) {
+				if ( ! $this->are_plugins_compatible_by_default( $feature_id ) ) {
 					$incompatible_plugins = true;
 					break;
 				}
