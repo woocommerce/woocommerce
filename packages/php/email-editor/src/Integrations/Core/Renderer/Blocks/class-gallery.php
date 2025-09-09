@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Gallery block renderer.
@@ -63,13 +64,21 @@ class Gallery extends Abstract_Block_Renderer {
 
 			// Look for a link around the image in the original HTML.
 			if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $inner_html, $link_matches ) ) {
+				// Validate and sanitize the link URL.
+				$sanitized_url = esc_url_raw( $link_matches[2] );
+				if ( empty( $sanitized_url ) ) {
+					// If URL is invalid, fall back to image without link.
+					return $this->remove_figure_wrapper( $rendered_image );
+				}
+
 				// Extract the linked image and caption separately.
-				$linked_image = '<a href="' . esc_url( $link_matches[2] ) . '">' . $link_matches[3] . '</a>';
+				$linked_image = '<a href="' . $sanitized_url . '">' . $link_matches[3] . '</a>';
 
 				// Extract caption if it exists.
 				$caption = '';
 				if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $inner_html, $caption_matches ) ) {
-					$caption = '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $caption_matches[1] . '</div>';
+					$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
+					$caption           = '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
 				}
 
 				return $linked_image . $caption;
@@ -92,10 +101,15 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Check if the image is wrapped in a link.
 		if ( preg_match( '/<a[^>]*href="([^"]*)"[^>]*>(<img[^>]*>)<\/a>/', $rendered_image, $link_matches ) ) {
-			// Image is linked - preserve the link with sanitized href and img.
-			$sanitized_href = esc_url( $link_matches[1] );
-			$sanitized_img  = wp_kses_post( $link_matches[2] );
-			$result        .= '<a href="' . $sanitized_href . '">' . $sanitized_img . '</a>';
+			// Image is linked - validate and sanitize the link URL.
+			$sanitized_href = esc_url_raw( $link_matches[1] );
+			if ( ! empty( $sanitized_href ) ) {
+				$sanitized_img = wp_kses_post( $link_matches[2] );
+				$result       .= '<a href="' . $sanitized_href . '">' . $sanitized_img . '</a>';
+			} else {
+				// If URL is invalid, extract just the image without link.
+				$result .= wp_kses_post( $link_matches[2] );
+			}
 		} elseif ( preg_match( '/<img[^>]*>/', $rendered_image, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
 			$result .= wp_kses_post( $img_matches[0] );
@@ -103,9 +117,11 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Extract the caption if it exists (handle both figcaption and span formats).
 		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $rendered_image, $caption_matches ) ) {
-			$result .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $caption_matches[1] . '</div>';
+			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
+			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
 		} elseif ( preg_match( '/<span class="wp-element-caption"[^>]*>(.*?)<\/span>/s', $rendered_image, $caption_matches ) ) {
-			$result .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $caption_matches[1] . '</div>';
+			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
+			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
 		}
 
 		return $result;
@@ -120,7 +136,7 @@ class Gallery extends Abstract_Block_Renderer {
 	private function extract_gallery_caption( string $block_content ): string {
 		// Look for gallery-level caption: <figcaption class="blocks-gallery-caption wp-element-caption">.
 		if ( preg_match( '/<figcaption class="blocks-gallery-caption[^"]*"[^>]*>(.*?)<\/figcaption>/s', $block_content, $matches ) ) {
-			return trim( $matches[1] );
+			return Html_Processing_Helper::sanitize_caption_html( trim( $matches[1] ) );
 		}
 
 		return '';
@@ -159,7 +175,7 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Apply class and style attributes to the wrapper table.
 		$table_attrs = array(
-			'class' => 'email-block-gallery ' . $original_wrapper_classname,
+			'class' => 'email-block-gallery ' . Html_Processing_Helper::clean_css_classes( $original_wrapper_classname ),
 			'style' => $block_styles['css'],
 			'align' => 'left',
 			'width' => '100%',
@@ -220,7 +236,7 @@ class Gallery extends Abstract_Block_Renderer {
 		// If there is exactly one image, span full width; otherwise distribute width evenly across the images in this row.
 		if ( 1 === $images_in_row ) {
 			$cell_attrs = array(
-				'style'   => sprintf( 'width: 100%%; padding: %dpx; vertical-align: top; text-align: center;', $cell_padding ),
+				'style'   => sprintf( 'width: %s; padding: %dpx; vertical-align: top; text-align: center;', Html_Processing_Helper::sanitize_css_value( '100%' ), $cell_padding ),
 				'valign'  => 'top',
 				'colspan' => $total_columns,
 			);
@@ -232,8 +248,8 @@ class Gallery extends Abstract_Block_Renderer {
 			foreach ( $row_images as $image_html ) {
 				$cell_attrs = array(
 					'style'  => sprintf(
-						'width: %.2f%%; padding: %dpx; vertical-align: top; text-align: center;',
-						$cell_width_percent,
+						'width: %s; padding: %dpx; vertical-align: top; text-align: center;',
+						Html_Processing_Helper::sanitize_css_value( sprintf( '%.2f%%', $cell_width_percent ) ),
 						$cell_padding
 					),
 					'valign' => 'top',
@@ -244,7 +260,8 @@ class Gallery extends Abstract_Block_Renderer {
 
 		// Create a separate table for this row (following tiled gallery pattern).
 		return sprintf(
-			'<table role="presentation" style="width: 100%%; border-collapse: collapse; table-layout: fixed;"><tr>%s</tr></table>',
+			'<table role="presentation" style="width: %s; border-collapse: collapse; table-layout: fixed;"><tr>%s</tr></table>',
+			Html_Processing_Helper::sanitize_css_value( '100%' ),
 			$row_cells
 		);
 	}
