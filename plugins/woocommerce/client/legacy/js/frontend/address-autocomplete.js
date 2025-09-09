@@ -350,10 +350,14 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					input.value = currentValue;
 				}
 
-				// Remove the manipulation flag after a brief delay
-				setTimeout( function () {
-					input.removeAttribute( 'data-autocomplete-manipulating' );
-				}, 10 );
+				// Remove the manipulation flag after a brief delay. Use two rAFs to ensure layout/assistive tech settle.
+				requestAnimationFrame( function () {
+					requestAnimationFrame( function () {
+						input.removeAttribute(
+							'data-autocomplete-manipulating'
+						);
+					} );
+				} );
 
 				if ( shouldFocus ) {
 					input.focus();
@@ -978,6 +982,16 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					target !== addressInputs[ type ][ 'address_1' ]
 				) {
 					hideSuggestions( type );
+					// Restore native autofill after manual dismissal.
+					if (
+						addressInputs[ type ] &&
+						addressInputs[ type ][ 'address_1' ]
+					) {
+						enableBrowserAutofill(
+							addressInputs[ type ][ 'address_1' ],
+							false
+						);
+					}
 				}
 			} );
 		} );
