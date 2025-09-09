@@ -133,15 +133,9 @@ class Cover extends Abstract_Block_Renderer {
 			return esc_url( $block_attrs['url'] );
 		}
 
-		// Fallback: extract from HTML content using DOM parsing for better security.
-		$dom_helper  = new Dom_Document_Helper( $block_content );
-		$img_element = $dom_helper->find_element( 'img' );
-		if ( $img_element ) {
-			$img_class = $dom_helper->get_attribute_value( $img_element, 'class' );
-			$img_src   = $dom_helper->get_attribute_value( $img_element, 'src' );
-			if ( false !== strpos( $img_class, 'wp-block-cover__image-background' ) && ! empty( $img_src ) ) {
-				return esc_url( $img_src );
-			}
+		// Fallback: use regex to find background image src directly.
+		if ( preg_match( '/<img[^>]*class="[^"]*wp-block-cover__image-background[^"]*"[^>]*src="([^"]+)"/', $block_content, $matches ) ) {
+			return esc_url( $matches[1] );
 		}
 
 		return '';
