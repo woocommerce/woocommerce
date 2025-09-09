@@ -269,6 +269,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
+		/**
+		 * Order is imported by WooCommerce Analytics
+		 * 
+		 * @param int $order_id Order id
+		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
 	}
 
