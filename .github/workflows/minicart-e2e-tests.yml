@@ -56,12 +56,6 @@ jobs:
                   pull-playwright-cache: true
                   pull-package-deps: '@woocommerce/block-library'
 
-            - name: 'Update wp-env config'
-              env:
-                  # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
-                  WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce/client/blocks
-              run: node .github/workflows/scripts/override-wp-env-plugins.js
-
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
               run: |
