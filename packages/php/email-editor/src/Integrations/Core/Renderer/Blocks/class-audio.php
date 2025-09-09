@@ -77,14 +77,21 @@ class Audio extends Abstract_Block_Renderer {
 			$length = null;
 		}
 
-		// Validate URL.
-		if ( empty( $url ) || ! wp_http_validate_url( $url ) ) {
+		// Validate URL with proper ordering and comprehensive checks.
+		if ( empty( $url ) ) {
 			return '';
 		}
 
-		// Additional security: prefer HTTPS for external URLs.
-		if ( strpos( $url, 'https://' ) !== 0 && strpos( $url, 'data:' ) !== 0 && strpos( $url, '/' ) !== 0 ) {
-			// For non-HTTPS external URLs, return empty to fail securely.
+		// Validate URL type and format.
+		if ( ! str_starts_with( $url, 'data:audio/' ) &&
+			! str_starts_with( $url, '/' ) &&
+			! str_starts_with( $url, 'https://' ) ) {
+			// Reject everything else (http://, ftp://, relative paths, etc.).
+			return '';
+		}
+
+		// For HTTPS URLs, validate with wp_http_validate_url.
+		if ( str_starts_with( $url, 'https://' ) && ! wp_http_validate_url( $url ) ) {
 			return '';
 		}
 

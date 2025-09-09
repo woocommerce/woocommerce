@@ -148,11 +148,11 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If not in attributes, extract from block content based on provider.
 		$patterns = array(
-			'spotify'      => '/(?<![a-zA-Z0-9.-])https:\/\/open\.spotify\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
-			'soundcloud'   => '/(?<![a-zA-Z0-9.-])https:\/\/soundcloud\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
-			'pocket-casts' => '/(?<![a-zA-Z0-9.-])https:\/\/pca\.st\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
-			'mixcloud'     => '/(?<![a-zA-Z0-9.-])https:\/\/mixcloud\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
-			'reverbnation' => '/(?<![a-zA-Z0-9.-])https:\/\/reverbnation\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
+			'spotify'      => '/(?<![a-zA-Z0-9.-])https:\/\/open\.spotify\.com\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+(?![a-zA-Z0-9.-])/',
+			'soundcloud'   => '/(?<![a-zA-Z0-9.-])https:\/\/soundcloud\.com\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+(?![a-zA-Z0-9.-])/',
+			'pocket-casts' => '/(?<![a-zA-Z0-9.-])https:\/\/pca\.st\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+(?![a-zA-Z0-9.-])/',
+			'mixcloud'     => '/(?<![a-zA-Z0-9.-])https:\/\/mixcloud\.com\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+(?![a-zA-Z0-9.-])/',
+			'reverbnation' => '/(?<![a-zA-Z0-9.-])https:\/\/reverbnation\.com\/[a-zA-Z0-9\-._~:\/?#\[\]@!$&\'()*+,;=%]+(?![a-zA-Z0-9.-])/',
 		);
 
 		if ( isset( $patterns[ $provider ] ) && preg_match( $patterns[ $provider ], $block_content, $matches ) ) {
