@@ -78,6 +78,15 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
+type CartItemDataAttr = {
+	name?: string;
+	value?: string;
+	className?: string;
+	hidden?: boolean;
+};
+
+type DataProperty = 'item_data' | 'variation';
+
 const trimWords = ( html: string, maxWords = 15 ): string => {
 	const words = html.trim().split( /\s+/ );
 	if ( words.length <= maxWords ) {
@@ -610,6 +619,76 @@ const { state: cartItemState } = store(
 					  } )
 					: true;
 			},
+
+			get cartItemDataAttr(): CartItemDataAttr | null {
+				const { itemData, dataProperty } = getContext< {
+					itemData: {
+						key: string;
+						attribute: string;
+						value: string;
+						hidden: string;
+					};
+					dataProperty: DataProperty;
+				} >();
+
+				// Use the context if it is in a loop, otherwise use the unique item if it exists.
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return { hidden: true };
+				}
+
+				const dataItemAttrKey =
+					dataItemAttr.key || dataItemAttr.attribute;
+				// Decode entities.
+				const nameTxt = document.createElement( 'textarea' );
+				nameTxt.innerHTML = dataItemAttrKey + ':';
+				const valueTxt = document.createElement( 'textarea' );
+				valueTxt.innerHTML = dataItemAttr.value;
+
+				return {
+					name: nameTxt.value,
+					value: valueTxt.value,
+					className: `wc-block-components-product-details__${ dataItemAttrKey
+						.replace( /([a-z])([A-Z])/g, '$1-$2' )
+						.replace( /[\s_]+/g, '-' )
+						.toLowerCase() }`,
+					hidden: dataItemAttr.hidden === '1' ? true : false,
+				};
+			},
+
+			get itemDataHasMultipleAttributes(): boolean {
+				const { dataProperty } = getContext< {
+					dataProperty: DataProperty;
+				} >();
+				return cartItemState.cartItem[ dataProperty ]?.length > 1;
+			},
+
+			get shouldHideProductDetails(): boolean {
+				const { dataProperty } = getContext< {
+					dataProperty: DataProperty;
+				} >();
+				return (
+					cartItemState.cartItem[ dataProperty ].length === 0 ||
+					( dataProperty === 'variation' &&
+						cartItemState.cartItem.type !== 'variation' )
+				);
+			},
+
+			get shouldHideSingleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					cartItemState.itemDataHasMultipleAttributes
+				);
+			},
+
+			get shouldHideMultipleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					! cartItemState.itemDataHasMultipleAttributes
+				);
+			},
 		},
 
 		actions: {
@@ -649,6 +728,7 @@ const { state: cartItemState } = store(
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -669,6 +749,7 @@ const { state: cartItemState } = store(
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -685,6 +766,7 @@ const { state: cartItemState } = store(
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 
