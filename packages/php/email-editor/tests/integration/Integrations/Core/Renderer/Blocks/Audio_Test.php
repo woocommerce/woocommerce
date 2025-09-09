@@ -76,8 +76,9 @@ class Audio_Test extends \Email_Editor_Integration_Test_Case {
 	public function test_returns_empty_string_when_no_valid_url(): void {
 		$parsed_audio_no_url = $this->parsed_audio;
 		unset( $parsed_audio_no_url['attrs']['src'] );
+		$parsed_audio_no_url['innerHTML'] = '<figure class="wp-block-audio"><audio controls></audio></figure>';
 
-		$rendered = $this->audio_renderer->render( $this->parsed_audio['innerHTML'], $parsed_audio_no_url, $this->rendering_context );
+		$rendered = $this->audio_renderer->render( $parsed_audio_no_url['innerHTML'], $parsed_audio_no_url, $this->rendering_context );
 
 		$this->assertEmpty( $rendered );
 	}

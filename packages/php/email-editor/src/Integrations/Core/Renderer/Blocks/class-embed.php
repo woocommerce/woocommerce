@@ -13,7 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 
 /**
  * Embed block renderer.
- * This renderer handles core/embed blocks, specifically detecting audio provider embeds (Spotify, SoundCloud, Pocket Casts) and rendering them as audio players.
+ * This renderer handles core/embed blocks, specifically detecting audio provider embeds (Spotify, SoundCloud, Pocket Casts, Mixcloud, ReverbNation) and rendering them as audio players.
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
@@ -97,7 +97,7 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Provider name or empty string if not supported.
 	 */
 	private function get_supported_provider( array $attr, string $block_content ): string {
-		$supported_providers = array( 'pocket-casts', 'spotify', 'soundcloud' );
+		$supported_providers = array( 'pocket-casts', 'spotify', 'soundcloud', 'mixcloud', 'reverbnation' );
 
 		// Check provider name slug.
 		if ( isset( $attr['providerNameSlug'] ) && in_array( $attr['providerNameSlug'], $supported_providers, true ) ) {
@@ -116,6 +116,12 @@ class Embed extends Abstract_Block_Renderer {
 		}
 		if ( strpos( $content_to_check, 'pca.st' ) !== false ) {
 			return 'pocket-casts';
+		}
+		if ( strpos( $content_to_check, 'mixcloud.com' ) !== false ) {
+			return 'mixcloud';
+		}
+		if ( strpos( $content_to_check, 'reverbnation.com' ) !== false ) {
+			return 'reverbnation';
 		}
 
 		return '';
@@ -145,6 +151,8 @@ class Embed extends Abstract_Block_Renderer {
 			'spotify'      => '/(?<![a-zA-Z0-9.-])https:\/\/open\.spotify\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
 			'soundcloud'   => '/(?<![a-zA-Z0-9.-])https:\/\/soundcloud\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
 			'pocket-casts' => '/(?<![a-zA-Z0-9.-])https:\/\/pca\.st\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
+			'mixcloud'     => '/(?<![a-zA-Z0-9.-])https:\/\/mixcloud\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
+			'reverbnation' => '/(?<![a-zA-Z0-9.-])https:\/\/reverbnation\.com\/[a-zA-Z0-9\/?=&%-]+(?![a-zA-Z0-9.-])/',
 		);
 
 		if ( isset( $patterns[ $provider ] ) && preg_match( $patterns[ $provider ], $block_content, $matches ) ) {
@@ -179,6 +187,10 @@ class Embed extends Abstract_Block_Renderer {
 				return __( 'Listen on SoundCloud', 'woocommerce' );
 			case 'pocket-casts':
 				return __( 'Listen on Pocket Casts', 'woocommerce' );
+			case 'mixcloud':
+				return __( 'Listen on Mixcloud', 'woocommerce' );
+			case 'reverbnation':
+				return __( 'Listen on ReverbNation', 'woocommerce' );
 			default:
 				return __( 'Listen to the audio', 'woocommerce' );
 		}
@@ -215,8 +227,22 @@ class Embed extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		// Get link text - use custom label if provided, otherwise use provider-specific label or URL.
-		$link_text = ! empty( $attr['label'] ) ? $attr['label'] : $this->get_provider_label( $attr['providerNameSlug'] ?? '', $attr );
+		// Get link text - use custom label if provided, otherwise use provider label for base URLs or URL.
+		if ( ! empty( $attr['label'] ) ) {
+			$link_text = $attr['label'];
+		} else {
+			// Check if this is a provider base URL (like https://open.spotify.com/).
+			$provider = $attr['providerNameSlug'] ?? '';
+			$base_url = $this->get_provider_base_url( $provider );
+
+			if ( ! empty( $base_url ) && $url === $base_url ) {
+				// Use provider-specific label for base URLs.
+				$link_text = $this->get_provider_label( $provider, $attr );
+			} else {
+				// Use the URL itself for specific URLs.
+				$link_text = $url;
+			}
+		}
 
 		// Create a simple link.
 		$link_html = sprintf(

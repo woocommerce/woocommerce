@@ -352,4 +352,48 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertEmpty( $rendered );
 	}
+
+	/**
+	 * Test that Mixcloud embed renders correctly
+	 */
+	public function test_mixcloud_embed_renders_correctly(): void {
+		$parsed_mixcloud_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://mixcloud.com/user/example-track/',
+				'type'             => 'rich',
+				'providerNameSlug' => 'mixcloud',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-rich is-provider-mixcloud wp-block-embed-mixcloud"><div class="wp-block-embed__wrapper">https://mixcloud.com/user/example-track/</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_mixcloud_embed['innerHTML'], $parsed_mixcloud_embed, $this->rendering_context );
+
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'Listen on Mixcloud', $rendered );
+		$this->assertStringContainsString( 'https://mixcloud.com/user/example-track/', $rendered );
+	}
+
+	/**
+	 * Test that ReverbNation embed renders correctly
+	 */
+	public function test_reverbnation_embed_renders_correctly(): void {
+		$parsed_reverbnation_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://reverbnation.com/artist/example-song',
+				'type'             => 'rich',
+				'providerNameSlug' => 'reverbnation',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-rich is-provider-reverbnation wp-block-embed-reverbnation"><div class="wp-block-embed__wrapper">https://reverbnation.com/artist/example-song</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_reverbnation_embed['innerHTML'], $parsed_reverbnation_embed, $this->rendering_context );
+
+		$this->assertNotEmpty( $rendered );
+		$this->assertStringContainsString( 'Listen on ReverbNation', $rendered );
+		$this->assertStringContainsString( 'https://reverbnation.com/artist/example-song', $rendered );
+	}
 }

@@ -34,15 +34,24 @@ class Audio extends Abstract_Block_Renderer {
 		$attr = $parsed_block['attrs'];
 
 		// Check if we have a valid audio source - return empty string immediately if not.
-		if ( empty( $attr['src'] ) && empty( $attr['id'] ) ) {
+		// For attachments, check the 'id' attribute. For external URLs, check if src exists in HTML content.
+		$has_attachment_id = ! empty( $attr['id'] );
+		$has_src_in_html   = preg_match( '#<audio[^>]*\ssrc=["\']([^"\']*)["\'][^>]*/?>#', $block_content );
+
+		// If we have neither an attachment ID nor a src in the HTML content, return empty.
+		if ( ! $has_attachment_id && ! $has_src_in_html ) {
 			return '';
 		}
 
 		// If we have a valid source, proceed with normal rendering.
-		return $this->add_spacer(
-			$this->render_content( $block_content, $parsed_block, $rendering_context ),
-			$parsed_block['email_attrs'] ?? array()
-		);
+		$rendered_content = $this->render_content( $block_content, $parsed_block, $rendering_context );
+
+		// If render_content returns empty (e.g., invalid URL), return empty string.
+		if ( empty( $rendered_content ) ) {
+			return '';
+		}
+
+		return $this->add_spacer( $rendered_content, $parsed_block['email_attrs'] ?? array() );
 	}
 	/**
 	 * Renders the audio block content as an audio player for email.
@@ -86,14 +95,9 @@ class Audio extends Abstract_Block_Renderer {
 		if ( ! empty( $email_attrs ) && class_exists( '\WP_Style_Engine' ) ) {
 			// Get margin for table styling.
 			$table_margin_style = \WP_Style_Engine::compile_css( array_intersect_key( $email_attrs, array_flip( array( 'margin' ) ) ), '' );
-
-			// Validate CSS output to prevent injection.
-			if ( ! empty( $table_margin_style ) && ! preg_match( '/^[a-zA-Z0-9\s:;().,pxemremvwvh%+-]+$/', $table_margin_style ) ) {
-				$table_margin_style = '';
-			}
 		}
 
-		$icon_image = 'https://s0.wp.com/i/emails/wpcom-notifications/audio-play.png';
+		$icon_image = $this->get_audio_icon_url();
 		$label      = ! empty( $attr['label'] ) ? $attr['label'] : __( 'Listen to the audio', 'woocommerce' );
 
 		// Add duration to label if available.
@@ -168,5 +172,15 @@ class Audio extends Abstract_Block_Renderer {
 		$main_wrapper = Table_Wrapper_Helper::render_table_wrapper( $main_table, $table_attrs, $cell_attrs );
 
 		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => 'left' ) );
+	}
+
+	/**
+	 * Gets the audio icon URL.
+	 *
+	 * @return string The audio icon URL.
+	 */
+	private function get_audio_icon_url(): string {
+		$file_name = '/icons/audio/audio-play.png';
+		return plugins_url( $file_name, __FILE__ );
 	}
 }
