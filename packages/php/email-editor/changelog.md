@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0](https://github.com/woocommerce/email-editor/releases/tag/1.5.0) - 2025-09-09 
+
+-   Patch - Add type check when extracting vars from theme style values in email editor [#60538]
+-   Patch - Upgrade pelago/emogrifier to v8.0 [#60489]
+-   Minor - Add email block renderer for the Table core block. [#60514]
+-   Minor - Add email rendering instructions for the core/media-text block. [#60752]
+-   Minor - Remove `block_preview_url` from `WooCommerceEmailEditor` object [#60603]
+-   Patch - Use a more robust way to post-process the style attribute values within the Email Editor. [#60764]
+
 ## [1.4.2](https://github.com/woocommerce/email-editor/releases/tag/1.4.2) - 2025-08-21 
 
 -   Patch - Filter unnecessary stylesheets from iframe assets [#60354]
