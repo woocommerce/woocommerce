@@ -284,6 +284,10 @@ class Embed extends Abstract_Block_Renderer {
 				return 'https://soundcloud.com/';
 			case 'pocket-casts':
 				return 'https://pca.st/';
+			case 'mixcloud':
+				return 'https://www.mixcloud.com/';
+			case 'reverbnation':
+				return 'https://www.reverbnation.com/';
 			default:
 				return '';
 		}

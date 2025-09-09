@@ -123,7 +123,7 @@ class Audio extends Abstract_Block_Renderer {
 		// Generate the icon content.
 		$icon_content = sprintf(
 			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="padding: 0.25em; padding-left: 17px; display: inline-block; vertical-align: middle;"><img height="%2$s" src="%3$s" style="display:block;margin-right:0;vertical-align:middle;" width="%2$s" alt="%4$s"></a>',
-			esc_url( $audio_url ),
+			$audio_url,
 			esc_attr( $icon_size ),
 			esc_url( $icon_image ),
 			// translators: %s is the audio player icon.
@@ -134,7 +134,7 @@ class Audio extends Abstract_Block_Renderer {
 		// Generate the label content.
 		$label_content    = sprintf(
 			'<a href="%1$s" rel="noopener nofollow" target="_blank" style="text-decoration:none; padding: 0.25em; padding-right: 17px; display: inline-block;"><span style="margin-left:.5em;margin-right:.5em;font-weight:bold"> %2$s </span></a>',
-			esc_url( $audio_url ),
+			$audio_url,
 			esc_html( $label )
 		);
 		$label_cell_style = sprintf(
