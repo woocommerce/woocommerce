@@ -147,6 +147,19 @@ jobs:
                   pull-playwright-cache: ${{ matrix.testEnv.shouldCreate && ( matrix.testType == 'e2e' || matrix.testType == 'performance' ) }}
                   pull-package-deps: '${{ matrix.projectName }}'
 
+            - name: 'Set experimental-iapi-mini-cart feature flag to false'
+              run: |
+                  sudo apt-get update && sudo apt-get install -y jq
+                  jq '.features."experimental-iapi-mini-cart" = false' plugins/woocommerce/client/admin/config/core.json > tmp.json && mv tmp.json plugins/woocommerce/client/admin/config/core.json
+                  echo "Set experimental-iapi-mini-cart to false in core.json:"
+                  cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+
+            - name: 'Verify experimental-iapi-mini-cart feature flag'
+              run: |
+                  echo "Expected value for experimental-iapi-mini-cart: false"
+                  echo "Current value in core.json:"
+                  cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+
             - name: 'Update wp-env config'
               if: ${{ inputs.artifactName != '' }}
               env:
