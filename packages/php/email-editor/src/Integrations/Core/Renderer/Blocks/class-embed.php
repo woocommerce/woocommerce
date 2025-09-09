@@ -90,12 +90,13 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If audio rendering fails, fall back to a simple link.
 		if ( empty( $audio_result ) ) {
-			// Create a simple link using the original embed URL and provider label.
-			return sprintf(
-				'<a href="%s" target="_blank" rel="noopener nofollow" style="color: #0073aa; text-decoration: underline;">%s</a>',
-				esc_url( $url ),
-				esc_html( $label )
+			// Use the existing render_link_fallback method for consistent spacing and formatting.
+			// Create a mock attr array with the URL and label for the fallback method.
+			$fallback_attr = array(
+				'url'   => $url,
+				'label' => $label,
 			);
+			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
 		}
 
 		return $audio_result;
