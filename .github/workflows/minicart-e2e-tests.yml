@@ -47,14 +47,20 @@ jobs:
               uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
-              name: 'Install Block Library'
-              id: 'install-block-library'
+              name: 'Install Monorepo'
+              id: 'install-monorepo'
               with:
                   install: '@woocommerce/block-library...'
                   build: '@woocommerce/block-library'
                   build-type: 'full'
                   pull-playwright-cache: true
                   pull-package-deps: '@woocommerce/block-library'
+
+            - name: 'Update wp-env config'
+              run: |
+                  # band-aid to get the path to wp-env.json for blocks e2e tests
+                  WP_ENV_CONFIG_PATH="${{ github.workspace }}/plugins/woocommerce/client/blocks"
+                  echo "WP_ENV_CONFIG_PATH=$WP_ENV_CONFIG_PATH" >> "$GITHUB_ENV"
 
             - name: 'Start Test Environment'
               id: 'prepare-test-environment'
@@ -69,9 +75,37 @@ jobs:
                   echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
                   WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="@woocommerce/block-library" env:start
 
+            - name: 'Resolve artifacts path'
+              run: |
+                  # Create artifacts directory
+                  mkdir -p plugins/woocommerce/client/blocks/tests/e2e/test-results
+                  echo "ARTIFACTS_PATH=plugins/woocommerce/client/blocks/tests/e2e/test-results" >> $GITHUB_ENV
+
             - name: 'Run all e2e tests (with feature flag disabled)'
-              working-directory: ./plugins/woocommerce/client/blocks
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
+                  E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
               run: |
-                  pnpm run test:e2e
+                  pnpm --filter="@woocommerce/block-library" test:e2e
+
+            - name: 'Determine BuildKite Analytics Message'
+              env:
+                  HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+                  PR_TITLE: ${{ github.event.pull_request.title }}
+              run: |
+                  if [[ "${{ github.event_name }}" == "push" ]]; then
+                      MESSAGE=`echo "$HEAD_COMMIT_MESSAGE" | head -1`
+                  elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+                      MESSAGE="$PR_TITLE"
+                  else
+                      MESSAGE="${{ github.event_name }}"
+                  fi
+                  echo "BUILDKITE_ANALYTICS_MESSAGE=$MESSAGE" >> $GITHUB_ENV
+
+            - name: 'Upload artifacts'
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: 'minicart-e2e-test-results'
+                  path: ${{ env.ARTIFACTS_PATH }}
+                  if-no-files-found: ignore
