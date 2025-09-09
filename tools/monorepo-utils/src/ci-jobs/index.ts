@@ -91,13 +91,23 @@ const program = new Command( 'ci-jobs' )
 
 		// Filter jobs by test type if specified
 		if ( options.testType ) {
-			const allowedTestTypes = options.testType.split(',').map(t => t.trim().toLowerCase());
-			Logger.notice( `Filtering jobs to only include test types: ${ allowedTestTypes.join(', ') }` );
-			
+			const allowedTestTypes = options.testType
+				.split( ',' )
+				.map( ( t ) => t.trim().toLowerCase() );
+			Logger.notice(
+				`Filtering jobs to only include test types: ${ allowedTestTypes.join(
+					', '
+				) }`
+			);
+
 			const originalTestJobsCount = jobs.test.length;
-			jobs.test = jobs.test.filter( job => allowedTestTypes.includes( job.testType.toLowerCase() ) );
-			
-			Logger.notice( `Filtered test jobs from ${ originalTestJobsCount } to ${ jobs.test.length }` );
+			jobs.test = jobs.test.filter( ( job ) =>
+				allowedTestTypes.includes( job.testType.toLowerCase() )
+			);
+
+			Logger.notice(
+				`Filtered test jobs from ${ originalTestJobsCount } to ${ jobs.test.length }`
+			);
 		}
 
 		// Rename the test jobs to include the project name and test type.
