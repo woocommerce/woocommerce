@@ -71,6 +71,8 @@ jobs:
 
             - name: 'Run minicart tests'
               working-directory: ./plugins/woocommerce/client/blocks
+              env:
+                  BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
               run: |
                   sh ./bin/check-env.sh
                   pnpm playwright test --config=tests/e2e/playwright.config.ts tests/e2e/tests/mini-cart
