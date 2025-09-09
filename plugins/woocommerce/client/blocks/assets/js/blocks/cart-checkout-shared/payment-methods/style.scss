@@ -159,7 +159,7 @@
 	}
 }
 
-@include cart-checkout-below-medium-container {
+@container (max-width: 32em) {
 	@include small-mobile-styles;
 }
 
