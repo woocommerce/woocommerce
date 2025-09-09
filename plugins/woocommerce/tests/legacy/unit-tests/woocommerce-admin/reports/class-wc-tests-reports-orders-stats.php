@@ -22,6 +22,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+		update_option( 'woocommerce_db_version', strstr( WC()->version, '-', true ) ?: WC()->version );
 	}
 
 	/**
@@ -623,6 +624,215 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
+	}
+
+	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_old_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp());
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime('+1 day', $order->get_date_created()->getOffsetTimestamp()) );
+
+		$args           = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals =  array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 8, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 20,
+			'shipping'            => 20,
+			'net_revenue'         => 10, // 50 + 100 - 100 - 20 - 20.
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args           = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals =  array(
+			'orders_count'        => 0,
+			'num_items_sold'      => 0, // bug fixed by PR #58744.
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100, // bug fixed by PR #58744.
+			'taxes'               => 0,
+			'shipping'            => 0,
+			'net_revenue'         => -100,       // @todo - does this value make sense?
+			'total_customers'     => 1,
+			'products'            => 0, // bug fixed by PR #58744.
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+	}
+
+	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_new_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp());
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime('+1 day', $order->get_date_created()->getOffsetTimestamp()) );
+
+		$args           = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals =  array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 4, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 10,
+			'shipping'            => 10,
+			'net_revenue'         => 30,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args           = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals =  array(
+			'orders_count'        => 0,
+			'num_items_sold'      => -4,
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => -10,
+			'shipping'            => -10,
+			'net_revenue'         => -80,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 
 	/**
