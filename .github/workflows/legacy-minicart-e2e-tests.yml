@@ -123,8 +123,13 @@ jobs:
                       // Run ci-jobs with --json flag to get jobs in a file
                       child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } --json` );
                       
-                      // Read the generated jobs.json file  
-                      const jobsData = JSON.parse(fs.readFileSync('jobs.json', 'utf8'));
+                      // Check if jobs.json file was created, if not create empty structure
+                      let jobsData = { test: [], lint: [] };
+                      if (fs.existsSync('jobs.json')) {
+                        jobsData = JSON.parse(fs.readFileSync('jobs.json', 'utf8'));
+                      } else {
+                        console.log('No jobs.json file generated, using empty job structure');
+                      }
                       
                       // Filter to only include e2e tests for Core and Blocks
                       const filteredTestJobs = (jobsData.test || []).filter(job => {
@@ -132,8 +137,11 @@ jobs:
                         const isCoreProject = job.projectName === 'woocommerce' || job.projectName === '@woocommerce/plugin-woocommerce';
                         const isBlocksProject = job.projectName === '@woocommerce/e2e-blocks' || job.projectName.includes('blocks');
                         
+                        console.log(`Checking job: ${job.name} - testType: ${job.testType}, projectName: ${job.projectName}`);
                         return isE2eTest && (isCoreProject || isBlocksProject);
                       });
+                      
+                      console.log(`Filtered to ${filteredTestJobs.length} e2e jobs for Core and Blocks projects`);
                       
                       // Generate report jobs from filtered test jobs
                       const reportNames = [...new Set(filteredTestJobs
