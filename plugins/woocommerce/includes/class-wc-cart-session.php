@@ -320,25 +320,6 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Remove the draft order from the session and delete it.
-	 */
-	private function remove_draft_order() {
-		$wc_session = WC()->session;
-
-		$draft_order = $wc_session->get( 'store_api_draft_order' );
-		if ( ! $draft_order ) {
-			return;
-		}
-
-		$order = wc_get_order( $draft_order );
-		if ( $order ) {
-			$order->delete( true );
-		}
-
-		WC()->session->set( 'store_api_draft_order', null );
-	}
-
-	/**
 	 * Will set cart cookies if needed and when possible.
 	 *
 	 * Headers are only updated if headers have not yet been sent.
@@ -666,5 +647,24 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
+	}
+
+	/**
+	 * Remove the draft order from the session and delete it.
+	 */
+	private function remove_draft_order() {
+		$wc_session = WC()->session;
+
+		$draft_order = $wc_session->get( 'store_api_draft_order' );
+		if ( ! $draft_order ) {
+			return;
+		}
+
+		$order = wc_get_order( $draft_order );
+		if ( $order ) {
+			$order->delete( true );
+		}
+
+		WC()->session->set( 'store_api_draft_order', null );
 	}
 }
