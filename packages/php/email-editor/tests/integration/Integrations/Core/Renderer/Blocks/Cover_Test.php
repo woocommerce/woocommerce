@@ -87,7 +87,7 @@ class Cover_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_cover['attrs']['url'] = 'https://example.com/background.jpg';
 
 		$rendered = $this->cover_renderer->render( '', $parsed_cover, $this->rendering_context );
-		$this->assertStringContainsString( 'background-image: url(https://example.com/background.jpg)', $rendered );
+		$this->assertStringContainsString( 'background-image: url("https://example.com/background.jpg")', $rendered );
 		$this->assertStringContainsString( 'background-size: cover', $rendered );
 		$this->assertStringContainsString( 'background-position: center', $rendered );
 	}
@@ -185,7 +185,7 @@ class Cover_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_cover['innerHTML'] = '<div class="wp-block-cover"><img class="wp-block-cover__image-background wp-image-537 size-full" alt="" src="https://example.com/background.jpg" data-object-fit="cover"/><span aria-hidden="true" class="wp-block-cover__background has-background-dim" style="background-color:#4b74b2"></span><div class="wp-block-cover__inner-container"><p>Cover block</p></div></div>';
 
 		$rendered = $this->cover_renderer->render( '', $parsed_cover, $this->rendering_context );
-		$this->assertStringContainsString( 'background-image: url(https://example.com/background.jpg)', $rendered );
+		$this->assertStringContainsString( 'background-image: url("https://example.com/background.jpg")', $rendered );
 	}
 
 	/**
@@ -196,7 +196,7 @@ class Cover_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_cover['attrs']['url'] = 'https://example.com/background.jpg';
 
 		$rendered = $this->cover_renderer->render( '', $parsed_cover, $this->rendering_context );
-		$this->assertStringContainsString( 'background-image: url(https://example.com/background.jpg)', $rendered );
+		$this->assertStringContainsString( 'background-image: url("https://example.com/background.jpg")', $rendered );
 	}
 
 	/**
@@ -208,7 +208,7 @@ class Cover_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_cover['attrs']['customOverlayColor'] = '#4b74b2';
 
 		$rendered = $this->cover_renderer->render( '', $parsed_cover, $this->rendering_context );
-		$this->assertStringContainsString( 'background-image: url(https://example.com/background.jpg)', $rendered );
+		$this->assertStringContainsString( 'background-image: url("https://example.com/background.jpg")', $rendered );
 		// Should not have overlay elements for email compatibility.
 		$this->assertStringNotContainsString( 'wp-block-cover__background', $rendered );
 		$this->assertStringNotContainsString( 'background-color: #4b74b2', $rendered );

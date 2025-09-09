@@ -145,7 +145,11 @@ class Cover extends Abstract_Block_Renderer {
 
 		// Check for overlay color slug (used as background color when no image).
 		if ( ! empty( $block_attrs['overlayColor'] ) ) {
-			return $rendering_context->translate_slug_to_color( $block_attrs['overlayColor'] );
+			$translated_color = $rendering_context->translate_slug_to_color( $block_attrs['overlayColor'] );
+			$sanitized_color  = $this->validate_and_sanitize_color( $translated_color );
+			if ( ! empty( $sanitized_color ) ) {
+				return $sanitized_color;
+			}
 		}
 
 		return '';
@@ -185,8 +189,8 @@ class Cover extends Abstract_Block_Renderer {
 		// Add background image if present.
 		if ( ! empty( $background_image ) ) {
 			$cover_style .= sprintf(
-				' background-image: url(%s); background-size: cover; background-position: center; background-repeat: no-repeat;',
-				esc_attr( $background_image )
+				' background-image: url("%s"); background-size: cover; background-position: center; background-repeat: no-repeat;',
+				esc_url( $background_image )
 			);
 		} elseif ( ! empty( $background_color ) ) {
 			// If no background image but there's a background color, use it.
