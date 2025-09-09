@@ -273,7 +273,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * Fires after an order or refund has been imported into Analytics lookup tables
 		 * and the reports cache has been invalidated.
 		 *
-		 * @since 10.2.0
+		 * @since 10.3.0
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
