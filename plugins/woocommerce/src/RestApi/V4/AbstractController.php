@@ -104,52 +104,6 @@ abstract class AbstractController extends \WP_REST_Controller {
 	}
 
 	/**
-	 * Get normalized rest base.
-	 *
-	 * @return string
-	 */
-	protected function get_normalized_rest_base() {
-		return preg_replace( '/\(.*\)\//i', '', $this->rest_base );
-	}
-
-	/**
-	 * Check batch limit.
-	 *
-	 * @param array $items Request items.
-	 * @return bool|WP_Error
-	 */
-	protected function check_batch_limit( $items ) {
-		/**
-		 * Filter the batch items limit.
-		 *
-		 * @param int $limit The limit.
-		 * @param string $rest_base The rest base.
-		 * @since 3.0.0
-		 */
-		$limit = apply_filters( $this->get_hook_prefix() . 'batch_items_limit', 100, $this->get_normalized_rest_base() );
-		$total = 0;
-
-		if ( ! empty( $items['create'] ) && is_countable( $items['create'] ) ) {
-			$total += count( $items['create'] );
-		}
-
-		if ( ! empty( $items['update'] ) && is_countable( $items['update'] ) ) {
-			$total += count( $items['update'] );
-		}
-
-		if ( ! empty( $items['delete'] ) && is_countable( $items['delete'] ) ) {
-			$total += count( $items['delete'] );
-		}
-
-		if ( $total > $limit ) {
-			/* translators: %s: items limit */
-			return new WP_Error( $this->get_error_prefix() . 'request_entity_too_large', sprintf( __( 'Unable to accept more than %s items for this request.', 'woocommerce' ), $limit ), array( 'status' => 413 ) );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Get route response when something went wrong.
 	 *
 	 * @param string $error_code String based error code.
