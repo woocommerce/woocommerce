@@ -237,7 +237,7 @@ class DataUtils {
 		} elseif ( 'update' === $action ) {
 			$product_id = 0;
 		} else {
-			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new \WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}

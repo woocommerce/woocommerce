@@ -158,6 +158,7 @@ class Controller extends AbstractController {
 		 * Filter the collection params for the orders controller.
 		 *
 		 * @param array $params The collection params.
+		 * @since 10.2.0
 		 */
 		return apply_filters( $this->get_hook_prefix() . 'collection_params', $params, $this );
 	}
@@ -165,9 +166,8 @@ class Controller extends AbstractController {
 	/**
 	 * Add links to the response.
 	 *
-	 * @param \WP_REST_Response $response The response object.
-	 * @param \WC_Order         $order   Order object.
-	 * @return \WP_REST_Response
+	 * @param \WC_Order $order   Order object.
+	 * @return array Links for the given order.
 	 */
 	protected function get_item_links( \WC_Order $order ) {
 		$links = array(
@@ -285,6 +285,7 @@ class Controller extends AbstractController {
 		 * @param \WP_REST_Response $response The response object.
 		 * @param \WC_Order          $order   Order object.
 		 * @param \WP_REST_Request  $request  Request object.
+		 * @since 10.2.0
 		 */
 		return rest_ensure_response( apply_filters( $this->get_hook_prefix() . 'item_response', $response, $order, $request ) );
 	}
@@ -317,6 +318,7 @@ class Controller extends AbstractController {
 		 *
 		 * @param array           $args    Key value array of query var to query value.
 		 * @param WP_REST_Request $request The request used.
+		 * @since 10.2.0
 		 */
 		$query_args    = apply_filters( $this->get_hook_prefix() . 'get_items_query', QueryUtils::prepare_query( $request ), $request );
 		$query         = new \WC_Order_Query(
@@ -371,6 +373,7 @@ class Controller extends AbstractController {
 			 * @param WC_Data         $order    Inserted object.
 			 * @param \WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @since 10.2.0
 			 */
 			do_action( $this->get_hook_prefix() . 'created', $order, $request );
 
@@ -426,6 +429,7 @@ class Controller extends AbstractController {
 			 * @param WC_Data         $order    Inserted object.
 			 * @param \WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @since 10.2.0
 			 */
 			do_action( $this->get_hook_prefix() . 'updated', $order, $request );
 
@@ -451,8 +455,9 @@ class Controller extends AbstractController {
 			return new \WP_Error( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		$force  = (bool) $request['force'];
 		$request->set_param( 'context', 'edit' );
+
+		$force    = (bool) $request['force'];
 		$response = $this->prepare_item_for_response( $order, $request );
 
 		if ( $force ) {
@@ -463,6 +468,7 @@ class Controller extends AbstractController {
 			 *
 			 * @param boolean $supports_trash Whether the object type support trashing.
 			 * @param \WC_Order $order         The object being considered for trashing support.
+			 * @since 10.2.0
 			 */
 			$supports_trash = apply_filters( $this->get_hook_prefix() . 'object_trashable', EMPTY_TRASH_DAYS > 0, $order );
 
@@ -488,6 +494,7 @@ class Controller extends AbstractController {
 		 * @param \WC_Order         $order   The deleted or trashed object.
 		 * @param \WP_REST_Response $response The response data.
 		 * @param \WP_REST_Request  $request  The request sent to the API.
+		 * @since 10.2.0
 		 */
 		do_action( $this->get_hook_prefix() . 'deleted', $order, $response, $request );
 
@@ -497,17 +504,16 @@ class Controller extends AbstractController {
 	/**
 	 * Update current object from the request.
 	 *
-	 * @throws \WC_REST_Exception When fails to set any item.
-	 * @throws \WC_Data_Exception When fails to set any item.
+	 * @throws \WC_REST_Exception When fails to set any item, \WC_Data_Exception When fails to set any item.
 	 * @param \WC_Order        $order Order object.
 	 * @param \WP_REST_Request $request Request object.
-	 * @param bool            $creating True when creating object, false when updating.
+	 * @param bool             $creating True when creating object, false when updating.
 	 * @return void
 	 */
 	protected function update_object_from_request( \WC_Order $order, \WP_REST_Request $request, bool $creating = false ) {
 		// Get data that can be edited from schema.
 		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
-		$data_keys = array_diff(
+		$data_keys   = array_diff(
 			array_keys( array_filter( $this->schema->get_item_properties(), array( $this, 'filter_writable_props' ) ) ),
 			$ignore_keys
 		);
@@ -525,7 +531,7 @@ class Controller extends AbstractController {
 
 			if ( 'billing' === $key || 'shipping' === $key ) {
 				DataUtils::update_address( $order, $key, (array) $value );
-			} else if ( 'coupon_lines' === $key ) {
+			} elseif ( 'coupon_lines' === $key ) {
 				DataUtils::update_line_items( $order, (array) $value, 'coupon' );
 			} elseif ( 'line_items' === $key ) {
 				DataUtils::update_line_items( $order, (array) $value, 'line_item' );
@@ -543,7 +549,7 @@ class Controller extends AbstractController {
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			// The customer must exist, and in a multisite context must be visible to the current user.
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', __( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
 			}
 
 			// Make sure customer is part of blog.
