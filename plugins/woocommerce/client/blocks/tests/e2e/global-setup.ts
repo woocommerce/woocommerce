@@ -45,8 +45,7 @@ const prepareAttributes = async () => {
 		.getByRole( 'row', {
 			name: /Regenerate the product attributes lookup table/,
 		} )
-		.getByRole( 'button', { name: 'Regenerate' } )
-		.or( page.locator( 'input[type="submit"][value="Regenerate"]' ) )
+		.getByRole( 'button' )
 		.click();
 
 	await context.close();
