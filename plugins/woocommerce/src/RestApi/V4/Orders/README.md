@@ -4,7 +4,7 @@ This directory contains the implementation of the WooCommerce REST API v4 Orders
 
 ## Overview
 
-The v4 Orders endpoint represents a **complete architectural rewrite** from the v3 implementation. Unlike other v4 endpoints that started as copy-paste from v3, the Orders endpoint was built from the ground up with a modern, modular architecture using the `Automattic\WooCommerce` namespace and extending `WP_REST_Controller` directly.
+The v4 Orders endpoint represents a **complete architectural rewrite** from the v3 implementation. The Orders endpoint was built with a modular architecture using the `Automattic\WooCommerce` namespace and extending `WP_REST_Controller` directly.
 
 **Current Status**: Experimental feature requiring the `rest-api-v4` feature flag.
 
