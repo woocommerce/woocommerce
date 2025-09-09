@@ -196,16 +196,16 @@ const ProductCollectionInspectorControls = (
 				{ ! isEmailEditor && (
 					<WidthOptionsControl { ...dimensionsControlProps } />
 				) }
-				{ showProductsPerPageControl && ! isEmailEditor && (
+				{ showProductsPerPageControl && (
 					<ProductsPerPageControl
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
 					/>
 				) }
-				{ showColumnsControl && (
+				{ ! isEmailEditor && showColumnsControl && (
 					<ColumnsControl { ...displayControlProps } />
 				) }
-				{ showOffsetControl && (
+				{ ! isEmailEditor && showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
 				{ showMaxPagesToShowControl && ! isEmailEditor && (

@@ -17,7 +17,9 @@ import { type ProductCollectionAttributes } from '../../types';
  */
 const useEmailColumnAdjustments = (
 	attributes: ProductCollectionAttributes,
-	setAttributes: ( attributes: Partial< ProductCollectionAttributes > ) => void
+	setAttributes: (
+		attributes: Partial< ProductCollectionAttributes >
+	) => void
 ) => {
 	const { displayLayout } = attributes;
 	const isEmail = useIsEmailEditor();
