@@ -425,9 +425,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$skip_settings = array(
 			'woocommerce_address_autocomplete_enabled',
 			'woocommerce_address_autocomplete_provider',
-			'woocommerce_calc_taxes',
-			'woocommerce_enable_coupons',
-			'woocommerce_calc_discounts_sequentially',
 		);
 
 		if ( in_array( $setting_id, $skip_settings, true ) ) {

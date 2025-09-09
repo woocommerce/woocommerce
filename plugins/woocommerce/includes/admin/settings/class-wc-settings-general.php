@@ -250,6 +250,18 @@ class WC_Settings_General extends WC_Settings_Page {
 				$address_autocomplete_preferred_provider_setting,
 
 				array(
+					'type' => 'sectionend',
+					'id'   => 'general_options',
+				),
+
+				array(
+					'title' => __( 'Taxes and coupons', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => __( 'Enable taxes and coupons and configure how they are calculated.', 'woocommerce' ),
+					'id'    => 'taxes_and_coupons_options',
+				),
+
+				array(
 					'title'    => __( 'Enable taxes', 'woocommerce' ),
 					'desc'     => __( 'Enable tax rates and calculations', 'woocommerce' ),
 					'id'       => 'woocommerce_calc_taxes',
@@ -282,7 +294,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'general_options',
+					'id'   => 'taxes_and_coupons_options',
 				),
 
 				array(
