@@ -191,10 +191,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		addressTypes.forEach( ( type ) => {
 			cacheAddressFields( type );
 			const addressInput = addressInputs[ type ][ 'address_1' ];
-			const address2Input = addressInputs[ type ][ 'address_2' ];
-			const cityInput = addressInputs[ type ][ 'city' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
-			const postcodeInput = addressInputs[ type ][ 'postcode' ];
 
 			if ( addressInput ) {
 				// Create suggestions container if it doesn't exist.
@@ -224,13 +221,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					searchIcon.className = 'address-search-icon';
 					addressInput.parentNode.appendChild( searchIcon );
 				}
-
-				addressInputs[ type ] = {};
-				addressInputs[ type ][ 'address_1' ] = addressInput;
-				addressInputs[ type ][ 'address_2' ] = address2Input;
-				addressInputs[ type ][ 'city' ] = cityInput;
-				addressInputs[ type ][ 'country' ] = countryInput;
-				addressInputs[ type ][ 'postcode' ] = postcodeInput;
 
 				suggestionsContainers[ type ] = document.getElementById(
 					`address_suggestions_${ type }`
