@@ -320,20 +320,20 @@ class Analytics {
 		global $wpdb;
 
 		Cache::invalidate();
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 
 		// Get every order ID where:
 		// 1. the total sales is less than 0, and
 		// 2. is not refunded shipping fee only, and
 		// 3. is not refunded tax fee only.
 		$refunded_orders = $wpdb->get_results(
-			"SELECT order_stats.order_id, order_stats.num_items_sold
+			"SELECT order_stats.order_id
 			FROM {$wpdb->prefix}wc_order_stats AS order_stats
 			WHERE order_stats.total_sales < 0 # Refunded orders
 				AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
 				AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
 		);
 
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 		if ( $refunded_orders ) {
 			foreach ( $refunded_orders as $refunded_order ) {
 				/**
@@ -346,6 +346,6 @@ class Analytics {
 			}
 		}
 
-		return __( 'Full refund data fixed.', 'woocommerce' );
+		return __( 'Re-importing refunded orders, full refund data will be updated shortly.', 'woocommerce' );
 	}
 }
