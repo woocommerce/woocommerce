@@ -472,8 +472,11 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 
 		foreach ( array_values( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_all_table_names_with_id() ) as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$GLOBALS['wpdb']->query( "TRUNCATE table {$table}" );
+			$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$table}" );
 		}
+
+		$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$GLOBALS['wpdb']->prefix}woocommerce_order_items" );
+		$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$GLOBALS['wpdb']->prefix}woocommerce_order_itemmeta" );
 
 		if ( ! $hide_errors ) {
 			$GLOBALS['wpdb']->show_errors();
