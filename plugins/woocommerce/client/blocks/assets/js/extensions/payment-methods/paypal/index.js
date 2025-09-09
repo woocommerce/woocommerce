@@ -67,6 +67,7 @@ if ( settings.isButtonsEnabled ) {
 			currency: options.currency,
 			intent: options.intent,
 			pageType: options[ 'page-type' ],
+			isCheckout: settings.isCheckout,
 		};
 
 		return (
