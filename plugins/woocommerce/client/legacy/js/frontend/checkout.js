@@ -200,8 +200,12 @@ jQuery( function ( $ ) {
 		init_checkout: function () {
 			$( document.body ).trigger( 'update_checkout' );
 		},
-		maybe_input_changed: function ( e ) {
-			// Check if this is an address_1 field with an active provider
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should skip checkout updates
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be skipped, false otherwise
+		 */
+		should_skip_address_update: function ( e ) {
 			var target = e.target || e.srcElement;
 			if (
 				target &&
@@ -213,7 +217,7 @@ jQuery( function ( $ ) {
 					target.getAttribute( 'data-autocomplete-manipulating' ) ===
 					'true'
 				) {
-					return;
+					return true;
 				}
 
 				var type = target.id.replace( '_address_1', '' );
@@ -227,11 +231,52 @@ jQuery( function ( $ ) {
 					if (
 						window.wc.addressAutocomplete.activeProvider[ type ]
 					) {
-						// Provider is available - don't trigger update on change event
-						// Updates will be handled by blur event instead
-						return;
+						return true;
 					}
 				}
+			}
+			return false;
+		},
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should trigger checkout updates on blur
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be triggered, false otherwise
+		 */
+		should_trigger_address_blur_update: function ( e ) {
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Skip if we're manipulating the DOM for autocomplete
+				if (
+					target.getAttribute( 'data-autocomplete-manipulating' ) ===
+					'true'
+				) {
+					return false;
+				}
+
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		maybe_input_changed: function ( e ) {
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
 			}
 
 			if ( wc_checkout_form.dirtyInput ) {
@@ -239,75 +284,17 @@ jQuery( function ( $ ) {
 			}
 		},
 		input_changed: function ( e ) {
-			// Check if this is an address_1 field with an active provider
-			var target = e.target || e.srcElement;
-			if (
-				target &&
-				( target.id === 'billing_address_1' ||
-					target.id === 'shipping_address_1' )
-			) {
-				// Skip if we're manipulating the DOM for autocomplete
-				if (
-					target.getAttribute( 'data-autocomplete-manipulating' ) ===
-					'true'
-				) {
-					return;
-				}
-
-				var type = target.id.replace( '_address_1', '' );
-
-				// Check if window.wc.addressAutocomplete exists and has an active provider
-				if (
-					window.wc &&
-					window.wc.addressAutocomplete &&
-					window.wc.addressAutocomplete.activeProvider
-				) {
-					if (
-						window.wc.addressAutocomplete.activeProvider[ type ]
-					) {
-						// Provider is available - don't trigger update on change event
-						// Updates will be handled by blur event instead
-						return;
-					}
-				}
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
 			}
 
 			wc_checkout_form.dirtyInput = e.target;
 			wc_checkout_form.maybe_update_checkout();
 		},
 		address_field_blur: function ( e ) {
-			var target = e.target || e.srcElement;
-
-			// Only trigger update if this is an address_1 field with an active provider
-			if (
-				target &&
-				( target.id === 'billing_address_1' ||
-					target.id === 'shipping_address_1' )
-			) {
-				// Skip if we're manipulating the DOM for autocomplete
-				if (
-					target.getAttribute( 'data-autocomplete-manipulating' ) ===
-					'true'
-				) {
-					return;
-				}
-
-				var type = target.id.replace( '_address_1', '' );
-
-				// Check if window.wc.addressAutocomplete exists and has an active provider
-				if (
-					window.wc &&
-					window.wc.addressAutocomplete &&
-					window.wc.addressAutocomplete.activeProvider
-				) {
-					if (
-						window.wc.addressAutocomplete.activeProvider[ type ]
-					) {
-						// Provider is available - trigger checkout update on blur
-						wc_checkout_form.dirtyInput = target;
-						wc_checkout_form.maybe_update_checkout();
-					}
-				}
+			if ( wc_checkout_form.should_trigger_address_blur_update( e ) ) {
+				wc_checkout_form.dirtyInput = e.target;
+				wc_checkout_form.maybe_update_checkout();
 			}
 		},
 		queue_update_checkout: function ( e ) {
