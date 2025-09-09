@@ -69,10 +69,9 @@ jobs:
                   echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
                   WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="@woocommerce/block-library" env:start
 
-            - name: 'Run minicart tests'
+            - name: 'Run all e2e tests (with feature flag disabled)'
               working-directory: ./plugins/woocommerce/client/blocks
               env:
                   BUILDKITE_ANALYTICS_TOKEN: ${{ secrets.BUILDKITE_CORE_E2E_TOKEN }}
               run: |
-                  sh ./bin/check-env.sh
-                  pnpm playwright test --config=tests/e2e/playwright.config.ts tests/e2e/tests/mini-cart
+                  pnpm run test:e2e
