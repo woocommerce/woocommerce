@@ -86,7 +86,19 @@ class Embed extends Abstract_Block_Renderer {
 
 		// Use the Audio renderer to render the audio provider embed.
 		$audio_renderer = new Audio();
-		return $audio_renderer->render( $mock_audio_block['innerHTML'], $mock_audio_block, $rendering_context );
+		$audio_result   = $audio_renderer->render( $mock_audio_block['innerHTML'], $mock_audio_block, $rendering_context );
+
+		// If audio rendering fails, fall back to a simple link.
+		if ( empty( $audio_result ) ) {
+			// Create a simple link using the original embed URL and provider label.
+			return sprintf(
+				'<a href="%s" target="_blank" rel="noopener nofollow" style="color: #0073aa; text-decoration: underline;">%s</a>',
+				esc_url( $url ),
+				esc_html( $label )
+			);
+		}
+
+		return $audio_result;
 	}
 
 	/**
