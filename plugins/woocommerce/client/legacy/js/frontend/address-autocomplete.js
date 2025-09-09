@@ -709,6 +709,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				return;
 			}
 
+			// Check if addressInputs exists for this type
+			if ( ! addressInputs[ type ] ) {
+				return;
+			}
+
 			if ( addressData.country ) {
 				setFieldValue(
 					addressInputs[ type ][ 'country' ],
@@ -730,6 +735,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			addressSelectionTimeout = setTimeout( function () {
 				// Cache address fields again as they may have updated following the country change.
 				cacheAddressFields( type );
+
+				// Check if addressInputs exists for this type after re-caching
+				if ( ! addressInputs[ type ] ) {
+					return;
+				}
 
 				// Set all available fields.
 				// Only set fields if the address data property exists and has a value.
@@ -807,6 +817,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 
 		// Initialize event handlers for each address type.
 		addressTypes.forEach( ( type ) => {
+			// Check if addressInputs exists for this type
+			if ( ! addressInputs[ type ] ) {
+				return;
+			}
 			const addressInput = addressInputs[ type ][ 'address_1' ];
 			const countryInput = addressInputs[ type ][ 'country' ];
 			if ( addressInput && countryInput ) {
