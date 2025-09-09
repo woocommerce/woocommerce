@@ -117,53 +117,8 @@ jobs:
                         githubEvent = 'release-checks';
                       }
 
-                      // We need to intercept the setOutput calls from the ci-jobs command
-                      const originalSetOutput = core.setOutput;
-                      let capturedJobs = {};
-                      
-                      // Override setOutput to capture job data
-                      core.setOutput = (name, value) => {
-                        if (name === 'test-jobs' || name === 'lint-jobs' || name === 'report-jobs') {
-                          try {
-                            capturedJobs[name] = JSON.parse(value);
-                          } catch (e) {
-                            capturedJobs[name] = [];
-                          }
-                        }
-                        // Don't call original setOutput yet, we'll do that after filtering
-                      };
-                      
                       const child_process = require( 'node:child_process' );
-                      
-                      // Run ci-jobs command normally (without --json flag)
-                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
-                      
-                      // Restore original setOutput
-                      core.setOutput = originalSetOutput;
-                      
-                      console.log(`Captured ${capturedJobs['test-jobs']?.length || 0} test jobs from ci-jobs`);
-                      
-                      // Filter to only include e2e tests for Core and Blocks
-                      const filteredTestJobs = (capturedJobs['test-jobs'] || []).filter(job => {
-                        const isE2eTest = job.testType === 'e2e';
-                        const isCoreProject = job.projectName === 'woocommerce' || job.projectName === '@woocommerce/plugin-woocommerce';
-                        const isBlocksProject = job.projectName === '@woocommerce/e2e-blocks' || job.projectName.includes('blocks');
-                        
-                        console.log(`Checking job: ${job.name} - testType: ${job.testType}, projectName: ${job.projectName}`);
-                        return isE2eTest && (isCoreProject || isBlocksProject);
-                      });
-                      
-                      console.log(`Filtered to ${filteredTestJobs.length} e2e jobs for Core and Blocks projects`);
-                      
-                      // Generate report jobs from filtered test jobs
-                      const reportNames = [...new Set(filteredTestJobs
-                        .map(job => job.report?.resultsBlobName)
-                        .filter(Boolean))];
-                      
-                      // Set the final outputs
-                      core.setOutput('lint-jobs', JSON.stringify([])); // No lint jobs needed
-                      core.setOutput('test-jobs', JSON.stringify(filteredTestJobs));
-                      core.setOutput('report-jobs', JSON.stringify(reportNames));
+                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } --test-type e2e` );
 
     project-test-jobs:
         name: '${{ matrix.name }}'
