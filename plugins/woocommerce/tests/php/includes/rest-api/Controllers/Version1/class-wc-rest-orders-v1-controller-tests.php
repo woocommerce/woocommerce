@@ -1,13 +1,13 @@
 <?php
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
- * Tests relating to WC_REST_Product_Reviews_V1_Controller.
+ * Tests relating to WC_REST_Orders_V1_Controller.
  */
 class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
@@ -31,7 +31,7 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_orders_with_coupons_can_be_fetched(): void {
 		// Create a legacy order (APIv1 does not work with HPOS).
-		if ( get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) !== 'no' ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$this->markTestSkipped( 'This test only runs when HPOS is not enabled.' );
 		}
 
@@ -62,6 +62,11 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_valid_and_invalid_customer_ids(): void {
+		// APIv1 does not work with HPOS.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'This test only runs when HPOS is not enabled.' );
+		}
+
 		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
 		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
 
