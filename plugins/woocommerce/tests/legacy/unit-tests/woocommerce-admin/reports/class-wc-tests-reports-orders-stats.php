@@ -673,15 +673,15 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$data_store = new OrdersStatsDataStore();
 
-		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp());
-		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime('+1 day', $order->get_date_created()->getOffsetTimestamp()) );
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
 
-		$args           = array(
+		$args            = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_totals =  array(
+		$expected_totals = array(
 			'orders_count'        => 2,
 			'num_items_sold'      => 8, // 4 per order.
 			'avg_items_per_order' => 4, // 8 / 2 orders.
@@ -702,13 +702,13 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
 
 		// Query full refunds.
-		$args           = array(
+		$args            = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
 			'refunds'  => 'full',
 		);
-		$expected_totals =  array(
+		$expected_totals = array(
 			'orders_count'        => 0,
 			'num_items_sold'      => 0, // bug fixed by PR #58744.
 			'avg_items_per_order' => 0,
@@ -777,15 +777,15 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$data_store = new OrdersStatsDataStore();
 
-		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp());
-		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime('+1 day', $order->get_date_created()->getOffsetTimestamp()) );
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
 
-		$args           = array(
+		$args            = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
 		);
-		$expected_totals =  array(
+		$expected_totals = array(
 			'orders_count'        => 2,
 			'num_items_sold'      => 4, // 4 per order.
 			'avg_items_per_order' => 4, // 8 / 2 orders.
@@ -806,13 +806,13 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
 
 		// Query full refunds.
-		$args           = array(
+		$args            = array(
 			'interval' => 'hour',
 			'after'    => $start_time,
 			'before'   => $end_time,
 			'refunds'  => 'full',
 		);
-		$expected_totals =  array(
+		$expected_totals = array(
 			'orders_count'        => 0,
 			'num_items_sold'      => -4,
 			'avg_items_per_order' => 0,
@@ -876,7 +876,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			foreach ( $coupons as $amount => $coupon ) {
 				if ( $amount >= $order_number ) {
 					$order->apply_coupon( $coupon );
-					$applied_coupons++;
+					++$applied_coupons;
 					$applied_amount += $amount;
 				}
 			}
@@ -4019,7 +4019,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
-
 	}
 
 	/**
@@ -4888,7 +4887,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5032,7 +5031,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5187,7 +5186,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5677,7 +5676,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5858,7 +5857,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -6031,7 +6030,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -6388,7 +6387,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
-
 	}
 
 	/**
