@@ -584,11 +584,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				suggestionsContainer.style.marginTop =
 					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
 				addressInput.setAttribute( 'aria-expanded', 'true' );
+				suggestionsList.id = `address_suggestions_${ type }_list`;
 				addressInput.setAttribute(
 					'aria-controls',
 					`address_suggestions_${ type }_list`
 				);
-				suggestionsList.id = `address_suggestions_${ type }_list`;
 				// Don't auto-highlight first suggestion for better screen reader accessibility
 				activeSuggestionIndices[ type ] = -1;
 
@@ -758,7 +758,10 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					);
 				} else {
 					// Clear address_2 if not provided in address data
-					setFieldValue( addressInputs[ type ][ 'address_2' ], '' );
+					const addr2El = addressInputs[ type ][ 'address_2' ];
+					if ( addr2El && addr2El.value ) {
+						setFieldValue( addr2El, '' );
+					}
 				}
 				if ( addressData.city ) {
 					setFieldValue(
@@ -891,7 +894,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							].querySelector(
 								`li#suggestion-item-${ type }-${ activeSuggestionIndices[ type ] }`
 							);
-							console.log( selectedItem );
 							if (
 								! selectedItem ||
 								! selectedItem.dataset ||
