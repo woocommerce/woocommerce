@@ -150,15 +150,33 @@ jobs:
             - name: 'Set experimental-iapi-mini-cart feature flag to false'
               run: |
                   sudo apt-get update && sudo apt-get install -y jq
+                  
+                  # Update both core.json and development.json since tests may use either
                   jq '.features."experimental-iapi-mini-cart" = false' plugins/woocommerce/client/admin/config/core.json > tmp.json && mv tmp.json plugins/woocommerce/client/admin/config/core.json
+                  jq '.features."experimental-iapi-mini-cart" = false' plugins/woocommerce/client/admin/config/development.json > tmp.json && mv tmp.json plugins/woocommerce/client/admin/config/development.json
+                  
                   echo "Set experimental-iapi-mini-cart to false in core.json:"
                   cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+                  echo "Set experimental-iapi-mini-cart to false in development.json:"
+                  cat plugins/woocommerce/client/admin/config/development.json | grep experimental-iapi-mini-cart
+
+            - name: 'Regenerate feature config file'
+              run: |
+                  # Regenerate the PHP feature config based on updated JSON files
+                  cd plugins/woocommerce
+                  php bin/generate-feature-config.php
+                  echo "Generated feature-config.php contains:"
+                  cat includes/react-admin/feature-config.php | grep experimental-iapi-mini-cart
 
             - name: 'Verify experimental-iapi-mini-cart feature flag'
               run: |
                   echo "Expected value for experimental-iapi-mini-cart: false"
                   echo "Current value in core.json:"
                   cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+                  echo "Current value in development.json:"
+                  cat plugins/woocommerce/client/admin/config/development.json | grep experimental-iapi-mini-cart
+                  echo "Current value in generated PHP config:"
+                  cat plugins/woocommerce/includes/react-admin/feature-config.php | grep experimental-iapi-mini-cart
 
             - name: 'Update wp-env config'
               if: ${{ inputs.artifactName != '' }}
