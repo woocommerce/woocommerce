@@ -109,7 +109,6 @@ class Cover extends Abstract_Block_Renderer {
 
 		// Build individual table cell.
 		$cell_attrs = array(
-			'style'  => 'padding: 20px;',
 			'valign' => 'middle',
 			'align'  => 'center',
 		);
