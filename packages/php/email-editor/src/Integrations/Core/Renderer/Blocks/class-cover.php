@@ -105,7 +105,7 @@ class Cover extends Abstract_Block_Renderer {
 		);
 
 		// Build the cover content without background (background is now on the table).
-		$cover_content = $this->build_cover_content( $inner_content, '', '' );
+		$cover_content = $this->build_cover_content( $inner_content );
 
 		// Build individual table cell.
 		$cell_attrs = array(
@@ -194,11 +194,9 @@ class Cover extends Abstract_Block_Renderer {
 	 * Build the cover content with background image or color.
 	 *
 	 * @param string $inner_content Inner content.
-	 * @param string $background_image Background image URL.
-	 * @param string $background_color Background color.
 	 * @return string Cover content HTML.
 	 */
-	private function build_cover_content( string $inner_content, string $background_image, string $background_color ): string {
+	private function build_cover_content( string $inner_content ): string {
 		$cover_style = 'position: relative; display: inline-block; width: 100%; max-width: 100%;';
 
 		// Wrap inner content with padding.
