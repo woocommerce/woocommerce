@@ -194,21 +194,47 @@ class ResponseUtils {
 			}
 		}
 
+		if ( $item instanceof \WC_Order_Item_Product ) {
+			$data['price'] = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			if ( isset( $data['cogs_value'] ) ) {
+				if ( self::cogs_is_enabled() ) {
+					$data['cost_of_goods_sold']['value'] = $data['cogs_value'];
+				}
+				unset( $data['cogs_value'] );
+			}
+		}
+
 		// Add SKU, PRICE, and IMAGE to products, and parent_name to variations.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
 			$product = $item->get_product();
 
-			$data['sku']              = $product ? $product->get_sku() : null;
-			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
-			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			if ( ! $product ) {
+				$data['sku']              = '';
+				$data['global_unique_id'] = '';
+				$data['image']            = array(
+					'id'  => 0,
+					'src' => '',
+				);
+				$data['product_type']     = '';
+				$data['is_virtual']       = false;
+				$data['is_downloadable']  = false;
+				$data['needs_shipping']   = false;
+				$data['permalink']        = '';
+			} else {
+				$data['sku']              = $product->get_sku();
+				$data['global_unique_id'] = $product->get_global_unique_id();
+				$data['image']            = $product->get_image_id() ? array(
+					'id'  => $product->get_image_id(),
+					'src' => $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'full' ) : '',
+				) : null;
+				$data['product_type']     = $product->get_type();
+				$data['is_virtual']       = $product->is_virtual();
+				$data['is_downloadable']  = $product->is_downloadable();
+				$data['needs_shipping']   = $product->needs_shipping();
+				$data['permalink']        = $product->get_permalink();
+			}
 
-			$image_id      = $product ? $product->get_image_id() : 0;
-			$data['image'] = array(
-				'id'  => $image_id,
-				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
-			);
-
-			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
+			if ( $product && is_callable( array( $product, 'get_parent_data' ) ) ) {
 				$data['parent_name'] = $product->get_title();
 			} else {
 				$data['parent_name'] = null;
@@ -261,15 +287,6 @@ class ResponseUtils {
 			);
 		}
 
-		if ( $item instanceof \WC_Order_Item_Product ) {
-			if ( isset( $data['cogs_value'] ) ) {
-				if ( self::cogs_is_enabled() ) {
-					$data['cost_of_goods_sold']['value'] = $data['cogs_value'];
-				}
-				unset( $data['cogs_value'] );
-			}
-		}
-
 		// Add additional applied coupon information.
 		if ( $item instanceof \WC_Order_Item_Coupon ) {
 			$temp_coupon = new \WC_Coupon();
@@ -293,6 +310,8 @@ class ResponseUtils {
 			$data['meta_data'],
 			array_fill( 0, count( $data['meta_data'] ), $formatted_meta_data )
 		);
+
+		ksort( $data );
 
 		return $data;
 	}

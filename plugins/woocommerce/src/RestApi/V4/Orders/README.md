@@ -123,6 +123,7 @@ The V4 Orders endpoint represents a **forward-looking architecture** that:
 - **Enhanced Coupon Handling**: Fixed coupon replacement bug from V3
 - **Improved Line Item Management**: Better validation and removal capabilities
 - **Removed Batch Operations**: Following Store API pattern for cleaner architecture
+- **Added Product Data**: Added product data to line items (product_type, is_virtual, is_downloadable, needs_shipping, permalink)
 
 **Breaking Changes**:
 
