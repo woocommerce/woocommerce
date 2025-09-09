@@ -117,22 +117,34 @@ jobs:
                         githubEvent = 'release-checks';
                       }
 
+                      // We need to intercept the setOutput calls from the ci-jobs command
+                      const originalSetOutput = core.setOutput;
+                      let capturedJobs = {};
+                      
+                      // Override setOutput to capture job data
+                      core.setOutput = (name, value) => {
+                        if (name === 'test-jobs' || name === 'lint-jobs' || name === 'report-jobs') {
+                          try {
+                            capturedJobs[name] = JSON.parse(value);
+                          } catch (e) {
+                            capturedJobs[name] = [];
+                          }
+                        }
+                        // Don't call original setOutput yet, we'll do that after filtering
+                      };
+                      
                       const child_process = require( 'node:child_process' );
-                      const fs = require('fs');
                       
-                      // Run ci-jobs with --json flag to get jobs in a file
-                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } --json` );
+                      // Run ci-jobs command normally (without --json flag)
+                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
                       
-                      // Check if jobs.json file was created, if not create empty structure
-                      let jobsData = { test: [], lint: [] };
-                      if (fs.existsSync('jobs.json')) {
-                        jobsData = JSON.parse(fs.readFileSync('jobs.json', 'utf8'));
-                      } else {
-                        console.log('No jobs.json file generated, using empty job structure');
-                      }
+                      // Restore original setOutput
+                      core.setOutput = originalSetOutput;
+                      
+                      console.log(`Captured ${capturedJobs['test-jobs']?.length || 0} test jobs from ci-jobs`);
                       
                       // Filter to only include e2e tests for Core and Blocks
-                      const filteredTestJobs = (jobsData.test || []).filter(job => {
+                      const filteredTestJobs = (capturedJobs['test-jobs'] || []).filter(job => {
                         const isE2eTest = job.testType === 'e2e';
                         const isCoreProject = job.projectName === 'woocommerce' || job.projectName === '@woocommerce/plugin-woocommerce';
                         const isBlocksProject = job.projectName === '@woocommerce/e2e-blocks' || job.projectName.includes('blocks');
@@ -148,7 +160,7 @@ jobs:
                         .map(job => job.report?.resultsBlobName)
                         .filter(Boolean))];
                       
-                      // Set outputs for GitHub Actions using core object provided by github-script
+                      // Set the final outputs
                       core.setOutput('lint-jobs', JSON.stringify([])); // No lint jobs needed
                       core.setOutput('test-jobs', JSON.stringify(filteredTestJobs));
                       core.setOutput('report-jobs', JSON.stringify(reportNames));
