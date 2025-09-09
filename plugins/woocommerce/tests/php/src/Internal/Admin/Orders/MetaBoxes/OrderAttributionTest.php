@@ -34,6 +34,17 @@ class OrderAttributionTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Tear down the test fixture.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		wp_set_current_user( 0 );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test default output.
 	 *
 	 * @return void
