@@ -891,6 +891,17 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 							].querySelector(
 								`li#suggestion-item-${ type }-${ activeSuggestionIndices[ type ] }`
 							);
+							console.log( selectedItem );
+							if (
+								! selectedItem ||
+								! selectedItem.dataset ||
+								! selectedItem.dataset.id
+							) {
+								// The selected item was invalid, hide suggestions and re-enable autofill.
+								hideSuggestions( type );
+								enableBrowserAutofill( addressInput );
+								return;
+							}
 							// Hide suggestions immediately for better UX.
 							hideSuggestions( type );
 							enableBrowserAutofill( addressInput );
