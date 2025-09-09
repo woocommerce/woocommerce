@@ -22,7 +22,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
-		update_option( 'woocommerce_db_version', strstr( WC()->version, '-', true ) ?: WC()->version );
+		$db_version = strstr( WC()->version, '-', true );
+		update_option( 'woocommerce_db_version', $db_version ?? WC()->version );
 	}
 
 	/**
