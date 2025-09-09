@@ -1,0 +1,246 @@
+<?php
+/**
+ * This file is part of the WooCommerce Email Editor package
+ *
+ * @package Automattic\WooCommerce\EmailEditor
+ */
+
+declare( strict_types = 1 );
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+
+/**
+ * Cover block renderer.
+ * This renderer handles core/cover blocks with proper email-friendly HTML layout.
+ */
+class Cover extends Abstract_Block_Renderer {
+	/**
+	 * Renders the cover block content using a table-based layout for email compatibility.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$block_attrs  = $parsed_block['attrs'] ?? array();
+		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
+
+		// Render all inner blocks content.
+		$inner_content = '';
+		foreach ( $inner_blocks as $block ) {
+			$inner_content .= render_block( $block );
+		}
+
+		// If we don't have inner content, return empty.
+		if ( empty( $inner_content ) ) {
+			return '';
+		}
+
+		// Build the email-friendly layout.
+		$background_image = $this->extract_background_image( $block_attrs, $parsed_block['innerHTML'] ?? $block_content );
+		return $this->build_email_layout( $inner_content, $block_attrs, $block_content, $background_image, $rendering_context );
+	}
+
+	/**
+	 * Build the email-friendly layout for cover blocks.
+	 *
+	 * @param string            $inner_content Inner content.
+	 * @param array             $block_attrs Block attributes.
+	 * @param string            $block_content Original block content.
+	 * @param string            $background_image Background image URL.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Rendered HTML.
+	 */
+	private function build_email_layout( string $inner_content, array $block_attrs, string $block_content, string $background_image, Rendering_Context $rendering_context ): string {
+		// Get original wrapper classes from block content.
+		$original_wrapper_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'div', 'class' ) ?? '';
+
+		// Get background color information.
+		$background_color = $this->get_background_color( $block_attrs, $rendering_context );
+
+		// Get block styles using the Styles_Helper.
+		$block_styles = Styles_Helper::get_block_styles( $block_attrs, $rendering_context, array( 'padding', 'border', 'background-color' ) );
+		$block_styles = Styles_Helper::extend_block_styles(
+			$block_styles,
+			array(
+				'width'           => '100%',
+				'border-collapse' => 'collapse',
+				'text-align'      => 'center',
+			)
+		);
+
+		// Apply class and style attributes to the wrapper table.
+		$table_attrs = array(
+			'class' => 'email-block-cover ' . esc_attr( $original_wrapper_classname ),
+			'style' => $block_styles['css'],
+			'align' => 'center',
+			'width' => '100%',
+		);
+
+		// Build the cover content with background.
+		$cover_content = $this->build_cover_content( $inner_content, $background_image, $background_color );
+
+		// Build individual table cell.
+		$cell_attrs = array(
+			'style'  => 'padding: 20px;',
+			'valign' => 'middle',
+			'align'  => 'center',
+		);
+
+		$cell = Table_Wrapper_Helper::render_table_cell( $cover_content, $cell_attrs );
+
+		// Use render_cell = false to avoid wrapping in an extra <td>.
+		return Table_Wrapper_Helper::render_table_wrapper( $cell, $table_attrs, array(), array(), false );
+	}
+
+	/**
+	 * Extract background image from block attributes or HTML content.
+	 *
+	 * @param array  $block_attrs Block attributes.
+	 * @param string $block_content Original block content.
+	 * @return string Background image URL or empty string.
+	 */
+	private function extract_background_image( array $block_attrs, string $block_content ): string {
+		// First check block attributes for URL.
+		if ( ! empty( $block_attrs['url'] ) ) {
+			return esc_url( $block_attrs['url'] );
+		}
+
+		// Fallback: extract from HTML content using DOM parsing for better security.
+		$dom_helper  = new Dom_Document_Helper( $block_content );
+		$img_element = $dom_helper->find_element( 'img' );
+		if ( $img_element ) {
+			$img_class = $dom_helper->get_attribute_value( $img_element, 'class' );
+			$img_src   = $dom_helper->get_attribute_value( $img_element, 'src' );
+			if ( false !== strpos( $img_class, 'wp-block-cover__image-background' ) && ! empty( $img_src ) ) {
+				return esc_url( $img_src );
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get background color from block attributes.
+	 *
+	 * @param array             $block_attrs Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string Background color or empty string.
+	 */
+	private function get_background_color( array $block_attrs, Rendering_Context $rendering_context ): string {
+		// Check for custom overlay color first (used as background color when no image).
+		if ( ! empty( $block_attrs['customOverlayColor'] ) ) {
+			$color = $block_attrs['customOverlayColor'];
+			// Validate color format (hex, rgb, rgba, or named colors).
+			if ( $this->is_valid_color( $color ) ) {
+				return $color;
+			}
+		}
+
+		// Check for overlay color slug (used as background color when no image).
+		if ( ! empty( $block_attrs['overlayColor'] ) ) {
+			return $rendering_context->translate_slug_to_color( $block_attrs['overlayColor'] );
+		}
+
+		return '';
+	}
+
+	/**
+	 * Validate if a color value is safe for CSS.
+	 *
+	 * @param string $color Color value to validate.
+	 * @return bool True if valid, false otherwise.
+	 */
+	private function is_valid_color( string $color ): bool {
+		// Remove whitespace.
+		$color = trim( $color );
+
+		// Check for hex colors (#fff, #ffffff, #ffffffff).
+		if ( preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $color ) ) {
+			return true;
+		}
+
+		// Check for rgb/rgba colors.
+		if ( preg_match( '/^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(,\s*[\d.]+\s*)?\)$/', $color ) ) {
+			return true;
+		}
+
+		// Check for hsl/hsla colors.
+		if ( preg_match( '/^hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*(,\s*[\d.]+\s*)?\)$/', $color ) ) {
+			return true;
+		}
+
+		// Check for named colors (basic set).
+		$named_colors = array(
+			'transparent',
+			'inherit',
+			'initial',
+			'unset',
+			'black',
+			'white',
+			'red',
+			'green',
+			'blue',
+			'yellow',
+			'orange',
+			'purple',
+			'pink',
+			'brown',
+			'gray',
+			'grey',
+		);
+		if ( in_array( strtolower( $color ), $named_colors, true ) ) {
+			return true;
+		}
+
+		return false;
+	}
+
+
+	/**
+	 * Build the cover content with background image or color.
+	 *
+	 * @param string $inner_content Inner content.
+	 * @param string $background_image Background image URL.
+	 * @param string $background_color Background color.
+	 * @return string Cover content HTML.
+	 */
+	private function build_cover_content( string $inner_content, string $background_image, string $background_color ): string {
+		$cover_style = 'position: relative; display: inline-block; width: 100%; max-width: 100%;';
+
+		// Add background image if present.
+		if ( ! empty( $background_image ) ) {
+			$cover_style .= sprintf(
+				' background-image: url(%s); background-size: cover; background-position: center; background-repeat: no-repeat;',
+				esc_attr( $background_image )
+			);
+		} elseif ( ! empty( $background_color ) ) {
+			// If no background image but there's a background color, use it.
+			$cover_style .= sprintf(
+				' background-color: %s;',
+				esc_attr( $background_color )
+			);
+		}
+
+		// Wrap inner content with padding.
+		// Note: $inner_content is already rendered HTML from other blocks via render_block(),
+		// so it should be properly escaped by the individual block renderers.
+		$inner_wrapper_style = 'padding: 20px;';
+		$inner_wrapper_html  = sprintf(
+			'<div class="wp-block-cover__inner-container" style="%s">%s</div>',
+			$inner_wrapper_style,
+			$inner_content
+		);
+
+		return sprintf(
+			'<div class="wp-block-cover" style="%s">%s</div>',
+			$cover_style,
+			$inner_wrapper_html
+		);
+	}
+}
