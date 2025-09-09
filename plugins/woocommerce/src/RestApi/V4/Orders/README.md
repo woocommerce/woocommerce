@@ -17,7 +17,7 @@ The v4 Orders endpoint represents a **complete architectural rewrite** from the 
 
 ### File Structure
 
-```
+```markdown
 src/RestApi/V4/Orders/
 ├── Controller.php      # Main controller with route registration and CRUD operations
 ├── DataUtils.php       # Data preparation and validation utilities
