@@ -163,32 +163,6 @@ class FeaturesController {
 		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'set_change_feature_enable_nonce' ), 20, 1 );
 		add_action( 'admin_init', array( $this, 'change_feature_enable_from_query_params' ), 20, 0 );
 		add_action( self::FEATURE_ENABLED_CHANGED_ACTION, array( $this, 'display_email_improvements_feedback_notice' ), 10, 2 );
-		add_filter( 'woocommerce_admin_features', array( $this, 'sync_iapi_mini_cart_feature' ) );
-	}
-
-	/**
-	 * Synchronize the 'experimental-iapi-mini-cart' feature flag with the admin Features system.
-	 *
-	 * @param array $features The original list of features.
-	 * @return array The modified list of features.
-	 */
-	public function sync_iapi_mini_cart_feature( $features ) {
-		$option_name = 'woocommerce_feature_experimental-iapi-mini-cart_enabled';
-		$is_enabled  = 'yes' === get_option( $option_name, 'no' );
-
-		if ( $is_enabled ) {
-			if ( ! in_array( 'experimental-iapi-mini-cart', $features, true ) ) {
-				$features[] = 'experimental-iapi-mini-cart';
-			}
-		} else {
-			$features = array_filter(
-				$features,
-				function ( $feature ) {
-					return 'experimental-iapi-mini-cart' !== $feature;
-				}
-			);
-		}
-		return $features;
 	}
 
 	/**
@@ -510,11 +484,6 @@ class FeaturesController {
 				'enabled_by_default' => false,
 				'disable_ui'         => true,
 				'is_experimental'    => false,
-			),
-			'experimental-iapi-mini-cart' => array(
-				'name'            => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
-				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
-				'is_experimental' => true,
 			),
 		);
 
