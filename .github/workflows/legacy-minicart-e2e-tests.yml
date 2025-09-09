@@ -118,7 +118,33 @@ jobs:
                       }
 
                       const child_process = require( 'node:child_process' );
-                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
+                      const fs = require('fs');
+                      const { setOutput } = require('@actions/core');
+                      
+                      // Run ci-jobs with --json flag to get jobs in a file
+                      child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } --json` );
+                      
+                      // Read the generated jobs.json file  
+                      const jobsData = JSON.parse(fs.readFileSync('jobs.json', 'utf8'));
+                      
+                      // Filter to only include e2e tests for Core and Blocks
+                      const filteredTestJobs = (jobsData.test || []).filter(job => {
+                        const isE2eTest = job.testType === 'e2e';
+                        const isCoreProject = job.projectName === 'woocommerce' || job.projectName === '@woocommerce/plugin-woocommerce';
+                        const isBlocksProject = job.projectName === '@woocommerce/e2e-blocks' || job.projectName.includes('blocks');
+                        
+                        return isE2eTest && (isCoreProject || isBlocksProject);
+                      });
+                      
+                      // Generate report jobs from filtered test jobs
+                      const reportNames = [...new Set(filteredTestJobs
+                        .map(job => job.report?.resultsBlobName)
+                        .filter(Boolean))];
+                      
+                      // Set outputs for GitHub Actions
+                      setOutput('lint-jobs', JSON.stringify([])); // No lint jobs needed
+                      setOutput('test-jobs', JSON.stringify(filteredTestJobs));
+                      setOutput('report-jobs', JSON.stringify(reportNames));
 
     project-test-jobs:
         name: '${{ matrix.name }}'
