@@ -119,7 +119,6 @@ jobs:
 
                       const child_process = require( 'node:child_process' );
                       const fs = require('fs');
-                      const { setOutput } = require('@actions/core');
                       
                       // Run ci-jobs with --json flag to get jobs in a file
                       child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent } --json` );
@@ -141,10 +140,10 @@ jobs:
                         .map(job => job.report?.resultsBlobName)
                         .filter(Boolean))];
                       
-                      // Set outputs for GitHub Actions
-                      setOutput('lint-jobs', JSON.stringify([])); // No lint jobs needed
-                      setOutput('test-jobs', JSON.stringify(filteredTestJobs));
-                      setOutput('report-jobs', JSON.stringify(reportNames));
+                      // Set outputs for GitHub Actions using core object provided by github-script
+                      core.setOutput('lint-jobs', JSON.stringify([])); // No lint jobs needed
+                      core.setOutput('test-jobs', JSON.stringify(filteredTestJobs));
+                      core.setOutput('report-jobs', JSON.stringify(reportNames));
 
     project-test-jobs:
         name: '${{ matrix.name }}'
