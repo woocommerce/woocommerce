@@ -75,6 +75,27 @@ class Cover extends Abstract_Block_Renderer {
 			)
 		);
 
+		// Add background image to table styles if present.
+		if ( ! empty( $background_image ) ) {
+			$block_styles = Styles_Helper::extend_block_styles(
+				$block_styles,
+				array(
+					'background-image'    => 'url("' . esc_url( $background_image ) . '")',
+					'background-size'     => 'cover',
+					'background-position' => 'center',
+					'background-repeat'   => 'no-repeat',
+				)
+			);
+		} elseif ( ! empty( $background_color ) ) {
+			// If no background image but there's a background color, use it.
+			$block_styles = Styles_Helper::extend_block_styles(
+				$block_styles,
+				array(
+					'background-color' => $background_color,
+				)
+			);
+		}
+
 		// Apply class and style attributes to the wrapper table.
 		$table_attrs = array(
 			'class' => 'email-block-cover ' . esc_attr( $original_wrapper_classname ),
@@ -83,8 +104,8 @@ class Cover extends Abstract_Block_Renderer {
 			'width' => '100%',
 		);
 
-		// Build the cover content with background.
-		$cover_content = $this->build_cover_content( $inner_content, $background_image, $background_color );
+		// Build the cover content without background (background is now on the table).
+		$cover_content = $this->build_cover_content( $inner_content, '', '' );
 
 		// Build individual table cell.
 		$cell_attrs = array(
@@ -185,20 +206,6 @@ class Cover extends Abstract_Block_Renderer {
 	 */
 	private function build_cover_content( string $inner_content, string $background_image, string $background_color ): string {
 		$cover_style = 'position: relative; display: inline-block; width: 100%; max-width: 100%;';
-
-		// Add background image if present.
-		if ( ! empty( $background_image ) ) {
-			$cover_style .= sprintf(
-				' background-image: url("%s"); background-size: cover; background-position: center; background-repeat: no-repeat;',
-				esc_url( $background_image )
-			);
-		} elseif ( ! empty( $background_color ) ) {
-			// If no background image but there's a background color, use it.
-			$cover_style .= sprintf(
-				' background-color: %s;',
-				esc_attr( $background_color )
-			);
-		}
 
 		// Wrap inner content with padding.
 		// Note: $inner_content is already rendered HTML from other blocks via render_block(),
