@@ -12,7 +12,7 @@ import metadata from './block.json';
 interface BlockAttributes {
 	showDesc?: boolean;
 	showPrice?: boolean;
-	[ key: string ]: any;
+	[ key: string ]: unknown;
 }
 
 // Version 1: Migration from legacy showDesc/showPrice attributes to inner blocks
@@ -45,7 +45,7 @@ const v1 = {
 				level: 2,
 				isLink: false,
 				__woocommerceNamespace:
-					'woocommerce/product-query/product-title',
+					'woocommerce/product-collection/product-title',
 			} )
 		);
 
