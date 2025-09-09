@@ -270,9 +270,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		ReportsCache::invalidate();
 
 		/**
-		 * Order is imported by WooCommerce Analytics
-		 * 
-		 * @param int $order_id Order id
+		 * Fires after an order or refund has been imported into Analytics lookup tables
+		 * and the reports cache has been invalidated.
+		 *
+		 * @hook woocommerce_order_scheduler_after_import_order
+		 * @param int      $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
 	}
