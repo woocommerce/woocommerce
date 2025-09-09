@@ -75,7 +75,7 @@ class QueryUtils {
 				'type'              => 'array',
 				'items'             => array(
 					'type' => 'string',
-					'enum' => array_merge( array( 'any', OrderStatus::TRASH ), Utils::get_order_statuses() ),
+					'enum' => array_map( 'wc_get_order_status_slug', array_merge( array( 'any', OrderStatus::TRASH ), array_keys( wc_get_order_statuses() ) ) ),
 				),
 				'validate_callback' => 'rest_validate_request_arg',
 			),

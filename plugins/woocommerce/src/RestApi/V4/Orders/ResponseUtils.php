@@ -11,14 +11,14 @@ namespace Automattic\WooCommerce\RestApi\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Utilities\StringUtil;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * ResponseUtils class.
  */
 class ResponseUtils {
+	use CogsAwareTrait;
 
 	/**
 	 * Prepare an order for response.
@@ -50,10 +50,9 @@ class ResponseUtils {
 			}
 		}
 
-		$extra_fields   = array_intersect( $extra_fields, $fields );
-		$format_decimal = array_intersect( $format_decimal, $fields );
-		$format_date    = array_intersect( $format_date, $fields );
-
+		$extra_fields      = array_intersect( $extra_fields, $fields );
+		$format_decimal    = array_intersect( $format_decimal, $fields );
+		$format_date       = array_intersect( $format_date, $fields );
 		$format_line_items = array_intersect( $format_line_items, $fields );
 
 		$data = $order->get_base_data();
@@ -122,9 +121,14 @@ class ResponseUtils {
 		// Format the order status.
 		$data['status'] = OrderUtil::remove_status_prefix( $data['status'] );
 
+		// Add COGS data.
+		if ( self::cogs_is_enabled() ) {
+			$data['cost_of_goods_sold']['total_value'] = $order->get_cogs_total_value();
+		}
+
 		// Format line items.
 		foreach ( $format_line_items as $key ) {
-			$data[ $key ] = array_values( array_map( array( self::class, 'prepare_order_line_item_for_response' ), $data[ $key ], array_fill( 0, count( $data[ $key ] ), $request ) ) );
+			$data[ $key ] = array_values( array_map( array( self::class, 'prepare_line_item_for_response' ), $data[ $key ], array_fill( 0, count( $data[ $key ] ), $request ) ) );
 		}
 
 		$data = array_intersect_key( $data, array_flip( $fields ) );
@@ -178,7 +182,7 @@ class ResponseUtils {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return array
 	 */
-	private static function prepare_order_line_item_for_response( \WC_Order_Item $item, \WP_REST_Request $request ) {
+	private static function prepare_line_item_for_response( \WC_Order_Item $item, \WP_REST_Request $request ) {
 		$data           = $item->get_data();
 		$dp             = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 		$format_decimal = array( 'subtotal', 'subtotal_tax', 'total', 'total_tax', 'tax_total', 'shipping_tax_total' );
@@ -190,22 +194,19 @@ class ResponseUtils {
 			}
 		}
 
-		// Add SKU, PRICE, and IMAGE to products.
+		// Add SKU, PRICE, and IMAGE to products, and parent_name to variations.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']              = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['global_unique_id'] = $item->get_product() ? $item->get_product()->get_global_unique_id() : null;
+			$product = $item->get_product();
+
+			$data['sku']              = $product ? $product->get_sku() : null;
+			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
 			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
+			$image_id      = $product ? $product->get_image_id() : 0;
 			$data['image'] = array(
 				'id'  => $image_id,
 				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
 			);
-		}
-
-		// Add parent_name if the product is a variation.
-		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$product = $item->get_product();
 
 			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
 				$data['parent_name'] = $product->get_title();
@@ -258,6 +259,15 @@ class ResponseUtils {
 					return true;
 				}
 			);
+		}
+
+		if ( $item instanceof \WC_Order_Item_Product ) {
+			if ( isset( $data['cogs_value'] ) ) {
+				if ( self::cogs_is_enabled() ) {
+					$data['cost_of_goods_sold']['value'] = $data['cogs_value'];
+				}
+				unset( $data['cogs_value'] );
+			}
 		}
 
 		// Add additional applied coupon information.

@@ -23,30 +23,89 @@ class DataUtils {
 	use CogsAwareTrait;
 
 	/**
-	 * Wrapper method to create/update order items.
-	 * When updating, the item ID provided is checked to ensure it is associated
-	 * with the order.
+	 * Update address.
 	 *
-	 * @param \WC_Order $order order object.
-	 * @param string    $item_type The item type.
-	 * @param array     $request_data item provided in the request body.
-	 * @throws \WC_REST_Exception If item ID is not associated with order.
+	 * @param \WC_Order $order  Order data.
+	 * @param string    $type   Type of address; 'billing' or 'shipping'.
+	 * @param array     $request_data Posted data.
 	 */
-	public static function update_line_item( \WC_Order $order, string $item_type, array $request_data ) {
-		global $wpdb;
+	public static function update_address( \WC_Order $order, string $type, array $request_data ) {
+		foreach ( $request_data as $key => $value ) {
+			if ( is_callable( array( $order, "set_{$type}_{$key}" ) ) ) {
+				$order->{"set_{$type}_{$key}"}( $value );
+			}
+		}
+	}
 
-		if ( ! empty( $request_data['id'] ) ) {
-			$action = 'update';
-		} else {
-			$action = 'create';
+	/**
+	 * Update meta data.
+	 *
+	 * @param \WC_Order $order  Order data.
+	 * @param array     $meta_data Posted data.
+	 */
+	public static function update_meta_data( \WC_Order $order, array $meta_data ) {
+		foreach ( $meta_data as $meta ) {
+			$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
+		}
+	}
+
+	/**
+	 * Update line items from an array of line item data for an order. Non-posted line items are removed.
+	 *
+	 * @throws \WC_REST_Exception If line items type is invalid.
+	 * @param \WC_Order $order The order to update the line items for.
+	 * @param array     $line_items The line items to update.
+	 * @param string    $line_items_type The type of line items to update.
+	 */
+	public static function update_line_items( \WC_Order $order, array $line_items, string $line_items_type = 'line_item' ) {
+		if ( ! in_array( $line_items_type, array( 'line_item', 'shipping', 'fee', 'coupon' ), true ) ) {
+			throw new \WC_REST_Exception( 'woocommerce_rest_invalid_line_items_type', esc_html__( 'Invalid line items type.', 'woocommerce' ), 400 );
 		}
 
-		$method = 'prepare_' . $item_type;
+		// Get existing items from the order. Any items that are not in the $line_items array will be removed.
+		$existing_items     = $order->get_items( $line_items_type );
+		$processed_item_ids = array();
+		foreach ( $line_items as $line_item_data ) {
+			if ( ! is_array( $line_item_data ) ) {
+				break;
+			}
+			if ( self::item_is_null_or_zero( $line_item_data ) ) {
+				if ( $line_item_data['id'] ) {
+					self::remove_item_from_order( $order, $line_items_type, (int) $line_item_data['id'] );
+				}
+				continue;
+			}
+			$processed_item_ids[] = self::update_line_item( $order, $line_items_type, $line_item_data );
+		}
+
+		// Remove any pre-existing items that were not posted.
+		foreach ( $existing_items as $existing_item ) {
+			if ( ! in_array( $existing_item->get_id(), $processed_item_ids, true ) ) {
+				self::remove_item_from_order( $order, $line_items_type, $existing_item->get_id() );
+			}
+		}
+	}
+
+	/**
+	 * Wrapper method to create/update order items.
+	 * When updating, the item ID provided is checked to ensure it is associated with the order.
+	 *
+	 * @throws \WC_REST_Exception If item ID is not associated with order.
+	 * @param \WC_Order $order order object.
+	 * @param string    $line_items_type The item type.
+	 * @param array     $line_item_data item provided in the request body.
+	 * @return int The ID of the updated or created item.
+	 */
+	protected static function update_line_item( \WC_Order $order, string $line_items_type, array $line_item_data ) {
+		global $wpdb;
+
+		$action = empty( $line_item_data['id'] ) ? 'create' : 'update';
+		$method = 'prepare_' . $line_items_type . '_data';
 		$item   = null;
 
 		// Verify provided line item ID is associated with order.
 		if ( 'update' === $action ) {
-			$item = $order->get_item( absint( $request_data['id'] ), false );
+			$item = $order->get_item( absint( $line_item_data['id'] ), false );
 
 			if ( ! $item ) {
 				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_item_id', esc_html__( 'Order item ID provided is not associated with order.', 'woocommerce' ), 400 );
@@ -54,7 +113,7 @@ class DataUtils {
 		}
 
 		// Prepare item data.
-		$item = self::$method( $request_data, $action, $item );
+		$item = self::$method( $line_item_data, $action, $item );
 
 		/**
 		 * Allow extensions be notified before the item is saved.
@@ -64,7 +123,7 @@ class DataUtils {
 		 *
 		 * @since 4.5.0.
 		 */
-		do_action( 'woocommerce_rest_set_order_item', $item, $request_data );
+		do_action( 'woocommerce_rest_set_order_item', $item, $line_item_data );
 
 		// If creating the order, add the item to it.
 		if ( 'create' === $action ) {
@@ -74,10 +133,7 @@ class DataUtils {
 		}
 
 		// Maybe update product stock quantity.
-		if (
-			'line_items' === $item_type
-			&& in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true )
-		) {
+		if ( 'line_item' === $line_items_type && in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::ON_HOLD ), true ) ) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			$changed_stock = wc_maybe_adjust_line_item_product_stock( $item );
 			if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
@@ -97,6 +153,8 @@ class DataUtils {
 				);
 			}
 		}
+
+		return $item->get_id();
 	}
 
 	/**
@@ -106,7 +164,7 @@ class DataUtils {
 	 * @param array $item Item provided in the request body.
 	 * @return bool True if the item resource ID is null, false otherwise.
 	 */
-	public static function item_is_null_or_zero( $item ) {
+	protected static function item_is_null_or_zero( $item ) {
 		$keys = array( 'product_id', 'method_id', 'method_title', 'name', 'code' );
 
 		foreach ( $keys as $key ) {
@@ -127,13 +185,13 @@ class DataUtils {
 	 * When updating, the item ID provided is checked to ensure it is associated with the order.
 	 *
 	 * @param \WC_Order $order     The order to remove the item from.
-	 * @param string    $item_type The item type (from the request, not from the item, e.g. 'line_items' rather than 'line_item').
+	 * @param string    $line_items_type The item type.
 	 * @param int       $item_id   The ID of the item to remove.
 	 *
 	 * @return void
 	 * @throws \WC_REST_Exception If item ID is not associated with order.
 	 */
-	public static function remove_item_from_order( \WC_Order $order, string $item_type, int $item_id ): void {
+	protected static function remove_item_from_order( \WC_Order $order, string $line_items_type, int $item_id ): void {
 		$item = $order->get_item( $item_id );
 
 		if ( ! $item ) {
@@ -144,7 +202,7 @@ class DataUtils {
 			);
 		}
 
-		if ( 'line_items' === $item_type ) {
+		if ( 'line_item' === $line_items_type ) {
 			require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
 			wc_maybe_adjust_line_item_product_stock( $item, 0 );
 		}
@@ -193,7 +251,7 @@ class DataUtils {
 	 * @return \WC_Order_Item_Product
 	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_line_items( $request_data, $action = 'create', $item = null ) {
+	protected static function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new \WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 		$product = wc_get_product( self::get_product_id_from_line_item( $request_data, $action ) );
 
@@ -232,7 +290,7 @@ class DataUtils {
 	 * @return \WC_Order_Item_Shipping
 	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_shipping_lines( $request_data, $action = 'create', $item = null ) {
+	protected static function prepare_shipping_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Shipping( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action && empty( $request_data['method_id'] ) ) {
@@ -254,7 +312,7 @@ class DataUtils {
 	 * @return \WC_Order_Item_Fee
 	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_fee_lines( $request_data, $action = 'create', $item = null ) {
+	protected static function prepare_fee_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Fee( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action && empty( $request_data['name'] ) ) {
@@ -276,7 +334,7 @@ class DataUtils {
 	 * @return \WC_Order_Item_Coupon
 	 * @throws \WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_coupon_lines( $request_data, $action = 'create', $item = null ) {
+	protected static function prepare_coupon_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new \WC_Order_Item_Coupon( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
@@ -331,21 +389,6 @@ class DataUtils {
 					$value = isset( $meta['value'] ) ? $meta['value'] : null;
 					$item->update_meta_data( $meta['key'], $value, isset( $meta['id'] ) ? $meta['id'] : '' );
 				}
-			}
-		}
-	}
-
-	/**
-	 * Update address.
-	 *
-	 * @param \WC_Order $order  Order data.
-	 * @param string    $type   Type of address; 'billing' or 'shipping'.
-	 * @param array     $request_data Posted data.
-	 */
-	public static function update_address( \WC_Order $order, string $type, array $request_data ) {
-		foreach ( $request_data as $key => $value ) {
-			if ( is_callable( array( $order, "set_{$type}_{$key}" ) ) ) {
-				$order->{"set_{$type}_{$key}"}( $value );
 			}
 		}
 	}

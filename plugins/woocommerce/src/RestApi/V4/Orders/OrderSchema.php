@@ -11,13 +11,14 @@ namespace Automattic\WooCommerce\RestApi\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\RestApi\V4\AbstractSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 /**
  * OrderSchema class.
  */
-class OrderSchema {
+class OrderSchema extends AbstractSchema {
 	use CogsAwareTrait;
 
 	/**
@@ -76,7 +77,7 @@ class OrderSchema {
 				'description' => __( 'Order status.', 'woocommerce' ),
 				'type'        => 'string',
 				'default'     => OrderStatus::PENDING,
-				'enum'        => Utils::get_order_statuses(),
+				'enum'        => array_map( 'wc_get_order_status_slug', array_merge( array( OrderStatus::AUTO_DRAFT ), array_keys( wc_get_order_statuses() ) ) ),
 				'context'     => array( 'view', 'edit' ),
 			),
 			'currency'             => array(
@@ -964,7 +965,7 @@ class OrderSchema {
 	 * @return array The updated schema.
 	 */
 	private function add_cogs_related_schema( array $schema ): array {
-		$schema['properties']['cost_of_goods_sold'] = array(
+		$schema['cost_of_goods_sold'] = array(
 			'description' => __( 'Cost of Goods Sold data.', 'woocommerce' ),
 			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
@@ -978,7 +979,7 @@ class OrderSchema {
 			),
 		);
 
-		$schema['properties']['line_items']['items']['properties']['cost_of_goods_sold'] = array(
+		$schema['line_items']['items']['properties']['cost_of_goods_sold'] = array(
 			'description' => __( 'Cost of Goods Sold data. Only present for product line items.', 'woocommerce' ),
 			'type'        => 'object',
 			'context'     => array( 'view', 'edit' ),
