@@ -296,7 +296,24 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			// This is achieved by removing and re-adding the element to trigger browser updates.
 			const parentElement = input.parentElement;
 			if ( parentElement ) {
+				// Store the current value to preserve it
+				const currentValue = input.value;
+
+				// Mark that we're manipulating the DOM to prevent checkout updates
+				input.setAttribute( 'data-autocomplete-manipulating', 'true' );
+
 				parentElement.appendChild( parentElement.removeChild( input ) );
+
+				// Restore the value if it was lost
+				if ( input.value !== currentValue ) {
+					input.value = currentValue;
+				}
+
+				// Remove the manipulation flag after a brief delay
+				setTimeout( function () {
+					input.removeAttribute( 'data-autocomplete-manipulating' );
+				}, 10 );
+
 				input.focus();
 			}
 		}
@@ -320,7 +337,24 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			// This is achieved by removing and re-adding the element to trigger browser updates.
 			const parentElement = input.parentElement;
 			if ( parentElement ) {
+				// Store the current value to preserve it
+				const currentValue = input.value;
+
+				// Mark that we're manipulating the DOM to prevent checkout updates
+				input.setAttribute( 'data-autocomplete-manipulating', 'true' );
+
 				parentElement.appendChild( parentElement.removeChild( input ) );
+
+				// Restore the value if it was lost
+				if ( input.value !== currentValue ) {
+					input.value = currentValue;
+				}
+
+				// Remove the manipulation flag after a brief delay
+				setTimeout( function () {
+					input.removeAttribute( 'data-autocomplete-manipulating' );
+				}, 10 );
+
 				if ( shouldFocus ) {
 					input.focus();
 				}
