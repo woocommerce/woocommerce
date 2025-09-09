@@ -1,4 +1,4 @@
-name: 'Minicart E2E Tests'
+name: 'CI / Legacy Minicart e2e tests'
 
 on:
     workflow_dispatch:
@@ -21,7 +21,7 @@ on:
 
 jobs:
     test-minicart:
-        name: 'Test with experimental-iapi-mini-cart=${{ matrix.flag_value }} turned off'
+        name: 'CI / Legacy Minicart e2e tests'
         runs-on: ubuntu-latest
         strategy:
             fail-fast: false
