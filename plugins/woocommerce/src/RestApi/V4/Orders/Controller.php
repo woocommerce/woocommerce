@@ -166,36 +166,25 @@ class Controller extends AbstractController {
 	/**
 	 * Add links to the response.
 	 *
-	 * @param \WC_Order $order   Order object.
-	 * @return array Links for the given order.
+	 * @param \WP_REST_Response $response Response object.
+	 * @param \WC_Order         $order   Order object.
+	 * @param \WP_REST_Request  $request Request object.
+	 * @return \WP_REST_Response
 	 */
-	protected function get_item_links( \WC_Order $order ) {
-		$links = array(
-			'self'            => array(
-				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ),
-			),
-			'collection'      => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
-			),
-			'email_templates' => array(
-				'href'       => rest_url( sprintf( '/%s/%s/%d/actions/email_templates', $this->namespace, $this->rest_base, $order->get_id() ) ),
-				'embeddable' => true,
-			),
-		);
+	protected function add_links( \WP_REST_Response $response, \WC_Order $order, \WP_REST_Request $request ) {
+		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ) );
+		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
+		$response->add_link( 'email_templates', rest_url( sprintf( '/%s/%s/%d/actions/email_templates', $this->namespace, $this->rest_base, $order->get_id() ) ), array( 'embeddable' => true ) );
 
 		if ( $order->get_customer_id() ) {
-			$links['customer'] = array(
-				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $order->get_customer_id() ) ),
-			);
+			$response->add_link( 'customer', rest_url( sprintf( '/%s/customers/%d', $this->namespace, $order->get_customer_id() ) ), array( 'embeddable' => true ) );
 		}
 
 		if ( $order->get_parent_id() ) {
-			$links['up'] = array(
-				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->get_parent_id() ) ),
-			);
+			$response->add_link( 'up', rest_url( sprintf( '/%s/orders/%d', $this->namespace, $order->get_parent_id() ) ) );
 		}
 
-		return $links;
+		return $response;
 	}
 
 	/**
@@ -271,13 +260,11 @@ class Controller extends AbstractController {
 	 * @return \WP_REST_Response
 	 */
 	public function prepare_item_for_response( $order, $request ) {
-		$fields = $this->get_fields_for_response( $request );
-		$data   = ResponseUtils::prepare_order_for_response( $order, $request, $fields );
-		$data   = $this->add_additional_fields_to_object( $data, $request );
-		$data   = $this->filter_response_by_context( $data, $request['context'] ?? 'view' );
-
-		$response = rest_ensure_response( $data );
-		$response->add_links( $this->get_item_links( $order ) );
+		$fields   = $this->get_fields_for_response( $request );
+		$data     = ResponseUtils::prepare_order_for_response( $order, $request, $fields );
+		$data     = $this->add_additional_fields_to_object( $data, $request );
+		$data     = $this->filter_response_by_context( $data, $request['context'] ?? 'view' );
+		$response = $this->add_links( rest_ensure_response( $data ), $order, $request );
 
 		/**
 		 * Filter the data for a response.
