@@ -269,7 +269,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
-		do_action( 'woocommerce_order_scheduler_import_order', $order_id );
+		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
 	}
 
 	/**
