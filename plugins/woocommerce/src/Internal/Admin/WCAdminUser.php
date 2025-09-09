@@ -181,7 +181,7 @@ class WCAdminUser {
 			return $user_data;
 		}
 
-		// If the user has install_plugins capability, check if file modifications are allowed
+		// If the user has install_plugins capability, check if file modifications are allowed.
 		if ( isset( $user_data['capabilities']->install_plugins ) && $user_data['capabilities']->install_plugins ) {
 			$user_data['capabilities']->install_plugins = wp_is_file_mod_allowed( 'woocommerce' );
 		}
