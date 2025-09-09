@@ -8,4 +8,11 @@
 		margin-left: 0;
 		list-style: none;
 	}
+
+	.wc-block-product-template__more-products-placeholder {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid $gray-200;
+	}
 }

@@ -6,7 +6,7 @@
 import clsx from 'clsx';
 import { memo, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	BlockContextProvider,
 	__experimentalUseBlockPreview as useBlockPreview,
@@ -34,6 +34,39 @@ import {
 import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
+
+const MAX_PREVIEWS_PER_PAGE = 20;
+
+const capProductsPerPage = ( perPage: number ): number => {
+	return Math.min( perPage, MAX_PREVIEWS_PER_PAGE );
+};
+
+const getRemainingProductsCount = (
+	inherit: boolean,
+	perPage: number,
+	loopShopPerPage: number
+): number => {
+	if ( inherit ) {
+		return Math.max( loopShopPerPage - MAX_PREVIEWS_PER_PAGE, 0 );
+	}
+	return Math.max( perPage - MAX_PREVIEWS_PER_PAGE, 0 );
+};
+
+const MoreProductsPlaceholder = ( {
+	remainingCount,
+}: {
+	remainingCount: number;
+} ) => {
+	return (
+		<li className="wc-block-product-template__more-products-placeholder">
+			{ sprintf(
+				/* translators: %d: number of products to display */
+				__( '+%d products', 'woocommerce' ),
+				remainingCount
+			) }
+		</li>
+	);
+};
 
 const ProductTemplateInnerBlocks = () => {
 	const innerBlocksProps = useInnerBlocksProps(
@@ -266,7 +299,7 @@ const ProductTemplateEdit = (
 				}
 			}
 			if ( perPage ) {
-				query.per_page = perPage;
+				query.per_page = capProductsPerPage( perPage );
 			}
 			if ( search ) {
 				query.search = search;
@@ -300,7 +333,7 @@ const ProductTemplateEdit = (
 						}
 					}
 				}
-				query.per_page = loopShopPerPage;
+				query.per_page = capProductsPerPage( loopShopPerPage );
 
 				const settings = getEditedEntityRecord(
 					'root',
@@ -402,6 +435,12 @@ const ProductTemplateEdit = (
 		);
 	}
 
+	const remainingProductsCount = getRemainingProductsCount(
+		inherit,
+		perPage,
+		loopShopPerPage
+	);
+
 	// To avoid flicker when switching active block contexts, a preview is rendered
 	// for each block context, but the preview for the active block context is hidden.
 	// This ensures that when it is displayed again, the cached rendering of the
@@ -429,6 +468,11 @@ const ProductTemplateEdit = (
 						/>
 					);
 				} ) }
+			{ remainingProductsCount > 0 && (
+				<MoreProductsPlaceholder
+					remainingCount={ remainingProductsCount }
+				/>
+			) }
 		</ul>
 	);
 };
