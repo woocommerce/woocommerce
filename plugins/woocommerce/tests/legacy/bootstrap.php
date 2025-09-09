@@ -102,10 +102,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
-		if ( 'posts' !== getenv( 'ORDER_DATASTORE' ) ) {
-			$this->initialize_hpos();
-		}
+		$this->initialize_order_datastore();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -174,14 +171,13 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize HPOS if tests need to run in HPOS context.
+	 * Configure order datastore (based on the ORDER_DATASTORE environment variable) for tests.
 	 *
 	 * @return void
 	 */
-	private function initialize_hpos() {
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
+	private function initialize_order_datastore() {
+		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( 'posts' !== getenv( 'ORDER_DATASTORE' ) );
 	}
 
 	/**
@@ -241,11 +237,8 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
-		add_filter(
-			'woocommerce_enable_hpos_by_default_for_new_shops',
-			'posts' === getenv( 'ORDER_DATASTORE' ) ? '__return_false' : '__return_true',
-		);
+		// Create HPOS tables and use it by default.
+		add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_true' );
 
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
