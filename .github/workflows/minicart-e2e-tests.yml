@@ -1,0 +1,82 @@
+name: 'Minicart E2E Tests'
+
+on:
+    workflow_dispatch:
+    pull_request:
+    push:
+        paths-ignore:
+            - 'docs/**'
+            - '**/changelog/**'
+            - '.cursor/**'
+            - '**/*.md'
+            - '**/changelog.txt'
+            - '.gitignore'
+            - '.coderabbit.yml'
+            - 'CODEOWNERS'
+            - '.github/**'
+            - '!.github/workflows/ci.yml'
+        branches:
+            - 'trunk'
+            - 'release/*'
+
+jobs:
+    test-minicart:
+        name: 'Test with experimental-iapi-mini-cart=${{ matrix.flag_value }} turned off'
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+
+        steps:
+            - uses: 'actions/checkout@v4'
+              name: 'Checkout'
+
+            - name: 'Set experimental-iapi-mini-cart feature flag to false'
+              run: |
+                  sudo apt-get update && sudo apt-get install -y jq
+                  jq '.features."experimental-iapi-mini-cart" = false' plugins/woocommerce/client/admin/config/core.json > tmp.json && mv tmp.json plugins/woocommerce/client/admin/config/core.json
+                  echo "Set experimental-iapi-mini-cart to false in core.json:"
+                  cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+
+            - name: 'Verify experimental-iapi-mini-cart feature flag'
+              run: |
+                  echo "Expected value for experimental-iapi-mini-cart: false"
+                  echo "Current value in core.json:"
+                  cat plugins/woocommerce/client/admin/config/core.json | grep experimental-iapi-mini-cart
+
+            - name: Setup - pnpm
+              uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
+            - uses: './.github/actions/setup-woocommerce-monorepo'
+              name: 'Install Block Library'
+              id: 'install-block-library'
+              with:
+                  install: '@woocommerce/block-library...'
+                  build: '@woocommerce/block-library'
+                  build-type: 'full'
+                  pull-playwright-cache: true
+                  pull-package-deps: '@woocommerce/block-library'
+
+            - name: 'Update wp-env config'
+              env:
+                  # band-aid to get the path to wp-env.json for blocks e2e tests, until they're migrated to plugins/woocommerce
+                  WP_ENV_CONFIG_PATH: ${{ github.workspace }}/plugins/woocommerce/client/blocks
+              run: node .github/workflows/scripts/override-wp-env-plugins.js
+
+            - name: 'Start Test Environment'
+              id: 'prepare-test-environment'
+              run: |
+                  min=10
+                  max=99
+                  randomized=$(( ($RANDOM % ($max - $min + 1)) + $min ))
+                  httpport="${randomized}80"
+                  mysqlport="${randomized}36"
+                  echo "WP_ENV_TESTS_PORT=$httpport" >> "$GITHUB_ENV"
+                  echo "WP_ENV_TESTS_MYSQL_PORT=$mysqlport" >> "$GITHUB_ENV"
+                  echo "WP_BASE_URL=http://localhost:$httpport" >> "$GITHUB_ENV"
+                  WP_ENV_TESTS_PORT=$httpport WP_ENV_TESTS_MYSQL_PORT=$mysqlport pnpm --filter="@woocommerce/block-library" env:start
+
+            - name: 'Run minicart tests'
+              working-directory: ./plugins/woocommerce/client/blocks
+              run: |
+                  sh ./bin/check-env.sh
+                  pnpm playwright test --config=tests/e2e/playwright.config.ts tests/e2e/tests/mini-cart
