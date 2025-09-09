@@ -5,7 +5,7 @@
 		"product-block-editor": true,
 		"product-data-views": false,
 		"experimental-blocks": true,
-		"experimental-iapi-mini-cart": false,
+		"experimental-iapi-mini-cart": true,
 		"experimental-iapi-runtime": false,
 		"coming-soon-newsletter-template": false,
 		"coupons": true,
