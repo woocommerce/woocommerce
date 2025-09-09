@@ -147,6 +147,14 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			if ( wrapper ) {
 				wrapper.classList.remove( 'autocomplete-available' );
 			}
+			// Remove all ARIA attributes when no provider is available
+			addressInput.removeAttribute( 'role' );
+			addressInput.removeAttribute( 'aria-autocomplete' );
+			addressInput.removeAttribute( 'aria-expanded' );
+			addressInput.removeAttribute( 'aria-haspopup' );
+			addressInput.removeAttribute( 'aria-activedescendant' );
+			addressInput.removeAttribute( 'aria-owns' );
+			addressInput.removeAttribute( 'aria-controls' );
 		}
 	}
 
@@ -577,7 +585,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 					addressInputs[ type ][ 'address_1' ].offsetHeight + 'px';
 				addressInput.setAttribute( 'aria-expanded', 'true' );
 				addressInput.setAttribute(
-					'aria-owns',
+					'aria-controls',
 					`address_suggestions_${ type }_list`
 				);
 				suggestionsList.id = `address_suggestions_${ type }_list`;
@@ -643,7 +651,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 			suggestionsContainer.style.display = 'none';
 			addressInput.setAttribute( 'aria-expanded', 'false' );
 			addressInput.removeAttribute( 'aria-activedescendant' );
-			addressInput.removeAttribute( 'aria-owns' );
+			addressInput.removeAttribute( 'aria-controls' );
 			activeSuggestionIndices[ type ] = -1;
 
 			// Remove blur event listener when suggestions are hidden
