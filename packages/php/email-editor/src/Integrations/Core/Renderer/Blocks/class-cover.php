@@ -12,6 +12,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Cover block renderer.
@@ -135,10 +136,10 @@ class Cover extends Abstract_Block_Renderer {
 	private function get_background_color( array $block_attrs, Rendering_Context $rendering_context ): string {
 		// Check for custom overlay color first (used as background color when no image).
 		if ( ! empty( $block_attrs['customOverlayColor'] ) ) {
-			$color = $block_attrs['customOverlayColor'];
-			// Validate color format (hex, rgb, rgba, or named colors).
-			if ( $this->is_valid_color( $color ) ) {
-				return $color;
+			$color           = $block_attrs['customOverlayColor'];
+			$sanitized_color = $this->validate_and_sanitize_color( $color );
+			if ( ! empty( $sanitized_color ) ) {
+				return $sanitized_color;
 			}
 		}
 
@@ -151,56 +152,24 @@ class Cover extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Validate if a color value is safe for CSS.
+	 * Validate and sanitize a color value, returning empty string for invalid colors.
 	 *
-	 * @param string $color Color value to validate.
-	 * @return bool True if valid, false otherwise.
+	 * @param string $color The color value to validate and sanitize.
+	 * @return string Sanitized color or empty string if invalid.
 	 */
-	private function is_valid_color( string $color ): bool {
-		// Remove whitespace.
-		$color = trim( $color );
+	private function validate_and_sanitize_color( string $color ): string {
+		$sanitized_color = Html_Processing_Helper::sanitize_color( $color );
 
-		// Check for hex colors (#fff, #ffffff, #ffffffff).
-		if ( preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $color ) ) {
-			return true;
+		// If sanitize_color returned the default fallback, check if the original was actually valid.
+		if ( '#000000' === $sanitized_color && '#000000' !== $color ) {
+			// The original color was invalid, so return empty string.
+			return '';
 		}
 
-		// Check for rgb/rgba colors.
-		if ( preg_match( '/^rgba?\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*(,\s*[\d.]+\s*)?\)$/', $color ) ) {
-			return true;
-		}
-
-		// Check for hsl/hsla colors.
-		if ( preg_match( '/^hsla?\(\s*\d+\s*,\s*\d+%\s*,\s*\d+%\s*(,\s*[\d.]+\s*)?\)$/', $color ) ) {
-			return true;
-		}
-
-		// Check for named colors (basic set).
-		$named_colors = array(
-			'transparent',
-			'inherit',
-			'initial',
-			'unset',
-			'black',
-			'white',
-			'red',
-			'green',
-			'blue',
-			'yellow',
-			'orange',
-			'purple',
-			'pink',
-			'brown',
-			'gray',
-			'grey',
-		);
-		if ( in_array( strtolower( $color ), $named_colors, true ) ) {
-			return true;
-		}
-
-		return false;
+		// The color is valid (either it was sanitized to something other than the default,
+		// or it was specifically #000000 which is a valid color).
+		return $sanitized_color;
 	}
-
 
 	/**
 	 * Build the cover content with background image or color.
