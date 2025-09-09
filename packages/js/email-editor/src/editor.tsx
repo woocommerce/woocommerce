@@ -45,7 +45,7 @@ function Editor( {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
-	contentRef?: React.RefObject< HTMLDivElement >;
+	contentRef?: React.Ref< HTMLDivElement > | null;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -141,7 +141,7 @@ export function ExperimentalEmailEditor( {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
-	contentRef?: React.RefObject< HTMLDivElement >;
+	contentRef?: React.Ref< HTMLDivElement > | null;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
