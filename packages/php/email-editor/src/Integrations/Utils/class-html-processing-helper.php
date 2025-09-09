@@ -6,7 +6,7 @@
  */
 
 declare( strict_types = 1 );
-namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Helpers;
+namespace Automattic\WooCommerce\EmailEditor\Integrations\Utils;
 
 /**
  * Helper class for HTML processing and manipulation.
