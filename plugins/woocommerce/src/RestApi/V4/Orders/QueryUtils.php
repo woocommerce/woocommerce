@@ -59,8 +59,8 @@ class QueryUtils {
 			),
 			'customer'        => array(
 				'description'       => __( 'Limit result set to orders assigned a specific customer.', 'woocommerce' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'product'         => array(
