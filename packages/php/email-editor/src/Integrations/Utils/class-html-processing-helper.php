@@ -25,11 +25,40 @@ class Html_Processing_Helper {
 		}
 
 		// Remove generic background classes but keep specific color classes.
-		$classes = (string) ( preg_replace( '/\bhas-background\b/', '', $classes ) ?? '' );
+		$result = preg_replace( '/\bhas-background\b/', '', $classes );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in clean_css_classes: has-background pattern', E_USER_WARNING );
+			$classes = '';
+		} else {
+			$classes = $result;
+		}
+
 		// Remove border classes.
-		$classes = (string) ( preg_replace( '/\bhas-[a-z-]*border[a-z-]*\b/', '', $classes ) ?? '' );
-		$classes = (string) ( preg_replace( '/\b[a-z-]+-border-[a-z-]+\b/', '', $classes ) ?? '' );
-		$classes = (string) ( preg_replace( '/\s+/', ' ', $classes ) ?? '' ); // Clean up multiple spaces.
+		$result = preg_replace( '/\bhas-[a-z-]*border[a-z-]*\b/', '', $classes );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in clean_css_classes: has-border pattern', E_USER_WARNING );
+			$classes = '';
+		} else {
+			$classes = $result;
+		}
+
+		$result = preg_replace( '/\b[a-z-]+-border-[a-z-]+\b/', '', $classes );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in clean_css_classes: border pattern', E_USER_WARNING );
+			$classes = '';
+		} else {
+			$classes = $result;
+		}
+
+		// Clean up multiple spaces.
+		$result = preg_replace( '/\s+/', ' ', $classes );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in clean_css_classes: whitespace pattern', E_USER_WARNING );
+			$classes = '';
+		} else {
+			$classes = $result;
+		}
+
 		return trim( $classes );
 	}
 
@@ -40,8 +69,14 @@ class Html_Processing_Helper {
 	 * @return string Sanitized CSS value or empty string if invalid.
 	 */
 	public static function sanitize_css_value( string $value ): string {
-		// Remove any potential script injection characters.
-		$value = (string) ( preg_replace( '/[<>"\']/', '', $value ) ?? '' );
+		// Remove dangerous script injection characters (angle brackets) but preserve quotes for CSS strings.
+		$result = preg_replace( '/[<>]/', '', $value );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in sanitize_css_value: script injection pattern', E_USER_WARNING );
+			$value = '';
+		} else {
+			$value = $result;
+		}
 
 		// Remove dangerous CSS functions and expressions.
 		$dangerous_patterns = array(
@@ -61,9 +96,6 @@ class Html_Processing_Helper {
 				return '';
 			}
 		}
-
-		// Remove any remaining potentially dangerous content.
-		$value = (string) ( preg_replace( '/[^\w\s\-\.\,\#\(\)\%\*\+\-\/]/', '', $value ) ?? '' );
 
 		return trim( $value );
 	}
@@ -294,7 +326,13 @@ class Html_Processing_Helper {
 		}
 
 		// Remove dangerous content: script, style, and other executable elements.
-		$caption_html = (string) preg_replace( '/<(script|style|iframe|object|embed|form|input|button)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
+		$result = preg_replace( '/<(script|style|iframe|object|embed|form|input|button)\b[^>]*>.*?<\/\1>/is', '', $caption_html );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in sanitize_caption_html: dangerous content pattern', E_USER_WARNING );
+			$caption_html = '';
+		} else {
+			$caption_html = $result;
+		}
 
 		// Use a more conservative approach - only validate attributes, don't modify tags.
 		$allowed_tags = array( 'strong', 'em', 'a', 'mark', 'kbd', 's', 'sub', 'sup', 'span', 'br' );
@@ -327,10 +365,22 @@ class Html_Processing_Helper {
 		$allowed_tags_pattern = implode( '|', array_map( 'preg_quote', $allowed_tags ) );
 
 		// Remove disallowed opening and closing tags, keeping only their content.
-		$final_html = (string) preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>(.*?)<\/(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>/s', '$1', $final_html );
+		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>(.*?)<\/(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*>/s', '$1', $final_html );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in sanitize_caption_html: disallowed tags pattern', E_USER_WARNING );
+			$final_html = '';
+		} else {
+			$final_html = $result;
+		}
 
 		// Remove disallowed self-closing tags.
-		$final_html = (string) preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*\/>/s', '', $final_html );
+		$result = preg_replace( '/<(?!(?:' . $allowed_tags_pattern . ')\b)[^>]*\/>/s', '', $final_html );
+		if ( null === $result ) {
+			trigger_error( 'Regex failure in sanitize_caption_html: self-closing tags pattern', E_USER_WARNING );
+			$final_html = '';
+		} else {
+			$final_html = $result;
+		}
 
 		return $final_html;
 	}

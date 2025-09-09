@@ -64,7 +64,7 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 	public function testSanitizeCssValueRemovesDangerousCharacters(): void {
 		$value  = 'color: red; <script>alert("xss")</script>';
 		$result = Html_Processing_Helper::sanitize_css_value( $value );
-		$this->assertEquals( 'color red scriptalert(xss)/script', $result );
+		$this->assertEquals( 'color: red; scriptalert("xss")/script', $result );
 	}
 
 	/**
@@ -107,6 +107,24 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 		foreach ( $safe_values as $value ) {
 			$result = Html_Processing_Helper::sanitize_css_value( $value );
 			$this->assertEquals( $value, $result, "Failed to preserve safe value: $value" );
+		}
+	}
+
+	/**
+	 * Test sanitize_css_value preserves quotes for CSS strings.
+	 */
+	public function testSanitizeCssValuePreservesQuotes(): void {
+		$css_with_quotes = array(
+			'font-family: "Arial", sans-serif',
+			'font-family: \'Arial\', sans-serif',
+			'content: "→"',
+			'background: url(\'image.jpg\')',
+			'background: url("image.jpg")',
+		);
+
+		foreach ( $css_with_quotes as $value ) {
+			$result = Html_Processing_Helper::sanitize_css_value( $value );
+			$this->assertEquals( $value, $result, "Failed to preserve quotes in: $value" );
 		}
 	}
 
