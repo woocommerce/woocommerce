@@ -7,11 +7,10 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\V4\Orders;
+namespace Automattic\WooCommerce\RestApi\Schemas\V4;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\V4\AbstractSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 

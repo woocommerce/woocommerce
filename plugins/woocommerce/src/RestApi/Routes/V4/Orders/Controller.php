@@ -9,13 +9,21 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\V4\Orders;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Schemas\V4\OrderSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
-use Automattic\WooCommerce\RestApi\V4\AbstractController;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use WP_Http;
+use WP_Error;
+use WC_Order;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+use WC_Order_Query;
 
 /**
  * Orders Controller.
@@ -29,7 +37,7 @@ class Controller extends AbstractController {
 	protected $rest_base = 'orders';
 
 	/**
-	 * Post type.
+	 * Post type used for permissions checks.
 	 *
 	 * @var string
 	 */
@@ -39,7 +47,7 @@ class Controller extends AbstractController {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->schema = new OrderSchema();
+		$this->schema_controller = new OrderSchema();
 	}
 
 	/**
@@ -51,16 +59,16 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
 				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -77,7 +85,7 @@ class Controller extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
@@ -85,13 +93,13 @@ class Controller extends AbstractController {
 					),
 				),
 				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
+					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 				array(
-					'methods'             => \WP_REST_Server::DELETABLE,
+					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
@@ -116,7 +124,7 @@ class Controller extends AbstractController {
 		$params = array_merge(
 			QueryUtils::get_query_schema(),
 			array(
-				'context'                 => $this->get_context_param(),
+				'context'                 => $this->get_context_param( array( 'default' => 'view' ) ),
 				'dp'                      => array(
 					'default'           => wc_get_price_decimals(),
 					'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
@@ -152,8 +160,6 @@ class Controller extends AbstractController {
 			)
 		);
 
-		$params['context']['default'] = 'view';
-
 		/**
 		 * Filter the collection params for the orders controller.
 		 *
@@ -166,12 +172,12 @@ class Controller extends AbstractController {
 	/**
 	 * Add links to the response.
 	 *
-	 * @param \WP_REST_Response $response Response object.
-	 * @param \WC_Order         $order   Order object.
-	 * @param \WP_REST_Request  $request Request object.
-	 * @return \WP_REST_Response
+	 * @param WP_REST_Response $response Response object.
+	 * @param WC_Order         $order   Order object.
+	 * @param WP_REST_Request  $request Request object.
+	 * @return WP_REST_Response
 	 */
-	protected function add_links( \WP_REST_Response $response, \WC_Order $order, \WP_REST_Request $request ) {
+	protected function add_links( WP_REST_Response $response, WC_Order $order, WP_REST_Request $request ) {
 		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ) );
 		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 		$response->add_link( 'email_templates', rest_url( sprintf( '/%s/%s/%d/actions/email_templates', $this->namespace, $this->rest_base, $order->get_id() ) ), array( 'embeddable' => true ) );
@@ -190,8 +196,8 @@ class Controller extends AbstractController {
 	/**
 	 * Check if a given request has access to read items.
 	 *
-	 * @param  \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|boolean
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
@@ -203,8 +209,8 @@ class Controller extends AbstractController {
 	/**
 	 * Check if a given request has access to read an item.
 	 *
-	 * @param  \WP_REST_Request $request The request object.
-	 * @return \WP_Error|boolean
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', $request['id'] ) ) {
@@ -229,8 +235,8 @@ class Controller extends AbstractController {
 	/**
 	 * Check if a given request has access to update an item.
 	 *
-	 * @param  \WP_REST_Request $request The request object.
-	 * @return \WP_Error|boolean
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'edit', $request['id'] ) ) {
@@ -242,8 +248,8 @@ class Controller extends AbstractController {
 	/**
 	 * Check if a given request has access to delete an item.
 	 *
-	 * @param  \WP_REST_Request $request The request object.
-	 * @return bool|\WP_Error
+	 * @param  WP_REST_Request $request The request object.
+	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $request['id'] ) ) {
@@ -255,9 +261,9 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a single order item for response.
 	 *
-	 * @param \WC_Order        $order Order object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response
+	 * @param WC_Order        $order Order object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response
 	 */
 	public function prepare_item_for_response( $order, $request ) {
 		$fields   = $this->get_fields_for_response( $request );
@@ -269,9 +275,9 @@ class Controller extends AbstractController {
 		/**
 		 * Filter the data for a response.
 		 *
-		 * @param \WP_REST_Response $response The response object.
-		 * @param \WC_Order          $order   Order object.
-		 * @param \WP_REST_Request  $request  Request object.
+		 * @param WP_REST_Response $response The response object.
+		 * @param WC_Order          $order   Order object.
+		 * @param WP_REST_Request  $request  Request object.
 		 * @since 10.2.0
 		 */
 		return rest_ensure_response( apply_filters( $this->get_hook_prefix() . 'item_response', $response, $order, $request ) );
@@ -280,14 +286,14 @@ class Controller extends AbstractController {
 	/**
 	 * Get a single item.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
 		$order = wc_get_order( (int) $request['id'] );
 
-		if ( ! $order instanceof \WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
-			return new \WP_Error( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
 		}
 
 		return $this->prepare_item_for_response( $order, $request );
@@ -296,8 +302,8 @@ class Controller extends AbstractController {
 	/**
 	 * Get collection of orders.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		/**
@@ -308,7 +314,7 @@ class Controller extends AbstractController {
 		 * @since 10.2.0
 		 */
 		$query_args    = apply_filters( $this->get_hook_prefix() . 'get_items_query', QueryUtils::prepare_query( $request ), $request );
-		$query         = new \WC_Order_Query(
+		$query         = new WC_Order_Query(
 			array_merge(
 				$query_args,
 				array(
@@ -324,8 +330,8 @@ class Controller extends AbstractController {
 			if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
 				continue;
 			}
-			$data    = $this->prepare_item_for_response( $order, $request );
-			$items[] = $this->prepare_response_for_collection( $data );
+			$item    = $this->prepare_item_for_response( $order, $request );
+			$items[] = $this->prepare_response_for_collection( $item );
 		}
 
 		$pagination_util = new Pagination();
@@ -337,17 +343,17 @@ class Controller extends AbstractController {
 	/**
 	 * Create a single item.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
 			/* translators: %s: post type */
-			return new \WP_Error( $this->get_error_prefix() . 'exists', sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), array( 'status' => 400 ) );
+			return $this->get_route_error_response( $this->get_error_prefix() . 'exists', sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), WP_Http::BAD_REQUEST );
 		}
 
 		try {
-			$order = new \WC_Order();
+			$order = new WC_Order();
 			$order->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 
@@ -357,16 +363,15 @@ class Controller extends AbstractController {
 			/**
 			 * Fires after a single object is created via the REST API.
 			 *
-			 * @param WC_Data         $order    Inserted object.
-			 * @param \WP_REST_Request $request   Request object.
-			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @param WC_Order         $order    Inserted object.
+			 * @param WP_REST_Request $request   Request object.
 			 * @since 10.2.0
 			 */
 			do_action( $this->get_hook_prefix() . 'created', $order, $request );
 
 			$request->set_param( 'context', 'edit' );
 			$response = $this->prepare_item_for_response( $order, $request );
-			$response->set_status( 201 );
+			$response->set_status( WP_Http::CREATED );
 			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ) );
 
 			return $response;
@@ -386,24 +391,24 @@ class Controller extends AbstractController {
 
 				$data['new_draft_order_id'] = $order->get_id();
 			}
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
 		} catch ( \WC_REST_Exception $e ) {
 			$order->delete( true );
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
 	/**
 	 * Update a single item.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_Error|\WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
 	 */
 	public function update_item( $request ) {
 		$order = wc_get_order( (int) $request['id'] );
 
-		if ( ! $order instanceof \WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
-			return new \WP_Error( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
 		}
 
 		try {
@@ -414,7 +419,7 @@ class Controller extends AbstractController {
 			 * Fires after a single object is updated via the REST API.
 			 *
 			 * @param WC_Data         $order    Inserted object.
-			 * @param \WP_REST_Request $request   Request object.
+			 * @param WP_REST_Request $request   Request object.
 			 * @param boolean         $creating  True when creating object, false when updating.
 			 * @since 10.2.0
 			 */
@@ -423,23 +428,23 @@ class Controller extends AbstractController {
 			$request->set_param( 'context', 'edit' );
 			return $this->prepare_item_for_response( $order, $request );
 		} catch ( \WC_Data_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
 		} catch ( \WC_REST_Exception $e ) {
-			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
 
 	/**
 	 * Delete a single item.
 	 *
-	 * @param \WP_REST_Request $request Full details about the request.
-	 * @return \WP_REST_Response|\WP_Error
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
 		$order = wc_get_order( (int) $request['id'] );
 
-		if ( ! $order instanceof \WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
-			return new \WP_Error( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -454,17 +459,17 @@ class Controller extends AbstractController {
 			 * Filter whether an object is trashable.
 			 *
 			 * @param boolean $supports_trash Whether the object type support trashing.
-			 * @param \WC_Order $order         The object being considered for trashing support.
+			 * @param WC_Order $order         The object being considered for trashing support.
 			 * @since 10.2.0
 			 */
 			$supports_trash = apply_filters( $this->get_hook_prefix() . 'object_trashable', EMPTY_TRASH_DAYS > 0, $order );
 
 			if ( ! $supports_trash ) {
-				return $this->get_route_error_response( $this->get_error_prefix() . 'trash_not_supported', __( 'This object does not support trashing.', 'woocommerce' ), 501 );
+				return $this->get_route_error_response( $this->get_error_prefix() . 'trash_not_supported', __( 'This object does not support trashing.', 'woocommerce' ), WP_Http::NOT_IMPLEMENTED );
 			}
 
 			if ( 'trash' === $order->get_status() ) {
-				return $this->get_route_error_response( $this->get_error_prefix() . 'already_trashed', __( 'This object has already been trashed.', 'woocommerce' ), 410 );
+				return $this->get_route_error_response( $this->get_error_prefix() . 'already_trashed', __( 'This object has already been trashed.', 'woocommerce' ), WP_Http::GONE );
 			}
 
 			$order->delete();
@@ -472,15 +477,15 @@ class Controller extends AbstractController {
 		}
 
 		if ( ! $result ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_delete', __( 'This object cannot be deleted.', 'woocommerce' ), 500 );
+			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_delete', __( 'This object cannot be deleted.', 'woocommerce' ), WP_Http::INTERNAL_SERVER_ERROR );
 		}
 
 		/**
 		 * Fires after a single object is deleted or trashed via the REST API.
 		 *
-		 * @param \WC_Order         $order   The deleted or trashed object.
-		 * @param \WP_REST_Response $response The response data.
-		 * @param \WP_REST_Request  $request  The request sent to the API.
+		 * @param WC_Order         $order   The deleted or trashed object.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
 		 * @since 10.2.0
 		 */
 		do_action( $this->get_hook_prefix() . 'deleted', $order, $response, $request );
@@ -492,16 +497,16 @@ class Controller extends AbstractController {
 	 * Update current object from the request.
 	 *
 	 * @throws \WC_REST_Exception When fails to set any item, \WC_Data_Exception When fails to set any item.
-	 * @param \WC_Order        $order Order object.
-	 * @param \WP_REST_Request $request Request object.
-	 * @param bool             $creating True when creating object, false when updating.
+	 * @param WC_Order        $order Order object.
+	 * @param WP_REST_Request $request Request object.
+	 * @param bool            $creating True when creating object, false when updating.
 	 * @return void
 	 */
-	protected function update_object_from_request( \WC_Order $order, \WP_REST_Request $request, bool $creating = false ) {
+	protected function update_object_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
 		// Get data that can be edited from schema.
 		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
 		$data_keys   = array_diff(
-			array_keys( array_filter( $this->schema->get_item_properties(), array( $this, 'filter_writable_props' ) ) ),
+			array_keys( array_filter( $this->schema_controller->get_item_properties(), array( $this, 'filter_writable_props' ) ) ),
 			$ignore_keys
 		);
 
@@ -536,7 +541,7 @@ class Controller extends AbstractController {
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			// The customer must exist, and in a multisite context must be visible to the current user.
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
-				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), 400 );
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), WP_Http::BAD_REQUEST );
 			}
 
 			// Make sure customer is part of blog.

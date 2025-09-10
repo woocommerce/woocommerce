@@ -7,7 +7,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 
-use Automattic\WooCommerce\RestApi\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 
 /**
  * class Automattic\WooCommerce\RestApi\V4\Orders\Controller tests.
@@ -16,7 +16,6 @@ use Automattic\WooCommerce\RestApi\V4\Orders\Controller as OrdersController;
 class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
-
 
 	/**
 	 * Runs after each test.

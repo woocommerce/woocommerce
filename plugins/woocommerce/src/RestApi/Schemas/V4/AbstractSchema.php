@@ -9,7 +9,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\V4;
+namespace Automattic\WooCommerce\RestApi\Schemas\V4;
 
 defined( 'ABSPATH' ) || exit;
 

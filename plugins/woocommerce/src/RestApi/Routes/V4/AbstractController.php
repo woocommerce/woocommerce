@@ -9,7 +9,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\V4;
+namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
 use WP_Http;
 use WP_REST_Request;
@@ -52,11 +52,11 @@ abstract class AbstractController extends \WP_REST_Controller {
 	protected $error_prefix = 'woocommerce_rest_api_';
 
 	/**
-	 * Schema instance.
+	 * Schema controller instance.
 	 *
 	 * @var AbstractSchema
 	 */
-	protected $schema;
+	protected $schema_controller;
 
 	/**
 	 * Get item schema, conforming to JSON Schema.
@@ -64,15 +64,20 @@ abstract class AbstractController extends \WP_REST_Controller {
 	 * @return array
 	 */
 	public function get_item_schema() {
-		if ( ! $this->schema ) {
-			return array();
-		}
-		return array(
+		$this->schema = $this->schema_controller ? array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'type'       => 'object',
-			'title'      => $this->schema::IDENTIFIER,
-			'properties' => $this->schema->get_item_properties(),
-		);
+			'title'      => $this->schema_controller::IDENTIFIER,
+			/**
+			 * Filter the schema for the item.
+			 *
+			 * @param array $schema The schema for the item.
+			 * @since 10.2.0
+			 */
+			'properties' => apply_filters( $this->get_hook_prefix() . $this->schema_controller::IDENTIFIER . '_schema', $this->schema_controller->get_item_properties() ),
+		) : array();
+
+		return $this->add_additional_fields_schema( $this->schema );
 	}
 
 	/**

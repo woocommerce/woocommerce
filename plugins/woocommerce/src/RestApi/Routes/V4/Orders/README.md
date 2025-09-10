@@ -18,13 +18,15 @@ The v4 Orders endpoint represents a **complete architectural rewrite** from the 
 ### File Structure
 
 ```markdown
-src/RestApi/V4/Orders/
-├── Controller.php      # Main controller with route registration and CRUD operations
-├── DataUtils.php       # Data preparation and validation utilities
-├── QueryUtils.php      # Query parameter handling and validation
-├── ResponseUtils.php   # Response formatting and data transformation
-├── OrderSchema.php     # Schema definition and field management
-└── README.md           # This documentation
+src/RestApi/
+├── Routes/V4/Orders/
+│   ├── Controller.php      # Main controller with route registration and CRUD operations
+│   ├── DataUtils.php       # Data preparation and validation utilities
+│   ├── QueryUtils.php      # Query parameter handling and validation
+│   ├── ResponseUtils.php   # Response formatting and data transformation
+│   └── README.md           # This documentation
+└── Schemas/V4/
+    └── OrderSchema.php     # Schema definition and field management
 ```
 
 ## Key Architectural Changes
@@ -43,7 +45,7 @@ src/RestApi/V4/Orders/
 - **V3**: Traditional PHP without strict typing
 - **V4**: Uses `declare( strict_types=1 )` and modern PHP features
 - **V3**: Mixed namespace usage
-- **V4**: Consistent `Automattic\WooCommerce\RestApi\V4\Orders` namespace
+- **V4**: Consistent `Automattic\WooCommerce\RestApi\Routes\V4\Orders` namespace
 
 ### 3. **Direct WP_REST_Controller Extension**
 

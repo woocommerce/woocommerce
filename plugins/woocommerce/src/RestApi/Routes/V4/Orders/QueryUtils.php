@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\V4\Orders;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
