@@ -42,7 +42,7 @@ foreach ( $items as $item_id => $item ) :
 
 	?>
 	<tr class="<?php echo esc_attr( apply_filters( 'woocommerce_order_item_class', 'order_item', $item, $order ) ); ?>">
-		<th class="td font-family text-align-left" style="vertical-align: middle; word-wrap:break-word;" scope="row">
+		<td class="td font-family text-align-left" style="vertical-align: middle; word-wrap:break-word;" scope="row">
 			<?php if ( $email_improvements_enabled ) { ?>
 				<table class="order-item-data" role="presentation">
 					<tr>
@@ -68,7 +68,7 @@ foreach ( $items as $item_id => $item ) :
 							 * @param WC_Order_Item_Product $item      The item being displayed.
 							 * @since 2.1.0
 							 */
-							echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false ) );
+							echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', "<h3 style='font-size: inherit;'>" . $item->get_name() . "</h3>", $item, false ) );
 
 							// SKU.
 							if ( $show_sku && $sku ) {
