@@ -22,6 +22,7 @@ import {
 	normalizeCurrencyResponse,
 } from '../../../../packages/prices/utils/currency';
 import { CartItem, Currency } from '../../types';
+import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -69,7 +70,7 @@ type MiniCart = {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
-		setupOpenDrawerListener: () => void;
+		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 	};
 };
@@ -194,7 +195,27 @@ store< MiniCart >(
 		},
 
 		callbacks: {
-			setupOpenDrawerListener() {
+			*setupEventListeners() {
+				if ( 'jQuery' in window ) {
+					// Make it so we can read jQuery events triggered by WC Core elements.
+					translateJQueryEventToNative(
+						'added_to_cart',
+						'wc-blocks_added_to_cart'
+					);
+					translateJQueryEventToNative(
+						'removed_from_cart',
+						'wc-blocks_removed_from_cart'
+					);
+				}
+				document.body.addEventListener(
+					'wc-blocks_added_to_cart',
+					actions.refreshCartItems
+				);
+				document.body.addEventListener(
+					'wc-blocks_removed_from_cart',
+					actions.refreshCartItems
+				);
+
 				if ( addToCartBehaviour === 'open_drawer' ) {
 					document.body.addEventListener(
 						'wc-blocks_added_to_cart',
@@ -203,6 +224,14 @@ store< MiniCart >(
 				}
 
 				return () => {
+					document.body.removeEventListener(
+						'wc-blocks_added_to_cart',
+						actions.refreshCartItems
+					);
+					document.body.removeEventListener(
+						'wc-blocks_removed_from_cart',
+						actions.refreshCartItems
+					);
 					document.body.removeEventListener(
 						'wc-blocks_added_to_cart',
 						callbacks.openDrawer
