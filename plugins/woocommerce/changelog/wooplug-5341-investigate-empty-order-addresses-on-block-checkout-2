@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent updating draft order on checkout GET route if it already exists

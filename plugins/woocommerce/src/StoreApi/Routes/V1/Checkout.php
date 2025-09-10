@@ -198,7 +198,9 @@ class Checkout extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$this->create_or_update_draft_order( $request );
+		if ( ! $this->order ) {
+			$this->create_or_update_draft_order( $request );
+		}
 		return $this->prepare_item_for_response(
 			(object) [
 				'order'          => $this->order,
