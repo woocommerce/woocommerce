@@ -55,10 +55,6 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	if ( null !== $index_exists ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type;" );
 	}
-	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->usermeta} WHERE key_name = 'woo_idx_meta_key_meta_value';" );
-	if ( null !== $index_exists ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->usermeta} DROP INDEX woo_idx_meta_key_meta_value;" );
-	}
 
 	// Roles + caps.
 	WC_Install::remove_roles();
