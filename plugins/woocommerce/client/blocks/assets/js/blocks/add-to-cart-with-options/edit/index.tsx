@@ -12,6 +12,7 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { useProduct } from '@woocommerce/entities';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -44,9 +45,10 @@ const AddToCartOptionsEdit = (
 
 	const productType =
 		product?.id === undefined ? currentProductType?.slug : product?.type;
-	const isCoreProductType =
+	const editorSupportedProductTypes = getSetting( 'editorSupportedProductTypes', [] ) as string[];
+	const isTemplatePartSupported =
 		productType &&
-		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
+		editorSupportedProductTypes.includes( productType );
 
 	return (
 		<>
@@ -56,7 +58,7 @@ const AddToCartOptionsEdit = (
 			<BlockControls>
 				<ToolbarProductTypeGroup />
 			</BlockControls>
-			{ isCoreProductType ? (
+			{ isTemplatePartSupported ? (
 				<AddToCartWithOptionsEditTemplatePart
 					productType={ productType }
 				/>

@@ -37,8 +37,31 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		if ( is_admin() && ! WC()->is_rest_api_request() ) {
 			$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
+			$this->asset_data_registry->add( 'editorSupportedProductTypes', $this->get_editor_supported_product_types() );
 			$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
 		}
+	}
+
+	/**
+	 * Get the editor supported product types.
+	 *
+	 * @return array Array of product types.
+	 */
+	protected function get_editor_supported_product_types() {
+
+		$product_types        = array_keys( wc_get_product_types() );
+		$core_product_types   = $this->get_core_product_types();
+		$custom_product_types = array_diff( $product_types, $core_product_types );
+
+		// If the product type has an experimental filter to locate a template part, add it to the supported product types.
+		$supported_product_types = $core_product_types;
+		foreach ( $custom_product_types as $product_type ) {
+			if ( has_filter( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part' ) ) {
+				$supported_product_types[] = $product_type;
+			}
+		}
+
+		return $supported_product_types;
 	}
 
 	/**
@@ -132,7 +155,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$slug = $product_type . '-product-add-to-cart-with-options';
 
-		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+		if ( in_array( $product_type, $this->get_core_product_types(), true ) ) {
 			$template_part_path = Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html';
 		} else {
 			/**
@@ -169,7 +192,6 @@ class AddToCartWithOptions extends AbstractBlock {
 				$template_slug_to_load   = $theme_has_template_part ? get_stylesheet() : BlockTemplateUtils::PLUGIN_SLUG;
 			}
 			$template_part = get_block_template( $template_slug_to_load . '//' . $slug, 'wp_template_part' );
-
 			if ( $template_part && ! empty( $template_part->content ) ) {
 				$template_part_contents = $template_part->content;
 			}
@@ -550,7 +572,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			ob_start();
 
-			if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+			if ( in_array( $product_type, $this->get_core_product_types(), true ) ) {
 
 				$add_to_cart_fn = 'woocommerce_' . $product_type . '_add_to_cart';
 				remove_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
@@ -641,5 +663,19 @@ class AddToCartWithOptions extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get core product types.
+	 *
+	 * @return array Array of product types.
+	 */
+	private function get_core_product_types() {
+		return array(
+			ProductType::SIMPLE,
+			ProductType::EXTERNAL,
+			ProductType::VARIABLE,
+			ProductType::GROUPED,
+		);
 	}
 }
