@@ -31,7 +31,7 @@ class Visa extends PaymentGateway {
 				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
 				$settings = $payment_gateway->get_config_settings();
 
-				return is_array( $settings ) &&
+				return is_array( $settings ) && isset( $settings[ 'environment' ] ) &&
 						( ( \VISA_ACCEPTANCE_ENVIRONMENT_TEST === $settings['environment'] &&
 						! empty( $settings['test_merchant_id'] ) &&
 						! empty( $settings['test_api_key'] ) &&
@@ -115,7 +115,7 @@ class Visa extends PaymentGateway {
 				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
 				$settings = $payment_gateway->get_config_settings();
 
-				if ( is_array( $settings ) ) {
+				if ( is_array( $settings ) && isset( $settings['environment'] ) ) {
 					if ( \VISA_ACCEPTANCE_ENVIRONMENT_TEST === $settings['environment'] ) {
 						return true;
 					}
