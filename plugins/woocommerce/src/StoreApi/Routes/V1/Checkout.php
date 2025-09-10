@@ -571,13 +571,17 @@ class Checkout extends AbstractCartRoute {
 			true
 		);
 
-		return $this->prepare_item_for_response(
+		$response = $this->prepare_item_for_response(
 			(object) [
 				'order'          => wc_get_order( $this->order ),
 				'payment_result' => $payment_result,
 			],
 			$request
 		);
+
+		// Unset the order so it is not reused in subsequent requests (edge case, but possible as illustrated in AdditionalFields::test_previous_values_are_loaded_in_checkout).
+		$this->order = null;
+		return $response;
 	}
 
 	/**
