@@ -319,6 +319,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'store_api_draft_order', null );
 		$wc_session->set( 'shipping_method_counts', null );
 		$wc_session->set( 'previous_shipping_methods', null );
+		$wc_session->set( 'chosen_shipping_methods', null );
 		$this->remove_shipping_for_package_from_session();
 	}
 
@@ -421,6 +422,7 @@ final class WC_Cart_Session {
 		if ( ! $this->cart_has_shippable_products() ) {
 			$wc_session->set( 'shipping_method_counts', null );
 			$wc_session->set( 'previous_shipping_methods', null );
+			$wc_session->set( 'chosen_shipping_methods', null );
 			$this->remove_shipping_for_package_from_session();
 		}
 

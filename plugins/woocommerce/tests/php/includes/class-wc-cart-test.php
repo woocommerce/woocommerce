@@ -648,16 +648,19 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 123 ) );
 		WC()->session->save_data();
 
 		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
 		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
 		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$chosen_shipping_methods   = WC()->session->get( 'chosen_shipping_methods' );
 		$this->assertNotEmpty( $shipping_method_counts );
 		$this->assertNotEmpty( $previous_shipping_methods );
 		$this->assertNotEmpty( $shipping_for_package_0 );
 		$this->assertNotEmpty( $shipping_for_package_1 );
+		$this->assertNotEmpty( $chosen_shipping_methods );
 
 		$cart = WC()->cart;
 		$cart->set_session();
@@ -666,6 +669,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
@@ -681,16 +685,19 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 123 ) );
 		WC()->session->save_data();
 
 		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
 		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
 		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$chosen_shipping_methods   = WC()->session->get( 'chosen_shipping_methods' );
 		$this->assertNotEmpty( $shipping_method_counts );
 		$this->assertNotEmpty( $previous_shipping_methods );
 		$this->assertNotEmpty( $shipping_for_package_0 );
 		$this->assertNotEmpty( $shipping_for_package_1 );
+		$this->assertNotEmpty( $chosen_shipping_methods );
 
 		$virtual_product = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 
@@ -703,6 +710,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
@@ -717,6 +725,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 123 ) );
 
 		$product = WC_Helper_Product::create_simple_product();
 
@@ -727,10 +736,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
 		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$chosen_shipping_methods   = WC()->session->get( 'chosen_shipping_methods' );
 		$this->assertNotEmpty( $previous_shipping_methods );
 		$this->assertNotEmpty( $shipping_method_counts );
 		$this->assertNotEmpty( $shipping_for_package_0 );
 		$this->assertNotEmpty( $shipping_for_package_1 );
+		$this->assertNotEmpty( $chosen_shipping_methods );
 
 		$cart->set_session();
 
@@ -738,6 +749,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNotEmpty( WC()->session->get( 'shipping_for_package_1' ) );
+		$this->assertNotEmpty( WC()->session->get( 'chosen_shipping_methods' ) );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
@@ -753,12 +765,15 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->session->set( 'previous_shipping_methods', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_0', array( 123 ) );
 		WC()->session->set( 'shipping_for_package_1', array( 123 ) );
+		WC()->session->set( 'chosen_shipping_methods', array( 123 ) );
 		WC()->session->save_data();
 
 		$shipping_method_counts    = WC()->session->get( 'shipping_method_counts' );
 		$previous_shipping_methods = WC()->session->get( 'previous_shipping_methods' );
 		$shipping_for_package_0    = WC()->session->get( 'shipping_for_package_0' );
 		$shipping_for_package_1    = WC()->session->get( 'shipping_for_package_1' );
+		$chosen_shipping_methods   = WC()->session->get( 'chosen_shipping_methods' );
+		$this->assertNotEmpty( $chosen_shipping_methods );
 		$this->assertNotEmpty( $shipping_method_counts );
 		$this->assertNotEmpty( $previous_shipping_methods );
 		$this->assertNotEmpty( $shipping_for_package_0 );
@@ -771,6 +786,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( WC()->session->get( 'previous_shipping_methods' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_0' ) );
 		$this->assertNull( WC()->session->get( 'shipping_for_package_1' ) );
+		$this->assertNull( WC()->session->get( 'chosen_shipping_methods' ) );
 
 		remove_all_filters( 'woocommerce_cart_shipping_packages' );
 	}
