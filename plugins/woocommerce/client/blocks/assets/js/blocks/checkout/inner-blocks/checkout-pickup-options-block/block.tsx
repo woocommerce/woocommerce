@@ -74,16 +74,18 @@ const renderPickupLocation = (
 ): RadioControlOptionType => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
-		: option.price;
+		: parseInt( option.price, 10 );
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
 	const details = getPickupDetails( option );
+
+	const isSelected = option?.selected;
 
 	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
 	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
 
 	// If there is a cost for local pickup, show the cost per package.
-	if ( parseInt( priceWithTaxes, 10 ) > 0 ) {
+	if ( priceWithTaxes > 0 ) {
 		// If only one package, show the price and not the package count.
 		if ( packageCount === 1 ) {
 			secondaryLabel = (
@@ -129,9 +131,12 @@ const renderPickupLocation = (
 				{ decodeEntities( address ) }
 			</>
 		) : undefined,
-		secondaryDescription: details ? (
-			<ReadMore maxLines={ 2 }>{ decodeEntities( details ) }</ReadMore>
-		) : undefined,
+		secondaryDescription:
+			isSelected && details ? (
+				<ReadMore maxLines={ 2 }>
+					{ decodeEntities( details ) }
+				</ReadMore>
+			) : undefined,
 	};
 };
 
@@ -139,7 +144,7 @@ const Block = () => {
 	const { shippingRates, selectShippingRate } = useShippingData();
 
 	// Memoize pickup locations to prevent re-rendering when the shipping rates change.
-	const pickupLocations = useMemo( () => {
+	const pickupLocations: CartShippingPackageShippingRate[] = useMemo( () => {
 		return ( shippingRates[ 0 ]?.shipping_rates || [] ).filter(
 			isPackageRateCollectable
 		);
@@ -183,7 +188,10 @@ const Block = () => {
 		if ( selectedRateId && selectedRateId !== selectedOption ) {
 			setSelectedOption( selectedRateId );
 		}
-	}, [ pickupLocations, selectedOption ] );
+		// We want to explicitly react to changes in the data store only here, local state is managed
+		// through different code path.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ pickupLocations ] );
 
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.

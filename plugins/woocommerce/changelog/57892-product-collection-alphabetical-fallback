@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Added alphabetical fallback sorting for Product Collection Block when multiple products have the same menu order value.

@@ -1,14 +1,17 @@
 /**
  * Internal dependencies
  */
-import { editorCurrentPostId } from './constants';
 import { State } from './types';
 import { getEditorSettings, getEditorTheme, getUrls } from './settings';
 
 export function getInitialState(): State {
-	const postId = editorCurrentPostId;
+	if ( ! window.WooCommerceEmailEditor ) {
+		throw new Error(
+			'WooCommerceEmailEditor global object is not available. This is required for the email editor to work.'
+		);
+	}
+
 	return {
-		postId,
 		editorSettings: getEditorSettings(),
 		theme: getEditorTheme(),
 		styles: {
@@ -26,5 +29,6 @@ export function getInitialState(): State {
 			list: [],
 			isFetching: false,
 		},
+		contentValidation: undefined,
 	};
 }

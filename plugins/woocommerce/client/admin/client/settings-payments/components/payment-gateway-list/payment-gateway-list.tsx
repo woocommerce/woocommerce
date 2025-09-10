@@ -3,13 +3,15 @@
  */
 import {
 	PaymentsEntity,
-	PaymentProvider,
-	PaymentProviderType,
+	PaymentsProvider,
+	PaymentsProviderType,
 	PaymentGatewayProvider,
 	OfflinePmsGroupProvider,
-	PaymentExtensionSuggestionProvider,
+	PaymentsExtensionSuggestionProvider,
 } from '@woocommerce/data';
 import { Gridicon } from '@automattic/components';
+import { useNavigate } from 'react-router-dom';
+import { isRTL } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -22,12 +24,13 @@ import {
 import { PaymentExtensionSuggestionListItem } from '~/settings-payments/components/payment-extension-suggestion-list-item';
 import { PaymentGatewayListItem } from '~/settings-payments/components/payment-gateway-list-item';
 import './payment-gateway-list.scss';
+import { removeOriginFromURL } from '~/settings-payments/utils';
 
 interface PaymentGatewayListProps {
 	/**
-	 * List of payment providers to display.
+	 * List of payments providers to display.
 	 */
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	/**
 	 * Array of slugs for installed plugins.
 	 */
@@ -42,11 +45,13 @@ interface PaymentGatewayListProps {
 	 * @param provider      Extension provider.
 	 * @param onboardingUrl Extension onboarding URL (if available).
 	 * @param attachUrl     Extension attach URL (if available).
+	 * @param context       The context from which the plugin is set up (e.g. 'wc_settings_payments__main_suggestion').
 	 */
 	setUpPlugin: (
 		provider: PaymentsEntity,
 		onboardingUrl: string | null,
-		attachUrl: string | null
+		attachUrl: string | null,
+		context?: string
 	) => void;
 	/**
 	 * Callback to handle accepting an incentive. Receives the incentive ID as a parameter.
@@ -57,9 +62,9 @@ interface PaymentGatewayListProps {
 	 */
 	shouldHighlightIncentive: boolean;
 	/**
-	 * Callback to update the ordering of payment providers after sorting.
+	 * Callback to update the ordering of payments providers after sorting.
 	 */
-	updateOrdering: ( providers: PaymentProvider[] ) => void;
+	updateOrdering: ( providers: PaymentsProvider[] ) => void;
 	/**
 	 * Callback to open or close the onboarding modal.
 	 */
@@ -84,18 +89,20 @@ export const PaymentGatewayList = ( {
 	updateOrdering,
 	setIsOnboardingModalOpen,
 }: PaymentGatewayListProps ) => {
+	const navigate = useNavigate();
+
 	return (
-		<SortableContainer< PaymentProvider >
+		<SortableContainer< PaymentsProvider >
 			items={ providers }
 			className={ 'settings-payment-gateways__list' }
 			setItems={ updateOrdering }
 		>
-			{ providers.map( ( provider: PaymentProvider ) => {
+			{ providers.map( ( provider: PaymentsProvider ) => {
 				switch ( provider._type ) {
 					// Return different components wrapped into SortableItem depending on the provider type.
-					case PaymentProviderType.Suggestion:
+					case PaymentsProviderType.Suggestion:
 						const suggestion =
-							provider as PaymentExtensionSuggestionProvider;
+							provider as PaymentsExtensionSuggestionProvider;
 						const pluginInstalled = installedPluginSlugs.includes(
 							provider.plugin.slug
 						);
@@ -114,7 +121,7 @@ export const PaymentGatewayList = ( {
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.Gateway:
+					case PaymentsProviderType.Gateway:
 						const gateway = provider as PaymentGatewayProvider;
 						return (
 							<SortableItem
@@ -130,7 +137,7 @@ export const PaymentGatewayList = ( {
 								} ) }
 							</SortableItem>
 						);
-					case PaymentProviderType.OfflinePmsGroup:
+					case PaymentsProviderType.OfflinePmsGroup:
 						// Offline payments item logic is described below.
 						const offlinePmsGroup =
 							provider as OfflinePmsGroupProvider;
@@ -144,8 +151,12 @@ export const PaymentGatewayList = ( {
 									id={ offlinePmsGroup.id }
 									className="transitions-disabled woocommerce-list__item clickable-list-item enter-done"
 									onClick={ () => {
-										window.location.href =
-											offlinePmsGroup.management._links.settings.href;
+										navigate(
+											removeOriginFromURL(
+												offlinePmsGroup.management
+													._links.settings.href
+											)
+										);
 									} }
 								>
 									<div className="woocommerce-list__item-inner">
@@ -180,8 +191,17 @@ export const PaymentGatewayList = ( {
 															.management._links
 															.settings.href
 													}
+													aria-label={
+														offlinePmsGroup.title
+													}
 												>
-													<Gridicon icon="chevron-right" />
+													<Gridicon
+														icon={
+															isRTL()
+																? 'chevron-left'
+																: 'chevron-right'
+														}
+													/>
 												</a>
 											</div>
 										</div>

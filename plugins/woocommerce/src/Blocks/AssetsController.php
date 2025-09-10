@@ -118,6 +118,13 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
 
+		// Sanitize.
+		$this->api->register_script(
+			'wc-sanitize',
+			'assets/client/admin/sanitize/index.js',
+			array()
+		);
+
 		// Customer Effort Score.
 		$this->api->register_script(
 			'wc-customer-effort-score',
@@ -145,15 +152,6 @@ final class AssetsController {
 	 * Register and enqueue assets for exclusive usage within the Site Editor.
 	 */
 	public function register_and_enqueue_site_editor_assets() {
-		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'assets/client/blocks/wc-blocks-classic-template-revert-button.js' );
-		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'assets/client/blocks/wc-blocks-classic-template-revert-button-style.css' );
-
-		$current_screen = get_current_screen();
-		if ( $current_screen instanceof \WP_Screen && 'site-editor' === $current_screen->base ) {
-			wp_enqueue_script( 'wc-blocks-classic-template-revert-button' );
-			wp_enqueue_style( 'wc-blocks-classic-template-revert-button-style' );
-		}
-
 		// Customer Effort Score.
 		wp_enqueue_script( 'wc-customer-effort-score' );
 		wp_enqueue_style( 'wc-customer-effort-score' );
@@ -266,6 +264,7 @@ final class AssetsController {
 		$current_version = array(
 			'woocommerce' => WOOCOMMERCE_VERSION,
 			'wordpress'   => get_bloginfo( 'version' ),
+			'site_url'    => wp_guess_url(),
 		);
 
 		if ( isset( $cache['version'] ) && $cache['version'] === $current_version ) {
@@ -288,6 +287,7 @@ final class AssetsController {
 			'version' => array(
 				'woocommerce' => WOOCOMMERCE_VERSION,
 				'wordpress'   => get_bloginfo( 'version' ),
+				'site_url'    => wp_guess_url(),
 			),
 		);
 

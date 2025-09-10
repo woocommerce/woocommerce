@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { Post } from '@wordpress/core-data';
 import { useState, useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { Icon } from '@wordpress/components';
+import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 // @ts-expect-error - We need to use this /wp see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-dataviews/#dataviews
 import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocommerce/dependency-group
@@ -30,10 +30,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const { emails, total, updateEmailEnabledStatus } = useTransactionalEmails(
-		emailTypes,
-		view
-	);
+	const { emails, total, updateEmailEnabledStatus, recreateEmailPost } =
+		useTransactionalEmails( emailTypes, view );
 
 	const fields = useMemo( () => {
 		const recipientElements = Array.from(
@@ -130,13 +128,17 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				callback: ( items: EmailType[] ) => {
 					const email = items[ 0 ];
 					if ( email.post_id ) {
-						window.location.href = `/wp-admin/post.php?post=${ encodeURIComponent(
-							email.post_id
-						) }&action=edit`;
+						window.location.href = getAdminLink(
+							`post.php?post=${ encodeURIComponent(
+								email.post_id
+							) }&action=edit`
+						);
 					} else {
-						window.location.href = `/wp-admin/admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
-							email.email_key
-						) }`;
+						window.location.href = getAdminLink(
+							`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
+								email.email_key
+							) }`
+						);
 					}
 				},
 				isPrimary: true,
@@ -166,8 +168,19 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					);
 				},
 			},
+			{
+				id: 'recreate-email-post',
+				label: __( 'Recreate email post', 'woocommerce' ),
+				disabled: false,
+				supportsBulk: false,
+				isEligible: ( item: EmailType ) => ! item?.post_id,
+				callback: ( items: EmailType[] ) => {
+					void recreateEmailPost( items[ 0 ].id );
+					return true;
+				},
+			},
 		],
-		[ updateEmailEnabledStatus ]
+		[ updateEmailEnabledStatus, recreateEmailPost ]
 	);
 
 	const form = {
@@ -193,7 +206,9 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				},
 			} }
 			showLayoutSwitcher={ false }
-			getItemId={ ( item: Post ) => item.id }
+			getItemId={ ( item: EmailType ) =>
+				`${ item.id }_${ item?.email_key || '' }`
+			}
 		/>
 	);
 };

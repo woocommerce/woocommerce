@@ -1,0 +1,386 @@
+name: 'Release: Assignment'
+on:
+  schedule:
+    - cron: '0 18 * * *' # Every day at 18h UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check-upcoming-release-events:
+    name: Check for upcoming release events
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
+      version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
+      feature-freeze-date: ${{ steps.check-code-freeze-8-weeks.outputs.feature-freeze-date }}
+      beta-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-beta-1-date }}
+      beta-2-release-date: ${{ steps.get-all-events-for-version.outputs.event-beta-2-date }}
+      rc-1-release-date: ${{ steps.get-all-events-for-version.outputs.event-rc-1-date }}
+      final-release-date: ${{ steps.get-all-events-for-version.outputs.event-final-date }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+      - name: Check for code freeze events
+        id: check-code-freeze-8-weeks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ical = require('node-ical');
+
+            const isManualTrigger = context.eventName === 'workflow_dispatch';
+            console.log(`Workflow triggered by: ${context.eventName}`);
+
+            try {
+              const today = new Date();
+              let targetDate = new Date(today);
+              targetDate.setDate(today.getDate() + (8 * 7)); // 8 weeks = 56 days
+
+              const events = await ical.async.fromURL(`https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics`);
+              const codeFreezeEvents = Object.values(events)
+                .filter(event => event.type === 'VEVENT')
+                .filter(event => {
+                  if (!event.start) return false;
+                  const pattern = /^WooCommerce \d+\.\d+ Feature Freeze$/i;
+                  return pattern.test(event.summary || '');
+                });
+
+              const eventsInRange = codeFreezeEvents.filter(event => {
+                const eventDate = new Date(event.start);
+                const diffTime = Math.abs(eventDate - targetDate);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (isManualTrigger) {
+                  // For manual triggers, include events within 2 weeks of the target date
+                  return diffDays <= 14;
+                } else {
+                  // For scheduled triggers, include events within 1 day of 8 weeks
+                  return diffDays <= 1;
+                }
+              });
+
+              if (eventsInRange.length > 0) {
+                const date = eventsInRange[0].start.toISOString();
+                const version = eventsInRange[0].summary.match(/\d+\.\d+/)[0];
+                console.log(`Found Code Freeze event: ${eventsInRange[0].summary}`);
+                console.log(`Date: ${date}`);
+                console.log(`Version: ${version}`);
+                core.setOutput('should-trigger-webhook', 'true');
+                core.setOutput('version', version);
+                core.setOutput('feature-freeze-date', date);
+              } else {
+                console.log(`No Code Freeze events found in the specified range.`);
+                core.setOutput('should-trigger-webhook', 'false');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+      - name: Get all events for version
+        id: get-all-events-for-version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const ical = require('node-ical');
+            const version = '${{ steps.check-code-freeze-8-weeks.outputs.version }}';
+
+            const releaseEvents = {
+              'beta-1': `WooCommerce ${version} Beta 1`,
+              'beta-2': `WooCommerce ${version} Beta 2`,
+              'rc-1': `WooCommerce ${version} RC 1`,
+              final: `WooCommerce ${version} Release`,
+            };
+
+            const events = await ical.async.fromURL(
+              `https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics`
+            );
+
+            const calendarEvents = Object.values(events)
+              .filter(event => event.type === 'VEVENT')
+              .filter(event => event.summary && event.start);
+
+            for (const [eventKey, eventTitle] of Object.entries(releaseEvents)) {
+              const matchingEvent = calendarEvents.find(event => 
+                event.summary.trim() === eventTitle
+              );
+
+              const date = matchingEvent ? new Date(matchingEvent.start).toISOString().split('T')[0] : null;
+              core.setOutput(`event-${eventKey}-date`, date);
+              console.log(`Event: ${eventTitle}, Date: ${date}`);
+            }
+
+  trigger-upcoming-code-freeze-events:
+    name: Assign a release lead
+    needs: check-upcoming-release-events
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      post: ${{ steps.trigger-upcoming-code-freeze-events.outputs.post }}
+      release-team: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-team }}
+      release-lead: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead }}
+      release-lead-google-login: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
+    steps:
+      - uses: actions/github-script@v7
+        id: trigger-upcoming-code-freeze-events
+        with:
+          script: |
+            const crypto = require('crypto');
+
+            const payload = {
+              action: 'release-assignment',
+              version: '${{ needs.check-upcoming-release-events.outputs.version }}',
+              feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
+              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+            };
+
+            const requestBody = JSON.stringify({
+              payload
+            });
+
+            const hmac = crypto.createHmac('sha256', process.env.WPCOM_WEBHOOK_SECRET);
+            hmac.update(requestBody);
+            const signature = hmac.digest('hex');
+
+            const response = await fetch(process.env.WPCOM_RELEASE_WEBHOOK_URL, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'X-Hub-Signature-256': `sha256=${signature}`
+              },
+              body: requestBody
+            });
+
+            if (!response.ok) {
+              const status = response.status;
+              let errorMessage = `Request failed with status ${status}`;
+
+              switch (status) {
+                case 409:
+                  errorMessage = `Post already exists for this release (${status})`;
+                  console.log(errorMessage);
+                  break;
+                case 403:
+                  errorMessage = `Invalid webhook secret or unauthorized access (${status})`;
+                  core.setFailed(errorMessage);
+                  break;
+                default:
+                  core.setFailed(errorMessage);
+                  break;
+              }
+            } else {
+              console.log('Successfully triggered upcoming release notification webhook');
+
+              const responseBody = await response.json();
+              core.setOutput('release-team', responseBody.release_team);
+              core.setOutput('release-lead', responseBody.release_lead);
+              core.setOutput('release-lead-google-login', responseBody.release_lead_google_login);
+              core.setOutput('post', responseBody.post);
+            }
+        env:
+          ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
+          WPCOM_WEBHOOK_SECRET: ${{ secrets.WPCOM_WEBHOOK_SECRET }}
+          WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
+
+  create-release-kickoff:
+    name: Create Release Kickoff in Linear
+    needs:
+      - trigger-upcoming-code-freeze-events
+      - check-upcoming-release-events
+    if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    env:
+      RELEASE_LEAD_GOOGLE_LOGIN: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
+      RELEASE_LEAD: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-lead }}
+      RELEASE_TEAM: ${{ needs.trigger-upcoming-code-freeze-events.outputs.release-team }}
+      POST: ${{ needs.trigger-upcoming-code-freeze-events.outputs.post }}
+      RELEASE_VERSION: ${{ needs.check-upcoming-release-events.outputs.version }}
+      FEATURE_FREEZE_DATE: ${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}
+      BETA_1_RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.beta-1-release-date }}
+      BETA_2_RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.beta-2-release-date }}
+      RC1_RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.rc-1-release-date }}
+      RELEASE_DATE: ${{ needs.check-upcoming-release-events.outputs.final-release-date }}
+      MILESTONE_NUMBER: ${{ needs.check-upcoming-release-events.outputs.version }}.0
+    steps:
+      - name: Checkout repository (sparse)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            .linear
+          sparse-checkout-cone-mode: false
+
+      - name: Install linear-sdk
+        run: npm install @linear/sdk
+
+      - name: Get Linear data
+        id: get-linear-data
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const { LinearClient } = require("@linear/sdk");
+            const linearClient = new LinearClient({
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
+            });
+
+            const organization = await linearClient.organization;
+
+            const labels = await linearClient.issueLabels({
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                name: { eq: 'Release' }
+              }
+            });
+
+            const states = await linearClient.workflowStates({
+              filter: {
+                team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                name: { eq: 'In Progress' }
+              }
+            });
+
+            const releaseLabelId = labels.nodes.length > 0 ? labels.nodes[0].id : null;
+            const inProgressStateId = states.nodes.length > 0 ? states.nodes[0].id : null;
+
+            core.setOutput('releaseLabelId', releaseLabelId);
+            core.setOutput('inProgressStateId', inProgressStateId);
+            core.setOutput('organizationUrlKey', organization.urlKey);
+
+      - name: Process release kickoff templates
+        id: process-kickoff-templates
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const { LinearClient } = require("@linear/sdk");
+            const fs = require('fs');
+            const path = require('path');
+
+            const templates = {
+              'parent': '.linear/release-kickoff.md',
+              'beta-1': '.linear/release-kickoff-beta.md',
+              'beta-2': '.linear/release-kickoff-beta.md',
+              'rc-1': '.linear/release-kickoff-rc.md',
+              'final': '.linear/release-kickoff-patch.md'
+            };
+
+            let templateContents = {};
+            for (const [key, templatePath] of Object.entries(templates)) {
+              let templateContent = '';
+
+              try {
+                templateContent = fs.readFileSync(templatePath, 'utf8');
+              } catch (error) {
+                core.setFailed(`Failed to read template file: ${error.message}`);
+                return;
+              }
+
+              templateContents[key] = templateContent;
+            }
+
+            const linearClient = new LinearClient({
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
+            });
+
+            const email = process.env.RELEASE_LEAD_GOOGLE_LOGIN || '';
+            const users = await linearClient.users({
+              filter: {
+                email: { eq: email }
+              }
+            });
+
+            const userId = users.nodes.length ? users.nodes[0].id : null;
+            const displayName = users.nodes.length ? users.nodes[0].displayName : null;
+            const mention = displayName ? `https://linear.app/${{ steps.get-linear-data.outputs.organizationUrlKey }}/profiles/${displayName}` : null;
+
+            const replacements = {
+              '{RELEASE_VERSION}': process.env.RELEASE_VERSION || '',
+              '{MILESTONE_NUMBER}': process.env.MILESTONE_NUMBER || '',
+              '{RELEASE_LEAD}': mention || process.env.RELEASE_LEAD || '',
+              '{RELEASE_TEAM}': process.env.RELEASE_TEAM || '',
+              '{BETA_1_RELEASE_DATE}': process.env.BETA_1_RELEASE_DATE || '',
+              '{BETA_2_RELEASE_DATE}': process.env.BETA_2_RELEASE_DATE || '',
+              '{RC1_RELEASE_DATE}': process.env.RC1_RELEASE_DATE || '',
+              '{RELEASE_DATE}': process.env.RELEASE_DATE || '',
+              '{FEATURE_FREEZE_DATE}': process.env.FEATURE_FREEZE_DATE || '',
+              '{PATCH_VERSION}': 0,
+            };
+
+            let processedTemplates = {};
+            for (const [key, content] of Object.entries(templateContents)) {
+              const lines = content.split('\n');
+              const title = lines[0].slice(2).trim();
+              const body = lines.slice(1).join('\n').trim();
+
+              let processedTitle = title;
+              let processedBody = body;
+
+              if (key.includes('beta')) {
+                replacements['{BETA_PATCH_VERSION}'] = key.split('-')[1] || '';
+              } else if (key.includes('rc')) {
+                replacements['{RC_PATCH_VERSION}'] = key.split('-')[1] || '';
+              }
+
+              for (const [placeholder, value] of Object.entries(replacements)) {
+                processedTitle = processedTitle.replaceAll(placeholder, value);
+                processedBody = processedBody.replaceAll(placeholder, value);
+              }
+
+              processedTemplates[key] = {
+                title: processedTitle,
+                body: processedBody
+              };
+            }
+
+            core.setOutput('processed-templates', JSON.stringify(processedTemplates));
+            core.setOutput('userId', userId || '');
+
+      - name: Create Release Kickoff Linear Issue
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const { LinearClient } = require("@linear/sdk");
+
+            const linearClient = new LinearClient({
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}',
+            });
+
+            const { parent, ...subIssues } = ${{ steps.process-kickoff-templates.outputs.processed-templates }};
+
+            let parentIssue;
+            try {
+              const assigneeId = '${{ steps.process-kickoff-templates.outputs.userId }}' || null;
+              const stateId = '${{ steps.get-linear-data.outputs.inProgressStateId }}' || null;
+              const labelId = '${{ steps.get-linear-data.outputs.releaseLabelId }}' || null;
+              const parentResult = await linearClient.createIssue({
+                teamId: '${{ secrets.LINEAR_TEAM_ID }}',
+                title: `${parent.title}`,
+                description: `${parent.body}`,
+                priority: 2,
+                ...(labelId && { labelIds: [labelId] }),
+                ...(stateId && { stateId }),
+                ...(assigneeId && { assigneeId })
+              });
+
+              parentIssue = await parentResult.issue;
+            } catch (error) {
+              core.setFailed(`Failed to create Linear issue: ${error.message}`);
+              return;
+            }
+
+            if (parentIssue) {
+              for (const subIssue of Object.values(subIssues)) {
+                try {
+                  const subIssueResult = await linearClient.createIssue({
+                    teamId: `${{ secrets.LINEAR_TEAM_ID }}`,
+                    title: subIssue.title,
+                    description: subIssue.body,
+                    parentId: parentIssue.id,
+                    priority: 2,
+                    labelIds: ['${{ steps.get-linear-data.outputs.releaseLabelId }}']
+                  });
+                } catch (error) {
+                  console.log(`Failed to create sub-issue in Linear: ${error.message}`);
+                }
+              }
+            }
+
+            console.log(`Release kickoff issue created: ${parentIssue?.url}`);

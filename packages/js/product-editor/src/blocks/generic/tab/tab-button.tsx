@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button, Fill } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Fragment } from '@wordpress/element';
 
 /**
@@ -32,7 +32,7 @@ export function TabButton( {
 	selected?: boolean;
 	order?: number;
 } ) {
-	const classes = classnames(
+	const classes = clsx(
 		'wp-block-woocommerce-product-tab__button',
 		className,
 		{ 'is-selected': selected }

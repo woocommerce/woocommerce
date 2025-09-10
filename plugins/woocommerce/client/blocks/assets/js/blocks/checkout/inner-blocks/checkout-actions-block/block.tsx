@@ -18,6 +18,7 @@ import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
  */
 import { defaultPlaceOrderButtonLabel } from './constants';
 import './style.scss';
+import { CheckoutOrderSummarySlot } from '../checkout-order-summary-block/slotfills';
 
 export type BlockAttributes = {
 	cartPageId: number;
@@ -64,6 +65,7 @@ const Block = ( {
 
 	return (
 		<div className={ clsx( 'wc-block-checkout__actions', className ) }>
+			<CheckoutOrderSummarySlot />
 			<StoreNoticesContainer
 				context={ noticeContexts.CHECKOUT_ACTIONS }
 			/>

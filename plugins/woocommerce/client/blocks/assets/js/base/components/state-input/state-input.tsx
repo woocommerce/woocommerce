@@ -9,7 +9,6 @@ import { clsx } from 'clsx';
 /**
  * Internal dependencies
  */
-import './style.scss';
 import type { StateInputWithStatesProps } from './StateInputProps';
 import { Select, SelectOption } from '../select';
 

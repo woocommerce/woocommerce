@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-review-author-name",
 	"title": "Review Author Name",
 	"category": "woocommerce",
-	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"ancestor": [ "woocommerce/product-reviews" ],
 	"description": "Displays the name of the author of the review.",
 	"textdomain": "woocommerce",
 	"attributes": {

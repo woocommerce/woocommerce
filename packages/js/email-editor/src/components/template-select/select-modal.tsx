@@ -16,7 +16,6 @@ import {
 	storeName,
 	TemplateCategory,
 	TemplatePreview,
-	editorCurrentPostType,
 } from '../../store';
 import { TemplateList } from './template-list';
 import { TemplateCategoriesListSidebar } from './template-categories-list-sidebar';
@@ -85,6 +84,7 @@ export function SelectTemplateModal( {
 	onSelectCallback,
 	closeCallback = null,
 	previewContent = '',
+	postType,
 } ) {
 	const templateSelectMode = previewContent ? 'swap' : 'new';
 	recordEventOnce( 'template_select_modal_opened', { templateSelectMode } );
@@ -95,7 +95,7 @@ export function SelectTemplateModal( {
 	const hasTemplates = templates?.length > 0;
 
 	const handleTemplateSelection = ( template: TemplatePreview ) => {
-		const templateIsPostContent = template.type === editorCurrentPostType;
+		const templateIsPostContent = template.type === postType;
 
 		const postContent = template.template as unknown as EmailEditorPostType;
 

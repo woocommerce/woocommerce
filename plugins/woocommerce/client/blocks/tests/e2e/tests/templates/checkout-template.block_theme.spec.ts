@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
-const templatePath = 'woocommerce/woocommerce//page-checkout';
+const templatePath = `${ BLOCK_THEME_SLUG }//page-checkout`;
 const templateType = 'wp_template';
 
 test.describe( 'Test the checkout template', () => {
@@ -15,6 +15,7 @@ test.describe( 'Test the checkout template', () => {
 			postId: templatePath,
 			postType: templateType,
 			canvas: 'edit',
+			showWelcomeGuide: false,
 		} );
 		const block = editor.canvas.getByLabel( 'Block: Checkout' );
 		await expect( block ).toBeVisible();
@@ -25,7 +26,10 @@ test.describe( 'Test the checkout template', () => {
 		editor,
 		page,
 	} ) => {
-		await admin.visitSiteEditor( { postType: 'page' } );
+		await admin.visitSiteEditor( {
+			postType: 'page',
+			showWelcomeGuide: false,
+		} );
 		await editor.page
 			.getByRole( 'button', { name: 'Checkout', exact: true } )
 			.click();

@@ -3,7 +3,7 @@
  */
 import { createElement, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { uniqueId } from 'lodash';
 
 type PagePickerProps = {
@@ -45,12 +45,9 @@ export function PagePicker( {
 	}
 
 	const isError = currentPage < 1 || currentPage > pageCount;
-	const inputClass = classNames(
-		'woocommerce-pagination__page-picker-input',
-		{
-			'has-error': isError,
-		}
-	);
+	const inputClass = clsx( 'woocommerce-pagination__page-picker-input', {
+		'has-error': isError,
+	} );
 
 	const instanceId = uniqueId( 'woocommerce-pagination-page-picker-' );
 	return (

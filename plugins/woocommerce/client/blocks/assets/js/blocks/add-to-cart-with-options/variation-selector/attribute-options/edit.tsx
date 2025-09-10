@@ -72,9 +72,8 @@ export default function AttributeOptionsEdit(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-				background-color: ${ editorColor };
-				color: ${ editorBackgroundColor };
-				border-color: ${ editorColor };
+				--pill-color: ${ editorBackgroundColor };
+				--pill-background-color: ${ editorColor };
 			}
 		`
 	);

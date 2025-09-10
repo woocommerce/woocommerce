@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
  *
  * @internal
  */
-class ProductAttributeTemplate extends AbstractTemplate {
+class ProductAttributeTemplate extends AbstractTemplateWithFallback {
 
 	/**
 	 * The slug of the template.
@@ -24,15 +24,7 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @var string
 	 */
-	public $fallback_template = ProductCatalogTemplate::SLUG;
-
-	/**
-	 * Initialization method.
-	 */
-	public function init() {
-		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'taxonomy_template_hierarchy', array( $this, 'update_taxonomy_template_hierarchy' ), 1, 3 );
-	}
+	public string $fallback_template = ProductCatalogTemplate::SLUG;
 
 	/**
 	 * Returns the title of the template.
@@ -70,8 +62,6 @@ class ProductAttributeTemplate extends AbstractTemplate {
 			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
 				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 			}
-
-			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}
 	}
 
@@ -80,10 +70,24 @@ class ProductAttributeTemplate extends AbstractTemplate {
 	 *
 	 * @param array $templates Templates that match the product attributes taxonomy.
 	 */
-	public function update_taxonomy_template_hierarchy( $templates ) {
+	public function template_hierarchy( $templates ) {
 		$queried_object = get_queried_object();
-		if ( taxonomy_is_product_attribute( $queried_object->taxonomy ) && wp_is_block_theme() ) {
-			array_splice( $templates, count( $templates ) - 1, 0, self::SLUG );
+
+		if ( ! is_null( $queried_object ) && taxonomy_is_product_attribute( $queried_object->taxonomy ) && wp_is_block_theme() ) {
+			// If Products by Attribute template has been customized or it's in the
+			// theme, we load it first, otherwise we only load the fallback template.
+			// If we don't do that, the WC core template would always have priority
+			// over the fallback template.
+			$slugs = array( $this->fallback_template );
+
+			if (
+				BlockTemplateUtils::theme_has_template( self::SLUG ) ||
+				BlockTemplateUtils::get_block_templates_from_db( array( self::SLUG ) )
+			) {
+				$slugs = array( self::SLUG, $this->fallback_template );
+			}
+
+			array_splice( $templates, count( $templates ) - 1, 0, $slugs );
 		}
 
 		return $templates;

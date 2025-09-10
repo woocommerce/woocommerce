@@ -4,7 +4,7 @@
 
 Welcome to the WooCommerce Monorepo on GitHub. Here you can find all of the plugins, packages, and tools used in the development of the core WooCommerce plugin as well as WooCommerce extensions. You can browse the source, look at open issues, contribute code, and keep tracking of ongoing development.
 
-We recommend all developers to follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWC](https://twitter.com/DevelopWC) on Twitter for the latest development updates.
+We recommend all developers to follow the [WooCommerce development blog](https://developer.woocommerce.com/blog/) to stay up to date about everything happening in the project. You can also [follow @DevelopWoo](https://x.com/DevelopWoo) on X (formerly Twitter) for the latest development updates.
 
 ## Getting Started
 
@@ -63,4 +63,4 @@ For peer to peer support, real-time announcements, and office hours, please [joi
 
 ## Contributing to WooCommerce
 
-As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woo.com/docs/category/contributing/) doc for more links and contribution guidelines.
+As an open source project, we rely on community contributions to continue to improve WooCommerce. To contribute, please follow the pre-requisites above and visit our [Contributing to Woo](https://developer.woocommerce.com/docs/contribution/contributing/) doc for more links and contribution guidelines.

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import {
@@ -24,7 +24,7 @@ export function SubsectionBlockEdit( {
 	const blockProps = useWooBlockProps( attributes );
 	const innerBlockProps = useInnerBlocksProps(
 		{
-			className: classNames(
+			className: clsx(
 				'wp-block-woocommerce-product-section-header__content',
 				`wp-block-woocommerce-product-section-header__content--block-gap-${ blockGap }`
 			),

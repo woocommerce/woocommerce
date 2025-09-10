@@ -41,6 +41,7 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await blockLocator.getByText( 'Color' ).click();
 		await blockLocator.getByText( 'Done' ).click();
 		await page.getByText( 'Filter by Product Attribute' ).click();
+		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 9 );
 		await page.getByText( 'Color' ).click();
 		await page.getByText( 'Size' ).click();
 		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 1 );

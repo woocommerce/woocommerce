@@ -5,10 +5,7 @@
 	"title": "Product notice field",
 	"category": "woocommerce",
 	"description": "A notice field for use in the product editor.",
-	"keywords": [
-		"products",
-		"notice"
-	],
+	"keywords": [ "products", "notice" ],
 	"textdomain": "default",
 	"attributes": {
 		"message": {
@@ -25,8 +22,5 @@
 		"lock": false,
 		"__experimentalToolbar": false
 	},
-	"editorStyle": "file:./editor.css",
-	"usesContext": [
-		"postType"
-	]
+	"usesContext": [ "postType" ]
 }

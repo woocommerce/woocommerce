@@ -1,5 +1,0 @@
-Significance: patch
-Type: add
-Comment: Product Button: prepare to detect selected variation when used inside the Add to Cart Form + Options block. The Product Button block is a production one, while the Add to Cart + Options block is an experimental block, so the changes to Product Button are split into a separate PR (from https://github.com/woocommerce/woocommerce/pull/57859) for proper testing and history.
-
-

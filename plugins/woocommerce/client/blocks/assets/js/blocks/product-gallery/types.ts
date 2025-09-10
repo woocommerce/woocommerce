@@ -1,5 +1,4 @@
 export interface ProductGalleryBlockAttributes {
-	cropImages: boolean;
 	hoverZoom: boolean;
 	fullScreenOnClick: boolean;
 }
@@ -15,8 +14,6 @@ export interface ProductGalleryContext {
 	selectedImageId: number;
 	isDialogOpen: boolean;
 	productId: string;
-	disableLeft: boolean;
-	disableRight: boolean;
 	touchStartX: number;
 	touchCurrentX: number;
 	isDragging: boolean;
@@ -27,4 +24,10 @@ export interface ProductGalleryContext {
 		left: boolean;
 		right: boolean;
 	};
+	// Next/Previous Buttons block context
+	hideNextPreviousButtons: boolean;
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+	ariaLabelPrevious: string;
+	ariaLabelNext: string;
 }

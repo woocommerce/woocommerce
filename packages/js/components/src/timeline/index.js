@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import { __ } from '@wordpress/i18n';
 import { format } from '@wordpress/date';
@@ -23,7 +23,7 @@ const Timeline = ( {
 	/* translators: PHP clock format string used to display times, see php.net/date. */
 	clockFormat = __( 'g:ia', 'woocommerce' ),
 } ) => {
-	const timelineClassName = classnames( 'woocommerce-timeline', className );
+	const timelineClassName = clsx( 'woocommerce-timeline', className );
 
 	// Early return in case no data was passed to the component.
 	if ( ! items || items.length === 0 ) {

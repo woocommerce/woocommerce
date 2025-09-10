@@ -3,10 +3,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions;
-use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
@@ -28,12 +28,12 @@ class PaymentsTest extends WC_Unit_Test_Case {
 	protected $sut;
 
 	/**
-	 * @var PaymentProviders|MockObject
+	 * @var PaymentsProviders|MockObject
 	 */
 	protected $mock_providers;
 
 	/**
-	 * @var PaymentExtensionSuggestions|MockObject
+	 * @var PaymentsExtensionSuggestions|MockObject
 	 */
 	protected $mock_extension_suggestions;
 
@@ -53,7 +53,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->mock_providers = $this->getMockBuilder( PaymentProviders::class )
+		$this->mock_providers = $this->getMockBuilder( PaymentsProviders::class )
 									->disableOriginalConstructor()
 									->onlyMethods(
 										array(
@@ -69,7 +69,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 									)
 									->getMock();
 
-		$this->mock_extension_suggestions = $this->getMockBuilder( PaymentExtensionSuggestions::class )
+		$this->mock_extension_suggestions = $this->getMockBuilder( PaymentsExtensionSuggestions::class )
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -135,7 +135,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 				array_flip(
 					array(
 						WC_Gateway_Paypal::ID,
-						PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+						PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 						WC_Gateway_BACS::ID,
 						WC_Gateway_Cheque::ID,
 						WC_Gateway_COD::ID,
@@ -157,7 +157,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertCount( 5, $data );
 		// Because the core registers the PayPal PG after the offline PMs, the order we expect is this.
 		$this->assertSame(
-			array( WC_Gateway_Paypal::ID, PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
+			array( WC_Gateway_Paypal::ID, PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ),
 			array_column( $data, 'id' )
 		);
 
@@ -166,7 +166,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $gateway, 'Gateway `id` entry is missing' );
 		$this->assertArrayHasKey( '_order', $gateway, 'Gateway `_order` entry is missing' );
 		$this->assertArrayHasKey( '_type', $gateway, 'Gateway `_type` entry is missing' );
-		$this->assertEquals( PaymentProviders::TYPE_GATEWAY, $gateway['_type'], 'Gateway `_type` entry is not `' . PaymentProviders::TYPE_GATEWAY . '`' );
+		$this->assertEquals( PaymentsProviders::TYPE_GATEWAY, $gateway['_type'], 'Gateway `_type` entry is not `' . PaymentsProviders::TYPE_GATEWAY . '`' );
 		$this->assertArrayHasKey( 'title', $gateway, 'Gateway `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $gateway, 'Gateway `description` entry is missing' );
 		$this->assertArrayHasKey( 'supports', $gateway, 'Gateway `supports` entry is missing' );
@@ -187,16 +187,16 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce', $gateway['plugin']['slug'] );
 		$this->assertArrayHasKey( 'file', $gateway['plugin'], 'Gateway `plugin[file]` entry is missing' );
 		$this->assertArrayHasKey( 'status', $gateway['plugin'], 'Gateway `plugin[status]` entry is missing' );
-		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $gateway['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $gateway['plugin']['status'] );
 
 		// Assert that the offline payment methods group has all the details.
 		$group = $data[1];
 		$this->assertArrayHasKey( 'id', $group, 'Group `id` entry is missing' );
-		$this->assertEquals( PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP, $group['id'] );
+		$this->assertEquals( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $group['id'] );
 		$this->assertArrayHasKey( '_order', $group, 'Group `_order` entry is missing' );
 		$this->assertIsInteger( $group['_order'], 'Group `_order` entry is not an integer' );
 		$this->assertArrayHasKey( '_type', $group, 'Group `_type` entry is missing' );
-		$this->assertEquals( PaymentProviders::TYPE_OFFLINE_PMS_GROUP, $group['_type'], 'Group `_type` entry is not `' . PaymentProviders::TYPE_OFFLINE_PMS_GROUP . '`' );
+		$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PMS_GROUP, $group['_type'], 'Group `_type` entry is not `' . PaymentsProviders::TYPE_OFFLINE_PMS_GROUP . '`' );
 		$this->assertArrayHasKey( 'title', $group, 'Group `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $group, 'Group `description` entry is missing' );
 		$this->assertArrayHasKey( 'icon', $group, 'Group `icon` entry is missing' );
@@ -208,14 +208,14 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'slug', $group['plugin'], 'Group `plugin[slug]` entry is missing' );
 		$this->assertSame( 'woocommerce', $group['plugin']['slug'] );
 		$this->assertArrayHasKey( 'status', $group['plugin'], 'Group `plugin[status]` entry is missing' );
-		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $group['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $group['plugin']['status'] );
 
 		// Assert that the offline payment methods have all the details.
 		$offline_pm = $data[2];
 		$this->assertArrayHasKey( 'id', $offline_pm, 'Offline PM `id` entry is missing' );
 		$this->assertArrayHasKey( '_order', $offline_pm, 'Offline PM `_order` entry is missing' );
 		$this->assertArrayHasKey( '_type', $offline_pm, 'Offline PM `_type` entry is missing' );
-		$this->assertEquals( PaymentProviders::TYPE_OFFLINE_PM, $offline_pm['_type'], 'Offline PM `_type` entry is not `' . PaymentProviders::TYPE_OFFLINE_PM . '`' );
+		$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $offline_pm['_type'], 'Offline PM `_type` entry is not `' . PaymentsProviders::TYPE_OFFLINE_PM . '`' );
 		$this->assertArrayHasKey( 'title', $offline_pm, 'Offline PM `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $offline_pm, 'Offline PM `description` entry is missing' );
 		$this->assertArrayHasKey( 'icon', $offline_pm, 'Offline PM `icon` entry is missing' );
@@ -227,7 +227,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'slug', $offline_pm['plugin'], 'Offline PM `plugin[slug]` entry is missing' );
 		$this->assertSame( 'woocommerce', $offline_pm['plugin']['slug'] );
 		$this->assertArrayHasKey( 'status', $offline_pm['plugin'], 'Offline PM `plugin[status]` entry is missing' );
-		$this->assertSame( PaymentProviders::EXTENSION_ACTIVE, $offline_pm['plugin']['status'] );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $offline_pm['plugin']['status'] );
 	}
 
 	/**
@@ -260,10 +260,10 @@ class PaymentsTest extends WC_Unit_Test_Case {
 			->willReturn(
 				array_flip(
 					array(
-						PaymentProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1',
-						PaymentProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion2',
+						PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1',
+						PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion2',
 						WC_Gateway_Paypal::ID,
-						PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+						PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 						WC_Gateway_BACS::ID,
 						WC_Gateway_Cheque::ID,
 						WC_Gateway_COD::ID,
@@ -355,10 +355,10 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Because the core registers the PayPal PG after the offline PMs, the order we expect is this.
 		$this->assertSame(
 			array(
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1',
-				PaymentProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion2',
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1',
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion2',
 				WC_Gateway_Paypal::ID,
-				PaymentProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_BACS::ID,
 				WC_Gateway_Cheque::ID,
 				WC_Gateway_COD::ID,
@@ -369,13 +369,13 @@ class PaymentsTest extends WC_Unit_Test_Case {
 		// Assert that the suggestions have all the details.
 		$suggestion1 = $data[0];
 		$this->assertArrayHasKey( 'id', $suggestion1, 'Provider `id` entry is missing' );
-		$this->assertEquals( PaymentProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1', $suggestion1['id'] );
+		$this->assertEquals( PaymentsProviders::SUGGESTION_ORDERING_PREFIX . 'suggestion1', $suggestion1['id'] );
 		$this->assertEquals( 'suggestion1', $suggestion1['_suggestion_id'] );
 		$this->assertArrayHasKey( '_order', $suggestion1, 'Provider `_order` entry is missing' );
 		$this->assertIsInteger( $suggestion1['_order'], 'Provider `_order` entry is not an integer' );
 		$this->assertEquals( 0, $suggestion1['_order'] );
 		$this->assertArrayHasKey( '_type', $suggestion1, 'Provider `_type` entry is missing' );
-		$this->assertEquals( PaymentProviders::TYPE_SUGGESTION, $suggestion1['_type'] );
+		$this->assertEquals( PaymentsProviders::TYPE_SUGGESTION, $suggestion1['_type'] );
 		$this->assertArrayHasKey( 'title', $suggestion1, 'Provider `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion1, 'Provider `description` entry is missing' );
 		$this->assertArrayHasKey( 'plugin', $suggestion1, 'Provider `plugin` entry is missing' );

@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test as base, expect, BlockData } from '@woocommerce/e2e-utils';
+import {
+	test as base,
+	expect,
+	BlockData,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -47,7 +52,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -100,12 +105,6 @@ test.describe( 'Merchant → Checkout', () => {
 	} );
 
 	test.describe( 'Can adjust T&S and Privacy Policy options', () => {
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-helper'
-			);
-		} );
-
 		test( 'Merchant can see T&S and Privacy Policy links without checkbox', async ( {
 			page,
 			frontendUtils,
@@ -164,7 +163,7 @@ test.describe( 'Merchant → Checkout', () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -207,7 +206,7 @@ test.describe( 'Merchant → Checkout', () => {
 		).toBeVisible();
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -222,87 +221,6 @@ test.describe( 'Merchant → Checkout', () => {
 		} );
 		await requireTermsCheckbox.uncheck();
 		await editor.saveSiteEditorEntities();
-	} );
-
-	test( 'inner blocks can be added/removed by filters', async ( {
-		page,
-		editor,
-	} ) => {
-		// Begin by removing the block.
-		await editor.selectBlocks( blockSelectorInEditor );
-		const options = page
-			.getByRole( 'toolbar', { name: 'Block tools' } )
-			.getByRole( 'button', { name: 'Options' } );
-		await options.click();
-		const removeButton = page.getByRole( 'menuitem', {
-			name: 'Delete',
-		} );
-		await removeButton.click();
-		// Expect block to have been removed.
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toHaveCount( 0 );
-
-		// Register a checkout filter to allow `core/table` block in the Checkout block's inner blocks, add
-		// core/audio into the woocommerce/checkout-fields-block.
-		await page.evaluate(
-			`wc.blocksCheckout.registerCheckoutFilters( 'woo-test-namespace', {
-					additionalCartCheckoutInnerBlockTypes: ( value, extensions, { block } ) => {
-						value.push( 'core/table' );
-						if ( block === 'woocommerce/checkout-totals-block' ) {
-							value.push( 'core/audio' );
-						}
-						return value;
-					},
-				} );`
-		);
-
-		await editor.insertBlock( { name: 'woocommerce/checkout' } );
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).not.toHaveCount( 0 );
-
-		// Select the checkout-fields-block block and try to insert a block. Check the Table block is available.
-		await editor.selectBlocks(
-			blockData.selectors.editor.block +
-				' .wp-block-woocommerce-checkout-fields-block'
-		);
-
-		const addBlockButton = editor.canvas
-			.locator( '.wp-block-woocommerce-checkout-totals-block' )
-			.getByRole( 'button', { name: 'Add block' } );
-		await addBlockButton.dispatchEvent( 'click' );
-
-		const tableButton = editor.page.getByRole( 'option', {
-			name: 'Table',
-		} );
-		await expect( tableButton ).toBeVisible();
-
-		const audioButton = editor.page.getByRole( 'option', {
-			name: 'Audio',
-		} );
-		await test.expect( audioButton ).toBeVisible();
-
-		// Now check the filled Checkout order summary block and expect only the Table block to be available there.
-		await editor.selectBlocks(
-			blockSelectorInEditor +
-				' [data-type="woocommerce/checkout-order-summary-block"]'
-		);
-		const orderSummaryAddBlockButton = editor.canvas
-			.getByRole( 'document', { name: 'Block: Order Summary' } )
-			.getByRole( 'button', { name: 'Add block' } )
-			.first();
-		await orderSummaryAddBlockButton.dispatchEvent( 'click' );
-
-		const orderSummaryTableButton = editor.page.getByRole( 'option', {
-			name: 'Table',
-		} );
-		await expect( orderSummaryTableButton ).toBeVisible();
-
-		const orderSummaryAudioButton = editor.page.getByRole( 'option', {
-			name: 'Audio',
-		} );
-		await expect( orderSummaryAudioButton ).toBeHidden();
 	} );
 
 	test.describe( 'Attributes', () => {

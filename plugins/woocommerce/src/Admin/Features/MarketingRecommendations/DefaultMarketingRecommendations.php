@@ -124,6 +124,22 @@ class DefaultMarketingRecommendations {
 				'tags'           => array(),
 			),
 			array(
+				'title'          => 'Meta Ads and Pixel by Kliken',
+				'description'    => __( 'Automate Facebook & Instagram marketing with Kliken. Launch ads and schedule a month of posts in 5 minutes—first 5 free! Plans start at just $20/mo.', 'woocommerce' ),
+				'url'            => "https://woocommerce.com/products/meta-ads-and-pixel/{$utm_string}",
+				'direct_install' => true,
+				'icon'           => "{$icon_dir_url}/kliken.svg",
+				'product'        => 'kliken-ads-pixel-for-meta',
+				'plugin'         => 'kliken-ads-pixel-for-meta/kliken-ads-pixel-for-meta.php',
+				'categories'     => array(
+					$marketing,
+				),
+				'subcategories'  => array(
+					$sales_channels,
+				),
+				'tags'           => array(),
+			),
+			array(
 				'title'          => 'MailPoet',
 				'description'    => __( 'Create and send purchase follow-up emails, newsletters, and promotional campaigns straight from your dashboard.', 'woocommerce' ),
 				'url'            => "https://woocommerce.com/products/mailpoet/{$utm_string}",

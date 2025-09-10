@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Allow gateway IDs with uppercase characters in the new Payments Settings page UX.
-
-

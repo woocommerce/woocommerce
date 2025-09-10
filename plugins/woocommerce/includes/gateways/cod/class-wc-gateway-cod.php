@@ -7,6 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -203,10 +204,10 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 	 */
 	private function is_accessing_settings() {
 		if ( is_admin() ) {
-			// phpcs:disable WordPress.Security.NonceVerification
-			if ( ! isset( $_REQUEST['page'] ) || 'wc-settings' !== $_REQUEST['page'] ) {
+			if ( ! is_wc_admin_settings_page() ) {
 				return false;
 			}
+			// phpcs:disable WordPress.Security.NonceVerification
 			if ( ! isset( $_REQUEST['tab'] ) || 'checkout' !== $_REQUEST['tab'] ) {
 				return false;
 			}
@@ -366,5 +367,33 @@ class WC_Gateway_COD extends WC_Payment_Gateway {
 		if ( $this->instructions && ! $sent_to_admin && $this->id === $order->get_payment_method() ) {
 			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
 		}
+	}
+
+	/**
+	 * Get the settings URL for the gateway.
+	 *
+	 * @return string The settings page URL for the gateway.
+	 */
+	public function get_settings_url() {
+		// Search for a WC_Settings_Payment_Gateways instance in the settings pages.
+		$payments_settings_page = null;
+		foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( $settings_page instanceof WC_Settings_Payment_Gateways ) {
+				$payments_settings_page = $settings_page;
+				break;
+			}
+		}
+		// If no instance found, return the default settings URL (the Reactified page).
+		if ( empty( $payments_settings_page ) ) {
+			return SettingsUtils::wc_payments_settings_url( '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id );
+		}
+
+		$should_use_react_settings_page = $payments_settings_page->should_render_react_section( WC_Settings_Payment_Gateways::COD_SECTION_NAME );
+
+		// We must not include both the path and the section query parameter, as this can cause weird behavior.
+		return SettingsUtils::wc_payments_settings_url(
+			$should_use_react_settings_page ? '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id : null,
+			$should_use_react_settings_page ? array() : array( 'section' => $this->id )
+		);
 	}
 }

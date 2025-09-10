@@ -15,6 +15,11 @@ $border-width: 1px;
 			margin: 0;
 			width: 100%;
 			overflow: hidden;
+			// ensure the buttons don't create a horizontal layout shift
+			min-height: 48px;
+			// ensure the elements take space before the button is loaded
+			// 150 is the minimum width of the button; allows for
+			min-width: 150px;
 
 			> img {
 				width: 100%;
@@ -25,16 +30,15 @@ $border-width: 1px;
 }
 
 .wc-block-components-express-payment--checkout {
-	/* stylelint-disable-next-line function-calc-no-unspaced-operator */
-	margin-top: calc($universal-border-radius * 3);
+	transition: none !important;
 
 	.wc-block-components-express-payment__event-buttons {
 		list-style: none;
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
 		grid-gap: 12px;
 
-		@include breakpoint("<782px") {
+		@include cart-checkout-mobile-container {
 			grid-template-columns: 1fr;
 		}
 	}
@@ -83,9 +87,10 @@ $border-width: 1px;
 		}
 	}
 
-	.wc-block-components-express-payment__title {
+	.wc-block-components-title.wc-block-components-express-payment__title {
 		flex-grow: 0;
 		transform: translateY(-50%);
+		font-size: 14px;
 	}
 
 	.wc-block-components-express-payment__content {
@@ -93,13 +98,29 @@ $border-width: 1px;
 		border-top: 0;
 		padding: #{$gap-large - $universal-border-radius} $gap-large $gap-large;
 		border-radius: 0 0 $universal-border-radius $universal-border-radius;
-
+		margin-top: calc($universal-border-radius + $border-width);
+		min-height: 48px;
 		.has-dark-controls & {
 			border-color: $input-border-dark;
 		}
 
 		> p {
 			margin-bottom: em($gap);
+		}
+	}
+
+	@include cart-checkout-below-large-container {
+		.wc-block-components-express-payment__content {
+			padding: #{$gap - $universal-border-radius} $gap $gap;
+		}
+	}
+}
+
+.wc-block-components-express-payment--disabled {
+	.wc-block-components-express-payment__content {
+		opacity: 0.6;
+		* {
+			pointer-events: none;
 		}
 	}
 }
@@ -122,8 +143,8 @@ $border-width: 1px;
 	display: flex;
 	align-items: center;
 	text-align: center;
-	padding: 0 $gap-large;
-	margin: $gap-larger 0 (3.5 * $grid-unit);
+	margin: $gap-large 0;
+	font-size: 14px;
 
 	&::before {
 		margin-right: 10px;
@@ -142,6 +163,11 @@ $border-width: 1px;
 		.has-dark-controls & {
 			border-color: $input-border-dark;
 		}
+	}
+}
+@include cart-checkout-below-large-container {
+	.wc-block-components-express-payment-continue-rule {
+		margin: $gap 0;
 	}
 }
 

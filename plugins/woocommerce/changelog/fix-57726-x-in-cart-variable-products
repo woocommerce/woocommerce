@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Comment: Make 'X in cart' button text work for variable products in the Blockified Add to Cart with Options block and use regular form in Add to Cart with Options when iAPI can't be used (simple and grouped products)

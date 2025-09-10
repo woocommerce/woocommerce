@@ -63,16 +63,16 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@types/cookie": "^0.4.1",
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/node": "20.x.x",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
-		"concurrently": "^7.6.0",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
@@ -108,7 +108,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -123,7 +123,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {

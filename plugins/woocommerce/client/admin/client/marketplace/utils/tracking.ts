@@ -3,11 +3,21 @@
  */
 import { recordEvent } from '@woocommerce/tracks';
 
+/**
+ * Internal dependencies
+ */
+import { getAdminSetting } from '~/utils/admin-settings';
+
 interface MarketplaceViewProps {
 	view?: string;
 	search_term?: string;
 	product_type?: string;
 	category?: string;
+}
+
+function isWCComConnected(): boolean {
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	return wccomSettings?.isConnected ?? false;
 }
 
 /**
@@ -31,6 +41,7 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 		...( search_term && { search_term } ),
 		...( product_type && { product_type } ),
 		...( category && { category } ),
+		wccom_connected: isWCComConnected(),
 	};
 
 	// User sees the default extensions, themes or business services view
@@ -66,6 +77,7 @@ function recordLegacyTabView( props: MarketplaceViewProps ) {
 		...( view && { section: view } ),
 		...( search_term && { search_term } ),
 		version: '2',
+		wccom_connected: isWCComConnected(),
 	};
 
 	switch ( view ) {

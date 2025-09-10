@@ -99,6 +99,10 @@ class Controller extends GenericController {
 				'slug'        => 'customers',
 				'description' => __( 'Customers detailed reports.', 'woocommerce' ),
 			),
+			array(
+				'slug'        => 'customers/stats',
+				'description' => __( 'Stats about groups of customers.', 'woocommerce' ),
+			),
 		);
 
 		/**

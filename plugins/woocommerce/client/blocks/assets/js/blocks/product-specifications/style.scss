@@ -1,35 +1,3 @@
-table.wc-block-product-specifications {
-	border: 0;
-	border-top: 1px dotted rgba(0, 0, 0, 0.1);
-	margin-bottom: 1.618em;
-	width: 100%;
-
-	th {
-		font-weight: 700;
-		padding: 8px;
-		border-top: 0;
-		border-bottom: 1px dotted rgba(0, 0, 0, 0.1);
-		margin: 0;
-		line-height: 1.5;
-		text-align: left;
-	}
-
-	td {
-		font-style: italic;
-		padding: 0;
-		border-top: 0;
-		border-bottom: 1px dotted rgba(0, 0, 0, 0.1);
-		margin: 0;
-		line-height: 1.5;
-
-		p {
-			margin: 0;
-			padding: 8px 0;
-		}
-	}
-
-	tr:nth-child(even) td,
-	tr:nth-child(even) th {
-		background: rgba(0, 0, 0, 0.025);
-	}
+:where(.wp-block-product-specifications-item__label) {
+	text-align: left;
 }

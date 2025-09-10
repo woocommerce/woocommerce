@@ -1,7 +1,9 @@
 ---
 post_title: Change a currency symbol
-tags: code-snippet
+
 ---
+
+# Change a currency symbol
 
 In WooCommerce, each currency is associated with a code and a symbol. For example, the Australian dollar has the code `AUD` and the symbol `$` (if you are interested, you can see a full list of codes and symbols in the [source code](https://github.com/woocommerce/woocommerce/blob/9.6.1/plugins/woocommerce/includes/wc-core-functions.php#L682)). 
 

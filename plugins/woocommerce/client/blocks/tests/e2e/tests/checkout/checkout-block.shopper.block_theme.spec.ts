@@ -7,6 +7,7 @@ import {
 	customerFile,
 	guestFile,
 	BlockData,
+	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -24,9 +25,10 @@ import {
 import { CheckoutPage } from './checkout.page';
 
 const test = base.extend< { checkoutPageObject: CheckoutPage } >( {
-	checkoutPageObject: async ( { page }, use ) => {
+	checkoutPageObject: async ( { page, requestUtils }, use ) => {
 		const pageObject = new CheckoutPage( {
 			page,
+			requestUtils,
 		} );
 		await use( pageObject );
 	},
@@ -152,7 +154,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page.getByRole( 'radio', { name: 'Pickup' } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByLabel( 'Testing' ).last() ).toBeVisible();
 		await page.getByLabel( 'Testing' ).last().check();
 
@@ -160,7 +162,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -174,9 +181,7 @@ test.describe( 'Shopper → Local pickup', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCheckout();
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await page
 			.getByLabel( 'Email address' )
 			.fill( 'thisShouldRemainHere@mail.com' );
@@ -184,34 +189,35 @@ test.describe( 'Shopper → Local pickup', () => {
 			'thisShouldRemainHere@mail.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Ship' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'thisShouldRemainHere@mail.com'
 		);
 
 		await checkoutPageObject.fillInCheckoutWithTestData();
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page.getByRole( 'radio', { name: 'Ship', exact: true } ).click();
+		await checkoutPageObject.selectDeliveryOption( 'Ship' );
 		await expect( page.getByLabel( 'Email address' ) ).toHaveValue(
 			'john.doe@test.com'
 		);
 
-		await page
-			.getByRole( 'radio', { name: 'Pickup', exact: true } )
-			.click();
+		await checkoutPageObject.selectDeliveryOption( 'Pickup' );
 		await expect( page.getByText( 'Pickup (Testing)' ) ).toBeVisible();
 
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -276,7 +282,12 @@ test.describe( 'Shopper → Local pickup', () => {
 		await checkoutPageObject.placeOrder();
 
 		await expect(
-			page.getByText( 'Collection from Testing' )
+			page.getByText( 'Thank you. Your order has been received.' )
+		).toBeVisible();
+
+		await expect(
+			// The regex pattern matches "Collection from Testing" followed by any characters (.*)
+			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
 	} );
@@ -338,7 +349,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 
 	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -644,7 +655,7 @@ test.describe( 'Billing Address Form', () => {
 
 	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

@@ -17,6 +17,8 @@ export const MARKETPLACE_SEARCH_RESULTS_PER_PAGE = 8;
 export const MARKETPLACE_CART_PATH = MARKETPLACE_HOST + '/cart/';
 export const MARKETPLACE_RENEW_SUBSCRIPTON_PATH =
 	MARKETPLACE_HOST + '/my-account/my-subscriptions/';
+export const MARKETPLACE_SUPPORT_PATH =
+	MARKETPLACE_HOST + '/my-account/contact-support/';
 export const MARKETPLACE_COLLABORATION_PATH =
 	MARKETPLACE_HOST +
 	'/document/managing-woocommerce-com-subscriptions/#transfer-a-woocommerce-com-subscription';

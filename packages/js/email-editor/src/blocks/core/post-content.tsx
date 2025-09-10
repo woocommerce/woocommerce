@@ -1,10 +1,13 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
-import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { useBlockProps } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
 
 function Placeholder( { layoutClassNames } ) {
 	const blockProps = useBlockProps( { className: layoutClassNames } );
@@ -23,22 +26,14 @@ function Placeholder( { layoutClassNames } ) {
 
 // Curried function to add a custom placeholder to the post content block, or just use the original Edit component.
 function PostContentEdit( OriginalEditComponent ) {
-	return function Edit( {
-		context,
-		__unstableLayoutClassNames: layoutClassNames,
-	} ) {
-		const { postId: contextPostId, postType: contextPostType } = context;
+	return function Edit( params ) {
+		const { postId: contextPostId, postType: contextPostType } =
+			params.context;
+		const { __unstableLayoutClassNames: layoutClassNames } = params;
 		const hasContent = contextPostId && contextPostType;
 
 		if ( hasContent ) {
-			return (
-				<OriginalEditComponent
-					{ ...{
-						context,
-						__unstableLayoutClassNames: layoutClassNames,
-					} }
-				/>
-			);
+			return <OriginalEditComponent { ...params } />;
 		}
 
 		return <Placeholder layoutClassNames={ layoutClassNames } />;
@@ -46,19 +41,10 @@ function PostContentEdit( OriginalEditComponent ) {
 }
 
 function enhancePostContentBlock() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/change-post-content',
-		( settings: Block, name ) => {
-			if ( name === 'core/post-content' ) {
-				return {
-					...settings,
-					edit: PostContentEdit( settings.edit ),
-				};
-			}
-			return settings;
-		}
-	);
+	updateBlockSettings( 'core/post-content', ( current ) => ( {
+		...current,
+		edit: PostContentEdit( current.edit ),
+	} ) );
 }
 
 export { enhancePostContentBlock };

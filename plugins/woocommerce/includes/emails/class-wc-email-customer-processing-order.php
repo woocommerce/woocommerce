@@ -31,6 +31,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			$this->customer_email = true;
 
 			$this->title          = __( 'Processing order', 'woocommerce' );
+			$this->email_group    = 'order-processing';
 			$this->template_html  = 'emails/customer-processing-order.php';
 			$this->template_plain = 'emails/plain/customer-processing-order.php';
 			$this->placeholders   = array(

@@ -8,6 +8,8 @@ import {
 } from '@wordpress/block-editor';
 import { useEffect } from '@wordpress/element';
 import type { BlockAlignment } from '@wordpress/blocks';
+import { isExperimentalWcRestApiV4Enabled } from '@woocommerce/block-settings';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -54,7 +56,7 @@ const PriceEdit = ( {
 	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
 
 	let { isDescendentOfSingleProductTemplate } =
-		useIsDescendentOfSingleProductTemplate( { isDescendentOfQueryLoop } );
+		useIsDescendentOfSingleProductTemplate();
 
 	if ( isDescendentOfQueryLoop ) {
 		isDescendentOfSingleProductTemplate = false;
@@ -73,6 +75,8 @@ const PriceEdit = ( {
 		]
 	);
 
+	const { product } = useProduct( context.postId );
+
 	return (
 		<>
 			<BlockControls>
@@ -84,7 +88,12 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				<Block { ...blockAttrs } />
+				<Block
+					{ ...blockAttrs }
+					isAdmin={ true }
+					product={ product }
+					isExperimentalWcRestApiV4Enabled={ isExperimentalWcRestApiV4Enabled() }
+				/>
 			</div>
 		</>
 	);

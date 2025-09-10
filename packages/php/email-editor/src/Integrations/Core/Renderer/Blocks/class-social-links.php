@@ -8,8 +8,9 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Social_Links_Helper;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 /**
  * Renders the social links block.
  */
@@ -32,12 +33,12 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
 	 *
-	 * @param string              $block_content Block content.
-	 * @param array               $parsed_block Parsed block.
-	 * @param Settings_Controller $settings_controller Settings controller.
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	protected function render_content( $block_content, array $parsed_block, Settings_Controller $settings_controller ): string {
+	protected function render_content( $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		$attrs = $parsed_block['attrs'] ?? array();
 
 		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
@@ -157,45 +158,55 @@ class Social_Links extends Abstract_Block_Renderer {
 		}
 		$row_container_styles = $this->compile_css( $row_container_styles );
 
-		// rendering inspired by mjml social. https://documentation.mjml.io/#mj-social.
-		return sprintf(
-			'
-			<!--[if mso | IE]><td><![endif]-->
-				<table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="%1$s">
-				<tbody><tr style="%7$s">
-				<td style="vertical-align:middle;font-size:%9$s">
-					<table border="0" cellpadding="0" cellspacing="0" role="presentation" style="">
-					<tbody><tr>
-						<td style="vertical-align:middle;">
-						<a href="%2$s" %5$s class="wp-block-social-link-anchor">
-							<img height="%8$s" src="%3$s" style="display:block;" width="%8$s" alt="%4$s">
-						</a>
-						</td>
-					</tr>
-					</tbody></table>
-				</td>
-				' . ( $service_label ? '
-				<td style="vertical-align:middle;padding-left:6px;padding-right:6px;font-size:%9$s">
-					<a href="%2$s" %5$s class="wp-block-social-link-anchor">
-						<span style="margin-left:.5em;margin-right:.5em"> %6$s </span>
-					</a>
-				</td>
-				' : '' ) . '
-				</tr>
-			</tbody></table>
-		  <!--[if mso | IE]></td><![endif]-->
-			',
-			esc_attr( $main_table_styles ), // %1$s -> The main table styles.
-			esc_url( $service_url ), // %2$s -> The a href link.
-			esc_url( $service_icon_url ), // %3$s -> The Img src.
+		// Generate the icon content.
+		$icon_content = sprintf(
+			'<a href="%1$s" %2$s class="wp-block-social-link-anchor">
+				<img height="%3$s" src="%4$s" style="display:block;margin-right:0;" width="%3$s" alt="%5$s">
+			</a>',
+			esc_url( $service_url ),
+			$anchor_html,
+			esc_attr( $icon_size ),
+			esc_url( $service_icon_url ),
 			// translators: %s is the social service name.
-			sprintf( __( '%s icon', 'woocommerce' ), $service_name ), // %4$s -> The Img alt.
-			$anchor_html, // %5$s -> The a styles plus rel and target attributes.
-			esc_html( $service_label ), // %6$s -> The a text (label).
-			esc_attr( $row_container_styles ), // %7$s -> The tr row container styles.
-			esc_attr( $icon_size ), // %8$s -> The icon size.
-			esc_attr( $text_font_size ) // %9$s -> The text font size.
+			sprintf( __( '%s icon', 'woocommerce' ), $service_name )
 		);
+		$icon_content = Table_Wrapper_Helper::render_table_wrapper( $icon_content, array(), array( 'style' => 'vertical-align:middle;' ) );
+		$icon_content = Table_Wrapper_Helper::render_table_cell( $icon_content, array( 'style' => sprintf( 'vertical-align:middle;font-size:%s;', $text_font_size ) ) );
+
+		// Generate the label content if needed.
+		$label_content = '';
+		if ( $service_label ) {
+			$label_content    = sprintf(
+				'<a href="%1$s" %2$s class="wp-block-social-link-anchor">
+					<span style="margin-left:.5em;margin-right:.5em"> %3$s </span>
+				</a>',
+				esc_url( $service_url ),
+				$anchor_html,
+				esc_html( $service_label )
+			);
+			$label_cell_style = sprintf(
+				'vertical-align:middle;padding-left:6px;padding-right:6px;font-size:%s;',
+				$text_font_size
+			);
+			$label_content    = Table_Wrapper_Helper::render_table_cell( $label_content, array( 'style' => $label_cell_style ) );
+		}
+
+		// Combine icon and label tables.
+		$social_link_content = $icon_content . $label_content;
+
+		// Create the main social link table.
+		$main_table_attrs = array(
+			'align' => 'center',
+			'style' => $main_table_styles,
+		);
+
+		$main_row_attrs = array(
+			'style' => $row_container_styles,
+		);
+
+		$main_table = Table_Wrapper_Helper::render_table_wrapper( $social_link_content, $main_table_attrs, array(), $main_row_attrs, false );
+
+		return Table_Wrapper_Helper::render_outlook_table_cell( $main_table );
 	}
 
 	/**
@@ -206,7 +217,6 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * @return string The block wrapper HTML.
 	 */
 	private function get_block_wrapper( $block_content, $parsed_block ) {
-
 		$content = $this->adjust_block_content( $block_content, $parsed_block );
 
 		$table_styles    = $content['table_styles'];
@@ -214,24 +224,26 @@ class Social_Links extends Abstract_Block_Renderer {
 		$compiled_styles = $content['compiled_styles'];
 		$align           = $content['align'];
 
-		return sprintf(
-			'<!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" ><tr><td><![endif]-->
-				<table class="wp-block-social-links" style="%1$s vertical-align:top;" border="0" width="100%%" cellpadding="0" cellspacing="0" role="presentation">
-						<tr  role="presentation">
-							<td class="%2$s" style="%3$s"  align="%4$s" role="presentation">
-								<!--[if mso | IE]><table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" ><tr><![endif]-->
-									%5$s
-								<!--[if mso | IE]></tr></table><![endif]-->
-							</td>
-						</tr>
-				</table>
-			<!--[if mso | IE]></td></tr></table><![endif]-->',
-			esc_attr( $table_styles ),
-			esc_attr( $classes ),
-			esc_attr( $compiled_styles ),
-			esc_attr( $align ),
-			'{social_links_content}'
+		$table_attrs = array(
+			'class' => 'wp-block-social-links',
+			'style' => $table_styles . ' vertical-align:top;',
+			'width' => '100%',
 		);
+
+		$cell_attrs = array(
+			'class' => $classes,
+			'style' => $compiled_styles,
+			'align' => $align,
+		);
+
+		$row_attrs = array(
+			'role' => 'presentation',
+		);
+
+		$inner_content = Table_Wrapper_Helper::render_outlook_table_wrapper( '{social_links_content}', array( 'align' => 'center' ), array(), array(), false );
+		$main_wrapper  = Table_Wrapper_Helper::render_table_wrapper( $inner_content, $table_attrs, $cell_attrs, $row_attrs );
+
+		return Table_Wrapper_Helper::render_outlook_table_wrapper( $main_wrapper, array( 'align' => 'center' ) );
 	}
 
 	/**

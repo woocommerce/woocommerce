@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { createElement, Fragment } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 
 /**
@@ -22,16 +22,13 @@ const OrderStatus = ( {
 	orderStatusMap,
 	labelPositionToLeft = false,
 } ) => {
-	const indicatorClasses = classnames(
-		'woocommerce-order-status__indicator',
-		{
-			[ 'is-' + status ]: true,
-		}
-	);
+	const indicatorClasses = clsx( 'woocommerce-order-status__indicator', {
+		[ 'is-' + status ]: true,
+	} );
 	const label = orderStatusMap[ status ] || status;
 
 	return (
-		<div className={ classnames( 'woocommerce-order-status', className ) }>
+		<div className={ clsx( 'woocommerce-order-status', className ) }>
 			{ labelPositionToLeft ? (
 				<Fragment>
 					{ label }

@@ -1,0 +1,86 @@
+name: 'Release: Feature highlight notification'
+on:
+  schedule:
+    - cron: '0 9 * * *' # Every day at 9 AM UTC
+  workflow_dispatch:
+
+jobs:
+  check-feature-freeze:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      event-version: ${{ steps.find-feature-freeze-event.outputs.event-version }}
+      event-title: ${{ steps.find-feature-freeze-event.outputs.event-title }}
+      event-date: ${{ steps.find-feature-freeze-event.outputs.event-date }}
+    steps:
+      - name: Install node-ical
+        run: npm install node-ical
+
+      - name: Check for Feature Freeze events in a week
+        id: find-feature-freeze-event
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const ical = require('node-ical');
+            
+            console.log('Checking for Feature Freeze events in a week...');
+            
+            try {
+              const aWeekFromNow = new Date();
+              aWeekFromNow.setDate((new Date()).getDate() + 7);
+
+              const events = await ical.async.fromURL('https://calendar.google.com/calendar/ical/${{ secrets.RELEASE_CALENDAR_ID }}/public/basic.ics');
+
+              const dayEvents = Object.values(events)
+                .filter(event => event.type === 'VEVENT')
+                .filter(event => {
+                  if (!event.start) return false;
+                  return new Date(event.start).toDateString() === new Date(aWeekFromNow).toDateString();
+                });
+
+              const ffEvent = dayEvents.find(event => {
+                if (!event.summary) return false;
+
+                const pattern = /^WooCommerce \d+\.\d+ Feature Freeze$/i;
+                return pattern.test(event.summary);
+              });
+
+              if (ffEvent) {
+                console.log(`Found Feature Freeze event: ${ffEvent.summary}`);
+
+                const versionMatch = ffEvent.summary.match(/WooCommerce (\d+\.\d+) Feature Freeze/i);
+                const version = versionMatch ? versionMatch[1] : '';
+
+                core.setOutput('event-title', ffEvent.summary);
+                core.setOutput('event-date', ffEvent.start.toDateString());
+                core.setOutput('event-version', version);
+                console.log(`Feature Freeze event for version ${version} found:`, ffEvent);
+              } else {
+                core.setOutput('event-title', '');
+                core.setOutput('event-date', '');
+                core.setOutput('event-version', '');
+                console.log('No Feature Freeze events found.');
+              }
+            } catch (error) {
+              core.setFailed(`Failed to fetch calendar events: ${error.message}`);
+            }
+
+  notify-upcoming-feature-freeze:
+    needs: check-feature-freeze
+    if: needs.check-feature-freeze.outputs.event-title != ''
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Send feature highlight reminder notification
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :megaphone1: Hey teams!
+            The feature freeze for *${{ needs.check-feature-freeze.outputs.event-title }}* is scheduled for *${{ needs.check-feature-freeze.outputs.event-date }}, by EOD (UTC)*.
+            If your team has contributed changes to *${{ needs.check-feature-freeze.outputs.event-version }}* kindly review your work and, if needed, share a *Feature Highlight* or *Developer Advisory* for the beta announcement post by <https://woocorerelease.wordpress.com/?start=feature-highlight|using the format in the release P2>.
+            You can <https://github.com/woocommerce/woocommerce/pulls?q=is%3Apr+milestone%3A${{ needs.check-feature-freeze.outputs.event-version }}.0+is%3Aclosed+author%3A%40me+|review a list of your own ${{ needs.check-feature-freeze.outputs.event-version }} PRs> to identify if any of those contributions merits a post.
+            
+            :scribbl-clock: *Please aim to submit your highlights by ${{ needs.check-feature-freeze.outputs.event-date }}, end of day*. Thanks!
+            
+            cc <!subteam^S086N376UTS>

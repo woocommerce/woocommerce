@@ -44,6 +44,10 @@ interface HeaderProps {
 	 * The callback function when the button is clicked.
 	 */
 	onButtonClick?: () => void;
+	/**
+	 * The context in which the header is used, e.g., 'wc_settings_payments'.
+	 */
+	context?: string;
 }
 
 const HEADER_PLUGIN_NAME = 'settings-payments-offline-header';
@@ -60,6 +64,7 @@ export const Header = ( {
 	hasButton,
 	buttonLabel,
 	onButtonClick,
+	context = '',
 }: HeaderProps ) => {
 	if ( ! hasRegisteredPlugins ) {
 		/**
@@ -81,7 +86,11 @@ export const Header = ( {
 				<>
 					{ backLink && (
 						<WooHeaderNavigationItem>
-							<BackButton href={ backLink } title={ title } />
+							<BackButton
+								href={ backLink }
+								title={ title }
+								from={ context }
+							/>
 						</WooHeaderNavigationItem>
 					) }
 					<WooHeaderPageTitle>

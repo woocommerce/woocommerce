@@ -1805,7 +1805,7 @@ test.describe( 'Settings API tests: CRUD', () => {
 								'Display suggestions within WooCommerce',
 							type: 'checkbox',
 							default: 'yes',
-							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com. You will see a static list of extensions instead.',
+							tip: 'Leave this box unchecked if you do not want to pull suggested extensions from WooCommerce.com.',
 							value: expect.any( String ),
 						} ),
 					] )

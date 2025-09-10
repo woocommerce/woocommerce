@@ -15,6 +15,43 @@ use Yoast\PHPUnitPolyfills\TestCases\TestCase;
  */
 class OrderControllerTests extends TestCase {
 	/**
+	 * The system under test.
+	 *
+	 * @var OrderController
+	 */
+	private $sut;
+
+	/**
+	 * Set up before test.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = new class() extends OrderController {
+			/**
+			 * Check all required address fields are set and return errors if not. Parent is protected.
+			 *
+			 * @param \WC_Order $order Order object.
+			 * @param string    $address_type billing or shipping address, used in error messages.
+			 * @param \WP_Error $errors Error object.
+			 */
+			public function validate_address_fields( \WC_Order $order, $address_type, \WP_Error $errors ) { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
+				parent::validate_address_fields( $order, $address_type, $errors );
+			}
+		};
+	}
+
+	/**
+	 * Tear down after test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		WC()->countries->locale = null;
+		$this->sut              = null;
+	}
+
+	/**
 	 * test_validate_existing_order_before_payment_valid_data.
 	 */
 	public function test_validate_existing_order_before_payment_valid_data() {
@@ -22,19 +59,16 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$this->assertNull( $class->validate_existing_order_before_payment( $order ) );
+		$this->assertNull( $this->sut->validate_existing_order_before_payment( $order ) );
 	}
 
 	/**
 	 * test_validate_selected_shipping_methods_throws
 	 */
 	public function test_validate_selected_shipping_methods_throws() {
-		$class = new OrderController();
-
 		$this->expectException( RouteException::class );
-		$class->validate_selected_shipping_methods( true, array( false ) );
-		$class->validate_selected_shipping_methods( true, null );
+		$this->sut->validate_selected_shipping_methods( true, array( false ) );
+		$this->sut->validate_selected_shipping_methods( true, null );
 	}
 
 	/**
@@ -47,13 +81,11 @@ class OrderControllerTests extends TestCase {
 		$default_zone->add_shipping_method( $flat_rate->id );
 		$default_zone->save();
 
-		$class = new OrderController();
-
 		$registered_methods = \WC_Shipping_Zones::get_zone( 0 )->get_shipping_methods();
 		$valid_method       = array_shift( $registered_methods );
 
-		$this->assertNull( $class->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
-		$this->assertNull( $class->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
+		$this->assertNull( $this->sut->validate_selected_shipping_methods( true, array( $valid_method->id . ':' . $valid_method->instance_id ) ) );
+		$this->assertNull( $this->sut->validate_selected_shipping_methods( false, array( 'free-shipping' ) ) );
 	}
 
 	/**
@@ -76,9 +108,8 @@ class OrderControllerTests extends TestCase {
 		$order->apply_coupon( $coupon );
 		$order->save();
 
-		$class = new OrderController();
 		try {
-			$class->validate_order_before_payment( $order );
+			$this->sut->validate_order_before_payment( $order );
 		} finally {
 			$this->assertEmpty( $order->get_coupon_codes() );
 		}
@@ -120,9 +151,8 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 		$this->assertEquals( array( 'fake-coupon' ), $order->get_coupon_codes() );
 
-		$class = new OrderController();
 		try {
-			$class->validate_existing_order_before_payment( $order );
+			$this->sut->validate_existing_order_before_payment( $order );
 		} finally {
 			$this->assertEmpty( $order->get_coupon_codes() );
 		}
@@ -140,8 +170,7 @@ class OrderControllerTests extends TestCase {
 		$order->set_status( OrderStatus::PENDING );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -157,13 +186,13 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 
 		/** @var \WC_Order_Item_Product $item */
-		$item = reset( $order->get_items() );
+		$array = $order->get_items();
+		$item  = reset( $array );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $item );
 
 		WC()->cart->add_to_cart( $item->get_product()->get_id() );
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -179,8 +208,7 @@ class OrderControllerTests extends TestCase {
 		$order->save();
 
 		// There is no need to update the cart here, we just check the order.
-		$class = new OrderController();
-		$class->validate_existing_order_before_payment( $order );
+		$this->sut->validate_existing_order_before_payment( $order );
 	}
 
 	/**
@@ -196,8 +224,7 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -215,8 +242,7 @@ class OrderControllerTests extends TestCase {
 		$this->set_shipping_address( $order );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 	}
 
 	/**
@@ -231,17 +257,81 @@ class OrderControllerTests extends TestCase {
 		$order->apply_coupon( $coupon );
 		$order->save();
 
-		$class = new OrderController();
-		$class->validate_order_before_payment( $order );
+		$this->sut->validate_order_before_payment( $order );
 		$this->assertEquals( array( 'valid-coupon' ), $order->get_coupon_codes() );
+	}
+
+	/**
+	 * test_validate_address_fields_valid_address.
+	 */
+	public function test_validate_address_fields_valid_address() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address( $order );
+		$order->save();
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+
+		$this->assertEmpty( $errors->get_error_messages() );
+	}
+
+	/**
+	 * test_validate_address_fields_invalid_address.
+	 */
+	public function test_validate_address_fields_invalid_address() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address(
+			$order,
+			[
+				'postcode' => '',
+			]
+		);
+		$order->save();
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+		$this->assertEquals( 'ZIP Code is required', $errors->get_error_message() );
+	}
+	/**
+	 * test_validate_address_fields_invalid_address.
+	 */
+	public function test_validate_address_fields_required_hidden_fields_not_validates() {
+		$order = WC_Helper_Order::create_order();
+		$this->set_shipping_address(
+			$order,
+			[
+				'postcode' => '',
+			]
+		);
+		$order->save();
+
+		/**
+		 * Hide the postcode field for US locale.
+		 *
+		 * @param array $locales All country locales.
+		 *
+		 * @return array
+		 */
+		$hide_postcode = function ( $locales ) {
+			$locales['US']['postcode']['hidden'] = true;
+			return $locales;
+		};
+
+		add_filter( 'woocommerce_get_country_locale', $hide_postcode );
+
+		$errors = new \WP_Error();
+		$this->sut->validate_address_fields( $order, 'shipping', $errors );
+		$this->assertEmpty( $errors->get_error_messages() );
+		remove_filter( 'woocommerce_get_country_locale', $hide_postcode );
 	}
 
 	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.
+	 * @param array     $override_data Optional data to override the default shipping address.
 	 */
-	private function set_shipping_address( \WC_Order $order ) {
+	private function set_shipping_address( \WC_Order $order, $override_data = [] ) {
 		$order->set_shipping_country( 'US' );
 		$order->set_shipping_first_name( 'John' );
 		$order->set_shipping_last_name( 'Doe' );
@@ -249,5 +339,9 @@ class OrderControllerTests extends TestCase {
 		$order->set_shipping_city( 'Test City' );
 		$order->set_shipping_state( 'CA' );
 		$order->set_shipping_postcode( '12345' );
+
+		foreach ( $override_data as $key => $value ) {
+			$order->{"set_shipping_$key"}( $value );
+		}
 	}
 }

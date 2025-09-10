@@ -24,7 +24,8 @@ export default function WooPaymentsStepHeader( {
 		<div className="settings-payments-onboarding-modal__header">
 			<img
 				src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-				alt="Woo Logo"
+				alt=""
+				role="presentation"
 				className="settings-payments-onboarding-modal__header--logo"
 			/>
 			<Button

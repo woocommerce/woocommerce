@@ -104,7 +104,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			?>
 		</div>
 		<?php
-			$step = apply_filters( 'woocommerce_quantity_input_step', '1', $product );
+			$step = $product ? $product->get_purchase_quantity_step() : 1;
 
 			/**
 			* Filter to change the product quantity stepping in the order editor of the admin area.

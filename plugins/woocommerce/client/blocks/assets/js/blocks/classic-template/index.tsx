@@ -22,6 +22,7 @@ import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
 
 /**
  * Internal dependencies
@@ -50,7 +51,6 @@ type Attributes = {
 };
 
 const blockifiedFallbackConfig = {
-	isConversionPossible: () => false,
 	getBlockifiedTemplate: () => [],
 	getDescription: () => '',
 	onClickCallback: () => void 0,
@@ -187,9 +187,10 @@ const Edit = ( {
 	setAttributes,
 }: BlockEditProps< Attributes > ) => {
 	const blockProps = useBlockProps();
-	const { editedPostId } = useSelect( ( sel ) => {
+	const { currentPostId } = useSelect( ( sel ) => {
 		return {
-			editedPostId: sel( 'core/edit-site' ).getEditedPostId(),
+			// @ts-expect-error getCurrentPostId is not typed
+			currentPostId: sel( editorStore ).getCurrentPostId(),
 		};
 	}, [] );
 
@@ -199,7 +200,7 @@ const Edit = ( {
 			rendered?: string;
 			row: string;
 		};
-	} >( 'postType', 'wp_template', editedPostId );
+	} >( 'postType', 'wp_template', currentPostId );
 
 	const templateDetails = getTemplateDetailsBySlug(
 		attributes.template,
@@ -219,12 +220,8 @@ const Edit = ( {
 		[ attributes.align, attributes.template, setAttributes ]
 	);
 
-	const {
-		isConversionPossible,
-		getDescription,
-		getSkeleton,
-		blockifyConfig,
-	} = conversionConfig[ templateType ];
+	const { getDescription, getSkeleton, blockifyConfig } =
+		conversionConfig[ templateType ];
 
 	const skeleton = getSkeleton ? (
 		getSkeleton()
@@ -236,8 +233,8 @@ const Edit = ( {
 		/>
 	);
 
-	const canConvert = isConversionPossible();
-	const placeholderDescription = getDescription( templateTitle, canConvert );
+	const canConvert = !! templateDetails?.type;
+	const placeholderDescription = getDescription( templateTitle );
 
 	return (
 		<div { ...blockProps }>
@@ -255,11 +252,13 @@ const Edit = ( {
 							) }
 						</span>
 					</div>
-					<p
-						dangerouslySetInnerHTML={ {
-							__html: placeholderDescription,
-						} }
-					/>
+					{ canConvert && (
+						<p
+							dangerouslySetInnerHTML={ {
+								__html: placeholderDescription,
+							} }
+						/>
+					) }
 					<p>
 						{ __(
 							'You cannot edit the content of this block. However, you can move it and place other blocks around it.',

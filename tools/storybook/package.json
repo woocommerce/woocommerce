@@ -9,7 +9,7 @@
 		"url": "https://github.com/woocommerce/woocommerce.git"
 	},
 	"author": "Automattic",
-	"license": "GPL-3.0-or-later",
+	"license": "GPL-2.0-or-later",
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:(project:|storybook).*$/'",
 		"build:storybook": "wireit",

@@ -1141,6 +1141,7 @@ class WC_Helper {
 	 * Activate helper subscription.
 	 *
 	 * @throws Exception If the subscription could not be activated or found.
+	 * @throws WC_Data_Exception If the activation fails with error details.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1172,7 +1173,16 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
+
+			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
+			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
+			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+			throw new WC_Data_Exception(
+				esc_html( $body['code'] ?? 'unknown_error' ),
+				isset( $body['message'] ) ? esc_html( $body['message'] ) : esc_html__( 'Unknown error', 'woocommerce' ),
+				(int) $status_code,
+				function_exists( 'map_deep' ) ? map_deep( $error_data, 'esc_html' ) : array_map( 'esc_html', $error_data ),
+			);
 		}
 
 		self::_flush_subscriptions_cache();
@@ -2199,6 +2209,9 @@ class WC_Helper {
 		$product_id   = $plugin['_product_id'];
 		$subscription = self::get_available_subscription( $product_id );
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		// No valid subscription found.
 		if ( ! $subscription ) {
 			return;
@@ -2231,9 +2244,6 @@ class WC_Helper {
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
 	}
 
 	/**
@@ -2381,10 +2391,11 @@ class WC_Helper {
 			}
 		}
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		if ( $deactivated ) {
 			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
-			self::_flush_subscriptions_cache();
-			self::_flush_updates_cache();
 		}
 	}
 

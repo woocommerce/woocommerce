@@ -4,7 +4,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
-import { store as coreStore } from '@wordpress/core-data';
+import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu } from '@wordpress/commands';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
@@ -26,6 +26,7 @@ import { storeName } from '../../store';
 import { useNavigateToEntityRecord } from '../../hooks/use-navigate-to-entity-record';
 import { Editor, FullscreenMode } from '../../private-apis';
 import { useEmailCss } from '../../hooks';
+import { PreviewSaveGuard } from '../preview/preview-save-guard';
 import { TemplateSelection } from '../template-select';
 import { StylesSidebar } from '../styles-sidebar';
 import { SendPreview } from '../preview';
@@ -42,6 +43,7 @@ export function InnerEditor( {
 	postId: initialPostId,
 	postType: initialPostType,
 	settings,
+	contentRef,
 } ) {
 	const {
 		currentPost,
@@ -65,11 +67,11 @@ export function InnerEditor( {
 				'postType',
 				currentPost.postType,
 				currentPost.postId
-			);
+			) as Post | null;
 			return {
 				template:
-					currentPost.postType !== 'wp_template'
-						? getEditedPostTemplate()
+					postObject && currentPost.postType !== 'wp_template'
+						? getEditedPostTemplate( postObject.template )
 						: null,
 				post: postObject,
 				isFullscreenEnabled:
@@ -107,8 +109,13 @@ export function InnerEditor( {
 			currentPost.postType,
 		]
 	);
+	const canRenderEditor =
+		post &&
+		( currentPost.postType === 'wp_template' ||
+			post.template === template?.slug || // If the post has a template, check proper template is loaded.
+			( ! post.template && template ) ); // If the post has no template, we render with the default template.
 
-	if ( ! post || ( currentPost.postType !== 'wp_template' && ! template ) ) {
+	if ( ! canRenderEditor ) {
 		return (
 			<div className="spinner-container">
 				<Spinner style={ { width: '80px', height: '80px' } } />
@@ -129,6 +136,7 @@ export function InnerEditor( {
 					settings={ editorSettings }
 					templateId={ template && template.id }
 					styles={ styles }
+					contentRef={ contentRef }
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />
@@ -138,6 +146,7 @@ export function InnerEditor( {
 					<TemplateSelection />
 					<StylesSidebar />
 					<SendPreview />
+					<PreviewSaveGuard />
 					<FullscreenMode
 						isActive={ isFullScreenForced || isFullscreenEnabled }
 					/>

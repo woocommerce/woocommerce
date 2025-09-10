@@ -1,0 +1,195 @@
+name: 'Release: Bump version number'
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Release branch'
+        type: string
+        required: true
+        default: ''
+      bump-type:
+        description: 'Type of version bump to perform'
+        required: true
+        type: choice
+        options:
+          - stable
+          - beta
+          - rc
+          - dev
+  workflow_call:
+    inputs:
+      branch:
+        description: Release branch
+        type: string
+        required: true
+      bump-type:
+        description: Type of version bump to perform
+        type: string
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+concurrency:
+  group: release-bump-version-${{ inputs.branch }}
+
+jobs:
+  bump-version:
+    name: Bump WooCommerce Version
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Get current version
+        id: get-current-version
+        run: |
+          version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+          echo "Current version: $version"
+          echo "version=$version" >> $GITHUB_OUTPUT
+
+      - name: Compute new version
+        id: compute-new-version
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branch = `${{ inputs.branch }}`;
+            const bumpType = `${{ inputs.bump-type }}`;
+            const currentVersion = '${{ steps.get-current-version.outputs.version }}';
+
+            const m = currentVersion.match( /(?<base>\d+\.\d+)\.(?<patch>\d+)(-(?<prerelease>rc|beta|dev)(\.(?<prerelease_number>\d+))?)?/ );
+            if ( ! m ) {
+              core.setFailed( `Current version (${ currentVersion }) does not have the expected format.` );
+              return;
+            }
+
+            const baseVersion      = m.groups['base'];
+            const patch            = parseInt( m.groups['patch'] );
+            const prerelease       = m.groups['prerelease'] ?? '';
+            const prereleaseNumber = m.groups['prerelease_number'] ? parseInt( m.groups['prerelease_number'] ) : 0;
+
+            // Validate current version against bumpType and/or branch.
+            const invalidBump =
+                ( prerelease && 0 !== patch ) ||
+                ( ! prerelease && 'stable' !== bumpType ) ||
+                ( 'dev' === prerelease && ! [ 'dev', 'beta' ].includes( bumpType ) ) ||
+                ( 'beta' === prerelease && ! [ 'beta', 'rc' ].includes( bumpType ) ) ||
+                ( 'rc' === prerelease && ! [ 'rc', 'stable' ].includes( bumpType ) );
+
+            if ( invalidBump ) {
+              core.setFailed( `Bump type (${ bumpType }) does not apply to current version (${ currentVersion }).` );
+              return;
+            }
+
+            if ( ( 'trunk' === branch && 'dev' !== bumpType ) || ( 'trunk' !== branch && 'dev' === bumpType ) ) {
+              core.setFailed( `Bump type (${ bumpType }) does not apply to source branch (${ branch }).` );
+              return;
+            }
+
+            // Compute new version.
+            let newVersion;
+
+            switch ( bumpType ) {
+              case 'dev':
+                newVersion = `${ ( Number( baseVersion ) + 0.1 ).toFixed( 1 ) }.0-dev`;
+                break;
+
+              case 'beta':
+              case 'rc':
+                newVersion = `${ baseVersion }.${ patch }-${ bumpType }.${ bumpType === prerelease ? prereleaseNumber + 1 : 1 }`;
+                break;
+
+              case 'stable':
+                newVersion = prerelease ? `${ baseVersion }.0` : `${ baseVersion }.${ patch + 1 }`;
+                break;
+
+              default:
+                core.setFailed(`Invalid bump type.`);
+                return;
+            }
+
+            core.setOutput( 'nextVersion', newVersion );
+            core.setOutput( 'nextStable', newVersion.replace( /-(dev|(beta|rc)\.\d+)/, '' ) );
+            core.setOutput( 'clearChangelog', '' === prerelease );
+
+      - name: Bump version in files
+        env:
+          NEXT_VERSION: ${{ steps.compute-new-version.outputs.nextVersion }}
+          NEXT_STABLE: ${{ steps.compute-new-version.outputs.nextStable }}
+          CLEAR_CHANGELOG: ${{ steps.compute-new-version.outputs.clearChangelog }}
+        run: |
+          cd plugins/woocommerce
+
+          # Update version header in woocommerce.php.
+          sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
+
+          # Update changelog in readme.txt.
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION \3 =/" readme.txt
+
+          if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
+            perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
+          fi
+
+          # Update composer.json and package.json.
+          for filename in {composer,package}.json; do
+            jq --tab ".version = \"$NEXT_STABLE\"" ${filename} > tmp.json
+            mv tmp.json ${filename}
+          done
+
+          # Update $version property in class-woocommerce.php.
+          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
+
+          if git diff --quiet; then
+            echo "::error::No changes to commit."
+            exit 1
+          fi
+
+      - name: Open PR with changes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          branch_name="bump-wc-version-to-${{ steps.compute-new-version.outputs.nextVersion }}/${{ github.run_id }}"
+
+          # Configure Git.
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          # Push changes.
+          git checkout -b ${branch_name}
+          git commit \
+            --all \
+            --message 'Bump version to ${{ steps.compute-new-version.outputs.nextVersion }}.'
+          git push origin ${branch_name}
+
+          # Open PR.
+          gh pr create \
+            --title 'Bump WooCommerce version to ${{ steps.compute-new-version.outputs.nextVersion }}' \
+            --body 'This PR updates the versions in ${{ inputs.branch }} to ${{ steps.compute-new-version.outputs.nextVersion }}.' \
+            --base ${{ inputs.branch }} \
+            --head ${branch_name} \
+            --label Release
+
+      - name: Ensure milestone for dev version exists
+        if: ${{ inputs.bump-type == 'dev' }}
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const milestone = '${{ steps.compute-new-version.outputs.nextStable }}';
+
+            try {
+              await github.rest.issues.createMilestone({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: milestone,
+              });
+            } catch ( e ) {
+              if ( e.response.data.errors?.some( (err) => 'already_exists' === err.code ) ) {
+                console.log( `Milestone ${ milestone } already exists.` );
+              } else {
+                throw e;
+              }
+            }

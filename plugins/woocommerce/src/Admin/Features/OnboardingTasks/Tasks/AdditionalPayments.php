@@ -1,7 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\Admin\Features\OnboardingTasks\Tasks;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments as SettingsPaymentsService;
 
 /**
@@ -121,7 +121,7 @@ class AdditionalPayments extends Payments {
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['_suggestion_category_id'] ) &&
-				in_array( $provider['_suggestion_category_id'], array( PaymentProviders::CATEGORY_BNPL, PaymentProviders::CATEGORY_EXPRESS_CHECKOUT, PaymentProviders::CATEGORY_CRYPTO ), true )
+				in_array( $provider['_suggestion_category_id'], array( PaymentsProviders::CATEGORY_BNPL, PaymentsProviders::CATEGORY_EXPRESS_CHECKOUT, PaymentsProviders::CATEGORY_CRYPTO ), true )
 			) {
 				return true;
 			}
@@ -137,10 +137,15 @@ class AdditionalPayments extends Payments {
 	 */
 	private function get_payment_providers(): array {
 		try {
+			/**
+			 * The Payments Settings [page] service.
+			 *
+			 * @var SettingsPaymentsService $settings_payments_service
+			 */
 			$settings_payments_service = wc_get_container()->get( SettingsPaymentsService::class );
 
-			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country() );
-		} catch ( \Exception $e ) {
+			$providers = $settings_payments_service->get_payment_providers( $settings_payments_service->get_country(), false );
+		} catch ( \Throwable $e ) {
 			// In case of any error, return an empty array.
 			$providers = array();
 		}

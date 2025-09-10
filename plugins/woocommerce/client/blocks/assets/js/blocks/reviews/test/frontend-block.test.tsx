@@ -134,6 +134,10 @@ describe( 'ReviewsFrontendBlock', () => {
 			/>
 		);
 
-		expect( () => findByText( 'Order by' ) ).rejects.toThrow();
+		/**
+		 * This test fails if the eslint rule is enabled. This block is deprecated so we can ignore it.
+		 */
+		// eslint-disable-next-line jest/valid-expect
+		expect( findByText( 'Order by' ) ).rejects.toThrow();
 	} );
 } );

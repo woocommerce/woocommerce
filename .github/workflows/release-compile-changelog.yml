@@ -3,9 +3,24 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version override. Default version is fetched from the base branch name, you can override the version but make sure the that the branch release/{version} exists on remote. Format: X.Y (Major.Minor)'
+        description: 'Version (in X.Y or X.Y.Z format). Branch "release/{x.y.z}" or "release/{x.y}" should already exist.'
+        required: true
+      append_changelog:
+        description: 'Append or replace entries in changelog?'
+        type: choice
+        options:
+          - auto
+          - replace
+          - append
+        required: false
+        default: auto
+      release_date:
+        description: 'Release date in YYYY-MM-DD format. If not provided, the current date will be used.'
         required: false
         default: ''
+
+concurrency:
+  group: release-compile-changelog-${{ inputs.version }}
 
 env:
     GIT_COMMITTER_NAME: 'WooCommerce Bot'
@@ -16,66 +31,169 @@ env:
 jobs:
   build-prep:
     name: Create changelog PR
-    runs-on: ubuntu-latest
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - name: Get version from the branch name workflow is running on
-        if: ${{ github.event.inputs.version == '' }}
-        uses: actions/github-script@v7
-        id: extract-version
-        with:
-          script: |
-            const refName = process.env.GITHUB_REF_NAME;
-            const versionMatch = refName.match(/^release\/(\d+\.\d+)$/);
-            if (versionMatch) {
-              const version = versionMatch[1];
-              console.log(`Extracted version: ${version}`);
-              core.setOutput('version', version);
-            } else {
-              core.setFailed(`Branch name ${refName} does not match the expected pattern 'release/x.y'`);
-              process.exit(1);
-            }
-
-      - name: Validate version input override
-        if: ${{ github.event.inputs.version != '' }}
-        uses: actions/github-script@v7
+      - name: Validate version input
+        id: validate-version
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
         env:
           VERSION: ${{ github.event.inputs.version }}
         with:
           script: |
             const version = process.env.VERSION;
-            if (!/^\d+\.\d+$/.test(version)) {
-              core.setFailed('Invalid version format. The version must be in the format X.Y');
-              core.info(`Version you entered: ${version}`);
+            if (!/^\d+\.\d+(?:\.\d+)?$/.test(version)) {
+              core.setFailed('Invalid version format. The version must be in the format X.Y or X.Y.Z');
+            }
+
+            console.log(`Version: ${version}`);
+
+            // Extract minor version (X.Y format)
+            const versionParts = version.split('.');
+            const minorVersion = `${versionParts[0]}.${versionParts[1]}`;
+
+            console.log(`Minor version: ${minorVersion}`);
+
+            core.setOutput('version', version);
+            core.setOutput('minor_version', minorVersion);
+
+      - name: Validate release date input
+        if: ${{ github.event.inputs.release_date != '' }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          RELEASE_DATE: ${{ github.event.inputs.release_date }}
+        with:
+          script: |
+            const releaseDate = process.env.RELEASE_DATE;
+
+            const regex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!regex.test(releaseDate)) {
+              core.setFailed('Invalid release date format. The release date must be in the format YYYY-MM-DD');
               process.exit(1);
             }
 
+            const [year, month, day] = releaseDate.split('-').map(Number);
+            const date = new Date(year, month - 1, day);
+
+            if (
+              date.getFullYear() !== year ||
+              date.getMonth() !== month - 1 ||
+              date.getDate() !== day
+            ) {
+              core.setFailed('Invalid release date. The release date must be an actual date.');
+              process.exit(1);
+            }
+
+            console.log(`Release date validated: ${releaseDate}`);
+
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+            ref: trunk
+
+      - name: Check the necessary branch exists
+        id: check-branch
+        run: |
+          VERSION_BRANCH="release/${{ steps.validate-version.outputs.version }}"
+          MINOR_BRANCH="release/${{ steps.validate-version.outputs.minor_version }}"
+
+          echo "Checking for version branch: $VERSION_BRANCH"
+
+          if git ls-remote --exit-code --heads origin ${VERSION_BRANCH} > /dev/null; then
+            echo "Found version branch: $VERSION_BRANCH"
+            SELECTED_BRANCH=${VERSION_BRANCH}
+          else
+            echo "Version branch '$VERSION_BRANCH' does not exist"
+            echo "Checking for minor version branch: $MINOR_BRANCH"
+
+            if git ls-remote --exit-code --heads origin ${MINOR_BRANCH} > /dev/null; then
+              echo "Found minor version branch: $MINOR_BRANCH"
+              SELECTED_BRANCH=${MINOR_BRANCH}
+            else
+              echo "Minor version branch '$MINOR_BRANCH' does not exist"
+              echo "::error::Neither branch '$VERSION_BRANCH' nor '$MINOR_BRANCH' exists."
+              exit 1
+            fi
+          fi
+
+          echo "Using branch: $SELECTED_BRANCH"
+          echo "selected_branch=${SELECTED_BRANCH}" >> $GITHUB_OUTPUT
+
+      - name: Validate input version matches current version in the selected branch
+        id: validate-selected-branch-version
+        env:
+          VERSION: ${{ steps.validate-version.outputs.version }}
+          SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
+        run: |
+          git fetch origin ${SELECTED_BRANCH}
+          git checkout ${SELECTED_BRANCH}
+          current_version=$( cat plugins/woocommerce/woocommerce.php | grep -oP '(?<=Version: )(.+)' | head -n1 )
+
+          echo "Current version from woocommerce.php: '$current_version'"
+          echo "Input version: '$VERSION'"
+
+          if [[ "$current_version" != "$VERSION"* ]]; then
+            echo "::error::The version in the selected branch ($current_version) does not match the input version ($VERSION)."
+            exit 1
+          fi
+
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
+          # Go back to trunk.
+          git checkout trunk
 
       - name: Setup PNPM
-        uses: pnpm/action-setup@a3252b78c470c02df07e9d59298aecedc3ccdd6d
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
 
       - name: Setup Node
-        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
             node-version-file: .nvmrc
             cache: pnpm
-            registry-url: 'https://registry.npmjs.org'
 
       - name: Install prerequisites
         run: |
             pnpm install --filter monorepo-utils --ignore-scripts
-            # ignore scripts speeds up setup signficantly, but we still need to build monorepo utils
+            # ignore scripts speeds up setup significantly, but we still need to build monorepo utils
             pnpm build
         working-directory: tools/monorepo-utils
 
       - name: Generate changelog changes and create PR
         id: changelog
         env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v ${{ github.event.inputs.version || steps.extract-version.outputs.version }}
+          VERSION: ${{ steps.validate-selected-branch-version.outputs.current_version }}
+          SELECTED_BRANCH: ${{ steps.check-branch.outputs.selected_branch }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Using branch: $SELECTED_BRANCH"
+          echo "Generating changelog for version: $VERSION"
+
+          # Determine whether to replace or append.
+          APPEND_CHANGELOG=""
+
+          # append_changelog: auto.
+          if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
+            # If a prerelease, append if there's already content in the changelog.
+            if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
+              git checkout ${SELECTED_BRANCH}
+
+              if sed -n '/== Changelog ==/,$p' plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+                APPEND_CHANGELOG="--append-changelog"
+              fi
+
+              # Go back to trunk to run the tools.
+              git checkout trunk
+            fi
+          elif [[ "${{ github.event.inputs.append_changelog }}" == "append" ]]; then
+            # append_changelog: append.
+            APPEND_CHANGELOG="--append-changelog"
+          fi
+
+          OVERRIDE_DATE=""
+          if [[ -n "${{ github.event.inputs.release_date }}" ]]; then
+            OVERRIDE_DATE="--override ${{ github.event.inputs.release_date }}"
+          fi
+
+          pnpm utils code-freeze changelog -o ${{ github.repository_owner }} -v $VERSION -b $SELECTED_BRANCH $APPEND_CHANGELOG $OVERRIDE_DATE

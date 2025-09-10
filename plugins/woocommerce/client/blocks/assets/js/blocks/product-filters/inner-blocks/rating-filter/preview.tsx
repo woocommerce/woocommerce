@@ -1,28 +1,43 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 
-import Rating from '@woocommerce/base-components/product-rating';
+/**
+ * Internal dependencies
+ */
+import { FilterOptionItem } from '../../types';
+import RatingStars from './components/rating-stars';
 
-export const previewOptions = [
+export const previewOptions: FilterOptionItem[] = [
 	{
-		label: <Rating key={ 5 } rating={ 5 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 5 } />,
+		ariaLabel: __( 'Rated 5 out of 5', 'woocommerce' ),
 		value: '5',
+		count: 35,
 	},
 	{
-		label: <Rating key={ 4 } rating={ 4 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 4 } />,
+		ariaLabel: __( 'Rated 4 out of 5', 'woocommerce' ),
 		value: '4',
+		count: 20,
 	},
 	{
-		label: <Rating key={ 3 } rating={ 3 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 3 } />,
+		ariaLabel: __( 'Rated 3 out of 5', 'woocommerce' ),
 		value: '3',
+		count: 3,
 	},
 	{
-		label: <Rating key={ 2 } rating={ 2 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 2 } />,
+		ariaLabel: __( 'Rated 2 out of 5', 'woocommerce' ),
 		value: '2',
+		count: 6,
 	},
 	{
-		label: <Rating key={ 1 } rating={ 1 } ratedProductsCount={ null } />,
+		label: <RatingStars stars={ 1 } />,
+		ariaLabel: __( 'Rated 1 out of 5', 'woocommerce' ),
 		value: '1',
+		count: 1,
 	},
 ];

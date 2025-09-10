@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import classnames from 'classnames';
+import clsx from 'clsx';
 import PropTypes from 'prop-types';
 import emojiFlags from 'emoji-flags';
 import { get } from 'lodash';
@@ -19,7 +19,7 @@ import { createElement } from '@wordpress/element';
  * @return {Object} - React component.
  */
 const Flag = ( { code, order, className, size, hideFromScreenReader } ) => {
-	const classes = classnames( 'woocommerce-flag', className );
+	const classes = clsx( 'woocommerce-flag', className );
 
 	let _code = code || 'unknown';
 	if ( order && order.shipping && order.shipping.country ) {

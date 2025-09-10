@@ -9,7 +9,11 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../../../core/logger';
 import { cloneAuthenticatedRepo } from '../../../core/git';
-import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
+import {
+	updateTrunkChangelog,
+	updateReleaseBranchChangelogs,
+	updateIntermediateBranches,
+} from './lib';
 import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
@@ -34,13 +38,22 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
+	.option(
+		'-b, --branch <branch>',
+		'Branch to use for the changelog. Default: "release/[version]".'
+	)
+	.option(
+		'-a, --append-changelog',
+		'Append changelog to the existing one instead of replacing it.',
+		false
+	)
 	.requiredOption( '-v, --version <version>', 'Version to bump to' )
 	.action( async ( options: Options ) => {
-		const { owner, name, version, devRepoPath } = options;
+		const { owner, name, version, branch, devRepoPath } = options;
 		Logger.startTask(
 			`Making a temporary clone of '${ owner }/${ name }'`
 		);
@@ -49,7 +62,7 @@ export const changelogCommand = new Command( 'changelog' )
 			owner: owner ? owner : 'woocommerce',
 			name: name ? name : 'woocommerce',
 		};
-		// Use a supplied path, otherwise do a full clone of the repo, including history so that changelogs can be created with links to PRs.
+		// Use a supplied path, otherwise do a full clone of the repo, including history, so that changelogs can be created with links to PRs.
 		const tmpRepoPath = devRepoPath
 			? devRepoPath
 			: await cloneAuthenticatedRepo( cloneOptions, false );
@@ -69,7 +82,8 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(
@@ -82,7 +96,12 @@ export const changelogCommand = new Command( 'changelog' )
 		await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
-			releaseBranch,
+			releaseBranchChanges
+		);
+
+		await updateIntermediateBranches(
+			options,
+			tmpRepoPath,
 			releaseBranchChanges
 		);
 	} );

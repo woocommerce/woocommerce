@@ -15,13 +15,19 @@ import { useOnboardingContext } from '../../data/onboarding-context';
 /**
  * WooPaymentsOnboarding component for the WooPayments onboarding modal.
  */
-export default function WooPaymentsOnboarding(): React.ReactNode {
+export default function WooPaymentsOnboarding( {
+	includeSidebar = true,
+}: {
+	includeSidebar?: boolean;
+} ): React.ReactNode {
 	const {
 		steps,
 		isLoading,
+		currentTopLevelStep,
 		currentStep,
 		navigateToStep,
 		justCompletedStepId,
+		sessionEntryPoint,
 	} = useOnboardingContext();
 
 	const location = useLocation();
@@ -29,12 +35,12 @@ export default function WooPaymentsOnboarding(): React.ReactNode {
 	// Forces navigation to the current step only if the URL does not already match.
 	useEffect( () => {
 		if (
-			currentStep &&
-			location.pathname !== ( currentStep?.path ?? '' )
+			currentTopLevelStep &&
+			! location.pathname.endsWith( currentTopLevelStep?.path ?? '' )
 		) {
-			navigateToStep( currentStep.id );
+			navigateToStep( currentTopLevelStep.id );
 		}
-	}, [ currentStep, navigateToStep, location.pathname ] );
+	}, [ currentTopLevelStep, navigateToStep, location.pathname ] );
 
 	// Displays a loading indicator if the content is still loading.
 	if ( isLoading ) {
@@ -50,18 +56,24 @@ export default function WooPaymentsOnboarding(): React.ReactNode {
 		return (
 			<Routes>
 				<Route
-					path="/woopayments/onboarding/*"
+					path="*"
 					element={
 						<div className="settings-payments-onboarding-modal__wrapper">
 							<Stepper
 								steps={ steps }
-								active={ currentStep?.id ?? '' }
+								activeTopLevelStep={
+									currentTopLevelStep?.id ?? ''
+								}
+								activeSubStep={ currentStep }
 								justCompletedStepId={ justCompletedStepId }
-								includeSidebar
+								includeSidebar={ includeSidebar }
 								sidebarTitle={ __(
 									'Set up WooPayments',
 									'woocommerce'
 								) }
+								context={ {
+									sessionEntryPoint,
+								} }
 							/>
 						</div>
 					}

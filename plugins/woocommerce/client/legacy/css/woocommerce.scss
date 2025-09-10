@@ -134,7 +134,7 @@ p.demo_store,
 			}
 
 			del {
-				opacity: 0.5;
+				opacity: 0.7;
 				display: inline-block;
 			}
 		}
@@ -573,7 +573,7 @@ p.demo_store,
 
 			del {
 				color: inherit;
-				opacity: 0.5;
+				opacity: 0.7;
 				display: inline-block;
 			}
 
@@ -873,7 +873,6 @@ p.demo_store,
 				line-height: 1;
 				font-family: "WooCommerce";
 				content: "\e021";
-				content: "\e021" / "";
 				text-indent: 0;
 			}
 
@@ -1206,6 +1205,49 @@ p.demo_store,
 	}
 
 	/**
+	 * Back in stock form
+	 */
+	.wc_bis_form {
+		margin: 2em 0;
+		padding: 0;
+
+		&.hidden {
+			display: none;
+		}
+
+		&__form-row {
+			display: flex;
+			flex-wrap: wrap;
+			flex-direction: row;
+			align-items: center;
+			justify-content: flex-start;
+			gap: 0.7em;
+			margin: .7em 0;
+		}
+
+		&__input {
+			box-sizing: border-box;
+			width: auto;
+			white-space: nowrap;
+		}
+
+		&__button {
+			box-sizing: border-box;
+			white-space: nowrap;
+		}
+
+		&__checkbox {
+			font-size: var(--wp--preset--font-size--small, .7em);
+			display: block;
+		}
+	}
+
+	:where(.wc_bis_form__input, .wc_bis_form__button) {
+		padding: .9rem 1.1rem;
+		line-height: 1;
+	}
+
+	/**
 	 * Order page
 	 */
 	ul.order_details {
@@ -1469,7 +1511,7 @@ p.demo_store,
 			width: 1em;
 			height: 1em;
 			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-			background-color: #7F54B3;
+			background-color: #7f54b3;
 			border-radius: 1em;
 			cursor: ew-resize;
 			outline: none;
@@ -1487,13 +1529,13 @@ p.demo_store,
 			border: 0;
 			border-radius: 1em;
 			// We use the old WooCommerce color on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-			background-color: #7F54B3;
+			background-color: #7f54b3;
 		}
 
 		.price_slider_wrapper .ui-widget-content {
 			border-radius: 1em;
 			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-			background-color: darken(#7F54B3, 30%);
+			background-color: darken(#7f54b3, 30%);
 			border: 0;
 		}
 
@@ -1621,14 +1663,14 @@ p.demo_store,
 
 		&.alt {
 			// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-			background-color: #7F54B3;
-			color: desaturate(lighten(#7F54B3, 50%), 18%);
+			background-color: #7f54b3;
+			color: desaturate(lighten(#7f54b3, 50%), 18%);
 			-webkit-font-smoothing: antialiased;
 
 			&:hover {
 				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-				background-color: darken(#7F54B3, 5%);
-				color: desaturate(lighten(#7F54B3, 50%), 18%);
+				background-color: darken(#7f54b3, 5%);
+				color: desaturate(lighten(#7f54b3, 50%), 18%);
 			}
 
 			&.disabled,
@@ -1638,8 +1680,8 @@ p.demo_store,
 			&:disabled:hover,
 			&:disabled[disabled]:hover {
 				// We use the old WooCommerce colors on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-				background-color: #7F54B3;
-				color: desaturate(lighten(#7F54B3, 50%), 18%);
+				background-color: #7f54b3;
+				color: desaturate(lighten(#7f54b3, 50%), 18%);
 			}
 		}
 
@@ -2005,7 +2047,7 @@ p.demo_store,
 
 	#payment {
 		// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
-		background: desaturate(rgba(#7F54B3, 0.14), 21%);
+		background: desaturate(rgba(#7f54b3, 0.14), 21%);
 		border-radius: 5px;
 
 		ul.payment_methods {
@@ -2014,7 +2056,7 @@ p.demo_store,
 			padding: 1em;
 			// We use the old WooCommerce color as the base on purpose. See https://github.com/woocommerce/woocommerce/issues/55165.
 			border-bottom: 1px solid
-				darken(desaturate(rgba(#7F54B3, 0.14), 21%), 10%);
+				darken(desaturate(rgba(#7f54b3, 0.14), 21%), 10%);
 			margin: 0;
 			list-style: none outside;
 

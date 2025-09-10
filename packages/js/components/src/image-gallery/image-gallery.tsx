@@ -9,7 +9,7 @@ import {
 	useState,
 	useMemo,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { MediaItem, MediaUpload } from '@wordpress/media-utils';
 
 /**
@@ -71,7 +71,7 @@ export const ImageGallery = ( {
 			{
 				key,
 				isDraggable: allowDragging && ! child.props.isCover,
-				className: classnames( {
+				className: clsx( {
 					'is-toolbar-visible': isToolbarVisible,
 				} ),
 				onClick() {
