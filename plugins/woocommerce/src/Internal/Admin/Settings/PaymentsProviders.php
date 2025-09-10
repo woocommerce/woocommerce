@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Visa;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
@@ -117,6 +118,7 @@ class PaymentsProviders {
 		'monei_*'                   => Monei::class,
 		'gocardless'                => GoCardless::class,
 		'kco'                       => KlarnaCheckout::class,
+		'visa_acceptance_solutions_*' => Visa::class,
 	);
 
 	/**
@@ -153,6 +155,7 @@ class PaymentsProviders {
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
 		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::VISA              => Visa::class,
 	);
 
 	/**
@@ -1177,16 +1180,16 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
-					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
-					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
-					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
-					ExtensionSuggestions::DEPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON, // We don't have suggestion details yet.
-					ExtensionSuggestions::EWAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::FORTISPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::NEXI, // We don't have suggestion details yet.
-					ExtensionSuggestions::PAYPAL_ZETTLE, // We don't have suggestion details yet.
-					ExtensionSuggestions::RAPYD, // We don't have suggestion details yet.
+					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
+					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
+					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
+					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
+					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
+					ExtensionSuggestions::EWAY,             // We don't have suggestion details yet.
+					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
+					ExtensionSuggestions::NEXI_CHECKOUT,    // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
+					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
 				),
 				true
