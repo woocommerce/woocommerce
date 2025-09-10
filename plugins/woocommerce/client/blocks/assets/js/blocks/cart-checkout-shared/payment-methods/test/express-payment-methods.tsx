@@ -118,8 +118,18 @@ describe( 'Express payment methods', () => {
 						'.wc-block-components-express-payment__event-buttons'
 					)
 				).toHaveProperty( 'tagName', 'DIV' );
+				expect(
+					document.querySelector(
+						'ul.wc-block-components-express-payment__event-buttons'
+					)
+				).toBeNull();
 				const mockExpressPaymentMethodName =
 					mockExpressPaymentMethodNames[ 0 ];
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( 1 );
 				expect(
 					document.querySelector(
 						`#express-payment-method-${ mockExpressPaymentMethodName }`
@@ -218,6 +228,11 @@ describe( 'Express payment methods', () => {
 						'.wc-block-components-express-payment__event-buttons'
 					)
 				).toHaveProperty( 'tagName', 'UL' );
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( mockExpressPaymentMethodNames.length );
 				mockExpressPaymentMethodNames.forEach( ( name ) => {
 					expect(
 						document.querySelector(
