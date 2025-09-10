@@ -2051,6 +2051,16 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 	category_id bigint(20) unsigned NOT NULL,
 	PRIMARY KEY (category_tree_id,category_id)
 ) $collate;
+CREATE TABLE {$wpdb->prefix}wc_user_meta_lookup (
+  `user_id` bigint(20) unsigned NOT NULL,
+  `billing_email` varchar(320) NULL default NULL,
+  `first_name` varchar(255) NULL default NULL,
+  `last_name` varchar(255) NULL default NULL,
+  `paying_customer` tinyint(1) NULL default NULL,
+  `wc_last_active` timestamp NULL default null,
+  PRIMARY KEY  (`user_id`),
+  KEY `billing_email` (`billing_email`)
+) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
 		";
@@ -2092,6 +2102,7 @@ $stock_notifications_table_schema;
 			"{$wpdb->prefix}wc_product_attributes_lookup",
 			"{$wpdb->prefix}wc_stock_notifications",
 			"{$wpdb->prefix}wc_stock_notificationmeta",
+			"{$wpdb->prefix}wc_user_meta_lookup",
 
 			// WCA Tables.
 			"{$wpdb->prefix}wc_order_stats",
