@@ -178,7 +178,10 @@ const ExpressPaymentMethods = () => {
 					? paymentMethod.edit
 					: paymentMethod.content;
 				return isValidElement( expressPaymentMethod ) ? (
-					<ExpressPayItem key={ id } id={ `express-payment-method-${ id }` }>
+					<ExpressPayItem
+						key={ id }
+						id={ `express-payment-method-${ id }` }
+					>
 						{ cloneElement( expressPaymentMethod, {
 							...paymentMethodInterface,
 							onClick: onExpressPaymentClick( id ),
