@@ -351,6 +351,20 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	}
 
 	/**
+	 * Get the display order for a settings group.
+	 *
+	 * @param array  $setting  Setting definition array.
+	 * @return int Display order.
+	 */
+	private function get_group_order( $setting ) {
+		if ( isset( $setting['order'] ) && is_numeric( $setting['order'] ) ) {
+			return (int) $setting['order'];
+		}
+
+		return 999;
+	}
+
+	/**
 	 * Get general settings data by transforming WC_Settings_General data into REST API format.
 	 *
 	 * @return array
@@ -373,6 +387,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				$current_group     = array(
 					'title'       => $setting['title'] ?? '',
 					'description' => $setting['desc'] ?? '',
+					'order'       => $this->get_group_order( $setting ),
 					'fields'      => array(),
 				);
 				continue;
@@ -584,6 +599,12 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 								'description' => __( 'Group description.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+							),
+							'order'       => array(
+								'description' => __( 'Display order for the group.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
 							),
 							'fields'      => array(
 								'description' => __( 'Settings fields.', 'woocommerce' ),
