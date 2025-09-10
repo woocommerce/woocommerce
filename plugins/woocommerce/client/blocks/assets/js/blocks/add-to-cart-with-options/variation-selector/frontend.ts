@@ -275,10 +275,9 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId = matchedVariation?.variation_id;
-				if ( typeof matchedVariationId === 'number' ) {
-					productDataActions.setVariationId( matchedVariationId );
-				}
+				const matchedVariationId =
+					matchedVariation?.variation_id || null;
+				productDataActions.setVariationId( matchedVariationId );
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
