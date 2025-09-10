@@ -468,18 +468,20 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	 * Helper method to clear all HPOS orders.
 	 */
 	protected static function clear_hpos_orders() {
-		$hide_errors = $GLOBALS['wpdb']->hide_errors();
+		global $wpdb;
 
-		foreach ( array_values( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_all_table_names_with_id() ) as $table ) {
+		$order_tables = array_merge(
+			array_values( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_all_table_names_with_id() ),
+			array(
+				"{$wpdb->prefix}woocommerce_order_items",
+				"{$wpdb->prefix}woocommerce_order_itemmeta",
+			)
+		);
+
+		$existing_tables = array_unique( array_intersect( $order_tables, $wpdb->get_col( 'SHOW TABLES' ) ) );
+		foreach ( $existing_tables as $table ) {
 			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$table}" );
-		}
-
-		$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$GLOBALS['wpdb']->prefix}woocommerce_order_items" );
-		$GLOBALS['wpdb']->query( "TRUNCATE TABLE {$GLOBALS['wpdb']->prefix}woocommerce_order_itemmeta" );
-
-		if ( ! $hide_errors ) {
-			$GLOBALS['wpdb']->show_errors();
+			$wpdb->query( "TRUNCATE TABLE {$table}" );
 		}
 	}
 }
