@@ -100,6 +100,21 @@ describe( 'Express payment methods', () => {
 			);
 			expect( noPaymentMethods.length ).toEqual( 1 );
 		} );
+
+		it( 'should use a div for the wrapper (a11y)', () => {
+			render( <ExpressPaymentMethods /> );
+			expect(
+				document.querySelector(
+					'.wc-block-components-express-payment__event-buttons'
+				)
+			).toHaveProperty( 'tagName', 'DIV' );
+			expect(
+				document.querySelector(
+					'ul.wc-block-components-express-payment__event-buttons'
+				)
+			).toBeNull();
+			expect( document.querySelectorAll( 'li' ).length ).toBe( 0 );
+		} );
 	} );
 
 	describe( 'Single payment method available', () => {
