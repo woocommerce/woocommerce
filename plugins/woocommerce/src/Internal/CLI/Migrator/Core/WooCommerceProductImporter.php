@@ -517,6 +517,10 @@ class WooCommerceProductImporter {
 		if ( ! empty( $product_data['stock_status'] ) ) {
 			$product->set_stock_status( $product_data['stock_status'] );
 		}
+
+		if ( ! empty( $product_data['cost_of_goods'] ) ) {
+			$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
+		}
 	}
 
 	/**
@@ -802,6 +806,10 @@ class WooCommerceProductImporter {
 			if ( $saved_variation_id ) {
 				$processed_variation_ids[] = $saved_variation_id;
 				$this->migration_data['variations_mapping'][ $original_variant_id ] = $saved_variation_id;
+				
+				if ( ! empty( $var_data['cost_of_goods'] ) ) {
+					update_post_meta( $saved_variation_id, '_cogs_total_value', (float) $var_data['cost_of_goods'] );
+				}
 			} else {
 				wc_get_logger()->error( "Failed to save variation for original variant {$original_variant_id}", array( 'source' => 'wc-migrator' ) );
 			}
@@ -1216,6 +1224,20 @@ class WooCommerceProductImporter {
 		if ( $current_desc !== $final_seo_description && ! empty( $final_seo_description ) ) {
 			$truncated_desc = mb_substr( $final_seo_description, 0, 160 );
 			update_post_meta( $product_id, '_yoast_wpseo_metadesc', $truncated_desc );
+		}
+	}
+
+	/**
+	 * Set COGS value directly using meta data.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @param float      $cogs_value The COGS value to set.
+	 */
+	private function set_cogs_value_direct( WC_Product $product, float $cogs_value ): void {
+		$product_id = $product->get_id();
+
+		if ( $product_id ) {
+			update_post_meta( $product_id, '_cogs_total_value', $cogs_value );
 		}
 	}
 
