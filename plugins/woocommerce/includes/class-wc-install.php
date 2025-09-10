@@ -304,6 +304,7 @@ class WC_Install {
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
 		'10.3.0' => array(
+			'wc_update_1030_create_user_meta_lookup_table',
 		),
 	);
 

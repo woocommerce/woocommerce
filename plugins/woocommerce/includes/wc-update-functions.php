@@ -3112,3 +3112,31 @@ function wc_update_990_remove_email_notes() {
 function wc_update_1000_remove_patterns_toolkit_transient() {
 	delete_transient( 'ptk_patterns' );
 }
+
+/**
+ * @param string|null $populate_column Indicates if we are setting up base structure or performing one of migration steps.
+ *
+ * @return void
+ */
+function wc_update_1030_create_user_meta_lookup_table( string $populate_column = null ): void {
+	global $wpdb;
+
+	$create_table    = null === $populate_column;
+	if ( $create_table ) {
+		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+		$wpdb->query(
+			"CREATE TABLE {$wpdb->prefix}wc_user_meta_lookup (
+				`user_id` bigint(20) unsigned NOT NULL,
+				`billing_email` varchar(320) NULL default NULL,
+				`first_name` varchar(255) NULL default NULL,
+				`last_name` varchar(255) NULL default NULL,
+				`paying_customer` tinyint(1) NULL default NULL,
+				`wc_last_active` timestamp NULL default null,
+				PRIMARY KEY  (`user_id`),
+				KEY `billing_email` (`billing_email`)
+			) $collate;"
+		);
+
+		// TODO: schedule populating the columns individually
+	}
+}
