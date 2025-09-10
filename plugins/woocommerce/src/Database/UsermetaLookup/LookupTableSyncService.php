@@ -35,18 +35,19 @@ class LookupTableSyncService {
 		return $this->table_name;
 	}
 
-	public function create_entry_for_user()
+	public function create_entry_for_user( $user_id )
 	{
 		// create a placeholder record
 	}
 
-	public function drop_entry_for_user()
-	{
+	public function drop_entry_for_user( $user_id ) {
 		// drop the user-specific record
+		// $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}wc_user_meta_lookup WHERE user_id = %d", $user_id ) );
 	}
 
-	public function update_entry_for_user()
-	{
-		// set the column value: provided value or null in case of deleted meta
+	public function update_entry_for_user( $meta_ids, $user_id, $meta_key, $meta_value = null ) {
+		if ( in_array( $meta_key, self::META_KEYS, true ) ) {
+			// set the column value: provided value or null in case of deleted meta
+		}
 	}
 }

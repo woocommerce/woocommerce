@@ -245,8 +245,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		wp_delete_user( $customer_id, $args['reassign'] );
 
-		// TODO: attach to WordPress hooks
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}wc_user_meta_lookup WHERE user_id = %d", $customer_id ) );
 		do_action( 'woocommerce_delete_customer', $customer_id );
 	}
 
