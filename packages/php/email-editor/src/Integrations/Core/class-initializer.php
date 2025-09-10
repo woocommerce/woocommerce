@@ -229,6 +229,7 @@ class Initializer {
 				break;
 			case 'core/embed':
 				$renderer = new Embed();
+				break;
 			case 'core/cover':
 				$renderer = new Cover();
 				break;
