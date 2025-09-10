@@ -28,18 +28,8 @@ class Gallery extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
-
-		// Process inner blocks to get gallery images.
-		$gallery_images = array();
-
-		foreach ( $inner_blocks as $block ) {
-			if ( 'core/image' === $block['blockName'] ) {
-				$rendered_image = render_block( $block );
-				// Extract image with link information from the original block data.
-				$gallery_images[] = $this->extract_image_with_link( $rendered_image, $block );
-			}
-		}
+		// Extract images directly from the block content (more efficient than re-rendering).
+		$gallery_images = $this->extract_images_from_gallery_content( $block_content, $parsed_block );
 
 		// If we don't have any images, return empty.
 		if ( empty( $gallery_images ) ) {
@@ -51,75 +41,60 @@ class Gallery extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Extract image with link information from block data.
+	 * Extract all images from gallery content with their links and captions.
 	 *
-	 * @param string $rendered_image The rendered image block HTML.
-	 * @param array  $block The original block data.
-	 * @return string Image HTML with proper link handling.
+	 * @param string $block_content The rendered gallery block HTML.
+	 * @param array  $parsed_block The parsed block data.
+	 * @return array Array of sanitized image HTML strings.
 	 */
-	private function extract_image_with_link( string $rendered_image, array $block ): string {
-		// Check if there's a link in the original innerHTML.
-		if ( isset( $block['innerHTML'] ) ) {
-			$inner_html = $block['innerHTML'];
+	private function extract_images_from_gallery_content( string $block_content, array $parsed_block ): array {
+		$gallery_images = array();
+		$inner_blocks   = $parsed_block['innerBlocks'] ?? array();
 
-			// Look for a link around the image in the original HTML.
-			if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $inner_html, $link_matches ) ) {
-				// Validate and sanitize the link URL.
-				$sanitized_url = esc_url_raw( $link_matches[2] );
-				if ( empty( $sanitized_url ) ) {
-					// If URL is invalid, fall back to image without link.
-					return $this->remove_figure_wrapper( $rendered_image );
+		// Extract images from inner blocks data where the actual image HTML is stored.
+		foreach ( $inner_blocks as $block ) {
+			if ( 'core/image' === $block['blockName'] && isset( $block['innerHTML'] ) ) {
+				$extracted_image = $this->extract_image_from_html( $block['innerHTML'] );
+				if ( ! empty( $extracted_image ) ) {
+					$gallery_images[] = $extracted_image;
 				}
-
-				// Extract the linked image and caption separately.
-				$linked_image = '<a href="' . $sanitized_url . '">' . $link_matches[3] . '</a>';
-
-				// Extract caption if it exists.
-				$caption = '';
-				if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $inner_html, $caption_matches ) ) {
-					$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
-					$caption           = '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
-				}
-
-				return $linked_image . $caption;
 			}
 		}
 
-		// Fallback to the original method if no link is found.
-		return $this->remove_figure_wrapper( $rendered_image );
+		return $gallery_images;
 	}
 
 	/**
-	 * Remove figure wrapper from rendered image block for email compatibility.
+	 * Extract and sanitize image with optional link and caption from HTML content.
+	 * This is the unified method that handles all image extraction scenarios.
 	 *
-	 * @param string $rendered_image Rendered image HTML.
-	 * @return string Image HTML without figure wrapper.
+	 * @param string $html_content HTML content containing the image.
+	 * @return string Sanitized image HTML with proper link and caption handling.
 	 */
-	private function remove_figure_wrapper( string $rendered_image ): string {
-		// Extract the img element and caption, preserving any links around the image.
+	private function extract_image_from_html( string $html_content ): string {
 		$result = '';
 
-		// Check if the image is wrapped in a link.
-		if ( preg_match( '/<a[^>]*href="([^"]*)"[^>]*>(<img[^>]*>)<\/a>/', $rendered_image, $link_matches ) ) {
-			// Image is linked - validate and sanitize the link URL.
-			$sanitized_href = esc_url_raw( $link_matches[1] );
-			if ( ! empty( $sanitized_href ) ) {
-				$sanitized_img = wp_kses_post( $link_matches[2] );
-				$result       .= '<a href="' . $sanitized_href . '">' . $sanitized_img . '</a>';
+		// First, try to find a linked image (most common case).
+		if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $html_content, $link_matches ) ) {
+			// Validate and sanitize the link URL.
+			$sanitized_url = esc_url_raw( $link_matches[2] );
+			if ( ! empty( $sanitized_url ) ) {
+				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
+				$result       .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
 			} else {
 				// If URL is invalid, extract just the image without link.
-				$result .= wp_kses_post( $link_matches[2] );
+				$result .= Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
 			}
-		} elseif ( preg_match( '/<img[^>]*>/', $rendered_image, $img_matches ) ) {
+		} elseif ( preg_match( '/<img[^>]*>/', $html_content, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
-			$result .= wp_kses_post( $img_matches[0] );
+			$result .= Html_Processing_Helper::sanitize_image_html( $img_matches[0] );
 		}
 
 		// Extract the caption if it exists (handle both figcaption and span formats).
-		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $rendered_image, $caption_matches ) ) {
+		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $html_content, $caption_matches ) ) {
 			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
 			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
-		} elseif ( preg_match( '/<span class="wp-element-caption"[^>]*>(.*?)<\/span>/s', $rendered_image, $caption_matches ) ) {
+		} elseif ( preg_match( '/<span class="wp-element-caption"[^>]*>(.*?)<\/span>/s', $html_content, $caption_matches ) ) {
 			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
 			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
 		}
@@ -265,6 +240,7 @@ class Gallery extends Abstract_Block_Renderer {
 			$row_cells
 		);
 	}
+
 
 	/**
 	 * Get the columns value from block attributes.

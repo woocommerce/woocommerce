@@ -376,4 +376,121 @@ class Html_Processing_Helper {
 
 		return $final_html;
 	}
+
+	/**
+	 * Sanitize image HTML while preserving necessary attributes for email rendering.
+	 *
+	 * @param string $image_html Raw image HTML.
+	 * @return string Sanitized image HTML.
+	 */
+	public static function sanitize_image_html( string $image_html ): string {
+		// Extract img tag using regex for more reliable processing.
+		if ( ! preg_match( '/<img[^>]*>/i', $image_html, $matches ) ) {
+			return $image_html;
+		}
+
+		$img_tag              = $matches[0];
+		$sanitized_attributes = array();
+
+		// Extract and sanitize individual attributes.
+		if ( preg_match_all( '/(\w+)=(["\'])(.*?)\2/', $img_tag, $attr_matches, PREG_SET_ORDER ) ) {
+			foreach ( $attr_matches as $attr_match ) {
+				$attr_name  = strtolower( $attr_match[1] );
+				$attr_value = $attr_match[3];
+
+				// Sanitize specific attributes.
+				switch ( $attr_name ) {
+					case 'src':
+						// Sanitize image source URL.
+						$sanitized_src = esc_url( $attr_value );
+						if ( ! empty( $sanitized_src ) ) {
+							$sanitized_attributes[] = $attr_name . '="' . $sanitized_src . '"';
+						}
+						break;
+
+					case 'alt':
+					case 'width':
+					case 'height':
+						// Sanitize text attributes.
+						$sanitized_attributes[] = $attr_name . '="' . esc_attr( $attr_value ) . '"';
+						break;
+
+					case 'class':
+						// Clean CSS classes.
+						$cleaned_classes = self::clean_css_classes( $attr_value );
+						if ( ! empty( $cleaned_classes ) ) {
+							$sanitized_attributes[] = $attr_name . '="' . $cleaned_classes . '"';
+						}
+						break;
+
+					case 'style':
+						// Sanitize inline styles - only allow safe properties for email rendering.
+						$sanitized_styles = self::sanitize_image_styles( $attr_value );
+						if ( ! empty( $sanitized_styles ) ) {
+							$sanitized_attributes[] = $attr_name . '="' . $sanitized_styles . '"';
+						}
+						break;
+
+					// Skip unknown attributes for security.
+				}
+			}
+		}
+
+		// Rebuild the img tag with sanitized attributes.
+		if ( empty( $sanitized_attributes ) ) {
+			return '';
+		}
+
+		// Ensure we have a src attribute - without it, the image is invalid.
+		$has_src = false;
+		foreach ( $sanitized_attributes as $attr ) {
+			if ( str_starts_with( $attr, 'src=' ) ) {
+				$has_src = true;
+				break;
+			}
+		}
+
+		if ( ! $has_src ) {
+			return '';
+		}
+
+		return '<img ' . implode( ' ', $sanitized_attributes ) . '>';
+	}
+
+	/**
+	 * Sanitize inline styles for image elements - only allow safe properties for email rendering.
+	 *
+	 * @param string $style_value Raw style value.
+	 * @return string Sanitized style value.
+	 */
+	private static function sanitize_image_styles( string $style_value ): string {
+		$sanitized_styles = array();
+		$style_parts      = explode( ';', $style_value );
+
+		foreach ( $style_parts as $style_part ) {
+			$style_part = trim( $style_part );
+			if ( empty( $style_part ) ) {
+				continue;
+			}
+
+			$property_parts = explode( ':', $style_part, 2 );
+			if ( count( $property_parts ) !== 2 ) {
+				continue;
+			}
+
+			$property = trim( strtolower( $property_parts[0] ) );
+			$value    = trim( $property_parts[1] );
+
+			// Allow safe CSS properties for images in email rendering.
+			$safe_properties = array( 'width', 'height', 'max-width', 'max-height', 'display', 'margin', 'padding', 'border', 'border-radius' );
+			if ( in_array( $property, $safe_properties, true ) ) {
+				$sanitized_value = self::sanitize_css_value( $value );
+				if ( ! empty( $sanitized_value ) ) {
+					$sanitized_styles[] = $property . ': ' . $sanitized_value;
+				}
+			}
+		}
+
+		return implode( '; ', $sanitized_styles );
+	}
 }
