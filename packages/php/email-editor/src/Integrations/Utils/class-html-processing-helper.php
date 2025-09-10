@@ -428,7 +428,7 @@ class Html_Processing_Helper {
 							// Clean CSS classes.
 							$cleaned_classes = self::clean_css_classes( (string) $attr_value );
 							if ( ! empty( $cleaned_classes ) ) {
-								$sanitized_attributes[] = $attr_name . '="' . $cleaned_classes . '"';
+								$sanitized_attributes[] = $attr_name . '="' . esc_attr( $cleaned_classes ) . '"';
 							}
 							break;
 
@@ -436,7 +436,7 @@ class Html_Processing_Helper {
 							// Sanitize inline styles - only allow safe properties for email rendering.
 							$sanitized_styles = self::sanitize_image_styles( (string) $attr_value );
 							if ( ! empty( $sanitized_styles ) ) {
-								$sanitized_attributes[] = $attr_name . '="' . $sanitized_styles . '"';
+								$sanitized_attributes[] = $attr_name . '="' . esc_attr( $sanitized_styles ) . '"';
 							}
 							break;
 					}
