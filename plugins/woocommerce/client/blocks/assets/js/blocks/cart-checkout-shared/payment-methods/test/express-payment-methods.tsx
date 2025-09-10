@@ -235,7 +235,7 @@ describe( 'Express payment methods', () => {
 				} );
 			} );
 
-			it( 'should use a ul wrapper and li for express payment method elements (a11y)', () => {
+			it( 'should use a ul wrapper and li for multiple express payment method elements (a11y)', () => {
 				render( <ExpressPaymentMethods /> );
 
 				expect(
@@ -260,6 +260,29 @@ describe( 'Express payment methods', () => {
 						)
 					).toHaveProperty( 'tagName', 'LI' );
 				} );
+			} );
+			it( 'should use a div wrapper and individual div for a single express payment method element (a11y)', () => {
+				deregisterMockExpressPaymentMethods();
+				registerSingleMockExpressPaymentMethod();
+				render( <ExpressPaymentMethods /> );
+
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+				expect(
+					document.querySelectorAll(
+						'[id^="express-payment-method-"]'
+					).length
+				).toBe( 1 );
+
+				expect(
+					document.querySelector( `#express-payment-method-paypal` )
+				).toBeInTheDocument();
+				expect(
+					document.querySelector( `#express-payment-method-paypal` )
+				).toHaveProperty( 'tagName', 'DIV' );
 			} );
 		} );
 	} );
