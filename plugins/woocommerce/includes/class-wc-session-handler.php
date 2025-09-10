@@ -81,6 +81,9 @@ class WC_Session_Handler extends WC_Session {
 	public function init() {
 		$this->init_hooks();
 		$this->init_session();
+		if($this->_has_cookie && empty($this->_data) && ! isset( WC()->cart )) {
+			$this->destroy_session();
+		}
 	}
 
 	/**
@@ -89,6 +92,7 @@ class WC_Session_Handler extends WC_Session {
 	protected function init_hooks() {
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
+		add_action( 'template_redirect', array( $this, 'remove_session_cookie_on_empty_session' ), 99 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
@@ -303,6 +307,21 @@ class WC_Session_Handler extends WC_Session {
 	public function maybe_set_customer_session_cookie() {
 		if ( is_wc_endpoint_url( 'order-pay' ) ) {
 			$this->set_customer_session_cookie( true );
+		}
+	}
+
+
+	public function remove_session_cookie_on_empty_session() {
+		if(is_user_logged_in() ) {
+			return;
+		}
+		/**
+		 * @todo: make sure we didn't just set the session
+		 * - test against the google pay issue
+		 *
+		 */
+		if($this->_has_cookie && empty($this->_data) && ! isset( WC()->cart )) {
+			$this->destroy_session();
 		}
 	}
 
@@ -664,7 +683,19 @@ class WC_Session_Handler extends WC_Session {
 			}
 		}
 
-		return maybe_unserialize( $value );
+		$session = maybe_unserialize( $value );
+		if ( ! is_user_logged_in() ) {
+			// @todo - just cleaning these out manually for testing until we get them nullified on their own.
+			if ( ! isset( $session['cart'] ) ) {
+				$session = array_diff_key( $session, array_flip( [
+					'wca_queued_events',
+					'customer',
+					'wca_session_data',
+					'removed_cart_contents',
+				] ) );
+			}
+		}
+		return $session;
 	}
 
 	/**
