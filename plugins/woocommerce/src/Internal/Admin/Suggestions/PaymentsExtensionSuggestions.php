@@ -3482,7 +3482,7 @@ class PaymentsExtensionSuggestions {
 	 * @return array The sanitized incentive details.
 	 */
 	private function sanitize_extension_incentive( array $incentive ): array {
-		// Apply a very lose sanitization. Stricter sanitization can be applied downstream, if needed.
+		// Apply a very loose sanitization. Stricter sanitization can be applied downstream, if needed.
 		return array_map(
 			function ( $value ) {
 				// Make sure that if we have HTML tags, we only allow a limited set of tags (only stylistic ones).
@@ -4361,25 +4361,27 @@ class PaymentsExtensionSuggestions {
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'woocommerce-gateway-eway',
 				),
-				array(
-					'_type' => self::LINK_TYPE_PRICING,
-					'url'   => 'https://www.eway.com.au/online-payments/#pricing',
-				),
-				array(
-					'_type' => self::LINK_TYPE_ABOUT,
-					'url'   => 'https://woocommerce.com/products/eway/',
-				),
-				array(
-					'_type' => self::LINK_TYPE_TERMS,
-					'url'   => 'https://www.eway.com.au/docs/eWAY-Terms-and-Conditions-AU.pdf',
-				),
-				array(
-					'_type' => self::LINK_TYPE_DOCS,
-					'url'   => 'https://woocommerce.com/document/eway/',
-				),
-				array(
-					'_type' => self::LINK_TYPE_SUPPORT,
-					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=eway',
+				'links'       => array(
+					array(
+						'_type' => self::LINK_TYPE_PRICING,
+						'url'   => 'https://www.eway.com.au/online-payments/#pricing',
+					),
+					array(
+						'_type' => self::LINK_TYPE_ABOUT,
+						'url'   => 'https://woocommerce.com/products/eway/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_TERMS,
+						'url'   => 'https://www.eway.com.au/docs/eWAY-Terms-and-Conditions-AU.pdf',
+					),
+					array(
+						'_type' => self::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/document/eway/',
+					),
+					array(
+						'_type' => self::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=eway',
+					),
 				),
 			),
 			self::VISA              => array(
