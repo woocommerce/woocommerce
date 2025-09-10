@@ -101,7 +101,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		$this->initialize_order_datastore();
+		$this->initialize_hpos();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -170,13 +170,13 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Configure order datastore (based on the ORDER_DATASTORE environment variable) for tests.
+	 * Configure the order datastore based on the DISABLE_HPOS environment variable.
 	 *
 	 * @return void
 	 */
-	private function initialize_order_datastore() {
-		// Enable HPOS by default unless ORDER_DATASTORE is set to "posts".
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( 'posts' !== getenv( 'ORDER_DATASTORE' ) );
+	private function initialize_hpos() {
+		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
 	}
 
 	/**
