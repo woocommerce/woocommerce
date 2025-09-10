@@ -3141,7 +3141,7 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 			"INSERT IGNORE INTO {$wpdb->prefix}wc_user_meta_lookup (`user_id`) SELECT users.ID FROM {$wpdb->users} users"
 		);
 
-		// TODO: schedule populating the columns individually
+		// TODO: schedule populating the columns individually, give it 30 seconds interval between steps
 		wc_update_1030_create_user_meta_lookup_table( 'billing_email' );
 		wc_update_1030_create_user_meta_lookup_table( 'first_name' );
 		wc_update_1030_create_user_meta_lookup_table( 'last_name' );
