@@ -401,11 +401,26 @@ final class WC_Cart_Session {
 		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
 		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
 
-		if ( ! is_user_logged_in() && $wc_session->has_session() && empty( $cart ) && empty( $applied_coupons ) && empty( $coupon_discount_totals ) && empty( $coupon_discount_tax_totals ) ) {
-			/*
-			 * Force deletion of the session cookie for anonymous users when there's nothing to actually store.
-			 * A session cookie prevents edge caching so we don't want it to exist for no reason.
+		/*
+		 * Check if we can force the deletion of the session cookie for anonymous users when there's nothing to actually store.
+		 * A session cookie prevents edge caching so we don't want it to exist for no reason, but on the other hand
+		 * extensions might want to use a custom session handler or add additional data to the session object.
+		 */
+		$should_delete_session = ! is_user_logged_in() && $wc_session->has_session() && empty( $cart ) && empty( $applied_coupons ) && empty( $coupon_discount_totals ) && empty( $coupon_discount_tax_totals );
+		if ( $should_delete_session ) {
+			/**
+			 * Filter whether the session cookie for an anonymous user should be destroyed when the cart is empty.
+			 *
+			 * @since 10.3.0
+			 *
+			 * @param bool       $destroy     Default true to destroy if we are using the default session class, false otherwise.
+			 * @param WC_Cart    $cart_object Cart object.
+			 * @param object $session     Session handler object.
 			 */
+			$should_delete_session = (bool) apply_filters( 'woocommerce_destroy_guest_session_when_cart_empty', 'WC_Session_Handler' === get_class( $wc_session ), $this->cart, $wc_session );
+		}
+
+		if ( $should_delete_session ) {
 			$wc_session->destroy_session();
 		} else {
 			/*
