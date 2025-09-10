@@ -74,6 +74,13 @@ class WooCommerceProductImporter {
 	);
 
 	/**
+	 * Mapping of original attribute names to taxonomy names for current product.
+	 *
+	 * @var array
+	 */
+	private array $current_attribute_mapping = array();
+
+	/**
 	 * Constructor - parameterless to support WooCommerce DI container.
 	 */
 	public function __construct() {
@@ -569,6 +576,7 @@ class WooCommerceProductImporter {
 	 */
 	private function setup_attributes( WC_Product_Variable $product, array $attributes_data ): void {
 		$woo_attributes = array();
+		$this->current_attribute_mapping = array();
 
 		foreach ( $attributes_data as $attribute_info ) {
 			$attr_name    = $attribute_info['name'] ?? null;
@@ -626,6 +634,8 @@ class WooCommerceProductImporter {
 			$woo_attribute->set_visible( $attribute_info['is_visible'] ?? true );
 			$woo_attribute->set_variation( $attribute_info['is_variation'] ?? true );
 			$woo_attributes[] = $woo_attribute;
+
+			$this->current_attribute_mapping[ $attr_name ] = $taxonomy_name;
 		}
 
 		$product->set_attributes( $woo_attributes );
@@ -645,17 +655,7 @@ class WooCommerceProductImporter {
 		$variation_count = count( $variations_data );
 		wc_get_logger()->debug( "Syncing {$variation_count} variations for product ID {$parent_product_id}", array( 'source' => 'wc-migrator' ) );
 
-		$attribute_taxonomy_map = array();
-		$product_attributes     = $product->get_attributes();
-
-		foreach ( $product_attributes as $taxonomy => $attribute_obj ) {
-			if ( $attribute_obj->get_variation() ) {
-				$attribute_label = wc_attribute_label( $taxonomy, $product );
-				// Store mapping with both original case and lowercase for case-insensitive lookup.
-				$attribute_taxonomy_map[ $attribute_label ]               = $taxonomy;
-				$attribute_taxonomy_map[ strtolower( $attribute_label ) ] = $taxonomy;
-			}
-		}
+		$attribute_taxonomy_map = $this->current_attribute_mapping;
 
 		foreach ( $variations_data as $var_data ) {
 			$original_variant_id = $var_data['original_id'] ?? null;
