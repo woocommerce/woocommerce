@@ -52,7 +52,7 @@
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
-		"test:api:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
+		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
 		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
@@ -61,7 +61,7 @@
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
-		"test:e2e:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
+		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
 		"test:env:start": "pnpm env:test",
@@ -317,9 +317,9 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - HPOS disabled",
+					"name": "Core e2e tests - (HPOS:off)",
 					"testType": "e2e",
-					"command": "test:e2e:hpos",
+					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
 						"tests/e2e-pw/**"
@@ -484,7 +484,7 @@
 				{
 					"name": "Core API tests (HPOS:off)",
 					"testType": "api",
-					"command": "test:api:hpos",
+					"command": "test:api:hpos-off",
 					"optional": false,
 					"changes": [
 						"composer.json",
