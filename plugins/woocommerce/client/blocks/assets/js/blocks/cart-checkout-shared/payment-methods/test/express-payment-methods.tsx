@@ -60,6 +60,26 @@ const registerMockExpressPaymentMethods = () => {
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
+const registerSingleMockExpressPaymentMethod = () => {
+	const mockExpressPaymentMethodName = mockExpressPaymentMethodNames[ 0 ];
+	[ mockExpressPaymentMethodName ].forEach( ( name ) => {
+		registerExpressPaymentMethod( {
+			name,
+			title: `${ name } payment method`,
+			description: `A test ${ name } payment method`,
+			gatewayId: 'test-express-payment-method',
+			paymentMethodId: name,
+			content: <MockExpressButton name={ name } />,
+			edit: <MockEditorExpressButton name={ name } />,
+			canMakePayment: () => true,
+			supports: {
+				features: [ 'products' ],
+			},
+		} );
+	} );
+	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+};
+
 const deregisterMockExpressPaymentMethods = () => {
 	mockExpressPaymentMethodNames.forEach( ( name ) => {
 		__experimentalDeRegisterExpressPaymentMethod( name );
