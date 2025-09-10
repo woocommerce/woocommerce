@@ -27,19 +27,19 @@ class Visa extends PaymentGateway {
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			if ( is_callable( array( $payment_gateway, 'get_config_settings' ) ) &&
-				 defined( 'VISA_ACCEPTANCE_ENVIRONMENT_TEST' ) &&
-				 defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
+				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_TEST' ) &&
+				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
 				$settings = $payment_gateway->get_config_settings();
 
 				return is_array( $settings ) &&
-					   ( ( \VISA_ACCEPTANCE_ENVIRONMENT_TEST === $settings['environment'] &&
-						 ! empty( $settings['test_merchant_id'] ) &&
-						 ! empty( $settings['test_api_key'] ) &&
-						 ! empty( $settings['test_api_shared_secret'] ) ) ||
-					   ( \VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION === $settings['environment'] &&
-						 ! empty( $settings['merchant_id'] ) &&
-						 ! empty( $settings['api_key'] ) &&
-						 ! empty( $settings['api_shared_secret'] ) ) );
+						( ( \VISA_ACCEPTANCE_ENVIRONMENT_TEST === $settings['environment'] &&
+						! empty( $settings['test_merchant_id'] ) &&
+						! empty( $settings['test_api_key'] ) &&
+						! empty( $settings['test_api_shared_secret'] ) ) ||
+						( \VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION === $settings['environment'] &&
+						! empty( $settings['merchant_id'] ) &&
+						! empty( $settings['api_key'] ) &&
+						! empty( $settings['api_shared_secret'] ) ) );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
@@ -111,8 +111,8 @@ class Visa extends PaymentGateway {
 	private function is_visa_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
 			if ( is_callable( array( $payment_gateway, 'get_config_settings' ) ) &&
-				 defined( 'VISA_ACCEPTANCE_ENVIRONMENT_TEST' ) &&
-				 defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
+				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_TEST' ) &&
+				defined( 'VISA_ACCEPTANCE_ENVIRONMENT_PRODUCTION' ) ) {
 				$settings = $payment_gateway->get_config_settings();
 
 				if ( is_array( $settings ) ) {

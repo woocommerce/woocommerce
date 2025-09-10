@@ -311,7 +311,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'AL' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -431,7 +431,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'BA' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -694,7 +694,7 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'PF' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -983,7 +983,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'MC' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1172,7 +1172,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'RS' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1345,7 +1345,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA => array(
+			self::VISA         => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1366,7 +1366,7 @@ class PaymentsExtensionSuggestions {
 						),
 					),
 				),
-				'_remove' => array(
+				'_remove'        => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
@@ -1494,7 +1494,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA => array(
+			self::VISA         => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1523,7 +1523,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA => array(
+			self::VISA         => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1801,7 +1801,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA => array(
+			self::VISA         => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1931,7 +1931,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA => array(
+			self::VISA         => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -2274,7 +2274,7 @@ class PaymentsExtensionSuggestions {
 			self::WOOPAYMENTS,
 			self::PAYPAL_FULL_STACK,
 			self::STRIPE,
-			self::EWAY => array(
+			self::EWAY   => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -2402,7 +2402,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_WALLET,
 		),
 		'TW' => array(
-			self::VISA => array(
+			self::VISA          => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -4353,11 +4353,11 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::EWAY              => array(
-				'_type'  => self::TYPE_PSP,
+				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Eway', 'woocommerce' ),
 				'description' => esc_html__( 'Take credit card payments securely via Eway keeping customers on your site.', 'woocommerce' ),
-				'icon'   => plugins_url( 'assets/images/onboarding/icons/eway.svg', WC_PLUGIN_FILE ),
-				'plugin' => array(
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/eway.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'woocommerce-gateway-eway',
 				),
@@ -4382,7 +4382,7 @@ class PaymentsExtensionSuggestions {
 					'url'   => 'https://woocommerce.com/my-account/contact-support/?select=eway',
 				),
 			),
-			self::VISA          => array(
+			self::VISA              => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Visa Acceptance Solutions', 'woocommerce' ),
 				'description' => esc_html__( 'Accept payments on your WooCommerce store securely.', 'woocommerce' ),
@@ -4438,12 +4438,12 @@ class PaymentsExtensionSuggestions {
 					),
 				),
 			),
-			self::NEXI_CHECKOUT => array(
-				'_type'  => self::TYPE_EXPRESS_CHECKOUT,
+			self::NEXI_CHECKOUT     => array(
+				'_type'       => self::TYPE_EXPRESS_CHECKOUT,
 				'title'       => esc_html__( 'Nexi Checkout', 'woocommerce' ),
 				'description' => esc_html__( 'A fully embedded checkout, with all popular payment methods, for more sales and less abandoned shopping carts.', 'woocommerce' ),
-				'icon'   => plugins_url( 'assets/images/onboarding/icons/nexi.svg', WC_PLUGIN_FILE ),
-				'plugin' => array(
+				'icon'        => plugins_url( 'assets/images/onboarding/icons/nexi.svg', WC_PLUGIN_FILE ),
+				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'dibs-easy-for-woocommerce',
 				),
