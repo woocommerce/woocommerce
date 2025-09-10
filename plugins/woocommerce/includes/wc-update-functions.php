@@ -3121,7 +3121,16 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
 function wc_update_1030_create_user_meta_lookup_table( string $populate_column = null ): void {
 	global $wpdb;
 
-	$create_table    = null === $populate_column;
+	$columns = [
+		'billing_email',
+		'first_name',
+		'first_name',
+		'last_name',
+		'paying_customer',
+		'wc_last_active',
+	];
+
+	$create_table = null === $populate_column;
 	if ( $create_table ) {
 		// Create an empty table and add placeholder-records for the existing users.
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
@@ -3142,5 +3151,18 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 		);
 
 		// TODO: schedule populating the columns individually
+		foreach ( $columns as $column ) {
+			wc_update_1030_create_user_meta_lookup_table( $column );
+		}
+	} else {
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->prefix}wc_user_meta_lookup lookup_table
+					LEFT JOIN {$wpdb->usermeta} meta ON lookup_table.user_id = meta.user_id AND meta.meta_key = %s
+				SET
+					lookup_table.`{$populate_column}` = meta.meta_value",
+				$populate_column
+			)
+		);
 	}
 }
