@@ -3121,15 +3121,6 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
 function wc_update_1030_create_user_meta_lookup_table( string $populate_column = null ): void {
 	global $wpdb;
 
-	$columns = [
-		'billing_email',
-		'first_name',
-		'first_name',
-		'last_name',
-		'paying_customer',
-		'wc_last_active',
-	];
-
 	$create_table = null === $populate_column;
 	if ( $create_table ) {
 		// Create an empty table and add placeholder-records for the existing users.
@@ -3141,7 +3132,7 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 				`first_name` varchar(255) NULL default NULL,
 				`last_name` varchar(255) NULL default NULL,
 				`paying_customer` tinyint(1) NULL default NULL,
-				`wc_last_active` timestamp NULL default null,
+				`wc_last_active` bigint(20) unsigned NULL default null,
 				PRIMARY KEY  (`user_id`),
 				KEY `billing_email` (`billing_email`)
 			) $collate;"
@@ -3151,9 +3142,11 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 		);
 
 		// TODO: schedule populating the columns individually
-		foreach ( $columns as $column ) {
-			wc_update_1030_create_user_meta_lookup_table( $column );
-		}
+		wc_update_1030_create_user_meta_lookup_table( 'billing_email' );
+		wc_update_1030_create_user_meta_lookup_table( 'first_name' );
+		wc_update_1030_create_user_meta_lookup_table( 'last_name' );
+		wc_update_1030_create_user_meta_lookup_table( 'paying_customer' );
+		wc_update_1030_create_user_meta_lookup_table( 'wc_last_active' );
 	} else {
 		$wpdb->query(
 			$wpdb->prepare(
