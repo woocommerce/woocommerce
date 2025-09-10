@@ -517,6 +517,37 @@
 					}
 				},
 				{
+					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"testType": "unit:php",
+					"command": "test:php:env:hpos-off",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.4",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"nightly-checks",
+						"release-checks",
+						"php-unit-php-8.4-wp-latest-hpos-off"
+					]
+				},
+				{
 					"name": "Core API tests (with object cache plugin)",
 					"testType": "api",
 					"command": "test:api:object-cache",
