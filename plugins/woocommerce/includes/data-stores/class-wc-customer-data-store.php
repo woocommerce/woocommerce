@@ -343,7 +343,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	private function update_user_meta_lookup_table( $customer ): void {
 		global $wpdb;
 
-		// TODO: attach to WordPress hooks
+		// TODO: attach to WordPress hooks; user: create/delete; meta: added/updated/removed
 		$wpdb->query(
 			$wpdb->prepare(
 				"REPLACE INTO {$wpdb->prefix}wc_user_meta_lookup (user_id, billing_email, first_name, last_name, paying_customer, wc_last_active) VALUES (%d, %s, %s, %s, %d, %d)",
