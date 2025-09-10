@@ -61,6 +61,7 @@ const registerMockExpressPaymentMethods = () => {
 };
 
 const registerSingleMockExpressPaymentMethod = () => {
+	// Use the first payment method to allow use of common deregister function.
 	const mockExpressPaymentMethodName = mockExpressPaymentMethodNames[ 0 ];
 	[ mockExpressPaymentMethodName ].forEach( ( name ) => {
 		registerExpressPaymentMethod( {
