@@ -1185,9 +1185,7 @@ class PaymentsProviders {
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
 					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
 					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
-					ExtensionSuggestions::EWAY,             // We don't have suggestion details yet.
 					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
-					ExtensionSuggestions::NEXI_CHECKOUT,    // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
 					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
