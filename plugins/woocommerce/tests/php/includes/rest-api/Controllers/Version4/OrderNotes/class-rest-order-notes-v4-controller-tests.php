@@ -76,12 +76,12 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test getting all order notes.
 	 */
 	public function test_get_items() {
-		// Create an order
+		// Create an order.
 		$order = OrderHelper::create_order( $this->user );
 
-		// Add some order notes
+		// Add some order notes.
 		$order->add_order_note( 'Test note 1', false, false );
-		$order->add_order_note( 'Test note 2', true, false ); // Customer note
+		$order->add_order_note( 'Test note 2', true, false );
 		$order->add_order_note( 'Test note 3', false, false );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/order-notes' );
@@ -127,11 +127,11 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_get_items_with_type_filter() {
 		$order = OrderHelper::create_order( $this->user );
 
-		// Add different types of notes
+		// Add different types of notes.
 		$order->add_order_note( 'Internal note', false, false );
 		$order->add_order_note( 'Customer note', true, false );
 
-		// Test internal notes filter
+		// Test internal notes filter.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/order-notes' );
 		$request->set_query_params(
 			array(
@@ -145,12 +145,12 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $notes );
 
-		// All notes should be internal
+		// All notes should be internal.
 		foreach ( $notes as $note ) {
 			$this->assertFalse( $note['is_customer_note'] );
 		}
 
-		// Test customer notes filter
+		// Test customer notes filter.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/order-notes' );
 		$request->set_query_params(
 			array(
@@ -164,7 +164,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $notes );
 
-		// All notes should be customer notes
+		// All notes should be customer notes.
 		foreach ( $notes as $note ) {
 			$this->assertTrue( $note['is_customer_note'] );
 		}
@@ -246,7 +246,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_body_params(
 			array(
 				'order_id' => $order->get_id(),
-				// Missing 'note' field
+				// Missing 'note' field.
 			)
 		);
 
