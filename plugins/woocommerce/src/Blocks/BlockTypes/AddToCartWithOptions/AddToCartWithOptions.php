@@ -241,8 +241,9 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variation_data       = array();
-				$available_variations = $product->get_available_variations( 'objects' );
+				$variation_data                = array();
+				$context['selectedAttributes'] = array();
+				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
 					// We intentionally set the default quantity to the product's min purchase quantity
 					// instead of the variation's min purchase quantity. That's because we use the same

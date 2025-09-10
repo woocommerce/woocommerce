@@ -21,6 +21,7 @@ import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {
+	selectedAttributes: SelectedAttributes[];
 	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
 	tempQuantity: number;
@@ -218,7 +219,8 @@ const { actions, state } = store<
 				return state.validationErrors.length === 0;
 			},
 			get allowsDecrease() {
-				const { quantity, childProductId } = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				if ( childProductId ) {
 					return quantity[ childProductId ] > 0;
@@ -226,7 +228,7 @@ const { actions, state } = store<
 
 				const productObject = getProductData(
 					productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( ! productObject ) {
@@ -240,11 +242,12 @@ const { actions, state } = store<
 				return currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
-				const { quantity, childProductId } = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( ! productObject ) {
@@ -266,10 +269,12 @@ const { actions, state } = store<
 					return;
 				}
 
+				const { selectedAttributes } = getContext< Context >();
+
 				// If selected quantity is invalid, add an error.
 				const productObject = getProductData(
 					productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if (
@@ -350,11 +355,12 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const { childProductId } = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( ! productObject ) {
@@ -381,11 +387,12 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const { childProductId } = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( ! productObject ) {
@@ -419,12 +426,13 @@ const { actions, state } = store<
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { childProductId } = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				let min = 1;
 				const productObject = getProductData(
 					childProductId || productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( productObject ) {
@@ -473,13 +481,14 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
+				const { selectedAttributes } = getContext< Context >();
+
 				const id =
 					productDataState.variationId || productDataState.productId;
 
 				const productType = productDataState.variationId
 					? 'variation'
-					: getProductData( id, productDataState.selectedAttributes )
-							?.type;
+					: getProductData( id, selectedAttributes )?.type;
 
 				if ( ! productType ) {
 					return;
@@ -490,7 +499,7 @@ const { actions, state } = store<
 				const newQuantity = getNewQuantity(
 					id,
 					quantity[ id ],
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				const { actions: wooActions } = store< WooCommerce >(
@@ -502,7 +511,7 @@ const { actions, state } = store<
 					{
 						id,
 						quantity: newQuantity,
-						variation: productDataState.selectedAttributes,
+						variation: selectedAttributes,
 						type: productType,
 					},
 					{

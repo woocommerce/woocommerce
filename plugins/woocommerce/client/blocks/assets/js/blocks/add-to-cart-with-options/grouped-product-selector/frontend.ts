@@ -6,7 +6,6 @@ import type {
 	ClientCartItem,
 	Store as WooCommerce,
 } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -20,12 +19,6 @@ import { getNewQuantity, getProductData } from '../frontend';
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
 
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
@@ -72,7 +65,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						productDataState.selectedAttributes
+						context.selectedAttributes
 					);
 					if ( ! productObject ) {
 						return false;
@@ -96,7 +89,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { quantity, groupedProductIds } =
+				const { quantity, selectedAttributes, groupedProductIds } =
 					getContext< AddToCartWithOptionsStoreContext >();
 
 				const addedItems: ClientCartItem[] = [];
@@ -113,7 +106,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 
 					const productObject = getProductData(
 						Number( childProductId ),
-						productDataState.selectedAttributes
+						selectedAttributes
 					);
 
 					if ( ! productObject ) {
@@ -123,7 +116,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					addedItems.push( {
 						id: Number( childProductId ),
 						quantity: newQuantity,
-						variation: productDataState.selectedAttributes,
+						variation: selectedAttributes,
 						type: productObject.type,
 					} );
 				}

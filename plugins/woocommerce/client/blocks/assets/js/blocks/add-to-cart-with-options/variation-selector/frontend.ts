@@ -137,6 +137,7 @@ const isAttributeValueValid = ( {
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
+			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
 		};
@@ -150,28 +151,36 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
+			setSelectedVariationId: () => void;
 			validateVariation: () => void;
 			watchQuantityConstraints: () => void;
 		};
 	};
 
-const { actions: productDataActions, state: productDataState } =
-	store< ProductDataStore >(
-		'woocommerce/product-data',
-		{},
-		{ lock: universalLock }
-	);
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
 
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
+			get selectedAttributes(): SelectedAttributes[] {
+				const context = getContext< Context >();
+				if ( ! context ) {
+					return [];
+				}
+				return context.selectedAttributes;
+			},
 			get isOptionSelected() {
 				const { selectedValue, option } = getContext< Context >();
 				return selectedValue === option.value;
 			},
 			get isOptionDisabled() {
-				const { name, option } = getContext< Context >();
+				const { name, option, selectedAttributes } =
+					getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
@@ -180,11 +189,47 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return ! isAttributeValueValid( {
 					attributeName: name,
 					attributeValue: option.value,
-					selectedAttributes: productDataState.selectedAttributes,
+					selectedAttributes,
 				} );
 			},
 		},
 		actions: {
+			setAttribute( attribute: string, value: string ) {
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+
+				if ( value === '' ) {
+					if ( index >= 0 ) {
+						selectedAttributes.splice( index, 1 );
+					}
+					return;
+				}
+
+				if ( index >= 0 ) {
+					selectedAttributes[ index ] = {
+						attribute,
+						value,
+					};
+				} else {
+					selectedAttributes.push( {
+						attribute,
+						value,
+					} );
+				}
+			},
+			removeAttribute( attribute: string ) {
+				const { selectedAttributes } = getContext< Context >();
+				const index = selectedAttributes.findIndex(
+					( selectedAttribute ) =>
+						selectedAttribute.attribute === attribute
+				);
+				if ( index >= 0 ) {
+					selectedAttributes.splice( index, 1 );
+				}
+			},
 			handlePillClick() {
 				if ( state.isOptionDisabled ) {
 					return;
@@ -195,18 +240,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} else {
 					context.selectedValue = context.option.value;
 				}
-				productDataActions.setAttribute(
-					context.name,
-					context.selectedValue
-				);
+				actions.setAttribute( context.name, context.selectedValue );
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
-				productDataActions.setAttribute(
-					context.name,
-					context.selectedValue
-				);
+				actions.setAttribute( context.name, context.selectedValue );
 			},
 		},
 		callbacks: {
@@ -214,10 +253,31 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const context = getContext< Context >();
 
 				if ( context.selectedValue ) {
-					productDataActions.setAttribute(
-						context.name,
-						context.selectedValue
+					actions.setAttribute( context.name, context.selectedValue );
+				}
+			},
+			setSelectedVariationId: () => {
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
+				const matchedVariation = getMatchedVariation(
+					variations,
+					selectedAttributes
+				);
+
+				const { actions: productDataActions } =
+					store< ProductDataStore >(
+						'woocommerce/product-data',
+						{},
+						{ lock: universalLock }
 					);
+				const matchedVariationId = matchedVariation?.variation_id;
+				if ( typeof matchedVariationId === 'number' ) {
+					productDataActions.setVariationId( matchedVariationId );
 				}
 			},
 			validateVariation() {
@@ -232,9 +292,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const variations =
 					products[ productDataState.productId ].variations;
 
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
 					variations,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				const { errorMessages } = getConfig();
@@ -261,6 +323,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
+				const { selectedAttributes } = getContext< Context >();
 				const { ref } = getElement();
 
 				if ( ! ( ref instanceof HTMLInputElement ) ) {
@@ -274,7 +337,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const productObject = getProductData(
 					productDataState.productId,
-					productDataState.selectedAttributes
+					selectedAttributes
 				);
 
 				if ( productObject ) {
