@@ -26,11 +26,14 @@ class NexiCheckout extends PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( $this->is_nexi_in_sandbox_mode( $payment_gateway ) ) {
-				return ! empty( $payment_gateway->get_option( 'dibs_test_key' ) ) && ! empty( $payment_gateway->get_option( 'dibs_test_checkout_key' ) );
-			} else {
-				return ! empty( $payment_gateway->get_option( 'dibs_live_key' ) ) && ! empty( $payment_gateway->get_option( 'dibs_checkout_key' ) );
+			$sandbox = $this->is_nexi_in_sandbox_mode( $payment_gateway );
+			if ( null === $sandbox ) {
+				return parent::is_account_connected( $payment_gateway );
 			}
+
+			return $sandbox
+				? ( ! empty( $payment_gateway->get_option( 'dibs_test_key' ) ) && ! empty( $payment_gateway->get_option( 'dibs_test_checkout_key' ) ) )
+				: ( ! empty( $payment_gateway->get_option( 'dibs_live_key' ) ) && ! empty( $payment_gateway->get_option( 'dibs_checkout_key' ) ) );
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
