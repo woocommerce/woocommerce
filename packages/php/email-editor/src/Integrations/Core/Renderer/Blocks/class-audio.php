@@ -148,7 +148,7 @@ class Audio extends Abstract_Block_Renderer {
 
 		// Create the main pill-style table.
 		$main_table_styles = sprintf(
-			'background-color: %s; border-radius: 9999px; display: inline-table; float: none; border: 1px solid %s; border-collapse: separate;',
+			'background-color: %s; border-radius: 9999px; float: none; border: 1px solid %s; border-collapse: separate;',
 			$background_color,
 			$border_color
 		);

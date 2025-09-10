@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
  * Embed block renderer.
@@ -250,10 +251,17 @@ class Embed extends Abstract_Block_Renderer {
 			}
 		}
 
+		// Get color from email attributes or theme styles.
+		$email_styles = $rendering_context->get_theme_styles();
+		$link_color   = $parsed_block['email_attrs']['color'] ?? $email_styles['color']['text'] ?? '#0073aa';
+		// Sanitize color value to ensure it's a valid hex color or CSS variable.
+		$link_color = Html_Processing_Helper::sanitize_color( $link_color );
+
 		// Create a simple link.
 		$link_html = sprintf(
-			'<a href="%s" target="_blank" rel="noopener nofollow" style="color: #0073aa; text-decoration: underline;">%s</a>',
+			'<a href="%s" target="_blank" rel="noopener nofollow" style="color: %s; text-decoration: underline;">%s</a>',
 			esc_url( $url ),
+			esc_attr( $link_color ),
 			esc_html( $link_text )
 		);
 
