@@ -296,7 +296,7 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 				const { products } = getConfig( 'woocommerce' );
 				const variations =
-					products?.[ productDataState.productId ].variations;
+					products?.[ productDataState.productId ]?.variations;
 
 				if ( variations ) {
 					const variationIds = Object.keys( variations );
