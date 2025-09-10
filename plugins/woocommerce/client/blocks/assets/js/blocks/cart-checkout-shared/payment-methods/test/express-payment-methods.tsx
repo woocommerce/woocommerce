@@ -163,6 +163,28 @@ describe( 'Express payment methods', () => {
 					'isPristine is deprecated since version 9.6.0. Please use isIdle instead. See: https://github.com/woocommerce/woocommerce-blocks/pull/8110'
 				);
 			} );
+
+			it( 'should use a ul wrapper and li for express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'UL' );
+				mockExpressPaymentMethodNames.forEach( ( name ) => {
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toBeInTheDocument();
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toHaveProperty( 'tagName', 'LI' );
+				} );
+			} );
 		} );
 		describe( 'In an editor context', () => {
 			beforeEach( () => {
