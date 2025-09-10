@@ -58,7 +58,11 @@ const v1 = {
 				createBlock( 'woocommerce/product-summary', {
 					showDescriptionIfEmpty: true,
 					summaryLength: 80,
-					textAlign: 'center',
+					style: {
+						typography: {
+							textAlign: 'center',
+						},
+					},
 				} )
 			);
 		}

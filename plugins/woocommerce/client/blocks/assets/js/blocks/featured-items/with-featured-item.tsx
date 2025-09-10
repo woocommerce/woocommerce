@@ -40,8 +40,6 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
@@ -257,8 +255,12 @@ export const withFeaturedItem =
 										'woocommerce/product-summary',
 										{
 											showDescriptionIfEmpty: true,
+											style: {
+												typography: {
+													textAlign: 'center',
+												},
+											},
 											summaryLength: 80,
-											textAlign: 'center',
 										},
 									],
 									[
@@ -364,8 +366,6 @@ export const withFeaturedItem =
 				minHeight,
 				overlayColor,
 				overlayGradient,
-				showDesc,
-				showPrice,
 				style,
 				textColor,
 			} = attributes;
