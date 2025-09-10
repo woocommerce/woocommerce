@@ -243,6 +243,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		wp_delete_user( $customer_id, $args['reassign'] );
 
+		// TODO: drop entry in wp_wc_user_meta_lookup
+
 		do_action( 'woocommerce_delete_customer', $customer_id );
 	}
 
@@ -323,6 +325,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$updated_props[] = $prop;
 			}
 		}
+
+		// TODO: replace entry in wp_wc_user_meta_lookup
 
 		do_action( 'woocommerce_customer_object_updated_props', $customer, $updated_props );
 	}
