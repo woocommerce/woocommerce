@@ -5,7 +5,6 @@
  * @package WooCommerce\DataStores
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -635,23 +634,17 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return array
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
-		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		global $wpdb;
 
+		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
-
-		$users_query = new WP_User_Query(
-			array(
-				'fields'     => 'ID',
-				'orderby'    => '',
-				'meta_query' => array(
-					array(
-						'key'     => 'billing_email',
-						'value'   => $emails,
-						'compare' => 'IN',
-					),
-				),
+		// TODO: security, properly inject the emails in here
+		$results = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT user_id FROM {$wpdb->prefix}wc_user_meta_lookup WHERE billing_email IN('" . implode("', '", $emails ) . "')"
 			)
 		);
-		return array_unique( $users_query->get_results() );
+
+		return $results;
 	}
 }
