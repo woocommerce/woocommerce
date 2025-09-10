@@ -73,8 +73,8 @@ class FeaturedProduct extends FeaturedItem {
 	protected function render_attributes( $product, $attributes ) {
 		$output = '';
 
-		// Backwards compatibility: Only render legacy attributes if they exist as boolean values
-		// This allows us to distinguish between old blocks (with boolean props) and new blocks (without these props)
+		// Backwards compatibility: Only render legacy attributes if they exist as boolean values.
+		// This allows us to distinguish between old blocks (with boolean props) and new blocks (without these props).
 		if ( array_key_exists( 'showDesc', $attributes ) && is_bool( $attributes['showDesc'] ) ) {
 			$legacy_title = sprintf(
 				'<h2 class="wc-block-featured-product__title">%s</h2>',
@@ -94,7 +94,7 @@ class FeaturedProduct extends FeaturedItem {
 					'<div class="wc-block-featured-product__description">%s</div>',
 					wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
 				);
-				$output .= $desc_str;
+				$output   .= $desc_str;
 			}
 
 			if ( $attributes['showPrice'] ) {
@@ -102,7 +102,7 @@ class FeaturedProduct extends FeaturedItem {
 					'<div class="wc-block-featured-product__price">%s</div>',
 					wp_kses_post( $product->get_price_html() )
 				);
-				$output .= $price_str;
+				$output   .= $price_str;
 			}
 		}
 
