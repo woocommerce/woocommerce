@@ -4441,7 +4441,7 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::NEXI_CHECKOUT     => array(
-				'_type'       => self::TYPE_EXPRESS_CHECKOUT,
+				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'Nexi Checkout', 'woocommerce' ),
 				'description' => esc_html__( 'A fully embedded checkout, with all popular payment methods, for more sales and less abandoned shopping carts.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/nexi.svg', WC_PLUGIN_FILE ),
