@@ -541,7 +541,6 @@
 						}
 					},
 					"events": [
-						"pull_request",
 						"nightly-checks",
 						"release-checks",
 						"php-unit-php-8.4-wp-latest-hpos-off"
