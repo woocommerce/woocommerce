@@ -55,8 +55,7 @@ class WC_Customer_Data_Store_Session_Test extends WC_Unit_Test_Case {
 		WC()->session->init();
 		WC()->session->set_customer_session_cookie( true );
 
-		$customer = $this->get_default_customer();
-		// $customer->set_billing_email( 'email@woocommerce.com' );
+		$customer   = $this->get_default_customer();
 		$data_store = new WC_Customer_Data_Store_Session();
 		$data_store->save_to_session( $customer );
 		WC()->session->save_data();

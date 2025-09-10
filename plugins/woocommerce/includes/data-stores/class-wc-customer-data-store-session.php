@@ -263,7 +263,7 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	/**
 	 * Returns whether the customer data is the same as a default customer.
 	 *
-	 * @param $customer_data array The customer data to check.
+	 * @param array $customer_data The customer data to check.
 	 * @return bool
 	 */
 	private function is_default_customer_data( array $customer_data ): bool {
