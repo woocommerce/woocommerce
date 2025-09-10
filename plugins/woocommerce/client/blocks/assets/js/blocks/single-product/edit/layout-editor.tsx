@@ -82,7 +82,7 @@ const LayoutEditor = ( {
 				</InspectorControls>
 				<div className={ baseClassName }>
 					<BlockContextProvider
-						value={ { postId: 65, postType: 'product' } }
+						value={ { postId: product?.id, postType: 'product' } }
 					>
 						<InnerBlocks
 							template={ DEFAULT_INNER_BLOCKS }
