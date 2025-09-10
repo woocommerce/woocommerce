@@ -80,14 +80,22 @@ class Gallery extends Abstract_Block_Renderer {
 			$sanitized_url = esc_url_raw( $link_matches[2] );
 			if ( ! empty( $sanitized_url ) ) {
 				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
-				$result       .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
+				if ( '' !== $sanitized_img ) {
+					$result .= '<a href="' . $sanitized_url . '">' . $sanitized_img . '</a>';
+				}
 			} else {
 				// If URL is invalid, extract just the image without link.
-				$result .= Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
+				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
+				if ( '' !== $sanitized_img ) {
+					$result .= $sanitized_img;
+				}
 			}
 		} elseif ( preg_match( '/<img[^>]*>/', $html_content, $img_matches ) ) {
 			// Image is not linked - just extract the img element with sanitization.
-			$result .= Html_Processing_Helper::sanitize_image_html( $img_matches[0] );
+			$sanitized_img = Html_Processing_Helper::sanitize_image_html( $img_matches[0] );
+			if ( '' !== $sanitized_img ) {
+				$result .= $sanitized_img;
+			}
 		}
 
 		// Extract the caption if it exists (handle both figcaption and span formats).

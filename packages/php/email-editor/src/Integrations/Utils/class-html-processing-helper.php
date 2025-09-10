@@ -400,7 +400,7 @@ class Html_Processing_Helper {
 
 		// Extract and sanitize individual attributes using WP_HTML_Tag_Processor for attribute processing.
 		$html = new \WP_HTML_Tag_Processor( $img_tag );
-		if ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+		if ( $html->next_tag() ) {
 			$attributes = $html->get_attribute_names_with_prefix( '' );
 			if ( is_array( $attributes ) ) {
 				foreach ( $attributes as $attr_name ) {
