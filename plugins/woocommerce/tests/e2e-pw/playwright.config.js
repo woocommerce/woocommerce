@@ -89,7 +89,7 @@ export default defineConfig( {
 	retries: CI ? 1 : 0,
 	repeatEach: REPEAT_EACH ? Number( REPEAT_EACH ) : 1,
 	workers: 1,
-	reportSlowTests: { max: 5, threshold: 30 * 1000 }, // 30 seconds threshold
+	reportSlowTests: { max: 5, threshold: 30 * 1000 },
 	reporter,
 	maxFailures: E2E_MAX_FAILURES ? Number( E2E_MAX_FAILURES ) : 0,
 	forbidOnly: !! CI,
