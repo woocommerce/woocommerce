@@ -89,6 +89,7 @@ The `PaymentsExtensionSuggestionsTest` class tests country-specific payment exte
 ## File Structure
 
 Key directories for testing:
+
 - `src/Internal/Admin/Suggestions/` - Payment extension suggestion implementation
 - `tests/php/src/Internal/Admin/Suggestions/` - Corresponding unit tests
 
