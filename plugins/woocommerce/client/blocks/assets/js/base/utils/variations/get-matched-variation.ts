@@ -4,13 +4,6 @@
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ProductData } from '@woocommerce/stores/woocommerce/cart';
 
-export type AvailableVariation = {
-	attributes: Record< string, string >;
-	variation_id: number;
-	price_html: string;
-	is_in_stock: boolean;
-};
-
 export const getMatchedVariation = (
 	availableVariations: ProductData[ 'variations' ],
 	selectedAttributes: SelectedAttributes[]
