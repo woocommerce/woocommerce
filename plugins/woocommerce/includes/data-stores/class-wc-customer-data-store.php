@@ -123,23 +123,25 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// Prevent wp_update_user calls in the same request and customer trigger the 'Notice of Password Changed' email.
 		$customer->set_password( '' );
 
+		$customer_id = $customer->get_id();
 		wp_update_user(
 			apply_filters(
 				'woocommerce_update_customer_args',
 				array(
-					'ID'           => $customer->get_id(),
+					'ID'           => $customer_id,
 					'role'         => $customer->get_role(),
 					'display_name' => $customer->get_display_name(),
 				),
 				$customer
 			)
 		);
-		$wp_user = new WP_User( $customer->get_id() );
+		$wp_user = new WP_User( $customer_id );
 		$customer->set_date_created( $wp_user->user_registered );
-		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
+		$customer->set_date_modified( get_user_meta( $customer_id, 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_new_customer', $customer->get_id(), $customer );
+
+		do_action( 'woocommerce_new_customer', $customer_id, $customer );
 	}
 
 	/**
@@ -150,14 +152,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @throws Exception If invalid customer.
 	 */
 	public function read( &$customer ) {
-		$user_object = $customer->get_id() ? get_user_by( 'id', $customer->get_id() ) : false;
+		$customer_id = $customer->get_id();
+		$user_object = $customer_id ? get_user_by( 'id', $customer_id ) : false;
 
 		// User object is required.
 		if ( ! $user_object || empty( $user_object->ID ) ) {
 			throw new Exception( __( 'Invalid customer.', 'woocommerce' ) );
 		}
-
-		$customer_id = $customer->get_id();
 
 		// Load meta but exclude deprecated props and parent keys.
 		$user_meta = array_diff_key(
@@ -190,11 +191,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param WC_Customer $customer Customer object.
 	 */
 	public function update( &$customer ) {
+		$customer_id = $customer->get_id();
 		wp_update_user(
 			apply_filters(
 				'woocommerce_update_customer_args',
 				array(
-					'ID'           => $customer->get_id(),
+					'ID'           => $customer_id,
 					'user_email'   => $customer->get_email(),
 					'display_name' => $customer->get_display_name(),
 				),
@@ -206,7 +208,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( $customer->get_password() ) {
 			wp_update_user(
 				array(
-					'ID'        => $customer->get_id(),
+					'ID'        => $customer_id,
 					'user_pass' => $customer->get_password(),
 				)
 			);
@@ -214,10 +216,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		$this->update_user_meta( $customer );
-		$customer->set_date_modified( get_user_meta( $customer->get_id(), 'last_update', true ) );
+		$customer->set_date_modified( get_user_meta( $customer_id, 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
-		do_action( 'woocommerce_update_customer', $customer->get_id(), $customer );
+		do_action( 'woocommerce_update_customer', $customer_id, $customer );
 	}
 
 	/**
@@ -228,7 +230,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param array       $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
-		if ( ! $customer->get_id() ) {
+		$customer_id = $customer->get_id();
+		if ( ! $customer_id ) {
 			return;
 		}
 
@@ -238,11 +241,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				'reassign' => 0,
 			)
 		);
+		wp_delete_user( $customer_id, $args['reassign'] );
 
-		$id = $customer->get_id();
-		wp_delete_user( $id, $args['reassign'] );
-
-		do_action( 'woocommerce_delete_customer', $id );
+		do_action( 'woocommerce_delete_customer', $customer_id );
 	}
 
 	/**
@@ -254,6 +255,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	private function update_user_meta( $customer ) {
 		$updated_props = array();
 		$changed_props = $customer->get_changes();
+		$customer_id   = $customer->get_id();
 
 		$meta_key_to_props = array(
 			'paying_customer' => 'is_paying_customer',
@@ -266,7 +268,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			if ( update_user_meta( $customer_id, $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -292,7 +294,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			if ( update_user_meta( $customer_id, $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -317,7 +319,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				continue;
 			}
 
-			if ( update_user_meta( $customer->get_id(), $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
+			if ( update_user_meta( $customer_id, $meta_key, $customer->{"get_$prop"}( 'edit' ) ) ) {
 				$updated_props[] = $prop;
 			}
 		}
@@ -343,7 +345,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_last_order( &$customer ) {
 		// Try to fetch the last order placed by this customer.
-		$last_order_id       = Users::get_site_user_meta( $customer->get_id(), 'wc_last_order', true );
+		$customer_id         = $customer->get_id();
+		$last_order_id       = Users::get_site_user_meta( $customer_id, 'wc_last_order', true );
 		$last_customer_order = false;
 
 		if ( ! empty( $last_order_id ) ) {
@@ -354,7 +357,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// empty string, for compatibility with the declared types of the following filter hook.
 		if (
 			! $last_customer_order instanceof WC_Order
-			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer->get_id() )
+			|| intval( $last_customer_order->get_customer_id() ) !== intval( $customer_id )
 		) {
 			$last_order_id = '';
 		}
@@ -389,7 +392,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					AND status in $order_statuses_sql
 					ORDER BY id DESC
 					LIMIT 1",
-					$customer->get_id()
+					$customer_id
 				);
 				$last_order_id = $wpdb->get_var( $sql );
 			} else {
@@ -398,7 +401,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				FROM $wpdb->posts AS posts
 				LEFT JOIN {$wpdb->postmeta} AS meta on posts.ID = meta.post_id
 				WHERE meta.meta_key = '_customer_user'
-				AND   meta.meta_value = '" . esc_sql( $customer->get_id() ) . "'
+				AND   meta.meta_value = '" . esc_sql( $customer_id ) . "'
 				AND   posts.post_type = 'shop_order'
 				AND   posts.post_status IN $order_statuses_sql
 				ORDER BY posts.ID DESC
@@ -406,7 +409,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			Users::update_site_user_meta( $customer->get_id(), 'wc_last_order', $last_order_id );
+			Users::update_site_user_meta( $customer_id, 'wc_last_order', $last_order_id );
 		}
 
 		if ( ! $last_order_id ) {
@@ -424,9 +427,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return integer
 	 */
 	public function get_order_count( &$customer ) {
-		$count = apply_filters(
+		$customer_id = $customer->get_id();
+		$count       = apply_filters(
 			'woocommerce_customer_get_order_count',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_order_count', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
 			$customer
 		);
 
@@ -441,7 +445,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					'SELECT COUNT(id) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
 					AND status in $order_statuses_sql",
-					$customer->get_id()
+					$customer_id
 				);
 				$count = $wpdb->get_var( $sql );
 			} else {
@@ -452,12 +456,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				WHERE   meta.meta_key = '_customer_user'
 				AND     posts.post_type = 'shop_order'
 				AND     posts.post_status IN $order_statuses_sql
-				AND     meta_value = '" . esc_sql( $customer->get_id() ) . "'"
+				AND     meta_value = '" . esc_sql( $customer_id ) . "'"
 				);
 			}
 			//phpcs:enable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
-			Users::update_site_user_meta( $customer->get_id(), 'wc_order_count', $count );
+			Users::update_site_user_meta( $customer_id, 'wc_order_count', $count );
 		}
 
 		return absint( $count );
@@ -471,9 +475,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return float
 	 */
 	public function get_total_spent( &$customer ) {
-		$spent = apply_filters(
+		$customer_id = $customer->get_id();
+		$spent       = apply_filters(
 			'woocommerce_customer_get_total_spent',
-			Users::get_site_user_meta( $customer->get_id(), 'wc_money_spent', true ),
+			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
 			$customer
 		);
 
@@ -489,7 +494,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					'SELECT SUM(total_amount) FROM ' . OrdersTableDataStore::get_orders_table_name() . "
 					WHERE customer_id = %d
 					AND status in $statuses_sql",
-					$customer->get_id()
+					$customer_id
 				);
 			} else {
 				$sql = "SELECT SUM(meta2.meta_value)
@@ -497,7 +502,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 					LEFT JOIN {$wpdb->postmeta} AS meta ON posts.ID = meta.post_id
 					LEFT JOIN {$wpdb->postmeta} AS meta2 ON posts.ID = meta2.post_id
 					WHERE   meta.meta_key       = '_customer_user'
-					AND     meta.meta_value     = '" . esc_sql( $customer->get_id() ) . "'
+					AND     meta.meta_value     = '" . esc_sql( $customer_id ) . "'
 					AND     posts.post_type     = 'shop_order'
 					AND     posts.post_status   IN $statuses_sql
 					AND     meta2.meta_key      = '_order_total'";
@@ -520,7 +525,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			if ( ! $spent ) {
 				$spent = 0;
 			}
-			Users::update_site_user_meta( $customer->get_id(), 'wc_money_spent', $spent );
+			Users::update_site_user_meta( $customer_id, 'wc_money_spent', $spent );
 		}
 
 		return wc_format_decimal( $spent, 2 );
