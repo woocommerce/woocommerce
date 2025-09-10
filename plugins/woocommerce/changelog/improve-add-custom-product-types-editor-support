@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow WYSIWYG editing of custom product types via the experimental template-part filter
