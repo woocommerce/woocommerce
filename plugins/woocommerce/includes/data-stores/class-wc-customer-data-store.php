@@ -141,6 +141,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->save_meta_data();
 		$customer->apply_changes();
 
+		$this->update_user_meta_lookup_table( $customer );
 		do_action( 'woocommerce_new_customer', $customer_id, $customer );
 	}
 
@@ -230,6 +231,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @param array       $args Array of args to pass to the delete method.
 	 */
 	public function delete( &$customer, $args = array() ) {
+		global $wpdb;
+
 		$customer_id = $customer->get_id();
 		if ( ! $customer_id ) {
 			return;
@@ -243,8 +246,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		wp_delete_user( $customer_id, $args['reassign'] );
 
-		// TODO: drop entry in wp_wc_user_meta_lookup
-
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}wc_user_meta_lookup WHERE user_id = %d", $customer_id ) );
 		do_action( 'woocommerce_delete_customer', $customer_id );
 	}
 
@@ -326,9 +328,33 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			}
 		}
 
-		// TODO: replace entry in wp_wc_user_meta_lookup
-
+		// TODO: if changes are made
+		$this->update_user_meta_lookup_table( $customer );
 		do_action( 'woocommerce_customer_object_updated_props', $customer, $updated_props );
+	}
+
+	/**
+	 * Update the user meta lookup table entry for the customer.
+	 *
+	 * @since 10.3.0
+	 * @param WC_Customer $customer Customer object.
+	 *
+	 * @return void
+	 */
+	private function update_user_meta_lookup_table( $customer ): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"REPLACE INTO {$wpdb->prefix}wc_user_meta_lookup (user_id, billing_email, first_name, last_name, paying_customer, wc_last_active) VALUES (%d, %s, %s, %s, %d, %d)",
+				$customer->get_id(),
+				$customer->get_billing_email( 'edit' ),
+				$customer->get_first_name( 'edit' ),
+				$customer->get_last_name( 'edit' ),
+				(int) $customer->get_is_paying_customer( 'edit' ),
+				(int) $customer->get_meta( 'wc_last_active', true, 'edit' )
+			)
+		);
 	}
 
 	/**
