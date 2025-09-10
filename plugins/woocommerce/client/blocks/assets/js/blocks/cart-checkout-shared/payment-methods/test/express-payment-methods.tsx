@@ -31,7 +31,7 @@ jest.mock( '../express-payment/express-payment-context', () => {
 	};
 } );
 
-const mockExpressPaymentMethodNames = [ 'paypal', 'google pay', 'apple pay' ];
+const mockExpressPaymentMethodNames = [ 'paypal', 'google-pay', 'apple-pay' ];
 
 const MockExpressButton = jest.fn( ( { name } ) => (
 	<div className="boo">{ `${ name } button` }</div>
