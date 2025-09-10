@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Destroy session for anonymous users when cart is empty
