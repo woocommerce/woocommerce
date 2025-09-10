@@ -45,10 +45,12 @@ const AddToCartOptionsEdit = (
 
 	const productType =
 		product?.id === undefined ? currentProductType?.slug : product?.type;
-	const editorSupportedProductTypes = getSetting( 'editorSupportedProductTypes', [] ) as string[];
+	const editorSupportedProductTypes = getSetting(
+		'editorSupportedProductTypes',
+		[]
+	) as string[];
 	const isTemplatePartSupported =
-		productType &&
-		editorSupportedProductTypes.includes( productType );
+		productType && editorSupportedProductTypes.includes( productType );
 
 	return (
 		<>
