@@ -1,8 +1,10 @@
 /**
  * External dependencies
  */
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductData } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	SelectedAttributes,
+	ProductData,
+} from '@woocommerce/stores/woocommerce/cart';
 
 export const getMatchedVariation = (
 	availableVariations: ProductData[ 'variations' ],
