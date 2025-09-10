@@ -316,6 +316,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_tax_totals', null );
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
+		$wc_session->set( 'store_api_draft_order', null );
 	}
 
 	/**
@@ -400,6 +401,10 @@ final class WC_Cart_Session {
 		$coupon_discount_totals     = $this->cart->get_coupon_discount_totals();
 		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
 		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
+
+		if ( empty( $cart ) ) {
+			$this->remove_draft_order();
+		}
 
 		/*
 		 * Check if we can force the deletion of the session cookie for anonymous users when there's nothing to actually store.
@@ -666,5 +671,24 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
+	}
+
+	/**
+	 * Remove the draft order from the session and delete it.
+	 */
+	private function remove_draft_order() {
+		$wc_session = WC()->session;
+
+		$draft_order = $wc_session->get( 'store_api_draft_order' );
+		if ( ! $draft_order ) {
+			return;
+		}
+
+		$order = wc_get_order( $draft_order );
+		if ( $order ) {
+			$order->delete( true );
+		}
+
+		WC()->session->set( 'store_api_draft_order', null );
 	}
 }
