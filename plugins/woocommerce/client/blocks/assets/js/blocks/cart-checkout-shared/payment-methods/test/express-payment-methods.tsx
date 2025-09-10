@@ -209,6 +209,28 @@ describe( 'Express payment methods', () => {
 					);
 				} );
 			} );
+
+			it( 'should use a ul wrapper and li for express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'UL' );
+				mockExpressPaymentMethodNames.forEach( ( name ) => {
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toBeInTheDocument();
+					expect(
+						document.querySelector(
+							`#express-payment-method-${ name }`
+						)
+					).toHaveProperty( 'tagName', 'LI' );
+				} );
+			} );
 		} );
 	} );
 } );
