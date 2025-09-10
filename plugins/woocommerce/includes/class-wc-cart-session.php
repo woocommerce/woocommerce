@@ -401,16 +401,24 @@ final class WC_Cart_Session {
 		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
 		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
 
-		/*
-		 * We want to clear out any empty/default data from the session that have no value in being stored so the session
-		 * can be forgotten if empty.
-		 */
-		$wc_session->set( 'cart_totals', empty( $cart ) ? null : $this->cart->get_totals() );
-		$wc_session->set( 'cart', empty( $cart ) ? null : $cart );
-		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
-		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
-		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
-		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		if ( ! is_user_logged_in() && $wc_session->has_session() && empty( $cart ) && empty( $applied_coupons ) && empty( $coupon_discount_totals ) && empty( $coupon_discount_tax_totals ) ) {
+			/*
+			 * Force deletion of the session cookie for anonymous users when there's nothing to actually store.
+			 * A session cookie prevents edge caching so we don't want it to exist for no reason.
+			 */
+			$wc_session->destroy_session();
+		} else {
+			/*
+			 * We want to clear out any empty/default data from the session that have no value in being stored so the session
+			 * can be forgotten if empty.
+			 */
+			$wc_session->set( 'cart_totals', empty( $cart ) ? null : $this->cart->get_totals() );
+			$wc_session->set( 'cart', empty( $cart ) ? null : $cart );
+			$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
+			$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
+			$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
+			$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		}
 
 		/**
 		 * Fires when cart is updated.
