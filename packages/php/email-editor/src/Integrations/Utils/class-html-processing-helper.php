@@ -384,73 +384,73 @@ class Html_Processing_Helper {
 	 * @return string Sanitized image HTML.
 	 */
 	public static function sanitize_image_html( string $image_html ): string {
-		// Extract img tag using regex for more reliable processing.
+		// If no HTML tags, return as-is.
+		if ( false === strpos( $image_html, '<' ) ) {
+			return $image_html;
+		}
+
+		// Extract img tag using regex for reliable processing.
 		if ( ! preg_match( '/<img[^>]*>/i', $image_html, $matches ) ) {
 			return $image_html;
 		}
 
 		$img_tag              = $matches[0];
 		$sanitized_attributes = array();
+		$has_src              = false;
 
-		// Extract and sanitize individual attributes.
-		if ( preg_match_all( '/(\w+)=(["\'])(.*?)\2/', $img_tag, $attr_matches, PREG_SET_ORDER ) ) {
-			foreach ( $attr_matches as $attr_match ) {
-				$attr_name  = strtolower( $attr_match[1] );
-				$attr_value = $attr_match[3];
+		// Extract and sanitize individual attributes using WP_HTML_Tag_Processor for attribute processing.
+		$html = new \WP_HTML_Tag_Processor( $img_tag );
+		if ( $html->next_tag( array( 'tag_name' => 'img' ) ) ) {
+			$attributes = $html->get_attribute_names_with_prefix( '' );
+			if ( is_array( $attributes ) ) {
+				foreach ( $attributes as $attr_name ) {
+					$attr_value = $html->get_attribute( $attr_name );
 
-				// Sanitize specific attributes.
-				switch ( $attr_name ) {
-					case 'src':
-						// Sanitize image source URL.
-						$sanitized_src = esc_url( $attr_value );
-						if ( ! empty( $sanitized_src ) ) {
-							$sanitized_attributes[] = $attr_name . '="' . $sanitized_src . '"';
-						}
-						break;
+					// Sanitize specific attributes.
+					switch ( $attr_name ) {
+						case 'src':
+							// Sanitize image source URL.
+							$sanitized_src = esc_url( (string) $attr_value );
+							if ( ! empty( $sanitized_src ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . $sanitized_src . '"';
+								$has_src                = true;
+							}
+							break;
 
-					case 'alt':
-					case 'width':
-					case 'height':
-						// Sanitize text attributes.
-						$sanitized_attributes[] = $attr_name . '="' . esc_attr( $attr_value ) . '"';
-						break;
+						case 'alt':
+						case 'width':
+						case 'height':
+							// Sanitize text attributes.
+							$sanitized_attributes[] = $attr_name . '="' . esc_attr( (string) $attr_value ) . '"';
+							break;
 
-					case 'class':
-						// Clean CSS classes.
-						$cleaned_classes = self::clean_css_classes( $attr_value );
-						if ( ! empty( $cleaned_classes ) ) {
-							$sanitized_attributes[] = $attr_name . '="' . $cleaned_classes . '"';
-						}
-						break;
+						case 'class':
+							// Clean CSS classes.
+							$cleaned_classes = self::clean_css_classes( (string) $attr_value );
+							if ( ! empty( $cleaned_classes ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . $cleaned_classes . '"';
+							}
+							break;
 
-					case 'style':
-						// Sanitize inline styles - only allow safe properties for email rendering.
-						$sanitized_styles = self::sanitize_image_styles( $attr_value );
-						if ( ! empty( $sanitized_styles ) ) {
-							$sanitized_attributes[] = $attr_name . '="' . $sanitized_styles . '"';
-						}
-						break;
-
-					// Skip unknown attributes for security.
+						case 'style':
+							// Sanitize inline styles - only allow safe properties for email rendering.
+							$sanitized_styles = self::sanitize_image_styles( (string) $attr_value );
+							if ( ! empty( $sanitized_styles ) ) {
+								$sanitized_attributes[] = $attr_name . '="' . $sanitized_styles . '"';
+							}
+							break;
+					}
 				}
 			}
 		}
 
-		// Rebuild the img tag with sanitized attributes.
-		if ( empty( $sanitized_attributes ) ) {
+		// If no valid src attribute, return empty string.
+		if ( ! $has_src ) {
 			return '';
 		}
 
-		// Ensure we have a src attribute - without it, the image is invalid.
-		$has_src = false;
-		foreach ( $sanitized_attributes as $attr ) {
-			if ( str_starts_with( $attr, 'src=' ) ) {
-				$has_src = true;
-				break;
-			}
-		}
-
-		if ( ! $has_src ) {
+		// Rebuild the img tag with sanitized attributes.
+		if ( empty( $sanitized_attributes ) ) {
 			return '';
 		}
 
