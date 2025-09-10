@@ -215,6 +215,26 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
+		await test.step( 'resets blocks rendering variation data when attributes are deselected', async () => {
+			await colorBlueOption.click();
+
+			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
+			await expect(
+				page
+					.getByLabel( 'Additional Information', { exact: true } )
+					.getByText( '1.5 lbs' )
+			).toBeVisible();
+			await expect( page.getByText( variationDescription ) ).toBeHidden();
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await productGalleryPageObject.getVisibleLargeImageId();
+
+				expect( newVisibleLargeImageId ).toBe( '34' );
+			} ).toPass( { timeout: 1_000 } );
+		} );
+
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await colorGreenOption.click();
 
@@ -747,5 +767,61 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect(
 			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
 		).toHaveValue( '1' );
+	} );
+
+	test( 'allows adding simple products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 't-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+
+	test( 'allows adding variable products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 'hoodie' );
+
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+
+		await colorBlueOption.click();
+		await logoYesOption.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+
+	test( 'allows adding grouped products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 'logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of T-Shirt'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( 'Added to cart' );
 	} );
 } );
