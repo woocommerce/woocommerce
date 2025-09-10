@@ -4409,7 +4409,7 @@ class PaymentsExtensionSuggestions {
 			self::GOCARDLESS        => array(
 				'_type'       => self::TYPE_PSP,
 				'title'       => esc_html__( 'GoCardless', 'woocommerce' ),
-				'description' => esc_html__( 'Accept Direct Debit, ACH Pull, and open baking payments.', 'woocommerce' ),
+				'description' => esc_html__( 'Accept Direct Debit, ACH Pull, and open banking payments.', 'woocommerce' ),
 				'icon'        => plugins_url( 'assets/images/onboarding/icons/gocardless.svg', WC_PLUGIN_FILE ),
 				'plugin'      => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
