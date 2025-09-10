@@ -101,6 +101,38 @@ describe( 'Express payment methods', () => {
 		} );
 	} );
 
+	describe( 'Single payment method available', () => {
+		beforeAll( () => {
+			registerSingleMockExpressPaymentMethod();
+		} );
+		afterAll( () => {
+			deregisterMockExpressPaymentMethods();
+		} );
+
+		describe( 'In a frontend context', () => {
+			it( 'should use a div for the wrapper and express payment method elements (a11y)', () => {
+				render( <ExpressPaymentMethods /> );
+				expect(
+					document.querySelector(
+						'.wc-block-components-express-payment__event-buttons'
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+				const mockExpressPaymentMethodName =
+					mockExpressPaymentMethodNames[ 0 ];
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toBeInTheDocument();
+				expect(
+					document.querySelector(
+						`#express-payment-method-${ mockExpressPaymentMethodName }`
+					)
+				).toHaveProperty( 'tagName', 'DIV' );
+			} );
+		} );
+	} );
+
 	describe( 'Payment methods available', () => {
 		beforeAll( () => {
 			registerMockExpressPaymentMethods();
