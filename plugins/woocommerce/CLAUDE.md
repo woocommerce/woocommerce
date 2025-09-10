@@ -10,20 +10,20 @@ To run PHP unit tests in the WooCommerce plugin directory, use the following com
 
 ```bash
 # Run all PHP unit tests
-npm run test:php:env
+pnpm run test:php:env
 
 # Run specific test class
-npm run test:php:env -- --filter TestClassName
+pnpm run test:php:env -- --filter TestClassName
 
 # Run specific test method
-npm run test:php:env -- --filter TestClassName::test_method_name
+pnpm run test:php:env -- --filter TestClassName::test_method_name
 
 # Run tests with verbose output
-npm run test:php:env -- --verbose --filter TestClassName
+pnpm run test:php:env -- --verbose --filter TestClassName
 
 # Examples:
-npm run test:php:env -- --filter PaymentsExtensionSuggestionsTest
-npm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_country_extensions_count_with_merchant_selling_online
+pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest
+pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_country_extensions_count_with_merchant_selling_online
 ```
 
 ### Test Environment
@@ -43,16 +43,16 @@ npm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_coun
 
 ```bash
 # Run tests for a specific directory
-npm run test:php:env -- tests/php/src/Internal/Admin/
+pnpm run test:php:env -- tests/php/src/Internal/Admin/
 
 # Run tests matching a pattern
-npm run test:php:env -- --filter "Admin.*Test"
+pnpm run test:php:env -- --filter "Admin.*Test"
 
 # Run tests and stop on first failure
-npm run test:php:env -- --stop-on-failure
+pnpm run test:php:env -- --stop-on-failure
 
 # Get test coverage (if configured)
-npm run test:php:env -- --coverage-text
+pnpm run test:php:env -- --coverage-text
 ```
 
 ### Troubleshooting Tests
@@ -68,13 +68,13 @@ When making changes to the codebase, run these commands to ensure code quality:
 
 ```bash
 # Run PHP linting
-npm run lint:php
+pnpm run lint:php
 
 # Fix PHP code style issues
-npm run lint:php:fix
+pnpm run lint:php:fix
 
 # Run JS linting
-npm run lint:lang:js
+pnpm run lint:lang:js
 ```
 
 ## Working with Payment Extension Tests
@@ -96,7 +96,7 @@ Key directories for testing:
 ## Development Workflow
 
 1. Make code changes
-2. Run relevant tests: `npm run test:php:env -- --filter YourTestClass`
+2. Run relevant tests: `pnpm run test:php:env -- --filter YourTestClass`
 3. Run linting/type checking if available
 4. Commit changes only after tests pass
 
