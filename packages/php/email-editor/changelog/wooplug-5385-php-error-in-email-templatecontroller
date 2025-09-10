@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add type check when extracting vars from theme style values in email editor

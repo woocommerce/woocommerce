@@ -389,11 +389,9 @@ const { actions, state } = store<
 					selectedAttributes
 				);
 
-				if ( ! productObject ) {
-					return;
-				}
-
-				const { max, min, step } = productObject;
+				const max = productObject?.max ?? Infinity;
+				const min = productObject?.min ?? 1;
+				const step = productObject?.step ?? 1;
 
 				const newValue = currentValue + step;
 
@@ -428,11 +426,8 @@ const { actions, state } = store<
 					selectedAttributes
 				);
 
-				if ( ! productObject ) {
-					return;
-				}
-
-				const { min, step } = productObject;
+				const min = productObject?.min ?? 1;
+				const step = productObject?.step ?? 1;
 
 				let newValue = currentValue - step;
 

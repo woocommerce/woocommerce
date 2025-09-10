@@ -23,10 +23,10 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options::actions.decreaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options::!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options::actions.increaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options::!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -84,11 +84,18 @@ class Utils {
 		if ( $child_product_id ) {
 			$context['childProductId'] = $child_product_id;
 		}
-		$context_attribute = ! empty( $context ) ? ' ' . wp_interactivity_data_wp_context( $context ) : '';
+		$context_attribute = ! empty( $context ) ? wp_interactivity_data_wp_context( $context ) : '';
+
+		$wrapper_attributes = array_merge(
+			array(
+				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+			),
+			$wrapper_attributes
+		);
 
 		if ( ! empty( $wrapper_attributes ) ) {
 			return sprintf(
-				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
+				'<div %1$s %2$s>%3$s</div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				$context_attribute,
 				$quantity_html
