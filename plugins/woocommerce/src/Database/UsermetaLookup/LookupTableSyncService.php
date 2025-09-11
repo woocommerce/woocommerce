@@ -111,7 +111,11 @@ class LookupTableSyncService {
 	public function update_entry_for_user( $meta_ids, $user_id, $meta_key, $meta_value = null ): void {
 		if ( in_array( $meta_key, self::META_KEYS, true ) ) {
 			global $wpdb;
-			$wpdb->query( $wpdb->prepare( "UPDATE %i SET %i = %s WHERE user_id = %d", $this->table_name, $meta_key, $meta_value, $user_id ) );
+			if ( null === $meta_value) {
+				$wpdb->query($wpdb->prepare("UPDATE %i SET %i = NULL WHERE user_id = %d", $this->table_name, $meta_key, $user_id));
+			} else {
+				$wpdb->query($wpdb->prepare("UPDATE %i SET %i = %s WHERE user_id = %d", $this->table_name, $meta_key, $meta_value, $user_id));
+			}
 		}
 	}
 }
