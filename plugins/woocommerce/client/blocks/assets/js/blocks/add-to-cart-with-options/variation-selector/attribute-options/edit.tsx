@@ -22,7 +22,7 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
-	style?: 'pills' | 'dropdown';
+	optionStyle?: 'pills' | 'dropdown';
 }
 
 function Pills( {
@@ -61,7 +61,7 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, style } = attributes;
+	const { className, optionStyle } = attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -94,9 +94,13 @@ export default function AttributeOptionsEdit(
 			<InspectorControls>
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<ToggleGroupControl
-						value={ style }
-						onChange={ ( option: 'pills' | 'dropdown' ) => {
-							setAttributes( { style: option } );
+						label={ __( 'Style', 'woocommerce' ) }
+						value={ optionStyle }
+						onChange={ ( option ) => {
+							if ( option !== 'pills' && option !== 'dropdown' ) {
+								return;
+							}
+							setAttributes( { optionStyle: option } );
 						} }
 						isBlock
 						hideLabelFromVision
@@ -115,7 +119,7 @@ export default function AttributeOptionsEdit(
 			</InspectorControls>
 
 			<Disabled>
-				{ style === 'pills' ? (
+				{ optionStyle === 'pills' ? (
 					<Pills id={ attribute.taxonomy } options={ options } />
 				) : (
 					<select

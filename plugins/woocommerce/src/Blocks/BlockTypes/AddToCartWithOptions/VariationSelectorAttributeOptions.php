@@ -31,7 +31,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'style' => 'pills',
+			'optionStyle' => 'pills',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -60,10 +60,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attributes = $this->parse_attributes( $attributes );
 
-		// `$attributes['style']` is the layout selector ("pills" | "dropdown"), not the block supports style object.
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'style' ) );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		$field_style = $attributes['style'];
+		$option_style = $attributes['optionStyle'];
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -72,7 +71,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			)
 		);
 
-		if ( 'dropdown' === $field_style ) {
+		if ( 'dropdown' === $option_style ) {
 			$content = $this->render_dropdown( $attributes, $content, $block );
 		} else {
 			$content = $this->render_pills( $attributes, $content, $block );

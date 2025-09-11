@@ -8,7 +8,7 @@
 		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"attributes": {
-		"style": {
+		"optionStyle": {
 			"type": "string",
 			"enum": [ "pills", "dropdown" ],
 			"default": "pills"
