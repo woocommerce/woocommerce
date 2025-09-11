@@ -61,6 +61,18 @@ class BlockUtils {
 		}
 
 		await singleProductBlock.getByText( 'Done' ).click();
+
+		// Switch to the non-blockified Add to Cart with Options block
+		const addToCartWithOptionsBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options'
+		);
+		await this.editor.selectBlocks( addToCartWithOptionsBlock );
+
+		await this.page
+			.getByRole( 'button', {
+				name: 'Switch back',
+			} )
+			.click();
 	}
 
 	async enableStepperMode() {
