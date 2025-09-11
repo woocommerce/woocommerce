@@ -56,12 +56,12 @@ class AddToCartWithOptions extends AbstractBlock {
 		// If the product type has an experimental filter to locate a template part, add it to the supported product types.
 		$supported_product_types = $core_product_types;
 		foreach ( $custom_product_types as $product_type ) {
-			if ( has_filter( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part' ) ) {
+			if ( false !== has_filter( '__experimental_woocommerce_' . sanitize_key( $product_type ) . '_add_to_cart_with_options_block_template_part' ) ) {
 				$supported_product_types[] = $product_type;
 			}
 		}
 
-		return $supported_product_types;
+		return array_values( array_unique( $supported_product_types ) );
 	}
 
 	/**
