@@ -1,14 +1,10 @@
 /**
- * External dependencies
- */
-import { ValidatedTextInput } from '@woocommerce/blocks-components';
-
-/**
  * Internal dependencies
  */
 import AddressLine2Field from './address-line-2-field';
 import { AddressLineFieldsProps } from './types';
 import { createFieldProps } from './utils';
+import { AddressAutocomplete } from '../address-autocomplete/address-autocomplete';
 
 const AddressLineFields = ( {
 	formId,
@@ -31,9 +27,10 @@ const AddressLineFields = ( {
 	return (
 		<>
 			{ address1 && (
-				<ValidatedTextInput
+				<AddressAutocomplete
 					{ ...address1FieldProps }
 					type={ address1.field.type }
+					addressType={ addressType }
 					className={ `wc-block-components-address-form__address_1` }
 					value={ address1.value }
 					onChange={ ( newValue: string ) =>
