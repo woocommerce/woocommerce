@@ -587,4 +587,53 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product->delete( true );
 		$coupon->delete( true );
 	}
+
+	/**
+	 * @testdox should clear store_api_draft_order from session when cart is empty
+	 */
+	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
+		$cart     = WC()->cart;
+		$order_id = WC_Helper_Order::create_order()->save();
+		WC()->session->set( 'store_api_draft_order', $order_id );
+
+		$cart->set_session();
+
+		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox should not clear store_api_draft_order from session when cart is not empty
+	 */
+	public function test_setting_session_should_not_clear_store_api_draft_order_when_cart_is_not_empty() {
+		$cart    = WC()->cart;
+		$product = WC_Helper_Product::create_simple_product();
+
+		$cart->add_to_cart( $product->get_id() );
+		$order_id = WC_Helper_Order::create_order()->save();
+		WC()->session->set( 'store_api_draft_order', $order_id );
+
+		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+
+		$cart->set_session();
+
+		$order = wc_get_order( $order_id );
+		$this->assertEquals( $order_id, $order->get_id() );
+		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+	}
+
+	/**
+	 * @testdox should clear store_api_draft_order from session and db when the cart is emptied
+	 */
+	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
+		$cart = WC()->cart;
+
+		$order_id = WC_Helper_Order::create_order()->save();
+		WC()->session->set( 'store_api_draft_order', $order_id );
+
+		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+
+		$cart->empty_cart();
+
+		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
+	}
 }

@@ -49,20 +49,22 @@ class Variables_Postprocessor implements Postprocessor {
 			$replacements[ $var_pattern ] = $value;
 		}
 
-		// Pattern to match style attributes and their values.
-		$callback = function ( $matches ) use ( $replacements ) {
-			// For each match, replace CSS variables with their values.
-			$style = $matches[1];
-			$style = preg_replace( array_keys( $replacements ), array_values( $replacements ), $style );
-			return 'style="' . esc_attr( $style ) . '"';
-		};
-
 		// We want to replace the CSS variables only in the style attributes to avoid replacing the actual content.
-		$style_pattern     = '/style="(.*?)"/i';
-		$style_pattern_alt = "/style='(.*?)'/i";
-		$html              = (string) preg_replace_callback( $style_pattern, $callback, $html );
-		$html              = (string) preg_replace_callback( $style_pattern_alt, $callback, $html );
+		$processor = new \WP_HTML_Tag_Processor( $html );
 
-		return $html;
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
+
+			if ( null !== $style && true !== $style ) {
+				// Replace CSS variables with their values.
+				$processed_style = preg_replace( array_keys( $replacements ), array_values( $replacements ), $style );
+
+				if ( null !== $processed_style ) {
+					$processor->set_attribute( 'style', $processed_style );
+				}
+			}
+		}
+
+		return $processor->get_updated_html();
 	}
 }

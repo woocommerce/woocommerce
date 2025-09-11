@@ -49,12 +49,12 @@
 		"simple-git": "^3.21.0"
 	},
 	"devDependencies": {
-		"@types/jest": "27.5.x",
+		"@types/jest": "29.5.x",
 		"@types/node": "20.x.x",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"copy-webpack-plugin": "13.0.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"replace": "^1.2.2",
 		"ts-jest": "29.1.x",
 		"ts-loader": "9.5.x",

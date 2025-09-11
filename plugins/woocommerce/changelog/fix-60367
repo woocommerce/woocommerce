@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make sure wc-admin db update notification is always in sync with legacy one.

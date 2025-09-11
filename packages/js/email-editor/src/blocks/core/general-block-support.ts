@@ -1,18 +1,19 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
 import {
 	Block as WPBlock,
 	BlockSupports as WPBlockSupports,
 } from '@wordpress/blocks/index';
 import domReady from '@wordpress/dom-ready';
-import {
-	store as blocksStore,
-	unregisterBlockStyle,
-	getBlockTypes,
-} from '@wordpress/blocks';
+import { getBlockTypes } from '@wordpress/blocks';
 import { select } from '@wordpress/data';
+
+/**
+ * Internal dependencies
+ */
+import { updateBlockSettings } from '../../config-tools/block-config';
+import { unregisterBlockStyleForEmail } from '../../config-tools/block-style';
 
 // Extend the BlockSupports type to include shadow
 // The shadow is not included in WP6.4 but it is in WP6.5
@@ -27,20 +28,18 @@ const BLOCK_STYLES_TO_PRESERVE = [ 'core/social-links' ];
  * Disables Shadow Support for all blocks
  * Currently we are not able to read these styles in renderer
  */
-function alterSupportConfiguration() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/block-support',
-		( settings: Block ) => {
-			if ( settings.supports?.shadow ) {
-				return {
-					...settings,
-					supports: { ...settings.supports, shadow: false },
-				};
-			}
-			return settings;
+function alterSupportConfiguration(): void {
+	getBlockTypes().forEach( ( blockType: Block ) => {
+		if ( blockType.supports?.shadow ) {
+			updateBlockSettings( blockType.name, ( current ) => ( {
+				...current,
+				supports: {
+					...current.supports,
+					shadow: false,
+				},
+			} ) );
 		}
-	);
+	} );
 }
 
 /**
@@ -61,13 +60,13 @@ function removeBlockStyles() {
 			// Skip block styles that are in the BLOCK_STYLES_TO_PRESERVE array
 			return;
 		}
-		// @ts-expect-error Type not complete.
-		const blockStyles = select( blocksStore ).getBlockStyles( blockName );
+		const blockStyles = select( 'core/blocks' ).getBlockStyles( blockName );
 		if ( ! Array.isArray( blockStyles ) || blockStyles?.length === 0 ) {
 			return;
 		}
+
 		blockStyles.forEach( ( blockStyle ) => {
-			unregisterBlockStyle( blockName, blockStyle.name );
+			unregisterBlockStyleForEmail( blockName, blockStyle.name );
 		} );
 	} );
 }

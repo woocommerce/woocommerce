@@ -7,6 +7,7 @@ import {
 	customerFile,
 	guestFile,
 	BlockData,
+	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 /**
@@ -348,7 +349,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 
 	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -654,7 +655,7 @@ test.describe( 'Billing Address Form', () => {
 
 	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//page-checkout',
+			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

@@ -58,35 +58,31 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 
-		if ( isset( $attribute_slug ) ) {
+		$attributes = $this->parse_attributes( $attributes );
 
-			$attributes = $this->parse_attributes( $attributes );
+		// `$attributes['style']` is the layout selector ("pills" | "dropdown"), not the block supports style object.
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'style' ) );
 
-			$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$field_style = $attributes['style'];
 
-			$field_style = $attributes['style'];
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => $classes_and_styles['classes'],
+				'style' => $classes_and_styles['styles'],
+			)
+		);
 
-			$wrapper_attributes = get_block_wrapper_attributes(
-				array(
-					'class' => esc_attr( $classes_and_styles['classes'] ),
-					'style' => esc_attr( $classes_and_styles['styles'] ),
-				)
-			);
-
-			if ( 'dropdown' === $field_style ) {
-				$content = $this->render_dropdown( $attributes, $content, $block );
-			} else {
-				$content = $this->render_pills( $attributes, $content, $block );
-			}
-
-			return sprintf(
-				'<div %s>%s</div>',
-				$wrapper_attributes,
-				$content
-			);
+		if ( 'dropdown' === $field_style ) {
+			$content = $this->render_dropdown( $attributes, $content, $block );
+		} else {
+			$content = $this->render_pills( $attributes, $content, $block );
 		}
 
-		return '';
+		return sprintf(
+			'<div %s>%s</div>',
+			$wrapper_attributes,
+			$content
+		);
 	}
 
 	/**
@@ -120,13 +116,26 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	/**
 	 * Get the default selected attribute.
 	 *
-	 * @param array $attribute_terms The attribute's.
+	 * @param string $attribute_slug The attribute's slug.
+	 * @param array  $attribute_terms The attribute's terms.
 	 * @return string|null The default selected attribute.
 	 */
-	protected function get_default_selected_attribute( $attribute_terms ) {
-		foreach ( $attribute_terms as $attribute_term ) {
-			if ( $attribute_term['isSelected'] ) {
-				return $attribute_term['value'];
+	protected function get_default_selected_attribute( $attribute_slug, $attribute_terms ) {
+		if ( isset( $_GET[ $attribute_slug ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$raw = wp_unslash( $_GET[ $attribute_slug ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( is_string( $raw ) ) {
+				$attribute_slug_from_request = sanitize_title( $raw );
+				foreach ( $attribute_terms as $attribute_term ) {
+					if ( sanitize_title( $attribute_term['value'] ) === $attribute_slug_from_request ) {
+						return $attribute_term['value'];
+					}
+				}
+			}
+		} else {
+			foreach ( $attribute_terms as $attribute_term ) {
+				if ( $attribute_term['isSelected'] ) {
+					return $attribute_term['value'];
+				}
 			}
 		}
 
@@ -146,6 +155,18 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
 
+		wp_interactivity_state(
+			'woocommerce/add-to-cart-with-options',
+			array(
+				'isOptionSelected' =>
+				function () {
+					$context = wp_interactivity_get_context();
+
+					return $context['option']['value'] === $context['selectedValue'];
+				},
+			)
+		);
+
 		$pills = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$input = sprintf(
@@ -164,11 +185,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 							'option' => $attribute_term,
 						),
 					),
-				),
-				$attribute_term['label']
+				)
 			);
 
-			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . $attribute_term['label'] . '</label>';
+			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . esc_html( $attribute_term['label'] ) . '</label>';
 		}
 
 		return sprintf(
@@ -182,11 +202,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'data-wp-context' => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
+						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
 						'focused'       => '',
 					),
 					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-watch'   => 'callbacks.setSelectedVariationId',
 				),
 			),
 			$pills,
@@ -216,6 +235,8 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			$attribute_terms
 		);
 
+		$selected_attribute = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+
 		$options = '';
 		foreach ( $attribute_terms as $attribute_term ) {
 			$option_attributes = array(
@@ -228,7 +249,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				),
 			);
 
-			if ( $attribute_term['isSelected'] ) {
+			if ( $attribute_term['value'] === $selected_attribute ) {
 				$option_attributes['selected'] = 'selected';
 			}
 
@@ -237,7 +258,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				$this->get_normalized_attributes(
 					$option_attributes
 				),
-				$attribute_term['label']
+				esc_html( $attribute_term['label'] )
 			);
 		}
 
@@ -250,10 +271,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 					'data-wp-context'    => array(
 						'name'          => $attribute_slug,
 						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_terms ),
+						'selectedValue' => $selected_attribute,
 					),
 					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-watch'      => 'callbacks.setSelectedVariationId',
 					'data-wp-on--change' => 'actions.handleDropdownChange',
 					'name'               => $attribute_slug,
 				),

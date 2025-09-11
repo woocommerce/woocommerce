@@ -331,7 +331,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
 					'first'         => 5,
-					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
@@ -384,7 +383,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 				array(
 					'first'         => 3,
 					'after'         => 'cursor2',
-					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
@@ -479,7 +477,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		$variables = array(
 			'first'         => 10,
 			'after'         => 'cursor123',
-			'query'         => '',
 			'variantsFirst' => 100,
 		);
 		$this->assertEquals(
@@ -496,7 +493,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		// Test with null cursor (should filter out null values).
 		$variables = array(
 			'first'         => 5,
-			'query'         => '',
 			'variantsFirst' => 100,
 		);
 		$this->assertEquals(
@@ -510,11 +506,9 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Test with empty cursor (empty strings are not filtered out).
+		// Test with empty cursor (empty strings are filtered out).
 		$variables = array(
 			'first'         => 15,
-			'after'         => '',
-			'query'         => '',
 			'variantsFirst' => 100,
 		);
 		$this->assertEquals(
@@ -559,7 +553,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
 					'first'         => 50,
-					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)
@@ -599,7 +592,6 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 				$this->stringContains( 'query GetShopifyProducts' ),
 				array(
 					'first'         => 1,
-					'query'         => '',
 					'variantsFirst' => 100,
 				)
 			)

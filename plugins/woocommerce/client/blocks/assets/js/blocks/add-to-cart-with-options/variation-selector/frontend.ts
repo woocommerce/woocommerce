@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import {
+	store,
+	getContext,
+	getConfig,
+	getElement,
+} from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
@@ -9,6 +14,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
+import { getProductData, dispatchChangeEvent } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -127,7 +133,6 @@ const isAttributeValueValid = ( {
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			isVariableProductFormValid: boolean;
 			variationId: number | null;
 			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
@@ -144,6 +149,8 @@ export type VariableProductAddToCartWithOptionsStore =
 		callbacks: {
 			setDefaultSelectedAttribute: () => void;
 			setSelectedVariationId: () => void;
+			validateVariation: () => void;
+			watchQuantityConstraints: () => void;
 		};
 	};
 
@@ -151,24 +158,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get isVariableProductFormValid(): boolean {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return true;
-				}
-				const { availableVariations, selectedAttributes } = context;
-
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-
-				// Variable products must be in stock and have a selected variation
-				return Boolean(
-					matchedVariation?.is_in_stock &&
-						matchedVariation?.variation_id
-				);
-			},
 			get variationId(): number | null {
 				const context = getContext< Context >();
 				if ( ! context ) {
@@ -291,6 +280,88 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					);
 				const matchedVariationId = matchedVariation?.variation_id;
 				productDataActions.setVariationId( matchedVariationId ?? null );
+			},
+			validateVariation() {
+				actions.clearErrors( 'variable-product' );
+
+				const { availableVariations, selectedAttributes } =
+					getContext< Context >();
+				const matchedVariation = getMatchedVariation(
+					availableVariations,
+					selectedAttributes
+				);
+
+				const { errorMessages } = getConfig();
+
+				if ( ! matchedVariation?.variation_id ) {
+					actions.addError( {
+						code: 'variableProductMissingAttributes',
+						message:
+							errorMessages?.variableProductMissingAttributes ||
+							'',
+						group: 'variable-product',
+					} );
+					return;
+				}
+
+				if ( ! matchedVariation?.is_in_stock ) {
+					actions.addError( {
+						code: 'variableProductOutOfStock',
+						message: errorMessages?.variableProductOutOfStock || '',
+						group: 'variable-product',
+					} );
+				}
+			},
+			// Quantity constraints might change dynamically when switching
+			// variations. Based on this, we might need to update the quantity.
+			watchQuantityConstraints() {
+				const {
+					productId,
+					productType,
+					availableVariations,
+					selectedAttributes,
+					quantity,
+				} = getContext< Context >();
+				const { ref } = getElement();
+
+				if ( ! ( ref instanceof HTMLInputElement ) ) {
+					return;
+				}
+
+				// Let's not do anything if the user is typing in the input.
+				if ( ref === document.activeElement ) {
+					return;
+				}
+
+				const productObject = getProductData(
+					productId,
+					productType,
+					availableVariations,
+					selectedAttributes
+				);
+
+				const currentValue = quantity[ productObject?.id || productId ];
+
+				if ( productObject ) {
+					const { min, max } = productObject;
+
+					let newValue = currentValue;
+					if ( quantity[ productObject.id ] < min ) {
+						newValue = min;
+					} else if ( quantity[ productObject.id ] > max ) {
+						newValue = max;
+					}
+
+					if (
+						newValue !== ref.valueAsNumber ||
+						newValue !== quantity[ productObject.id ]
+					) {
+						actions.setQuantity( newValue );
+
+						ref.value = newValue.toString();
+						dispatchChangeEvent( ref );
+					}
+				}
 			},
 		},
 	},
