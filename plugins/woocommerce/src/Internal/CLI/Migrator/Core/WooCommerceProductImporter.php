@@ -750,9 +750,10 @@ class WooCommerceProductImporter {
 			if ( ! empty( $var_data['attributes'] ) && is_array( $var_data['attributes'] ) ) {
 				foreach ( $var_data['attributes'] as $attr_name => $attr_value ) {
 					if ( isset( $attribute_taxonomy_map[ $attr_name ] ) ) {
-						$taxonomy                                           = $attribute_taxonomy_map[ $attr_name ];
-						$term_slug                                          = sanitize_title( $attr_value );
-						$normalized_attribute_name                          = wc_variation_attribute_name( $taxonomy );
+						$taxonomy                  = $attribute_taxonomy_map[ $attr_name ];
+						$term_slug                 = sanitize_title( $attr_value );
+						$normalized_attribute_name = wc_variation_attribute_name( $taxonomy );
+
 						$wc_variation_attributes[ $normalized_attribute_name ] = $term_slug;
 					} else {
 						wc_get_logger()->warning( "Attribute taxonomy mapping not found for option '{$attr_name}' while processing variation {$original_variant_id}.", array( 'source' => 'wc-migrator' ) );
