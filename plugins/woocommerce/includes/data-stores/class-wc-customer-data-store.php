@@ -608,14 +608,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_user_ids_for_billing_email( $emails ) {
 		global $wpdb;
 
-		$emails            = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$lookup_table_name = wc_get_container()->get( LookupTableSyncService::class )->get_table_name();
+		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
 		// TODO: security, properly inject the emails in here
 		$results = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT user_id FROM %i WHERE billing_email IN('" . implode("', '", $emails ) . "')",
-				$lookup_table_name
+				wc_get_container()->get( LookupTableSyncService::class )->get_table_name()
 			)
 		);
 
