@@ -10,6 +10,7 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
+				let responseData;
 				try {
 					// Create a draft order in WooCommerce.
 					const response = await fetch( paypal_standard.rest_url + 'wc/store/v1/checkout', {
