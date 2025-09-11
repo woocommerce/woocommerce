@@ -77,7 +77,7 @@ class Gallery extends Abstract_Block_Renderer {
 		// First, try to find a linked image (most common case).
 		if ( preg_match( '/<a[^>]*href=(["\'])(.*?)\1[^>]*>(\s*<img[^>]*>)\s*<\/a>/s', $html_content, $link_matches ) ) {
 			// Validate and sanitize the link URL.
-			$sanitized_url = esc_url_raw( $link_matches[2] );
+			$sanitized_url = esc_url( $link_matches[2] );
 			if ( ! empty( $sanitized_url ) ) {
 				$sanitized_img = Html_Processing_Helper::sanitize_image_html( $link_matches[3] );
 				if ( '' !== $sanitized_img ) {
