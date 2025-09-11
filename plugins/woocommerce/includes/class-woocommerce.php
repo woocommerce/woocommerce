@@ -10,7 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
-use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService;
+use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService as UsermetaLookupService;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
@@ -353,7 +353,7 @@ final class WooCommerce {
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
 		$container->get( AddressProviderController::class );
-		$container->get( LookupTableSyncService::class );
+		$container->get( UsermetaLookupService::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {

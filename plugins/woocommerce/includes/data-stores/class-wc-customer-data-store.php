@@ -5,7 +5,7 @@
  * @package WooCommerce\DataStores
  */
 
-use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService;
+use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService as UsermetaLookupService;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -610,7 +610,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$emails            = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 		$placeholders      = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
-		$lookup_table_name = wc_get_container()->get( LookupTableSyncService::class )->get_table_name();
+		$lookup_table_name = wc_get_container()->get( UsermetaLookupService::class )->get_table_name();
 
 		return $wpdb->get_col(
 			$wpdb->prepare(
