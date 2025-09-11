@@ -701,11 +701,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'wc-paypal-frontend',
 			'paypal_standard',
 			array(
-				'gateway_id'          => $this->id,
-				'ajax_url'            => admin_url( 'admin-ajax.php' ),
-				'wc_ajax_url'         => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-				'create_order_nonce'  => wp_create_nonce( 'create_order' ),
-				'capture_order_nonce' => wp_create_nonce( 'capture_order' ),
+				'gateway_id'         => $this->id,
+				'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
+				'rest_url'           => rest_url(),
+				'nonce'              => wp_create_nonce( 'wp_rest' ),
 			)
 		);
 
