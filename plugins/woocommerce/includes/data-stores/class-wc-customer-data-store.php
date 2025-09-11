@@ -141,6 +141,12 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->save_meta_data();
 		$customer->apply_changes();
 
+		/**
+		 * Fires after creating a new customer in the database
+		 *
+		 * @param int         $customer_id Customer ID (matches user ID).
+		 * @param WC_Customer $customer    Customer object.
+		 */
 		do_action( 'woocommerce_new_customer', $customer_id, $customer );
 	}
 
@@ -219,6 +225,13 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$customer->set_date_modified( get_user_meta( $customer_id, 'last_update', true ) );
 		$customer->save_meta_data();
 		$customer->apply_changes();
+
+		/**
+		 * Fires after updating a customer in the database
+		 *
+		 * @param int         $customer_id Customer ID (matches user ID).
+		 * @param WC_Customer $customer    Customer object.
+		 */
 		do_action( 'woocommerce_update_customer', $customer_id, $customer );
 	}
 
@@ -245,6 +258,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		wp_delete_user( $customer_id, $args['reassign'] );
 
+		/**
+		 * Fires after deleting a customer from the database
+		 *
+		 * @param int $customer_id Customer ID (matches user ID).
+		 */
 		do_action( 'woocommerce_delete_customer', $customer_id );
 	}
 
