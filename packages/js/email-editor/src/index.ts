@@ -7,7 +7,7 @@ import { initialize } from './editor';
  * The unique identifier used to register the email editor data store.
  * This store manages the email editor's state and settings.
  */
-export { storeName } from './store';
+export { storeName, createStore } from './store';
 
 /**
  * This method is used to initialize the email editor.
@@ -44,3 +44,5 @@ export function initializeEditor( htmlId: string ) {
 }
 
 export { ExperimentalEmailEditor } from './editor';
+
+export { SendPreviewEmail } from './components/preview';
