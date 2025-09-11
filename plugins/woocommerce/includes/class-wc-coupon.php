@@ -421,7 +421,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return float
 	 */
 	public function get_minimum_amount( $context = 'view' ) {
-		if ( $this->get_prop( 'minimum_amount', $context ) === '' ) {
+		if ( 'edit' !== $context && $this->get_prop( 'minimum_amount', $context ) === '' ) {
 			return wc_format_decimal( 0 );
 		}
 		return $this->get_prop( 'minimum_amount', $context );
@@ -434,7 +434,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @return float
 	 */
 	public function get_maximum_amount( $context = 'view' ) {
-		if ( $this->get_prop( 'maximum_amount', $context ) === '' ) {
+		if ( 'edit' !== $context && $this->get_prop( 'maximum_amount', $context ) === '' ) {
 			return wc_format_decimal( 0 );
 		}
 		return $this->get_prop( 'maximum_amount', $context );
