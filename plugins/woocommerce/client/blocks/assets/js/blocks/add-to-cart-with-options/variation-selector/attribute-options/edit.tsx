@@ -96,11 +96,14 @@ export default function AttributeOptionsEdit(
 					<ToggleGroupControl
 						label={ __( 'Style', 'woocommerce' ) }
 						value={ optionStyle ?? 'pills' }
-						onChange={ ( option ) => {
-							if ( option !== 'pills' && option !== 'dropdown' ) {
+						onChange={ ( newOptionStyle ) => {
+							if (
+								newOptionStyle !== 'pills' &&
+								newOptionStyle !== 'dropdown'
+							) {
 								return;
 							}
-							setAttributes( { optionStyle: option } );
+							setAttributes( { optionStyle: newOptionStyle } );
 						} }
 						isBlock
 						hideLabelFromVision
