@@ -8,7 +8,6 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
-use Automattic\WooCommerce\EmailEditor\Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
@@ -35,7 +34,8 @@ use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as CoreInitializer;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Initializer as WooCommerceInitializer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,9 +75,15 @@ class Email_Editor_Container {
 		$container = new Container();
 
 		$container->set(
-			Initializer::class,
+			CoreInitializer::class,
 			function () {
-				return new Initializer();
+				return new CoreInitializer();
+			}
+		);
+		$container->set(
+			WooCommerceInitializer::class,
+			function () {
+				return new WooCommerceInitializer();
 			}
 		);
 		// Start: Email editor dependencies.
@@ -287,7 +293,8 @@ class Email_Editor_Container {
 			function ( $container ) {
 				return new Bootstrap(
 					$container->get( Email_Editor::class ),
-					$container->get( Initializer::class ),
+					$container->get( CoreInitializer::class ),
+					$container->get( WooCommerceInitializer::class ),
 				);
 			}
 		);
