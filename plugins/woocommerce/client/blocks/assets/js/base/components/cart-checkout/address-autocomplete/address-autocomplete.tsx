@@ -41,6 +41,7 @@ export const AddressAutocomplete = ( {
 	useUpdatePreferredAutocompleteProvider( addressType );
     
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
+	const observerRef = useRef< MutationObserver | null >( null );
 	const serverProviders = getSettingWithCoercion<
 		ServerAddressAutocompleteProvider[]
 	>(
@@ -190,6 +191,74 @@ export const AddressAutocomplete = ( {
 			}
 		};
 	}, [] );
+
+	// Disable browser autocomplete when searching
+	useEffect( () => {
+		if ( ! isSearching ) {
+			// Clean up observer when not searching
+			if ( observerRef.current ) {
+				observerRef.current.disconnect();
+				observerRef.current = null;
+			}
+			return;
+		}
+
+		// Get the actual input element from the ref
+		const inputElement = inputRef.current?.inputRef?.current;
+		if ( ! inputElement ) {
+			return;
+		}
+
+		// Create MutationObserver to enforce autocomplete="none"
+		observerRef.current = new MutationObserver( () => {
+			if ( observerRef.current ) {
+				observerRef.current.disconnect();
+			}
+			inputElement.autocomplete = 'off';
+
+			// To prevent 1Password and browser autocomplete clashes, we disable 1Password on the address search field.
+			// This is achieved by setting the data-1p-ignore attribute and refocusing on the field so that the new attribute takes effect.
+			inputElement.setAttribute( 'data-1p-ignore', 'true' );
+			const parentElement = inputElement.parentElement;
+			if ( parentElement ) {
+				// Store current focus state and cursor position
+				const hasFocus = document.activeElement === inputElement;
+				const selectionStart = inputElement.selectionStart;
+				const selectionEnd = inputElement.selectionEnd;
+
+				// Remove and re-add the element
+				parentElement.appendChild(
+					parentElement.removeChild( inputElement )
+				);
+
+				// Restore focus and cursor position if it had focus
+				if ( hasFocus ) {
+					inputElement.focus();
+					inputElement.setSelectionRange(
+						selectionStart,
+						selectionEnd
+					);
+				}
+			}
+		} );
+
+		observerRef.current.observe( inputElement, {
+			attributes: true,
+			attributeFilter: [ 'autocomplete' ],
+		} );
+
+		// Set initial autocomplete attribute
+		inputElement.autocomplete = 'off';
+		inputElement.setAttribute( 'data-1p-ignore', 'true' );
+
+		// Cleanup on unmount or when isSearching changes
+		return () => {
+			if ( observerRef.current ) {
+				observerRef.current.disconnect();
+				observerRef.current = null;
+			}
+		};
+	}, [ isSearching ] );
 
 	const addressChangeHandler = ( value: string ) => {
 		props.onChange( value );
