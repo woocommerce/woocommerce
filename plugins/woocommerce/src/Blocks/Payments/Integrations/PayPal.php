@@ -75,11 +75,14 @@ final class PayPal extends AbstractPaymentMethodType {
 		$options = $buttons->get_options();
 
 		return [
-			'title'            => $this->get_setting( 'title' ),
-			'description'      => $this->get_setting( 'description' ),
-			'supports'         => $this->get_supported_features(),
-			'isButtonsEnabled' => $buttons->is_enabled(),
-			'buttonsOptions'   => $options,
+			'title'              => $this->get_setting( 'title' ),
+			'description'        => $this->get_setting( 'description' ),
+			'supports'           => $this->get_supported_features(),
+			'isButtonsEnabled'   => $buttons->is_enabled(),
+			'buttonsOptions'     => $options,
+			'nonce'              => wp_create_nonce( 'wp_rest' ),
+			'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
+			'rest_url'           => rest_url(),
 		];
 	}
 
