@@ -660,19 +660,7 @@ class WC_Session_Handler extends WC_Session {
 			}
 		}
 
-		$session = maybe_unserialize( $value );
-		if ( ! is_user_logged_in() ) {
-			// @todo - just cleaning these out manually for testing until we get them nullified on their own.
-			if ( ! isset( $session['cart'] ) ) {
-				$session = array_diff_key( $session, array_flip( [
-					'wca_queued_events',
-					'customer',
-					'wca_session_data',
-					'removed_cart_contents',
-				] ) );
-			}
-		}
-		return $session;
+		return maybe_unserialize( $value );
 	}
 
 	/**
