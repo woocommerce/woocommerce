@@ -1,3 +1,4 @@
+export * from './address-autocomplete';
 export * from './api-error-response';
 export * from './api-response';
 export * from './attributes';
