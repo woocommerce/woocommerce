@@ -169,8 +169,7 @@ export const AddressAutocomplete = ( {
 					// Clear searching state after results are received
 					setIsSearching( false );
 				} )
-				.catch( ( error ) => {
-					console.error( 'Address search error:', error );
+				.catch( () => {
 					setSuggestions( [] );
 					setIsSearching( false );
 				} );
