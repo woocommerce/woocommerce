@@ -3138,6 +3138,8 @@ function wc_update_1030_create_user_meta_lookup_table( ?string $populate_column 
 				KEY `billing_email` (`billing_email`)
 			) $collate;"
 		);
+
+		// TODO: also refresh the table on activation.
 		$wpdb->query(
 			"INSERT IGNORE INTO {$wpdb->prefix}wc_user_meta_lookup (`user_id`) SELECT users.ID FROM {$wpdb->users} users"
 		);
