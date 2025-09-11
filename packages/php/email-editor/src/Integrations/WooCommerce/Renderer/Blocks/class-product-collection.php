@@ -91,7 +91,10 @@ class Product_Collection extends Abstract_Block_Renderer {
 		// We start with supporting 1 product per row.
 		$content = '';
 		foreach ( $products as $product ) {
-			$content .= $this->render_product_content( $product, $inner_block, $rendering_context );
+			$content .= $this->add_spacer(
+				$this->render_product_content( $product, $inner_block, $rendering_context ),
+				$inner_block['email_attrs'] ?? array()
+			);
 		}
 
 		return $content;

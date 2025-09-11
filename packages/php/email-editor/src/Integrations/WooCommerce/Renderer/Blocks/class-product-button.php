@@ -84,7 +84,7 @@ class Product_Button extends Abstract_Block_Renderer {
 		);
 
 		$cell_attrs = array(
-			'style'  => 'padding: 10px 0; text-align: ' . $text_align . '; vertical-align: top;',
+			'style'  => 'text-align: ' . $text_align . '; vertical-align: top;',
 			'align'  => $text_align,
 			'valign' => 'top',
 		);
