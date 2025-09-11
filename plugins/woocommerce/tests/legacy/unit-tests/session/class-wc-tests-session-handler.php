@@ -262,8 +262,8 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		// Spy on destroy_session method - this time expect it to be called.
 		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
-	        ->onlyMethods( array( 'destroy_session' ) )
-	        ->getMock();
+			->onlyMethods( array( 'destroy_session' ) )
+			->getMock();
 
 		$reflection = new ReflectionClass( $session_handler_spy );
 
