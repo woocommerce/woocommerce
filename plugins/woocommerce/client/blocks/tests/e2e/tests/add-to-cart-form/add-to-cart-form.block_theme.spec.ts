@@ -307,7 +307,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();
@@ -331,7 +331,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			await editor.publishAndVisitPost();
 
 			const minusButton = page.getByLabel( `Reduce quantity` );
-			const plusButton = page.getByLabel( `Increase quantity ` );
+			const plusButton = page.getByLabel( `Increase quantity` );
 
 			await expect( minusButton ).toBeHidden();
 			await expect( plusButton ).toBeHidden();
