@@ -598,7 +598,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 *
 	 * @return int[]
 	 */
-	public function get_user_ids_for_billing_email($emails, bool $have_orders = false ) {
+	public function get_user_ids_for_billing_email( $emails, bool $have_orders = false ) {
 		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
 		$include_user_ids = array();
