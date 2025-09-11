@@ -3,6 +3,7 @@
  */
 import { Icon, mediaAndText } from '@wordpress/icons';
 import { getBlockMap } from '@woocommerce/atomic-utils';
+import { getSetting } from '@woocommerce/settings';
 import type { InnerBlockTemplate } from '@wordpress/blocks';
 
 /**
@@ -73,7 +74,11 @@ export const DEFAULT_INNER_BLOCKS: InnerBlockTemplate[] = [
 						'woocommerce/product-summary',
 						{ isDescendentOfSingleProductBlock: true },
 					],
-					[ 'woocommerce/add-to-cart-form' ],
+					[
+						getSetting( 'isBlockTheme', false )
+							? 'woocommerce/add-to-cart-with-options'
+							: 'woocommerce/add-to-cart-form',
+					],
 					[ 'woocommerce/product-meta' ],
 				],
 			],
