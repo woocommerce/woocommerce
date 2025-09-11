@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add product object as parameter to woocommerce_add_to_cart_handler_$product_type hook
