@@ -47,8 +47,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'product_categories'          => array(),
 		'excluded_product_categories' => array(),
 		'exclude_sale_items'          => false,
-		'minimum_amount'              => 0,
-		'maximum_amount'              => 0,
+		'minimum_amount'              => '',
+		'maximum_amount'              => '',
 		'email_restrictions'          => array(),
 		'used_by'                     => array(),
 		'virtual'                     => false,
@@ -418,26 +418,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_minimum_amount( $context = 'view' ) {
 		if ( 'edit' !== $context && $this->get_prop( 'minimum_amount', $context ) === '' ) {
 			return wc_format_decimal( 0 );
 		}
-		return $this->get_prop( 'minimum_amount', $context );
+		return wc_format_decimal( $this->get_prop( 'minimum_amount', $context ) );
 	}
 	/**
 	 * Get maximum spend amount.
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_maximum_amount( $context = 'view' ) {
 		if ( 'edit' !== $context && $this->get_prop( 'maximum_amount', $context ) === '' ) {
 			return wc_format_decimal( 0 );
 		}
-		return $this->get_prop( 'maximum_amount', $context );
+		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
 	}
 
 	/**
