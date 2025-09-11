@@ -24,6 +24,26 @@ import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
 
+const serverProviders = getSettingWithCoercion<
+	ServerAddressAutocompleteProvider[]
+>(
+	'addressAutocompleteProviders',
+	[],
+	( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
+		if ( ! Array.isArray( type ) ) {
+			return true;
+		}
+
+		return type.every( ( item ) => {
+			return (
+				typeof item.name === 'string' &&
+				typeof item.id === 'string' &&
+				typeof item.branding_html === 'string'
+			);
+		} );
+	}
+);
+
 /**
  * Address Autocomplete component.
  *
@@ -41,6 +61,29 @@ export const AddressAutocomplete = ( {
 	useUpdatePreferredAutocompleteProvider( addressType );
     
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
+
+	const [ activeProviderBranding, setActiveProviderBranding ] =
+		useState< string >( '' );
+
+	const activeProvider = useSelect(
+		( select ) => {
+			const store = select( checkoutStore );
+			return store.getActiveAutocompleteProvider( addressType );
+		},
+		[ addressType ]
+	);
+
+	useEffect( () => {
+		const activeProviderConfig = serverProviders.find(
+			( provider ) => provider.id === activeProvider
+		);
+		if ( typeof activeProviderConfig?.branding_html === 'string' ) {
+			setActiveProviderBranding( activeProviderConfig.branding_html );
+			return;
+		}
+		setActiveProviderBranding( '' );
+	}, [ activeProvider, serverProviders ] );
+
 	const [ suggestions, setSuggestions ] = useState<
 		AddressAutocompleteResult[]
 	>( [] );
@@ -124,6 +167,7 @@ export const AddressAutocomplete = ( {
 			{ suggestions.length > 0 ? (
 				<Suggestions
 					suggestions={ suggestions }
+					branding={ activeProviderBranding }
 					addressType={ addressType }
 				/>
 			) : null }
