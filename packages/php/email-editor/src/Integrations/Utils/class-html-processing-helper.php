@@ -170,6 +170,12 @@ class Html_Processing_Helper {
 			return;
 		}
 
+		// Block all event handler attributes (on*) - Critical security fix.
+		if ( str_starts_with( $attr_name, 'on' ) ) {
+			$html->remove_attribute( $attr_name );
+			return;
+		}
+
 		switch ( $attr_name ) {
 			case 'href':
 				// Only allow http, https, mailto, and tel protocols.
@@ -266,6 +272,18 @@ class Html_Processing_Helper {
 					$html->remove_attribute( $attr_name );
 				}
 				break;
+
+			default:
+				// Handle data-* attributes with strict validation.
+				if ( str_starts_with( $attr_name, 'data-' ) ) {
+					if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', (string) $attr_value ) ) {
+						$html->remove_attribute( $attr_name );
+					}
+					break;
+				}
+				// Default deny policy: Remove any attribute not explicitly allowed.
+				$html->remove_attribute( $attr_name );
+				break;
 		}
 	}
 
@@ -306,6 +324,55 @@ class Html_Processing_Helper {
 			'letter-spacing',
 			'text-transform',
 		);
+	}
+
+	/**
+	 * Validate HTML container attributes for security before content extraction.
+	 * This method checks if a container element (like figcaption, span) has safe attributes.
+	 *
+	 * @param string $container_html Full container HTML (e.g., <figcaption class="...">content</figcaption>).
+	 * @return bool True if container attributes are safe, false otherwise.
+	 */
+	public static function validate_container_attributes( string $container_html ): bool {
+		// Use WP_HTML_Tag_Processor to validate container attributes.
+		$html = new \WP_HTML_Tag_Processor( $container_html );
+		if ( ! $html->next_tag() ) {
+			return false;
+		}
+
+		// Get all attributes and validate each one using our existing validation logic.
+		$attributes = $html->get_attribute_names_with_prefix( '' );
+		if ( is_array( $attributes ) ) {
+			foreach ( $attributes as $attr_name ) {
+				// Use the same validation logic as validate_caption_attribute for consistency.
+				$attr_value = $html->get_attribute( $attr_name );
+				if ( null === $attr_value ) {
+					continue;
+				}
+
+				// Block event handlers immediately.
+				if ( str_starts_with( $attr_name, 'on' ) ) {
+					return false;
+				}
+
+				// Apply the same validation rules as caption attributes.
+				// Create a temporary processor to test validation.
+				$escaped_value = htmlspecialchars( (string) $attr_value, ENT_QUOTES, 'UTF-8' );
+				$temp_html     = new \WP_HTML_Tag_Processor( '<span ' . $attr_name . '="' . $escaped_value . '">test</span>' );
+				if ( $temp_html->next_tag() ) {
+					$original_value = $temp_html->get_attribute( $attr_name );
+					self::validate_caption_attribute( $temp_html, $attr_name );
+					$validated_value = $temp_html->get_attribute( $attr_name );
+
+					// If attribute was removed during validation, container is unsafe.
+					if ( null !== $original_value && null === $validated_value ) {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**

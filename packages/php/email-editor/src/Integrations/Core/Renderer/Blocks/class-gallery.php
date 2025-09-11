@@ -99,12 +99,19 @@ class Gallery extends Abstract_Block_Renderer {
 		}
 
 		// Extract the caption if it exists (handle both figcaption and span formats).
-		if ( preg_match( '/<figcaption[^>]*>(.*?)<\/figcaption>/s', $html_content, $caption_matches ) ) {
-			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
-			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
-		} elseif ( preg_match( '/<span class="wp-element-caption"[^>]*>(.*?)<\/span>/s', $html_content, $caption_matches ) ) {
-			$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[1] );
-			$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
+		// Enhanced security: validate container attributes before extracting content.
+		if ( preg_match( '/(<figcaption[^>]*>)(.*?)(<\/figcaption>)/s', $html_content, $caption_matches ) ) {
+			// Validate the figcaption container attributes for security.
+			if ( Html_Processing_Helper::validate_container_attributes( $caption_matches[1] . $caption_matches[3] ) ) {
+				$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[2] );
+				$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
+			}
+		} elseif ( preg_match( '/(<span class="wp-element-caption"[^>]*>)(.*?)(<\/span>)/s', $html_content, $caption_matches ) ) {
+			// Validate the span container attributes for security.
+			if ( Html_Processing_Helper::validate_container_attributes( $caption_matches[1] . $caption_matches[3] ) ) {
+				$sanitized_caption = Html_Processing_Helper::sanitize_caption_html( $caption_matches[2] );
+				$result           .= '<br><div class="wp-element-caption" style="font-size: 13px; line-height: 1.0;">' . $sanitized_caption . '</div>';
+			}
 		}
 
 		return $result;
@@ -118,8 +125,12 @@ class Gallery extends Abstract_Block_Renderer {
 	 */
 	private function extract_gallery_caption( string $block_content ): string {
 		// Look for gallery-level caption: <figcaption class="blocks-gallery-caption wp-element-caption">.
-		if ( preg_match( '/<figcaption class="blocks-gallery-caption[^"]*"[^>]*>(.*?)<\/figcaption>/s', $block_content, $matches ) ) {
-			return Html_Processing_Helper::sanitize_caption_html( trim( $matches[1] ) );
+		// Enhanced security: validate container attributes before extracting content.
+		if ( preg_match( '/(<figcaption class="blocks-gallery-caption[^"]*"[^>]*>)(.*?)(<\/figcaption>)/s', $block_content, $matches ) ) {
+			// Validate the figcaption container attributes for security.
+			if ( Html_Processing_Helper::validate_container_attributes( $matches[1] . $matches[3] ) ) {
+				return Html_Processing_Helper::sanitize_caption_html( trim( $matches[2] ) );
+			}
 		}
 
 		return '';
