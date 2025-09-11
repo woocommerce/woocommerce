@@ -40,6 +40,9 @@ export const AddressAutocomplete = ( {
 	useUpdatePreferredAutocompleteProvider( addressType );
     
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
+	const [ suggestions, setSuggestions ] = useState<
+		AddressAutocompleteResult[]
+	>( [] );
 	const [ isSearching, setIsSearching ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
