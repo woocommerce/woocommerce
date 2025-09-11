@@ -1,5 +1,6 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
+	let orderReceivedUrl = '';
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -9,30 +10,39 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
-				// TODO: Add createOrder logic here
+				// Create a draft order in WooCommerce.
+				const response = await fetch( paypal_standard.rest_url + 'wc/store/v1/checkout', {
+					headers: {
+						'Content-Type': 'application/json',
+						'Nonce': paypal_standard.wc_store_api_nonce,
+					},
+					} );
+				responseData = await response.json();
+
+				// Create a PayPal order.
+				const paypalResponse = await fetch( paypal_standard.rest_url + 'wc/v3/paypal-buttons/create-order', {
+					method: 'POST',
+					body: JSON.stringify( {
+						order_id: responseData.order_id,
+					} ),
+					// credentials: 'same-origin',
+					headers: {
+						'Content-Type': 'application/json',
+						'Nonce': paypal_standard.nonce,
+					},
+				} );
+				paypalResponseData = await paypalResponse.json();
+
+				orderReceivedUrl = paypalResponseData.return_url;
+
+				return paypalResponseData.paypal_order_id;
 			},
 
 			async onApprove( data ) {
-				// TODO: Add onApprove logic here
+				if ( data.paymentID && orderReceivedUrl ) {
+					window.location.href = orderReceivedUrl;
+				}
 			},
-
-			onError: function ( err ) {
-				// TODO: Add onError logic here
-				console.error( 'PayPal error:', err );
-			},
-
-			onCancel( data ) {
-				// TODO: Add onCancel logic here
-			},
-
-			onInit( data, actions ) {
-				// TODO: Add onInit logic here
-			},
-
-			onClick() {
-				// TODO: Add onClick logic here
-			},
-
 		});
 
 
