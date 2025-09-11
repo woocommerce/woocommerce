@@ -1,4 +1,0 @@
-Could not verify checkout blocks status: page.goto: net::ERR_EMPTY_RESPONSE at http://localhost:8080/checkout/
-Call log:
-  - navigating to "http://localhost:8080/checkout/", waiting until "domcontentloaded"
-

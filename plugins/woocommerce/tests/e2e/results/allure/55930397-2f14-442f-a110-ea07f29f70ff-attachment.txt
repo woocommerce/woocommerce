@@ -1,6 +1,0 @@
-✅ Contact information section visible
-✅ Billing address section visible
-✅ Payment options section visible
-✅ Order summary visible
-✅ Email field visible
-✅ Place Order button visible
