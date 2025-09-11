@@ -620,7 +620,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			array(
 				'fields'     => 'ID',
 				'include'    => $include_user_ids,
-				'orderby'    => '',
 				'meta_query' => array(
 					array(
 						'key'     => 'billing_email',
