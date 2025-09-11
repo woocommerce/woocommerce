@@ -111,3 +111,25 @@ export const prefersCollection = ( state: CheckoutState ) => {
 	}
 	return state.prefersCollection;
 };
+
+/**
+ * Get registered address autocomplete providers.
+ *
+ * @param state
+ */
+export const getRegisteredAutocompleteProviders = ( state: CheckoutState ) => {
+	return state.addressAutocompleteProviders;
+};
+
+/**
+ * Get active address autocomplete provider.
+ *
+ * @param type
+ * @param state
+ */
+export const getActiveAutocompleteProvider = (
+	type: 'billing' | 'shipping',
+	state: CheckoutState
+) => {
+	return state.activeAddressAutocompleteProvider?.[ type ];
+};
