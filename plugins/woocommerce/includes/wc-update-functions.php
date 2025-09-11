@@ -3114,11 +3114,12 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
 }
 
 /**
- * @param string|null $populate_column Indicates if we are setting up base structure or performing one of migration steps.
+ * Introduces `wc_user_meta_lookup` table and initially populates it.
  *
+ * @param string|null $populate_column Indicates if we are setting up base structure or performing one of migration steps.
  * @return void
  */
-function wc_update_1030_create_user_meta_lookup_table( string $populate_column = null ): void {
+function wc_update_1030_create_user_meta_lookup_table( ?string $populate_column = null ): void {
 	global $wpdb;
 
 	$create_table = null === $populate_column;
@@ -3141,7 +3142,7 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 			"INSERT IGNORE INTO {$wpdb->prefix}wc_user_meta_lookup (`user_id`) SELECT users.ID FROM {$wpdb->users} users"
 		);
 
-		// TODO: schedule populating the columns individually, give it 30 seconds interval between steps
+		// TODO: schedule populating the columns individually, give it 30 seconds interval between steps.
 		wc_update_1030_create_user_meta_lookup_table( 'billing_email' );
 		wc_update_1030_create_user_meta_lookup_table( 'first_name' );
 		wc_update_1030_create_user_meta_lookup_table( 'last_name' );
@@ -3153,7 +3154,8 @@ function wc_update_1030_create_user_meta_lookup_table( string $populate_column =
 				"UPDATE {$wpdb->prefix}wc_user_meta_lookup lookup_table
 					LEFT JOIN {$wpdb->usermeta} meta ON lookup_table.user_id = meta.user_id AND meta.meta_key = %s
 				SET
-					lookup_table.`{$populate_column}` = meta.meta_value",
+					lookup_table.%i = meta.meta_value",
+				$populate_column,
 				$populate_column
 			)
 		);
