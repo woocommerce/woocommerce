@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService as Use
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -635,25 +636,38 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
-	 * @param array $emails List of emails to check against.
+	 * @param string[] $emails List of emails to check against.
+	 * @param bool     $emails List of emails to check against.
 	 *
-	 * @return array
+	 * @return int[]
 	 */
-	public function get_user_ids_for_billing_email( $emails ) {
-		global $wpdb;
-
+	public function get_user_ids_for_billing_email( $emails, bool $with_orders = false ) {
 		$emails            = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$placeholders      = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
-		$lookup_table_name = wc_get_container()->get( UsermetaLookupService::class )->get_table_name();
 
-		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT user_id FROM %i WHERE billing_email IN ($placeholders)",
-				$lookup_table_name,
-				...$emails
+		$user_ids_from_orders = [];
+		if ( $with_orders && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			//$user_ids_from_orders
+			//return $wpdb->get_col(
+			//	$wpdb->prepare(
+			//		"SELECT user_id FROM %i WHERE billing_email IN ($placeholders)",
+			//		$lookup_table_name,
+			//		...$emails
+			//	)
+			//);
+		}
+
+		$users_query = new WP_User_Query(
+			array(
+				'fields'     => 'ID',
+				'meta_query' => array(
+					array(
+						'key'     => 'billing_email',
+						'value'   => $emails,
+						'compare' => 'IN',
+					),
+				),
 			)
 		);
-		// phpcs:enable
+		return array_unique( $users_query->get_results() );
 	}
 }
