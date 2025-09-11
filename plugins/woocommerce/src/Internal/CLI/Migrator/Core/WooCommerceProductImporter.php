@@ -15,6 +15,7 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Error;
 use Exception;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -519,9 +520,13 @@ class WooCommerceProductImporter {
 		}
 
 		if ( ! empty( $product_data['cost_of_goods'] ) ) {
-			$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
-			// works when cogs is disabled.
-			$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
+			$cogs_is_enabled = FeaturesUtil::feature_is_enabled( 'cost_of_goods_sold' );
+			if ( $cogs_is_enabled ) {
+				$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
+			} else {
+				// works when cogs is disabled.
+				$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
+			}
 		}
 	}
 
@@ -580,7 +585,7 @@ class WooCommerceProductImporter {
 	 * Sets up product attributes for variable products with global taxonomy creation.
 	 *
 	 * @param WC_Product_Variable $product The variable product object.
-	 * @param array               $attributes_data Standardized attribute data from mapper.
+	 * @param array               $attributes_data              Standardized attribute data from mapper.
 	 */
 	private function setup_attributes( WC_Product_Variable $product, array $attributes_data ): void {
 		$woo_attributes                  = array();
@@ -808,7 +813,6 @@ class WooCommerceProductImporter {
 			if ( $saved_variation_id ) {
 				$processed_variation_ids[] = $saved_variation_id;
 				$this->migration_data['variations_mapping'][ $original_variant_id ] = $saved_variation_id;
-				
 				if ( ! empty( $var_data['cost_of_goods'] ) ) {
 					update_post_meta( $saved_variation_id, '_cogs_total_value', (float) $var_data['cost_of_goods'] );
 				}
