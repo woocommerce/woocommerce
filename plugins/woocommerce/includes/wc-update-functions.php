@@ -3126,6 +3126,7 @@ function wc_update_1030_create_user_meta_lookup_table( ?string $populate_column 
 	if ( $create_table ) {
 		// Create an empty table and add placeholder-records for the existing users.
 		$collate = $wpdb->has_cap( 'collation' ) ? $wpdb->get_charset_collate() : '';
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query(
 			"CREATE TABLE {$wpdb->prefix}wc_user_meta_lookup (
 				`user_id` bigint(20) unsigned NOT NULL,
@@ -3137,7 +3138,8 @@ function wc_update_1030_create_user_meta_lookup_table( ?string $populate_column 
 				PRIMARY KEY  (`user_id`),
 				KEY `billing_email` (`billing_email`)
 			) $collate;"
-		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+		// phpcs:enable
 
 		// TODO: also refresh the table on activation.
 		$wpdb->query(
