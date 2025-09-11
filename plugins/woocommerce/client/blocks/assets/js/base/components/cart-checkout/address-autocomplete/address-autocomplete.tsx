@@ -24,26 +24,6 @@ import './style.scss';
 import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
 
-const serverProviders = getSettingWithCoercion<
-	ServerAddressAutocompleteProvider[]
->(
-	'addressAutocompleteProviders',
-	[],
-	( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
-		if ( ! Array.isArray( type ) ) {
-			return true;
-		}
-
-		return type.every( ( item ) => {
-			return (
-				typeof item.name === 'string' &&
-				typeof item.id === 'string' &&
-				typeof item.branding_html === 'string'
-			);
-		} );
-	}
-);
-
 /**
  * Address Autocomplete component.
  *
@@ -61,28 +41,94 @@ export const AddressAutocomplete = ( {
 	useUpdatePreferredAutocompleteProvider( addressType );
     
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
+	const serverProviders = getSettingWithCoercion<
+		ServerAddressAutocompleteProvider[]
+	>(
+		'addressAutocompleteProviders',
+		[],
+		( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
+			if ( ! Array.isArray( type ) ) {
+				return true;
+			}
 
-	const [ activeProviderBranding, setActiveProviderBranding ] =
-		useState< string >( '' );
+			return type.every( ( item ) => {
+				return (
+					typeof item.name === 'string' &&
+					typeof item.id === 'string' &&
+					typeof item.branding_html === 'string'
+				);
+			} );
+		}
+	);
 
-	const activeProvider = useSelect(
+	const { country, registeredProviders } = useSelect(
 		( select ) => {
-			const store = select( checkoutStore );
-			return store.getActiveAutocompleteProvider( addressType );
+			const cartSelectors = select( cartStore );
+			const checkoutSelectors = select( checkoutStore );
+			const key =
+				addressType === 'shipping'
+					? 'shippingAddress'
+					: 'billingAddress';
+			const cartData = cartSelectors.getCartData();
+			return {
+				country: cartData?.[ key ]?.country || '',
+				registeredProviders:
+					checkoutSelectors.getRegisteredAutocompleteProviders() ||
+					[],
+			};
 		},
 		[ addressType ]
 	);
 
+	const { setActiveAddressAutocompleteProvider } =
+		useDispatch( checkoutStore );
+	const { setBillingAddress, setShippingAddress } = useDispatch( cartStore );
+	const [ activeProviderBranding, setActiveProviderBranding ] =
+		useState< string >( '' );
+
+	// Used to set active provider on mount and when country changes.
 	useEffect( () => {
-		const activeProviderConfig = serverProviders.find(
-			( provider ) => provider.id === activeProvider
-		);
-		if ( typeof activeProviderConfig?.branding_html === 'string' ) {
-			setActiveProviderBranding( activeProviderConfig.branding_html );
+		if ( ! window?.wc?.addressAutocomplete?.providers ) {
 			return;
 		}
+		// Check providers in preference order (server handles preferred provider ordering).
+		for ( const serverProvider of serverProviders ) {
+			const provider =
+				window?.wc?.addressAutocomplete?.providers?.[
+					serverProvider.id
+				];
+
+			if ( provider && provider.canSearch( country ) ) {
+				setActiveAddressAutocompleteProvider(
+					provider.id,
+					addressType
+				);
+
+				setActiveProviderBranding(
+					serverProviders.find( ( p ) => p.id === provider.id )
+						?.branding_html || ''
+				);
+
+				// Set globally as this is going to be the source of truth where the actual provider objects are stored.
+				window.wc.addressAutocomplete.activeProvider[ addressType ] =
+					provider;
+				return;
+			}
+		}
+
 		setActiveProviderBranding( '' );
-	}, [ activeProvider, serverProviders ] );
+		setActiveAddressAutocompleteProvider( '', addressType );
+		// Set globally as this is going to be the source of truth where the actual provider objects are stored.
+		if ( window?.wc?.addressAutocomplete?.activeProvider ) {
+			window.wc.addressAutocomplete.activeProvider[ addressType ] = null;
+		}
+	}, [
+		country,
+		registeredProviders,
+		setActiveAddressAutocompleteProvider,
+		addressType,
+		serverProviders,
+	] );
 
 	const [ suggestions, setSuggestions ] = useState<
 		AddressAutocompleteResult[]
@@ -218,6 +264,35 @@ export const AddressAutocomplete = ( {
 		}
 	};
 
+	const handleSuggestionClick = async ( suggestionId: string ) => {
+		const provider =
+			window.wc.addressAutocomplete.activeProvider[
+				addressType as 'shipping' | 'billing'
+			];
+		if ( provider ) {
+			setIsSettingAddress( true );
+			// Immediately suppress search to prevent any change events from triggering search
+			suppressSearchTimeoutRef.current = setTimeout( () => {
+				suppressSearchTimeoutRef.current = null;
+			}, 1000 );
+			try {
+				const address = await provider.select( suggestionId, country );
+				const actionToDispatch =
+					addressType === 'shipping'
+						? setShippingAddress
+						: setBillingAddress;
+				actionToDispatch( {
+					...address,
+				} );
+			} finally {
+				// Clear suggestions.
+				setIsSettingAddress( false );
+				setSuggestions( [] );
+				setSelectedSuggestion( -1 );
+			}
+		}
+	};
+
 	const listId = `address-suggestions-${ addressType }-list`;
 	const activeDescendantId =
 		selectedSuggestion >= 0
@@ -244,6 +319,7 @@ export const AddressAutocomplete = ( {
 					suggestions={ suggestions }
 					branding={ activeProviderBranding }
 					addressType={ addressType }
+					onSuggestionClick={ handleSuggestionClick }
 				/>
 			) : null }
 		</div>
