@@ -494,6 +494,13 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
+
+		// Enqueue all integration scripts registered for this block.
+		$integration_script_handles = $this->integration_registry->get_all_registered_script_handles();
+		foreach ( $integration_script_handles as $handle ) {
+			wp_enqueue_script( $handle );
+		}
+
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
