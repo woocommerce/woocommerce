@@ -644,7 +644,8 @@ class WC_Frontend_Scripts {
 				);
 				break;
 			case 'wc-checkout':
-				$params = array(
+				$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
+				$params    = array(
 					'ajax_url'                  => WC()->ajax_url(),
 					'wc_ajax_url'               => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
@@ -656,22 +657,22 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
-				);
-
-				$providers                   = wc_get_container()->get( AddressProviderController::class )->get_providers();
-				$params['address_providers'] = array_map(
-					function ( $provider ) {
-						// Sanitize provider data before sending to frontend.
-						return array(
-							'id'            => sanitize_key( $provider->id ),
-							'name'          => sanitize_text_field( $provider->name ),
-							'branding_html' => wp_kses(
-								trim( (string) ( $provider->branding_html ?? '' ) ),
-								'post'
-							),
-						);
-					},
-					$providers
+					'address_providers'         => wp_json_encode(
+						array_map(
+							function ( $provider ) {
+								// Escape provider data before sending to frontend.
+								return array(
+									'id'            => $provider->id,
+									'name'          => $provider->name,
+									'branding_html' => wp_kses(
+										trim( (string) ( $provider->branding_html ?? '' ) ),
+										'post'
+									),
+								);
+							},
+							$providers
+						),
+					),
 				);
 				break;
 			case 'wc-address-i18n':
