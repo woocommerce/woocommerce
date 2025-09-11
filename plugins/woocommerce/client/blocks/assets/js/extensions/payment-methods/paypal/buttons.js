@@ -31,7 +31,8 @@ const PayPalButtonsContainer = ( {
 	partnerAttributionId,
 	pageType,
 } ) => {
-	const [ orderReceivedUrl, setOrderReceivedURL ] = useState();
+	const [ orderReceivedUrl, setOrderReceivedURL ] = useState( '' );
+	const [ orderId, setOrderId ] = useState( '' );
 	const payPalData = getPaymentMethodData( 'paypal', {} );
 	const options = {
 		clientId: clientId || '',
@@ -59,6 +60,7 @@ const PayPalButtonsContainer = ( {
 				}
 			);
 			responseData = await response.json();
+			setOrderId( responseData.order_id );
 		} catch ( error ) {
 			console.error( 'Failed to create WooCommerce order', error );
 			return null;
@@ -96,11 +98,34 @@ const PayPalButtonsContainer = ( {
 		}
 	};
 
+	const onCancel = async () => {
+		try {
+			await fetch(
+				payPalData.rest_url + 'wc/v3/paypal-buttons/cancel-payment',
+				{
+					method: 'POST',
+					body: JSON.stringify( {
+						order_id: orderId,
+					} ),
+					headers: {
+						'Content-Type': 'application/json',
+						Nonce: payPalData.nonce,
+					},
+				}
+			);
+
+			setOrderReceivedURL( '' );
+		} catch ( error ) {
+			console.error( 'Failed to create PayPal order', error );
+		}
+	};
+
 	return (
 		<PayPalScriptProvider options={ options }>
 			<PayPalButtons
 				createOrder={ createOrder }
 				onApprove={ onApprove }
+				onCancel={ onCancel }
 			/>
 		</PayPalScriptProvider>
 	);

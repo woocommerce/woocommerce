@@ -1,6 +1,7 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
+	let orderId = '';
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -20,6 +21,7 @@ jQuery(function ($) {
 						},
 						} );
 					responseData = await response.json();
+					orderId = responseData.order_id;
 				} catch ( error ) {
 					console.error( 'Failed to create WooCommerce order', error );
 					return null;
@@ -51,6 +53,27 @@ jQuery(function ($) {
 			async onApprove( data ) {
 				if ( data.paymentID && orderReceivedUrl ) {
 					window.location.href = orderReceivedUrl;
+				}
+			},
+
+			async onCancel() {
+				try {
+					await fetch(
+						paypal_standard.rest_url + 'wc/v3/paypal-buttons/cancel-payment',
+						{
+							method: 'POST',
+							body: JSON.stringify( {
+								order_id: orderId,
+							} ),
+							headers: {
+								'Content-Type': 'application/json',
+								Nonce: paypal_standard.nonce,
+							},
+						}
+					);
+		
+					orderReceivedUrl = '';
+				} catch ( error ) {
 				}
 			},
 		});
