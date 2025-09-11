@@ -587,7 +587,7 @@ class OrderController {
 
 			// This will get us any user ids for the given billing email.
 			$customer_data_store = \WC_Data_Store::load( 'customer' );
-			$user_ids            = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email() ) );
+			$user_ids            = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email(), true ) );
 
 			// Convert all found user ids to a list of email addresses.
 			$user_emails = array_map( array( $this, 'get_email_from_user_id' ), $user_ids );

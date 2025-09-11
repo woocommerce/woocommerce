@@ -635,33 +635,33 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
-	 * @param string[] $emails List of emails to check against.
-	 * @param bool     $emails List of emails to check against.
+	 * @param string[] $emails      List of emails to check against.
+	 * @param bool     $with_orders Experimental: supporting HPOS-enabled stores only, does nothing if HPOS is disabled.
 	 *
 	 * @return int[]
 	 */
 	public function get_user_ids_for_billing_email( $emails, bool $with_orders = false ) {
-		$emails            = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
-		$user_ids_from_orders = array();
+		$include_user_ids = array();
 		if ( $with_orders && $this->is_cot_in_use() ) {
 			global $wpdb;
-
-			$placeholders         = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
-			$orders_table         = OrdersTableDataStore::get_orders_table_name();
-			$user_ids_from_orders = $wpdb->get_col(
+			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
+			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$include_user_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT customer_id FROM %i WHERE billing_email IN ($placeholders)",
-					$orders_table,
+					"SELECT DISTINCT customer_id FROM %i WHERE billing_email IN ($placeholders)",
+					OrdersTableDataStore::get_orders_table_name(),
 					...$emails
 				)
 			);
+			// phpcs:enable
 		}
 
 		$users_query = new WP_User_Query(
 			array(
 				'fields'     => 'ID',
-				'include'    => $user_ids_from_orders,
+				'include'    => $include_user_ids,
 				'orderby'    => '',
 				'meta_query' => array(
 					array(
