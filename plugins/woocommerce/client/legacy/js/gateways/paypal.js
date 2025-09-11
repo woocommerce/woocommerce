@@ -10,32 +10,41 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
-				// Create a draft order in WooCommerce.
-				const response = await fetch( paypal_standard.rest_url + 'wc/store/v1/checkout', {
-					headers: {
-						'Content-Type': 'application/json',
-						'Nonce': paypal_standard.wc_store_api_nonce,
-					},
+				try {
+					// Create a draft order in WooCommerce.
+					const response = await fetch( paypal_standard.rest_url + 'wc/store/v1/checkout', {
+						headers: {
+							'Content-Type': 'application/json',
+							'Nonce': paypal_standard.wc_store_api_nonce,
+						},
+						} );
+					responseData = await response.json();
+				} catch ( error ) {
+					console.error( 'Failed to create WooCommerce order', error );
+					return null;
+				}
+
+				try {
+					// Create a PayPal order.
+					const paypalResponse = await fetch( paypal_standard.rest_url + 'wc/v3/paypal-buttons/create-order', {
+						method: 'POST',
+						body: JSON.stringify( {
+							order_id: responseData.order_id,
+						} ),
+						headers: {
+							'Content-Type': 'application/json',
+							'Nonce': paypal_standard.nonce,
+						},
 					} );
-				responseData = await response.json();
+					paypalResponseData = await paypalResponse.json();
 
-				// Create a PayPal order.
-				const paypalResponse = await fetch( paypal_standard.rest_url + 'wc/v3/paypal-buttons/create-order', {
-					method: 'POST',
-					body: JSON.stringify( {
-						order_id: responseData.order_id,
-					} ),
-					// credentials: 'same-origin',
-					headers: {
-						'Content-Type': 'application/json',
-						'Nonce': paypal_standard.nonce,
-					},
-				} );
-				paypalResponseData = await paypalResponse.json();
+					orderReceivedUrl = paypalResponseData.return_url;
 
-				orderReceivedUrl = paypalResponseData.return_url;
-
-				return paypalResponseData.paypal_order_id;
+					return paypalResponseData.paypal_order_id;
+				} catch ( error ) {
+					console.error( 'Failed to create PayPal order', error );
+					return null;
+				}
 			},
 
 			async onApprove( data ) {
