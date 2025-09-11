@@ -254,7 +254,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	 * Test that method destroys session when all conditions are met.
 	 */
 	public function test_destroy_session_if_empty_should_destroy_session_when_all_conditions_met() {
-		// Use a logged out user
+		// Use a logged out user.
 		wp_set_current_user( 0 );
 
 		// Enable the empty session feature.
@@ -262,8 +262,8 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		// Spy on destroy_session method - this time expect it to be called.
 		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
-		                            ->onlyMethods( array( 'destroy_session' ) )
-		                            ->getMock();
+	        ->onlyMethods( array( 'destroy_session' ) )
+	        ->getMock();
 
 		$reflection = new ReflectionClass( $session_handler_spy );
 
@@ -273,7 +273,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		// Set the $_COOOKIE value as if it were passed by the browser.
 		$cookie_property = $reflection->getProperty( '_cookie' );
 		$cookie_property->setAccessible( true );
-		$cookie_name = $cookie_property->getValue( $session_handler_spy );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
 		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
 
 		// Make sure the cart is empty.
@@ -289,7 +289,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	 * Test that method returns early if user is logged in.
 	 */
 	public function test_should_return_early_if_user_is_logged_in() {
-		// Create and log in a user
+		// Create and log in a user.
 		$user_id = $this->factory->user->create();
 		wp_set_current_user( $user_id );
 
@@ -309,7 +309,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		// Set the $_COOOKIE value as if it were passed by the browser.
 		$cookie_property = $reflection->getProperty( '_cookie' );
 		$cookie_property->setAccessible( true );
-		$cookie_name = $cookie_property->getValue( $session_handler_spy );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
 		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
 
 		// Make sure the cart is empty.
@@ -346,7 +346,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		// Set the $_COOOKIE value as if it were passed by the browser.
 		$cookie_property = $reflection->getProperty( '_cookie' );
 		$cookie_property->setAccessible( true );
-		$cookie_name = $cookie_property->getValue( $session_handler_spy );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
 		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
 
 		// Make sure the cart is empty.
