@@ -481,6 +481,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_attributes         = '';
 			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
 			if ( $legacy_mode ) {
+				$action_url = home_url( add_query_arg( null, null ) );
+
 				// If an extension is hoooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
@@ -489,10 +491,10 @@ class AddToCartWithOptions extends AbstractBlock {
 						 * Filter the add to cart form action.
 						 *
 						 * @since 10.0.0
-						 * @param string $permalink The product permalink.
-						 * @return string The add to cart form action.
+						 * @param string $action_url The add to cart form action URL, defaulting to the current page.
+						 * @return string The add to cart form action URL.
 						 */
-						apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() )
+						apply_filters( 'woocommerce_add_to_cart_form_action', $action_url )
 					),
 					'method'  => 'post',
 					'enctype' => 'multipart/form-data',
