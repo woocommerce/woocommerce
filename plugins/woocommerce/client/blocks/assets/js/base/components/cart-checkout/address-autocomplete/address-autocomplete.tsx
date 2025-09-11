@@ -293,6 +293,14 @@ export const AddressAutocomplete = ( {
 		}
 	};
 
+	const handleBlur = () => {
+		// Use a small delay to allow clicks on suggestions to register
+		setTimeout( () => {
+			setSuggestions( [] );
+			setSelectedSuggestion( -1 );
+		}, 200 );
+	};
+
 	const listId = `address-suggestions-${ addressType }-list`;
 	const activeDescendantId =
 		selectedSuggestion >= 0
@@ -307,6 +315,7 @@ export const AddressAutocomplete = ( {
 				ref={ inputRef }
 				onChange={ addressChangeHandler }
 				onKeyDown={ handleKeyDown }
+				onBlurCapture={ handleBlur }
 				aria-expanded={ suggestions.length > 0 }
 				aria-owns={ suggestions.length > 0 ? listId : undefined }
 				aria-activedescendant={ activeDescendantId }
