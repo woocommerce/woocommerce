@@ -9,6 +9,21 @@ window.wc.addressAutocomplete = window.wc.addressAutocomplete || {
 	activeProvider: { billing: null, shipping: null },
 };
 
+var serverProviders = [];
+try {
+	if (
+		window &&
+		window.wc_checkout_params &&
+		window.wc_checkout_params.address_providers
+	) {
+		serverProviders = JSON.parse(
+			window.wc_checkout_params.address_providers
+		);
+	}
+} catch ( e ) {
+	console.error( 'Invalid address providers JSON:', e );
+}
+
 /**
  * Register an address autocomplete provider
  *
@@ -38,17 +53,6 @@ function registerAddressAutocompleteProvider( provider ) {
 
 		if ( typeof provider.select !== 'function' ) {
 			throw new Error( 'Address provider must have a select function' );
-		}
-
-		// Check if provider is registered on server.
-		var serverProviders = [];
-		if (
-			window &&
-			window.wc_checkout_params &&
-			Array.isArray( window.wc_checkout_params.address_providers ) &&
-			window.wc_checkout_params.address_providers.length > 0
-		) {
-			serverProviders = window.wc_checkout_params.address_providers;
 		}
 
 		if ( ! Array.isArray( serverProviders ) ) {
@@ -102,11 +106,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 	 */
 	function setActiveProvider( country, type ) {
 		// Get server providers list (already ordered by preference).
-		const serverProviders =
-			( window &&
-				window.wc_checkout_params &&
-				window.wc_checkout_params.address_providers ) ||
-			[];
 
 		// Check providers in preference order (server handles preferred provider ordering).
 		for ( const serverProvider of serverProviders ) {
@@ -501,12 +500,6 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 				const activeProvider =
 					window.wc.addressAutocomplete.activeProvider[ type ];
 				if ( activeProvider && activeProvider.id ) {
-					// Get the server provider data to access branding_html.
-					const serverProviders =
-						( window &&
-							window.wc_checkout_params &&
-							window.wc_checkout_params.address_providers ) ||
-						[];
 					const serverProvider = serverProviders.find(
 						( provider ) => provider.id === activeProvider.id
 					);
