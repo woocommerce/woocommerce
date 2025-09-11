@@ -82,9 +82,6 @@ class WC_Session_Handler extends WC_Session {
 	public function init() {
 		$this->init_hooks();
 		$this->init_session();
-		if($this->_has_cookie && empty($this->_data) && ! isset( WC()->cart )) {
-			$this->destroy_session();
-		}
 	}
 
 	/**
@@ -184,12 +181,6 @@ class WC_Session_Handler extends WC_Session {
 
 		/**
 		 * This clears the session if the cookie is invalid.
-		 *
-		 * Previously this also cleared the session when $this->_data was empty, and the cart was not yet initialised,
-		 * however this caused a conflict with WooCommerce Payments session handler which overrides this class.
-		 *
-		 * Ref: https://github.com/woocommerce/woocommerce/pull/57652
-		 * See also: https://github.com/woocommerce/woocommerce/pull/59530
 		 */
 		if ( ! $this->is_session_cookie_valid() ) {
 			$this->destroy_session();
@@ -309,41 +300,6 @@ class WC_Session_Handler extends WC_Session {
 		if ( is_wc_endpoint_url( 'order-pay' ) ) {
 			$this->set_customer_session_cookie( true );
 		}
-	}
-
-
-	/**
-	 * Destroys the WooCommerce session if it contains no data for non-logged-in users.
-	 *
-	 * This method helps improve caching performance by removing session cookies when they
-	 * are no longer needed, allowing non-logged-in customers to receive cached pages.
-	 * Only runs if the destroy-empty-sessions feature is enabled.
-	 *
-	 * @return void
-	 *
-	 * @since 10.3.0
-	 */
-	public function destroy_session_if_empty() {
-		if ( is_user_logged_in() || ! $this->_has_cookie ) {
-			return;
-		}
-
-		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) {
-			// If $_COOKIE isn't set, then something triggered setting the cookie during this request. So we won't
-			// yet destroy the session if it is empty to expand compatibility at the cost of one additional request being uncached.
-			return;
-		}
-
-		if ( ! empty( $this->_data ) || isset( WC()->cart ) ) {
-			return;
-		}
-
-		$feature_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $feature_controller->feature_is_enabled( 'destroy-empty-sessions' ) ) {
-			return;
-		}
-
-		$this->destroy_session();
 	}
 
 	/**
@@ -743,6 +699,41 @@ class WC_Session_Handler extends WC_Session {
 			return;
 		}
 		$GLOBALS['wpdb']->update( $this->_table, array( 'session_expiry' => $timestamp ), array( 'session_key' => $customer_id ), array( '%d' ) );
+	}
+
+	/**
+	 * Destroys the WooCommerce session if it contains no data for non-logged-in users.
+	 *
+	 * This method helps improve caching performance by removing session cookies when they
+	 * are no longer needed, allowing non-logged-in customers to receive cached pages.
+	 * Only runs if the destroy-empty-sessions feature is enabled.
+	 *
+	 * @return void
+	 *
+	 * @since 10.3.0
+	 */
+	public function destroy_session_if_empty() {
+		if ( is_user_logged_in() || ! $this->_has_cookie ) {
+			return;
+		}
+
+		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) {
+			// If $_COOKIE isn't set, then something triggered setting the cookie during this request. So we won't
+			// yet destroy the session if it is empty to expand compatibility at the cost of one additional request being uncached.
+			return;
+		}
+
+		if ( ! empty( $this->_data ) || ! ( is_null( WC()->cart ) || WC()->cart->is_empty() ) ) {
+			// Verify that the session data is empty and there is no pending cart to save.
+			return;
+		}
+
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $feature_controller->feature_is_enabled( 'destroy-empty-sessions' ) ) {
+			return;
+		}
+
+		$this->destroy_session();
 	}
 
 	/**
