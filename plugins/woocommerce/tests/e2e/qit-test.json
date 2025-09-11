@@ -14,7 +14,13 @@
     ],
     "test": {
         "phases": {
-            "globalSetup": ["./bootstrap/global-setup.sh"],
+            "globalSetup": [
+                "./bootstrap/global-setup.sh",
+                {
+                    "command": "npx playwright test --config=playwright.bootstrap.config.js dismiss-coming-soon.spec.js",
+                    "runs_on": "host"
+                }
+            ],
             "setup": ["./bootstrap/setup.sh"],
             "run": ["npx playwright test"],
             "teardown": [],
