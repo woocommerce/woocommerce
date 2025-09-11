@@ -203,7 +203,7 @@ class ComingSoonRequestHandler {
 			$parent_theme_json_file = $parent_theme->get_file_path( 'theme.json' );
 
 			if ( is_readable( $parent_theme_json_file ) ) {
-				$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true );
+				$parent_theme_json_data = json_decode( file_get_contents( $parent_theme_json_file ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 
 				if ( isset( $parent_theme_json_data['settings']['typography']['fontFamilies'] ) ) {
 					$parent_fonts = $parent_theme_json_data['settings']['typography']['fontFamilies'];
