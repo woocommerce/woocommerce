@@ -25,6 +25,8 @@ export type CheckoutState = {
 	useShippingAsBilling: boolean; // Should the billing form be hidden and inherit the shipping address?
 	editingBillingAddress: boolean; // Is the billing address being edited?
 	editingShippingAddress: boolean; // Is the shipping address being edited?
+	addressAutocompleteProviders: string[]; // IDs of registered address autocomplete providers, if any.
+	activeAddressAutocompleteProvider: { billing: string; shipping: string }; // Active address autocomplete provider.
 };
 
 // Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.
@@ -61,4 +63,9 @@ export const defaultState: CheckoutState = {
 	useShippingAsBilling: billingMatchesShipping,
 	editingBillingAddress: ! hasBillingAddress,
 	editingShippingAddress: ! hasShippingAddress,
+	addressAutocompleteProviders: [],
+	activeAddressAutocompleteProvider: {
+		billing: '',
+		shipping: '',
+	},
 };
