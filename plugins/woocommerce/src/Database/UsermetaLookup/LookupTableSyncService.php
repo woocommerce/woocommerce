@@ -38,6 +38,8 @@ class LookupTableSyncService {
 	public function __construct() {
 		global $wpdb;
 		$this->table_name = $wpdb->prefix . 'wc_user_meta_lookup';
+
+		$this->init_hooks();
 	}
 
 	/**
