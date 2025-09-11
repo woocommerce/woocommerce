@@ -45,9 +45,6 @@ class Eway extends PaymentGateway {
 	/**
 	 * Try to determine if the payment gateway is in test mode.
 	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
-	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
@@ -59,9 +56,6 @@ class Eway extends PaymentGateway {
 	/**
 	 * Try to determine if the payment gateway is in dev mode.
 	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
-	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
@@ -72,9 +66,6 @@ class Eway extends PaymentGateway {
 
 	/**
 	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
-	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
@@ -96,10 +87,15 @@ class Eway extends PaymentGateway {
 	 */
 	private function is_eway_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
-			if ( isset( $payment_gateway->testmode ) ) {
-				return wc_string_to_bool( $payment_gateway->testmode );
+			// Prefer option over property.
+			$raw_option = $payment_gateway->get_option( 'testmode' );
+			if ( '' !== $raw_option && null !== $raw_option ) {
+				return \wc_string_to_bool( $raw_option );
 			}
-		} catch ( \Throwable $e ) {
+			if ( isset( $payment_gateway->testmode ) ) {
+				return \wc_string_to_bool( $payment_gateway->testmode );
+			}
+		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),

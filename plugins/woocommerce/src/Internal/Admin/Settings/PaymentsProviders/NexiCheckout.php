@@ -52,9 +52,6 @@ class NexiCheckout extends PaymentGateway {
 	/**
 	 * Try to determine if the payment gateway is in test mode.
 	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
-	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
@@ -66,9 +63,6 @@ class NexiCheckout extends PaymentGateway {
 	/**
 	 * Try to determine if the payment gateway is in dev mode.
 	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
-	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
@@ -79,9 +73,6 @@ class NexiCheckout extends PaymentGateway {
 
 	/**
 	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
-	 *
-	 * This is a best-effort attempt, as there is no standard way to determine this.
-	 * Trust the true value, but don't consider a false value as definitive.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
 	 *
@@ -103,8 +94,8 @@ class NexiCheckout extends PaymentGateway {
 	 */
 	private function is_nexi_in_sandbox_mode( WC_Payment_Gateway $payment_gateway ): ?bool {
 		try {
-			return wc_string_to_bool( $payment_gateway->get_option( 'test_mode' ) );
-		} catch ( \Throwable $e ) {
+			return \wc_string_to_bool( $payment_gateway->get_option( 'test_mode' ) );
+		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
 			SafeGlobalFunctionProxy::wc_get_logger()->debug(
 				'Failed to determine if gateway is in sandbox mode: ' . $e->getMessage(),
