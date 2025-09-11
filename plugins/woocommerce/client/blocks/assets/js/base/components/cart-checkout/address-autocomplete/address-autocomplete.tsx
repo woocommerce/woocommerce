@@ -21,6 +21,7 @@ import { useDebounce } from '@wordpress/compose';
  */
 import { ValidatedTextInputProps } from '../../../../../../packages/components/text-input/types';
 import './style.scss';
+import { Suggestions } from './suggestions';
 import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
 
 /**
