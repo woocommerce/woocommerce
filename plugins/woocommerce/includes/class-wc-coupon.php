@@ -154,10 +154,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	public function get_data() {
 		$data = parent::get_data();
 		if ( '' === $data['minimum_amount'] ) {
-			$data['minimum_amount'] = 0;
+			$data['minimum_amount'] = '0';
 		}
 		if ( '' === $data['maximum_amount'] ) {
-			$data['maximum_amount'] = 0;
+			$data['maximum_amount'] = '0';
 		}
 		return $data;
 	}
