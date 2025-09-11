@@ -612,6 +612,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$placeholders      = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
 		$lookup_table_name = wc_get_container()->get( UsermetaLookupService::class )->get_table_name();
 
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT user_id FROM %i WHERE billing_email IN ($placeholders)",
@@ -619,5 +620,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				...$emails
 			)
 		);
+		// phpcs:enable
 	}
 }
