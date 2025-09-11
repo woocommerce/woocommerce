@@ -37,13 +37,6 @@ class Controller extends AbstractController {
 	protected $rest_base = 'order-notes';
 
 	/**
-	 * Post type used for permissions checks.
-	 *
-	 * @var string
-	 */
-	protected $post_type = 'shop_order';
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -211,7 +204,7 @@ class Controller extends AbstractController {
 			return null;
 		}
 		$order = wc_get_order( $order_id );
-		return $order && $this->post_type === $order->get_type() ? $order : null;
+		return $order && 'shop_order' === $order->get_type() ? $order : null;
 	}
 	/**
 	 * Get the parent order of a note.
@@ -228,6 +221,19 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * To read, edit or delete order notes, the user must have permission to edit the parent order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return bool
+	 */
+	protected function check_order_permission( WC_Order $order ) {
+		if ( ! $order ) {
+			return false;
+		}
+		return wc_rest_check_post_permissions( $order->get_type(), 'edit', $order->get_id() );
+	}
+
+	/**
 	 * Check if a given request has access to read an item.
 	 *
 	 * @param  WP_REST_Request $request The request object.
@@ -236,7 +242,7 @@ class Controller extends AbstractController {
 	public function get_item_permissions_check( $request ) {
 		$order = $this->get_order_by_note( (int) $request['id'] );
 
-		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'read', $order->get_id() ) ) {
+		if ( $order && ! $this->check_order_permission( $order ) ) {
 			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), rest_authorization_required_code() );
 		}
 		return true;
@@ -265,7 +271,9 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', (int) $request['order_id'] ) ) {
+		$order = $this->get_order_by_id( (int) $request['order_id'] );
+
+		if ( ! $order || ! $this->check_order_permission( $order ) ) {
 			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), rest_authorization_required_code() );
 		}
 		return true;
@@ -335,7 +343,7 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
 		}
 
-		if ( ! wc_rest_check_post_permissions( $this->post_type, 'edit', $order->get_id() ) ) {
+		if ( ! $this->check_order_permission( $order ) ) {
 			return $this->get_route_error_response( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), rest_authorization_required_code() );
 		}
 
@@ -390,7 +398,7 @@ class Controller extends AbstractController {
 	public function delete_item_permissions_check( $request ) {
 		$order = $this->get_order_by_note( (int) $request['id'] );
 
-		if ( $order && ! wc_rest_check_post_permissions( $this->post_type, 'delete', $order->get_id() ) ) {
+		if ( $order && ! $this->check_order_permission( $order ) ) {
 			return $this->get_route_error_response( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), rest_authorization_required_code() );
 		}
 		return true;
