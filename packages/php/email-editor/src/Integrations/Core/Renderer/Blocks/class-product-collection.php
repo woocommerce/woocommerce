@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Query;
 
 /**
@@ -32,7 +33,7 @@ class Product_Collection extends Abstract_Block_Renderer {
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query, $parsed_block, $rendering_context );
+					$content .= $this->render_product_template( $inner_block, $query, $rendering_context );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -51,138 +52,129 @@ class Product_Collection extends Abstract_Block_Renderer {
 	 *
 	 * @param array             $inner_block Inner block data.
 	 * @param \WP_Query         $query WP_Query object.
-	 * @param array             $parent_block Parent block data.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query, array $parent_block, Rendering_Context $rendering_context ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query, Rendering_Context $rendering_context ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
 
-		$display_layout = $parent_block['attrs']['displayLayout'] ?? array(
-			'type'    => 'flex',
-			'columns' => 3,
-		);
-		$columns        = max( 1, intval( $display_layout['columns'] ?? 3 ) );
+		$posts       = $query->get_posts();
+		$total_count = count( $posts );
 
-		$products       = $query->get_posts();
-		$total_products = count( $products );
-
-		if ( 0 === $total_products ) {
+		if ( 0 === $total_count ) {
 			return $this->render_no_results_message();
 		}
 
-		return $this->render_product_grid( $products, $columns, $inner_block, $rendering_context );
+		$products = array_filter(
+			array_map(
+				function ( $post ) {
+					return $post instanceof \WP_Post ? wc_get_product( $post->ID ) : $post;
+				},
+				$posts
+			)
+		);
+		return $this->render_product_grid( $products, $inner_block, $rendering_context );
 	}
 
 	/**
 	 * Render product grid using HTML table structure for email compatibility.
 	 *
-	 * @param array             $products Array of WP_Post objects.
-	 * @param int               $columns Number of columns.
+	 * @param array             $products Array of WC_Product objects.
 	 * @param array             $inner_block Inner block data.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, int $columns, array $inner_block, Rendering_Context $rendering_context ): string {
-		$total_products = count( $products );
-		$rows           = ceil( $total_products / $columns );
-
-		$table_style = 'width: 100%; border-collapse: collapse; margin: 0; padding: 0;';
-		$cell_width  = floor( 100 / $columns );
-
-		$content = sprintf( '<table style="%s">', esc_attr( $table_style ) );
-
-		for ( $row = 0; $row < $rows; $row++ ) {
-			$content .= '<tr>';
-
-			for ( $col = 0; $col < $columns; $col++ ) {
-				$product_index = ( $row * $columns ) + $col;
-
-				$cell_style = sprintf(
-					'width: %d%%; vertical-align: top; padding: 10px; text-align: center; border: 0;',
-					$cell_width
-				);
-
-				$content .= sprintf( '<td style="%s">', esc_attr( $cell_style ) );
-
-				if ( $product_index < $total_products ) {
-					$product = wc_get_product( $products[ $product_index ]->ID );
-					if ( $product ) {
-						$content .= $this->render_product_cell_content( $product, $inner_block, $rendering_context );
-					}
-				} else {
-					$content .= '&nbsp;';
-				}
-
-				$content .= '</td>';
-			}
-
-			$content .= '</tr>';
+	private function render_product_grid( array $products, array $inner_block, Rendering_Context $rendering_context ): string {
+		// We start with supporting 1 product per row.
+		$content = '';
+		foreach ( $products as $product ) {
+			$content .= $this->render_product_content( $product, $inner_block, $rendering_context );
 		}
-
-		$content .= '</table>';
 
 		return $content;
 	}
 
 	/**
-	 * Render individual product cell content.
+	 * Render default product content when no inner blocks are present.
 	 *
 	 * @param \WC_Product       $product Product object.
-	 * @param array             $parsed_block Parsed block data.
+	 * @param array             $template_block Inner block data.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_product_cell_content( \WC_Product $product, array $parsed_block, Rendering_Context $rendering_context ): string {
-		return $this->render_default_product_content( $product );
-	}
-
-	/**
-	 * Render default product content when no inner blocks are present.
-	 *
-	 * @param \WC_Product $product Product object.
-	 * @return string
-	 */
-	private function render_default_product_content( \WC_Product $product ): string {
+	private function render_product_content( \WC_Product $product, array $template_block, Rendering_Context $rendering_context ): string {
 		$content = '';
 
-		// Product image - using table for email compatibility.
-		$image_id = $product->get_image_id();
-		if ( $image_id ) {
-			$image_url = wp_get_attachment_image_url( (int) $image_id, 'medium' );
-			if ( $image_url ) {
-				$content .= sprintf(
-					'<table width="100%%" style="border-collapse: collapse; margin-bottom: 10px;"><tr><td style="text-align: center; padding: 0;"><img src="%s" alt="%s" style="max-width: 100%%; height: auto; display: block;" /></td></tr></table>',
-					esc_url( $image_url ),
-					esc_attr( $product->get_name() )
-				);
+		foreach ( $template_block['innerBlocks'] as $inner_block ) {
+			switch ( $inner_block['blockName'] ) {
+				case 'woocommerce/product-image':
+					$inner_block['context']           = $inner_block['context'] ?? array();
+					$inner_block['context']['postId'] = $product->get_id();
+					$content                         .= render_block( $inner_block );
+					break;
+				case 'woocommerce/product-price':
+				case 'woocommerce/product-button':
+					$content .= $this->render_woocommerce_block( $inner_block, $product );
+					break;
+				case 'woocommerce/product-sale-badge':
+					$inner_block['context']           = $inner_block['context'] ?? array();
+					$inner_block['context']['postId'] = $product->get_id();
+					$content                         .= render_block( $inner_block );
+					break;
+				case 'core/post-title':
+					global $post;
+					$original_post           = $post;
+					$original_global_product = $GLOBALS['product'] ?? null;
+
+					$product_post = get_post( $product->get_id() );
+
+					$post               = $product_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$GLOBALS['product'] = $product;
+
+					$inner_block['context']           = $inner_block['context'] ?? array();
+					$inner_block['context']['postId'] = $product->get_id();
+
+					$content .= render_block( $inner_block );
+
+					$post               = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					$GLOBALS['product'] = $original_global_product;
+					break;
+				default:
+					break;
 			}
 		}
 
-		// Product title - using table for email compatibility.
-		$content .= sprintf(
-			'<table width="100%%" style="border-collapse: collapse; margin-bottom: 10px;"><tr><td style="text-align: center; padding: 0;"><h3 style="margin: 0; font-size: 16px; font-weight: bold;"><a href="%s" style="color: #333; text-decoration: none;">%s</a></h3></td></tr></table>',
-			esc_url( $product->get_permalink() ),
-			esc_html( $product->get_name() )
+		return $content;
+	}
+
+	/**
+	 * Render a WooCommerce block with proper product context.
+	 *
+	 * @param array       $inner_block Inner block data.
+	 * @param \WC_Product $product Product object.
+	 * @return string
+	 */
+	private function render_woocommerce_block( array $inner_block, \WC_Product $product ): string {
+		global $post;
+		$original_post           = $post;
+		$original_global_product = $GLOBALS['product'] ?? null;
+
+		$product_post = get_post( $product->get_id() );
+
+		$post               = $product_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['product'] = $product;
+
+		$block_context = array(
+			'postId' => $product->get_id(),
 		);
 
-		// Product price - using table for email compatibility.
-		$price_html = $product->get_price_html();
-		if ( $price_html ) {
-			$content .= sprintf(
-				'<table width="100%%" style="border-collapse: collapse; margin-bottom: 10px;"><tr><td style="text-align: center; padding: 0; font-size: 14px;">%s</td></tr></table>',
-				$price_html
-			);
-		}
+		$wp_block = new \WP_Block( $inner_block, $block_context );
+		$content  = $wp_block->render();
 
-		// Add to cart button - using table for email compatibility.
-		$content .= sprintf(
-			'<table width="100%%" style="border-collapse: collapse;"><tr><td style="text-align: center; padding: 0;"><a href="%s" style="display: inline-block; padding: 8px 16px; background-color: #0073aa; color: white; text-decoration: none; border-radius: 3px; font-size: 14px;">%s</a></td></tr></table>',
-			esc_url( $product->add_to_cart_url() ),
-			esc_html__( 'Add to Cart', 'woocommerce' )
-		);
+		$post               = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$GLOBALS['product'] = $original_global_product;
 
 		return $content;
 	}

@@ -25,7 +25,11 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Collection;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Image;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Price;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Product_Sale_Badge;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
@@ -59,6 +63,10 @@ class Initializer {
 		'core/site-title',
 		'core/table',
 		'woocommerce/product-collection',
+		'woocommerce/product-image',
+		'woocommerce/product-price',
+		'woocommerce/product-button',
+		'woocommerce/product-sale-badge',
 	);
 
 	/**
@@ -184,6 +192,7 @@ class Initializer {
 			case 'core/heading':
 			case 'core/paragraph':
 			case 'core/site-title':
+			case 'core/post-title':
 				$renderer = new Text();
 				break;
 			case 'core/column':
@@ -200,6 +209,15 @@ class Initializer {
 				break;
 			case 'core/image':
 				$renderer = new Image();
+				break;
+			case 'woocommerce/product-image':
+				$renderer = new Product_Image();
+				break;
+			case 'woocommerce/product-price':
+				$renderer = new Product_Price();
+				break;
+			case 'woocommerce/product-sale-badge':
+				$renderer = new Product_Sale_Badge();
 				break;
 			case 'core/button':
 				$renderer = new Button();
@@ -241,6 +259,9 @@ class Initializer {
 				$renderer = new Video();
 			case 'woocommerce/product-collection':
 				$renderer = new Product_Collection();
+				break;
+			case 'woocommerce/product-button':
+				$renderer = new Product_Button();
 				break;
 			default:
 				$renderer = new Fallback();
