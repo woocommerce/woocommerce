@@ -45,8 +45,8 @@ class ProductReviewForm extends AbstractBlock {
 			return '<p class="woocommerce-verification-required">' . esc_html__( 'Only logged in customers who have purchased this product may leave a review.', 'woocommerce' ) . '</p>';
 		}
 
-		$interactivy_state  = [];
-		$interactivy_config = [
+		$interactivity_state  = [];
+		$interactivity_config = [
 			'reviewRatingEnabled' => wc_review_ratings_enabled(),
 		];
 
@@ -117,12 +117,12 @@ class ProductReviewForm extends AbstractBlock {
 		}
 
 		if ( wc_review_ratings_enabled() ) {
-			$interactivy_state['selectedStar']            = '';
-			$interactivy_state['hoveredStar']             = '0';
-			$interactivy_state['ratingError']             = '';
-			$interactivy_state['hasRatingError']          = false;
-			$interactivy_config['i18nRequiredRatingText'] = esc_attr__( 'Please select a rating', 'woocommerce' );
-			$interactivy_config['reviewRatingRequired']   = wc_review_ratings_required();
+			$interactivity_state['selectedStar']            = '';
+			$interactivity_state['hoveredStar']             = '0';
+			$interactivity_state['ratingError']             = '';
+			$interactivity_state['hasRatingError']          = false;
+			$interactivity_config['i18nRequiredRatingText'] = esc_attr__( 'Please select a rating', 'woocommerce' );
+			$interactivity_config['reviewRatingRequired']   = wc_review_ratings_required();
 
 			$comment_form['comment_field'] = '<div class="comment-form-rating"><label for="rating-selector" id="comment-form-rating-label">' .
 				esc_html__( 'Your rating', 'woocommerce' ) . ( wc_review_ratings_required() ? '&nbsp;<span class="required">*</span>' : '' ) .
@@ -166,11 +166,11 @@ class ProductReviewForm extends AbstractBlock {
 			$p->set_attribute( 'data-wp-on--submit', 'actions.handleSubmit' );
 		}
 
-		if ( ! empty( $interactivy_state ) ) {
-			wp_interactivity_state( 'woocommerce/product-reviews', $interactivy_state );
+		if ( ! empty( $interactivity_state ) ) {
+			wp_interactivity_state( 'woocommerce/product-reviews', $interactivity_state );
 		}
-		if ( ! empty( $interactivy_config ) ) {
-			wp_interactivity_config( 'woocommerce/product-reviews', $interactivy_config );
+		if ( ! empty( $interactivity_config ) ) {
+			wp_interactivity_config( 'woocommerce/product-reviews', $interactivity_config );
 		}
 
 		return $p->get_updated_html();
