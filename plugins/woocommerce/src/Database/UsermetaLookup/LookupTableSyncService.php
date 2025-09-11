@@ -80,7 +80,7 @@ class LookupTableSyncService {
 	public function create_entry_for_user( $user_id ): void {
 		if ( ! is_wp_error( $user_id ) ) {
 			global $wpdb;
-			$wpdb->query( $wpdb->prepare( "INSERT INTO %i (user_id) VALUES (%d)", $this->table_name, $user_id ) );
+			$wpdb->query( $wpdb->prepare( 'INSERT INTO %i (user_id) VALUES (%d)', $this->table_name, $user_id ) );
 		}
 	}
 
@@ -94,7 +94,7 @@ class LookupTableSyncService {
 	 */
 	public function delete_entry_for_user( $user_id ): void {
 		global $wpdb;
-		$wpdb->query( $wpdb->prepare( "DELETE FROM %i WHERE user_id = %d", $this->table_name, $user_id ) );
+		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE user_id = %d', $this->table_name, $user_id ) );
 	}
 
 	/**
@@ -112,10 +112,12 @@ class LookupTableSyncService {
 		if ( in_array( $meta_key, self::META_KEYS, true ) ) {
 			global $wpdb;
 			if ( null === $meta_value) {
-				$wpdb->query($wpdb->prepare("UPDATE %i SET %i = NULL WHERE user_id = %d", $this->table_name, $meta_key, $user_id));
+				$wpdb->query( $wpdb->prepare( 'UPDATE %i SET %i = NULL WHERE user_id = %d', $this->table_name, $meta_key, $user_id ) );
 			} else {
-				$wpdb->query($wpdb->prepare("UPDATE %i SET %i = %s WHERE user_id = %d", $this->table_name, $meta_key, $meta_value, $user_id));
+				$wpdb->query( $wpdb->prepare( 'UPDATE %i SET %i = %s WHERE user_id = %d', $this->table_name, $meta_key, $meta_value, $user_id ) );
 			}
 		}
 	}
+
+	// TODO: relocate here initial population routines
 }
