@@ -659,6 +659,19 @@ class WooCommerceProductImporter {
 
 		$attribute_taxonomy_map = $this->current_attribute_mapping;
 
+		// Build fallback mapping from product attributes if current mapping is empty.
+		if ( empty( $attribute_taxonomy_map ) ) {
+			$product_attributes = $product->get_attributes();
+			foreach ( $product_attributes as $taxonomy => $attribute_obj ) {
+				if ( $attribute_obj->get_variation() ) {
+					$attribute_label = wc_attribute_label( $taxonomy, $product );
+					// Store mapping with both original case and lowercase for case-insensitive lookup.
+					$attribute_taxonomy_map[ $attribute_label ]               = $taxonomy;
+					$attribute_taxonomy_map[ strtolower( $attribute_label ) ] = $taxonomy;
+				}
+			}
+		}
+
 		foreach ( $variations_data as $var_data ) {
 			$original_variant_id = $var_data['original_id'] ?? null;
 			if ( ! $original_variant_id ) {
@@ -737,9 +750,10 @@ class WooCommerceProductImporter {
 			if ( ! empty( $var_data['attributes'] ) && is_array( $var_data['attributes'] ) ) {
 				foreach ( $var_data['attributes'] as $attr_name => $attr_value ) {
 					if ( isset( $attribute_taxonomy_map[ $attr_name ] ) ) {
-						$taxonomy                             = $attribute_taxonomy_map[ $attr_name ];
-						$term_slug                            = sanitize_title( $attr_value );
-						$wc_variation_attributes[ $taxonomy ] = $term_slug;
+						$taxonomy                                           = $attribute_taxonomy_map[ $attr_name ];
+						$term_slug                                          = sanitize_title( $attr_value );
+						$normalized_attribute_name                          = wc_variation_attribute_name( $taxonomy );
+						$wc_variation_attributes[ $normalized_attribute_name ] = $term_slug;
 					} else {
 						wc_get_logger()->warning( "Attribute taxonomy mapping not found for option '{$attr_name}' while processing variation {$original_variant_id}.", array( 'source' => 'wc-migrator' ) );
 					}
