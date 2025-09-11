@@ -13,11 +13,11 @@ var serverProviders = [];
 try {
 	if (
 		window &&
-		window.wc_checkout_params &&
-		window.wc_checkout_params.address_providers
+		window.wc_address_autocomplete_params &&
+		window.wc_address_autocomplete_params.address_providers
 	) {
 		serverProviders = JSON.parse(
-			window.wc_checkout_params.address_providers
+			window.wc_address_autocomplete_params.address_providers
 		);
 	}
 } catch ( e ) {
