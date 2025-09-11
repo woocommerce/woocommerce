@@ -593,9 +593,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
-	 * @param array $emails List of emails to check against.
+	 * @param string[] $emails List of emails to check against.
 	 *
-	 * @return array
+	 * @return int[]
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
 		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
