@@ -26,6 +26,20 @@ abstract class AbstractSchema {
 	const IDENTIFIER = '';
 
 	/**
+	 * Context for the item schema.
+	 *
+	 * @var array
+	 */
+	const VIEW_EDIT_EMBED_CONTEXT = array( 'view', 'edit', 'embed' );
+
+	/**
+	 * Context for the item schema.
+	 *
+	 * @var array
+	 */
+	const VIEW_EDIT_CONTEXT = array( 'view', 'edit' );
+
+	/**
 	 * Return all properties for the item schema.
 	 *
 	 * @return array

@@ -180,7 +180,8 @@ class Controller extends AbstractController {
 	protected function add_links( WP_REST_Response $response, WC_Order $order, WP_REST_Request $request ) {
 		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ) );
 		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		$response->add_link( 'email_templates', rest_url( sprintf( '/%s/%s/%d/actions/email_templates', $this->namespace, $this->rest_base, $order->get_id() ) ), array( 'embeddable' => true ) );
+		$response->add_link( 'email-templates', rest_url( sprintf( '/wc/v3/%s/%d/actions/email_templates', $this->rest_base, $order->get_id() ) ), array( 'embeddable' => true ) );
+		$response->add_link( 'order-notes', rest_url( sprintf( '/%s/order-notes?order_id=%d', $this->namespace, $order->get_id() ) ), array( 'embeddable' => true ) );
 
 		if ( $order->get_customer_id() ) {
 			$response->add_link( 'customer', rest_url( sprintf( '/%s/customers/%d', $this->namespace, $order->get_customer_id() ) ), array( 'embeddable' => true ) );

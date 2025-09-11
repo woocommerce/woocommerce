@@ -39,44 +39,44 @@ class OrderNoteSchema extends AbstractSchema {
 			'id'               => array(
 				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'order_id'         => array(
 				'description' => __( 'Order ID the note belongs to.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'author'           => array(
 				'description' => __( 'Order note author.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'date_created'     => array(
 				'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
 				'type'        => 'date-time',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'date_created_gmt' => array(
 				'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
 				'type'        => 'date-time',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'note'             => array(
 				'description' => __( 'Order note content.', 'woocommerce' ),
 				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'required'    => true,
 			),
 			'is_customer_note' => array(
-				'description' => __( 'If true, the note will be shown to customers and they will be notified. If false, the note will be for admin reference only.', 'woocommerce' ),
+				'description' => __( 'If true, the note will be shown to customers. If false, the note will be for admin reference only.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
 		);
 
