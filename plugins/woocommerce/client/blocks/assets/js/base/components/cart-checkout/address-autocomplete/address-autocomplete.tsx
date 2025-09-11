@@ -99,9 +99,24 @@ export const AddressAutocomplete = ( {
 		};
 	}, [] );
 
+	const addressChangeHandler = ( value: string ) => {
+		props.onChange( value );
+
+		// Don't trigger search when we're programmatically setting the address
+		// or when search is temporarily suppressed after address selection
+		if ( ! isSettingAddress && ! suppressSearchTimeoutRef.current ) {
+			setSearchValue( value );
+		}
+	};
+
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
-			<ValidatedTextInput { ...props } id={ id } ref={ inputRef } />
+			<ValidatedTextInput
+				{ ...props }
+				id={ id }
+				ref={ inputRef }
+				onChange={ addressChangeHandler }
+			/>
 		</div>
 	);
 };
