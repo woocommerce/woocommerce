@@ -1,0 +1,35 @@
+
+Running 403 tests using 8 workers
+
+  -    1 [install wc] › fixtures/install-wc.setup.js:21:6 › Install WC using WC Beta Tester
+  ✘    2 [global authentication] › fixtures/auth.setup.js:35:6 › authenticate users (330ms)
+
+
+  1) [global authentication] › fixtures/auth.setup.js:35:6 › authenticate users › authenticate admin 
+
+    Error: apiRequestContext.post: connect ECONNREFUSED ::1:32809
+    Call log:
+    [2m  - → POST http://localhost:32809/wp-login.php[22m
+    [2m    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.7339.16 Safari/537.36[22m
+    [2m    - accept: */*[22m
+    [2m    - accept-encoding: gzip,deflate,br[22m
+    [2m    - content-type: application/x-www-form-urlencoded[22m
+    [2m    - content-length: 22[22m
+
+        at apiRequestContext.post: connect ECONNREFUSED ::1:32809
+        at authenticate (/storage/automattic/woocommerce/plugins/woocommerce/tests/e2e/fixtures/auth.setup.js:18:16)
+        at /storage/automattic/woocommerce/plugins/woocommerce/tests/e2e/fixtures/auth.setup.js:37:9
+        at /storage/automattic/woocommerce/plugins/woocommerce/tests/e2e/fixtures/auth.setup.js:36:14
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    results/auth.setup.js-authenticate-users-global-authentication/trace.zip
+    Usage:
+
+        npx playwright show-trace results/auth.setup.js-authenticate-users-global-authentication/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [global authentication] › fixtures/auth.setup.js:35:6 › authenticate users ─────────────────────
+  1 skipped
+  401 did not run

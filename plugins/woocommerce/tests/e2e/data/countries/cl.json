@@ -1,0 +1,82 @@
+{
+    "code": "CL",
+    "name": "Chile",
+    "states": [
+        {
+            "code": "CL-AI",
+            "name": "Aisén del General Carlos Ibañez del Campo"
+        },
+        {
+            "code": "CL-AN",
+            "name": "Antofagasta"
+        },
+        {
+            "code": "CL-AP",
+            "name": "Arica y Parinacota"
+        },
+        {
+            "code": "CL-AR",
+            "name": "La Araucanía"
+        },
+        {
+            "code": "CL-AT",
+            "name": "Atacama"
+        },
+        {
+            "code": "CL-BI",
+            "name": "Biobío"
+        },
+        {
+            "code": "CL-CO",
+            "name": "Coquimbo"
+        },
+        {
+            "code": "CL-LI",
+            "name": "Libertador General Bernardo O'Higgins"
+        },
+        {
+            "code": "CL-LL",
+            "name": "Los Lagos"
+        },
+        {
+            "code": "CL-LR",
+            "name": "Los Ríos"
+        },
+        {
+            "code": "CL-MA",
+            "name": "Magallanes"
+        },
+        {
+            "code": "CL-ML",
+            "name": "Maule"
+        },
+        {
+            "code": "CL-NB",
+            "name": "Ñuble"
+        },
+        {
+            "code": "CL-RM",
+            "name": "Región Metropolitana de Santiago"
+        },
+        {
+            "code": "CL-TA",
+            "name": "Tarapacá"
+        },
+        {
+            "code": "CL-VS",
+            "name": "Valparaíso"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/cl"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

@@ -1,0 +1,18 @@
+{
+    "private": true,
+    "dependencies": {
+        "@woocommerce/e2e-utils-playwright": "file:./packages/e2e-utils-playwright"
+    },
+    "devDependencies": {
+        "@playwright/test": "^1.55.0",
+        "@faker-js/faker": "^8.4.1",
+        "allure-playwright": "^3.4.1",
+        "axios": "^1.6.0",
+        "dotenv": "^16.4.5",
+        "oauth-1.0a": "^2.2.6",
+        "playwright-ctrf-json-reporter": "^0.0.23"
+    },
+    "scripts": {
+        "test:e2e": "playwright test"
+    }
+}

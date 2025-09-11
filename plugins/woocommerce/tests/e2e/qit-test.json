@@ -1,0 +1,29 @@
+{
+    "$schema": "https://qit.woo.com/json-schema/test-package",
+    "package": "woocommerce/e2e",
+    "description": "WooCommerce E2E test suite ported to QIT test package format",
+    "tags": ["e2e", "woocommerce", "checkout", "cart", "products"],
+    "requires": {
+    		"network": true
+    },
+    "mu_plugins": [
+        "./bin/filter-setter.php",
+        "./bin/process-waiting-actions.php",
+        "./bin/test-helper-apis.php",
+        "./bin/woocommerce-cleanup.php"
+    ],
+    "test": {
+        "phases": {
+            "globalSetup": ["./bootstrap/global-setup.sh"],
+            "setup": ["./bootstrap/setup.sh"],
+            "run": ["npx playwright test"],
+            "teardown": [],
+            "globalTeardown": ["./bootstrap/global-teardown.sh"]
+        },
+        "results": {
+            "ctrf-json": "./results/ctrf.json",
+            "allure-dir": "./results/allure",
+            "blob-dir": "./results/blob"
+        }
+    }
+}

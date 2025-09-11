@@ -120,3 +120,9 @@ changes.json
 
 # Docusaurus
 .docusaurus
+
+plugins/woocommerce/tests/e2e/.state/
+
+plugins/woocommerce/tests/e2e/playwright-report/
+
+plugins/woocommerce/tests/e2e/results/
