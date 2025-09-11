@@ -107,6 +107,8 @@ class WooCommerceProductImporter {
 		$start_time   = microtime( true );
 		$product_name = $product_data['name'] ?? 'Unknown Product';
 
+		$this->current_attribute_mapping = array();
+
 		try {
 			wc_get_logger()->info( "Starting import for product: {$product_name}", array( 'source' => 'wc-migrator' ) );
 
