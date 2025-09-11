@@ -448,7 +448,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_order_count( &$customer ) {
 		$customer_id = $customer->get_id();
-		$count       = apply_filters(
+
+		/**
+		 * Allows to customize calculating the number of customer orders.
+		 *
+		 * @param string|int  $order_count Order count from `wc_order_count` user meta.
+		 * @param WC_Customer $customer    Customer object.
+		 * @return int
+		 */
+		$count = apply_filters(
 			'woocommerce_customer_get_order_count',
 			Users::get_site_user_meta( $customer_id, 'wc_order_count', true ),
 			$customer
@@ -496,7 +504,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_total_spent( &$customer ) {
 		$customer_id = $customer->get_id();
-		$spent       = apply_filters(
+
+		/**
+		 * Allows to customize calculating customers' total spent amount.
+		 *
+		 * @param string|int  $total_spent Total spent amount from `wc_money_spent` user meta.
+		 * @param WC_Customer $customer    Customer object.
+		 * @return float
+		 */
+		$spent = apply_filters(
 			'woocommerce_customer_get_total_spent',
 			Users::get_site_user_meta( $customer_id, 'wc_money_spent', true ),
 			$customer
