@@ -47,7 +47,6 @@ export const AddressAutocomplete = ( {
 	id,
 	...props
 }: { addressType: FormType; id: string } & ValidatedTextInputProps ) => {
-	const inputRef = useRef< ValidatedTextInputHandle >( null );
 	const serverProviders = getSettingWithCoercion<
 		ServerAddressAutocompleteProvider[]
 	>(
