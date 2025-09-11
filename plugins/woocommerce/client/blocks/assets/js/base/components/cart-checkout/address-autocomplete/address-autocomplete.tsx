@@ -120,6 +120,12 @@ export const AddressAutocomplete = ( {
 				ref={ inputRef }
 				onChange={ addressChangeHandler }
 			/>
+			{ suggestions.length > 0 ? (
+				<Suggestions
+					suggestions={ suggestions }
+					addressType={ addressType }
+				/>
+			) : null }
 		</div>
 	);
 };
