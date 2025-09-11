@@ -38,7 +38,8 @@ export const AddressAutocomplete = ( {
 }: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
 	// This hook will monitor for changes in country and update the provider accordingly.
 	useUpdatePreferredAutocompleteProvider( addressType );
-
+    
+	const inputRef = useRef< ValidatedTextInputHandle >( null );
 	const [ isSearching, setIsSearching ] = useState( false );
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
@@ -100,7 +101,7 @@ export const AddressAutocomplete = ( {
 
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
-			<ValidatedTextInput { ...props } id={ id } />
+			<ValidatedTextInput { ...props } id={ id } ref={ inputRef } />
 		</div>
 	);
 };
