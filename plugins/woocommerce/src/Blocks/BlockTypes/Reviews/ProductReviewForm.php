@@ -66,7 +66,7 @@ class ProductReviewForm extends AbstractBlock {
 		$commenter    = wp_get_current_commenter();
 		$comment_form = [
 			/* translators: %s is product title */
-			'title_reply'         => get_comments_number( $block->context['postId'] ) > 0 ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), get_the_title() ),
+			'title_reply'         => $product->get_review_count() > 0 ? esc_html__( 'Add a review', 'woocommerce' ) : sprintf( esc_html__( 'Be the first to review &ldquo;%s&rdquo;', 'woocommerce' ), esc_html( get_the_title( $block->context['postId'] ) ) ),
 			/* translators: %s is product title */
 			'title_reply_to'      => esc_html__( 'Leave a Reply to %s', 'woocommerce' ),
 			'title_reply_before'  => '<span id="reply-title" class="comment-reply-title" role="heading" aria-level="3">',
