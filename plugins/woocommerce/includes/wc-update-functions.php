@@ -3137,7 +3137,7 @@ function wc_update_1030_create_user_meta_lookup_table( ?string $populate_column 
 				PRIMARY KEY  (`user_id`),
 				KEY `billing_email` (`billing_email`)
 			) $collate;"
-		);
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// TODO: also refresh the table on activation.
 		$wpdb->query(
