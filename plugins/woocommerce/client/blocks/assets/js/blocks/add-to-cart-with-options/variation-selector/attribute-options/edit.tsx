@@ -81,7 +81,7 @@ export default function AttributeOptionsEdit(
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return;
+	if ( ! attribute ) return null;
 
 	const options = attribute.terms.map( ( term, index ) => ( {
 		value: term.slug,
@@ -98,12 +98,13 @@ export default function AttributeOptionsEdit(
 						value={ optionStyle ?? 'pills' }
 						onChange={ ( newOptionStyle ) => {
 							if (
-								newOptionStyle !== 'pills' &&
-								newOptionStyle !== 'dropdown'
+								newOptionStyle === 'pills' ||
+								newOptionStyle === 'dropdown'
 							) {
-								return;
+								setAttributes( {
+									optionStyle: newOptionStyle,
+								} );
 							}
-							setAttributes( { optionStyle: newOptionStyle } );
 						} }
 						isBlock
 						hideLabelFromVision
@@ -122,9 +123,7 @@ export default function AttributeOptionsEdit(
 			</InspectorControls>
 
 			<Disabled>
-				{ optionStyle === 'pills' ? (
-					<Pills id={ attribute.taxonomy } options={ options } />
-				) : (
+				{ optionStyle === 'dropdown' ? (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -135,6 +134,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
+				) : (
+					<Pills id={ attribute.taxonomy } options={ options } />
 				) }
 			</Disabled>
 		</div>
