@@ -575,7 +575,7 @@ class WooCommerceProductImporter {
 	 * @param array               $attributes_data Standardized attribute data from mapper.
 	 */
 	private function setup_attributes( WC_Product_Variable $product, array $attributes_data ): void {
-		$woo_attributes = array();
+		$woo_attributes                  = array();
 		$this->current_attribute_mapping = array();
 
 		foreach ( $attributes_data as $attribute_info ) {
