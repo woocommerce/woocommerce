@@ -519,6 +519,8 @@ class WooCommerceProductImporter {
 		}
 
 		if ( ! empty( $product_data['cost_of_goods'] ) ) {
+			$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
+			// works when cogs is disabled.
 			$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
 		}
 	}
