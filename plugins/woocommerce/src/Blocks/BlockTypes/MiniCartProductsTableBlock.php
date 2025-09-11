@@ -53,7 +53,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		$increase_quantity_label = __( 'Increase quantity of %s', 'woocommerce' );
 
 		// translators: %s is the name of the product in cart.
-		$quantity_description_label = __( 'Quantity of %s in your cart', 'woocommerce' );
+		$quantity_description_label = __( 'Quantity of %s in your cart.', 'woocommerce' );
 
 		// translators: %s is the name of the product in cart.
 		$remove_from_cart_label = __( 'Remove %s from cart', 'woocommerce' );
