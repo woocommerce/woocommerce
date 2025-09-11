@@ -516,6 +516,16 @@ class FeaturesController {
 				'description'     => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
 				'is_experimental' => true,
 			),
+			'destroy-empty-sessions'      => array(
+				'name'               => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
+				'description'        => __(
+					'[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.',
+					'woocommerce'
+				),
+				'enabled_by_default' => false,
+				'is_experimental'    => true,
+				'disable_ui'         => false,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
