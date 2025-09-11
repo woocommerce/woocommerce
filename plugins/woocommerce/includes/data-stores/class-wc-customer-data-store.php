@@ -604,8 +604,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$include_user_ids = array();
 		if ( $with_orders && $this->is_cot_in_use() ) {
 			global $wpdb;
-			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
 			$include_user_ids = $wpdb->get_col(
 				$wpdb->prepare(
 					"SELECT DISTINCT customer_id FROM %i WHERE billing_email IN ($placeholders)",
