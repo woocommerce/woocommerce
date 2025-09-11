@@ -95,7 +95,7 @@ export default function AttributeOptionsEdit(
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<ToggleGroupControl
 						label={ __( 'Style', 'woocommerce' ) }
-						value={ optionStyle }
+						value={ optionStyle ?? 'pills' }
 						onChange={ ( option ) => {
 							if ( option !== 'pills' && option !== 'dropdown' ) {
 								return;
