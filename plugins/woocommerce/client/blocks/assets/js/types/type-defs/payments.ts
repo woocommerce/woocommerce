@@ -15,6 +15,7 @@ import type {
 } from './cart-response';
 import type { EmptyObjectType } from './objects';
 import type { CheckoutResponseSuccess } from './checkout';
+import type { PaymentMethodInterface } from './payment-method-interface';
 
 /**
  * The shape of objects on the `globalPaymentMethods` object from `allSettings`.
@@ -117,7 +118,8 @@ export interface PaymentMethodConfiguration {
 	// Optionally customize the label text for the checkout submit (`Place Order`) button.
 	placeOrderButtonLabel?: string;
 	// A function that renders a custom React component for the place order button.
-	placeOrderButton?: ( props: never ) => ReactNode;
+	// Receives the full payment method interface as props.
+	placeOrderButton?: ( props: PaymentMethodInterface ) => ReactNode | null;
 	// A React node that contains logic handling any processing your payment method has to do with saved payment methods if your payment method supports them
 	savedTokenComponent?: ReactNode | null;
 }
@@ -182,7 +184,7 @@ export interface PaymentMethodConfigInstance {
 	label: ReactNode;
 	ariaLabel: string;
 	placeOrderButtonLabel?: string;
-	placeOrderButton?: ( props: never ) => ReactNode;
+	placeOrderButton?: ( props: PaymentMethodInterface ) => ReactNode;
 	savedTokenComponent?: ReactNode | null;
 	canMakePaymentFromConfig: CanMakePaymentCallback;
 	canMakePayment: CanMakePaymentCallback;

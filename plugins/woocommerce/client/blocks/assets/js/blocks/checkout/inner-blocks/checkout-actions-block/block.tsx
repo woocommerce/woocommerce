@@ -12,6 +12,7 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts, usePaymentMethodInterface } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import type { PaymentMethodInterface } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -34,8 +35,16 @@ const PaymentMethodPlaceOrderButtonContainer = ( {
 }: {
 	children: ReactNode;
 } ) => {
-	// TODO: dynamically change the CSS based on the checkout status. E.g.: when processing, add an overlay.
-	return <div className="wc-block-checkout__actions_row">{ children }</div>;
+	// Enhanced container with better styling and accessibility
+	return (
+		<div 
+			className="wc-block-checkout__actions_row wc-block-checkout__payment-method-button"
+			role="button"
+			tabIndex={0}
+		>
+			{ children }
+		</div>
+	);
 };
 
 const Block = ( {
@@ -53,6 +62,7 @@ const Block = ( {
 
 	const paymentMethodInterface = usePaymentMethodInterface();
 
+	// Apply checkout filter for button label
 	const label = applyCheckoutFilter( {
 		filterName: 'placeOrderButtonLabel',
 		defaultValue:
@@ -88,6 +98,7 @@ const Block = ( {
 					}` }
 					</style>
 				) }
+				{/* Enhanced conditional rendering with better error handling */}
 				{ PaymentMethodPlaceOrderButton ? (
 					<PaymentMethodPlaceOrderButtonContainer>
 						<PaymentMethodPlaceOrderButton

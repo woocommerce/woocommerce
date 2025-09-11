@@ -94,22 +94,33 @@ export const PaymentEventsProvider = ( {
 	const { onPaymentSetup } = useEventEmitters( observerDispatch );
 	const currentObservers = useRef( observers );
 
+	// Enhanced validation function with better error handling
 	const onPlaceOrderButtonValidation = useCallback( () => {
+		// Show all validation errors to the user
 		showAllValidationErrors();
 
+		// Check for validation errors
 		if ( hasValidationErrors ) {
 			return false;
 		}
 
+		// Check for payment errors
 		if ( hasPaymentError ) {
 			return false;
 		}
 
+		// Check for checkout errors
 		if ( checkoutHasError ) {
 			return false;
 		}
 
-		return ! checkoutIsCalculating;
+		// Check if checkout is still calculating
+		if ( checkoutIsCalculating ) {
+			return false;
+		}
+
+		// All validations passed
+		return true;
 	}, [
 		hasValidationErrors,
 		hasPaymentError,

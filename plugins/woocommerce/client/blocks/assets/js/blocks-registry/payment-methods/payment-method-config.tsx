@@ -9,6 +9,7 @@ import type {
 	CanMakePaymentCallback,
 	PaymentMethodConfigInstance,
 	PaymentMethodIcons,
+	PaymentMethodInterface,
 } from '@woocommerce/types';
 
 /**
@@ -37,7 +38,7 @@ export default class PaymentMethodConfig
 	public label: ReactNode;
 	public ariaLabel: string;
 	public placeOrderButtonLabel?: string;
-	public placeOrderButton?: () => ReactNode;
+	public placeOrderButton?: ( props: PaymentMethodInterface ) => ReactNode;
 	public savedTokenComponent?: ReactNode | null;
 	public canMakePaymentFromConfig: CanMakePaymentCallback;
 
@@ -122,7 +123,7 @@ export default class PaymentMethodConfig
 			typeof config.placeOrderButton !== 'function'
 		) {
 			throw new TypeError(
-				'The placeOrderButton property for the payment method must be a function'
+				'The placeOrderButton property for the payment method must be a function that returns a React component'
 			);
 		}
 		assertValidElementOrString( config.label, 'label' );
