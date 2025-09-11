@@ -594,15 +594,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
 	 * @param string[] $emails      List of emails to check against.
-	 * @param bool     $with_orders Experimental: supporting HPOS-enabled stores only, does nothing if HPOS is disabled.
+	 * @param bool     $have_orders Experimental: supporting HPOS-enabled stores only, does nothing if HPOS is disabled.
 	 *
 	 * @return int[]
 	 */
-	public function get_user_ids_for_billing_email( $emails, bool $with_orders = false ) {
+	public function get_user_ids_for_billing_email($emails, bool $have_orders = false ) {
 		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
 		$include_user_ids = array();
-		if ( $with_orders && $this->is_cot_in_use() ) {
+		if ( $have_orders && $this->is_cot_in_use() ) {
 			global $wpdb;
 
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
