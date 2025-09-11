@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -594,11 +595,18 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
 	 * @param string[] $emails List of emails to check against.
+	 * @param bool     $emails List of emails to check against.
 	 *
 	 * @return int[]
 	 */
-	public function get_user_ids_for_billing_email( $emails ) {
-		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+	public function get_user_ids_for_billing_email( $emails, bool $with_orders = false ) {
+		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+
+		$user_ids_from_orders = [];
+		if ( $with_orders && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			//$user_ids_from_orders
+		}
+
 		$users_query = new WP_User_Query(
 			array(
 				'fields'     => 'ID',
