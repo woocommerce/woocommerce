@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsSchema\Validation;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 /**
  * Checkout class.
@@ -412,6 +413,9 @@ class Checkout extends AbstractBlock {
 			$country_data[ $country_code ]['format'] = $format;
 		}
 
+		if ( class_exists( AddressProviderController::class ) ) {
+			$this->asset_data_registry->add( 'addressAutocompleteProviders', wc_get_container()->get( AddressProviderController::class )->get_providers() );
+		}
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
 		$this->asset_data_registry->add(
