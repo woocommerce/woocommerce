@@ -1,0 +1,67 @@
+{
+  "reportFormat": "CTRF",
+  "specVersion": "0.0.0",
+  "reportId": "412c1ffd-1103-418e-8d11-55e405a2a0ac",
+  "timestamp": "2025-09-11T01:54:06.747Z",
+  "generatedBy": "playwright-ctrf-json-reporter",
+  "results": {
+    "tool": {
+      "name": "playwright"
+    },
+    "summary": {
+      "tests": 2,
+      "passed": 2,
+      "failed": 0,
+      "pending": 0,
+      "skipped": 0,
+      "other": 0,
+      "start": 1757555646764,
+      "stop": 1757555650528,
+      "suites": 0
+    },
+    "tests": [
+      {
+        "name": "Can access checkout page with blocks",
+        "status": "passed",
+        "duration": 1536,
+        "start": 1757555646,
+        "stop": 1757555648,
+        "rawStatus": "passed",
+        "tags": [],
+        "type": "e2e",
+        "filePath": "/storage/automattic/woocommerce/plugins/woocommerce/tests/e2e/tests/checkout-blocks/simple-test.spec.js",
+        "retries": 0,
+        "flaky": false,
+        "steps": [],
+        "suite": "chromium > checkout-blocks/simple-test.spec.js > Simple Checkout Blocks Test",
+        "attachments": [],
+        "stdout": [],
+        "stderr": [],
+        "extra": {
+          "annotations": []
+        }
+      },
+      {
+        "name": "Can fill checkout form and place order",
+        "status": "passed",
+        "duration": 1942,
+        "start": 1757555648,
+        "stop": 1757555650,
+        "rawStatus": "passed",
+        "tags": [],
+        "type": "e2e",
+        "filePath": "/storage/automattic/woocommerce/plugins/woocommerce/tests/e2e/tests/checkout-blocks/simple-test.spec.js",
+        "retries": 0,
+        "flaky": false,
+        "steps": [],
+        "suite": "chromium > checkout-blocks/simple-test.spec.js > Simple Checkout Blocks Test",
+        "attachments": [],
+        "stdout": [],
+        "stderr": [],
+        "extra": {
+          "annotations": []
+        }
+      }
+    ]
+  }
+}

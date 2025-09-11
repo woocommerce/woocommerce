@@ -1,0 +1,17 @@
+{
+    "code": "PR",
+    "name": "Puerto Rico",
+    "states": [],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/pr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

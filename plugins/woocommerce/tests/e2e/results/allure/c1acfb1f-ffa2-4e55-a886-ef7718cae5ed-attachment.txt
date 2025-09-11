@@ -1,0 +1,2 @@
+✅ Order notes checkbox available
+✅ Order notes field appears and accepts input

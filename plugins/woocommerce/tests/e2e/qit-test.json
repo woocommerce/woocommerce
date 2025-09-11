@@ -1,0 +1,81 @@
+{
+    "package": "woocommerce/e2e",
+    "requires": {
+        "plugins": ["woocommerce"],
+        "network": false
+    },
+    "test_type": "e2e",
+    "test": {
+        "phases": {
+            "globalSetup": [
+                "./bootstrap/global-setup.sh",
+                {
+                    "command": "npx playwright test --config=playwright.bootstrap.config.js dismiss-coming-soon.spec.js",
+                    "runs_on": "host"
+                }
+            ],
+            "setup": [
+                "./bootstrap/setup.sh"
+            ],
+            "run": [
+                "npx playwright test"
+            ],
+            "teardown": [],
+            "globalTeardown": [
+                "./bootstrap/global-teardown.sh"
+            ]
+        },
+        "results": {
+            "ctrf-json": "./results/ctrf.json",
+            "allure-dir": "./results/allure",
+            "blob-dir": "./results/blob"
+        }
+    },
+    "subpackages": {
+        "woocommerce/checkout": {
+            "description": "Checkout tests for validating payment gateways, shipping methods, and checkout flow compatibility",
+            "tags": ["checkout", "payments", "shipping"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test tests/checkout.spec.js"]
+                }
+            }
+        },
+        "woocommerce/checkout-blocks": {
+            "description": "Comprehensive checkout blocks tests including shopper and merchant flows",
+            "tags": ["checkout", "blocks", "payments"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test tests/checkout.spec.js tests/checkout-blocks/*.spec.js --grep 'Checkout Blocks'"]
+                }
+            }
+        },
+        "woocommerce/checkout-blocks-shopper": {
+            "description": "Checkout blocks tests from shopper perspective - order placement, payments, shipping",
+            "tags": ["checkout", "blocks", "shopper"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test tests/checkout-blocks/checkout-block.shopper.spec.js tests/checkout-blocks/order-confirmation.spec.js"]
+                }
+            }
+        },
+        "woocommerce/checkout-blocks-merchant": {
+            "description": "Checkout blocks merchant configuration and management tests",
+            "tags": ["checkout", "blocks", "merchant", "admin"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test tests/checkout-blocks/checkout-block.merchant.spec.js"]
+                }
+            }
+        },
+        "woocommerce/checkout-blocks-fields": {
+            "description": "Additional fields and form validation tests for checkout blocks",
+            "tags": ["checkout", "blocks", "fields", "validation"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test tests/checkout-blocks/additional-fields.spec.js"]
+                }
+            }
+        }
+    }
+}

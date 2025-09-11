@@ -1,0 +1,1 @@
+Checkout blocks may not be enabled. Please configure in setup.sh

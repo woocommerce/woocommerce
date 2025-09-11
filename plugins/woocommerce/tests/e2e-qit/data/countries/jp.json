@@ -1,0 +1,206 @@
+{
+    "code": "JP",
+    "name": "Japan",
+    "states": [
+        {
+            "code": "JP01",
+            "name": "Hokkaido"
+        },
+        {
+            "code": "JP02",
+            "name": "Aomori"
+        },
+        {
+            "code": "JP03",
+            "name": "Iwate"
+        },
+        {
+            "code": "JP04",
+            "name": "Miyagi"
+        },
+        {
+            "code": "JP05",
+            "name": "Akita"
+        },
+        {
+            "code": "JP06",
+            "name": "Yamagata"
+        },
+        {
+            "code": "JP07",
+            "name": "Fukushima"
+        },
+        {
+            "code": "JP08",
+            "name": "Ibaraki"
+        },
+        {
+            "code": "JP09",
+            "name": "Tochigi"
+        },
+        {
+            "code": "JP10",
+            "name": "Gunma"
+        },
+        {
+            "code": "JP11",
+            "name": "Saitama"
+        },
+        {
+            "code": "JP12",
+            "name": "Chiba"
+        },
+        {
+            "code": "JP13",
+            "name": "Tokyo"
+        },
+        {
+            "code": "JP14",
+            "name": "Kanagawa"
+        },
+        {
+            "code": "JP15",
+            "name": "Niigata"
+        },
+        {
+            "code": "JP16",
+            "name": "Toyama"
+        },
+        {
+            "code": "JP17",
+            "name": "Ishikawa"
+        },
+        {
+            "code": "JP18",
+            "name": "Fukui"
+        },
+        {
+            "code": "JP19",
+            "name": "Yamanashi"
+        },
+        {
+            "code": "JP20",
+            "name": "Nagano"
+        },
+        {
+            "code": "JP21",
+            "name": "Gifu"
+        },
+        {
+            "code": "JP22",
+            "name": "Shizuoka"
+        },
+        {
+            "code": "JP23",
+            "name": "Aichi"
+        },
+        {
+            "code": "JP24",
+            "name": "Mie"
+        },
+        {
+            "code": "JP25",
+            "name": "Shiga"
+        },
+        {
+            "code": "JP26",
+            "name": "Kyoto"
+        },
+        {
+            "code": "JP27",
+            "name": "Osaka"
+        },
+        {
+            "code": "JP28",
+            "name": "Hyogo"
+        },
+        {
+            "code": "JP29",
+            "name": "Nara"
+        },
+        {
+            "code": "JP30",
+            "name": "Wakayama"
+        },
+        {
+            "code": "JP31",
+            "name": "Tottori"
+        },
+        {
+            "code": "JP32",
+            "name": "Shimane"
+        },
+        {
+            "code": "JP33",
+            "name": "Okayama"
+        },
+        {
+            "code": "JP34",
+            "name": "Hiroshima"
+        },
+        {
+            "code": "JP35",
+            "name": "Yamaguchi"
+        },
+        {
+            "code": "JP36",
+            "name": "Tokushima"
+        },
+        {
+            "code": "JP37",
+            "name": "Kagawa"
+        },
+        {
+            "code": "JP38",
+            "name": "Ehime"
+        },
+        {
+            "code": "JP39",
+            "name": "Kochi"
+        },
+        {
+            "code": "JP40",
+            "name": "Fukuoka"
+        },
+        {
+            "code": "JP41",
+            "name": "Saga"
+        },
+        {
+            "code": "JP42",
+            "name": "Nagasaki"
+        },
+        {
+            "code": "JP43",
+            "name": "Kumamoto"
+        },
+        {
+            "code": "JP44",
+            "name": "Oita"
+        },
+        {
+            "code": "JP45",
+            "name": "Miyazaki"
+        },
+        {
+            "code": "JP46",
+            "name": "Kagoshima"
+        },
+        {
+            "code": "JP47",
+            "name": "Okinawa"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/jp"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

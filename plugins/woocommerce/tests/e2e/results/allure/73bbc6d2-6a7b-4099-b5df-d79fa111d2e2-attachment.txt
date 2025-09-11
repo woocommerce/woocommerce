@@ -1,0 +1,1 @@
+Checkout blocks should be enabled via setup.sh or bootstrap

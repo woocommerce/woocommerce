@@ -1,0 +1,58 @@
+{
+    "code": "ZM",
+    "name": "Zambia",
+    "states": [
+        {
+            "code": "ZM-01",
+            "name": "Western"
+        },
+        {
+            "code": "ZM-02",
+            "name": "Central"
+        },
+        {
+            "code": "ZM-03",
+            "name": "Eastern"
+        },
+        {
+            "code": "ZM-04",
+            "name": "Luapula"
+        },
+        {
+            "code": "ZM-05",
+            "name": "Northern"
+        },
+        {
+            "code": "ZM-06",
+            "name": "North-Western"
+        },
+        {
+            "code": "ZM-07",
+            "name": "Southern"
+        },
+        {
+            "code": "ZM-08",
+            "name": "Copperbelt"
+        },
+        {
+            "code": "ZM-09",
+            "name": "Lusaka"
+        },
+        {
+            "code": "ZM-10",
+            "name": "Muchinga"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/zm"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

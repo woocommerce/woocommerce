@@ -1,0 +1,90 @@
+{
+    "code": "AO",
+    "name": "Angola",
+    "states": [
+        {
+            "code": "BGO",
+            "name": "Bengo"
+        },
+        {
+            "code": "BLU",
+            "name": "Benguela"
+        },
+        {
+            "code": "BIE",
+            "name": "Bié"
+        },
+        {
+            "code": "CAB",
+            "name": "Cabinda"
+        },
+        {
+            "code": "CNN",
+            "name": "Cunene"
+        },
+        {
+            "code": "HUA",
+            "name": "Huambo"
+        },
+        {
+            "code": "HUI",
+            "name": "Huíla"
+        },
+        {
+            "code": "CCU",
+            "name": "Kuando Kubango"
+        },
+        {
+            "code": "CNO",
+            "name": "Kwanza-Norte"
+        },
+        {
+            "code": "CUS",
+            "name": "Kwanza-Sul"
+        },
+        {
+            "code": "LUA",
+            "name": "Luanda"
+        },
+        {
+            "code": "LNO",
+            "name": "Lunda-Norte"
+        },
+        {
+            "code": "LSU",
+            "name": "Lunda-Sul"
+        },
+        {
+            "code": "MAL",
+            "name": "Malanje"
+        },
+        {
+            "code": "MOX",
+            "name": "Moxico"
+        },
+        {
+            "code": "NAM",
+            "name": "Namibe"
+        },
+        {
+            "code": "UIG",
+            "name": "Uíge"
+        },
+        {
+            "code": "ZAI",
+            "name": "Zaire"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/ao"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

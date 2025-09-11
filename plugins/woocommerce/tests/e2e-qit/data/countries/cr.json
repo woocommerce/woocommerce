@@ -1,0 +1,46 @@
+{
+    "code": "CR",
+    "name": "Costa Rica",
+    "states": [
+        {
+            "code": "CR-A",
+            "name": "Alajuela"
+        },
+        {
+            "code": "CR-C",
+            "name": "Cartago"
+        },
+        {
+            "code": "CR-G",
+            "name": "Guanacaste"
+        },
+        {
+            "code": "CR-H",
+            "name": "Heredia"
+        },
+        {
+            "code": "CR-L",
+            "name": "Limón"
+        },
+        {
+            "code": "CR-P",
+            "name": "Puntarenas"
+        },
+        {
+            "code": "CR-SJ",
+            "name": "San José"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/cr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

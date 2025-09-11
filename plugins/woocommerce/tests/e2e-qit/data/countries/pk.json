@@ -1,0 +1,50 @@
+{
+    "code": "PK",
+    "name": "Pakistan",
+    "states": [
+        {
+            "code": "JK",
+            "name": "Azad Kashmir"
+        },
+        {
+            "code": "BA",
+            "name": "Balochistan"
+        },
+        {
+            "code": "TA",
+            "name": "FATA"
+        },
+        {
+            "code": "GB",
+            "name": "Gilgit Baltistan"
+        },
+        {
+            "code": "IS",
+            "name": "Islamabad Capital Territory"
+        },
+        {
+            "code": "KP",
+            "name": "Khyber Pakhtunkhwa"
+        },
+        {
+            "code": "PB",
+            "name": "Punjab"
+        },
+        {
+            "code": "SD",
+            "name": "Sindh"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/pk"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

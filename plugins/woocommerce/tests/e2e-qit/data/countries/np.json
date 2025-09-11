@@ -1,0 +1,74 @@
+{
+    "code": "NP",
+    "name": "Nepal",
+    "states": [
+        {
+            "code": "BAG",
+            "name": "Bagmati"
+        },
+        {
+            "code": "BHE",
+            "name": "Bheri"
+        },
+        {
+            "code": "DHA",
+            "name": "Dhaulagiri"
+        },
+        {
+            "code": "GAN",
+            "name": "Gandaki"
+        },
+        {
+            "code": "JAN",
+            "name": "Janakpur"
+        },
+        {
+            "code": "KAR",
+            "name": "Karnali"
+        },
+        {
+            "code": "KOS",
+            "name": "Koshi"
+        },
+        {
+            "code": "LUM",
+            "name": "Lumbini"
+        },
+        {
+            "code": "MAH",
+            "name": "Mahakali"
+        },
+        {
+            "code": "MEC",
+            "name": "Mechi"
+        },
+        {
+            "code": "NAR",
+            "name": "Narayani"
+        },
+        {
+            "code": "RAP",
+            "name": "Rapti"
+        },
+        {
+            "code": "SAG",
+            "name": "Sagarmatha"
+        },
+        {
+            "code": "SET",
+            "name": "Seti"
+        }
+    ],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/np"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

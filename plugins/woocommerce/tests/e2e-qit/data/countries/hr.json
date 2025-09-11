@@ -1,0 +1,102 @@
+{
+    "code": "HR",
+    "name": "Croatia",
+    "states": [
+			{
+            "code": "HR-01",
+            "name": "Zagreb County"
+      },
+			{
+            "code": "HR-02",
+            "name": "Krapina-Zagorje County"
+      },
+			{
+            "code": "HR-03",
+            "name": "Sisak-Moslavina County"
+      },
+			{
+            "code": "HR-04",
+            "name": "Karlovac County"
+      },
+			{
+            "code": "HR-05",
+            "name": "Varaždin County"
+      },
+			{
+            "code": "HR-06",
+            "name": "Koprivnica-Križevci County"
+      },
+			{
+            "code": "HR-07",
+            "name": "Bjelovar-Bilogora County"
+      },
+			{
+            "code": "HR-08",
+            "name": "Primorje-Gorski Kotar County"
+      },
+			{
+            "code": "HR-09",
+            "name": "Lika-Senj County"
+      },
+			{
+            "code": "HR-10",
+            "name": "Virovitica-Podravina County"
+      },
+			{
+            "code": "HR-11",
+            "name": "Požega-Slavonia County"
+      },
+			{
+            "code": "HR-12",
+            "name": "Brod-Posavina County"
+			},
+			{
+            "code": "HR-13",
+            "name": "Zadar County"
+			},
+			{
+            "code": "HR-14",
+            "name": "Osijek-Baranja County"
+			},
+			{
+            "code": "HR-15",
+            "name": "Šibenik-Knin County"
+			},
+			{
+            "code": "HR-16",
+            "name": "Vukovar-Srijem County"
+			}, 
+			{
+            "code": "HR-17",
+            "name": "Split-Dalmatia County"
+			},
+			{
+            "code": "HR-18",
+            "name": "Istria County"
+			},
+			{
+            "code": "HR-19",
+            "name": "Dubrovnik-Neretva County"
+			},
+			{
+            "code": "HR-20",
+            "name": "Međimurje County"
+			},
+			{
+				"code": "HR-21",
+				"name": "Zagreb City"
+			}
+		],
+    "_links": {
+        "self": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries/hr"
+            }
+        ],
+        "collection": [
+            {
+                "href": "http://localhost:8086/wp-json/wc/v3/data/countries"
+            }
+        ]
+    }
+}

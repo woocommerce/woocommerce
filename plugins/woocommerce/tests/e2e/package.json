@@ -1,0 +1,15 @@
+{
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@playwright/test": "^1.55.0",
+        "allure-playwright": "^3.3.3",
+        "playwright-ctrf-json-reporter": "^0.0.23"
+    },
+    "scripts": {
+        "test:e2e": "playwright test"
+    },
+    "dependencies": {
+        "@faker-js/faker": "^10.0.0"
+    }
+}
