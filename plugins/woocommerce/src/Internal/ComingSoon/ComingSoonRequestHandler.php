@@ -257,7 +257,7 @@ class ComingSoonRequestHandler {
 			),
 		);
 
-		// Add WooCommerce fonts if they don't already exist
+		// Add WooCommerce fonts if they don't already exist.
 		foreach ( $fonts_to_add as $font_to_add ) {
 			$found = false;
 			foreach ( $font_data as $font ) {
