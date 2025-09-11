@@ -5,7 +5,6 @@
  * @package WooCommerce\DataStores
  */
 
-use Automattic\WooCommerce\Database\UsermetaLookup\LookupTableSyncService as UsermetaLookupService;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -644,21 +643,26 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function get_user_ids_for_billing_email( $emails, bool $with_orders = false ) {
 		$emails            = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
-		$user_ids_from_orders = [];
-		if ( $with_orders && OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			//$user_ids_from_orders
-			//return $wpdb->get_col(
-			//	$wpdb->prepare(
-			//		"SELECT user_id FROM %i WHERE billing_email IN ($placeholders)",
-			//		$lookup_table_name,
-			//		...$emails
-			//	)
-			//);
+		$user_ids_from_orders = array();
+		if ( $with_orders && $this->is_cot_in_use() ) {
+			global $wpdb;
+
+			$placeholders         = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
+			$orders_table         = OrdersTableDataStore::get_orders_table_name();
+			$user_ids_from_orders = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT customer_id FROM %i WHERE billing_email IN ($placeholders)",
+					$orders_table,
+					...$emails
+				)
+			);
 		}
 
 		$users_query = new WP_User_Query(
 			array(
 				'fields'     => 'ID',
+				'include'    => $user_ids_from_orders,
+				'orderby'    => '',
 				'meta_query' => array(
 					array(
 						'key'     => 'billing_email',
