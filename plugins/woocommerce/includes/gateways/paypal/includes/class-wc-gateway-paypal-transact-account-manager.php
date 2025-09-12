@@ -101,7 +101,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Cache the merchant account data.
-			$this->update_merchant_account_cache( $merchant_account );
+			$cache_key = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
+			$this->update_transact_account_cache( $cache_key, $merchant_account );
 		}
 
 		$provider_account_data = $this->get_provider_account_data();
@@ -113,7 +114,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Cache the provider account data.
-			$this->update_provider_account_cache( $provider_account );
+			$cache_key = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
+			$this->update_transact_account_cache( $cache_key, $provider_account );
 		}
 
 		// Set an extra flag to indicate that we've completed onboarding,
@@ -130,7 +132,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 */
 	public function get_merchant_account_data() {
 		// Get merchant account from cache. If not found, fetch/create it.
-		$merchant_account = $this->get_merchant_account_from_cache();
+		$cache_key        = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
+		$merchant_account = $this->get_transact_account_from_cache( $cache_key );
 		if ( empty( $merchant_account ) ) {
 			$merchant_account = $this->fetch_merchant_account();
 
@@ -140,7 +143,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Update cache.
-			$this->update_merchant_account_cache( $merchant_account );
+			$this->update_transact_account_cache( $cache_key, $merchant_account );
 		}
 
 		return $merchant_account;
@@ -154,7 +157,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 */
 	public function get_provider_account_data() {
 		// Get provider account from cache. If not found, fetch/create it.
-		$provider_account = $this->get_provider_account_from_cache();
+		$cache_key        = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
+		$provider_account = $this->get_transact_account_from_cache( $cache_key );
 		if ( empty( $provider_account ) ) {
 			$provider_account = $this->fetch_provider_account();
 			// Fetch failed.
@@ -163,7 +167,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Update cache.
-			$this->update_provider_account_cache( $provider_account );
+			$this->update_transact_account_cache( $cache_key, $provider_account );
 		}
 
 		return $provider_account;
@@ -296,71 +300,37 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	}
 
 	/**
-	 * Update the merchant account cache.
+	 * Update the transact account (merchant or provider) cache.
 	 *
-	 * @param array $merchant_account The merchant account data.
+	 * @param string $cache_key The cache key to update.
+	 * @param array $account_data The transact account data.
 	 */
-	private function update_merchant_account_cache( $merchant_account ) {
-		$cache_key = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
-		$expires   = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
+	private function update_transact_account_cache( $cache_key, $account_data ) {
+		$expires = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
 		update_option(
 			$cache_key,
 			array(
-				'account' => $merchant_account,
+				'account' => $account_data,
 				'expiry'  => $expires,
 			)
 		);
 	}
 
 	/**
-	 * Update the provider account cache.
+	 * Get the transact account (merchant or provider) from the database cache.
 	 *
-	 * @param array $provider_account The provider account data.
-	 */
-	private function update_provider_account_cache( $provider_account ) {
-		$cache_key = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
-		$expires   = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
-		update_option(
-			$cache_key,
-			array(
-				'account' => $provider_account,
-				'expiry'  => $expires,
-			)
-		);
-	}
-
-	/**
-	 * Get the merchant account from the database cache.
-	 *
-	 * @return array|null The merchant account data, or null if the cache is
+	 * @param string $cache_key The cache key to get the account.
+	 * @return bool|null The transact account data, or null if the cache is
 	 *                    empty or expired.
 	 */
-	private function get_merchant_account_from_cache() {
-		$cache_key        = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
-		$merchant_account = get_option( $cache_key, null );
+	private function get_transact_account_from_cache( $cache_key ) {
+		$transact_account = get_option( $cache_key, null );
 
-		if ( empty( $merchant_account ) || ( isset( $merchant_account['expiry'] ) && $merchant_account['expiry'] < time() ) ) {
+		if ( empty( $transact_account ) || ( isset( $transact_account['expiry'] ) && $transact_account['expiry'] < time() ) ) {
 			return null;
 		}
 
-		return $merchant_account['account'] ?? null;
-	}
-
-	/**
-	 * Get the provider account from the database cache.
-	 *
-	 * @return bool|null The provider account data, or null if the cache is
-	 *                    empty or expired.
-	 */
-	private function get_provider_account_from_cache() {
-		$cache_key        = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
-		$provider_account = get_option( $cache_key, null );
-
-		if ( empty( $provider_account ) || ( isset( $provider_account['expiry'] ) && $provider_account['expiry'] < time() ) ) {
-			return null;
-		}
-
-		return $provider_account['account'] ?? null;
+		return $transact_account['account'] ?? null;
 	}
 
 	/**
