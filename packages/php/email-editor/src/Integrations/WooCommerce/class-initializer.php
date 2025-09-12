@@ -40,13 +40,6 @@ class Initializer {
 	private array $renderers = array();
 
 	/**
-	 * Initializes the WooCommerce blocks renderers.
-	 */
-	public function initialize(): void {
-		// No additional setup needed for WooCommerce blocks currently
-	}
-
-	/**
 	 * Set `supports.email = true` and configure render_email_callback for supported blocks.
 	 *
 	 * @param array $settings Block settings.

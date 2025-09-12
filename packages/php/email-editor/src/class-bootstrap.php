@@ -100,7 +100,6 @@ class Bootstrap {
 	 */
 	public function setup_email_editor_integrations(): bool {
 		$this->core_email_editor_integration->initialize();
-		$this->woocommerce_email_editor_integration->initialize();
 		return true; // PHPStan expect returning a value from the filter.
 	}
 }

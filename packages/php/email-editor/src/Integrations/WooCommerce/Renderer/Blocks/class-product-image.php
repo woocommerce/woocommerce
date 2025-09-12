@@ -48,17 +48,16 @@ class Product_Image extends Abstract_Block_Renderer {
 
 		$image_html = $this->build_image_html( $image_data, $attributes );
 
-		$inner_blocks = $this->process_inner_blocks( $block_content, $parsed_block, $product );
+		$inner_blocks = $this->process_inner_blocks( $parsed_block, $product, $rendering_context );
 
 		$combined_content = $this->create_overlay_structure(
 			$image_html,
 			$inner_blocks['badges'],
-			$inner_blocks['other_content']
+			$inner_blocks['other_content'],
+			$inner_blocks['badge_alignment'],
+			$product,
+			$attributes['showProductLink']
 		);
-
-		if ( $attributes['showProductLink'] ) {
-			$combined_content = $this->wrap_with_link( $combined_content, $product );
-		}
 
 		return $this->apply_email_wrapper( $combined_content, $parsed_block, $rendering_context );
 	}
@@ -67,14 +66,15 @@ class Product_Image extends Abstract_Block_Renderer {
 	 * Process inner blocks (like sale badges) from block content.
 	 * Handles special positioning for email compatibility.
 	 *
-	 * @param string      $block_content Original block content.
-	 * @param array       $parsed_block Parsed block.
-	 * @param \WC_Product $product Product object.
+	 * @param array             $parsed_block Parsed block.
+	 * @param \WC_Product       $product Product object.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array Array with 'badges' and 'other_content' keys
 	 */
-	private function process_inner_blocks( string $block_content, array $parsed_block, \WC_Product $product ): array {
-		$badges        = '';
-		$other_content = '';
+	private function process_inner_blocks( array $parsed_block, \WC_Product $product, Rendering_Context $rendering_context ): array {
+		$badges          = '';
+		$other_content   = '';
+		$badge_alignment = 'left';
 
 		if ( ! empty( $parsed_block['innerBlocks'] ) ) {
 			foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
@@ -82,7 +82,8 @@ class Product_Image extends Abstract_Block_Renderer {
 				$inner_block['context']['postId'] = $product->get_id();
 
 				if ( 'woocommerce/product-sale-badge' === $inner_block['blockName'] ) {
-					$badges .= $this->render_overlay_badge( $inner_block, $product );
+					$badges         .= $this->render_overlay_badge( $inner_block, $product, $rendering_context );
+					$badge_alignment = $inner_block['attrs']['align'] ?? 'left';
 				} else {
 					$other_content .= render_block( $inner_block );
 				}
@@ -90,118 +91,139 @@ class Product_Image extends Abstract_Block_Renderer {
 		}
 
 		return array(
-			'badges'        => $badges,
-			'other_content' => $other_content,
+			'badges'          => $badges,
+			'other_content'   => $other_content,
+			'badge_alignment' => $badge_alignment,
 		);
 	}
 
 	/**
 	 * Render a sale badge with email-compatible overlay positioning.
 	 *
-	 * @param array       $badge_block Badge block data.
-	 * @param \WC_Product $product Product object.
+	 * @param array             $badge_block Badge block data.
+	 * @param \WC_Product       $product Product object.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function render_overlay_badge( array $badge_block, \WC_Product $product ): string {
+	private function render_overlay_badge( array $badge_block, \WC_Product $product, Rendering_Context $rendering_context ): string {
 		if ( ! $product->is_on_sale() ) {
 			return '';
 		}
 
-		$attributes = $badge_block['attrs'] ?? array();
-		$sale_text  = apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product );
-
-		$badge_styles = array(
-			'font-size'      => '0.875em',
-			'padding'        => '0.25em 0.75em',
-			'display'        => 'inline-block',
-			'width'          => 'fit-content',
-			'border'         => '1px solid #43454b',
-			'border-radius'  => '4px',
-			'box-sizing'     => 'border-box',
-			'color'          => '#43454b',
-			'background'     => '#fff',
-			'text-align'     => 'center',
-			'text-transform' => 'uppercase',
-			'font-weight'    => '600',
-			'z-index'        => '9',
-			'margin'         => '4px',
+		$sale_text        = apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product );
+		$badge_attributes = array_replace_recursive(
+			array(
+				'textColor'       => '#43454b',
+				'backgroundColor' => '#fff',
+				'style'           => array(
+					'border'     => array(
+						'width'  => '1px',
+						'radius' => '4px',
+						'color'  => '#43454b',
+					),
+					'spacing'    => array(
+						'padding' => '4px 12px',
+					),
+					'typography' => array(
+						'fontSize'      => '14px',
+						'fontWeight'    => '600',
+						'textTransform' => 'uppercase',
+						'lineHeight'    => '1.5',
+					),
+				),
+			),
+			wp_parse_args( $badge_block['attrs'] ?? array() )
 		);
 
-		if ( ! empty( $attributes['style'] ) ) {
-			$custom_styles = $this->parse_badge_styles( $attributes['style'] );
-			$badge_styles  = array_merge( $badge_styles, $custom_styles );
-		}
+		$block_styles = Styles_Helper::get_block_styles(
+			$badge_attributes,
+			$rendering_context,
+			array( 'border', 'background-color', 'color', 'typography', 'spacing' )
+		);
 
-		$style_attr = \WP_Style_Engine::compile_css( $badge_styles, '' );
+		$additional_styles = array(
+			'display'    => 'inline-block',
+			'width'      => 'fit-content',
+			'box-sizing' => 'border-box',
+		);
+
+		$final_styles = Styles_Helper::extend_block_styles( $block_styles, $additional_styles );
 
 		return sprintf(
-			'<span style="%s">%s</span>',
-			esc_attr( $style_attr ),
+			'<span class="wc-block-components-product-sale-badge__text" style="%s">%s</span>',
+			esc_attr( $final_styles['css'] ),
 			esc_html( $sale_text )
 		);
 	}
 
 	/**
 	 * Create overlay structure for email compatibility.
-	 * Uses background image technique to overlay badge on image.
+	 * Uses Faux Absolute Position with badge-below fallback for better cross-client support.
 	 *
-	 * @param string $image_html Image HTML.
-	 * @param string $badges_html Badges HTML.
-	 * @param string $other_content Other inner content.
+	 * @param string           $image_html Image HTML.
+	 * @param string           $badges_html Badges HTML.
+	 * @param string           $other_content Other inner content.
+	 * @param string           $badge_alignment Badge alignment.
+	 * @param \WC_Product|null $product Product object for link.
+	 * @param bool             $show_product_link Whether to show product link.
 	 * @return string
 	 */
-	private function create_overlay_structure( string $image_html, string $badges_html, string $other_content ): string {
+	private function create_overlay_structure(
+		string $image_html,
+		string $badges_html,
+		string $other_content,
+		string $badge_alignment,
+		?\WC_Product $product = null,
+		bool $show_product_link = false
+	): string {
 		if ( empty( $badges_html ) ) {
-			return $image_html . $other_content;
+			$linked_image_html = $image_html;
+			if ( $show_product_link && $product ) {
+				$linked_image_html = $this->wrap_with_link( $image_html, $product );
+			}
+			return $linked_image_html . $other_content;
 		}
 
-		$image_src    = $this->extract_image_src( $image_html );
 		$image_width  = $this->extract_image_width( $image_html );
 		$image_height = $this->extract_image_height( $image_html );
 
-		if ( $image_src ) {
-			$overlay_html = sprintf(
-				'<table style="border-collapse: collapse; width: %dpx; height: %dpx; background-image: url(%s); background-size: cover; background-position: center;">
-					<tr>
-						<td style="vertical-align: top; text-align: right; padding: 8px;">
-							%s
-						</td>
-					</tr>
-				</table>%s',
-				$image_width,
-				$image_height,
-				esc_url( $image_src ),
-				$badges_html,
-				$other_content
-			);
-		} else {
-			$overlay_html = sprintf(
-				'<div style="position: relative; display: inline-block;">
-					%s
-					<div style="position: absolute; top: 8px; right: 8px;">
-						%s
-					</div>
-				</div>%s',
-				$image_html,
-				$badges_html,
-				$other_content
-			);
+		$linked_image_html = $image_html;
+		if ( $show_product_link && $product ) {
+			$linked_image_html = $this->wrap_with_link( $image_html, $product );
 		}
+
+		$overlay_html = sprintf(
+			'<table cellpadding="0" cellspacing="0" border="0" style="width: %dpx; height: %dpx; table-layout: fixed;">
+				<tr>
+					<td style="font-size: 0; line-height: 0; padding: 0; height: %dpx; width: %dpx;">
+					<div style="max-height:0; position:relative; opacity:0.999;">
+						<!--[if mso]>
+						<v:rect xmlns:v="urn:schemas-microsoft-com:vml" stroked="false" filled="false" style="mso-width-percent: 1000; position:absolute; top:16px; right:16px;">
+						<v:textbox inset="0,0,0,0">
+						<![endif]-->
+						<div style="padding: 12px; box-sizing: border-box; display: inline-block; width: 100%%; text-align: %s;">
+							%s
+						</div>
+						<!--[if mso]>
+						</v:textbox>
+						</v:rect>
+						<![endif]-->
+					</div>
+						%s
+					</td>
+				</tr>
+			</table>%s',
+			$image_width,
+			$image_height,
+			$image_height,
+			$image_width,
+			$badge_alignment,
+			$badges_html,
+			$linked_image_html,
+			$other_content
+		);
 
 		return $overlay_html;
-	}
-
-	/**
-	 * Extract image src from HTML.
-	 *
-	 * @param string $image_html Image HTML.
-	 * @return string|null Image src URL.
-	 */
-	private function extract_image_src( string $image_html ): ?string {
-		if ( preg_match( '/src=["\']([^"\']+)["\']/', $image_html, $matches ) ) {
-			return $matches[1];
-		}
-		return null;
 	}
 
 	/**
@@ -232,37 +254,6 @@ class Product_Image extends Abstract_Block_Renderer {
 		return 300;
 	}
 
-	/**
-	 * Parse badge-specific styles from block attributes.
-	 *
-	 * @param array $style_block Style block from attributes.
-	 * @return array
-	 */
-	private function parse_badge_styles( array $style_block ): array {
-		$styles = array();
-
-		if ( ! empty( $style_block['color'] ) ) {
-			$color = $style_block['color'];
-			if ( ! empty( $color['text'] ) ) {
-				$styles['color'] = $color['text'];
-			}
-			if ( ! empty( $color['background'] ) ) {
-				$styles['background-color'] = $color['background'];
-			}
-		}
-
-		if ( ! empty( $style_block['typography'] ) ) {
-			$typography = $style_block['typography'];
-			if ( ! empty( $typography['fontSize'] ) ) {
-				$styles['font-size'] = $typography['fontSize'];
-			}
-			if ( ! empty( $typography['fontWeight'] ) ) {
-				$styles['font-weight'] = $typography['fontWeight'];
-			}
-		}
-
-		return $styles;
-	}
 
 	/**
 	 * When the width is not set, it's important to get it for the image to be displayed correctly.
@@ -423,13 +414,17 @@ class Product_Image extends Abstract_Block_Renderer {
 		$width         = $rendering_context->get_layout_width_without_padding();
 		$wrapper_width = ( $width && '100%' !== $width ) ? $width : 'auto';
 
+		$image_height   = $this->extract_image_height( $image_html );
+		$dynamic_height = $image_height . 'px';
+
 		$wrapper_styles = array(
 			'border-collapse' => 'separate',
 			'width'           => $wrapper_width,
 		);
 
 		$cell_styles = array(
-			'overflow' => 'hidden',
+			'overflow'       => 'hidden',
+			'vertical-align' => 'top',
 		);
 
 		$align                     = $parsed_block['attrs']['align'] ?? 'left';
@@ -441,6 +436,7 @@ class Product_Image extends Abstract_Block_Renderer {
 					'border-collapse' => 'collapse',
 					'border-spacing'  => '0px',
 					'width'           => '100%',
+					'height'          => $dynamic_height,
 				),
 				''
 			),
@@ -452,8 +448,9 @@ class Product_Image extends Abstract_Block_Renderer {
 		);
 
 		$inner_table_attrs = array(
-			'style' => \WP_Style_Engine::compile_css( $wrapper_styles, '' ),
-			'width' => $wrapper_width,
+			'style'  => \WP_Style_Engine::compile_css( $wrapper_styles, '' ),
+			'width'  => $wrapper_width,
+			'height' => $dynamic_height,
 		);
 
 		$inner_cell_attrs = array(
