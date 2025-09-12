@@ -312,8 +312,8 @@ class PluginUtil {
 
 	/**
 	 * Filter plugin/feature compatibility info, returning the names of the plugins/features that are considered incompatible.
-	 * "Uncertain" information will be included or not depending on the value of the value of the 'plugins_are_incompatible_by_default'
-	 * flag in the feature definition (default is true).
+	 * "Uncertain" information will be included or not depending on the value of the value of the 'default_plugin_compatibility'
+	 * flag in the feature definition (default is 'compatible').
 	 *
 	 * @param string $feature_id Feature id.
 	 * @param array  $compatibility_info Array containing "compatible', 'incompatible' and 'uncertain' keys.
