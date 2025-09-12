@@ -644,7 +644,7 @@ class WC_Frontend_Scripts {
 				);
 				break;
 			case 'wc-checkout':
-				$params    = array(
+				$params = array(
 					'ajax_url'                  => WC()->ajax_url(),
 					'wc_ajax_url'               => WC_AJAX::get_endpoint( '%%endpoint%%' ),
 					'update_order_review_nonce' => wp_create_nonce( 'update-order-review' ),
