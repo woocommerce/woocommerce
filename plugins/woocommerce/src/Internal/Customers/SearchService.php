@@ -55,6 +55,6 @@ final class SearchService {
 				),
 			)
 		);
-		return array_unique( $users_query->get_results() );
+		return array_map( 'intval', array_unique( $users_query->get_results() ) );
 	}
 }
