@@ -36,6 +36,10 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	public function test_find_user_ids_by_billing_email(): void {
 		$customer1 = CustomerHelper::create_customer( 'customer1', '', 'customer1@example.com' );
 		$customer2 = CustomerHelper::create_customer( 'customer2', '', 'customer2@example.com' );
+		foreach ( [ $customer1, $customer2 ] as $customer ) {
+			$customer->set_billing_address( $customer->get_email( 'edit' ) );
+			$customer->save();
+		}
 
 		$this->assertSame(
 			array( $customer1->get_id() ),
@@ -56,13 +60,13 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_find_user_ids_by_billing_email_with_have_orders_flag(): void {
-		if ( ! getenv( 'HPOS' ) ) {
-			$this->markTestSkipped( 'This tests requires enabling HPOS.' );
-		}
-
 		$customer1 = CustomerHelper::create_customer( 'customer1', '', 'customer1@example.com' );
 		$customer2 = CustomerHelper::create_customer( 'customer2', '', 'customer2@example.com' );
-		$order     = OrderHelper::create_order( $customer1->get_id() );
+		foreach ( [ $customer1, $customer2 ] as $customer ) {
+			$customer->set_billing_address( $customer->get_email( 'edit' ) );
+			$customer->save();
+		}
+		$order = OrderHelper::create_order( $customer1->get_id() );
 
 		$this->assertSame(
 			array( $customer1->get_id() ),
