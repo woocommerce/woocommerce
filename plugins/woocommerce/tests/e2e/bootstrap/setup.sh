@@ -32,7 +32,7 @@ echo "[setup] Installing themes..."
 wp theme install twentytwentythree --allow-root || echo "Theme already installed"
 wp theme install twentytwentyfour --allow-root || echo "Theme already installed"
 wp theme install storefront --allow-root || echo "Theme already installed"
-wp theme activate twentytwentythree --allow-root
+wp theme activate twentytwentyfour --allow-root
 
 # Create customer user for tests
 echo "[setup] Creating customer user..."
