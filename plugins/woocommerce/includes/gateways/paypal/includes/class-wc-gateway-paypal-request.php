@@ -19,21 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Generates requests to send to PayPal.
  */
 class WC_Gateway_Paypal_Request {
-
-	/**
-	 * The maximum length of the invoice ID.
-	 *
-	 * @var int
-	 */
-	private const PAYPAL_INVOICE_ID_MAX_LENGTH = 127;
-
-	/**
-	 * The maximum length of the order item name.
-	 *
-	 * @var int
-	 */
-	private const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
-
 	/**
 	 * Stores line items to send to PayPal.
 	 *
@@ -406,7 +391,7 @@ class WC_Gateway_Paypal_Request {
 							),
 						),
 					),
-					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $this->get_paypal_order_items( $order ),
 					'payee'      => array(
 						'email_address' => $payee_email,
@@ -454,7 +439,7 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items() as $item ) {
 			$items[] = array(
-				'name'        => $this->limit_length( $item->get_name(), self::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
+				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
@@ -532,11 +517,11 @@ class WC_Gateway_Paypal_Request {
 				'full_name' => $order->{"get_formatted_{$address_type}_full_name"}(),
 			),
 			'address' => array(
-				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), 300 ),
-				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), 300 ),
-				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), 300 ),
-				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), 120 ),
-				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), 60 ),
+				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
+				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
+				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
 				'country_code'   => $order->{"get_{$address_type}_country"}(),
 			),
 		);
@@ -617,7 +602,7 @@ class WC_Gateway_Paypal_Request {
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 				'custom'        => wp_json_encode(
 					array(
 						'order_id'  => $order->get_id(),

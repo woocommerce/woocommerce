@@ -47,4 +47,14 @@ class WC_Gateway_Paypal_Constants {
 	 * PayPal user actions.
 	 */
 	const USER_ACTION_PAY_NOW = 'PAY_NOW';
+
+	/**
+	 * Maximum lengths for PayPal fields.
+	 */
+    const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
+	const PAYPAL_INVOICE_ID_MAX_LENGTH      = 127;
+    const PAYPAL_ADDRESS_LINE_MAX_LENGTH    = 300;
+    const PAYPAL_STATE_MAX_LENGTH           = 300;
+    const PAYPAL_CITY_MAX_LENGTH            = 120;
+    const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
 }
