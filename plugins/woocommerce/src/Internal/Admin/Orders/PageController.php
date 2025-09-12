@@ -304,7 +304,7 @@ class PageController {
 				$post_type->labels->add_new_item,
 				__( 'Add new order', 'woocommerce' ),
 				$post_type->cap->create_posts,
-				add_query_arg( 'action', 'new', admin_url( 'admin.php?page=wc-orders' ) ),
+				add_query_arg( array( 'page' => 'wc-orders', 'action' => 'new' ), admin_url( 'admin.php' ) ),
 				''
 			);
 		}
