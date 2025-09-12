@@ -52,7 +52,8 @@ test( 'Merchant can add brands', async ( { page } ) => {
 			.fill( description );
 		await page.getByRole( 'button', { name: 'Upload/Add image' } ).click();
 		await page.getByRole( 'tab', { name: 'Media Library' } ).click();
-		await page.getByRole( 'checkbox', { name: thumbnailFileName } ).click();
+		// Use .first() to handle duplicate images with the same name
+		await page.getByRole( 'checkbox', { name: thumbnailFileName } ).first().click();
 		await page.getByRole( 'button', { name: 'Use image' } ).click();
 		await page.getByRole( 'button', { name: 'Add New Brand' } ).click();
 
