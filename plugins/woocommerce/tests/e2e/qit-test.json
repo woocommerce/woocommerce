@@ -29,7 +29,7 @@
                     "runs_on": "host"
                 }
             ],
-            "run": ["npx playwright test"],
+            "run": ["npx playwright test --project=e2e"],
             "teardown": [],
             "globalTeardown": ["./bootstrap/global-teardown.sh"]
         },
@@ -37,6 +37,17 @@
             "ctrf-json": "./results/ctrf.json",
             "allure-dir": "./results/allure",
             "blob-dir": "./results/blob"
+        }
+    },
+    "subpackages": {
+        "woocommerce/api": {
+            "description": "WooCommerce API test suite",
+            "tags": ["api", "woocommerce", "rest-api"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=api"]
+                }
+            }
         }
     }
 }
