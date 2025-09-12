@@ -5,7 +5,7 @@
         "slug": "woocommerce",
         "source": {
             "type": "local",
-            "path": "/storage/automattic/woocommerce/plugins/woocommerce/woocommerce.zip"
+            "path": "../../woocommerce.zip"
         }
     },
     "environments": {
