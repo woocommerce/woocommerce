@@ -65,7 +65,7 @@ class PageController {
 		}
 
 		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->edit_post, $this->order->get_id() ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You do not have permission to edit this order', 'woocommerce' ) );
+			wp_die( esc_html__( 'You do not have permission to edit this order.', 'woocommerce' ) );
 		}
 
 		if ( 'trash' === $this->order->get_status() ) {
