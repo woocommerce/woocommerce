@@ -2,7 +2,6 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/test-abstract-controller-v4.php';
-require_once __DIR__ . '/test-abstract-schema-v4.php';
 
 /**
  * Abstract Controller tests for V4 REST API.
@@ -23,10 +22,6 @@ class WC_REST_Abstract_Controller_V4_Test extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 		$this->controller = new Test_Abstract_Controller_V4();
 		$this->user       = $this->factory->user->create( array( 'role' => 'administrator' ) );
-
-		// Set up mock schema controller.
-		$this->test_schema_controller = new Test_Abstract_Schema_V4();
-		$this->controller->set_schema_controller( $this->test_schema_controller );
 	}
 
 	/**

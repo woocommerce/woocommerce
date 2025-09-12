@@ -24,10 +24,10 @@ class WC_REST_Abstract_Schema_V4_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test get_item_properties method.
+	 * Test get_item_schema_properties method.
 	 */
-	public function test_get_item_properties() {
-		$properties = $this->schema->get_item_properties();
+	public function test_get_item_schema_properties() {
+		$properties = $this->schema->get_item_schema_properties();
 
 		$this->assertIsArray( $properties );
 		$this->assertArrayHasKey( 'id', $properties );

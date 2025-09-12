@@ -48,12 +48,27 @@ abstract class AbstractSchema {
 	const VIEW_EDIT_CONTEXT = array( 'view', 'edit' );
 
 	/**
+	 * Get the item schema.
+	 *
+	 * @return array The item schema.
+	 * @since 10.2.0
+	 */
+	public static function get_item_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => self::IDENTIFIER,
+			'type'       => 'object',
+			'properties' => self::get_item_schema_properties(),
+		);
+	}
+
+	/**
 	 * Return all properties for the item schema.
 	 *
 	 * @return array The schema properties.
 	 * @since 10.2.0
 	 */
-	public function get_item_properties(): array {
+	public static function get_item_schema_properties(): array {
 		return array();
 	}
 }

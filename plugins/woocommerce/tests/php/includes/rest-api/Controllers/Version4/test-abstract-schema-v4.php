@@ -18,7 +18,7 @@ class Test_Abstract_Schema_V4 extends Automattic\WooCommerce\RestApi\Routes\V4\A
 	 *
 	 * @return array
 	 */
-	public function get_item_properties(): array {
+	public static function get_item_schema_properties(): array {
 		return array(
 			'id'           => array(
 				'description' => __( 'Unique identifier.', 'woocommerce' ),

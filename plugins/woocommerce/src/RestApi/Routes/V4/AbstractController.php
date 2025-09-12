@@ -41,13 +41,6 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $rest_base = '';
 
 	/**
-	 * Schema controller instance.
-	 *
-	 * @var AbstractSchema
-	 */
-	protected $schema_controller;
-
-	/**
 	 * Cache for the item schema populated after calling get_item_schema().
 	 *
 	 * @var array
@@ -55,29 +48,27 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $schema;
 
 	/**
-	 * Get item schema, conforming to JSON Schema.
+	 * Get item schema, conforming to JSON Schema. Extended by routes.
 	 *
 	 * @return array The item schema.
 	 * @since 10.2.0
 	 */
-	public function get_item_schema(): array {
+	public function get_item_schema() {
 		if ( null === $this->schema ) {
-			$this->schema = $this->schema_controller ? array(
+			$this->schema = array(
 				'$schema'    => 'http://json-schema.org/draft-04/schema#',
 				'type'       => 'object',
-				'title'      => $this->schema_controller::IDENTIFIER,
-				/**
-				 * Filter the schema for the item.
-				 *
-				 * @param array $schema The schema for the item.
-				 * @since 10.2.0
-				 */
-				'properties' => apply_filters( $this->get_hook_prefix() . $this->schema_controller::IDENTIFIER . '_schema', $this->schema_controller->get_item_properties() ),
-			) : array();
-
-			$this->schema = $this->add_additional_fields_schema( $this->schema );
+				'title'      => 'item',
+				'properties' => array(),
+			);
+			/**
+			 * Filter the item schema for this route.
+			 *
+			 * @param array $schema The item schema.
+			 * @since 10.2.0
+			 */
+			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->schema ) );
 		}
-
 		return $this->schema;
 	}
 
