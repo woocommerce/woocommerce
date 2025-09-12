@@ -907,9 +907,9 @@ class FeaturesController {
 	 *
 	 * This method can't be called before the 'woocommerce_init' hook is fired.
 	 *
-	 * @param string $plugin_name Plugin name, in the form 'directory/file.php'.
+	 * @param string $plugin_name           Plugin name, in the form 'directory/file.php'.
 	 * @param bool   $enabled_features_only True to return only names of enabled plugins.
-	 * @param bool   $resolve_uncertain True to resolve the uncertain features to compatible or incompatible.
+	 * @param bool   $resolve_uncertain     True to resolve the uncertain features to compatible or incompatible.
 	 * @return array An array having a 'compatible' and an 'incompatible' key, each holding an array of feature ids.
 	 */
 	public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false, bool $resolve_uncertain = false ): array {
