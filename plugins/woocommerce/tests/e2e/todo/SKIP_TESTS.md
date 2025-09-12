@@ -6,7 +6,8 @@
 **Test:** customer can login at checkout and place the order with a different shipping address blocks checkout
 **Reason:** UI assumption mismatch - test expects "Edit shipping address" button that doesn't exist
 **Details:** See `checkout-edit-shipping-address-button-missing/README.md`
-**Skip line to add:** `test.skip('customer can login at checkout and place the order with a different shipping address blocks checkout'`
+**Status:** SKIPPED with QIT-SKIP tag
+**Skip Implementation:** Added `test.skip()` with QIT-SKIP comment in test file
 
 ## Coupon Tests  
 
