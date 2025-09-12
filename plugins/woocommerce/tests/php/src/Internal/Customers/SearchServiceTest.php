@@ -100,9 +100,9 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	/**
 	 * Wrapper around the helper, as injecting the billing in there cause some tests to fail.
 	 *
-	 * @param string $username
-	 * @param string $password
-	 * @param string $email
+	 * @param string $username Username.
+	 * @param string $password Password.
+	 * @param string $email    Email.
 	 * @return \WC_Customer
 	 */
 	private function create_customer( string $username, string $password, string $email ): \WC_Customer {
