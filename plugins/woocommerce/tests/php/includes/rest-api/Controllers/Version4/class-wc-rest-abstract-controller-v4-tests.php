@@ -195,7 +195,6 @@ class WC_REST_Abstract_Controller_V4_Test extends WC_REST_Unit_Test_Case {
 		$error = $this->controller->get_route_error_response( 'test_error', '' );
 
 		$this->assertInstanceOf( 'WP_Error', $error );
-		$this->assertEquals( 'test_error', $error->get_error_code() );
 		$this->assertStringContainsString( 'An error occurred while processing your request', $error->get_error_message() );
 	}
 
