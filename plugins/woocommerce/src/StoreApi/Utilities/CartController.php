@@ -1224,7 +1224,7 @@ class CartController {
 		$product_name = $this->get_product_name( $product );
 
 		if ( empty( $product_name ) ) {
-			$message = esc_html__( 'This product is not available for purchase.', 'woocommerce' );
+			$message = esc_html__( 'This item is not available for purchase.', 'woocommerce' );
 		} else {
 			$message = sprintf(
 				/* translators: %s: product name */
