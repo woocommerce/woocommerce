@@ -715,8 +715,12 @@ class WC_Session_Handler extends WC_Session {
 			return;
 		}
 
-		if ( ! empty( $this->_data ) || ! ( is_null( WC()->cart ) || WC()->cart->is_empty() ) ) {
-			// Verify that the session data is empty and there is no pending cart to save.
+		if ( ! empty( $this->_data ) ) {
+			return;
+		}
+
+		if ( is_object( WC()->cart ) && ! WC()->cart->is_empty() ) {
+			// There is a pending cart to save that isn't yet in the session data.
 			return;
 		}
 
