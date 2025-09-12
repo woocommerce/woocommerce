@@ -776,12 +776,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart',
+			name: 'Add to cart: “T-Shirt”',
 		} );
 
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
 	} );
 
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
@@ -798,11 +800,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		const addToCartButton = page.getByRole( 'button', {
 			name: 'Add to cart',
+			exact: true,
 		} );
 
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( '1 in cart' );
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
 	} );
 
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
@@ -818,10 +823,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		const addToCartButton = page.getByRole( 'button', {
 			name: 'Add to cart',
+			exact: true,
 		} );
 
 		await addToCartButton.click();
 
-		await expect( addToCartButton ).toHaveText( 'Added to cart' );
+		await expect(
+			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
+		).toBeVisible();
 	} );
 } );
