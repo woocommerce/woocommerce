@@ -36,24 +36,11 @@ class Controller extends AbstractController {
 	protected $rest_base = 'order-notes';
 
 	/**
-	 * Get item schema, conforming to JSON Schema.
-	 *
-	 * @return array The item schema.
-	 * @since 10.2.0
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
 	 */
-	public function get_item_schema() {
-		if ( null === $this->schema ) {
-			$this->schema = OrderNoteSchema::get_item_schema();
-
-			/**
-			 * Filter the item schema for this route.
-			 *
-			 * @param array $schema The item schema.
-			 * @since 10.2.0
-			 */
-			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->schema ) );
-		}
-		return $this->schema;
+	protected function get_schema(): array {
+		return OrderNoteSchema::get_item_schema();
 	}
 
 	/**
@@ -193,57 +180,16 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get a note by ID.
-	 *
-	 * @param int $note_id The note ID.
-	 * @return WP_Comment|null
-	 */
-	protected function get_note_by_id( int $note_id ) {
-		if ( ! $note_id ) {
-			return null;
-		}
-		$note = get_comment( $note_id );
-		return $note ? $note : null;
-	}
-
-	/**
-	 * Get an order by ID.
-	 *
-	 * @param int $order_id The order ID.
-	 * @return WC_Order|null
-	 */
-	protected function get_order_by_id( int $order_id ) {
-		if ( ! $order_id ) {
-			return null;
-		}
-		$order = wc_get_order( $order_id );
-		return $order && 'shop_order' === $order->get_type() ? $order : null;
-	}
-	/**
-	 * Get the parent order of a note.
-	 *
-	 * @param int|WP_Comment $note The note ID or note object.
-	 * @return WC_Order|null
-	 */
-	protected function get_order_by_note( $note ) {
-		$note = $note instanceof WP_Comment ? $note : $this->get_note_by_id( (int) $note );
-		if ( ! $note ) {
-			return null;
-		}
-		return $this->get_order_by_id( (int) $note->comment_post_ID );
-	}
-
-	/**
 	 * To read, edit or delete order notes, the user must have permission to edit the parent order.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @return bool
 	 */
-	protected function check_order_permission( WC_Order $order ) {
+	protected function can_edit_order( WC_Order $order ) {
 		if ( ! $order ) {
 			return false;
 		}
-		return wc_rest_check_post_permissions( $order->get_type(), 'edit', $order->get_id() );
+		return $this->check_permissions( 'order', 'edit', (int) $order->get_id() );
 	}
 
 	/**
@@ -253,10 +199,60 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		$order = $this->get_order_by_note( (int) $request['id'] );
+		$order = Utils::get_order_by_note_id( (int) $request['id'] );
 
-		if ( $order && ! $this->check_order_permission( $order ) ) {
+		if ( $order && ! $this->can_edit_order( $order ) ) {
 			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		$order = Utils::get_order_by_id( (int) $request['order_id'] );
+
+		if ( ! $order || ! $this->can_edit_order( $order ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to create an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		$order = Utils::get_order_by_id( (int) $request['order_id'] );
+
+		if ( ! $order ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+		}
+
+		if ( ! $this->can_edit_order( $order ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		$order = Utils::get_order_by_note_id( (int) $request['id'] );
+
+		if ( $order && ! $this->can_edit_order( $order ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), rest_authorization_required_code() );
 		}
 		return true;
 	}
@@ -268,7 +264,7 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$note = $this->get_note_by_id( (int) $request['id'] );
+		$note = Utils::get_note_by_id( (int) $request['id'] );
 
 		if ( ! $note ) {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
@@ -278,28 +274,13 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Check if a given request has access to read items.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function get_items_permissions_check( $request ) {
-		$order = $this->get_order_by_id( (int) $request['order_id'] );
-
-		if ( ! $order || ! $this->check_order_permission( $order ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), rest_authorization_required_code() );
-		}
-		return true;
-	}
-
-	/**
 	 * Get collection of orders.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$order = $this->get_order_by_id( (int) $request['order_id'] );
+		$order = Utils::get_order_by_id( (int) $request['order_id'] );
 
 		if ( ! $order ) {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
@@ -344,26 +325,6 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Check if a given request has access to create an item.
-	 *
-	 * @param  WP_REST_Request $request The request object.
-	 * @return WP_Error|boolean
-	 */
-	public function create_item_permissions_check( $request ) {
-		$order = $this->get_order_by_id( (int) $request['order_id'] );
-
-		if ( ! $order ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
-		}
-
-		if ( ! $this->check_order_permission( $order ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), rest_authorization_required_code() );
-		}
-
-		return true;
-	}
-
-	/**
 	 * Create a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -375,7 +336,7 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'exists', __( 'Cannot create existing order note.', 'woocommerce' ), WP_Http::BAD_REQUEST );
 		}
 
-		$order   = $this->get_order_by_id( (int) $request['order_id'] );
+		$order   = Utils::get_order_by_id( (int) $request['order_id'] );
 		$note_id = $order ? $order->add_order_note( $request['note'], $request['is_customer_note'], true ) : null;
 
 		if ( ! $note_id ) {
@@ -403,28 +364,13 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Check if a given request has access to delete an item.
-	 *
-	 * @param  WP_REST_Request $request The request object.
-	 * @return bool|WP_Error
-	 */
-	public function delete_item_permissions_check( $request ) {
-		$order = $this->get_order_by_note( (int) $request['id'] );
-
-		if ( $order && ! $this->check_order_permission( $order ) ) {
-			return $this->get_route_error_response( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), rest_authorization_required_code() );
-		}
-		return true;
-	}
-
-	/**
 	 * Delete a single item.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$note = $this->get_note_by_id( (int) $request['id'] );
+		$note = Utils::get_note_by_id( (int) $request['id'] );
 
 		if ( empty( $note ) ) {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), WP_Http::NOT_FOUND );

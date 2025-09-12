@@ -48,27 +48,31 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $schema;
 
 	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 *
+	 * This should return the full schema object, not just the properties.
+	 *
+	 * @return array The full item schema.
+	 */
+	abstract protected function get_schema(): array;
+
+	/**
 	 * Get item schema, conforming to JSON Schema. Extended by routes.
 	 *
 	 * @return array The item schema.
 	 * @since 10.2.0
 	 */
 	public function get_item_schema() {
+		// Cache the schema for the route.
 		if ( null === $this->schema ) {
-			$this->schema = array(
-				'$schema'    => 'http://json-schema.org/draft-04/schema#',
-				'type'       => 'object',
-				'title'      => 'item',
-				'properties' => array(),
-			);
-
 			/**
 			 * Filter the item schema for this route.
 			 *
 			 * @param array $schema The item schema.
 			 * @since 10.2.0
 			 */
-			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->schema ) );
+			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->get_schema() ) );
 		}
 		return $this->schema;
 	}
