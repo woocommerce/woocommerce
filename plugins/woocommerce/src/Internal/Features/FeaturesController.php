@@ -1436,8 +1436,8 @@ class FeaturesController {
 				$features_considered_incompatible = array_filter(
 					$this->plugin_util->get_items_considered_incompatible( $feature_id, $compatibility_info ),
 					$only_enabled_features ?
-						fn( $feature_id ) => $this->feature_is_enabled( $feature_id ) && ! $this->skip_compatibility_checks( $feature_id ) :
-						fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id )
+						fn( $id ) => $this->feature_is_enabled( $id ) && ! $this->skip_compatibility_checks( $id ) :
+						fn( $id ) => ! $this->skip_compatibility_checks( $id )
 				);
 				if ( in_array( $feature_id, $features_considered_incompatible, true ) ) {
 					$incompatibles[] = $plugin_name;
@@ -1480,13 +1480,13 @@ class FeaturesController {
 		foreach ( $relevant_plugins as $plugin ) {
 			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin, true );
 
-			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id ) );
+			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $id ) => ! $this->skip_compatibility_checks( $id ) );
 			if ( ! empty( $incompatibles ) ) {
 				$incompatible_plugins = true;
 				break;
 			}
 
-			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id ) );
+			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $id ) => ! $this->skip_compatibility_checks( $id ) );
 			foreach ( $uncertains as $feature_id ) {
 				if ( 'compatible' !== $this->get_default_plugin_compatibility( $feature_id ) ) {
 					$incompatible_plugins = true;
