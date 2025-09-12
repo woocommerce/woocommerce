@@ -31,7 +31,7 @@ class PostsRedirectionController {
 
 		add_action(
 			'admin_menu',
-			function() {
+			function () {
 				$this->maybe_update_menu_items();
 			},
 			9999
