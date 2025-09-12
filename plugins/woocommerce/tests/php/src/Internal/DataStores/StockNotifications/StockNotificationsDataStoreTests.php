@@ -25,10 +25,6 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 * Set up the test.
 	 */
 	public function setUp(): void {
-		if ( ! \Automattic\Jetpack\Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
-			$this->markTestSkipped( 'Back In Stock is not enabled.' );
-		}
-
 		parent::setUp();
 		$this->data_store = wc_get_container()->get( StockNotificationsDataStore::class );
 	}
@@ -38,10 +34,8 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
-
 		// Clean up all notifications.
 		global $wpdb;
-		$wpdb->hide_errors(); // Truncate tables can fail if the tables don't exist.
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
 	}

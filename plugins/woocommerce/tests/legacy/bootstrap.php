@@ -6,13 +6,11 @@
  * @package WooCommerce Tests
  */
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
 /**
@@ -218,11 +216,7 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_USE_TRANSACTIONS', false );
 
 		// Enable Back In Stock alpha during tests.
-		if ( class_exists( 'Automattic\Jetpack\Constants' ) ) {
-			Automattic\Jetpack\Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		} else {
-			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
-		}
+		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
