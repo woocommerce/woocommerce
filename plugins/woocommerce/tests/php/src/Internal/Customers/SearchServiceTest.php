@@ -38,8 +38,10 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 		$this->service = wc_get_container()->get( CustomersSearchService::class );
 
 		$this->original_hpos_status = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->setup_cot();
-		$this->toggle_cot_feature_and_usage( true );
+		if ( ! $this->original_hpos_status ) {
+			$this->setup_cot();
+			$this->toggle_cot_feature_and_usage (true );
+		}
 	}
 
 	/**
