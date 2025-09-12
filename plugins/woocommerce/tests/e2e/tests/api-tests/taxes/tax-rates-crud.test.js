@@ -1,6 +1,6 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { allUSTaxesExample } = require( '../../../data' );
-const { BASE_URL } = process.env;
+const BASE_URL = process.env.QIT_SITE_URL || process.env.BASE_URL;
 const shouldSkip = BASE_URL !== undefined;
 
 test.describe.serial( 'Tax Rates API tests: CRUD', () => {

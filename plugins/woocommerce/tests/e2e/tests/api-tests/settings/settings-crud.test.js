@@ -6,7 +6,7 @@ const {
 } = require( '../../../fixtures/api-tests-fixtures' );
 const { setOption } = require( '../../../utils/options' );
 
-const { BASE_URL } = process.env;
+const BASE_URL = process.env.QIT_SITE_URL || process.env.BASE_URL;
 
 const {
 	countries,

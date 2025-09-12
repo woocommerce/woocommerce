@@ -1,7 +1,7 @@
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { resetGatewayOrder } = require( '../../../utils/payments-settings' );
 
-const { BASE_URL } = process.env;
+const BASE_URL = process.env.QIT_SITE_URL || process.env.BASE_URL;
 
 test.describe( 'Payment Gateways API tests', () => {
 	test.beforeAll( async () => {

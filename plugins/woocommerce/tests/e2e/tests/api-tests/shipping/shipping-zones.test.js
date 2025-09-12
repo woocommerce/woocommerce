@@ -1,7 +1,7 @@
 /* eslint-disable */
 const { test, expect } = require( '../../../fixtures/api-tests-fixtures' );
 const { getShippingZoneExample } = require( '../../../data' );
-const { BASE_URL } = process.env;
+const BASE_URL = process.env.QIT_SITE_URL || process.env.BASE_URL;
 const shouldSkip = BASE_URL !== undefined;
 /**
  * Tests for the WooCommerce Shipping zones API.

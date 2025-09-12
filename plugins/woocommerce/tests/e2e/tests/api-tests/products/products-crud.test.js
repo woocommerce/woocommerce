@@ -2,7 +2,7 @@ const {
 	test: baseTest,
 	expect,
 } = require( '../../../fixtures/api-tests-fixtures' );
-const { BASE_URL } = process.env;
+const BASE_URL = process.env.QIT_SITE_URL || process.env.BASE_URL;
 const { admin } = require( '../../../test-data/data' );
 const shouldSkip = BASE_URL !== undefined;
 
