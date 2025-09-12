@@ -75,39 +75,6 @@ Schemas should extend `V4/AbstractSchema.php` and implement the following:
 2. **get_item_properties() method** - Return array of schema properties
 3. **Context constants** - Define available contexts (`VIEW_EDIT_EMBED_CONTEXT`, `VIEW_EDIT_CONTEXT`)
 
-### Example Schema Implementation
-
-```php
-<?php
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
-
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
-
-class OrderSchema extends AbstractSchema {
-    const IDENTIFIER = 'order';
-    
-    public function get_item_properties() {
-        return array(
-            'id' => $this->get_integer_property(
-                __( 'Unique identifier for the order.', 'woocommerce' ),
-                self::VIEW_EDIT_CONTEXT,
-                true // readonly
-            ),
-            'status' => $this->get_enum_property(
-                __( 'Order status.', 'woocommerce' ),
-                array( 'pending', 'processing', 'completed' ),
-                self::VIEW_EDIT_CONTEXT
-            ),
-            'date_created' => $this->get_date_property(
-                __( 'The date the order was created.', 'woocommerce' ),
-                self::VIEW_EDIT_CONTEXT,
-                true // readonly
-            ),
-        );
-    }
-}
-```
-
 ### Schema Contexts
 
 - **view** - Data visible when viewing the resource
