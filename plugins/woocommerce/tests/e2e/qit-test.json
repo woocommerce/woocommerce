@@ -10,8 +10,7 @@
         "./bin/filter-setter.php",
         "./bin/process-waiting-actions.php",
         "./bin/test-helper-apis.php",
-        "./bin/woocommerce-cleanup.php",
-        "./paypal-monitor.php"
+        "./bin/woocommerce-cleanup.php"
     ],
     "test": {
         "phases": {
