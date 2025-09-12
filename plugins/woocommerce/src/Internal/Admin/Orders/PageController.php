@@ -387,6 +387,10 @@ class PageController {
 
 		// Modify the screen ID for backwards compatibility
 		add_action( 'current_screen', function( $screen ) use ( $hook_mappings ) {
+			if ( ! is_object( $screen ) || ! property_exists( $screen, 'id' ) ) {
+				return;
+			}
+
 			if ( isset( $hook_mappings[ $screen->id ] ) ) {
 				// Store the original ID in case something needs it
 				$screen->original_id = $screen->id;
