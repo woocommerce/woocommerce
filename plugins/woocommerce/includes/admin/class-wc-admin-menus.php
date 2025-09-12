@@ -248,8 +248,8 @@ class WC_Admin_Menus {
 		}
 
 		// Highlight "Add new order" submenu when on the new order page.
-		if ( isset( $_GET['page'], $_GET['action'] ) && 0 === strpos( $_GET['page'], 'wc-orders' ) && 'new' === $_GET['action'] ) { // WPCS: input var okay, CSRF ok.
-			$submenu_file = add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ); // WPCS: override ok, input var okay, CSRF ok.
+		if ( isset( $_GET['page'], $_GET['action'] ) && 0 === strpos( sanitize_text_field( wp_unslash( $_GET['page'] ) ), 'wc-orders' ) && 'new' === sanitize_text_field( wp_unslash( $_GET['action'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$submenu_file = add_query_arg( 'action', 'new', admin_url( 'admin.php?page=' . sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited,WordPress.Security.NonceVerification.Recommended
 		}
 	}
 

@@ -270,9 +270,16 @@ class PageController {
 			/**
 			 * Filters whether to include the processing order count in the menu.
 			 *
+			 * @since 2.5.0
 			 * @param bool $include_count Whether to include the count. Default true.
 			 */
 			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+				/**
+				 * Filters the order count displayed in the menu.
+				 *
+				 * @since 3.9.0
+				 * @param int $order_count The order count.
+				 */
 				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 				if ( $order_count ) {
 					$menu_name .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
@@ -375,6 +382,8 @@ class PageController {
 					if ( ! doing_action( "load-{$expected_hook}" ) ) {
 						/**
 						 * Fires when the orders page is loaded.
+						 *
+						 * @since 10.3.0
 						 */
 						do_action( "load-{$expected_hook}" );
 					}
@@ -388,6 +397,8 @@ class PageController {
 					if ( ! doing_action( "admin_print_styles-{$expected_hook}" ) ) {
 						/**
 						 * Fires when styles are printed for the orders page.
+						 *
+						 * @since 10.3.0
 						 */
 						do_action( "admin_print_styles_{$expected_hook}" );
 					}
@@ -401,6 +412,8 @@ class PageController {
 					if ( ! doing_action( "admin_print_scripts-{$expected_hook}" ) ) {
 						/**
 						 * Fires when scripts are printed for the orders page.
+						 *
+						 * @since 10.3.0
 						 */
 						do_action( "admin_print_scripts_{$expected_hook}" );
 					}
@@ -415,6 +428,8 @@ class PageController {
 					if ( ! doing_action( $expected_hook ) ) {
 						/**
 						 * Fires for the orders page hook.
+						 *
+						 * @since 10.3.0
 						 */
 						do_action( $expected_hook );
 					}
