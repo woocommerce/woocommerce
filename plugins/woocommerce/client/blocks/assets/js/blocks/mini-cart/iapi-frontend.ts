@@ -10,7 +10,10 @@ import {
 	useRef,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	Store as WooCommerce,
+	WooCommerceConfig,
+} from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
 
 /**
@@ -26,7 +29,9 @@ import { CartItem, Currency } from '../../types';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency, placeholderImgSrc } = getConfig( 'woocommerce' );
+const { currency, placeholderImgSrc } = getConfig(
+	'woocommerce'
+) as WooCommerceConfig;
 const {
 	addToCartBehaviour,
 	onCartClickBehaviour,
@@ -127,6 +132,10 @@ store< MiniCart >(
 			},
 
 			get formattedSubtotal(): string {
+				if ( ! currency ) {
+					return '';
+				}
+
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
 					  parseInt(
@@ -460,7 +469,8 @@ const { state: cartItemState } = store(
 			get itemThumbnail(): string {
 				return (
 					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
-					placeholderImgSrc
+					placeholderImgSrc ||
+					''
 				);
 			},
 
