@@ -11,6 +11,8 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_Comment;
+
 /**
  * Utils class.
  */
@@ -53,6 +55,6 @@ class Utils {
 			return null;
 		}
 		$note = get_comment( $note_id );
-		return $note ? $note : null;
+		return $note && 'order_note' === $note->comment_type ? $note : null;
 	}
 }
