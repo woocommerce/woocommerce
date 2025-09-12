@@ -370,7 +370,7 @@ class WC_Gateway_Paypal_Request {
 			'payment_source' => array(
 				'paypal' => array(
 					'experience_context' => array(
-						'user_action'         => 'PAY_NOW',
+						'user_action'         => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
 						'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
 						// Customer redirected here on approval.
 						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
@@ -507,11 +507,11 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_shipping_preference( $order ) {
 		if ( ! $order->needs_shipping_address() ) {
-			return 'NO_SHIPPING';
+			return WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING;
 		}
 
 		$address_override = $this->gateway->get_option( 'address_override' ) === 'yes';
-		return $address_override ? 'SET_PROVIDED_ADDRESS' : 'GET_FROM_FILE';
+		return $address_override ? WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS : WC_Gateway_Paypal_Constants::SHIPPING_GET_FROM_FILE;
 	}
 
 	/**

@@ -35,4 +35,16 @@ class WC_Gateway_Paypal_Constants {
      */
     const PAYMENT_ACTION_CAPTURE = 'capture';
     const PAYMENT_ACTION_AUTHORIZE = 'authorize';
+
+	/**
+	 * PayPal shipping preferences.
+	 */
+	const SHIPPING_NO_SHIPPING         = 'NO_SHIPPING';
+	const SHIPPING_GET_FROM_FILE       = 'GET_FROM_FILE';
+	const SHIPPING_SET_PROVIDED_ADDRESS = 'SET_PROVIDED_ADDRESS';
+
+	/**
+	 * PayPal user actions.
+	 */
+	const USER_ACTION_PAY_NOW = 'PAY_NOW';
 }
