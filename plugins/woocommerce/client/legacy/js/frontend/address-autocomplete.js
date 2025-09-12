@@ -9,16 +9,16 @@ window.wc.addressAutocomplete = window.wc.addressAutocomplete || {
 	activeProvider: { billing: null, shipping: null },
 };
 
-var serverProviders = [];
+let serverProviders = [];
 try {
-	if (
-		window &&
-		window.wc_address_autocomplete_params &&
-		window.wc_address_autocomplete_params.address_providers
-	) {
-		serverProviders = JSON.parse(
-			window.wc_address_autocomplete_params.address_providers
-		);
+	if ( window && window.wc_address_autocomplete_params ) {
+		const raw = window.wc_address_autocomplete_params.address_providers;
+		if ( typeof raw === 'string' ) {
+			const parsed = JSON.parse( raw );
+			serverProviders = Array.isArray( parsed ) ? parsed : [];
+		} else if ( Array.isArray( raw ) ) {
+			serverProviders = raw;
+		}
 	}
 } catch ( e ) {
 	console.error( 'Invalid address providers JSON:', e );
