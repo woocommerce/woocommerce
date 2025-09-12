@@ -8,6 +8,8 @@
  * @package  WooCommerce\Gateways
  */
 
+declare(strict_types=1);
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -16,10 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Gateway_Paypal_Constants Class.
  */
 class WC_Gateway_Paypal_Constants {
-    /**
-     * PayPal proxy request timeout.
-     */
-    const WPCOM_PROXY_REQUEST_TIMEOUT = 60;
+	/**
+	 * PayPal proxy request timeout.
+	 */
+	const WPCOM_PROXY_REQUEST_TIMEOUT = 60;
 
 	/**
 	 * PayPal payment statuses.
@@ -34,17 +36,17 @@ class WC_Gateway_Paypal_Constants {
 	const INTENT_CAPTURE   = 'CAPTURE';
 	const INTENT_AUTHORIZE = 'AUTHORIZE';
 
-    /**
-     * PayPal payment actions.
-     */
-    const PAYMENT_ACTION_CAPTURE = 'capture';
-    const PAYMENT_ACTION_AUTHORIZE = 'authorize';
+	/**
+	 * PayPal payment actions.
+	 */
+	const PAYMENT_ACTION_CAPTURE   = 'capture';
+	const PAYMENT_ACTION_AUTHORIZE = 'authorize';
 
 	/**
 	 * PayPal shipping preferences.
 	 */
-	const SHIPPING_NO_SHIPPING         = 'NO_SHIPPING';
-	const SHIPPING_GET_FROM_FILE       = 'GET_FROM_FILE';
+	const SHIPPING_NO_SHIPPING          = 'NO_SHIPPING';
+	const SHIPPING_GET_FROM_FILE        = 'GET_FROM_FILE';
 	const SHIPPING_SET_PROVIDED_ADDRESS = 'SET_PROVIDED_ADDRESS';
 
 	/**
@@ -55,10 +57,10 @@ class WC_Gateway_Paypal_Constants {
 	/**
 	 * Maximum lengths for PayPal fields.
 	 */
-    const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
+	const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
 	const PAYPAL_INVOICE_ID_MAX_LENGTH      = 127;
-    const PAYPAL_ADDRESS_LINE_MAX_LENGTH    = 300;
-    const PAYPAL_STATE_MAX_LENGTH           = 300;
-    const PAYPAL_CITY_MAX_LENGTH            = 120;
-    const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
+	const PAYPAL_ADDRESS_LINE_MAX_LENGTH    = 300;
+	const PAYPAL_STATE_MAX_LENGTH           = 300;
+	const PAYPAL_CITY_MAX_LENGTH            = 120;
+	const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
 }
