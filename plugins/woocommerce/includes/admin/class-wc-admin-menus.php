@@ -299,16 +299,22 @@ class WC_Admin_Menus {
 		$woocommerce_orders = array_search( 'wc-orders', $menu_order, true );
 
 		// Loop through menu order and do some rearranging.
-		foreach ( $menu_order as $index => $item ) {
+		foreach ( $menu_order as $item ) {
 
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
 				$woocommerce_menu_order[] = 'wc-orders';
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
-				unset( $menu_order[ $woocommerce_separator ] );
-				unset( $menu_order[ $woocommerce_orders ] );
-				unset( $menu_order[ $woocommerce_product ] );
+				if ( false !== $woocommerce_separator ) {
+					unset( $menu_order[ $woocommerce_separator ] );
+				}
+				if ( false !== $woocommerce_orders ) {
+					unset( $menu_order[ $woocommerce_orders ] );
+				}
+				if ( false !== $woocommerce_product ) {
+					unset( $menu_order[ $woocommerce_product ] );
+				}
 			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', 'wc-orders' ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
