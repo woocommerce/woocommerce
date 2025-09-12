@@ -61,6 +61,7 @@ abstract class AbstractController extends WP_REST_Controller {
 				'title'      => 'item',
 				'properties' => array(),
 			);
+
 			/**
 			 * Filter the item schema for this route.
 			 *
