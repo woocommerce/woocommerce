@@ -12,10 +12,6 @@ echo "[globalSetup] Starting minimal WooCommerce configuration..."
 echo "[globalSetup] Checking WooCommerce installation status..."
 wp plugin list --allow-root
 
-# Activate WooCommerce if not already active
-echo "[globalSetup] Activating WooCommerce..."
-wp plugin activate woocommerce --allow-root || echo "WooCommerce already active"
-
 # Verify WooCommerce is active
 echo "[globalSetup] Verifying WooCommerce activation..."
 if wp plugin is-active woocommerce --allow-root; then
@@ -48,12 +44,3 @@ wp option update woocommerce_default_country "US:CA" --allow-root
 wp option update woocommerce_currency "USD" --allow-root
 
 echo "[globalSetup] Minimal WooCommerce configuration complete."
-
-# Note: For full QIT integration with Playwright-based setup, the manifest would need:
-# "globalSetup": [
-#     "./bootstrap/global-setup.sh",
-#     {
-#         "command": "npx playwright test --config=playwright.bootstrap.config.js dismiss-coming-soon.spec.js",
-#         "runs_on": "host"
-#     }
-# ]

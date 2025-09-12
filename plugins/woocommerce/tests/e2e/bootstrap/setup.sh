@@ -50,6 +50,7 @@ wp rewrite structure '/%postname%/' --hard --allow-root
 echo "[setup] Installing themes..."
 wp theme install twentytwentythree --allow-root || echo "Theme already installed"
 wp theme install twentytwentyfour --allow-root || echo "Theme already installed"
+wp theme install storefront --allow-root || echo "Theme already installed"
 wp theme activate twentytwentythree --allow-root
 
 # Create customer user for tests
