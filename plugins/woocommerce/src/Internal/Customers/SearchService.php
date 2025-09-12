@@ -10,8 +10,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 /**
  * Internal API for searching users/customers: no backward compatibility obligation.
  */
-final class SearchService
-{
+final class SearchService {
 	/**
 	 * Searches users having the billing email as specified and returns their id.
 	 *
@@ -20,8 +19,7 @@ final class SearchService
 	 *
 	 * @return int[]
 	 */
-	public function find_user_ids_by_billing_email( array $emails, bool $have_orders = false ): array
-	{
+	public function find_user_ids_by_billing_email( array $emails, bool $have_orders = false ): array {
 		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
 		$include_user_ids = array();
@@ -48,7 +46,7 @@ final class SearchService
 			array(
 				'fields'     => 'ID',
 				'include'    => $include_user_ids,
-				'meta_query' => array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 					array(
 						'key'     => 'billing_email',
 						'value'   => $emails,
