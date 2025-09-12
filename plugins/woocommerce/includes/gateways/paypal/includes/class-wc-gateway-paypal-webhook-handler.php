@@ -205,13 +205,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ) {
-		$action_url = null;
-		foreach ( $links as $link ) {
-			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
-				$action_url = esc_url_raw( $link['href'] );
-				break;
-			}
-		}
+		$action_url = $this->get_action_url( $links, $action );
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 		if ( ! isset( $payment_gateways['paypal'] ) ) {
@@ -221,5 +215,23 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$gateway        = $payment_gateways['paypal'];
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 		$paypal_request->authorize_or_capture_payment( $order, $action_url, $action );
+	}
+
+	/**
+	 * Get the action URL from the links.
+	 *
+	 * @param array  $links The links from the webhook event.
+	 * @param string $action The action to perform (capture or authorize).
+	 * @return string|null
+	 */
+	private function get_action_url( $links, $action ) {
+		$action_url = null;
+		foreach ( $links as $link ) {
+			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				$action_url = esc_url_raw( $link['href'] );
+				break;
+			}
+		}
+		return $action_url;
 	}
 }
