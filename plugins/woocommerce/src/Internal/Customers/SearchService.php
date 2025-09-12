@@ -15,7 +15,7 @@ final class SearchService {
 	 * Searches users having the billing email as specified and returns their id.
 	 *
 	 * @param string[] $emails      Emails to search for.
-	 * @param bool     $have_orders Lookup existing order in HPOS tables as pre-selection for users search.
+	 * @param bool     $have_orders Lookup existing orders in HPOS tables as pre-selection for users search.
 	 *
 	 * @return int[]
 	 */
