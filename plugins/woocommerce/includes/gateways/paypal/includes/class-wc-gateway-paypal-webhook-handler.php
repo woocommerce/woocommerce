@@ -64,7 +64,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -72,7 +72,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
-			$order->update_meta_data( '_paypal_status', strtolower( $status ) );
+			$order->update_meta_data( '_paypal_status', $status );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -113,12 +113,12 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
 		$order->set_transaction_id( $event['resource']['id'] );
-		$order->update_meta_data( '_paypal_status', strtolower( $event['resource']['status'] ) );
+		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(
@@ -144,7 +144,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
