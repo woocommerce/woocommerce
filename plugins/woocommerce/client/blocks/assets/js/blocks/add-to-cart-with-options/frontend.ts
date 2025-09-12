@@ -225,15 +225,21 @@ const { actions, state } = store<
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
-					const id = context.childProductId || productId;
-
 					context.quantity = {
 						...context.quantity,
-						[ id ]: value,
+						[ productId ]: value,
 					};
 				}
 
-				actions.validateQuantity( productId, value );
+				const productObject = getProductData(
+					productDataState.productId,
+					context.selectedAttributes
+				);
+				if ( productObject?.type === 'grouped' ) {
+					actions.validateGroupedProductQuantity();
+				} else {
+					actions.validateQuantity( productId, value );
+				}
 			},
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;

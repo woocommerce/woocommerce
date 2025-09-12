@@ -209,18 +209,18 @@ store< QuantitySelectorStore >(
 				if ( productObject ) {
 					const { min, step } = productObject;
 					newValue = currentValue - step;
-					newValue = Math.max( min, newValue );
 
-					// In grouped product children, we allow decreasing the value
-					// down to 0, even if the minimum value is greater than 0.
-					if (
-						parentProductObject?.type === 'grouped' &&
-						newValue < min
-					) {
-						if ( currentValue > min ) {
-							newValue = min;
+					if ( newValue < min ) {
+						// In grouped product children, we allow decreasing the value
+						// down to 0, even if the minimum value is greater than 0.
+						if ( parentProductObject?.type === 'grouped' ) {
+							if ( currentValue > min ) {
+								newValue = min;
+							} else {
+								newValue = 0;
+							}
 						} else {
-							newValue = 0;
+							newValue = min;
 						}
 					}
 				}
@@ -245,7 +245,7 @@ store< QuantitySelectorStore >(
 				let min = 1;
 				const { productId } = getContext< Context >();
 				const productObject = getProductData(
-					productId,
+					productDataState.productId,
 					selectedAttributes
 				);
 
