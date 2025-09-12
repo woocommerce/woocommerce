@@ -263,8 +263,15 @@ class PageController {
 		foreach ( $order_types as $order_type ) {
 			$post_type = get_post_type_object( $order_type );
 
+			// Do not add the "Orders" menu under WooCommerce if the user can't see the WooCommerce menu in the first place.
+			if ( 'shop_order' === $order_type && ! \WC_Admin_Menus::can_view_woocommerce_menu_item() ) {
+				$parent_menu_slug = null;
+			} else {
+				$parent_menu_slug = 'woocommerce';
+			}
+
 			add_submenu_page(
-				( 'shop_order' === $order_type && ! current_user_can( 'edit_others_shop_orders' ) ) ? null : 'woocommerce',
+				$parent_menu_slug,
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
 				$post_type->cap->edit_posts,
