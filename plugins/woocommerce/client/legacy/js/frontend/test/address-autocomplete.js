@@ -7,13 +7,13 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc;
 		// Reset the window object and providers before each test
 		Object.assign( global.window, {
-			wc_checkout_params: {
-				address_providers: [
+			wc_address_autocomplete_params: {
+				address_providers: JSON.stringify( [
 					{ id: 'test-provider', name: 'Test provider' },
 					{ id: 'wc-payments', name: 'WooCommerce Payments' },
 					{ id: 'provider-1', name: 'Provider 1' },
 					{ id: 'provider-2', name: 'Provider 2' },
-				],
+				] ),
 			},
 		} );
 
@@ -55,9 +55,9 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		} );
 	} );
 
-	test( 'should handle missing wc_checkout_params', () => {
+	test( 'should handle missing wc_address_autocomplete_params', () => {
 		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
+		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
 		require( '../address-autocomplete' );
 		const validProvider = {
@@ -80,7 +80,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 	test( 'should handle invalid address_providers type', () => {
 		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
+		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
 		require( '../address-autocomplete' );
 		const validProvider = {
@@ -362,7 +362,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Setup window object
 		Object.assign( global.window, {
-			wc_checkout_params: {
+			wc_address_autocomplete_params: {
 				address_providers: [
 					{
 						id: 'test-provider',
@@ -1289,7 +1289,7 @@ describe( 'Address Suggestions Component', () => {
 
 		test( 'should not create branding element when provider has no branding_html', async () => {
 			// Update window object to have no branding_html
-			global.window.wc_checkout_params.address_providers = [
+			global.window.wc_address_autocomplete_params.address_providers = [
 				{
 					id: 'test-provider',
 					name: 'Test provider',
