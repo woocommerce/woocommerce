@@ -472,11 +472,29 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  * @param string   $ns The namespace to check.
  * @param callable $callback The callback to execute if the namespace should be loaded.
  * @param string   $rest_route (Optional) The REST route to check against.
- * @param string   $callback_filter_id (Internal) Used to prevent recursive filter registration.
  *
  * @return void
  */
-function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
+function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '' ) {
+	_wc_rest_internal_lazy_load_namespace( $ns, $callback, $rest_route );
+}
+
+/**
+ * This is the internal function that implements the logic of wc_rest_lazy_load_namespace(). Its interface
+ * and behavior is not guaranteed.  It solely exists so that $callback_filter_id does not need to be part of the
+ * public interface to `wc_rest_lazy_load_namespace()`. Do not call it directly.
+ *
+ * @param string $ns The namespace to check.
+ * @param callable $callback The callback to execute if the namespace should be loaded.
+ * @param string   $rest_route (Optional) The REST route to check against.
+ * @param string   $callback_filter_id (Internal) Used to prevent recursive filter registration.
+ *
+ * @return void
+ *
+ * @see wc_rest_lazy_load_namespace()
+ * @internal Do not call this function directly.
+ */
+function _wc_rest_internal_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
 	if ( '' === $rest_route ) {
 		$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 	}
@@ -506,7 +524,7 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 	if ( '' === $callback_filter_id ) {
 		$callback_filter    = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
 			if ( is_callable( array( $request, 'get_route' ) ) ) {
-				wc_rest_lazy_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
+				_wc_rest_internal_lazy_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
 			}
 
 			return $filter_result;
@@ -516,3 +534,4 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 		add_filter( 'rest_pre_dispatch', $callback_filter, 0, 3 );
 	}
 }
+
