@@ -137,8 +137,9 @@ class GroupedProductItemSelector extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		$context_attribute = wp_interactivity_data_wp_context( array( 'childProductId' => $product->get_id() ) );
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $context_attribute . ' aria-label="' . esc_attr( $label ) . '" />';
+
+		$context_attribute = wp_interactivity_data_wp_context( array( 'productId' => $product->get_id() ) );
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $context_attribute . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}
 
 	/**
@@ -164,7 +165,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 			} else {
 				$markup = $this->get_quantity_selector_markup( $product );
 			}
-
+			wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 			if ( $markup ) {
 				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector">' . $markup . '</div>';
 			}
