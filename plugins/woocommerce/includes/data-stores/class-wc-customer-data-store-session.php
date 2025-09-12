@@ -89,8 +89,12 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 
 		$data = $this->get_customer_session_data( $customer );
 
-		if ( ! $this->is_default_customer_data( $data ) ) {
+		if ( $this->is_default_customer_data( $data ) ) {
+			// Clear the customer from the session if it matches the default.
+			WC()->session->set( 'customer', null );
+		} else {
 			WC()->session->set( 'customer', $data );
+		}
 		}
 	}
 
