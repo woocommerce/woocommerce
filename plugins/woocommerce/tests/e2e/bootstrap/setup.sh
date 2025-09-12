@@ -15,19 +15,6 @@ wp plugin install https://github.com/WP-API/Basic-Auth/archive/master.zip --acti
 echo "[setup] Installing WP Mail Logging plugin..."
 wp plugin install wp-mail-logging --activate --allow-root || echo "WP Mail Logging already installed"
 
-# Note: Mail is disabled via PHP configuration (see disable-mail.ini)
-# This allows email tests to work correctly
-
-# Install Customize Store workaround for known issues (GitHub #44766)
-echo "[setup] Installing Customize Store workaround..."
-if [ -f "./bin/customize-store-workaround.php" ]; then
-    mkdir -p wp-content/mu-plugins
-    cp ./bin/customize-store-workaround.php wp-content/mu-plugins/customize-store-workaround.php
-    echo "[setup] Customize Store workaround installed"
-else
-    echo "[setup] Warning: Customize Store workaround file not found"
-fi
-
 # Update blog name for test suite
 echo "[setup] Setting blog name..."
 wp option update blogname 'WooCommerce Core E2E Test Suite' --allow-root
