@@ -10,12 +10,51 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\B
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a WooCommerce product button block for email.
  */
 class Product_Button extends Abstract_Block_Renderer {
+	/**
+	 * Get styles for the wrapper element.
+	 *
+	 * @param array             $block_attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array
+	 */
+	private function get_wrapper_styles( array $block_attributes, Rendering_Context $rendering_context ): array {
+		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
+
+		return Styles_Helper::extend_block_styles(
+			$block_styles,
+			array(
+				'word-break' => 'break-word',
+				'display'    => 'block',
+			)
+		);
+	}
+
+	/**
+	 * Get styles for the button link element.
+	 *
+	 * @param array             $block_attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array
+	 */
+	private function get_button_styles( array $block_attributes, Rendering_Context $rendering_context ): array {
+		$block_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'color', 'typography' ) );
+
+		return Styles_Helper::extend_block_styles(
+			$block_styles,
+			array(
+				'display' => 'block',
+				'text-decoration' => 'none',
+			)
+		);
+	}
+
 	/**
 	 * Render the product button block content for email.
 	 *
@@ -39,57 +78,54 @@ class Product_Button extends Abstract_Block_Renderer {
 			$button_url = $product->get_permalink();
 		}
 
-		$styles = array(
-			'display'          => 'inline-block',
-			'padding'          => '12px 24px',
-			'background-color' => '#000000',
-			'color'            => '#ffffff',
-			'text-decoration'  => 'none',
-			'font-weight'      => 'bold',
-			'font-size'        => '16px',
-			'border'           => 'none',
-			'border-radius'    => '0',
-			'text-align'       => 'center',
-			'font-family'      => 'inherit',
+		$block_attributes = array_replace_recursive(
+			array(
+				'textColor'       => '#ffffff',
+				'backgroundColor' => '#000000',
+				'textAlign'       => 'left',
+				'width'           => '',
+				'style'           => array(
+					'typography' => array(
+						'fontSize'   => '16px',
+						'fontWeight' => 'bold',
+					),
+					'border' => array(
+						'radius' => '0',
+					),
+					'spacing' => array(
+						'padding' => '12px 24px',
+					),
+				),
+			),
+			$parsed_block['attrs'] ?? array()
 		);
 
-		$attributes = $parsed_block['attrs'] ?? array();
-		if ( ! empty( $attributes['style']['typography']['fontSize'] ) ) {
-			$styles['font-size'] = $attributes['style']['typography']['fontSize'];
-		}
-		if ( ! empty( $attributes['style']['typography']['fontWeight'] ) ) {
-			$styles['font-weight'] = $attributes['style']['typography']['fontWeight'];
-		}
-		if ( ! empty( $attributes['style']['color']['background'] ) ) {
-			$styles['background-color'] = $attributes['style']['color']['background'];
-		}
-		if ( ! empty( $attributes['style']['color']['text'] ) ) {
-			$styles['color'] = $attributes['style']['color']['text'];
-		}
-
-		$button_styles = \WP_Style_Engine::compile_css( $styles, '' );
-
-		$button_html = sprintf(
-			'<a href="%s" style="%s">%s</a>',
-			esc_url( $button_url ),
-			esc_attr( $button_styles ),
-			esc_html( $button_text )
-		);
-
-		$text_align = $parsed_block['attrs']['textAlign'] ?? 'left';
+		$wrapper_styles = $this->get_wrapper_styles( $block_attributes, $rendering_context );
+		$button_styles  = $this->get_button_styles( $block_attributes, $rendering_context );
 
 		$table_attrs = array(
-			'style' => 'width: 100%; border-collapse: collapse;',
-			'width' => '100%',
+			'style' => 'width:' . ( $block_attributes['width'] ? '100%' : 'auto' ) . ';',
+			'align' => $block_attributes['textAlign'],
 		);
 
 		$cell_attrs = array(
-			'style'  => 'text-align: ' . $text_align . '; vertical-align: top;',
-			'align'  => $text_align,
-			'valign' => 'top',
+			'class'  => $wrapper_styles['classnames'],
+			'style'  => $wrapper_styles['css'],
+			'align'  => $block_attributes['textAlign'],
+			'valign' => 'middle',
+			'role'   => 'presentation',
 		);
 
-		return Table_Wrapper_Helper::render_table_wrapper( $button_html, $table_attrs, $cell_attrs );
+		$button_content = sprintf(
+			'<a class="product-button-link %1$s" style="%2$s" href="%3$s" target="_blank">%4$s</a>',
+			esc_attr( $button_styles['classnames'] ),
+			esc_attr( $button_styles['css'] ),
+			esc_url( $button_url ),
+			esc_html( $button_text )
+		);
+
+		$button_html = Table_Wrapper_Helper::render_table_wrapper( $button_content, $table_attrs, $cell_attrs );
+		return Table_Wrapper_Helper::render_table_wrapper( $button_html, array( 'style' => 'width: 100%' ) );
 	}
 
 	/**
