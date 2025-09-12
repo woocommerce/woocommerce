@@ -1296,7 +1296,9 @@ describe( 'Address Suggestions Component', () => {
 
 			// Re-register provider
 			window.wc.addressAutocomplete.registerAddressAutocompleteProvider( {
-				...mockProvider,
+				search: mockProvider,
+				select: mockProvider,
+				canSearch: mockProvider,
 				id: 'mock-provider-unbranded',
 			} );
 
