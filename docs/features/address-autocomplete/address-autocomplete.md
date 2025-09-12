@@ -142,126 +142,92 @@ The `select` function must return address objects with these WooCommerce field n
 /**
  * Custom Address Provider Client Implementation
  */
-( function() {
-    // Wait for the address autocomplete system to be ready.
-    document.addEventListener( 'DOMContentLoaded', function() {
-        // Define the provider
-        const customProvider = {
-            // Must match the PHP provider's ID
-            id: 'custom-provider',
-            
-            /**
-             * Check if provider can search in given country
-             * 
-             * @param {string} country - Two-letter country code (e.g., 'US', 'GB')
-             * @return {boolean} Whether the provider supports this country
-             */
-            canSearch: function( country ) {
-                // Define supported countries.
-                const supportedCountries = [ 'US', 'CA', 'GB', 'AU' ];
-                return supportedCountries.includes( country );
-            },
-            
-            /**
-             * Search for address suggestions
-             * 
-             * @param {string} query - The search query entered by the user
-             * @param {string} country - The selected country code
-             * @param {string} type - Address type ('billing' or 'shipping')
-             * @return {Promise<Array>} Array of suggestion objects
-             */
-            search: async function(query, country, type) {
-                try {
-                    // Call your address service API
-                    const response = await fetch('/wp-json/your-plugin/v1/address-search', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify( {
-                            query: query,
-                            country: country,
-                            type: type
-                        } )
-                    });
-                    
-                    if ( ! response.ok ) {
-                        throw new Error( 'Search request failed' );
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // Transform your API response to the required format.
-                    return data.results.map( function( result ) {
-                        return {
-                            // Unique identifier for this suggestion
-                            id: result.place_id || result.id,
-                            
-                            // Display label for the suggestion
-                            label: result.description || result.formatted_address,
-                            
-                            // Optional: Highlight matching parts of the text
-                            matchedSubstrings: result.matched_substrings || []
-                        };
-                    } );
-                } catch ( error ) {
-                    console.error( 'Address search error:', error );
-                    return [];
-                }
-            },
-            
-            /**
-             * Get full address details for a selected suggestion
-             * 
-             * @param {string} addressId - The ID of the selected suggestion
-             * @return {Promise<Object>} Address details object
-             */
-            select: async function( addressId ) {
-                try {
-                    // Fetch complete address details.
-                    const response = await fetch( '/wp-json/your-plugin/v1/address-details', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-WP-Nonce': yourPlugin.nonce
-                        },
-                        body: JSON.stringify( {
-                            id: addressId
-                        } )
-                    });
-                    
-                    if ( ! response.ok ) {
-                        throw new Error( 'Details request failed' );
-                    }
-                    
-                    const data = await response.json();
-                    
-                    // Return address components in WooCommerce format.
-                    return {
-                        // Required fields
-                        address_1: data.street_address || '',
-                        city: data.city || '',
-                        state: data.state_code || '',
-                        postcode: data.postal_code || '',
-                        country: data.country_code || '',
-                        
-                        // Optional fields
-                        address_2: data.apartment || '',
-                    };
-                } catch ( error ) {
-                    console.error( 'Address selection error:', error );
-                    return null;
-                }
-            }
-        };
-        
-        // Register the provider.
-        if ( window.wc && window.wc.addressAutocomplete && 
-            window.wc.addressAutocomplete.registerAddressAutocompleteProvider ) {
-            window.wc.addressAutocomplete.registerAddressAutocompleteProvider( customProvider );
-        }
-    } );
-} )();
+// Define the provider
+const customProvider = {
+    // Must match the PHP provider's ID.
+    id: 'custom-provider',
+
+    /**
+     * Check if provider can search in given country
+     *
+     * @param {string} country - Two-letter country code (e.g., 'US', 'GB')
+     * @return {boolean} Whether the provider supports this country
+     */
+    canSearch: function ( country ) {
+      // Define supported countries.
+      const supportedCountries = [ 'US', 'CA', 'GB', 'AU' ];
+      return supportedCountries.includes( country );
+    },
+
+    /**
+     * Search for address suggestions
+     *
+     * @param {string} query - The search query entered by the user
+     * @param {string} country - The selected country code
+     * @param {string} type - Address type ('billing' or 'shipping')
+     * @return {Promise<Array>} Array of suggestion objects
+     */
+    search: async function ( query, country, type ) {
+      // Return search results.  Your function may call an endpoint to get this data.
+      const data = [
+        {
+          id: '1',
+          label: '123 Main Street, City, US',
+          matchedSubstrings: [ { offset: 0, length: 3 } ],
+        },
+        {
+          id: '2',
+          label: '456 Oak Avenue, Town, US',
+          matchedSubstrings: [ { offset: 0, length: 3 } ],
+        },
+        {
+          id: '3',
+          label: '789 Pine Road, Village, US',
+          matchedSubstrings: [ { offset: 0, length: 3 } ],
+        },
+        {
+          id: '4',
+          label: '101 Pine Road, Village, US',
+          matchedSubstrings: [ { offset: 0, length: 3 } ],
+        },
+        {
+          id: '5',
+          label: '101 Pine Road, Village, US',
+          matchedSubstrings: [ { offset: 0, length: 3 } ],
+        },
+      ];
+      return data;
+    },
+
+    /**
+     * Get full address details for a selected suggestion
+     *
+     * @param {string} addressId - The ID of the selected suggestion
+     * @return {Promise<Object>} Address details object
+     */
+    select: async function ( addressId ) {
+      // Return address components in correct format. Your function may call an endpoint to get this data.
+      return {
+        // Required fields
+        address_1: 'Test address 1',
+        city: 'Test City',
+        state: 'CA',
+        postcode: '92010',
+        country: 'US',
+      };
+    },
+  };
+
+// Register the provider.
+if (
+  window.wc &&
+  window.wc.addressAutocomplete &&
+  window.wc.addressAutocomplete.registerAddressAutocompleteProvider
+) {
+  window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
+    customProvider
+  );
+}
 ```
 
 ### Step 4: Enqueue the JavaScript
