@@ -278,13 +278,13 @@ function enqueue_custom_provider_scripts() {
     // Only load on checkout pages
     if ( is_checkout() ) {
         // Check if address autocomplete is enabled
-        $is_enabled = get_option( 'woocommerce_enable_address_autocomplete' ) === 'yes';
+        $is_enabled = get_option( 'woocommerce_address_autocomplete_enabled' ) === 'yes';
         
         if ( $is_enabled ) {
             wp_enqueue_script(
                 'custom-address-provider',
                 plugin_dir_url( __FILE__ ) . 'assets/js/custom-address-provider.js',
-                array( 'woocommerce-address-autocomplete' ),
+                array( 'wc-address-autocomplete' ),
                 '1.0.0',
                 true
             );
