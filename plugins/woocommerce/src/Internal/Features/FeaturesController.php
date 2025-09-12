@@ -325,20 +325,6 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => 'compatible',
-				'disabled'                     => function () {
-					return version_compare( get_bloginfo( 'version' ), '6.2', '<' );
-				},
-				'desc_tip'                     => function () {
-					$string = '';
-					if ( version_compare( get_bloginfo( 'version' ), '6.2', '<' ) ) {
-						$string = __(
-							'⚠ This feature is compatible with WordPress version 6.2 or higher.',
-							'woocommerce'
-						);
-					}
-
-					return $string;
-				},
 			),
 			'cart_checkout_blocks'        => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
