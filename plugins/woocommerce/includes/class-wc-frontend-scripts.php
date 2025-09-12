@@ -659,8 +659,13 @@ class WC_Frontend_Scripts {
 				);
 				break;
 			case 'wc-address-autocomplete':
-				$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
-				$params    = array(
+				$providers = array();
+				try {
+					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
+				} catch ( Throwable $e ) {
+					wc_get_logger()->error( 'Could not get address providers for wc-address-autocomplete script: ' . $e->getMessage(), array( 'source' => 'address-autocomplete' ) );
+				}
+				$params = array(
 					'address_providers' => wp_json_encode(
 						array_map(
 							function ( $provider ) {
