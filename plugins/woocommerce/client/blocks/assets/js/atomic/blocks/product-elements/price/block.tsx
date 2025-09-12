@@ -90,6 +90,8 @@ export const Block = ( props: Props ): JSX.Element | null => {
 			: undefined
 	);
 
+	console.log( 'product from useProductDataContext', product );
+
 	const isDescendentOfAllProductsBlock =
 		parentName === 'woocommerce/all-products';
 	const isDescendentOfAddToCartGroupedProductSelectorBlock =

@@ -90,27 +90,14 @@ const PriceEdit = ( {
 				/>
 			</BlockControls>
 			<div { ...blockProps }>
-				{
-					// If experimental WC API is not available we must fallback to "old" way of fetching product data.
-					// Once it's available everywhere we can remove this fallback.
-					isExperimentalWcRestApiEnabled ? (
-						<Block
-							{ ...blockAttrs }
-							isAdmin={ true }
-							product={ product }
-							isExperimentalWcRestApiV4Enabled={
-								isExperimentalWcRestApiEnabled
-							}
-						/>
-					) : (
-						<Block
-							{ ...blockAttrs }
-							product={ undefined }
-							isAdmin={ false }
-							isExperimentalWcRestApiV4Enabled={ false }
-						/>
-					)
-				}
+				<Block
+					{ ...blockAttrs }
+					isAdmin={ true }
+					product={ product }
+					isExperimentalWcRestApiV4Enabled={
+						isExperimentalWcRestApiEnabled
+					}
+				/>
 			</div>
 		</>
 	);
