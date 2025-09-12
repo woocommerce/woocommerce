@@ -492,6 +492,11 @@ const { actions, state } = store<
 					return;
 				}
 
+				if ( productType === 'grouped' ) {
+					yield actions.batchAddToCart();
+					return;
+				}
+
 				const { quantity } = getContext< Context >();
 
 				const newQuantity = getNewQuantity(

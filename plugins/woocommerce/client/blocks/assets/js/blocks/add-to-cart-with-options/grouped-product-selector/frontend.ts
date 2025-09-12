@@ -24,7 +24,7 @@ export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
 			validateQuantity: ( value?: number ) => void;
-			addToCart: () => void;
+			batchAddToCart: () => void;
 		};
 		callbacks: {
 			validateQuantities: () => void;
@@ -84,7 +84,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
-			*addToCart() {
+			*batchAddToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
