@@ -13,6 +13,31 @@ require_once WC_ABSPATH . '/includes/admin/list-tables/class-wc-admin-list-table
 class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * Stores the previous HPOS state.
+	 * @var bool
+	 */
+	private static $hpos_prev_state;
+
+	/**
+	 * Prepare for running the tests. Disables HPOS, as it's not compatible with this test.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		// Store the previous HPOS state.
+		self::$hpos_prev_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore previous state (including HPOS) after all tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Set up the test.
 	 */
 	public function setUp(): void {

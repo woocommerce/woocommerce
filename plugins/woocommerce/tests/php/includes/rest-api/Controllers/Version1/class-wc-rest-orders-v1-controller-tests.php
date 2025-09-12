@@ -10,6 +10,32 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  * Tests relating to WC_REST_Orders_V1_Controller.
  */
 class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Stores the previous HPOS state.
+	 * @var bool
+	 */
+	private static $hpos_prev_state;
+
+	/**
+	 * Prepare for running the tests. Disables HPOS, as it's not compatible with this test.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		// Store the previous HPOS state.
+		self::$hpos_prev_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore previous state (including HPOS) after all tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		parent::tearDownAfterClass();
+	}
+
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
@@ -30,11 +56,6 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_orders_with_coupons_can_be_fetched(): void {
-		// Create a legacy order (APIv1 does not work with HPOS).
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'This test only runs when HPOS is not enabled.' );
-		}
-
 		// Create an order and apply a coupon.
 		CouponHelper::create_coupon( 'savebig' );
 		$coupon_line_item = new WC_Order_Item_Coupon();
@@ -62,11 +83,6 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_valid_and_invalid_customer_ids(): void {
-		// APIv1 does not work with HPOS.
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'This test only runs when HPOS is not enabled.' );
-		}
-
 		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
 		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
 
