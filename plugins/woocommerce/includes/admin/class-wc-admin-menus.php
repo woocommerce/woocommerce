@@ -235,6 +235,8 @@ class WC_Admin_Menus {
 
 		switch ( $post_type ) {
 			case 'shop_order':
+				$parent_file = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ? 'woocommerce' : 'edit.php?post_type=shop_order'; // WPCS: override ok.
+				break;
 			case 'shop_coupon':
 				$parent_file = 'woocommerce'; // WPCS: override ok.
 				break;
@@ -254,26 +256,57 @@ class WC_Admin_Menus {
 	}
 
 	/**
+	 * Generate order count badge HTML.
+	 *
+	 * @param int $order_count The number of processing orders.
+	 * @return string The badge HTML.
+	 */
+	private function get_order_count_badge( $order_count ) {
+		return ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
+	}
+
+	/**
 	 * Adds the order processing count to the menu.
 	 */
 	public function menu_order_count() {
-		global $submenu;
+		global $submenu, $menu;
+		
+		// Cache HPOS status check.
+		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+		
+		// Early exit if user doesn't have permission or filter is disabled.
+		if ( ! apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) || ! current_user_can( 'edit_others_shop_orders' ) ) {
+			if ( isset( $submenu['woocommerce'] ) ) {
+				// Still remove 'WooCommerce' sub menu item.
+				unset( $submenu['woocommerce'][0] );
+			}
+			return;
+		}
+		
+		// Cache order count since it might be used twice.
+		$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
 		if ( isset( $submenu['woocommerce'] ) ) {
 			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
 
-			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
-				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
-
-				if ( $order_count ) {
-					foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-						if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-							$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-							break;
-						}
+			// Add count to WooCommerce submenu.
+			if ( $order_count ) {
+				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
+					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
+						$submenu['woocommerce'][ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						break;
 					}
+				}
+			}
+		}
+		
+		// Add count to top-level Orders menu when HPOS is disabled.
+		if ( ! $is_hpos_enabled && $order_count ) {
+			foreach ( $menu as $key => $menu_item ) {
+				if ( 'edit.php?post_type=shop_order' === $menu_item[2] ) {
+					$menu[ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+					break;
 				}
 			}
 		}
@@ -288,6 +321,9 @@ class WC_Admin_Menus {
 	public function menu_order( $menu_order ) {
 		// Initialize our custom order array.
 		$woocommerce_menu_order = array();
+		
+		// Cache HPOS status check.
+		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 
 		// Get the index of our custom separator.
 		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
@@ -297,6 +333,11 @@ class WC_Admin_Menus {
 
 		// Get index of orders menu.
 		$woocommerce_orders = array_search( 'wc-orders', $menu_order, true );
+		
+		// Also check for legacy post type orders menu when HPOS is disabled.
+		if ( false === $woocommerce_orders && ! $is_hpos_enabled ) {
+			$woocommerce_orders = array_search( 'edit.php?post_type=shop_order', $menu_order, true );
+		}
 
 		// Loop through menu order and do some rearranging.
 		foreach ( $menu_order as $item ) {
@@ -304,7 +345,7 @@ class WC_Admin_Menus {
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
-				$woocommerce_menu_order[] = 'wc-orders';
+				$woocommerce_menu_order[] = $is_hpos_enabled ? 'wc-orders' : 'edit.php?post_type=shop_order';
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
 				if ( false !== $woocommerce_separator ) {
 					unset( $menu_order[ $woocommerce_separator ] );
@@ -315,7 +356,7 @@ class WC_Admin_Menus {
 				if ( false !== $woocommerce_product ) {
 					unset( $menu_order[ $woocommerce_product ] );
 				}
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', 'wc-orders' ), true ) ) {
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', 'wc-orders', 'edit.php?post_type=shop_order' ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
