@@ -149,7 +149,7 @@ class PageController {
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
 
-		// Hook to all possible orders screen IDs (the compatibility layer will handle firing the right hooks)
+		// Hook to all possible orders screen IDs (the compatibility layer will handle firing the right hooks).
 		add_action( 'load-toplevel_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 
@@ -258,16 +258,20 @@ class PageController {
 	 * @return void
 	 */
 	public function register_menu(): void {
-		$order_types = wc_get_order_types( 'admin-menu' );
+		$order_types    = wc_get_order_types( 'admin-menu' );
 		$has_shop_order = in_array( 'shop_order', $order_types, true );
-		$hook_mappings = array();
+		$hook_mappings  = array();
 
 		if ( $has_shop_order ) {
-			// Process shop_order first to create top-level menu
+			// Process shop_order first to create top-level menu.
 			$post_type = get_post_type_object( 'shop_order' );
 			$menu_name = $post_type->labels->menu_name;
 
-			// Add order count badge for shop_order
+			/**
+			 * Filters whether to include the processing order count in the menu.
+			 *
+			 * @param bool $include_count Whether to include the count. Default true.
+			 */
 			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
 				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 				if ( $order_count ) {
@@ -275,7 +279,7 @@ class PageController {
 				}
 			}
 
-			// Create top-level Orders menu and capture the hook suffix
+			// Create top-level Orders menu and capture the hook suffix.
 			$main_hook_suffix = add_menu_page(
 				$post_type->labels->name,
 				$menu_name,
@@ -286,8 +290,8 @@ class PageController {
 				56
 			);
 
-			// Map the new top-level hook to the expected submenu hook for backwards compatibility
-			$hook_mappings[$main_hook_suffix] = 'woocommerce_page_wc-orders';
+			// Map the new top-level hook to the expected submenu hook for backwards compatibility.
+			$hook_mappings[ $main_hook_suffix ] = 'woocommerce_page_wc-orders';
 
 			// Add submenu items for shop_order
 			add_submenu_page(
@@ -304,14 +308,20 @@ class PageController {
 				$post_type->labels->add_new_item,
 				__( 'Add new order', 'woocommerce' ),
 				$post_type->cap->create_posts,
-				add_query_arg( array( 'page' => 'wc-orders', 'action' => 'new' ), admin_url( 'admin.php' ) ),
+				add_query_arg(
+					array(
+						'page'   => 'wc-orders',
+						'action' => 'new',
+					),
+					admin_url( 'admin.php' )
+				),
 				''
 			);
 		}
 
-		// Process remaining order types
+		// Process remaining order types.
 		foreach ( $order_types as $order_type ) {
-			// Skip shop_order if we already processed it
+			// Skip shop_order if we already processed it.
 			if ( 'shop_order' === $order_type && $has_shop_order ) {
 				continue;
 			}
@@ -319,7 +329,7 @@ class PageController {
 			$post_type = get_post_type_object( $order_type );
 			$page_slug = 'wc-orders' . ( 'shop_order' === $order_type ? '' : '--' . $order_type );
 
-			// Add as submenu under shop_order if it exists, otherwise under WooCommerce
+			// Add as submenu under shop_order if it exists, otherwise under WooCommerce.
 			$menu_parent = $has_shop_order ? 'wc-orders' : 'woocommerce';
 
 			$sub_hook_suffix = add_submenu_page(
@@ -331,11 +341,11 @@ class PageController {
 				array( $this, 'output' )
 			);
 
-			// Map submenu hooks - they should appear as if under woocommerce for backwards compatibility
-			$hook_mappings[$sub_hook_suffix] = 'woocommerce_page_' . $page_slug;
+			// Map submenu hooks - they should appear as if under woocommerce for backwards compatibility.
+			$hook_mappings[ $sub_hook_suffix ] = 'woocommerce_page_' . $page_slug;
 		}
 
-		// Create backwards compatibility layer
+		// Create backwards compatibility layer.
 		$this->create_hook_compatibility( $hook_mappings );
 
 		// In some cases (such as if the authoritative order store was changed earlier in the current request) we
@@ -357,47 +367,79 @@ class PageController {
 	 */
 	private function create_hook_compatibility( array $hook_mappings ): void {
 		foreach ( $hook_mappings as $actual_hook => $expected_hook ) {
-			// Fire the expected hooks when the actual hooks are triggered
-			add_action( "load-{$actual_hook}", function() use ( $expected_hook ) {
-				// Only fire if we're not already in the expected hook (prevent infinite loops)
-				if ( ! doing_action( "load-{$expected_hook}" ) ) {
-					do_action( "load-{$expected_hook}" );
-				}
-			}, 1 );
+			// Fire the expected hooks when the actual hooks are triggered.
+			add_action(
+				"load-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					// Only fire if we're not already in the expected hook (prevent infinite loops).
+					if ( ! doing_action( "load-{$expected_hook}" ) ) {
+						/**
+						 * Fires when the orders page is loaded.
+						 */
+						do_action( "load-{$expected_hook}" );
+					}
+				},
+				1
+			);
 
-			add_action( "admin_print_styles-{$actual_hook}", function() use ( $expected_hook ) {
-				if ( ! doing_action( "admin_print_styles-{$expected_hook}" ) ) {
-					do_action( "admin_print_styles-{$expected_hook}" );
-				}
-			}, 1 );
+			add_action(
+				"admin_print_styles-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( "admin_print_styles-{$expected_hook}" ) ) {
+						/**
+						 * Fires when styles are printed for the orders page.
+						 */
+						do_action( "admin_print_styles_{$expected_hook}" );
+					}
+				},
+				1
+			);
 
-			add_action( "admin_print_scripts-{$actual_hook}", function() use ( $expected_hook ) {
-				if ( ! doing_action( "admin_print_scripts-{$expected_hook}" ) ) {
-					do_action( "admin_print_scripts-{$expected_hook}" );
-				}
-			}, 1 );
+			add_action(
+				"admin_print_scripts-{$actual_hook}",
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( "admin_print_scripts-{$expected_hook}" ) ) {
+						/**
+						 * Fires when scripts are printed for the orders page.
+						 */
+						do_action( "admin_print_scripts_{$expected_hook}" );
+					}
+				},
+				1
+			);
 
-			// Also fire the base hook (without prefix)
-			add_action( $actual_hook, function() use ( $expected_hook ) {
-				if ( ! doing_action( $expected_hook ) ) {
-					do_action( $expected_hook );
-				}
-			}, 1 );
+			// Also fire the base hook (without prefix).
+			add_action(
+				$actual_hook,
+				function () use ( $expected_hook ) {
+					if ( ! doing_action( $expected_hook ) ) {
+						/**
+						 * Fires for the orders page hook.
+						 */
+						do_action( $expected_hook );
+					}
+				},
+				1
+			);
 		}
 
-		// Modify the screen ID for backwards compatibility
-		add_action( 'current_screen', function( $screen ) use ( $hook_mappings ) {
-			if ( ! is_object( $screen ) || ! property_exists( $screen, 'id' ) ) {
-				return;
-			}
+		// Modify the screen ID for backwards compatibility.
+		add_action(
+			'current_screen',
+			function ( $screen ) use ( $hook_mappings ) {
+				if ( ! is_object( $screen ) || ! property_exists( $screen, 'id' ) ) {
+					return;
+				}
 
-			if ( isset( $hook_mappings[ $screen->id ] ) ) {
-				// Store the original ID in case something needs it
-				$screen->original_id = $screen->id;
-				// Change the screen ID to what plugins expect
-				$screen->id = $hook_mappings[ $screen->id ];
-			}
-		}, 1 );
+				if ( isset( $hook_mappings[ $screen->id ] ) ) {
+					// Store the original ID in case something needs it.
+					$screen->original_id = $screen->id;
+					// Change the screen ID to what plugins expect.
+					$screen->id = $hook_mappings[ $screen->id ];
+				}
+			},
+			1
+		);
 	}
 
 	/**
