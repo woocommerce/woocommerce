@@ -180,19 +180,19 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$default_quantity = $product->get_min_purchase_quantity();
 
+			$product_id = $product->get_id();
+
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options',
 				array(
-					'isFormValid' => function () {
-						$context = wp_interactivity_get_context();
-						$product = wc_get_product( $context['productId'] );
+					'isFormValid' => function () use ( $product_id ) {
+						$product = wc_get_product( $product_id );
 
 						if ( $product instanceof \WC_Product && ( $product->is_type( ProductType::GROUPED ) || $product->has_options() ) ) {
 							return false;
 						}
 						return true;
 					},
-					'variationId' => null,
 				)
 			);
 
@@ -224,14 +224,24 @@ class AddToCartWithOptions extends AbstractBlock {
 				)
 			);
 
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'type' => $product->get_type(),
+						),
+					),
+				)
+			);
+
 			$context = array(
-				'productId'        => $product->get_id(),
-				'productType'      => $product->get_type(),
 				'quantity'         => array( $product->get_id() => $default_quantity ),
 				'validationErrors' => array(),
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
+				$variation_data                = array();
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
@@ -239,12 +249,24 @@ class AddToCartWithOptions extends AbstractBlock {
 					// instead of the variation's min purchase quantity. That's because we use the same
 					// input for all variations, so we want quantities to be in sync.
 					$context['quantity'][ $variation->get_id() ] = $default_quantity;
-					$context['availableVariations'][]            = array(
-						'variation_id' => $variation->get_id(),
-						'attributes'   => $variation->get_variation_attributes(),
-						'is_in_stock'  => $variation->is_in_stock(),
+
+					$variation_data[ $variation->get_id() ] = array(
+						'is_in_stock' => $variation->is_in_stock(),
+						'attributes'  => $variation->get_variation_attributes(),
+						'type'        => $variation->get_type(),
 					);
 				}
+
+				wp_interactivity_config(
+					'woocommerce',
+					array(
+						'products' => array(
+							$product->get_id() => array(
+								'variations' => $variation_data,
+							),
+						),
+					)
+				);
 			}
 
 			if ( $product->is_type( ProductType::GROUPED ) ) {
@@ -259,6 +281,7 @@ class AddToCartWithOptions extends AbstractBlock {
 							'min'  => $child_product_quantity_constraints['min'],
 							'max'  => $child_product_quantity_constraints['max'],
 							'step' => $child_product_quantity_constraints['step'],
+							'type' => $child_product->get_type(),
 						);
 					}
 				}
@@ -481,6 +504,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			$form_attributes         = '';
 			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
 			if ( $legacy_mode ) {
+				$action_url = home_url( add_query_arg( null, null ) );
+
 				// If an extension is hoooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
@@ -489,10 +514,10 @@ class AddToCartWithOptions extends AbstractBlock {
 						 * Filter the add to cart form action.
 						 *
 						 * @since 10.0.0
-						 * @param string $permalink The product permalink.
-						 * @return string The add to cart form action.
+						 * @param string $action_url The add to cart form action URL, defaulting to the current page.
+						 * @return string The add to cart form action URL.
 						 */
-						apply_filters( 'woocommerce_add_to_cart_form_action', $product->get_permalink() )
+						apply_filters( 'woocommerce_add_to_cart_form_action', $action_url )
 					),
 					'method'  => 'post',
 					'enctype' => 'multipart/form-data',
@@ -517,7 +542,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-bind--value="state.variationId"
+						data-wp-bind--value="woocommerce/product-data::state.variationId"
 					/>
 				</div>';
 			}

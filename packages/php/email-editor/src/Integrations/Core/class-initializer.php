@@ -18,6 +18,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Gallery;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
@@ -65,6 +66,7 @@ class Initializer {
 	 * 3. Add the renderer case in the get_block_renderer method
 	 */
 	const RENDER_ONLY_BLOCK_TYPES = array(
+		'core/gallery',
 		'core/media-text',
 		'core/audio',
 		'core/embed',
@@ -213,6 +215,9 @@ class Initializer {
 				break;
 			case 'core/table':
 				$renderer = new Table();
+				break;
+			case 'core/gallery':
+				$renderer = new Gallery();
 				break;
 			case 'core/media-text':
 				$renderer = new Media_Text();

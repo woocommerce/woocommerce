@@ -14,15 +14,12 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
-import { getProductData, dispatchChangeEvent } from '../frontend';
+import { dispatchChangeEvent, getProductData } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
-import {
-	getMatchedVariation,
-	type AvailableVariation,
-} from '../../../base/utils/variations/get-matched-variation';
+import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
 type Option = {
@@ -57,18 +54,15 @@ const isAttributeValueValid = ( {
 	attributeName,
 	attributeValue,
 	selectedAttributes,
-	availableVariations,
 }: {
 	attributeName: string;
 	attributeValue: string;
 	selectedAttributes: SelectedAttributes[];
-	availableVariations: AvailableVariation[];
 } ) => {
 	if (
 		! attributeName ||
 		! attributeValue ||
-		! Array.isArray( selectedAttributes ) ||
-		! Array.isArray( availableVariations )
+		! Array.isArray( selectedAttributes )
 	) {
 		return false;
 	}
@@ -84,6 +78,16 @@ const isAttributeValueValid = ( {
 	const attributesToMatch = isCurrentAttributeSelected
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
+
+	const { products } = getConfig( 'woocommerce' );
+
+	if ( ! products || ! products[ productDataState.productId ] ) {
+		return false;
+	}
+
+	const availableVariations = Object.values(
+		products[ productDataState.productId ].variations || {}
+	);
 
 	// Check if there is at least one available variation matching the current
 	// selected attributes and the attribute value being checked.
@@ -133,7 +137,6 @@ const isAttributeValueValid = ( {
 export type VariableProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		state: {
-			variationId: number | null;
 			selectedAttributes: SelectedAttributes[];
 			isOptionSelected: boolean;
 			isOptionDisabled: boolean;
@@ -154,22 +157,16 @@ export type VariableProductAddToCartWithOptionsStore =
 		};
 	};
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			get variationId(): number | null {
-				const context = getContext< Context >();
-				if ( ! context ) {
-					return null;
-				}
-				const { availableVariations, selectedAttributes } = context;
-				const matchedVariation = getMatchedVariation(
-					availableVariations,
-					selectedAttributes
-				);
-				return matchedVariation?.variation_id || null;
-			},
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				if ( ! context ) {
@@ -182,12 +179,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				return selectedValue === option.value;
 			},
 			get isOptionDisabled() {
-				const {
-					name,
-					option,
-					selectedAttributes,
-					availableVariations,
-				} = getContext< Context >();
+				const { name, option, selectedAttributes } =
+					getContext< Context >();
 
 				if ( option.value === '' ) {
 					return false;
@@ -197,7 +190,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeName: name,
 					attributeValue: option.value,
 					selectedAttributes,
-					availableVariations,
 				} );
 			},
 		},
@@ -265,10 +257,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			setSelectedVariationId: () => {
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+
+				const variations =
+					products?.[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
 
@@ -278,16 +275,26 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						{},
 						{ lock: universalLock }
 					);
-				const matchedVariationId = matchedVariation?.variation_id;
-				productDataActions.setVariationId( matchedVariationId ?? null );
+				const matchedVariationId =
+					matchedVariation?.variation_id || null;
+				productDataActions.setVariationId( matchedVariationId );
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { availableVariations, selectedAttributes } =
-					getContext< Context >();
+				const { products } = getConfig( 'woocommerce' );
+
+				if ( ! products || ! products[ productDataState.productId ] ) {
+					return;
+				}
+
+				const variations =
+					products[ productDataState.productId ].variations;
+
+				const { selectedAttributes } = getContext< Context >();
+
 				const matchedVariation = getMatchedVariation(
-					availableVariations,
+					variations,
 					selectedAttributes
 				);
 
@@ -315,13 +322,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
-				const {
-					productId,
-					productType,
-					availableVariations,
-					selectedAttributes,
-					quantity,
-				} = getContext< Context >();
 				const { ref } = getElement();
 
 				if ( ! ( ref instanceof HTMLInputElement ) ) {
@@ -333,16 +333,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
+				const { selectedAttributes } = getContext< Context >();
+
 				const productObject = getProductData(
-					productId,
-					productType,
-					availableVariations,
+					productDataState.productId,
 					selectedAttributes
 				);
 
-				const currentValue = quantity[ productObject?.id || productId ];
-
 				if ( productObject ) {
+					const { quantity } = getContext< Context >();
+					const currentValue = quantity[ productObject.id ];
 					const { min, max } = productObject;
 
 					let newValue = currentValue;

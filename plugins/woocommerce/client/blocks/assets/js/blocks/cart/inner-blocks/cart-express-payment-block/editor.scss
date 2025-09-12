@@ -61,6 +61,7 @@
 // Center images rendered in place of buttons in the editor
 .wc-block-components-express-payment {
 	.wc-block-components-express-payment__event-buttons {
+		> div,
 		> li {
 			pointer-events: none;
 			user-select: none;
