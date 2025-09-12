@@ -484,9 +484,9 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
  * and behavior is not guaranteed.  It solely exists so that $callback_filter_id does not need to be part of the
  * public interface to `wc_rest_lazy_load_namespace()`. Do not call it directly.
  *
- * @param string $ns The namespace to check.
- * @param callable $callback The callback to execute if the namespace should be loaded.
- * @param string   $rest_route (Optional) The REST route to check against.
+ * @param string   $ns                 The namespace to check.
+ * @param callable $callback           The callback to execute if the namespace should be loaded.
+ * @param string   $rest_route         (Optional) The REST route to check against.
  * @param string   $callback_filter_id (Internal) Used to prevent recursive filter registration.
  *
  * @return void
@@ -534,4 +534,3 @@ function _wc_rest_internal_lazy_load_namespace( string $ns, callable $callback, 
 		add_filter( 'rest_pre_dispatch', $callback_filter, 0, 3 );
 	}
 }
-
