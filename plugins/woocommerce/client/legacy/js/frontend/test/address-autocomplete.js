@@ -364,10 +364,11 @@ describe( 'Address Suggestions Component', () => {
 		Object.assign( global.window, {
 			wc_checkout_params: {
 				address_providers: [
-					{ 
-						id: 'test-provider', 
+					{
+						id: 'test-provider',
 						name: 'Test provider',
-						branding_html: '<div class="provider-branding">Powered by Test Provider</div>'
+						branding_html:
+							'<div class="provider-branding">Powered by Test Provider</div>',
 					},
 				],
 			},
@@ -1271,7 +1272,7 @@ describe( 'Address Suggestions Component', () => {
 			expect( brandingElement.innerHTML ).toBe(
 				'<div class="provider-branding">Powered by Test Provider</div>'
 			);
-			expect( brandingElement.style.display ).toBe( 'block' );
+			expect( brandingElement.style.display ).toBe( 'flex' );
 
 			// Hide suggestions
 			billingAddressInput.value = 'xy';
@@ -1289,9 +1290,9 @@ describe( 'Address Suggestions Component', () => {
 		test( 'should not create branding element when provider has no branding_html', async () => {
 			// Update window object to have no branding_html
 			global.window.wc_checkout_params.address_providers = [
-				{ 
-					id: 'test-provider', 
-					name: 'Test provider'
+				{
+					id: 'test-provider',
+					name: 'Test provider',
 					// No branding_html
 				},
 			];
@@ -1299,7 +1300,7 @@ describe( 'Address Suggestions Component', () => {
 			// Re-initialize the module
 			jest.resetModules();
 			require( '../address-autocomplete' );
-			
+
 			// Re-register provider
 			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
 				mockProvider
@@ -1401,9 +1402,10 @@ describe( 'Address Suggestions Component', () => {
 			const billingSuggestionsContainer = document.getElementById(
 				'address_suggestions_billing'
 			);
-			const billingBrandingElement = billingSuggestionsContainer.querySelector(
-				'.woocommerce-address-autocomplete-branding'
-			);
+			const billingBrandingElement =
+				billingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
 
 			expect( billingBrandingElement ).toBeTruthy();
 			expect( billingBrandingElement.innerHTML ).toBe(
@@ -1419,9 +1421,10 @@ describe( 'Address Suggestions Component', () => {
 			const shippingSuggestionsContainer = document.getElementById(
 				'address_suggestions_shipping'
 			);
-			const shippingBrandingElement = shippingSuggestionsContainer.querySelector(
-				'.woocommerce-address-autocomplete-branding'
-			);
+			const shippingBrandingElement =
+				shippingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
 
 			expect( shippingBrandingElement ).toBeTruthy();
 			expect( shippingBrandingElement.innerHTML ).toBe(

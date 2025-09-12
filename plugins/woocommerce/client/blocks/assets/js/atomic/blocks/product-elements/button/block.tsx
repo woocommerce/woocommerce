@@ -10,13 +10,17 @@ import {
 } from '@woocommerce/base-context/hooks';
 import { useStyleProps } from '@woocommerce/base-hooks';
 import { decodeEntities } from '@wordpress/html-entities';
-import { CART_URL } from '@woocommerce/block-settings';
+import {
+	CART_URL,
+	isExperimentalWcRestApiV4Enabled,
+} from '@woocommerce/block-settings';
 import { getSetting } from '@woocommerce/settings';
 import {
 	useInnerBlockLayoutContext,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
+import { ProductEntityResponse } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -57,6 +61,45 @@ const getButtonText = ( {
 	}
 
 	return productCartDetails?.text || __( 'Add to cart', 'woocommerce' );
+};
+
+/**
+ * This is used to render the button for the admin side.
+ */
+const AddToCartButtonAdminSide = ( {
+	product,
+	isDescendantOfAddToCartWithOptions,
+}: {
+	product: ProductEntityResponse;
+	isDescendantOfAddToCartWithOptions: boolean | undefined;
+} ): JSX.Element => {
+	const isExternal = product.type === 'external';
+	// We need to use the button_text for external products
+	const singleTextToRender = isExternal
+		? product.button_text
+		: product.add_to_cart?.single_text;
+
+	const buttonText = isDescendantOfAddToCartWithOptions
+		? singleTextToRender
+		: product.add_to_cart?.text;
+
+	return (
+		<button
+			disabled={ false }
+			className={ clsx(
+				'wp-block-button__link',
+				'wp-element-button',
+				'add_to_cart_button',
+				'wc-block-components-product-button__button'
+			) }
+			style={ {} }
+		>
+			{ /* We need to use the button_text for external products*/ }
+			{ isExternal
+				? product.button_text
+				: buttonText || __( 'Add to cart', 'woocommerce' ) }
+		</button>
+	);
 };
 
 const AddToCartButton = ( {
@@ -207,7 +250,13 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 	const { className, textAlign, blockClientId } = props;
 	const styleProps = useStyleProps( props );
 	const { parentClassName } = useInnerBlockLayoutContext();
-	const { isLoading, product } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext( {
+		product: props.product,
+		isAdmin: props.isAdmin,
+	} );
+
+	const showNewAddToCartButton =
+		product?.id && props.isAdmin && isExperimentalWcRestApiV4Enabled();
 
 	return (
 		<div
@@ -229,25 +278,38 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 				/>
 			) : (
 				<>
-					{ product.id ? (
-						<AddToCartButton
-							product={ product }
-							style={ styleProps.style }
-							className={ styleProps.className }
+					{ showNewAddToCartButton && (
+						<AddToCartButtonAdminSide
+							product={ product as ProductEntityResponse }
 							isDescendantOfAddToCartWithOptions={
 								props[
 									'woocommerce/isDescendantOfAddToCartWithOptions'
 								]
 							}
 						/>
-					) : (
-						<AddToCartButtonPlaceholder
-							style={ styleProps.style }
-							className={ styleProps.className }
-							isLoading={ isLoading }
-							blockClientId={ blockClientId }
-						/>
 					) }
+					{ ! showNewAddToCartButton &&
+						( product && product?.id ? (
+							<AddToCartButton
+								product={ product }
+								style={ styleProps.style }
+								className={ styleProps.className }
+								isAdmin={ props.isAdmin }
+								isDescendantOfAddToCartWithOptions={
+									props[
+										'woocommerce/isDescendantOfAddToCartWithOptions'
+									]
+								}
+								productEntity={ props.product }
+							/>
+						) : (
+							<AddToCartButtonPlaceholder
+								style={ styleProps.style }
+								className={ styleProps.className }
+								isLoading={ isLoading ?? false }
+								blockClientId={ blockClientId }
+							/>
+						) ) }
 				</>
 			) }
 		</div>
