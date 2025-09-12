@@ -80,12 +80,6 @@ class Utils {
 
 		$quantity_html = $processor->get_updated_html();
 
-		$context = array();
-		if ( $child_product_id ) {
-			$context['childProductId'] = $child_product_id;
-		}
-		$context_attribute = ! empty( $context ) ? wp_interactivity_data_wp_context( $context ) : '';
-
 		$wrapper_attributes = array_merge(
 			array(
 				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options-quantity-selector',

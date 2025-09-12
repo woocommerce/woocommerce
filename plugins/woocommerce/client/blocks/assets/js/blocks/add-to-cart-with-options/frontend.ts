@@ -27,7 +27,6 @@ export type Context = {
 	validationErrors: AddToCartError[];
 	tempQuantity: number;
 	groupedProductIds: number[];
-	childProductId: number;
 };
 
 export type AddToCartError = {
