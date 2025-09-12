@@ -300,7 +300,7 @@ class PageController {
 			// Map the new top-level hook to the expected submenu hook for backwards compatibility.
 			$hook_mappings[ $main_hook_suffix ] = 'woocommerce_page_wc-orders';
 
-			// Add submenu items for shop_order
+			// Add submenu items for shop_order.
 			add_submenu_page(
 				'wc-orders',
 				$post_type->labels->all_items,
