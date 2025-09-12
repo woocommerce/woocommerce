@@ -47,6 +47,69 @@
                     "run": ["npx playwright test --project=api"]
                 }
             }
+        },
+        "woocommerce/shopper": {
+            "description": "Complete shopper journey tests - cart, checkout, shop browsing, and account management",
+            "tags": ["shopper", "e2e", "critical-path", "frontend"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/cart/ tests/checkout/ tests/shop/ tests/my-account/"]
+                }
+            }
+        },
+        "woocommerce/shopper-checkout": {
+            "description": "Focused checkout flow testing - guest and logged-in checkout scenarios",
+            "tags": ["shopper", "checkout", "payments", "critical-path"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/checkout/ tests/coupons/"]
+                }
+            }
+        },
+        "woocommerce/merchant-products": {
+            "description": "Product management tests - creation, editing, import/export, inventory",
+            "tags": ["merchant", "products", "admin", "backend"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/product/"]
+                }
+            }
+        },
+        "woocommerce/merchant-orders": {
+            "description": "Order management tests - creation, editing, refunds, status management",
+            "tags": ["merchant", "orders", "admin", "backend"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/order/"]
+                }
+            }
+        },
+        "woocommerce/merchant-store": {
+            "description": "Store configuration tests - settings, shipping, taxes, analytics",
+            "tags": ["merchant", "settings", "admin", "configuration"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/settings/ tests/shipping/ tests/analytics/"]
+                }
+            }
+        },
+        "woocommerce/blocks": {
+            "description": "Block functionality tests - cart/checkout blocks, product blocks, block editor",
+            "tags": ["blocks", "gutenberg", "frontend", "editor"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/product/block-editor/ tests/coupons/cart-block-coupons.spec.js"]
+                }
+            }
+        },
+        "woocommerce/mini-cart": {
+            "description": "Mini-cart specific tests - add to cart interactions, mini-cart display",
+            "tags": ["mini-cart", "shopper", "frontend", "blocks"],
+            "test": {
+                "phases": {
+                    "run": ["npx playwright test --project=e2e tests/cart/add-to-cart.spec.js"]
+                }
+            }
         }
     }
 }
