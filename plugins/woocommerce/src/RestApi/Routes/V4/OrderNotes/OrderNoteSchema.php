@@ -57,13 +57,15 @@ class OrderNoteSchema extends AbstractSchema {
 			),
 			'date_created'     => array(
 				'description' => __( "The date the order note was created, in the site's timezone.", 'woocommerce' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
+				'format'      => 'date-time',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'date_created_gmt' => array(
 				'description' => __( 'The date the order note was created, as GMT.', 'woocommerce' ),
-				'type'        => 'date-time',
+				'type'        => 'string',
+				'format'      => 'date-time',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
