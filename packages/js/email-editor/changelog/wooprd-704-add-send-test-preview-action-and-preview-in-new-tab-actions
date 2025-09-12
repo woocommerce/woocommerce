@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Export `SendPreviewEmail` component and `createStore`
