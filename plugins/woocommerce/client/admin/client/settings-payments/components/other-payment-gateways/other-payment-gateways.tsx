@@ -255,27 +255,23 @@ export const OtherPaymentGateways = ( {
 
 							<div className="other-payment-gateways__content__grid">
 								{ categorySuggestions.map( ( extension ) => {
-									// Determine the extension CTA label based on its status and whether we are
-									// installing/activating it.
-									const isInstallingOrActivatingExtension =
+									const isPluginAlreadyInstalled =
+										extension.plugin.status === 'installed';
+
+									// Is the button currently busy, either installing or activating the plugin?
+									const isCurrentlyBusy =
 										installingPlugin === extension.id;
-									let ctaLabel =
-										isInstallingOrActivatingExtension
-											? __( 'Installing', 'woocommerce' )
-											: __( 'Install', 'woocommerce' );
-									if (
-										extension.plugin.status === 'installed'
-									) {
-										ctaLabel =
-											isInstallingOrActivatingExtension
-												? __(
-														'Activating',
-														'woocommerce'
-												  )
-												: __(
-														'Activate',
-														'woocommerce'
-												  );
+
+									// By default, the CTA is to install a plugin.
+									let ctaLabel = isCurrentlyBusy
+										? __( 'Installing', 'woocommerce' )
+										: __( 'Install', 'woocommerce' );
+
+									// If the plugin is already installed, the CTA is to activate it.
+									if ( isPluginAlreadyInstalled ) {
+										ctaLabel = isCurrentlyBusy
+											? __( 'Activating', 'woocommerce' )
+											: __( 'Activate', 'woocommerce' );
 									}
 
 									return (
@@ -336,7 +332,7 @@ export const OtherPaymentGateways = ( {
 															)
 														}
 														isBusy={
-															isInstallingOrActivatingExtension
+															isCurrentlyBusy
 														}
 														disabled={
 															!! installingPlugin
