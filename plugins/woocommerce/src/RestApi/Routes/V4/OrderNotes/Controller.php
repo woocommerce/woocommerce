@@ -142,7 +142,6 @@ class Controller extends AbstractController {
 
 		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $note->comment_ID ) ) );
 		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-		$response->add_link( 'order', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order_id ) ) );
 
 		return $response;
 	}
