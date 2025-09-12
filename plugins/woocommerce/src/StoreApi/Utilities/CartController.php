@@ -1224,18 +1224,18 @@ class CartController {
 		$product_name = $this->get_product_name( $product );
 
 		if ( empty( $product_name ) ) {
-			$message = esc_html__( 'This item is not available for purchase.', 'woocommerce' );
+			$message = __( 'This item is not available for purchase.', 'woocommerce' );
 		} else {
 			$message = sprintf(
 				/* translators: %s: product name */
-				esc_html__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
-				esc_html( $product_name )
+				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
+				$product_name
 			);
 		}
 
 		throw new RouteException(
 			'woocommerce_rest_product_not_purchasable',
-			$message, // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			esc_html( $message ),
 			400
 		);
 	}
