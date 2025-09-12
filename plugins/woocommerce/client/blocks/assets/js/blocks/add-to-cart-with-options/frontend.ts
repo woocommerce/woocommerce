@@ -7,6 +7,7 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
+	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
@@ -74,7 +75,7 @@ export const getProductData = (
 	let productId = id;
 	let productData: ProductData | undefined;
 
-	const { products } = getConfig( 'woocommerce' );
+	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		if ( ! products || ! products[ id ] ) {

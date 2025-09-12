@@ -9,6 +9,7 @@ import type {
 	ApiErrorResponse,
 	ApiResponse,
 	CartResponseTotals,
+	Currency,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
@@ -19,6 +20,17 @@ import type {
  * Internal dependencies
  */
 import { triggerAddedToCartEvent } from './legacy-events';
+
+export type WooCommerceConfig = {
+	products?: {
+		[ productId: number ]: ProductData;
+	};
+	messages?: {
+		addedToCartText?: string;
+	};
+	placeholderImgSrc?: string;
+	currency?: Currency;
+};
 
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
@@ -386,7 +398,9 @@ const { state, actions } = store< Store >(
 						preserveCartData: true,
 					} );
 
-					const { messages } = getConfig( 'woocommerce' );
+					const { messages } = getConfig(
+						'woocommerce'
+					) as WooCommerceConfig;
 					if ( messages?.addedToCartText ) {
 						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
 					}
@@ -537,7 +551,9 @@ const { state, actions } = store< Store >(
 							preserveCartData: true,
 						} );
 
-						const { messages } = getConfig( 'woocommerce' );
+						const { messages } = getConfig(
+							'woocommerce'
+						) as WooCommerceConfig;
 						if ( messages?.addedToCartText ) {
 							wp?.a11y?.speak(
 								messages.addedToCartText,
