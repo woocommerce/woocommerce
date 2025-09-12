@@ -11,7 +11,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
-use Automattic\WooCommerce\RestApi\Schemas\V4\AbstractSchema;
 use WP_Error;
 use WP_Http;
 use WP_REST_Controller;
