@@ -19,21 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Generates requests to send to PayPal.
  */
 class WC_Gateway_Paypal_Request {
-
-	/**
-	 * The maximum length of the invoice ID.
-	 *
-	 * @var int
-	 */
-	private const PAYPAL_INVOICE_ID_MAX_LENGTH = 127;
-
-	/**
-	 * The maximum length of the order item name.
-	 *
-	 * @var int
-	 */
-	private const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
-
 	/**
 	 * Stores line items to send to PayPal.
 	 *
@@ -196,7 +181,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( $order, $action_url, $action = 'capture' ) {
+	public function authorize_or_capture_payment( $order, $action_url, $action = WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE ) {
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
@@ -210,13 +195,13 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Skip if the payment is already captured.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
 		try {
-			if ( 'capture' === $action ) {
+			if ( WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE === $action ) {
 				$endpoint     = self::WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT;
 				$request_body = array(
 					'capture_url'     => $action_url,
@@ -285,7 +270,7 @@ class WC_Gateway_Paypal_Request {
 
 		// Skip if the payment is already captured.
 		$paypal_status = $order->get_meta( '_paypal_status', true );
-		if ( 'captured' === $paypal_status || 'completed' === $paypal_status ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
@@ -313,7 +298,7 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			// Set custom status for successful capture response.
-			$order->update_meta_data( '_paypal_status', 'captured' );
+			$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_CAPTURED );
 			$order->save();
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
@@ -370,7 +355,7 @@ class WC_Gateway_Paypal_Request {
 			'payment_source' => array(
 				'paypal' => array(
 					'experience_context' => array(
-						'user_action'         => 'PAY_NOW',
+						'user_action'         => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
 						'shipping_preference' => $this->get_paypal_shipping_preference( $order ),
 						// Customer redirected here on approval.
 						'return_url'          => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
@@ -406,7 +391,7 @@ class WC_Gateway_Paypal_Request {
 							),
 						),
 					),
-					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 					'items'      => $this->get_paypal_order_items( $order ),
 					'payee'      => array(
 						'email_address' => $payee_email,
@@ -454,7 +439,7 @@ class WC_Gateway_Paypal_Request {
 
 		foreach ( $order->get_items() as $item ) {
 			$items[] = array(
-				'name'        => $this->limit_length( $item->get_name(), self::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
+				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
@@ -493,10 +478,10 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_order_intent() {
 		$payment_action = $this->gateway->get_option( 'paymentaction' );
 		if ( 'authorization' === $payment_action ) {
-			return 'AUTHORIZE';
+			return WC_Gateway_Paypal_Constants::INTENT_AUTHORIZE;
 		}
 
-		return 'CAPTURE';
+		return WC_Gateway_Paypal_Constants::INTENT_CAPTURE;
 	}
 
 	/**
@@ -507,11 +492,11 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_shipping_preference( $order ) {
 		if ( ! $order->needs_shipping_address() ) {
-			return 'NO_SHIPPING';
+			return WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING;
 		}
 
 		$address_override = $this->gateway->get_option( 'address_override' ) === 'yes';
-		return $address_override ? 'SET_PROVIDED_ADDRESS' : 'GET_FROM_FILE';
+		return $address_override ? WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS : WC_Gateway_Paypal_Constants::SHIPPING_GET_FROM_FILE;
 	}
 
 	/**
@@ -532,11 +517,11 @@ class WC_Gateway_Paypal_Request {
 				'full_name' => $order->{"get_formatted_{$address_type}_full_name"}(),
 			),
 			'address' => array(
-				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), 300 ),
-				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), 300 ),
-				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), 300 ),
-				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), 120 ),
-				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), 60 ),
+				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
+				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
+				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
 				'country_code'   => $order->{"get_{$address_type}_country"}(),
 			),
 		);
@@ -569,7 +554,7 @@ class WC_Gateway_Paypal_Request {
 			array(
 				'headers' => array( 'Content-Type' => 'application/json' ),
 				'method'  => $method,
-				'timeout' => 60,
+				'timeout' => WC_Gateway_Paypal_Constants::WPCOM_PROXY_REQUEST_TIMEOUT,
 			),
 			'GET' === $method ? null : wp_json_encode( $request_body ),
 			'wpcom'
@@ -617,7 +602,7 @@ class WC_Gateway_Paypal_Request {
 				'cancel_return' => esc_url_raw( $order->get_cancel_order_url_raw() ),
 				'image_url'     => esc_url_raw( $this->gateway->get_option( 'image_url' ) ),
 				'paymentaction' => $this->gateway->get_option( 'paymentaction' ),
-				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), self::PAYPAL_INVOICE_ID_MAX_LENGTH ),
+				'invoice'       => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
 				'custom'        => wp_json_encode(
 					array(
 						'order_id'  => $order->get_id(),
