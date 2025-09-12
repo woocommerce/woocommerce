@@ -363,14 +363,14 @@ describe( 'Address Suggestions Component', () => {
 		// Setup window object
 		Object.assign( global.window, {
 			wc_address_autocomplete_params: {
-				address_providers: [
+				address_providers: JSON.stringify( [
 					{
 						id: 'test-provider',
 						name: 'Test provider',
 						branding_html:
 							'<div class="provider-branding">Powered by Test Provider</div>',
 					},
-				],
+				] ),
 			},
 		} );
 
@@ -1289,13 +1289,14 @@ describe( 'Address Suggestions Component', () => {
 
 		test( 'should not create branding element when provider has no branding_html', async () => {
 			// Update window object to have no branding_html
-			global.window.wc_address_autocomplete_params.address_providers = [
-				{
-					id: 'test-provider',
-					name: 'Test provider',
-					// No branding_html
-				},
-			];
+			global.window.wc_address_autocomplete_params.address_providers =
+				JSON.stringify( [
+					{
+						id: 'test-provider-2',
+						name: 'Test provider 2',
+						// No branding_html
+					},
+				] );
 
 			// Re-initialize the module
 			jest.resetModules();
