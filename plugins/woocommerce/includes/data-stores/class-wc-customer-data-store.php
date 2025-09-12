@@ -593,38 +593,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	/**
 	 * Get all user ids who have `billing_email` set to any of the email passed in array.
 	 *
-	 * @param string[] $emails      List of emails to check against.
-	 * @param bool     $have_orders Experimental: supporting HPOS-enabled stores only, does nothing if HPOS is disabled.
+	 * @deprecated since 10.3.0 and not used by WooCommerce core anymore.
 	 *
+	 * @param string[] $emails List of emails to check against.
 	 * @return int[]
 	 */
-	public function get_user_ids_for_billing_email( $emails, bool $have_orders = false ) {
+	public function get_user_ids_for_billing_email( $emails ) {
 		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-
-		$include_user_ids = array();
-		if ( $have_orders && $this->is_cot_in_use() ) {
-			global $wpdb;
-
-			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$placeholders     = implode( ', ', array_fill( 0, count( $emails ), '%s' ) );
-			$include_user_ids = $wpdb->get_col(
-				$wpdb->prepare(
-					"SELECT DISTINCT customer_id FROM %i WHERE billing_email IN ($placeholders)",
-					OrdersTableDataStore::get_orders_table_name(),
-					...$emails
-				)
-			);
-			// phpcs:enable
-
-			if ( array() === $include_user_ids ) {
-				return array();
-			}
-		}
-
 		$users_query = new WP_User_Query(
 			array(
 				'fields'     => 'ID',
-				'include'    => $include_user_ids,
 				'meta_query' => array(
 					array(
 						'key'     => 'billing_email',
