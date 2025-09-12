@@ -243,7 +243,6 @@ store< QuantitySelectorStore >(
 			) => {
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 				let min = 1;
-				const { productId } = getContext< Context >();
 				const productObject = getProductData(
 					productDataState.productId,
 					selectedAttributes
@@ -252,6 +251,8 @@ store< QuantitySelectorStore >(
 				if ( ! productObject ) {
 					return;
 				}
+
+				const { productId } = getContext< Context >();
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
