@@ -28,12 +28,6 @@ else
     echo "[setup] Warning: Customize Store workaround file not found"
 fi
 
-# Setup payment methods for checkout tests
-echo "[setup] Configuring payment methods..."
-wp option update woocommerce_cod_settings '{"enabled":"yes","title":"Cash on delivery","description":"Pay with cash upon delivery.","instructions":"Pay with cash upon delivery."}' --format=json --allow-root
-wp option update woocommerce_bacs_settings '{"enabled":"yes","title":"Direct bank transfer"}' --format=json --allow-root  
-wp option update woocommerce_cheque_settings '{"enabled":"yes","title":"Check payments"}' --format=json --allow-root
-
 # Update blog name for test suite
 echo "[setup] Setting blog name..."
 wp option update blogname 'WooCommerce Core E2E Test Suite' --allow-root
