@@ -56,7 +56,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_checkout_order_approved( $event ) {
-		$custom_id = $event['resource']['purchase_units'][0]['custom_id'];
+		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -83,8 +83,10 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			$order->save();
 
 			// Authorize or capture the payment after approval.
-			$action = WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $event['resource']['intent'] ? WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
-			$this->authorize_or_capture_payment( $order, $event['resource']['links'], $action );
+			$paypal_intent = $event['resource']['intent'] ?? null;
+			$links         = $event['resource']['links'] ?? null;
+			$action        = WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $paypal_intent ? WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
+			$this->authorize_or_capture_payment( $order, $links, $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
@@ -105,7 +107,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_payment_capture_completed( $event ) {
-		$custom_id = $event['resource']['custom_id'];
+		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -117,14 +119,16 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		$order->set_transaction_id( $event['resource']['id'] );
-		$order->update_meta_data( '_paypal_status', $event['resource']['status'] );
+		$transaction_id = $event['resource']['id'] ?? null;
+		$status         = $event['resource']['status'] ?? null;
+		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_status', $status );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment captured. Transaction ID: %1$s.', 'woocommerce' ),
-				$event['resource']['id']
+				$transaction_id
 			)
 		);
 		$order->save();
@@ -136,7 +140,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_payment_authorization_created( $event ) {
-		$custom_id = $event['resource']['custom_id'];
+		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -148,12 +152,13 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		$order->set_transaction_id( $event['resource']['id'] );
+		$transaction_id = $event['resource']['id'] ?? null;
+		$order->set_transaction_id( $transaction_id );
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment authorized. Transaction ID: %1$s. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
-				$event['resource']['id']
+				$transaction_id
 			)
 		);
 		$order->update_status( OrderStatus::ON_HOLD );
