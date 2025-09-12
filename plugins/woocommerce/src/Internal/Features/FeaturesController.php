@@ -680,20 +680,6 @@ class FeaturesController {
 	}
 
 	/**
-	 * Check if plugins that don't declare compatibility nor incompatibility with a given feature
-	 * are to be considered incompatible with that feature.
-	 *
-	 * @deprecated since 10.3.0. {@see FeaturesController::are_plugins_compatible_by_default()} and {@see FeaturesController::get_default_plugin_compatibility()}.
-	 *
-	 * @param string $feature_id Feature id to check.
-	 * @return bool True if plugins that don't declare compatibility nor incompatibility with the feature will be considered incompatible with the feature.
-	 * @throws \InvalidArgumentException The feature doesn't exist.
-	 */
-	public function get_plugins_are_incompatible_by_default( string $feature_id ): bool {
-		return ! $this->are_plugins_compatible_by_default( $feature_id );
-	}
-
-	/**
 	 * Check whether plugins that don't explicitly declare (in)compatibility are to be considered (in)compatible with a feature.
 	 *
 	 * @param string $feature_id Feature id to check.
@@ -718,7 +704,7 @@ class FeaturesController {
 
 		$default_plugin_compatibility = $feature_definition['default_plugin_compatibility'] ?? 'compatible';
 
-		// Filter below is only fired for backwards compatibility with get_plugins_are_incompatible_by_default().
+		// Filter below is only fired for backwards compatibility with (now removed) get_plugins_are_incompatible_by_default().
 		/**
 		 * Filter to determine if plugins that don't declare compatibility nor incompatibility with a given feature
 		 * are to be considered incompatible with that feature.
@@ -1037,19 +1023,6 @@ class FeaturesController {
 		}
 
 		return "woocommerce_feature_{$feature_id}_enabled";
-	}
-
-	/**
-	 * Checks whether a feature id corresponds to a legacy feature
-	 * (a feature that existed prior to the implementation of the features engine).
-	 *
-	 * @deprecated since 10.3.0, use {@see FeaturesController::skip_compatibility_checks()} instead.
-	 *
-	 * @param string $feature_id The feature id to check.
-	 * @return bool True if the id corresponds to a legacy feature.
-	 */
-	public function is_legacy_feature( string $feature_id ): bool {
-		return $this->skip_compatibility_checks( $feature_id );
 	}
 
 	/**

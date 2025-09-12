@@ -320,7 +320,7 @@ class PluginUtil {
 	 * @return array Items in 'incompatible' and 'uncertain' if plugins are incompatible by default with the feature; only items in 'incompatible' otherwise.
 	 */
 	public function get_items_considered_incompatible( string $feature_id, array $compatibility_info ): array {
-		$incompatible_by_default = wc_get_container()->get( FeaturesController::class )->get_plugins_are_incompatible_by_default( $feature_id );
+		$incompatible_by_default = ! wc_get_container()->get( FeaturesController::class )->are_plugins_compatible_by_default( $feature_id );
 
 		return $incompatible_by_default ?
 			array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :
