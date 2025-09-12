@@ -23,9 +23,9 @@ wp option update blogname 'WooCommerce Core E2E Test Suite' --allow-root
 echo "[setup] Setting admin email..."
 wp option update admin_email 'admin@woocommercecoree2etestsuite.com' --allow-root
 
-# Set email base color to match test expectations (theme-independent)
-echo "[setup] Setting email base color..."
-wp option update woocommerce_email_base_color '#720eec' --allow-root
+# Disable email improvements feature to use classic email defaults in tests
+echo "[setup] Disabling email improvements feature..."
+wp option update woocommerce_feature_email_improvements_enabled 'no' --allow-root
 
 # Set permalink structure for clean URLs
 echo "[setup] Setting permalink structure..."
