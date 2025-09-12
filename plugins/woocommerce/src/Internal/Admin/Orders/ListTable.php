@@ -317,6 +317,10 @@ class ListTable extends WP_List_Table {
 	protected function get_bulk_actions() {
 		$selected_status = $this->order_query_args['status'] ?? false;
 
+		if ( ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
+			return array();
+		}
+
 		if ( array( 'trash' ) === $selected_status ) {
 			$actions = array(
 				'untrash' => __( 'Restore', 'woocommerce' ),
@@ -1405,7 +1409,7 @@ class ListTable extends WP_List_Table {
 	public function handle_bulk_actions() {
 		$action = $this->current_action();
 
-		if ( ! $action ) {
+		if ( ! $action || ! current_user_can( $this->wp_post_type->cap->edit_others_posts ) ) {
 			return;
 		}
 
