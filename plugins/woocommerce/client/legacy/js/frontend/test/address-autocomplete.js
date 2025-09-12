@@ -370,6 +370,10 @@ describe( 'Address Suggestions Component', () => {
 						branding_html:
 							'<div class="provider-branding">Powered by Test Provider</div>',
 					},
+					{
+						id: 'test-provider-unbranded',
+						name: 'Test provider unbranded',
+					},
 				] ),
 			},
 		} );
@@ -497,6 +501,7 @@ describe( 'Address Suggestions Component', () => {
 
 	afterEach( () => {
 		jest.clearAllMocks();
+		window.wc.addressAutocomplete.providers = [];
 	} );
 
 	describe( 'DOM Initialization', () => {
@@ -886,10 +891,6 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should select address with Enter key', async () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
 			// Navigate to first suggestion first
 			let keydownEvent = new KeyboardEvent( 'keydown', {
 				key: 'ArrowDown',
@@ -1288,24 +1289,16 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should not create branding element when provider has no branding_html', async () => {
-			// Update window object to have no branding_html
-			global.window.wc_address_autocomplete_params.address_providers =
-				JSON.stringify( [
-					{
-						id: 'test-provider-2',
-						name: 'Test provider 2',
-						// No branding_html
-					},
-				] );
-
 			// Re-initialize the module
 			jest.resetModules();
+			window.wc.addressAutocomplete.providers = [];
 			require( '../address-autocomplete' );
 
 			// Re-register provider
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				mockProvider
-			);
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider( {
+				...mockProvider,
+				id: 'mock-provider-unbranded',
+			} );
 
 			// Trigger DOMContentLoaded again
 			const event = new Event( 'DOMContentLoaded' );
