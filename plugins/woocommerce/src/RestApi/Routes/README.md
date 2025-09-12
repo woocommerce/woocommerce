@@ -14,7 +14,7 @@ Each major version of the REST API has its own directory:
 
 Previous versions of the REST API (v1, v2, v3) can be found in the legacy includes directory:
 
-```
+```markdown
 plugins/woocommerce/includes/rest-api/
 ```
 
@@ -28,7 +28,7 @@ Route controllers and schemas for the WooCommerce REST API V4 endpoints are plac
 
 Each route should have its own directory containing both controller and schema files:
 
-```
+```markdown
 V4/
 ├── AbstractController.php
 ├── AbstractSchema.php
