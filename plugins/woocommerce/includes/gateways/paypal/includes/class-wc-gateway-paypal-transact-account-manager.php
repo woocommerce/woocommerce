@@ -92,7 +92,8 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		}
 
 		// Fetch (cached) or create the Transact merchant and provider accounts.
-		$merchant_account_data = $this->get_merchant_account_data();
+		$merchant_cache_key    = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
+		$merchant_account_data = $this->get_transact_account_data( $merchant_cache_key, 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			$merchant_account = $this->create_merchant_account();
 			if ( empty( $merchant_account ) ) {
@@ -101,11 +102,11 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Cache the merchant account data.
-			$cache_key = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
-			$this->update_transact_account_cache( $cache_key, $merchant_account );
+			$this->update_transact_account_cache( $merchant_cache_key, $merchant_account );
 		}
 
-		$provider_account_data = $this->get_provider_account_data();
+		$provider_cache_key    = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
+		$provider_account_data = $this->get_transact_account_data( $provider_cache_key, 'provider' );
 		if ( empty( $provider_account_data ) ) {
 			$provider_account = $this->create_provider_account();
 			if ( ! $provider_account ) {
@@ -114,8 +115,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			}
 
 			// Cache the provider account data.
-			$cache_key = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
-			$this->update_transact_account_cache( $cache_key, $provider_account );
+			$this->update_transact_account_cache( $provider_cache_key, $provider_account );
 		}
 
 		// Set an extra flag to indicate that we've completed onboarding,
@@ -125,52 +125,29 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	}
 
 	/**
-	 * Get the Transact merchant account data. Performs a fetch if the account
+	 * Get the Transact account (merchant or provider) data. Performs a fetch if the account
 	 * is not in cache or expired.
 	 *
-	 * @return array|null Returns null if the merchant account cannot be retrieved.
+	 * @param string $cache_key The cache key to get the account.
+	 * @param string $account_type The type of account to get (merchant or provider).
+	 * @return array|null Returns null if the transact account cannot be retrieved.
 	 */
-	public function get_merchant_account_data() {
-		// Get merchant account from cache. If not found, fetch/create it.
-		$cache_key        = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
-		$merchant_account = $this->get_transact_account_from_cache( $cache_key );
-		if ( empty( $merchant_account ) ) {
-			$merchant_account = $this->fetch_merchant_account();
+	public function get_transact_account_data( $cache_key, $account_type ) {
+		// Get transact account from cache. If not found, fetch/create it.
+		$transact_account = $this->get_transact_account_from_cache( $cache_key );
+		if ( empty( $transact_account ) ) {
+			$transact_account = 'merchant' === $account_type ? $this->fetch_merchant_account() : $this->fetch_provider_account();
 
 			// Fetch failed.
-			if ( empty( $merchant_account ) ) {
+			if ( empty( $transact_account ) ) {
 				return null;
 			}
 
 			// Update cache.
-			$this->update_transact_account_cache( $cache_key, $merchant_account );
+			$this->update_transact_account_cache( $cache_key, $transact_account );
 		}
 
-		return $merchant_account;
-	}
-
-	/**
-	 * Get the Transact provider account data. Performs a fetch if the account
-	 * is not in cache or expired.
-	 *
-	 * @return bool|null Returns null if the provider account cannot be retrieved.
-	 */
-	public function get_provider_account_data() {
-		// Get provider account from cache. If not found, fetch/create it.
-		$cache_key        = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
-		$provider_account = $this->get_transact_account_from_cache( $cache_key );
-		if ( empty( $provider_account ) ) {
-			$provider_account = $this->fetch_provider_account();
-			// Fetch failed.
-			if ( empty( $provider_account ) ) {
-				return null;
-			}
-
-			// Update cache.
-			$this->update_transact_account_cache( $cache_key, $provider_account );
-		}
-
-		return $provider_account;
+		return $transact_account;
 	}
 
 	/**
