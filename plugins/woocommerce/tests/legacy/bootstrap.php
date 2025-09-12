@@ -101,7 +101,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		$this->initialize_hpos();
+		$this->maybe_initialize_hpos();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -174,7 +174,7 @@ class WC_Unit_Tests_Bootstrap {
 	 *
 	 * @return void
 	 */
-	private function initialize_hpos() {
+	private function maybe_initialize_hpos() {
 		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
 	}
