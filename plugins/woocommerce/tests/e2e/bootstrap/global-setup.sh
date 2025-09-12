@@ -8,10 +8,6 @@ echo "[globalSetup] Starting minimal WooCommerce configuration..."
 # features that would interfere with ANY test package
 # ------------------------------------------------------------------
 
-# Check if WooCommerce is installed
-echo "[globalSetup] Checking WooCommerce installation status..."
-wp plugin list --allow-root
-
 # Verify WooCommerce is active
 echo "[globalSetup] Verifying WooCommerce activation..."
 if wp plugin is-active woocommerce --allow-root; then
@@ -20,10 +16,6 @@ else
     echo "[globalSetup] ERROR: WooCommerce is not active!"
     exit 1
 fi
-
-# Test WC CLI is available
-echo "[globalSetup] Testing WC CLI commands..."
-wp wc --help --allow-root
 
 # MINIMAL: Disable WooCommerce onboarding/setup wizard that would interfere
 wp option update woocommerce_task_list_hidden yes --allow-root || true
