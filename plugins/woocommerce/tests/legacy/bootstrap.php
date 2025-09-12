@@ -237,9 +237,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
 
-		// Create HPOS tables and use it by default.
-		add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_true' );
-
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
 		if ( $paypal ) {
