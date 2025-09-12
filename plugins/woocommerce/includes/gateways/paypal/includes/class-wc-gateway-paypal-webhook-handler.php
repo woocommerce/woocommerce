@@ -83,7 +83,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			$order->save();
 
 			// Authorize or capture the payment after approval.
-			$action = 'CAPTURE' === $event['resource']['intent'] ? 'capture' : 'authorize';
+			$action = WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $event['resource']['intent'] ? WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
 			$this->authorize_or_capture_payment( $order, $event['resource']['links'], $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.

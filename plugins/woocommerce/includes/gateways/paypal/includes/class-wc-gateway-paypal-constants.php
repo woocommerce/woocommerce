@@ -29,4 +29,10 @@ class WC_Gateway_Paypal_Constants {
 	 */
 	const INTENT_CAPTURE   = 'CAPTURE';
 	const INTENT_AUTHORIZE = 'AUTHORIZE';
+
+    /**
+     * PayPal payment actions.
+     */
+    const PAYMENT_ACTION_CAPTURE = 'capture';
+    const PAYMENT_ACTION_AUTHORIZE = 'authorize';
 }

@@ -196,7 +196,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
-	public function authorize_or_capture_payment( $order, $action_url, $action = 'capture' ) {
+	public function authorize_or_capture_payment( $order, $action_url, $action = WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE ) {
 		$paypal_debug_id = null;
 		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
 		if ( ! $paypal_order_id ) {
@@ -216,7 +216,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		try {
-			if ( 'capture' === $action ) {
+			if ( WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE === $action ) {
 				$endpoint     = self::WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT;
 				$request_body = array(
 					'capture_url'     => $action_url,
@@ -493,10 +493,10 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_order_intent() {
 		$payment_action = $this->gateway->get_option( 'paymentaction' );
 		if ( 'authorization' === $payment_action ) {
-			return 'AUTHORIZE';
+			return WC_Gateway_Paypal_Constants::INTENT_AUTHORIZE;
 		}
 
-		return 'CAPTURE';
+		return WC_Gateway_Paypal_Constants::INTENT_CAPTURE;
 	}
 
 	/**
