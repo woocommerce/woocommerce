@@ -30,6 +30,14 @@ class PostsRedirectionController {
 		}
 
 		add_action(
+			'admin_menu',
+			function() {
+				$this->maybe_update_menu_items();
+			},
+			9999
+		);
+
+		add_action(
 			'load-edit.php',
 			function() {
 				$this->maybe_redirect_to_orders_page();
@@ -182,6 +190,28 @@ class PostsRedirectionController {
 
 		wp_safe_redirect( $new_url, 301 );
 		exit;
+	}
+
+	/**
+	 * Updates legacy menu items to point to the new Orders page.
+	 *
+	 * @since 10.3.0
+	 */
+	private function maybe_update_menu_items(): void {
+		global $submenu;
+
+		if ( ! isset( $submenu['edit.php?post_type=shop_order'] ) || \WC_Admin_Menus::can_view_woocommerce_menu_item() || ! current_user_can( 'edit_shop_orders' ) ) {
+			return;
+		}
+
+		$orders_menu  = &$submenu['edit.php?post_type=shop_order'];
+		$menu_indexes = array_flip( array_map( fn( $x ) => $x[2], $orders_menu ) );
+
+		// Rewrite URL for the legacy Orders menu item.
+		$orders_menu[ $menu_indexes[ 'edit.php?post_type=shop_order' ] ][2] = $this->page_controller->get_orders_url();
+
+		// Hide the legacy "Add New" menu item.
+		unset( $orders_menu[ $menu_indexes[ 'post-new.php?post_type=shop_order' ] ] );
 	}
 
 }
