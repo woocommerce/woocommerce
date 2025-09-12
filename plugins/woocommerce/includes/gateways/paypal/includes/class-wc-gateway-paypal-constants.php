@@ -16,6 +16,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  * WC_Gateway_Paypal_Constants Class.
  */
 class WC_Gateway_Paypal_Constants {
+    /**
+     * PayPal proxy request timeout.
+     */
+    const WPCOM_PROXY_REQUEST_TIMEOUT = 60;
 
 	/**
 	 * PayPal payment statuses.

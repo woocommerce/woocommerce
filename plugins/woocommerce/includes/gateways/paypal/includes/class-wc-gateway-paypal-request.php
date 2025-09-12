@@ -554,7 +554,7 @@ class WC_Gateway_Paypal_Request {
 			array(
 				'headers' => array( 'Content-Type' => 'application/json' ),
 				'method'  => $method,
-				'timeout' => 60,
+				'timeout' => WC_Gateway_Paypal_Constants::WPCOM_PROXY_REQUEST_TIMEOUT,
 			),
 			'GET' === $method ? null : wp_json_encode( $request_body ),
 			'wpcom'
