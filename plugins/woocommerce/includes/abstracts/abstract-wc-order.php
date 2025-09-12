@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
-use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -1251,7 +1251,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$emails[] = wp_get_current_user()->user_email;
 		}
 		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email( $emails, true );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email( $emails, true );
 		return array_merge( $user_ids, $emails );
 	}
 

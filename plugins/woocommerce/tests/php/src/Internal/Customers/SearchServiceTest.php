@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Customers;
 
-use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CustomerHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -19,9 +19,9 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	/**
 	 * Service instance.
 	 *
-	 * @var CustomerSearchService;
+	 * @var CustomersSearchService;
 	 */
-	private CustomerSearchService $service;
+	private CustomersSearchService $service;
 
 	/**
 	 * Original HPOS status.
@@ -35,7 +35,7 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->service = wc_get_container()->get( CustomerSearchService::class );
+		$this->service = wc_get_container()->get( CustomersSearchService::class );
 
 		$this->original_hpos_status = OrderUtil::custom_orders_table_usage_is_enabled();
 		$this->setup_cot();
