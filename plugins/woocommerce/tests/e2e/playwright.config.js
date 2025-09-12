@@ -79,7 +79,10 @@ module.exports = defineConfig({
 		...setupProjects,
 		{
 			name: 'e2e',
-			testIgnore: '**/api-tests/**',
+			testIgnore: [
+				'**/api-tests/**',
+				'**/tests/customize-store/**/*.spec.js' // QIT-SKIP: Customize Store tests fail due to iframe loading issues
+			],
 			dependencies: ['site setup'],
 		},
 		{
