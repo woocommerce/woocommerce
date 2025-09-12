@@ -235,7 +235,7 @@ class WC_Admin_Menus {
 
 		switch ( $post_type ) {
 			case 'shop_order':
-				$parent_file = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ? 'woocommerce' : 'edit.php?post_type=shop_order'; // WPCS: override ok.
+				$parent_file = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ? 'woocommerce' : 'edit.php?post_type=shop_order'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 				break;
 			case 'shop_coupon':
 				$parent_file = 'woocommerce'; // WPCS: override ok.
@@ -287,7 +287,13 @@ class WC_Admin_Menus {
 			return;
 		}
 
-		// Cache order count since it might be used twice.
+		/**
+		 * Filters the order count displayed in the menu.
+		 *
+		 * @since 3.9.0
+		 *
+		 * @param int $order_count The order count.
+		 */
 		$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
 		if ( isset( $submenu['woocommerce'] ) ) {
