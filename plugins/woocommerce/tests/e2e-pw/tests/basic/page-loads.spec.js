@@ -61,7 +61,7 @@ const wcPages = [
 				heading: 'Orders',
 				element: '.select2-selection__placeholder',
 				text: 'Filter by registered customer',
-			}
+			},
 		],
 	},
 	{
