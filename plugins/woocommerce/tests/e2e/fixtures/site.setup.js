@@ -66,13 +66,21 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		);
 	} );
 
-	await setup.step( 'disable coming soon', async () => {
-		await setComingSoon( { baseURL, enabled: 'no' } );
-	} );
+	// Note: Coming soon is disabled in QIT global setup via dismiss-coming-soon.spec.js
+	// Only disable here when not running in QIT environment
+	if ( ! process.env.QIT_SITE_URL ) {
+		await setup.step( 'disable coming soon', async () => {
+			await setComingSoon( { baseURL, enabled: 'no' } );
+		} );
+	}
 
-	await setup.step( 'disable onboarding wizard', async () => {
-		await skipOnboardingWizard();
-	} );
+	// Note: Onboarding wizard is disabled in QIT global setup
+	// Only disable here when not running in QIT environment
+	if ( ! process.env.QIT_SITE_URL ) {
+		await setup.step( 'disable onboarding wizard', async () => {
+			await skipOnboardingWizard();
+		} );
+	}
 
 	await setup.step( 'determine if multisite', async () => {
 		const response = await restApi.get( `${ WC_API_PATH }/system_status` );
@@ -86,19 +94,23 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		}
 	} );
 
-	await setup.step( 'general settings', async () => {
-		await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
-			update: [
-				{ id: 'woocommerce_allowed_countries', value: 'all' },
-				{ id: 'woocommerce_currency', value: 'USD' },
-				{ id: 'woocommerce_price_thousand_sep', value: ',' },
-				{ id: 'woocommerce_price_decimal_sep', value: '.' },
-				{ id: 'woocommerce_price_num_decimals', value: '2' },
-				{ id: 'woocommerce_store_address', value: 'addr 1' },
-				{ id: 'woocommerce_store_city', value: 'San Francisco' },
-				{ id: 'woocommerce_default_country', value: 'US:CA' },
-				{ id: 'woocommerce_store_postcode', value: '94107' },
-			],
+	// Note: General settings are configured in QIT global setup
+	// Only configure here when not running in QIT environment
+	if ( ! process.env.QIT_SITE_URL ) {
+		await setup.step( 'general settings', async () => {
+			await restApi.post( `${ WC_API_PATH }/settings/general/batch`, {
+				update: [
+					{ id: 'woocommerce_allowed_countries', value: 'all' },
+					{ id: 'woocommerce_currency', value: 'USD' },
+					{ id: 'woocommerce_price_thousand_sep', value: ',' },
+					{ id: 'woocommerce_price_decimal_sep', value: '.' },
+					{ id: 'woocommerce_price_num_decimals', value: '2' },
+					{ id: 'woocommerce_store_address', value: 'addr 1' },
+					{ id: 'woocommerce_store_city', value: 'San Francisco' },
+					{ id: 'woocommerce_default_country', value: 'US:CA' },
+					{ id: 'woocommerce_store_postcode', value: '94107' },
+				],
+			} );
 		} );
-	} );
+	}
 } );
