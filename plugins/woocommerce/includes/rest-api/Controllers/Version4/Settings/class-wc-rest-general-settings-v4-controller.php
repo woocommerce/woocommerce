@@ -353,7 +353,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	/**
 	 * Get the display order for a settings group.
 	 *
-	 * @param array  $setting  Setting definition array.
+	 * @param array $setting  Setting definition array.
 	 * @return int Display order.
 	 */
 	private function get_group_order( $setting ) {
