@@ -295,7 +295,9 @@ const { actions, state } = store<
 			},
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
-				const { products } = getConfig( 'woocommerce' );
+				const { products } = getConfig(
+					'woocommerce'
+				) as WooCommerceConfig;
 				const variations =
 					products?.[ productDataState.productId ]?.variations;
 
