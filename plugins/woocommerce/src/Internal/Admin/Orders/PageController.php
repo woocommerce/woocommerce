@@ -80,7 +80,7 @@ class PageController {
 	 */
 	private function verify_create_permission() {
 		if ( ! current_user_can( get_post_type_object( $this->order_type )->cap->publish_posts ) && ! current_user_can( 'manage_woocommerce' ) ) {
-			wp_die( esc_html__( 'You don\'t have permission to create a new order', 'woocommerce' ) );
+			wp_die( esc_html__( 'You don\'t have permission to create a new order.', 'woocommerce' ) );
 		}
 
 		if ( isset( $this->order ) ) {
@@ -148,11 +148,9 @@ class PageController {
 		$this->set_action();
 
 		$page_suffix = ( 'shop_order' === $this->order_type ? '' : '--' . $this->order_type );
-		$page_name   = ( 'shop_order' === $this->order_type && ! current_user_can( 'edit_others_shop_orders' ) ) ? 'admin_page_wc-orders' : 'woocommerce_page_wc-orders' . $page_suffix;
+		$page_name   = ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce_page_wc-orders' : 'admin_page_wc-orders' ) . $page_suffix;
 
 		add_action( "load-{$page_name}", array( $this, 'handle_load_page_action' ) );
-
-		add_action( 'load-woocommerce_page_wc-orders' . $page_suffix, array( $this, 'handle_load_page_action' ) );
 		add_action( 'admin_title', array( $this, 'set_page_title' ) );
 	}
 
@@ -263,15 +261,8 @@ class PageController {
 		foreach ( $order_types as $order_type ) {
 			$post_type = get_post_type_object( $order_type );
 
-			// Do not add the "Orders" menu under WooCommerce if the user can't see the WooCommerce menu in the first place.
-			if ( 'shop_order' === $order_type && ! \WC_Admin_Menus::can_view_woocommerce_menu_item() ) {
-				$parent_menu_slug = null;
-			} else {
-				$parent_menu_slug = 'woocommerce';
-			}
-
 			add_submenu_page(
-				$parent_menu_slug,
+				\WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : null,
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
 				$post_type->cap->edit_posts,

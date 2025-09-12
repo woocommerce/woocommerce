@@ -200,18 +200,25 @@ class PostsRedirectionController {
 	private function maybe_update_menu_items(): void {
 		global $submenu;
 
-		if ( ! isset( $submenu['edit.php?post_type=shop_order'] ) || \WC_Admin_Menus::can_view_woocommerce_menu_item() || ! current_user_can( 'edit_shop_orders' ) ) {
+		if ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ) {
 			return;
 		}
 
-		$orders_menu  = &$submenu['edit.php?post_type=shop_order'];
-		$menu_indexes = array_flip( array_map( fn( $x ) => $x[2], $orders_menu ) );
+		$post_types = array_filter( array_map( 'get_post_type_object', wc_get_order_types( 'admin-menu' ) ) );
+		foreach ( $post_types as $post_type ) {
+			if ( ! current_user_can( $post_type->cap->edit_posts ) || ! isset( $submenu[ 'edit.php?post_type=' . $post_type->name ] ) ) {
+				continue;
+			}
 
-		// Rewrite URL for the legacy Orders menu item.
-		$orders_menu[ $menu_indexes[ 'edit.php?post_type=shop_order' ] ][2] = $this->page_controller->get_orders_url();
+			$post_type_menu = &$submenu[ 'edit.php?post_type=' . $post_type->name ];
+			$menu_indexes   = array_flip( array_map( fn( $x ) => $x[2], $post_type_menu ) );
 
-		// Hide the legacy "Add New" menu item.
-		unset( $orders_menu[ $menu_indexes[ 'post-new.php?post_type=shop_order' ] ] );
+			// Rewrite URL for the legacy menu item.
+			$post_type_menu[ $menu_indexes[ 'edit.php?post_type=' . $post_type->name ] ][2] = $this->page_controller->get_base_page_url( $post_type->name );
+
+			// Hide the legacy "Add New" menu item.
+			unset( $post_type_menu[ $menu_indexes[ "post-new.php?post_type={$post_type->name}" ] ] );
+		}
 	}
 
 }
