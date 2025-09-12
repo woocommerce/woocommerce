@@ -385,7 +385,7 @@ class PageController {
 						 *
 						 * @since 10.3.0
 						 */
-						do_action( "load-{$expected_hook}" );
+						do_action( "load-{$expected_hook}" ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores -- WordPress core uses hyphens for this hook pattern.
 					}
 				},
 				1
