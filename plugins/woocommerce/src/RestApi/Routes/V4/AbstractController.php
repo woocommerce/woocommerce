@@ -14,9 +14,6 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 use WP_Error;
 use WP_Http;
 use WP_REST_Controller;
-use WP_REST_Request;
-use WP_REST_Response;
-use WP_REST_Server;
 
 defined( 'ABSPATH' ) || exit;
 
