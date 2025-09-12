@@ -469,7 +469,8 @@ const { state: cartItemState } = store(
 			get itemThumbnail(): string {
 				return (
 					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
-					placeholderImgSrc
+					placeholderImgSrc ||
+					''
 				);
 			},
 
