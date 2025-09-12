@@ -544,6 +544,44 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'mcp_integration'             => array(
+				'name'               => __( 'MCP Server', 'woocommerce' ),
+				'description'        => function() {
+					$base_description = __( 'Enable Model Context Protocol (MCP) integration for AI-powered WooCommerce operations.', 'woocommerce' );
+					
+					// Check permalink structure requirement
+					$permalink_structure = get_option( 'permalink_structure' );
+					if ( empty( $permalink_structure ) ) {
+						$permalinks_url = admin_url( 'options-permalink.php' );
+						$permalink_warning = sprintf(
+							'<br><br><strong style="color: #d63638;">⚠ %s:</strong> %s <a href="%s">%s</a>',
+							__( 'Configuration Required', 'woocommerce' ),
+							__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
+							$permalinks_url,
+							__( 'Configure Permalinks', 'woocommerce' )
+						);
+						return $base_description . $permalink_warning;
+					}
+					
+					if ( class_exists( 'Automattic\\WooCommerce\\Internal\\MCP\\ApiKeyManager' ) ) {
+						$api_key = \Automattic\WooCommerce\Internal\MCP\ApiKeyManager::get_api_key();
+						$site_url = get_site_url();
+						$connection_example = sprintf(
+							'<br><br><strong>%s:</strong><br><code>claude mcp add woocommerce_mcp \\<br>  --env WP_API_URL=%s/wp-json/woocommerce/mcp \\<br>  --env CUSTOM_HEADERS=\'{"X-MCP-API-Key": "%s"}\' \\<br>  -- npx -y @automattic/mcp-wordpress-remote@latest</code>',
+							__( 'Connect with Claude Code', 'woocommerce' ),
+							$site_url,
+							$api_key
+						);
+						return $base_description . $connection_example;
+					}
+					
+					return $base_description;
+				},
+				'enabled_by_default' => false,
+				'disable_ui'         => false,
+				'is_experimental'    => true,
+				'is_legacy'          => false,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
