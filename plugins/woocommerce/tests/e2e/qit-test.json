@@ -1,6 +1,7 @@
 {
     "$schema": "https://qit.woo.com/json-schema/test-package",
     "package": "woocommerce/e2e",
+    "test_type": "e2e",
     "description": "WooCommerce E2E test suite ported to QIT test package format",
     "tags": ["e2e", "woocommerce", "checkout", "cart", "products"],
     "requires": {
