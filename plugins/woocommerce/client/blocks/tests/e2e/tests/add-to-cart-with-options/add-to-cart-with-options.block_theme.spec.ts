@@ -158,7 +158,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const colorRedOption = page.locator( 'label:has-text("Red")' );
-		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
@@ -221,6 +223,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
 				page
 					.getByLabel( 'Additional Information', { exact: true } )
@@ -776,14 +779,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
-			name: 'Add to cart: “T-Shirt”',
+			name: 'Add to cart',
 		} );
 
 		await addToCartButton.click();
 
-		await expect(
-			page.getByRole( 'button', { name: '1 in cart', exact: true } )
-		).toBeVisible();
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
 	} );
 
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
