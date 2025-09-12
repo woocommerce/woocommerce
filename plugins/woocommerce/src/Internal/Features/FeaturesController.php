@@ -680,16 +680,6 @@ class FeaturesController {
 	}
 
 	/**
-	 * Check whether plugins that don't explicitly declare (in)compatibility are to be considered (in)compatible with a feature.
-	 *
-	 * @param string $feature_id Feature id to check.
-	 * @return bool TRUE if plugins that don't declare (in)compatibility are to be considered compatible with the feature.
-	 */
-	public function are_plugins_compatible_by_default( string $feature_id ): bool {
-		return 'compatible' === $this->get_default_plugin_compatibility( $feature_id );
-	}
-
-	/**
 	 * Get the default plugin compatibility for a given feature.
 	 *
 	 * @param string $feature_id Feature id to check.
@@ -816,8 +806,8 @@ class FeaturesController {
 	 * @internal For usage by WooCommerce core only. Backwards compatibility not guaranteed.
 	 * @since 10.1.0
 	 *
-	 * @param string $feature_id Unique feature ID.
-	 * @param string $plugin_file Raw plugin file path (full or 'directory/file.php').
+	 * @param string $feature_id             Unique feature ID.
+	 * @param string $plugin_file            Raw plugin file path (full or 'directory/file.php').
 	 * @param bool   $positive_compatibility True if declaring compatibility, false if declaring incompatibility.
 	 * @return bool True on successful registration, false if the feature does not exist.
 	 * @throws \Exception If the plugin attempts to declare both compatibility and incompatibility for the same feature.
@@ -1512,7 +1502,7 @@ class FeaturesController {
 
 			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $feature_id ) => ! $this->skip_compatibility_checks( $feature_id ) );
 			foreach ( $uncertains as $feature_id ) {
-				if ( ! $this->are_plugins_compatible_by_default( $feature_id ) ) {
+				if ( 'compatible' !== $this->get_default_plugin_compatibility( $feature_id ) ) {
 					$incompatible_plugins = true;
 					break;
 				}
