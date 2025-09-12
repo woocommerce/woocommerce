@@ -126,3 +126,11 @@ plugins/woocommerce/tests/e2e/.state/
 plugins/woocommerce/tests/e2e/playwright-report/
 
 plugins/woocommerce/tests/e2e/results/
+
+plugins/woocommerce/tests/e2e/results-failures/
+
+plugins/woocommerce/tests/e2e/fail.txt
+
+# Ignore generated CSV files from templates
+plugins/woocommerce/tests/e2e/test-data/sample_products.csv
+plugins/woocommerce/tests/e2e/test-data/sample_products_override.csv

@@ -10,7 +10,8 @@
         "./bin/filter-setter.php",
         "./bin/process-waiting-actions.php",
         "./bin/test-helper-apis.php",
-        "./bin/woocommerce-cleanup.php"
+        "./bin/woocommerce-cleanup.php",
+        "./paypal-monitor.php"
     ],
     "test": {
         "phases": {
@@ -21,7 +22,13 @@
                     "runs_on": "host"
                 }
             ],
-            "setup": ["./bootstrap/setup.sh"],
+            "setup": [
+                "./bootstrap/setup.sh",
+                {
+                    "command": "./bin/copy-images-to-container.sh",
+                    "runs_on": "host"
+                }
+            ],
             "run": ["npx playwright test"],
             "teardown": [],
             "globalTeardown": ["./bootstrap/global-teardown.sh"]
