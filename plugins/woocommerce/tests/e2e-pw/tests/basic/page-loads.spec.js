@@ -27,12 +27,6 @@ const wcPages = [
 				text: 'Inbox',
 			},
 			{
-				name: 'Orders',
-				heading: 'Orders',
-				element: '.select2-selection__placeholder',
-				text: 'Filter by registered customer',
-			},
-			{
 				name: 'Customers',
 				heading: 'Customers',
 				element: '.woocommerce-dropdown-button__labels',
@@ -59,11 +53,23 @@ const wcPages = [
 		],
 	},
 	{
+		name: 'Orders',
+		url: 'wp-admin/admin.php?page=wc-orders',
+		subpages: [
+			{
+				name: 'All orders',
+				heading: 'Orders',
+				element: '.select2-selection__placeholder',
+				text: 'Filter by registered customer',
+			}
+		],
+	},
+	{
 		name: 'Products',
 		url: 'wp-admin/edit.php?post_type=product',
 		subpages: [
 			{
-				name: 'All Products',
+				name: 'All products',
 				heading: 'Products',
 				element: '#dropdown_product_type',
 				text: 'Filter by product type',
