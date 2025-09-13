@@ -128,6 +128,7 @@ export const getExpectedExpressPaymentProps = ( name: string ) => ( {
 		onCheckoutValidationBeforeProcessing: expect.any( Function ),
 		onPaymentProcessing: expect.any( Function ),
 		onPaymentSetup: expect.any( Function ),
+		onPlaceOrderButtonValidation: expect.any( Function ),
 		onShippingRateFail: expect.any( Function ),
 		onShippingRateSelectFail: expect.any( Function ),
 		onShippingRateSelectSuccess: expect.any( Function ),
