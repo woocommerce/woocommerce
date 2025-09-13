@@ -65,4 +65,9 @@ wp user create customer customer@woocommercecoree2etestsuite.com \
     --user_registered='2022-01-01 12:23:45' \
     --allow-root || echo "Customer user already exists"
 
+# Dismiss email improvements modals to prevent test interference
+echo "[globalSetup] Dismissing email improvements modals..."
+wp option update woocommerce_admin_dismissed_email_improvements_modal 'yes' --allow-root
+wp option update woocommerce_admin_dismissed_try_email_improvements_modal 'yes' --allow-root
+
 echo "[globalSetup] Universal WooCommerce baseline configuration complete."
