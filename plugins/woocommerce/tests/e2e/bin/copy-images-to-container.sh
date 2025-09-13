@@ -53,10 +53,11 @@ for template in sample_products sample_products_override; do
         echo "[setup] Processing ${template}.csv..."
         cp "$BASE_DIR/test-data/${template}.template.csv" "$BASE_DIR/test-data/${template}.csv"
         # Replace ALL image URLs with the single uploaded image URL
-        # Simple str_replace - just replace the placeholder with the actual URL
+        # Using regex with ~ delimiter to avoid issues with pipe character
         php -r "
             \$content = file_get_contents('$BASE_DIR/test-data/${template}.csv');
-            \$content = str_replace('{{SITE_URL}}', '${QIT_SITE_URL}', \$content);
+            \$pattern = '~\{\{SITE_URL\}\}/test-data/images/[^,\"\n]*~';
+            \$content = preg_replace(\$pattern, '${IMAGE_URL}', \$content);
             file_put_contents('$BASE_DIR/test-data/${template}.csv', \$content);
         "
     else

@@ -5,7 +5,8 @@
     "description": "WooCommerce E2E test suite ported to QIT test package format",
     "tags": ["e2e", "woocommerce", "checkout", "cart", "products"],
     "requires": {
-    		"network": true
+    		"network": true,
+			  "plugins": ["woocommerce"]
     },
     "mu_plugins": [
         "./bin/filter-setter.php",
