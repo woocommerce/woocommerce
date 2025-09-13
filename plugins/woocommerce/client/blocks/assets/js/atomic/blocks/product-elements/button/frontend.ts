@@ -3,6 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -49,6 +50,12 @@ const { state: wooState } = store< WooCommerce >(
 
 const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
+	{},
+	{ lock: universalLock }
+);
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -135,10 +142,14 @@ const productButtonStore = {
 			return state.quantity > 0;
 		},
 		get productId() {
-			return (
-				addToCartWithOptionsState?.variationId ||
-				getContext< Context >().productId
-			);
+			const { productId } = getContext< Context >();
+
+			const isDescendantOfAddToCartWithOptions =
+				productId === productDataState?.productId;
+
+			return isDescendantOfAddToCartWithOptions
+				? productDataState?.variationId || productId
+				: productId;
 		},
 	},
 	actions: {
@@ -224,7 +235,6 @@ const productButtonStore = {
 			// We start the animation if the temporary quantity is out of
 			// sync with the quantity in the cart and the animation hasn't
 			// started yet.
-			// We skip the animation altogether if the Add to Cart + Options form is invalid.
 			if (
 				context.tempQuantity !== state.quantity &&
 				context.animationStatus === AnimationStatus.IDLE

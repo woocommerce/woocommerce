@@ -83,6 +83,31 @@ if ( ! function_exists( 'esc_url_raw' ) ) {
 	}
 }
 
+if ( ! function_exists( 'esc_url' ) ) {
+	/**
+	 * Mock esc_url function.
+	 *
+	 * @param string $url URL to sanitize.
+	 * @return string Sanitized URL or empty string if invalid.
+	 */
+	function esc_url( $url ) {
+		return esc_url_raw( $url );
+	}
+}
+
+if ( ! function_exists( 'esc_attr' ) ) {
+	/**
+	 * Mock esc_attr function.
+	 *
+	 * @param string $text Text to escape.
+	 * @return string Escaped text.
+	 */
+	function esc_attr( $text ) {
+		return htmlspecialchars( $text, ENT_QUOTES | ENT_HTML5, 'UTF-8', false );
+	}
+}
+
+
 // Dummy WP classes.
 // phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
 if ( ! class_exists( \WP_Theme_JSON::class ) ) {

@@ -254,86 +254,97 @@ export const OtherPaymentGateways = ( {
 							</div>
 
 							<div className="other-payment-gateways__content__grid">
-								{ categorySuggestions.map( ( extension ) => (
-									<div
-										className="other-payment-gateways__content__grid-item"
-										key={ extension.id }
-									>
-										<img
-											className="other-payment-gateways__content__grid-item-image"
-											src={ extension.icon }
-											alt={
-												decodeEntities(
-													extension.title
-												) + ' logo'
-											}
-										/>
-										<div className="other-payment-gateways__content__grid-item__content">
-											<span className="other-payment-gateways__content__grid-item__content__title">
-												{ extension.title }
-												{ extension?._incentive && (
-													<IncentiveStatusBadge
-														incentive={
-															extension._incentive
+								{ categorySuggestions.map( ( extension ) => {
+									const isPluginAlreadyInstalled =
+										extension.plugin.status === 'installed';
+
+									// Is the button currently busy, either installing or activating the plugin?
+									const isCurrentlyBusy =
+										installingPlugin === extension.id;
+
+									// By default, the CTA is to install a plugin.
+									let ctaLabel = isCurrentlyBusy
+										? __( 'Installing', 'woocommerce' )
+										: __( 'Install', 'woocommerce' );
+
+									// If the plugin is already installed, the CTA is to activate it.
+									if ( isPluginAlreadyInstalled ) {
+										ctaLabel = isCurrentlyBusy
+											? __( 'Activating', 'woocommerce' )
+											: __( 'Activate', 'woocommerce' );
+									}
+
+									return (
+										<div
+											className="other-payment-gateways__content__grid-item"
+											key={ extension.id }
+										>
+											<img
+												className="other-payment-gateways__content__grid-item-image"
+												src={ extension.icon }
+												alt={
+													decodeEntities(
+														extension.title
+													) + ' logo'
+												}
+											/>
+											<div className="other-payment-gateways__content__grid-item__content">
+												<span className="other-payment-gateways__content__grid-item__content__title">
+													{ extension.title }
+													{ extension?._incentive && (
+														<IncentiveStatusBadge
+															incentive={
+																extension._incentive
+															}
+														/>
+													) }
+													{ /* All payment extension suggestions are official. */ }
+													<OfficialBadge
+														variant="expanded"
+														suggestionId={
+															extension.id
 														}
 													/>
-												) }
-												{ /* All payment extension suggestions are official. */ }
-												<OfficialBadge
-													variant="expanded"
-													suggestionId={
-														extension.id
-													}
-												/>
-											</span>
-											<span className="other-payment-gateways__content__grid-item__content__description">
-												{ decodeEntities(
-													extension.description
-												) }
-											</span>
-											<div className="other-payment-gateways__content__grid-item__content__actions">
-												<Button
-													variant="link"
-													onClick={ () =>
-														setUpPlugin(
-															extension,
-															null, // Suggested gateways won't have an onboarding URL.
-															// Only provide the attach link if not already installed.
-															extension.plugin
-																.status ===
-																'not_installed'
-																? extension
-																		._links
-																		?.attach
-																		?.href ??
-																		null
-																: null,
-															'wc_settings_payments__other_payment_options'
-														)
-													}
-													isBusy={
-														installingPlugin ===
-														extension.id
-													}
-													disabled={
-														!! installingPlugin
-													}
-												>
-													{ installingPlugin ===
-													extension.id
-														? __(
-																'Installing',
-																'woocommerce'
-														  )
-														: __(
-																'Install',
-																'woocommerce'
-														  ) }
-												</Button>
+												</span>
+												<span className="other-payment-gateways__content__grid-item__content__description">
+													{ decodeEntities(
+														extension.description
+													) }
+												</span>
+												<div className="other-payment-gateways__content__grid-item__content__actions">
+													<Button
+														variant="link"
+														onClick={ () =>
+															setUpPlugin(
+																extension,
+																null, // Suggested gateways won't have an onboarding URL.
+																// Only provide the attach link if not already installed.
+																extension.plugin
+																	.status ===
+																	'not_installed'
+																	? extension
+																			._links
+																			?.attach
+																			?.href ??
+																			null
+																	: null,
+																'wc_settings_payments__other_payment_options'
+															)
+														}
+														isBusy={
+															isCurrentlyBusy
+														}
+														disabled={
+															!! installingPlugin
+														}
+													>
+														{ ctaLabel }
+													</Button>
+												</div>
 											</div>
 										</div>
-									</div>
-								) ) }
+									);
+								} ) }
 							</div>
 						</div>
 					);

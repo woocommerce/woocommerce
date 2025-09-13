@@ -65,14 +65,14 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				).some( ( [ id, qty ] ) => {
 					const productObject = getProductData(
 						Number( id ),
-						context.productType,
-						context.availableVariations,
 						context.selectedAttributes
 					);
+					if ( ! productObject ) {
+						return false;
+					}
 					return (
 						qty !== 0 &&
-						( qty < ( productObject?.min ?? 0 ) ||
-							qty > ( productObject?.max ?? Infinity ) )
+						( qty < productObject.min || qty > productObject.max )
 					);
 				} );
 
@@ -89,12 +89,8 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const {
-					quantity,
-					selectedAttributes,
-					productType,
-					groupedProductIds,
-				} = getContext< AddToCartWithOptionsStoreContext >();
+				const { quantity, selectedAttributes, groupedProductIds } =
+					getContext< AddToCartWithOptionsStoreContext >();
 
 				const addedItems: ClientCartItem[] = [];
 
@@ -108,11 +104,20 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						quantity[ childProductId ]
 					);
 
+					const productObject = getProductData(
+						Number( childProductId ),
+						selectedAttributes
+					);
+
+					if ( ! productObject ) {
+						continue;
+					}
+
 					addedItems.push( {
-						id: childProductId,
+						id: Number( childProductId ),
 						quantity: newQuantity,
 						variation: selectedAttributes,
-						type: productType,
+						type: productObject.type,
 					} );
 				}
 
