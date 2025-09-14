@@ -33,7 +33,7 @@ echo "[setup] Installing themes for E2E tests..."
 wp theme install twentytwentythree --allow-root || echo "Theme already installed"
 wp theme install twentytwentyfour --allow-root || echo "Theme already installed"
 wp theme install storefront --allow-root || echo "Theme already installed"
-wp theme activate twentytwentyfour --allow-root
+wp theme activate twentytwentythree --allow-root
 
 # Upload test images specific to E2E tests
 echo "[setup] Uploading E2E test images..."
