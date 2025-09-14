@@ -123,9 +123,9 @@ test.describe( 'Reports API tests', () => {
 		expect( Array.isArray( responseJSON ) ).toBe( true );
 
 		const today = new Date();
-		const dd = String( today.getDate() ).padStart( 2, '0' );
-		const mm = String( today.getMonth() + 1 ).padStart( 2, '0' ); //January is 0!
-		const yyyy = today.getFullYear();
+		const dd = String( today.getUTCDate() ).padStart( 2, '0' );
+		const mm = String( today.getUTCMonth() + 1 ).padStart( 2, '0' ); //January is 0!
+		const yyyy = today.getUTCFullYear();
 		const dateString = yyyy + '-' + mm + '-' + dd;
 
 		expect( responseJSON ).toEqual(

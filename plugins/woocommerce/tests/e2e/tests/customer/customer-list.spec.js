@@ -226,9 +226,9 @@ test.describe( 'Merchant > Customer List', () => {
 			const download = await downloadPromise;
 
 			const today = new Date();
-			const year = today.getFullYear();
-			const month = String( today.getMonth() + 1 ).padStart( 2, '0' );
-			const day = String( today.getDate() ).padStart( 2, '0' );
+			const year = today.getUTCFullYear();
+			const month = String( today.getUTCMonth() + 1 ).padStart( 2, '0' );
+			const day = String( today.getUTCDate() ).padStart( 2, '0' );
 
 			const filename = `customers_${ year }-${ month }-${ day }_orderby-date-last-active_order-desc_page-wc-admin_path--customers.csv`;
 

@@ -249,12 +249,12 @@ test.describe(
 				// alternative way to verify new site icon on the site
 				// verifying site icon shown in the new tab is impossible in headless mode
 				const date = new Date();
-				const month = ( date.getMonth() + 1 )
+				const month = ( date.getUTCMonth() + 1 )
 					.toString()
 					.padStart( 2, '0' );
 				await expect(
 					page.goto(
-						`wp-content/uploads/${ date.getFullYear() }/${ month }/image-03-100x100.png`
+						`wp-content/uploads/${ date.getUTCFullYear() }/${ month }/image-03-100x100.png`
 					)
 				).toBeTruthy();
 			}
