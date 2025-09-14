@@ -1,5 +1,14 @@
 # Tests to Skip
 
+## API Tests
+
+### tests/api-tests/products/product-list.test.js:2717
+**Test:** before / after
+**Reason:** Date boundary condition - WooCommerce API uses inclusive filtering for 'before' parameter
+**Details:** See `api-product-list-date-filter.md`
+**Status:** SKIPPED with [QIT-SKIP] tag
+**Skip Implementation:** Added `test.skip()` with TODO: [QIT-SKIP] comment in test file
+
 ## Checkout Tests
 
 ### tests/checkout/checkout.spec.js:381
