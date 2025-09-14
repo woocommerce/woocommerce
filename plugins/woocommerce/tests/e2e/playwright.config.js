@@ -70,6 +70,7 @@ module.exports = defineConfig({
 		video: 'retain-on-failure',
 		actionTimeout: 20 * 1000,
 		navigationTimeout: 20 * 1000,
+		timezoneId: 'UTC',
 		contextOptions: {
 			reducedMotion: 'reduce',
 		},
