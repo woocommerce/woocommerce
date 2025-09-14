@@ -7,12 +7,5 @@
             "type": "local",
             "path": "../../woocommerce.zip"
         }
-    },
-    "environments": {
-        "default": {
-            "volumes": [
-                "./disable-mail.ini:/usr/local/etc/php/conf.d/disable-mail.ini"
-            ]
-        }
     }
 }
