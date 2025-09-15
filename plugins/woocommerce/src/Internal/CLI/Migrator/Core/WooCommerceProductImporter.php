@@ -1240,11 +1240,7 @@ class WooCommerceProductImporter {
 	 * @param float      $cogs_value The COGS value to set.
 	 */
 	private function set_cogs_value_direct( WC_Product $product, float $cogs_value ): void {
-		$product_id = $product->get_id();
-
-		if ( $product_id ) {
-			update_post_meta( $product_id, '_cogs_total_value', $cogs_value );
-		}
+		$product->update_meta_data( '_cogs_total_value', $cogs_value );
 	}
 
 	/**
