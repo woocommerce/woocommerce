@@ -25,7 +25,7 @@ class WC_Shipping_Zones {
 	 */
 	public static function get_zones( $context = 'admin' ) {
 		$zone_objects = self::get_shipping_zones();
-		$zones      = array();
+		$zones        = array();
 
 		foreach ( $zone_objects as $zone_object ) {
 			$zones[ $zone_object->get_id() ]                            = $zone_object->get_data();

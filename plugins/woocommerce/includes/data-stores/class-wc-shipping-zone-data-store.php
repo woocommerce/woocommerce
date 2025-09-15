@@ -82,6 +82,8 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 	 * @param WC_Shipping_Zone[] $zones Array of zones to read keyed by the zone_id.
 	 *
 	 * @return void
+	 *
+	 * @throws Exception If invalid zone_id givein for data store.
 	 */
 	public function read_multiple( array &$zones ) {
 		$zone_ids  = array_keys( $zones );
@@ -132,11 +134,13 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 
 		$zone_ids = array_map( 'absint', $ids );
 
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $zone_ids already run through absint.
 		return $wpdb->get_results(
 			"SELECT zone_id, zone_name, zone_order FROM {$wpdb->prefix}woocommerce_shipping_zones " .
 			'WHERE zone_id IN ( ' . implode( ',', $zone_ids ) . ' ) ',
 			OBJECT_K
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
@@ -154,11 +158,12 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		}
 
 		$zone_ids = array_map( 'absint', $ids );
-
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared -- $zone_ids already run through absint.
 		return $wpdb->get_results(
 			"SELECT zone_id, location_code, location_type FROM {$wpdb->prefix}woocommerce_shipping_zone_locations " .
 			'WHERE zone_id IN ( ' . implode( ',', $zone_ids ) . ' ) '
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 	}
 
 	/**
