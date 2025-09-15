@@ -93,7 +93,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 
 		// Fetch (cached) or create the Transact merchant and provider accounts.
 		$merchant_cache_key    = $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
-		$merchant_account_data = $this->get_transact_account_data( $merchant_cache_key, 'merchant' );
+		$merchant_account_data = $this->get_transact_account_data( 'merchant', $merchant_cache_key );
 		if ( empty( $merchant_account_data ) ) {
 			$merchant_account = $this->create_merchant_account();
 			if ( empty( $merchant_account ) ) {
@@ -106,7 +106,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		}
 
 		$provider_cache_key    = $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
-		$provider_account_data = $this->get_transact_account_data( $provider_cache_key, 'provider' );
+		$provider_account_data = $this->get_transact_account_data( 'provider', $provider_cache_key );
 		if ( empty( $provider_account_data ) ) {
 			$provider_account = $this->create_provider_account();
 			if ( ! $provider_account ) {
@@ -128,11 +128,15 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * Get the Transact account (merchant or provider) data. Performs a fetch if the account
 	 * is not in cache or expired.
 	 *
-	 * @param string $cache_key The cache key to get the account.
 	 * @param string $account_type The type of account to get (merchant or provider).
+	 * @param string $cache_key The cache key to get the account.
 	 * @return array|null Returns null if the transact account cannot be retrieved.
 	 */
-	public function get_transact_account_data( $cache_key, $account_type ) {
+	public function get_transact_account_data( $account_type, $cache_key = '' ) {
+		if ( empty( $cache_key ) ) {
+			$cache_key = $this->get_cache_key( $account_type );
+		}
+
 		// Get transact account from cache. If not found, fetch/create it.
 		$transact_account = $this->get_transact_account_from_cache( $cache_key );
 		if ( empty( $transact_account ) ) {
@@ -148,6 +152,24 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		}
 
 		return $transact_account;
+	}
+
+	/**
+	 * Get the cache key for the transact account.
+	 *
+	 * @param string $account_type The type of account to get (merchant or provider).
+	 * @return string|null The cache key, or null if the account type is invalid.
+	 */
+	private function get_cache_key( $account_type ) {
+		if ( 'merchant' === $account_type ) {
+			return $this->gateway->testmode ? self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_MERCHANT_ACCOUNT_CACHE_KEY_LIVE;
+		}
+
+		if ( 'provider' === $account_type ) {
+			return $this->gateway->testmode ? self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_TEST : self::TRANSACT_PROVIDER_ACCOUNT_CACHE_KEY_LIVE;
+		}
+
+		return null;
 	}
 
 	/**
