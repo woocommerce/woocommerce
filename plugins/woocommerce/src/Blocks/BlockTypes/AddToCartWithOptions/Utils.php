@@ -92,7 +92,7 @@ class Utils {
 		$context_attribute = wp_interactivity_data_wp_context( array( 'productId' => $child_product_id ? $child_product_id : $product->get_id() ) );
 
 		return sprintf(
-			'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector"%2$s>%3$s</div>',
+			'<div %1$s %2$s>%3$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_attribute,
 			$quantity_html
