@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -24,6 +23,17 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'add-to-cart-with-options';
+
+	/**
+	 * Initialize the block.
+	 */
+	public function initialize() {
+		parent::initialize();
+		// Hint: We only need to backfill default template parts for the REST API requests via the Site Editor.
+		if ( WC()->is_rest_api_request() ) {
+			add_filter( 'get_block_template', array( $this, 'experimental_ensure_custom_product_type_template_parts' ), 10, 3 );
+		}
+	}
 
 	/**
 	 * Extra data passed through from server to client for block.
@@ -47,11 +57,18 @@ class AddToCartWithOptions extends AbstractBlock {
 	 * @return array Array of product types with their corresponding template part IDs.
 	 */
 	protected function get_template_part_ids() {
-		$product_types = array_keys( wc_get_product_types() );
-		$current_theme = wp_get_theme()->get_stylesheet();
+		$product_types      = array_keys( wc_get_product_types() );
+		$core_product_types = Utils::get_core_product_types();
+		$current_theme      = wp_get_theme()->get_stylesheet();
 
 		$template_part_ids = array();
 		foreach ( $product_types as $product_type ) {
+
+			// Skip custom product types that don't have a default template part.
+			if ( ! in_array( $product_type, $core_product_types, true ) && false === has_filter( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part' ) ) {
+				continue;
+			}
+
 			$slug = $product_type . '-product-add-to-cart-with-options';
 
 			// Check if theme template exists.
@@ -132,7 +149,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 		$slug = $product_type . '-product-add-to-cart-with-options';
 
-		if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+		if ( in_array( $product_type, Utils::get_core_product_types(), true ) ) {
 			$template_part_path = Package::get_path() . 'templates/' . BlockTemplateUtils::DIRECTORY_NAMES['TEMPLATE_PARTS'] . '/' . $slug . '.html';
 		} else {
 			/**
@@ -575,7 +592,7 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			ob_start();
 
-			if ( in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true ) ) {
+			if ( in_array( $product_type, Utils::get_core_product_types(), true ) ) {
 
 				$add_to_cart_fn = 'woocommerce_' . $product_type . '_add_to_cart';
 				remove_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
@@ -666,5 +683,86 @@ class AddToCartWithOptions extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Ensure template parts for custom product types are available for the block.
+	 *
+	 * @param \WP_Block_Template $block_template The block template.
+	 * @param string             $id             The block template ID.
+	 * @param string             $template_type  The block template type.
+	 * @return \WP_Block_Template|null The block template, or null if not found.
+	 */
+	public function experimental_ensure_custom_product_type_template_parts( $block_template, $id, $template_type ) {
+		if ( $block_template instanceof \WP_Block_Template ) {
+			return $block_template;
+		}
+
+		if ( 'wp_template_part' !== $template_type ) {
+			return $block_template;
+		}
+
+		$wc_prefix = 'woocommerce/woocommerce';
+		if ( 0 !== strpos( $id, $wc_prefix ) ) {
+			return $block_template;
+		}
+
+		$parts = explode( '//', $id, 2 );
+		if ( count( $parts ) < 2 ) {
+			return $block_template;
+		}
+		list( $theme, $slug ) = $parts;
+
+		$slug_suffix = '-product-add-to-cart-with-options';
+		if ( false === strpos( $slug, $slug_suffix ) ) {
+			return $block_template;
+		}
+
+		// Extract product type from slug.
+		$product_type = str_replace( $slug_suffix, '', $slug );
+		$product_type = sanitize_key( $product_type );
+
+		// Only target custom product types.
+		if ( in_array( $product_type, Utils::get_core_product_types(), true ) ) {
+			return $block_template;
+		}
+
+		$supported_types = $this->get_template_part_ids();
+		if ( ! isset( $supported_types[ $product_type ] ) ) {
+			return $block_template;
+		}
+
+		$file_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		if ( ! is_string( $file_path ) || ! file_exists( $file_path ) ) {
+			return $block_template;
+		}
+
+		$content = file_get_contents( $file_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		if ( false === $content || '' === $content ) {
+			return $block_template;
+		}
+
+		$all_product_types       = wc_get_product_types();
+		$normalized_product_type = $all_product_types[ $product_type ] ?? $product_type;
+
+		/* translators: %s: Product type. */
+		$title = sprintf( '%s Add to Cart + Options', $normalized_product_type );
+		/* translators: %s: Product type. */
+		$description = sprintf( 'Template used to display the Add to Cart + Options form for %ss.', $normalized_product_type );
+
+		$template_part              = new \WP_Block_Template();
+		$template_part->id          = $id;
+		$template_part->type        = $template_type;
+		$template_part->content     = $content;
+		$template_part->theme       = $theme;
+		$template_part->slug        = $slug;
+		$template_part->title       = $title;
+		$template_part->description = $description;
+		$template_part->area        = 'add-to-cart-with-options';
+		$template_part->status      = 'publish';
+		$template_part->source      = 'plugin';
+		$template_part->post_types  = array();
+
+		return $template_part;
 	}
 }
