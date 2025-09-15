@@ -519,12 +519,12 @@ class WooCommerceProductImporter {
 			$product->set_stock_status( $product_data['stock_status'] );
 		}
 
-		if ( ! empty( $product_data['cost_of_goods'] ) ) {
+		if ( array_key_exists( 'cost_of_goods', $product_data ) ) {
 			$cogs_is_enabled = FeaturesUtil::feature_is_enabled( 'cost_of_goods_sold' );
 			if ( $cogs_is_enabled ) {
 				$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
 			} else {
-				// works when cogs is disabled.
+				// Store COGS directly when the feature is disabled; use product meta API so it persists on save.
 				$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
 			}
 		}
