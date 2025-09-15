@@ -15,7 +15,6 @@ import type { BlockAttributes } from './types';
 
 const Edit = ( {
 	attributes,
-	setAttributes,
 	context,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const { style, ...blockProps } = useBlockProps( {
@@ -26,12 +25,6 @@ const Edit = ( {
 		...attributes,
 		...context,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
 
 	return (
 		<div
