@@ -328,6 +328,9 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix Cart and Checkout blocks layout issues when parent element has flexbox properties [#60737](https://github.com/woocommerce/woocommerce/pull/60737)
 * Fix - Support variations and custom data in iAPI-powered minicart [#60709](https://github.com/woocommerce/woocommerce/pull/60709)
 * Tweak - Update More payment options link to open the WooCommerce.com marketplace instead of in-app [#60736](https://github.com/woocommerce/woocommerce/pull/60736)
+* Fix - Fix individually sold products not being added to cart when they are children of a grouped product [#60906](https://github.com/woocommerce/woocommerce/pull/60906)
+* Update - Add tool to Status > Tools page for fixing the refund logic. [#60814](https://github.com/woocommerce/woocommerce/pull/60814)
+* Tweak - Update other payment gateways section title to ‘More payment options’ on the Payments page. [#60865](https://github.com/woocommerce/woocommerce/pull/60865)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
