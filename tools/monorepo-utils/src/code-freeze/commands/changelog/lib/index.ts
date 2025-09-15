@@ -91,8 +91,8 @@ const processNextChangelog = (
 	// Split changelogEntries into individual entries by detecting lines that start with "* "
 	// This preserves multiline changelog entries.
 	const entries = changelogEntries
-		.split( '\n' )
-		.filter( ( line ) => line.trim() );
+		.split( /\r?\n(?=\* )/ )
+		.filter( ( entry ) => entry.trim() );
 
 	return {
 		nextLogTitle: `= ${ version } ${ releaseDate } =\n\n**WooCommerce**\n\n`,
