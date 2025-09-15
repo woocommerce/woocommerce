@@ -605,6 +605,26 @@ class WooCommerceProductImporter {
 					wc_get_logger()->warning( "Failed to create attribute '{$attr_name}': " . $attribute_id->get_error_message(), array( 'source' => 'wc-migrator' ) );
 					continue;
 				}
+				
+				// Immediately register the taxonomy so it's available for term insertion in the same request.
+				register_taxonomy(
+					$taxonomy_name,
+					apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+					apply_filters(
+						'woocommerce_taxonomy_args_' . $taxonomy_name,
+						array(
+							'labels'       => array(
+								'name' => $attr_name,
+							),
+							'hierarchical' => false,
+							'show_ui'      => false,
+							'show_in_rest' => true,
+							'query_var'    => true,
+							'rewrite'      => false,
+							'public'       => false,
+						)
+					)
+				);
 			} else {
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy_name );
 			}
