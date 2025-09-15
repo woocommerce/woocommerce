@@ -194,4 +194,18 @@ class Utils {
 			'step' => $step,
 		);
 	}
+
+	/**
+	 * Get Core product types.
+	 *
+	 * @return array The Core product types.
+	 */
+	public static function get_core_product_types() {
+		return array(
+			ProductType::SIMPLE,
+			ProductType::VARIABLE,
+			ProductType::GROUPED,
+			ProductType::EXTERNAL,
+		);
+	}
 }
