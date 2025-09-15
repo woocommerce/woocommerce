@@ -608,7 +608,17 @@ class WooCommerceProductImporter {
 
 				register_taxonomy(
 					$taxonomy_name,
+					/**
+					 * Filters the object types associated with the attribute taxonomy.
+					 *
+					 * @param array $object_types Array of object types.
+					 */
 					apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+					/**
+					 * Filters the arguments for registering the attribute taxonomy.
+					 *
+					 * @param array $args Array of taxonomy registration arguments.
+					 */
 					apply_filters(
 						'woocommerce_taxonomy_args_' . $taxonomy_name,
 						array(
