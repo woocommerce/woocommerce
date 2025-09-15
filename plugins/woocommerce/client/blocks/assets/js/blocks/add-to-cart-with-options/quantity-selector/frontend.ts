@@ -3,7 +3,7 @@
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
-import type { HTMLElementEvent } from 'react';
+import type { HTMLElementEvent } from '@woocommerce/types';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
