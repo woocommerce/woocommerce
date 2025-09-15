@@ -260,17 +260,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-			await expect(
-				page.locator( '.wc-block-mini-cart__quantity-badge' )
-			).toContainText( '2' );
+			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
-			const reduceQuantityButton = page
-				.locator(
-					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
-				)
-				.getByLabel( 'Reduce quantity of Beanie' );
+			const reduceQuantityButton = page.getByLabel(
+				'Reduce quantity of Beanie'
+			);
 			await reduceQuantityButton.click();
 			await reduceQuantityButton.click();
 

@@ -54,17 +54,8 @@ test.describe( 'Shopper → Notices', () => {
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
 
-		const miniCartTitleLabelBlock = page.locator(
-			'[data-block-name="woocommerce/mini-cart-title-label-block"]'
-		);
-		const miniCartTitleItemsCounterBlock = page.locator(
-			'[data-block-name="woocommerce/mini-cart-title-items-counter-block"]'
-		);
-
-		await expect( miniCartTitleLabelBlock ).toBeVisible();
-		await expect( miniCartTitleLabelBlock ).toHaveText( 'Your cart' );
-		await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
-		await expect( miniCartTitleItemsCounterBlock ).toContainText( '1' );
+		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+		await expect( page.getByText( '(1 item)' ) ).toBeVisible();
 
 		await page.getByLabel( 'Close', { exact: true } ).click();
 		// Mini cart gets out of sync if triggered to open and close very quickly. PW interacts too quickly
@@ -74,9 +65,8 @@ test.describe( 'Shopper → Notices', () => {
 			.getByLabel( `Add to cart: “${ SIMPLE_PHYSICAL_PRODUCT_NAME }”` )
 			.click();
 
-		await expect( miniCartTitleLabelBlock ).toBeVisible();
-		await expect( miniCartTitleItemsCounterBlock ).toBeVisible();
-		await expect( miniCartTitleItemsCounterBlock ).toContainText( '2' );
+		await expect( page.getByText( 'Your cart' ) ).toBeVisible();
+		await expect( page.getByText( '(2 items)' ) ).toBeVisible();
 		await expect(
 			page
 				.getByRole( 'dialog' )

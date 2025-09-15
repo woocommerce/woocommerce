@@ -100,15 +100,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await page.click( 'text=Add to cart' );
 		await miniCartUtils.openMiniCart();
-		const miniCartTitleBlock = page.locator(
-			'[data-block-name="woocommerce/mini-cart-title-block"]'
+
+		await expect( page.getByRole( 'dialog' ) ).toContainText(
+			'Your cart (1 item)'
 		);
-		const titleText = await miniCartTitleBlock.innerText();
-		await expect( miniCartTitleBlock ).toBeVisible();
-		expect(
-			titleText?.includes( '(1 item)' ) ||
-				titleText?.includes( '(items: 1)' )
-		).toBeTruthy();
 	} );
 
 	test( 'should show the correct cart items count', async ( {
@@ -119,16 +114,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
-		const miniCartTitleBlock = page.locator(
-			'[data-block-name="woocommerce/mini-cart-title-block"]'
-		);
-		let titleText = await miniCartTitleBlock.innerText();
 
-		await expect( miniCartTitleBlock ).toBeVisible();
-		expect(
-			titleText?.includes( '(1 item)' ) ||
-				titleText?.includes( '(items: 1)' )
-		).toBeTruthy();
+		await expect(
+			page.getByRole( 'heading', { name: 'Your cart (1 item)' } )
+		).toBeVisible();
 
 		await page.getByRole( 'button', { name: 'Close' } ).click();
 
@@ -139,12 +128,9 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
 
-		await expect( miniCartTitleBlock ).toBeVisible();
-		titleText = await miniCartTitleBlock.innerText();
-		expect(
-			titleText?.includes( '(2 items)' ) ||
-				titleText?.includes( '(items: 2)' )
-		).toBeTruthy();
+		await expect(
+			page.getByRole( 'heading', { name: 'Your cart (2 items)' } )
+		).toBeVisible();
 	} );
 
 	test( 'should show the correct cart item name', async ( {
@@ -157,9 +143,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect(
-			page
-				.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-				.filter( { has: page.locator( ':visible' ) } )
+			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
 		).toBeVisible();
 	} );
 
@@ -227,9 +211,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect(
-			page
-				.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
-				.filter( { has: page.locator( ':visible' ) } )
+			page.getByRole( 'link', { name: REGULAR_PRICED_PRODUCT_NAME } )
 		).toBeVisible();
 
 		await page
