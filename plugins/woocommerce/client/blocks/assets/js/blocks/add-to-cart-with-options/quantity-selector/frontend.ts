@@ -208,7 +208,7 @@ store< QuantitySelectorStore >(
 				}
 			},
 			// We need to listen to blur events instead of change events because
-			// the change event isn't triggered in invalid numbers (ie: writting
+			// the change event isn't triggered in invalid numbers (ie: writing
 			// letters) if the current value is already invalid or an empty string.
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
