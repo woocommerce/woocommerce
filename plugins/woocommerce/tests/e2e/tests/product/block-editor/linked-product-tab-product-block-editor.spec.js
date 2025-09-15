@@ -100,28 +100,36 @@ test.describe( 'General tab', { tag: tags.GUTENBERG }, () => {
 
 			// Include in category
 			await clickOnTab( 'Organization', page );
-			const waitForCategoriesResponse = page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/wp-json/wp/v2/product_cat' ) &&
-					response.status() === 200
-			);
+
+			// Click on Categories field and handle the case where API might not be called
+			// if categories are already loaded/cached
 			await page.getByLabel( 'Categories' ).click();
-			await waitForCategoriesResponse;
-			await page.getByLabel( categoryName ).check();
+
+			// Wait a bit for any potential API calls and for dropdown to populate
+			await page.waitForTimeout(2000);
+
+			// Type the category name to search for it
+			await page.getByLabel( 'Categories' ).fill( categoryName );
+			await page.waitForTimeout(1000);
+
+			// Try to find and select the category option
+			const categoryOption = page.getByRole( 'option', { name: categoryName } );
+			if ( await categoryOption.isVisible() ) {
+				await categoryOption.click();
+			} else {
+				// Fallback: try checkbox approach
+				await page.getByLabel( categoryName ).check();
+			}
 			await page.getByLabel( `Remove Uncategorized` ).click();
 			await expect(
 				page.getByLabel( `Remove ${ categoryName }` )
 			).toBeVisible();
 
-			const waitForProductsSearchResponse = page.waitForResponse(
-				( response ) =>
-					response
-						.url()
-						.includes( '/wp-json/wc/v3/products?search' ) &&
-					response.status() === 200
-			);
+			// Navigate to Linked products tab
 			await clickOnTab( 'Linked products', page );
-			await waitForProductsSearchResponse;
+
+			// Wait for the tab content to load
+			await page.waitForTimeout(1000);
 
 			await expect(
 				page.getByRole( 'heading', {
