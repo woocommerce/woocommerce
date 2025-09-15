@@ -89,7 +89,13 @@ class Utils {
 
 		global $product;
 
-		$context_attribute = wp_interactivity_data_wp_context( array( 'productId' => $child_product_id ? $child_product_id : $product->get_id() ) );
+		$context_attribute = wp_interactivity_data_wp_context(
+			array(
+				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
+					$child_product_id :
+					$product->get_id(),
+			)
+		);
 
 		return sprintf(
 			'<div %1$s %2$s>%3$s</div>',
