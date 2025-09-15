@@ -266,7 +266,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.first();
 
 		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
-			await expect( addToCartButton ).toHaveClass( /disabled/ );
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 
 			// There is the chance the button might be clicked before the iAPI
 			// stores have been loaded.
@@ -286,7 +286,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			await increaseQuantityButton.click();
 
-			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 			await increaseQuantityButton.click();
 
@@ -322,7 +322,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					name: 'Added to cart',
 					exact: true,
 				} )
-			).toHaveClass( /disabled/ );
+			).toHaveClass( /\bdisabled\b/ );
 		} );
 
 		await test.step( 'products sold individually can be added to cart', async () => {
@@ -334,7 +334,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			await individuallySoldProductCheckbox.click();
 
-			await expect( addToCartButton ).not.toHaveClass( /disabled/ );
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 			await addToCartButton.click();
 
