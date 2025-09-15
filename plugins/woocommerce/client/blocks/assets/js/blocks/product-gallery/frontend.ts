@@ -9,6 +9,7 @@ import {
 	getConfig,
 } from '@wordpress/interactivity';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -434,7 +435,9 @@ const productGallery = {
 				return;
 			}
 
-			const { products } = getConfig( 'woocommerce' );
+			const { products } = getConfig(
+				'woocommerce'
+			) as WooCommerceConfig;
 
 			const productData =
 				products?.[ productId ]?.variations?.[

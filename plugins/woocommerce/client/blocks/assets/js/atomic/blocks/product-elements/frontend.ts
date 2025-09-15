@@ -9,7 +9,10 @@ import {
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { ProductData } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	ProductData,
+	WooCommerceConfig,
+} from '@woocommerce/stores/woocommerce/cart';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -63,7 +66,9 @@ const productElementStore = store(
 					return undefined;
 				}
 
-				const { products } = getConfig( 'woocommerce' );
+				const { products } = getConfig(
+					'woocommerce'
+				) as WooCommerceConfig;
 
 				if ( ! products ) {
 					return undefined;

@@ -11,11 +11,14 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Layout\Flex_Layout_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Button;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Buttons;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Column;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Columns;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Embed;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Gallery;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Group;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
@@ -63,7 +66,10 @@ class Initializer {
 	 * 3. Add the renderer case in the get_block_renderer method
 	 */
 	const RENDER_ONLY_BLOCK_TYPES = array(
+		'core/gallery',
 		'core/media-text',
+		'core/audio',
+		'core/embed',
 	);
 
 	/**
@@ -210,8 +216,17 @@ class Initializer {
 			case 'core/table':
 				$renderer = new Table();
 				break;
+			case 'core/gallery':
+				$renderer = new Gallery();
+				break;
 			case 'core/media-text':
 				$renderer = new Media_Text();
+				break;
+			case 'core/audio':
+				$renderer = new Audio();
+				break;
+			case 'core/embed':
+				$renderer = new Embed();
 				break;
 			default:
 				$renderer = new Fallback();
