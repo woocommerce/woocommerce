@@ -86,7 +86,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 10.2.0
 	 */
 	protected function get_hook_prefix(): string {
-		return 'woocommerce_rest_api_v4_' . $this->rest_base . '_';
+		return 'woocommerce_rest_api_v4_' . str_replace( '-', '_', $this->rest_base ) . '_';
 	}
 
 	/**
@@ -98,7 +98,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 10.2.0
 	 */
 	protected function get_error_prefix(): string {
-		return 'woocommerce_rest_api_v4_' . $this->rest_base . '_';
+		return 'woocommerce_rest_api_v4_' . str_replace( '-', '_', $this->rest_base ) . '_';
 	}
 
 	/**
