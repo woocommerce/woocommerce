@@ -21,6 +21,7 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import { getSetting } from '@woocommerce/settings';
 
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
@@ -44,9 +45,12 @@ const AddToCartOptionsEdit = (
 
 	const productType =
 		product?.id === undefined ? currentProductType?.slug : product?.type;
-	const isCoreProductType =
-		productType &&
-		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
+	const addToCartWithOptionsTemplatePartIds = getSetting(
+		'addToCartWithOptionsTemplatePartIds',
+		{}
+	) as Record< string, string | null >;
+
+	const templatePartId = addToCartWithOptionsTemplatePartIds?.[ productType ];
 
 	return (
 		<>
@@ -56,9 +60,9 @@ const AddToCartOptionsEdit = (
 			<BlockControls>
 				<ToolbarProductTypeGroup />
 			</BlockControls>
-			{ isCoreProductType ? (
+			{ templatePartId ? (
 				<AddToCartWithOptionsEditTemplatePart
-					productType={ productType }
+					templatePartId={ templatePartId }
 				/>
 			) : (
 				<div { ...blockProps }>

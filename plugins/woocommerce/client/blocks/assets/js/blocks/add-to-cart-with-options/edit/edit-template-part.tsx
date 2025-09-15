@@ -9,7 +9,6 @@ import {
 	useInnerBlocksProps,
 	useBlockProps,
 } from '@wordpress/block-editor';
-import { getSetting } from '@woocommerce/settings';
 
 const TemplatePartInnerBlocks = ( {
 	blockProps,
@@ -65,16 +64,10 @@ const TemplatePartInnerBlocks = ( {
 };
 
 export const AddToCartWithOptionsEditTemplatePart = ( {
-	productType,
+	templatePartId,
 }: {
-	productType: string;
+	templatePartId: string;
 } ) => {
-	const addToCartWithOptionsTemplatePartIds = getSetting(
-		'addToCartWithOptionsTemplatePartIds',
-		{}
-	) as Record< string, string | null >;
-
-	const templatePartId = addToCartWithOptionsTemplatePartIds?.[ productType ];
 
 	const blockProps = useBlockProps();
 
