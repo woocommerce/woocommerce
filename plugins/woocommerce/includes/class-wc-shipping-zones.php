@@ -38,19 +38,27 @@ class WC_Shipping_Zones {
 	}
 
 	/**
-	 * Retrieve the full set of shipping Zones.
+	 * Retrieve Shipping_Zone data objects for the given zone_ids.
+	 *
+	 * @param array|null $zone_ids The zone_ids of the zones to retrieve. An empty array will return no results. Use null for all zones.
+	 *
 	 * @return WC_Shipping_Zone[]
 	 */
-	public static function get_shipping_zones() {
+	public static function get_shipping_zones( ?array $zone_ids = null ) {
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
-		$raw_zones  = $data_store->get_zones();
-		$zones      = array();
+		if ( null === $zone_ids ) {
+			$raw_zones = $data_store->get_zones();
+			$zone_ids  = array_column( $raw_zones, 'zone_id' );
+		} elseif ( empty( $zone_ids ) ) {
+			return array();
+		}
 
-		foreach ( $raw_zones as $raw_zone ) {
+		$zones = array();
+		foreach ( $zone_ids as $zone_id ) {
 			$zone = new WC_Shipping_Zone();
 			$zone->set_object_read( false );
-			$zone->set_id( $raw_zone->zone_id );
-			$zones[ $raw_zone->zone_id ] = $zone;
+			$zone->set_id( $zone_id );
+			$zones[ $zone_id ] = $zone;
 		}
 
 		if ( ! empty( $zones ) ) {
