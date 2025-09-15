@@ -24,16 +24,37 @@ class WC_Shipping_Zones {
 	 * @return array Array of arrays.
 	 */
 	public static function get_zones( $context = 'admin' ) {
+		$zone_objects = self::get_shipping_zones();
+		$zones      = array();
+
+		foreach ( $zone_objects as $zone_object ) {
+			$zones[ $zone_object->get_id() ]                            = $zone_object->get_data();
+			$zones[ $zone_object->get_id() ]['zone_id']                 = $zone_object->get_id();
+			$zones[ $zone_object->get_id() ]['formatted_zone_location'] = $zone_object->get_formatted_location();
+			$zones[ $zone_object->get_id() ]['shipping_methods']        = $zone_object->get_shipping_methods( false, $context );
+		}
+
+		return $zones;
+	}
+
+	/**
+	 * Retrieve the full set of shipping Zones.
+	 * @return WC_Shipping_Zone[]
+	 */
+	public static function get_shipping_zones() {
 		$data_store = WC_Data_Store::load( 'shipping-zone' );
 		$raw_zones  = $data_store->get_zones();
 		$zones      = array();
 
 		foreach ( $raw_zones as $raw_zone ) {
-			$zone                                = new WC_Shipping_Zone( $raw_zone );
-			$zones[ $zone->get_id() ]            = $zone->get_data();
-			$zones[ $zone->get_id() ]['zone_id'] = $zone->get_id();
-			$zones[ $zone->get_id() ]['formatted_zone_location'] = $zone->get_formatted_location();
-			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods( false, $context );
+			$zone = new WC_Shipping_Zone();
+			$zone->set_object_read( false );
+			$zone->set_id( $raw_zone->zone_id );
+			$zones[ $raw_zone->zone_id ] = $zone;
+		}
+
+		if ( ! empty( $zones ) ) {
+			$data_store->read_multiple( $zones );
 		}
 
 		return $zones;
