@@ -605,8 +605,7 @@ class WooCommerceProductImporter {
 					wc_get_logger()->warning( "Failed to create attribute '{$attr_name}': " . $attribute_id->get_error_message(), array( 'source' => 'wc-migrator' ) );
 					continue;
 				}
-				
-				// Immediately register the taxonomy so it's available for term insertion in the same request.
+
 				register_taxonomy(
 					$taxonomy_name,
 					apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
