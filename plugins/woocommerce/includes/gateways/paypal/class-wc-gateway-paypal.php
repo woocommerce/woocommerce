@@ -757,12 +757,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
 		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
-		$merchant_account_data    = $transact_account_manager->get_merchant_account_data();
+		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
 		}
 
-		$provider_account_data = $transact_account_manager->get_provider_account_data();
+		$provider_account_data = $transact_account_manager->get_transact_account_data( 'provider' );
 		if ( empty( $provider_account_data ) ) {
 			return false;
 		}
