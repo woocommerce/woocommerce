@@ -142,11 +142,11 @@ class Checkout extends AbstractBlock {
 	 * @return array|string;
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = array(
+		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => array( 'wc-blocks' ),
-		);
+			'dependencies' => [ 'wc-blocks' ],
+		];
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -158,7 +158,7 @@ class Checkout extends AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_script( $key = null ) {
-		$dependencies = array();
+		$dependencies = [];
 
 		// Load password strength meter script asynchronously if needed.
 		if ( ! is_user_logged_in() && 'no' === get_option( 'woocommerce_registration_generate_password' ) ) {
@@ -171,11 +171,11 @@ class Checkout extends AbstractBlock {
 			$dependencies[] = 'wc-schema-parser';
 		}
 
-		$script = array(
+		$script = [
 			'handle'       => 'wc-' . $this->block_name . '-block-frontend',
 			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
 			'dependencies' => $dependencies,
-		);
+		];
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -185,7 +185,7 @@ class Checkout extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), array( 'wc-blocks-packages-style' ) );
+		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
 	}
 
 	/**
@@ -393,7 +393,7 @@ class Checkout extends AbstractBlock {
 	 *                           Note, this will be empty in the editor context when the block is
 	 *                           not in the post content on editor load.
 	 */
-	protected function enqueue_data( array $attributes = array() ) {
+	protected function enqueue_data( array $attributes = [] ) {
 		parent::enqueue_data( $attributes );
 
 		$country_data    = CartCheckoutUtils::get_country_data();
@@ -470,15 +470,15 @@ class Checkout extends AbstractBlock {
 						return $acc;
 					}
 					if ( $method->supports( 'settings' ) ) {
-						$acc[] = array(
+						$acc[] = [
 							'id'          => $method->id,
 							'title'       => $method->method_title,
 							'description' => $method->method_description,
-						);
+						];
 					}
 					return $acc;
 				},
-				array()
+				[]
 			);
 			$this->asset_data_registry->add( 'globalShippingMethods', $formatted_shipping_methods );
 		}
@@ -494,14 +494,14 @@ class Checkout extends AbstractBlock {
 			$formatted_payment_methods = array_reduce(
 				$payment_methods,
 				function ( $acc, $method ) {
-					$acc[] = array(
+					$acc[] = [
 						'id'          => $method->id,
 						'title'       => $method->get_method_title() !== '' ? $method->get_method_title() : $method->get_title(),
 						'description' => $method->get_method_description() !== '' ? $method->get_method_description() : $method->get_description(),
-					);
+					];
 					return $acc;
 				},
-				array()
+				[]
 			);
 			$this->asset_data_registry->add( 'globalPaymentMethods', $formatted_payment_methods );
 		}
@@ -519,13 +519,13 @@ class Checkout extends AbstractBlock {
 					$plugin      = $all_plugins[ $item ] ?? null;
 					$plugin_id   = $plugin['TextDomain'] ?? dirname( $item, 2 );
 					$plugin_name = $plugin['Name'] ?? $plugin_id;
-					$acc[]       = array(
+					$acc[]       = [
 						'id'    => $plugin_id,
 						'title' => $plugin_name,
-					);
+					];
 					return $acc;
 				},
-				array()
+				[]
 			);
 			$this->asset_data_registry->add( 'incompatibleExtensions', $incompatible_extensions );
 		}
@@ -569,7 +569,7 @@ class Checkout extends AbstractBlock {
 		parent::register_block_type_assets();
 		$chunks        = $this->get_chunks_paths( $this->chunks_folder );
 		$vendor_chunks = $this->get_chunks_paths( 'vendors--checkout-blocks' );
-		$shared_chunks = array( 'cart-blocks/cart-express-payment--checkout-blocks/express-payment-frontend' );
+		$shared_chunks = [ 'cart-blocks/cart-express-payment--checkout-blocks/express-payment-frontend' ];
 		$this->register_chunk_translations( array_merge( $chunks, $vendor_chunks, $shared_chunks ) );
 	}
 
@@ -579,7 +579,7 @@ class Checkout extends AbstractBlock {
 	 * @return array;
 	 */
 	public static function get_checkout_block_types() {
-		return array(
+		return [
 			'Checkout',
 			'CheckoutActionsBlock',
 			'CheckoutAdditionalInformationBlock',
@@ -604,6 +604,6 @@ class Checkout extends AbstractBlock {
 			'CheckoutPickupOptionsBlock',
 			'CheckoutTermsBlock',
 			'CheckoutTotalsBlock',
-		);
+		];
 	}
 }
