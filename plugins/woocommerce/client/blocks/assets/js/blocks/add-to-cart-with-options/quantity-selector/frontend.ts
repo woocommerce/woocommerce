@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { HTMLElementEvent } from 'react';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
@@ -31,40 +31,6 @@ const { state: productDataState } = store< ProductDataStore >(
 	{},
 	{ lock: universalLock }
 );
-
-const getInputElementFromEvent = (
-	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
-) => {
-	let inputElement = null;
-
-	if ( event.target instanceof HTMLButtonElement ) {
-		inputElement = event.target.parentElement?.querySelector( '.qty' );
-	}
-
-	if ( event.target instanceof HTMLInputElement ) {
-		inputElement = event.target;
-	}
-
-	return inputElement;
-};
-
-const getInputData = (
-	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
-) => {
-	const inputElement = getInputElementFromEvent( event );
-
-	if ( ! inputElement ) {
-		return;
-	}
-
-	const parsedValue = Number( inputElement.value );
-	const currentValue = isNaN( parsedValue ) ? 0 : parsedValue;
-
-	return {
-		currentValue,
-		inputElement,
-	};
-};
 
 export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
@@ -150,11 +116,14 @@ store< QuantitySelectorStore >(
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
+				const inputElement =
+					event.target.parentElement?.querySelector( '.qty' );
+
+				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
-				const { currentValue, inputElement } = inputData;
+
+				const currentValue = Number( inputElement.value ) || 0;
 
 				const { productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
@@ -181,11 +150,14 @@ store< QuantitySelectorStore >(
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
-				const inputData = getInputData( event );
-				if ( ! inputData ) {
+				const inputElement =
+					event.target.parentElement?.querySelector( '.qty' );
+
+				if ( ! ( inputElement instanceof HTMLInputElement ) ) {
 					return;
 				}
-				const { currentValue, inputElement } = inputData;
+
+				const currentValue = Number( inputElement.value ) || 0;
 
 				const { productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
@@ -303,24 +275,18 @@ store< QuantitySelectorStore >(
 				event.target.value = newValue.toString();
 				dispatchChangeEvent( event.target );
 			},
-			handleQuantityCheckboxChange: (
-				event: HTMLElementEvent< HTMLInputElement >
-			) => {
-				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-				const inputData = getInputData( event );
-				if ( ! inputData || ! productObject ) {
+			handleQuantityCheckboxChange: () => {
+				const element = getElement();
+
+				if ( ! ( element.ref instanceof HTMLInputElement ) ) {
 					return;
 				}
-				const { inputElement } = inputData;
+
+				const { productId } = getContext< Context >();
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					inputElement.checked ? 1 : 0
+					element.ref.checked ? 1 : 0
 				);
 			},
 		},
