@@ -87,8 +87,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 					 * @param array  $item          The order item data.
 					 * @param WC_Order $order       The order object.
 					 */
-					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					echo '<small class="refunded">' . apply_filters( 'woocommerce_order_item_cogs_refunded_admin_html', wc_price( $refunded_cost, $wc_price_arg ), $refunded_cost, $item, $order ) . '</small>';
+					echo '<small class="refunded">' . apply_filters( 'woocommerce_order_item_cogs_refunded_admin_html', wc_price( $refunded_cost, $wc_price_arg ), $refunded_cost, $item, $order ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}
 				?>
 			</div>
