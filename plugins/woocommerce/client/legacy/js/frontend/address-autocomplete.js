@@ -282,18 +282,11 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param input {HTMLInputElement} The input element to disable autofill for.
 		 */
 		function disableBrowserAutofill( input ) {
-			const autocompleteAttr = input.getAttribute( 'autocomplete' );
-			if ( autocompleteAttr === 'off' || autocompleteAttr === 'none' ) {
+			if ( input.getAttribute( 'autocomplete' ) === 'none' ) {
 				return;
 			}
 
 			input.setAttribute( 'autocomplete', 'none' );
-
-			let userAgent = navigator.userAgent;
-			if ( userAgent.match( /firefox|fxios/i ) ) {
-				input.setAttribute( 'autocomplete', 'off' );
-			}
-
 			input.setAttribute( 'data-lpignore', 'true' );
 			input.setAttribute( 'data-op-ignore', 'true' );
 			input.setAttribute( 'data-1p-ignore', 'true' );
@@ -330,8 +323,7 @@ window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
 		 * @param shouldFocus {boolean} Whether to focus the input after enabling autofill.
 		 */
 		function enableBrowserAutofill( input, shouldFocus = true ) {
-			const autocompleteAttr = input.getAttribute( 'autocomplete' );
-			if ( autocompleteAttr !== 'none' && autocompleteAttr !== 'off' ) {
+			if ( input.getAttribute( 'autocomplete' ) !== 'none' ) {
 				return;
 			}
 
