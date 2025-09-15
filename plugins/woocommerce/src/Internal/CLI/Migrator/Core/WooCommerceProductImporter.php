@@ -524,7 +524,6 @@ class WooCommerceProductImporter {
 			if ( $cogs_is_enabled ) {
 				$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
 			} else {
-				// Store COGS directly when the feature is disabled; use product meta API so it persists on save.
 				$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
 			}
 		}
