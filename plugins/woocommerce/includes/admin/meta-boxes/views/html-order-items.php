@@ -306,7 +306,8 @@ if ( wc_tax_enabled() ) {
 					 * @param float    $total      The total COGS value.
 					 * @param WC_Order $order      The order object.
 					 */
-					echo apply_filters( 'woocommerce_order_cogs_total_value_admin_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					echo apply_filters( 'woocommerce_order_cogs_total_value_admin_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					?>
 				</td>
 			</tr>
 		</table>
