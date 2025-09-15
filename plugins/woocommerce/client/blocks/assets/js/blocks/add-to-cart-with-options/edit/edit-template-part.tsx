@@ -68,7 +68,6 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 }: {
 	templatePartId: string;
 } ) => {
-
 	const blockProps = useBlockProps();
 
 	if ( ! templatePartId ) {

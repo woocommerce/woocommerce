@@ -12,6 +12,7 @@ import {
 	useBlockProps,
 } from '@wordpress/block-editor';
 import { useProduct } from '@woocommerce/entities';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -21,7 +22,6 @@ import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
-import { getSetting } from '@woocommerce/settings';
 
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
