@@ -302,7 +302,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	 * Update the transact account (merchant or provider) cache.
 	 *
 	 * @param string $cache_key The cache key to update.
-	 * @param array $account_data The transact account data.
+	 * @param array  $account_data The transact account data.
 	 */
 	private function update_transact_account_cache( $cache_key, $account_data ) {
 		$expires = time() + self::TRANSACT_ACCOUNT_CACHE_EXPIRY;
