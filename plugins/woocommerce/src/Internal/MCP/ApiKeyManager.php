@@ -43,7 +43,10 @@ class ApiKeyManager {
 	 */
 	private static function generate_new_key(): string {
 		$api_key = 'wc_mcp_' . wp_generate_password( 32, false );
-		update_option( self::OPTION_NAME, $api_key );
+		
+		if ( ! add_option( self::OPTION_NAME, $api_key, '', false ) ) {
+			update_option( self::OPTION_NAME, $api_key, false );
+		}
 		
 		return $api_key;
 	}
