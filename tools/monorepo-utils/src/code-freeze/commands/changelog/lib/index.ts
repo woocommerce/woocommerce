@@ -88,8 +88,6 @@ const processNextChangelog = (
 		'[#$1](https://github.com/woocommerce/woocommerce/pull/$1)'
 	);
 
-	// Split changelogEntries into individual entries by detecting lines that start with "* "
-	// This preserves multiline changelog entries.
 	const entries = changelogEntries
 		.split( /\r?\n(?=\* )/ )
 		.filter( ( entry ) => entry.trim() );
