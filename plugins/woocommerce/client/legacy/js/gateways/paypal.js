@@ -67,7 +67,7 @@ jQuery(function ($) {
 							} ),
 							headers: {
 								'Content-Type': 'application/json',
-								Nonce: paypal_standard.nonce,
+								'Nonce': paypal_standard.nonce,
 							},
 						}
 					);
