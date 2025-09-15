@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import type { FormEvent } from 'react';
 import { store, getContext, getConfig } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
@@ -142,7 +141,7 @@ export type AddToCartWithOptionsStore = {
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: () => void;
-		handleSubmit: ( event: FormEvent< HTMLFormElement > ) => void;
+		handleSubmit: ( event: SubmitEvent ) => void;
 	};
 };
 
@@ -312,7 +311,7 @@ const { actions, state } = store<
 					}
 				);
 			},
-			*handleSubmit( event: FormEvent< HTMLFormElement > ) {
+			*handleSubmit( event: SubmitEvent ) {
 				event.preventDefault();
 
 				const { isFormValid } = state;
