@@ -116,7 +116,7 @@ const PayPalButtonsContainer = ( {
 
 			setOrderReceivedURL( '' );
 		} catch ( error ) {
-			console.error( 'Failed to create PayPal order', error );
+			console.error( 'Failed to cancel PayPal payment', error );
 		}
 	};
 
