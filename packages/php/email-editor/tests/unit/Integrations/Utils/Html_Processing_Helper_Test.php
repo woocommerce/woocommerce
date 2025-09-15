@@ -449,4 +449,153 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 		$result = Html_Processing_Helper::sanitize_caption_html( $html );
 		$this->assertEquals( $html, $result );
 	}
+
+	/**
+	 * Test sanitize_image_html with basic image.
+	 */
+	public function testSanitizeImageHtmlWithBasicImage(): void {
+		$html   = '<img src="https://example.com/image.jpg" alt="Test image" width="100" height="50">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'src="https://example.com/image.jpg"', $result );
+		$this->assertStringContainsString( 'alt="Test image"', $result );
+		$this->assertStringContainsString( 'width="100"', $result );
+		$this->assertStringContainsString( 'height="50"', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html sanitizes src URL.
+	 */
+	public function testSanitizeImageHtmlSanitizesSrcUrl(): void {
+		$html   = '<img src="javascript:alert(\'xss\')" alt="Test">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringNotContainsString( 'javascript:', $result );
+		$this->assertStringNotContainsString( 'src=', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html sanitizes alt text.
+	 */
+	public function testSanitizeImageHtmlSanitizesAltText(): void {
+		$html   = '<img src="https://example.com/image.jpg" alt="Test &quot;quoted&quot; text">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'alt="Test &quot;quoted&quot; text"', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html sanitizes dimensions.
+	 */
+	public function testSanitizeImageHtmlSanitizesDimensions(): void {
+		$html   = '<img src="https://example.com/image.jpg" width="100px" height="50px">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'width="100px"', $result );
+		$this->assertStringContainsString( 'height="50px"', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html cleans CSS classes.
+	 */
+	public function testSanitizeImageHtmlCleansCssClasses(): void {
+		$html   = '<img src="https://example.com/image.jpg" class="wp-image-123 has-background has-border">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'class="wp-image-123"', $result );
+		$this->assertStringNotContainsString( 'has-background', $result );
+		$this->assertStringNotContainsString( 'has-border', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html sanitizes inline styles.
+	 */
+	public function testSanitizeImageHtmlSanitizesInlineStyles(): void {
+		$html   = '<img src="https://example.com/image.jpg" style="width: 100px; height: 50px; background: url(javascript:alert(\'xss\'));">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'width: 100px', $result );
+		$this->assertStringContainsString( 'height: 50px', $result );
+		$this->assertStringNotContainsString( 'background:', $result );
+		$this->assertStringNotContainsString( 'javascript:', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html allows safe CSS properties.
+	 */
+	public function testSanitizeImageHtmlAllowsSafeCssProperties(): void {
+		$html   = '<img src="https://example.com/image.jpg" style="width: 100px; height: 50px; max-width: 200px; margin: 10px; padding: 5px; border: 1px solid #000; border-radius: 5px;">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'width: 100px', $result );
+		$this->assertStringContainsString( 'height: 50px', $result );
+		$this->assertStringContainsString( 'max-width: 200px', $result );
+		$this->assertStringContainsString( 'margin: 10px', $result );
+		$this->assertStringContainsString( 'padding: 5px', $result );
+		$this->assertStringContainsString( 'border: 1px solid #000', $result );
+		$this->assertStringContainsString( 'border-radius: 5px', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html removes dangerous CSS properties.
+	 */
+	public function testSanitizeImageHtmlRemovesDangerousCssProperties(): void {
+		$html   = '<img src="https://example.com/image.jpg" style="width: 100px; position: absolute; z-index: 999; background: red;">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringContainsString( 'width: 100px', $result );
+		$this->assertStringNotContainsString( 'position:', $result );
+		$this->assertStringNotContainsString( 'z-index:', $result );
+		$this->assertStringNotContainsString( 'background:', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html removes unknown attributes.
+	 */
+	public function testSanitizeImageHtmlRemovesUnknownAttributes(): void {
+		$html   = '<img src="https://example.com/image.jpg" onclick="alert(\'xss\')" data-custom="value" id="test">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertStringNotContainsString( 'onclick=', $result );
+		$this->assertStringNotContainsString( 'data-custom=', $result );
+		$this->assertStringNotContainsString( 'id=', $result );
+		$this->assertStringContainsString( 'src="https://example.com/image.jpg"', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html with empty string.
+	 */
+	public function testSanitizeImageHtmlWithEmptyString(): void {
+		$result = Html_Processing_Helper::sanitize_image_html( '' );
+		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html with non-image HTML.
+	 */
+	public function testSanitizeImageHtmlWithNonImageHtml(): void {
+		$html   = '<div>Not an image</div>';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertEquals( $html, $result );
+	}
+
+	/**
+	 * Test sanitize_image_html with malformed HTML.
+	 */
+	public function testSanitizeImageHtmlWithMalformedHtml(): void {
+		$html   = '<img src="https://example.com/image.jpg" alt="Test" <malformed';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		// Should still sanitize what it can.
+		$this->assertStringContainsString( 'src="https://example.com/image.jpg"', $result );
+		$this->assertStringContainsString( 'alt="Test"', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html returns empty string when no valid attributes.
+	 */
+	public function testSanitizeImageHtmlReturnsEmptyWhenNoValidAttributes(): void {
+		$html   = '<img onclick="alert(\'xss\')" data-custom="value">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test sanitize_image_html returns empty string when src is invalid.
+	 */
+	public function testSanitizeImageHtmlReturnsEmptyWhenSrcInvalid(): void {
+		$html   = '<img src="javascript:alert(\'xss\')" alt="Test">';
+		$result = Html_Processing_Helper::sanitize_image_html( $html );
+		$this->assertEquals( '', $result );
+	}
 }

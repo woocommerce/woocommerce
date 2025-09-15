@@ -7,26 +7,22 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
+	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
  */
-import {
-	getMatchedVariation,
-	type AvailableVariation,
-} from '../../base/utils/variations/get-matched-variation';
+import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 
 export type Context = {
-	productId: number;
-	productType: string;
 	selectedAttributes: SelectedAttributes[];
-	availableVariations: AvailableVariation[];
 	quantity: Record< number, number >;
 	validationErrors: AddToCartError[];
 	tempQuantity: number;
@@ -50,6 +46,12 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const getInputElementFromEvent = (
 	event: HTMLElementEvent< HTMLButtonElement, HTMLInputElement >
 ) => {
@@ -68,22 +70,20 @@ const getInputElementFromEvent = (
 
 export const getProductData = (
 	id: number,
-	productType: string,
-	availableVariations: AvailableVariation[],
 	selectedAttributes: SelectedAttributes[]
 ) => {
 	let productId = id;
 	let productData: ProductData | undefined;
 
-	const { products } = getConfig( 'woocommerce' );
+	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	if (
-		productType === 'variable' &&
-		availableVariations &&
-		selectedAttributes
-	) {
+	if ( selectedAttributes && selectedAttributes.length > 0 ) {
+		if ( ! products || ! products[ id ] ) {
+			return null;
+		}
+		const variations = products[ id ].variations;
 		const matchedVariation = getMatchedVariation(
-			availableVariations,
+			variations,
 			selectedAttributes
 		);
 		if ( matchedVariation?.variation_id ) {
@@ -220,26 +220,15 @@ const { actions, state } = store<
 				return state.validationErrors.length === 0;
 			},
 			get allowsDecrease() {
-				const {
-					quantity,
-					childProductId,
-					productType,
-					productId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
-				if (
-					productType === 'grouped' &&
-					quantity[ childProductId ] > 0
-				) {
-					return true;
+				if ( childProductId ) {
+					return quantity[ childProductId ] > 0;
 				}
 
 				const productObject = getProductData(
-					childProductId || productId,
-					productType,
-					availableVariations,
+					productDataState.productId,
 					selectedAttributes
 				);
 
@@ -254,19 +243,11 @@ const { actions, state } = store<
 				return currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
-				const {
-					quantity,
-					childProductId,
-					productType,
-					productId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { quantity, childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
-					productType,
-					availableVariations,
+					childProductId || productDataState.productId,
 					selectedAttributes
 				);
 
@@ -289,16 +270,12 @@ const { actions, state } = store<
 					return;
 				}
 
-				const context = getContext< Context >();
+				const { selectedAttributes } = getContext< Context >();
 
 				// If selected quantity is invalid, add an error.
-				const { variationId } = state;
-				const id = variationId || context.productId;
 				const productObject = getProductData(
-					id,
-					context.productType,
-					context.availableVariations,
-					context.selectedAttributes
+					productDataState.productId,
+					selectedAttributes
 				);
 
 				if (
@@ -318,20 +295,27 @@ const { actions, state } = store<
 			},
 			setQuantity( value: number ) {
 				const context = getContext< Context >();
+				const { products } = getConfig(
+					'woocommerce'
+				) as WooCommerceConfig;
+				const variations =
+					products?.[ productDataState.productId ]?.variations;
 
-				if ( context.productType === 'variable' ) {
+				if ( variations ) {
+					const variationIds = Object.keys( variations );
 					// Set the quantity for all variations, so when switching
 					// variations the quantity persists.
-					const variationIds = context.availableVariations.map(
-						( variation ) => variation.variation_id
-					);
-					const idsToUpdate = [ context.productId, ...variationIds ];
+					const idsToUpdate = [
+						productDataState.productId,
+						...variationIds,
+					];
 
 					idsToUpdate.forEach( ( id ) => {
-						context.quantity[ id ] = value;
+						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
-					const id = context.childProductId || context.productId;
+					const id =
+						context.childProductId || productDataState.productId;
 
 					context.quantity = {
 						...context.quantity,
@@ -374,18 +358,11 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const {
-					childProductId,
-					productType,
-					productId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
-					productType,
-					availableVariations,
+					childProductId || productDataState.productId,
 					selectedAttributes
 				);
 
@@ -411,18 +388,11 @@ const { actions, state } = store<
 				}
 				const { currentValue, inputElement } = inputData;
 
-				const {
-					childProductId,
-					productType,
-					productId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
 				const productObject = getProductData(
-					childProductId || productId,
-					productType,
-					availableVariations,
+					childProductId || productDataState.productId,
 					selectedAttributes
 				);
 
@@ -433,7 +403,7 @@ const { actions, state } = store<
 
 				// In grouped product children, we allow decreasing the value
 				// down to 0, even if the minimum value is greater than 0.
-				if ( productType === 'grouped' && newValue < min ) {
+				if ( childProductId && newValue < min ) {
 					if ( currentValue > min ) {
 						newValue = min;
 					} else {
@@ -454,41 +424,35 @@ const { actions, state } = store<
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const {
-					childProductId,
-					productType,
-					productId,
-					availableVariations,
-					selectedAttributes,
-				} = getContext< Context >();
+				const { childProductId, selectedAttributes } =
+					getContext< Context >();
 
-				// In grouped products, we reset invalid inputs to ''.
-				if (
-					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
-					productType === 'grouped'
-				) {
-					actions.setQuantity( 0 );
-					if ( Number.isNaN( event.target.valueAsNumber ) ) {
-						event.target.value = '';
+				let min = 1;
+				const productObject = getProductData(
+					childProductId || productDataState.productId,
+					selectedAttributes
+				);
+
+				if ( productObject ) {
+					// In grouped products, we reset invalid inputs to ''.
+					if (
+						( Number.isNaN( event.target.valueAsNumber ) ||
+							event.target.valueAsNumber === 0 ) &&
+						childProductId
+					) {
+						actions.setQuantity( 0 );
+						if ( Number.isNaN( event.target.valueAsNumber ) ) {
+							event.target.value = '';
+						}
+						dispatchChangeEvent( event.target );
+						return;
 					}
-					dispatchChangeEvent( event.target );
-					return;
+
+					min = productObject.min;
 				}
 
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
-				let min = 1;
-				const productObject = getProductData(
-					childProductId || productId,
-					productType,
-					availableVariations,
-					selectedAttributes
-				);
-				if ( productObject ) {
-					min = productObject.min;
-				}
-
 				const newValue =
 					Number.isFinite( event.target.valueAsNumber ) &&
 					event.target.valueAsNumber > 0
@@ -515,11 +479,21 @@ const { actions, state } = store<
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { productId, quantity, selectedAttributes, productType } =
-					getContext< Context >();
+				const { selectedAttributes } = getContext< Context >();
 
-				const { variationId } = state;
-				const id = variationId || productId;
+				const id =
+					productDataState.variationId || productDataState.productId;
+
+				const productType = productDataState.variationId
+					? 'variation'
+					: getProductData( id, selectedAttributes )?.type;
+
+				if ( ! productType ) {
+					return;
+				}
+
+				const { quantity } = getContext< Context >();
+
 				const newQuantity = getNewQuantity(
 					id,
 					quantity[ id ],
