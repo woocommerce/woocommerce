@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Accessibility: Avoid list of one for a single express pay option on the block cart page.

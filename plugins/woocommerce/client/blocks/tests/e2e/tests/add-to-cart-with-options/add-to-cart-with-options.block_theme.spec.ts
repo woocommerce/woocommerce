@@ -244,6 +244,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// Make Hoodie with Logo to be sold individually.
+		const cliOutput = await wpCLI(
+			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
+		);
+		const hoodieWithLogoProductId = cliOutput.stdout.match( /\d+/g )?.pop();
+		await wpCLI(
+			`wc product update ${ hoodieWithLogoProductId } --sold_individually=true --user=1`
+		);
+
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -252,9 +261,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/logo-collection' );
 
-		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
 
 		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+
 			// There is the chance the button might be clicked before the iAPI
 			// stores have been loaded.
 			await expect( async () => {
@@ -272,11 +285,19 @@ test.describe( 'Add to Cart + Options Block', () => {
 				'Increase quantity of Beanie'
 			);
 			await increaseQuantityButton.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
 			await increaseQuantityButton.click();
 
 			await addToCartButton.click();
 
-			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
 
 			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 		} );
@@ -295,6 +316,36 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantityInput ).toHaveValue( '0' );
 
 			await expect( reduceQuantityButton ).toBeDisabled();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toHaveClass( /\bdisabled\b/ );
+		} );
+
+		await test.step( 'products sold individually can be added to cart', async () => {
+			await page.reload();
+
+			const individuallySoldProductCheckbox = page.getByRole(
+				'checkbox',
+				{ name: 'Buy one of Hoodie with Logo' }
+			);
+			await individuallySoldProductCheckbox.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+
+			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
 		} );
 	} );
 
