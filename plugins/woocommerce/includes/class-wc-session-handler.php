@@ -90,7 +90,7 @@ class WC_Session_Handler extends WC_Session {
 	protected function init_hooks() {
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
-		add_action( 'template_redirect', array( $this, 'destroy_session_if_empty' ), 99 );
+		add_action( 'template_redirect', array( $this, 'destroy_session_if_empty' ), 999 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
@@ -703,6 +703,8 @@ class WC_Session_Handler extends WC_Session {
 	 * @return void
 	 *
 	 * @since 10.3.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function destroy_session_if_empty() {
 		if ( is_user_logged_in() || ! $this->_has_cookie ) {

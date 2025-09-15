@@ -36,7 +36,7 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Reset any feature settings.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
-		$features            = $features_controller->get_features();
+		$features            = $features_controller->get_features( true );
 		$features_controller->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, ! empty( $features[ self::DESTROY_EMPTY_SESSION_FEATURE ]['enabled_by_default'] ) );
 
 		parent::tearDown();
