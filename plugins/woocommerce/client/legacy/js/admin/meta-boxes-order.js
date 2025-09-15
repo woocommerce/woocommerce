@@ -491,8 +491,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							if ( response.data.notes_html ) {
-								$( 'ul.order_notes' ).empty();
-								$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
@@ -736,8 +735,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							if ( response.data.notes_html ) {
-								$( 'ul.order_notes' ).empty();
-								$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
@@ -1261,8 +1259,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							if ( response.data.notes_html ) {
-								$( 'ul.order_notes' ).empty();
-								$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
