@@ -158,14 +158,21 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$markup  = '';
 
 		if ( $product ) {
+			$is_interactive = false;
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
-				$markup = $this->get_checkbox_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_checkbox_markup( $product );
 			} else {
-				$markup = $this->get_quantity_selector_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_quantity_selector_markup( $product );
 			}
-			wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
+
+			if ( $is_interactive ) {
+				wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
+			}
+
 			if ( $markup ) {
 				$markup = '<div class="wp-block-add-to-cart-with-options-grouped-product-item-selector wc-block-add-to-cart-with-options-grouped-product-item-selector">' . $markup . '</div>';
 			}
