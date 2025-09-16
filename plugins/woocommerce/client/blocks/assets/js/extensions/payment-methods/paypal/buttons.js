@@ -7,17 +7,16 @@ import { dispatch } from '@wordpress/data';
 /**
  * PayPalButtonsContainer component.
  *
- * @param {Object}  props
- * @param {string}  props.clientId
- * @param {string}  [props.components]
- * @param {string}  [props.disableFunding]
- * @param {string}  [props.enableFunding]
- * @param {string}  [props.currency]
- * @param {string}  [props.intent]
- * @param {string}  [props.merchantId]
- * @param {string}  [props.partnerAttributionId]
- * @param {string}  [props.pageType]
- * @param {boolean} [props.isCheckout]
+ * @param {Object} props
+ * @param {string} props.clientId
+ * @param {string} [props.components]
+ * @param {string} [props.disableFunding]
+ * @param {string} [props.enableFunding]
+ * @param {string} [props.currency]
+ * @param {string} [props.intent]
+ * @param {string} [props.merchantId]
+ * @param {string} [props.partnerAttributionId]
+ * @param {string} [props.pageType]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
 const PayPalButtonsContainer = ( {
@@ -30,7 +29,6 @@ const PayPalButtonsContainer = ( {
 	merchantId,
 	partnerAttributionId,
 	pageType,
-	isCheckout,
 } ) => {
 	const options = {
 		clientId: clientId || '',
