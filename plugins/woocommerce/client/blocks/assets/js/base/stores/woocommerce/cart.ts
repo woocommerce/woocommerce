@@ -40,7 +40,6 @@ export type OptimisticCartItem = {
 	quantity: number;
 	variation?: CartVariationItem[];
 	type: string;
-	updateOptimistically?: boolean;
 };
 
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
@@ -305,12 +304,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{
-					id,
-					quantity,
-					variation,
-					updateOptimistically = true,
-				}: ClientCartItem,
+				{ id, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -339,12 +333,17 @@ const { state, actions } = store< Store >(
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// Optimistically updates the number of items in the cart.
+				// In some cases, optimistically update the number of items in
+				// the cart.
+				let updatedItem = null;
 				if ( item ) {
 					if ( item.key ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
 					}
-					if ( updateOptimistically ) {
+					const isSoldIndividually =
+						isCartItem( item ) && item.sold_individually;
+					updatedItem = { ...item, quantity };
+					if ( ! isSoldIndividually ) {
 						item.quantity = quantity;
 					}
 				} else {
@@ -354,9 +353,8 @@ const { state, actions } = store< Store >(
 						variation,
 					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
-					if ( updateOptimistically ) {
-						state.cart.items.push( item );
-					}
+					state.cart.items.push( item );
+					updatedItem = item;
 				}
 
 				// Updates the database.
@@ -369,7 +367,7 @@ const { state, actions } = store< Store >(
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
 							},
-							body: JSON.stringify( item ),
+							body: JSON.stringify( updatedItem ),
 						}
 					);
 					const json: Cart = yield res.json();
