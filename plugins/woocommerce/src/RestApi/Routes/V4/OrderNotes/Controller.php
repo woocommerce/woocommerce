@@ -128,18 +128,21 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Add links to the response.
+	 * Prepare links for the request.
 	 *
-	 * @param WP_REST_Response $response Response object.
-	 * @param WP_Comment       $note   Note object (wp comment).
-	 * @param WP_REST_Request  $request Request object.
-	 * @return WP_REST_Response
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
 	 */
-	protected function add_links( WP_REST_Response $response, WP_Comment $note, WP_REST_Request $request ) {
-		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $note->comment_ID ) ) );
-		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
-
-		return $response;
+	protected function prepare_links( $item, WP_REST_Request $request ): array {
+		return array(
+			'self'       => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $item->comment_ID ) ),
+			),
+			'collection' => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+		);
 	}
 
 	/**
@@ -147,10 +150,10 @@ class Controller extends AbstractController {
 	 *
 	 * @param WP_Comment      $note Note object.
 	 * @param WP_REST_Request $request Request object.
-	 * @return WP_REST_Response
+	 * @return array
 	 */
-	public function prepare_item_for_response( $note, $request ) {
-		$data     = array(
+	protected function get_item_response( $note, WP_REST_Request $request ): array {
+		return array(
 			'id'               => (int) $note->comment_ID,
 			'order_id'         => (int) $note->comment_post_ID,
 			'author'           => __( 'woocommerce', 'woocommerce' ) === $note->comment_author ? 'system' : $note->comment_author,
@@ -159,19 +162,6 @@ class Controller extends AbstractController {
 			'note'             => $note->comment_content,
 			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
 		);
-		$data     = $this->add_additional_fields_to_object( $data, $request );
-		$data     = $this->filter_response_by_context( $data, $request['context'] ?? 'view' );
-		$response = $this->add_links( rest_ensure_response( $data ), $note, $request );
-
-		/**
-		 * Filter the data for a response.
-		 *
-		 * @param WP_REST_Response $response The response object.
-		 * @param WP_Comment          $order   Order object.
-		 * @param WP_REST_Request  $request  Request object.
-		 * @since 10.2.0
-		 */
-		return rest_ensure_response( apply_filters( $this->get_hook_prefix() . 'item_response', $response, $note, $request ) );
 	}
 
 	/**

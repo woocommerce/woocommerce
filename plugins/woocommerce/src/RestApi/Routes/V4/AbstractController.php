@@ -14,6 +14,8 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 use WP_Error;
 use WP_Http;
 use WP_REST_Controller;
+use WP_REST_Response;
+use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,6 +77,55 @@ abstract class AbstractController extends WP_REST_Controller {
 			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->get_schema() ) );
 		}
 		return $this->schema;
+	}
+
+	/**
+	 * Get the item response.
+	 *
+	 * @param mixed           $item    WooCommerce representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array The item response.
+	 * @since 10.2.0
+	 */
+	abstract protected function get_item_response( $item, WP_REST_Request $request ): array;
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function prepare_links( $item, WP_REST_Request $request ): array {
+		return array();
+	}
+
+	/**
+	 * Prepares the item for the REST response. Controllers do not need to override this method as they can define a
+	 * get_item_response method to prepare items. This method will take care of filter hooks.
+	 *
+	 * @param mixed           $item    WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @since 10.2.0
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$response_data = $this->get_item_response( $item, $request );
+		$response_data = $this->add_additional_fields_to_object( $response_data, $request );
+		$response_data = $this->filter_response_by_context( $response_data, $request['context'] ?? 'view' );
+
+		$response = rest_ensure_response( $response_data );
+		$response->add_links( $this->prepare_links( $item, $request ) );
+
+		/**
+		 * Filter the data for a response.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param mixed           $item    WordPress representation of the item.
+		 * @param WP_REST_Request  $request  Request object.
+		 * @since 10.2.0
+		 */
+		return rest_ensure_response( apply_filters( $this->get_hook_prefix() . 'item_response', $response, $item, $request ) );
 	}
 
 	/**

@@ -80,4 +80,15 @@ class Test_Abstract_Controller_V4 extends Automattic\WooCommerce\RestApi\Routes\
 	protected function get_schema(): array {
 		return Test_Abstract_Schema_V4::get_item_schema();
 	}
+
+	/**
+	 * Get item response for testing.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( $item, WP_REST_Request $request ): array {
+		return array();
+	}
 }
