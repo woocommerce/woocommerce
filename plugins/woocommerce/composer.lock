@@ -4,29 +4,29 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5b72cd066b457917cffd2fce63d3b491",
+    "content-hash": "f78f91a7f4338f55ec12b0f2fbb5ede0",
     "packages": [
         {
             "name": "automattic/block-delimiter",
-            "version": "v0.2.1",
+            "version": "v0.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/block-delimiter.git",
-                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04"
+                "reference": "f36d786abdd4e10cfec8b261796dac9cdd192457"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/block-delimiter/zipball/b303cdc29656df4efbd0753adb8c284d8b986f04",
-                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04",
+                "url": "https://api.github.com/repos/Automattic/block-delimiter/zipball/f36d786abdd4e10cfec8b261796dac9cdd192457",
+                "reference": "f36d786abdd4e10cfec8b261796dac9cdd192457",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.5",
-                "automattic/phpunit-select-config": "^1.0.3",
-                "yoast/phpunit-polyfills": "^4.0.0"
+                "automattic/jetpack-changelogger": "^6.0.6",
+                "automattic/jetpack-test-environment": "@dev",
+                "automattic/phpunit-select-config": "^1.0.3"
             },
             "suggest": {
                 "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
@@ -37,7 +37,7 @@
                 "textdomain": "jetpack-block-delimiter",
                 "mirror-repo": "Automattic/block-delimiter",
                 "branch-alias": {
-                    "dev-trunk": "0.2.x-dev"
+                    "dev-trunk": "0.3.x-dev"
                 },
                 "changelogger": {
                     "link-template": "https://github.com/Automattic/block-delimiter/compare/v${old}...v${new}"
@@ -54,9 +54,9 @@
             ],
             "description": "Efficiently work with block structure",
             "support": {
-                "source": "https://github.com/Automattic/block-delimiter/tree/v0.2.1"
+                "source": "https://github.com/Automattic/block-delimiter/tree/v0.3.4"
             },
-            "time": "2025-06-23T19:59:34+00:00"
+            "time": "2025-09-01T13:50:05+00:00"
         },
         {
             "name": "automattic/jetpack-a8c-mc-stats",
@@ -168,25 +168,25 @@
         },
         {
             "name": "automattic/jetpack-assets",
-            "version": "v4.3.5",
+            "version": "v4.3.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-assets.git",
-                "reference": "5b0f74ff0de9d36c12242c0ef07b9a1fa922849b"
+                "reference": "ddb61de11993f99e676ddc8b99af89d560b178e5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-assets/zipball/5b0f74ff0de9d36c12242c0ef07b9a1fa922849b",
-                "reference": "5b0f74ff0de9d36c12242c0ef07b9a1fa922849b",
+                "url": "https://api.github.com/repos/Automattic/jetpack-assets/zipball/ddb61de11993f99e676ddc8b99af89d560b178e5",
+                "reference": "ddb61de11993f99e676ddc8b99af89d560b178e5",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-constants": "^3.0.8",
-                "automattic/jetpack-status": "^6.0.3",
+                "automattic/jetpack-status": "^6.0.4",
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.6",
+                "automattic/jetpack-changelogger": "^6.0.7",
                 "automattic/phpunit-select-config": "^1.0.3",
                 "brain/monkey": "^2.6.2",
                 "wikimedia/testing-access-wrapper": "^1.0 || ^2.0 || ^3.0",
@@ -221,9 +221,9 @@
             ],
             "description": "Asset management utilities for Jetpack ecosystem packages",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-assets/tree/v4.3.5"
+                "source": "https://github.com/Automattic/jetpack-assets/tree/v4.3.7"
             },
-            "time": "2025-08-18T15:25:14+00:00"
+            "time": "2025-09-15T14:37:22+00:00"
         },
         {
             "name": "automattic/jetpack-autoloader",
@@ -371,30 +371,30 @@
         },
         {
             "name": "automattic/jetpack-connection",
-            "version": "v6.18.1",
+            "version": "v6.18.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-connection.git",
-                "reference": "3ebd14d8570657b888d28bd4f4a708f6d7273344"
+                "reference": "49457cab427723e54432d70289c02037e7603026"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/3ebd14d8570657b888d28bd4f4a708f6d7273344",
-                "reference": "3ebd14d8570657b888d28bd4f4a708f6d7273344",
+                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/49457cab427723e54432d70289c02037e7603026",
+                "reference": "49457cab427723e54432d70289c02037e7603026",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-a8c-mc-stats": "^3.0.5",
                 "automattic/jetpack-admin-ui": "^0.5.11",
-                "automattic/jetpack-assets": "^4.3.5",
+                "automattic/jetpack-assets": "^4.3.7",
                 "automattic/jetpack-constants": "^3.0.8",
-                "automattic/jetpack-redirect": "^3.0.8",
+                "automattic/jetpack-redirect": "^3.0.9",
                 "automattic/jetpack-roles": "^3.0.8",
-                "automattic/jetpack-status": "^6.0.3",
+                "automattic/jetpack-status": "^6.0.4",
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.6",
+                "automattic/jetpack-changelogger": "^6.0.7",
                 "automattic/jetpack-test-environment": "@dev",
                 "automattic/phpunit-select-config": "^1.0.3",
                 "brain/monkey": "^2.6.2",
@@ -441,9 +441,9 @@
             ],
             "description": "Everything needed to connect to the Jetpack infrastructure",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.18.1"
+                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.18.7"
             },
-            "time": "2025-08-18T15:25:41+00:00"
+            "time": "2025-09-15T14:37:40+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -499,24 +499,24 @@
         },
         {
             "name": "automattic/jetpack-redirect",
-            "version": "v3.0.8",
+            "version": "v3.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-redirect.git",
-                "reference": "876617673a655797178a4c35d9676000829432df"
+                "reference": "afb74d7c2ae46863c2af46b5703cf1c8728e6a5d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-redirect/zipball/876617673a655797178a4c35d9676000829432df",
-                "reference": "876617673a655797178a4c35d9676000829432df",
+                "url": "https://api.github.com/repos/Automattic/jetpack-redirect/zipball/afb74d7c2ae46863c2af46b5703cf1c8728e6a5d",
+                "reference": "afb74d7c2ae46863c2af46b5703cf1c8728e6a5d",
                 "shasum": ""
             },
             "require": {
-                "automattic/jetpack-status": "^6.0.0",
+                "automattic/jetpack-status": "^6.0.3",
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.5",
+                "automattic/jetpack-changelogger": "^6.0.6",
                 "automattic/phpunit-select-config": "^1.0.3",
                 "brain/monkey": "^2.6.2",
                 "yoast/phpunit-polyfills": "^4.0.0"
@@ -546,9 +546,9 @@
             ],
             "description": "Utilities to build URLs to the jetpack.com/redirect/ service",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-redirect/tree/v3.0.8"
+                "source": "https://github.com/Automattic/jetpack-redirect/tree/v3.0.9"
             },
-            "time": "2025-07-21T15:54:58+00:00"
+            "time": "2025-08-25T05:54:15+00:00"
         },
         {
             "name": "automattic/jetpack-roles",
@@ -604,16 +604,16 @@
         },
         {
             "name": "automattic/jetpack-status",
-            "version": "v6.0.3",
+            "version": "v6.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-status.git",
-                "reference": "a51e12ed67ba58e5f8551cef819eb8a4d8eded1c"
+                "reference": "6eefeeed590f248bc7b11aa12b12ab93e288bcd3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-status/zipball/a51e12ed67ba58e5f8551cef819eb8a4d8eded1c",
-                "reference": "a51e12ed67ba58e5f8551cef819eb8a4d8eded1c",
+                "url": "https://api.github.com/repos/Automattic/jetpack-status/zipball/6eefeeed590f248bc7b11aa12b12ab93e288bcd3",
+                "reference": "6eefeeed590f248bc7b11aa12b12ab93e288bcd3",
                 "shasum": ""
             },
             "require": {
@@ -623,7 +623,7 @@
             "require-dev": {
                 "automattic/jetpack-changelogger": "^6.0.6",
                 "automattic/jetpack-connection": "@dev",
-                "automattic/jetpack-ip": "^0.4.9",
+                "automattic/jetpack-ip": "^0.4.10",
                 "automattic/jetpack-plans": "@dev",
                 "automattic/phpunit-select-config": "^1.0.3",
                 "brain/monkey": "^2.6.2",
@@ -660,9 +660,9 @@
             ],
             "description": "Used to retrieve information about the current status of Jetpack and the site overall.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-status/tree/v6.0.3"
+                "source": "https://github.com/Automattic/jetpack-status/tree/v6.0.4"
             },
-            "time": "2025-08-14T13:40:33+00:00"
+            "time": "2025-09-08T17:51:46+00:00"
         },
         {
             "name": "composer/installers",
@@ -1070,41 +1070,42 @@
         },
         {
             "name": "pelago/emogrifier",
-            "version": "v8.0.0",
+            "version": "v8.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MyIntervals/emogrifier.git",
-                "reference": "7fdf4ee46fe57bd017b92640bca1ec42d124440a"
+                "reference": "e59cdcc21139c5a630edf7896aad02f01140fa01"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MyIntervals/emogrifier/zipball/7fdf4ee46fe57bd017b92640bca1ec42d124440a",
-                "reference": "7fdf4ee46fe57bd017b92640bca1ec42d124440a",
+                "url": "https://api.github.com/repos/MyIntervals/emogrifier/zipball/e59cdcc21139c5a630edf7896aad02f01140fa01",
+                "reference": "e59cdcc21139c5a630edf7896aad02f01140fa01",
                 "shasum": ""
             },
             "require": {
                 "ext-dom": "*",
                 "ext-libxml": "*",
-                "php": "~7.3.0 || ~7.4.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0",
-                "sabberworm/php-css-parser": "^9.0.0",
-                "symfony/css-selector": "^5.4.35 || ~6.3.12 || ^6.4.3 || ^7.0.3"
+                "php": "~7.3.0 || ~7.4.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "sabberworm/php-css-parser": "^9.1.0",
+                "symfony/css-selector": "^5.4.35 || ~6.3.12 || ^6.4.3 || ^7.0.3",
+                "thecodingmachine/safe": "^1.3 || ^2.5 || ^3.3"
             },
             "require-dev": {
                 "php-parallel-lint/php-parallel-lint": "1.4.0",
                 "phpmd/phpmd": "2.15.0",
                 "phpstan/extension-installer": "1.4.3",
-                "phpstan/phpstan": "1.12.28 || 2.1.20",
+                "phpstan/phpstan": "1.12.28 || 2.1.25",
                 "phpstan/phpstan-phpunit": "1.4.2 || 2.0.7",
                 "phpstan/phpstan-strict-rules": "1.6.2 || 2.0.6",
-                "phpunit/phpunit": "9.6.23",
+                "phpunit/phpunit": "9.6.27",
                 "rawr/phpunit-data-provider": "3.3.1",
-                "rector/rector": "1.2.10 || 2.1.2",
+                "rector/rector": "1.2.10 || 2.1.7",
                 "rector/type-perfect": "1.0.0 || 2.1.0"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "8.1.x-dev"
+                    "dev-main": "8.2.x-dev"
                 }
             },
             "autoload": {
@@ -1151,35 +1152,36 @@
                 "issues": "https://github.com/MyIntervals/emogrifier/issues",
                 "source": "https://github.com/MyIntervals/emogrifier"
             },
-            "time": "2025-07-27T17:45:42+00:00"
+            "time": "2025-09-15T12:53:23+00:00"
         },
         {
             "name": "sabberworm/php-css-parser",
-            "version": "v9.0.0",
+            "version": "v9.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MyIntervals/PHP-CSS-Parser.git",
-                "reference": "54574e3de2f8cdc91175ffd2337e5c6804a7d729"
+                "reference": "1b363fdbdc6dd0ca0f4bf98d3a4d7f388133f1fb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/54574e3de2f8cdc91175ffd2337e5c6804a7d729",
-                "reference": "54574e3de2f8cdc91175ffd2337e5c6804a7d729",
+                "url": "https://api.github.com/repos/MyIntervals/PHP-CSS-Parser/zipball/1b363fdbdc6dd0ca0f4bf98d3a4d7f388133f1fb",
+                "reference": "1b363fdbdc6dd0ca0f4bf98d3a4d7f388133f1fb",
                 "shasum": ""
             },
             "require": {
                 "ext-iconv": "*",
-                "php": "^7.2.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0"
+                "php": "^7.2.0 || ~8.0.0 || ~8.1.0 || ~8.2.0 || ~8.3.0 || ~8.4.0 || ~8.5.0",
+                "thecodingmachine/safe": "^1.3 || ^2.5 || ^3.3"
             },
             "require-dev": {
                 "php-parallel-lint/php-parallel-lint": "1.4.0",
                 "phpstan/extension-installer": "1.4.3",
-                "phpstan/phpstan": "1.12.28 || 2.1.19",
+                "phpstan/phpstan": "1.12.28 || 2.1.25",
                 "phpstan/phpstan-phpunit": "1.4.2 || 2.0.7",
                 "phpstan/phpstan-strict-rules": "1.6.2 || 2.0.6",
-                "phpunit/phpunit": "8.5.42",
+                "phpunit/phpunit": "8.5.46",
                 "rawr/phpunit-data-provider": "3.3.1",
-                "rector/rector": "1.2.10 || 2.1.2",
+                "rector/rector": "1.2.10 || 2.1.7",
                 "rector/type-perfect": "1.0.0 || 2.1.0"
             },
             "suggest": {
@@ -1188,7 +1190,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-main": "9.1.x-dev"
+                    "dev-main": "9.2.x-dev"
                 }
             },
             "autoload": {
@@ -1222,9 +1224,9 @@
             ],
             "support": {
                 "issues": "https://github.com/MyIntervals/PHP-CSS-Parser/issues",
-                "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v9.0.0"
+                "source": "https://github.com/MyIntervals/PHP-CSS-Parser/tree/v9.1.0"
             },
-            "time": "2025-07-27T07:24:01+00:00"
+            "time": "2025-09-14T07:37:21+00:00"
         },
         {
             "name": "symfony/css-selector",
@@ -1375,6 +1377,145 @@
                 }
             ],
             "time": "2025-01-02T08:10:11+00:00"
+        },
+        {
+            "name": "thecodingmachine/safe",
+            "version": "v1.3.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thecodingmachine/safe.git",
+                "reference": "a8ab0876305a4cdaef31b2350fcb9811b5608dbc"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thecodingmachine/safe/zipball/a8ab0876305a4cdaef31b2350fcb9811b5608dbc",
+                "reference": "a8ab0876305a4cdaef31b2350fcb9811b5608dbc",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^0.12",
+                "squizlabs/php_codesniffer": "^3.2",
+                "thecodingmachine/phpstan-strict-rules": "^0.12"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.1-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "deprecated/apc.php",
+                    "deprecated/libevent.php",
+                    "deprecated/mssql.php",
+                    "deprecated/stats.php",
+                    "lib/special_cases.php",
+                    "generated/apache.php",
+                    "generated/apcu.php",
+                    "generated/array.php",
+                    "generated/bzip2.php",
+                    "generated/calendar.php",
+                    "generated/classobj.php",
+                    "generated/com.php",
+                    "generated/cubrid.php",
+                    "generated/curl.php",
+                    "generated/datetime.php",
+                    "generated/dir.php",
+                    "generated/eio.php",
+                    "generated/errorfunc.php",
+                    "generated/exec.php",
+                    "generated/fileinfo.php",
+                    "generated/filesystem.php",
+                    "generated/filter.php",
+                    "generated/fpm.php",
+                    "generated/ftp.php",
+                    "generated/funchand.php",
+                    "generated/gmp.php",
+                    "generated/gnupg.php",
+                    "generated/hash.php",
+                    "generated/ibase.php",
+                    "generated/ibmDb2.php",
+                    "generated/iconv.php",
+                    "generated/image.php",
+                    "generated/imap.php",
+                    "generated/info.php",
+                    "generated/ingres-ii.php",
+                    "generated/inotify.php",
+                    "generated/json.php",
+                    "generated/ldap.php",
+                    "generated/libxml.php",
+                    "generated/lzf.php",
+                    "generated/mailparse.php",
+                    "generated/mbstring.php",
+                    "generated/misc.php",
+                    "generated/msql.php",
+                    "generated/mysql.php",
+                    "generated/mysqli.php",
+                    "generated/mysqlndMs.php",
+                    "generated/mysqlndQc.php",
+                    "generated/network.php",
+                    "generated/oci8.php",
+                    "generated/opcache.php",
+                    "generated/openssl.php",
+                    "generated/outcontrol.php",
+                    "generated/password.php",
+                    "generated/pcntl.php",
+                    "generated/pcre.php",
+                    "generated/pdf.php",
+                    "generated/pgsql.php",
+                    "generated/posix.php",
+                    "generated/ps.php",
+                    "generated/pspell.php",
+                    "generated/readline.php",
+                    "generated/rpminfo.php",
+                    "generated/rrd.php",
+                    "generated/sem.php",
+                    "generated/session.php",
+                    "generated/shmop.php",
+                    "generated/simplexml.php",
+                    "generated/sockets.php",
+                    "generated/sodium.php",
+                    "generated/solr.php",
+                    "generated/spl.php",
+                    "generated/sqlsrv.php",
+                    "generated/ssdeep.php",
+                    "generated/ssh2.php",
+                    "generated/stream.php",
+                    "generated/strings.php",
+                    "generated/swoole.php",
+                    "generated/uodbc.php",
+                    "generated/uopz.php",
+                    "generated/url.php",
+                    "generated/var.php",
+                    "generated/xdiff.php",
+                    "generated/xml.php",
+                    "generated/xmlrpc.php",
+                    "generated/yaml.php",
+                    "generated/yaz.php",
+                    "generated/zip.php",
+                    "generated/zlib.php"
+                ],
+                "psr-4": {
+                    "Safe\\": [
+                        "lib/",
+                        "deprecated/",
+                        "generated/"
+                    ]
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "PHP core functions that throw exceptions instead of returning FALSE on error",
+            "support": {
+                "issues": "https://github.com/thecodingmachine/safe/issues",
+                "source": "https://github.com/thecodingmachine/safe/tree/v1.3.3"
+            },
+            "time": "2020-10-28T17:51:34+00:00"
         },
         {
             "name": "woocommerce/action-scheduler",
@@ -2939,16 +3080,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.6.24",
+            "version": "9.6.27",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "ea49afa29aeea25ea7bf9de9fdd7cab163cc0701"
+                "reference": "0a9aa4440b6a9528cf360071502628d717af3e0a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/ea49afa29aeea25ea7bf9de9fdd7cab163cc0701",
-                "reference": "ea49afa29aeea25ea7bf9de9fdd7cab163cc0701",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0a9aa4440b6a9528cf360071502628d717af3e0a",
+                "reference": "0a9aa4440b6a9528cf360071502628d717af3e0a",
                 "shasum": ""
             },
             "require": {
@@ -3022,7 +3163,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.24"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.27"
             },
             "funding": [
                 {
@@ -3046,7 +3187,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-08-10T08:32:42+00:00"
+            "time": "2025-09-14T06:18:03+00:00"
         },
         {
             "name": "psr/container",
@@ -5366,7 +5507,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-trunk",
+            "version": "dev-performance/58285-replace-parse_blocks-1",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

@@ -1,6 +1,8 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\Block_Scanner;
+
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
  */
@@ -415,23 +417,21 @@ class CartCheckoutUtils {
 	 * Recursively search the checkout block to find the express checkout block and
 	 * get the button style attributes
 	 *
-	 * @param array  $blocks Blocks to search.
+	 * @param string $post_content Blocks to search.
 	 * @param string $cart_or_checkout The block type to check.
 	 */
-	public static function find_express_checkout_attributes( $blocks, $cart_or_checkout ) {
+	public static function find_express_checkout_attributes( $post_content, $cart_or_checkout ) {
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
-		foreach ( $blocks as $block ) {
-			if ( ! empty( $block['blockName'] ) && $express_block_name === $block['blockName'] && ! empty( $block['attrs'] ) ) {
-				return $block['attrs'];
-			}
 
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$answer = self::find_express_checkout_attributes( $block['innerBlocks'], $cart_or_checkout );
-				if ( $answer ) {
-					return $answer;
-				}
+		$scanner = Block_Scanner::create( $post_content );
+
+		while ( $scanner->next_delimiter() ) {
+			if ( $scanner->opens_block( $express_block_name ) ) {
+				return $scanner->allocate_and_return_parsed_attributes();
 			}
 		}
+
+		return null;
 	}
 
 	/**
