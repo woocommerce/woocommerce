@@ -17,13 +17,12 @@ jQuery(function ($) {
 				// TODO: Add onApprove logic here
 			},
 
-			onError: function ( error ) {
-				console.log( 'PayPal onError:', error );
-				
+			onError: function ( error ) {				
+				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
 						'PayPal error: ' +
-						error.message +
+						sanitizedErrorMessage +
 					'</li></ul>';	
 				
 				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
