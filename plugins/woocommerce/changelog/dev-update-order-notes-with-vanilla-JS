@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Use vanilla JS to replace order_notes after ajax updates
