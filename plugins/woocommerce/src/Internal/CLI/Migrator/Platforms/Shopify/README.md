@@ -10,7 +10,7 @@ The Shopify platform integration provides a complete, production-ready implement
 
 ### ShopifyPlatform (`ShopifyPlatform.php`)
 
-**Platform Registration Component**
+#### Platform Registration Component
 
 - Registers with WooCommerce migrator system via `woocommerce_migrator_platforms` filter (handled by [`PlatformRegistry`](../../Core/PlatformRegistry.php))
 - Defines required credentials: `shop_url` and `access_token`
@@ -18,7 +18,7 @@ The Shopify platform integration provides a complete, production-ready implement
 
 ### ShopifyClient (`ShopifyClient.php`)
 
-**API Communication Layer**
+#### API Communication Layer
 
 - **Dual API Support**: REST API for simple operations, GraphQL for complex queries
 - **API Version**: Uses Shopify API version `2025-04`
@@ -28,7 +28,7 @@ The Shopify platform integration provides a complete, production-ready implement
 
 ### ShopifyFetcher (`ShopifyFetcher.php`)
 
-**Data Retrieval Implementation** (`PlatformFetcherInterface`)
+#### Data Retrieval Implementation (`PlatformFetcherInterface`)
 
 - **GraphQL Query**: Comprehensive product query with variants, images, collections, metafields
 - **Pagination**: Cursor-based pagination with `edges` and `pageInfo`
@@ -37,7 +37,7 @@ The Shopify platform integration provides a complete, production-ready implement
 
 ### ShopifyMapper (`ShopifyMapper.php`)
 
-**Data Transformation Implementation** (`PlatformMapperInterface`)
+#### Data Transformation Implementation (`PlatformMapperInterface`)
 
 - **Product Types**: Simple and variable product mapping
 - **Field Processing**: Selective field processing based on constructor arguments
