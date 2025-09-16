@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Use a more robust way to post-process the style attribute values within the Email Editor.

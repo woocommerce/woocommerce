@@ -3,7 +3,7 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select, useSelect } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
@@ -329,7 +329,11 @@ export const useSetPreviewState = ( {
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
 } ) => {
+	const { __unstableMarkNextChangeAsNotPersistent } =
+		useDispatch( blockEditorStore );
+
 	const setState = ( newPreviewState: PreviewState ) => {
+		__unstableMarkNextChangeAsNotPersistent();
 		setAttributes( {
 			__privatePreviewState: {
 				...attributes.__privatePreviewState,
@@ -346,8 +350,9 @@ export const useSetPreviewState = ( {
 		location,
 		isUsingReferencePreviewMode
 	);
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: usesReferencePreviewMessage.length > 0,
@@ -393,11 +398,12 @@ export const useSetPreviewState = ( {
 		location.type === LocationType.Archive
 			? location.sourceData?.termId
 			: null;
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: isGenericArchiveTemplate

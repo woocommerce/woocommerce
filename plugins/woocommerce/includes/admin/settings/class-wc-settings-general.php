@@ -49,58 +49,55 @@ class WC_Settings_General extends WC_Settings_Page {
 			$currency_code_options[ $code ] = $name . ' (' . get_woocommerce_currency_symbol( $code ) . ') — ' . esc_html( $code );
 		}
 
-		$enable_address_autocomplete_setting             = array();
 		$address_autocomplete_preferred_provider_setting = array();
 		$address_autocomplete_setting_desc_tip           = __( 'Suggest full addresses for customer as they type.', 'woocommerce' );
 
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			// This is in a try because getting the class from the container may fail if the class is not available.
-			// If it fails, these settings should not be shown as the feature is not available.
-			try {
-				$address_provider_class         = wc_get_container()->get( AddressProviderController::class );
-				$address_autocomplete_providers = $address_provider_class->get_providers();
-				$address_autocomplete_available = ! empty( $address_autocomplete_providers );
+		// This is in a try because getting the class from the container may fail if the class is not available.
+		// If it fails, these settings should not be shown as the feature is not available.
+		try {
+			$address_provider_class         = wc_get_container()->get( AddressProviderController::class );
+			$address_autocomplete_providers = $address_provider_class->get_providers();
+			$address_autocomplete_available = ! empty( $address_autocomplete_providers );
 
-				if ( ! $address_autocomplete_available ) {
-					// translators: %s: WooPayments URL.
-					$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'To use this feature, you need to install an address provider such as <a href="%s">WooPayments</a>.', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
-				}
-
-				$enable_address_autocomplete_setting = array(
-					'id'       => 'woocommerce_address_autocomplete_enabled',
-					'desc'     => __( 'Enable predictive address search', 'woocommerce' ),
-					'name'     => __( 'Address autocomplete', 'woocommerce' ),
-					'type'     => 'checkbox',
-					'disabled' => ! $address_autocomplete_available,
-					'desc_tip' => $address_autocomplete_setting_desc_tip,
-					'default'  => 'no',
-				);
-
-				// If no providers are available, make sure the checkbox is unchecked.
-				if ( ! $address_autocomplete_available ) {
-					$enable_address_autocomplete_setting['value'] = false;
-				}
-
-				if ( count( $address_autocomplete_providers ) > 1 ) {
-					$address_provider_options = array();
-					foreach ( $address_autocomplete_providers as $address_provider ) {
-						$address_provider_options[ $address_provider->id ] = $address_provider->name;
-					}
-					$address_autocomplete_preferred_provider_setting = array(
-						'id'      => 'woocommerce_address_autocomplete_provider',
-						'name'    => __( 'Preferred address autocomplete provider', 'woocommerce' ),
-						'type'    => 'select',
-						'class'   => 'wc-enhanced-select',
-						'default' => $address_autocomplete_providers[0]->id ?? '',
-						'options' => $address_provider_options,
-					);
-				}
-			} catch ( \Exception $e ) {
-				// If the class is not available, we don't want to show the setting.
-				wc_get_logger()->log( 'error', 'Error getting address provider class: ' . $e->getMessage() );
-				$enable_address_autocomplete_setting             = array();
-				$address_autocomplete_preferred_provider_setting = array();
+			if ( ! $address_autocomplete_available ) {
+				// translators: %s: WooPayments URL.
+				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'To use this feature, you need to install an address provider such as <a href="%s">WooPayments</a>.', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
 			}
+
+			$enable_address_autocomplete_setting = array(
+				'id'       => 'woocommerce_address_autocomplete_enabled',
+				'desc'     => __( 'Enable predictive address search', 'woocommerce' ),
+				'name'     => __( 'Address autocomplete', 'woocommerce' ),
+				'type'     => 'checkbox',
+				'disabled' => ! $address_autocomplete_available,
+				'desc_tip' => $address_autocomplete_setting_desc_tip,
+				'default'  => 'no',
+			);
+
+			// If no providers are available, make sure the checkbox is unchecked.
+			if ( ! $address_autocomplete_available ) {
+				$enable_address_autocomplete_setting['value'] = false;
+			}
+
+			if ( count( $address_autocomplete_providers ) > 1 ) {
+				$address_provider_options = array();
+				foreach ( $address_autocomplete_providers as $address_provider ) {
+					$address_provider_options[ $address_provider->id ] = $address_provider->name;
+				}
+				$address_autocomplete_preferred_provider_setting = array(
+					'id'      => 'woocommerce_address_autocomplete_provider',
+					'name'    => __( 'Preferred address autocomplete provider', 'woocommerce' ),
+					'type'    => 'select',
+					'class'   => 'wc-enhanced-select',
+					'default' => $address_autocomplete_providers[0]->id ?? '',
+					'options' => $address_provider_options,
+				);
+			}
+		} catch ( \Exception $e ) {
+			// If the class is not available, we don't want to show the setting.
+			wc_get_logger()->log( 'error', 'Error getting address provider class: ' . $e->getMessage() );
+			$enable_address_autocomplete_setting             = array();
+			$address_autocomplete_preferred_provider_setting = array();
 		}
 
 		$settings =
