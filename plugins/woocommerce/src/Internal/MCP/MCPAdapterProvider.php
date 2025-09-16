@@ -86,6 +86,11 @@ class MCPAdapterProvider {
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
 		$abilities_ids = $abilities_registry->getAbilitiesIDs();
 
+		// Temporarily disable MCP validation during server creation
+		// Workaround for validator bug with union types (e.g., ["integer", "null"])
+		// TODO: Remove once mcp-adapter validator bug is fixed
+		add_filter( 'mcp_validation_enabled', '__return_false', 999 );
+
 		// Create MCP server
 		$adapter->create_server(
 			'woocommerce-mcp',                                           // Server ID
@@ -99,6 +104,9 @@ class MCPAdapterProvider {
 			\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class, // Observability handler
 			$abilities_ids,                                             // Abilities from registry
 		);
+
+		// Re-enable MCP validation immediately after server creation
+		remove_filter( 'mcp_validation_enabled', '__return_false', 999 );
 	}
 
 	/**
