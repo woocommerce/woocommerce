@@ -481,11 +481,10 @@ function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $re
 		/**
 		 * Filter whether to lazy load the namespace.  When set to false, the namespace will be loaded immediately during initialization.
 		 *
-		 * @param bool Whether to lazy load the namespace instead of loading immediately.
-		 * @param string The namespace.
+		 * @param bool   $should_lazy_load_namespace Whether to lazy load the namespace instead of loading immediately.
+		 * @param string $ns                         The namespace.
 		 *
 		 * @since 10.3.0
-		 *
 		 */
 		$should_lazy_load_namespace = apply_filters( 'woocommerce_rest_should_lazy_load_namespace', true, $ns );
 		if ( $should_lazy_load_namespace ) {
