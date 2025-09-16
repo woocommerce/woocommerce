@@ -2612,7 +2612,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @param array|null $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
 	 * @return string
 	 */
-	public function get_cogs_total_value_html( ?array $wc_price_arg = null ) {
+	public function get_cogs_total_value_html( ?array $wc_price_arg = null ): string {
 		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
 			return '';
 		}

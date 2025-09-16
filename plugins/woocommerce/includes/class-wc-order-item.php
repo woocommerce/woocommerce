@@ -641,11 +641,14 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 *
 	 * @return string
 	 */
-	public function get_cogs_refund_value_html( float $refunded_cost, ?array $wc_price_arg = null, ?WC_Order $order = null ) {
+	public function get_cogs_refund_value_html( float $refunded_cost, ?array $wc_price_arg = null, ?WC_Order $order = null ): string {
 		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
 			return '';
 		}
 
+		if ( $refunded_cost > 0 ) {
+			$refunded_cost = -$refunded_cost;
+		}
 		$order ??= $this->get_order();
 		$html    = $refunded_cost ? '<small class="refunded">' . wc_price( $refunded_cost, $wc_price_arg ?? array( 'currency' => $order->get_currency() ) ) . '</small>' : '';
 
@@ -655,8 +658,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		 * @since 10.3.0
 		 *
 		 * @param string $refunded_html The formatted refunded COGS HTML.
-		 * @param float  $refunded_cost The refunded cost value.
-		 * @param array  $item          The order item data.
+		 * @param float  $refunded_cost The refunded cost value (always zero or a negative number).
+		 * @param WC_Order_Item $item   The order item object.
 		 * @param WC_Order $order       The order object.
 		 */
 		return apply_filters( 'woocommerce_order_item_cogs_refunded_html', $html, $refunded_cost, $this, $order );
