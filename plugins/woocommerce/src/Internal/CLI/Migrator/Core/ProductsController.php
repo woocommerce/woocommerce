@@ -133,7 +133,7 @@ class ProductsController {
 		$progress_label = $this->parsed_args['dry_run']
 			? 'Simulating Products from ' . ucfirst( $this->parsed_args['platform'] )
 			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
-		$progress = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
+		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
 
 		if ( ! $this->parsed_args['dry_run'] ) {
 			$progress->tick( $this->session->count_all_imported_entities(), false );
@@ -627,14 +627,6 @@ class ProductsController {
 				$existing_product_id = wc_get_product_id_by_sku( $product_data['sku'] );
 			}
 
-			if ( ! $existing_product_id && ! empty( $product_data['name'] ) ) {
-				$existing_post = get_page_by_title( $product_data['name'], OBJECT, 'product' );
-				if ( $existing_post ) {
-					$existing_product_id = $existing_post->ID;
-				}
-				wp_reset_postdata();
-			}
-
 			$would_skip = false;
 			if ( $existing_product_id && $this->parsed_args['skip_existing'] ) {
 				$would_skip = true;
@@ -687,9 +679,10 @@ class ProductsController {
 	 */
 	private function simulate_stats_increment( string $stat_key ): void {
 		try {
-			$reflection = new \ReflectionClass( $this->product_importer );
+			$reflection     = new \ReflectionClass( $this->product_importer );
 			$stats_property = $reflection->getProperty( 'import_stats' );
 			$stats_property->setAccessible( true );
+
 			$current_stats = $stats_property->getValue( $this->product_importer );
 			if ( isset( $current_stats[ $stat_key ] ) ) {
 				++$current_stats[ $stat_key ];
