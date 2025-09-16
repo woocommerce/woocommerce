@@ -183,6 +183,9 @@ class WC_Tracker {
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
 
+		// Migrator CLI statistics.
+		$data['migrator'] = self::get_migrator_data();
+
 		// Get order snapshot.
 		$data['order_snapshot'] = self::get_order_snapshot();
 
@@ -967,6 +970,17 @@ class WC_Tracker {
 			return 0;
 		}
 		return wp_count_terms( 'product_brand' );
+	}
+
+	/**
+	 * Get migrator CLI statistics.
+	 *
+	 * @return array
+	 */
+	private static function get_migrator_data() {
+		return array(
+			'products_migrated' => absint( get_option( 'wc_migrator_products_count', 0 ) ),
+		);
 	}
 
 	/**

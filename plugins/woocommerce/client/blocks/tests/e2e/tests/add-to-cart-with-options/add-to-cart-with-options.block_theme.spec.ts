@@ -158,7 +158,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const colorRedOption = page.locator( 'label:has-text("Red")' );
-		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
@@ -215,6 +217,27 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
+		await test.step( 'resets blocks rendering variation data when attributes are deselected', async () => {
+			await colorBlueOption.click();
+
+			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
+			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+			await expect(
+				page
+					.getByLabel( 'Additional Information', { exact: true } )
+					.getByText( '1.5 lbs' )
+			).toBeVisible();
+			await expect( page.getByText( variationDescription ) ).toBeHidden();
+			await expect( async () => {
+				const newVisibleLargeImageId =
+					await productGalleryPageObject.getVisibleLargeImageId();
+
+				expect( newVisibleLargeImageId ).toBe( '34' );
+			} ).toPass( { timeout: 1_000 } );
+		} );
+
 		await test.step( 'successfully adds to cart when attributes are selected', async () => {
 			await colorGreenOption.click();
 
@@ -244,6 +267,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// Make Hoodie with Logo to be sold individually.
+		const cliOutput = await wpCLI(
+			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
+		);
+		const hoodieWithLogoProductId = cliOutput.stdout.match( /\d+/g )?.pop();
+		await wpCLI(
+			`wc product update ${ hoodieWithLogoProductId } --sold_individually=true --user=1`
+		);
+
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -252,9 +284,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page.goto( '/logo-collection' );
 
-		const addToCartButton = page.getByText( 'Add to cart' ).first();
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
 
 		await test.step( 'displays an error when attempting to add grouped products with zero quantity', async () => {
+			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+
 			// There is the chance the button might be clicked before the iAPI
 			// stores have been loaded.
 			await expect( async () => {
@@ -272,11 +308,19 @@ test.describe( 'Add to Cart + Options Block', () => {
 				'Increase quantity of Beanie'
 			);
 			await increaseQuantityButton.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
 			await increaseQuantityButton.click();
 
 			await addToCartButton.click();
 
-			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
 
 			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
 		} );
@@ -295,6 +339,36 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( quantityInput ).toHaveValue( '0' );
 
 			await expect( reduceQuantityButton ).toBeDisabled();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toHaveClass( /\bdisabled\b/ );
+		} );
+
+		await test.step( 'products sold individually can be added to cart', async () => {
+			await page.reload();
+
+			const individuallySoldProductCheckbox = page.getByRole(
+				'checkbox',
+				{ name: 'Buy one of Hoodie with Logo' }
+			);
+			await individuallySoldProductCheckbox.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+
+			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
 		} );
 	} );
 
@@ -747,5 +821,67 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect(
 			page.getByLabel( 'Quantity of T-Shirt in your cart.' )
 		).toHaveValue( '1' );
+	} );
+
+	test( 'allows adding simple products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 't-shirt' );
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect( addToCartButton ).toHaveText( '1 in cart' );
+	} );
+
+	test( 'allows adding variable products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 'hoodie' );
+
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const logoYesOption = page.locator( 'label:has-text("Yes")' );
+
+		await colorBlueOption.click();
+		await logoYesOption.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
+	test( 'allows adding grouped products to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock( 'logo-collection' );
+
+		const increaseQuantityButton = page.getByLabel(
+			'Increase quantity of T-Shirt'
+		);
+		await increaseQuantityButton.click();
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
+		).toBeVisible();
 	} );
 } );
