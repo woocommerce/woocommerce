@@ -1,7 +1,24 @@
 /**
  * External dependencies
  */
-import { AddressFormValues } from '@woocommerce/settings';
+import type { AddressFormValues, FormType } from '@woocommerce/settings';
+
+// Declare window
+declare global {
+	interface Window {
+		wc: {
+			addressAutocomplete: {
+				providers: Record< string, ClientAddressAutocompleteProvider >;
+				activeProvider: {
+					[ key in FormType ]?: ClientAddressAutocompleteProvider;
+				};
+				registerAddressAutocompleteProvider: (
+					provider: ClientAddressAutocompleteProvider
+				) => boolean;
+			};
+		};
+	}
+}
 
 export interface ServerAddressAutocompleteProvider {
 	name: string;
