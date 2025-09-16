@@ -9,13 +9,17 @@ The Shopify platform integration provides a complete, production-ready implement
 ## Architecture Components
 
 ### ShopifyPlatform (`ShopifyPlatform.php`)
+
 **Platform Registration Component**
+
 - Registers with WooCommerce migrator system via `woocommerce_migrator_platforms` filter (handled by [`PlatformRegistry`](../../Core/PlatformRegistry.php))
 - Defines required credentials: `shop_url` and `access_token`
 - Links fetcher and mapper implementations to the migration system
 
 ### ShopifyClient (`ShopifyClient.php`)
+
 **API Communication Layer**
+
 - **Dual API Support**: REST API for simple operations, GraphQL for complex queries
 - **API Version**: Uses Shopify API version `2025-04`
 - **Authentication**: Handles X-Shopify-Access-Token header management
@@ -23,14 +27,18 @@ The Shopify platform integration provides a complete, production-ready implement
 - **Request Building**: Automatic URL construction and parameter handling
 
 ### ShopifyFetcher (`ShopifyFetcher.php`)
+
 **Data Retrieval Implementation** (`PlatformFetcherInterface`)
+
 - **GraphQL Query**: Comprehensive product query with variants, images, collections, metafields
 - **Pagination**: Cursor-based pagination with `edges` and `pageInfo`
 - **Filtering**: Support for status, vendor, product type, date ranges, specific IDs
 - **Progress Tracking**: Total count retrieval via REST API
 
 ### ShopifyMapper (`ShopifyMapper.php`)
+
 **Data Transformation Implementation** (`PlatformMapperInterface`)
+
 - **Product Types**: Simple and variable product mapping
 - **Field Processing**: Selective field processing based on constructor arguments
 - **Unit Conversion**: Automatic weight unit conversion with fallback logic
@@ -82,6 +90,7 @@ query GetShopifyProducts($first: Int!, $after: String, $query: String, $variants
 ### Key Mapping Logic
 
 **Product Type Detection** (`ShopifyMapper:125`):
+
 ```php
 private function is_variable_product(object $shopify_product): bool {
     return isset($shopify_product->variants->edges) && count($shopify_product->variants->edges) > 1;
@@ -89,6 +98,7 @@ private function is_variable_product(object $shopify_product): bool {
 ```
 
 **Weight Conversion** (`ShopifyMapper:288`):
+
 ```php
 private function get_converted_weight($weight, $weight_unit): ?float {
     // Uses WooCommerce wc_get_weight() when available
@@ -97,6 +107,7 @@ private function get_converted_weight($weight, $weight_unit): ?float {
 ```
 
 **Status Mapping** (`ShopifyMapper:135`):
+
 ```php
 private function get_woo_product_status(object $shopify_product): string {
     return 'ACTIVE' === $shopify_product->status ? 'publish' : 'draft';
@@ -108,6 +119,7 @@ private function get_woo_product_status(object $shopify_product): string {
 ### Client Architecture (`ShopifyClient.php`)
 
 **Credential Management**:
+
 ```php
 private function get_credentials() {
     $credentials = $this->credential_manager->get_credentials('shopify');
@@ -116,6 +128,7 @@ private function get_credentials() {
 ```
 
 **REST API URLs** (`ShopifyClient:115`):
+
 ```php
 private function build_rest_url(string $domain, string $path, array $query_params): string {
     $api_version = '2025-04';
@@ -124,6 +137,7 @@ private function build_rest_url(string $domain, string $path, array $query_param
 ```
 
 **GraphQL API URLs** (`ShopifyClient:197`):
+
 ```php
 private function build_graphql_url(string $domain): string {
     $api_version = '2025-04';
@@ -134,12 +148,14 @@ private function build_graphql_url(string $domain): string {
 ### Error Handling Implementation
 
 **API Response Processing** (`ShopifyClient:165`):
+
 - HTTP status code validation (>=300 triggers error)
 - JSON decode error handling
 - GraphQL-specific error checking
 - Detailed error messages with context
 
 **Fetcher Error Recovery** (`ShopifyFetcher:191`):
+
 ```php
 if (is_wp_error($response_data)) {
     \WP_CLI::warning('Failed to fetch products via GraphQL: ' . $response_data->get_error_message());
@@ -150,11 +166,13 @@ if (is_wp_error($response_data)) {
 ### Performance Optimization
 
 **Batch Configuration**:
+
 - Default batch size: 50 products (optimized for API limits)
 - Variants per product: 100 (configurable via `variantsFirst` parameter)
 - Media items: 50 per product, 1 per variant
 
 **Memory Management**:
+
 - Streaming product processing
 - Cursor-based pagination prevents memory accumulation
 - JSON response processing with immediate transformation
@@ -162,6 +180,7 @@ if (is_wp_error($response_data)) {
 ### Filter Implementation (`ShopifyFetcher:255`)
 
 **GraphQL Query Building**:
+
 ```php
 private function build_graphql_query_string(array $args): string {
     // Supports: status, product_type, vendor, handle, created_after, created_before, ids
@@ -170,6 +189,7 @@ private function build_graphql_query_string(array $args): string {
 ```
 
 **REST API Count Filters** (`ShopifyFetcher:338`):
+
 ```php
 private function build_count_query_params(array $args): array {
     // Maps filter arguments to Shopify REST API parameters
@@ -189,6 +209,7 @@ $mapper = new ShopifyMapper(['fields' => ['title', 'price', 'images']]);
 ```
 
 **Implementation** (`ShopifyMapper:339`):
+
 ```php
 private function should_process(string $field_key): bool {
     return empty($this->fields_to_process) || in_array($field_key, $this->fields_to_process, true);
@@ -198,6 +219,7 @@ private function should_process(string $field_key): bool {
 ### Weight Conversion System
 
 **Conversion Process**:
+
 1. Map Shopify unit using `WEIGHT_UNIT_MAP`
 2. Check WooCommerce store weight unit setting
 3. Use `wc_get_weight()` if available, else manual conversion
@@ -222,7 +244,7 @@ The mapper processes Shopify products through these steps:
 
 | WooCommerce Field | Shopify Source | Data Type | Transformation Logic | Notes |
 |-------------------|----------------|-----------|---------------------|-------|
-| **Basic Product Information** |
+| **Basic Product Information** | | | | |
 | `name` | `title` | string | Direct mapping | Product title |
 | `slug` | `handle` | string | Direct mapping | URL-friendly identifier |
 | `description` | `descriptionHtml` | string | `sanitize_product_description()` | HTML content, sanitized |
@@ -230,43 +252,43 @@ The mapper processes Shopify products through these steps:
 | `status` | `status` | string | `ACTIVE` → `publish`, others → `draft` | Publication status |
 | `original_product_id` | `id` | string | `basename($shopify_product->id)` | Shopify product ID |
 | `original_url` | `onlineStoreUrl` | string | Direct mapping | Original Shopify URL |
-| **Date Fields** |
+| **Date Fields** | | | | |
 | `date_created_gmt` | `createdAt` | datetime | Direct mapping | Creation timestamp |
 | `date_modified_gmt` | `updatedAt` | datetime | Direct mapping | Last update timestamp |
 | `date_published_gmt` | `publishedAt` | datetime | Direct mapping | Publication timestamp |
-| **Visibility & Status** |
+| **Visibility & Status** | | | | |
 | `catalog_visibility` | `onlineStoreUrl` | string | `null` → `hidden`, exists → `visible` | Store visibility |
 | `available_for_sale` | `availableForSale` | boolean | Direct mapping | Sale availability flag |
-| **Product Classification** |
+| **Product Classification** | | | | |
 | `brand` | `vendor` | object | `['name' => $vendor, 'slug' => sanitize_title($vendor)]` | Brand/manufacturer |
 | `product_type` | `productType` | object | `['name' => $type, 'slug' => sanitize_title($type)]` | Product category type |
 | `is_gift_card` | `isGiftCard` | boolean | Direct mapping | Gift card detection |
 | `requires_subscription` | `requiresSellingPlan` | boolean | Direct mapping | Subscription requirement |
-| **Pricing (Simple Products)** |
+| **Pricing (Simple Products)** | | | | |
 | `regular_price` | `variants[0].price` or `compareAtPrice` | decimal | Compare logic determines regular vs sale | Base price |
 | `sale_price` | `variants[0].price` (if compare exists) | decimal | Set when `compareAtPrice > price` | Discounted price |
-| **Inventory (Simple Products)** |
+| **Inventory (Simple Products)** | | | | |
 | `sku` | `variants[0].sku` | string | Direct mapping | Stock keeping unit |
 | `manage_stock` | `variants[0].inventoryItem.tracked` | boolean | Direct mapping | Inventory tracking flag |
 | `stock_quantity` | `variants[0].inventoryQuantity` | integer | Direct mapping | Available quantity |
 | `stock_status` | Calculated | string | `(quantity > 0 \|\| oversell) ? 'instock' : 'outofstock'` | Stock availability |
-| **Physical Properties** |
+| **Physical Properties** | | | | |
 | `weight` | `variants[0].inventoryItem.measurement.weight` | decimal | Unit conversion via `get_converted_weight()` | Weight with unit conversion |
 | `cost_of_goods` | `variants[0].inventoryItem.unitCost.amount` | decimal | Direct mapping | Product cost |
-| **Taxonomies** |
+| **Taxonomies** | | | | |
 | `categories` | `collections.edges[].node` | array | `[['name' => $title, 'slug' => $handle], ...]` | Product collections |
 | `tags` | `tags[]` | array | `[['name' => $tag, 'slug' => sanitize_title($tag)], ...]` | Product tags |
-| **Images** |
+| **Images** | | | | |
 | `images` | `media.edges[].node.image` | array | Complex object with featured detection | Gallery images |
 | `images[].src` | `image.url` | string | Direct mapping | Image URL |
 | `images[].alt` | `image.altText` | string | Direct mapping | Alt text |
 | `images[].is_featured` | Calculated | boolean | `id === featuredMedia.id` | Featured image flag |
 | `images[].original_id` | `id` | string | Direct mapping | Shopify media ID |
-| **Variable Product Data** |
+| **Variable Product Data** | | | | |
 | `is_variable` | Calculated | boolean | `count(variants.edges) > 1` | Variable product detection |
 | `attributes` | `options[]` | array | `[['name' => $name, 'options' => $values, ...], ...]` | Product attributes |
 | `variations` | `variants.edges[].node` | array | Complex mapping for each variant | Product variations |
-| **Variation Fields** |
+| **Variation Fields** | | | | |
 | `variations[].original_id` | `variants[].id` | string | `basename($variant->id)` | Variant ID |
 | `variations[].attributes` | `variants[].selectedOptions` | object | `[$name => $value, ...]` | Variant attributes |
 | `variations[].regular_price` | `variants[].price` or `compareAtPrice` | decimal | Same logic as simple products | Variant pricing |
@@ -279,7 +301,7 @@ The mapper processes Shopify products through these steps:
 | `variations[].cost_of_goods` | `variants[].inventoryItem.unitCost.amount` | decimal | Direct mapping | Variant cost |
 | `variations[].image_original_id` | `variants[].media.edges[0].node.id` | string | First media item ID | Variant image |
 | `variations[].menu_order` | `variants[].position` | integer | Direct mapping | Variant display order |
-| **Metafields & SEO** |
+| **Metafields & SEO** | | | | |
 | `metafields` | `metafields.edges[].node` | object | `[namespace_key => value, ...]` | Custom fields |
 | `global_title_tag` | `seo.title` | string | Direct mapping | SEO title |
 | `global_description_tag` | `seo.description` | string | Direct mapping | SEO description |
@@ -294,6 +316,7 @@ The mapper processes Shopify products through these steps:
 | `OUNCES` | `oz` | 0.0283495 | 0.0625 |
 
 **Weight Conversion Process**:
+
 1. Map Shopify unit using `WEIGHT_UNIT_MAP`
 2. Get WooCommerce store weight unit setting
 3. Use `wc_get_weight()` if available, else manual conversion
@@ -302,6 +325,7 @@ The mapper processes Shopify products through these steps:
 ### Pricing Logic
 
 **Simple Products & Variations**:
+
 ```php
 if ($compareAtPrice && $compareAtPrice > $price) {
     'regular_price' => $compareAtPrice,
@@ -415,6 +439,7 @@ $key = sprintf('%s_%s', $field_node->namespace, $field_node->key),
 ### Weight Conversion System (`get_converted_weight:288-320`)
 
 **Conversion Logic**:
+
 1. Validate weight > 0 and unit exists
 2. Map Shopify unit using `WEIGHT_UNIT_MAP` (GRAMS→g, KILOGRAMS→kg, etc.)
 3. Get WooCommerce store weight unit (`woocommerce_weight_unit`)
@@ -422,6 +447,7 @@ $key = sprintf('%s_%s', $field_node->namespace, $field_node->key),
 5. Use `wc_get_weight()` if available, else manual conversion using `WEIGHT_CONVERSION_FACTORS`
 
 **Conversion Factors** (`WEIGHT_CONVERSION_FACTORS:46-71`):
+
 ```php
 'kg' => ['kg' => 1, 'g' => 1000, 'lb' => 2.20462, 'oz' => 35.274],
 'g' => ['kg' => 0.001, 'g' => 1, 'lb' => 0.00220462, 'oz' => 0.035274],
@@ -432,6 +458,7 @@ $key = sprintf('%s_%s', $field_node->namespace, $field_node->key),
 ### Selective Field Processing
 
 **Default Fields** (`get_default_product_fields:638-657`):
+
 ```php
 ['title', 'slug', 'description', 'short_description', 'status', 'date_created',
  'catalog_visibility', 'category', 'tag', 'price', 'sku', 'stock', 'weight',
@@ -439,6 +466,7 @@ $key = sprintf('%s_%s', $field_node->namespace, $field_node->key),
 ```
 
 **Processing Check** (`should_process:339-343`):
+
 ```php
 private function should_process(string $field_key): bool {
     return empty($this->fields_to_process) || in_array($field_key, $this->fields_to_process, true);
@@ -450,6 +478,7 @@ private function should_process(string $field_key): bool {
 This implementation serves as the **canonical reference** for WooCommerce CLI Migrator platform development. For creating new platform integrations, see the [main CLI Migrator documentation](../../README.md).
 
 ### Key Implementation Patterns
+
 - Complete [`PlatformFetcherInterface`](../../Interfaces/PlatformFetcherInterface.php) implementation with cursor-based pagination
 - Complete [`PlatformMapperInterface`](../../Interfaces/PlatformMapperInterface.php) implementation with comprehensive field mapping
 - Dual API approach (REST + GraphQL) for optimal performance
@@ -458,7 +487,8 @@ This implementation serves as the **canonical reference** for WooCommerce CLI Mi
 - Extensible architecture with constructor options
 
 ### File Structure
-```
+
+```text
 Shopify/
 ├── ShopifyPlatform.php     # Platform registration
 ├── ShopifyClient.php       # API communication layer
