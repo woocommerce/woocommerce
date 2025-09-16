@@ -54,18 +54,10 @@ export const translateJQueryEventToNative = (
 	// Name of the jQuery event to listen to.
 	jQueryEventName: string,
 	// Name of the native event to dispatch.
-	nativeEventName: string,
-	// Whether the event bubbles.
-	bubbles = false,
-	// Whether the event is cancelable.
-	cancelable = false
+	nativeEventName: string
 ): ( () => void ) => {
-	if ( typeof jQuery !== 'function' ) {
-		return () => void null;
-	}
-
 	const eventDispatcher = () => {
-		dispatchEvent( nativeEventName, { bubbles, cancelable } );
+		dispatchEvent( nativeEventName, {} );
 	};
 
 	jQuery( document ).on( jQueryEventName, eventDispatcher );
