@@ -673,6 +673,7 @@ const { state: cartItemState } = store(
 					itemData: {
 						key: string;
 						attribute: string;
+						name: string;
 						value: string;
 						hidden: string;
 					};
@@ -688,7 +689,10 @@ const { state: cartItemState } = store(
 				}
 
 				const dataItemAttrKey =
-					dataItemAttr.key || dataItemAttr.attribute;
+					dataItemAttr.key ||
+					dataItemAttr.attribute ||
+					dataItemAttr.name;
+
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
 				nameTxt.innerHTML = dataItemAttrKey + ':';
