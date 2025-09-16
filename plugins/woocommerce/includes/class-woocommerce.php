@@ -1131,6 +1131,7 @@ final class WooCommerce {
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
 		$above[] = 'Disallow: /*?add-to-cart=';
+		$above[] = 'Disallow: /*?*add-to-cart=';
 
 		$lines = array_merge( $above, $below );
 
