@@ -24,17 +24,24 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Save original value (includes the case "no exists").
+		$this->original_old_refund_opt = get_option( 'woocommerce_analytics_uses_old_full_refund_data', null );
 
-		// Force new logic of full refund in analytics/products.
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		// Force new mode explicitly.
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'no' );
 	}
 
 	/**
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		// Clean in case any test changes options.
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		// Restore exactly as it was.
+		if ( null === $this->original_old_refund_opt ) {
+			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		} else {
+			update_option( 'woocommerce_analytics_uses_old_full_refund_data', $this->original_old_refund_opt );
+		}
+
 		parent::tearDown();
 	}
 
