@@ -1856,7 +1856,7 @@ ul.wc_coupon_list_block {
 }
 
 #order_data {
-	padding: 23px 24px 12px;
+	padding: 24px;
 
 	h2 {
 		margin: 0;
@@ -8082,6 +8082,7 @@ table.bar_chart {
 
 	.select2-selection--single {
 		height: 40px;
+		margin-bottom: 0;
 
 		.select2-selection__rendered {
 			line-height: 40px;
