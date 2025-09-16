@@ -22,6 +22,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+<<<<<<< HEAD
+=======
+
+>>>>>>> 3247c83ddc ([Backport to trunk] Disable the Analytics refund fix, and only enable for stores without refunds (#60874))
 		$db_version = strstr( WC()->version, '-', true );
 		$db_version = $db_version ? $db_version : WC()->version;
 		update_option( 'woocommerce_db_version', $db_version );
