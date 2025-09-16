@@ -158,17 +158,17 @@ class MiniCart extends \WP_UnitTestCase {
 		// Test badge is shown when "always" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown, because product count is not greater than zero when "greater_than_zero" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"greater_than_zero"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown when "never" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"never"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringNotContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertFalse( $this->has_mini_cart_badge( $output ) );
 	}
 
 	/**
@@ -181,17 +181,17 @@ class MiniCart extends \WP_UnitTestCase {
 		// Tests badge is shown with items in cart when "always" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"always"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge *is* shown, because product count is greater than zero when "greater_than_zero" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"greater_than_zero"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertTrue( $this->has_mini_cart_badge( $output ) );
 
 		// Tests badge is not shown with items in cart when "never" is selected.
 		$block  = parse_blocks( '<!-- wp:woocommerce/mini-cart {"productCountVisibility":"never"} /-->' );
 		$output = render_block( $block[0] );
-		$this->assertStringNotContainsString( '<span class="wc-block-mini-cart__badge"', $output );
+		$this->assertFalse( $this->has_mini_cart_badge( $output ) );
 	}
 
 	/**
@@ -289,6 +289,23 @@ class MiniCart extends \WP_UnitTestCase {
 				)
 			),
 			'The hr with class wp-block-separator should be preserved.'
+		);
+	}
+
+	/**
+	 * Helper method to check if mini-cart badge exists in the HTML using WP_HTML_Tag_Processor.
+	 *
+	 * @param string $html The HTML to search in.
+	 * @return bool True if mini-cart badge is found, false otherwise.
+	 */
+	private function has_mini_cart_badge( string $html ): bool {
+		$processor = new \WP_HTML_Tag_Processor( $html );
+
+		return $processor->next_tag(
+			array(
+				'tag_name'   => 'span',
+				'class_name' => 'wc-block-mini-cart__badge',
+			)
 		);
 	}
 }
