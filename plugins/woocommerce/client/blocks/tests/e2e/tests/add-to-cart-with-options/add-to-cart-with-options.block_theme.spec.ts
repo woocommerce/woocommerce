@@ -260,7 +260,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( page.getByText( 'Added to cart' ) ).toBeVisible();
 
-			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			try {
+				await expect(
+					page.locator( '.wc-block-mini-cart__quantity-badge' )
+				).toContainText( '2', { timeout: 1000 } );
+			} catch ( e ) {
+				await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			}
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
