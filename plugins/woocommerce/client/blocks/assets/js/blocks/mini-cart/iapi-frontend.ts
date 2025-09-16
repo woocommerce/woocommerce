@@ -196,16 +196,19 @@ store< MiniCart >(
 
 		callbacks: {
 			*setupEventListeners() {
+				let removeJQueryAddedToCartEvent = () => {};
+				let removeJQueryRemovedFromCartEvent = () => {};
 				if ( 'jQuery' in window ) {
 					// Make it so we can read jQuery events triggered by WC Core elements.
-					translateJQueryEventToNative(
+					removeJQueryAddedToCartEvent = translateJQueryEventToNative(
 						'added_to_cart',
 						'wc-blocks_added_to_cart'
 					);
-					translateJQueryEventToNative(
-						'removed_from_cart',
-						'wc-blocks_removed_from_cart'
-					);
+					removeJQueryRemovedFromCartEvent =
+						translateJQueryEventToNative(
+							'removed_from_cart',
+							'wc-blocks_removed_from_cart'
+						);
 				}
 				document.body.addEventListener(
 					'wc-blocks_added_to_cart',
@@ -236,6 +239,10 @@ store< MiniCart >(
 						'wc-blocks_added_to_cart',
 						callbacks.openDrawer
 					);
+					if ( 'jQuery' in window ) {
+						removeJQueryAddedToCartEvent();
+						removeJQueryRemovedFromCartEvent();
+					}
 				};
 			},
 
