@@ -645,6 +645,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @internal
 	 * @param int $order_id Order ID.
+	 * @return void
 	 */
 	public static function maybe_update_order_statuses_cache( $order_id ) {
 		$order = wc_get_order( $order_id );
@@ -656,6 +657,18 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
 			}
 		}
+	}
+
+	/**
+	 * Ensure the order status will present in `get_all_statuses` call result.
+	 *
+	 * @deprecated 10.3.0 Use maybe_update_order_statuses_cache().
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function maybe_update_order_statuses_transient( $order_id ) {
+		wc_deprecated_function( __METHOD__, '10.3.0', __CLASS__ . '::maybe_update_order_statuses_cache()' );
+		return self::maybe_update_order_statuses_cache( $order_id );
 	}
 
 	/**
