@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -476,7 +477,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  * @return void
  */
 function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '' ) {
-	$rest_api_util = wc_get_container()->get( 'RestApiUtil' );
+	$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 	if ( is_callable( array( $rest_api_util, 'lazy_load_namespace' ) ) ) {
 		/**
 		 * Filter whether to lazy load the namespace.  When set to false, the namespace will be loaded immediately during initialization.
