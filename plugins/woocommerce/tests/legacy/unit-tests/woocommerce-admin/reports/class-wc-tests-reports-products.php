@@ -19,7 +19,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * @todo Finish up unit testing to verify bug-free product reports.
  */
 class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
-	/*
+	/**
 	 * Setup test case.
 	 */
 	public function setUp(): void {
@@ -29,7 +29,7 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 
-	/*
+	/**
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
