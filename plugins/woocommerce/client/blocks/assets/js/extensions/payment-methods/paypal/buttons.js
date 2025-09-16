@@ -43,7 +43,6 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const createOrder = async () => {
-		console.log( 'createOrder' );
 		return null;
 	};
 
