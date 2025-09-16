@@ -206,7 +206,6 @@ export const setActiveProvider = (
 	providerId: string,
 	addressType: FormType
 ) => {
-	console.log( 'setting active provider' );
 	// Set the provider on the window, which is the source of truth as these providers contain functions and cannot go into a data store.
 	const registeredProvider =
 		window?.wc?.addressAutocomplete?.providers?.[ providerId ];
@@ -225,6 +224,7 @@ export const setActiveProvider = (
 	}
 	return async ( { dispatch, select }: CheckoutThunkArgs ) => {
 		dispatch.__internalSetActiveAddressAutocompleteProvider(
+			// @ts-expect-error -- Types are incorrect for `select` the first argument of State is implicitly supplied when calling it.
 			select.getActiveAutocompleteProvider( addressType ) || '',
 			addressType
 		);
