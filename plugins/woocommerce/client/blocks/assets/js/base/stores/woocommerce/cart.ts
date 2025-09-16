@@ -337,13 +337,11 @@ const { state, actions } = store< Store >(
 				// the cart.
 				let updatedItem = null;
 				if ( item ) {
-					if ( item.key ) {
-						quantityChanges.cartItemsPendingQuantity = [ item.key ];
-					}
 					const isSoldIndividually =
 						isCartItem( item ) && item.sold_individually;
 					updatedItem = { ...item, quantity };
-					if ( ! isSoldIndividually ) {
+					if ( item.key && ! isSoldIndividually ) {
+						quantityChanges.cartItemsPendingQuantity = [ item.key ];
 						item.quantity = quantity;
 					}
 				} else {
