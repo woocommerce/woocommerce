@@ -156,7 +156,7 @@ class Controller extends AbstractController {
 		return array(
 			'id'               => (int) $note->comment_ID,
 			'order_id'         => (int) $note->comment_post_ID,
-			'author'           => __( 'woocommerce', 'woocommerce' ) === $note->comment_author ? 'system' : $note->comment_author,
+			'author'           => $note->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'             => $note->comment_content,
