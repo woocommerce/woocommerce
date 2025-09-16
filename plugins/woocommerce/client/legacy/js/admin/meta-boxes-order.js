@@ -491,7 +491,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
 								notesEl.outerHTML = response.data.notes_html;
 							}
 
@@ -736,7 +736,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
 								notesEl.outerHTML = response.data.notes_html;
 							}
 
@@ -1261,7 +1261,7 @@ jQuery( function ( $ ) {
 
 							// Update notes.
 							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
 								notesEl.outerHTML = response.data.notes_html;
 							}
 
