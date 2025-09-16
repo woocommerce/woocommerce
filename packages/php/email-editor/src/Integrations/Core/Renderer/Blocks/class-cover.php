@@ -65,14 +65,20 @@ class Cover extends Abstract_Block_Renderer {
 		$background_color = $this->get_background_color( $block_attrs, $rendering_context );
 
 		// Get block styles using the Styles_Helper.
-		$block_styles = Styles_Helper::get_block_styles( $block_attrs, $rendering_context, array( 'padding', 'border', 'background-color' ) );
+		$block_styles   = Styles_Helper::get_block_styles( $block_attrs, $rendering_context, array( 'padding', 'border', 'background-color' ) );
+		$default_styles = array(
+			'width'           => '100%',
+			'border-collapse' => 'collapse',
+			'text-align'      => 'center',
+		);
+
+		// Add minimum height (use specified value or default).
+		$min_height                   = $this->get_minimum_height( $block_attrs );
+		$default_styles['min-height'] = ! empty( $min_height ) ? $min_height : '430px';
+
 		$block_styles = Styles_Helper::extend_block_styles(
 			$block_styles,
-			array(
-				'width'           => '100%',
-				'border-collapse' => 'collapse',
-				'text-align'      => 'center',
-			)
+			$default_styles
 		);
 
 		// Add background image to table styles if present.
@@ -144,6 +150,26 @@ class Cover extends Abstract_Block_Renderer {
 					return esc_url( $src );
 				}
 			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Get minimum height from block attributes.
+	 *
+	 * @param array $block_attrs Block attributes.
+	 * @return string Minimum height value or empty string.
+	 */
+	private function get_minimum_height( array $block_attrs ): string {
+		// Check for minHeight attribute (legacy format).
+		if ( ! empty( $block_attrs['minHeight'] ) ) {
+			return Html_Processing_Helper::sanitize_dimension_value( $block_attrs['minHeight'] );
+		}
+
+		// Check for style.dimensions.minHeight (WordPress 6.2+ format).
+		if ( ! empty( $block_attrs['style']['dimensions']['minHeight'] ) ) {
+			return Html_Processing_Helper::sanitize_dimension_value( $block_attrs['style']['dimensions']['minHeight'] );
 		}
 
 		return '';

@@ -96,6 +96,37 @@ class Html_Processing_Helper {
 	}
 
 	/**
+	 * Sanitize dimension value to ensure it's a valid CSS dimension.
+	 *
+	 * Supports numeric values (converted to px) and standard CSS units.
+	 *
+	 * @param mixed $value The dimension value to sanitize.
+	 * @return string Sanitized dimension value or empty string if invalid.
+	 */
+	public static function sanitize_dimension_value( $value ): string {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		$value = (string) $value;
+
+		// If it's just a number, assume pixels.
+		if ( is_numeric( $value ) ) {
+			$value = $value . 'px';
+		}
+
+		// Use existing CSS value sanitization for security.
+		$sanitized_value = self::sanitize_css_value( $value );
+
+		// Additional validation for dimension-specific units.
+		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
+			return $sanitized_value;
+		}
+
+		return '';
+	}
+
+	/**
 	 * Sanitize color value to ensure it's a valid color format.
 	 *
 	 * Supports hex colors, rgb/rgba, hsl/hsla, named colors, and CSS variables.
