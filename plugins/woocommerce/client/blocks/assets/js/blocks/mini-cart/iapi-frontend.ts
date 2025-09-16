@@ -721,11 +721,7 @@ const { state: cartItemState } = store(
 				const { dataProperty } = getContext< {
 					dataProperty: DataProperty;
 				} >();
-				return (
-					cartItemState.cartItem[ dataProperty ].length === 0 ||
-					( dataProperty === 'variation' &&
-						cartItemState.cartItem.type !== 'variation' )
-				);
+				return cartItemState.cartItem[ dataProperty ].length === 0;
 			},
 
 			get shouldHideSingleProductDetails(): boolean {
