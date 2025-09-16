@@ -39,7 +39,7 @@ jQuery(function ($) {
 							'Nonce': paypal_standard.nonce,
 						},
 					} );
-					paypalResponseData = await paypalResponse.json();
+					const paypalResponseData = await paypalResponse.json();
 
 					orderReceivedUrl = paypalResponseData.return_url;
 
