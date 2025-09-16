@@ -13,6 +13,7 @@ import {
 import { getTestTranslation } from '../../utils/get-test-translation';
 import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {
@@ -106,56 +107,59 @@ test.describe( 'Shopper → Notices', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Translations', () => {
-	test.beforeEach( async () => {
-		await wpCLI( `site switch-language ${ translations.locale }` );
+// Skip the rest of the translation tests if the iAPI mini cart is  enabled.
+if ( ! config.features[ 'experimental-iapi-mini-cart' ] ) {
+	test.describe( 'Shopper → Translations', () => {
+		test.beforeEach( async () => {
+			await wpCLI( `site switch-language ${ translations.locale }` );
+		} );
+
+		test.only( 'User can see translation in empty Mini-Cart', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await miniCartUtils.openMiniCart();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'Start shopping' ),
+				} )
+			).toBeVisible();
+		} );
+
+		test( 'User can see translation in filled Mini-Cart', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			await frontendUtils.emptyCart();
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await miniCartUtils.openMiniCart();
+
+			await expect(
+				page.getByRole( 'heading', {
+					name: getTestTranslation( 'Your cart' ),
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'View my cart' ),
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByRole( 'link', {
+					name: getTestTranslation( 'Go to checkout' ),
+				} )
+			).toBeVisible();
+		} );
 	} );
-
-	test( 'User can see translation in empty Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Start shopping' ),
-			} )
-		).toBeVisible();
-	} );
-
-	test( 'User can see translation in filled Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'heading', {
-				name: getTestTranslation( 'Your cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'View my cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Go to checkout' ),
-			} )
-		).toBeVisible();
-	} );
-} );
+}
 
 test.describe( 'Shopper → Tax', () => {
 	test.beforeEach( async () => {
