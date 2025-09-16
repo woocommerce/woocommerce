@@ -3,6 +3,7 @@
  * Helpers for order notes.
  *
  * @package WooCommerce\RestApi
+ * @internal This file is for internal use only and should not be used by external code.
  */
 
 declare( strict_types=1 );
@@ -16,8 +17,10 @@ use WC_Order;
 
 /**
  * Utils class.
+ *
+ * @internal This class is for internal use only and should not be used by external code.
  */
-class Utils {
+final class Utils {
 	/**
 	 * Get an order by ID.
 	 *
