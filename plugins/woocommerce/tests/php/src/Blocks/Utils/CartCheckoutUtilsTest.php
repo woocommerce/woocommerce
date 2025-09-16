@@ -91,14 +91,14 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 	 * Test finding express checkout attributes in top-level blocks.
 	 */
 	public function test_find_express_checkout_attributes_top_level() {
-		$post_content = '<!-- wp:woocommerce/cart-express-payment-block {"buttonStyle":"dark","buttonType":"buy"} /-->';
+		$post_content = '<!-- wp:woocommerce/cart-express-payment-block {"buttonStyle":"dark","buttonHeight":48} /-->';
 
 		$result = CartCheckoutUtils::find_express_checkout_attributes( $post_content, 'cart' );
 
 		$this->assertEquals(
 			array(
-				'buttonStyle' => 'dark',
-				'buttonType'  => 'buy',
+				'buttonStyle'  => 'dark',
+				'buttonHeight' => 48,
 			),
 			$result
 		);
@@ -121,5 +121,16 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 			),
 			$result
 		);
+	}
+
+	/**
+	 * Test finding express checkout returns null when no block is present.
+	 */
+	public function test_find_express_checkout_attributes_not_found() {
+		$post_content = '<!-- wp:paragraph --> <p>This is a paragraph block.</p> <!-- /wp:paragraph -->';
+
+		$result = CartCheckoutUtils::find_express_checkout_attributes( $post_content, 'cart' );
+
+		$this->assertNull( $result );
 	}
 }
