@@ -383,7 +383,7 @@ class WC_Frontend_Scripts {
 
 		$scripts['wc-address-autocomplete'] = array(
 			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
+			'deps'    => array( 'wc-dompurify' ),
 			'version' => $version,
 		);
 
