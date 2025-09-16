@@ -196,8 +196,10 @@ store< MiniCart >(
 
 		callbacks: {
 			*setupEventListeners() {
-				let removeJQueryAddedToCartEvent = () => {};
-				let removeJQueryRemovedFromCartEvent = () => {};
+				// eslint-disable-next-line @typescript-eslint/no-empty-function
+				const noop = () => {};
+				let removeJQueryAddedToCartEvent = noop;
+				let removeJQueryRemovedFromCartEvent = noop;
 				if ( 'jQuery' in window ) {
 					// Make it so we can read jQuery events triggered by WC Core elements.
 					removeJQueryAddedToCartEvent = translateJQueryEventToNative(
