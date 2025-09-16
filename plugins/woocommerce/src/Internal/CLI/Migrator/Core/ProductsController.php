@@ -110,29 +110,34 @@ class ProductsController {
 			WP_CLI::line( '' );
 		}
 
-		$this->session = $this->manage_session_lifecycle( $this->parsed_args );
-		if ( ! $this->session ) {
-			return;
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$this->session = $this->manage_session_lifecycle( $this->parsed_args );
+			if ( ! $this->session ) {
+				return;
+			}
 		}
 
 		$fetcher = $this->platform_registry->get_fetcher( $this->parsed_args['platform'] );
 		$mapper  = $this->platform_registry->get_mapper( $this->parsed_args['platform'], array( 'fields' => $this->fields_to_process ) );
 
-		// Fetch total count and setup progress tracking.
 		$total_count = $fetcher->fetch_total_count( $this->parsed_args['filters'] );
 
-		// Only set total count if it hasn't been set yet (new session or first time).
-		$existing_total = $this->session->count_all_total_entities();
-		if ( 0 < $total_count && 0 === $existing_total ) {
-			$this->session->bump_total_number_of_entities( array( 'post' => $total_count ) );
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$existing_total = $this->session->count_all_total_entities();
+			if ( 0 < $total_count && 0 === $existing_total ) {
+				$this->session->bump_total_number_of_entities( array( 'post' => $total_count ) );
+			}
 		}
 
 		WP_CLI::line( "Total entities found: {$total_count}" );
-		$progress = \WP_CLI\Utils\make_progress_bar(
-			'Importing Products from ' . ucfirst( $this->parsed_args['platform'] ),
-			$total_count
-		);
-		$progress->tick( $this->session->count_all_imported_entities(), false );
+		$progress_label = $this->parsed_args['dry_run'] 
+			? 'Simulating Products from ' . ucfirst( $this->parsed_args['platform'] )
+			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
+		$progress = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
+		
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$progress->tick( $this->session->count_all_imported_entities(), false );
+		}
 
 		$this->configure_product_importer();
 
@@ -141,8 +146,6 @@ class ProductsController {
 		$progress->finish();
 
 		$this->display_migration_summary();
-
-		$this->display_feedback_survey();
 
 		if ( $this->parsed_args['dry_run'] ) {
 			WP_CLI::success( 'Dry-run completed successfully. No products were actually created or modified.' );
@@ -161,7 +164,7 @@ class ProductsController {
 	 */
 	private function execute_migration_loop( $fetcher, $mapper, $progress ): void {
 		$limit_remaining            = $this->parsed_args['limit'];
-		$session_cursor             = $this->session->get_reentrancy_cursor();
+		$session_cursor             = $this->parsed_args['dry_run'] ? null : $this->session->get_reentrancy_cursor();
 		$after_cursor               = ! empty( $session_cursor ) ? $session_cursor : null;
 		$has_next_page              = true;
 		$total_processed_in_session = 0;
