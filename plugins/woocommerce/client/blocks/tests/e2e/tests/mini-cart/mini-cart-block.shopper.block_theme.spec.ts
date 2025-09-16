@@ -176,27 +176,26 @@ test.describe( 'Shopper → Tax', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await frontendUtils.goToMiniCart();
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(incl. tax)' );
+		const miniCartLocator = page
+			.getByTestId( 'mini-cart' )
+			.getByLabel(
+				config.features[ 'experimental-iapi-mini-cart' ]
+					? 'Number of items in the cart: 1'
+					: '1 item in cart'
+			);
+
+		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
 		// Hovering over the mini cart should not change the label,
 		// see https://github.com/woocommerce/woocommerce/issues/43691
-		await page
-			.getByTestId( 'mini-cart' )
-			.getByLabel( '1 item in cart' )
-			.dispatchEvent( 'mouseover' );
+		await miniCartLocator.dispatchEvent( 'mouseover' );
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(incl. tax)' );
+		await expect( miniCartLocator ).toContainText( '(incl. tax)' );
 
 		await wpCLI( 'option set woocommerce_prices_include_tax yes' );
 		await wpCLI( 'option set woocommerce_tax_display_cart excl' );
 		await page.reload();
 
-		await expect(
-			page.getByTestId( 'mini-cart' ).getByLabel( '1 item in cart' )
-		).toContainText( '(ex. tax)' );
+		await expect( miniCartLocator ).toContainText( '(ex. tax)' );
 	} );
 } );
