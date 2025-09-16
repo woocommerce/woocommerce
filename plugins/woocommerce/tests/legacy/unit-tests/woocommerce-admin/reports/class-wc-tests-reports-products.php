@@ -27,9 +27,6 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 
 		// Force new logic of full refund in analytics/products.
 		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-
-		// In case any check depends on the DB version (not always necessary, but safe).
-		update_option( 'woocommerce_db_version', '10.2.0' );
 	}
 
 	/*
