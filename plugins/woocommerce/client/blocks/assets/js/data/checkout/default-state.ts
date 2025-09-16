@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { isSameAddress } from '@woocommerce/base-utils';
-import { OrderFormValues } from '@woocommerce/settings';
+import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -26,7 +26,7 @@ export type CheckoutState = {
 	editingBillingAddress: boolean; // Is the billing address being edited?
 	editingShippingAddress: boolean; // Is the shipping address being edited?
 	addressAutocompleteProviders: string[]; // IDs of registered address autocomplete providers, if any.
-	activeAddressAutocompleteProvider: { billing: string; shipping: string }; // Active address autocomplete provider.
+	activeAddressAutocompleteProvider: { [ key in AddressFormType ]: string }; // Active address autocomplete provider.
 };
 
 // Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.

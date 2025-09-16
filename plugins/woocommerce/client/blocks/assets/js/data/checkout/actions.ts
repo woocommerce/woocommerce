@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { FormType, OrderFormValues } from '@woocommerce/settings';
+import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
 import deprecated from '@wordpress/deprecated';
 
 /**
@@ -251,7 +251,7 @@ export const addAddressAutocompleteProvider = ( providerId: string ) => ( {
  */
 export const setActiveAddressAutocompleteProvider = (
 	providerId: string,
-	addressType: FormType
+	addressType: AddressFormType
 ) => ( {
 	type: types.SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER,
 	addressType,

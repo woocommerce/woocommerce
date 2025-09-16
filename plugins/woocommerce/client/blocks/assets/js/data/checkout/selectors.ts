@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
+import type { AddressFormType } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -129,7 +130,7 @@ export const getRegisteredAutocompleteProviders = ( state: CheckoutState ) => {
  */
 export const getActiveAutocompleteProvider = (
 	state: CheckoutState,
-	type: 'billing' | 'shipping'
+	type: AddressFormType
 ) => {
 	return state.activeAddressAutocompleteProvider?.[ type ];
 };

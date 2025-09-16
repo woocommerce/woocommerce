@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { AddressFormValues, FormType } from '@woocommerce/settings';
+import type { AddressFormType, AddressFormValues } from '@woocommerce/settings';
 
 // Declare window
 declare global {
@@ -10,7 +10,7 @@ declare global {
 			addressAutocomplete: {
 				providers: Record< string, ClientAddressAutocompleteProvider >;
 				activeProvider: {
-					[ key in FormType ]?: ClientAddressAutocompleteProvider;
+					[ key in AddressFormType ]?: ClientAddressAutocompleteProvider;
 				};
 				registerAddressAutocompleteProvider: (
 					provider: ClientAddressAutocompleteProvider
