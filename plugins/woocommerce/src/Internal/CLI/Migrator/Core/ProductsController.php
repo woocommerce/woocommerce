@@ -130,11 +130,11 @@ class ProductsController {
 		}
 
 		WP_CLI::line( "Total entities found: {$total_count}" );
-		$progress_label = $this->parsed_args['dry_run'] 
+		$progress_label = $this->parsed_args['dry_run']
 			? 'Simulating Products from ' . ucfirst( $this->parsed_args['platform'] )
 			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
 		$progress = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
-		
+
 		if ( ! $this->parsed_args['dry_run'] ) {
 			$progress->tick( $this->session->count_all_imported_entities(), false );
 		}
@@ -602,7 +602,7 @@ class ProductsController {
 	 */
 	private function simulate_import_batch( array $mapped_products ): array {
 		$results = array();
-		$stats = array(
+		$stats   = array(
 			'successful' => 0,
 			'failed'     => 0,
 			'skipped'    => 0,
@@ -610,7 +610,7 @@ class ProductsController {
 
 		foreach ( $mapped_products as $product_data ) {
 			$product_name = $product_data['name'] ?? 'Unknown Product';
-			
+
 			if ( empty( $product_data['name'] ) ) {
 				$results[] = array(
 					'status'  => 'error',
@@ -626,12 +626,13 @@ class ProductsController {
 			if ( ! empty( $product_data['sku'] ) ) {
 				$existing_product_id = wc_get_product_id_by_sku( $product_data['sku'] );
 			}
-			
+
 			if ( ! $existing_product_id && ! empty( $product_data['name'] ) ) {
 				$existing_post = get_page_by_title( $product_data['name'], OBJECT, 'product' );
 				if ( $existing_post ) {
 					$existing_product_id = $existing_post->ID;
 				}
+				wp_reset_postdata();
 			}
 
 			$would_skip = false;
@@ -654,13 +655,13 @@ class ProductsController {
 					'data'    => $product_data,
 				);
 				++$stats['successful'];
-				
+
 				if ( $existing_product_id ) {
 					$this->simulate_stats_increment( 'products_updated' );
 				} else {
 					$this->simulate_stats_increment( 'products_created' );
 				}
-				
+
 				if ( in_array( 'images', $this->fields_to_process, true ) && ! empty( $product_data['images'] ) ) {
 					$image_count = is_array( $product_data['images'] ) ? count( $product_data['images'] ) : 1;
 					for ( $i = 0; $i < $image_count; $i++ ) {
@@ -689,14 +690,13 @@ class ProductsController {
 			$reflection = new \ReflectionClass( $this->product_importer );
 			$stats_property = $reflection->getProperty( 'import_stats' );
 			$stats_property->setAccessible( true );
-			
 			$current_stats = $stats_property->getValue( $this->product_importer );
 			if ( isset( $current_stats[ $stat_key ] ) ) {
 				++$current_stats[ $stat_key ];
 				$stats_property->setValue( $this->product_importer, $current_stats );
 			}
 		} catch ( \ReflectionException $e ) {
-			wc_get_logger()->warning( 
+			wc_get_logger()->warning(
 				"DRY RUN: Could not update import stats for '{$stat_key}': " . $e->getMessage(),
 				array( 'source' => 'wc-migrator' )
 			);
