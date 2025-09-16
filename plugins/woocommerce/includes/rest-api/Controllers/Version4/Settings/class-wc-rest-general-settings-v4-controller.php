@@ -281,14 +281,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					);
 				}
 
-				if ( ! $this->validate_country_or_state_code( $value ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
-						__( 'Invalid country/state format.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
 				break;
 
 			case 'woocommerce_ship_to_countries':
@@ -297,14 +289,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					return new WP_Error(
 						'rest_invalid_param',
 						__( 'Invalid shipping location option.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				if ( ! $this->validate_country_or_state_code( $value ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
-						__( 'Invalid country/state format.', 'woocommerce' ),
 						array( 'status' => 400 )
 					);
 				}
