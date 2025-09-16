@@ -371,7 +371,7 @@ class Checkout extends AbstractBlock {
 	 * @param string $post_content The post content to search through.
 	 * @return null|string The local pickup text if found, otherwise null.
 	 */
-	function find_local_pickup_text_in_checkout_block( $post_content ) {
+	private function find_local_pickup_text_in_checkout_block( $post_content ) {
 		$scanner = Block_Scanner::create( $post_content );
 
 		while ( $scanner->next_delimiter() ) {
