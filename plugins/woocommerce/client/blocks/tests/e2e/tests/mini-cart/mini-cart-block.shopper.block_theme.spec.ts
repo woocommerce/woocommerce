@@ -114,7 +114,7 @@ if ( ! config.features[ 'experimental-iapi-mini-cart' ] ) {
 			await wpCLI( `site switch-language ${ translations.locale }` );
 		} );
 
-		test.only( 'User can see translation in empty Mini-Cart', async ( {
+		test( 'User can see translation in empty Mini-Cart', async ( {
 			page,
 			frontendUtils,
 			miniCartUtils,
