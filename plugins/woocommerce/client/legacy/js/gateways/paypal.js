@@ -53,6 +53,27 @@ jQuery(function ($) {
 					window.location.href = orderReceivedUrl;
 				}
 			},
+
+			onError: function ( error ) {				
+				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
+				const messageWrapper =
+					'<ul class="woocommerce-error" role="alert"><li>' +
+						'PayPal error: ' +
+						sanitizedErrorMessage +
+					'</li></ul>';	
+				
+				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
+
+				if ( ! $noticeContainer.length ) {
+					return;
+				}
+		
+				$(
+					'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message'
+				).remove();
+				$noticeContainer.prepend( messageWrapper );
+			},
+
 		});
 
 

@@ -4,6 +4,7 @@
 import { useState } from '@wordpress/element';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { getPaymentMethodData } from '@woocommerce/settings';
+import { dispatch } from '@wordpress/data';
 
 /**
  * PayPalButtonsContainer component.
@@ -90,10 +91,20 @@ const PayPalButtonsContainer = ( {
 		}
 	};
 
-	const onApprove = async ( data ) => {
+	const onApprove = ( data ) => {
 		if ( data.paymentID && orderReceivedUrl ) {
 			window.location.href = orderReceivedUrl;
 		}
+		return null;
+	};
+
+	const onError = ( error ) => {
+		dispatch( 'core/notices' ).createErrorNotice(
+			'PayPal error: ' + error.message,
+			{
+				context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
+			}
+		);
 	};
 
 	return (
@@ -101,6 +112,7 @@ const PayPalButtonsContainer = ( {
 			<PayPalButtons
 				createOrder={ createOrder }
 				onApprove={ onApprove }
+				onError={ onError }
 			/>
 		</PayPalScriptProvider>
 	);
