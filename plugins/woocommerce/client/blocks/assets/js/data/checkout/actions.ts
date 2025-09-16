@@ -249,7 +249,7 @@ export const addAddressAutocompleteProvider = ( providerId: string ) => ( {
  *
  * @param providerId
  */
-export const __internalSetActiveAddressAutocompleteProvider = (
+export const setActiveAddressAutocompleteProvider = (
 	providerId: string,
 	addressType: FormType
 ) => ( {

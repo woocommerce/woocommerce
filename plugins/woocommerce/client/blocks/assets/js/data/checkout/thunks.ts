@@ -195,38 +195,3 @@ export const disableCheckoutFor = ( asyncFunc: () => Promise< unknown > ) => {
 		}
 	};
 };
-
-/**
- * Set the active address autocomplete provider and updates the value on window.wc.addressAutocomplete
- *
- * @param providerId the provider id to set as active
- * @param addressType the address type (shipping or billing)
- */
-export const setActiveProvider = (
-	providerId: string,
-	addressType: FormType
-) => {
-	// Set the provider on the window, which is the source of truth as these providers contain functions and cannot go into a data store.
-	const registeredProvider =
-		window?.wc?.addressAutocomplete?.providers?.[ providerId ];
-	if (
-		registeredProvider &&
-		window?.wc?.addressAutocomplete?.activeProvider
-	) {
-		window.wc.addressAutocomplete.activeProvider[ addressType ] =
-			registeredProvider;
-		return async ( { dispatch }: CheckoutThunkArgs ) => {
-			dispatch.__internalSetActiveAddressAutocompleteProvider(
-				providerId,
-				addressType
-			);
-		};
-	}
-	return async ( { dispatch, select }: CheckoutThunkArgs ) => {
-		dispatch.__internalSetActiveAddressAutocompleteProvider(
-			// @ts-expect-error -- Types are incorrect for `select` the first argument of State is implicitly supplied when calling it.
-			select.getActiveAutocompleteProvider( addressType ) || '',
-			addressType
-		);
-	};
-};
