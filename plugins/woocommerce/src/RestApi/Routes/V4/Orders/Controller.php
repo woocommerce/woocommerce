@@ -1,0 +1,530 @@
+<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+/**
+ * REST API Orders controller
+ *
+ * Handles route registration, permissions, CRUD operations, and schema definition.
+ *
+ * @package WooCommerce\RestApi
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
+
+defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
+use Automattic\WooCommerce\Internal\Utilities\Users;
+use WP_Http;
+use WP_Error;
+use WC_Order;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+
+/**
+ * Orders Controller.
+ */
+class Controller extends AbstractController {
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'orders';
+
+	/**
+	 * Post type used for orders.
+	 *
+	 * @var string
+	 */
+	protected $post_type = 'shop_order';
+
+	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 */
+	protected function get_schema(): array {
+		return OrderSchema::get_item_schema();
+	}
+
+	/**
+	 * Get the collection args schema.
+	 *
+	 * @return array
+	 */
+	protected function get_query_schema(): array {
+		return QueryUtils::get_query_schema();
+	}
+
+	/**
+	 * Register the routes for orders.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				'schema' => array( $this, 'get_public_item_schema' ),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			array(
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_item_permissions_check' ),
+					'args'                => array(
+						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'delete_item' ),
+					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
+					'args'                => array(
+						'force' => array(
+							'default'     => false,
+							'type'        => 'boolean',
+							'description' => __( 'Whether to bypass trash and force deletion.', 'woocommerce' ),
+						),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function prepare_links( $item, WP_REST_Request $request ): array {
+		$links = array(
+			'self'            => array(
+				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
+			),
+			'collection'      => array(
+				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+			),
+			'email-templates' => array(
+				'href'       => rest_url( sprintf( '/wc/v3/%s/%d/actions/email_templates', $this->rest_base, $item->get_id() ) ),
+				'embeddable' => true,
+			),
+			'order-notes'     => array(
+				'href'       => rest_url( sprintf( '/%s/order-notes?order_id=%d', $this->namespace, $item->get_id() ) ),
+				'embeddable' => true,
+			),
+		);
+
+		if ( $item->get_customer_id() ) {
+			$links['customer'] = array(
+				'href' => rest_url( sprintf( '/%s/customers/%d', $this->namespace, $item->get_customer_id() ) ),
+			);
+		}
+
+		if ( $item->get_parent_id() ) {
+			$links['up'] = array(
+				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
+			);
+		}
+
+		return $links;
+	}
+
+	/**
+	 * Prepare a single order object for response.
+	 *
+	 * @param WC_Order        $order Order object.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( $order, WP_REST_Request $request ): array {
+		$fields = $this->get_fields_for_response( $request );
+		return ResponseUtils::prepare_order_for_response( $order, $request, $fields );
+	}
+
+	/**
+	 * Check if a given request has access to read items.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_items_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read' ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to read an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'read', $request['id'] ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to create an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'create' ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to update an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'edit', $request['id'] ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_edit', __( 'Sorry, you cannot edit this resource.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to delete an item.
+	 *
+	 * @param  WP_REST_Request $request The request object.
+	 * @return bool|WP_Error
+	 */
+	public function delete_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_post_permissions( $this->post_type, 'delete', $request['id'] ) ) {
+			return $this->get_route_error_response( 'woocommerce_rest_cannot_delete', __( 'Sorry, you cannot delete this resource.', 'woocommerce' ), rest_authorization_required_code() );
+		}
+		return true;
+	}
+
+	/**
+	 * Get a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_item( $request ) {
+		$order = wc_get_order( (int) $request['id'] );
+
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+		}
+
+		return $this->prepare_item_for_response( $order, $request );
+	}
+
+	/**
+	 * Get collection of orders.
+	 *
+	 * PERMISSIONS CHEKC PER ITEM?
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function get_items( $request ) {
+		/**
+		 * Filter the query arguments for a request.
+		 *
+		 * @param array           $args    Key value array of query var to query value.
+		 * @param WP_REST_Request $request The request used.
+		 * @since 10.2.0
+		 */
+		$query_args = apply_filters( $this->get_hook_prefix() . 'get_items_query', QueryUtils::prepare_query( $request ), $request );
+		$results    = QueryUtils::get_query_results( $query_args );
+		$items      = array();
+
+		foreach ( $results['results'] as $result ) {
+			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );
+		}
+
+		$pagination_util = new Pagination();
+		$response        = $pagination_util->add_headers( rest_ensure_response( $items ), $request, $results['total'], $results['pages'] );
+
+		return $response;
+	}
+
+	/**
+	 * Create a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function create_item( $request ) {
+		if ( ! empty( $request['id'] ) ) {
+			/* translators: %s: post type */
+			return $this->get_route_error_response( $this->get_error_prefix() . 'exists', sprintf( __( 'Cannot create existing %s.', 'woocommerce' ), $this->post_type ), WP_Http::BAD_REQUEST );
+		}
+
+		try {
+			$order = new WC_Order();
+			$order->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
+			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+
+			$this->update_object_from_request( $order, $request, true );
+			$this->update_additional_fields_for_object( $order, $request );
+
+			/**
+			 * Fires after a single object is created via the REST API.
+			 *
+			 * @param WC_Order         $order    Inserted object.
+			 * @param WP_REST_Request $request   Request object.
+			 * @since 10.2.0
+			 */
+			do_action( $this->get_hook_prefix() . 'created', $order, $request );
+
+			$request->set_param( 'context', 'edit' );
+			$response = $this->prepare_item_for_response( $order, $request );
+			$response->set_status( WP_Http::CREATED );
+			$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order->get_id() ) ) );
+
+			return $response;
+		} catch ( \WC_Data_Exception $e ) {
+			$data = $e->getErrorData();
+
+			if ( $order->get_id() ) {
+				try {
+					$order->set_status( 'checkout-draft' );
+					$order->save();
+					// phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+				} catch ( \Exception $_ ) {
+					// We don't want a failure in changing the order status
+					// to throw on itself, but we don't have anything meaningful
+					// to do with this failure either.
+				}
+
+				$data['new_draft_order_id'] = $order->get_id();
+			}
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
+		} catch ( \WC_REST_Exception $e ) {
+			$order->delete( true );
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Update a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	public function update_item( $request ) {
+		$order = wc_get_order( (int) $request['id'] );
+
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+		}
+
+		try {
+			$this->update_object_from_request( $order, $request, false );
+			$this->update_additional_fields_for_object( $order, $request );
+
+			/**
+			 * Fires after a single object is updated via the REST API.
+			 *
+			 * @param WC_Data         $order    Inserted object.
+			 * @param WP_REST_Request $request   Request object.
+			 * @param boolean         $creating  True when creating object, false when updating.
+			 * @since 10.2.0
+			 */
+			do_action( $this->get_hook_prefix() . 'updated', $order, $request );
+
+			$request->set_param( 'context', 'edit' );
+			return $this->prepare_item_for_response( $order, $request );
+		} catch ( \WC_Data_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		} catch ( \WC_REST_Exception $e ) {
+			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Delete a single item.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function delete_item( $request ) {
+		$order = wc_get_order( (int) $request['id'] );
+
+		if ( ! $order instanceof WC_Order || $order->get_id() === 0 || 'shop_order_refund' === $order->get_type() ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+		}
+
+		$request->set_param( 'context', 'edit' );
+
+		$force    = (bool) $request['force'];
+		$response = $this->prepare_item_for_response( $order, $request );
+
+		if ( $force ) {
+			$result = $order->delete( true );
+		} else {
+			/**
+			 * Filter whether an object is trashable.
+			 *
+			 * @param boolean $supports_trash Whether the object type support trashing.
+			 * @param WC_Order $order         The object being considered for trashing support.
+			 * @since 10.2.0
+			 */
+			$supports_trash = apply_filters( $this->get_hook_prefix() . 'object_trashable', EMPTY_TRASH_DAYS > 0, $order );
+
+			if ( ! $supports_trash ) {
+				return $this->get_route_error_response( $this->get_error_prefix() . 'trash_not_supported', __( 'This object does not support trashing.', 'woocommerce' ), WP_Http::NOT_IMPLEMENTED );
+			}
+
+			if ( 'trash' === $order->get_status() ) {
+				return $this->get_route_error_response( $this->get_error_prefix() . 'already_trashed', __( 'This object has already been trashed.', 'woocommerce' ), WP_Http::GONE );
+			}
+
+			$order->delete();
+			$result = 'trash' === $order->get_status();
+		}
+
+		if ( ! $result ) {
+			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_delete', __( 'This object cannot be deleted.', 'woocommerce' ), WP_Http::INTERNAL_SERVER_ERROR );
+		}
+
+		/**
+		 * Fires after a single object is deleted or trashed via the REST API.
+		 *
+		 * @param WC_Order         $order   The deleted or trashed object.
+		 * @param WP_REST_Response $response The response data.
+		 * @param WP_REST_Request  $request  The request sent to the API.
+		 * @since 10.2.0
+		 */
+		do_action( $this->get_hook_prefix() . 'deleted', $order, $response, $request );
+
+		return $response;
+	}
+
+	/**
+	 * Update current object from the request.
+	 *
+	 * @throws \WC_REST_Exception When fails to set any item, \WC_Data_Exception When fails to set any item.
+	 * @param WC_Order        $order Order object.
+	 * @param WP_REST_Request $request Request object.
+	 * @param bool            $creating True when creating object, false when updating.
+	 * @return void
+	 */
+	protected function update_object_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
+		// Get data that can be edited from schema.
+		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
+		$data_keys   = array_diff(
+			array_keys(
+				array_filter(
+					OrderSchema::get_item_schema_properties(),
+					array( $this, 'filter_writable_props' )
+				)
+			),
+			$ignore_keys
+		);
+
+		// Make sure gateways are loaded so hooks from gateways fire on save/create.
+		WC()->payment_gateways();
+
+		// Handle all writable props.
+		foreach ( $data_keys as $key ) {
+			$value = $request[ $key ];
+
+			if ( is_null( $value ) ) {
+				continue;
+			}
+
+			if ( 'billing' === $key || 'shipping' === $key ) {
+				DataUtils::update_address( $order, $key, (array) $value );
+			} elseif ( 'coupon_lines' === $key ) {
+				DataUtils::update_line_items( $order, (array) $value, 'coupon' );
+			} elseif ( 'line_items' === $key ) {
+				DataUtils::update_line_items( $order, (array) $value, 'line_item' );
+			} elseif ( 'shipping_lines' === $key ) {
+				DataUtils::update_line_items( $order, (array) $value, 'shipping' );
+			} elseif ( 'fee_lines' === $key ) {
+				DataUtils::update_line_items( $order, (array) $value, 'fee' );
+			} elseif ( 'meta_data' === $key ) {
+				DataUtils::update_meta_data( $order, (array) $value );
+			} elseif ( is_callable( array( $order, "set_{$key}" ) ) ) {
+				$order->{"set_{$key}"}( $value );
+			}
+		}
+
+		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
+			// The customer must exist, and in a multisite context must be visible to the current user.
+			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
+				throw new \WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), esc_html( WP_Http::BAD_REQUEST ) );
+			}
+
+			// Make sure customer is part of blog.
+			if ( is_multisite() && ! is_user_member_of_blog( $request['customer_id'] ) ) {
+				add_user_to_blog( get_current_blog_id(), $request['customer_id'], 'customer' );
+			}
+
+			$order->set_customer_id( (int) $request['customer_id'] );
+		}
+
+		// Save before calculating totals to ensure all line items are up to date.
+		$order->save();
+
+		// If items have changed, recalculate order totals.
+		if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) ) {
+			$order->calculate_totals( true );
+		}
+
+		if ( isset( $request['coupon_lines'] ) ) {
+			$order->recalculate_coupons();
+		}
+
+		if ( ! empty( $request['status'] ) ) {
+			$order->set_status( $request['status'], '', true );
+			$order->save();
+		}
+
+		// Actions for after the order is saved.
+		if ( true === $request['set_paid'] ) {
+			if ( $creating || $order->needs_payment() ) {
+				$order->payment_complete( $request['transaction_id'] );
+			}
+		}
+	}
+}
