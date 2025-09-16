@@ -490,8 +490,9 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							if ( response.data.notes_html ) {
-								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
+							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
+							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+								notesEl.outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
@@ -734,8 +735,9 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							if ( response.data.notes_html ) {
-								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
+							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
+							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+								notesEl.outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
@@ -1258,8 +1260,9 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							if ( response.data.notes_html ) {
-								document.querySelector( 'ul.order_notes' ).outerHTML = response.data.notes_html;
+							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
+							if ( notesEl && typeof response.data.notes_html === 'string' ) {
+								notesEl.outerHTML = response.data.notes_html;
 							}
 
 							wc_meta_boxes_order_items.reloaded_items();
