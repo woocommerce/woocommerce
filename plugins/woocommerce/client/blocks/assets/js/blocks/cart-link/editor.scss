@@ -1,0 +1,9 @@
+.wc-block-cart-link {
+	cursor: default;
+	user-select: none;
+
+	.wc-block-cart-link__text {
+		cursor: text;
+		user-select: text;
+	}
+}

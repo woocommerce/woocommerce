@@ -1201,6 +1201,19 @@ class CartController {
 	}
 
 	/**
+	 * Get product name, hiding it for draft and private products.
+	 *
+	 * @param \WC_Product $product Product instance.
+	 * @return string
+	 */
+	protected function get_product_name( \WC_Product $product ) {
+		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+			return '';
+		}
+		return $product->get_name();
+	}
+
+	/**
 	 * Default exception thrown when an item cannot be added to the cart.
 	 *
 	 * @throws RouteException Exception with code woocommerce_rest_product_not_purchasable.
@@ -1208,13 +1221,21 @@ class CartController {
 	 * @param \WC_Product $product Product object associated with the cart item.
 	 */
 	protected function throw_default_product_exception( \WC_Product $product ) {
+		$product_name = $this->get_product_name( $product );
+
+		if ( empty( $product_name ) ) {
+			$message = __( 'This item is not available for purchase.', 'woocommerce' );
+		} else {
+			$message = sprintf(
+				/* translators: %s: product name */
+				__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
+				$product_name
+			);
+		}
+
 		throw new RouteException(
 			'woocommerce_rest_product_not_purchasable',
-			sprintf(
-				/* translators: %s: product name */
-				esc_html__( '&quot;%s&quot; is not available for purchase.', 'woocommerce' ),
-				$product->get_name()
-			),
+			esc_html( $message ),
 			400
 		);
 	}
