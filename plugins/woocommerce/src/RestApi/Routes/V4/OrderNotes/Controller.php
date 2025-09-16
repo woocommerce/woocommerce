@@ -14,8 +14,6 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
-use Automattic\WooCommerce\Internal\Utilities\Users;
 use WP_Http;
 use WP_Error;
 use WP_Comment;
@@ -138,8 +136,6 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response
 	 */
 	protected function add_links( WP_REST_Response $response, WP_Comment $note, WP_REST_Request $request ) {
-		$order_id = (int) $note->comment_post_ID;
-
 		$response->add_link( 'self', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $note->comment_ID ) ) );
 		$response->add_link( 'collection', rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ) );
 

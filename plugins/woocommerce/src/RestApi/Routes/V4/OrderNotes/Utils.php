@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 defined( 'ABSPATH' ) || exit;
 
 use WP_Comment;
+use WC_Order;
 
 /**
  * Utils class.

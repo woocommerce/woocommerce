@@ -12,8 +12,6 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
-use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 /**
  * OrderNoteSchema class.
