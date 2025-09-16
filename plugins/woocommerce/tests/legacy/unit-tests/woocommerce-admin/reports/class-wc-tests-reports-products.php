@@ -19,21 +19,27 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * @todo Finish up unit testing to verify bug-free product reports.
  */
 class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
+	/*
+	 * Setup test case.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		// Force new logic of full refund in analytics/products.
-        delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 
-        // In case any check depends on the DB version (not always necessary, but safe):
-        update_option( 'woocommerce_db_version', '10.2.0' );
-    }
+		// In case any check depends on the DB version (not always necessary, but safe).
+		update_option( 'woocommerce_db_version', '10.2.0' );
+	}
 
-    public function tearDown(): void {
-        // Clean in case any test changes options.
-        delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-        parent::tearDown();
-    }
+	/*
+	 * Tear down test case.
+	 */
+	public function tearDown(): void {
+		// Clean in case any test changes options.
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 product.
