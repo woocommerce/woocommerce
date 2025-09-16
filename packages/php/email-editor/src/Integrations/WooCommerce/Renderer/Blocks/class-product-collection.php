@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\B
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 use WP_Query;
 
 /**
@@ -34,7 +33,7 @@ class Product_Collection extends Abstract_Block_Renderer {
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query, $rendering_context );
+					$content .= $this->render_product_template( $inner_block, $query );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -42,7 +41,6 @@ class Product_Collection extends Abstract_Block_Renderer {
 			}
 		}
 
-		// Reset post data.
 		wp_reset_postdata();
 
 		return $content;
@@ -51,12 +49,11 @@ class Product_Collection extends Abstract_Block_Renderer {
 	/**
 	 * Render the product template block.
 	 *
-	 * @param array             $inner_block Inner block data.
-	 * @param \WP_Query         $query WP_Query object.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param array     $inner_block Inner block data.
+	 * @param \WP_Query $query WP_Query object.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query, Rendering_Context $rendering_context ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
@@ -76,23 +73,22 @@ class Product_Collection extends Abstract_Block_Renderer {
 				$posts
 			)
 		);
-		return $this->render_product_grid( $products, $inner_block, $rendering_context );
+		return $this->render_product_grid( $products, $inner_block );
 	}
 
 	/**
 	 * Render product grid using HTML table structure for email compatibility.
 	 *
-	 * @param array             $products Array of WC_Product objects.
-	 * @param array             $inner_block Inner block data.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param array $products Array of WC_Product objects.
+	 * @param array $inner_block Inner block data.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, array $inner_block, Rendering_Context $rendering_context ): string {
+	private function render_product_grid( array $products, array $inner_block ): string {
 		// We start with supporting 1 product per row.
 		$content = '';
 		foreach ( $products as $product ) {
 			$content .= $this->add_spacer(
-				$this->render_product_content( $product, $inner_block, $rendering_context ),
+				$this->render_product_content( $product, $inner_block ),
 				$inner_block['email_attrs'] ?? array()
 			);
 		}
@@ -103,26 +99,19 @@ class Product_Collection extends Abstract_Block_Renderer {
 	/**
 	 * Render default product content when no inner blocks are present.
 	 *
-	 * @param \WC_Product       $product Product object.
-	 * @param array             $template_block Inner block data.
-	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @param \WC_Product $product Product object.
+	 * @param array       $template_block Inner block data.
 	 * @return string
 	 */
-	private function render_product_content( \WC_Product $product, array $template_block, Rendering_Context $rendering_context ): string {
+	private function render_product_content( \WC_Product $product, array $template_block ): string {
 		$content = '';
 
 		foreach ( $template_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
-				case 'woocommerce/product-image':
-					$inner_block['context']           = $inner_block['context'] ?? array();
-					$inner_block['context']['postId'] = $product->get_id();
-					$content                         .= render_block( $inner_block );
-					break;
 				case 'woocommerce/product-price':
 				case 'woocommerce/product-button':
-					$content .= $this->render_woocommerce_block( $inner_block, $product );
-					break;
 				case 'woocommerce/product-sale-badge':
+				case 'woocommerce/product-image':
 					$inner_block['context']           = $inner_block['context'] ?? array();
 					$inner_block['context']['postId'] = $product->get_id();
 					$content                         .= render_block( $inner_block );
@@ -149,36 +138,6 @@ class Product_Collection extends Abstract_Block_Renderer {
 					break;
 			}
 		}
-
-		return $content;
-	}
-
-	/**
-	 * Render a WooCommerce block with proper product context.
-	 *
-	 * @param array       $inner_block Inner block data.
-	 * @param \WC_Product $product Product object.
-	 * @return string
-	 */
-	private function render_woocommerce_block( array $inner_block, \WC_Product $product ): string {
-		global $post;
-		$original_post           = $post;
-		$original_global_product = $GLOBALS['product'] ?? null;
-
-		$product_post = get_post( $product->get_id() );
-
-		$post               = $product_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$GLOBALS['product'] = $product;
-
-		$block_context = array(
-			'postId' => $product->get_id(),
-		);
-
-		$wp_block = new \WP_Block( $inner_block, $block_context );
-		$content  = $wp_block->render();
-
-		$post               = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		$GLOBALS['product'] = $original_global_product;
 
 		return $content;
 	}

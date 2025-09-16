@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\B
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
@@ -53,18 +54,19 @@ class Product_Sale_Badge extends Abstract_Block_Renderer {
 		 */
 		$sale_text = apply_filters( 'woocommerce_sale_badge_text', __( 'Sale', 'woocommerce' ), $product );
 
-		$badge_html = $this->build_badge_html( $sale_text, $attributes );
+		$badge_html = $this->build_badge_html( $sale_text, $attributes, $rendering_context );
 		return $this->apply_email_wrapper( $badge_html, $parsed_block );
 	}
 
 	/**
 	 * Build email-compatible badge HTML.
 	 *
-	 * @param string $sale_text Sale badge text.
-	 * @param array  $attributes Block attributes.
+	 * @param string            $sale_text Sale badge text.
+	 * @param array             $attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function build_badge_html( string $sale_text, array $attributes ): string {
+	private function build_badge_html( string $sale_text, array $attributes, Rendering_Context $rendering_context ): string {
 		$align = $attributes['align'] ?? 'left';
 
 		$position_style = $this->get_position_style( $align );
@@ -89,11 +91,8 @@ class Product_Sale_Badge extends Abstract_Block_Renderer {
 			$position_style
 		);
 
-		// Apply custom styles from block attributes if present.
-		if ( ! empty( $attributes['style'] ) ) {
-			$custom_styles = $this->parse_block_styles( $attributes['style'] );
-			$badge_styles  = array_merge( $badge_styles, $custom_styles );
-		}
+		$custom_styles = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
+		$badge_styles  = array_merge( $badge_styles, $custom_styles );
 
 		$style_attr = \WP_Style_Engine::compile_css( $badge_styles, '' );
 
@@ -133,77 +132,6 @@ class Product_Sale_Badge extends Abstract_Block_Renderer {
 					'text-align' => 'left',
 				);
 		}
-	}
-
-	/**
-	 * Parse block styles into CSS properties.
-	 *
-	 * @param array $style_block Style block from attributes.
-	 * @return array
-	 */
-	private function parse_block_styles( array $style_block ): array {
-		$styles = array();
-
-		// Handle color styles.
-		if ( ! empty( $style_block['color'] ) ) {
-			$color = $style_block['color'];
-			if ( ! empty( $color['text'] ) ) {
-				$styles['color'] = $color['text'];
-			}
-			if ( ! empty( $color['background'] ) ) {
-				$styles['background-color'] = $color['background'];
-			}
-		}
-
-		// Handle typography styles.
-		if ( ! empty( $style_block['typography'] ) ) {
-			$typography = $style_block['typography'];
-			if ( ! empty( $typography['fontSize'] ) ) {
-				$styles['font-size'] = $typography['fontSize'];
-			}
-			if ( ! empty( $typography['fontWeight'] ) ) {
-				$styles['font-weight'] = $typography['fontWeight'];
-			}
-			if ( ! empty( $typography['textTransform'] ) ) {
-				$styles['text-transform'] = $typography['textTransform'];
-			}
-		}
-
-		// Handle spacing styles.
-		if ( ! empty( $style_block['spacing'] ) ) {
-			$spacing = $style_block['spacing'];
-			if ( ! empty( $spacing['padding'] ) ) {
-				$padding = $spacing['padding'];
-				if ( is_array( $padding ) ) {
-					foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
-						if ( ! empty( $padding[ $side ] ) ) {
-							$styles[ "padding-{$side}" ] = $padding[ $side ];
-						}
-					}
-				} else {
-					$styles['padding'] = $padding;
-				}
-			}
-		}
-
-		// Handle border styles.
-		if ( ! empty( $style_block['border'] ) ) {
-			$border = $style_block['border'];
-			if ( ! empty( $border['radius'] ) ) {
-				$styles['border-radius'] = $border['radius'];
-			}
-			if ( ! empty( $border['width'] ) ) {
-				$styles['border-width'] = $border['width'];
-			}
-			if ( ! empty( $border['color'] ) ) {
-				$styles['border-color'] = $border['color'];
-			}
-			if ( ! empty( $border['style'] ) ) {
-				$styles['border-style'] = $border['style'];
-			}
-		}
-
-		return $styles;
 	}
 
 	/**

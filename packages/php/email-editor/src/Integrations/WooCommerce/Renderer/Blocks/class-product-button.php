@@ -49,7 +49,7 @@ class Product_Button extends Abstract_Block_Renderer {
 		return Styles_Helper::extend_block_styles(
 			$block_styles,
 			array(
-				'display' => 'block',
+				'display'         => 'block',
 				'text-decoration' => 'none',
 			)
 		);
@@ -89,10 +89,10 @@ class Product_Button extends Abstract_Block_Renderer {
 						'fontSize'   => '16px',
 						'fontWeight' => 'bold',
 					),
-					'border' => array(
+					'border'     => array(
 						'radius' => '0',
 					),
-					'spacing' => array(
+					'spacing'    => array(
 						'padding' => '12px 24px',
 					),
 				),

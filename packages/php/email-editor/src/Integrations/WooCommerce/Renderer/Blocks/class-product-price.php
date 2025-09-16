@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\B
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
@@ -52,7 +53,7 @@ class Product_Price extends Abstract_Block_Renderer {
 
 		$attributes = $parsed_block['attrs'] ?? array();
 
-		$price_content = $this->generate_price_html( $product, $attributes );
+		$price_content = $this->generate_price_html( $product, $attributes, $rendering_context );
 
 		return $this->apply_email_wrapper( $price_content, $parsed_block );
 	}
@@ -60,11 +61,12 @@ class Product_Price extends Abstract_Block_Renderer {
 	/**
 	 * Generate clean price HTML from product data.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @param array       $attributes Block attributes.
+	 * @param \WC_Product       $product Product object.
+	 * @param array             $attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function generate_price_html( \WC_Product $product, array $attributes ): string {
+	private function generate_price_html( \WC_Product $product, array $attributes, Rendering_Context $rendering_context ): string {
 		$price_html = $this->build_price_from_scratch( $product );
 
 		if ( empty( $price_html ) ) {
@@ -80,14 +82,8 @@ class Product_Price extends Abstract_Block_Renderer {
 			'text-decoration' => 'none',
 		);
 
-		if ( ! empty( $attributes['style'] ) ) {
-			$custom_styles = $this->parse_block_styles( $attributes['style'] );
-			$price_styles  = array_merge( $price_styles, $custom_styles );
-		}
-
-		if ( ! empty( $attributes['textAlign'] ) ) {
-			$price_styles['text-align'] = $attributes['textAlign'];
-		}
+		$custom_styles = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
+		$price_styles  = array_merge( $price_styles, $custom_styles['declarations'] );
 
 		$style_attr = \WP_Style_Engine::compile_css( $price_styles, '' );
 
@@ -231,69 +227,6 @@ class Product_Price extends Abstract_Block_Renderer {
 			default:
 				return $formatted . '&nbsp;' . $currency;
 		}
-	}
-
-	/**
-	 * Parse block styles into CSS properties.
-	 *
-	 * @param array $style_block Style block from attributes.
-	 * @return array
-	 */
-	private function parse_block_styles( array $style_block ): array {
-		$styles = array();
-
-		if ( ! empty( $style_block['color'] ) ) {
-			$color = $style_block['color'];
-			if ( ! empty( $color['text'] ) ) {
-				$styles['color'] = $color['text'];
-			}
-			if ( ! empty( $color['background'] ) ) {
-				$styles['background-color'] = $color['background'];
-			}
-		}
-
-		if ( ! empty( $style_block['typography'] ) ) {
-			$typography = $style_block['typography'];
-			if ( ! empty( $typography['fontSize'] ) ) {
-				$styles['font-size'] = $typography['fontSize'];
-			}
-			if ( ! empty( $typography['fontWeight'] ) ) {
-				$styles['font-weight'] = $typography['fontWeight'];
-			}
-			if ( ! empty( $typography['lineHeight'] ) ) {
-				$styles['line-height'] = $typography['lineHeight'];
-			}
-		}
-
-		if ( ! empty( $style_block['spacing'] ) ) {
-			$spacing = $style_block['spacing'];
-			if ( ! empty( $spacing['padding'] ) ) {
-				$padding = $spacing['padding'];
-				if ( is_array( $padding ) ) {
-					foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
-						if ( ! empty( $padding[ $side ] ) ) {
-							$styles[ "padding-{$side}" ] = $padding[ $side ];
-						}
-					}
-				} else {
-					$styles['padding'] = $padding;
-				}
-			}
-			if ( ! empty( $spacing['margin'] ) ) {
-				$margin = $spacing['margin'];
-				if ( is_array( $margin ) ) {
-					foreach ( array( 'top', 'right', 'bottom', 'left' ) as $side ) {
-						if ( ! empty( $margin[ $side ] ) ) {
-							$styles[ "margin-{$side}" ] = $margin[ $side ];
-						}
-					}
-				} else {
-					$styles['margin'] = $margin;
-				}
-			}
-		}
-
-		return $styles;
 	}
 
 	/**

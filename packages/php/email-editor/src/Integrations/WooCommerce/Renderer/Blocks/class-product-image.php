@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\B
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
@@ -43,10 +44,10 @@ class Product_Image extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $image_data['url'] );
+		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $rendering_context );
 		$attributes   = $this->parse_attributes( $parsed_block['attrs'] ?? array() );
 
-		$image_html = $this->build_image_html( $image_data, $attributes );
+		$image_html = $this->build_image_html( $image_data, $attributes, $rendering_context );
 
 		$inner_blocks = $this->process_inner_blocks( $parsed_block, $product, $rendering_context );
 
@@ -230,11 +231,12 @@ class Product_Image extends Abstract_Block_Renderer {
 	 * Extract image width from HTML for positioning calculations.
 	 *
 	 * @param string $image_html Image HTML.
-	 * @return int Image width in pixels.
+	 * @return float Image width in pixels.
 	 */
-	private function extract_image_width( string $image_html ): int {
-		if ( preg_match( '/width=["\']?(\d+)["\']?/i', $image_html, $matches ) ) {
-			return (int) $matches[1];
+	private function extract_image_width( string $image_html ): float {
+		$width = ( new Dom_Document_Helper( $image_html ) )->get_attribute_value_by_tag_name( 'img', 'width' ) ?? '';
+		if ( $width ) {
+			return Styles_Helper::parse_value( $width );
 		}
 
 		return 300;
@@ -244,11 +246,12 @@ class Product_Image extends Abstract_Block_Renderer {
 	 * Extract image height from HTML for positioning calculations.
 	 *
 	 * @param string $image_html Image HTML.
-	 * @return int Image height in pixels.
+	 * @return float Image height in pixels.
 	 */
-	private function extract_image_height( string $image_html ): int {
-		if ( preg_match( '/height=["\']?(\d+)["\']?/i', $image_html, $matches ) ) {
-			return (int) $matches[1];
+	private function extract_image_height( string $image_html ): float {
+		$height = ( new Dom_Document_Helper( $image_html ) )->get_attribute_value_by_tag_name( 'img', 'height' ) ?? '';
+		if ( $height ) {
+			return Styles_Helper::parse_value( $height );
 		}
 
 		return 300;
@@ -259,11 +262,11 @@ class Product_Image extends Abstract_Block_Renderer {
 	 * When the width is not set, it's important to get it for the image to be displayed correctly.
 	 * Based on the email Image renderer logic.
 	 *
-	 * @param array  $parsed_block Parsed block.
-	 * @param string $image_url Image URL.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array
 	 */
-	private function add_image_size_when_missing( array $parsed_block, string $image_url ): array {
+	private function add_image_size_when_missing( array $parsed_block, Rendering_Context $rendering_context ): array {
 		if ( isset( $parsed_block['attrs']['width'] ) ) {
 			return $parsed_block;
 		}
@@ -273,8 +276,7 @@ class Product_Image extends Abstract_Block_Renderer {
 			return $parsed_block;
 		}
 
-		$container_width                = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] );
-		$parsed_block['attrs']['width'] = "{$container_width}px";
+		$parsed_block['attrs']['width'] = $rendering_context->get_layout_width_without_padding();
 
 		return $parsed_block;
 	}
@@ -338,33 +340,42 @@ class Product_Image extends Abstract_Block_Renderer {
 	/**
 	 * Build email-compatible image HTML.
 	 *
-	 * @param array $image_data Image data.
-	 * @param array $attributes Block attributes.
+	 * @param array             $image_data Image data.
+	 * @param array             $attributes Block attributes.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string
 	 */
-	private function build_image_html( array $image_data, array $attributes ): string {
+	private function build_image_html( array $image_data, array $attributes, Rendering_Context $rendering_context ): string {
 		$style_parts = array(
-			'max-width: 100%',
-			'height: auto',
-			'display: block',
+			'max-width' => '100%',
+			'height'    => 'auto',
+			'display'   => 'block',
 		);
 
 		if ( ! empty( $attributes['scale'] ) ) {
-			$style_parts[] = sprintf( 'object-fit: %s', esc_attr( $attributes['scale'] ) );
+			$style_parts['object-fit'] = $attributes['scale'];
 		}
 
 		if ( ! empty( $attributes['width'] ) ) {
-			$style_parts[] = sprintf( 'width: %s', esc_attr( $attributes['width'] ) );
+			$style_parts['width'] = $attributes['width'];
 		}
+
 		if ( ! empty( $attributes['height'] ) ) {
-			$style_parts[] = sprintf( 'height: %s', esc_attr( $attributes['height'] ) );
+			$style_parts['height'] = $attributes['height'];
 		}
 
 		if ( ! empty( $attributes['aspectRatio'] ) ) {
-			$style_parts[] = sprintf( 'aspect-ratio: %s', esc_attr( $attributes['aspectRatio'] ) );
+			$style_parts['aspect-ratio'] = $attributes['aspectRatio'];
 		}
 
-		$width = ! empty( $attributes['width'] ) ? Styles_Helper::parse_value( $attributes['width'] ) : $image_data['width'];
+		$width        = ! empty( $attributes['width'] ) ? Styles_Helper::parse_value( $attributes['width'] ) : $image_data['width'];
+		$layout_width = Styles_Helper::parse_value( $rendering_context->get_layout_width_without_padding() );
+
+		if ( $width > $layout_width ) {
+			$width                = $layout_width;
+			$aspect_ratio         = $image_data['height'] / $image_data['width'];
+			$attributes['height'] = round( $width * $aspect_ratio ) . 'px';
+		}
 
 		$height = $image_data['height'];
 		if ( ! empty( $attributes['height'] ) ) {
@@ -378,7 +389,7 @@ class Product_Image extends Abstract_Block_Renderer {
 			'<img src="%s" alt="%s" style="%s" width="%d" height="%d" />',
 			esc_url( $image_data['url'] ),
 			esc_attr( $image_data['alt'] ),
-			implode( '; ', $style_parts ),
+			esc_attr( \WP_Style_Engine::compile_css( $style_parts, '' ) ),
 			$width,
 			$height
 		);
@@ -411,11 +422,9 @@ class Product_Image extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function apply_email_wrapper( string $image_html, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$width         = $rendering_context->get_layout_width_without_padding();
+		$width         = $parsed_block['attrs']['width'] ?? '';
 		$wrapper_width = ( $width && '100%' !== $width ) ? $width : 'auto';
-
-		$image_height   = $this->extract_image_height( $image_html );
-		$dynamic_height = $image_height . 'px';
+		$image_height  = $this->extract_image_height( $image_html ) . 'px';
 
 		$wrapper_styles = array(
 			'border-collapse' => 'separate',
@@ -436,7 +445,7 @@ class Product_Image extends Abstract_Block_Renderer {
 					'border-collapse' => 'collapse',
 					'border-spacing'  => '0px',
 					'width'           => '100%',
-					'height'          => $dynamic_height,
+					'height'          => $image_height,
 				),
 				''
 			),
@@ -450,7 +459,7 @@ class Product_Image extends Abstract_Block_Renderer {
 		$inner_table_attrs = array(
 			'style'  => \WP_Style_Engine::compile_css( $wrapper_styles, '' ),
 			'width'  => $wrapper_width,
-			'height' => $dynamic_height,
+			'height' => $image_height,
 		);
 
 		$inner_cell_attrs = array(
