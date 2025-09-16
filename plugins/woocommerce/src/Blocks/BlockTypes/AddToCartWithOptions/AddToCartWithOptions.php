@@ -523,7 +523,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			if ( $legacy_mode ) {
 				$action_url = home_url( add_query_arg( null, null ) );
 
-				// If an extension is hoooking into the form or we need to redirect to the cart,
+				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
 					'action'  => esc_url(
