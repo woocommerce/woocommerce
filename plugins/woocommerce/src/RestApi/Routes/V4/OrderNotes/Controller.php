@@ -140,7 +140,10 @@ class Controller extends AbstractController {
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $item->comment_ID ) ),
 			),
 			'collection' => array(
-				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) ),
+				'href' => add_query_arg(
+					array( 'order_id' => (int) $item->comment_post_ID ),
+					rest_url( sprintf( '/%s/%s', $this->namespace, $this->rest_base ) )
+				),
 			),
 		);
 	}
