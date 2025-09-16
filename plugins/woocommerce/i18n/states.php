@@ -803,7 +803,7 @@ return array(
 		'WX' => __( 'Wexford', 'woocommerce' ),
 		'WW' => __( 'Wicklow', 'woocommerce' ),
 	),
-	'IN' => array( //Indian states.
+	'IN' => array( // Indian states.
 		'AN' => __( 'Andaman and Nicobar Islands', 'woocommerce' ),
 		'AP' => __( 'Andhra Pradesh', 'woocommerce' ),
 		'AR' => __( 'Arunachal Pradesh', 'woocommerce' ),
