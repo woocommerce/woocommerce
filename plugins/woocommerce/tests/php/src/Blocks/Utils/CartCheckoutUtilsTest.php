@@ -284,9 +284,21 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
                 <!-- /wp:woocommerce/cart -->',
 				true,
 			),
+			'nested_block_not_found'                       => array(
+				'woocommerce/cart',
+				'displayType',
+				'full',
+				'<!-- wp:group -->
+					<div class="wp-block-group">
+						<!-- wp:woocommerce/cart {"displayType":"full"} -->
+						<div class="wp-block-woocommerce-cart">Cart content</div>
+						<!-- /wp:woocommerce/cart -->
+					</div>
+				<!-- /wp:group -->',
+				true,
+			),
 		);
 	}
-
 
 	/**
 	 * Test has_block_variation with all scenarios using data provider
