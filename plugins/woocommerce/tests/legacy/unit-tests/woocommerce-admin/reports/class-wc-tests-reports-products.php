@@ -820,6 +820,11 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotEmpty(
+			$result,
+			'No lookup rows found for the refund; check full-refund mode and queue processing.'
+		);
+
 		$this->assertEquals( '-2', $result[0]->product_qty );
 		$this->assertEqualsWithDelta( -60.000000, $result[0]->product_net_revenue, 0.000001 );    // -($30 product_2 * 2).
 		$this->assertEqualsWithDelta( -33.333333, $result[0]->shipping_amount, 0.000001 );        // -($100 shipping / 6 total items * 2 product_2 ).
