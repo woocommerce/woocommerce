@@ -668,7 +668,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	public static function maybe_update_order_statuses_transient( $order_id ) {
 		wc_deprecated_function( __METHOD__, '10.3.0', __CLASS__ . '::maybe_update_order_statuses_cache()' );
-		return self::maybe_update_order_statuses_cache( $order_id );
+		self::maybe_update_order_statuses_cache( $order_id );
 	}
 
 	/**
