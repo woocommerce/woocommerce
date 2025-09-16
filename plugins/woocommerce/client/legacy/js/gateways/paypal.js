@@ -10,15 +10,31 @@ jQuery(function ($) {
 		const buttons = paypal.Buttons( {
 			async createOrder() {
 				// TODO: Add createOrder logic here
+				return null;
 			},
 
 			async onApprove( data ) {
 				// TODO: Add onApprove logic here
 			},
 
-			onError: function ( err ) {
-				// TODO: Add onError logic here
-				console.error( 'PayPal error:', err );
+			onError: function ( error ) {				
+				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
+				const messageWrapper =
+					'<ul class="woocommerce-error" role="alert"><li>' +
+						'PayPal error: ' +
+						sanitizedErrorMessage +
+					'</li></ul>';	
+				
+				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
+
+				if ( ! $noticeContainer.length ) {
+					return;
+				}
+		
+				$(
+					'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message'
+				).remove();
+				$noticeContainer.prepend( messageWrapper );
 			},
 
 			onCancel( data ) {

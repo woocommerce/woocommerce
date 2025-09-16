@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { dispatch } from '@wordpress/data';
 
 /**
  * PayPalButtonsContainer component.
@@ -41,9 +42,22 @@ const PayPalButtonsContainer = ( {
 		'data-page-type': pageType || '',
 	};
 
+	const createOrder = async () => {
+		return null;
+	};
+
+	const onError = ( error ) => {
+		dispatch( 'core/notices' ).createErrorNotice(
+			'PayPal error: ' + error.message,
+			{
+				context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
+			}
+		);
+	};
+
 	return (
 		<PayPalScriptProvider options={ options }>
-			<PayPalButtons />
+			<PayPalButtons createOrder={ createOrder } onError={ onError } />
 		</PayPalScriptProvider>
 	);
 };
