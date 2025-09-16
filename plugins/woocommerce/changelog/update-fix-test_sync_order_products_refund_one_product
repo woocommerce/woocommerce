@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+tests: Isolate refund mode and guard lookup assertions
