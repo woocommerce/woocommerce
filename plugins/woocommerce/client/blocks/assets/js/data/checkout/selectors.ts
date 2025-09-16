@@ -124,12 +124,12 @@ export const getRegisteredAutocompleteProviders = ( state: CheckoutState ) => {
 /**
  * Get active address autocomplete provider.
  *
- * @param type
  * @param state
+ * @param type
  */
 export const getActiveAutocompleteProvider = (
-	type: 'billing' | 'shipping',
-	state: CheckoutState
+	state: CheckoutState,
+	type: 'billing' | 'shipping'
 ) => {
 	return state.activeAddressAutocompleteProvider?.[ type ];
 };
