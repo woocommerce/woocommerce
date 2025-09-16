@@ -8,6 +8,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -322,15 +323,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			try {
-				await expect(
-					page.getByLabel( 'Number of items in the cart: 2' )
-				).toBeVisible();
-			} catch ( e ) {
-				await expect(
-					page.getByLabel( '2 items in cart' )
-				).toBeVisible();
-			}
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
@@ -378,7 +377,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 3'
+						: '3 items in cart'
+				)
+			).toBeVisible();
 		} );
 	} );
 
