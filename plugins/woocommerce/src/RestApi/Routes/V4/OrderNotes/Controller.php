@@ -42,6 +42,15 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Get the collection args schema.
+	 *
+	 * @return array
+	 */
+	protected function get_query_schema(): array {
+		return QueryUtils::get_query_schema();
+	}
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -71,7 +80,6 @@ class Controller extends AbstractController {
 				),
 			)
 		);
-
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -98,33 +106,6 @@ class Controller extends AbstractController {
 				),
 			)
 		);
-	}
-
-	/**
-	 * Get the query params for collections.
-	 *
-	 * @return array
-	 */
-	public function get_collection_params() {
-		$params = array(
-			'context'   => $this->get_context_param( array( 'default' => 'view' ) ),
-			'note_type' => array(
-				'default'           => 'all',
-				'description'       => __( 'Limit result to customer notes or private notes.', 'woocommerce' ),
-				'type'              => 'string',
-				'enum'              => array( 'all', 'customer', 'private' ),
-				'sanitize_callback' => 'sanitize_key',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
-		);
-
-		/**
-		 * Filter the collection params for the orders controller.
-		 *
-		 * @param array $params The collection params.
-		 * @since 10.2.0
-		 */
-		return apply_filters( $this->get_hook_prefix() . 'collection_params', $params, $this );
 	}
 
 	/**
@@ -254,39 +235,11 @@ class Controller extends AbstractController {
 			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
 		}
 
-		$args = array(
-			'post_id' => $order->get_id(),
-			'approve' => 'approve',
-			'type'    => 'order_note',
-		);
+		$results = QueryUtils::get_query_results( $request, $order );
+		$items   = array();
 
-		// Allow filter by order note type.
-		if ( 'customer' === $request['note_type'] ) {
-			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				array(
-					'key'     => 'is_customer_note',
-					'value'   => 1,
-					'compare' => '=',
-				),
-			);
-		} elseif ( 'private' === $request['note_type'] ) {
-			$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				array(
-					'key'     => 'is_customer_note',
-					'compare' => 'NOT EXISTS',
-				),
-			);
-		}
-
-		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$notes = get_comments( $args );
-		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-
-		$items = array();
-
-		foreach ( $notes as $note ) {
-			$item    = $this->prepare_item_for_response( $note, $request );
-			$items[] = $this->prepare_response_for_collection( $item );
+		foreach ( $results as $result ) {
+			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );
 		}
 
 		return rest_ensure_response( $items );

@@ -13,6 +13,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
 use WP_Error;
 use WP_Http;
+use WP_REST_Server;
 use WP_REST_Controller;
 use WP_REST_Response;
 use WP_REST_Request;
@@ -58,6 +59,34 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @return array The full item schema.
 	 */
 	abstract protected function get_schema(): array;
+
+	/**
+	 * Get the collection args schema.
+	 *
+	 * @return array
+	 */
+	protected function get_query_schema(): array {
+		return array();
+	}
+
+	/**
+	 * Add default context collection params and filter the result. This does not inherit from
+	 * WP_REST_Controller::get_collection_params because some endpoints do not paginate results.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params            = $this->get_query_schema();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+
+		/**
+		 * Filter the collection params.
+		 *
+		 * @param array $params The collection params.
+		 * @since 10.2.0
+		 */
+		return apply_filters( $this->get_hook_prefix() . 'collection_params', $params, $this );
+	}
 
 	/**
 	 * Get item schema, conforming to JSON Schema. Extended by routes.
