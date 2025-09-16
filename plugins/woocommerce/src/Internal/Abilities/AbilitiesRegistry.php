@@ -30,10 +30,9 @@ class AbilitiesRegistry {
 	private function init_abilities(): void {
 		// Initialize store info ability
 		StoreInfoAbility::init();
-		
-		// Future abilities will be initialized here:
-		// ProductAbility::init();
-		// OrderAbility::init();
+
+		// Initialize REST bridge for REST endpoint abilities
+		AbilitiesRestBridge::init();
 	}
 
 	/**
