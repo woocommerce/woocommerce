@@ -12,6 +12,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -43,10 +44,13 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				$this->controllers[ $namespace ][ $controller_name ] =
-					$container->has( $controller_class ) ?
+				if ( 'wc/v4' === $namespace && ! str_starts_with( $controller_class, 'WC_REST_' ) ) {
+					$this->controllers[ $namespace ][ $controller_name ] = $this->get_v4_controller( $controller_name, $controller_class );
+				} else {
+					$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
 					$legacy_proxy->get_instance_of( $controller_class );
+				}
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
@@ -58,22 +62,24 @@ class Server {
 	 * @return array List of Namespaces and Main controller classes.
 	 */
 	protected function get_rest_namespaces() {
+		$namespaces = array(
+			'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
+			'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
+			'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
+			'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
+		);
+
+		if ( wc_rest_should_load_namespace( 'wc/v4' ) && Features::is_enabled( 'rest-api-v4' ) ) {
+			$namespaces['wc/v4'] = $this->get_v4_controllers();
+		}
+
 		/**
 		 * Filter the list of REST API controllers to load.
 		 *
 		 * @since 4.5.0
 		 * @param array $controllers List of $namespace => $controllers to load.
 		 */
-		return apply_filters(
-			'woocommerce_rest_api_get_rest_namespaces',
-			array(
-				'wc/v1'        => wc_rest_should_load_namespace( 'wc/v1' ) ? $this->get_v1_controllers() : array(),
-				'wc/v2'        => wc_rest_should_load_namespace( 'wc/v2' ) ? $this->get_v2_controllers() : array(),
-				'wc/v3'        => wc_rest_should_load_namespace( 'wc/v3' ) ? $this->get_v3_controllers() : array(),
-				'wc/v4'        => ( wc_rest_should_load_namespace( 'wc/v4' ) && ( class_exists( \Automattic\WooCommerce\Admin\Features\Features::class ) && Features::is_enabled( 'rest-api-v4' ) ) ) ? $this->get_v4_controllers() : array(),
-				'wc-telemetry' => wc_rest_should_load_namespace( 'wc-telemetry' ) ? $this->get_telemetry_controllers() : array(),
-			)
-		);
+		return apply_filters( 'woocommerce_rest_api_get_rest_namespaces', $namespaces );
 	}
 
 	/**
@@ -210,7 +216,22 @@ class Server {
 			'ping'         => 'WC_REST_Ping_V4_Controller',
 			'fulfillments' => 'WC_REST_Fulfillments_V4_Controller',
 			'products'     => 'WC_REST_Products_V4_Controller',
+			'order-notes'  => OrderNotesController::class,
 		);
+	}
+
+	/**
+	 * Get instance of a V4 controller.
+	 *
+	 * @param string $identifier Controller identifier.
+	 * @param string $route Route class name.
+	 * @return object The instance of the controller.
+	 */
+	protected function get_v4_controller( $identifier, $route ) {
+		if ( isset( $this->controllers['wc/v4'][ $identifier ] ) ) {
+			return $this->controllers['wc/v4'][ $identifier ];
+		}
+		return new $route();
 	}
 
 	/**

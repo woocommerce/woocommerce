@@ -13,7 +13,10 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
 use WP_Error;
 use WP_Http;
+use WP_REST_Server;
 use WP_REST_Controller;
+use WP_REST_Response;
+use WP_REST_Request;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -48,28 +51,110 @@ abstract class AbstractController extends WP_REST_Controller {
 	protected $schema;
 
 	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 *
+	 * This should return the full schema object, not just the properties.
+	 *
+	 * @return array The full item schema.
+	 */
+	abstract protected function get_schema(): array;
+
+	/**
+	 * Get the collection args schema.
+	 *
+	 * @return array
+	 */
+	protected function get_query_schema(): array {
+		return array();
+	}
+
+	/**
+	 * Add default context collection params and filter the result. This does not inherit from
+	 * WP_REST_Controller::get_collection_params because some endpoints do not paginate results.
+	 *
+	 * @return array
+	 */
+	public function get_collection_params() {
+		$params            = $this->get_query_schema();
+		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
+
+		/**
+		 * Filter the collection params.
+		 *
+		 * @param array $params The collection params.
+		 * @since 10.2.0
+		 */
+		return apply_filters( $this->get_hook_prefix() . 'collection_params', $params, $this );
+	}
+
+	/**
 	 * Get item schema, conforming to JSON Schema. Extended by routes.
 	 *
 	 * @return array The item schema.
 	 * @since 10.2.0
 	 */
 	public function get_item_schema() {
+		// Cache the schema for the route.
 		if ( null === $this->schema ) {
-			$this->schema = array(
-				'$schema'    => 'http://json-schema.org/draft-04/schema#',
-				'type'       => 'object',
-				'title'      => 'item',
-				'properties' => array(),
-			);
 			/**
 			 * Filter the item schema for this route.
 			 *
 			 * @param array $schema The item schema.
 			 * @since 10.2.0
 			 */
-			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->schema ) );
+			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->get_schema() ) );
 		}
 		return $this->schema;
+	}
+
+	/**
+	 * Get the item response.
+	 *
+	 * @param mixed           $item    WooCommerce representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array The item response.
+	 * @since 10.2.0
+	 */
+	abstract protected function get_item_response( $item, WP_REST_Request $request ): array;
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function prepare_links( $item, WP_REST_Request $request ): array {
+		return array();
+	}
+
+	/**
+	 * Prepares the item for the REST response. Controllers do not need to override this method as they can define a
+	 * get_item_response method to prepare items. This method will take care of filter hooks.
+	 *
+	 * @param mixed           $item    WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 * @since 10.2.0
+	 */
+	public function prepare_item_for_response( $item, $request ) {
+		$response_data = $this->get_item_response( $item, $request );
+		$response_data = $this->add_additional_fields_to_object( $response_data, $request );
+		$response_data = $this->filter_response_by_context( $response_data, $request['context'] ?? 'view' );
+
+		$response = rest_ensure_response( $response_data );
+		$response->add_links( $this->prepare_links( $item, $request ) );
+
+		/**
+		 * Filter the data for a response.
+		 *
+		 * @param WP_REST_Response $response The response object.
+		 * @param mixed           $item    WordPress representation of the item.
+		 * @param WP_REST_Request  $request  Request object.
+		 * @since 10.2.0
+		 */
+		return rest_ensure_response( apply_filters( $this->get_hook_prefix() . 'item_response', $response, $item, $request ) );
 	}
 
 	/**
@@ -81,7 +166,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 10.2.0
 	 */
 	protected function get_hook_prefix(): string {
-		return 'woocommerce_rest_api_v4_' . $this->rest_base . '_';
+		return 'woocommerce_rest_api_v4_' . str_replace( '-', '_', $this->rest_base ) . '_';
 	}
 
 	/**
@@ -93,7 +178,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	 * @since 10.2.0
 	 */
 	protected function get_error_prefix(): string {
-		return 'woocommerce_rest_api_v4_' . $this->rest_base . '_';
+		return 'woocommerce_rest_api_v4_' . str_replace( '-', '_', $this->rest_base ) . '_';
 	}
 
 	/**
