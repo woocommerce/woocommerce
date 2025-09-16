@@ -19,7 +19,6 @@ import {
 	CHECKOUT_EVENTS,
 	checkoutEventsEmitter,
 } from '@woocommerce/blocks-checkout-events';
-import type { FormType } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
