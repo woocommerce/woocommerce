@@ -260,6 +260,15 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 						array( 'status' => 400 )
 					);
 				}
+
+				if ( ! $this->validate_country_or_state_code( $value ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid country/state format.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+
 				break;
 
 			case 'woocommerce_allowed_countries':
@@ -271,6 +280,15 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 						array( 'status' => 400 )
 					);
 				}
+
+				if ( ! $this->validate_country_or_state_code( $value ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid country/state format.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+
 				break;
 
 			case 'woocommerce_ship_to_countries':
@@ -282,6 +300,15 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 						array( 'status' => 400 )
 					);
 				}
+
+				if ( ! $this->validate_country_or_state_code( $value ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Invalid country/state format.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+
 				break;
 
 			case 'woocommerce_specific_allowed_countries':
@@ -293,9 +320,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 						array( 'status' => 400 )
 					);
 				}
-				$valid = array_keys( WC()->countries->get_countries() );
+
 				foreach ( $value as $code ) {
-					if ( ! is_string( $code ) || ! in_array( $code, $valid, true ) ) {
+					if ( ! is_string( $code ) || ! $this->validate_country_or_state_code( $code ) ) {
 						return new WP_Error(
 							'rest_invalid_param',
 							__( 'Invalid country code in list.', 'woocommerce' ),
@@ -551,6 +578,32 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;
+	}
+
+	/**
+	 * Validate country or state code.
+	 *
+	 * @param string $country_or_state Country or state code.
+	 * @return boolean Valid or not valid.
+	 */
+	private function validate_country_or_state_code( $country_or_state ) {
+		list( $country, $state ) = array_pad( explode( ':', $country_or_state, 2 ), 2, '' );
+		$countries = WC()->countries->get_countries();
+		$states = WC()->countries->get_states();
+
+		if ( ! empty( $country ) && ! in_array( $country, $countries, true ) ) {
+			return false;
+		}
+
+		if ( ! empty( $state ) && ! in_array( $state, $states[ $country ], true ) ) {
+			return false;
+		}
+
+		if ( empty( $state ) ) {
+			return true;
+		}
+
+		return true;
 	}
 
 	/**
