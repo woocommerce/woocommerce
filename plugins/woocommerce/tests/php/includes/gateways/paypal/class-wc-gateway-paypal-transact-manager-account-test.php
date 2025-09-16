@@ -185,7 +185,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_valid_merchant_account_cache' )
 		);
 
-		$result = $this->account_manager->get_merchant_account_data();
+		$result = $this->account_manager->get_transact_account_data( 'merchant' );
 
 		// Clean up the filter.
 		remove_filter(
@@ -207,7 +207,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_expired_merchant_account_cache' )
 		);
 
-		$result = $this->account_manager->get_merchant_account_data();
+		$result = $this->account_manager->get_transact_account_data( 'merchant' );
 
 		// Clean up the filter.
 		remove_filter(
@@ -238,7 +238,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_merchant_account_api_success' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$result          = $account_manager->get_merchant_account_data();
+		$result          = $account_manager->get_transact_account_data( 'merchant' );
 
 		// Clean up the filters.
 		remove_filter( 'pre_option_woocommerce_paypal_transact_merchant_account_test', array( $this, 'return_empty_merchant_account_cache' ) );
@@ -268,7 +268,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_valid_provider_account_cache' )
 		);
 
-		$result = $this->account_manager->get_provider_account_data();
+		$result = $this->account_manager->get_transact_account_data( 'provider' );
 
 		// Clean up the filter.
 		remove_filter(
@@ -290,7 +290,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 			array( $this, 'return_expired_provider_account_cache' )
 		);
 
-		$result = $this->account_manager->get_provider_account_data();
+		$result = $this->account_manager->get_transact_account_data( 'provider' );
 
 		// Clean up the filter.
 		remove_filter(
@@ -321,7 +321,7 @@ class WC_Gateway_Paypal_Transact_Account_Manager_Test extends \WC_Unit_Test_Case
 		add_filter( 'pre_http_request', array( $this, 'return_provider_account_api_success' ) );
 
 		$account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this->gateway );
-		$result          = $account_manager->get_provider_account_data();
+		$result          = $account_manager->get_transact_account_data( 'provider' );
 
 		// Clean up the filters.
 		remove_filter( 'pre_option_woocommerce_paypal_transact_provider_account_test', array( $this, 'return_empty_provider_account_cache' ) );
