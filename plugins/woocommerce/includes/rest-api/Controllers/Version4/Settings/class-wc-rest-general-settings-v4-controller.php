@@ -587,23 +587,22 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return boolean Valid or not valid.
 	 */
 	private function validate_country_or_state_code( $country_or_state ) {
-		list( $country, $state ) = array_pad( explode( ':', $country_or_state, 2 ), 2, '' );
-		$countries = WC()->countries->get_countries();
-		$states = WC()->countries->get_states();
-
-		if ( ! empty( $country ) && ! in_array( $country, $countries, true ) ) {
+		list( $country, $state ) = array_pad( explode( ':', (string) $country_or_state, 2 ), 2, '' );
+		if ( '' === $country ) {
 			return false;
 		}
-
-		if ( ! empty( $state ) && ! in_array( $state, $states[ $country ], true ) ) {
+		$country_codes = array_keys( WC()->countries->get_countries() );
+		if ( ! in_array( $country, $country_codes, true ) ) {
 			return false;
 		}
-
-		if ( empty( $state ) ) {
+		if ( '' === $state ) {
 			return true;
 		}
-
-		return true;
+		$states_for_country = WC()->countries->get_states( $country );
+		if ( empty( $states_for_country ) ) {
+			return false;
+		}
+		return isset( $states_for_country[ $state ] );
 	}
 
 	/**
