@@ -1087,7 +1087,7 @@ describe( 'Address Suggestions Component', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
 
 			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
+				'none'
 			);
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
 				'true'
@@ -1503,7 +1503,7 @@ describe( 'Address Suggestions Component', () => {
 
 			// Verify autofill is disabled
 			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
+				'none'
 			);
 
 			// Blur the input

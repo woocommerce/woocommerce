@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix individually sold products not being added to cart when they are children of a grouped product

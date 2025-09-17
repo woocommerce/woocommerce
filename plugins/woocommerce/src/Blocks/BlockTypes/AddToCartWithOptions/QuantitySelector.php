@@ -149,7 +149,6 @@ class QuantitySelector extends AbstractBlock {
 				)
 			);
 
-			$wrapper_attributes['data-wp-interactive']  = 'woocommerce/product-elements';
 			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/product-elements::state.productData.sold_individually';
 			$input_attributes['data-wp-bind--min']      = 'woocommerce/product-elements::state.productData.min';
 			$input_attributes['data-wp-bind--max']      = 'woocommerce/product-elements::state.productData.max';

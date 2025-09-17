@@ -552,6 +552,11 @@ class ProductsController {
 
 			$this->log_batch_results( $batch_results );
 			$processed_count = $batch_results['stats']['successful'];
+
+			if ( $processed_count > 0 ) {
+				$current_count = get_option( 'wc_migrator_products_count', 0 );
+				update_option( 'wc_migrator_products_count', $current_count + $processed_count );
+			}
 		}
 
 		return $processed_count;

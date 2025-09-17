@@ -22,7 +22,6 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.2.0
  */
 abstract class AbstractSchema {
-
 	/**
 	 * The schema item identifier.
 	 *
@@ -56,9 +55,9 @@ abstract class AbstractSchema {
 	public static function get_item_schema(): array {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => self::IDENTIFIER,
+			'title'      => static::IDENTIFIER,
 			'type'       => 'object',
-			'properties' => self::get_item_schema_properties(),
+			'properties' => static::get_item_schema_properties(),
 		);
 	}
 
