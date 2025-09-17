@@ -620,20 +620,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get all statuses that have been synced.
 	 *
-	 * @return array Unique order statuses.
+	 * @return string[] Unique order statuses.
 	 */
 	public static function get_all_statuses() {
 		global $wpdb;
 
 		$statuses = wp_cache_get( self::ORDERS_STATUSES_ALL_CACHE_KEY, 'woocommerce_analytics' );
 		if ( false === $statuses ) {
-			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 			$table_name = self::get_db_table_name();
-			$statuses   = $wpdb->get_col(
-				"SELECT DISTINCT status FROM {$table_name}"
-			);
-			/* phpcs:enable */
-
+			$statuses   = $wpdb->get_col( $wpdb->prepare( 'SELECT DISTINCT status FROM %i', $table_name ) );
 			wp_cache_set( self::ORDERS_STATUSES_ALL_CACHE_KEY, $statuses, 'woocommerce_analytics', YEAR_IN_SECONDS );
 		}
 
