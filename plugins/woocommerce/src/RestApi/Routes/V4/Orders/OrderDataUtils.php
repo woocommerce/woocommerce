@@ -159,7 +159,7 @@ final class OrderDataUtils {
 		$processed_item_ids = array();
 		foreach ( $line_items as $line_item_data ) {
 			if ( ! is_array( $line_item_data ) ) {
-				break;
+				continue;
 			}
 			if ( self::item_is_null_or_zero( $line_item_data ) ) {
 				if ( $line_item_data['id'] ) {
@@ -450,7 +450,7 @@ final class OrderDataUtils {
 	 * @param array         $request_data Request data.
 	 */
 	protected static function maybe_set_item_prop( $item, $prop, $request_data ) {
-		if ( isset( $request_data[ $prop ] ) ) {
+		if ( isset( $request_data[ $prop ] ) && is_callable( array( $item, "set_$prop" ) ) ) {
 			$item->{"set_$prop"}( $request_data[ $prop ] );
 		}
 	}
