@@ -7,8 +7,6 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Utilities\OrderUtil;
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }

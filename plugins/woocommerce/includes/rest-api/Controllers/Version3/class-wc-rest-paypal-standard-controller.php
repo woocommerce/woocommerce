@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Admin\Overrides\OrderUtil;
-
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
 }
