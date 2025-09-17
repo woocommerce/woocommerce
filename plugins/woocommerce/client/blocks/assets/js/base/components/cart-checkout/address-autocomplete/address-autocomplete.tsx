@@ -197,14 +197,23 @@ export const AddressAutocomplete = ( {
 
 		// Create MutationObserver to enforce autocomplete="none"
 		observerRef.current = new MutationObserver( () => {
-			if ( observerRef.current ) {
-				observerRef.current.disconnect();
-			}
-			inputElement.autocomplete = 'off';
+			const disableAutofill =
+				inputElement.getAttribute( 'data-disable-autocomplete' ) ===
+				'on';
 
 			// To prevent 1Password and browser autocomplete clashes, we disable 1Password on the address search field.
 			// This is achieved by setting the data-1p-ignore attribute and refocusing on the field so that the new attribute takes effect.
-			inputElement.setAttribute( 'data-1p-ignore', 'true' );
+			if ( disableAutofill ) {
+				inputElement.setAttribute( 'data-1p-ignore', 'true' );
+				inputElement.setAttribute( 'autocomplete', 'none' );
+			} else {
+				inputElement.removeAttribute( 'data-1p-ignore' );
+				inputElement.setAttribute(
+					'autocomplete',
+					props.autoComplete || ''
+				);
+			}
+
 			const parentElement = inputElement.parentElement;
 			if ( parentElement ) {
 				// Store current focus state and cursor position
@@ -230,12 +239,8 @@ export const AddressAutocomplete = ( {
 
 		observerRef.current.observe( inputElement, {
 			attributes: true,
-			attributeFilter: [ 'autocomplete' ],
+			attributeFilter: [ 'data-disable-autocomplete' ],
 		} );
-
-		// Set initial autocomplete attribute
-		inputElement.autocomplete = 'off';
-		inputElement.setAttribute( 'data-1p-ignore', 'true' );
 
 		// Cleanup on unmount or when isSearching changes
 		return () => {
@@ -244,7 +249,7 @@ export const AddressAutocomplete = ( {
 				observerRef.current = null;
 			}
 		};
-	}, [ isSearching ] );
+	}, [ props.autoComplete ] );
 
 	const addressChangeHandler = ( value: string ) => {
 		props.onChange( value );
@@ -375,8 +380,11 @@ export const AddressAutocomplete = ( {
 				aria-activedescendant={ activeDescendantId }
 				aria-autocomplete="list"
 				role="combobox"
+				data-disable-autocomplete={
+					searchValue.length >= 3 ? 'on' : 'off'
+				}
 			/>
-			{ suggestions.length > 0 ? (
+			{ searchValue.length >= 3 && suggestions.length > 0 ? (
 				<Suggestions
 					selectedSuggestion={ selectedSuggestion }
 					suggestions={ suggestions }
