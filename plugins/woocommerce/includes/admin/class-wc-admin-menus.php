@@ -335,7 +335,7 @@ class WC_Admin_Menus {
 		$product_index   = array_search( $product_menu, $menu_order, true );
 		$orders_index    = array_search( $orders_menu, $menu_order, true );
 
-		// Loop through menu order and do some rearranging.
+		// Loop through menu order and do some rearranging. Also, remove or skip the menu items that we've already added manually.
 		foreach ( $menu_order as $item ) {
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = $separator;
@@ -352,7 +352,6 @@ class WC_Admin_Menus {
 				if ( false !== $product_index ) {
 					unset( $menu_order[ $product_index ] );
 				}
-			// We already add the menu items above manually, so we need to skip them if they come up again.
 			} elseif ( ! in_array( $item, array( $separator, $product_menu, $hpos_orders, $legacy_orders ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
