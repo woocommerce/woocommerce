@@ -95,10 +95,31 @@ class StoreInfoAbility {
 
 		// Include statistics if requested
 		if ( ! empty( $input['include_stats'] ) ) {
+			// Products use 'publish' status.
+			$product_count = (int) wp_count_posts( 'product' )->publish;
+
+			// Orders using wc_get_orders for accurate counting
+			$completed_orders = wc_get_orders( array(
+				'status' => 'completed',
+				'limit'  => -1,
+				'return' => 'ids',
+			) );
+			$completed_count = count( $completed_orders );
+
+			$order_breakdown = array(
+				'completed' => $completed_count,
+			);
+			$order_count = $completed_count;
+
+			// Customers only.
+			$users_counts   = count_users();
+			$customer_count = isset( $users_counts['avail_roles']['customer'] ) ? (int) $users_counts['avail_roles']['customer'] : 0;
+
 			$result['stats'] = array(
-				'product_count'  => wp_count_posts( 'product' )->publish,
-				'order_count'    => wp_count_posts( 'shop_order' )->publish,
-				'customer_count' => count_users()['total_users'],
+				'product_count'    => $product_count,
+				'order_count'      => $order_count,
+				'order_breakdown'  => $order_breakdown,
+				'customer_count'   => $customer_count,
 			);
 		}
 
