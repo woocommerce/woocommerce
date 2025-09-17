@@ -239,60 +239,65 @@ export const withFeaturedItem =
 					<BlockContextProvider
 						value={ { postId: product.id, postType: 'product' } }
 					>
-						<div className={ `${ className }__inner-blocks` }>
-							<InnerBlocks
-								template={ [
-									[
-										'core/post-title',
-										{
-											isLink: true,
-											level: 2,
-											textAlign: 'center',
-											__woocommerceNamespace:
-												PRODUCT_TITLE_VARIATION_NAME,
-										},
-									],
-									[
-										'woocommerce/product-price',
-										{ textAlign: 'center' },
-									],
-									[
-										'woocommerce/product-summary',
-										{
-											showDescriptionIfEmpty: true,
-											style: {
-												typography: {
-													textAlign: 'center',
-												},
-											},
-											summaryLength: 80,
-										},
-									],
-									[
-										'core/buttons',
-										{
-											layout: {
-												type: 'flex',
-												justifyContent: 'center',
-											},
-										},
+						<ProductDataContextProvider
+							product={ product }
+							isLoading={ isLoading }
+						>
+							<div className={ `${ className }__inner-blocks` }>
+								<InnerBlocks
+									template={ [
 										[
-											[
-												'core/button',
-												{
-													text: __(
-														'Shop now',
-														'woocommerce'
-													),
-													url: product.permalink,
+											'core/post-title',
+											{
+												isLink: true,
+												level: 2,
+												textAlign: 'center',
+												__woocommerceNamespace:
+													PRODUCT_TITLE_VARIATION_NAME,
+											},
+										],
+										[
+											'woocommerce/product-price',
+											{ textAlign: 'center' },
+										],
+										[
+											'woocommerce/product-summary',
+											{
+												showDescriptionIfEmpty: true,
+												style: {
+													typography: {
+														textAlign: 'center',
+													},
 												},
+												summaryLength: 80,
+											},
+										],
+										[
+											'core/buttons',
+											{
+												layout: {
+													type: 'flex',
+													justifyContent: 'center',
+												},
+											},
+											[
+												[
+													'core/button',
+													{
+														text: __(
+															'Shop now',
+															'woocommerce'
+														),
+														url: product.permalink,
+													},
+												],
 											],
 										],
-									],
-								] }
-								templateLock={ false }
-							/>
-						</div>
+									] }
+									templateLock={ false }
+								/>
+							</div>
+						</ProductDataContextProvider>
 					</BlockContextProvider>
 				);
 			}
