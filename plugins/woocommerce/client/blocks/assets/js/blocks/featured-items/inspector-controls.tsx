@@ -304,7 +304,6 @@ export const withInspectorControls =
 			mediaSrc,
 			overlayColor,
 			overlayGradient,
-			showDesc,
 			backgroundColor,
 			style,
 		} = attributes;
