@@ -88,18 +88,19 @@ export const Suggestions = ( {
 	const listId = `address-suggestions-${ addressType }-list`;
 
 	return (
-		<div 
+		<div
 			className="wc-block-components-address-autocomplete-suggestions"
 			role="region"
 			aria-live="polite"
 		>
-			<ul 
+			<ul
 				className="suggestions-list"
 				id={ listId }
 				role="listbox"
 				aria-label="Address suggestions"
 			>
 				{ suggestions.map( ( item, index ) => (
+					// eslint-disable-next-line jsx-a11y/click-events-have-key-events -- keypress is handled by AddressAutocomplete component.
 					<li
 						key={ item.id }
 						id={ `suggestion-item-${ addressType }-${ index }` }
@@ -110,7 +111,6 @@ export const Suggestions = ( {
 						tabIndex={ -1 }
 						aria-selected={ selectedSuggestion === index }
 						onClick={ () => onSuggestionClick( item.id ) }
-						onMouseEnter={ () => {} }
 						style={ { cursor: 'pointer' } }
 					>
 						{ getHighlightedLabel(
