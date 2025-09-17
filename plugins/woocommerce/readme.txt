@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.2.0-rc.1 2025-09-01 =
+= 10.2.0 2025-09-17 =
 
 **WooCommerce**
 
@@ -331,6 +331,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Fix individually sold products not being added to cart when they are children of a grouped product [#60906](https://github.com/woocommerce/woocommerce/pull/60906)
 * Update - Add tool to Status > Tools page for fixing the refund logic. [#60814](https://github.com/woocommerce/woocommerce/pull/60814)
 * Tweak - Update other payment gateways section title to ‘More payment options’ on the Payments page. [#60865](https://github.com/woocommerce/woocommerce/pull/60865)
+* Fix - WooCommerce: Fix sync order products refund test [#60934](https://github.com/woocommerce/woocommerce/pull/60934)
 
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
