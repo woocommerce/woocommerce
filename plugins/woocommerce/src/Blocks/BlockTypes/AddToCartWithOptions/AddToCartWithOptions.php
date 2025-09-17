@@ -254,7 +254,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						'attributes' => $variation->get_variation_attributes(),
 					);
 					if ( $variation->is_in_stock() ) {
-						$variation_data['is_in_stock'] = $variation->is_in_stock();
+						$variation_data['is_in_stock'] = true;
 					}
 
 					$variations_data[ $variation->get_id() ] = $variation_data;

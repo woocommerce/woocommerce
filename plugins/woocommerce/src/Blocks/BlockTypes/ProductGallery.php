@@ -168,11 +168,12 @@ class ProductGallery extends AbstractBlock {
 						continue;
 					}
 
-					if ( $variation['image_id'] && $variation['image_id'] !== $product->get_image_id() ) {
+					$variation_image_id = (int) $variation['image_id'];
+					if ( $variation_image_id && $variation_image_id !== (int) $product->get_image_id() ) {
 						$has_variation_images = true;
 
 						$formatted_variations_data[ $variation['variation_id'] ] = array(
-							'image_id' => (int) $variation['image_id'],
+							'image_id' => $variation_image_id,
 						);
 					}
 				}

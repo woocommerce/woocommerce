@@ -53,6 +53,7 @@ export type VariationData = {
 	price_html?: string;
 	image_id?: number;
 	availability?: string;
+	variation_description?: string;
 	sku?: string;
 	weight?: string;
 	dimensions?: string;

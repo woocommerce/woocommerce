@@ -60,7 +60,7 @@ export const getProductData = (
 
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type = null;
+	let type: ProductData[ 'type' ] | 'variation' | null = null;
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		if ( ! products || ! products[ id ] ) {
 			return null;
