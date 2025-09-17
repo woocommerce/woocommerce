@@ -73,9 +73,7 @@ class FeaturedProduct extends FeaturedItem {
 	protected function render_attributes( $product, $attributes ) {
 		$output = '';
 
-		// Backwards compatibility: Only render legacy attributes if they exist as boolean values.
-		// This allows us to distinguish between old blocks (with boolean props) and new blocks (without these props).
-		if ( array_key_exists( 'showDesc', $attributes ) && is_bool( $attributes['showDesc'] ) ) {
+		if ( ! isset( $attributes['__woocommerceBlockVersion'] ) ) {
 			$legacy_title = sprintf(
 				'<h2 class="wc-block-featured-product__title">%s</h2>',
 				wp_kses_post( $product->get_title() )
@@ -89,7 +87,10 @@ class FeaturedProduct extends FeaturedItem {
 
 			$output .= $legacy_title;
 
-			if ( $attributes['showDesc'] ) {
+			if (
+				! isset( $attributes['showDesc'] ) ||
+				( isset( $attributes['showDesc'] ) && false !== $attributes['showDesc'] )
+			) {
 				$desc_str = sprintf(
 					'<div class="wc-block-featured-product__description">%s</div>',
 					wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
@@ -97,7 +98,10 @@ class FeaturedProduct extends FeaturedItem {
 				$output   .= $desc_str;
 			}
 
-			if ( $attributes['showPrice'] ) {
+			if (
+				! isset( $attributes['showPrice'] ) ||
+				( isset( $attributes['showPrice'] ) && false !== $attributes['showPrice'] )
+			) {
 				$price_str = sprintf(
 					'<div class="wc-block-featured-product__price">%s</div>',
 					wp_kses_post( $product->get_price_html() )

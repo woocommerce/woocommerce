@@ -69,6 +69,7 @@ export interface FeaturedItemRequiredAttributes {
 		isBackgroundVisible: boolean;
 		message?: string | null;
 	};
+	__woocommerceBlockVersion: number;
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -153,6 +154,15 @@ export const withFeaturedItem =
 		const [ parentContainerDimension, setParentContainerDimension ] =
 			useState< BgImageDimensions >( { height: 0, width: 0 } );
 
+		// We need to manually set this property to make sure we can reliably
+		// distinguish between legacy and new block versions. We can't just
+		// set the default value in the block.json.
+		useEffect( () => {
+			setAttributes( {
+				__woocommerceBlockVersion: 2,
+			} );
+		}, [ setAttributes ] );
+
 		useEffect( () => {
 			// Observes the resizable block's dimension changes.
 			const observer = new ResizeObserver( ( entries ) => {
@@ -229,13 +239,6 @@ export const withFeaturedItem =
 					>
 						<div className={ `${ className }__inner-blocks` }>
 							<InnerBlocks
-								allowedBlocks={ [
-									'core/post-title',
-									'core/buttons',
-									'core/heading',
-									'woocommerce/product-price',
-									'woocommerce/product-summary',
-								] }
 								template={ [
 									[
 										'core/post-title',

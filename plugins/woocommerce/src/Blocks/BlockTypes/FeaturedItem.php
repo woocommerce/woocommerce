@@ -255,12 +255,13 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			}
 		}
 
+		// Render additional attributes (e.g. description/price) for legacy compatibility.
+		$output .= $this->render_attributes( $item, $attributes );
+
 		if ( ! empty( $content ) ) {
 			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
 		}
 
-		// Render additional attributes (e.g. description/price) for legacy compatibility.
-		$output .= $this->render_attributes( $item, $attributes );
 		$output .= '</div>';
 		$output .= '</div>';
 

@@ -30,6 +30,13 @@
 		},
 		"multiple": true
 	},
+	"allowedBlocks": [
+		"core/post-title",
+		"core/buttons",
+		"core/heading",
+		"woocommerce/product-price",
+		"woocommerce/product-summary"
+	],
 	"attributes": {
 		"alt": {
 			"type": "string",
@@ -95,9 +102,19 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
+		},
+		"showDesc": {
+			"type": "boolean",
+			"default": true
+		},
+		"showPrice": {
+			"type": "boolean",
+			"default": true
+		},
+		"__woocommerceBlockVersion": {
+			"type": "number"
 		}
 	},
-	"hasInnerBlocks": true,
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

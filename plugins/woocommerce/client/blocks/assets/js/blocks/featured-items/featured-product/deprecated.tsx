@@ -30,12 +30,9 @@ const v1 = {
 	},
 	save: () => <InnerBlocks.Content />,
 	isEligible: ( attributes: BlockAttributes ) => {
-		// If the block has showDesc or showPrice attributes as boolean values, it's a legacy block
-		// and it should be migrated to use inner blocks instead.
-		return (
-			typeof attributes.showDesc === 'boolean' ||
-			typeof attributes.showPrice === 'boolean'
-		);
+		// If the block has showDesc or showPrice attributes are not explicitly set to false,
+		// it's a legacy block and it should be migrated to use inner blocks instead.
+		return attributes.showDesc !== false || attributes.showPrice !== false;
 	},
 	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
 		const { showDesc, showPrice, ...otherAttributes } = attributes;
@@ -44,16 +41,19 @@ const v1 = {
 			createBlock( 'core/post-title', {
 				level: 2,
 				isLink: false,
+				textAlign: 'center',
 				__woocommerceNamespace:
 					'woocommerce/product-collection/product-title',
 			} )
 		);
 
-		if ( showPrice ) {
+		// We check if these legacy attributes are explicitly set to false, because
+		// the default value is true (i.e. `undefined` meant `true`).
+		if ( showPrice !== false ) {
 			innerBlocks.push( createBlock( 'woocommerce/product-price' ) );
 		}
 
-		if ( showDesc ) {
+		if ( showDesc !== false ) {
 			innerBlocks.push(
 				createBlock( 'woocommerce/product-summary', {
 					showDescriptionIfEmpty: true,
@@ -67,7 +67,15 @@ const v1 = {
 			);
 		}
 
-		return [ otherAttributes, innerBlocks ];
+		return [
+			{
+				...otherAttributes,
+				showDesc: false,
+				showPrice: false,
+				__woocommerceBlockVersion: 2,
+			},
+			innerBlocks,
+		];
 	},
 };
 
