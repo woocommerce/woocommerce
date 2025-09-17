@@ -235,8 +235,8 @@ add_action('init', function() {
         $platforms['yourplatform'] = [
             'name'        => 'Your Platform',
             'description' => 'Import products from Your Platform',
-            'fetcher'     => 'YourNamespace\YourPlatformFetcher',
-            'mapper'      => 'YourNamespace\YourPlatformMapper',
+            'fetcher'     => 'YourNamespace\YourPlatform\YourPlatformFetcher',
+            'mapper'      => 'YourNamespace\YourPlatform\YourPlatformMapper',
             'credentials' => [
                 'api_key'    => 'Enter API Key:',
                 'store_url'  => 'Enter Store URL:',
@@ -264,8 +264,8 @@ class YourPlatformPlatform {
         $platforms['yourplatform'] = [
             'name'        => 'Your Platform',
             'description' => 'Import products from Your Platform',
-            'fetcher'     => YourPlatformFetcher::class,
-            'mapper'      => YourPlatformMapper::class,
+            'fetcher'     => \YourNamespace\YourPlatform\YourPlatformFetcher::class,
+            'mapper'      => \YourNamespace\YourPlatform\YourPlatformMapper::class,
             'credentials' => [
                 'api_key'    => 'Enter API Key:',
                 'store_url'  => 'Enter Store URL:',
@@ -282,7 +282,7 @@ Create a fetcher class that implements [`PlatformFetcherInterface`](Interfaces/P
 
 ```php
 <?php
-namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\YourPlatform;
+namespace YourNamespace\YourPlatform;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformFetcherInterface;
 
@@ -308,7 +308,7 @@ Create a mapper class that implements [`PlatformMapperInterface`](Interfaces/Pla
 
 ```php
 <?php
-namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\YourPlatform;
+namespace YourNamespace\YourPlatform;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
 
