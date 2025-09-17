@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 /**
  * Shipping Zones V4 Controller tests.
  *
@@ -399,4 +399,3 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertArrayHasKey( 'rate_description', $method_properties );
 	}
 }
-
