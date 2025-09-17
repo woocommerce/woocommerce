@@ -5,7 +5,6 @@ import { render, waitFor } from '@testing-library/react';
 import * as wpData from '@wordpress/data';
 import { AddressAutocomplete } from '@woocommerce/base-components/cart-checkout/address-autocomplete/address-autocomplete';
 import { cartStore } from '@woocommerce/block-data';
-import userEvent from '@testing-library/user-event';
 
 describe( 'Address Autocomplete Component', () => {
 	it( 'should render a ValidatedTextInput with correct props', () => {
@@ -81,11 +80,15 @@ describe( 'Address Autocomplete Component', () => {
 			/>
 		);
 
-		const input = container.querySelector( '#billing_address_1' ) as HTMLInputElement;
+		const input = container.querySelector(
+			'#billing_address_1'
+		) as HTMLInputElement;
 		expect( input ).toBeTruthy();
 
 		// Initially should have data-disable-autocomplete attribute set to "off"
-		expect( input.getAttribute( 'data-disable-autocomplete' ) ).toBe( 'off' );
+		expect( input.getAttribute( 'data-disable-autocomplete' ) ).toBe(
+			'off'
+		);
 
 		// Manually trigger the mutation observer by changing the attribute
 		// This simulates what would happen when searchValue state changes
@@ -101,7 +104,9 @@ describe( 'Address Autocomplete Component', () => {
 
 			// Wait for mutation observer to restore original attributes
 			return waitFor( () => {
-				expect( input.getAttribute( 'autocomplete' ) ).toBe( 'street-address' );
+				expect( input.getAttribute( 'autocomplete' ) ).toBe(
+					'street-address'
+				);
 				expect( input.hasAttribute( 'data-1p-ignore' ) ).toBe( false );
 			} );
 		} );

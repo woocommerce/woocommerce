@@ -3,8 +3,7 @@
  */
 import { render, screen } from '@testing-library/react';
 import type { AddressAutocompleteResult } from '@woocommerce/types';
-import { AddressAutocomplete } from '@woocommerce/base-components/cart-checkout/address-autocomplete/address-autocomplete';
-import userEvent from '@testing-library/user-event';
+
 /**
  * Internal dependencies
  */
