@@ -133,7 +133,7 @@ export const AddressAutocomplete = ( {
 	const [ suggestions, setSuggestions ] = useState<
 		AddressAutocompleteResult[]
 	>( [] );
-	const [ isSearching, setIsSearching ] = useState( false );
+
 	const [ searchValue, setSearchValue ] = useState( '' );
 	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
 	const suppressSearchTimeoutRef = useRef< NodeJS.Timeout | null >( null );
@@ -145,7 +145,6 @@ export const AddressAutocomplete = ( {
 			searchValue.length < 3 ||
 			suppressSearchTimeoutRef.current
 		) {
-			setIsSearching( false );
 			setSuggestions( [] );
 			return;
 		}
@@ -157,7 +156,6 @@ export const AddressAutocomplete = ( {
 			];
 
 		if ( provider ) {
-			setIsSearching( true );
 			provider
 				.search( searchValue, country )
 				.then( ( results ) => {
@@ -166,12 +164,9 @@ export const AddressAutocomplete = ( {
 					} else {
 						setSuggestions( [] );
 					}
-					// Clear searching state after results are received
-					setIsSearching( false );
 				} )
 				.catch( () => {
 					setSuggestions( [] );
-					setIsSearching( false );
 				} );
 		}
 	}, 150 );
@@ -194,15 +189,6 @@ export const AddressAutocomplete = ( {
 
 	// Disable browser autocomplete when searching
 	useEffect( () => {
-		if ( ! isSearching ) {
-			// Clean up observer when not searching
-			if ( observerRef.current ) {
-				observerRef.current.disconnect();
-				observerRef.current = null;
-			}
-			return;
-		}
-
 		// Get the actual input element from the ref
 		const inputElement = inputRef.current?.inputRef?.current;
 		if ( ! inputElement ) {
