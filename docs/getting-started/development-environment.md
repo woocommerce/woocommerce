@@ -108,7 +108,7 @@ Note: If you try to run WooCommerce on your server without generating the compil
 
 #### Symlink the WooCommerce plugin 
 
-To load the WooCommerce plugin into your local develop environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress develoment environment.
+To load the WooCommerce plugin into your local develop environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress development environment.
 
 ```shell
 ln -s woocommerce/plugins/woocommerce /path-to-local/wp-content/plugins

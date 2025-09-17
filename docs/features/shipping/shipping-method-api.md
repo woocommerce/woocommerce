@@ -44,7 +44,7 @@ function your_shipping_method_init() {
 
 ## Create your class
 
-Now we create your class to place inside the function just created. It is best to make sure the class doesn't already exist to make sure there are no unexpected fatal errors. The class will need to extend the shipping method class so that we have access to the Shipping and Settings APIs. We also make sure to declare neccessary properties and then define more options/properties in the constructor, and we end with a call to the init method.
+Now we create your class to place inside the function just created. It is best to make sure the class doesn't already exist to make sure there are no unexpected fatal errors. The class will need to extend the shipping method class so that we have access to the Shipping and Settings APIs. We also make sure to declare necessary properties and then define more options/properties in the constructor, and we end with a call to the init method.
 
 ```php
 if ( ! class_exists( 'WC_Your_Shipping_Method' ) ) {
@@ -160,7 +160,7 @@ Options are then able to be defined using the [WooCommerce settings API](https:/
 	 * @return void
 	 */
 	private function init_instance_form_fields() {
-		// Define some strings that will be used several times for the cost decription and link.
+		// Define some strings that will be used several times for the cost description and link.
 		$cost_desc = __( 'Enter a cost (excl. tax).', 'your_text_domain' );
 		$cost_link = sprintf( '<span id="wc-shipping-advanced-costs-help-text">%s <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">%s</a>.</span>', __( 'Charge a flat rate per item, or enter a cost formula to charge a percentage based cost or a minimum fee. Learn more about', 'your_text_domain' ), __( 'advanced costs', 'your_text_domain' ) );
 
@@ -688,7 +688,7 @@ function your_shipping_method_init() {
 			 * @return void
 			 */
 			private function init_instance_form_fields() {
-				// Define some strings that will be used several times for the cost decription and link.
+				// Define some strings that will be used several times for the cost description and link.
 				$cost_desc = __( 'Enter a cost (excl. tax).', 'your_text_domain' );
 				$cost_link = sprintf( '<span id="wc-shipping-advanced-costs-help-text">%s <a target="_blank" href="https://woocommerce.com/document/flat-rate-shipping/#advanced-costs">%s</a>.</span>', __( 'Charge a flat rate per item, or enter a cost formula to charge a percentage based cost or a minimum fee. Learn more about', 'your_text_domain' ), __( 'advanced costs', 'your_text_domain' ) );
 
