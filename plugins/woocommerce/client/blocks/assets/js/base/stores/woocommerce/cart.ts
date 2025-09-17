@@ -47,6 +47,21 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 	variation?: SelectedAttributes[];
 };
 
+export type VariationData = {
+	attributes: Record< string, string >;
+	is_in_stock?: boolean;
+	price_html?: string;
+	image_id?: number;
+	availability?: string;
+	sku?: string;
+	weight?: string;
+	dimensions?: string;
+	min?: number;
+	max?: number;
+	step?: number;
+	sold_individually?: boolean;
+};
+
 export type ProductData = {
 	type: string;
 	price_html?: string;
@@ -58,23 +73,7 @@ export type ProductData = {
 	min?: number;
 	max?: number;
 	step?: number;
-	variations?: {
-		[ variationId: number ]: {
-			attributes: Record< string, string >;
-			is_in_stock: boolean;
-			type: string;
-			price_html?: string;
-			image_id?: number;
-			availability?: string;
-			sku?: string;
-			weight?: string;
-			dimensions?: string;
-			min?: number;
-			max?: number;
-			step?: number;
-			sold_individually?: boolean;
-		};
-	};
+	variations?: Record< number, VariationData >;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };

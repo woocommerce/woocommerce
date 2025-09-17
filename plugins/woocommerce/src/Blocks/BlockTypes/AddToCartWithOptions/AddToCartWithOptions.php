@@ -241,7 +241,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variation_data                = array();
+				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
@@ -250,11 +250,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					// input for all variations, so we want quantities to be in sync.
 					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 
-					$variation_data[ $variation->get_id() ] = array(
-						'is_in_stock' => $variation->is_in_stock(),
-						'attributes'  => $variation->get_variation_attributes(),
-						'type'        => $variation->get_type(),
+					$variation_data = array(
+						'attributes' => $variation->get_variation_attributes(),
 					);
+					if ( $variation->is_in_stock() ) {
+						$variation_data['is_in_stock'] = $variation->is_in_stock();
+					}
+
+					$variations_data[ $variation->get_id() ] = $variation_data;
 				}
 
 				wp_interactivity_config(
@@ -262,7 +265,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					array(
 						'products' => array(
 							$product->get_id() => array(
-								'variations' => $variation_data,
+								'variations' => $variations_data,
 							),
 						),
 					)
