@@ -25,7 +25,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private $user;
+	private $user_id;
 
 	/**
 	 * Runs after each test.
@@ -85,12 +85,12 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new OrdersController();
 		$this->endpoint->init( $order_schema, $query_utils, $update_utils );
 
-		$this->user = $this->factory->user->create(
+		$this->user_id = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
-		wp_set_current_user( $this->user );
+		wp_set_current_user( $this->user_id );
 	}
 
 	/**
@@ -158,7 +158,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_orders_api_get_all_fields() {
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user_id );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -177,7 +177,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_orders_get_each_field_one_by_one() {
 		$expected_response_fields = $this->get_expected_response_fields();
-		$order                    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+		$order                    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user_id );
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
@@ -1080,7 +1080,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'line_items' => array(
 					array(
 						'id'       => $updated_first_item->get_id(),
-						'quantity' => 0, // This will remove the first item
+						'quantity' => 0, // This will remove the first item.
 					),
 					array(
 						'id'       => $second_item->get_id(),
@@ -1152,6 +1152,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$shipping_items = $order->get_items( 'shipping' );
 		$this->assertCount( 1, $shipping_items );
 
+		/** @var WC_Order_Item_Shipping $shipping_item */
 		$shipping_item = reset( $shipping_items );
 		$this->assertEquals( 'Standard Shipping', $shipping_item->get_name() );
 		$this->assertEquals( 'flat_rate', $shipping_item->get_method_id() );
@@ -1177,6 +1178,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order          = wc_get_order( $order_id );
 		$shipping_items = $order->get_items( 'shipping' );
 		$this->assertCount( 1, $shipping_items );
+		/** @var WC_Order_Item_Shipping $shipping_item */
 		$shipping_item = reset( $shipping_items );
 		$this->assertEquals( 'Express Shipping', $shipping_item->get_name() );
 		$this->assertEquals( 'express', $shipping_item->get_method_id() );
@@ -1227,7 +1229,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order_id = $response->get_data()['id'];
 
-		// Test adding fee line
+		// Test adding fee line.
 		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
 		$request->set_body_params(
 			array(
@@ -1248,11 +1250,12 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$fee_items = $order->get_items( 'fee' );
 		$this->assertCount( 1, $fee_items );
 
+		/** @var WC_Order_Item_Fee $fee_item */
 		$fee_item = reset( $fee_items );
 		$this->assertEquals( 'Processing Fee', $fee_item->get_name() );
 		$this->assertEquals( 5.00, (float) $fee_item->get_total() );
 
-		// Test adding multiple fee lines
+		// Test adding multiple fee lines.
 		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
 		$request->set_body_params(
 			array(
@@ -1299,6 +1302,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order     = wc_get_order( $order_id );
 		$fee_items = $order->get_items( 'fee' );
 		$this->assertCount( 1, $fee_items );
+		/** @var WC_Order_Item_Fee $fee_item */
 		$fee_item = reset( $fee_items );
 		$this->assertEquals( 'Updated Processing Fee', $fee_item->get_name() );
 		$this->assertEquals( 7.00, (float) $fee_item->get_total() );
@@ -1391,6 +1395,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test tax line properties.
 		foreach ( $tax_items as $tax_item ) {
+			/** @var WC_Order_Item_Tax $tax_item */
 			$this->assertNotEmpty( $tax_item->get_rate_id() );
 			$this->assertNotEmpty( $tax_item->get_label() );
 			$this->assertGreaterThan( 0, (float) $tax_item->get_tax_total() );
@@ -1398,6 +1403,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test that tax lines are read-only (automatically calculated).
 		// Tax lines should not be manually updatable as they are calculated based on tax rates and line items.
+		/** @var WC_Order_Item_Tax $first_tax */
 		$first_tax      = reset( $tax_items );
 		$original_total = $first_tax->get_tax_total();
 		$original_count = count( $tax_items );
@@ -1426,6 +1432,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Verify that tax lines still have their original calculated values.
 		foreach ( $tax_items as $tax_item ) {
+			/** @var WC_Order_Item_Tax $tax_item */
 			$this->assertNotEmpty( $tax_item->get_rate_id() );
 			$this->assertNotEmpty( $tax_item->get_label() );
 			$this->assertGreaterThan( 0, (float) $tax_item->get_tax_total() );
