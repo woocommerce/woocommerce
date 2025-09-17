@@ -97,4 +97,36 @@ describe( 'FormStep', () => {
 
 		expect( component.toJSON() ).toMatchSnapshot();
 	} );
+
+	test( 'should render div wrapper when no title or legend provided', () => {
+		const component = TestRenderer.create(
+			<FormStep id="test-div">Content without form</FormStep>
+		);
+
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'div' );
+		expect( json.props.id ).toBe( 'test-div' );
+	} );
+
+	test( 'should render form wrapper when title is provided', () => {
+		const component = TestRenderer.create(
+			<FormStep id="test-form" title="Test Title">Content with form</FormStep>
+		);
+
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'form' );
+		expect( json.props.id ).toBe( 'test-form' );
+		expect( json.children[0].type ).toBe( 'fieldset' );
+	} );
+
+	test( 'should render form wrapper when legend is provided', () => {
+		const component = TestRenderer.create(
+			<FormStep id="test-form-legend" legend="Test Legend">Content with form</FormStep>
+		);
+
+		const json = component.toJSON();
+		expect( json.type ).toBe( 'form' );
+		expect( json.props.id ).toBe( 'test-form-legend' );
+		expect( json.children[0].type ).toBe( 'fieldset' );
+	} );
 } );
