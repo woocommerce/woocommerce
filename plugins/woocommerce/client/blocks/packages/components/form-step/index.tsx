@@ -58,37 +58,38 @@ const FormStep = ( {
 	const Element = legend || title ? 'fieldset' : 'div';
 
 	return (
-		<Element
-			className={ clsx( className, 'wc-block-components-checkout-step', {
-				'wc-block-components-checkout-step--with-step-number':
-					showStepNumber,
-				'wc-block-components-checkout-step--disabled': disabled,
-			} ) }
-			id={ id }
-			disabled={ disabled }
-		>
-			{ !! ( legend || title ) && (
-				<legend className="screen-reader-text">
-					{ legend || title }
-				</legend>
-			) }
-			{ !! title && (
-				<StepHeading
-					title={ title }
-					stepHeadingContent={ stepHeadingContent() }
-				/>
-			) }
-			<div className="wc-block-components-checkout-step__container">
-				{ !! description && (
-					<p className="wc-block-components-checkout-step__description">
-						{ description }
-					</p>
+		<form id={ id }>
+			<Element
+				className={ clsx( className, 'wc-block-components-checkout-step', {
+					'wc-block-components-checkout-step--with-step-number':
+						showStepNumber,
+					'wc-block-components-checkout-step--disabled': disabled,
+				} ) }
+				disabled={ disabled }
+			>
+				{ !! ( legend || title ) && (
+					<legend className="screen-reader-text">
+						{ legend || title }
+					</legend>
 				) }
-				<div className="wc-block-components-checkout-step__content">
-					{ children }
+				{ !! title && (
+					<StepHeading
+						title={ title }
+						stepHeadingContent={ stepHeadingContent() }
+					/>
+				) }
+				<div className="wc-block-components-checkout-step__container">
+					{ !! description && (
+						<p className="wc-block-components-checkout-step__description">
+							{ description }
+						</p>
+					) }
+					<div className="wc-block-components-checkout-step__content">
+						{ children }
+					</div>
 				</div>
-			</div>
-		</Element>
+			</Element>
+		</form>
 	);
 };
 
