@@ -267,25 +267,6 @@ class PageController {
 			$post_type = get_post_type_object( 'shop_order' );
 			$menu_name = $post_type->labels->menu_name;
 
-			/**
-			 * Filters whether to include the processing order count in the menu.
-			 *
-			 * @since 2.5.0
-			 * @param bool $include_count Whether to include the count. Default true.
-			 */
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
-				/**
-				 * Filters the order count displayed in the menu.
-				 *
-				 * @since 3.9.0
-				 * @param int $order_count The order count.
-				 */
-				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
-				if ( $order_count ) {
-					$menu_name .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>';
-				}
-			}
-
 			// Create top-level Orders menu and capture the hook suffix.
 			$main_hook_suffix = add_menu_page(
 				$post_type->labels->name,
