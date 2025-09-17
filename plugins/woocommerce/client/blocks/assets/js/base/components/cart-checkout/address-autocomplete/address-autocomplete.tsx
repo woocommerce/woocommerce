@@ -7,7 +7,6 @@ import {
 } from '@woocommerce/blocks-components';
 import type {
 	AddressAutocompleteResult,
-	ClientAddressAutocompleteProvider,
 	ServerAddressAutocompleteProvider,
 } from '@woocommerce/types';
 import { cartStore, checkoutStore } from '@woocommerce/block-data';
@@ -181,6 +180,7 @@ export const AddressAutocomplete = ( {
 	useEffect( () => {
 		debouncedSearch();
 		return debouncedSearch.cancel;
+		// eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when searchValue changes, debouncedSearch is stable.
 	}, [ searchValue ] );
 
 	// Cleanup timeouts on unmount
