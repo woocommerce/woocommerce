@@ -112,7 +112,7 @@ final class QueryUtils {
 				'type'              => 'array',
 				'items'             => array(
 					'type' => 'string',
-					'enum' => array_map( 'wc_get_order_status_slug', array_merge( array( 'any', OrderStatus::TRASH ), array_keys( wc_get_order_statuses() ) ) ),
+					'enum' => array_map( OrderUtil::class . '::remove_status_prefix', array_merge( array( 'any', OrderStatus::TRASH ), array_keys( wc_get_order_statuses() ) ) ),
 				),
 				'validate_callback' => 'rest_validate_request_arg',
 			),

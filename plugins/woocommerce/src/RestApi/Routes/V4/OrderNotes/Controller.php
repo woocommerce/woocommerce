@@ -18,7 +18,6 @@ use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema;
 use WP_Http;
 use WP_Error;
 use WP_Comment;
-use WC_Order;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;

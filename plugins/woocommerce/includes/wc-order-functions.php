@@ -159,16 +159,6 @@ function wc_get_is_pending_statuses() {
 }
 
 /**
- * Get the order status without the 'wc-' prefix.
- *
- * @param string $status Status.
- * @return string
- */
-function wc_get_order_status_slug( $status ) {
-	return str_replace( 'wc-', '', $status );
-}
-
-/**
  * Get the nice name for an order status.
  *
  * @since  2.2
