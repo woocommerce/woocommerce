@@ -86,27 +86,41 @@ class MCPAdapterProvider {
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
 		$abilities_ids = $abilities_registry->getAbilitiesIDs();
 
+		// Bail if no abilities are available
+		if ( empty( $abilities_ids ) ) {
+			return;
+		}
+
 		// Temporarily disable MCP validation during server creation
 		// Workaround for validator bug with union types (e.g., ["integer", "null"])
 		// TODO: Remove once mcp-adapter validator bug is fixed
 		add_filter( 'mcp_validation_enabled', '__return_false', 999 );
 
-		// Create MCP server
-		$adapter->create_server(
-			'woocommerce-mcp',                                           // Server ID
-			'woocommerce',                                              // REST namespace
-			'mcp',                                                      // REST route
-			'WooCommerce MCP Server',                                   // Name
-			'AI-accessible WooCommerce operations via MCP',            // Description
-			'1.0.0',                                                    // Version
-			array( WooCommerceRestTransport::class ),                       // Transport methods
-			\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class, // Error handler
-			\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class, // Observability handler
-			$abilities_ids,                                             // Abilities from registry
-		);
-
-		// Re-enable MCP validation immediately after server creation
-		remove_filter( 'mcp_validation_enabled', '__return_false', 999 );
+		try {
+			// Create MCP server
+			$adapter->create_server(
+				'woocommerce-mcp',
+				'woocommerce',
+				'mcp',
+				'WooCommerce MCP Server',
+				'AI-accessible WooCommerce operations via MCP',
+				'1.0.0',
+				array( WooCommerceRestTransport::class ),
+				\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class,
+				\WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler::class,
+				$abilities_ids,
+			);
+		} catch ( \Throwable $e ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error(
+					'MCP server initialization failed: ' . $e->getMessage(),
+					array( 'source' => 'woocommerce-mcp' )
+				);
+			}
+		} finally {
+			// Re-enable MCP validation immediately after server creation
+			remove_filter( 'mcp_validation_enabled', '__return_false', 999 );
+		}
 	}
 
 	/**
