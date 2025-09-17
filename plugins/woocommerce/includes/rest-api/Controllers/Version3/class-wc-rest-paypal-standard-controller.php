@@ -251,7 +251,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return array The error response.
 	 */
 	private function get_update_shipping_error_response( $issue = 'ADDRESS_ERROR' ) {
-		// https://developer.paypal.com/docs/checkout/standard/customize/shipping-module/#merchant-decline-response
+		// See https://developer.paypal.com/docs/checkout/standard/customize/shipping-module/#merchant-decline-response.
 		return array(
 			'name'    => 'UNPROCESSABLE_ENTITY',
 			'details' => array(
