@@ -55,11 +55,12 @@ const FormStep = ( {
 }: FormStepProps ): JSX.Element => {
 	// If the form step doesn't have a legend or title, render a <div> instead
 	// of a <fieldset>.
-	const Element = legend || title ? 'fieldset' : 'div';
+	const FormElement = legend || title ? 'form' : 'div';
+	const InnerElement = legend || title ? 'fieldset' : 'div';
 
 	return (
-		<form id={ id }>
-			<Element
+		<FormElement id={ id }>
+			<InnerElement
 				className={ clsx(
 					className,
 					'wc-block-components-checkout-step',
@@ -92,8 +93,8 @@ const FormStep = ( {
 						{ children }
 					</div>
 				</div>
-			</Element>
-		</form>
+			</InnerElement>
+		</FormElement>
 	);
 };
 
