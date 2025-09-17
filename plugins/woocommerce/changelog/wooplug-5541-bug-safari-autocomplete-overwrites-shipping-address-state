@@ -1,0 +1,4 @@
+Significance: major
+Type: update
+
+Change checkout form to be a div, and instead be composed of smaller forms
