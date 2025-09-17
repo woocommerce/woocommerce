@@ -969,7 +969,7 @@ In this example, we ensure that VAT is made up of a country code and 8-12 number
 ]
 ```
 
-Validation can also be against other fields, for example, an alternative email field that shouldn't the current email:
+Validation can also be against other fields, for example, an alternative email field that shouldn't match the current email:
 
 ```php
 'validation' => [

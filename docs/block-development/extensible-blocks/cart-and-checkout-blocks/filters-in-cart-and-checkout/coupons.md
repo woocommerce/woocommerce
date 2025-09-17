@@ -144,7 +144,7 @@ registerCheckoutFilters( 'example-extension', {
 
 ### Returns 
 
--   `boolean` - Whether to show the apply coupon notice.
+-   `boolean` - Whether to show the remove coupon notice.
 
 ### Code examples 
 

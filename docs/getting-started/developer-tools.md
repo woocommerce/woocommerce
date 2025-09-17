@@ -48,7 +48,7 @@ A dummy payment gateway for your WooCommerce development needs, with built-in su
 
 #### [QIT](https://qit.woo.com/)
 
-QIT is a testing platform for WooCommerce plugins and themes with managed tests, E2E tests, and disposable local local testing environments.
+QIT is a testing platform for WooCommerce plugins and themes with managed tests, E2E tests, and disposable local testing environments.
 
 ## Libraries
 
