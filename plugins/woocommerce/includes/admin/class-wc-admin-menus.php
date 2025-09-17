@@ -296,22 +296,13 @@ class WC_Admin_Menus {
 		 */
 		$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
-		if ( isset( $submenu['woocommerce'] ) ) {
-			// Add count to WooCommerce submenu.
-			if ( $order_count ) {
-				foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-					if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-						$submenu['woocommerce'][ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-						break;
-					}
-				}
-			}
-		}
+		if ( $order_count ) {
+			// Determine the menu slug to search for based on HPOS status.
+			$orders_menu_slug = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ? 'wc-orders' : 'edit.php?post_type=shop_order';
 
-		// Add count to top-level Orders menu when HPOS is disabled.
-		if ( ! wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() && $order_count ) {
+			// Add count badge to the orders menu.
 			foreach ( $menu as $key => $menu_item ) {
-				if ( 'edit.php?post_type=shop_order' === $menu_item[2] ) {
+				if ( $orders_menu_slug === $menu_item[2] ) {
 					$menu[ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 					break;
 				}
