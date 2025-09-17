@@ -57,45 +57,33 @@ class WC_Gateway_Paypal_Helper {
 	}
 
 	/**
-	 * Get the order by PayPal order ID.
+	 * Get the WC order from the PayPal custom ID.
 	 *
-	 * @param string $paypal_order_id The PayPal order ID.
-	 * @return WC_Order|null The order object, or null if not found.
+	 * @param string $custom_id The custom ID string from the PayPal order.
+	 * @return WC_Order|null
 	 */
-	public static function get_order_by_paypal_order_id( $paypal_order_id ) {
-		global $wpdb;
-
-		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$args = array(
-				'limit'      => 1,
-				'meta_query' => array(
-					array(
-						'key'   => '_paypal_order_id',
-						'value' => $paypal_order_id,
-					),
-				),
-			);
-
-			$orders = wc_get_orders( $args );
-			if ( ! empty( $orders ) ) {
-				return $orders[0];
-			}
-
+	public static function get_wc_order_from_paypal_custom_id( $custom_id ) {
+		$data = json_decode( $custom_id, true );
+		if ( ! is_array( $data ) ) {
 			return null;
 		}
 
-		$order_id = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT DISTINCT ID FROM $wpdb->posts as posts LEFT JOIN $wpdb->postmeta as meta ON posts.ID = meta.post_id WHERE meta.meta_value = %s AND meta.meta_key = %s",
-				$paypal_order_id,
-				'_paypal_order_id'
-			)
-		);
-
-		if ( ! empty( $order_id ) ) {
-			return wc_get_order( $order_id );
+		$order_id = $data['order_id'] ?? null;
+		if ( ! $order_id ) {
+			return null;
 		}
 
-		return null;
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return null;
+		}
+
+		// Validate the order key.
+		$order_key = $data['order_key'] ?? null;
+		if ( $order_key !== $order->get_order_key() ) {
+			return null;
+		}
+
+		return $order;
 	}
 }

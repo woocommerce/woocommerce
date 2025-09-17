@@ -188,14 +188,16 @@ class WC_Gateway_Paypal_Request {
 		);
 		$response     = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
 		if ( is_wp_error( $response ) ) {
-			throw new Exception( 'PayPal order details request failed. Response error: ' . $response->get_error_message() );
+			throw new Exception( 'PayPal order details request failed: ' . esc_html( $response->get_error_message() ) );
 		}
+
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
 		if ( 200 !== $http_code ) {
-			throw new Exception( 'PayPal order details request failed. Response status: ' . $http_code . '. Response body: ' . $body );
+			throw new Exception( 'PayPal order details request failed. Response status: ' . esc_html( $http_code ) . '. Response body: ' . esc_html( $body ) );
 		}
+
 		return $response_data;
 	}
 

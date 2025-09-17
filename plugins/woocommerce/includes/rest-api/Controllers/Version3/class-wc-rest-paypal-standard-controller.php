@@ -15,6 +15,18 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\Overrides\OrderUtil;
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+}
+
 /**
  * REST API PayPal webhook handler controller class.
  *
@@ -75,21 +87,22 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		}
 
 		// Get the WC order.
-		$order = WC_Gateway_Paypal_Helper::get_order_by_paypal_order_id( $paypal_order_id );
+		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
 		}
 
-		// TODO: Is this necessary?
 		if ( ! WC()->session ) {
 			WC()->session = new WC_Session_Handler();
 		}
 		WC()->session->init();
 
+		// Update the shipping address before we do anything else.
 		$this->update_order_shipping_address( $order, $shipping_address );
 
-		// Rebuild the cart from the order.
+		// We need to rebuild the cart from the order, as we do not have session cart data
+		// for REST API requests.
 		$this->rebuild_cart_from_order( $order );
 
 		// Get the new shipping options, which depend on the new shipping address.
@@ -103,11 +116,9 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			WC()->session->set( 'chosen_shipping_methods', array( $shipping_option['id'] ) );
 		}
 
-		// Recompute fees.
+		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		include_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal.php';
-		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 		$paypal_request = new WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
