@@ -127,11 +127,8 @@ class Video extends Cover {
 	 * @return string Play button icon URL.
 	 */
 	private function get_play_icon_url(): string {
-		// Get the plugin directory URL.
-		$plugin_dir_url = plugins_url( '', __DIR__ );
-
-		// Build the path to the play icon.
-		return $plugin_dir_url . '/icons/video/play2x.png';
+		$file_name = '/icons/video/play2x.png';
+		return plugins_url( $file_name, __FILE__ );
 	}
 
 	/**
