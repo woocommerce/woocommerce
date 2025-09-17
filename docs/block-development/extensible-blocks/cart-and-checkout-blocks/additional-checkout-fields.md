@@ -704,7 +704,7 @@ It's full schema is this one:
 {
 	"$schema": "http://json-schema.org/draft-07/schema#",
 	"title": "Cart and Checkout Document Object Schema",
-	"description": "Document object schema for cart, checkout, and customer information, to be used for conditional visibility, requirment, and validation of fields.",
+	"description": "Document object schema for cart, checkout, and customer information, to be used for conditional visibility, requirement, and validation of fields.",
 	"type": "object",
 	"properties": {
 		"cart": {
@@ -843,7 +843,7 @@ It's full schema is this one:
 				},
 				"address": {
 					"$ref": "#/definitions/address",
-					"description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluted."
+					"description": "This is a dynamic field that will be the billing or shipping address depending on the context of the field being evaluated."
 				}
 			},
 			"additionalProperties": false

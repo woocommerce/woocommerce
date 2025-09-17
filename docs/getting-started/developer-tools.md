@@ -40,7 +40,7 @@ It also includes the [Dependency Extraction Webpack Plugin](https://www.npmjs.co
 
 #### [Smooth Generator](https://github.com/woocommerce/wc-smooth-generator)
 
-A plugin to help you generate WooCommerce-related data for testing. Use the WP Admin interface for basic operations, or the CLI tool for more advanced features. Download and install the latest version from the [Releases page](https://github.com/woocommerce/wc-smooth-generator/releases) and review the [documentation on Github](https://github.com/woocommerce/wc-smooth-generator).
+A plugin to help you generate WooCommerce-related data for testing. Use the WP Admin interface for basic operations, or the CLI tool for more advanced features. Download and install the latest version from the [Releases page](https://github.com/woocommerce/wc-smooth-generator/releases) and review the [documentation on GitHub](https://github.com/woocommerce/wc-smooth-generator).
 
 #### [WooCommerce Dummy Payments Gateway](https://github.com/woocommerce/woocommerce-gateway-dummy)
 
