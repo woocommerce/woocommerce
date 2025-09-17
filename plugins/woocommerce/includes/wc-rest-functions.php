@@ -230,8 +230,8 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 	$contexts = array(
 		'read'   => 'read_private_posts',
 		'create' => 'publish_posts',
-		'edit'   => 'edit_post',
-		'delete' => 'delete_post',
+		'edit'   => 'edit_posts',
+		'delete' => 'delete_posts',
 		'batch'  => 'edit_others_posts',
 	);
 
@@ -242,10 +242,29 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		$post_type_object = get_post_type_object( $post_type );
 		$permission       = false;
 		if ( $post_type_object instanceof WP_Post_Type ) {
-			$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+			$permission = current_user_can( $post_type_object->cap->$cap );
+
+			// Special handling when object ID is provided for object-level permissions.
+			if ( $object_id && 'edit_posts' === $cap ) {
+				$permission = $permission && current_user_can( $post_type_object->cap->edit_post, $object_id );
+			} elseif ( $object_id && 'delete_posts' === $cap ) {
+				$permission = $permission && current_user_can( $post_type_object->cap->delete_post, $object_id );
+			} elseif ( $object_id && 'read_private_posts' === $cap ) {
+				$permission = $permission && current_user_can( $post_type_object->cap->read_post, $object_id );
+			}
 		}
 	}
 
+	/**
+	 * Provides an opportunity to override the permission check made before acting on an object in relation to
+	 * REST API requests.
+	 *
+	 * @param bool   $permission  If we have permission to act on this object.
+	 * @param string $context     Describes the operation being performed: 'read', 'edit', 'delete', etc.
+	 * @param int    $object_id   Object ID. This could be a user ID, order ID, post ID, etc.
+	 * @param string $object_type Type of object ('user', 'shop_order', etc) for which checks are being made.
+	 * @since 2.6.0
+	 */
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
 }
 
