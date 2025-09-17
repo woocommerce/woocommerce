@@ -19,30 +19,31 @@ class RTLFilenameFixPlugin {
 			const fs = require( 'fs' );
 			const path = require( 'path' );
 			
-			compilation.entrypoints.forEach( ( entrypoint ) => {
-				entrypoint.chunks.forEach( ( chunk ) => {
-					chunk.files.forEach( ( filename ) => {
-						if ( filename.endsWith( '.rtl.css' ) ) {
-							const oldPath = path.join( compilation.outputOptions.path, filename );
-							const newPath = oldPath.replace( '.rtl.css', '-rtl.css' );
-							
-							if ( fs.existsSync( oldPath ) ) {
-								try {
-									// Copy to new filename
-									fs.copyFileSync( oldPath, newPath );
-									// Remove old file
-									fs.unlinkSync( oldPath );
-									
-									// Update compilation records
-									const newFilename = filename.replace( '.rtl.css', '-rtl.css' );
-									chunk.files.delete( filename );
-									chunk.files.add( newFilename );
-								} catch ( error ) {
-									console.warn( `RTL filename fix failed for ${filename}:`, error.message );
-								}
+			// Handle all chunks (including those from entrypoints and standalone chunks)
+			compilation.chunks.forEach( ( chunk ) => {
+				chunk.files.forEach( ( filename ) => {
+					if ( filename.match( /\.rtl\.css(\?|$)/ ) ) {
+						// Extract actual filename without query string for file operations
+						const actualFilename = filename.split('?')[0];
+						const oldPath = path.join( compilation.outputOptions.path, actualFilename );
+						const newPath = oldPath.replace( '.rtl.css', '-rtl.css' );
+						
+						if ( fs.existsSync( oldPath ) ) {
+							try {
+								// Copy to new filename
+								fs.copyFileSync( oldPath, newPath );
+								// Remove old file
+								fs.unlinkSync( oldPath );
+								
+								// Update compilation records
+								const newFilename = filename.replace( '.rtl.css', '-rtl.css' );
+								chunk.files.delete( filename );
+								chunk.files.add( newFilename );
+							} catch ( error ) {
+								console.warn( `RTL filename fix failed for ${filename}:`, error.message );
 							}
 						}
-					} );
+					}
 				} );
 			} );
 		} );
