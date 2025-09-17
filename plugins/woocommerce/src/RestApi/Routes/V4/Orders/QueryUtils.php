@@ -22,13 +22,13 @@ use WC_Order_Query;
  *
  * @internal This class is for internal use only and should not be used by external code.
  */
-final class QueryUtils {
+class QueryUtils {
 	/**
 	 * Get query schema.
 	 *
 	 * @return array
 	 */
-	public static function get_query_schema() {
+	public function get_query_schema() {
 		return array(
 			'num_decimals'            => array(
 				'default'           => wc_get_price_decimals(),
@@ -200,7 +200,7 @@ final class QueryUtils {
 	 * @param WP_REST_Request $request The request object.
 	 * @return array
 	 */
-	public static function prepare_query( WP_REST_Request $request ): array {
+	public function prepare_query( WP_REST_Request $request ): array {
 		$args                   = array();
 		$args['offset']         = $request['offset'];
 		$args['order']          = $request['order'];
@@ -295,7 +295,7 @@ final class QueryUtils {
 	 * @param string $post_type The post type to query.
 	 * @return array
 	 */
-	public static function get_query_results( $query_args, $post_type = 'shop_order' ): array {
+	public function get_query_results( $query_args, $post_type = 'shop_order' ): array {
 		$query   = new WC_Order_Query(
 			array_merge(
 				$query_args,

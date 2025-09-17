@@ -1,6 +1,6 @@
 <?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
 /**
- * OrderDataUtils class.
+ * Handles order data updates from the request.
  *
  * @package WooCommerce\RestApi
  */
@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\OrderSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -27,10 +27,27 @@ use WC_Order_Item_Fee;
 use WC_Order_Item_Coupon;
 
 /**
- * OrderDataUtils class.
+ * UpdateUtils class.
  */
-final class OrderDataUtils {
+class UpdateUtils {
 	use CogsAwareTrait;
+
+	/**
+	 * The order schema.
+	 *
+	 * @var OrderSchema
+	 */
+	private $order_schema;
+
+	/**
+	 * Initialize the update utils.
+	 *
+	 * @internal
+	 * @param OrderSchema $order_schema The order schema.
+	 */
+	final public function init( OrderSchema $order_schema ) {
+		$this->order_schema = $order_schema;
+	}
 
 	/**
 	 * Update an order from the request.
@@ -41,10 +58,10 @@ final class OrderDataUtils {
 	 * @param bool            $creating True when creating object, false when updating.
 	 * @return void
 	 */
-	public static function update_order_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
+	public function update_order_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
 		// Get data that can be edited from schema.
 		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
-		$data_keys   = array_diff( array_keys( OrderSchema::get_writable_item_schema_properties() ), $ignore_keys );
+		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
 
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
 		WC()->payment_gateways();
@@ -58,17 +75,17 @@ final class OrderDataUtils {
 			}
 
 			if ( 'billing' === $key || 'shipping' === $key ) {
-				self::update_address( $order, $key, (array) $value );
+				$this->update_address( $order, $key, (array) $value );
 			} elseif ( 'coupon_lines' === $key ) {
-				self::update_line_items( $order, (array) $value, 'coupon' );
+				$this->update_line_items( $order, (array) $value, 'coupon' );
 			} elseif ( 'line_items' === $key ) {
-				self::update_line_items( $order, (array) $value, 'line_item' );
+				$this->update_line_items( $order, (array) $value, 'line_item' );
 			} elseif ( 'shipping_lines' === $key ) {
-				self::update_line_items( $order, (array) $value, 'shipping' );
+				$this->update_line_items( $order, (array) $value, 'shipping' );
 			} elseif ( 'fee_lines' === $key ) {
-				self::update_line_items( $order, (array) $value, 'fee' );
+				$this->update_line_items( $order, (array) $value, 'fee' );
 			} elseif ( 'meta_data' === $key ) {
-				self::update_meta_data( $order, (array) $value );
+				$this->update_meta_data( $order, (array) $value );
 			} elseif ( is_callable( array( $order, "set_{$key}" ) ) ) {
 				$order->{"set_{$key}"}( $value );
 			}
@@ -121,7 +138,7 @@ final class OrderDataUtils {
 	 * @param string   $type   Type of address; 'billing' or 'shipping'.
 	 * @param array    $request_data Posted data.
 	 */
-	protected static function update_address( WC_Order $order, string $type, array $request_data ) {
+	protected function update_address( WC_Order $order, string $type, array $request_data ) {
 		foreach ( $request_data as $key => $value ) {
 			if ( is_callable( array( $order, "set_{$type}_{$key}" ) ) ) {
 				$order->{"set_{$type}_{$key}"}( $value );
@@ -135,7 +152,7 @@ final class OrderDataUtils {
 	 * @param WC_Order $order  Order data.
 	 * @param array    $meta_data Posted data.
 	 */
-	protected static function update_meta_data( WC_Order $order, array $meta_data ) {
+	protected function update_meta_data( WC_Order $order, array $meta_data ) {
 		foreach ( $meta_data as $meta ) {
 			$order->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
 		}
@@ -149,7 +166,7 @@ final class OrderDataUtils {
 	 * @param array    $line_items The line items to update.
 	 * @param string   $line_items_type The type of line items to update.
 	 */
-	protected static function update_line_items( WC_Order $order, array $line_items, string $line_items_type = 'line_item' ) {
+	protected function update_line_items( WC_Order $order, array $line_items, string $line_items_type = 'line_item' ) {
 		if ( ! in_array( $line_items_type, array( 'line_item', 'shipping', 'fee', 'coupon' ), true ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_line_items_type', esc_html__( 'Invalid line items type.', 'woocommerce' ), 400 );
 		}
@@ -161,19 +178,19 @@ final class OrderDataUtils {
 			if ( ! is_array( $line_item_data ) ) {
 				continue;
 			}
-			if ( self::item_is_null_or_zero( $line_item_data ) ) {
+			if ( $this->item_is_null_or_zero( $line_item_data ) ) {
 				if ( $line_item_data['id'] ) {
-					self::remove_item_from_order( $order, $line_items_type, (int) $line_item_data['id'] );
+					$this->remove_item_from_order( $order, $line_items_type, (int) $line_item_data['id'] );
 				}
 				continue;
 			}
-			$processed_item_ids[] = self::update_line_item( $order, $line_items_type, $line_item_data );
+			$processed_item_ids[] = $this->update_line_item( $order, $line_items_type, $line_item_data );
 		}
 
 		// Remove any pre-existing items that were not posted.
 		foreach ( $existing_items as $existing_item ) {
 			if ( ! in_array( $existing_item->get_id(), $processed_item_ids, true ) ) {
-				self::remove_item_from_order( $order, $line_items_type, $existing_item->get_id() );
+				$this->remove_item_from_order( $order, $line_items_type, $existing_item->get_id() );
 			}
 		}
 	}
@@ -188,7 +205,7 @@ final class OrderDataUtils {
 	 * @param array    $line_item_data item provided in the request body.
 	 * @return int The ID of the updated or created item.
 	 */
-	protected static function update_line_item( WC_Order $order, string $line_items_type, array $line_item_data ) {
+	protected function update_line_item( WC_Order $order, string $line_items_type, array $line_item_data ) {
 		global $wpdb;
 
 		$action = empty( $line_item_data['id'] ) ? 'create' : 'update';
@@ -205,7 +222,7 @@ final class OrderDataUtils {
 		}
 
 		// Prepare item data.
-		$item = self::$method( $line_item_data, $action, $item );
+		$item = $this->$method( $line_item_data, $action, $item );
 
 		/**
 		 * Allow extensions be notified before the item is saved.
@@ -256,7 +273,7 @@ final class OrderDataUtils {
 	 * @param array $item Item provided in the request body.
 	 * @return bool True if the item resource ID is null, false otherwise.
 	 */
-	protected static function item_is_null_or_zero( $item ) {
+	protected function item_is_null_or_zero( $item ) {
 		$keys = array( 'product_id', 'method_id', 'method_title', 'name', 'code' );
 
 		foreach ( $keys as $key ) {
@@ -283,7 +300,7 @@ final class OrderDataUtils {
 	 * @return void
 	 * @throws WC_REST_Exception If item ID is not associated with order.
 	 */
-	protected static function remove_item_from_order( WC_Order $order, string $line_items_type, int $item_id ): void {
+	protected function remove_item_from_order( WC_Order $order, string $line_items_type, int $item_id ): void {
 		$item = $order->get_item( $item_id );
 
 		if ( ! $item ) {
@@ -319,7 +336,7 @@ final class OrderDataUtils {
 	 * @param string $action 'create' to add line item or 'update' to update it.
 	 * @return int
 	 */
-	protected static function get_product_id_from_line_item( $request_data, $action = 'create' ) {
+	protected function get_product_id_from_line_item( $request_data, $action = 'create' ) {
 		if ( ! empty( $request_data['sku'] ) ) {
 			$product_id = (int) wc_get_product_id_by_sku( $request_data['sku'] );
 		} elseif ( ! empty( $request_data['product_id'] ) && empty( $request_data['variation_id'] ) ) {
@@ -343,9 +360,9 @@ final class OrderDataUtils {
 	 * @return WC_Order_Item_Product
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
+	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
-		$product = wc_get_product( self::get_product_id_from_line_item( $request_data, $action ) );
+		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
@@ -358,10 +375,10 @@ final class OrderDataUtils {
 			}
 		}
 
-		self::maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $request_data );
-		self::maybe_set_item_meta_data( $item, $request_data );
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $request_data );
+		$this->maybe_set_item_meta_data( $item, $request_data );
 
-		if ( ! $item->has_cogs() || ! self::cogs_is_enabled() ) {
+		if ( ! $item->has_cogs() || ! $this->cogs_is_enabled() ) {
 			return $item;
 		}
 
@@ -382,15 +399,15 @@ final class OrderDataUtils {
 	 * @return WC_Order_Item_Shipping
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_shipping_data( $request_data, $action = 'create', $item = null ) {
+	protected function prepare_shipping_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new WC_Order_Item_Shipping( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action && empty( $request_data['method_id'] ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_shipping_item', esc_html__( 'Shipping method ID is required.', 'woocommerce' ), 400 );
 		}
 
-		self::maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $request_data );
-		self::maybe_set_item_meta_data( $item, $request_data );
+		$this->maybe_set_item_props( $item, array( 'method_id', 'method_title', 'total', 'instance_id' ), $request_data );
+		$this->maybe_set_item_meta_data( $item, $request_data );
 
 		return $item;
 	}
@@ -404,15 +421,15 @@ final class OrderDataUtils {
 	 * @return WC_Order_Item_Fee
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_fee_data( $request_data, $action = 'create', $item = null ) {
+	protected function prepare_fee_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new WC_Order_Item_Fee( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action && empty( $request_data['name'] ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_fee_item', esc_html__( 'Fee name is required.', 'woocommerce' ), 400 );
 		}
 
-		self::maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $request_data );
-		self::maybe_set_item_meta_data( $item, $request_data );
+		$this->maybe_set_item_props( $item, array( 'name', 'tax_class', 'tax_status', 'total' ), $request_data );
+		$this->maybe_set_item_meta_data( $item, $request_data );
 
 		return $item;
 	}
@@ -426,7 +443,7 @@ final class OrderDataUtils {
 	 * @return WC_Order_Item_Coupon
 	 * @throws WC_REST_Exception Invalid data, server error.
 	 */
-	protected static function prepare_coupon_data( $request_data, $action = 'create', $item = null ) {
+	protected function prepare_coupon_data( $request_data, $action = 'create', $item = null ) {
 		$item = is_null( $item ) ? new WC_Order_Item_Coupon( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 
 		if ( 'create' === $action ) {
@@ -436,8 +453,8 @@ final class OrderDataUtils {
 			}
 		}
 
-		self::maybe_set_item_props( $item, array( 'code', 'discount' ), $request_data );
-		self::maybe_set_item_meta_data( $item, $request_data );
+		$this->maybe_set_item_props( $item, array( 'code', 'discount' ), $request_data );
+		$this->maybe_set_item_meta_data( $item, $request_data );
 
 		return $item;
 	}
@@ -449,7 +466,7 @@ final class OrderDataUtils {
 	 * @param string        $prop   Order property.
 	 * @param array         $request_data Request data.
 	 */
-	protected static function maybe_set_item_prop( $item, $prop, $request_data ) {
+	protected function maybe_set_item_prop( $item, $prop, $request_data ) {
 		if ( isset( $request_data[ $prop ] ) && is_callable( array( $item, "set_$prop" ) ) ) {
 			$item->{"set_$prop"}( $request_data[ $prop ] );
 		}
@@ -462,9 +479,9 @@ final class OrderDataUtils {
 	 * @param string[]      $props  Properties.
 	 * @param array         $request_data Request data.
 	 */
-	protected static function maybe_set_item_props( $item, $props, $request_data ) {
+	protected function maybe_set_item_props( $item, $props, $request_data ) {
 		foreach ( $props as $prop ) {
-			self::maybe_set_item_prop( $item, $prop, $request_data );
+			$this->maybe_set_item_prop( $item, $prop, $request_data );
 		}
 	}
 
@@ -474,7 +491,7 @@ final class OrderDataUtils {
 	 * @param WC_Order_Item $item   Order item data.
 	 * @param array         $request_data Request data.
 	 */
-	protected static function maybe_set_item_meta_data( $item, $request_data ) {
+	protected function maybe_set_item_meta_data( $item, $request_data ) {
 		if ( ! empty( $request_data['meta_data'] ) && is_array( $request_data['meta_data'] ) ) {
 			foreach ( $request_data['meta_data'] as $meta ) {
 				if ( isset( $meta['key'] ) ) {

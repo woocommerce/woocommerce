@@ -98,7 +98,7 @@ class OrderTaxSchema extends AbstractLineItemSchema {
 			'id'                 => $order_item->get_id(),
 			'rate_code'          => $order_item->get_rate_code(),
 			'rate_id'            => $order_item->get_rate_id(),
-			'label'              => $order_item->get_tax_status(),
+			'label'              => $order_item->get_label(),
 			'compound'           => $order_item->get_compound(),
 			'tax_total'          => wc_format_decimal( $order_item->get_tax_total(), $dp ),
 			'shipping_tax_total' => wc_format_decimal( $order_item->get_shipping_tax_total(), $dp ),

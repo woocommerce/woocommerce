@@ -49,13 +49,31 @@ class Controller extends AbstractController {
 	protected $item_schema;
 
 	/**
+	 * Query utils class.
+	 *
+	 * @var QueryUtils
+	 */
+	protected $query_utils;
+
+	/**
+	 * Update utils class.
+	 *
+	 * @var UpdateUtils
+	 */
+	protected $update_utils;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @param OrderSchema $item_schema Order schema class.
+	 * @param QueryUtils  $query_utils Query utils class.
+	 * @param UpdateUtils $update_utils Update utils class.
 	 * @internal
 	 */
-	final public function init( OrderSchema $item_schema ) {
-		$this->item_schema = $item_schema;
+	final public function init( OrderSchema $item_schema, QueryUtils $query_utils, UpdateUtils $update_utils ) {
+		$this->item_schema  = $item_schema;
+		$this->query_utils  = $query_utils;
+		$this->update_utils = $update_utils;
 	}
 
 	/**
@@ -72,7 +90,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_query_schema(): array {
-		return QueryUtils::get_query_schema();
+		return $this->query_utils->get_query_schema();
 	}
 
 	/**
@@ -239,8 +257,8 @@ class Controller extends AbstractController {
 		 * @param WP_REST_Request $request The request used.
 		 * @since 10.2.0
 		 */
-		$query_args = apply_filters( $this->get_hook_prefix() . 'get_items_query', QueryUtils::prepare_query( $request ), $request );
-		$results    = QueryUtils::get_query_results( $query_args );
+		$query_args = apply_filters( $this->get_hook_prefix() . 'get_items_query', $this->query_utils->prepare_query( $request ), $request );
+		$results    = $this->query_utils->get_query_results( $query_args );
 		$items      = array();
 
 		foreach ( $results['results'] as $result ) {
@@ -270,7 +288,7 @@ class Controller extends AbstractController {
 			$order->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 
-			OrderDataUtils::update_order_from_request( $order, $request, true );
+			$this->update_utils->update_order_from_request( $order, $request, true );
 			$this->update_additional_fields_for_object( $order, $request );
 
 			/**
@@ -325,7 +343,7 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			OrderDataUtils::update_order_from_request( $order, $request, false );
+			$this->update_utils->update_order_from_request( $order, $request, false );
 			$this->update_additional_fields_for_object( $order, $request );
 
 			/**

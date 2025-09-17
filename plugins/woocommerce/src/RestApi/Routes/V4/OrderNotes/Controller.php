@@ -18,6 +18,7 @@ use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema;
 use WP_Http;
 use WP_Error;
 use WP_Comment;
+use WC_Order;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -382,6 +383,58 @@ class Controller extends AbstractController {
 			return null;
 		}
 		return $this->get_order_by_id( (int) $note->comment_post_ID );
+	}
+
+	/**
+	 * Get a note by ID.
+	 *
+	 * @param int $note_id The note ID.
+	 * @return WP_Comment|null
+	 */
+	protected function get_note_by_id( int $note_id ) {
+		if ( ! $note_id ) {
+			return null;
+		}
+		$note = get_comment( $note_id );
+		return $note && 'order_note' === $note->comment_type ? $note : null;
+	}
+
+	/**
+	 * Check if an order is valid.
+	 *
+	 * @param mixed $order_id The order ID.
+	 * @return bool True if the order is valid, false otherwise.
+	 */
+	protected function is_valid_order_id( $order_id ): bool {
+		$order = $this->get_order_by_id( (int) $order_id );
+		return $order && $order instanceof WC_Order;
+	}
+
+	/**
+	 * Get an order by ID.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return WC_Order|null
+	 */
+	protected function get_order_by_id( int $order_id ) {
+		if ( ! $order_id ) {
+			return null;
+		}
+		$order = wc_get_order( $order_id );
+		return $order && 'shop_order' === $order->get_type() ? $order : null;
+	}
+	/**
+	 * Get the parent order of a note.
+	 *
+	 * @param int|WP_Comment $note The note ID or note object.
+	 * @return WC_Order|null
+	 */
+	protected function get_order_by_note_id( $note ) {
+		$note = $note instanceof WP_Comment ? $note : $this->get_note_by_id( (int) $note );
+		if ( ! $note ) {
+			return null;
+		}
+		return self::get_order_by_id( (int) $note->comment_post_ID );
 	}
 
 	/**

@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Item_Product;
 use WP_REST_Request;
+use WC_Product;
 
 /**
  * OrderItemSchema class.
@@ -64,7 +65,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			),
 			'variation_id'     => array(
 				'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
-				'type'        => 'integer',
+				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
 			'quantity'         => array(
@@ -170,8 +171,8 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'meta_data'        => $this->get_meta_data_schema(),
 		);
 
-		if ( self::cogs_is_enabled() ) {
-			$schema = self::add_cogs_related_schema( $schema );
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema );
 		}
 
 		return $schema;
@@ -216,30 +217,42 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		$data = array(
 			'id'               => $order_item->get_id(),
 			'name'             => $order_item->get_name(),
-			'parent_name'      => $product && is_callable( array( $product, 'get_parent_data' ) ) ? $product->get_title() : null,
-			'product_id'       => $product->get_id(),
-			'variation_id'     => $order->get_created_via(),
 			'quantity'         => $order_item->get_quantity(),
-			'tax_class'        => OrderUtil::remove_status_prefix( $order->get_status() ),
+			'product_id'       => $order_item->get_product_id(),
+			'variation_id'     => $order_item->get_variation_id(),
+			'tax_class'        => $order_item->get_tax_class(),
 			'subtotal'         => wc_format_decimal( $order_item->get_subtotal(), $dp ),
 			'subtotal_tax'     => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
 			'total'            => wc_format_decimal( $order_item->get_total(), $dp ),
 			'total_tax'        => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'            => $this->prepare_taxes( $order_item, $request ),
 			'meta_data'        => $this->filter_meta_data( $this->prepare_meta_data( $order_item ), $order_item, $request ),
-			'sku'              => $product->get_sku(),
-			'global_unique_id' => $product->get_global_unique_id(),
 			'price'            => $order_item->get_quantity() ? $order_item->get_total() / $order_item->get_quantity() : 0,
-			'image'            => $product->get_image_id() ? array(
+			'sku'              => null,
+			'global_unique_id' => null,
+			'parent_name'      => null,
+			'image'            => null,
+			'product_type'     => null,
+			'is_virtual'       => false,
+			'is_downloadable'  => false,
+			'needs_shipping'   => false,
+			'permalink'        => null,
+		);
+
+		if ( $product && $product instanceof WC_Product ) {
+			$data['sku']              = $product->get_sku();
+			$data['global_unique_id'] = $product->get_global_unique_id();
+			$data['parent_name']      = is_callable( array( $product, 'get_parent_data' ) ) ? $product->get_title() : null;
+			$data['image']            = $product->get_image_id() ? array(
 				'id'  => $product->get_image_id(),
 				'src' => $product->get_image_id() ? wp_get_attachment_image_url( $product->get_image_id(), 'full' ) : '',
-			) : null,
-			'product_type'     => $product->get_type(),
-			'is_virtual'       => $product->is_virtual(),
-			'is_downloadable'  => $product->is_downloadable(),
-			'needs_shipping'   => $product->needs_shipping(),
-			'permalink'        => $product->get_permalink(),
-		);
+			) : null;
+			$data['product_type']     = $product->get_type();
+			$data['is_virtual']       = $product->is_virtual();
+			$data['is_downloadable']  = $product->is_downloadable();
+			$data['needs_shipping']   = $product->needs_shipping();
+			$data['permalink']        = $product->get_permalink();
+		}
 
 		// Add COGS data.
 		if ( self::cogs_is_enabled() ) {

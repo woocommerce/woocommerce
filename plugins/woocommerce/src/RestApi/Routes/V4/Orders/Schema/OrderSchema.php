@@ -357,6 +357,11 @@ class OrderSchema extends AbstractSchema {
 						'type'        => 'string',
 						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 					),
+					'phone'      => array(
+						'description' => __( 'Phone number.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+					),
 				),
 			),
 			'payment_method'       => array(
@@ -437,7 +442,10 @@ class OrderSchema extends AbstractSchema {
 				'description' => __( 'A list of line items (products) within this order.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'items'       => $this->order_item_schema->get_item_schema_properties(),
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => $this->order_item_schema->get_item_schema_properties(),
+				),
 			),
 			'tax_lines'            => array(
 				'description' => __( 'Tax lines data.', 'woocommerce' ),
@@ -502,8 +510,8 @@ class OrderSchema extends AbstractSchema {
 			),
 		);
 
-		if ( self::cogs_is_enabled() ) {
-			$schema = self::add_cogs_related_schema( $schema );
+		if ( $this->cogs_is_enabled() ) {
+			$schema = $this->add_cogs_related_schema( $schema );
 		}
 
 		return $schema;
@@ -648,7 +656,15 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'meta_data', $include_fields, true ) ) {
-			$data['meta_data'] = $this->prepare_meta_data_for_response( $this->filter_internal_meta_keys( $order->get_meta_data() ), $request );
+			$filtered_meta_data = $this->filter_internal_meta_keys( $this->get_meta_data_for_response( $order->get_meta_data(), $request ) );
+			$data['meta_data']  = array();
+			foreach ( $filtered_meta_data as $meta_item ) {
+				$data['meta_data'][] = array(
+					'id'    => $meta_item->id,
+					'key'   => $meta_item->key,
+					'value' => $meta_item->value,
+				);
+			}
 		}
 
 		// Add COGS data.
@@ -694,7 +710,7 @@ class OrderSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	protected function prepare_meta_data_for_response( $meta_data, $request ) {
+	protected function get_meta_data_for_response( $meta_data, $request ) {
 		$include = (array) $request['include_meta'];
 		$exclude = (array) $request['exclude_meta'];
 
