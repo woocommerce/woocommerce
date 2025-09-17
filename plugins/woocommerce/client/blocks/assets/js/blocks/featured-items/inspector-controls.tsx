@@ -48,7 +48,6 @@ interface InspectorControlsRequiredAttributes
 	> {
 	alt: string;
 	backgroundImageSrc: string;
-	contentPanel: JSX.Element | undefined;
 }
 
 interface InspectorControlsProps extends InspectorControlsRequiredAttributes {
@@ -88,7 +87,6 @@ type WithInspectorControlsProps< T extends EditorBlock< T > > =
 export const InspectorControls = ( {
 	alt,
 	backgroundImageSrc,
-	contentPanel,
 	dimRatio,
 	focalPoint,
 	hasParallax,
@@ -333,7 +331,6 @@ export const withInspectorControls =
 				<InspectorControls
 					alt={ alt }
 					backgroundImageSrc={ backgroundImageSrc }
-					contentPanel={ undefined }
 					dimRatio={ dimRatio }
 					focalPoint={ focalPoint }
 					hasParallax={ hasParallax }
