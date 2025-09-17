@@ -60,12 +60,10 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
-					'args'                => $this->get_collection_params(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
-
 	}
 
 	/**
@@ -104,46 +102,139 @@ class Controller extends AbstractController {
 		return rest_ensure_response( $data );
 	}
 
-	}
 
 	/**
-	 * Get the item response based on the request context.
+	 * Get the item response for list view.
 	 *
 	 * @param WC_Shipping_Zone $zone    Shipping zone object.
 	 * @param WP_REST_Request  $request Request object.
 	 * @return array
 	 */
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
-		// Basic zone data.
-		$data = array(
-			'id'    => $zone->get_id(),
-			'name'  => $zone->get_zone_name(),
-			'order' => $zone->get_zone_order(),
+		return array(
+			'id'        => $zone->get_id(),
+			'name'      => $zone->get_zone_name(),
+			'order'     => $zone->get_zone_order(),
+			'locations' => $this->get_location_names_array( $zone ),
+			'methods'   => $this->get_formatted_methods_summary( $zone ),
 		);
-
-		return $data;
 	}
 
 	/**
-	 * Register the routes for shipping zones.
-	 */
-	public function register_routes() {}
-
-	/**
-	 * Retrieve a shipping zone by ID.
+	 * Get array of location names for display.
 	 *
-	 * @param int $zone_id Shipping zone ID.
-	 * @return WC_Shipping_Zone|WP_Error
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @return array
 	 */
-	protected function get_zone( $zone_id ) {
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
-
-		if ( false === $zone ) {
-			return new WP_Error( 'woocommerce_rest_shipping_zone_invalid', __( 'Resource does not exist.', 'woocommerce' ), array( 'status' => 404 ) );
+	protected function get_location_names_array( $zone ) {
+		if ( 0 === $zone->get_id() ) {
+			return array( __( 'All regions not covered above', 'woocommerce' ) );
 		}
 
-		return $zone;
+		$locations      = $zone->get_zone_locations();
+		$location_names = array();
+
+		foreach ( $locations as $location ) {
+			$location_names[] = $this->get_location_name( $location );
+		}
+
+		if ( empty( $location_names ) ) {
+			return array();
+		}
+
+		return $location_names;
 	}
+
+	/**
+	 * Get location name from location object.
+	 *
+	 * @param object $location Location object.
+	 * @return string
+	 */
+	protected function get_location_name( $location ) {
+		switch ( $location->type ) {
+			case 'continent':
+				$continents = WC()->countries->get_continents();
+				return isset( $continents[ $location->code ] ) ? $continents[ $location->code ]['name'] : $location->code;
+
+			case 'country':
+				$countries = WC()->countries->get_countries();
+				return isset( $countries[ $location->code ] ) ? $countries[ $location->code ] : $location->code;
+
+			case 'state':
+				$parts  = explode( ':', $location->code );
+				$states = WC()->countries->get_states( $parts[0] );
+				return isset( $states[ $parts[1] ] ) ? $states[ $parts[1] ] : $location->code;
+
+			case 'postcode':
+				return $location->code;
+
+			default:
+				return $location->code;
+		}
+	}
+
+	/**
+	 * Get formatted methods summary for list view.
+	 *
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @return array
+	 */
+	protected function get_formatted_methods_summary( $zone ) {
+		$methods         = $zone->get_shipping_methods( false, 'json' );
+		$formatted_methods = array();
+
+		foreach ( $methods as $method ) {
+			$formatted_method = array(
+				'instance_id' => $method->instance_id,
+				'title'       => $method->title,
+				'enabled'     => 'yes' === $method->enabled,
+			);
+
+			// Get rate description based on method type.
+			$formatted_method['rate_description'] = $this->get_method_rate_description( $method );
+
+			$formatted_methods[] = $formatted_method;
+		}
+
+		return $formatted_methods;
+	}
+
+	/**
+	 * Get method rate description for display.
+	 *
+	 * @param object $method Shipping method object.
+	 * @return string
+	 */
+	protected function get_method_rate_description( $method ) {
+		switch ( $method->id ) {
+			case 'free_shipping':
+				if ( ! empty( $method->min_amount ) ) {
+					return sprintf( __( 'Free over %s', 'woocommerce' ), wc_price( $method->min_amount ) );
+				}
+				return __( 'Free', 'woocommerce' );
+
+			case 'flat_rate':
+				if ( ! empty( $method->cost ) ) {
+					return wc_price( $method->cost );
+				}
+				return __( 'Flat rate', 'woocommerce' );
+
+			case 'local_pickup':
+				if ( ! empty( $method->cost ) ) {
+					return wc_price( $method->cost );
+				}
+				return __( 'Local pickup', 'woocommerce' );
+
+			default:
+				// For custom methods, try to get cost if available.
+				if ( isset( $method->cost ) && '' !== $method->cost ) {
+					return wc_price( $method->cost );
+				}
+				return $method->title;
+		}
+	}
+
 
 	/**
 	 * Check whether a given request has permission to read shipping zones.
