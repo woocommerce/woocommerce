@@ -159,6 +159,8 @@ export const withFeaturedItem =
 		// set the default value in the block.json.
 		useEffect( () => {
 			setAttributes( {
+				showDesc: false,
+				showPrice: false,
 				__woocommerceBlockVersion: 2,
 			} );
 		}, [ setAttributes ] );
