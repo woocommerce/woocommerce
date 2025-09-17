@@ -87,11 +87,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		}
 		WC()->session->init();
 
+		$this->update_order_shipping_address( $order, $shipping_address );
+
 		// Rebuild the cart from the order.
 		$this->rebuild_cart_from_order( $order );
-
-		// Update the WooCommerce order with the new shipping address.
-		$this->update_order_shipping_address( $order, $shipping_address );
 
 		// Get the new shipping options, which depend on the new shipping address.
 		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
@@ -127,7 +126,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Rebuild the cart, given the order.
+	 * Rebuild the session cart.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @return void
@@ -140,6 +139,12 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		}
 	}
 
+	/**
+	 * Recompute the fees for the order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return void
+	 */
 	private function recompute_fees( $order ) {
 		WC()->cart->calculate_fees();
 		WC()->cart->calculate_shipping();
@@ -167,6 +172,12 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		$order->set_shipping_postcode( $postcode );
 		$order->set_shipping_state( $state );
 		$order->set_shipping_city( $city );
+
+		// We do not have the address line 1 and 2 -- we are clearing them here to avoid
+		// showing stale data. The final address will be updated when the
+		// customer approves the order, via 'woocommerce_thankyou_paypal' hook.
+		$order->set_shipping_address_1( '' );
+		$order->set_shipping_address_2( '' );
 		$order->save();
 
 		// Get customer from order and update their shipping location.
@@ -181,6 +192,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * Get the shipping options for the order.
 	 *
 	 * @param WC_Order $order The order object.
+	 * @param array    $selected_shipping_option The selected shipping option.
 	 * @return array The shipping options.
 	 */
 	private function get_updated_shipping_options( $order, $selected_shipping_option ) {

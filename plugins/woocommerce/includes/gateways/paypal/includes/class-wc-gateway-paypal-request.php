@@ -175,6 +175,31 @@ class WC_Gateway_Paypal_Request {
 	}
 
 	/**
+	 * Get PayPal order details.
+	 *
+	 * @param string $paypal_order_id The ID of the PayPal order.
+	 * @return array
+	 * @throws Exception If the PayPal order details request fails.
+	 * @throws Exception If the PayPal order details are not found.
+	 */
+	public function get_paypal_order_details( $paypal_order_id ) {
+		$request_body = array(
+			'test_mode' => $this->gateway->testmode,
+		);
+		$response     = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_ORDER_ENDPOINT . '/' . $paypal_order_id, $request_body );
+		if ( is_wp_error( $response ) ) {
+			throw new Exception( 'PayPal order details request failed. Response error: ' . $response->get_error_message() );
+		}
+		$http_code     = wp_remote_retrieve_response_code( $response );
+		$body          = wp_remote_retrieve_body( $response );
+		$response_data = json_decode( $body, true );
+		if ( 200 !== $http_code ) {
+			throw new Exception( 'PayPal order details request failed. Response status: ' . $http_code . '. Response body: ' . $body );
+		}
+		return $response_data;
+	}
+
+	/**
 	 * Authorize or capture a PayPal payment using the Orders v2 API.
 	 *
 	 * This method authorizes or captures a PayPal payment and updates the order status.

@@ -198,6 +198,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
 
 			if ( $this->should_use_orders_v2() ) {
+				// Hook for updating the shipping information on order approval (Orders v2).
+				add_action( 'woocommerce_before_thankyou', array( $this, 'update_shipping_information' ), 10 );
+
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
 
@@ -209,6 +212,60 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Product page.
 				add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
 			}
+		}
+	}
+
+	/**
+	 * Update the shipping information for the order.
+	 * Hooked on 'woocommerce_before_thankyou'.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
+	public function update_shipping_information( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		// Bail early if the order is not a PayPal order.
+		if ( ! $order || ! $order->get_payment_method() === $this->id ) {
+			return;
+		}
+
+		// Bail early if not on Orders v2.
+		if ( ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
+		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		if ( empty( $paypal_order_id ) ) {
+			return;
+		}
+
+		try {
+			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
+
+			$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
+			if ( ! empty( $full_name ) ) {
+				$approximate_first_name = explode( ' ', $full_name )[0] ?? '';
+				$approximate_last_name  = explode( ' ', $full_name )[1] ?? '';
+				$order->set_shipping_first_name( $approximate_first_name );
+				$order->set_shipping_last_name( $approximate_last_name );
+				$order->save();
+			}
+
+			$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
+			if ( ! empty( $shipping_address ) ) {
+				$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
+				$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
+				$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
+				$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
+				$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
+				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
+				$order->save();
+			}
+		} catch ( Exception $e ) {
+			self::log( 'Error updating shipping information for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
 	}
 
