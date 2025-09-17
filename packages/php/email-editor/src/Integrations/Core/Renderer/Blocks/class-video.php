@@ -61,6 +61,47 @@ class Video extends Cover {
 	}
 
 	/**
+	 * Extract video URL from block content.
+	 *
+	 * @param string $block_content Block content HTML.
+	 * @return string Video URL or empty string.
+	 */
+	private function extract_video_url( string $block_content ): string {
+		// Use Dom_Document_Helper for robust HTML parsing.
+		$dom_helper = new Dom_Document_Helper( $block_content );
+
+		// Find the wp-block-embed__wrapper div.
+		$wrapper_element = $dom_helper->find_element( 'div' );
+		if ( ! $wrapper_element ) {
+			return '';
+		}
+
+		// Check if this div has the correct class.
+		$class_attr = $dom_helper->get_attribute_value( $wrapper_element, 'class' );
+		if ( strpos( $class_attr, 'wp-block-embed__wrapper' ) === false ) {
+			return '';
+		}
+
+		// Get the inner HTML content from the wrapper div.
+		$inner_html = $dom_helper->get_element_inner_html( $wrapper_element );
+
+		// Look for HTTP/HTTPS URLs in the inner HTML content.
+		if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%-]*(?![a-zA-Z0-9.-])/', $inner_html, $matches ) ) {
+			$url = $matches[0];
+
+			// Decode HTML entities and validate URL.
+			$url = html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+			// Validate the URL.
+			if ( filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url ) ) {
+				return $url;
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Transform a video block into a cover block structure.
 	 *
 	 * @param array  $video_block Original video block.
@@ -68,8 +109,12 @@ class Video extends Cover {
 	 * @return array Cover block structure.
 	 */
 	private function transform_to_cover_block( array $video_block, string $poster_url ): array {
-		$block_attrs = $video_block['attrs'] ?? array();
-		$post_url    = $this->get_current_post_url();
+		$block_attrs   = $video_block['attrs'] ?? array();
+		$block_content = $video_block['innerHTML'] ?? '';
+
+		// Extract video URL from block content, fall back to post URL.
+		$video_url = $this->extract_video_url( $block_content );
+		$link_url  = ! empty( $video_url ) ? $video_url : $this->get_current_post_url();
 
 		return array(
 			'blockName'   => 'core/cover',
@@ -82,11 +127,11 @@ class Video extends Cover {
 					'blockName'    => 'core/html',
 					'attrs'        => array(),
 					'innerBlocks'  => array(),
-					'innerHTML'    => $this->create_play_button_html( $post_url ),
-					'innerContent' => array( $this->create_play_button_html( $post_url ) ),
+					'innerHTML'    => $this->create_play_button_html( $link_url ),
+					'innerContent' => array( $this->create_play_button_html( $link_url ) ),
 				),
 			),
-			'innerHTML'   => $video_block['innerHTML'] ?? '',
+			'innerHTML'   => $block_content,
 		);
 	}
 
@@ -149,7 +194,7 @@ class Video extends Cover {
 		}
 
 		// Validate URL type and format (following audio block pattern).
-		if ( ! str_starts_with( $permalink, 'https://' ) && ! str_starts_with( $permalink, 'http://' ) ) {
+		if ( strpos( $permalink, 'https://' ) !== 0 && strpos( $permalink, 'http://' ) !== 0 ) {
 			// Reject non-HTTP protocols for security.
 			return '';
 		}

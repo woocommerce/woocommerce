@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Audio;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 
 /**
@@ -232,6 +233,37 @@ class Embed extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Extract URL from block content using DOM parsing.
+	 *
+	 * @param string $block_content Block content HTML.
+	 * @return string Extracted URL or empty string.
+	 */
+	private function extract_url_from_content( string $block_content ): string {
+		$dom_helper = new Dom_Document_Helper( $block_content );
+
+		// Find the wp-block-embed__wrapper div.
+		$wrapper_element = $dom_helper->find_element( 'div' );
+		if ( $wrapper_element ) {
+			// Check if this div has the correct class.
+			$class_attr = $dom_helper->get_attribute_value( $wrapper_element, 'class' );
+			if ( strpos( $class_attr, 'wp-block-embed__wrapper' ) !== false ) {
+				// Get the text content (URL) from the div.
+				$url = trim( $wrapper_element->textContent ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+				// Decode HTML entities and validate URL.
+				$url = html_entity_decode( $url, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+
+				// Validate the extracted URL.
+				if ( $this->is_valid_url( $url ) ) {
+					return $url;
+				}
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Extract provider URL from block attributes or content.
 	 *
 	 * @param array  $attr Block attributes.
@@ -249,17 +281,8 @@ class Embed extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		// If not in attributes, extract from block content using simple pattern.
-		// The innerHTML always contains the URL in a predictable structure.
-		if ( preg_match( '/<div class="wp-block-embed__wrapper">([^<]+)<\/div>/', $block_content, $matches ) ) {
-			$url = trim( $matches[1] );
-			// Validate the extracted URL.
-			if ( $this->is_valid_url( $url ) ) {
-				return $url;
-			}
-		}
-
-		return '';
+		// If not in attributes, extract from block content.
+		return $this->extract_url_from_content( $block_content );
 	}
 
 	/**
@@ -319,9 +342,21 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If no URL in attributes, try to extract from block content.
 		if ( empty( $url ) ) {
-			// Look for any HTTP/HTTPS URL in the content with proper boundaries.
-			if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%-]*(?![a-zA-Z0-9.-])/', $block_content, $matches ) ) {
-				$url = $matches[0];
+			// First try the standard wrapper div extraction.
+			$url = $this->extract_url_from_content( $block_content );
+
+			// If still no URL, try to find any HTTP/HTTPS URL in the entire content.
+			if ( empty( $url ) ) {
+				$dom_helper   = new Dom_Document_Helper( $block_content );
+				$body_element = $dom_helper->find_element( 'body' );
+				if ( $body_element ) {
+					$text_content = $body_element->textContent; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+
+					// Look for HTTP/HTTPS URLs in the text content.
+					if ( preg_match( '/(?<![a-zA-Z0-9.-])https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}[a-zA-Z0-9\/?=&%-]*(?![a-zA-Z0-9.-])/', $text_content, $matches ) ) {
+						$url = $matches[0];
+					}
+				}
 			}
 		}
 
@@ -420,7 +455,7 @@ class Embed extends Abstract_Block_Renderer {
 			'attrs'     => array(
 				'poster' => $poster_url,
 			),
-			'innerHTML' => '<figure class="wp-block-video"><video controls poster="' . esc_attr( $poster_url ) . '"></video></figure>',
+			'innerHTML' => '<figure class="wp-block-video wp-block-embed is-type-video is-provider-' . esc_attr( $provider ) . '"><div class="wp-block-embed__wrapper">' . esc_url( $url ) . '</div></figure>',
 		);
 
 		// Copy email attributes to the mock block.
