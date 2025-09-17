@@ -32,7 +32,10 @@ class MCPAdapterProvider {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// Hook into WordPress plugins loaded to ensure proper timing
+		/*
+		 * Hook into init because MCP adapter registers hooks for rest_api_init,
+		 * so we need to initialize earlier to ensure proper sequence.
+		 */
 		add_action( 'init', array( $this, 'maybe_initialize' ) );
 	}
 
