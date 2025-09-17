@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update rest API capability check to only use object ID when set
