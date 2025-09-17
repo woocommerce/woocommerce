@@ -1,8 +1,11 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
+import * as wpData from '@wordpress/data';
 import { AddressAutocomplete } from '@woocommerce/base-components/cart-checkout/address-autocomplete/address-autocomplete';
+import { cartStore } from '@woocommerce/block-data';
+import userEvent from '@testing-library/user-event';
 
 describe( 'Address Autocomplete Component', () => {
 	it( 'should render a ValidatedTextInput with correct props', () => {
@@ -66,5 +69,41 @@ describe( 'Address Autocomplete Component', () => {
 		expect( input ).toHaveAttribute( 'placeholder', 'Enter address' );
 		expect( input ).toBeDisabled();
 		expect( input ).toBeRequired();
+	} );
+
+	it( 'Creates mutation observer that watches data-disable-autocomplete attribute', () => {
+		const { container } = render(
+			<AddressAutocomplete
+				addressType="billing"
+				onChange={ () => {} }
+				id="billing_address_1"
+				autoComplete="street-address"
+			/>
+		);
+
+		const input = container.querySelector( '#billing_address_1' ) as HTMLInputElement;
+		expect( input ).toBeTruthy();
+
+		// Initially should have data-disable-autocomplete attribute set to "off"
+		expect( input.getAttribute( 'data-disable-autocomplete' ) ).toBe( 'off' );
+
+		// Manually trigger the mutation observer by changing the attribute
+		// This simulates what would happen when searchValue state changes
+		input.setAttribute( 'data-disable-autocomplete', 'on' );
+
+		// Give the mutation observer time to react
+		return waitFor( () => {
+			expect( input.getAttribute( 'autocomplete' ) ).toBe( 'none' );
+			expect( input.getAttribute( 'data-1p-ignore' ) ).toBe( 'true' );
+		} ).then( () => {
+			// Now set it back to 'off'
+			input.setAttribute( 'data-disable-autocomplete', 'off' );
+
+			// Wait for mutation observer to restore original attributes
+			return waitFor( () => {
+				expect( input.getAttribute( 'autocomplete' ) ).toBe( 'street-address' );
+				expect( input.hasAttribute( 'data-1p-ignore' ) ).toBe( false );
+			} );
+		} );
 	} );
 } );
