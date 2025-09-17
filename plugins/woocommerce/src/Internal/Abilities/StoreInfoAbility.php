@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -98,18 +100,26 @@ class StoreInfoAbility {
 			// Products use 'publish' status.
 			$product_count = (int) wp_count_posts( 'product' )->publish;
 
-			// Orders using wc_get_orders for accurate counting
-			$completed_orders = wc_get_orders( array(
-				'status' => 'completed',
-				'limit'  => -1,
-				'return' => 'ids',
-			) );
-			$completed_count = count( $completed_orders );
+			// Orders using wc_orders_count for efficient counting with caching
+			$completed_count  = wc_orders_count( OrderStatus::COMPLETED );
+			$processing_count = wc_orders_count( OrderStatus::PROCESSING );
+			$pending_count    = wc_orders_count( OrderStatus::PENDING );
+			$on_hold_count    = wc_orders_count( OrderStatus::ON_HOLD );
+			$cancelled_count  = wc_orders_count( OrderStatus::CANCELLED );
+			$refunded_count   = wc_orders_count( OrderStatus::REFUNDED );
+			$failed_count     = wc_orders_count( OrderStatus::FAILED );
 
 			$order_breakdown = array(
-				'completed' => $completed_count,
+				'completed'  => $completed_count,
+				'processing' => $processing_count,
+				'pending'    => $pending_count,
+				'on-hold'    => $on_hold_count,
+				'cancelled'  => $cancelled_count,
+				'refunded'   => $refunded_count,
+				'failed'     => $failed_count,
 			);
-			$order_count = $completed_count;
+
+			$order_count = $completed_count + $processing_count + $pending_count + $on_hold_count + $cancelled_count + $refunded_count + $failed_count;
 
 			// Customers only.
 			$users_counts   = count_users();
