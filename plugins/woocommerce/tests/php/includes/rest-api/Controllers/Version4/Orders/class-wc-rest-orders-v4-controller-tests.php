@@ -957,4 +957,391 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order2->delete( true );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $original_cot_setting );
 	}
+
+	/**
+	 * Test DELETE endpoint removes order.
+	 */
+	public function test_orders_delete_endpoint(): void {
+		$order = $this->create_test_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc/v4/orders/' . $order_id );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Check that the response includes order data from the order (before deletion).
+		$response_data = $response->get_data();
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertEquals( $response_data['id'], $order_id );
+		$this->assertEquals( OrderStatus::COMPLETED, $response_data['status'] );
+
+		// Check the order was actually deleted (trashed).
+		$order = wc_get_order( $order_id );
+		$this->assertEquals( OrderStatus::TRASH, $order->get_status( 'edit' ) );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test _fields parameter filters response correctly.
+	 */
+	public function test_fields_parameter_filtering(): void {
+		$order = $this->create_test_order();
+
+		// Test single field.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_param( '_fields', 'id,status' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertArrayHasKey( 'status', $response_data );
+		$this->assertArrayNotHasKey( 'billing', $response_data );
+		$this->assertArrayNotHasKey( 'line_items', $response_data );
+
+		// Test multiple fields.
+		$request->set_param( '_fields', 'id,status,billing' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertArrayHasKey( 'status', $response_data );
+		$this->assertArrayHasKey( 'billing', $response_data );
+		$this->assertArrayNotHasKey( 'line_items', $response_data );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test date filtering with before and after parameters.
+	 */
+	public function test_date_filtering(): void {
+		// Set up specific time ranges for testing.
+		$time_past   = time() - ( 2 * DAY_IN_SECONDS ); // 2 days ago.
+		$time_recent = time() - HOUR_IN_SECONDS; // 1 hour ago.
+		$time_future = time() + DAY_IN_SECONDS; // 1 day in future.
+
+		// Create orders with specific dates.
+		$order1 = $this->create_test_order();
+		$order1->set_date_created( $time_past );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->set_date_created( $time_recent );
+		$order2->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+
+		// No date params should return all orders.
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
+
+		// Test 'after' parameter - should return orders created after the past time.
+		$request->set_param( 'after', gmdate( DateTime::ATOM, $time_past ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertGreaterThanOrEqual( 1, count( $response_data ) );
+
+		// Test 'before' parameter - should return orders created before the future time.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_future ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertGreaterThanOrEqual( 1, count( $response_data ) );
+
+		// Test both 'after' and 'before' - should return orders in the range.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+		$request->set_param( 'after', gmdate( DateTime::ATOM, $time_past ) );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_future ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertGreaterThanOrEqual( 1, count( $response_data ) );
+
+		// Test 'after' with future time - should return no orders.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+		$request->set_param( 'after', gmdate( DateTime::ATOM, $time_future ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 0, $response_data );
+
+		// Test 'before' with past time - should return no orders.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_past ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 0, $response_data );
+
+		// Test narrow range that should return orders between past and recent times.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', 1 );
+		$request->set_param( 'after', gmdate( DateTime::ATOM, $time_past - HOUR_IN_SECONDS ) );
+		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_recent + HOUR_IN_SECONDS ) );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertGreaterThanOrEqual( 1, count( $response_data ) );
+
+		$order1->delete( true );
+		$order2->delete( true );
+	}
+
+	/**
+	 * Test status filtering.
+	 */
+	public function test_status_filtering(): void {
+		$order1 = $this->create_test_order();
+		$order1->set_status( OrderStatus::PENDING );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->set_status( OrderStatus::PROCESSING );
+		$order2->save();
+
+		// Test filtering by pending status - should find order1 but not order2.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'status', OrderStatus::PENDING );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order ) {
+			$this->assertEquals( OrderStatus::PENDING, $order['status'], 'All returned orders should have pending status' );
+			if ( $order['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with pending status' );
+		$this->assertFalse( $found_order2, 'Should not find order with processing status when filtering by pending' );
+
+		// Test filtering by processing status - should find order2 but not order1.
+		$request->set_param( 'status', OrderStatus::PROCESSING );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order ) {
+			$this->assertEquals( OrderStatus::PROCESSING, $order['status'], 'All returned orders should have processing status' );
+			if ( $order['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertFalse( $found_order1, 'Should not find order with pending status when filtering by processing' );
+		$this->assertTrue( $found_order2, 'Should find order with processing status' );
+
+		$order1->delete( true );
+		$order2->delete( true );
+	}
+
+	/**
+	 * Test customer filtering.
+	 */
+	public function test_customer_filtering(): void {
+		$customer = WC_Helper_Customer::create_customer( 'test', 'password', 'test@example.com' );
+
+		$order1 = $this->create_test_order();
+		$order1->set_customer_id( $customer->get_id() );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->set_customer_id( 0 ); // Guest order.
+		$order2->save();
+
+		// Test filtering by customer ID - should find order1 but not order2.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'customer', $customer->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order ) {
+			$this->assertEquals( $customer->get_id(), $order['customer_id'], 'All returned orders should have the correct customer ID' );
+			if ( $order['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with matching customer ID' );
+		$this->assertFalse( $found_order2, 'Should not find guest order when filtering by customer ID' );
+
+		// Test filtering by guest orders (customer ID 0) - should find order2 but not order1.
+		$request->set_param( 'customer', 0 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order ) {
+			$this->assertEquals( 0, $order['customer_id'], 'All returned orders should be guest orders' );
+			if ( $order['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertFalse( $found_order1, 'Should not find order with customer ID when filtering by guest orders' );
+		$this->assertTrue( $found_order2, 'Should find guest order when filtering by customer ID 0' );
+
+		$customer->delete( true );
+		$order1->delete( true );
+		$order2->delete( true );
+	}
+
+	/**
+	 * Test order by parameters.
+	 */
+	public function test_order_by(): void {
+		$order1 = $this->create_test_order();
+		$order2 = $this->create_test_order();
+
+		// Test ordering by date (default).
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'orderby', 'date' );
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should have at least 2 orders.
+		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
+
+		// Test ordering by ID.
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
+
+		$order1->delete( true );
+		$order2->delete( true );
+	}
+
+	/**
+	 * Test search functionality.
+	 */
+	public function test_search(): void {
+		// Create orders with different searchable content.
+		$order1 = $this->create_test_order(
+			array(
+				'billing' => array(
+					'first_name' => 'SearchTest',
+					'last_name'  => 'User',
+					'email'      => 'searchtest@example.com',
+				),
+			)
+		);
+
+		$order2 = $this->create_test_order(
+			array(
+				'billing' => array(
+					'first_name' => 'DifferentName',
+					'last_name'  => 'DifferentUser',
+					'email'      => 'different@example.com',
+				),
+			)
+		);
+
+		// Test searching by first name - should find order1 but not order2.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'search', 'SearchTest' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should find order1.
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order_data['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with matching first name' );
+		$this->assertFalse( $found_order2, 'Should not find order with non-matching first name' );
+
+		// Test searching by email - should find order1 but not order2.
+		$request->set_param( 'search', 'searchtest@example.com' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1 = false;
+		$found_order2 = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order_data['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with matching email' );
+		$this->assertFalse( $found_order2, 'Should not find order with non-matching email' );
+
+		// Test searching for non-existent term - should find no orders.
+		$request->set_param( 'search', 'NonExistentTerm123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_any_order = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order1->get_id() || $order_data['id'] === $order2->get_id() ) {
+				$found_any_order = true;
+				break;
+			}
+		}
+		$this->assertFalse( $found_any_order, 'Should not find any orders for non-existent search term' );
+
+		$order1->delete( true );
+		$order2->delete( true );
+	}
 }
