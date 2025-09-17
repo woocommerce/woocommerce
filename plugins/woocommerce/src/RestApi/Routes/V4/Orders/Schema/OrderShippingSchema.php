@@ -84,7 +84,7 @@ class OrderShippingSchema extends AbstractLineItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order_item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$dp   = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
+		$dp   = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$data = array(
 			'id'           => $order_item->get_id(),
 			'method_title' => $order_item->get_method_title(),

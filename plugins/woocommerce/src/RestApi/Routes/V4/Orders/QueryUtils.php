@@ -30,7 +30,7 @@ final class QueryUtils {
 	 */
 	public static function get_query_schema() {
 		return array(
-			'dp'                      => array(
+			'num_decimals'            => array(
 				'default'           => wc_get_price_decimals(),
 				'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
 				'type'              => 'integer',

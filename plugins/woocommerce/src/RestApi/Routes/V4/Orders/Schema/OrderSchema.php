@@ -541,7 +541,7 @@ class OrderSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order, WP_REST_Request $request, array $include_fields = array() ): array {
-		$dp   = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
+		$dp   = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$data = array(
 			'id'                   => $order->get_id(),
 			'parent_id'            => $order->get_parent_id(),

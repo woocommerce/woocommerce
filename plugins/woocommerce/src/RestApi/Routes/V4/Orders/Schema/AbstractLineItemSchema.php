@@ -132,7 +132,7 @@ abstract class AbstractLineItemSchema extends AbstractSchema {
 	 */
 	protected function prepare_taxes( $order_item, WP_REST_Request $request ) {
 		$taxes  = $order_item->get_taxes();
-		$dp     = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
+		$dp     = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$return = array();
 
 		if ( $taxes && ! empty( $taxes['total'] ) ) {
