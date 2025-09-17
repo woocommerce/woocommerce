@@ -226,11 +226,17 @@ class Site_Style_Sync_Controller {
 		$email_colors = array();
 
 		if ( isset( $color_styles['background'] ) ) {
-			$email_colors['background'] = $color_styles['background'];
+			$background = $this->resolve_style_value( $color_styles['background'] );
+			if ( $background ) {
+				$email_colors['background'] = $background;
+			}
 		}
 
 		if ( isset( $color_styles['text'] ) ) {
-			$email_colors['text'] = $color_styles['text'];
+			$text = $this->resolve_style_value( $color_styles['text'] );
+			if ( $text ) {
+				$email_colors['text'] = $text;
+			}
 		}
 
 		return $email_colors;
@@ -247,19 +253,28 @@ class Site_Style_Sync_Controller {
 
 		// Convert font family to email-safe alternative.
 		if ( isset( $typography_styles['fontFamily'] ) ) {
-			$email_typography['fontFamily'] = $this->convert_to_email_safe_font( $typography_styles['fontFamily'] );
+			$font_family = $this->resolve_style_value( $typography_styles['fontFamily'] );
+			if ( $font_family ) {
+				$email_typography['fontFamily'] = $this->convert_to_email_safe_font( $font_family );
+			}
 		}
 
 		// Convert font size to px if needed.
 		if ( isset( $typography_styles['fontSize'] ) ) {
-			$email_typography['fontSize'] = $this->convert_to_px_size( $typography_styles['fontSize'] );
+			$font_size = $this->resolve_style_value( $typography_styles['fontSize'] );
+			if ( $font_size ) {
+				$email_typography['fontSize'] = $this->convert_to_px_size( $font_size );
+			}
 		}
 
 		// Preserve email-compatible typography properties.
 		$compatible_props = array( 'fontWeight', 'fontStyle', 'lineHeight', 'letterSpacing', 'textTransform', 'textDecoration' );
 		foreach ( $compatible_props as $prop ) {
 			if ( isset( $typography_styles[ $prop ] ) ) {
-				$email_typography[ $prop ] = $typography_styles[ $prop ];
+				$email_typography_value = $this->resolve_style_value( $typography_styles[ $prop ] );
+				if ( $email_typography_value ) {
+					$email_typography[ $prop ] = $email_typography_value;
+				}
 			}
 		}
 
@@ -277,12 +292,18 @@ class Site_Style_Sync_Controller {
 
 		// Convert padding to px values.
 		if ( isset( $spacing_styles['padding'] ) ) {
-			$email_spacing['padding'] = $this->convert_spacing_values( $spacing_styles['padding'] );
+			$padding = $this->resolve_style_value( $spacing_styles['padding'] );
+			if ( $padding ) {
+				$email_spacing['padding'] = $this->convert_spacing_values( $padding );
+			}
 		}
 
 		// Convert blockGap to px if present.
 		if ( isset( $spacing_styles['blockGap'] ) ) {
-			$email_spacing['blockGap'] = $this->convert_to_px_size( $spacing_styles['blockGap'] );
+			$block_gap = $this->resolve_style_value( $spacing_styles['blockGap'] );
+			if ( $block_gap ) {
+				$email_spacing['blockGap'] = $this->convert_to_px_size( $block_gap );
+			}
 		}
 
 		// Note: We intentionally skip margin as it's not supported in email renderer.
@@ -336,6 +357,30 @@ class Site_Style_Sync_Controller {
 		}
 
 		return $email_element;
+	}
+
+	/**
+	 * Styles may contain references to other styles.
+	 * This function resolves the reference to the actual value.
+	 * https://make.wordpress.org/core/2022/10/11/reference-styles-values-in-theme-json/
+	 * It is not allowed to reference another reference so we don't need to check recursively.
+	 *
+	 * @param mixed $style_value Style value that might contain a reference.
+	 * @return mixed Resolved style value or null when the reference is not found.
+	 */
+	private function resolve_style_value( $style_value ) {
+		// Check if this is a reference array.
+		if ( is_array( $style_value ) && isset( $style_value['ref'] ) ) {
+			$ref = $style_value['ref'];
+			if ( ! is_string( $ref ) || empty( $ref ) ) {
+				return null;
+			}
+			$path = explode( '.', $ref );
+
+			return _wp_array_get( $this->get_site_theme()->get_data(), $path, null );
+		}
+
+		return $style_value;
 	}
 
 	/**
