@@ -746,9 +746,9 @@ class AddToCartWithOptions extends AbstractBlock {
 		$normalized_product_type = $all_product_types[ $product_type ] ?? $product_type;
 
 		/* translators: %s: Product type. */
-		$title = sprintf( '%s Add to Cart + Options', $normalized_product_type );
+		$title = sprintf( __( '%s Add to Cart + Options', 'woocommerce' ), $normalized_product_type );
 		/* translators: %s: Product type. */
-		$description = sprintf( 'Template used to display the Add to Cart + Options form for %ss.', $normalized_product_type );
+		$description = sprintf( __( 'Template used to display the Add to Cart + Options form for %ss.', 'woocommerce' ), $normalized_product_type );
 
 		$template_part              = new \WP_Block_Template();
 		$template_part->id          = $id;
