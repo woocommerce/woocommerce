@@ -12,7 +12,6 @@ import {
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { isNumber, isEmpty } from '@woocommerce/types';
 
 /**
  * Settings for product block registration.
