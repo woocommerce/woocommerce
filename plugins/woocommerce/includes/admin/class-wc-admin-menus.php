@@ -234,9 +234,6 @@ class WC_Admin_Menus {
 		global $parent_file, $submenu_file, $post_type;
 
 		switch ( $post_type ) {
-			case 'shop_order':
-				$parent_file = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled() ? 'woocommerce' : 'edit.php?post_type=shop_order'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				break;
 			case 'shop_coupon':
 				$parent_file = 'woocommerce'; // WPCS: override ok.
 				break;
