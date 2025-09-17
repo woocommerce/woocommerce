@@ -1946,12 +1946,12 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	shipping_total double DEFAULT 0 NOT NULL,
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
-	status varchar(200) NOT NULL,
+	status varchar(20) NOT NULL,
 	customer_id bigint(20) unsigned NOT NULL,
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
-	KEY status (status({$max_index_length}))
+	KEY status (status)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,
