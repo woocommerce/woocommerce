@@ -35,6 +35,7 @@ The Shopify platform is a **fully functional, production-ready migration platfor
 ### Setup and Configuration
 
 1. **Configure platform credentials:**
+
    ```bash
    wp wc migrate setup
    ```
@@ -44,6 +45,7 @@ The Shopify platform is a **fully functional, production-ready migration platfor
 ### Command Examples
 
 #### Basic Usage
+
 ```bash
 # Get product count
 wp wc migrate products --count
@@ -56,6 +58,7 @@ wp wc migrate products --limit=100 --batch-size=25
 ```
 
 #### Filtering Examples
+
 ```bash
 # Count products with filters
 wp wc migrate products --count --status=active
@@ -69,6 +72,7 @@ wp wc migrate products --vendor="My Brand" --limit=25
 ```
 
 #### Field Selection Examples
+
 ```bash
 # Migrate only specific fields
 wp wc migrate products --fields=name,price,sku --limit=50
@@ -78,6 +82,7 @@ wp wc migrate products --exclude-fields=images,metafields --limit=100
 ```
 
 #### Advanced Migration Examples
+
 ```bash
 # Dry run to preview migration
 wp wc migrate products --dry-run --verbose --limit=10
@@ -105,7 +110,9 @@ wp wc migrate products --assign-default-category --limit=100
 | `reset` | Reset platform credentials | `wp wc migrate reset [--platform=shopify]` | [`ResetCommand`](Commands/ResetCommand.php) |
 
 #### Setup Command
+
 Configure credentials for a specific platform:
+
 ```bash
 # Setup credentials for default platform (Shopify)
 wp wc migrate setup
@@ -115,14 +122,18 @@ wp wc migrate setup --platform=shopify
 ```
 
 #### List Command
+
 Display all registered migration platforms in a detailed table format:
+
 ```bash
 # Shows table with columns: ID, Name, Fetcher Class, Mapper Class
 wp wc migrate list
 ```
 
 #### Reset Command
+
 Delete stored credentials for a platform:
+
 ```bash
 # Reset credentials for default platform (Shopify)
 wp wc migrate reset
@@ -136,6 +147,7 @@ wp wc migrate reset --platform=shopify
 The `products` command supports extensive filtering and configuration options:
 
 #### Basic Parameters
+
 | Parameter | Description | Example Values |
 |-----------|-------------|----------------|
 | `--platform` | Source platform identifier | `shopify` (default) |
@@ -144,6 +156,7 @@ The `products` command supports extensive filtering and configuration options:
 | `--count` | Only fetch and display total product count | `--count` |
 
 #### Filtering Parameters
+
 | Parameter | Description | Example Values |
 |-----------|-------------|----------------|
 | `--status` | Filter products by status | `active`, `archived`, `draft` |
@@ -152,12 +165,14 @@ The `products` command supports extensive filtering and configuration options:
 | `--ids` | Comma-separated list of specific product IDs | `"123,456,789"` |
 
 #### Field Selection Parameters
+
 | Parameter | Description | Example Values |
 |-----------|-------------|----------------|
 | `--fields` | Comma-separated list of fields to migrate | `"name,price,sku"` |
 | `--exclude-fields` | Comma-separated list of fields to exclude | `"images,metafields"` |
 
 #### Execution Control Parameters
+
 | Parameter | Description | Example Values |
 |-----------|-------------|----------------|
 | `--resume` | Resume from previous migration session | `--resume` |
@@ -181,7 +196,7 @@ New platforms must implement two required interfaces:
 
 Create a new WordPress plugin for your platform:
 
-```
+```text
 your-platform-migrator-plugin/
 ├── your-platform-migrator.php         # Main plugin file
 ├── src/
@@ -442,9 +457,9 @@ class YourPlatformFetcherTest extends WP_UnitTestCase {
 ### Built-in Platforms
 
 - **Shopify Platform**: [Technical Implementation Reference](Platforms/Shopify/README.md)
-  - The Shopify platform ships with WooCommerce and provides immediate migration capabilities
-  - Includes complete GraphQL/REST API integration
-  - Serves as the reference implementation for building new platforms
+    - The Shopify platform ships with WooCommerce and provides immediate migration capabilities
+    - Includes complete GraphQL/REST API integration
+    - Serves as the reference implementation for building new platforms
 
 ### External Platform Examples
 
