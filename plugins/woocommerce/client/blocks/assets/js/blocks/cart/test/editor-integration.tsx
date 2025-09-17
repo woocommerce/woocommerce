@@ -21,6 +21,13 @@ import '../index';
 import '../inner-blocks/index';
 import '../inner-blocks/cart-order-summary-coupon-form/index';
 import '../../product-new/index';
+import '../../../atomic/blocks/product-elements/sale-badge/index';
+import '../../../atomic/blocks/product-elements/image/index';
+import '../../../atomic/blocks/product-elements/price/index';
+import '../../../atomic/blocks/product-elements/button/index';
+import '../../../atomic/blocks/product-elements/title/index';
+import '../../product-template/index.tsx';
+import '../../product-collection/index.tsx';
 
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [ { name: 'woocommerce/cart', attributes } ];
@@ -97,11 +104,13 @@ describe( 'Cart block editor integration', () => {
 			( element ) => element.textContent === 'Audio'
 		);
 
-		// Verify Table option is available (should be available on all blocks).
-		expect( tableOption ).toBeVisible();
+		await waitFor( () => {
+			// Verify Table option is available (should be available on all blocks).
+			expect( tableOption ).toBeVisible();
 
-		// Verify Audio option is available (added only for order summary block).
-		expect( audioOption ).toBeVisible();
+			// Verify Audio option is available (added only for order summary block).
+			expect( audioOption ).toBeVisible();
+		} );
 
 		// Test Filled Cart block - should only have Table option (no block-specific Audio filter).
 		const filledCartBlock = screen.getByLabelText( /Block: Filled Cart/i );
@@ -131,13 +140,33 @@ describe( 'Cart block editor integration', () => {
 		const filledCartTableOption = screen.getByRole( 'option', {
 			name: /Table/i,
 		} );
-		expect( filledCartTableOption ).toBeVisible();
+		await waitFor( () => {
+			expect( filledCartTableOption ).toBeVisible();
+		} );
 
 		// Verify Audio option is NOT available (block-specific filter only applies to Order Summary).
 		const filledCartAudioOption = screen.queryByRole( 'option', {
 			name: /Audio/i,
 		} );
 		expect( filledCartAudioOption ).not.toBeInTheDocument();
+	} );
+
+	it( 'renders the Product collection cross-sells', async () => {
+		await setup( {} );
+
+		// Verify Cart block is properly initialized in the editor.
+		expect(
+			await screen.findByLabelText( /^Block: Cart$/i )
+		).toBeVisible();
+
+		// Navigate to the Filled Cart block first
+		await selectBlock( /^Block: Filled Cart$/i );
+
+		// Verify Product Collection block is present in the Cart Items
+		const productCollection = await screen.findByLabelText(
+			/^Block: Product Collection$/i
+		);
+		expect( productCollection ).toBeVisible();
 	} );
 
 	it( 'shows the cart preview in the editor', async () => {

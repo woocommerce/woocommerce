@@ -25,7 +25,19 @@
 			"type": "string"
 		},
 		"displayLayout": {
-			"type": "object"
+			"type": "object",
+			"properties": {
+				"type": {
+					"type": "string",
+					"enum": [ "flex", "list", "carousel" ]
+				},
+				"columns": {
+					"type": "number"
+				},
+				"shrinkColumns": {
+					"type": "boolean"
+				}
+			}
 		},
 		"dimensions": {
 			"type": "object"

@@ -25,7 +25,7 @@ interface ProductEntityResponseBase {
 	date_modified: string;
 	date_modified_gmt: string;
 	type: 'simple' | 'grouped' | 'external' | 'variable' | 'variation';
-	status: 'draft' | 'pending' | 'private' | 'publish';
+	status: 'draft' | 'pending' | 'private' | 'publish' | 'trash';
 	featured: boolean;
 	catalog_visibility: 'visible' | 'catalog' | 'search' | 'hidden';
 	description: string;
@@ -34,14 +34,20 @@ interface ProductEntityResponseBase {
 	price: string;
 	regular_price: string;
 	sale_price: string;
+	rating_count: number;
+	average_rating: string;
 	stock_status: 'instock' | 'outofstock' | 'onbackorder';
 	/**
 	 * Experimental price fields for grouped products
 	 */
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_min_price?: string;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_max_price?: string;
+	min_price?: string;
+	max_price?: string;
+	add_to_cart?: {
+		url: string;
+		description: string;
+		text: string;
+		single_text: string;
+	};
 }
 
 /**
@@ -50,10 +56,6 @@ interface ProductEntityResponseBase {
 export interface GroupedProductResponse extends ProductEntityResponseBase {
 	type: 'grouped';
 	grouped_products: number[];
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_min_price: string;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__experimental_max_price: string;
 }
 
 /**
@@ -75,6 +77,7 @@ export interface SimpleProductResponse extends ProductEntityResponseBase {
  */
 export interface ExternalProductResponse extends ProductEntityResponseBase {
 	type: 'external';
+	button_text: string;
 }
 
 export type ProductEntityResponse =

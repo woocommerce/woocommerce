@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
+import { BLOCK_NAMES } from './constants';
 import { Coordinates, ImageFit } from './types';
 import { BgImageDimensions } from './use-background-image';
 
@@ -96,6 +97,24 @@ export function dimRatioToClass( ratio: number ) {
 	return ratio === 0 || ratio === 50
 		? null
 		: `has-background-dim-${ 10 * Math.round( ratio / 10 ) }`;
+}
+
+/**
+ * Return the description message when the selected product or category isn't available.
+ *
+ * @param {string} name current item name.
+ * @return {string} The description message for unavailable item.
+ */
+export function getInvalidItemDescription( name: string ): string {
+	return name === BLOCK_NAMES.featuredProduct
+		? __(
+				'Previously selected product is no longer available',
+				'woocommerce'
+		  )
+		: __(
+				'Previously selected category is no longer available',
+				'woocommerce'
+		  );
 }
 
 /**

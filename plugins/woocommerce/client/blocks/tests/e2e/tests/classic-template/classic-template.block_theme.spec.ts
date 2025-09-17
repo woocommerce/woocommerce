@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { test, expect, wpCLI, BlockData, Editor } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	wpCLI,
+	BlockData,
+	Editor,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -27,31 +34,37 @@ const templates = [
 		title: 'Single Product',
 		slug: 'single-product',
 		path: '/product/hoodie',
+		needsCreation: false,
 	},
 	{
-		title: 'Product Attribute',
+		title: 'Products by Attribute',
 		slug: 'taxonomy-product_attribute',
 		path: '/color/blue',
+		needsCreation: false,
 	},
 	{
-		title: 'Product Category',
+		title: 'Products by Category',
 		slug: 'taxonomy-product_cat',
 		path: '/product-category/clothing',
+		needsCreation: true,
 	},
 	{
-		title: 'Product Tag',
+		title: 'Products by Tag',
 		slug: 'taxonomy-product_tag',
 		path: '/product-tag/recommended/',
+		needsCreation: true,
 	},
 	{
 		title: 'Product Catalog',
 		slug: 'archive-product',
 		path: '/shop/',
+		needsCreation: false,
 	},
 	{
 		title: 'Product Search Results',
 		slug: 'product-search-results',
 		path: '/?s=shirt&post_type=product',
+		needsCreation: false,
 	},
 ];
 
@@ -145,7 +158,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -182,7 +195,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		editor,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//archive-product`,
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -233,7 +246,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		wpCoreVersion,
 	} ) => {
 		await admin.visitSiteEditor( {
-			postId: `woocommerce/woocommerce//single-product`,
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -249,32 +262,20 @@ test.describe( `${ blockData.name } Block `, () => {
 
 		await editor.page.getByLabel( 'Open Navigation' ).click();
 
-		// Reset the template.
-		await editor.page.getByPlaceholder( 'Search' ).fill( 'Single Product' );
-		const resetNotice = editor.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText( `"Single Product" reset.` );
-		const searchResults = editor.page.getByLabel( 'Actions', {
-			exact: true,
+		await editor.revertTemplate( {
+			templateName: 'Single Product',
 		} );
-		// Wait until there's only one search result.
-		await expect.poll( async () => await searchResults.count() ).toBe( 1 );
 
-		const actionsButton = editor.page.getByRole( 'button', {
-			name: 'Actions',
-		} );
-		await actionsButton.click();
-
-		await editor.page.getByRole( 'menuitem', { name: 'Reset' } ).click();
-		await editor.page.getByRole( 'button', { name: 'Reset' } ).click();
-		await expect( resetNotice ).toBeVisible();
+		if ( wpCoreVersion >= 6.8 ) {
+			const actionsButton = editor.page.getByRole( 'button', {
+				name: 'Actions',
+			} );
+			await actionsButton.click();
+		}
 
 		const editButton = editor.page.getByRole( 'menuitem', {
 			name: 'Edit',
 		} );
-		if ( wpCoreVersion >= 6.8 ) {
-			await actionsButton.click();
-		}
 
 		// Edit the template again.
 		await editButton.click();
@@ -295,17 +296,32 @@ test.describe( `${ blockData.name } Block `, () => {
 			editor,
 			page,
 		} ) => {
-			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ template.slug }`,
-				postType: 'wp_template',
-				canvas: 'edit',
-			} );
+			if ( template.needsCreation ) {
+				await admin.visitSiteEditor( {
+					postType: 'wp_template',
+				} );
+				await editor.createTemplate( {
+					templateName: template.title,
+				} );
+			} else {
+				await admin.visitSiteEditor( {
+					postId: `${ BLOCK_THEME_SLUG }//${ template.slug }`,
+					postType: 'wp_template',
+					canvas: 'edit',
+				} );
+			}
 
 			const block = editor.canvas.locator(
 				`[data-type="${ blockData.name }"]`
 			);
 
 			await expect( block ).toBeVisible();
+
+			if ( template.needsCreation ) {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+			}
 
 			await page.goto( template.path );
 

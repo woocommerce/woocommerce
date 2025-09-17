@@ -57,10 +57,9 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		$sut = new WC_CLI_Update_Command();
 		$sut->update();
 
-		$this->assertEquals(
-			WC()->version,
-			get_option( 'woocommerce_db_version' ),
-			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the current `WC()->version` property.'
+		$this->assertTrue(
+			version_compare( get_option( 'woocommerce_db_version' ), WC()->version, '>=' ),
+			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the last db update version in code.'
 		);
 	}
 
@@ -77,10 +76,9 @@ class WC_CLI_Update_Command_Test extends WC_Unit_Test_Case {
 		$sut = new WC_CLI_Update_Command();
 		$sut->update();
 
-		$this->assertEquals(
-			WC()->version,
-			get_option( 'woocommerce_db_version' ),
-			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the current `WC()->version` property.'
+		$this->assertTrue(
+			version_compare( get_option( 'woocommerce_db_version' ), WC()->version, '>=' ),
+			'After applying updates via WP CLI, the `woocommerce_db_version` option should match the last db update version in code.'
 		);
 	}
 

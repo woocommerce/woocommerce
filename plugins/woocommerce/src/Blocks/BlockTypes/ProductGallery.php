@@ -116,9 +116,10 @@ class ProductGallery extends AbstractBlock {
 		}
 
 		$image_ids              = ProductGalleryUtils::get_all_image_ids( $product );
+		$number_of_images       = count( $image_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = count( $image_ids ) > 0 ? $image_ids[0] : -1;
-		$classname_single_image = count( $image_ids ) < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_image_id       = $number_of_images > 0 ? $image_ids[0] : -1;
+		$classname_single_image = $number_of_images < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
 		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
 		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
@@ -131,31 +132,65 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'          => $image_ids,
-						'isDialogOpen'       => false,
-						'isDragging'         => false,
-						'touchStartX'        => 0,
-						'touchCurrentX'      => 0,
-						'productId'          => $product_id,
-						'selectedImageId'    => $initial_image_id,
-						'thumbnailsOverflow' => [
+						'imageData'               => $image_ids,
+						'isDialogOpen'            => false,
+						'isDragging'              => false,
+						'touchStartX'             => 0,
+						'touchCurrentX'           => 0,
+						'productId'               => $product_id,
+						'selectedImageId'         => $initial_image_id,
+						'thumbnailsOverflow'      => [
 							'top'    => false,
 							'bottom' => false,
 							'left'   => false,
 							'right'  => false,
 						],
 						// Next/Previous Buttons block context.
-						'isDisabledPrevious' => true,
-						'isDisabledNext'     => false,
-						'ariaLabelPrevious'  => __( 'Previous image', 'woocommerce' ),
-						'ariaLabelNext'      => __( 'Next image', 'woocommerce' ),
+						'hideNextPreviousButtons' => $number_of_images <= 1,
+						'isDisabledPrevious'      => true,
+						'isDisabledNext'          => false,
+						'ariaLabelPrevious'       => __( 'Previous image', 'woocommerce' ),
+						'ariaLabelNext'           => __( 'Next image', 'woocommerce' ),
 					),
 					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 				)
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+				$variations_data           = $product->get_available_variations();
+				$formatted_variations_data = array();
+				$has_variation_images      = false;
+				foreach ( $variations_data as $variation ) {
+					if (
+						empty( $variation['variation_id'] )
+						|| ! array_key_exists( 'image_id', $variation )
+					) {
+						continue;
+					}
+					$has_variation_images                                    = $has_variation_images || $variation['image_id'] !== $product->get_image_id();
+					$formatted_variations_data[ $variation['variation_id'] ] = array(
+						'image_id' => (int) $variation['image_id'],
+					);
+				}
+
+				if ( $has_variation_images ) {
+					wp_interactivity_config(
+						'woocommerce',
+						array(
+							'products' => array(
+								$product->get_id() => array(
+									'image_id'   => (int) $product->get_image_id(),
+									'variations' => $formatted_variations_data,
+								),
+							),
+						)
+					);
+
+					// Support legacy Add to Cart with Options block.
+					$p->set_attribute( 'data-wp-init--watch-changes-on-add-to-cart-form', 'callbacks.watchForChangesOnAddToCartForm' );
+					// Support blockified Add to Cart + Options block.
+					$p->set_attribute( 'data-wp-watch', 'callbacks.listenToProductDataChanges' );
+				}
 			}
 
 			$p->add_class( $classname );

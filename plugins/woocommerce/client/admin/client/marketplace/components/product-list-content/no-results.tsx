@@ -44,18 +44,16 @@ export default function NoResults( props: {
 					return;
 				}
 
-				const productGroupsToDisplay = products.filter( ( group ) => {
-					return productGroupIds.includes( group.id );
-				} );
+				const productGroupsToDisplay = products
+					.filter( ( group ) => productGroupIds.includes( group.id ) )
+					.map( ( group ) => ( {
+						...group,
+						items: group.items.slice( 0, 4 ),
+					} ) );
 
 				if ( ! productGroupsToDisplay ) {
 					return;
 				}
-
-				// Limit productGroup.items to 4 items.
-				productGroupsToDisplay.forEach( ( group ) => {
-					group.items = group.items.slice( 0, 4 );
-				} );
 
 				setProductGroups( productGroupsToDisplay );
 			} )

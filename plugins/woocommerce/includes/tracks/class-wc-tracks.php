@@ -46,7 +46,7 @@ class WC_Tracks {
 				'blog_id'        => class_exists( 'Jetpack_Options' ) ? Jetpack_Options::get_option( 'id' ) : null,
 				'store_id'       => get_option( \WC_Install::STORE_ID_OPTION, null ),
 				'products_count' => self::get_products_count(),
-				'wc_version'     => WC()->version,
+				'wc_version'     => WC()->stable_version(),
 			);
 			set_transient( 'wc_tracks_blog_details', $blog_details, DAY_IN_SECONDS );
 		}

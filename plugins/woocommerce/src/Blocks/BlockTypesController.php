@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
@@ -443,6 +442,7 @@ final class BlockTypesController {
 			'ClassicShortcode',
 			'ComingSoon',
 			'CustomerAccount',
+			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
 			'FilterWrapper',
@@ -469,6 +469,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',
 			'ProductGalleryThumbnails',
@@ -548,6 +549,7 @@ final class BlockTypesController {
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';
 			$block_types[] = 'AddToCartWithOptions\QuantitySelector';
+			$block_types[] = 'AddToCartWithOptions\VariationDescription';
 			$block_types[] = 'AddToCartWithOptions\VariationSelector';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttribute';
 			$block_types[] = 'AddToCartWithOptions\VariationSelectorAttributeName';
@@ -556,10 +558,6 @@ final class BlockTypesController {
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItem';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemSelector';
 			$block_types[] = 'AddToCartWithOptions\GroupedProductItemLabel';
-		}
-
-		if ( Features::is_enabled( 'experimental-blocks' ) ) {
-			$block_types[] = 'ProductFilterTaxonomy';
 		}
 
 		/**

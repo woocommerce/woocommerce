@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
@@ -39,15 +40,20 @@ class WooPayments extends PaymentGateway {
 	 *                                         This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway provider details.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- We wrap the throw in a try/catch.
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
 		$details = parent::get_details( $gateway, $order, $country_code );
+
+		$has_test_account    = $this->has_test_account();
+		$has_sandbox_account = $this->has_sandbox_account();
 
 		// Switch the onboarding type to native.
 		$details['onboarding']['type'] = self::ONBOARDING_TYPE_NATIVE;
 
 		// Add the test [drive] account details to the onboarding state.
-		$details['onboarding']['state']['test_drive_account'] = $this->has_test_drive_account();
+		$details['onboarding']['state']['test_drive_account'] = $has_test_account;
 
 		// Add WPCOM/Jetpack connection details to the onboarding state.
 		$details['onboarding']['state'] = array_merge( $details['onboarding']['state'], $this->get_wpcom_connection_state() );
@@ -55,7 +61,7 @@ class WooPayments extends PaymentGateway {
 		// If the WooPayments installed version is less than minimum required version,
 		// we can't use the in-context onboarding flows.
 		if ( Constants::is_defined( 'WCPAY_VERSION_NUMBER' ) &&
-			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
+			version_compare( Constants::get_constant( 'WCPAY_VERSION_NUMBER' ), WooPaymentsService::EXTENSION_MINIMUM_VERSION, '<' ) ) {
 
 			return $details;
 		}
@@ -68,6 +74,73 @@ class WooPayments extends PaymentGateway {
 		$details['onboarding']['_links']['onboard'] = array(
 			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
+
+		try {
+			/**
+			 * The WooPayments REST controller instance.
+			 *
+			 * @var WooPaymentsRestController $rest_controller
+			 */
+			$rest_controller = wc_get_container()->get( WooPaymentsRestController::class );
+
+			// Add disable test account URL to onboarding links, if the current account is a test or sandbox account.
+			if ( $has_test_account || $has_sandbox_account ) {
+				$details['onboarding']['_links']['disable_test_account'] = array(
+					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/test_account/disable' ) ),
+				);
+			}
+
+			// Add reset account/onboarding URL to onboarding links.
+			$details['onboarding']['_links']['reset'] = array(
+				'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/reset' ) ),
+			);
+		} catch ( \Throwable $e ) {
+			// If the REST controller is not available, we can't generate the REST API endpoint URLs.
+			// This is not a critical error, so we just ignore it.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
+
+		// Override the onboarding state with the entries provided by the WooPayments service.
+		if ( ! empty( $country_code ) ) {
+			try {
+				/**
+				 * The WooPayments service instance.
+				 *
+				 * @var WooPaymentsService $service
+				 */
+				$service = wc_get_container()->get( WooPaymentsService::class );
+
+				// Ensure we have a valid rest_controller from the earlier try block.
+				if ( ! isset( $rest_controller ) ) {
+					throw new \RuntimeException( 'WooPayments REST controller not available' );
+				}
+
+				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
+				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
+					// Merge the onboarding state with the one provided by the service.
+					$details['onboarding']['state'] = array_merge(
+						$details['onboarding']['state'],
+						$onboarding_details['state']
+					);
+				}
+			} catch ( \Throwable $e ) {
+				// If the service is not available, we can't impose the more specific logic.
+				// This is not a critical error, so we just ignore it.
+				// Log so we can investigate.
+				SafeGlobalFunctionProxy::wc_get_logger()->error(
+					'Failed to get the WooPayments service instance: ' . $e->getMessage(),
+					array(
+						'source' => 'settings-payments',
+					)
+				);
+			}
+		}
 
 		return $details;
 	}
@@ -180,7 +253,7 @@ class WooPayments extends PaymentGateway {
 		}
 
 		// Test-drive accounts don't need setup.
-		if ( $this->has_test_drive_account() ) {
+		if ( $this->has_test_account() ) {
 			return false;
 		}
 
@@ -448,17 +521,43 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
-	 * Determines if the current account is a test-drive account.
+	 * Determines if the current account is a test account.
 	 *
-	 * @return bool True if the account is a test-drive account, false otherwise.
+	 * Test accounts are test-drive accounts.
+	 * They are different from sandbox accounts (i.e. accounts onboarded in test mode).
+	 *
+	 * @return bool True if the account is a test account, false otherwise.
 	 */
-	private function has_test_drive_account(): bool {
+	private function has_test_account(): bool {
 		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
 			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
 			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
 				$account_status = $account_service->get_account_status_data();
 
 				return ! empty( $account_status['testDrive'] );
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Determines if the current account is a sandbox account.
+	 *
+	 * Sandbox accounts are accounts that were onboarded in test mode.
+	 * They are different from test accounts (i.e. test-drive accounts).
+	 *
+	 * Sandbox accounts are generally created in development or staging environments when simulating live onboarding.
+	 *
+	 * @return bool True if the account is a sandbox account, false otherwise.
+	 */
+	private function has_sandbox_account(): bool {
+		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
+			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
+			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+				$account_status = $account_service->get_account_status_data();
+
+				return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
 			}
 		}
 

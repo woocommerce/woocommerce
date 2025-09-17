@@ -156,7 +156,6 @@ export interface ShippingLineMetaDatum {
 
 export interface Fulfillment {
 	id?: number;
-	fulfillment_id?: number;
 	entity_type: string;
 	entity_id: string;
 	status: string;

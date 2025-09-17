@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store } from '@wordpress/interactivity';
+import { getConfig, store } from '@wordpress/interactivity';
 import type {
 	Cart,
 	CartItem,
@@ -9,6 +9,7 @@ import type {
 	ApiErrorResponse,
 	ApiResponse,
 	CartResponseTotals,
+	Currency,
 } from '@woocommerce/types';
 import type {
 	Store as StoreNotices,
@@ -20,6 +21,17 @@ import type {
  */
 import { triggerAddedToCartEvent } from './legacy-events';
 
+export type WooCommerceConfig = {
+	products?: {
+		[ productId: number ]: ProductData;
+	};
+	messages?: {
+		addedToCartText?: string;
+	};
+	placeholderImgSrc?: string;
+	currency?: Currency;
+};
+
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 export type OptimisticCartItem = {
@@ -27,7 +39,6 @@ export type OptimisticCartItem = {
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
-	name: string;
 	type: string;
 	updateOptimistically?: boolean;
 };
@@ -37,7 +48,9 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 };
 
 export type ProductData = {
+	type: string;
 	price_html?: string;
+	image_id?: number;
 	availability?: string;
 	sku?: string;
 	weight?: string;
@@ -47,7 +60,11 @@ export type ProductData = {
 	step?: number;
 	variations?: {
 		[ variationId: number ]: {
+			attributes: Record< string, string >;
+			is_in_stock: boolean;
+			type: string;
 			price_html?: string;
+			image_id?: number;
 			availability?: string;
 			sku?: string;
 			weight?: string;
@@ -55,9 +72,12 @@ export type ProductData = {
 			min?: number;
 			max?: number;
 			step?: number;
+			sold_individually?: boolean;
 		};
 	};
 };
+
+type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
 
 export type Store = {
 	state: {
@@ -70,14 +90,17 @@ export type Store = {
 			items: ( OptimisticCartItem | CartItem )[];
 			totals: CartResponseTotals;
 		};
-		products?: {
-			[ productId: number ]: ProductData;
-		};
 	};
 	actions: {
 		removeCartItem: ( key: string ) => void;
-		addCartItem: ( args: ClientCartItem ) => void;
-		batchAddCartItems: ( items: ClientCartItem[] ) => void;
+		addCartItem: (
+			args: ClientCartItem,
+			options?: CartUpdateOptions
+		) => void;
+		batchAddCartItems: (
+			items: ClientCartItem[],
+			options?: CartUpdateOptions
+		) => void;
 		// Todo: Check why if I switch to an async function here the types of the store stop working.
 		refreshCartItems: () => void;
 		showNoticeError: ( error: Error | ApiErrorResponse ) => void;
@@ -94,6 +117,11 @@ type QuantityChanges = {
 type BatchResponse = {
 	responses: ApiResponse< Cart >[];
 };
+
+// Guard to distinguish between optimistic and cart items.
+function isCartItem( item: OptimisticCartItem | CartItem ): item is CartItem {
+	return 'name' in item;
+}
 
 function isApiErrorResponse(
 	res: Response,
@@ -137,11 +165,15 @@ const getInfoNoticesFromCartUpdates = (
 	const autoDeletedToNotify = oldItems.filter(
 		( old ) =>
 			old.key &&
+			isCartItem( old ) &&
 			! newItems.some( ( item ) => old.key === item.key ) &&
 			! pendingDelete.includes( old.key )
 	);
 
 	const autoUpdatedToNotify = newItems.filter( ( item ) => {
+		if ( ! isCartItem( item ) ) {
+			return false;
+		}
 		const old = oldItems.find( ( o ) => o.key === item.key );
 		return old
 			? ! pendingQuantity.includes( item.key ) &&
@@ -272,12 +304,15 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*addCartItem( {
-				id,
-				quantity,
-				variation,
-				updateOptimistically = true,
-			}: OptimisticCartItem ) {
+			*addCartItem(
+				{
+					id,
+					quantity,
+					variation,
+					updateOptimistically = true,
+				}: ClientCartItem,
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				let item = state.cart.items.find( ( cartItem ) => {
 					if ( cartItem.type === 'variation' ) {
 						// If it's a variation, check that attributes match.
@@ -343,11 +378,13 @@ const { state, actions } = store< Store >(
 					if ( isApiErrorResponse( res, json ) )
 						throw generateError( json );
 
-					const infoNotices = getInfoNoticesFromCartUpdates(
-						state.cart,
-						json,
-						quantityChanges
-					);
+					const infoNotices = showCartUpdatesNotices
+						? getInfoNoticesFromCartUpdates(
+								state.cart,
+								json,
+								quantityChanges
+						  )
+						: [];
 					const errorNotices = json.errors.map( generateErrorNotice );
 					yield actions.updateNotices(
 						[ ...infoNotices, ...errorNotices ],
@@ -362,6 +399,13 @@ const { state, actions } = store< Store >(
 						preserveCartData: true,
 					} );
 
+					const { messages } = getConfig(
+						'woocommerce'
+					) as WooCommerceConfig;
+					if ( messages?.addedToCartText ) {
+						wp?.a11y?.speak( messages.addedToCartText, 'polite' );
+					}
+
 					// Dispatches the event to sync the @wordpress/data store.
 					emitSyncEvent( { quantityChanges } );
 				} catch ( error ) {
@@ -374,7 +418,10 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			*batchAddCartItems( items: OptimisticCartItem[] ) {
+			*batchAddCartItems(
+				items: ClientCartItem[],
+				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+			) {
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
@@ -474,11 +521,13 @@ const { state, actions } = store< Store >(
 							successfulResponses.length - 1
 						]?.body as Cart;
 
-						const infoNotices = getInfoNoticesFromCartUpdates(
-							state.cart,
-							lastSuccessfulCartResponse,
-							quantityChanges
-						);
+						const infoNotices = showCartUpdatesNotices
+							? getInfoNoticesFromCartUpdates(
+									state.cart,
+									lastSuccessfulCartResponse,
+									quantityChanges
+							  )
+							: [];
 
 						// Generate notices for any error that successful
 						// responses may contain.
@@ -502,6 +551,16 @@ const { state, actions } = store< Store >(
 						triggerAddedToCartEvent( {
 							preserveCartData: true,
 						} );
+
+						const { messages } = getConfig(
+							'woocommerce'
+						) as WooCommerceConfig;
+						if ( messages?.addedToCartText ) {
+							wp?.a11y?.speak(
+								messages.addedToCartText,
+								'polite'
+							);
+						}
 
 						// Dispatches the event to sync the @wordpress/data store.
 						emitSyncEvent( { quantityChanges } );

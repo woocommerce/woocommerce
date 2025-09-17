@@ -4,6 +4,12 @@
 import { initialize } from './editor';
 
 /**
+ * The unique identifier used to register the email editor data store.
+ * This store manages the email editor's state and settings.
+ */
+export { storeName, createStore } from './store';
+
+/**
  * This method is used to initialize the email editor.
  * This method expects some data set on the global window object set on window.WooCommerceEmailEditor
  *
@@ -38,3 +44,5 @@ export function initializeEditor( htmlId: string ) {
 }
 
 export { ExperimentalEmailEditor } from './editor';
+
+export { SendPreviewEmail } from './components/preview';
