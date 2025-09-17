@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add v4/shipping-zones endpoint with unified location and method data for improved performance in shipping zone list views.
