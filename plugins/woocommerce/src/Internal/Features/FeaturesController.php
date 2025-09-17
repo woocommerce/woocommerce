@@ -563,17 +563,22 @@ class FeaturesController {
 						return $base_description . $permalink_warning;
 					}
 					
-					if ( class_exists( 'Automattic\\WooCommerce\\Internal\\MCP\\ApiKeyManager' ) ) {
-						$api_key = \Automattic\WooCommerce\Internal\MCP\ApiKeyManager::get_api_key();
-						$site_url = get_site_url();
-						$connection_example = sprintf(
-							'<br><br><strong>%s:</strong><br><code>claude mcp add woocommerce_mcp \\<br>  --env WP_API_URL=%s/wp-json/woocommerce/mcp \\<br>  --env CUSTOM_HEADERS=\'{"X-MCP-API-Key": "%s"}\' \\<br>  -- npx -y @automattic/mcp-wordpress-remote@latest</code>',
-							__( 'Connect with Claude Code', 'woocommerce' ),
-							$site_url,
-							$api_key
-						);
-						return $base_description . $connection_example;
-					}
+					// Show setup instructions for MCP authentication
+					$site_url = get_site_url();
+					$connection_example = sprintf(
+						'<br><br><strong>%s:</strong><br>
+						<ol>
+							<li>%s</li>
+							<li>%s</li>
+							<li>%s:<br><code>claude mcp add woocommerce_mcp \\<br>  --env WP_API_URL=%s/wp-json/woocommerce/mcp \\<br>  --env CUSTOM_HEADERS=\'{"X-MCP-API-Key": "YOUR_CONSUMER_KEY:YOUR_CONSUMER_SECRET"}\' \\<br>  -- npx -y @automattic/mcp-wordpress-remote@latest</code></li>
+						</ol>',
+						__( 'Connect with Claude Code', 'woocommerce' ),
+						__( 'Go to WooCommerce → Settings → Advanced → REST API', 'woocommerce' ),
+						__( 'Create a new API key with "Read/Write" permissions', 'woocommerce' ),
+						__( 'Configure MCP with your API key', 'woocommerce' ),
+						$site_url
+					);
+					return $base_description . $connection_example;
 					
 					return $base_description;
 				},
