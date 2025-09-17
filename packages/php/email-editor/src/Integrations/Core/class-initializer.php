@@ -24,6 +24,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Cover;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Links;
@@ -70,6 +71,7 @@ class Initializer {
 		'core/media-text',
 		'core/audio',
 		'core/embed',
+		'core/cover',
 	);
 
 	/**
@@ -227,6 +229,9 @@ class Initializer {
 				break;
 			case 'core/embed':
 				$renderer = new Embed();
+				break;
+			case 'core/cover':
+				$renderer = new Cover();
 				break;
 			default:
 				$renderer = new Fallback();
