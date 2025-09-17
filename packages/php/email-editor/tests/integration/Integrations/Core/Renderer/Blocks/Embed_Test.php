@@ -365,9 +365,9 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test that link fallback returns empty when no valid URL is found
+	 * Test that link fallback returns base URL when no valid URL is found but provider is known
 	 */
-	public function test_link_fallback_returns_empty_when_no_valid_url(): void {
+	public function test_link_fallback_returns_base_url_when_no_valid_url(): void {
 		$parsed_embed_no_url = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -378,7 +378,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_embed_no_url['innerHTML'], $parsed_embed_no_url, $this->rendering_context );
 
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available.
+		$this->assertStringContainsString( '<a href="https://www.youtube.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on YouTube', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**
@@ -499,8 +503,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_youtube_by_slug['innerHTML'], $parsed_youtube_by_slug, $this->rendering_context );
 
-		// Should return empty since no valid URL is available for thumbnail extraction.
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://www.youtube.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on YouTube', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**

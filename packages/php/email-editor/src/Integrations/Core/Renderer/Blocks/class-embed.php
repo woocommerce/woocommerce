@@ -22,6 +22,108 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper
  */
 class Embed extends Abstract_Block_Renderer {
 	/**
+	 * Supported audio providers with their configuration.
+	 *
+	 * @var array
+	 */
+	private const AUDIO_PROVIDERS = array(
+		'pocket-casts' => array(
+			'domains'  => array( 'pca.st' ),
+			'base_url' => 'https://pca.st/',
+		),
+		'spotify'      => array(
+			'domains'  => array( 'open.spotify.com' ),
+			'base_url' => 'https://open.spotify.com/',
+		),
+		'soundcloud'   => array(
+			'domains'  => array( 'soundcloud.com' ),
+			'base_url' => 'https://soundcloud.com/',
+		),
+		'mixcloud'     => array(
+			'domains'  => array( 'mixcloud.com' ),
+			'base_url' => 'https://www.mixcloud.com/',
+		),
+		'reverbnation' => array(
+			'domains'  => array( 'reverbnation.com' ),
+			'base_url' => 'https://www.reverbnation.com/',
+		),
+	);
+
+	/**
+	 * Supported video providers with their configuration.
+	 *
+	 * @var array
+	 */
+	private const VIDEO_PROVIDERS = array(
+		'youtube' => array(
+			'domains'  => array( 'youtube.com', 'youtu.be' ),
+			'base_url' => 'https://www.youtube.com/',
+		),
+	);
+
+	/**
+	 * Get all supported providers (audio and video).
+	 *
+	 * @return array All supported providers.
+	 */
+	private function get_all_supported_providers(): array {
+		return array_merge( array_keys( self::AUDIO_PROVIDERS ), array_keys( self::VIDEO_PROVIDERS ) );
+	}
+
+	/**
+	 * Get all provider configurations (audio and video).
+	 *
+	 * @return array All provider configurations.
+	 */
+	private function get_all_provider_configs(): array {
+		return array_merge( self::AUDIO_PROVIDERS, self::VIDEO_PROVIDERS );
+	}
+
+	/**
+	 * Detect provider from content by checking against known domains.
+	 *
+	 * @param string $content Content to check for provider domains.
+	 * @return string Provider name or empty string if not found.
+	 */
+	private function detect_provider_from_domains( string $content ): string {
+		$all_providers = $this->get_all_provider_configs();
+
+		foreach ( $all_providers as $provider => $config ) {
+			foreach ( $config['domains'] as $domain ) {
+				if ( strpos( $content, $domain ) !== false ) {
+					return $provider;
+				}
+			}
+		}
+
+		return '';
+	}
+
+	/**
+	 * Validate URL using both filter_var and wp_http_validate_url.
+	 *
+	 * @param string $url URL to validate.
+	 * @return bool True if URL is valid.
+	 */
+	private function is_valid_url( string $url ): bool {
+		return ! empty( $url ) && filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url );
+	}
+
+	/**
+	 * Create fallback attributes for link rendering.
+	 *
+	 * @param string $url URL for the fallback.
+	 * @param string $label Label for the fallback.
+	 * @return array Fallback attributes.
+	 */
+	private function create_fallback_attributes( string $url, string $label ): array {
+		return array(
+			'url'   => $url,
+			'label' => $label,
+		);
+	}
+
+	/**
 	 * Renders the embed block.
 	 *
 	 * @param string            $block_content Block content.
@@ -45,7 +147,7 @@ class Embed extends Abstract_Block_Renderer {
 			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
 		}
 
-		$url = $this->extract_provider_url( $attr, $block_content, $provider );
+		$url = $this->extract_provider_url( $attr, $block_content );
 		if ( empty( $url ) ) {
 			// Provider was detected but URL extraction failed - provide graceful fallback.
 			return $this->render_link_fallback( $attr, $block_content, $parsed_block, $rendering_context );
@@ -68,7 +170,7 @@ class Embed extends Abstract_Block_Renderer {
 
 		// Get provider and URL (validation already done in render method).
 		$provider = $this->get_supported_provider( $attr, $block_content );
-		$url      = $this->extract_provider_url( $attr, $block_content, $provider );
+		$url      = $this->extract_provider_url( $attr, $block_content );
 
 		// Check if this is a video provider - render as video block.
 		if ( $this->is_video_provider( $provider ) ) {
@@ -99,10 +201,7 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If audio rendering fails, fall back to a simple link.
 		if ( empty( $audio_result ) ) {
-			$fallback_attr = array(
-				'url'   => $url,
-				'label' => $label,
-			);
+			$fallback_attr = $this->create_fallback_attributes( $url, $label );
 			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
 		}
 
@@ -117,10 +216,7 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Provider name or empty string if not supported.
 	 */
 	private function get_supported_provider( array $attr, string $block_content ): string {
-		$supported_audio_providers = array( 'pocket-casts', 'spotify', 'soundcloud', 'mixcloud', 'reverbnation' );
-		$supported_video_providers = array( 'youtube' );
-
-		$all_supported_providers = array_merge( $supported_audio_providers, $supported_video_providers );
+		$all_supported_providers = $this->get_all_supported_providers();
 
 		// Check provider name slug.
 		if ( isset( $attr['providerNameSlug'] ) && in_array( $attr['providerNameSlug'], $all_supported_providers, true ) ) {
@@ -131,29 +227,8 @@ class Embed extends Abstract_Block_Renderer {
 		$url              = $attr['url'] ?? '';
 		$content_to_check = ! empty( $url ) ? $url : $block_content;
 
-		// Audio providers.
-		if ( strpos( $content_to_check, 'open.spotify.com' ) !== false ) {
-			return 'spotify';
-		}
-		if ( strpos( $content_to_check, 'soundcloud.com' ) !== false ) {
-			return 'soundcloud';
-		}
-		if ( strpos( $content_to_check, 'pca.st' ) !== false ) {
-			return 'pocket-casts';
-		}
-		if ( strpos( $content_to_check, 'mixcloud.com' ) !== false ) {
-			return 'mixcloud';
-		}
-		if ( strpos( $content_to_check, 'reverbnation.com' ) !== false ) {
-			return 'reverbnation';
-		}
-
-		// Video providers.
-		if ( strpos( $content_to_check, 'youtube.com' ) !== false || strpos( $content_to_check, 'youtu.be' ) !== false ) {
-			return 'youtube';
-		}
-
-		return '';
+		// Use sophisticated domain detection logic.
+		return $this->detect_provider_from_domains( $content_to_check );
 	}
 
 	/**
@@ -161,15 +236,14 @@ class Embed extends Abstract_Block_Renderer {
 	 *
 	 * @param array  $attr Block attributes.
 	 * @param string $block_content Block content.
-	 * @param string $provider Provider name.
 	 * @return string Provider URL or empty string.
 	 */
-	private function extract_provider_url( array $attr, string $block_content, string $provider ): string {
+	private function extract_provider_url( array $attr, string $block_content ): string {
 		// First, try to get URL from attributes.
 		if ( ! empty( $attr['url'] ) ) {
 			$url = $attr['url'];
 			// Validate the URL from attributes.
-			if ( filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url ) ) {
+			if ( $this->is_valid_url( $url ) ) {
 				return $url;
 			}
 			return '';
@@ -180,7 +254,7 @@ class Embed extends Abstract_Block_Renderer {
 		if ( preg_match( '/<div class="wp-block-embed__wrapper">([^<]+)<\/div>/', $block_content, $matches ) ) {
 			$url = trim( $matches[1] );
 			// Validate the extracted URL.
-			if ( filter_var( $url, FILTER_VALIDATE_URL ) && wp_http_validate_url( $url ) ) {
+			if ( $this->is_valid_url( $url ) ) {
 				return $url;
 			}
 		}
@@ -201,7 +275,17 @@ class Embed extends Abstract_Block_Renderer {
 			return $attr['label'];
 		}
 
-		// Use default label based on provider.
+		// Get translated label for the provider.
+		return $this->get_translated_provider_label( $provider );
+	}
+
+	/**
+	 * Get translated label for a provider.
+	 *
+	 * @param string $provider Provider name.
+	 * @return string Translated label for the provider.
+	 */
+	private function get_translated_provider_label( string $provider ): string {
 		switch ( $provider ) {
 			case 'spotify':
 				return __( 'Listen on Spotify', 'woocommerce' );
@@ -213,13 +297,15 @@ class Embed extends Abstract_Block_Renderer {
 				return __( 'Listen on Mixcloud', 'woocommerce' );
 			case 'reverbnation':
 				return __( 'Listen on ReverbNation', 'woocommerce' );
+			case 'youtube':
+				return __( 'Watch on YouTube', 'woocommerce' );
 			default:
 				return __( 'Listen to the audio', 'woocommerce' );
 		}
 	}
 
 	/**
-	 * Render a simple link fallback for non-audio embeds.
+	 * Render a simple link fallback for non-supported embeds.
 	 *
 	 * @param array             $attr Block attributes.
 	 * @param string            $block_content Block content.
@@ -245,7 +331,7 @@ class Embed extends Abstract_Block_Renderer {
 		}
 
 		// Validate URL with both filter_var and wp_http_validate_url.
-		if ( empty( $url ) || ! filter_var( $url, FILTER_VALIDATE_URL ) || ! wp_http_validate_url( $url ) ) {
+		if ( ! $this->is_valid_url( $url ) ) {
 			return '';
 		}
 
@@ -294,20 +380,8 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Base URL for the provider or empty string.
 	 */
 	private function get_provider_base_url( string $provider ): string {
-		switch ( $provider ) {
-			case 'spotify':
-				return 'https://open.spotify.com/';
-			case 'soundcloud':
-				return 'https://soundcloud.com/';
-			case 'pocket-casts':
-				return 'https://pca.st/';
-			case 'mixcloud':
-				return 'https://www.mixcloud.com/';
-			case 'reverbnation':
-				return 'https://www.reverbnation.com/';
-			default:
-				return '';
-		}
+		$all_providers = $this->get_all_provider_configs();
+		return $all_providers[ $provider ]['base_url'] ?? '';
 	}
 
 	/**
@@ -317,8 +391,7 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return bool True if video provider.
 	 */
 	private function is_video_provider( string $provider ): bool {
-		$video_providers = array( 'youtube' );
-		return in_array( $provider, $video_providers, true );
+		return array_key_exists( $provider, self::VIDEO_PROVIDERS );
 	}
 
 	/**
@@ -337,10 +410,7 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If no poster available, fall back to a simple link.
 		if ( empty( $poster_url ) ) {
-			$fallback_attr = array(
-				'url'   => $url,
-				'label' => $url,
-			);
+			$fallback_attr = $this->create_fallback_attributes( $url, $url );
 			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
 		}
 
@@ -364,10 +434,7 @@ class Embed extends Abstract_Block_Renderer {
 
 		// If video rendering fails, fall back to a simple link.
 		if ( empty( $video_result ) ) {
-			$fallback_attr = array(
-				'url'   => $url,
-				'label' => $url,
-			);
+			$fallback_attr = $this->create_fallback_attributes( $url, $url );
 			return $this->render_link_fallback( $fallback_attr, $block_content, $parsed_block, $rendering_context );
 		}
 
@@ -382,14 +449,14 @@ class Embed extends Abstract_Block_Renderer {
 	 * @return string Thumbnail URL or empty string.
 	 */
 	private function get_video_thumbnail_url( string $url, string $provider ): string {
-		switch ( $provider ) {
-			case 'youtube':
-				return $this->get_youtube_thumbnail( $url );
-			default:
-				// For other providers, we don't have thumbnail extraction implemented.
-				// Return empty to trigger link fallback.
-				return '';
+		// Currently only YouTube supports thumbnail extraction.
+		if ( 'youtube' === $provider ) {
+			return $this->get_youtube_thumbnail( $url );
 		}
+
+		// For other providers, we don't have thumbnail extraction implemented.
+		// Return empty to trigger link fallback.
+		return '';
 	}
 
 	/**
