@@ -323,38 +323,37 @@ class WC_Admin_Menus {
 		// Cache HPOS status check.
 		$is_hpos_enabled = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 
-		// Get the index of our custom separator.
-		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
+		// Menu identifiers for reordering.
+		$separator     = 'separator-woocommerce';
+		$product_menu  = 'edit.php?post_type=product';
+		$hpos_orders   = 'wc-orders';
+		$legacy_orders = 'edit.php?post_type=shop_order';
+		$orders_menu   = $is_hpos_enabled ? $hpos_orders : $legacy_orders;
 
-		// Get index of product menu.
-		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order, true );
-
-		// Get index of orders menu.
-		$woocommerce_orders = array_search( 'wc-orders', $menu_order, true );
-
-		// Also check for legacy post type orders menu when HPOS is disabled.
-		if ( false === $woocommerce_orders && ! $is_hpos_enabled ) {
-			$woocommerce_orders = array_search( 'edit.php?post_type=shop_order', $menu_order, true );
-		}
+		// Get the indexes of our custom menu items.
+		$separator_index = array_search( $separator, $menu_order, true );
+		$product_index   = array_search( $product_menu, $menu_order, true );
+		$orders_index    = array_search( $orders_menu, $menu_order, true );
 
 		// Loop through menu order and do some rearranging.
 		foreach ( $menu_order as $item ) {
-
 			if ( 'woocommerce' === $item ) {
-				$woocommerce_menu_order[] = 'separator-woocommerce';
+				$woocommerce_menu_order[] = $separator;
 				$woocommerce_menu_order[] = $item;
-				$woocommerce_menu_order[] = $is_hpos_enabled ? 'wc-orders' : 'edit.php?post_type=shop_order';
-				$woocommerce_menu_order[] = 'edit.php?post_type=product';
-				if ( false !== $woocommerce_separator ) {
-					unset( $menu_order[ $woocommerce_separator ] );
+				$woocommerce_menu_order[] = $orders_menu;
+				$woocommerce_menu_order[] = $product_menu;
+
+				if ( false !== $separator_index ) {
+					unset( $menu_order[ $separator_index ] );
 				}
-				if ( false !== $woocommerce_orders ) {
-					unset( $menu_order[ $woocommerce_orders ] );
+				if ( false !== $orders_index ) {
+					unset( $menu_order[ $orders_index ] );
 				}
-				if ( false !== $woocommerce_product ) {
-					unset( $menu_order[ $woocommerce_product ] );
+				if ( false !== $product_index ) {
+					unset( $menu_order[ $product_index ] );
 				}
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', 'wc-orders', 'edit.php?post_type=shop_order' ), true ) ) {
+			// We already add the menu items above manually, so we need to skip them if they come up again.
+			} elseif ( ! in_array( $item, array( $separator, $product_menu, $hpos_orders, $legacy_orders ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
