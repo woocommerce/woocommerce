@@ -142,19 +142,27 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	 */
 	public function test_get_items() {
 		// Create test zones.
-		$zone1 = $this->create_shipping_zone( 'Test Zone 1', 1, array(
+		$zone1 = $this->create_shipping_zone(
+			'Test Zone 1',
+			1,
 			array(
-				'code' => 'US:CA',
-				'type' => 'state',
-			),
-		) );
+				array(
+					'code' => 'US:CA',
+					'type' => 'state',
+				),
+			)
+		);
 
-		$zone2 = $this->create_shipping_zone( 'Test Zone 2', 2, array(
+		$zone2 = $this->create_shipping_zone(
+			'Test Zone 2',
+			2,
 			array(
-				'code' => 'US',
-				'type' => 'country',
-			),
-		) );
+				array(
+					'code' => 'US',
+					'type' => 'country',
+				),
+			)
+		);
 
 		// Add shipping methods.
 		$this->add_shipping_method( $zone1, 'flat_rate', array( 'cost' => '10.00' ) );
@@ -172,8 +180,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertGreaterThanOrEqual( 3, count( $data ) ); // Our 2 zones + Rest of World.
 
 		// Find our test zones in the response.
-		$zone1_data = null;
-		$zone2_data = null;
+		$zone1_data         = null;
+		$zone2_data         = null;
 		$rest_of_world_data = null;
 
 		foreach ( $data as $zone_data ) {
@@ -391,3 +399,4 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertArrayHasKey( 'rate_description', $method_properties );
 	}
 }
+
