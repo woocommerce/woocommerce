@@ -414,7 +414,12 @@ class Checkout extends AbstractBlock {
 		}
 
 		if ( class_exists( AddressProviderController::class ) ) {
-			$this->asset_data_registry->add( 'addressAutocompleteProviders', wc_get_container()->get( AddressProviderController::class )->get_providers() );
+			if ( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) === 'no' ) {
+				// If address autocomplete is disabled, we don't need to load the providers.
+				$this->asset_data_registry->add( 'addressAutocompleteProviders', [] );
+			} else {
+				$this->asset_data_registry->add( 'addressAutocompleteProviders', wc_get_container()->get( AddressProviderController::class )->get_providers() );
+			}
 		}
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
