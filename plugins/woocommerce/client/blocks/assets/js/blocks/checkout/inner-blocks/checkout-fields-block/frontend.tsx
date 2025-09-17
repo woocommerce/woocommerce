@@ -30,7 +30,7 @@ const FrontendBlock = ( {
 
 	return (
 		<Main className={ clsx( 'wc-block-checkout__main', className ) }>
-			<form
+			<div
 				aria-label={ __( 'Checkout', 'woocommerce' ) }
 				className={ clsx(
 					'wc-block-components-form wc-block-checkout__form',
@@ -41,7 +41,7 @@ const FrontendBlock = ( {
 				) }
 			>
 				{ children }
-			</form>
+			</div>
 		</Main>
 	);
 };
