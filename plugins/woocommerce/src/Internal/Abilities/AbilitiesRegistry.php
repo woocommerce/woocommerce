@@ -28,17 +28,14 @@ class AbilitiesRegistry {
 	 * Initialize all WooCommerce abilities.
 	 */
 	private function init_abilities(): void {
-		// Initialize store info ability
 		StoreInfoAbility::init();
-
-		// Initialize REST bridge for REST endpoint abilities
 		AbilitiesRestBridge::init();
 	}
 
 	/**
-	 * Get WooCommerce ability IDs from the WordPress Abilities API.
+	 * Get all ability IDs from the WordPress Abilities API.
 	 *
-	 * @return array Array of WooCommerce ability IDs.
+	 * @return array Array of all ability IDs.
 	 */
 	public function getAbilitiesIDs(): array {
 		// Check if the abilities API is available
@@ -46,18 +43,8 @@ class AbilitiesRegistry {
 			return array();
 		}
 
-		// Get all registered abilities
 		$all_abilities = wp_get_abilities();
-		
-		// Filter for WooCommerce-specific abilities
-		$woocommerce_abilities = array();
-		foreach ( array_keys( $all_abilities ) as $ability_id ) {
-			// Check if ability ID starts with 'woocommerce/'
-			if ( strpos( $ability_id, 'woocommerce/' ) === 0 ) {
-				$woocommerce_abilities[] = $ability_id;
-			}
-		}
 
-		return $woocommerce_abilities;
+		return array_keys( $all_abilities );
 	}
 }
