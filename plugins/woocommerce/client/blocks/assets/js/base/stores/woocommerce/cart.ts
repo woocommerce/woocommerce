@@ -457,7 +457,9 @@ const { state, actions } = store< Store >(
 						item = {
 							id: item.id,
 							quantity: item.quantity,
-							variation: item.variation,
+							...( item.variation && {
+								variation: item.variation,
+							} ),
 						} as OptimisticCartItem;
 						state.cart.items.push( item );
 						quantityChanges.productsPendingAdd =
