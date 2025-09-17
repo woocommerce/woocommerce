@@ -47,21 +47,81 @@ class Controller extends AbstractController {
 	public function __construct() {
 		$this->zone_schema = new ShippingZoneSchema();
 	}
+
 	/**
+	 * Register the routes for shipping zones.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base,
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_collection_params(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
 	}
 
 	/**
-	 * Prepare a shipping zone item for response.
+	 * Get all shipping zones.
 	 *
-	 * @param mixed      $zone Note object.
-	 * @param WP_REST_Request $request Request object.
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_items( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new WP_Error( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		// Get all zones including "Rest of the World".
+		$zones             = WC_Shipping_Zones::get_zones();
+		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
+
+		// Add "Rest of the World" zone at the end.
+		$zones[0] = $rest_of_the_world->get_data();
+
+		// Sort zones by order.
+		uasort(
+			$zones,
+			function( $a, $b ) {
+				return $a['zone_order'] <=> $b['zone_order'];
+			}
+		);
+
+		$data = array();
+		foreach ( $zones as $zone_data ) {
+			$zone = WC_Shipping_Zones::get_zone( $zone_data['id'] );
+			$item = $this->prepare_item_for_response( $zone, $request );
+			$data[] = $this->prepare_response_for_collection( $item );
+		}
+
+		return rest_ensure_response( $data );
+	}
+
+	}
+
+	/**
+	 * Get the item response based on the request context.
+	 *
+	 * @param WC_Shipping_Zone $zone    Shipping zone object.
+	 * @param WP_REST_Request  $request Request object.
 	 * @return array
 	 */
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
-		return array(
-			/* @todo:add class variables */
-			'id'=>""
+		// Basic zone data.
+		$data = array(
+			'id'    => $zone->get_id(),
+			'name'  => $zone->get_zone_name(),
+			'order' => $zone->get_zone_order(),
 		);
+
+		return $data;
 	}
 
 	/**
