@@ -12,7 +12,7 @@ import {
 } from '@wordpress/blocks';
 import { subscribe, select } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { isNumber, isEmpty } from '@woocommerce/types';
+import { isEmpty } from '@woocommerce/types';
 
 /**
  * Settings for product block registration.
@@ -96,23 +96,6 @@ export class BlockRegistrationManager {
 	}
 
 	/**
-	 * Parses a template ID from various possible formats.
-	 * Handles both string and number inputs due to Gutenberg changes.
-	 *
-	 * @param {string | number | undefined} templateId - The template ID to parse
-	 * @return {string | undefined} The parsed template ID
-	 */
-	private parseTemplateId(
-		templateId: string | number | undefined
-	): string | undefined {
-		const parsedTemplateId = isNumber( templateId )
-			? undefined
-			: templateId;
-
-		return parsedTemplateId?.split( '//' )[ 1 ];
-	}
-
-	/**
 	 * Initializes subscriptions for template changes and block registration.
 	 * Sets up listeners for both the site editor and post editor contexts.
 	 */
@@ -159,14 +142,11 @@ export class BlockRegistrationManager {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
 
-				// @ts-expect-error getCurrentPostId is not typed
-				const postId = editorSelectors.getCurrentPostId();
+				// @ts-expect-error getEditedPostSlug is not typed
+				const postSlug = editorSelectors.getEditedPostSlug();
 
 				// Set initial template ID
-				this.currentTemplateId =
-					typeof postId === 'string'
-						? this.parseTemplateId( postId )
-						: undefined;
+				this.currentTemplateId = postSlug;
 
 				// Handle the initial template change
 				this.handleTemplateChange( undefined );
@@ -174,10 +154,9 @@ export class BlockRegistrationManager {
 				// Set up the template change listener
 				subscribe( () => {
 					const previousTemplateId = this.currentTemplateId;
-					this.currentTemplateId = this.parseTemplateId(
-						// @ts-expect-error getCurrentPostId is not typed
-						editorSelectors.getCurrentPostId()
-					);
+					this.currentTemplateId =
+						// @ts-expect-error getEditedPostSlug is not typed
+						editorSelectors.getEditedPostSlug();
 
 					if ( previousTemplateId !== this.currentTemplateId ) {
 						this.handleTemplateChange( previousTemplateId );
