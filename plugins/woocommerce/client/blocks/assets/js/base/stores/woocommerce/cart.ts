@@ -351,7 +351,7 @@ const { state, actions } = store< Store >(
 					item = {
 						id,
 						quantity,
-						variation,
+						...( variation && { variation } ),
 					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
 					if ( updateOptimistically ) {

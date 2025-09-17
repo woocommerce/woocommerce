@@ -309,9 +309,17 @@ const { state: cartItemState } = store(
 					cartItem: { id },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				return woocommerceState.cart.items.find(
-					( item ) => item.id === id
-				) as CartItem;
+				const cartItem =
+					woocommerceState.cart.items.find(
+						( item ) => item.id === id
+					) || ( {} as CartItem );
+
+				return {
+					// Todo: add the full schema.
+					variation: [],
+					item_data: [],
+					...cartItem,
+				};
 			},
 
 			get currency(): Currency {
