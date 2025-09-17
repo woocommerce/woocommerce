@@ -262,7 +262,8 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that the default option is set in variable products.
+	 * Tests that the default attributes are selected when defined in product
+	 * data or in the URL parameters.
 	 */
 	public function test_variable_product_default_option_render() {
 		global $product;
@@ -291,6 +292,18 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			)
 		);
 
+		$fixtures->get_variation_product(
+			$product_id,
+			array(
+				'pa_color' => 'red-slug',
+				'pa_size'  => 'medium-slug',
+			),
+			array(
+				'regular_price' => 10,
+				'stock_status'  => ProductStockStatus::IN_STOCK,
+			)
+		);
+
 		// Sync the variable product to update its children list.
 		\WC_Product_Variable::sync( $product_id );
 
@@ -309,10 +322,22 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
 		$this->assertMatchesRegularExpression(
-			'/<input[^>]*checked(?:=" checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
+			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="small-slug"[^>]*>/',
 			$markup,
 			'The "small" size option should be checked when set as the default attribute.'
 		);
+
+		$_GET['attribute_pa_size'] = 'medium-slug';
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertMatchesRegularExpression(
+			'/<input[^>]*checked(?:="checked")?[^>]*type="radio"[^>]*value="medium-slug"[^>]*>/',
+			$markup,
+			'The "medium" size option should be checked when set in the URL parameters.'
+		);
+
+		unset( $_GET['attribute_pa_size'] );
 	}
 
 	/**

@@ -1840,21 +1840,19 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
-		if ( Features::is_enabled( 'experimental-wc-rest-api' ) ) {
-			$schema['properties']['__experimental_min_price'] = array(
-				'description' => __( 'Product minimum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
+		$schema['properties']['min_price'] = array(
+			'description' => __( 'Product minimum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
 
-			$schema['properties']['__experimental_max_price'] = array(
-				'description' => __( 'Product maximum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
-		}
+		$schema['properties']['max_price'] = array(
+			'description' => __( 'Product maximum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
 
-		return $this->add_additional_fields_schema( $schema );
+			return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -2065,12 +2063,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
-			if ( in_array( '__experimental_min_price', $fields, true ) ) {
-				$data['__experimental_min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
+			if ( in_array( 'min_price', $fields, true ) ) {
+				$data['min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
 			}
 
-			if ( in_array( '__experimental_max_price', $fields, true ) ) {
-				$data['__experimental_max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
+			if ( in_array( 'max_price', $fields, true ) ) {
+				$data['max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );
