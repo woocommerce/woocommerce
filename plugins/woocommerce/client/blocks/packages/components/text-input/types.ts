@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 export interface ValidatedTextInputProps
 	extends Omit<
@@ -34,4 +34,8 @@ export interface ValidatedTextInputProps
 	customFormatter?: ( value: string ) => string;
 	// Whether validation should run when mounted - only has an effect when focusOnMount is also true.
 	validateOnMount?: boolean;
+	// Whether to wrap the input in its own element (for layout purposes).
+	wrapInput?: boolean;
+	// Children to render within the wrapper element, if wrapInput is true.
+	wrapperChildren?: ReactNode;
 }
