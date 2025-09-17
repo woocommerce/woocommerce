@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
-import { useState } from '@wordpress/element';
+import { render } from '@testing-library/react';
 import * as wpData from '@wordpress/data';
 import { AddressAutocomplete } from '@woocommerce/base-components/cart-checkout/address-autocomplete/address-autocomplete';
-import { cartStore, checkoutStore } from '@woocommerce/block-data';
+import { cartStore } from '@woocommerce/block-data';
 
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
