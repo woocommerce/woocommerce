@@ -321,7 +321,7 @@ class WC_Admin_Menus {
 		$woocommerce_menu_order = array();
 
 		// Cache HPOS status check.
-		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+		$is_hpos_enabled = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
 
 		// Get the index of our custom separator.
 		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
