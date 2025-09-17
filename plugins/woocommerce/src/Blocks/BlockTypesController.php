@@ -107,7 +107,10 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
-		if ( ! ( wp_should_load_block_assets_on_demand() || wp_is_block_theme() || wp_should_load_separate_core_block_assets() ) ) {
+		if ( ! (
+			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
+			wp_is_block_theme() ||
+			wp_should_load_separate_core_block_assets() ) ) {
 			add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 		}
 
