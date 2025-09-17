@@ -5,9 +5,14 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderCouponSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
 
 /**
- * class Automattic\WooCommerce\RestApi\V4\Orders\Controller tests.
  * Orders Controller tests for V4 REST API.
  */
 class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
@@ -26,6 +31,13 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @var int
 	 */
 	private $user_id;
+
+	/**
+	 * Order schema instance.
+	 *
+	 * @var OrderSchema
+	 */
+	private $order_schema;
 
 	/**
 	 * Runs after each test.
@@ -69,21 +81,21 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Create schema instances with dependency injection.
-		$order_item_schema     = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderItemSchema();
-		$order_coupon_schema   = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderCouponSchema();
-		$order_fee_schema      = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema();
-		$order_tax_schema      = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema();
-		$order_shipping_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema();
+		$order_item_schema     = new OrderItemSchema();
+		$order_coupon_schema   = new OrderCouponSchema();
+		$order_fee_schema      = new OrderFeeSchema();
+		$order_tax_schema      = new OrderTaxSchema();
+		$order_shipping_schema = new OrderShippingSchema();
 
-		$order_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderSchema();
-		$order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
+		$this->order_schema = new OrderSchema();
+		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
 
 		// Create utils instances.
 		$query_utils  = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\QueryUtils();
 		$update_utils = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
 
 		$this->endpoint = new OrdersController();
-		$this->endpoint->init( $order_schema, $query_utils, $update_utils );
+		$this->endpoint->init( $this->order_schema, $query_utils, $update_utils );
 
 		$this->user_id = $this->factory->user->create(
 			array(
@@ -94,775 +106,73 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Get all expected fields.
-	 */
-	public function get_expected_response_fields() {
-		$fields = array(
-			'id',
-			'parent_id',
-			'number',
-			'order_key',
-			'created_via',
-			'version',
-			'status',
-			'currency',
-			'date_created',
-			'date_created_gmt',
-			'date_modified',
-			'date_modified_gmt',
-			'discount_total',
-			'discount_tax',
-			'shipping_total',
-			'shipping_tax',
-			'cart_tax',
-			'total',
-			'total_tax',
-			'prices_include_tax',
-			'customer_id',
-			'customer_ip_address',
-			'customer_user_agent',
-			'customer_note',
-			'billing',
-			'shipping',
-			'payment_method',
-			'payment_method_title',
-			'transaction_id',
-			'date_paid',
-			'date_paid_gmt',
-			'date_completed',
-			'date_completed_gmt',
-			'cart_hash',
-			'meta_data',
-			'line_items',
-			'tax_lines',
-			'shipping_lines',
-			'fee_lines',
-			'coupon_lines',
-			'currency_symbol',
-			'payment_url',
-			'is_editable',
-			'needs_payment',
-			'needs_processing',
-		);
-
-		return $fields;
-	}
-
-	/**
-	 * @testWith [true]
-	 *           [false]
+	 * Helper method to create a simple order.
 	 *
-	 * Test that all expected response fields are present.
-	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
+	 * @param array $order_data Optional order data.
+	 * @return WC_Order
 	 */
-	public function test_orders_api_get_all_fields() {
-		$expected_response_fields = $this->get_expected_response_fields();
-
-		$order    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user_id );
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() ) );
-
-		$this->assertEquals( 200, $response->get_status() );
-
-		$response_fields = array_keys( $response->get_data() );
-
-		$this->assertEmpty( array_diff( $expected_response_fields, $response_fields ), 'These fields were expected but not present in API response: ' . print_r( array_diff( $expected_response_fields, $response_fields ), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-
-		$this->assertEmpty( array_diff( $response_fields, $expected_response_fields ), 'These fields were not expected in the API response: ' . print_r( array_diff( $response_fields, $expected_response_fields ), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
-	}
-
-	/**
-	 * @testWith [true]
-	 *
-	 * Test that all fields are returned when requested one by one.
-	 */
-	public function test_orders_get_each_field_one_by_one() {
-		$expected_response_fields = $this->get_expected_response_fields();
-		$order                    = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user_id );
-
-		foreach ( $expected_response_fields as $field ) {
-			$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-			$request->set_param( '_fields', $field );
-			$response = $this->server->dispatch( $request );
-			$this->assertEquals( 200, $response->get_status() );
-			$response_fields = array_keys( $response->get_data() );
-
-			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in order API response." );
-		}
-	}
-
-	/**
-	 * Tests getting all orders with the REST API.
-	 *
-	 * @return void
-	 */
-	public function test_orders_get_all(): void {
-		// Create a few orders.
-		foreach ( range( 1, 5 ) as $i ) {
-			$order = new \WC_Order();
-			$order->save();
-		}
-
-		$request  = new \WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
-	}
-
-	/**
-	 * Tests filtering with the 'before' and 'after' params.
-	 *
-	 * @return void
-	 */
-	public function test_orders_date_filtering(): void {
-		$time_before_orders = time();
-
-		// Create a few orders for testing.
-		$order_ids = array();
-		foreach ( range( 1, 5 ) as $i ) {
-			$order = new \WC_Order();
-			$order->save();
-
-			$order_ids[] = $order->get_id();
-		}
-
-		$time_after_orders = time() + HOUR_IN_SECONDS;
-
-		$request = new \WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'dates_are_gmt', 1 );
-
-		// No date params should return all orders.
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
-
-		// There are no orders before `$time_before_orders`.
-		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_before_orders ) );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 0, $response->get_data() );
-
-		// All orders are before `$time_after_orders`.
-		$request->set_param( 'before', gmdate( DateTime::ATOM, $time_after_orders ) );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertCount( 5, $response->get_data() );
-	}
-
-	/**
-	 * Tests creating an order.
-	 */
-	public function test_orders_create(): void {
-		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-		$order_params             = array(
-			'payment_method'       => WC_Gateway_BACS::ID,
-			'payment_method_title' => 'Direct Bank Transfer',
-			'set_paid'             => true,
-			'billing'              => array(
+	private function create_test_order( array $order_data = array() ): WC_Order {
+		$default_data = array(
+			'status'  => OrderStatus::PENDING,
+			'billing' => array(
 				'first_name' => 'John',
 				'last_name'  => 'Doe',
-				'address_1'  => '969 Market',
-				'address_2'  => '',
-				'city'       => 'San Francisco',
-				'state'      => 'CA',
-				'postcode'   => '94103',
-				'country'    => 'US',
 				'email'      => 'john.doe@example.com',
-				'phone'      => '(555) 555-5555',
-			),
-			'line_items'           => array(
-				array(
-					'product_id' => $product->get_id(),
-					'quantity'   => 3,
-				),
+				'phone'      => '555-1234',
+				'address_1'  => '123 Main St',
+				'city'       => 'Anytown',
+				'state'      => 'CA',
+				'postcode'   => '12345',
+				'country'    => 'US',
 			),
 		);
-		$order_params['shipping'] = $order_params['billing'];
 
-		$request = new \WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params( $order_params );
+		$order_data = wp_parse_args( $order_data, $default_data );
 
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( $order_data );
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
 
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'id', $data );
-		$this->assertEquals( OrderStatus::PROCESSING, $data['status'] );
-
-		wp_cache_flush();
-
-		// Fetch the order and compare some data.
-		$order = wc_get_order( $data['id'] );
-		$this->assertNotEmpty( $order );
-
-		$this->assertEquals( (float) ( $product->get_price() * 3 ), (float) $order->get_total() );
-		$this->assertEquals( $order_params['payment_method'], $order->get_payment_method( 'edit' ) );
-
-		foreach ( array_keys( $order_params['billing'] ) as $address_key ) {
-			$this->assertEquals( $order_params['billing'][ $address_key ], $order->{"get_billing_{$address_key}"}( 'edit' ) );
-		}
-	}
-
-	/**
-	 * Tests that the created_via parameter is properly stored when creating orders.
-	 */
-	public function test_order_created_via_param(): void {
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-
-		$order_params = array(
-			'line_items'  => array(
-				array(
-					'product_id' => $product->get_id(),
-					'quantity'   => 1,
-				),
-			),
-			'created_via' => 'some_value',
-		);
-
-		$request = new \WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params( $order_params );
-
-		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 201, $response->get_status() );
 		$data = $response->get_data();
 
-		wp_cache_flush();
-
-		$order = wc_get_order( $data['id'] );
-		$this->assertNotEmpty( $order );
-		$this->assertEquals( $order_params['created_via'], $order->get_created_via() );
+		return wc_get_order( $data['id'] );
 	}
 
 	/**
-	 * Tests that the created_via parameter is set to 'rest-api' when empty.
-	 */
-	public function test_order_empty_created_via_param_is_set_to_rest_api() {
-		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
-
-		$order_params = array(
-			'line_items'  => array(
-				array(
-					'product_id' => $product->get_id(),
-					'quantity'   => 1,
-				),
-			),
-			'created_via' => '',
-		);
-
-		$request = new \WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params( $order_params );
-
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-		$data = $response->get_data();
-
-		wp_cache_flush();
-
-		$order = wc_get_order( $data['id'] );
-		$this->assertNotEmpty( $order );
-		$this->assertEquals( 'rest-api', $order->get_created_via() );
-	}
-
-	/**
-	 * Tests that the created_via parameter cannot be updated.
-	 */
-	public function test_created_via_cannot_be_updated() {
-		$order = new \WC_Order();
-		$order->set_created_via( 'original_value' );
-		$order->save();
-
-		$request = new \WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_body_params( array( 'created_via' => 'updated_value' ) );
-
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertEquals( 'original_value', $data['created_via'] );
-	}
-
-	/**
-	 * Describes the behavior of order creation (and updates) when the provided customer ID is valid
-	 * as well as when it is invalid (ie, the customer does not belong to the current blog).
+	 * Helper method to validate response against schema.
 	 *
-	 * @return void
+	 * @param array $response_data Response data to validate.
+	 * @param array $schema_properties Schema properties to check against.
 	 */
-	public function test_valid_and_invalid_customer_ids(): void {
-		$customer_a = WC_Helper_Customer::create_customer( 'bob', 'staysafe', 'bob@rest-orders-controller.email' );
-		$customer_b = WC_Helper_Customer::create_customer( 'bill', 'trustno1', 'bill@rest-orders-controller.email' );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params( array( 'customer_id' => $customer_a->get_id() ) );
-
-		$response = $this->server->dispatch( $request );
-		$order_id = $response->get_data()['id'];
-		$this->assertEquals( 201, $response->get_status(), 'The order was created.' );
-		$this->assertEquals( $customer_a->get_id(), $response->get_data()['customer_id'], 'The order is associated with the expected customer' );
-
-		// Simulate a multisite network in which $customer_b is not a member of the blog.
-		$legacy_proxy_mock = wc_get_container()->get( LegacyProxy::class );
-		$legacy_proxy_mock->register_function_mocks(
-			array(
-				'is_multisite'           => function () {
-					return true;
-				},
-				'is_user_member_of_blog' => function () {
-					return false;
-				},
-			)
-		);
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
-
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status(), 'The order was not created, as the specified customer does not belong to the blog.' );
-		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
-
-		// Repeat the last test, except by performing an order update (instead of order creation).
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params( array( 'customer_id' => $customer_b->get_id() ) );
-
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 400, $response->get_status(), 'The order was not updated, as the specified customer does not belong to the blog.' );
-		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'], 'The returned error indicates the customer ID was invalid.' );
-	}
-
-	/**
-	 * Tests deleting an order.
-	 */
-	public function test_orders_delete(): void {
-		$order = new \WC_Order();
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$order_id = $order->get_id();
-
-		$request  = new \WP_REST_Request( 'DELETE', '/wc/v4/orders/' . $order_id );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-
-		// Check that the response includes order data from the order (before deletion).
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'id', $data );
-		$this->assertEquals( $data['id'], $order_id );
-		$this->assertEquals( OrderStatus::COMPLETED, $data['status'] );
-
-		wp_cache_flush();
-
-		// Check the order was actually deleted.
-		$order = wc_get_order( $order_id );
-		$this->assertEquals( OrderStatus::TRASH, $order->get_status( 'edit' ) );
-	}
-
-	/**
-	 * Test that the `include_meta` param filters the `meta_data` prop correctly.
-	 */
-	public function test_collection_param_include_meta() {
-		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$order = new \WC_Order();
-			$order->add_meta_data( 'test1', 'test1', true );
-			$order->add_meta_data( 'test2', 'test2', true );
-			$order->save();
-		}
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'include_meta', 'test1' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$response_data = $response->get_data();
-		$this->assertCount( 3, $response_data );
-
-		foreach ( $response_data as $order ) {
-			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertEquals( 1, count( $order['meta_data'] ) );
-			$meta_keys = array_map(
-				function ( $meta_item ) {
-					return $meta_item['key'];
-				},
-				$order['meta_data']
-			);
-			$this->assertContains( 'test1', $meta_keys );
+	private function validate_response_against_schema( array $response_data, array $schema_properties ): void {
+		foreach ( $schema_properties as $key => $schema ) {
+			$this->assertArrayHasKey( $key, $response_data, "Response missing schema key: {$key}" );
 		}
 	}
 
 	/**
-	 * Test that the `include_meta` param is skipped when empty.
+	 * Test OrderSchema properties match response.
 	 */
-	public function test_collection_param_include_meta_empty() {
-		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$order = new \WC_Order();
-			$order->add_meta_data( 'test1', 'test1', true );
-			$order->add_meta_data( 'test2', 'test2', true );
-			$order->save();
-		}
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'include_meta', '' );
+	public function test_order_schema_properties_match_response(): void {
+		$order    = $this->create_test_order();
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data     = $response->get_data();
+		$schema_properties = $this->order_schema->get_item_schema_properties();
 
-		$response_data = $response->get_data();
-		$this->assertCount( 3, $response_data );
-
-		foreach ( $response_data as $order ) {
-			$this->assertArrayHasKey( 'meta_data', $order );
-			$meta_keys = array_map(
-				function ( $meta_item ) {
-					return $meta_item['key'];
-				},
-				$order['meta_data']
-			);
-			$this->assertContains( 'test1', $meta_keys );
-			$this->assertContains( 'test2', $meta_keys );
-		}
+		$this->validate_response_against_schema( $response_data, $schema_properties );
 	}
 
 	/**
-	 * Test that the `exclude_meta` param filters the `meta_data` prop correctly.
+	 * Test OrderItemSchema properties match response.
 	 */
-	public function test_collection_param_exclude_meta() {
-		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$order = new \WC_Order();
-			$order->add_meta_data( 'test1', 'test1', true );
-			$order->add_meta_data( 'test2', 'test2', true );
-			$order->save();
-		}
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'exclude_meta', 'test1' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$response_data = $response->get_data();
-		$this->assertCount( 3, $response_data );
-
-		foreach ( $response_data as $order ) {
-			$this->assertArrayHasKey( 'meta_data', $order );
-			$meta_keys = array_map(
-				function ( $meta_item ) {
-					return $meta_item['key'];
-				},
-				$order['meta_data']
-			);
-			$this->assertContains( 'test2', $meta_keys );
-			$this->assertNotContains( 'test1', $meta_keys );
-		}
-	}
-
-	/**
-	 * Test that the `include_meta` param overrides the `exclude_meta` param.
-	 */
-	public function test_collection_param_include_meta_override() {
-		// Create 3 orders.
-		for ( $i = 1; $i <= 3; $i++ ) {
-			$order = new \WC_Order();
-			$order->add_meta_data( 'test1', 'test1', true );
-			$order->add_meta_data( 'test2', 'test2', true );
-			$order->save();
-		}
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'include_meta', 'test1' );
-		$request->set_param( 'exclude_meta', 'test1' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$response_data = $response->get_data();
-		$this->assertCount( 3, $response_data );
-
-		foreach ( $response_data as $order ) {
-			$this->assertArrayHasKey( 'meta_data', $order );
-			$this->assertEquals( 1, count( $order['meta_data'] ) );
-			$meta_keys = array_map(
-				function ( $meta_item ) {
-					return $meta_item['key'];
-				},
-				$order['meta_data']
-			);
-			$this->assertContains( 'test1', $meta_keys );
-		}
-	}
-
-	/**
-	 * Test that the meta_data property contains an array, and not an object, after being filtered.
-	 */
-	public function test_collection_param_include_meta_returns_array() {
-		$order = new \WC_Order();
-		$order->add_meta_data( 'test1', 'test1', true );
-		$order->add_meta_data( 'test2', 'test2', true );
-		$order->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'include_meta', 'test2' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$response_data       = $this->server->response_to_data( $response, false );
-		$encoded_data_string = wp_json_encode( $response_data );
-		$decoded_data_object = json_decode( $encoded_data_string, false ); // Ensure object instead of associative array.
-
-		$this->assertIsArray( $decoded_data_object[0]->meta_data );
-	}
-
-	/**
-	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
-	 */
-	public function test_created_via_param_is_filters_order_when_cot_is_enabled() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
-
-		$order_checkout = WC_Helper_Order::create_order();
-		$order_checkout->set_created_via( 'checkout' );
-		$order_checkout->save();
-
-		$order_admin = WC_Helper_Order::create_order();
-		$order_admin->set_created_via( 'admin' );
-		$order_admin->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'created_via', array( 'checkout' ) );
-
-		$response = rest_do_request( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-
-		$this->assertIsArray( $data );
-		$this->assertCount( 1, $data );
-	}
-
-	/**
-	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is enabled.
-	 */
-	public function test_get_orders_by_invalid_created_via_when_cot_is_enabled() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
-
-		$order_checkout = WC_Helper_Order::create_order();
-		$order_checkout->set_created_via( 'checkout' );
-		$order_checkout->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'created_via', array( 'invalid_source' ) );
-
-		$response = rest_do_request( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertEmpty( $data );
-	}
-
-	/**
-	 * Test that the `created_via` parameter is accepted when "custom orders table" is enabled.
-	 */
-	public function test_created_via_param_is_filters_order_when_cot_is_disabled() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
-
-		$order_checkout = WC_Helper_Order::create_order();
-		$order_checkout->set_created_via( 'checkout' );
-		$order_checkout->save();
-
-		$order_admin = WC_Helper_Order::create_order();
-		$order_admin->set_created_via( 'admin' );
-		$order_admin->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'created_via', array( 'checkout' ) );
-
-		$response = rest_do_request( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-
-		$this->assertIsArray( $data );
-		$this->assertCount( 1, $data );
-	}
-
-	/**
-	 * Test filtering orders with an invalid `created_via` value when "custom orders table" is disabled.
-	 */
-	public function test_get_orders_by_invalid_created_via_when_cot_is_disabled() {
-		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
-
-		$order_checkout = WC_Helper_Order::create_order();
-		$order_checkout->set_created_via( 'checkout' );
-		$order_checkout->save();
-
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param( 'created_via', array( 'invalid_source' ) );
-
-		$response = rest_do_request( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertEmpty( $data );
-	}
-
-	/**
-	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should also be updated.
-	 */
-	public function test_order_update_line_item_quantity_updates_product_stock() {
+	public function test_order_item_schema_properties_match_response(): void {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_manage_stock( true );
-		$product->set_stock_quantity( 10 );
-		$product->save();
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
+		$order   = $this->create_test_order(
 			array(
-				'status'     => 'on-hold',
-				'line_items' => array(
-					array(
-						'product_id' => $product->get_id(),
-						'quantity'   => 4,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-
-		$product = wc_get_product( $product->get_id() );
-		$this->assertEquals( 6, $product->get_stock_quantity() );
-
-		$order = wc_get_order( $response->get_data()['id'] );
-		$items = $order->get_items();
-		$item  = reset( $items );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'       => $item->get_id(),
-						'quantity' => 5,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$product = wc_get_product( $product );
-		$this->assertEquals( 5, $product->get_stock_quantity() );
-	}
-
-	/**
-	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
-	 *          only be updated when the order is set to certain statuses.
-	 */
-	public function test_order_update_line_item_quantity_only_updates_product_stock_on_status_change() {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_manage_stock( true );
-		$product->set_stock_quantity( 10 );
-		$product->save();
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
-			array(
-				'status'     => 'auto-draft',
-				'line_items' => array(
-					array(
-						'product_id' => $product->get_id(),
-						'quantity'   => 4,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-
-		$product = wc_get_product( $product->get_id() );
-		$this->assertEquals( 10, $product->get_stock_quantity() );
-
-		$order = wc_get_order( $response->get_data()['id'] );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'status' => 'processing',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$product = wc_get_product( $product );
-		$this->assertEquals( 6, $product->get_stock_quantity() );
-	}
-
-	/**
-	 * @testdox When a line item in an order is removed via REST API, the product's stock should also be updated.
-	 */
-	public function test_order_remove_line_item_updates_product_stock() {
-		require_once WC_ABSPATH . 'includes/admin/wc-admin-functions.php';
-
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_manage_stock( true );
-		$product->set_stock_quantity( 10 );
-		$product->save();
-
-		$order = WC_Helper_Order::create_order( 1, $product, array( 'status' => OrderStatus::ON_HOLD ) ); // Initial qty of 4.
-		$items = $order->get_items();
-		$item  = reset( $items );
-		wc_maybe_adjust_line_item_product_stock( $item );
-
-		$product = wc_get_product( $product->get_id() );
-		$this->assertEquals( 6, $product->get_stock_quantity() );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'       => $item->get_id(),
-						'quantity' => 0,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order );
-		$this->assertEmpty( $order->get_items() );
-
-		$product = wc_get_product( $product );
-		$this->assertEquals( 10, $product->get_stock_quantity() );
-	}
-
-	/**
-	 * @testdox When coupon_lines are updated via REST API v4, applied coupons and totals should be correctly updated.
-	 */
-	public function test_order_update_coupon_lines_updates_applied_coupons_and_totals() {
-		// Enable sequential coupon calculation for predictable results.
-		update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
-		// Create test coupons.
-		$coupon1 = WC_Helper_Coupon::create_coupon( 'test-coupon-1' );
-		$coupon1->set_discount_type( 'percent' );
-		$coupon1->set_amount( 10 ); // 10% discount.
-		$coupon1->save();
-
-		$coupon2 = WC_Helper_Coupon::create_coupon( 'test-coupon-2' );
-		$coupon2->set_discount_type( 'fixed_cart' );
-		$coupon2->set_amount( 5 ); // $5 discount.
-		$coupon2->save();
-
-		$coupon3 = WC_Helper_Coupon::create_coupon( 'test-coupon-3' );
-		$coupon3->set_discount_type( 'percent' );
-		$coupon3->set_amount( 15 ); // 15% discount.
-		$coupon3->save();
-
-		// Create a product and order.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->save();
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
-			array(
-				'status'     => 'pending',
 				'line_items' => array(
 					array(
 						'product_id' => $product->get_id(),
@@ -871,271 +181,137 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
 
-		$order_id = $response->get_data()['id'];
-		$order    = wc_get_order( $order_id );
-
-		// Verify initial state - no coupons applied.
-		$this->assertEmpty( $order->get_coupon_codes() );
-		$this->assertEquals( 200, $order->get_total() ); // 2 * $100 = $200.
-
-		// Test 1: Add first coupon.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'test-coupon-1',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$order = wc_get_order( $order_id );
-		$this->assertContains( 'test-coupon-1', $order->get_coupon_codes() );
-		$this->assertEquals( 180, $order->get_total() ); // $200 - 10% = $180.
+		$this->assertArrayHasKey( 'line_items', $response_data );
+		$this->assertNotEmpty( $response_data['line_items'] );
 
-		// Test 2: Add second coupon (both should be applied).
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'test-coupon-1',
-					),
-					array(
-						'code' => 'test-coupon-2',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
+		$line_item         = $response_data['line_items'][0];
+		$item_schema       = new OrderItemSchema();
+		$schema_properties = $item_schema->get_item_schema_properties();
 
-		$order = wc_get_order( $order_id );
-		$this->assertContains( 'test-coupon-1', $order->get_coupon_codes() );
-		$this->assertContains( 'test-coupon-2', $order->get_coupon_codes() );
-		// Verify that both coupons are applied and totals are recalculated.
-		$this->assertGreaterThan( 0, $order->get_total_discount() );
-		$this->assertLessThan( $order->get_subtotal(), $order->get_total() );
+		$this->validate_response_against_schema( $line_item, $schema_properties );
 
-		// Test 3: Replace coupons (remove first two, add third).
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(
-					array(
-						'code' => 'test-coupon-3',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
+		// Verify values match what was sent.
+		$this->assertEquals( $product->get_id(), $line_item['product_id'] );
+		$this->assertEquals( 2, $line_item['quantity'] );
 
-		$order = wc_get_order( $order_id );
-		$this->assertNotContains( 'test-coupon-1', $order->get_coupon_codes() );
-		$this->assertNotContains( 'test-coupon-2', $order->get_coupon_codes() );
-		$this->assertContains( 'test-coupon-3', $order->get_coupon_codes() );
-		// Total should be: $200 - 15% = $170.
-		$this->assertEquals( 170, $order->get_total() );
-
-		// Test 4: Remove all coupons.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'coupon_lines' => array(),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order_id );
-		$this->assertEmpty( $order->get_coupon_codes() );
-		$this->assertEquals( 200, $order->get_total() ); // Back to original total.
-
-		// Test 5: Verify response data includes correct coupon_lines.
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order_id );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'coupon_lines', $data );
-		$this->assertEmpty( $data['coupon_lines'] );
-
-		// Clean up.
-		$coupon1->delete( true );
-		$coupon2->delete( true );
-		$coupon3->delete( true );
 		$product->delete( true );
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox Test comprehensive line items functionality including products, variations, quantities, and pricing.
+	 * Test OrderCouponSchema properties match response.
 	 */
-	public function test_order_line_items_comprehensive() {
-		// Create a simple product.
-		$simple_product = WC_Helper_Product::create_simple_product();
-		$simple_product->set_regular_price( 25.00 );
-		$simple_product->save();
+	public function test_order_coupon_schema_properties_match_response(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test-coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
 
-		// Create a variable product with variations.
-		$variable_product = WC_Helper_Product::create_variation_product();
-		$variations       = $variable_product->get_children();
-		$variation_id     = reset( $variations );
-		$variation        = wc_get_product( $variation_id );
-		$variation->set_regular_price( 50.00 );
-		$variation->save();
-
-		// Create order with multiple line items.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
 			array(
-				'status'     => 'pending',
-				'line_items' => array(
+				'line_items'   => array(
 					array(
-						'product_id' => $simple_product->get_id(),
-						'quantity'   => 2,
-					),
-					array(
-						'product_id'   => $variable_product->get_id(),
-						'variation_id' => $variation_id,
-						'quantity'     => 1,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-
-		$order_id = $response->get_data()['id'];
-		$order    = wc_get_order( $order_id );
-
-		// Verify line items were created correctly.
-		$line_items = $order->get_items();
-		$this->assertCount( 2, $line_items );
-
-		// Test updating line item quantities.
-		$first_item  = reset( $line_items );
-		$second_item = next( $line_items );
-		$request     = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'       => $first_item->get_id(),
-						'quantity' => 3,
-					),
-					array(
-						'id'       => $second_item->get_id(),
-						'quantity' => 1,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order              = wc_get_order( $order_id );
-		$updated_line_items = $order->get_items();
-		$updated_first_item = reset( $updated_line_items );
-		$this->assertEquals( 3, $updated_first_item->get_quantity() );
-
-		// Test adding new line item.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
-					array(
-						'id'       => $updated_first_item->get_id(),
-						'quantity' => 3,
-					),
-					array(
-						'id'       => $second_item->get_id(),
-						'quantity' => 1,
-					),
-					array(
-						'product_id' => $simple_product->get_id(),
+						'product_id' => $product->get_id(),
 						'quantity'   => 1,
 					),
 				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order_id );
-		$this->assertCount( 3, $order->get_items() );
-
-		// Test removing line item by setting quantity to 0.
-		$current_items = $order->get_items();
-		$request       = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'line_items' => array(
+				'coupon_lines' => array(
 					array(
-						'id'       => $updated_first_item->get_id(),
-						'quantity' => 0, // This will remove the first item.
-					),
-					array(
-						'id'       => $second_item->get_id(),
-						'quantity' => 1,
-					),
-					array(
-						'id'       => end( $current_items )->get_id(),
-						'quantity' => 1,
+						'code' => 'test-coupon',
 					),
 				),
 			)
 		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$order = wc_get_order( $order_id );
-		$this->assertCount( 2, $order->get_items() );
+		$this->assertArrayHasKey( 'coupon_lines', $response_data );
+		$this->assertNotEmpty( $response_data['coupon_lines'] );
 
-		// Clean up.
-		$simple_product->delete( true );
-		$variable_product->delete( true );
+		$coupon_line       = $response_data['coupon_lines'][0];
+		$coupon_schema     = new OrderCouponSchema();
+		$schema_properties = $coupon_schema->get_item_schema_properties();
+
+		$this->validate_response_against_schema( $coupon_line, $schema_properties );
+
+		// Verify values match what was sent.
+		$this->assertEquals( 'test-coupon', $coupon_line['code'] );
+
+		$coupon->delete( true );
+		$product->delete( true );
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox Test shipping lines functionality including methods, costs, and taxes.
+	 * Test OrderFeeSchema properties match response.
 	 */
-	public function test_order_shipping_lines_comprehensive() {
-		// Create a product.
+	public function test_order_fee_schema_properties_match_response(): void {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100.00 );
-		$product->save();
-
-		// Create order with line items.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
+		$order   = $this->create_test_order(
 			array(
-				'status'     => 'pending',
 				'line_items' => array(
 					array(
 						'product_id' => $product->get_id(),
 						'quantity'   => 1,
 					),
 				),
+				'fee_lines'  => array(
+					array(
+						'name'  => 'Processing Fee',
+						'total' => '5.00',
+					),
+				),
 			)
 		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
 
-		$order_id = $response->get_data()['id'];
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		// Test adding shipping line.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
+		$this->assertArrayHasKey( 'fee_lines', $response_data );
+		$this->assertNotEmpty( $response_data['fee_lines'] );
+
+		$fee_line          = $response_data['fee_lines'][0];
+		$fee_schema        = new OrderFeeSchema();
+		$schema_properties = $fee_schema->get_item_schema_properties();
+
+		$this->validate_response_against_schema( $fee_line, $schema_properties );
+
+		// Verify values match what was sent.
+		$this->assertEquals( 'Processing Fee', $fee_line['name'] );
+		$this->assertEquals( '5.00', $fee_line['total'] );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test OrderShippingSchema properties match response.
+	 */
+	public function test_order_shipping_schema_properties_match_response(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
 			array(
+				'line_items'     => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
 				'shipping_lines' => array(
 					array(
 						'method_title' => 'Standard Shipping',
@@ -1145,195 +321,40 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$order          = wc_get_order( $order_id );
-		$shipping_items = $order->get_items( 'shipping' );
-		$this->assertCount( 1, $shipping_items );
+		$this->assertArrayHasKey( 'shipping_lines', $response_data );
+		$this->assertNotEmpty( $response_data['shipping_lines'] );
 
-		/** @var WC_Order_Item_Shipping $shipping_item */
-		$shipping_item = reset( $shipping_items );
-		$this->assertEquals( 'Standard Shipping', $shipping_item->get_name() );
-		$this->assertEquals( 'flat_rate', $shipping_item->get_method_id() );
-		$this->assertEquals( 10.00, (float) $shipping_item->get_total() );
+		$shipping_line     = $response_data['shipping_lines'][0];
+		$shipping_schema   = new OrderShippingSchema();
+		$schema_properties = $shipping_schema->get_item_schema_properties();
 
-		// Test updating shipping line.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'shipping_lines' => array(
-					array(
-						'id'           => $shipping_item->get_id(),
-						'method_title' => 'Express Shipping',
-						'method_id'    => 'express',
-						'total'        => '15.00',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
+		$this->validate_response_against_schema( $shipping_line, $schema_properties );
 
-		$order          = wc_get_order( $order_id );
-		$shipping_items = $order->get_items( 'shipping' );
-		$this->assertCount( 1, $shipping_items );
-		/** @var WC_Order_Item_Shipping $shipping_item */
-		$shipping_item = reset( $shipping_items );
-		$this->assertEquals( 'Express Shipping', $shipping_item->get_name() );
-		$this->assertEquals( 'express', $shipping_item->get_method_id() );
-		$this->assertEquals( 15.00, (float) $shipping_item->get_total() );
+		// Verify values match what was sent.
+		$this->assertEquals( 'Standard Shipping', $shipping_line['method_title'] );
+		$this->assertEquals( 'flat_rate', $shipping_line['method_id'] );
+		$this->assertEquals( '10.00', $shipping_line['total'] );
 
-		// Test removing shipping line.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'shipping_lines' => array(),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order_id );
-		$this->assertCount( 0, $order->get_items( 'shipping' ) );
-
-		// Clean up.
 		$product->delete( true );
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox Test fee lines functionality including types, amounts, and taxes.
+	 * Test OrderTaxSchema properties match response.
 	 */
-	public function test_order_fee_lines_comprehensive() {
-		// Create a product.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100.00 );
-		$product->save();
-
-		// Create order with line items.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
-			array(
-				'status'     => 'pending',
-				'line_items' => array(
-					array(
-						'product_id' => $product->get_id(),
-						'quantity'   => 1,
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-
-		$order_id = $response->get_data()['id'];
-
-		// Test adding fee line.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'fee_lines' => array(
-					array(
-						'name'       => 'Processing Fee',
-						'tax_class'  => '',
-						'tax_status' => 'taxable',
-						'total'      => '5.00',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order     = wc_get_order( $order_id );
-		$fee_items = $order->get_items( 'fee' );
-		$this->assertCount( 1, $fee_items );
-
-		/** @var WC_Order_Item_Fee $fee_item */
-		$fee_item = reset( $fee_items );
-		$this->assertEquals( 'Processing Fee', $fee_item->get_name() );
-		$this->assertEquals( 5.00, (float) $fee_item->get_total() );
-
-		// Test adding multiple fee lines.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'fee_lines' => array(
-					array(
-						'name'       => 'Processing Fee',
-						'tax_class'  => '',
-						'tax_status' => 'taxable',
-						'total'      => '5.00',
-					),
-					array(
-						'name'       => 'Service Fee',
-						'tax_class'  => '',
-						'tax_status' => 'none',
-						'total'      => '3.00',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order_id );
-		$this->assertCount( 2, $order->get_items( 'fee' ) );
-
-		// Test updating fee line.
-		$fee_items = $order->get_items( 'fee' );
-		$first_fee = reset( $fee_items );
-		$request   = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'fee_lines' => array(
-					array(
-						'id'    => $first_fee->get_id(),
-						'name'  => 'Updated Processing Fee',
-						'total' => '7.00',
-					),
-				),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order     = wc_get_order( $order_id );
-		$fee_items = $order->get_items( 'fee' );
-		$this->assertCount( 1, $fee_items );
-		/** @var WC_Order_Item_Fee $fee_item */
-		$fee_item = reset( $fee_items );
-		$this->assertEquals( 'Updated Processing Fee', $fee_item->get_name() );
-		$this->assertEquals( 7.00, (float) $fee_item->get_total() );
-
-		// Test removing all fee lines.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'fee_lines' => array(),
-			)
-		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$order = wc_get_order( $order_id );
-		$this->assertCount( 0, $order->get_items( 'fee' ) );
-
-		// Clean up.
-		$product->delete( true );
-		$order->delete( true );
-	}
-
-	/**
-	 * @testdox Test tax lines functionality including rates, amounts, and compound taxes.
-	 */
-	public function test_order_tax_lines_comprehensive() {
+	public function test_order_tax_schema_properties_match_response(): void {
 		// Enable taxes.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
-		// Create tax rates.
-		$tax_rate_1 = WC_Tax::_insert_tax_rate(
+		// Create tax rate.
+		$tax_rate = WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => 'US',
 				'tax_rate_state'    => 'CA',
@@ -1344,28 +365,12 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$tax_rate_2 = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'US',
-				'tax_rate_state'    => 'CA',
-				'tax_rate'          => '2.5',
-				'tax_rate_name'     => 'CA District Tax',
-				'tax_rate_priority' => 2,
-				'tax_rate_compound' => 1,
-			)
-		);
-
-		// Create a product.
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100.00 );
 		$product->set_tax_status( 'taxable' );
 		$product->save();
 
-		// Create order with line items.
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
+		$order = $this->create_test_order(
 			array(
-				'status'     => 'pending',
 				'line_items' => array(
 					array(
 						'product_id' => $product->get_id(),
@@ -1378,227 +383,578 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			)
 		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
-
-		$order_id = $response->get_data()['id'];
-		$order    = wc_get_order( $order_id );
 
 		// Calculate taxes.
 		$order->calculate_taxes();
 		$order->calculate_totals();
-		$order->save();
+			$order->save();
 
-		// Test that tax lines were created.
-		$tax_items = $order->get_items( 'tax' );
-		$this->assertGreaterThan( 0, count( $tax_items ) );
-
-		// Test tax line properties.
-		foreach ( $tax_items as $tax_item ) {
-			/** @var WC_Order_Item_Tax $tax_item */
-			$this->assertNotEmpty( $tax_item->get_rate_id() );
-			$this->assertNotEmpty( $tax_item->get_label() );
-			$this->assertGreaterThan( 0, (float) $tax_item->get_tax_total() );
-		}
-
-		// Test that tax lines are read-only (automatically calculated).
-		// Tax lines should not be manually updatable as they are calculated based on tax rates and line items.
-		/** @var WC_Order_Item_Tax $first_tax */
-		$first_tax      = reset( $tax_items );
-		$original_total = $first_tax->get_tax_total();
-		$original_count = count( $tax_items );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/orders/' . $order_id );
-		$request->set_body_params(
-			array(
-				'tax_lines' => array(
-					array(
-						'id'        => $first_tax->get_id(),
-						'rate_code' => 'CA-TAX-1',
-						'label'     => 'Updated CA Tax',
-						'tax_total' => '10.00',
-					),
-				),
-			)
-		);
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$order     = wc_get_order( $order_id );
-		$tax_items = $order->get_items( 'tax' );
+		$this->assertArrayHasKey( 'tax_lines', $response_data );
+		$this->assertNotEmpty( $response_data['tax_lines'] );
 
-		// Tax lines should remain as calculated by the tax system.
-		$this->assertEquals( $original_count, count( $tax_items ) );
+		$tax_line          = $response_data['tax_lines'][0];
+		$tax_schema        = new OrderTaxSchema();
+		$schema_properties = $tax_schema->get_item_schema_properties();
 
-		// Verify that tax lines still have their original calculated values.
-		foreach ( $tax_items as $tax_item ) {
-			/** @var WC_Order_Item_Tax $tax_item */
-			$this->assertNotEmpty( $tax_item->get_rate_id() );
-			$this->assertNotEmpty( $tax_item->get_label() );
-			$this->assertGreaterThan( 0, (float) $tax_item->get_tax_total() );
-		}
+		$this->validate_response_against_schema( $tax_line, $schema_properties );
 
 		// Clean up.
-		WC_Tax::_delete_tax_rate( $tax_rate_1 );
-		WC_Tax::_delete_tax_rate( $tax_rate_2 );
+		WC_Tax::_delete_tax_rate( $tax_rate );
 		update_option( 'woocommerce_calc_taxes', 'no' );
 		$product->delete( true );
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox Test meta data filtering functionality with include_meta and exclude_meta parameters.
+	 * Test LIST endpoint returns orders with correct schema.
 	 */
-	public function test_order_meta_data_filtering() {
-		// Create an order.
-		$order = new \WC_Order();
-		$order->add_meta_data( 'test_meta_1', 'value_1', true );
-		$order->add_meta_data( 'test_meta_2', 'value_2', true );
-		$order->add_meta_data( 'test_meta_3', 'value_3', true );
-		$order->add_meta_data( 'internal_meta', 'internal_value', true );
-		$order->save();
+	public function test_orders_list_endpoint(): void {
+		// Create test orders.
+		$order1 = $this->create_test_order();
+		$order2 = $this->create_test_order();
 
-		// Test include_meta parameter.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_param( 'include_meta', array( 'test_meta_1', 'test_meta_2' ) );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders' );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$data = $response->get_data();
-		$this->assertArrayHasKey( 'meta_data', $data );
-		$this->assertCount( 2, $data['meta_data'] );
+		$this->assertIsArray( $response_data );
+		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
 
-		$meta_keys = array_map(
-			function ( $meta_item ) {
-				return $meta_item['key'];
-			},
-			$data['meta_data']
-		);
-		$this->assertContains( 'test_meta_1', $meta_keys );
-		$this->assertContains( 'test_meta_2', $meta_keys );
-		$this->assertNotContains( 'test_meta_3', $meta_keys );
+		// Validate first order against schema.
+		$first_order       = $response_data[0];
+		$schema_properties = $this->order_schema->get_item_schema_properties();
+		$this->validate_response_against_schema( $first_order, $schema_properties );
 
-		// Test exclude_meta parameter.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_param( 'exclude_meta', 'test_meta_1' );
+		$order1->delete( true );
+		$order2->delete( true );
+	}
+
+	/**
+	 * Test GET endpoint returns order with correct schema.
+	 */
+	public function test_orders_get_endpoint(): void {
+		$order = $this->create_test_order();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$data      = $response->get_data();
-		$meta_keys = array_map(
-			function ( $meta_item ) {
-				return $meta_item['key'];
-			},
-			$data['meta_data']
-		);
-		$this->assertNotContains( 'test_meta_1', $meta_keys );
-		$this->assertContains( 'test_meta_2', $meta_keys );
-		$this->assertContains( 'test_meta_3', $meta_keys );
+		$schema_properties = $this->order_schema->get_item_schema_properties();
+		$this->validate_response_against_schema( $response_data, $schema_properties );
 
-		// Test include_meta overrides exclude_meta.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
-		$request->set_param( 'include_meta', 'test_meta_1' );
-		$request->set_param( 'exclude_meta', 'test_meta_1' );
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 200, $response->get_status() );
-
-		$data = $response->get_data();
-		$this->assertCount( 1, $data['meta_data'] );
-		$this->assertEquals( 'test_meta_1', $data['meta_data'][0]['key'] );
-
-		// Clean up.
 		$order->delete( true );
 	}
 
 	/**
-	 * @testdox Test schema validation and field types for order responses.
+	 * Test CREATE endpoint creates order with correct schema and values.
 	 */
-	public function test_order_schema_validation() {
-		// Create an order with various data.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 50.00 );
-		$product->save();
+	public function test_orders_create_endpoint(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$order_data = array(
+			'status'     => OrderStatus::PENDING,
+			'billing'    => array(
+				'first_name' => 'Jane',
+				'last_name'  => 'Smith',
+				'email'      => 'jane.smith@example.com',
+				'phone'      => '555-5678',
+				'address_1'  => '456 Oak Ave',
+				'city'       => 'Springfield',
+				'state'      => 'IL',
+				'postcode'   => '62701',
+				'country'    => 'US',
+			),
+			'line_items' => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 3,
+				),
+			),
+		);
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
-		$request->set_body_params(
+		$request->set_body_params( $order_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$schema_properties = $this->order_schema->get_item_schema_properties();
+		$this->validate_response_against_schema( $response_data, $schema_properties );
+
+		// Verify order was created with correct values.
+		$this->assertEquals( OrderStatus::PENDING, $response_data['status'] );
+		$this->assertEquals( 'Jane', $response_data['billing']['first_name'] );
+		$this->assertEquals( 'Smith', $response_data['billing']['last_name'] );
+		$this->assertEquals( 'jane.smith@example.com', $response_data['billing']['email'] );
+		$this->assertEquals( '555-5678', $response_data['billing']['phone'] );
+		$this->assertEquals( '456 Oak Ave', $response_data['billing']['address_1'] );
+		$this->assertEquals( 'Springfield', $response_data['billing']['city'] );
+		$this->assertEquals( 'IL', $response_data['billing']['state'] );
+		$this->assertEquals( '62701', $response_data['billing']['postcode'] );
+		$this->assertEquals( 'US', $response_data['billing']['country'] );
+
+		// Verify line items.
+		$this->assertCount( 1, $response_data['line_items'] );
+		$this->assertEquals( $product->get_id(), $response_data['line_items'][0]['product_id'] );
+		$this->assertEquals( 3, $response_data['line_items'][0]['quantity'] );
+
+		$product->delete( true );
+		$order = wc_get_order( $response_data['id'] );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test UPDATE endpoint updates order with correct schema.
+	 */
+	public function test_orders_update_endpoint(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
 			array(
-				'status'     => 'pending',
 				'line_items' => array(
 					array(
 						'product_id' => $product->get_id(),
-						'quantity'   => 2,
+						'quantity'   => 1,
 					),
-				),
-				'billing'    => array(
-					'first_name' => 'John',
-					'last_name'  => 'Doe',
-					'email'      => 'john@example.com',
-					'phone'      => '555-1234',
-					'address_1'  => '123 Main St',
-					'city'       => 'Anytown',
-					'state'      => 'CA',
-					'postcode'   => '12345',
-					'country'    => 'US',
 				),
 			)
 		);
-		$response = $this->server->dispatch( $request );
-		$this->assertEquals( 201, $response->get_status() );
 
-		$order_id = $response->get_data()['id'];
+		$update_data = array(
+			'status'     => OrderStatus::PROCESSING,
+			'billing'    => array(
+				'first_name' => 'Updated',
+				'last_name'  => 'Name',
+				'email'      => 'updated@example.com',
+				'phone'      => '555-9999',
+				'address_1'  => '789 New St',
+				'city'       => 'New City',
+				'state'      => 'NY',
+				'postcode'   => '10001',
+				'country'    => 'US',
+			),
+			'line_items' => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 2,
+				),
+			),
+		);
 
-		// Test schema validation.
-		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/orders' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
 		$response = $this->server->dispatch( $request );
+
 		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
 
-		$schema = $response->get_data()['schema'];
-		$this->assertArrayHasKey( 'properties', $schema );
+		$schema_properties = $this->order_schema->get_item_schema_properties();
+		$this->validate_response_against_schema( $response_data, $schema_properties );
 
-		$properties = $schema['properties'];
+		// Verify order was updated with correct values.
+		$this->assertEquals( OrderStatus::PROCESSING, $response_data['status'] );
+		$this->assertEquals( 'Updated', $response_data['billing']['first_name'] );
+		$this->assertEquals( 'Name', $response_data['billing']['last_name'] );
+		$this->assertEquals( 'updated@example.com', $response_data['billing']['email'] );
+		$this->assertEquals( '555-9999', $response_data['billing']['phone'] );
+		$this->assertEquals( '789 New St', $response_data['billing']['address_1'] );
+		$this->assertEquals( 'New City', $response_data['billing']['city'] );
+		$this->assertEquals( 'NY', $response_data['billing']['state'] );
+		$this->assertEquals( '10001', $response_data['billing']['postcode'] );
+		$this->assertEquals( 'US', $response_data['billing']['country'] );
 
-		// Test core order properties.
-		$this->assertArrayHasKey( 'id', $properties );
-		$this->assertEquals( 'integer', $properties['id']['type'] );
-		$this->assertTrue( $properties['id']['readonly'] );
+		// Verify line items were updated correctly.
+		$this->assertCount( 1, $response_data['line_items'] );
+		$this->assertEquals( $product->get_id(), $response_data['line_items'][0]['product_id'] );
+		$this->assertEquals( 2, $response_data['line_items'][0]['quantity'] );
 
-		$this->assertArrayHasKey( 'status', $properties );
-		$this->assertEquals( 'string', $properties['status']['type'] );
-		$this->assertArrayHasKey( 'enum', $properties['status'] );
+		$product->delete( true );
+		$order->delete( true );
+	}
 
-		$this->assertArrayHasKey( 'total', $properties );
-		$this->assertEquals( 'string', $properties['total']['type'] );
-		$this->assertTrue( $properties['total']['readonly'] );
+	/**
+	 * Test comprehensive value validation for all line types.
+	 */
+	public function test_comprehensive_value_validation(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'test-coupon' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
 
-		// Test line items schema.
-		$this->assertArrayHasKey( 'line_items', $properties );
-		$this->assertEquals( 'array', $properties['line_items']['type'] );
-		$this->assertArrayHasKey( 'items', $properties['line_items'] );
+		$order_data = array(
+			'status'         => OrderStatus::PENDING,
+			'billing'        => array(
+				'first_name' => 'Test',
+				'last_name'  => 'User',
+				'email'      => 'test@example.com',
+				'phone'      => '555-0000',
+				'address_1'  => '123 Test St',
+				'city'       => 'Test City',
+				'state'      => 'TS',
+				'postcode'   => '12345',
+				'country'    => 'US',
+			),
+			'line_items'     => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 2,
+				),
+			),
+			'shipping_lines' => array(
+				array(
+					'method_title' => 'Test Shipping',
+					'method_id'    => 'test_method',
+					'total'        => '12.50',
+				),
+			),
+			'fee_lines'      => array(
+				array(
+					'name'  => 'Test Fee',
+					'total' => '3.75',
+				),
+			),
+			'coupon_lines'   => array(
+				array(
+					'code' => 'test-coupon',
+				),
+			),
+		);
 
-		// Test shipping lines schema.
-		$this->assertArrayHasKey( 'shipping_lines', $properties );
-		$this->assertEquals( 'array', $properties['shipping_lines']['type'] );
+		// Create order.
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( $order_data );
+		$response = $this->server->dispatch( $request );
 
-		// Test fee lines schema.
-		$this->assertArrayHasKey( 'fee_lines', $properties );
-		$this->assertEquals( 'array', $properties['fee_lines']['type'] );
+		$this->assertEquals( 201, $response->get_status() );
+		$response_data = $response->get_data();
 
-		// Test coupon lines schema.
-		$this->assertArrayHasKey( 'coupon_lines', $properties );
-		$this->assertEquals( 'array', $properties['coupon_lines']['type'] );
+		// Verify all values match what was sent.
+		$this->assertEquals( OrderStatus::PENDING, $response_data['status'] );
+		// Verify billing address.
+		$this->assertEquals( 'Test', $response_data['billing']['first_name'] );
+		$this->assertEquals( 'User', $response_data['billing']['last_name'] );
+		$this->assertEquals( 'test@example.com', $response_data['billing']['email'] );
+		$this->assertEquals( '555-0000', $response_data['billing']['phone'] );
+		$this->assertEquals( '123 Test St', $response_data['billing']['address_1'] );
+		$this->assertEquals( 'Test City', $response_data['billing']['city'] );
+		$this->assertEquals( 'TS', $response_data['billing']['state'] );
+		$this->assertEquals( '12345', $response_data['billing']['postcode'] );
+		$this->assertEquals( 'US', $response_data['billing']['country'] );
 
-		// Test tax lines schema.
-		$this->assertArrayHasKey( 'tax_lines', $properties );
-		$this->assertEquals( 'array', $properties['tax_lines']['type'] );
-		$this->assertTrue( $properties['tax_lines']['readonly'] );
+		// Verify line items.
+		$this->assertCount( 1, $response_data['line_items'] );
+		$this->assertEquals( $product->get_id(), $response_data['line_items'][0]['product_id'] );
+		$this->assertEquals( 2, $response_data['line_items'][0]['quantity'] );
 
-		// Test meta data schema.
-		$this->assertArrayHasKey( 'meta_data', $properties );
-		$this->assertEquals( 'array', $properties['meta_data']['type'] );
+		// Verify shipping lines.
+		$this->assertCount( 1, $response_data['shipping_lines'] );
+		$this->assertEquals( 'Test Shipping', $response_data['shipping_lines'][0]['method_title'] );
+		$this->assertEquals( 'test_method', $response_data['shipping_lines'][0]['method_id'] );
+		$this->assertEquals( '12.50', $response_data['shipping_lines'][0]['total'] );
+
+		// Verify fee lines.
+		$this->assertCount( 1, $response_data['fee_lines'] );
+		$this->assertEquals( 'Test Fee', $response_data['fee_lines'][0]['name'] );
+		$this->assertEquals( '3.75', $response_data['fee_lines'][0]['total'] );
+
+		// Verify coupon lines.
+		$this->assertCount( 1, $response_data['coupon_lines'] );
+		$this->assertEquals( 'test-coupon', $response_data['coupon_lines'][0]['code'] );
 
 		// Clean up.
+		$coupon->delete( true );
 		$product->delete( true );
-		$order = wc_get_order( $order_id );
+		$order = wc_get_order( $response_data['id'] );
 		$order->delete( true );
+	}
+
+	/**
+	 * Test UPDATE endpoint with line items, shipping, fees, and coupons.
+	 */
+	public function test_orders_update_with_all_line_types(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'test-coupon' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+
+		$update_data = array(
+			'line_items'     => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 2,
+				),
+			),
+			'shipping_lines' => array(
+				array(
+					'method_title' => 'Express Shipping',
+					'method_id'    => 'express',
+					'total'        => '15.00',
+				),
+			),
+			'fee_lines'      => array(
+				array(
+					'name'  => 'Processing Fee',
+					'total' => '3.00',
+				),
+			),
+			'coupon_lines'   => array(
+				array(
+					'code' => 'test-coupon',
+				),
+			),
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Verify all line types were updated correctly.
+		$this->assertCount( 1, $response_data['line_items'] );
+		$this->assertEquals( 2, $response_data['line_items'][0]['quantity'] );
+
+		$this->assertCount( 1, $response_data['shipping_lines'] );
+		$this->assertEquals( 'Express Shipping', $response_data['shipping_lines'][0]['method_title'] );
+		$this->assertEquals( 'express', $response_data['shipping_lines'][0]['method_id'] );
+		$this->assertEquals( '15.00', $response_data['shipping_lines'][0]['total'] );
+
+		$this->assertCount( 1, $response_data['fee_lines'] );
+		$this->assertEquals( 'Processing Fee', $response_data['fee_lines'][0]['name'] );
+		$this->assertEquals( '3.00', $response_data['fee_lines'][0]['total'] );
+
+		$this->assertCount( 1, $response_data['coupon_lines'] );
+		$this->assertEquals( 'test-coupon', $response_data['coupon_lines'][0]['code'] );
+
+		$coupon->delete( true );
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: invalid customer ID.
+	 */
+	public function test_invalid_customer_id(): void {
+		$customer = WC_Helper_Customer::create_customer( 'test', 'password', 'test@example.com' );
+
+		// Simulate multisite where customer doesn't belong to blog.
+		$legacy_proxy_mock = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy_mock->register_function_mocks(
+			array(
+				'is_multisite'           => function () {
+					return true;
+				},
+				'is_user_member_of_blog' => function () {
+					return false;
+				},
+			)
+		);
+
+		$order_data = array(
+			'customer_id' => $customer->get_id(),
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( $order_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_invalid_customer_id', $response->get_data()['code'] );
+
+		$customer->delete( true );
+	}
+
+	/**
+	 * Test edge case: created_via parameter handling.
+	 */
+	public function test_created_via_parameter(): void {
+		$order_data = array(
+			'created_via' => 'test-source',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( $order_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 'test-source', $response_data['created_via'] );
+
+		$order = wc_get_order( $response_data['id'] );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: empty created_via defaults to rest-api.
+	 */
+	public function test_empty_created_via_defaults_to_rest_api(): void {
+		$order_data = array(
+			'created_via' => '',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( $order_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 201, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertEquals( 'rest-api', $response_data['created_via'] );
+
+		$order = wc_get_order( $response_data['id'] );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: created_via cannot be updated.
+	 */
+	public function test_created_via_cannot_be_updated(): void {
+		$order                = $this->create_test_order();
+		$original_created_via = $order->get_created_via();
+
+		$update_data = array(
+			'created_via' => 'updated-source',
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Created via should remain unchanged.
+		$this->assertEquals( $original_created_via, $response_data['created_via'] );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: meta data filtering with include_meta.
+	 */
+	public function test_meta_data_include_filtering(): void {
+		$order = $this->create_test_order();
+		$order->add_meta_data( 'test_meta_1', 'value_1', true );
+		$order->add_meta_data( 'test_meta_2', 'value_2', true );
+		$order->add_meta_data( 'internal_meta', 'internal_value', true );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_param( 'include_meta', array( 'test_meta_1', 'test_meta_2' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'meta_data', $response_data );
+		$this->assertCount( 2, $response_data['meta_data'] );
+
+		$meta_keys = array_map(
+			function ( $meta_item ) {
+				return $meta_item['key'];
+			},
+			$response_data['meta_data']
+		);
+
+		$this->assertContains( 'test_meta_1', $meta_keys );
+		$this->assertContains( 'test_meta_2', $meta_keys );
+		$this->assertNotContains( 'internal_meta', $meta_keys );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: meta data filtering with exclude_meta.
+	 */
+	public function test_meta_data_exclude_filtering(): void {
+		$order = $this->create_test_order();
+		$order->add_meta_data( 'test_meta_1', 'value_1', true );
+		$order->add_meta_data( 'test_meta_2', 'value_2', true );
+		$order->add_meta_data( 'internal_meta', 'internal_value', true );
+		$order->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_param( 'exclude_meta', 'test_meta_1' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'meta_data', $response_data );
+
+		$meta_keys = array_map(
+			function ( $meta_item ) {
+				return $meta_item['key'];
+			},
+			$response_data['meta_data']
+		);
+
+		$this->assertNotContains( 'test_meta_1', $meta_keys );
+		$this->assertContains( 'test_meta_2', $meta_keys );
+		$this->assertContains( 'internal_meta', $meta_keys );
+
+		$order->delete( true );
+	}
+
+	/**
+	 * Test edge case: created_via filtering when COT is enabled.
+	 */
+	public function test_created_via_filtering_with_cot_enabled(): void {
+		$original_cot_setting = get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION );
+
+		// Skip test if COT cannot be safely enabled/disabled.
+		try {
+			update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		} catch ( Exception $e ) {
+			$this->markTestSkipped( 'Custom Orders Table cannot be enabled: ' . $e->getMessage() );
+		}
+
+		$order1 = $this->create_test_order();
+		$order1->set_created_via( 'checkout' );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->set_created_via( 'admin' );
+		$order2->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'created_via', array( 'checkout' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertIsArray( $response_data );
+		$this->assertCount( 1, $response_data );
+		$this->assertEquals( 'checkout', $response_data[0]['created_via'] );
+
+		// Clean up orders first, then restore setting.
+		$order1->delete( true );
+		$order2->delete( true );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $original_cot_setting );
 	}
 }
