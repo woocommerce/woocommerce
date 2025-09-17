@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Enabled WYSIWYG editing for custom product types via formerly frontend-only experimental hook
