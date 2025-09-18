@@ -386,6 +386,129 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * Test non-numeric cost handling.
+	 */
+	public function test_non_numeric_cost_handling() {
+		$zone = $this->create_shipping_zone( 'Expression Cost Zone' );
+
+		// Add flat rate with expression-based cost.
+		$instance_id = $this->add_shipping_method( $zone, 'flat_rate', array( 'cost' => '10 + [qty] * 2' ) );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Find our test zone.
+		$test_zone_data = null;
+		foreach ( $data as $zone_data ) {
+			if ( 'Expression Cost Zone' === $zone_data['name'] ) {
+				$test_zone_data = $zone_data;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $test_zone_data );
+		$this->assertIsArray( $test_zone_data['methods'] );
+		$this->assertCount( 1, $test_zone_data['methods'] );
+
+		$method = $test_zone_data['methods'][0];
+		$this->assertEquals( 'Flat rate', $method['title'] );
+		// Should return expression as-is, not attempt to format as price.
+		$this->assertEquals( '10 + [qty] * 2', $method['rate_description'] );
+	}
+
+	/**
+	 * Test free shipping requirements.
+	 */
+	public function test_free_shipping_requirements() {
+		$zone = $this->create_shipping_zone( 'Free Shipping Test Zone' );
+
+		// Test different free shipping requirements.
+		$test_cases = array(
+			array(
+				'requires'       => 'min_amount',
+				'min_amount'     => '50',
+				'expected_text'  => 'Free over',
+				'expected_price' => '50',
+			),
+			array(
+				'requires'       => 'coupon',
+				'min_amount'     => '',
+				'expected_text'  => 'Free with coupon',
+				'expected_price' => null,
+			),
+			array(
+				'requires'        => 'either',
+				'min_amount'      => '100',
+				'expected_text'   => 'Free over',
+				'expected_price'  => '100',
+				'expected_suffix' => 'or with coupon',
+			),
+			array(
+				'requires'        => 'both',
+				'min_amount'      => '75',
+				'expected_text'   => 'Free over',
+				'expected_price'  => '75',
+				'expected_suffix' => 'and with coupon',
+			),
+			array(
+				'requires'       => '',
+				'min_amount'     => '',
+				'expected_text'  => 'Free',
+				'expected_price' => null,
+			),
+		);
+
+		foreach ( $test_cases as $index => $test_case ) {
+			$settings = array( 'requires' => $test_case['requires'] );
+			if ( ! empty( $test_case['min_amount'] ) ) {
+				$settings['min_amount'] = $test_case['min_amount'];
+			}
+
+			$this->add_shipping_method( $zone, 'free_shipping', $settings );
+		}
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Find our test zone.
+		$test_zone_data = null;
+		foreach ( $data as $zone_data ) {
+			if ( 'Free Shipping Test Zone' === $zone_data['name'] ) {
+				$test_zone_data = $zone_data;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $test_zone_data );
+		$this->assertIsArray( $test_zone_data['methods'] );
+		$this->assertCount( count( $test_cases ), $test_zone_data['methods'] );
+
+		// Verify each method has the correct description.
+		foreach ( $test_cases as $index => $test_case ) {
+			$method = $test_zone_data['methods'][ $index ];
+			$this->assertEquals( 'Free shipping', $method['title'] );
+
+			$description = $method['rate_description'];
+
+			// Check basic text is present.
+			$this->assertStringContainsString( $test_case['expected_text'], $description );
+
+			// Check price is formatted correctly if expected.
+			if ( ! empty( $test_case['expected_price'] ) ) {
+				// Check for the price amount - could be $50 or &#36;50.00 depending on formatting.
+				$this->assertStringContainsString( $test_case['expected_price'], $description );
+			}
+
+			// Check suffix if expected.
+			if ( ! empty( $test_case['expected_suffix'] ) ) {
+				$this->assertStringContainsString( $test_case['expected_suffix'], $description );
+			}
+		}
+	}
+
+	/**
 	 * Test schema.
 	 */
 	public function test_get_item_schema() {
