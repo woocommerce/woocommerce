@@ -361,9 +361,10 @@ final class AssetsController {
 	 * and their nested dependencies in the provided array. Used internally to build a
 	 * complete, deduplicated set of handles for further processing (e.g., mapping to src URLs).
 	 *
-	 * @param array      $dependencies      Array of initial script handles to process.
-	 * @param \WP_Scripts $wp_scripts       WP_Scripts instance containing all registered scripts.
-	 * @param array      $found_dependencies Reference to array in which discovered handles are stored.
+	 * @param array       $dependencies       Array of initial script handles to process.
+	 * @param \WP_Scripts $wp_scripts         WP_Scripts instance containing all registered scripts.
+	 * @param array       $found_dependencies Reference to array in which discovered handles are stored.
+	 *
 	 * @return void
 	 */
 	private function gather_script_dependency_handles( array $dependencies, \WP_Scripts $wp_scripts, &$found_dependencies = array() ) {
