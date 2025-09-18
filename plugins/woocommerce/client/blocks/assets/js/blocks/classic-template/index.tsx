@@ -194,20 +194,21 @@ const Edit = ( {
 		currentPostId
 	);
 
-	const templateDetails = getTemplateDetailsBySlug(
-		template.record?.slug as string,
-		TEMPLATES
-	);
+	const templateSlug = template.record?.slug as string;
+
+	const templateDetails = getTemplateDetailsBySlug( templateSlug, TEMPLATES );
 
 	const templateTitle =
 		template.record?.title.rendered?.toLowerCase() ?? attributes.template;
 	const templatePlaceholder = templateDetails?.placeholder ?? 'fallback';
 	const templateType = templateDetails?.type ?? 'fallback';
 
+	console.log( 'templateSlug', templateSlug );
+
 	useEffect(
 		() =>
 			setAttributes( {
-				template: attributes.template,
+				template: templateSlug ?? attributes.template,
 				align: attributes.align ?? 'wide',
 			} ),
 		[ attributes.align, attributes.template, setAttributes ]
