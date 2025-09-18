@@ -48,7 +48,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	protected $rest_base = 'paypal-standard';
 
 	/**
-	 * Register the routes for the PayPal webhook handler.
+	 * Register the routes for PayPal Standard REST API requests.
 	 *
 	 * @return void
 	 */
