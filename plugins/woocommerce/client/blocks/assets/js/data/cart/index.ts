@@ -93,8 +93,8 @@ let previousBillingCountry: string | null = null;
  * This function checks all registered providers and selects the first one that
  * supports the given country, respecting the server-defined provider order.
  *
- * @param addressType The type of address ('shipping' or 'billing')
- * @param country The country code
+ * @param addressType     The type of address ('shipping' or 'billing')
+ * @param country         The country code
  * @param serverProviders The list of server providers
  */
 export function updateAutocompleteProvider(
@@ -161,32 +161,34 @@ const serverProviders = getSettingWithCoercion<
 	}
 );
 
+export const autocompleteSubscription = () => {
+	const cartData = select( STORE_KEY ).getCartData();
+	const shippingCountry = cartData?.shippingAddress?.country || '';
+	const billingCountry = cartData?.billingAddress?.country || '';
+
+	// Check if shipping country has changed
+	if ( shippingCountry !== previousShippingCountry ) {
+		previousShippingCountry = shippingCountry;
+		updateAutocompleteProvider(
+			'shipping',
+			shippingCountry,
+			serverProviders
+		);
+	}
+
+	// Check if billing country has changed
+	if ( billingCountry !== previousBillingCountry ) {
+		previousBillingCountry = billingCountry;
+		updateAutocompleteProvider(
+			'billing',
+			billingCountry,
+			serverProviders
+		);
+	}
+};
+
 if ( serverProviders.length > 0 ) {
-	subscribe( () => {
-		const cartData = select( STORE_KEY ).getCartData();
-		const shippingCountry = cartData?.shippingAddress?.country || '';
-		const billingCountry = cartData?.billingAddress?.country || '';
-
-		// Check if shipping country has changed
-		if ( shippingCountry !== previousShippingCountry ) {
-			previousShippingCountry = shippingCountry;
-			updateAutocompleteProvider(
-				'shipping',
-				shippingCountry,
-				serverProviders
-			);
-		}
-
-		// Check if billing country has changed
-		if ( billingCountry !== previousBillingCountry ) {
-			previousBillingCountry = billingCountry;
-			updateAutocompleteProvider(
-				'billing',
-				billingCountry,
-				serverProviders
-			);
-		}
-	}, store );
+	subscribe( autocompleteSubscription, store );
 }
 
 // Emmits event to sync iAPI store.
