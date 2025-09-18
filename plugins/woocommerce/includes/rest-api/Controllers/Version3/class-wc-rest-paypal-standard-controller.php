@@ -26,7 +26,7 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 }
 
 /**
- * REST API PayPal webhook handler controller class.
+ * REST API PayPal Standard controller class.
  *
  * @package WooCommerce\RestApi
  * @extends WC_REST_Controller
