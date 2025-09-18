@@ -2,9 +2,11 @@
  * External dependencies
  */
 import { render, waitFor } from '@testing-library/react';
-import * as wpData from '@wordpress/data';
-import { AddressAutocomplete } from '@woocommerce/base-components/cart-checkout/address-autocomplete/address-autocomplete';
-import { cartStore } from '@woocommerce/block-data';
+
+/**
+ * Internal dependencies
+ */
+import { AddressAutocomplete } from '../address-autocomplete';
 
 describe( 'Address Autocomplete Component', () => {
 	it( 'should render a ValidatedTextInput with correct props', () => {
