@@ -4,9 +4,7 @@
 import {
 	BlockInstance,
 	createBlock,
-	getBlockType,
 	registerBlockType,
-	unregisterBlockType,
 } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -18,7 +16,7 @@ import {
 import { Button, Placeholder, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { box, Icon } from '@wordpress/icons';
-import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
