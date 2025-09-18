@@ -42,6 +42,7 @@ class OrdersScheduler extends ImportScheduler {
 		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -214,7 +215,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() ) {
+		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() && 'woocommerce_schedule_import' !== current_filter() ) {
 			return $order_id;
 		}
 
@@ -267,6 +268,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		ReportsCache::invalidate();
+
+		/**
+		 * Fires after an order or refund has been imported into Analytics lookup tables
+		 * and the reports cache has been invalidated.
+		 *
+		 * @since 10.3.0
+		 * @param int $order_id Order or refund ID.
+		 */
+		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
 	}
 
 	/**

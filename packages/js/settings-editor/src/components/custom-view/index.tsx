@@ -7,7 +7,7 @@ import {
 	useMemo,
 	useEffect,
 } from '@wordpress/element';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Sometimes extensions will place a <script /> tag in the custom output of a settings field,
@@ -30,7 +30,7 @@ const processCustomView = ( html: string ) => {
 	} );
 
 	return {
-		cleanHTML: sanitize( doc.documentElement.outerHTML ),
+		cleanHTML: sanitizeHTML( doc.documentElement.outerHTML ),
 		scripts,
 	};
 };

@@ -252,7 +252,7 @@ test.describe( 'Shopper → Cart block', () => {
 		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
 		await frontendUtils.goToCart();
 		await page
-			.locator( '.wp-block-woocommerce-cart-cross-sells-block' )
+			.locator( '.wp-block-woocommerce-product-collection' )
 			.waitFor();
 		// Cap is the cross sells product that will be added to the cart
 		await page

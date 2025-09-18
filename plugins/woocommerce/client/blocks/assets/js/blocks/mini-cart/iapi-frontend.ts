@@ -10,7 +10,10 @@ import {
 	useRef,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import type {
+	Store as WooCommerce,
+	WooCommerceConfig,
+} from '@woocommerce/stores/woocommerce/cart';
 import Dinero from 'dinero.js';
 
 /**
@@ -22,11 +25,14 @@ import {
 	normalizeCurrencyResponse,
 } from '../../../../packages/prices/utils/currency';
 import { CartItem, Currency } from '../../types';
+import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { currency, placeholderImgSrc } = getConfig( 'woocommerce' );
+const { currency, placeholderImgSrc } = getConfig(
+	'woocommerce'
+) as WooCommerceConfig;
 const {
 	addToCartBehaviour,
 	onCartClickBehaviour,
@@ -63,12 +69,13 @@ type MiniCart = {
 		drawerRole: string | null;
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
+		shouldShowTaxLabel: boolean;
 	};
 	callbacks: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
-		setupOpenDrawerListener: () => void;
+		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 	};
 };
@@ -76,6 +83,15 @@ type MiniCart = {
 type CartItemContext = {
 	cartItem: CartItem;
 };
+
+type CartItemDataAttr = {
+	name?: string;
+	value?: string;
+	className?: string;
+	hidden?: boolean;
+};
+
+type DataProperty = 'item_data' | 'variation';
 
 const trimWords = ( html: string, maxWords = 15 ): string => {
 	const words = html.trim().split( /\s+/ );
@@ -117,6 +133,10 @@ store< MiniCart >(
 			},
 
 			get formattedSubtotal(): string {
+				if ( ! currency ) {
+					return '';
+				}
+
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
 					  parseInt(
@@ -172,10 +192,44 @@ store< MiniCart >(
 					.replace( '%1$d', state.totalItemsInCart )
 					.replace( '%2$s', state.formattedSubtotal );
 			},
+
+			get shouldShowTaxLabel(): boolean {
+				return (
+					parseInt(
+						woocommerceState.cart.totals.total_items_tax,
+						10
+					) > 0
+				);
+			},
 		},
 
 		callbacks: {
-			setupOpenDrawerListener() {
+			*setupEventListeners() {
+				// eslint-disable-next-line @typescript-eslint/no-empty-function
+				const noop = () => {};
+				let removeJQueryAddedToCartEvent = noop;
+				let removeJQueryRemovedFromCartEvent = noop;
+				if ( 'jQuery' in window ) {
+					// Make it so we can read jQuery events triggered by WC Core elements.
+					removeJQueryAddedToCartEvent = translateJQueryEventToNative(
+						'added_to_cart',
+						'wc-blocks_added_to_cart'
+					);
+					removeJQueryRemovedFromCartEvent =
+						translateJQueryEventToNative(
+							'removed_from_cart',
+							'wc-blocks_removed_from_cart'
+						);
+				}
+				document.body.addEventListener(
+					'wc-blocks_added_to_cart',
+					actions.refreshCartItems
+				);
+				document.body.addEventListener(
+					'wc-blocks_removed_from_cart',
+					actions.refreshCartItems
+				);
+
 				if ( addToCartBehaviour === 'open_drawer' ) {
 					document.body.addEventListener(
 						'wc-blocks_added_to_cart',
@@ -186,8 +240,20 @@ store< MiniCart >(
 				return () => {
 					document.body.removeEventListener(
 						'wc-blocks_added_to_cart',
+						actions.refreshCartItems
+					);
+					document.body.removeEventListener(
+						'wc-blocks_removed_from_cart',
+						actions.refreshCartItems
+					);
+					document.body.removeEventListener(
+						'wc-blocks_added_to_cart',
 						callbacks.openDrawer
 					);
+					if ( 'jQuery' in window ) {
+						removeJQueryAddedToCartEvent();
+						removeJQueryRemovedFromCartEvent();
+					}
 				};
 			},
 
@@ -441,7 +507,8 @@ const { state: cartItemState } = store(
 			get itemThumbnail(): string {
 				return (
 					cartItemState.cartItem.images[ 0 ]?.thumbnail ||
-					placeholderImgSrc
+					placeholderImgSrc ||
+					''
 				);
 			},
 
@@ -600,6 +667,76 @@ const { state: cartItemState } = store(
 					  } )
 					: true;
 			},
+
+			get cartItemDataAttr(): CartItemDataAttr | null {
+				const { itemData, dataProperty } = getContext< {
+					itemData: {
+						key: string;
+						attribute: string;
+						name: string;
+						value: string;
+						hidden: string;
+					};
+					dataProperty: DataProperty;
+				} >();
+
+				// Use the context if it is in a loop, otherwise use the unique item if it exists.
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return { hidden: true };
+				}
+
+				const dataItemAttrKey =
+					dataItemAttr.key ||
+					dataItemAttr.attribute ||
+					dataItemAttr.name;
+
+				// Decode entities.
+				const nameTxt = document.createElement( 'textarea' );
+				nameTxt.innerHTML = dataItemAttrKey + ':';
+				const valueTxt = document.createElement( 'textarea' );
+				valueTxt.innerHTML = dataItemAttr.value;
+
+				return {
+					name: nameTxt.value,
+					value: valueTxt.value,
+					className: `wc-block-components-product-details__${ dataItemAttrKey
+						.replace( /([a-z])([A-Z])/g, '$1-$2' )
+						.replace( /[\s_]+/g, '-' )
+						.toLowerCase() }`,
+					hidden: dataItemAttr.hidden === '1' ? true : false,
+				};
+			},
+
+			get itemDataHasMultipleAttributes(): boolean {
+				const { dataProperty } = getContext< {
+					dataProperty: DataProperty;
+				} >();
+				return cartItemState.cartItem[ dataProperty ]?.length > 1;
+			},
+
+			get shouldHideProductDetails(): boolean {
+				const { dataProperty } = getContext< {
+					dataProperty: DataProperty;
+				} >();
+				return cartItemState.cartItem[ dataProperty ].length === 0;
+			},
+
+			get shouldHideSingleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					cartItemState.itemDataHasMultipleAttributes
+				);
+			},
+
+			get shouldHideMultipleProductDetails(): boolean {
+				return (
+					cartItemState.shouldHideProductDetails ||
+					! cartItemState.itemDataHasMultipleAttributes
+				);
+			},
 		},
 
 		actions: {
@@ -629,9 +766,17 @@ const { state: cartItemState } = store(
 			},
 
 			*changeQuantity(): Generator< unknown, void > {
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity,
+					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 
@@ -642,18 +787,34 @@ const { state: cartItemState } = store(
 			*incrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
+					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 
 			*decrementQuantity(): Generator< unknown, void > {
 				const { multiple_of: multipleOf = 1 } =
 					cartItemState.cartItem.quantity_limits;
+				const variation = cartItemState.cartItem.variation.map(
+					( { raw_attribute: rawAttribute, ...rest } ) => ( {
+						...rest,
+						attribute: rawAttribute,
+					} )
+				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
+					variation,
+					type: cartItemState.cartItem.type,
 				} );
 			},
 

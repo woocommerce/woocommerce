@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Refactor Attribute and Status filter blocks to use shared DisplayStyleSwitcher component instead of duplicate implementations.

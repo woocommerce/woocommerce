@@ -4,6 +4,7 @@
 
 	// Don't remove this, it marks the container for container queries used in inner blocks.
 	container-type: inline-size;
+	width: 100%;
 
 	.with-scroll-to-top__scroll-point {
 		top: -96px;
@@ -134,19 +135,6 @@
 		.wc-block-components-totals-coupon-link {
 			margin-left: $gap;
 			margin-right: $gap;
-		}
-	}
-}
-
-.wp-block-woocommerce-checkout.is-loading.is-fading {
-	div.wp-block-woocommerce-checkout-totals-block,
-	div.wp-block-woocommerce-checkout-fields-block {
-		> div {
-			background-color: transparent;
-
-			&::after {
-				background: transparent;
-			}
 		}
 	}
 }
