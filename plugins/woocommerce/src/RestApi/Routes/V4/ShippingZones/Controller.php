@@ -94,9 +94,11 @@ class Controller extends AbstractController {
 
 		$data = array();
 		foreach ( $zones as $zone_data ) {
-			$zone   = WC_Shipping_Zones::get_zone( $zone_data['id'] );
-			$item   = $this->prepare_item_for_response( $zone, $request );
-			$data[] = $this->prepare_response_for_collection( $item );
+			// Handle both 'zone_id' (from get_zones()) and 'id' (from get_data()) keys.
+			$zone_id = isset( $zone_data['zone_id'] ) ? $zone_data['zone_id'] : $zone_data['id'];
+			$zone    = WC_Shipping_Zones::get_zone( $zone_id );
+			$item    = $this->prepare_item_for_response( $zone, $request );
+			$data[]  = $this->prepare_response_for_collection( $item );
 		}
 
 		return rest_ensure_response( $data );
