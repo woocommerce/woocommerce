@@ -33,10 +33,11 @@ class MCPAdapterProvider {
 	 */
 	public function __construct() {
 		/*
-		 * Hook into init because MCP adapter registers hooks for rest_api_init,
-		 * so we need to initialize earlier to ensure proper sequence.
+		 * Hook into rest_api_init with priority 10 to initialize only on REST API requests.
+		 * MCP adapter registers on rest_api_init with priority 20000, so we initialize earlier.
+		 * This prevents unnecessary MCP initialization on favicon, cron, or admin requests.
 		 */
-		add_action( 'init', array( $this, 'maybe_initialize' ) );
+		add_action( 'rest_api_init', array( $this, 'maybe_initialize' ), 10 );
 	}
 
 	/**
