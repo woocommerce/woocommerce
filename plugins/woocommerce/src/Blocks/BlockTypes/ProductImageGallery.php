@@ -15,6 +15,25 @@ class ProductImageGallery extends AbstractBlock {
 	protected $block_name = 'product-image-gallery';
 
 	/**
+	 * Initialize this block type.
+	 *
+	 * - Hook into WP lifecycle.
+	 * - Register the block with WordPress.
+	 */
+	protected function initialize() {
+		parent::initialize();
+		add_action(
+			'wp_footer',
+			function () {
+				wc_get_template( 'single-product/photoswipe.php' );
+			}
+		);
+		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+	}
+
+	/**
 	 * It isn't necessary register block assets because it is a server side block.
 	 */
 	protected function register_block_type_assets() {
@@ -58,16 +77,6 @@ class ProductImageGallery extends AbstractBlock {
 		wp_enqueue_script( 'wc-photoswipe-ui-default' );
 		wp_enqueue_style( 'photoswipe-default-skin' );
 		wp_enqueue_script( 'wc-single-product' );
-
-		add_action(
-			'wp_footer',
-			function () {
-				wc_get_template( 'single-product/photoswipe.php' );
-			}
-		);
-		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
 	}
 
 	/**
