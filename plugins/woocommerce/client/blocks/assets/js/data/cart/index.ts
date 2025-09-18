@@ -187,7 +187,7 @@ export const autocompleteSubscription = () => {
 	}
 };
 
-if ( serverProviders.length > 0 ) {
+if ( serverProviders && serverProviders.length > 0 ) {
 	subscribe( autocompleteSubscription, store );
 }
 
