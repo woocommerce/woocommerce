@@ -1167,10 +1167,12 @@ class OrdersTableQuery {
 				);
 			}
 
-			$total_query = $this->generate_total_query( $total_param );
+			if ( is_array( $total_param ) ) {
+				$total_query = $this->generate_total_query( $total_param );
 
-			if ( $total_query ) {
-				$this->where[] = $total_query;
+				if ( $total_query ) {
+					$this->where[] = $total_query;
+				}
 			}
 		}
 	}

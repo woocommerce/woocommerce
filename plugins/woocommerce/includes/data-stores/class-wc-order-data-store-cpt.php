@@ -1040,9 +1040,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				);
 			}
 
-			$total_query = $this->generate_total_meta_query( $total_param );
-			if ( $total_query ) {
-				$wp_query_args['meta_query'][] = $total_query;
+			if ( is_array( $total_param ) ) {
+				$total_query = $this->generate_total_meta_query( $total_param );
+				if ( $total_query ) {
+					$wp_query_args['meta_query'][] = $total_query;
+				}
 			}
 		}
 
