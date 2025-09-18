@@ -154,7 +154,7 @@ class StoreInfoAbility {
 	 * @return bool Whether user has permission.
 	 */
 	public static function check_permission(): bool {
-		// Allow users who can view WooCommerce reports
-		return current_user_can( 'view_woocommerce_reports' );
+		// Allow users who can manage WooCommerce (same as system_status endpoint)
+		return current_user_can( 'manage_woocommerce' );
 	}
 }
