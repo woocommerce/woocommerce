@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\ComingSoonTemplate;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * BlockTemplatesController class.
@@ -187,10 +188,28 @@ class BlockTemplatesController {
 			return $template;
 		}
 
+		$template_file_path = '';
 		$directory          = BlockTemplateUtils::get_templates_directory( $template_type );
-		$template_file_path = $directory . '/' . $template_slug . '.html';
-		$template_object    = BlockTemplateUtils::create_new_block_template_object( $template_file_path, $template_type, $template_slug );
-		$template_built     = BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
+		// If template slug ends with '-add-to-cart-with-options'.
+		if ( strpos( $template_slug, '-product-add-to-cart-with-options' ) > 0 ) {
+			$product_type         = str_replace( '-product-add-to-cart-with-options', '', $template_slug );
+			$is_core_product_type = in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true );
+			if ( $product_type && ! $is_core_product_type ) {
+				/**
+				 * Filter to declare the Add to Cart + Options template part in custom product types.
+				 *
+				 * @since 10.3.0
+				 * @param mixed string|boolean The template part path if it exists
+				 * @param string $product_type The product type
+				 */
+				$template_file_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
+			}
+		}
+		if ( ! $template_file_path ) {
+			$template_file_path = $directory . '/' . $template_slug . '.html';
+		}
+		$template_object = BlockTemplateUtils::create_new_block_template_object( $template_file_path, $template_type, $template_slug );
+		$template_built  = BlockTemplateUtils::build_template_result_from_file( $template_object, $template_type );
 
 		if ( null !== $template_built ) {
 			return $template_built;
@@ -354,7 +373,29 @@ class BlockTemplatesController {
 	 */
 	public function get_block_templates_from_woocommerce( $slugs, $already_found_templates, $template_type = 'wp_template' ) {
 		$template_files = BlockTemplateUtils::get_template_paths( $template_type );
-		$templates      = array();
+
+		if ( 'wp_template_part' === $template_type ) {
+			$product_types = wc_get_product_types();
+			foreach ( $product_types as $product_type => $product_type_label ) {
+				$is_core_product_type = in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true );
+				if ( $is_core_product_type ) {
+					continue;
+				}
+				/**
+				 * Filter to declare the Add to Cart + Options template part in custom product types.
+				 *
+				 * @since 10.3.0
+				 * @param mixed string|boolean The template part path if it exists
+				 * @param string $product_type The product type
+				 */
+				$add_to_cart_with_options_template_part_path = apply_filters( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part', false, $product_type );
+				if ( $add_to_cart_with_options_template_part_path ) {
+					$template_files[] = $add_to_cart_with_options_template_part_path;
+				}
+			}
+		}
+
+		$templates = array();
 
 		foreach ( $template_files as $template_file ) {
 			// Skip the template if it's blockified, and we should only use classic ones.

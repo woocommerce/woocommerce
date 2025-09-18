@@ -19,10 +19,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
-use Automattic\WooCommerce\Blocks\Templates\SimpleProductAddToCartWithOptionsTemplate;
-use Automattic\WooCommerce\Blocks\Templates\ExternalProductAddToCartWithOptionsTemplate;
-use Automattic\WooCommerce\Blocks\Templates\VariableProductAddToCartWithOptionsTemplate;
-use Automattic\WooCommerce\Blocks\Templates\GroupedProductAddToCartWithOptionsTemplate;
+use Automattic\WooCommerce\Blocks\Templates\AddToCartWithOptionsTemplate;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -69,19 +66,26 @@ class BlockTemplatesRegistry {
 			);
 			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
+
 				if ( count( $product_types ) > 0 ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );
-					if ( array_key_exists( ProductType::SIMPLE, $product_types ) ) {
-						$template_parts[ SimpleProductAddToCartWithOptionsTemplate::SLUG ] = new SimpleProductAddToCartWithOptionsTemplate();
-					}
-					if ( array_key_exists( ProductType::EXTERNAL, $product_types ) ) {
-						$template_parts[ ExternalProductAddToCartWithOptionsTemplate::SLUG ] = new ExternalProductAddToCartWithOptionsTemplate();
-					}
-					if ( array_key_exists( ProductType::VARIABLE, $product_types ) ) {
-						$template_parts[ VariableProductAddToCartWithOptionsTemplate::SLUG ] = new VariableProductAddToCartWithOptionsTemplate();
-					}
-					if ( array_key_exists( ProductType::GROUPED, $product_types ) ) {
-						$template_parts[ GroupedProductAddToCartWithOptionsTemplate::SLUG ] = new GroupedProductAddToCartWithOptionsTemplate();
+
+					foreach ( $product_types as $product_type => $product_type_label ) {
+						$is_core_product_type = in_array( $product_type, array( ProductType::SIMPLE, ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ), true );
+						if (
+							$is_core_product_type ||
+							(
+								! $is_core_product_type &&
+								has_filter( '__experimental_woocommerce_' . $product_type . '_add_to_cart_with_options_block_template_part' )
+							)
+						) {
+							$template_parts[ $product_type . '-product-add-to-cart-with-options' ] = new AddToCartWithOptionsTemplate(
+								array(
+									'product_type'       => $product_type,
+									'product_type_label' => $product_type_label,
+								)
+							);
+						}
 					}
 				}
 			}
