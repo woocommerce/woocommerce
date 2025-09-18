@@ -53,6 +53,7 @@ const defaultProductData: ProductResponseItem = {
 	sold_individually: false,
 	add_to_cart: {
 		text: 'Add to cart',
+		single_text: 'Add to cart',
 		description: 'Add to cart',
 		url: '',
 		minimum: 1,

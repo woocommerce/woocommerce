@@ -14,6 +14,7 @@ import {
 	CustomDataProvider,
 	useProductDataContext,
 } from '@woocommerce/shared-context';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -70,8 +71,11 @@ export default function AttributeItemTemplateEdit(
 	} );
 
 	const { product } = useProductDataContext();
+
 	const productAttributes =
-		product.type === 'variable' ? product.attributes : DEFAULT_ATTRIBUTES;
+		isProductResponseItem( product ) && product.type === 'variable'
+			? product.attributes
+			: DEFAULT_ATTRIBUTES;
 
 	const { blocks } = useSelect(
 		( select ) => {

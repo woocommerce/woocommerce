@@ -19,6 +19,7 @@ import {
 import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 interface Attributes {
 	className?: string;
@@ -86,10 +87,11 @@ export default function ProductItemTemplateEdit(
 		className,
 	} );
 
-	const { product } = useProductDataContext();
+	const { product, isLoading } = useProductDataContext();
 	const [ products, setProducts ] = useState< ProductResponseItem[] | null >(
 		null
 	);
+	const productsLength = products?.length;
 
 	useEffect( () => {
 		const fetchChildProducts = async ( groupedProductIds: number[] ) => {
@@ -108,11 +110,16 @@ export default function ProductItemTemplateEdit(
 				} );
 		};
 
-		if ( ! products ) {
-			if ( product.id !== 0 && product.type === 'grouped' ) {
+		if (
+			! isLoading &&
+			product &&
+			product.type === 'grouped' &&
+			productsLength === 0
+		) {
+			if ( isProductResponseItem( product ) ) {
 				fetchChildProducts( product.grouped_products );
-			} else if ( product.id === 0 ) {
-				// If product ID is 0, then we must be editing a template.
+			} else {
+				// If not editing a specific product, we are editing a template.
 				// Fetch an existing grouped product so template can be edited.
 				resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
@@ -137,7 +144,7 @@ export default function ProductItemTemplateEdit(
 					} );
 			}
 		}
-	}, [ products, product ] );
+	}, [ isLoading, product, productsLength ] );
 
 	const { blocks } = useSelect(
 		( select ) => {
