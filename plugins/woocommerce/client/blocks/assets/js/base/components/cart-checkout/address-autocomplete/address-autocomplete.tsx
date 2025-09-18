@@ -109,8 +109,11 @@ export const AddressAutocomplete = ( {
 				);
 
 				// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-				window.wc.addressAutocomplete.activeProvider[ addressType ] =
-					provider;
+				if ( window?.wc?.addressAutocomplete?.activeProvider ) {
+					window.wc.addressAutocomplete.activeProvider[
+						addressType
+					] = provider;
+				}
 				return;
 			}
 		}
@@ -318,7 +321,7 @@ export const AddressAutocomplete = ( {
 
 	const handleSuggestionClick = async ( suggestionId: string ) => {
 		const provider =
-			window.wc.addressAutocomplete.activeProvider[
+			window?.wc?.addressAutocomplete?.activeProvider?.[
 				addressType as 'shipping' | 'billing'
 			];
 		if ( provider ) {

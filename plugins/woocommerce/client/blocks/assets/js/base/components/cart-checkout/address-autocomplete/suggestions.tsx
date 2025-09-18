@@ -114,8 +114,8 @@ export const Suggestions = ( {
 						style={ { cursor: 'pointer' } }
 					>
 						{ getHighlightedLabel(
-							item.label,
-							item.matchedSubstrings || []
+							item?.label,
+							item?.matchedSubstrings || []
 						) }
 					</li>
 				) ) }
