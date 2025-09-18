@@ -1259,6 +1259,168 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test total filtering with operators.
+	 */
+	public function test_total_filtering(): void {
+		// Create orders with different totals.
+		$order1 = $this->create_test_order();
+		$order1->set_total( '100.00' );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->set_total( '250.50' );
+		$order2->save();
+
+		$order3 = $this->create_test_order();
+		$order3->set_total( '500.75' );
+		$order3->save();
+
+		// Test simple equality filtering.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 250.50,
+				'operator' => '=',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 1, $response_data );
+		$this->assertEquals( $order2->get_id(), $response_data[0]['id'] );
+
+		// Test greater than operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 200.00,
+				'operator' => '>',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test greater than or equal operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 250.50,
+				'operator' => '>=',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test less than operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 300.00,
+				'operator' => '<',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order2->get_id(), $order_ids );
+
+		// Test less than or equal operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 250.50,
+				'operator' => '<=',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order2->get_id(), $order_ids );
+
+		// Test not equal operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 100.00,
+				'operator' => '!=',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test between operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => array( 200.00, 300.00 ),
+				'operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 1, $response_data );
+		$this->assertEquals( $order2->get_id(), $response_data[0]['id'] );
+
+		// Test not between operator.
+		$request->set_param(
+			'total',
+			array(
+				'value'    => array( 200.00, 300.00 ),
+				'operator' => 'not between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data );
+
+		$order_ids = wp_list_pluck( $response_data, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Clean up.
+		$order1->delete( true );
+		$order2->delete( true );
+		$order3->delete( true );
+	}
+
+	/**
 	 * Test search functionality.
 	 */
 	public function test_search(): void {

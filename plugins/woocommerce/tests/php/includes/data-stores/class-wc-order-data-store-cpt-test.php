@@ -40,6 +40,132 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test total filtering with operators works as expected for CPT storage.
+	 */
+	public function test_total_filtering_with_operators() {
+		// Create orders with different totals.
+		$order1 = WC_Helper_Order::create_order();
+		$order1->set_total( 100.00 );
+		$order1->save();
+
+		$order2 = WC_Helper_Order::create_order();
+		$order2->set_total( 250.50 );
+		$order2->save();
+
+		$order3 = WC_Helper_Order::create_order();
+		$order3->set_total( 500.75 );
+		$order3->save();
+
+		// Test equals operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '=',
+				),
+			)
+		);
+		$this->assertCount( 1, $orders );
+		$this->assertEquals( $order2->get_id(), $orders[0]->get_id() );
+
+		// Test greater than operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 200.00,
+					'operator' => '>',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test greater than or equal operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '>=',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test less than operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 300.00,
+					'operator' => '<',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order2->get_id(), $order_ids );
+
+		// Test less than or equal operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '<=',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order2->get_id(), $order_ids );
+
+		// Test not equal operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => 100.00,
+					'operator' => '!=',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order2->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+
+		// Test between operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => array( 200.00, 300.00 ),
+					'operator' => 'between',
+				),
+			)
+		);
+		$this->assertCount( 1, $orders );
+		$this->assertEquals( $order2->get_id(), $orders[0]->get_id() );
+
+		// Test not between operator.
+		$orders = wc_get_orders(
+			array(
+				'total' => array(
+					'value'    => array( 200.00, 300.00 ),
+					'operator' => 'not between',
+				),
+			)
+		);
+		$this->assertCount( 2, $orders );
+		$order_ids = wp_list_pluck( $orders, 'id' );
+		$this->assertContains( $order1->get_id(), $order_ids );
+		$this->assertContains( $order3->get_id(), $order_ids );
+	}
+
+	/**
 	 * Test that refund cache are invalidated correctly when refund is deleted.
 	 */
 	public function test_refund_cache_invalidation() {

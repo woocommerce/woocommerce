@@ -609,4 +609,199 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$query = new OrdersTableQuery( $args );
 		$this->assertEquals( $args, $query->get_query_args() );
 	}
+
+	/**
+	 * @testDox Total filtering with operators works as expected for HPOS storage.
+	 */
+	public function test_total_filtering_with_operators() {
+		// Create orders with different totals.
+		$order1 = OrderHelper::create_order();
+		$order1->set_total( 100.00 );
+		$order1->save();
+
+		$order2 = OrderHelper::create_order();
+		$order2->set_total( 250.50 );
+		$order2->save();
+
+		$order3 = OrderHelper::create_order();
+		$order3->set_total( 500.75 );
+		$order3->save();
+
+		// Test equals operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '=',
+				),
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( $order2->get_id(), $query->orders[0] );
+
+		// Test greater than operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 200.00,
+					'operator' => '>',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+
+		// Test greater than or equal operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '>=',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+
+		// Test less than operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 300.00,
+					'operator' => '<',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order1->get_id(), $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+
+		// Test less than or equal operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 250.50,
+					'operator' => '<=',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order1->get_id(), $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+
+		// Test not equal operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => 100.00,
+					'operator' => '!=',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order2->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+
+		// Test between operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => array( 200.00, 300.00 ),
+					'operator' => 'between',
+				),
+			)
+		);
+		$this->assertCount( 1, $query->orders );
+		$this->assertEquals( $order2->get_id(), $query->orders[0] );
+
+		// Test not between operator.
+		$query = new OrdersTableQuery(
+			array(
+				'total' => array(
+					'value'    => array( 200.00, 300.00 ),
+					'operator' => 'not between',
+				),
+			)
+		);
+		$this->assertCount( 2, $query->orders );
+		$this->assertContains( $order1->get_id(), $query->orders );
+		$this->assertContains( $order3->get_id(), $query->orders );
+	}
+
+	/**
+	 * @testDox Total filtering works consistently across both HPOS and CPT storage methods.
+	 */
+	public function test_total_filtering_consistency_across_storage_methods() {
+		// Test data - same orders for both storage methods.
+		$test_cases = array(
+			array(
+				'total'          => array(
+					'value'    => 250.50,
+					'operator' => '=',
+				),
+				'expected_count' => 1,
+			),
+			array(
+				'total'          => array(
+					'value'    => 200.00,
+					'operator' => '>',
+				),
+				'expected_count' => 2,
+			),
+			array(
+				'total'          => array(
+					'value'    => array( 200.00, 300.00 ),
+					'operator' => 'between',
+				),
+				'expected_count' => 1,
+			),
+		);
+
+		// Test HPOS (current test environment).
+		$order1 = OrderHelper::create_order();
+		$order1->set_total( 100.00 );
+		$order1->save();
+
+		$order2 = OrderHelper::create_order();
+		$order2->set_total( 250.50 );
+		$order2->save();
+
+		$order3 = OrderHelper::create_order();
+		$order3->set_total( 500.75 );
+		$order3->save();
+
+		foreach ( $test_cases as $test_case ) {
+			$query = new OrdersTableQuery( array( 'total' => $test_case['total'] ) );
+			$this->assertCount( $test_case['expected_count'], $query->orders, 'HPOS test failed for operator: ' . $test_case['total']['operator'] );
+		}
+
+		// Test CPT storage by temporarily switching to CPT.
+		$prev_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		OrderHelper::toggle_cot_feature_and_usage( false );
+
+		try {
+			// Create new orders for CPT test.
+			$cpt_order1 = WC_Helper_Order::create_order();
+			$cpt_order1->set_total( 100.00 );
+			$cpt_order1->save();
+
+			$cpt_order2 = WC_Helper_Order::create_order();
+			$cpt_order2->set_total( 250.50 );
+			$cpt_order2->save();
+
+			$cpt_order3 = WC_Helper_Order::create_order();
+			$cpt_order3->set_total( 500.75 );
+			$cpt_order3->save();
+
+			foreach ( $test_cases as $test_case ) {
+				$orders = wc_get_orders( array( 'total' => $test_case['total'] ) );
+				$this->assertCount( $test_case['expected_count'], $orders, 'CPT test failed for operator: ' . $test_case['total']['operator'] );
+			}
+		} finally {
+			// Restore original COT state.
+			OrderHelper::toggle_cot_feature_and_usage( $prev_cot_state );
+		}
+	}
 }

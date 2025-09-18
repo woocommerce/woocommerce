@@ -13,6 +13,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use WP_REST_Request;
+use WP_Error;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
@@ -191,6 +192,25 @@ class QueryUtils {
 				'default'           => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'total'                   => array(
+				'description'       => __( 'Limit result set to orders with specific total amounts.', 'woocommerce' ),
+				'type'              => 'object',
+				'properties'        => array(
+					'value'    => array(
+						'description' => __( 'The value(s) to compare against the order total. Use a single number for most operators, or an array of two numbers for between/not between.', 'woocommerce' ),
+						'type'        => array( 'number', 'array' ),
+						'required'    => true,
+					),
+					'operator' => array(
+						'description' => __( 'The comparison operator to use.', 'woocommerce' ),
+						'type'        => 'string',
+						'enum'        => array( '=', '!=', '>', '>=', '<', '<=', 'between', 'not between' ),
+						'default'     => '=',
+					),
+				),
+				'validate_callback' => array( $this, 'validate_total_field' ),
+				'sanitize_callback' => array( $this, 'sanitize_total_field' ),
+			),
 		);
 	}
 
@@ -214,6 +234,7 @@ class QueryUtils {
 		$args['created_via']    = $request['created_via'];
 		$args['status']         = $request['status'];
 		$args['customer']       = $request['customer'];
+		$args['total']          = $request['total'];
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
@@ -318,5 +339,64 @@ class QueryUtils {
 			'total'   => $results->total,
 			'pages'   => $results->max_num_pages,
 		);
+	}
+
+	/**
+	 * Validate the total value parameter.
+	 *
+	 * @param mixed $total_param   The value to validate.
+	 * @return bool|WP_Error True if valid, WP_Error otherwise.
+	 */
+	public function validate_total_field( $total_param ) {
+		if ( empty( $total_param ) ) {
+			return true; // Optional parameter.
+		}
+
+		$value    = $total_param['value'] ?? null;
+		$operator = $total_param['operator'] ?? '=';
+
+		if ( is_null( $value ) ) {
+			return true;
+		}
+
+		// Validate value based on operator.
+		if ( in_array( $operator, array( 'between', 'not between' ), true ) ) {
+			// For between operators, value must be an array with exactly 2 numbers.
+			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+				return new WP_Error( 'rest_invalid_param', __( 'Total value must be an array with exactly 2 numbers for between operators.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+			if ( ! is_numeric( $value[0] ) || ! is_numeric( $value[1] ) ) {
+				return new WP_Error( 'rest_invalid_param', __( 'Total value array must contain only numbers.', 'woocommerce' ), array( 'status' => 400 ) );
+			}
+		} elseif ( ! is_numeric( $value ) ) {
+			// For other operators, value must be a single number.
+			return new WP_Error( 'rest_invalid_param', __( 'Total value must be a number for this operator.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Sanitize the total value parameter.
+	 *
+	 * @param mixed $total_param The value to sanitize.
+	 * @return mixed Sanitized value.
+	 */
+	public function sanitize_total_field( $total_param ) {
+		if ( empty( $total_param ) ) {
+			return true; // Optional parameter.
+		}
+
+		if ( is_array( $total_param['value'] ) ) {
+			// For between operators, sanitize each value in the array.
+			foreach ( $total_param['value'] as $key => $val ) {
+				$total_param['value'][ $key ] = wc_format_decimal( $val, wc_get_price_decimals() );
+			}
+		} else {
+			// For other operators, sanitize as a single number.
+			$total_param['value'] = wc_format_decimal( $total_param['value'], wc_get_price_decimals() );
+		}
+
+		return $total_param;
 	}
 }
