@@ -191,10 +191,9 @@ class Controller extends AbstractController {
 				'instance_id' => $method->instance_id,
 				'title'       => $method->title,
 				'enabled'     => 'yes' === $method->enabled,
+				'method_id'   => $method->id,
+				'settings'    => $this->get_method_settings( $method ),
 			);
-
-			// Get rate description based on method type.
-			$formatted_method['rate_description'] = $this->get_method_rate_description( $method );
 
 			$formatted_methods[] = $formatted_method;
 		}
@@ -203,81 +202,29 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get method rate description for display.
+	 * Get raw method settings for frontend processing.
 	 *
 	 * @param object $method Shipping method object.
-	 * @return string
+	 * @return array
 	 */
-	protected function get_method_rate_description( $method ) {
-		switch ( $method->id ) {
-			case 'free_shipping':
-				return $this->get_free_shipping_description( $method );
+	protected function get_method_settings( $method ) {
+		$settings = array();
 
-			case 'flat_rate':
-				if ( ! empty( $method->cost ) && is_numeric( $method->cost ) ) {
-					return wc_price( $method->cost );
-				} elseif ( ! empty( $method->cost ) ) {
-					return $method->cost; // Return expression-based cost as-is.
-				}
-				return __( 'Flat rate', 'woocommerce' );
+		// Common settings that most methods have.
+		$common_fields = array( 'cost', 'min_amount', 'requires', 'class_cost', 'no_class_cost' );
 
-			case 'local_pickup':
-				if ( ! empty( $method->cost ) && is_numeric( $method->cost ) ) {
-					return wc_price( $method->cost );
-				} elseif ( ! empty( $method->cost ) ) {
-					return $method->cost; // Return expression-based cost as-is.
-				}
-				return __( 'Local pickup', 'woocommerce' );
-
-			default:
-				// For custom methods, try to get cost if available.
-				if ( isset( $method->cost ) && '' !== $method->cost && is_numeric( $method->cost ) ) {
-					return wc_price( $method->cost );
-				} elseif ( isset( $method->cost ) && '' !== $method->cost ) {
-					return $method->cost; // Return expression-based cost as-is.
-				}
-				return $method->title;
+		foreach ( $common_fields as $field ) {
+			if ( isset( $method->$field ) ) {
+				$settings[ $field ] = $method->$field;
+			}
 		}
-	}
 
-	/**
-	 * Get free shipping method description based on requirements.
-	 *
-	 * @param object $method Free shipping method object.
-	 * @return string
-	 */
-	protected function get_free_shipping_description( $method ) {
-		$requires = isset( $method->requires ) ? $method->requires : '';
-
-		switch ( $requires ) {
-			case 'min_amount':
-				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
-					/* translators: %s: minimum amount for free shipping */
-					return sprintf( __( 'Free over %s', 'woocommerce' ), wc_price( $method->min_amount ) );
-				}
-				return __( 'Free shipping', 'woocommerce' );
-
-			case 'coupon':
-				return __( 'Free with coupon', 'woocommerce' );
-
-			case 'either':
-				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
-					/* translators: %s: minimum amount for free shipping */
-					return sprintf( __( 'Free over %s or with coupon', 'woocommerce' ), wc_price( $method->min_amount ) );
-				}
-				return __( 'Free with coupon', 'woocommerce' );
-
-			case 'both':
-				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
-					/* translators: %s: minimum amount for free shipping */
-					return sprintf( __( 'Free over %s and with coupon', 'woocommerce' ), wc_price( $method->min_amount ) );
-				}
-				return __( 'Free with coupon', 'woocommerce' );
-
-			default:
-				// Default case for 'none' or any other value.
-				return __( 'Free', 'woocommerce' );
+		// Return all available settings for maximum flexibility.
+		if ( isset( $method->instance_settings ) && is_array( $method->instance_settings ) ) {
+			$settings = array_merge( $settings, $method->instance_settings );
 		}
+
+		return $settings;
 	}
 
 

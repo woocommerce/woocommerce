@@ -61,21 +61,25 @@ class ShippingZoneSchema extends AbstractSchema {
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'instance_id'      => array(
+						'instance_id' => array(
 							'description' => __( 'Shipping method instance ID.', 'woocommerce' ),
 							'type'        => 'integer',
 						),
-						'title'            => array(
+						'title'       => array(
 							'description' => __( 'Shipping method title.', 'woocommerce' ),
 							'type'        => 'string',
 						),
-						'enabled'          => array(
+						'enabled'     => array(
 							'description' => __( 'Whether the shipping method is enabled.', 'woocommerce' ),
 							'type'        => 'boolean',
 						),
-						'rate_description' => array(
-							'description' => __( 'Formatted rate description for display.', 'woocommerce' ),
+						'method_id'   => array(
+							'description' => __( 'Shipping method ID (e.g., flat_rate, free_shipping).', 'woocommerce' ),
 							'type'        => 'string',
+						),
+						'settings'    => array(
+							'description' => __( 'Raw shipping method settings for frontend processing.', 'woocommerce' ),
+							'type'        => 'object',
 						),
 					),
 				),
