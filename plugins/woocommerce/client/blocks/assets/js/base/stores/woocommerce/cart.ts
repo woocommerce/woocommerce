@@ -438,6 +438,8 @@ const { state, actions } = store< Store >(
 							existingItem.quantity = item.quantity;
 							if ( existingItem.key ) {
 								quantityChanges.cartItemsPendingQuantity = [
+									...( quantityChanges.cartItemsPendingQuantity ??
+										[] ),
 									existingItem.key,
 								];
 							}
@@ -509,6 +511,15 @@ const { state, actions } = store< Store >(
 						  )
 						: [];
 
+					if (
+						errorResponses.length > 0 &&
+						successfulResponses.length === 0
+					) {
+						throw generateError(
+							errorResponses[ 0 ].body as ApiErrorResponse
+						);
+					}
+
 					// Only update the cart and trigger events if there is at least one successful response.
 					if ( successfulResponses.length > 0 ) {
 						const lastSuccessfulCartResponse = successfulResponses[
@@ -572,12 +583,6 @@ const { state, actions } = store< Store >(
 								generateErrorNotice( body as ApiErrorResponse )
 							)
 					);
-
-					if ( errorResponses.length > 0 ) {
-						throw generateError(
-							errorResponses[ 0 ].body as ApiErrorResponse
-						);
-					}
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
