@@ -87,7 +87,7 @@ class Controller extends AbstractController {
 		// Sort zones by order.
 		uasort(
 			$zones,
-			function( $a, $b ) {
+			function ( $a, $b ) {
 				return $a['zone_order'] <=> $b['zone_order'];
 			}
 		);
@@ -210,6 +210,7 @@ class Controller extends AbstractController {
 		switch ( $method->id ) {
 			case 'free_shipping':
 				if ( ! empty( $method->min_amount ) ) {
+					/* translators: minimum amount of order over which the shipping cost would be free */
 					return sprintf( __( 'Free over %s', 'woocommerce' ), wc_price( $method->min_amount ) );
 				}
 				return __( 'Free', 'woocommerce' );
