@@ -5,6 +5,7 @@
  * @package WooCommerce\DataStores
  */
 
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -600,19 +601,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
 		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '10.3.0' );
-		$emails      = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$users_query = new WP_User_Query(
-			array(
-				'fields'     => 'ID',
-				'meta_query' => array(
-					array(
-						'key'     => 'billing_email',
-						'value'   => $emails,
-						'compare' => 'IN',
-					),
-				),
-			)
-		);
-		return array_unique( $users_query->get_results() );
+		return wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email( $emails, false );
 	}
 }
