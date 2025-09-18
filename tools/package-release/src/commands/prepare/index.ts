@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { CliUx, Command, Flags } from '@oclif/core';
-import { writeFileSync } from 'fs';
+import { writeFileSync, execSync } from 'fs';
 
 /**
  * Internal dependencies
@@ -21,6 +21,7 @@ import {
 	writeChangelog,
 	hasValidChangelogs,
 } from '../../changelogger';
+import { WOOCOMMERCE_PLUGIN_ROOT } from '../../const';
 
 /**
  * PackagePrepare class
@@ -165,6 +166,14 @@ export default class PackagePrepare extends Command {
 				jsonFilepath,
 				JSON.stringify( json, null, '\t' ) + '\n'
 			);
+
+			// if preparing a php package, also update the version in the root composer.json and composer.lock
+			if ( packageType === 'php' ) {
+				execSync( `composer update ${ json.name } --no-scripts`, {
+					encoding: 'utf-8',
+					cwd: WOOCOMMERCE_PLUGIN_ROOT,
+				} );
+			}
 		} catch ( e ) {
 			this.error( `Can't bump version for ${ name }.` );
 		}
