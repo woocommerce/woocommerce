@@ -333,8 +333,9 @@ const { state, actions } = store< Store >(
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// In some cases, optimistically update the number of items in
-				// the cart.
+				// Optimistically update the number of items in the cart except
+				// if the product is sold individually and is already in the
+				// cart.
 				let updatedItem = null;
 				if ( item ) {
 					const isSoldIndividually =
