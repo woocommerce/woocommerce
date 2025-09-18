@@ -64,9 +64,21 @@ class StoreInfoAbility {
 						'stats'               => array(
 							'type'       => 'object',
 							'properties' => array(
-								'product_count'  => array( 'type' => 'integer' ),
-								'order_count'    => array( 'type' => 'integer' ),
-								'customer_count' => array( 'type' => 'integer' ),
+								'product_count'   => array( 'type' => 'integer' ),
+								'order_count'     => array( 'type' => 'integer' ),
+								'order_breakdown' => array(
+									'type'       => 'object',
+									'properties' => array(
+										'completed'  => array( 'type' => 'integer' ),
+										'processing' => array( 'type' => 'integer' ),
+										'pending'    => array( 'type' => 'integer' ),
+										'on-hold'    => array( 'type' => 'integer' ),
+										'cancelled'  => array( 'type' => 'integer' ),
+										'refunded'   => array( 'type' => 'integer' ),
+										'failed'     => array( 'type' => 'integer' ),
+									),
+								),
+								'customer_count'  => array( 'type' => 'integer' ),
 							),
 						),
 					),
