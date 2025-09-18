@@ -179,11 +179,12 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param mixed           $item WordPress representation of the item.
-	 * @param WP_REST_Request $request Request object.
+	 * @param mixed            $item WordPress representation of the item.
+	 * @param WP_REST_Request  $request Request object.
+	 * @param WP_REST_Response $response Response object.
 	 * @return array
 	 */
-	protected function prepare_links( $item, WP_REST_Request $request ): array {
+	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
 		$links = array(
 			'self'            => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $item->get_id() ) ),
@@ -211,6 +212,22 @@ class Controller extends AbstractController {
 			$links['up'] = array(
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
 			);
+		}
+
+		$response_data = $response->get_data();
+
+		if ( ! empty( $response_data['line_items'] ) ) {
+			$embed_ids = array_filter( array_unique( wp_list_pluck( $response_data['line_items'], 'product_id' ) ) );
+
+			if ( ! empty( $embed_ids ) ) {
+				$links['products'] = array();
+				foreach ( $embed_ids as $embed_id ) {
+					$links['products'][] = array(
+						'href'       => rest_url( sprintf( '%s/products/%d?_fields=id,name,permalink,images,sku,global_unique_id,price,product_type,virtual,downloadable,shipping_required', $this->namespace, $embed_id ) ),
+						'embeddable' => true,
+					);
+				}
+			}
 		}
 
 		return $links;
