@@ -87,6 +87,19 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Get the WC order.
 		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $purchase_units[0]['custom_id'] ?? '{}' );
+			$response = $this->get_update_shipping_error_response();
+			return new WP_REST_Response( $response, 422 );
+		}
+
+		// Compare PayPal order IDs.
+		$paypal_order_id_from_order_meta = $order->get_meta( '_paypal_order_id', true );
+		if ( $paypal_order_id !== $paypal_order_id_from_order_meta ) {
+			WC_Gateway_Paypal::log(
+				'PayPal order ID mismatch. Order ID: ' . $order->get_id() .
+				'. PayPal order ID (request): ' . $paypal_order_id .
+				'. PayPal order ID (order meta): ' . $paypal_order_id_from_order_meta
+			);
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
 		}
@@ -106,10 +119,15 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Get the new shipping options, which depend on the new shipping address.
 		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
 		if ( empty( $updated_shipping_options ) ) {
+			WC_Gateway_Paypal::log(
+				'No shipping options found for address. Order ID: ' . $order->get_id() .
+				'. Address: ' . wp_json_encode( $shipping_address )
+			);
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
 		}
 
+		// Set the chosen shipping method in the session.
 		if ( ! empty( $shipping_option ) ) {
 			WC()->session->set( 'chosen_shipping_methods', array( $shipping_option['id'] ) );
 		}
