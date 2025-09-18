@@ -211,30 +211,72 @@ class Controller extends AbstractController {
 	protected function get_method_rate_description( $method ) {
 		switch ( $method->id ) {
 			case 'free_shipping':
-				if ( ! empty( $method->min_amount ) ) {
-					/* translators: minimum amount of order over which the shipping cost would be free */
-					return sprintf( __( 'Free over %s', 'woocommerce' ), wc_price( $method->min_amount ) );
-				}
-				return __( 'Free', 'woocommerce' );
+				return $this->get_free_shipping_description( $method );
 
 			case 'flat_rate':
-				if ( ! empty( $method->cost ) ) {
+				if ( ! empty( $method->cost ) && is_numeric( $method->cost ) ) {
 					return wc_price( $method->cost );
+				} elseif ( ! empty( $method->cost ) ) {
+					return $method->cost; // Return expression-based cost as-is.
 				}
 				return __( 'Flat rate', 'woocommerce' );
 
 			case 'local_pickup':
-				if ( ! empty( $method->cost ) ) {
+				if ( ! empty( $method->cost ) && is_numeric( $method->cost ) ) {
 					return wc_price( $method->cost );
+				} elseif ( ! empty( $method->cost ) ) {
+					return $method->cost; // Return expression-based cost as-is.
 				}
 				return __( 'Local pickup', 'woocommerce' );
 
 			default:
 				// For custom methods, try to get cost if available.
-				if ( isset( $method->cost ) && '' !== $method->cost ) {
+				if ( isset( $method->cost ) && '' !== $method->cost && is_numeric( $method->cost ) ) {
 					return wc_price( $method->cost );
+				} elseif ( isset( $method->cost ) && '' !== $method->cost ) {
+					return $method->cost; // Return expression-based cost as-is.
 				}
 				return $method->title;
+		}
+	}
+
+	/**
+	 * Get free shipping method description based on requirements.
+	 *
+	 * @param object $method Free shipping method object.
+	 * @return string
+	 */
+	protected function get_free_shipping_description( $method ) {
+		$requires = isset( $method->requires ) ? $method->requires : '';
+
+		switch ( $requires ) {
+			case 'min_amount':
+				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
+					/* translators: %s: minimum amount for free shipping */
+					return sprintf( __( 'Free over %s', 'woocommerce' ), wc_price( $method->min_amount ) );
+				}
+				return __( 'Free shipping', 'woocommerce' );
+
+			case 'coupon':
+				return __( 'Free with coupon', 'woocommerce' );
+
+			case 'either':
+				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
+					/* translators: %s: minimum amount for free shipping */
+					return sprintf( __( 'Free over %s or with coupon', 'woocommerce' ), wc_price( $method->min_amount ) );
+				}
+				return __( 'Free with coupon', 'woocommerce' );
+
+			case 'both':
+				if ( ! empty( $method->min_amount ) && is_numeric( $method->min_amount ) ) {
+					/* translators: %s: minimum amount for free shipping */
+					return sprintf( __( 'Free over %s and with coupon', 'woocommerce' ), wc_price( $method->min_amount ) );
+				}
+				return __( 'Free with coupon', 'woocommerce' );
+
+			default:
+				// Default case for 'none' or any other value.
+				return __( 'Free', 'woocommerce' );
 		}
 	}
 
