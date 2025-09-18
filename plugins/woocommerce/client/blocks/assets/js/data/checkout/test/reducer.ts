@@ -342,4 +342,239 @@ describe( 'Checkout Store Reducer', () => {
 			);
 		} );
 	} );
+
+	describe( 'should handle ADD_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
+		it( 'should add a new provider to empty list', () => {
+			const expectedState = {
+				...defaultState,
+				addressAutocompleteProviders: [ 'google-places' ],
+			};
+
+			expect(
+				reducer(
+					defaultState,
+					actions.addAddressAutocompleteProvider( 'google-places' )
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should add a new provider to existing list', () => {
+			const initialState = {
+				...defaultState,
+				addressAutocompleteProviders: [ 'google-places' ],
+			};
+
+			const expectedState = {
+				...defaultState,
+				addressAutocompleteProviders: [ 'google-places', 'mapbox' ],
+			};
+
+			expect(
+				reducer(
+					initialState,
+					actions.addAddressAutocompleteProvider( 'mapbox' )
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should not add duplicate providers', () => {
+			const initialState = {
+				...defaultState,
+				addressAutocompleteProviders: [ 'google-places' ],
+			};
+
+			const expectedState = {
+				...defaultState,
+				addressAutocompleteProviders: [ 'google-places' ],
+			};
+
+			expect(
+				reducer(
+					initialState,
+					actions.addAddressAutocompleteProvider( 'google-places' )
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should not add provider if providerId is not a string', () => {
+			const expectedState = defaultState;
+
+			expect(
+				reducer(
+					defaultState,
+					// @ts-expect-error Testing invalid input
+					actions.addAddressAutocompleteProvider( null )
+				)
+			).toEqual( expectedState );
+
+			expect(
+				reducer(
+					defaultState,
+					// @ts-expect-error Testing invalid input
+					actions.addAddressAutocompleteProvider( 123 )
+				)
+			).toEqual( expectedState );
+		} );
+	} );
+
+	describe( 'should handle SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER', () => {
+		it( 'should set active provider for billing address', () => {
+			const expectedState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'google-places',
+					shipping: '',
+				},
+			};
+
+			expect(
+				reducer(
+					defaultState,
+					actions.setActiveAddressAutocompleteProvider(
+						'google-places',
+						'billing'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should set active provider for shipping address', () => {
+			const expectedState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: '',
+					shipping: 'mapbox',
+				},
+			};
+
+			expect(
+				reducer(
+					defaultState,
+					actions.setActiveAddressAutocompleteProvider(
+						'mapbox',
+						'shipping'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should update existing provider for an address type', () => {
+			const initialState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'google-places',
+					shipping: 'google-places',
+				},
+			};
+
+			const expectedState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'mapbox',
+					shipping: 'google-places',
+				},
+			};
+
+			expect(
+				reducer(
+					initialState,
+					actions.setActiveAddressAutocompleteProvider(
+						'mapbox',
+						'billing'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should not update if same provider is already active', () => {
+			const initialState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'google-places',
+					shipping: '',
+				},
+			};
+
+			const expectedState = initialState;
+
+			expect(
+				reducer(
+					initialState,
+					actions.setActiveAddressAutocompleteProvider(
+						'google-places',
+						'billing'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should not update for invalid address type', () => {
+			const expectedState = defaultState;
+
+			expect(
+				reducer(
+					defaultState,
+					// @ts-expect-error Testing invalid input
+					actions.setActiveAddressAutocompleteProvider(
+						'google-places',
+						'invalid'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should not update if providerId is not a string', () => {
+			const expectedState = defaultState;
+
+			expect(
+				reducer(
+					defaultState,
+					// @ts-expect-error Testing invalid input
+					actions.setActiveAddressAutocompleteProvider(
+						null,
+						'billing'
+					)
+				)
+			).toEqual( expectedState );
+
+			expect(
+				reducer(
+					defaultState,
+					// @ts-expect-error Testing invalid input
+					actions.setActiveAddressAutocompleteProvider(
+						123,
+						'shipping'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+
+		it( 'should preserve other address type when updating one', () => {
+			const initialState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'google-places',
+					shipping: 'mapbox',
+				},
+			};
+
+			const expectedState = {
+				...defaultState,
+				activeAddressAutocompleteProvider: {
+					billing: 'another-provider',
+					shipping: 'mapbox',
+				},
+			};
+
+			expect(
+				reducer(
+					initialState,
+					actions.setActiveAddressAutocompleteProvider(
+						'another-provider',
+						'billing'
+					)
+				)
+			).toEqual( expectedState );
+		} );
+	} );
 } );
