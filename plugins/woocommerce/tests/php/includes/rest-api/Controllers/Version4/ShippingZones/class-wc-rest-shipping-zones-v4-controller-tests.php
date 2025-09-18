@@ -1,9 +1,11 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
+<?php
 /**
  * Shipping Zones V4 Controller tests.
  *
  * @package WooCommerce\Tests\API
  */
+
+declare( strict_types=1 );
 
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 

@@ -110,7 +110,7 @@ class Controller extends AbstractController {
 	 * @param WP_REST_Request  $request Request object.
 	 * @return array
 	 */
-	protected function get_item_response( $zone, WP_REST_Request $request ): array {
+	protected function get_item_response( $zone, WP_REST_Request $request ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array(
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
@@ -243,7 +243,7 @@ class Controller extends AbstractController {
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_items_permissions_check( $request ) {
+	public function get_items_permissions_check( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}

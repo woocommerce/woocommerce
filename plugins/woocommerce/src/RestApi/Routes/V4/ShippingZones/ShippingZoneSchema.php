@@ -91,11 +91,6 @@ class ShippingZoneSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_schema(): array {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'shipping_zone',
-			'type'       => 'object',
-			'properties' => self::get_item_schema_properties(),
-		);
+		return self::get_item_schema();
 	}
 }

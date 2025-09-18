@@ -1,4 +1,3 @@
 Significance: minor
 Type: dev
-
-Add v4/shipping-zones endpoint with unified location and method data for improved performance in shipping zone list views.
+Comment: Add wc/v4/shipping-zones endpoint with unified location and method data to improve performance in shipping zone list views.
