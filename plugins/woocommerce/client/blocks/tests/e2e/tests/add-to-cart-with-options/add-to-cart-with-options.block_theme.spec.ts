@@ -370,6 +370,43 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
 		} );
+
+		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
+			await page.reload();
+
+			// Try to add the individually sold product to cart again (it will fail).
+			const individuallySoldProductCheckbox = page.getByRole(
+				'checkbox',
+				{ name: 'Buy one of Hoodie with Logo' }
+			);
+			await individuallySoldProductCheckbox.click();
+
+			// Try to add another product to cart again (it will succeed).
+			const beanieIncreaseQuantityButton = page.getByLabel(
+				'Increase quantity of Beanie'
+			);
+			await beanieIncreaseQuantityButton.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			await addToCartButton.click();
+
+			// Verify button updated successfully.
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+			// Verify error message is displayed.
+			await expect(
+				page.getByText(
+					'The quantity of "Hoodie with Logo" cannot be changed'
+				)
+			).toBeVisible();
+			// Verify optimistic updates were applied, so the product that was
+			// successfully added to cart is counted.
+			await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+		} );
 	} );
 
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {

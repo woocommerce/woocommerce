@@ -438,6 +438,8 @@ const { state, actions } = store< Store >(
 							existingItem.quantity = item.quantity;
 							if ( existingItem.key ) {
 								quantityChanges.cartItemsPendingQuantity = [
+									...( quantityChanges.cartItemsPendingQuantity ??
+										[] ),
 									existingItem.key,
 								];
 							}
@@ -493,6 +495,10 @@ const { state, actions } = store< Store >(
 
 					const json: BatchResponse = yield res.json();
 
+					// Checks if the response contains an error.
+					if ( isApiErrorResponse( res, json ) )
+						throw generateError( json );
+
 					const errorResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -500,12 +506,6 @@ const { state, actions } = store< Store >(
 									response.status >= 300
 						  )
 						: [];
-
-					if ( errorResponses.length > 0 ) {
-						throw generateError(
-							errorResponses[ 0 ].body as ApiErrorResponse
-						);
-					}
 
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
