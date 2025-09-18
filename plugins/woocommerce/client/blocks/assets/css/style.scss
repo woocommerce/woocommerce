@@ -373,6 +373,6 @@ body.wc-block-product-gallery-modal-open {
 
 // These styles are for handling RTL currency symbols in classic themes.
 .woocommerce-Price-bidi {
-	unicode-bidi: bidi-override;
+	unicode-bidi: isolate;
 	direction: ltr;
 }

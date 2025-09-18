@@ -29,7 +29,7 @@
 	}
 
 	.woocommerce-Price-bidi {
-		unicode-bidi: bidi-override;
+		unicode-bidi: isolate;
 		direction: ltr;
 	}
 
