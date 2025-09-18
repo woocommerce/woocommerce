@@ -22,6 +22,23 @@ defined( 'ABSPATH' ) || exit;
 class WooCommerceRestTransport extends RestTransport {
 
 	/**
+	 * Current MCP user's API key permissions.
+	 *
+	 * @var string|null
+	 */
+	private static $current_mcp_permissions = null;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct( ...$args ) {
+		parent::__construct( ...$args );
+
+		// Register permission filter callback
+		add_filter( 'woocommerce_check_rest_ability_permissions_for_method', array( $this, 'check_ability_permission' ), 10, 3 );
+	}
+
+	/**
 	 * Validate request using WooCommerce REST API authentication.
 	 *
 	 * @param WP_REST_Request|null $request The REST request object.
@@ -110,10 +127,54 @@ class WooCommerceRestTransport extends RestTransport {
 			);
 		}
 
+		// Store permissions for tool-level checking
+		self::$current_mcp_permissions = $user_data->permissions;
+
 		// Set the current user
 		wp_set_current_user( $user_data->user_id );
 
 		return $user_data->user_id;
+	}
+
+	/**
+	 * Get the current MCP user's API key permissions.
+	 *
+	 * @return string|null The permissions (read, write, read_write) or null if no MCP context.
+	 */
+	public static function get_current_user_permissions(): ?string {
+		return self::$current_mcp_permissions;
+	}
+
+	/**
+	 * Check REST ability permissions for HTTP method.
+	 *
+	 * @param bool   $allowed    Whether the operation is allowed. Default false.
+	 * @param string $method     HTTP method (GET, POST, PUT, DELETE).
+	 * @param object $controller REST controller instance.
+	 * @return bool Whether permission is granted.
+	 */
+	public function check_ability_permission( $allowed, $method, $controller ) {
+		// Only check permissions if we have MCP context
+		$permissions = self::get_current_user_permissions();
+		if ( $permissions === null ) {
+			return $allowed;
+		}
+
+		// Check permissions based on method
+		switch ( $method ) {
+			case 'HEAD':
+			case 'GET':
+				return ( 'read' === $permissions || 'read_write' === $permissions );
+			case 'POST':
+			case 'PUT':
+			case 'PATCH':
+			case 'DELETE':
+				return ( 'write' === $permissions || 'read_write' === $permissions );
+			case 'OPTIONS':
+				return true;
+			default:
+				return false;
+		}
 	}
 
 }

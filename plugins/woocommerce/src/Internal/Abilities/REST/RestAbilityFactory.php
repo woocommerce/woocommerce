@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\REST;
 
+use Automattic\WooCommerce\Internal\MCP\Transport\WooCommerceRestTransport;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -188,15 +190,7 @@ class RestAbilityFactory {
 	 * @return mixed Operation result.
 	 */
 	private static function execute_operation( $controller, string $operation, array $input, string $route ) {
-		// Map operation to REST method
-		$method_map = array(
-			'list'   => 'GET',
-			'get'    => 'GET',
-			'create' => 'POST',
-			'update' => 'PUT',
-			'delete' => 'DELETE',
-		);
-		$method = $method_map[ $operation ] ?? 'GET';
+		$method = self::get_http_method_for_operation( $operation );
 
 		// Build final route - add ID for single item operations
 		$request_route = $route;
@@ -228,9 +222,25 @@ class RestAbilityFactory {
 		return $data;
 	}
 
+	/**
+	 * Get HTTP method for a given operation type.
+	 *
+	 * @param string $operation Operation type (list, get, create, update, delete).
+	 * @return string HTTP method (GET, POST, PUT, DELETE).
+	 */
+	private static function get_http_method_for_operation( string $operation ): string {
+		$method_map = array(
+			'list'   => 'GET',
+			'get'    => 'GET',
+			'create' => 'POST',
+			'update' => 'PUT',
+			'delete' => 'DELETE',
+		);
+		return $method_map[ $operation ] ?? 'GET';
+	}
 
 	/**
-	 * Check permissions - delegate to REST controller.
+	 * Check permissions for MCP operations.
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param string $operation Operation type.
@@ -238,8 +248,16 @@ class RestAbilityFactory {
 	 * @return bool Whether permission is granted.
 	 */
 	private static function check_permission( $controller, string $operation, array $input ): bool {
-		// We return true here and let the controller handle permissions
-		// The REST controller will check permissions when its methods are called
-		return true;
+		// Get HTTP method for the operation
+		$method = self::get_http_method_for_operation( $operation );
+
+		/**
+		 * Filter to check REST ability permissions for HTTP method.
+		 *
+		 * @param bool   $allowed    Whether the operation is allowed. Default false.
+		 * @param string $method     HTTP method (GET, POST, PUT, DELETE).
+		 * @param object $controller REST controller instance.
+		 */
+		return apply_filters( 'woocommerce_check_rest_ability_permissions_for_method', false, $method, $controller );
 	}
 }
