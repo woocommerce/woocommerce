@@ -83,6 +83,23 @@ class AddToCartWithOptions extends AbstractBlock {
 	}
 
 	/**
+	 * Check if HTML content has form elements.
+	 *
+	 * @param string $html_content The HTML content.
+	 * @return bool True if the HTML content has form elements, false otherwise.
+	 */
+	public function has_form_elements( $html_content ) {
+		$processor     = new \WP_HTML_Tag_Processor( $html_content );
+		$form_elements = array( 'INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'FORM' );
+		while ( $processor->next_tag() ) {
+			if ( in_array( $processor->get_tag(), $form_elements, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Check if a child product is purchasable.
 	 *
 	 * @param \WC_Product $product The product to check.
@@ -502,11 +519,11 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
-			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
+			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
 				$action_url = home_url( add_query_arg( null, null ) );
 
-				// If an extension is hoooking into the form or we need to redirect to the cart,
+				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
 					'action'  => esc_url(
