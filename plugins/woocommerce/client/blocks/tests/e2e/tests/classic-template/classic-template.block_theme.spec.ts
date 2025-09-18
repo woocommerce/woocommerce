@@ -44,28 +44,17 @@ const getClassicTemplateBlocksInInserter = async ( {
 	const options = inserterBlocks.locator( 'role=option' );
 
 	// Filter out blocks that don't match one of the possible Classic Template block names (case-insensitive).
-	const classicTemplateBlocks = await options.evaluateAll(
-		( elements, blockNames ) => {
-			const blockOptions = elements.filter( ( element ) => {
-				return blockNames.some(
-					( name ) => element.textContent === name
-				);
-			} );
-			return blockOptions.map( ( element ) => element.textContent );
-		},
-		'WooCommerce Classic Template'
-	);
+	const classicTemplateBlocks = await options.evaluateAll( ( elements ) => {
+		const blockOptions = elements.filter( ( element ) => {
+			return element.textContent === 'WooCommerce Classic Template';
+		} );
+		return blockOptions.map( ( element ) => element.textContent );
+	} );
 
 	return classicTemplateBlocks;
 };
 
 test.describe( `${ blockData.name } Block `, () => {
-	test.beforeEach( async () => {
-		await wpCLI(
-			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
-		);
-	} );
-
 	test( `is not available in the inserter`, async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
@@ -82,21 +71,22 @@ test.describe( `${ blockData.name } Block `, () => {
 		expect( classicTemplateBlocks ).toHaveLength( 0 );
 	} );
 
-	test( `can be added to a WC template`, async ( {
+	test( `is visible as default block when wc_blocks_use_blockified_product_grid_block_as_template is false`, async ( {
 		admin,
 		editor,
 		page,
 	} ) => {
+		await wpCLI(
+			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
+		);
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
 
-		await editor.insertBlock( { name: blockData.slug } );
-
 		await expect(
-			await editor.getBlockByName( blockData.slug )
+			await editor.getBlockByName( blockData.name )
 		).toBeVisible();
 
 		await page.goto( '/shop/' );
