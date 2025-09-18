@@ -63,6 +63,12 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
+			'price'        => array(
+				'description' => __( 'Item price. Calculated as total / quantity.', 'woocommerce' ),
+				'type'        => 'number',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'tax_class'    => array(
 				'description' => __( 'Tax class of product.', 'woocommerce' ),
 				'type'        => 'string',
@@ -138,6 +144,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'id'           => $order_item->get_id(),
 			'name'         => $order_item->get_name(),
 			'quantity'     => $order_item->get_quantity(),
+			'price'        => $order_item->get_quantity() ? $order_item->get_total() / $order_item->get_quantity() : 0,
 			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
 			'tax_class'    => $order_item->get_tax_class(),
 			'subtotal'     => wc_format_decimal( $order_item->get_subtotal(), $dp ),
@@ -146,12 +153,11 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'total_tax'    => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'        => $this->prepare_taxes( $order_item, $request ),
 			'meta_data'    => $this->filter_meta_data( $this->prepare_meta_data( $order_item ), $order_item, $request ),
-			'price'        => $order_item->get_quantity() ? $order_item->get_total() / $order_item->get_quantity() : 0,
 		);
 
 		// Add COGS data.
 		if ( self::cogs_is_enabled() ) {
-			$data['cost_of_goods_sold']['value'] = isset( $data['cogs_value'] ) ? $data['cogs_value'] : 0;
+			$data['cost_of_goods_sold']['total_value'] = isset( $data['cogs_value'] ) ? $data['cogs_value'] : 0;
 			unset( $data['cogs_value'] );
 		}
 
@@ -174,7 +180,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 
 		foreach ( $meta_data as $meta ) {
 			// Filter out product variations.
-			if ( $filter_variation_meta && wc_is_attribute_in_product_name( $meta->display_value, $item_name ) ) {
+			if ( $filter_variation_meta && wc_is_attribute_in_product_name( $meta['display_value'], $item_name ) ) {
 				continue;
 			}
 			$return[] = $meta;
