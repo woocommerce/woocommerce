@@ -32,7 +32,7 @@ class RestAbilityFactory {
 		$controller = new $controller_class();
 
 		foreach ( $config['abilities'] as $ability_config ) {
-			self::register_single_ability( $controller, $ability_config );
+			self::register_single_ability( $controller, $ability_config, $config['route'] );
 		}
 	}
 
@@ -41,8 +41,9 @@ class RestAbilityFactory {
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param array  $ability_config Ability configuration array.
+	 * @param string $route REST route for this controller.
 	 */
-	private static function register_single_ability( $controller, array $ability_config ): void {
+	private static function register_single_ability( $controller, array $ability_config, string $route ): void {
 		// Only proceed if wp_register_ability function exists
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return;
@@ -56,8 +57,8 @@ class RestAbilityFactory {
 					'description'         => $ability_config['description'],
 					'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
 					'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
-					'execute_callback'    => function( $input ) use ( $controller, $ability_config ) {
-						return self::execute_operation( $controller, $ability_config['operation'], $input );
+					'execute_callback'    => function( $input ) use ( $controller, $ability_config, $route ) {
+						return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
 					},
 					'permission_callback' => function( $input ) use ( $controller, $ability_config ) {
 						return self::check_permission( $controller, $ability_config['operation'], $input );
@@ -183,11 +184,10 @@ class RestAbilityFactory {
 	 * @param object $controller REST controller instance.
 	 * @param string $operation Operation type.
 	 * @param array  $input Input parameters.
+	 * @param string $route REST route for this controller.
 	 * @return mixed Operation result.
 	 */
-	private static function execute_operation( $controller, string $operation, array $input ) {
-		$request = new \WP_REST_Request();
-
+	private static function execute_operation( $controller, string $operation, array $input, string $route ) {
 		// Map operation to REST method
 		$method_map = array(
 			'list'   => 'GET',
@@ -196,43 +196,29 @@ class RestAbilityFactory {
 			'update' => 'PUT',
 			'delete' => 'DELETE',
 		);
+		$method = $method_map[ $operation ] ?? 'GET';
 
-		$request->set_method( $method_map[ $operation ] );
-
-		// Set parameters
-		if ( isset( $input['id'] ) ) {
-			$request->set_param( 'id', $input['id'] );
+		// Build final route - add ID for single item operations
+		$request_route = $route;
+		if ( isset( $input['id'] ) && in_array( $operation, array( 'get', 'update', 'delete' ), true ) ) {
+			$request_route .= '/' . intval( $input['id'] );
 			unset( $input['id'] );
 		}
 
-		// Set remaining parameters
+		// Create REST request
+		$request = new \WP_REST_Request( $method, $request_route );
 		foreach ( $input as $key => $value ) {
 			$request->set_param( $key, $value );
 		}
 
-		// Execute controller method
-		$controller_method_map = array(
-			'list'   => 'get_items',
-			'get'    => 'get_item',
-			'create' => 'create_item',
-			'update' => 'update_item',
-			'delete' => 'delete_item',
-		);
-
-		$method = $controller_method_map[ $operation ];
-
-		if ( ! method_exists( $controller, $method ) ) {
-			return new \WP_Error( 'method_not_found', "Method $method not found in controller" );
-		}
-
-		// Execute the operation - controller handles permissions automatically
-		$response = $controller->$method( $request );
+		// Dispatch through REST API for proper validation and permissions
+		$response = rest_do_request( $request );
 
 		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
 
-		$data = $response->get_data();
+		$data = $response instanceof \WP_REST_Response ? $response->get_data() : $response;
 
 		// For list operations, wrap in data object to match schema
 		if ( 'list' === $operation ) {

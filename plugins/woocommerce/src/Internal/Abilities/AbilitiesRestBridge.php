@@ -28,6 +28,7 @@ class AbilitiesRestBridge {
 		return array(
 			array(
 				'controller' => \WC_REST_Products_Controller::class,
+				'route'      => '/wc/v3/products',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/products-list',
@@ -63,6 +64,7 @@ class AbilitiesRestBridge {
 			),
 			array(
 				'controller' => \WC_REST_Orders_Controller::class,
+				'route'      => '/wc/v3/orders',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/orders-list',
