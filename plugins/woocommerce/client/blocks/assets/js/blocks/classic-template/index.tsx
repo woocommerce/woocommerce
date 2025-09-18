@@ -203,8 +203,6 @@ const Edit = ( {
 	const templatePlaceholder = templateDetails?.placeholder ?? 'fallback';
 	const templateType = templateDetails?.type ?? 'fallback';
 
-	console.log( 'templateSlug', templateSlug );
-
 	useEffect(
 		() =>
 			setAttributes( {
