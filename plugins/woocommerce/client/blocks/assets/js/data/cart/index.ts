@@ -92,8 +92,12 @@ let previousBillingCountry: string | null = null;
  * Updates the active address autocomplete provider based on the country.
  * This function checks all registered providers and selects the first one that
  * supports the given country, respecting the server-defined provider order.
+ *
+ * @param addressType The type of address ('shipping' or 'billing')
+ * @param country The country code
+ * @param serverProviders The list of server providers
  */
-function updateAutocompleteProvider(
+export function updateAutocompleteProvider(
 	addressType: 'shipping' | 'billing',
 	country: string,
 	serverProviders: ServerAddressAutocompleteProvider[]
