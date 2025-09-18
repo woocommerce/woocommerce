@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Enums\ProductType;
 
@@ -474,6 +475,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$is_full_refund_without_line_items = false;
 		$partial_refund_product_revenue    = array();
 		$refund_type                       = $order->get_meta( '_refund_type' );
+		$uses_new_full_refund_data         = OrderUtil::uses_new_full_refund_data();
 
 		$parent_order = null;
 
@@ -482,7 +484,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if (
 			'shop_order_refund' === $order->get_type() &&
 			'full' === $refund_type &&
-			empty( $order_items )
+			empty( $order_items ) &&
+			$uses_new_full_refund_data
 		) {
 			$is_full_refund_without_line_items = true;
 

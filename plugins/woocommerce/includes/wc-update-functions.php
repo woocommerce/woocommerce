@@ -3039,6 +3039,7 @@ function wc_update_1020_add_old_refunded_order_items_to_product_lookup_table() {
 	);
 
 	if ( $refunded_orders ) {
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
 		foreach ( $refunded_orders as $refunded_order ) {
 			if ( intval( $refunded_order->num_items_sold ) === 0 ) {
 				$order = wc_get_order( $refunded_order->order_id );
@@ -3051,14 +3052,6 @@ function wc_update_1020_add_old_refunded_order_items_to_product_lookup_table() {
 					$order->save_meta_data();
 				}
 			}
-
-			/**
-			 * Trigger an action to schedule the data import for old refunded order items.
-			 *
-			 * @param int $order_id The ID of the order to be synced.
-			 * @since 10.2.0
-			 */
-			do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
 		}
 	}
 }
