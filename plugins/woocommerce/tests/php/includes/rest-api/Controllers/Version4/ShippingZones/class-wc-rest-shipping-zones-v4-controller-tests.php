@@ -120,10 +120,24 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	 */
 	protected function add_shipping_method( $zone, $method_id, $settings = array() ) {
 		$instance_id = $zone->add_shipping_method( $method_id );
-		$methods     = $zone->get_shipping_methods();
 
-		if ( isset( $methods[ $instance_id ] ) && ! empty( $settings ) ) {
-			$methods[ $instance_id ]->set_settings( $settings );
+		if ( ! empty( $settings ) ) {
+			$methods = $zone->get_shipping_methods();
+			if ( isset( $methods[ $instance_id ] ) ) {
+				$method = $methods[ $instance_id ];
+
+				// Update instance settings.
+				foreach ( $settings as $key => $value ) {
+					$method->instance_settings[ $key ] = $value;
+				}
+
+				// Save the settings.
+				$option_key = $method->get_instance_option_key();
+				update_option( $option_key, $method->instance_settings );
+
+				// Refresh the method.
+				$method->init_settings();
+			}
 		}
 
 		return $instance_id;
@@ -210,7 +224,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 'Test Zone 2', $zone2_data['name'] );
 		$this->assertEquals( 2, $zone2_data['order'] );
 		$this->assertIsArray( $zone2_data['locations'] );
-		$this->assertContains( 'United States', $zone2_data['locations'] );
+		$this->assertContains( 'United States (US)', $zone2_data['locations'] );
 		$this->assertIsArray( $zone2_data['methods'] );
 		$this->assertCount( 1, $zone2_data['methods'] );
 
