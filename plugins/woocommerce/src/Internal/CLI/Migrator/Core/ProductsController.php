@@ -146,7 +146,7 @@ class ProductsController {
 		$progress->finish();
 
 		$this->display_migration_summary();
- 
+
 		if ( $this->parsed_args['dry_run'] ) {
 			WP_CLI::success( 'Dry-run completed successfully. No products were actually created or modified.' );
 		} else {
