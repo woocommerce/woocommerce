@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Improve performance of uncached Block Assets dependency loading.
