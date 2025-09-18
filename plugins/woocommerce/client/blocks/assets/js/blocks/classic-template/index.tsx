@@ -311,14 +311,9 @@ registerBlockType( BLOCK_SLUG, {
 		clientId,
 		setAttributes,
 	}: BlockEditProps< Attributes > ) => {
-		const newTemplate = slug ?? attributes.template;
-
 		return (
 			<Edit
-				attributes={ {
-					...attributes,
-					template: newTemplate,
-				} }
+				attributes={ attributes }
 				setAttributes={ setAttributes }
 				clientId={ clientId }
 			/>
