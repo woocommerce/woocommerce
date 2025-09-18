@@ -8,9 +8,9 @@
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
-use Pelago\Emogrifier\CssInliner;
-use Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
-use Pelago\Emogrifier\HtmlProcessor\HtmlPruner;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\HtmlProcessor\CssToAttributeConverter;
+use Automattic\WooCommerce\Vendor\Pelago\Emogrifier\HtmlProcessor\HtmlPruner;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
