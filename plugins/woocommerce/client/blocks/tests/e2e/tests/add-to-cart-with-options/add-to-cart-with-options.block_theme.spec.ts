@@ -371,7 +371,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
 		} );
 
-		await test.step( 'if one product is added to cart and another product fails, optimistic updates are applied and an eror is displayed', async () => {
+		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
 			await page.reload();
 
 			// Try to add the individually sold product to cart again (it will fail).
