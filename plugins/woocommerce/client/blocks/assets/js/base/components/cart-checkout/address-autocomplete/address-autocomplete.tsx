@@ -13,7 +13,6 @@ import { cartStore, checkoutStore } from '@woocommerce/block-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { AddressFormType, getSettingWithCoercion } from '@woocommerce/settings';
-import { useDebounce } from '@wordpress/compose';
 
 /**
  * Internal dependencies
@@ -138,8 +137,8 @@ export const AddressAutocomplete = ( {
 	const [ isSettingAddress, setIsSettingAddress ] = useState( false );
 	const suppressSearchTimeoutRef = useRef< NodeJS.Timeout | null >( null );
 
-	// Debounced search function
-	const debouncedSearch = useDebounce( () => {
+	// Trigger search when searchValue changes
+	useEffect( () => {
 		if (
 			isSettingAddress ||
 			searchValue.length < 3 ||
@@ -169,12 +168,6 @@ export const AddressAutocomplete = ( {
 					setSuggestions( [] );
 				} );
 		}
-	}, 150 );
-
-	// Trigger debounced search when searchValue changes
-	useEffect( () => {
-		debouncedSearch();
-		return debouncedSearch.cancel;
 		// eslint-disable-next-line react-hooks/exhaustive-deps -- we only want to run this when searchValue changes, debouncedSearch is stable.
 	}, [ searchValue ] );
 
