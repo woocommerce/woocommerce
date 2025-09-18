@@ -65,7 +65,7 @@ export function reducer( state: State, action ): State {
 		case 'SET_EDITOR_URLS':
 			return {
 				...state,
-				urls: action.urls,
+				urls: { ...state.urls, ...action.urls },
 			};
 		case 'SET_EDITOR_CONFIG':
 			return {

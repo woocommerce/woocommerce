@@ -47,9 +47,9 @@ export function initializeEditor( htmlId: string ) {
  * Experimental component meant as a replacement for initializeEditor.
  * Still working on the API, so it's not recommended to use it in production.
  *
- * @param postId - The ID of the post to edit.
+ * @param postId   - The ID of the post to edit.
  * @param postType - The type of the post to edit.
- * @param config - The configuration for the editor.
+ * @param config   - The configuration for the editor.
  *
  * @example
  * ```jsx

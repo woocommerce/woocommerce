@@ -26,11 +26,38 @@ export function getEditorConfigFromWindow() {
 		);
 	}
 
+	const editorSettings = getEditorSettings();
+	const editorTheme = getEditorTheme();
+	const urls = getUrls();
+	const currentWpUserEmail =
+		window.WooCommerceEmailEditor.current_wp_user_email;
+	const userThemePostId = window.WooCommerceEmailEditor.user_theme_post_id;
+
+	if ( ! editorSettings ) {
+		throw new Error(
+			'window.WooCommerceEmailEditor.editor_settings is required.'
+		);
+	}
+	if ( ! editorTheme ) {
+		throw new Error(
+			'window.WooCommerceEmailEditor.editor_theme is required.'
+		);
+	}
+	if (
+		! urls ||
+		typeof urls.back !== 'string' ||
+		typeof urls.listings !== 'string'
+	) {
+		throw new Error(
+			'window.WooCommerceEmailEditor.urls.back and .listings are required strings.'
+		);
+	}
+
 	return {
-		editorSettings: getEditorSettings(),
-		theme: getEditorTheme(),
-		urls: getUrls(),
-		userEmail: window.WooCommerceEmailEditor.current_wp_user_email,
-		globalStylesPostId: window.WooCommerceEmailEditor.user_theme_post_id,
+		editorSettings,
+		theme: editorTheme,
+		urls,
+		userEmail: currentWpUserEmail as string,
+		globalStylesPostId: ( userThemePostId as number | null ) ?? null,
 	};
 }
