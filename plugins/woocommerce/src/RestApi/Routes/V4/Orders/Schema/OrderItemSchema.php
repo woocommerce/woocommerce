@@ -139,12 +139,13 @@ class OrderItemSchema extends AbstractLineItemSchema {
 	 * @return array
 	 */
 	public function get_item_response( $order_item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$dp   = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
-		$data = array(
+		$dp              = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
+		$quantity_amount = (float) $order_item->get_quantity();
+		$data            = array(
 			'id'           => $order_item->get_id(),
 			'name'         => $order_item->get_name(),
 			'quantity'     => $order_item->get_quantity(),
-			'price'        => $order_item->get_quantity() ? $order_item->get_total() / $order_item->get_quantity() : 0,
+			'price'        => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
 			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
 			'tax_class'    => $order_item->get_tax_class(),
 			'subtotal'     => wc_format_decimal( $order_item->get_subtotal(), $dp ),

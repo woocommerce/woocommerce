@@ -668,7 +668,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		// Add COGS data.
-		if ( self::cogs_is_enabled() ) {
+		if ( $this->cogs_is_enabled() ) {
 			$data['cost_of_goods_sold']['total_value'] = $order->get_cogs_total_value();
 		}
 
