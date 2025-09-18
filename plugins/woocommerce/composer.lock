@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "e039832f270436551634c6da823bf1c1",
-=======
-    "content-hash": "b0d38cdf166a79c5c91e1cdd8ac0747a",
->>>>>>> 32b0875940 (Downgrade Emogrifier and its subdepencies (#60994))
+    "content-hash": "ae7b5b1ab4cdb2b1bb706ef8f95df4a6",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1480,15 +1476,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "1.4.1",
+            "version": "1.4.2",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-<<<<<<< HEAD
-                "reference": "77bb8b9fbfcc7c1e940c8b1f3bf8eb2de19ab0d6"
-=======
-                "reference": "9ab8bc7c476d09f09e6a0861bdcd82a02ac01abf"
->>>>>>> 32b0875940 (Downgrade Emogrifier and its subdepencies (#60994))
+                "reference": "d37cbb0fd20bfb0c7d3abbfe1dde38ec6e51d945"
             },
             "require": {
                 "pelago/emogrifier": "7.3.0",
