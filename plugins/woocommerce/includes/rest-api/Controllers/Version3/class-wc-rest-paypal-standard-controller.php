@@ -6,7 +6,7 @@
  * Handles requests to the /paypal-standard endpoint.
  *
  * @package WooCommerce\RestApi
- * @since   2.6.0
+ * @since   10.3.0
  */
 
 declare(strict_types=1);
