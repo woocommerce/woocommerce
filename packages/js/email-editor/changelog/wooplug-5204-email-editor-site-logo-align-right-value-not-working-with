@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix site logo not rendered properly. In the email editor if the site logo was in a group block the right alignment didn't work.

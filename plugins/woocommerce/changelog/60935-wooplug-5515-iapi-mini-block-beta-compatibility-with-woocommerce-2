@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+iAPI Mini Cart: remove unnecessary type check that hid variation metadata for non-variation item types (e.g., `subscription_variation`);

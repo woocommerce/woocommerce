@@ -149,12 +149,13 @@ class PlatformRegistry {
 	 * Retrieves and instantiates the mapper class for a given platform.
 	 *
 	 * @param string $platform_id The ID of the platform.
+	 * @param array  $args Optional arguments to pass to the mapper constructor.
 	 *
 	 * @return PlatformMapperInterface An instance of the platform's mapper class.
 	 *
 	 * @throws InvalidArgumentException If the platform is not found or the mapper class is invalid.
 	 */
-	public function get_mapper( string $platform_id ): PlatformMapperInterface {
+	public function get_mapper( string $platform_id, array $args = array() ): PlatformMapperInterface {
 		$platform = $this->get_platform( $platform_id );
 
 		if ( ! $platform ) {
@@ -203,9 +204,14 @@ class PlatformRegistry {
 			);
 		}
 
-		// Use the WooCommerce DI container to properly inject dependencies.
-		$container = wc_get_container();
-		return $container->get( $mapper_class );
+		// If arguments are provided, instantiate manually to pass constructor args.
+		// Otherwise, use the WooCommerce DI container for dependency injection.
+		if ( ! empty( $args ) ) {
+			return new $mapper_class( $args );
+		} else {
+			$container = wc_get_container();
+			return $container->get( $mapper_class );
+		}
 	}
 
 	/**
@@ -251,15 +257,11 @@ class PlatformRegistry {
 	 * @return array Array of field_name => prompt_text pairs.
 	 */
 	public function get_platform_credential_fields( string $platform_slug ): array {
-
-		// Default field mappings for known platforms.
-		$default_fields = array(
-			'shopify' => array(
-				'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
-				'access_token' => 'Enter access token:',
-			),
-		);
-
-		return $default_fields[ $platform_slug ] ?? array();
+		$platform = $this->get_platform( $platform_slug );
+		if ( ! is_array( $platform ) ) {
+			return array();
+		}
+		$credentials = $platform['credentials'] ?? array();
+		return is_array( $credentials ) ? $credentials : array();
 	}
 }

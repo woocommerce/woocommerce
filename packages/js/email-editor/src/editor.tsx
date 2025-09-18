@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect, useDispatch, select, dispatch } from '@wordpress/data';
 import {
 	StrictMode,
 	createRoot,
@@ -10,6 +10,8 @@ import {
 	useState,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
+import { store as editorStore } from '@wordpress/editor';
+import { useMergeRefs } from '@wordpress/compose';
 import '@wordpress/format-library'; // Enables text formatting capabilities
 
 /**
@@ -27,21 +29,28 @@ import {
 	initDomTracking,
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
-import { useContentValidation, useRemoveSavingFailedNotices } from './hooks';
+import {
+	useContentValidation,
+	useRemoveSavingFailedNotices,
+	useFilterEditorContentStylesheets,
+} from './hooks';
+import { cleanupConfigurationChanges } from './config-tools';
 
 function Editor( {
 	postId,
 	postType,
 	isPreview = false,
+	contentRef = null,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
-		( select ) => ( {
-			settings: select( storeName ).getInitialEditorSettings(),
+		( sel ) => ( {
+			settings: sel( storeName ).getInitialEditorSettings(),
 		} ),
 		[]
 	);
@@ -54,6 +63,9 @@ function Editor( {
 		setEmailPost( postId, postType );
 		setIsInitialized( true );
 	}, [ postId, postType, setEmailPost ] );
+
+	const stylesContentRef = useFilterEditorContentStylesheets();
+	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
 
 	if ( ! isInitialized ) {
 		return null;
@@ -72,6 +84,7 @@ function Editor( {
 				postId={ postId }
 				postType={ postType }
 				settings={ editorSettings }
+				contentRef={ mergedContentRef }
 			/>
 		</StrictMode>
 	);
@@ -123,16 +136,29 @@ export function ExperimentalEmailEditor( {
 	postId,
 	postType,
 	isPreview = false,
+	contentRef = null,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
+	contentRef?: React.Ref< HTMLDivElement > | null;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
+		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		onInit();
 		setIsInitialized( true );
+		// Cleanup global editor settings
+		return () => {
+			try {
+				cleanupConfigurationChanges();
+			} finally {
+				dispatch( editorStore ).updateEditorSettings(
+					backupEditorSettings
+				);
+			}
+		};
 	}, [] );
 
 	const WrappedEditor = applyFilters(
@@ -149,6 +175,7 @@ export function ExperimentalEmailEditor( {
 			postId={ postId }
 			postType={ postType }
 			isPreview={ isPreview }
+			contentRef={ contentRef }
 		/>
 	);
 }

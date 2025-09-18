@@ -30,6 +30,7 @@ if ( ! class_exists( 'WC_Email_Customer_Completed_Order', false ) ) :
 			$this->id             = 'customer_completed_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Completed order', 'woocommerce' );
+			$this->email_group    = 'order-processing';
 			$this->template_html  = 'emails/customer-completed-order.php';
 			$this->template_plain = 'emails/plain/customer-completed-order.php';
 			$this->placeholders   = array(

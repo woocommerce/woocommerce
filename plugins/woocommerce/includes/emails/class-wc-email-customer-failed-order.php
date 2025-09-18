@@ -30,6 +30,7 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 			$this->id             = 'customer_failed_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Failed order', 'woocommerce' );
+			$this->email_group    = 'order-exceptions';
 			$this->template_html  = 'emails/customer-failed-order.php';
 			$this->template_plain = 'emails/plain/customer-failed-order.php';
 			$this->placeholders   = array(

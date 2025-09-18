@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce WordPress Abilities API package for capability declaration and discovery

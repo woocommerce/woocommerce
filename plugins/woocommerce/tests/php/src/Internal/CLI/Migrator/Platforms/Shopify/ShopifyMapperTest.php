@@ -402,7 +402,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 					'node' => (object) array(
 						'id'    => 'gid://shopify/MediaImage/featured123',
 						'image' => (object) array(
-							'url'     => 'https://example.com/featured.jpg',
+							'url'     => 'https://placehold.co/800x600.jpg',
 							'altText' => 'Featured Image',
 						),
 					),
@@ -411,7 +411,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 					'node' => (object) array(
 						'id'    => 'gid://shopify/MediaImage/gallery456',
 						'image' => (object) array(
-							'url'     => 'https://example.com/gallery.jpg',
+							'url'     => 'https://placehold.co/600x600.jpg',
 							'altText' => 'Gallery Image',
 						),
 					),
@@ -426,14 +426,14 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 		// Test featured image.
 		$featured_image = $result['images'][0];
 		$this->assertEquals( 'gid://shopify/MediaImage/featured123', $featured_image['original_id'] );
-		$this->assertEquals( 'https://example.com/featured.jpg', $featured_image['url'] );
+		$this->assertEquals( 'https://placehold.co/800x600.jpg', $featured_image['src'] );
 		$this->assertEquals( 'Featured Image', $featured_image['alt'] );
 		$this->assertTrue( $featured_image['is_featured'] );
 
 		// Test gallery image.
 		$gallery_image = $result['images'][1];
 		$this->assertEquals( 'gid://shopify/MediaImage/gallery456', $gallery_image['original_id'] );
-		$this->assertEquals( 'https://example.com/gallery.jpg', $gallery_image['url'] );
+		$this->assertEquals( 'https://placehold.co/600x600.jpg', $gallery_image['src'] );
 		$this->assertEquals( 'Gallery Image', $gallery_image['alt'] );
 		$this->assertFalse( $gallery_image['is_featured'] );
 	}

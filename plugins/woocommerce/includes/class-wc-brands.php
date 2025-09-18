@@ -276,6 +276,7 @@ class WC_Brands {
 						'add_new_item'      => __( 'Add New Brand', 'woocommerce' ),
 						'new_item_name'     => __( 'New Brand Name', 'woocommerce' ),
 						'not_found'         => __( 'No Brands Found', 'woocommerce' ),
+						'no_terms'          => __( 'No brands', 'woocommerce' ),
 						'back_to_items'     => __( '&larr; Go to Brands', 'woocommerce' ),
 					),
 

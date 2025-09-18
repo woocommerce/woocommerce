@@ -449,6 +449,12 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$simple_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
 			}
 
+			if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				property_exists( $variant_node->inventoryItem, 'unitCost' ) && is_object( $variant_node->inventoryItem->unitCost ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			) {
+				$simple_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			}
+
 			$simple_data['original_variant_id'] = basename( $variant_node->id );
 
 		} else {
@@ -534,6 +540,12 @@ class ShopifyMapper implements PlatformMapperInterface {
 					$variation_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
 				}
 
+				if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					property_exists( $variant_node->inventoryItem, 'unitCost' ) && is_object( $variant_node->inventoryItem->unitCost ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				) {
+					$variation_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				}
+
 				if ( $this->should_process( 'attributes' ) ) {
 					$variation_data['attributes'] = array();
 					if ( ! empty( $variant_node->selectedOptions ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
@@ -583,7 +595,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 				if ( property_exists( $media_node, 'image' ) && is_object( $media_node->image ) && ! empty( $media_node->id ) && ! empty( $media_node->image->url ) ) {
 					$images_data[] = array(
 						'original_id' => $media_node->id,
-						'url'         => $media_node->image->url,
+						'src'         => $media_node->image->url,
 						'alt'         => $media_node->image->altText ?? null,
 						'is_featured' => ( $media_node->id === $featured_media_id ),
 					);
