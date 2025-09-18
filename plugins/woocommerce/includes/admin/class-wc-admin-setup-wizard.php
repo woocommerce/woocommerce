@@ -1061,10 +1061,10 @@ class WC_Admin_Setup_Wizard {
 				<ul class="wc-wizard-services shipping">
 					<li class="wc-wizard-service-item">
 						<div class="wc-wizard-service-name">
-							<p><?php echo esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
+							<p><?php esc_html_e( 'Shipping Zone', 'woocommerce' ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
-							<p><?php echo esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
+							<p><?php esc_html_e( 'Shipping Method', 'woocommerce' ); ?></p>
 						</div>
 					</li>
 					<li class="wc-wizard-service-item">
@@ -1083,7 +1083,7 @@ class WC_Admin_Setup_Wizard {
 					</li>
 					<li class="wc-wizard-service-item">
 						<div class="wc-wizard-service-name">
-							<p><?php echo esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
+							<p><?php esc_html_e( 'Locations not covered by your other zones', 'woocommerce' ); ?></p>
 						</div>
 						<div class="wc-wizard-service-description">
 							<?php $this->shipping_method_selection_form( $country_code, $currency_code, 'shipping_zones[intl]' ); ?>
