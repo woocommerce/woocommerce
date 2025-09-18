@@ -94,8 +94,8 @@ class Controller extends AbstractController {
 
 		$data = array();
 		foreach ( $zones as $zone_data ) {
-			$zone = WC_Shipping_Zones::get_zone( $zone_data['id'] );
-			$item = $this->prepare_item_for_response( $zone, $request );
+			$zone   = WC_Shipping_Zones::get_zone( $zone_data['id'] );
+			$item   = $this->prepare_item_for_response( $zone, $request );
 			$data[] = $this->prepare_response_for_collection( $item );
 		}
 
@@ -181,7 +181,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_formatted_methods_summary( $zone ) {
-		$methods         = $zone->get_shipping_methods( false, 'json' );
+		$methods           = $zone->get_shipping_methods( false, 'json' );
 		$formatted_methods = array();
 
 		foreach ( $methods as $method ) {
