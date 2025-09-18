@@ -271,11 +271,13 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 			$this->assertArrayHasKey( 'instance_id', $method );
 			$this->assertArrayHasKey( 'title', $method );
 			$this->assertArrayHasKey( 'enabled', $method );
-			$this->assertArrayHasKey( 'rate_description', $method );
+			$this->assertArrayHasKey( 'method_id', $method );
+			$this->assertArrayHasKey( 'settings', $method );
 			$this->assertIsInt( $method['instance_id'] );
 			$this->assertIsString( $method['title'] );
 			$this->assertIsBool( $method['enabled'] );
-			$this->assertIsString( $method['rate_description'] );
+			$this->assertIsString( $method['method_id'] );
+			$this->assertIsArray( $method['settings'] );
 		}
 	}
 
@@ -413,8 +415,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$method = $test_zone_data['methods'][0];
 		$this->assertEquals( 'Flat rate', $method['title'] );
-		// Should return expression as-is, not attempt to format as price.
-		$this->assertEquals( '10 + [qty] * 2', $method['rate_description'] );
+		$this->assertEquals( 'flat_rate', $method['method_id'] );
+		$this->assertArrayHasKey( 'settings', $method );
+		// Should return expression as-is in raw settings.
+		$this->assertEquals( '10 + [qty] * 2', $method['settings']['cost'] );
 	}
 
 	/**
@@ -426,36 +430,24 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		// Test different free shipping requirements.
 		$test_cases = array(
 			array(
-				'requires'       => 'min_amount',
-				'min_amount'     => '50',
-				'expected_text'  => 'Free over',
-				'expected_price' => '50',
+				'requires'   => 'min_amount',
+				'min_amount' => '50',
 			),
 			array(
-				'requires'       => 'coupon',
-				'min_amount'     => '',
-				'expected_text'  => 'Free with coupon',
-				'expected_price' => null,
+				'requires'   => 'coupon',
+				'min_amount' => '',
 			),
 			array(
-				'requires'        => 'either',
-				'min_amount'      => '100',
-				'expected_text'   => 'Free over',
-				'expected_price'  => '100',
-				'expected_suffix' => 'or with coupon',
+				'requires'   => 'either',
+				'min_amount' => '100',
 			),
 			array(
-				'requires'        => 'both',
-				'min_amount'      => '75',
-				'expected_text'   => 'Free over',
-				'expected_price'  => '75',
-				'expected_suffix' => 'and with coupon',
+				'requires'   => 'both',
+				'min_amount' => '75',
 			),
 			array(
-				'requires'       => '',
-				'min_amount'     => '',
-				'expected_text'  => 'Free',
-				'expected_price' => null,
+				'requires'   => '',
+				'min_amount' => '',
 			),
 		);
 
@@ -485,25 +477,23 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertIsArray( $test_zone_data['methods'] );
 		$this->assertCount( count( $test_cases ), $test_zone_data['methods'] );
 
-		// Verify each method has the correct description.
+		// Verify each method has the correct raw settings.
 		foreach ( $test_cases as $index => $test_case ) {
 			$method = $test_zone_data['methods'][ $index ];
 			$this->assertEquals( 'Free shipping', $method['title'] );
+			$this->assertEquals( 'free_shipping', $method['method_id'] );
+			$this->assertArrayHasKey( 'settings', $method );
 
-			$description = $method['rate_description'];
+			$settings = $method['settings'];
 
-			// Check basic text is present.
-			$this->assertStringContainsString( $test_case['expected_text'], $description );
-
-			// Check price is formatted correctly if expected.
-			if ( ! empty( $test_case['expected_price'] ) ) {
-				// Check for the price amount - could be $50 or &#36;50.00 depending on formatting.
-				$this->assertStringContainsString( $test_case['expected_price'], $description );
+			// Check requires setting.
+			if ( ! empty( $test_case['requires'] ) ) {
+				$this->assertEquals( $test_case['requires'], $settings['requires'] );
 			}
 
-			// Check suffix if expected.
-			if ( ! empty( $test_case['expected_suffix'] ) ) {
-				$this->assertStringContainsString( $test_case['expected_suffix'], $description );
+			// Check min_amount setting.
+			if ( ! empty( $test_case['min_amount'] ) ) {
+				$this->assertEquals( $test_case['min_amount'], $settings['min_amount'] );
 			}
 		}
 	}
@@ -535,6 +525,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertArrayHasKey( 'instance_id', $method_properties );
 		$this->assertArrayHasKey( 'title', $method_properties );
 		$this->assertArrayHasKey( 'enabled', $method_properties );
-		$this->assertArrayHasKey( 'rate_description', $method_properties );
+		$this->assertArrayHasKey( 'method_id', $method_properties );
+		$this->assertArrayHasKey( 'settings', $method_properties );
 	}
 }
