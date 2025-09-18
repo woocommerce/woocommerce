@@ -9,8 +9,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Dom_Document_Helper;
 
 /**
@@ -113,6 +111,7 @@ class Video extends Cover {
 		$block_content = $video_block['innerHTML'] ?? '';
 
 		// Extract video URL from block content, fall back to post URL.
+		// Priority: 1) Video URL (if found), 2) Post permalink (fallback).
 		$video_url = $this->extract_video_url( $block_content );
 		$link_url  = ! empty( $video_url ) ? $video_url : $this->get_current_post_url();
 
@@ -154,7 +153,7 @@ class Video extends Cover {
 		// Wrap the play button in a link if URL is provided.
 		if ( ! empty( $link_url ) ) {
 			$play_button = sprintf(
-				'<a href="%s" target="_blank" rel="noopener nofollow" style="display: inline-block; text-decoration: none;">%s</a>',
+				'<a href="%s" target="_blank" rel="noopener noreferrer nofollow" style="display: inline-block; text-decoration: none;">%s</a>',
 				esc_url( $link_url ),
 				$play_button
 			);
