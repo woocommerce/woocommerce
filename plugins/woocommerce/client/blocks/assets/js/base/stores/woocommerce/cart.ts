@@ -501,12 +501,6 @@ const { state, actions } = store< Store >(
 						  )
 						: [];
 
-					if ( errorResponses.length > 0 ) {
-						throw generateError(
-							errorResponses[ 0 ].body as ApiErrorResponse
-						);
-					}
-
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -578,6 +572,12 @@ const { state, actions } = store< Store >(
 								generateErrorNotice( body as ApiErrorResponse )
 							)
 					);
+
+					if ( errorResponses.length > 0 ) {
+						throw generateError(
+							errorResponses[ 0 ].body as ApiErrorResponse
+						);
+					}
 				} catch ( error ) {
 					// Reverts the optimistic update.
 					// Todo: Prevent racing conditions with multiple addToCart calls for the same item.
