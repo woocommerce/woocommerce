@@ -600,7 +600,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * @return int[]
 	 */
 	public function get_user_ids_for_billing_email( $emails ) {
-		wc_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '10.3.0' );
+		wc_deprecated_function( __METHOD__, '10.3.0' );
 		return wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email( $emails, false );
 	}
 }
