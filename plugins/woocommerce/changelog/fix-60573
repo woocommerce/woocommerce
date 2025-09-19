@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent order attribution install banner when file mods are not allowed
