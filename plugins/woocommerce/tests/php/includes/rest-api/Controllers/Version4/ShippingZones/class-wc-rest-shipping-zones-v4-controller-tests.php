@@ -598,4 +598,115 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertArrayHasKey( 'method_id', $method_properties );
 		$this->assertArrayHasKey( 'settings', $method_properties );
 	}
+
+	/**
+	 * Test get single zone.
+	 */
+	public function test_get_item() {
+		$zone = $this->create_shipping_zone( 'Single Zone Test' );
+		$zone->add_location( 'US', 'country' );
+		$zone->add_location( 'GB', 'country' );
+		$zone->save();  // Make sure to save the zone with locations.
+		$this->add_shipping_method( $zone, 'flat_rate', array( 'cost' => '10.00' ) );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $zone->get_id(), $data['id'] );
+		$this->assertEquals( 'Single Zone Test', $data['name'] );
+		$this->assertArrayHasKey( 'locations', $data );
+		$this->assertArrayHasKey( 'methods', $data );
+
+		// Check that detailed location format is used (should return location objects).
+		$this->assertIsArray( $data['locations'] );
+		$this->assertCount( 2, $data['locations'] );
+
+		// In detailed view, locations should have name property.
+		foreach ( $data['locations'] as $location ) {
+			$this->assertIsObject( $location );
+			$this->assertObjectHasProperty( 'name', $location );
+			$this->assertObjectHasProperty( 'code', $location );
+			$this->assertObjectHasProperty( 'type', $location );
+		}
+
+		// Check methods.
+		$this->assertCount( 1, $data['methods'] );
+		$method = $data['methods'][0];
+		$this->assertEquals( 'Flat rate', $method['title'] );
+		$this->assertEquals( 'flat_rate', $method['method_id'] );
+		$this->assertArrayHasKey( 'settings', $method );
+		$this->assertEquals( '10.00', $method['settings']['cost'] );
+	}
+
+	/**
+	 * Test get single zone with invalid ID.
+	 */
+	public function test_get_item_invalid_id() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/99999' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_id', $data['code'] );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertEquals( 'Invalid resource ID.', $data['message'] );
+	}
+
+	/**
+	 * Test get single zone when shipping is disabled.
+	 */
+	public function test_get_item_shipping_disabled() {
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		// Disable shipping temporarily.
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		// Check for 503 Service Unavailable status.
+		$this->assertEquals( 503, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertEquals( 'Shipping is disabled.', $data['message'] );
+
+		// Re-enable shipping.
+		remove_filter( 'wc_shipping_enabled', '__return_false' );
+	}
+
+	/**
+	 * Test get single zone without permission.
+	 */
+	public function test_get_item_without_permission() {
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+		wp_set_current_user( 0 );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test detailed location formatting for "Rest of the World" zone.
+	 */
+	public function test_get_item_rest_of_world_zone() {
+		// "Rest of the World" zone has ID 0.
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones/0' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 0, $data['id'] );
+		$this->assertIsArray( $data['locations'] );
+		$this->assertCount( 1, $data['locations'] );
+		$this->assertEquals( 'All regions not covered above', $data['locations'][0] );
+	}
 }

@@ -212,19 +212,24 @@ class Controller extends AbstractController {
 			return array( __( 'All regions not covered above', 'woocommerce' ) );
 		}
 
-		$locations      = $zone->get_zone_locations();
-		$location_names = array();
+		$locations = $zone->get_zone_locations();
 
-		foreach ( $locations as $location ) {
-			$location_name = $this->get_location_name( $location );
-			if ( 'summary' === $view ) {
-				$location_names[] = $location_name;
-			} else if ( 'detailed' === $view ) {
-				$location->name = $location_name;
+		if ( 'summary' === $view ) {
+			$location_names = array();
+			foreach ( $locations as $location ) {
+				$location_names[] = $this->get_location_name( $location );
 			}
+			return $location_names;
+		} else {
+			// For detailed view, add name property to each location object.
+			$detailed_locations = array();
+			foreach ( $locations as $location ) {
+				$location_copy       = clone $location;
+				$location_copy->name = $this->get_location_name( $location );
+				$detailed_locations[] = $location_copy;
+			}
+			return $detailed_locations;
 		}
-
-		return 'summary' === $view ? $location_names : $locations;
 	}
 
 	/**
