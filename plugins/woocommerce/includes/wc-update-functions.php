@@ -3043,6 +3043,9 @@ function wc_update_1020_add_old_refunded_order_items_to_product_lookup_table() {
 		foreach ( $refunded_orders as $refunded_order ) {
 			if ( intval( $refunded_order->num_items_sold ) === 0 ) {
 				$order = wc_get_order( $refunded_order->order_id );
+				if ( ! $order ) {
+					continue;
+				}
 				// If the refund order has no line items, mark it as a full refund in orders_meta table.
 				// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
 				// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
