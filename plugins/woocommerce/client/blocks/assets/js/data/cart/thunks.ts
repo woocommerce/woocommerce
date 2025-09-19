@@ -625,7 +625,7 @@ export const updateCustomerData =
 export const setShippingAddress =
 	( shippingAddress: Partial< ShippingAddress > ) =>
 	async ( { dispatch, select, registry }: CartThunkArgs ) => {
-		// Shipping country is being updated in this action, so reset the address autocomplete provider.
+		// Shipping country may be updated in this action, so reset the address autocomplete provider if it is.
 		if ( typeof shippingAddress?.country !== 'undefined' ) {
 			const currentCountry =
 				select.getCustomerData()?.shippingAddress?.country;
@@ -648,7 +648,7 @@ export const setShippingAddress =
 export const setBillingAddress =
 	( billingAddress: Partial< BillingAddress > ) =>
 	async ( { dispatch, select, registry }: CartThunkArgs ) => {
-		// Billing country is being updated in this action, so reset the address autocomplete provider.
+		// Billing country may be updated in this action, so reset the address autocomplete provider if it is.
 		if ( typeof billingAddress?.country !== 'undefined' ) {
 			const currentCountry =
 				select.getCustomerData()?.billingAddress?.country;
