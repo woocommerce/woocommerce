@@ -14,11 +14,13 @@ A command-line tool for migrating products from external e-commerce platforms to
 ## Basic Usage
 
 1. **Configure platform credentials:**
+
    ```bash
    wp wc migrate setup
    ```
 
 2. **Migrate products:**
+
    ```bash
    # Get product count
    wp wc migrate products --count
@@ -33,6 +35,7 @@ A command-line tool for migrating products from external e-commerce platforms to
 ## Products Command Options
 
 ### Basic Parameters
+
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | `--platform` | Source platform (default: shopify) | `shopify` |
@@ -41,6 +44,7 @@ A command-line tool for migrating products from external e-commerce platforms to
 | `--count` | Show total product count only | `--count` |
 
 ### Filtering Parameters
+
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | `--status` | Filter by product status | `active`, `archived`, `draft` |
@@ -49,6 +53,7 @@ A command-line tool for migrating products from external e-commerce platforms to
 | `--ids` | Specific product IDs | `"123,456,789"` |
 
 **Filtering Examples:**
+
 ```bash
 # Count products with filters
 wp wc migrate products --count --status=active
@@ -60,12 +65,14 @@ wp wc migrate products --vendor="My Brand" --limit=25
 ```
 
 ### Field Selection Parameters
+
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | `--fields` | Include only specific fields | `"name,price,sku"` |
 | `--exclude-fields` | Exclude specific fields | `"images,metafields"` |
 
 **Field Selection Examples:**
+
 ```bash
 # Migrate only specific fields
 wp wc migrate products --fields=name,price,sku --limit=50
@@ -75,6 +82,7 @@ wp wc migrate products --exclude-fields=images,metafields --limit=100
 ```
 
 ### Execution Control Parameters
+
 | Parameter | Description | Example |
 |-----------|-------------|---------|
 | `--resume` | Resume previous migration | `--resume` |
@@ -84,6 +92,7 @@ wp wc migrate products --exclude-fields=images,metafields --limit=100
 | `--assign-default-category` | Assign default category to uncategorized products | `--assign-default-category` |
 
 **Advanced Examples:**
+
 ```bash
 # Preview migration
 wp wc migrate products --dry-run --verbose --limit=10
@@ -110,6 +119,7 @@ wp wc migrate products --assign-default-category --limit=100
 ### Platform Interface
 
 Each platform must implement:
+
 - **PlatformFetcherInterface** ([`PlatformFetcherInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformFetcherInterface.php)) - Data retrieval
 - **PlatformMapperInterface** ([`PlatformMapperInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformMapperInterface.php)) - Data transformation
 
