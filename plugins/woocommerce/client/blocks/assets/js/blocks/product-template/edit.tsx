@@ -57,15 +57,11 @@ const MoreProductsPlaceholder = ( {
 }: {
 	remainingCount: number;
 } ) => {
-	return (
+	return Array.from( { length: remainingCount } ).map( () => (
 		<li className="wc-block-product-template__more-products-placeholder">
-			{ sprintf(
-				/* translators: %d: number of products to display */
-				__( '+%d products', 'woocommerce' ),
-				remainingCount
-			) }
+			<p>{ __( 'Product', 'woocommerce' ) }</p>
 		</li>
-	);
+	) );
 };
 
 const ProductTemplateInnerBlocks = () => {
