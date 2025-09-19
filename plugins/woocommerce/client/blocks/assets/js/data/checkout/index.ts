@@ -11,6 +11,7 @@ import * as selectors from './selectors';
 import * as actions from './actions';
 import reducer from './reducers';
 import { pushChanges } from './push-changes';
+import { subscribeToCountryChanges } from './subscriptions/autocomplete';
 
 export const config = {
 	reducer,
@@ -24,5 +25,8 @@ register( store );
 export type CheckoutStoreDescriptor = typeof store;
 
 subscribe( pushChanges, store );
+
+// Subscribe to country changes to update address autocomplete provider
+subscribeToCountryChanges();
 
 export const CHECKOUT_STORE_KEY = STORE_KEY;
