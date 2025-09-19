@@ -205,15 +205,7 @@ class CollectionQuery extends AbstractCollectionQuery {
 					'operator' => array(
 						'description' => __( 'The comparison operator to use.', 'woocommerce' ),
 						'type'        => 'string',
-						'enum'        => array(
-							self::OPERATOR_IS,
-							self::OPERATOR_IS_NOT,
-							self::OPERATOR_LESS_THAN,
-							self::OPERATOR_GREATER_THAN,
-							self::OPERATOR_LESS_THAN_OR_EQUAL,
-							self::OPERATOR_GREATER_THAN_OR_EQUAL,
-							self::OPERATOR_BETWEEN,
-						),
+						'enum'        => self::OPERATORS,
 						'default'     => self::OPERATOR_IS,
 					),
 				),
@@ -405,20 +397,9 @@ class CollectionQuery extends AbstractCollectionQuery {
 			return true;
 		}
 
-		if ( ! in_array(
-			$operator,
-			array(
-				self::OPERATOR_IS,
-				self::OPERATOR_IS_NOT,
-				self::OPERATOR_LESS_THAN,
-				self::OPERATOR_GREATER_THAN,
-				self::OPERATOR_LESS_THAN_OR_EQUAL,
-				self::OPERATOR_GREATER_THAN_OR_EQUAL,
-				self::OPERATOR_BETWEEN,
-			),
-			true
-		) ) {
-			return new WP_Error( 'rest_invalid_param', __( 'Invalid operator.', 'woocommerce' ), array( 'status' => 400 ) );
+		if ( ! in_array( $operator, self::OPERATORS, true ) ) {
+			// translators: %s is a list of valid operators.
+			return new WP_Error( 'rest_invalid_param', sprintf( esc_html__( 'Invalid operator. Valid operators are: %s.', 'woocommerce' ), implode( ', ', self::OPERATORS ) ), array( 'status' => 400 ) );
 		}
 
 		// Validate value based on operator.
