@@ -16,6 +16,7 @@ use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
+use WP_Http;
 use WC_Shipping_Zone;
 use WC_Shipping_Zones;
 
@@ -64,6 +65,36 @@ class Controller extends AbstractController {
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
+	}
+
+	/**
+	 * Get shipping zone by ID.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'disabled',
+				__( 'Shipping is disabled.', 'woocommerce' ),
+				WP_Http::SERVICE_UNAVAILABLE
+			);
+		}
+
+		$zone_id = (int) $request['id'];
+
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+
+		if ( ! $zone ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_id',
+				__( 'Invalid resource ID.', 'woocommerce' ),
+				WP_Http::NOT_FOUND
+			);
+		}
+
+		return $this->prepare_item_for_response( $zone, $request );
 	}
 
 	/**
