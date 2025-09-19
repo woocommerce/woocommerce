@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Classic Template: add a new filter for consumers to control gallery assets enqueuing
