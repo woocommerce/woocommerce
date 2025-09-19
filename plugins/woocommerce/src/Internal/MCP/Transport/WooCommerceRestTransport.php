@@ -55,6 +55,15 @@ class WooCommerceRestTransport extends RestTransport {
 	 * @return bool|\WP_Error True if allowed, WP_Error if not.
 	 */
 	public function validate_request( \WP_REST_Request $request ) {
+		// Require TLS by default; allow explicit opt-in for non-SSL (e.g., local dev).
+		if ( ! is_ssl() && ! apply_filters( 'woocommerce_mcp_allow_insecure_transport', false, $request ) ) {
+			return new \WP_Error(
+				'insecure_transport',
+				__( 'HTTPS is required for MCP requests.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		// Get X-MCP-API-Key header
 		$api_key = $request->get_header( 'X-MCP-API-Key' );
 
