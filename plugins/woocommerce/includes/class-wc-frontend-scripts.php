@@ -382,7 +382,7 @@ class WC_Frontend_Scripts {
 		);
 
 		$scripts['wc-address-autocomplete-common'] = array(
-			'src'     => self::get_asset_url( 'assets/js/utils/address-autocomplete-common' . $suffix . '.js' ),
+			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
 			'deps'    => array(),
 			'version' => $version,
 		);
