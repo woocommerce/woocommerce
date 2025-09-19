@@ -98,15 +98,6 @@ Each variation inherits the same pricing, inventory, and weight logic as simple 
 | `variations[].image_original_id` | `variant.media[0].id` | First variant image |
 | `variations[].menu_order` | `variant.position` | Display order |
 
-### Weight Conversion
-
-| Shopify Unit | Conversion to kg | Conversion to lb |
-|--------------|------------------|------------------|
-| `GRAMS` | × 0.001 | × 0.00220462 |
-| `KILOGRAMS` | × 1 | × 2.20462 |
-| `POUNDS` | × 0.453592 | × 1 |
-| `OUNCES` | × 0.0283495 | × 0.0625 |
-
 ## GraphQL Query Structure
 
 The fetcher uses a comprehensive GraphQL query to retrieve all necessary product data:
