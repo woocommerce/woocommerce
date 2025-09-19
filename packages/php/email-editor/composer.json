@@ -8,7 +8,8 @@
 	"version": "1.5.0",
 	"autoload": {
 		"classmap": [
-			"src/"
+			"src/",
+			"vendor-prefixed/"
 		]
 	},
 	"autoload-dev": {
@@ -23,7 +24,9 @@
 		"automattic/jetpack-changelogger": "3.3.0",
 		"phpunit/phpunit": "^9.6",
 		"woocommerce/woocommerce-sniffs": "1.0.0",
-		"yoast/phpunit-polyfills": "^4.0"
+		"yoast/phpunit-polyfills": "^4.0",
+		"pelago/emogrifier": "8.1.0",
+		"coenjacobs/mozart": "^0.7.1"
 	},
 	"config": {
 		"platform": {
@@ -34,6 +37,12 @@
 		}
 	},
 	"scripts": {
+		"post-install-cmd": [
+			"mozart compose"
+		],
+		"post-update-cmd": [
+			"mozart compose"
+		],
 		"env:destroy": "wp-env destroy",
 		"env:stop": "wp-env stop",
 		"env:start": "wp-env start",
@@ -57,6 +66,21 @@
 				"enhancement": "Improve existing functionality"
 			},
 			"changelog": "changelog.md"
-		}
+		},
+		"mozart": {
+			"dep_namespace": "Automattic\\WooCommerce\\EmailEditorVendor\\",
+			"dep_directory": "/vendor-prefixed/packages/",
+			"packages": [
+				"pelago/emogrifier"
+			],
+			"excluded_packages": [
+			],
+			"override_autoload": {
+				"thecodingmachine/safe": {}
+			},
+			"classmap_directory": "/vendor-prefixed/classes/",
+			"classmap_prefix": "EmailEditorVendor_",
+			"delete_vendor_directories": true
+		} 
 	}
 }

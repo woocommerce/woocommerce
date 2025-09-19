@@ -8,8 +8,19 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
+if ( ! class_exists( 'Automattic\WooCommerce\EmailEditorVendor\Pelago\Emogrifier\CssInliner' ) ) {
+	// This is required to load the packages in the vendor-prefixed directory.
+	$autoloader = dirname( __DIR__ ) . '/vendor/autoload.php';
+
+	if ( ! is_readable( $autoloader ) ) {
+		throw new \Exception( 'Autoloader for Email Editor not found' );
+	}
+
+	require_once $autoloader;
+}
+
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
-use Pelago\Emogrifier\CssInliner;
+use Automattic\WooCommerce\EmailEditorVendor\Pelago\Emogrifier\CssInliner;
 
 /**
  * Class for inlining CSS in HTML emails.
