@@ -1,7 +1,7 @@
 /**
  * Address provider implementation for WooCommerce shortcode checkout
  *
- * Note: The core registration logic and provider management is now handled
+ * Note: The core registration logic and provider management is handled
  * by the common module (address-autocomplete-common.js). This file focuses
  * on the shortcode-specific implementation.
  */
