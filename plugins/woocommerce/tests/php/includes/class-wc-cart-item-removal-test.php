@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Cart
  */
 
+declare( strict_types=1 );
+
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
@@ -30,7 +32,7 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$this->product->delete( true );
-		WC()->cart->empty_cart();
+		$this->cart->empty_cart();
 		parent::tearDown();
 	}
 
@@ -242,8 +244,11 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 
 		$undo_url = wc_get_cart_undo_url( $cart_item_key, $cart_item_data );
 
-		$parsed_url = wp_parse_url( $undo_url );
-		parse_str( $parsed_url['query'], $query_params );
+		$parsed_url   = wp_parse_url( $undo_url );
+		$query_string = html_entity_decode( $parsed_url['query'], ENT_QUOTES, 'UTF-8' );
+		parse_str( $query_string, $query_params );
+
+		$this->assertArrayHasKey( 'undo_data', $query_params );
 		$decoded_data = json_decode( base64_decode( $query_params['undo_data'] ), true );
 
 		$this->assertArrayNotHasKey( 'data', $decoded_data );
