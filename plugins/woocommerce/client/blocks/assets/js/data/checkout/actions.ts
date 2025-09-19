@@ -239,7 +239,9 @@ export const __internalSetExtensionData = (
 /**
  * Add a new address autocomplete provider to the list.
  */
-export const addAddressAutocompleteProvider = ( providerId: string ) => ( {
+export const addAddressAutocompleteProviderAction = (
+	providerId: string
+) => ( {
 	type: types.ADD_ADDRESS_AUTOCOMPLETE_PROVIDER,
 	providerId,
 } );

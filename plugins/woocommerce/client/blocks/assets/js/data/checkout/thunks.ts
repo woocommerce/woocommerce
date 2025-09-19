@@ -38,7 +38,8 @@ import type {
 } from './types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { CheckoutPutAbortController } from '../utils/clear-put-requests';
-import { CART_STORE_KEY } from '../cart';
+import { CART_STORE_KEY, type CartStoreDescriptor } from '../cart';
+import { updateAutocompleteProvider } from './subscriptions/autocomplete';
 
 export interface CheckoutThunkArgs {
 	select: CurriedSelectorsOf< CheckoutStoreDescriptor >;
@@ -192,5 +193,29 @@ export const disableCheckoutFor = ( asyncFunc: () => Promise< unknown > ) => {
 		} finally {
 			dispatch.__internalFinishCalculation();
 		}
+	};
+};
+
+export const addAddressAutocompleteProvider = ( providerId: string ) => {
+	return ( { dispatch, registry }: CheckoutThunkArgs ) => {
+		dispatch.addAddressAutocompleteProviderAction( providerId );
+		updateAutocompleteProvider(
+			dispatch,
+			'shipping',
+			(
+				registry.select(
+					'wc/store/cart'
+				) as CurriedSelectorsOf< CartStoreDescriptor >
+			 ).getCartData()?.shippingAddress?.country || ''
+		);
+		updateAutocompleteProvider(
+			dispatch,
+			'billing',
+			(
+				registry.select(
+					'wc/store/cart'
+				) as CurriedSelectorsOf< CartStoreDescriptor >
+			 ).getCartData()?.billingAddress?.country || ''
+		);
 	};
 };
