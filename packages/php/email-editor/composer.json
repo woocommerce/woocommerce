@@ -38,10 +38,12 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"mozart compose"
+			"mozart compose",
+			"composer dump-autoload -o"
 		],
 		"post-update-cmd": [
-			"mozart compose"
+			"mozart compose",
+			"composer dump-autoload -o"
 		],
 		"env:destroy": "wp-env destroy",
 		"env:stop": "wp-env stop",
