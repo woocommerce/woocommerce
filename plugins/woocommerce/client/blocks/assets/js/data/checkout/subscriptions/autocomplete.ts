@@ -53,7 +53,6 @@ export function updateAutocompleteProvider(
 		}
 		return;
 	}
-	console.log( 'checking and setting' );
 
 	// Check providers in preference order (server handles preferred provider ordering)
 	for ( const serverProvider of serverProviders ) {
