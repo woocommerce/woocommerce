@@ -4205,14 +4205,22 @@ function wc_get_cart_remove_url( $cart_item_key ) {
  *
  * @since 3.3.0
  * @param  string $cart_item_key Cart item key to undo.
+ * @param  array  $cart_item_data Cart item data (optional, used when removed_cart_contents is not in session).
  * @return string url to page
  */
-function wc_get_cart_undo_url( $cart_item_key ) {
+function wc_get_cart_undo_url( $cart_item_key, $cart_item_data = null ) {
 	$cart_page_url = wc_get_cart_url();
 
 	$query_args = array(
 		'undo_item' => $cart_item_key,
 	);
+
+	if ( $cart_item_data && is_array( $cart_item_data ) ) {
+		$item_data_for_url = $cart_item_data;
+		unset( $item_data_for_url['data'] );
+
+		$query_args['undo_data'] = base64_encode( wp_json_encode( $item_data_for_url ) );
+	}
 
 	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
 }
