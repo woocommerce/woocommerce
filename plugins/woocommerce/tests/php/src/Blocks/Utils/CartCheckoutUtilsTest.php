@@ -86,4 +86,51 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 		delete_option( 'woocommerce_cart_page_id' );
 		$this->assertFalse( CartCheckoutUtils::has_cart_page() );
 	}
+
+	/**
+	 * Test finding express checkout attributes in top-level blocks.
+	 */
+	public function test_find_express_checkout_attributes_top_level() {
+		$post_content = '<!-- wp:woocommerce/cart-express-payment-block {"buttonStyle":"dark","buttonHeight":48} /-->';
+
+		$result = CartCheckoutUtils::find_express_checkout_attributes( $post_content, 'cart' );
+
+		$this->assertEquals(
+			array(
+				'buttonStyle'  => 'dark',
+				'buttonHeight' => 48,
+			),
+			$result
+		);
+	}
+
+	/**
+	 * Test finding express checkout attributes in nested blocks.
+	 */
+	public function test_find_express_checkout_attributes_nested() {
+		$post_content = '<!-- wp:woocommerce/cart -->
+    <!-- wp:woocommerce/cart-express-payment-block {"buttonStyle":"light","buttonHeight":48} /-->
+    <!-- /wp:woocommerce/cart -->';
+
+		$result = CartCheckoutUtils::find_express_checkout_attributes( $post_content, 'cart' );
+
+		$this->assertEquals(
+			array(
+				'buttonStyle'  => 'light',
+				'buttonHeight' => 48,
+			),
+			$result
+		);
+	}
+
+	/**
+	 * Test finding express checkout returns null when no block is present.
+	 */
+	public function test_find_express_checkout_attributes_not_found() {
+		$post_content = '<!-- wp:paragraph --> <p>This is a paragraph block.</p> <!-- /wp:paragraph -->';
+
+		$result = CartCheckoutUtils::find_express_checkout_attributes( $post_content, 'cart' );
+
+		$this->assertNull( $result );
+	}
 }

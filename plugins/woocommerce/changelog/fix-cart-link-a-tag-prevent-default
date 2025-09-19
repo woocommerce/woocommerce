@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cart Link block: Fix issue that happens when you try and edit the text by hijacking onClick with a preventDefault()

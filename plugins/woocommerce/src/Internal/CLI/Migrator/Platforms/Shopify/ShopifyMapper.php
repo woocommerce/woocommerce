@@ -449,6 +449,12 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$simple_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
 			}
 
+			if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				property_exists( $variant_node->inventoryItem, 'unitCost' ) && is_object( $variant_node->inventoryItem->unitCost ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			) {
+				$simple_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+			}
+
 			$simple_data['original_variant_id'] = basename( $variant_node->id );
 
 		} else {
@@ -532,6 +538,12 @@ class ShopifyMapper implements PlatformMapperInterface {
 					$weight                   = $weight_data ? $weight_data->value : null;
 					$weight_unit              = $weight_data ? $weight_data->unit : null;
 					$variation_data['weight'] = $this->get_converted_weight( $weight, $weight_unit );
+				}
+
+				if ( property_exists( $variant_node, 'inventoryItem' ) && is_object( $variant_node->inventoryItem ) && // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+					property_exists( $variant_node->inventoryItem, 'unitCost' ) && is_object( $variant_node->inventoryItem->unitCost ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				) {
+					$variation_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 				}
 
 				if ( $this->should_process( 'attributes' ) ) {

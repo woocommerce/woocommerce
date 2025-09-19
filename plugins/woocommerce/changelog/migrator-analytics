@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Added tracker for migrated products in wc_migrator_products_count
