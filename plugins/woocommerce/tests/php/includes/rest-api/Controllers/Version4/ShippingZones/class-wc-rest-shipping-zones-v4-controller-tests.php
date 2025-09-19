@@ -560,7 +560,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'woocommerce_rest_shipping_disabled', $data['code'] );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
 		$this->assertArrayHasKey( 'message', $data );
 		$this->assertEquals( 'Shipping is disabled.', $data['message'] );
 
