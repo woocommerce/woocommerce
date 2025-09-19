@@ -175,18 +175,6 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 			}
 		}
 
-		// Log the update if settings were changed.
-		if ( ! empty( $updated_settings ) ) {
-			/**
-			 * Fires when WooCommerce email settings are updated.
-			 *
-			 * @param array $updated_settings Array of updated settings IDs.
-			 * @param string $rest_base The REST base of the settings.
-			 * @since 4.0.0
-			 */
-			do_action( 'woocommerce_email_settings_updated', $updated_settings, $this->rest_base );
-		}
-
 		// Return updated settings.
 		$response_data = $this->get_email_settings_data();
 		return rest_ensure_response( $response_data );
@@ -325,7 +313,6 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 			),
 		);
 
-		// Extract values separately
 		$values = array(
 			'woocommerce_email_from_name' => get_option( 'woocommerce_email_from_name', get_option( 'blogname' ) ),
 			'woocommerce_email_from_address' => get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
@@ -336,8 +323,8 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 		return array(
 			'id'          => 'email',
-			'title'       => __( 'Email settings', 'woocommerce' ),
-			'description' => __( 'Configure email sender details and design options.', 'woocommerce' ),
+			'title'       => __( 'Email design', 'woocommerce' ),
+			'description' => __( 'Customize the look and feel of all you notification emails.', 'woocommerce' ),
 			'values'      => $values,
 			'groups'      => array(
 				'sender_details' => array(
@@ -376,6 +363,12 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 				'description' => array(
 					'description' => __( 'Settings description.', 'woocommerce' ),
 					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'values'      => array(
+					'description' => __( 'Flattened setting values.', 'woocommerce' ),
+					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
@@ -470,8 +463,8 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'enum'        => array( 'text', 'email', 'boolean' ),
 					'context'     => array( 'view', 'edit' ),
 				),
-				'value' => array(
-					'description' => __( 'Setting field value.', 'woocommerce' ),
+				'description' => array(
+					'description' => __( 'Setting field description.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
