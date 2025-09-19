@@ -415,14 +415,48 @@ class CartCheckoutUtils {
 
 	/**
 	 * Recursively search the checkout block to find the express checkout block and
+	 * get the button style attributes using the parse_blocks function.
+	 *
+	 * @param array  $blocks Blocks to search.
+	 * @param string $cart_or_checkout The block type to check.
+	 */
+	public static function find_express_checkout_attributes_in_parsed_blocks( $blocks, $cart_or_checkout ) {
+		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
+		foreach ( $blocks as $block ) {
+			if ( ! empty( $block['blockName'] ) && $express_block_name === $block['blockName'] && ! empty( $block['attrs'] ) ) {
+				return $block['attrs'];
+			}
+
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$answer = self::find_express_checkout_attributes_in_parsed_blocks( $block['innerBlocks'], $cart_or_checkout );
+				if ( $answer ) {
+					return $answer;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Recursively search the checkout block to find the express checkout block and
 	 * get the button style attributes
 	 *
-	 * @param string $post_content Blocks to search.
-	 * @param string $cart_or_checkout The block type to check.
+	 * @param string|array $post_content The post content.
+	 * @param string       $cart_or_checkout The block type to check.
 	 *
 	 * @return array|null Block attributes, if present and valid, otherwise `null`.
 	 */
 	public static function find_express_checkout_attributes( $post_content, $cart_or_checkout ) {
+		if ( is_array( $post_content ) ) {
+			// If an array is passed, assume it's already been parsed with parse_blocks,
+			// use the old method, and show a deprecation warning.
+			wc_deprecated_argument(
+				'post_content',
+				'10.3.0',
+				'Passing parsed blocks as an array in $post_content is deprecated. Please pass the post content as a string.'
+			);
+			return self::find_express_checkout_attributes_in_parsed_blocks( $post_content, $cart_or_checkout );
+		}
+
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
 
 		$scanner = Block_Scanner::create( $post_content );
