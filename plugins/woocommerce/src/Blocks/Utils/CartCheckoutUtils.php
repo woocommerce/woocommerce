@@ -419,6 +419,8 @@ class CartCheckoutUtils {
 	 *
 	 * @param array  $blocks Blocks to search.
 	 * @param string $cart_or_checkout The block type to check.
+	 *
+	 * @return array Block attributes.
 	 */
 	public static function find_express_checkout_attributes_in_parsed_blocks( $blocks, $cart_or_checkout ) {
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
