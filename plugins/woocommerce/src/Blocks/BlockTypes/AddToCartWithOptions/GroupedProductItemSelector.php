@@ -137,8 +137,9 @@ class GroupedProductItemSelector extends AbstractBlock {
 				esc_html( wp_strip_all_tags( wc_price( $product->get_price() ) ) )
 			);
 		}
-		$context_attribute = wp_interactivity_data_wp_context( array( 'childProductId' => $product->get_id() ) );
-		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $context_attribute . ' aria-label="' . esc_attr( $label ) . '" />';
+
+		$context_attribute = wp_interactivity_data_wp_context( array( 'productId' => $product->get_id() ) );
+		return '<input type="checkbox" name="' . esc_attr( 'quantity[' . $product->get_id() . ']' ) . '" value="1" class="wc-grouped-product-add-to-cart-checkbox" id="' . esc_attr( 'quantity_' . $product->get_id() ) . '" data-wp-interactive="woocommerce/add-to-cart-with-options-quantity-selector" data-wp-on--change="actions.handleQuantityCheckboxChange" ' . $context_attribute . ' aria-label="' . esc_attr( $label ) . '"/>';
 	}
 
 	/**
@@ -157,12 +158,19 @@ class GroupedProductItemSelector extends AbstractBlock {
 		$markup  = '';
 
 		if ( $product ) {
+			$is_interactive = false;
 			if ( ! $product->is_purchasable() || $product->has_options() || ! $product->is_in_stock() ) {
 				$markup = $this->get_button_markup( $product );
 			} elseif ( $product->is_sold_individually() ) {
-				$markup = $this->get_checkbox_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_checkbox_markup( $product );
 			} else {
-				$markup = $this->get_quantity_selector_markup( $product );
+				$is_interactive = true;
+				$markup         = $this->get_quantity_selector_markup( $product );
+			}
+
+			if ( $is_interactive ) {
+				wp_enqueue_script_module( 'woocommerce/add-to-cart-with-options-quantity-selector' );
 			}
 
 			if ( $markup ) {

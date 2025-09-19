@@ -77,22 +77,18 @@ class Test_Abstract_Controller_V4 extends Automattic\WooCommerce\RestApi\Routes\
 	 *
 	 * @return array
 	 */
-	public function get_item_schema(): array { // phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found
-		if ( null === $this->schema ) {
-			$this->schema = array(
-				'$schema'    => 'http://json-schema.org/draft-04/schema#',
-				'type'       => 'object',
-				'title'      => Test_Abstract_Schema_V4::IDENTIFIER,
-				'properties' => Test_Abstract_Schema_V4::get_item_schema_properties(),
-			);
-			/**
-			 * Filter the item schema for this route.
-			 *
-			 * @param array $schema The item schema.
-			 * @since 10.2.0
-			 */
-			$this->schema = apply_filters( $this->get_hook_prefix() . 'item_schema', $this->add_additional_fields_schema( $this->schema ) );
-		}
-		return $this->schema;
+	protected function get_schema(): array {
+		return Test_Abstract_Schema_V4::get_item_schema();
+	}
+
+	/**
+	 * Get item response for testing.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( $item, WP_REST_Request $request ): array {
+		return array();
 	}
 }

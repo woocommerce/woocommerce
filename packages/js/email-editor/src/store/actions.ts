@@ -14,6 +14,9 @@ import {
 	State,
 	PersonalizationTag,
 	ContentValidation,
+	EmailEditorSettings,
+	EmailTheme,
+	EmailEditorUrls,
 } from './types';
 import { recordEvent } from '../events';
 
@@ -129,5 +132,39 @@ export function setContentValidation(
 	return {
 		type: 'SET_CONTENT_VALIDATION',
 		validation,
+	} as const;
+}
+
+export function setEditorSettings( editorSettings: EmailEditorSettings ) {
+	return {
+		type: 'SET_EDITOR_SETTINGS',
+		editorSettings,
+	} as const;
+}
+
+export function setEditorTheme( theme: EmailTheme ) {
+	return {
+		type: 'SET_EDITOR_THEME',
+		theme,
+	} as const;
+}
+
+export function setEditorUrls( urls: EmailEditorUrls ) {
+	return {
+		type: 'SET_EDITOR_URLS',
+		urls,
+	} as const;
+}
+
+export function setEditorConfig( config: {
+	editorSettings: EmailEditorSettings;
+	theme: EmailTheme;
+	urls: EmailEditorUrls;
+	userEmail: string;
+	globalStylesPostId?: number | null;
+} ) {
+	return {
+		type: 'SET_EDITOR_CONFIG',
+		config,
 	} as const;
 }

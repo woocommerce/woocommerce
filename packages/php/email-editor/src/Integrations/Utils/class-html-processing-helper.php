@@ -96,18 +96,68 @@ class Html_Processing_Helper {
 	}
 
 	/**
-	 * Sanitize color value to ensure it's a valid hex color or CSS variable.
+	 * Sanitize dimension value to ensure it's a valid CSS dimension.
+	 *
+	 * Supports numeric values (converted to px) and standard CSS units.
+	 *
+	 * @param mixed $value The dimension value to sanitize.
+	 * @return string Sanitized dimension value or empty string if invalid.
+	 */
+	public static function sanitize_dimension_value( $value ): string {
+		if ( ! is_string( $value ) && ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		$value = (string) $value;
+
+		// If it's just a number, assume pixels.
+		if ( is_numeric( $value ) ) {
+			$value = $value . 'px';
+		}
+
+		// Use existing CSS value sanitization for security.
+		$sanitized_value = self::sanitize_css_value( $value );
+
+		// Additional validation for dimension-specific units.
+		if ( ! empty( $sanitized_value ) && preg_match( '/^(\d+(?:\.\d+)?)(px|em|rem|%|vh|vw|ex|ch|in|cm|mm|pt|pc)$/', $sanitized_value ) ) {
+			return $sanitized_value;
+		}
+
+		return '';
+	}
+
+	/**
+	 * Sanitize color value to ensure it's a valid color format.
+	 *
+	 * Supports hex colors, rgb/rgba, hsl/hsla, named colors, and CSS variables.
 	 *
 	 * @param string $color The color value to sanitize.
-	 * @return string Sanitized color value.
+	 * @return string Sanitized color value or safe default if invalid.
 	 */
 	public static function sanitize_color( string $color ): string {
-		// Remove any whitespace and convert to lowercase.
-		$color = strtolower( trim( $color ) );
+		// Remove any whitespace.
+		$color = trim( $color );
 
-		// Check if it's a valid hex color (3 or 6 characters).
-		if ( preg_match( '/^#([a-f0-9]{3}){1,2}$/i', $color ) ) {
+		// Check if it's a valid hex color (#fff, #ffffff, #ffffffff).
+		if ( preg_match( '/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/', $color ) ) {
+			return strtolower( $color );
+		}
+
+		// Check for rgb/rgba colors.
+		if ( preg_match( '/^rgba?\(\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*,\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*,\s*(25[0-5]|2[0-4]\d|1\d{2}|\d{1,2})\s*(?:,\s*(?:1(?:\.0+)?|0(?:\.\d+)?|\.\d+)\s*)?\)$/', $color ) ) {
 			return $color;
+		}
+
+		// Check for hsl/hsla colors.
+		if ( preg_match( '/^hsla?\(\s*(360|3[0-5]\d|[12]\d{2}|\d{1,2})\s*,\s*(100|[1-9]?\d)%\s*,\s*(100|[1-9]?\d)%\s*(?:,\s*(?:1(?:\.0+)?|0(?:\.\d+)?|\.\d+)\s*)?\)$/', $color ) ) {
+			return $color;
+		}
+
+		// Check for named colors and other valid CSS color values.
+		// We use a permissive approach: accept any string that doesn't contain dangerous characters
+		// and let the CSS engine handle the actual validation.
+		if ( preg_match( '/^[a-zA-Z][a-zA-Z0-9-]*$/', $color ) && ! preg_match( '/^(expression|javascript|vbscript|data|import|behavior|binding|filter|progid)/i', $color ) ) {
+			return strtolower( $color );
 		}
 
 		// Check if it's a CSS variable (var(--variable-name)).
