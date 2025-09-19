@@ -141,12 +141,15 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 			);
 		}
 
+		// Handle nested values structure - extract values if they exist
+		$settings_data = isset( $params['values'] ) && is_array( $params['values'] ) ? $params['values'] : $params;
+
 		// Define valid email settings.
 		$valid_settings = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address', 'woocommerce_email_reply_to_enabled', 'woocommerce_email_reply_to_name', 'woocommerce_email_reply_to_address' );
 		$validated_settings = array();
 
 		// Process each setting in the payload.
-		foreach ( $params as $setting_id => $setting_value ) {
+		foreach ( $settings_data as $setting_id => $setting_value ) {
 			// Sanitize the setting ID.
 			$setting_id = sanitize_text_field( $setting_id );
 
