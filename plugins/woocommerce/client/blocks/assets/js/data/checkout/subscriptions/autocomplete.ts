@@ -114,7 +114,7 @@ export const autocompleteSubscription = () => {
 	}
 };
 
-export const subscribeToCountryChanges = () => {
+export const subscribeToCartChanges = () => {
 	if ( serverProviders && serverProviders.length > 0 ) {
 		subscribe( autocompleteSubscription, 'wc/store/cart' );
 	}
