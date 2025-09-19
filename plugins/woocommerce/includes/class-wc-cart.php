@@ -288,7 +288,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Gets cart total. This is the total of items in the cart, but after discounts. Subtotal is before discounts.
 	 *
 	 * @since 3.2.0
-	 * @return float
+	 * @return float|string|int
 	 */
 	public function get_cart_contents_total() {
 		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, $this->get_totals_var( 'cart_contents_total' ) );
