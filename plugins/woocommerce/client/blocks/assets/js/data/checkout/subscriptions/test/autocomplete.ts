@@ -17,59 +17,23 @@ jest.mock( '@wordpress/data-controls', () => ( {
 	controls: {},
 } ) );
 
-// Mock the entire checkout store to avoid importing its dependencies
-jest.mock( '../../checkout', () => ( {
-	store: 'mocked-checkout-store',
-	CHECKOUT_STORE_KEY: 'wc/store/checkout',
-} ) );
-
 // Mock all internal dependencies
-jest.mock( '../constants', () => ( {
-	STORE_KEY: 'wc/store/cart',
+jest.mock( '../../constants', () => ( {
+	STORE_KEY: 'wc/store/checkout',
 } ) );
 
-jest.mock( '../selectors', () => ( {} ) );
-jest.mock( '../actions', () => ( {} ) );
-jest.mock( '../resolvers', () => ( {} ) );
-jest.mock( '../reducers', () => jest.fn() );
-jest.mock( '../push-changes', () => ( {
+jest.mock( '../../selectors', () => ( {} ) );
+jest.mock( '../../actions', () => ( {} ) );
+jest.mock( '../../reducers', () => jest.fn() );
+jest.mock( '../../push-changes', () => ( {
 	pushChanges: jest.fn(),
 	flushChanges: jest.fn(),
-} ) );
-
-jest.mock( '../update-payment-methods', () => ( {
-	updatePaymentMethods: jest.fn(),
-	debouncedUpdatePaymentMethods: jest.fn(),
-} ) );
-
-jest.mock( '../persistence-layer', () => ( {
-	hasCartSession: jest.fn(),
-	persistenceLayer: {
-		get: jest.fn(),
-	},
-	isAddingToCart: jest.fn(),
-} ) );
-
-jest.mock( '../default-state', () => ( {
-	defaultCartState: {
-		cartData: {},
-	},
-} ) );
-
-jest.mock( '../utils', () => ( {
-	getTriggerStoreSyncEvent: jest.fn().mockReturnValue( false ),
-} ) );
-
-jest.mock( '../notify-quantity-changes', () => ( {} ) );
-
-jest.mock( '../../utils', () => ( {
-	isEditor: jest.fn().mockReturnValue( false ),
 } ) );
 
 /**
  * Internal dependencies
  */
-import { autocompleteSubscription } from '../index';
+import { autocompleteSubscription } from '../autocomplete';
 
 // Mock settings
 jest.mock( '@woocommerce/settings', () => ( {
