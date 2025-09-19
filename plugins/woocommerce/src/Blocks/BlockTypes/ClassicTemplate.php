@@ -107,22 +107,55 @@ class ClassicTemplate extends AbstractDynamicBlock {
 	 * @see https://github.com/woocommerce/woocommerce/pull/60223
 	 */
 	public function enqueue_legacy_assets() {
-		// Legacy script dependencies for backward compatibility.
-		wp_enqueue_script( 'wc-zoom' );
-		wp_enqueue_script( 'wc-flexslider' );
-		wp_enqueue_script( 'wc-photoswipe-ui-default' );
-		wp_enqueue_style( 'photoswipe-default-skin' );
-		wp_enqueue_script( 'wc-single-product' );
-
-		add_action(
-			'wp_footer',
-			function () {
-				wc_get_template( 'single-product/photoswipe.php' );
-			}
+		$default_settings = array(
+			'zoom'       => true,
+			'flexslider' => true,
+			'photoswipe' => true,
 		);
-		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+		/**
+		 * Filters the legacy gallery features enqueued by the Classic Template block.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param array $settings Associative array with zoom, flexslider, photoswipe flags.
+		 */
+		$filtered_settings = apply_filters( 'woocommerce_classic_template_legacy_gallery_features', $default_settings );
+		$parsed_settings   = wp_parse_args( is_array( $filtered_settings ) ? $filtered_settings : array(), $default_settings );
+		$settings          = array(
+			'zoom'       => wc_string_to_bool( $parsed_settings['zoom'] ),
+			'flexslider' => wc_string_to_bool( $parsed_settings['flexslider'] ),
+			'photoswipe' => wc_string_to_bool( $parsed_settings['photoswipe'] ),
+		);
+
+		if ( $settings['zoom'] ) {
+			wp_enqueue_script( 'wc-zoom' );
+			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		} else {
+			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_false' );
+		}
+
+		if ( $settings['flexslider'] ) {
+			wp_enqueue_script( 'wc-flexslider' );
+			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+		} else {
+			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_false' );
+		}
+
+		if ( $settings['photoswipe'] ) {
+			wp_enqueue_script( 'wc-photoswipe-ui-default' );
+			wp_enqueue_style( 'photoswipe-default-skin' );
+			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+			add_action(
+				'wp_footer',
+				function () {
+					wc_get_template( 'single-product/photoswipe.php' );
+				}
+			);
+		} else {
+			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_false' );
+		}
+
+		wp_enqueue_script( 'wc-single-product' );
 	}
 
 
