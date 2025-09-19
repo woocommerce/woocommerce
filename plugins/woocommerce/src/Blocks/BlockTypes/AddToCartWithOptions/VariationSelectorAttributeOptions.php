@@ -23,21 +23,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute-options';
 
 	/**
-	 * Get the block's attributes.
-	 *
-	 * @param array $attributes Block attributes. Default empty array.
-	 * @return array  Block attributes merged with defaults.
-	 */
-	private function parse_attributes( $attributes ) {
-		// These should match what's set in JS `registerBlockType`.
-		$defaults = array(
-			'style' => 'pills',
-		);
-
-		return wp_parse_args( $attributes, $defaults );
-	}
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -58,12 +43,15 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 
-		$attributes = $this->parse_attributes( $attributes );
+		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		// `$attributes['style']` is the layout selector ("pills" | "dropdown"), not the block supports style object.
-		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'style' ) );
+		$option_style = array_key_exists( 'optionStyle', $attributes ) ? $attributes['optionStyle'] : null;
 
-		$field_style = $attributes['style'];
+		// During the beta period, `optionStyle` was called `style`, so we check
+		// `style` for backwards compatibility.
+		if ( ! $option_style && array_key_exists( 'style', $attributes ) && 'dropdown' === $attributes['style'] ) {
+			$option_style = 'dropdown';
+		}
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -72,7 +60,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			)
 		);
 
-		if ( 'dropdown' === $field_style ) {
+		if ( 'dropdown' === $option_style ) {
 			$content = $this->render_dropdown( $attributes, $content, $block );
 		} else {
 			$content = $this->render_pills( $attributes, $content, $block );

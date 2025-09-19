@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add to Cart Button: disable optimistic updates if product is sold individually and is already in the cart

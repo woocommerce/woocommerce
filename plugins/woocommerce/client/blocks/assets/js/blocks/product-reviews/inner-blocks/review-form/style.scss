@@ -64,6 +64,10 @@
 		}
 	}
 
+	textarea[name="comment"]:focus {
+		outline-offset: -2px;
+	}
+
 	.comment-form-author,
 	.comment-form-email,
 	.comment-form-url {

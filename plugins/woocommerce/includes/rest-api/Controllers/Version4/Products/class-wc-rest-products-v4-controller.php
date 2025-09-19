@@ -1840,6 +1840,8 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
+		// New properties added for v4.
+
 		$schema['properties']['min_price'] = array(
 			'description' => __( 'Product minimum price.', 'woocommerce' ),
 			'type'        => 'string',
@@ -1850,6 +1852,35 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			'description' => __( 'Product maximum price.', 'woocommerce' ),
 			'type'        => 'string',
 			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['add_to_cart'] = array(
+			'description' => __( 'Add to cart details.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'url'         => array(
+					'description' => __( 'Add to cart URL.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'description' => array(
+					'description' => __( 'Add to cart description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'text'        => array(
+					'description' => __( 'Add to cart text.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'single_text' => array(
+					'description' => __( 'Add to cart single text.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+			'readonly'    => true,
 		);
 
 			return $this->add_additional_fields_schema( $schema );
@@ -2147,6 +2178,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
+		$data['add_to_cart'] = array(
+			'url'         => $object_data->add_to_cart_url(),
+			'description' => $object_data->add_to_cart_description(),
+			'text'        => $object_data->add_to_cart_text(),
+			'single_text' => $object_data->single_add_to_cart_text(),
+		);
 		return $data;
 	}
 

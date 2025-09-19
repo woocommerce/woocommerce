@@ -61,7 +61,7 @@ class Note extends \WC_Data {
 			'status'        => self::E_WC_ADMIN_NOTE_UNACTIONED,
 			'source'        => 'woocommerce',
 			'date_created'  => '0000-00-00 00:00:00',
-			'date_reminder' => '',
+			'date_reminder' => null,
 			'is_snoozable'  => false,
 			'actions'       => array(),
 			'layout'        => 'plain',

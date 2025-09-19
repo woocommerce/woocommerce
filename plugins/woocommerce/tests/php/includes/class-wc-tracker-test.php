@@ -5,11 +5,31 @@
  * @package WooCommerce\Tests\WC_Tracker.
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound -- Ignoring test doubles.
+
+/**
+ * Mock Address Provider for testing.
+ */
+class WC_Tracker_Test_MockAddressProvider extends WC_Address_Provider {
+	/**
+	 * Constructor.
+	 *
+	 * @param string $id   Provider ID.
+	 * @param string $name Provider name.
+	 */
+	public function __construct( $id = 'mock-address-provider', $name = 'Mock Address Provider' ) {
+		$this->id   = $id;
+		$this->name = $name;
+	}
+}
+
 /**
  * Class WC_Tracker_Test
  */
@@ -25,14 +45,16 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		// Test the case for woocommerce_admin_disabled filter returning true.
 		add_filter(
 			'woocommerce_admin_disabled',
-			function( $default ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+			function ( $default_value ) {
 				return true;
 			}
 		);
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+			function ( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},
@@ -57,7 +79,8 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'pre_http_request',
-			function( $pre, $args, $url ) use ( &$posted_data ) {
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+			function ( $pre, $args, $url ) use ( &$posted_data ) {
 				$posted_data = $args;
 				return true;
 			},
@@ -77,7 +100,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_tracking_data_plugin_feature_compatibility() {
 		$legacy_mocks = array(
-			'get_plugins' => function() {
+			'get_plugins' => function () {
 				return array(
 					'plugin1' => array(
 						'Name' => 'Plugin 1',
@@ -354,5 +377,117 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_allow_tracking', $current_woocommerce_allow_tracking );
 		delete_option( 'woocommerce_allow_tracking_last_modified' );
 		delete_option( 'woocommerce_allow_tracking_first_optin' );
+	}
+
+	/**
+	 * @testDox Test address autocomplete tracking data.
+	 */
+	public function test_get_address_autocomplete_info() {
+		// Test when address autocomplete is disabled (default).
+		update_option( 'woocommerce_address_autocomplete_enabled', 'no' );
+		$data = WC_Tracker::get_address_autocomplete_info();
+		$this->assertEquals( 'no', $data['enabled'] );
+		$this->assertIsArray( $data['providers'] );
+		$this->assertEmpty( $data['providers'] );
+		$this->assertEquals( '', $data['preferred_provider'] );
+
+		// Test when address autocomplete is enabled but no providers registered.
+		update_option( 'woocommerce_address_autocomplete_enabled', 'yes' );
+		$data = WC_Tracker::get_address_autocomplete_info();
+		// Should be disabled if no providers are available.
+		$this->assertEquals( 'no', $data['enabled'] );
+		$this->assertEmpty( $data['providers'] );
+		$this->assertEquals( '', $data['preferred_provider'] );
+
+		// Test with a single registered provider and preferred provider set.
+		$this->register_mock_address_provider();
+		update_option( 'woocommerce_address_autocomplete_provider', 'mock-address-provider' );
+
+		update_option( 'woocommerce_address_autocomplete_enabled', 'yes' );
+		$data = WC_Tracker::get_address_autocomplete_info();
+		$this->assertEquals( 'yes', $data['enabled'] );
+		$this->assertIsArray( $data['providers'] );
+		$this->assertCount( 1, $data['providers'] );
+		$this->assertContains( 'mock-address-provider', $data['providers'] );
+		// Should return the preferred provider we set.
+		$this->assertEquals( 'mock-address-provider', $data['preferred_provider'] );
+
+		// Clean up before testing multiple providers.
+		remove_all_filters( 'woocommerce_address_providers' );
+
+		// Test with multiple registered providers and different preferred provider.
+		$this->register_multiple_mock_address_providers();
+		update_option( 'woocommerce_address_autocomplete_provider', 'mock-address-provider-two' );
+
+		$data = WC_Tracker::get_address_autocomplete_info();
+		$this->assertEquals( 'yes', $data['enabled'] );
+		$this->assertIsArray( $data['providers'] );
+		$this->assertCount( 2, $data['providers'] );
+		$this->assertContains( 'mock-address-provider', $data['providers'] );
+		$this->assertContains( 'mock-address-provider-two', $data['providers'] );
+		// Should return the second provider as preferred.
+		$this->assertEquals( 'mock-address-provider-two', $data['preferred_provider'] );
+
+		// Test with invalid preferred provider (not in the list).
+		update_option( 'woocommerce_address_autocomplete_provider', 'non-existent-provider' );
+		$data = WC_Tracker::get_address_autocomplete_info();
+		// Should fall back to the first provider when the preferred provider doesn't exist.
+		$this->assertEquals( 'mock-address-provider', $data['preferred_provider'] );
+
+		// Test with multiple registered providers but feature disabled.
+		$this->register_multiple_mock_address_providers();
+		update_option( 'woocommerce_address_autocomplete_enabled', 'no' );
+		update_option( 'woocommerce_address_autocomplete_provider', 'mock-address-provider-two' );
+
+		$data = WC_Tracker::get_address_autocomplete_info();
+		$this->assertEquals( 'no', $data['enabled'] );
+		$this->assertIsArray( $data['providers'] );
+		$this->assertCount( 2, $data['providers'] );
+		$this->assertContains( 'mock-address-provider', $data['providers'] );
+		$this->assertContains( 'mock-address-provider-two', $data['providers'] );
+		// Should return the second provider as preferred.
+		$this->assertEquals( '', $data['preferred_provider'] );
+
+		// Test with invalid preferred provider (not in the list) when feature is disabled.
+		update_option( 'woocommerce_address_autocomplete_provider', 'non-existent-provider' );
+		$data = WC_Tracker::get_address_autocomplete_info();
+		// Should not fall back to the first provider when the preferred provider doesn't exist.
+		$this->assertEquals( '', $data['preferred_provider'] );
+
+		// Clean up.
+		delete_option( 'woocommerce_address_autocomplete_enabled' );
+		delete_option( 'woocommerce_address_autocomplete_provider' );
+		remove_all_filters( 'woocommerce_address_providers' );
+		// Re-init address providers to ensure class is clean for other tests.
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController::class )->init();
+	}
+
+	/**
+	 * Helper method to register a mock address provider.
+	 */
+	private function register_mock_address_provider() {
+		// Register the provider instance.
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) {
+				$providers[] = new WC_Tracker_Test_MockAddressProvider();
+				return $providers;
+			}
+		);
+	}
+
+	/**
+	 * Helper method to register multiple mock address providers.
+	 */
+	private function register_multiple_mock_address_providers() {
+		// Register multiple provider instances with different IDs.
+		add_filter(
+			'woocommerce_address_providers',
+			function ( $providers ) {
+				$providers[] = new WC_Tracker_Test_MockAddressProvider( 'mock-address-provider', 'Mock Address Provider' );
+				$providers[] = new WC_Tracker_Test_MockAddressProvider( 'mock-address-provider-two', 'Mock Address Provider Two' );
+				return $providers;
+			}
+		);
 	}
 }

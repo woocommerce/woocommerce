@@ -41,15 +41,21 @@ class Border_Style_Postprocessor implements Postprocessor {
 	 * @return string
 	 */
 	public function postprocess( string $html ): string {
-		$html = (string) preg_replace_callback(
-			'/style="(.*?)"/i',
-			function ( $matches ) {
-				return 'style="' . esc_attr( $this->process_style( $matches[1] ) ) . '"';
-			},
-			$html
-		);
+		$processor = new \WP_HTML_Tag_Processor( $html );
 
-		return $html;
+		while ( $processor->next_tag() ) {
+			$style = $processor->get_attribute( 'style' );
+
+			if ( null !== $style && true !== $style ) {
+				$processed_style = $this->process_style( $style );
+
+				if ( $processed_style !== $style ) {
+					$processor->set_attribute( 'style', $processed_style );
+				}
+			}
+		}
+
+		return $processor->get_updated_html();
 	}
 
 	/**
