@@ -21,7 +21,6 @@ class My_Account {
 		add_action( 'woocommerce_account_content', array( $this, 'track_tabs' ) );
 		add_action( 'woocommerce_account_content', array( $this, 'track_logouts' ) );
 		add_action( 'woocommerce_customer_save_address', array( $this, 'track_save_address' ), 10, 2 );
-		add_action( 'wp_head', array( $this, 'trigger_queued_events' ) );
 		add_action( 'wp', array( $this, 'track_add_payment_method' ) );
 		add_action( 'wp', array( $this, 'track_delete_payment_method' ) );
 		add_action( 'woocommerce_save_account_details', array( $this, 'track_save_account_details' ) );
@@ -133,7 +132,7 @@ class My_Account {
 	 * @param string $load_address The address type (billing, shipping).
 	 */
 	public function track_save_address( $customer_id, $load_address ) {
-		$this->queue_event( 'woocommerceanalytics_my_account_address_save', array( 'address' => $load_address ) );
+		WC_Analytics_Tracking::record_event( 'my_account_address_save', array( 'address' => $load_address ) );
 	}
 
 	/**
@@ -148,7 +147,7 @@ class My_Account {
 				return;
 			}
 
-			$this->queue_event( 'woocommerceanalytics_my_account_payment_save' );
+			WC_Analytics_Tracking::record_event( 'my_account_payment_save' );
 			return;
 		}
 	}
@@ -159,7 +158,7 @@ class My_Account {
 	public function track_delete_payment_method() {
 		global $wp;
 		if ( isset( $wp->query_vars['delete-payment-method'] ) ) {
-			$this->queue_event( 'woocommerceanalytics_my_account_payment_delete' );
+			WC_Analytics_Tracking::record_event( 'my_account_payment_delete' );
 			return;
 		}
 	}
@@ -169,7 +168,7 @@ class My_Account {
 	 */
 	public function track_order_cancel_event() {
 		if ( isset( $_GET['_wca_initiator'] ) && ( isset( $_GET['_wpnonce'] ) && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-cancel_order' ) ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$this->queue_event( 'woocommerceanalytics_my_account_order_action_click', array( 'action' => 'cancel' ) );
+			WC_Analytics_Tracking::record_event( 'my_account_order_action_click', array( 'action' => 'cancel' ) );
 		}
 	}
 
@@ -178,7 +177,7 @@ class My_Account {
 	 */
 	public function track_order_pay_event() {
 		if ( isset( $_GET['_wca_initiator'] ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Recommended
-			$this->record_event( 'woocommerceanalytics_my_account_order_action_click', array( 'action' => 'pay' ) );
+			WC_Analytics_Tracking::record_event( 'my_account_order_action_click', array( 'action' => 'pay' ) );
 		}
 	}
 
@@ -186,7 +185,7 @@ class My_Account {
 	 * Track account details save events, this can only come from the my account page.
 	 */
 	public function track_save_account_details() {
-		$this->queue_event( 'woocommerceanalytics_my_account_details_save' );
+		WC_Analytics_Tracking::record_event( 'my_account_details_save' );
 	}
 
 	/**
@@ -275,44 +274,5 @@ class My_Account {
 	public function add_initiator_param_to_query_vars( $query_vars ) {
 		$query_vars[] = '_wca_initiator';
 		return $query_vars;
-	}
-
-	/**
-	 * Record all queued up events in session.
-	 *
-	 * This is called on every page load, and will record all events that were queued up in session.
-	 */
-	public function trigger_queued_events() {
-		if ( is_object( WC()->session ) ) {
-			$events = WC()->session->get( 'wca_queued_events', array() );
-
-			foreach ( $events as $event ) {
-				$this->record_event(
-					$event['event_name'],
-					$event['event_props']
-				);
-			}
-
-			// Clear data, now that these events have been recorded.
-			WC()->session->set( 'wca_queued_events', array() );
-
-		}
-	}
-
-	/**
-	 * Queue an event in session to be recorded later on next page load.
-	 *
-	 * @param string $event_name The event name.
-	 * @param array  $event_props The event properties.
-	 */
-	protected function queue_event( $event_name, $event_props = array() ) {
-		if ( is_object( WC()->session ) ) {
-			$events   = WC()->session->get( 'wca_queued_events', array() );
-			$events[] = array(
-				'event_name'  => $event_name,
-				'event_props' => $event_props,
-			);
-			WC()->session->set( 'wca_queued_events', $events );
-		}
 	}
 }
