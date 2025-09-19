@@ -19,7 +19,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 		// Reset the module before each test
 		jest.resetModules();
-		require( '../../utils/address-autocomplete-common' );
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 	} );
 
@@ -60,7 +60,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
-		require( '../../utils/address-autocomplete-common' );
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -84,7 +84,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
-		require( '../../utils/address-autocomplete-common' );
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
