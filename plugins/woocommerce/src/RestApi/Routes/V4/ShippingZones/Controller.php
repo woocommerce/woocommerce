@@ -74,7 +74,7 @@ class Controller extends AbstractController {
 	 */
 	public function get_items( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error( 'woocommerce_rest_shipping_disabled', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 503 ) );
 		}
 
 		// Get all zones including "Rest of the World".

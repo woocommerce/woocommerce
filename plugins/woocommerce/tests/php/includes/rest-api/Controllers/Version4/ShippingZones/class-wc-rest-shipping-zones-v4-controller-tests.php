@@ -546,6 +546,29 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	}
 
 	/**
+	 * Test shipping disabled response.
+	 */
+	public function test_shipping_disabled_response() {
+		// Disable shipping temporarily.
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/shipping-zones' );
+		$response = $this->server->dispatch( $request );
+
+		// Check for 503 Service Unavailable status.
+		$this->assertEquals( 503, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_shipping_disabled', $data['code'] );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertEquals( 'Shipping is disabled.', $data['message'] );
+
+		// Re-enable shipping.
+		remove_filter( 'wc_shipping_enabled', '__return_false' );
+	}
+
+	/**
 	 * Test schema.
 	 */
 	public function test_get_item_schema() {
