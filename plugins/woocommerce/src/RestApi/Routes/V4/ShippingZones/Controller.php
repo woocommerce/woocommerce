@@ -164,9 +164,12 @@ class Controller extends AbstractController {
 				return isset( $countries[ $location->code ] ) ? $countries[ $location->code ] : $location->code;
 
 			case 'state':
-				$parts  = explode( ':', $location->code );
-				$states = WC()->countries->get_states( $parts[0] );
-				return isset( $states[ $parts[1] ] ) ? $states[ $parts[1] ] : $location->code;
+				$parts = explode( ':', $location->code );
+				if ( count( $parts ) === 2 ) {
+					$states = WC()->countries->get_states( $parts[0] );
+					return isset( $states[ $parts[1] ] ) ? $states[ $parts[1] ] : $location->code;
+				}
+				return $location->code;
 
 			case 'postcode':
 				return $location->code;
