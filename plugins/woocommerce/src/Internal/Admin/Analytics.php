@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -21,10 +20,6 @@ class Analytics {
 	 * Clear cache tool identifier.
 	 */
 	const CACHE_TOOL_ID = 'clear_woocommerce_analytics_cache';
-	/**
-	 * Full refund fix data tool identifier.
-	 */
-	const FULL_REFUND_FIX_DATA_TOOL_ID = 'fix_woocommerce_analytics_full_refund_data';
 
 	/**
 	 * Class instance.
@@ -65,7 +60,6 @@ class Analytics {
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 	}
 
 	/**
@@ -170,27 +164,6 @@ class Analytics {
 				'</a>'
 			),
 			'callback' => array( $this, 'run_clear_cache_tool' ),
-		);
-
-		return $debug_tools;
-	}
-
-	/**
-	 * Register the full refund fix data tool on the WooCommerce > Status > Tools page.
-	 *
-	 * @param array $debug_tools Available debug tool registrations.
-	 * @return array Filtered debug tool registrations.
-	 */
-	public function register_full_refund_fix_data_tool( $debug_tools ) {
-		if ( OrderUtil::uses_new_full_refund_data() ) {
-			return $debug_tools;
-		}
-
-		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
-			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
-			'button'   => __( 'Fix', 'woocommerce' ),
-			'desc'     => __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' ),
-			'callback' => array( $this, 'run_full_refund_fix_data_tool' ),
 		);
 
 		return $debug_tools;
@@ -311,41 +284,5 @@ class Analytics {
 		Cache::invalidate();
 
 		return __( 'Analytics cache cleared.', 'woocommerce' );
-	}
-
-	/**
-	 * "Fix" full refund data by re-importing all the refunded historical data.
-	 */
-	public function run_full_refund_fix_data_tool() {
-		global $wpdb;
-
-		Cache::invalidate();
-
-		// Get every order ID where:
-		// 1. the total sales is less than 0, and
-		// 2. is not refunded shipping fee only, and
-		// 3. is not refunded tax fee only.
-		$refunded_orders = $wpdb->get_results(
-			"SELECT order_stats.order_id
-			FROM {$wpdb->prefix}wc_order_stats AS order_stats
-			WHERE order_stats.total_sales < 0 # Refunded orders
-				AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
-				AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
-		);
-
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-		if ( $refunded_orders ) {
-			foreach ( $refunded_orders as $refunded_order ) {
-				/**
-				 * Trigger an action to schedule the data import for old refunded order items.
-				 *
-				 * @param int $order_id The ID of the order to be synced.
-				 * @since 10.2.0
-				 */
-				do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
-			}
-		}
-
-		return __( 'Re-importing refunded orders, full refund data will be updated shortly.', 'woocommerce' );
 	}
 }
