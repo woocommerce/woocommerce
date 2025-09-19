@@ -185,12 +185,18 @@ class Analytics {
 		if ( OrderUtil::uses_new_full_refund_data() ) {
 			return $debug_tools;
 		}
+		$message = __( 'Warning, slow for large stores. This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
 
 		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
 			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
 			'button'   => __( 'Fix', 'woocommerce' ),
-			'desc'     => __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' ),
+			'desc'     => sprintf(
+				'<strong class="red">%1$s</strong> %2$s',
+				__( 'Note:', 'woocommerce' ),
+				$message
+			),
 			'callback' => array( $this, 'run_full_refund_fix_data_tool' ),
+			'disabled' => true
 		);
 
 		return $debug_tools;
