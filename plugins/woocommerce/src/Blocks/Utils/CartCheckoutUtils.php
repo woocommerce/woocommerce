@@ -348,15 +348,15 @@ class CartCheckoutUtils {
 			WC()->countries->get_country_locale()
 		);
 
-		$country_data = [];
+		$country_data = array();
 
 		foreach ( array_keys( $all_countries ) as $country_code ) {
-			$country_data[ $country_code ] = [
+			$country_data[ $country_code ] = array(
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => $country_states[ $country_code ] ?? [],
-				'locale'        => $country_locales[ $country_code ] ?? [],
-			];
+				'states'        => $country_states[ $country_code ] ?? array(),
+				'locale'        => $country_locales[ $country_code ] ?? array(),
+			);
 		}
 
 		return $country_data;
@@ -396,20 +396,20 @@ class CartCheckoutUtils {
 		$formatted_shipping_zones   = array_reduce(
 			$shipping_zones,
 			function ( $acc, $zone ) {
-				$acc[] = [
+				$acc[] = array(
 					'id'          => $zone['id'],
 					'title'       => $zone['zone_name'],
 					'description' => $zone['formatted_zone_location'],
-				];
+				);
 				return $acc;
 			},
-			[]
+			array()
 		);
-		$formatted_shipping_zones[] = [
+		$formatted_shipping_zones[] = array(
 			'id'          => 0,
 			'title'       => __( 'International', 'woocommerce' ),
 			'description' => __( 'Locations outside all other zones', 'woocommerce' ),
-		];
+		);
 		return $formatted_shipping_zones;
 	}
 
@@ -419,6 +419,8 @@ class CartCheckoutUtils {
 	 *
 	 * @param string $post_content Blocks to search.
 	 * @param string $cart_or_checkout The block type to check.
+	 *
+	 * @return array|null Block attributes, if present and valid, otherwise `null`.
 	 */
 	public static function find_express_checkout_attributes( $post_content, $cart_or_checkout ) {
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
