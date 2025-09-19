@@ -281,7 +281,7 @@ class WC_Data_Store_WP {
 		);
 
 		foreach ( $query_vars as $key => $value ) {
-			if ( in_array( $value, $skipped_values, true ) || 'meta_query' === $key || 'order_total' === $key ) {
+			if ( in_array( $value, $skipped_values, true ) || 'meta_query' === $key ) {
 				continue;
 			}
 
