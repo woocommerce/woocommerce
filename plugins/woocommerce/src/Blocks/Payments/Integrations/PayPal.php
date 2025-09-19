@@ -81,7 +81,7 @@ final class PayPal extends AbstractPaymentMethodType {
 	 * @return string[]
 	 */
 	public function get_supported_features() {
-		$gateway  = new WC_Gateway_Paypal();
+		$gateway  = WC_Gateway_Paypal::get_instance();
 		$features = array_filter( $gateway->supports, array( $gateway, 'supports' ) );
 
 		/**

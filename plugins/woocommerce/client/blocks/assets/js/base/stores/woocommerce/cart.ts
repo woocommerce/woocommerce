@@ -40,11 +40,26 @@ export type OptimisticCartItem = {
 	quantity: number;
 	variation?: CartVariationItem[];
 	type: string;
-	updateOptimistically?: boolean;
 };
 
 export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 	variation?: SelectedAttributes[];
+};
+
+export type VariationData = {
+	attributes: Record< string, string >;
+	is_in_stock?: boolean;
+	price_html?: string;
+	image_id?: number;
+	availability?: string;
+	variation_description?: string;
+	sku?: string;
+	weight?: string;
+	dimensions?: string;
+	min?: number;
+	max?: number;
+	step?: number;
+	sold_individually?: boolean;
 };
 
 export type ProductData = {
@@ -58,23 +73,7 @@ export type ProductData = {
 	min?: number;
 	max?: number;
 	step?: number;
-	variations?: {
-		[ variationId: number ]: {
-			attributes: Record< string, string >;
-			is_in_stock: boolean;
-			type: string;
-			price_html?: string;
-			image_id?: number;
-			availability?: string;
-			sku?: string;
-			weight?: string;
-			dimensions?: string;
-			min?: number;
-			max?: number;
-			step?: number;
-			sold_individually?: boolean;
-		};
-	};
+	variations?: Record< number, VariationData >;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
@@ -305,12 +304,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{
-					id,
-					quantity,
-					variation,
-					updateOptimistically = true,
-				}: ClientCartItem,
+				{ id, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -339,12 +333,16 @@ const { state, actions } = store< Store >(
 				const previousCart = JSON.stringify( state.cart );
 				const quantityChanges: QuantityChanges = {};
 
-				// Optimistically updates the number of items in the cart.
+				// Optimistically update the number of items in the cart except
+				// if the product is sold individually and is already in the
+				// cart.
+				let updatedItem = null;
 				if ( item ) {
-					if ( item.key ) {
+					const isSoldIndividually =
+						isCartItem( item ) && item.sold_individually;
+					updatedItem = { ...item, quantity };
+					if ( item.key && ! isSoldIndividually ) {
 						quantityChanges.cartItemsPendingQuantity = [ item.key ];
-					}
-					if ( updateOptimistically ) {
 						item.quantity = quantity;
 					}
 				} else {
@@ -354,9 +352,8 @@ const { state, actions } = store< Store >(
 						variation,
 					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
-					if ( updateOptimistically ) {
-						state.cart.items.push( item );
-					}
+					state.cart.items.push( item );
+					updatedItem = item;
 				}
 
 				// Updates the database.
@@ -369,7 +366,7 @@ const { state, actions } = store< Store >(
 								Nonce: state.nonce,
 								'Content-Type': 'application/json',
 							},
-							body: JSON.stringify( item ),
+							body: JSON.stringify( updatedItem ),
 						}
 					);
 					const json: Cart = yield res.json();
@@ -438,6 +435,8 @@ const { state, actions } = store< Store >(
 							existingItem.quantity = item.quantity;
 							if ( existingItem.key ) {
 								quantityChanges.cartItemsPendingQuantity = [
+									...( quantityChanges.cartItemsPendingQuantity ??
+										[] ),
 									existingItem.key,
 								];
 							}
@@ -493,6 +492,10 @@ const { state, actions } = store< Store >(
 
 					const json: BatchResponse = yield res.json();
 
+					// Checks if the response contains an error.
+					if ( isApiErrorResponse( res, json ) )
+						throw generateError( json );
+
 					const errorResponses = Array.isArray( json.responses )
 						? json.responses.filter(
 								( response ) =>
@@ -500,12 +503,6 @@ const { state, actions } = store< Store >(
 									response.status >= 300
 						  )
 						: [];
-
-					if ( errorResponses.length > 0 ) {
-						throw generateError(
-							errorResponses[ 0 ].body as ApiErrorResponse
-						);
-					}
 
 					const successfulResponses = Array.isArray( json.responses )
 						? json.responses.filter(
