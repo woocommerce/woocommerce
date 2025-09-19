@@ -53,10 +53,22 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'type'        => array( 'string', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
+			'image'        => array(
+				'description' => __( 'Line item image, if available.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'product_id'   => array(
 				'description' => __( 'Product or variation ID.', 'woocommerce' ),
 				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'product_data' => array(
+				'description' => __( 'Product data this item is linked to.', 'woocommerce' ),
+				'type'        => array( 'object', 'null' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'properties'  => $this->get_product_data_schema(),
 			),
 			'quantity'     => array(
 				'description' => __( 'Quantity ordered.', 'woocommerce' ),
@@ -144,9 +156,11 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		$data            = array(
 			'id'           => $order_item->get_id(),
 			'name'         => $order_item->get_name(),
+			'image'        => $this->get_image( $order_item ),
+			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
+			'product_data' => $this->get_product_data( $order_item ),
 			'quantity'     => $order_item->get_quantity(),
 			'price'        => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
-			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
 			'tax_class'    => $order_item->get_tax_class(),
 			'subtotal'     => wc_format_decimal( $order_item->get_subtotal(), $dp ),
 			'subtotal_tax' => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
@@ -188,5 +202,97 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		}
 
 		return $return;
+	}
+
+	/**
+	 * Get embedded product schema.
+	 *
+	 * @return array
+	 */
+	private function get_product_data_schema(): array {
+		return array(
+			'name'             => array(
+				'description' => __( 'Product name.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'permalink'        => array(
+				'description' => __( 'Product permalink.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'sku'              => array(
+				'description' => __( 'Product SKU.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'global_unique_id' => array(
+				'description' => __( 'Product global unique ID.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'type'             => array(
+				'description' => __( 'Product type.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'is_virtual'       => array(
+				'description' => __( 'Product is virtual.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'is_downloadable'  => array(
+				'description' => __( 'Product is downloadable.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'needs_shipping'   => array(
+				'description' => __( 'Product needs shipping.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+		);
+	}
+
+	/**
+	 * Get product data.
+	 *
+	 * @param WC_Order_Item_Product $order_item Order item instance.
+	 * @return array|null
+	 */
+	private function get_product_data( WC_Order_Item_Product $order_item ) {
+		$product = $order_item->get_product();
+
+		if ( ! $product instanceof \WC_Product ) {
+			return null;
+		}
+
+		return array(
+			'name'             => $product->get_name(),
+			'permalink'        => $product->get_permalink(),
+			'sku'              => $product->get_sku(),
+			'global_unique_id' => $product->get_global_unique_id(),
+			'type'             => $product->get_type(),
+			'is_virtual'       => $product->is_virtual(),
+			'is_downloadable'  => $product->is_downloadable(),
+			'needs_shipping'   => $product->needs_shipping(),
+		);
+	}
+
+	/**
+	 * Get image.
+	 *
+	 * @param WC_Order_Item_Product $order_item Order item instance.
+	 * @return string
+	 */
+	private function get_image( WC_Order_Item_Product $order_item ) {
+		$product = $order_item->get_product();
+
+		if ( ! $product instanceof \WC_Product ) {
+			return '';
+		}
+
+		$image_id = $product->get_image_id() ? $product->get_image_id() : 0;
+		return $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 	}
 }

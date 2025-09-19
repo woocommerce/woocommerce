@@ -1174,46 +1174,46 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'id'                    => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'name'                  => array(
 					'description' => __( 'Product name.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'slug'                  => array(
 					'description' => __( 'Product slug.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'permalink'             => array(
 					'description' => __( 'Product URL.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_created'          => array(
 					'description' => __( "The date the product was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_created_gmt'      => array(
 					'description' => __( 'The date the product was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_modified'         => array(
 					'description' => __( "The date the product was last modified, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'date_modified_gmt'     => array(
 					'description' => __( 'The date the product was last modified, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'type'                  => array(
@@ -1221,141 +1221,141 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'type'        => 'string',
 					'default'     => ProductType::SIMPLE,
 					'enum'        => array_keys( wc_get_product_types() ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'status'                => array(
 					'description' => __( 'Product status (post status).', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => ProductStatus::PUBLISH,
 					'enum'        => array_merge( array_keys( get_post_statuses() ), array( ProductStatus::FUTURE, ProductStatus::AUTO_DRAFT, ProductStatus::TRASH ) ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'featured'              => array(
 					'description' => __( 'Featured product.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'catalog_visibility'    => array(
 					'description' => __( 'Catalog visibility.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => CatalogVisibility::VISIBLE,
 					'enum'        => array( CatalogVisibility::VISIBLE, CatalogVisibility::CATALOG, CatalogVisibility::SEARCH, CatalogVisibility::HIDDEN ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'description'           => array(
 					'description' => __( 'Product description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'short_description'     => array(
 					'description' => __( 'Product short description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'sku'                   => array(
 					'description' => __( 'Stock Keeping Unit.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'global_unique_id'      => array(
 					'description' => __( 'GTIN, UPC, EAN or ISBN.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'price'                 => array(
 					'description' => __( 'Current product price.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'regular_price'         => array(
 					'description' => __( 'Product regular price.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'sale_price'            => array(
 					'description' => __( 'Product sale price.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from'     => array(
 					'description' => __( "Start date of sale price, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_from_gmt' => array(
 					'description' => __( 'Start date of sale price, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to'       => array(
 					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'date_on_sale_to_gmt'   => array(
 					'description' => __( "End date of sale price, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'price_html'            => array(
 					'description' => __( 'Price formatted in HTML.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'on_sale'               => array(
 					'description' => __( 'Shows if the product is on sale.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'purchasable'           => array(
 					'description' => __( 'Shows if the product can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'total_sales'           => array(
 					'description' => __( 'Amount of sales.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'virtual'               => array(
 					'description' => __( 'If the product is virtual.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'downloadable'          => array(
 					'description' => __( 'If the product is downloadable.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'downloads'             => array(
 					'description' => __( 'List of downloadable files.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
 								'description' => __( 'File ID.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
 								'description' => __( 'File name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'file' => array(
 								'description' => __( 'File URL.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
@@ -1364,160 +1364,160 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'description' => __( 'Number of times downloadable files can be downloaded after purchase.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'download_expiry'       => array(
 					'description' => __( 'Number of days until access to downloadable files expires.', 'woocommerce' ),
 					'type'        => 'integer',
 					'default'     => -1,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'external_url'          => array(
 					'description' => __( 'Product external URL. Only for external products.', 'woocommerce' ),
 					'type'        => 'string',
 					'format'      => 'uri',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'button_text'           => array(
 					'description' => __( 'Product external button text. Only for external products.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_status'            => array(
 					'description' => __( 'Tax status.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => ProductTaxStatus::TAXABLE,
 					'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'tax_class'             => array(
 					'description' => __( 'Tax class.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'manage_stock'          => array(
 					'description' => __( 'Stock management at product level.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_quantity'        => array(
 					'description' => __( 'Stock quantity.', 'woocommerce' ),
 					'type'        => wc_is_stock_amount_integer() ? 'integer' : 'number',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'stock_status'          => array(
 					'description' => __( 'Controls the stock status of the product.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => ProductStockStatus::IN_STOCK,
 					'enum'        => array_keys( wc_get_product_stock_status_options() ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders'            => array(
 					'description' => __( 'If managing stock, this controls if backorders are allowed.', 'woocommerce' ),
 					'type'        => 'string',
 					'default'     => 'no',
 					'enum'        => array( 'no', 'notify', 'yes' ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'backorders_allowed'    => array(
 					'description' => __( 'Shows if backorders are allowed.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'backordered'           => array(
 					'description' => __( 'Shows if the product is on backordered.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'low_stock_amount'      => array(
 					'description' => __( 'Low Stock amount for the product.', 'woocommerce' ),
 					'type'        => array( 'integer', 'null' ),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'sold_individually'     => array(
 					'description' => __( 'Allow one item to be bought in a single order.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => false,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'weight'                => array(
 					/* translators: %s: weight unit */
 					'description' => sprintf( __( 'Product weight (%s).', 'woocommerce' ), $weight_unit_label ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'dimensions'            => array(
 					'description' => __( 'Product dimensions.', 'woocommerce' ),
 					'type'        => 'object',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'properties'  => array(
 						'length' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product length (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit', 'embed' ),
+							'context'     => array( 'view', 'edit' ),
 						),
 						'width'  => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product width (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit', 'embed' ),
+							'context'     => array( 'view', 'edit' ),
 						),
 						'height' => array(
 							/* translators: %s: dimension unit */
 							'description' => sprintf( __( 'Product height (%s).', 'woocommerce' ), $dimension_unit_label ),
 							'type'        => 'string',
-							'context'     => array( 'view', 'edit', 'embed' ),
+							'context'     => array( 'view', 'edit' ),
 						),
 					),
 				),
 				'shipping_required'     => array(
 					'description' => __( 'Shows if the product need to be shipped.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_taxable'      => array(
 					'description' => __( 'Shows whether or not the product shipping is taxable.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'shipping_class'        => array(
 					'description' => __( 'Shipping class slug.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'shipping_class_id'     => array(
 					'description' => __( 'Shipping class ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'reviews_allowed'       => array(
 					'description' => __( 'Allow reviews.', 'woocommerce' ),
 					'type'        => 'boolean',
 					'default'     => true,
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'post_password'         => array(
 					'description' => __( 'Post password.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'average_rating'        => array(
 					'description' => __( 'Reviews average rating.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'rating_count'          => array(
 					'description' => __( 'Amount of reviews that the product have.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'related_ids'           => array(
@@ -1526,7 +1526,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'items'       => array(
 						'type' => 'integer',
 					),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'upsell_ids'            => array(
@@ -1535,7 +1535,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'items'       => array(
 						'type' => 'integer',
 					),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'cross_sell_ids'        => array(
 					'description' => __( 'List of cross-sell products IDs.', 'woocommerce' ),
@@ -1543,40 +1543,40 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'items'       => array(
 						'type' => 'integer',
 					),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'parent_id'             => array(
 					'description' => __( 'Product parent ID.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'purchase_note'         => array(
 					'description' => __( 'Optional note to send the customer after purchase.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'categories'            => array(
 					'description' => __( 'List of categories.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
 								'description' => __( 'Category ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
 								'description' => __( 'Category name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'slug' => array(
 								'description' => __( 'Category slug.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 						),
@@ -1585,25 +1585,25 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'brands'                => array(
 					'description' => __( 'List of brands.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
 								'description' => __( 'Brand ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
 								'description' => __( 'Brand name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'slug' => array(
 								'description' => __( 'Brand slug.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 						),
@@ -1612,25 +1612,25 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'tags'                  => array(
 					'description' => __( 'List of tags.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'   => array(
 								'description' => __( 'Tag ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name' => array(
 								'description' => __( 'Tag name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'slug' => array(
 								'description' => __( 'Tag slug.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 						),
@@ -1639,54 +1639,54 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'images'                => array(
 					'description' => __( 'List of images.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'                => array(
 								'description' => __( 'Image ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'date_created'      => array(
 								'description' => __( "The date the image was created, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_created_gmt'  => array(
 								'description' => __( 'The date the image was created, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified'     => array(
 								'description' => __( "The date the image was last modified, in the site's timezone.", 'woocommerce' ),
 								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'date_modified_gmt' => array(
 								'description' => __( 'The date the image was last modified, as GMT.', 'woocommerce' ),
 								'type'        => 'date-time',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'src'               => array(
 								'description' => __( 'Image URL.', 'woocommerce' ),
 								'type'        => 'string',
 								'format'      => 'uri',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name'              => array(
 								'description' => __( 'Image name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'alt'               => array(
 								'description' => __( 'Image alternative text.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
@@ -1694,42 +1694,42 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'has_options'           => array(
 					'description' => __( 'Shows if the product needs to be configured before it can be bought.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'attributes'            => array(
 					'description' => __( 'List of attributes.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'        => array(
 								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name'      => array(
 								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'position'  => array(
 								'description' => __( 'Attribute position.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'visible'   => array(
 								'description' => __( "Define if the attribute is visible on the \"Additional information\" tab in the product's page.", 'woocommerce' ),
 								'type'        => 'boolean',
 								'default'     => false,
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'variation' => array(
 								'description' => __( 'Define if the attribute can be used as variation.', 'woocommerce' ),
 								'type'        => 'boolean',
 								'default'     => false,
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'options'   => array(
 								'description' => __( 'List of available term names of the attribute.', 'woocommerce' ),
@@ -1737,7 +1737,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 								'items'       => array(
 									'type' => 'string',
 								),
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
@@ -1745,24 +1745,24 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'default_attributes'    => array(
 					'description' => __( 'Defaults variation attributes.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'     => array(
 								'description' => __( 'Attribute ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'name'   => array(
 								'description' => __( 'Attribute name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'option' => array(
 								'description' => __( 'Selected attribute term name.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
@@ -1770,7 +1770,7 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'variations'            => array(
 					'description' => __( 'List of variations IDs.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type' => 'integer',
 					),
@@ -1782,36 +1782,36 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 					'items'       => array(
 						'type' => 'integer',
 					),
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
 				'menu_order'            => array(
 					'description' => __( 'Menu order, used to custom sort products.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'meta_data'             => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'    => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
 							'key'   => array(
 								'description' => __( 'Meta key.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit', 'embed' ),
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
@@ -1845,39 +1845,39 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 		$schema['properties']['min_price'] = array(
 			'description' => __( 'Product minimum price.', 'woocommerce' ),
 			'type'        => 'string',
-			'context'     => array( 'view', 'edit', 'embed' ),
+			'context'     => array( 'view', 'edit' ),
 		);
 
 		$schema['properties']['max_price'] = array(
 			'description' => __( 'Product maximum price.', 'woocommerce' ),
 			'type'        => 'string',
-			'context'     => array( 'view', 'edit', 'embed' ),
+			'context'     => array( 'view', 'edit' ),
 		);
 
 		$schema['properties']['add_to_cart'] = array(
 			'description' => __( 'Add to cart details.', 'woocommerce' ),
 			'type'        => 'object',
-			'context'     => array( 'view', 'edit', 'embed' ),
+			'context'     => array( 'view', 'edit' ),
 			'properties'  => array(
 				'url'         => array(
 					'description' => __( 'Add to cart URL.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'description' => array(
 					'description' => __( 'Add to cart description.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'text'        => array(
 					'description' => __( 'Add to cart text.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 				'single_text' => array(
 					'description' => __( 'Add to cart single text.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit', 'embed' ),
+					'context'     => array( 'view', 'edit' ),
 				),
 			),
 			'readonly'    => true,
