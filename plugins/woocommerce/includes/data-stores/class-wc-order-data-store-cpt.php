@@ -952,7 +952,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'shipping_total' => 'order_shipping',
 			'shipping_tax'   => 'order_shipping_tax',
 			'cart_tax'       => 'order_tax',
-			'total'          => 'order_total',
 			'page'           => 'paged',
 		);
 
@@ -1028,9 +1027,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Handle total filtering with operators.
-		if ( isset( $query_vars['order_total'] ) ) {
-			$total_param = $query_vars['order_total'];
+		// Handle total filtering with support for operators.
+		if ( isset( $query_vars['total'] ) ) {
+			$total_param = $query_vars['total'];
+			unset( $query_vars['total'] );
 
 			// If it's a simple number, convert to array format.
 			if ( is_numeric( $total_param ) ) {
@@ -1040,11 +1040,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				);
 			}
 
-			if ( is_array( $total_param ) ) {
-				$total_query = $this->generate_total_meta_query( $total_param );
-				if ( $total_query ) {
-					$wp_query_args['meta_query'][] = $total_query;
-				}
+			$total_query = $this->generate_total_query( (array) $total_param );
+
+			if ( $total_query ) {
+				$wp_query_args['meta_query'][] = $total_query;
 			}
 		}
 
@@ -1306,68 +1305,50 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @param array $total_params Total query parameters with value, operator.
 	 * @return array|false Meta query array or false if invalid.
 	 */
-	private function generate_total_meta_query( array $total_params ) {
+	private function generate_total_query( array $total_params ) {
 		if ( ! isset( $total_params['value'] ) ) {
 			return false;
 		}
 
-		$operator = $total_params['operator'] ?? '=';
-		$value    = $total_params['value'];
+		$operator            = $total_params['operator'] ?? '=';
+		$value               = $total_params['value'];
+		$supported_operators = array( '=', '!=', '>', '>=', '<', '<=', 'BETWEEN', 'NOT BETWEEN' );
 
-		// Handle between operators.
-		if ( 'between' === $operator ) {
-			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
-				return false;
-			}
-			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
-			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
-			return array(
-				'relation' => 'AND',
-				array(
-					'key'     => '_order_total',
-					'value'   => $value1,
-					'compare' => '>=',
-					'type'    => 'NUMERIC',
-				),
-				array(
-					'key'     => '_order_total',
-					'value'   => $value2,
-					'compare' => '<=',
-					'type'    => 'NUMERIC',
-				),
-			);
+		if ( ! in_array( $operator, $supported_operators, true ) ) {
+			return false;
 		}
 
-		if ( 'not between' === $operator ) {
+		// Handle between operators.
+		if ( 'BETWEEN' === $operator || 'NOT BETWEEN' === $operator ) {
 			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
 				return false;
 			}
 			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
 			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
-			return array(
-				'relation' => 'OR',
-				array(
-					'key'     => '_order_total',
-					'value'   => $value1,
-					'compare' => '<',
-					'type'    => 'NUMERIC',
-				),
-				array(
-					'key'     => '_order_total',
-					'value'   => $value2,
-					'compare' => '>',
-					'type'    => 'NUMERIC',
-				),
-			);
+
+			if ( 'BETWEEN' === $operator ) {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			} else {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'NOT BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			}
 		}
 
 		// Handle other operators - value must be a single number.
 		if ( ! is_numeric( $value ) ) {
-			return false;
-		}
-
-		$valid_operators = array( '=', '!=', '>', '>=', '<', '<=' );
-		if ( ! in_array( $operator, $valid_operators, true ) ) {
 			return false;
 		}
 

@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
  * Class WC_Order_Data_Store_CPT_Test.
+ *
+ * @group order-query-tests
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
@@ -37,132 +39,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		OrderHelper::toggle_cot_feature_and_usage( $this->prev_cot_state );
 		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 		parent::tearDown();
-	}
-
-	/**
-	 * Test total filtering with operators works as expected for CPT storage.
-	 */
-	public function test_total_filtering_with_operators() {
-		// Create orders with different totals.
-		$order1 = WC_Helper_Order::create_order();
-		$order1->set_total( 100.00 );
-		$order1->save();
-
-		$order2 = WC_Helper_Order::create_order();
-		$order2->set_total( 250.50 );
-		$order2->save();
-
-		$order3 = WC_Helper_Order::create_order();
-		$order3->set_total( 500.75 );
-		$order3->save();
-
-		// Test equals operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 250.50,
-					'operator' => '=',
-				),
-			)
-		);
-		$this->assertCount( 1, $orders );
-		$this->assertEquals( $order2->get_id(), $orders[0]->get_id() );
-
-		// Test greater than operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 200.00,
-					'operator' => '>',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
-
-		// Test greater than or equal operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 250.50,
-					'operator' => '>=',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
-
-		// Test less than operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 300.00,
-					'operator' => '<',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order2->get_id(), $order_ids );
-
-		// Test less than or equal operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 250.50,
-					'operator' => '<=',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order2->get_id(), $order_ids );
-
-		// Test not equal operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => 100.00,
-					'operator' => '!=',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
-
-		// Test between operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => array( 200.00, 300.00 ),
-					'operator' => 'between',
-				),
-			)
-		);
-		$this->assertCount( 1, $orders );
-		$this->assertEquals( $order2->get_id(), $orders[0]->get_id() );
-
-		// Test not between operator.
-		$orders = wc_get_orders(
-			array(
-				'total' => array(
-					'value'    => array( 200.00, 300.00 ),
-					'operator' => 'not between',
-				),
-			)
-		);
-		$this->assertCount( 2, $orders );
-		$order_ids = wp_list_pluck( $orders, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
 	}
 
 	/**
@@ -662,5 +538,73 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 1, $new_count );
 
 		remove_action( 'woocommerce_new_order', $callback );
+	}
+
+	/**
+	 * Test total filtering with operators works as expected for CPT storage.
+	 */
+	public function test_total_filtering_with_operators() {
+		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
+		foreach ( $order_totals_to_test as $order_total ) {
+			$order = OrderHelper::create_order();
+			$order->set_total( $order_total );
+			$order->save();
+		}
+
+		$test_matrix = array(
+			array(
+				'value'          => 250.50,
+				'operator'       => '=',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '!=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>=',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<',
+				'expected_count' => 5,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'BETWEEN',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'NOT BETWEEN',
+				'expected_count' => 5,
+			),
+		);
+
+		foreach ( $test_matrix as $test ) {
+			$orders = wc_get_orders(
+				array(
+					'total' => array(
+						'value'    => $test['value'],
+						'operator' => $test['operator'],
+					),
+				)
+			);
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertCount( $test['expected_count'], $orders, print_r( $test, true ) );
+		}
 	}
 }

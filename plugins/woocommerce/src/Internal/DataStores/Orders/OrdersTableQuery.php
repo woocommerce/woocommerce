@@ -1167,12 +1167,10 @@ class OrdersTableQuery {
 				);
 			}
 
-			if ( is_array( $total_param ) ) {
-				$total_query = $this->generate_total_query( $total_param );
+			$total_query = $this->generate_total_query( (array) $total_param );
 
-				if ( $total_query ) {
-					$this->where[] = $total_query;
-				}
+			if ( $total_query ) {
+				$this->where[] = $total_query;
 			}
 		}
 	}
@@ -1221,34 +1219,35 @@ class OrdersTableQuery {
 	 * @return string SQL to be used in a WHERE clause.
 	 */
 	private function generate_total_query( array $total_params ): string {
-		$operator = $total_params['operator'] ?? '=';
-		$value    = $total_params['value'];
-
-		// Handle between operators.
-		if ( 'between' === $operator ) {
-			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
-				return '';
-			}
-			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
-			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
-			return $this->where( $this->tables['orders'], 'total_amount', '>=', $value1, 'decimal' ) . ' AND ' . $this->where( $this->tables['orders'], 'total_amount', '<=', $value2, 'decimal' );
+		if ( ! isset( $total_params['value'] ) ) {
+			return '';
 		}
 
-		if ( 'not between' === $operator ) {
+		$operator            = $total_params['operator'] ?? '=';
+		$value               = $total_params['value'];
+		$supported_operators = array( '=', '!=', '>', '>=', '<', '<=', 'BETWEEN', 'NOT BETWEEN' );
+
+		if ( ! in_array( $operator, $supported_operators, true ) ) {
+			return '';
+		}
+
+		// Handle between operators.
+		if ( 'BETWEEN' === $operator || 'NOT BETWEEN' === $operator ) {
 			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
 				return '';
 			}
 			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
 			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
-			return '(' . $this->where( $this->tables['orders'], 'total_amount', '<', $value1, 'decimal' ) . ' OR ' . $this->where( $this->tables['orders'], 'total_amount', '>', $value2, 'decimal' ) . ')';
+
+			if ( 'BETWEEN' === $operator ) {
+				return $this->where( $this->tables['orders'], 'total_amount', '>=', $value1, 'decimal' ) . ' AND ' . $this->where( $this->tables['orders'], 'total_amount', '<=', $value2, 'decimal' );
+			} else {
+				return '(' . $this->where( $this->tables['orders'], 'total_amount', '<', $value1, 'decimal' ) . ' OR ' . $this->where( $this->tables['orders'], 'total_amount', '>', $value2, 'decimal' ) . ')';
+			}
 		}
 
 		// Handle other operators - value must be a single number.
 		if ( ! is_numeric( $value ) ) {
-			return '';
-		}
-		$valid_operators = array( '=', '!=', '>', '>=', '<', '<=' );
-		if ( ! in_array( $operator, $valid_operators, true ) ) {
 			return '';
 		}
 

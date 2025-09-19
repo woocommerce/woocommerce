@@ -65,15 +65,15 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param OrderSchema $item_schema Order schema class.
-	 * @param QueryUtils  $query_utils Query utils class.
-	 * @param UpdateUtils $update_utils Update utils class.
+	 * @param OrderSchema     $item_schema Order schema class.
+	 * @param CollectionQuery $query_utils Query utils class.
+	 * @param UpdateUtils     $update_utils Update utils class.
 	 * @internal
 	 */
-	final public function init( OrderSchema $item_schema, QueryUtils $query_utils, UpdateUtils $update_utils ) {
-		$this->item_schema  = $item_schema;
-		$this->query_utils  = $query_utils;
-		$this->update_utils = $update_utils;
+	final public function init( OrderSchema $item_schema, CollectionQuery $query_utils, UpdateUtils $update_utils ) {
+		$this->item_schema      = $item_schema;
+		$this->collection_query = $query_utils;
+		$this->update_utils     = $update_utils;
 	}
 
 	/**
@@ -90,7 +90,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_query_schema(): array {
-		return $this->query_utils->get_query_schema();
+		return $this->collection_query->get_query_schema();
 	}
 
 	/**
@@ -251,15 +251,8 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		/**
-		 * Filter the query arguments for a request.
-		 *
-		 * @param array           $args    Key value array of query var to query value.
-		 * @param WP_REST_Request $request The request used.
-		 * @since 10.2.0
-		 */
-		$query_args = apply_filters( $this->get_hook_prefix() . 'get_items_query', $this->query_utils->prepare_query( $request ), $request );
-		$results    = $this->query_utils->get_query_results( $query_args );
+		$query_args = $this->collection_query->get_query_args( $request );
+		$results    = $this->collection_query->get_query_results( array_merge( $query_args, array( 'post_type' => $this->post_type ) ), $request );
 		$items      = array();
 
 		foreach ( $results['results'] as $result ) {

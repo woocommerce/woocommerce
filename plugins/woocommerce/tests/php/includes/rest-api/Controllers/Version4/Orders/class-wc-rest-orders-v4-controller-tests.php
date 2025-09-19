@@ -14,6 +14,8 @@ use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
 
 /**
  * Orders Controller tests for V4 REST API.
+ *
+ * @group order-query-tests
  */
 class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
@@ -91,11 +93,11 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
 
 		// Create utils instances.
-		$query_utils  = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\QueryUtils();
-		$update_utils = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
+		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\CollectionQuery();
+		$update_utils     = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
 
 		$this->endpoint = new OrdersController();
-		$this->endpoint->init( $this->order_schema, $query_utils, $update_utils );
+		$this->endpoint->init( $this->order_schema, $collection_query, $update_utils );
 
 		$this->user_id = $this->factory->user->create(
 			array(
@@ -1259,21 +1261,57 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test total filtering with operators.
+	 * Test total filtering with operators. Only basic tests are needed here because operators are tested in the data stores.
+	 *
+	 * @see WC_Order_Data_Store_CPT_Test
+	 * @see OrdersTableQueryTests
 	 */
 	public function test_total_filtering(): void {
 		// Create orders with different totals.
-		$order1 = $this->create_test_order();
-		$order1->set_total( '100.00' );
-		$order1->save();
+		$order_totals_to_test = array( 100.00, 100.00, 250.50, 500.75, 1000.00 );
+		$orders               = array();
+		foreach ( $order_totals_to_test as $order_total ) {
+			$order = $this->create_test_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
 
-		$order2 = $this->create_test_order();
-		$order2->set_total( '250.50' );
-		$order2->save();
+		// Unsupported operator should return an error.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 250.50,
+				'operator' => 'not supported',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
 
-		$order3 = $this->create_test_order();
-		$order3->set_total( '500.75' );
-		$order3->save();
+		// Between operator should return an error if value is not an array.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param(
+			'total',
+			array(
+				'value'    => 250.50,
+				'operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Between operator should return an error if value is not an array of 2 numbers.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param(
+			'total',
+			array(
+				'value'    => array( 250.50 ),
+				'operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
 
 		// Test simple equality filtering.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
@@ -1281,105 +1319,25 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'total',
 			array(
 				'value'    => 250.50,
-				'operator' => '=',
+				'operator' => 'is',
 			)
 		);
 		$response = $this->server->dispatch( $request );
-
 		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 1, $response_data );
-		$this->assertEquals( $order2->get_id(), $response_data[0]['id'] );
+		$this->assertCount( 1, $response->get_data() );
 
 		// Test greater than operator.
 		$request->set_param(
 			'total',
 			array(
 				'value'    => 200.00,
-				'operator' => '>',
+				'operator' => 'greaterThan',
 			)
 		);
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
-
-		// Test greater than or equal operator.
-		$request->set_param(
-			'total',
-			array(
-				'value'    => 250.50,
-				'operator' => '>=',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
-
-		// Test less than operator.
-		$request->set_param(
-			'total',
-			array(
-				'value'    => 300.00,
-				'operator' => '<',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order2->get_id(), $order_ids );
-
-		// Test less than or equal operator.
-		$request->set_param(
-			'total',
-			array(
-				'value'    => 250.50,
-				'operator' => '<=',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order2->get_id(), $order_ids );
-
-		// Test not equal operator.
-		$request->set_param(
-			'total',
-			array(
-				'value'    => 100.00,
-				'operator' => '!=',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order2->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
+		$this->assertCount( 3, $response->get_data() );
 
 		// Test between operator.
 		$request->set_param(
@@ -1392,32 +1350,12 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 1, $response_data );
-		$this->assertEquals( $order2->get_id(), $response_data[0]['id'] );
-
-		// Test not between operator.
-		$request->set_param(
-			'total',
-			array(
-				'value'    => array( 200.00, 300.00 ),
-				'operator' => 'not between',
-			)
-		);
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-		$this->assertCount( 2, $response_data );
-
-		$order_ids = wp_list_pluck( $response_data, 'id' );
-		$this->assertContains( $order1->get_id(), $order_ids );
-		$this->assertContains( $order3->get_id(), $order_ids );
+		$this->assertCount( 1, $response->get_data() );
 
 		// Clean up.
-		$order1->delete( true );
-		$order2->delete( true );
-		$order3->delete( true );
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
 	}
 
 	/**
