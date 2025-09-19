@@ -196,7 +196,7 @@ class Analytics {
 				$message
 			),
 			'callback' => array( $this, 'run_full_refund_fix_data_tool' ),
-			'disabled' => true
+			'disabled' => true,
 		);
 
 		return $debug_tools;
