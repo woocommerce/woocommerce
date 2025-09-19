@@ -39,7 +39,7 @@ import type {
 import { apiFetchWithHeaders } from '../shared-controls';
 import { CheckoutPutAbortController } from '../utils/clear-put-requests';
 import { CART_STORE_KEY, type CartStoreDescriptor } from '../cart';
-import { updateAutocompleteProvider } from './subscriptions/autocomplete';
+import { updateAutocompleteProvider } from './autocomplete-utils';
 
 export interface CheckoutThunkArgs {
 	select: CurriedSelectorsOf< CheckoutStoreDescriptor >;

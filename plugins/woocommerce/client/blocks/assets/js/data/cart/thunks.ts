@@ -40,7 +40,7 @@ import {
 	setTriggerStoreSyncEvent,
 } from './utils';
 import { isEditor } from '../utils';
-import { updateAutocompleteProvider } from '../checkout/subscriptions/autocomplete';
+import { updateAutocompleteProvider } from '../checkout/autocomplete-utils';
 import { CheckoutStoreDescriptor } from '../checkout';
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;

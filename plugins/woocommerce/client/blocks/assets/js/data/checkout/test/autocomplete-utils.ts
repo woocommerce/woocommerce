@@ -2,6 +2,10 @@
  * External dependencies
  */
 import * as wpData from '@wordpress/data';
+import type {
+	ActionCreatorsOf,
+	ConfigOf,
+} from '@wordpress/data/build-types/types';
 
 // Mock all problematic dependencies first - MUST be before any imports
 jest.mock( '@wordpress/data', () => ( {
@@ -18,14 +22,14 @@ jest.mock( '@wordpress/data-controls', () => ( {
 } ) );
 
 // Mock all internal dependencies
-jest.mock( '../../constants', () => ( {
+jest.mock( '../constants', () => ( {
 	STORE_KEY: 'wc/store/checkout',
 } ) );
 
-jest.mock( '../../selectors', () => ( {} ) );
-jest.mock( '../../actions', () => ( {} ) );
-jest.mock( '../../reducers', () => jest.fn() );
-jest.mock( '../../push-changes', () => ( {
+jest.mock( '../selectors', () => ( {} ) );
+jest.mock( '../actions', () => ( {} ) );
+jest.mock( '../reducers', () => jest.fn() );
+jest.mock( '../push-changes', () => ( {
 	pushChanges: jest.fn(),
 	flushChanges: jest.fn(),
 } ) );
@@ -33,7 +37,8 @@ jest.mock( '../../push-changes', () => ( {
 /**
  * Internal dependencies
  */
-import { autocompleteSubscription } from '../autocomplete';
+import { updateAutocompleteProvider } from '../autocomplete-utils';
+import type { CheckoutStoreDescriptor } from '../index';
 
 // Mock settings
 jest.mock( '@woocommerce/settings', () => ( {
@@ -73,32 +78,14 @@ wpData.dispatch.mockImplementation( ( storeName ) => {
 	return {};
 } );
 
-wpData.select.mockImplementation( ( storeName ) => {
-	if ( storeName === 'wc/store/cart' ) {
-		return {
-			getCartData() {
-				return {
-					shippingAddress: {
-						country: 'DE',
-					},
-					billingAddress: {
-						country: 'DE',
-					},
-				};
-			},
-		};
-	}
-	return {};
-} );
-
 /**
  * This is in a separate file as doing it in `index` led to an overly complicated set of mocks. Doing it here allows the test to be isolated.
  */
 describe( 'Autocomplete country change handler', () => {
 	it( 'should update provider when country changes', () => {
-		// Call the subscription function directly, so it saves countries as DE/DE.
-		autocompleteSubscription();
-
+		const checkoutActions = wpData.dispatch(
+			'wc/store/checkout'
+		) as ActionCreatorsOf< ConfigOf< CheckoutStoreDescriptor > >;
 		window.wc = {
 			addressAutocomplete: {
 				registerAddressAutocompleteProvider: ( provider ) =>
@@ -135,27 +122,8 @@ describe( 'Autocomplete country change handler', () => {
 			},
 		};
 
-		// Now change the country data returned by the cart store
-		wpData.select.mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/cart' ) {
-				return {
-					getCartData() {
-						return {
-							shippingAddress: {
-								country: 'FR',
-							},
-							billingAddress: {
-								country: 'FR',
-							},
-						};
-					},
-				};
-			}
-			return {};
-		} );
-
-		// Call it again now countries have changed.
-		autocompleteSubscription();
+		updateAutocompleteProvider( checkoutActions, 'shipping', 'FR' );
+		updateAutocompleteProvider( checkoutActions, 'billing', 'FR' );
 
 		// Verify that the provider update was called with a fallback provider as germany-only only works for DE.
 		expect( mockSetActiveAddressAutocompleteProvider ).toHaveBeenCalledWith(
@@ -167,27 +135,15 @@ describe( 'Autocomplete country change handler', () => {
 			'billing'
 		);
 
-		// Now change the country data returned by the cart store so only shipping is DE.
-		wpData.select.mockImplementation( ( storeName ) => {
-			if ( storeName === 'wc/store/cart' ) {
-				return {
-					getCartData() {
-						return {
-							shippingAddress: {
-								country: 'DE',
-							},
-							billingAddress: {
-								country: 'FR',
-							},
-						};
-					},
-				};
-			}
-			return {};
-		} );
+		// Check active provider on window was changed too.
+		expect( window.wc.addressAutocomplete.activeProvider.shipping ).toBe(
+			window.wc.addressAutocomplete.providers.fallback
+		);
+		expect( window.wc.addressAutocomplete.activeProvider.billing ).toBe(
+			window.wc.addressAutocomplete.providers.fallback
+		);
 
-		// Call it again now countries have changed.
-		autocompleteSubscription();
+		updateAutocompleteProvider( checkoutActions, 'shipping', 'DE' );
 
 		// Verify that the provider update was called with germany-only for shipping.
 		expect(
