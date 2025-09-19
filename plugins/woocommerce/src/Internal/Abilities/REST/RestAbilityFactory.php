@@ -86,10 +86,7 @@ class RestAbilityFactory {
 			case 'list':
 				// Use controller's collection parameters
 				if ( method_exists( $controller, 'get_collection_params' ) ) {
-					return array(
-						'type'       => 'object',
-						'properties' => $controller->get_collection_params(),
-					);
+					return self::sanitize_args_to_schema( $controller->get_collection_params() );
 				}
 				break;
 
@@ -97,26 +94,31 @@ class RestAbilityFactory {
 				// Use controller's creatable schema
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
 					$args = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE );
-					return array(
-						'type'       => 'object',
-						'properties' => $args,
-					);
+					return self::sanitize_args_to_schema( $args );
 				}
 				break;
 
 			case 'update':
 				// Use controller's editable schema + ID
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
-					$args       = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE );
-					$args['id'] = array(
+					$args   = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE );
+					$schema = self::sanitize_args_to_schema( $args );
+
+					// Add ID field for update operations
+					$schema['properties']['id'] = array(
 						'type'        => 'integer',
 						'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
 					);
-					return array(
-						'type'       => 'object',
-						'properties' => $args,
-						'required'   => array( 'id' ),
-					);
+
+					// Ensure ID is required
+					if ( ! isset( $schema['required'] ) ) {
+						$schema['required'] = array();
+					}
+					if ( ! in_array( 'id', $schema['required'], true ) ) {
+						$schema['required'][] = 'id';
+					}
+
+					return $schema;
 				}
 				break;
 
@@ -137,6 +139,79 @@ class RestAbilityFactory {
 
 		// Fallback
 		return array( 'type' => 'object' );
+	}
+
+	/**
+	 * Sanitize WordPress REST args to valid JSON Schema format.
+	 *
+	 * Converts WordPress REST API argument arrays to JSON Schema by:
+	 * - Removing PHP callbacks (sanitize_callback, validate_callback)
+	 * - Converting 'required' from boolean-per-field to array-of-names
+	 * - Removing WordPress-specific non-schema fields
+	 * - Preserving valid JSON Schema properties
+	 *
+	 * @param array $args WordPress REST API arguments array.
+	 * @return array Valid JSON Schema object.
+	 */
+	private static function sanitize_args_to_schema( array $args ): array {
+		$properties = array();
+		$required   = array();
+
+		foreach ( $args as $key => $arg ) {
+			$property = array();
+
+			// Copy valid JSON Schema fields
+			if ( isset( $arg['type'] ) ) {
+				$property['type'] = $arg['type'];
+			}
+			if ( isset( $arg['description'] ) ) {
+				$property['description'] = $arg['description'];
+			}
+			if ( isset( $arg['default'] ) ) {
+				$property['default'] = $arg['default'];
+			}
+			if ( isset( $arg['enum'] ) ) {
+				$property['enum'] = array_values( $arg['enum'] );
+			}
+			if ( isset( $arg['items'] ) ) {
+				$property['items'] = $arg['items'];
+			}
+			if ( isset( $arg['minimum'] ) ) {
+				$property['minimum'] = $arg['minimum'];
+			}
+			if ( isset( $arg['maximum'] ) ) {
+				$property['maximum'] = $arg['maximum'];
+			}
+			if ( isset( $arg['format'] ) ) {
+				$property['format'] = $arg['format'];
+			}
+			if ( isset( $arg['properties'] ) ) {
+				$property['properties'] = $arg['properties'];
+			}
+
+			// Convert readonly to readOnly (JSON Schema format)
+			if ( isset( $arg['readonly'] ) && $arg['readonly'] ) {
+				$property['readOnly'] = true;
+			}
+
+			// Collect required fields
+			if ( isset( $arg['required'] ) && $arg['required'] === true ) {
+				$required[] = $key;
+			}
+
+			$properties[ $key ] = $property;
+		}
+
+		$schema = array(
+			'type'       => 'object',
+			'properties' => $properties,
+		);
+
+		if ( ! empty( $required ) ) {
+			$schema['required'] = array_unique( $required );
+		}
+
+		return $schema;
 	}
 
 	/**
