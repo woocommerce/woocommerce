@@ -81,6 +81,22 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 				'format'      => 'email',
 				'required'    => false,
 			),
+			'woocommerce_email_reply_to_enabled' => array(
+				'description' => __( 'Enable reply-to email address.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'required'    => false,
+			),
+			'woocommerce_email_reply_to_name' => array(
+				'description' => __( 'Reply-to name.', 'woocommerce' ),
+				'type'        => 'string',
+				'required'    => false,
+			),
+			'woocommerce_email_reply_to_address' => array(
+				'description' => __( 'Reply-to email address.', 'woocommerce' ),
+				'type'        => 'string',
+				'format'      => 'email',
+				'required'    => false,
+			),
 		);
 	}
 
@@ -126,7 +142,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 		}
 
 		// Define valid email settings.
-		$valid_settings = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address' );
+		$valid_settings = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address', 'woocommerce_email_reply_to_enabled', 'woocommerce_email_reply_to_name', 'woocommerce_email_reply_to_address' );
 		$validated_settings = array();
 
 		// Process each setting in the payload.
@@ -204,6 +220,44 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 					);
 				}
 				break;
+
+			case 'woocommerce_email_reply_to_enabled':
+				// Convert string 'true'/'false' to boolean if needed
+				if ( is_string( $value ) ) {
+					$value = filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				}
+				if ( ! is_bool( $value ) && $value !== null ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Reply-to enabled must be a boolean value.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+
+			case 'woocommerce_email_reply_to_name':
+				// Only validate if reply-to is enabled
+				$reply_to_enabled = get_option( 'woocommerce_email_reply_to_enabled', false );
+				if ( $reply_to_enabled && ( empty( $value ) || ! is_string( $value ) ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Reply-to name cannot be empty when reply-to is enabled.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
+
+			case 'woocommerce_email_reply_to_address':
+				// Only validate if reply-to is enabled
+				$reply_to_enabled = get_option( 'woocommerce_email_reply_to_enabled', false );
+				if ( $reply_to_enabled && ( empty( $value ) || ! is_email( $value ) ) ) {
+					return new WP_Error(
+						'rest_invalid_param',
+						__( 'Please enter a valid reply-to email address.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				break;
 		}
 
 		return true;
@@ -220,7 +274,16 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 		switch ( $setting_id ) {
 			case 'woocommerce_email_from_name':
 			case 'woocommerce_email_from_address':
+			case 'woocommerce_email_reply_to_name':
+			case 'woocommerce_email_reply_to_address':
 				return sanitize_text_field( $value );
+
+			case 'woocommerce_email_reply_to_enabled':
+				// Convert to boolean and store as string for WordPress options
+				if ( is_string( $value ) ) {
+					$value = filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+				}
+				return $value ? 'yes' : 'no';
 
 			default:
 				return sanitize_text_field( $value );
@@ -238,20 +301,44 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 				'id'    => 'woocommerce_email_from_name',
 				'label' => __( '"FROM" Name', 'woocommerce' ),
 				'type'  => 'text',
-				'value' => get_option( 'woocommerce_email_from_name', get_option( 'blogname' ) ),
 			),
 			array(
 				'id'    => 'woocommerce_email_from_address',
 				'label' => __( '"FROM" Address', 'woocommerce' ),
 				'type'  => 'email',
-				'value' => get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
 			),
+			array(
+				'id'    => 'woocommerce_email_reply_to_enabled',
+				'label' => __( 'Add "Reply-to" email', 'woocommerce' ),
+				'type'  => 'boolean',
+				'description' => __( 'In case you want to set a different address for replies', 'woocommerce' ),
+			),
+			array(
+				'id'    => 'woocommerce_email_reply_to_name',
+				'label' => __( '"Reply-to" Name', 'woocommerce' ),
+				'type'  => 'text',
+			),
+			array(
+				'id'    => 'woocommerce_email_reply_to_address',
+				'label' => __( '"Reply-to" Address', 'woocommerce' ),
+				'type'  => 'email',
+			),
+		);
+
+		// Extract values separately
+		$values = array(
+			'woocommerce_email_from_name' => get_option( 'woocommerce_email_from_name', get_option( 'blogname' ) ),
+			'woocommerce_email_from_address' => get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
+			'woocommerce_email_reply_to_enabled' => get_option( 'woocommerce_email_reply_to_enabled', 'no' ) === 'yes',
+			'woocommerce_email_reply_to_name' => get_option( 'woocommerce_email_reply_to_name', '' ),
+			'woocommerce_email_reply_to_address' => get_option( 'woocommerce_email_reply_to_address', '' ),
 		);
 
 		return array(
 			'id'          => 'email',
 			'title'       => __( 'Email settings', 'woocommerce' ),
 			'description' => __( 'Configure email sender details and design options.', 'woocommerce' ),
+			'values'      => $values,
 			'groups'      => array(
 				'sender_details' => array(
 					'title'       => __( 'Sender details', 'woocommerce' ),
@@ -336,6 +423,22 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'format'      => 'email',
 					'context'     => array( 'view', 'edit' ),
 				),
+				'woocommerce_email_reply_to_enabled' => array(
+					'description' => __( 'Enable reply-to email address.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'woocommerce_email_reply_to_name' => array(
+					'description' => __( 'Reply-to name.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'woocommerce_email_reply_to_address' => array(
+					'description' => __( 'Reply-to email address.', 'woocommerce' ),
+					'type'        => 'string',
+					'format'      => 'email',
+					'context'     => array( 'view', 'edit' ),
+				),
 			),
 		);
 
@@ -364,7 +467,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 				'type'  => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'email' ),
+					'enum'        => array( 'text', 'email', 'boolean' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'value' => array(
