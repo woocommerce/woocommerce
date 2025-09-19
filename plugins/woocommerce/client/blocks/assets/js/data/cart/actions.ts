@@ -19,7 +19,7 @@ export * from './thunks';
 /**
  * An action creator that dispatches the plain action responsible for setting the cart data in the store.
  */
-export function setCartData( cart: Cart ) {
+export function setCartDataAction( cart: Cart ) {
 	return {
 		type: types.SET_CART_DATA,
 		response: cart,
@@ -153,14 +153,16 @@ export function shippingRatesBeingSelected( isResolving: boolean ) {
 /**
  * Sets billing address locally, as opposed to updateCustomerData which sends it to the server.
  */
-export function setBillingAddress( billingAddress: Partial< BillingAddress > ) {
+export function setBillingAddressAction(
+	billingAddress: Partial< BillingAddress >
+) {
 	return { type: types.SET_BILLING_ADDRESS, billingAddress };
 }
 
 /**
  * Sets shipping address locally, as opposed to updateCustomerData which sends it to the server.
  */
-export function setShippingAddress(
+export function setShippingAddressAction(
 	shippingAddress: Partial< ShippingAddress >
 ) {
 	return { type: types.SET_SHIPPING_ADDRESS, shippingAddress };
