@@ -129,8 +129,8 @@ New platforms should be created as **external WordPress plugins** that hook into
 your-platform-migrator/
 ├── your-platform-migrator.php     # Main plugin file
 ├── src/
-│   ├── YourPlatformFetcher.php    # Implements PlatformFetcherInterface
-│   └── YourPlatformMapper.php     # Implements PlatformMapperInterface
+│   ├── YourPlatformFetcher.php
+│   └── YourPlatformMapper.php
 ```
 
 ### 2. Register Platform
@@ -200,7 +200,7 @@ class YourPlatformMapper implements PlatformMapperInterface {
 
 ### Reference Implementation
 
-See the Shopify platform for a complete example: [`https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/)
+See the Shopify platform for a complete example: [`Platforms/Shopify/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/)
 
 ## Required Data Structure
 
@@ -208,16 +208,110 @@ Your mapper must return data in this format:
 
 ```php
 [
+    // Basic Product Information
     'name' => 'Product Title',
-    'description' => 'Product description',
+    'slug' => 'product-slug',
+    'description' => 'Full product description',
+    'short_description' => 'Brief description',
+    'status' => 'publish', // publish|draft|private
+    'catalog_visibility' => 'visible', // visible|catalog|search|hidden
+    'date_created_gmt' => '2023-01-01 12:00:00',
+    
+    // Pricing
     'regular_price' => '29.99',
+    'sale_price' => '19.99',
+    
+    // Inventory
     'sku' => 'PRODUCT-SKU',
+    'manage_stock' => true,
+    'stock_quantity' => 100,
+    'stock_status' => 'instock', // instock|outofstock|onbackorder
+    
+    // Physical Properties
+    'weight' => '1.5',
+    
+    // Taxonomies
     'categories' => [
-        ['name' => 'Category', 'slug' => 'category']
+        ['name' => 'Category 1', 'slug' => 'category-1'],
+        ['name' => 'Category 2', 'slug' => 'category-2']
     ],
+    'tags' => [
+        ['name' => 'Tag 1', 'slug' => 'tag-1'],
+        ['name' => 'Tag 2', 'slug' => 'tag-2']
+    ],
+    'brand' => [
+        'name' => 'Brand Name',
+        'slug' => 'brand-slug'
+    ],
+    
+    // Images
     'images' => [
-        ['src' => 'https://example.com/image.jpg', 'alt' => 'Alt text']
+        [
+            'src' => 'https://example.com/image1.jpg',
+            'alt' => 'Image description',
+            'is_featured' => true,
+            'original_id' => 'source_image_id_123'
+        ],
+        [
+            'src' => 'https://example.com/image2.jpg',
+            'alt' => 'Gallery image',
+            'is_featured' => false,
+            'original_id' => 'source_image_id_456'
+        ]
     ],
-    // ... see WooCommerceProductImporter for complete structure
+    
+    // Variable Products
+    'is_variable' => false,
+    'attributes' => [
+        [
+            'name' => 'Color',
+            'options' => ['Red', 'Blue', 'Green'],
+            'position' => 0,
+            'is_visible' => true,
+            'is_variation' => true
+        ],
+        [
+            'name' => 'Size',
+            'options' => ['Small', 'Medium', 'Large'],
+            'position' => 1,
+            'is_visible' => true,
+            'is_variation' => true
+        ]
+    ],
+    'variations' => [
+        [
+            'original_id' => 'source_variant_id_789',
+            'regular_price' => '29.99',
+            'sale_price' => '24.99',
+            'sku' => 'PRODUCT-SKU-RED-S',
+            'manage_stock' => true,
+            'stock_quantity' => 10,
+            'stock_status' => 'instock',
+            'weight' => '1.5',
+            'menu_order' => 0,
+            'attributes' => [
+                'Color' => 'Red',
+                'Size' => 'Small'
+            ],
+            'image_original_id' => 'source_image_id_789',
+            'cost_of_goods' => '15.00'
+        ]
+    ],
+    
+    // Metadata and Tracking
+    'original_product_id' => 'source_platform_product_id',
+    'original_url' => 'https://source-platform.com/products/product-slug',
+    'metafields' => [
+        'custom_field_1' => 'value1',
+        'custom_field_2' => 'value2',
+        'global_title_tag' => 'SEO Title',
+        'global_description_tag' => 'SEO Description'
+    ],
+    'meta_data' => [
+        ['key' => 'custom_meta_key', 'value' => 'custom_meta_value']
+    ],
+    
+    // Cost of Goods (if supported)
+    'cost_of_goods' => '15.00'
 ]
 ```
