@@ -224,8 +224,8 @@ class Controller extends AbstractController {
 			// For detailed view, add name property to each location object.
 			$detailed_locations = array();
 			foreach ( $locations as $location ) {
-				$location_copy       = clone $location;
-				$location_copy->name = $this->get_location_name( $location );
+				$location_copy        = clone $location;
+				$location_copy->name  = $this->get_location_name( $location );
 				$detailed_locations[] = $location_copy;
 			}
 			return $detailed_locations;
