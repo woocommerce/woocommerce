@@ -26,7 +26,7 @@ final class QueryUtils {
 	 *
 	 * @return array
 	 */
-	public static function get_query_schema() {
+	public function get_query_schema() {
 		return array(
 			'note_type' => array(
 				'default'           => 'all',
@@ -46,7 +46,7 @@ final class QueryUtils {
 	 * @param WC_Order        $order The order object.
 	 * @return array
 	 */
-	public static function get_query_results( WP_REST_Request $request, WC_Order $order ): array {
+	public function get_query_results( WP_REST_Request $request, WC_Order $order ): array {
 		$args = array(
 			'post_id' => $order->get_id(),
 			'status'  => 'approve',
