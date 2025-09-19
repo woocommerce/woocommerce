@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Caching\CacheNameSpaceTrait;
+use Automattic\WooCommerce\Internal\Caches\ProductLastModifiedDateCache;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -14,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_Cache_Helper {
 	use CacheNameSpaceTrait;
+
+	private const DEFAULT_MAX_AGE = 10 * MINUTE_IN_SECONDS;
 
 	/**
 	 * Transients to delete on shutdown.
@@ -26,7 +29,7 @@ class WC_Cache_Helper {
 	 * Hook in methods.
 	 */
 	public static function init() {
-		add_action( 'wp_headers', array( __CLASS__, 'prevent_caching' ), 5 ); // Lower priority than default to facilitate plugins enforcing `no-store` if desired.
+		add_action( 'wp_headers', array( __CLASS__, 'handle_wp_headers' ), 999 ); // Lower priority than default to facilitate plugins enforcing `no-store` if desired.
 		add_action( 'shutdown', array( __CLASS__, 'delete_transients_on_shutdown' ), 10 );
 		add_action( 'template_redirect', array( __CLASS__, 'geolocation_ajax_redirect' ) );
 		add_action( 'wc_ajax_update_order_review', array( __CLASS__, 'update_geolocation_hash' ), 5 );
@@ -34,6 +37,119 @@ class WC_Cache_Helper {
 		add_action( 'delete_version_transients', array( __CLASS__, 'delete_version_transients' ), 10 );
 		add_action( 'clean_term_cache', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
 		add_action( 'edit_terms', array( __CLASS__, 'clean_term_cache' ), 10, 2 );
+	}
+
+	/**
+	 * Handler for the wp_headers hook, it will try to either produce
+	 * proper cache control headers or return a "304 not modified" response,
+	 * and will fallback to the old cache prevention code if that's not possible.
+	 *
+	 * @param array $headers Original HTTP headers to return.
+	 * @return array HTTP headers to return.
+	 */
+	public static function handle_wp_headers( array $headers ) {
+		return self::handle_page_caching( $headers ) ?? self::prevent_caching( $headers );
+	}
+
+	/**
+	 * Attempt to either return a "304 not modified" response or add proper cache control
+	 * headers to the response if possible.
+	 *
+	 * Currently this method will only act when the requested page is a product page,
+	 * and will act as follows:
+	 *
+	 * - If the request has a "If-Modified-Since" header and it contains a date that is
+	 *   less than the last modification date of the requested product, it will return
+	 *   a "304 not modified" response and finish execution immediately.
+	 * - Otherwise, it will send a "Last-Modified" header appropriate for the product
+	 *   (if that information can be obtained), together with a sensible
+	 *   "Cache-Control" header.
+	 *
+	 * If the request is not for a product page, this method returns null
+	 * so that prevent_caching can take over.
+	 *
+	 * @param array $headers Original HTTP response headers.
+	 * @return array|null New HTTP response headers, or null if no processing is actually performed.
+	 */
+	private static function handle_page_caching( $headers ): ?array {
+		global $wp_query;
+
+		if ( ( ! is_main_query() ) || ( ! is_blog_installed() ) ) {
+			return null;
+		}
+
+		if ( 'product' !== ( $wp_query->query_vars['post_type'] ?? null ) ) {
+			return null;
+		}
+
+		$product_name = $wp_query->query_vars['name'] ?? null;
+		if ( ! $product_name ) {
+			return null;
+		}
+
+		$entity_last_modified_date = wc_get_container()->get( ProductLastModifiedDateCache::class )->get_last_modified_date( $product_name );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$if_modified_since_header_value = wp_unslash( $_SERVER['HTTP_IF_MODIFIED_SINCE'] ?? '' );
+		if ( $if_modified_since_header_value && $entity_last_modified_date ) {
+			$if_modified_since_date = DateTime::createFromFormat( DateTimeInterface::RFC7231, $if_modified_since_header_value );
+			if ( $if_modified_since_date && $if_modified_since_date <= $entity_last_modified_date ) {
+				status_header( 304 );
+				exit;
+			}
+		}
+
+		if ( ! $entity_last_modified_date ) {
+			return null;
+		}
+
+		$visibility = is_user_logged_in() ? 'private' : 'public';
+
+		/**
+		 * Filter to control the cache control headers returned for a cacheable entity.
+		 * The input is an array with the following keys:
+		 *
+		 * - entity_type: currently this is always "product".
+		 * - handle_cache_control: if false, no cache control headers will be generated whatsoever.
+		 * - no_store: if true, the generated Cache-Control header will include a "no-store" directive.
+		 * - max_age: value for the max-age directive in the Cache-Control header, 0 will cause a "no-cache" directive to be used instead.
+		 * - visibility: either "public" or "private" to allow either edge caching or only client caching.
+		 *
+		 * @since 10.3.0
+		 */
+		$cache_control_data = apply_filters(
+			'woocommerce_cache_control_data',
+			array(
+				'entity_type'          => 'product',
+				'handle_cache_control' => true,
+				'no_store'             => false,
+				'max_age'              => self::DEFAULT_MAX_AGE,
+				'visibility'           => $visibility,
+			)
+		);
+
+		if ( ! ( $cache_control_data['handle_cache_control'] ?? false ) ) {
+			return null;
+		}
+
+		if ( $cache_control_data['no_store'] ?? false ) {
+			return array_merge( $headers, wp_get_nocache_headers() );
+		}
+
+		$headers['Last-Modified'] = $entity_last_modified_date->format( DateTimeInterface::RFC7231 );
+		if ( ! isset( $headers['Date'] ) ) {
+			$headers['Date'] = ( new DateTime( 'now' ) )->format( DateTimeInterface::RFC7231 );
+		}
+
+		$max_age = $cache_control_data['max_age'] ?? 0;
+		if ( is_integer( $max_age ) && $max_age > 0 ) {
+			$headers['Cache-Control'] = "{$cache_control_data['visibility']}, max-age={$cache_control_data['max_age']}, must-revalidate";
+			$headers['Expires']       = ( new DateTime( "now + {$max_age} seconds" ) )->format( DateTimeInterface::RFC7231 );
+		} else {
+			$headers['Cache-Control'] = "{$cache_control_data['visibility']}, no-cache, must-revalidate";
+		}
+
+		return $headers;
 	}
 
 	/**
