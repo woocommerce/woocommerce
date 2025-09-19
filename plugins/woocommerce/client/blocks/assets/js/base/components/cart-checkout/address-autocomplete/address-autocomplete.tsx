@@ -28,7 +28,6 @@ export const AddressAutocomplete = ( {
 			<ValidatedTextInput
 				{ ...props }
 				id={ id }
-				onChange={ props.onChange }
 			/>
 		</div>
 	);
