@@ -665,7 +665,7 @@ class WC_Form_Handler {
 				if ( $product && $product->is_in_stock() && $product->has_enough_stock( $cart_item['quantity'] ) ) {
 					/* Translators: %s Product title. */
 					$removed_notice  = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
-					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
+					$removed_notice .= ' <a href="' . esc_url( wc_get_cart_undo_url( $cart_item_key, $cart_item ) ) . '" class="restore-item">' . __( 'Undo?', 'woocommerce' ) . '</a>';
 				} else {
 					/* Translators: %s Product title. */
 					$removed_notice = sprintf( __( '%s removed.', 'woocommerce' ), $item_removed_title );
@@ -682,8 +682,15 @@ class WC_Form_Handler {
 
 			// Undo Cart Item.
 			$cart_item_key = sanitize_text_field( wp_unslash( $_GET['undo_item'] ) );
+			$undo_data     = null;
 
-			WC()->cart->restore_cart_item( $cart_item_key );
+			// Check if cart item data is provided in the URL (for when removed_cart_contents is not in session).
+			if ( ! empty( $_GET['undo_data'] ) ) {
+				$undo_data = wp_unslash( $_GET['undo_data'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+				$undo_data = json_decode( base64_decode( $undo_data ), true );
+			}
+
+			WC()->cart->restore_cart_item( $cart_item_key, $undo_data );
 
 			if ( wp_get_referer() ) {
 				wp_safe_redirect( remove_query_arg( array( 'undo_item', '_wpnonce' ), wp_get_referer() ) );

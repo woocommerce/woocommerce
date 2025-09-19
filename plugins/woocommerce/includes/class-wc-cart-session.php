@@ -105,7 +105,6 @@ final class WC_Cart_Session {
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
 		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
-		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
 		$order_again         = false; // Flag to indicate whether this is a re-order.
@@ -314,7 +313,6 @@ final class WC_Cart_Session {
 		$wc_session->set( 'applied_coupons', null );
 		$wc_session->set( 'coupon_discount_totals', null );
 		$wc_session->set( 'coupon_discount_tax_totals', null );
-		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
 		$wc_session->set( 'store_api_draft_order', null );
 		$wc_session->set( 'shipping_method_counts', null );
@@ -404,7 +402,6 @@ final class WC_Cart_Session {
 		$applied_coupons            = $this->cart->get_applied_coupons();
 		$coupon_discount_totals     = $this->cart->get_coupon_discount_totals();
 		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
-		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
 
 		/*
 		 * We want to clear out any empty/default data from the session that have no value in being stored so the session
@@ -415,7 +412,6 @@ final class WC_Cart_Session {
 		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
-		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
 		if ( empty( $cart ) ) {
 			$this->remove_draft_order();
 		}

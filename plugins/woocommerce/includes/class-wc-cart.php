@@ -1380,11 +1380,20 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * Restore a cart item.
 	 *
 	 * @param  string $cart_item_key Cart item key to restore to the cart.
+	 * @param  array  $cart_item_data Cart item data (optional, used when removed_cart_contents is not in session).
 	 * @return bool
 	 */
-	public function restore_cart_item( $cart_item_key ) {
+	public function restore_cart_item( $cart_item_key, $cart_item_data = null ) {
+		$restore_item = null;
+
 		if ( isset( $this->removed_cart_contents[ $cart_item_key ] ) ) {
-			$restore_item                                  = $this->removed_cart_contents[ $cart_item_key ];
+			$restore_item = $this->removed_cart_contents[ $cart_item_key ];
+			unset( $this->removed_cart_contents[ $cart_item_key ] );
+		} elseif ( $cart_item_data && is_array( $cart_item_data ) ) {
+			$restore_item = $cart_item_data;
+		}
+
+		if ( $restore_item ) {
 			$this->cart_contents[ $cart_item_key ]         = $restore_item;
 			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
 
