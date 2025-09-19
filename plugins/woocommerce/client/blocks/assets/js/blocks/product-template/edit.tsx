@@ -121,8 +121,6 @@ const MemoizedProductTemplateBlockPreview = memo( ProductTemplateBlockPreview );
 
 type ProductContentProps = {
 	attributes: { productId: string };
-	isLoading: boolean;
-	product: ProductResponseItem;
 	displayTemplate: boolean;
 	blocks: BlockInstance[];
 	blockContext: {
@@ -132,7 +130,32 @@ type ProductContentProps = {
 	setActiveBlockContextId: ( id: string ) => void;
 };
 
-const ProductContent = withProduct(
+const ProductContent = ( {
+	displayTemplate,
+	blocks,
+	blockContext,
+	setActiveBlockContextId,
+}: ProductContentProps ) => {
+	return (
+		<BlockContextProvider
+			key={ blockContext.postId }
+			value={ blockContext }
+		>
+			{ displayTemplate ? <ProductTemplateInnerBlocks /> : null }
+			<MemoizedProductTemplateBlockPreview
+				blocks={ blocks }
+				blockContextId={ blockContext.postId }
+				setActiveBlockContextId={ setActiveBlockContextId }
+				isHidden={ displayTemplate }
+			/>
+		</BlockContextProvider>
+	);
+};
+
+// This version of the component is used only when Product Collection is within Single Product block.
+// But because it's causing performance issues in editor, it's extracted to a separate component
+// and will be removed once all inner blocks are migrated from withProduct to useProduct HOC.
+const ProductContentWithProduct = withProduct(
 	( {
 		isLoading,
 		product,
@@ -140,7 +163,10 @@ const ProductContent = withProduct(
 		blocks,
 		blockContext,
 		setActiveBlockContextId,
-	}: ProductContentProps ) => {
+	}: ProductContentProps & {
+		isLoading: boolean;
+		product: ProductResponseItem;
+	} ) => {
 		return (
 			<BlockContextProvider
 				key={ blockContext.postId }
@@ -262,11 +288,12 @@ const ProductTemplateEdit = (
 		queryContextIncludes: queryContextIncludesWithDefaults,
 	} );
 
-	const { products, blocks } = useSelect(
+	const { products, isInSingleProductBlock, blocks } = useSelect(
 		( select ) => {
 			const { getEntityRecords, getEditedEntityRecord, getTaxonomies } =
 				select( coreStore );
-			const { getBlocks } = select( blockEditorStore );
+			const { getBlocks, getBlockParentsByBlockName } =
+				select( blockEditorStore );
 			const taxonomies = getTaxonomies( {
 				type: postType,
 				per_page: -1,
@@ -363,6 +390,10 @@ const ProductTemplateEdit = (
 						woocommerceStockStatus: getDefaultStockStatuses(),
 					} ),
 				} ),
+				isInSingleProductBlock:
+					getBlockParentsByBlockName( clientId, [
+						'woocommerce/single-product',
+					] ).length > 0,
 				blocks: getBlocks( clientId ),
 			};
 		},
@@ -440,6 +471,9 @@ const ProductTemplateEdit = (
 		perPage,
 		loopShopPerPage
 	);
+	const ProductContentComponent = isInSingleProductBlock
+		? ProductContentWithProduct
+		: ProductContent;
 
 	// To avoid flicker when switching active block contexts, a preview is rendered
 	// for each block context, but the preview for the active block context is hidden.
@@ -456,7 +490,7 @@ const ProductTemplateEdit = (
 					return (
 						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 						// @ts-ignore isLoading and product props are missing as they're coming from untyped withProduct HOC.
-						<ProductContent
+						<ProductContentComponent
 							key={ blockContext.postId }
 							attributes={ {
 								productId: blockContext.postId,
