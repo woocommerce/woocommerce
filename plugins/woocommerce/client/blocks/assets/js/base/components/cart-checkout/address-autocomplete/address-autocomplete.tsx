@@ -25,10 +25,7 @@ export const AddressAutocomplete = ( {
 }: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
-			<ValidatedTextInput
-				{ ...props }
-				id={ id }
-			/>
+			<ValidatedTextInput { ...props } id={ id } />
 		</div>
 	);
 };

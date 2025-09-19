@@ -9,12 +9,6 @@ import {
 	select,
 } from '@wordpress/data';
 import { controls as dataControls } from '@wordpress/data-controls';
-import { getSettingWithCoercion } from '@woocommerce/settings';
-import type { ServerAddressAutocompleteProvider } from '@woocommerce/types';
-import type {
-	ActionCreatorsOf,
-	ConfigOf,
-} from '@wordpress/data/build-types/types';
 
 /**
  * Internal dependencies
@@ -38,7 +32,6 @@ import { defaultCartState } from './default-state';
 import { getTriggerStoreSyncEvent } from './utils';
 import type { QuantityChanges } from './notify-quantity-changes';
 import { isEditor } from '../utils';
-import type { CheckoutStoreDescriptor } from '../checkout';
 
 export const config = {
 	reducer,
