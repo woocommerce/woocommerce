@@ -153,7 +153,7 @@ export const AddressAutocomplete = ( {
 
 		// Do autocomplete search.
 		const provider =
-			window.wc.addressAutocomplete.activeProvider[
+			window?.wc?.addressAutocomplete?.activeProvider?.[
 				addressType as 'shipping' | 'billing'
 			];
 
@@ -285,8 +285,8 @@ export const AddressAutocomplete = ( {
 			) {
 				const selected = suggestions[ selectedSuggestion ];
 				const provider =
-					window.wc.addressAutocomplete.activeProvider[
-						addressType as 'shipping' | 'billing'
+					window?.wc?.addressAutocomplete?.activeProvider?.[
+						addressType
 					];
 				if ( provider ) {
 					setIsSettingAddress( true );
@@ -321,9 +321,7 @@ export const AddressAutocomplete = ( {
 
 	const handleSuggestionClick = async ( suggestionId: string ) => {
 		const provider =
-			window?.wc?.addressAutocomplete?.activeProvider?.[
-				addressType as 'shipping' | 'billing'
-			];
+			window?.wc?.addressAutocomplete?.activeProvider?.[ addressType ];
 		if ( provider ) {
 			setIsSettingAddress( true );
 			// Immediately suppress search to prevent any change events from triggering search
