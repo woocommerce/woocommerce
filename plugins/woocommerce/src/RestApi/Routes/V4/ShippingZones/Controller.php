@@ -169,7 +169,7 @@ class Controller extends AbstractController {
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
 			'order'     => $zone->get_zone_order(),
-			'locations' => $this->get_location_names_array( $zone ),
+			'locations' => $this->get_formatted_zone_locations( $zone ),
 			'methods'   => $this->get_formatted_methods_summary( $zone ),
 		);
 	}
@@ -185,7 +185,7 @@ class Controller extends AbstractController {
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
 			'order'     => $zone->get_zone_order(),
-			'locations' => $this->get_location_names_array( $zone ),
+			'locations' => $this->get_formatted_zone_locations( $zone, 'detail' ),
 			'methods'   => $this->get_formatted_methods_summary( $zone ),
 		);
 	}
@@ -205,9 +205,10 @@ class Controller extends AbstractController {
 	 * Get array of location names for display.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @param string           $view The view for which the API is requested ('summary' or 'detail').
 	 * @return array
 	 */
-	protected function get_location_names_array( $zone ) {
+	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone, string $view = 'summary' ): array {
 		if ( 0 === $zone->get_id() ) {
 			return array( __( 'All regions not covered above', 'woocommerce' ) );
 		}
@@ -216,14 +217,15 @@ class Controller extends AbstractController {
 		$location_names = array();
 
 		foreach ( $locations as $location ) {
-			$location_names[] = $this->get_location_name( $location );
+			$location_name = $this->get_location_name( $location );
+			if ( $view === 'summary' ) {
+				$location_names[] = $location_name;
+			} else {
+				$location->name=$location_name;
+			}
 		}
 
-		if ( empty( $location_names ) ) {
-			return array();
-		}
-
-		return $location_names;
+		return $view === 'summary'? $location_names:$locations;
 	}
 
 	/**
