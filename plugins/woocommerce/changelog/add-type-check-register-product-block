@@ -1,0 +1,5 @@
+Significance: patch
+Type: update
+Comment: Making sure we operate on string returned from getEditedPostSlug
+
+

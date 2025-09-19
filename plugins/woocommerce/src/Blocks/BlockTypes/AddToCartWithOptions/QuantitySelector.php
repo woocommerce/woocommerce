@@ -129,13 +129,23 @@ class QuantitySelector extends AbstractBlock {
 			$variations_data           = $product->get_available_variations( 'objects' );
 			$formatted_variations_data = array();
 			foreach ( $variations_data as $variation ) {
-				$variation_quantity_constraints                    = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'min'               => $variation_quantity_constraints['min'],
-					'max'               => $variation_quantity_constraints['max'],
-					'step'              => $variation_quantity_constraints['step'],
-					'sold_individually' => (bool) $variation->is_sold_individually(),
-				);
+				$variation_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
+				$variation_data                 = array();
+
+				// Only add variation data if it's different than the defaults.
+				if ( 1 !== $variation_quantity_constraints['min'] ) {
+					$variation_data['min'] = $variation_quantity_constraints['min'];
+				}
+				if ( null !== $variation_quantity_constraints['max'] ) {
+					$variation_data['max'] = $variation_quantity_constraints['max'];
+				}
+				if ( 1 !== $variation_quantity_constraints['step'] ) {
+					$variation_data['step'] = $variation_quantity_constraints['step'];
+				}
+				if ( $variation->is_sold_individually() ) {
+					$variation_data['sold_individually'] = true;
+				}
+				$formatted_variations_data[ $variation->get_id() ] = $variation_data;
 			}
 
 			wp_interactivity_config(
