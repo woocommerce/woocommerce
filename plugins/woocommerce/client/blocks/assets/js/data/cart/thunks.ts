@@ -22,6 +22,8 @@ import {
 	type ActionCreatorsOf,
 } from '@wordpress/data/build-types/types';
 import { cartStore } from '@woocommerce/block-data';
+import type { BillingAddress, ShippingAddress } from '@woocommerce/settings';
+import { dispatch as wpDispatch, select as wpSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -38,10 +40,17 @@ import {
 	setTriggerStoreSyncEvent,
 } from './utils';
 import { isEditor } from '../utils';
+import { updateAutocompleteProvider } from '../checkout/subscriptions/autocomplete';
+import { CheckoutStoreDescriptor } from '../checkout';
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;
 	dispatch: ActionCreatorsOf< ConfigOf< typeof cartStore > >;
+	registry: { dispatch: typeof wpDispatch; select: typeof wpSelect };
 }
+
+type CheckoutStoreSelectors = ActionCreatorsOf<
+	ConfigOf< CheckoutStoreDescriptor >
+>;
 
 /**
  * A thunk used in updating the store with the cart items retrieved from a request. This also notifies the shopper
@@ -608,6 +617,89 @@ export const updateCustomerData =
 			dispatch.updatingCustomerData( false );
 			dispatch.updatingAddressFieldsForShippingRates( false );
 		}
+	};
+
+/**
+ * Updates the shipping address.
+ */
+export const setShippingAddress =
+	( shippingAddress: Partial< ShippingAddress > ) =>
+	async ( { dispatch, select, registry }: CartThunkArgs ) => {
+		// Shipping country is being updated in this action, so reset the address autocomplete provider.
+		if ( typeof shippingAddress?.country !== 'undefined' ) {
+			const currentCountry =
+				select.getCustomerData()?.shippingAddress?.country;
+			if ( shippingAddress?.country !== currentCountry ) {
+				updateAutocompleteProvider(
+					registry.dispatch(
+						'wc/store/checkout'
+					) as CheckoutStoreSelectors,
+					'shipping',
+					shippingAddress?.country
+				);
+			}
+		}
+		dispatch.setShippingAddressAction( shippingAddress );
+	};
+
+/**
+ * Updates the billing address
+ */
+export const setBillingAddress =
+	( billingAddress: Partial< BillingAddress > ) =>
+	async ( { dispatch, select, registry }: CartThunkArgs ) => {
+		// Billing country is being updated in this action, so reset the address autocomplete provider.
+		if ( typeof billingAddress?.country !== 'undefined' ) {
+			const currentCountry =
+				select.getCustomerData()?.billingAddress?.country;
+			if ( billingAddress?.country !== currentCountry ) {
+				updateAutocompleteProvider(
+					registry.dispatch(
+						'wc/store/checkout'
+					) as CheckoutStoreSelectors,
+					'billing',
+					billingAddress?.country
+				);
+			}
+		}
+		dispatch.setBillingAddressAction( billingAddress );
+	};
+
+/**
+ * Updates the billing address
+ */
+export const setCartData =
+	( cart: Cart ) =>
+	async ( { dispatch, select, registry }: CartThunkArgs ) => {
+		// Billing country is being updated in this action, so reset the address autocomplete provider.
+		if ( typeof cart.billingAddress?.country !== 'undefined' ) {
+			const currentCountry =
+				select.getCustomerData()?.billingAddress?.country;
+			if ( cart?.billingAddress?.country !== currentCountry ) {
+				updateAutocompleteProvider(
+					registry.dispatch(
+						'wc/store/checkout'
+					) as CheckoutStoreSelectors,
+					'billing',
+					cart?.billingAddress?.country
+				);
+			}
+		}
+		// Shipping country is being updated in this action, so reset the address autocomplete provider.
+		if ( typeof cart.shippingAddress?.country !== 'undefined' ) {
+			const currentCountry =
+				select.getCustomerData()?.shippingAddress?.country;
+			if ( cart?.shippingAddress?.country !== currentCountry ) {
+				updateAutocompleteProvider(
+					registry.dispatch(
+						'wc/store/checkout'
+					) as CheckoutStoreSelectors,
+					'billing',
+					cart?.shippingAddress?.country
+				);
+			}
+		}
+		dispatch.setCartDataAction( cart );
 	};
 
 export type Thunks =
