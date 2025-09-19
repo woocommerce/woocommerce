@@ -21,11 +21,13 @@ Production-ready Shopify to WooCommerce migration platform. For general usage in
 ## Key Features
 
 ### Data Fetching
+
 - Comprehensive GraphQL query retrieving products, variants, images, collections, metafields
 - Filtering support: status, vendor, product type, date ranges, specific IDs
 - Batch processing with configurable limits (default: 50 products per batch)
 
 ### Data Mapping
+
 - **Product Types**: Auto-detection (>1 variant = variable product)
 - **Weight Conversion**: Automatic unit conversion (grams, kg, pounds, ounces)
 - **Pricing Logic**: Smart regular/sale price detection using `compareAtPrice`
@@ -51,7 +53,7 @@ Production-ready Shopify to WooCommerce migration platform. For general usage in
 | `sale_price` | `price` | Set when `compareAtPrice > price` |
 | `manage_stock` | `inventoryItem.tracked` | Direct mapping |
 | `stock_quantity` | `inventoryQuantity` | Direct mapping |
-| `stock_status` | Calculated | `(quantity > 0 || oversell) ? 'instock' : 'outofstock'` |
+| `stock_status` | Calculated | `(quantity > 0 OR oversell) ? 'instock' : 'outofstock'` |
 
 ### Physical Properties
 
