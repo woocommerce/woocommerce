@@ -353,7 +353,9 @@ describe( 'Checkout Store Reducer', () => {
 			expect(
 				reducer(
 					defaultState,
-					actions.addAddressAutocompleteProvider( 'google-places' )
+					actions.addAddressAutocompleteProviderAction(
+						'google-places'
+					)
 				)
 			).toEqual( expectedState );
 		} );
@@ -372,7 +374,7 @@ describe( 'Checkout Store Reducer', () => {
 			expect(
 				reducer(
 					initialState,
-					actions.addAddressAutocompleteProvider( 'mapbox' )
+					actions.addAddressAutocompleteProviderAction( 'mapbox' )
 				)
 			).toEqual( expectedState );
 		} );
@@ -391,7 +393,9 @@ describe( 'Checkout Store Reducer', () => {
 			expect(
 				reducer(
 					initialState,
-					actions.addAddressAutocompleteProvider( 'google-places' )
+					actions.addAddressAutocompleteProviderAction(
+						'google-places'
+					)
 				)
 			).toEqual( expectedState );
 		} );
@@ -403,7 +407,7 @@ describe( 'Checkout Store Reducer', () => {
 				reducer(
 					defaultState,
 					// @ts-expect-error Testing invalid input
-					actions.addAddressAutocompleteProvider( null )
+					actions.addAddressAutocompleteProviderAction( null )
 				)
 			).toEqual( expectedState );
 
@@ -411,7 +415,7 @@ describe( 'Checkout Store Reducer', () => {
 				reducer(
 					defaultState,
 					// @ts-expect-error Testing invalid input
-					actions.addAddressAutocompleteProvider( 123 )
+					actions.addAddressAutocompleteProviderAction( 123 )
 				)
 			).toEqual( expectedState );
 		} );
