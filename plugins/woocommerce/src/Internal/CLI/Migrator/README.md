@@ -102,22 +102,22 @@ wp wc migrate products --assign-default-category --limit=100
 
 ### Components
 
-- **Platform Registry** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/PlatformRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/PlatformRegistry.php)) - Manages registered migration platforms
-- **Credential Manager** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/CredentialManager.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/CredentialManager.php)) - Handles platform credentials
-- **Products Controller** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/ProductsController.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/ProductsController.php)) - Orchestrates product migration
-- **WooCommerce Product Importer** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/WooCommerceProductImporter.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/WooCommerceProductImporter.php)) - Imports data to WooCommerce
+- **Platform Registry** ([`PlatformRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/PlatformRegistry.php)) - Manages registered migration platforms
+- **Credential Manager** ([`CredentialManager.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/CredentialManager.php)) - Handles platform credentials
+- **Products Controller** ([`ProductsController.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/ProductsController.php)) - Orchestrates product migration
+- **WooCommerce Product Importer** ([`WooCommerceProductImporter.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Core/WooCommerceProductImporter.php)) - Imports data to WooCommerce
 
 ### Platform Interface
 
 Each platform must implement:
-- **PlatformFetcherInterface** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformFetcherInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformFetcherInterface.php)) - Data retrieval
-- **PlatformMapperInterface** ([`https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformMapperInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformMapperInterface.php)) - Data transformation
+- **PlatformFetcherInterface** ([`PlatformFetcherInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformFetcherInterface.php)) - Data retrieval
+- **PlatformMapperInterface** ([`PlatformMapperInterface.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Interfaces/PlatformMapperInterface.php)) - Data transformation
 
 ## Supported Platforms
 
 | Platform | Status | Location |
 |----------|--------|----------|
-| **Shopify** | ✅ Production Ready | [`https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/) |
+| **Shopify** | ✅ Production Ready | [`Platforms/Shopify/`](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/Internal/CLI/Migrator/Platforms/Shopify/) |
 
 ## Creating a New Platform
 
