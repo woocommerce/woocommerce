@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove removed cart session data in favor of URL restore params
