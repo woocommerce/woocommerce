@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Implement Mozart prefixing for Emogrifier dependencies to prevent conflicts with other plugins using different versions of Sabberworm CSS parser.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Implement Mozart prefixing for PHP package dependencies to prevent conflicts with other plugins.
