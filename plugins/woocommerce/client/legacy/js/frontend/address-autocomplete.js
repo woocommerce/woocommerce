@@ -1,115 +1,14 @@
 /**
- * Address provider registration for WooCommerce shortcode checkout
+ * Address provider implementation for WooCommerce shortcode checkout
+ *
+ * Note: The core registration logic and provider management is now handled
+ * by the common module (address-autocomplete-common.js). This file focuses
+ * on the shortcode-specific implementation.
  */
 
-// Make functions and state available globally under window.wc.addressAutocomplete
-window.wc = window.wc || {};
-window.wc.addressAutocomplete = window.wc.addressAutocomplete || {
-	providers: {},
-	activeProvider: { billing: null, shipping: null },
-};
-
-let serverProviders = [];
-try {
-	if ( window && window.wc_address_autocomplete_params ) {
-		const raw = window.wc_address_autocomplete_params.address_providers;
-		if ( typeof raw === 'string' ) {
-			const parsed = JSON.parse( raw );
-			serverProviders = Array.isArray( parsed ) ? parsed : [];
-		} else if ( Array.isArray( raw ) ) {
-			serverProviders = raw;
-		}
-	}
-} catch ( e ) {
-	console.error( 'Invalid address providers JSON:', e );
-}
-
-/**
- * Register an address autocomplete provider. This will be used by both shortcode and blocks implementations. *
- * @param {Object} provider The provider object
- * @return {boolean} Whether the registration was successful
- */
-function registerAddressAutocompleteProvider( provider ) {
-	try {
-		// Check required properties
-		if ( ! provider || typeof provider !== 'object' ) {
-			throw new Error( 'Address provider must be a valid object' );
-		}
-
-		if ( ! provider.id || typeof provider.id !== 'string' ) {
-			throw new Error( 'Address provider must have a valid ID' );
-		}
-
-		if ( typeof provider.canSearch !== 'function' ) {
-			throw new Error(
-				'Address provider must have a canSearch function'
-			);
-		}
-
-		if ( typeof provider.search !== 'function' ) {
-			throw new Error( 'Address provider must have a search function' );
-		}
-
-		if ( typeof provider.select !== 'function' ) {
-			throw new Error( 'Address provider must have a select function' );
-		}
-
-		if ( ! Array.isArray( serverProviders ) ) {
-			throw new Error( 'Server providers configuration is invalid' );
-		}
-
-		var isRegistered = serverProviders.some( function ( serverProvider ) {
-			return (
-				serverProvider &&
-				typeof serverProvider === 'object' &&
-				typeof serverProvider.id === 'string' &&
-				serverProvider.id === provider.id
-			);
-		} );
-		if ( ! isRegistered ) {
-			throw new Error(
-				'Provider ' + provider.id + ' not registered on server'
-			);
-		}
-
-		// Check if a provider with the same ID already exists
-		if ( window.wc.addressAutocomplete.providers[ provider.id ] ) {
-			console.warn(
-				'Address provider with ID "' +
-					provider.id +
-					'" is already registered.'
-			);
-			return false;
-		}
-
-		// Freeze and add provider to registry.
-		Object.freeze( provider );
-		window.wc.addressAutocomplete.providers[ provider.id ] = provider;
-
-		// Check if window.wp.data and the checkout store is available, if so we're likely in a block context
-		if (
-			window.wp &&
-			window.wp.data &&
-			window.wp.data.dispatch &&
-			window.wc &&
-			window.wc.wcBlocksData &&
-			window.wc.wcBlocksData.checkoutStore
-		) {
-			// Dispatch an action to notify that a new provider has been registered
-			window.wp.data
-				.dispatch( window.wc.wcBlocksData.checkoutStore )
-				.addAddressAutocompleteProvider( provider.id );
-		}
-		return true;
-	} catch ( error ) {
-		console.error( 'Error registering address provider:', error.message );
-		return false;
-	}
-}
-
-// Export the registration function
-window.wc.addressAutocomplete.registerAddressAutocompleteProvider =
-	registerAddressAutocompleteProvider;
+// The common module will have already initialized window.wc.addressAutocomplete
+// with providers, activeProvider, serverProviders, and the registration function.
+// We just need to use them here.
 
 if (
 	! window.wc ||
@@ -126,6 +25,8 @@ if (
 		 */
 		function setActiveProvider( country, type ) {
 			// Get server providers list (already ordered by preference).
+			const serverProviders =
+				window.wc.addressAutocomplete.serverProviders;
 
 			// Check providers in preference order (server handles preferred provider ordering).
 			for ( const serverProvider of serverProviders ) {
@@ -601,9 +502,10 @@ if (
 					const activeProvider =
 						window.wc.addressAutocomplete.activeProvider[ type ];
 					if ( activeProvider && activeProvider.id ) {
-						const serverProvider = serverProviders.find(
-							( provider ) => provider.id === activeProvider.id
-						);
+						const serverProvider =
+							window.wc.addressAutocomplete.getServerProvider(
+								activeProvider.id
+							);
 						const brandingHtml =
 							serverProvider &&
 							typeof serverProvider.branding_html === 'string'
