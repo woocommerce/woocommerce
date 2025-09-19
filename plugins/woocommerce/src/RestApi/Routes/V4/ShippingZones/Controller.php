@@ -218,14 +218,14 @@ class Controller extends AbstractController {
 
 		foreach ( $locations as $location ) {
 			$location_name = $this->get_location_name( $location );
-			if ( $view === 'summary' ) {
+			if ( 'summary' === $view ) {
 				$location_names[] = $location_name;
 			} else {
-				$location->name=$location_name;
+				$location->name = $location_name;
 			}
 		}
 
-		return $view === 'summary'? $location_names:$locations;
+		return 'summary' === $view ? $location_names : $locations;
 	}
 
 	/**
