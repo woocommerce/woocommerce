@@ -113,7 +113,7 @@ class Controller extends AbstractController {
 			);
 		}
 
-		return $this->prepare_item_for_response( $zone, $request );
+		return rest_ensure_response( $this->get_zone_detail( $zone ) );
 	}
 
 	/**
@@ -151,8 +151,7 @@ class Controller extends AbstractController {
 			// Handle both 'zone_id' (from get_zones()) and 'id' (from get_data()) keys.
 			$zone_id = isset( $zone_data['zone_id'] ) ? $zone_data['zone_id'] : $zone_data['id'];
 			$zone    = WC_Shipping_Zones::get_zone( $zone_id );
-			$item    = $this->prepare_item_for_response( $zone, $request );
-			$data[]  = $this->prepare_response_for_collection( $item );
+			$data[]  = $this->get_zone_summary( $zone );
 		}
 
 		return rest_ensure_response( $data );
@@ -160,13 +159,12 @@ class Controller extends AbstractController {
 
 
 	/**
-	 * Get the item response for list view.
+	 * Get zone summary for list view.
 	 *
-	 * @param WC_Shipping_Zone $zone    Shipping zone object.
-	 * @param WP_REST_Request  $request Request object.
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @return array
 	 */
-	protected function get_item_response( $zone, WP_REST_Request $request ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	protected function get_zone_summary( $zone ): array {
 		return array(
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
@@ -174,6 +172,33 @@ class Controller extends AbstractController {
 			'locations' => $this->get_location_names_array( $zone ),
 			'methods'   => $this->get_formatted_methods_summary( $zone ),
 		);
+	}
+
+	/**
+	 * Get zone detail for single zone view.
+	 *
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @return array
+	 */
+	protected function get_zone_detail( $zone ): array {
+		return array(
+			'id'        => $zone->get_id(),
+			'name'      => $zone->get_zone_name(),
+			'order'     => $zone->get_zone_order(),
+			'locations' => $this->get_location_names_array( $zone ),
+			'methods'   => $this->get_formatted_methods_summary( $zone ),
+		);
+	}
+
+	/**
+	 * Get the item response for the parent class compatibility.
+	 *
+	 * @param WC_Shipping_Zone $zone    Shipping zone object.
+	 * @param WP_REST_Request  $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( $zone, WP_REST_Request $request ): array {
+		return $this->get_zone_summary( $zone );
 	}
 
 	/**
