@@ -59,6 +59,8 @@ class Checkout extends AbstractBlock {
 	 */
 	public function dequeue_woocommerce_core_scripts() {
 		wp_dequeue_script( 'wc-checkout' );
+		wp_dequeue_script( 'wc-address-autocomplete' );
+		wp_dequeue_style( 'wc-address-autocomplete' );
 		wp_dequeue_script( 'wc-password-strength-meter' );
 		wp_dequeue_script( 'selectWoo' );
 		wp_dequeue_style( 'select2' );
