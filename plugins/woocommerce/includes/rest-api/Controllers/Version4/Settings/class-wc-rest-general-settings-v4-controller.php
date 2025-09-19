@@ -376,6 +376,34 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	}
 
 	/**
+	 * Get the display order for a settings field.
+	 *
+	 * @param array $setting  Setting definition array.
+	 * @return int Display order.
+	 */
+	private function get_field_order( $setting ) {
+		if ( isset( $setting['order'] ) && is_numeric( $setting['order'] ) ) {
+			return (int) $setting['order'];
+		}
+
+		return 999;
+	}
+
+	/**
+	 * Sort fields by order for usort callback.
+	 *
+	 * @param array $a First field.
+	 * @param array $b Second field.
+	 * @return int Comparison result.
+	 */
+	private function sort_fields_by_order( $a, $b ) {
+		$order_a = $a['order'] ?? 999;
+		$order_b = $b['order'] ?? 999;
+
+		return $order_a <=> $order_b;
+	}
+
+	/**
 	 * Get general settings data by transforming WC_Settings_General data into REST API format.
 	 *
 	 * @return array
@@ -407,6 +435,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			// Handle section ends.
 			if ( 'sectionend' === $setting_type ) {
 				if ( $current_group && $current_group_key ) {
+					// Sort fields by order before storing the group.
+					usort( $current_group['fields'], array( $this, 'sort_fields_by_order' ) );
 					$groups[ $current_group_key ] = $current_group;
 				}
 				$current_group     = null;
@@ -462,6 +492,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'label' => $setting['title'] ?? $setting_id,
 			'type'  => $this->normalize_field_type( $setting_type ),
 			'value' => get_option( $setting_id, $setting['default'] ?? '' ),
+			'order' => $this->get_field_order( $setting ),
 		);
 
 		// Add tip if available.
@@ -696,6 +727,12 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'description' => __( 'Help text for the setting field.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+				),
+				'order'   => array(
+					'description' => __( 'Display order for the field.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
 				),
 			),
 		);

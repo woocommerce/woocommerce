@@ -118,6 +118,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 40,
 				),
 
 				array(
@@ -127,6 +128,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 50,
 				),
 
 				array(
@@ -136,6 +138,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 20,
 				),
 
 				array(
@@ -145,6 +148,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => 'US:CA',
 					'type'     => 'single_select_country',
 					'desc_tip' => true,
+					'order'    => 10,
 				),
 
 				array(
@@ -155,6 +159,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 30,
 				),
 
 				array(
