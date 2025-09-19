@@ -8,7 +8,7 @@ import { getSettingWithCoercion } from '@woocommerce/settings';
 /**
  * Internal dependencies
  */
-import type { CheckoutStoreDescriptor } from '../index';
+import type { CheckoutStoreDescriptor } from './index';
 
 // Get server providers configuration
 const serverProviders = getSettingWithCoercion<
