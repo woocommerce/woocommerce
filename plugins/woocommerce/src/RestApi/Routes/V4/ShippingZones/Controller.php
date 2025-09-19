@@ -170,7 +170,7 @@ class Controller extends AbstractController {
 			'name'      => $zone->get_zone_name(),
 			'order'     => $zone->get_zone_order(),
 			'locations' => $this->get_formatted_zone_locations( $zone ),
-			'methods'   => $this->get_formatted_methods_summary( $zone ),
+			'methods'   => $this->get_formatted_zone_methods( $zone ),
 		);
 	}
 
@@ -184,9 +184,8 @@ class Controller extends AbstractController {
 		return array(
 			'id'        => $zone->get_id(),
 			'name'      => $zone->get_zone_name(),
-			'order'     => $zone->get_zone_order(),
-			'locations' => $this->get_formatted_zone_locations( $zone, 'detail' ),
-			'methods'   => $this->get_formatted_methods_summary( $zone ),
+			'locations' => $this->get_formatted_zone_locations( $zone, 'detailed' ),
+			'methods'   => $this->get_formatted_zone_methods( $zone ),
 		);
 	}
 
@@ -205,7 +204,7 @@ class Controller extends AbstractController {
 	 * Get array of location names for display.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
-	 * @param string           $view The view for which the API is requested ('summary' or 'detail').
+	 * @param string           $view The view for which the API is requested ('summary' or 'detailed').
 	 * @return array
 	 */
 	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone, string $view = 'summary' ): array {
@@ -220,7 +219,7 @@ class Controller extends AbstractController {
 			$location_name = $this->get_location_name( $location );
 			if ( 'summary' === $view ) {
 				$location_names[] = $location_name;
-			} else {
+			} else if ( 'detailed' === $view ) {
 				$location->name = $location_name;
 			}
 		}
@@ -261,12 +260,12 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get formatted methods summary for list view.
+	 * Get formatted methods for a zone.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @return array
 	 */
-	protected function get_formatted_methods_summary( $zone ) {
+	protected function get_formatted_zone_methods( $zone ) {
 		$methods           = $zone->get_shipping_methods( false, 'json' );
 		$formatted_methods = array();
 
