@@ -162,6 +162,10 @@ const serverProviders = getSettingWithCoercion<
 );
 
 export const autocompleteSubscription = () => {
+	if ( ! window?.wc?.addressAutocomplete?.providers ) {
+		return;
+	}
+
 	const cartData = select( STORE_KEY ).getCartData();
 	const shippingCountry = cartData?.shippingAddress?.country || '';
 	const billingCountry = cartData?.billingAddress?.country || '';
