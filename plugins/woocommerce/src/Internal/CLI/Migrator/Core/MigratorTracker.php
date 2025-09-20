@@ -235,9 +235,6 @@ class MigratorTracker {
 				'total_time'         => $platform_data['total_time'],
 				'product_types'      => $platform_data['product_types'],
 				'last_migration'     => $platform_data['last_migration'],
-				'avg_products_per_session' => $platform_data['total_sessions'] > 0 
-					? round( $platform_data['total_products'] / $platform_data['total_sessions'] ) 
-					: 0,
 			);
 		}
 
