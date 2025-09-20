@@ -174,8 +174,9 @@ class MigratorTracker {
 	 */
 	private function save_session_data(): void {
 		$analytics = $this->get_stored_analytics();
+		$platform  = $this->current_session['platform'];
 
-		$platform = $this->current_session['platform'];
+		// Initialize platform data if it doesn't exist.
 		if ( ! isset( $analytics['platforms'][ $platform ] ) ) {
 			$analytics['platforms'][ $platform ] = array(
 				'sessions'           => array(),
@@ -188,23 +189,34 @@ class MigratorTracker {
 		}
 
 		$platform_data = &$analytics['platforms'][ $platform ];
-		$platform_data['sessions'][] = $this->current_session;
-		$platform_data['total_products'] += $this->current_session['products_processed'];
-		$platform_data['total_sessions']++;
-		$platform_data['total_time'] += $this->current_session['total_time'];
-		$platform_data['last_migration'] = $this->current_session['completed_at'];
 
-		foreach ( $this->current_session['product_types'] as $type => $count ) {
+		// Safely get session data with defaults.
+		$products_processed = $this->current_session['products_processed'] ?? 0;
+		$total_time         = $this->current_session['total_time'] ?? 0;
+		$completed_at       = $this->current_session['completed_at'] ?? time();
+		$product_types      = $this->current_session['product_types'] ?? array();
+
+		// Update platform aggregates.
+		$platform_data['sessions'][]        = $this->current_session;
+		$platform_data['total_products']   += $products_processed;
+		$platform_data['total_sessions']++;
+		$platform_data['total_time']       += $total_time;
+		$platform_data['last_migration']    = $completed_at;
+
+		// Aggregate product types safely.
+		foreach ( $product_types as $type => $count ) {
 			if ( ! isset( $platform_data['product_types'][ $type ] ) ) {
 				$platform_data['product_types'][ $type ] = 0;
 			}
 			$platform_data['product_types'][ $type ] += $count;
 		}
 
-		$analytics['totals']['products_migrated_in'] += $this->current_session['products_processed'];
+		// Update global totals.
+		$analytics['totals']['products_migrated_in']   += $products_processed;
 		$analytics['totals']['total_sessions']++;
-		$analytics['totals']['total_migration_time'] += $this->current_session['total_time'];
+		$analytics['totals']['total_migration_time']   += $total_time;
 
+		// Keep only last 10 sessions per platform to avoid unlimited growth.
 		if ( count( $platform_data['sessions'] ) > 10 ) {
 			$platform_data['sessions'] = array_slice( $platform_data['sessions'], -10 );
 		}
@@ -220,21 +232,26 @@ class MigratorTracker {
 	public function get_data(): array {
 		$analytics = $this->get_stored_analytics();
 
+		// Safely extract totals with defaults.
+		$totals = $analytics['totals'] ?? array();
+
 		$data = array(
-			'products_migrated_in'    => $analytics['totals']['products_migrated_in'],
-			'total_migration_sessions' => $analytics['totals']['total_sessions'],
-			'total_migration_time'    => $analytics['totals']['total_migration_time'],
-			'platforms_used'          => array_keys( $analytics['platforms'] ),
-			'platform_breakdown'      => array(),
+			'products_migrated_in'     => $totals['products_migrated_in'] ?? 0,
+			'total_migration_sessions' => $totals['total_sessions'] ?? 0,
+			'total_migration_time'     => $totals['total_migration_time'] ?? 0,
+			'platforms_used'           => array_keys( $analytics['platforms'] ?? array() ),
+			'platform_breakdown'       => array(),
 		);
 
-		foreach ( $analytics['platforms'] as $platform => $platform_data ) {
+		// Safely build platform breakdown.
+		$platforms = $analytics['platforms'] ?? array();
+		foreach ( $platforms as $platform => $platform_data ) {
 			$data['platform_breakdown'][ $platform ] = array(
-				'products_migrated'  => $platform_data['total_products'],
-				'sessions_count'     => $platform_data['total_sessions'],
-				'total_time'         => $platform_data['total_time'],
-				'product_types'      => $platform_data['product_types'],
-				'last_migration'     => $platform_data['last_migration'],
+				'products_migrated'  => $platform_data['total_products'] ?? 0,
+				'sessions_count'     => $platform_data['total_sessions'] ?? 0,
+				'total_time'         => $platform_data['total_time'] ?? 0,
+				'product_types'      => $platform_data['product_types'] ?? array(),
+				'last_migration'     => $platform_data['last_migration'] ?? null,
 			);
 		}
 
@@ -249,19 +266,24 @@ class MigratorTracker {
 	 * @return array Error statistics.
 	 */
 	private function get_recent_error_stats(): array {
-		$analytics = $this->get_stored_analytics();
+		$analytics   = $this->get_stored_analytics();
 		$cutoff_time = time() - ( 30 * DAY_IN_SECONDS );
 		
-		$error_types = array();
+		$error_types  = array();
 		$total_errors = 0;
 
-		foreach ( $analytics['platforms'] as $platform_data ) {
-			foreach ( $platform_data['sessions'] as $session ) {
+		$platforms = $analytics['platforms'] ?? array();
+		foreach ( $platforms as $platform_data ) {
+			$sessions = $platform_data['sessions'] ?? array();
+			foreach ( $sessions as $session ) {
+				// Skip sessions older than 30 days.
 				if ( ( $session['completed_at'] ?? 0 ) < $cutoff_time ) {
 					continue;
 				}
 
-				foreach ( $session['errors'] as $error ) {
+				// Process errors from this session.
+				$errors = $session['errors'] ?? array();
+				foreach ( $errors as $error ) {
 					$type = $error['type'] ?? 'unknown';
 					if ( ! isset( $error_types[ $type ] ) ) {
 						$error_types[ $type ] = 0;
