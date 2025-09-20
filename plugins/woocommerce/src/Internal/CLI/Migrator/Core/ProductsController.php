@@ -229,10 +229,22 @@ class ProductsController {
 			try {
 				$batch_data = $fetcher->fetch_batch( $batch_args );
 			} catch ( Exception $e ) {
-				do_action( 'wc_migrator_error_occurred', 'fetch', $e->getMessage(), array(
-					'batch_args' => $batch_args,
-					'platform' => $this->parsed_args['platform'],
-				) );
+				/**
+				 * Fires when an error occurs during migration.
+				 *
+				 * @param string $error_type The type of error (fetch, mapping, import).
+				 * @param string $message    The error message.
+				 * @param array  $context    Additional error context.
+				 */
+				do_action(
+					'wc_migrator_error_occurred',
+					'fetch',
+					$e->getMessage(),
+					array(
+						'batch_args' => $batch_args,
+						'platform'   => $this->parsed_args['platform'],
+					)
+				);
 
 				WP_CLI::warning( "Error fetching batch: {$e->getMessage()}" );
 				break;
@@ -617,10 +629,22 @@ class ProductsController {
 					$source_data_batch[] = is_object( $product_data ) ? (array) $product_data : $product_data;
 				}
 			} catch ( Exception $e ) {
-				do_action( 'wc_migrator_error_occurred', 'mapping', $e->getMessage(), array(
-					'product_data' => $product_data,
-					'platform' => $this->parsed_args['platform'],
-				) );
+				/**
+				 * Fires when an error occurs during migration.
+				 *
+				 * @param string $error_type The type of error (fetch, mapping, import).
+				 * @param string $message    The error message.
+				 * @param array  $context    Additional error context.
+				 */
+				do_action(
+					'wc_migrator_error_occurred',
+					'mapping',
+					$e->getMessage(),
+					array(
+						'product_data' => $product_data,
+						'platform'     => $this->parsed_args['platform'],
+					)
+				);
 
 				WP_CLI::warning( sprintf( 'Error mapping product: %s', $e->getMessage() ) );
 				continue;
@@ -634,6 +658,13 @@ class ProductsController {
 				$batch_results = $this->product_importer->import_batch( $mapped_products, $source_data_batch );
 			}
 
+			/**
+			 * Fires when a batch has been processed during migration.
+			 *
+			 * @param array $batch_results   Results from the batch import.
+			 * @param array $source_data     Source platform data for the batch.
+			 * @param array $mapped_products Mapped WooCommerce data for the batch.
+			 */
 			do_action( 'wc_migrator_batch_processed', $batch_results, $source_data_batch, $mapped_products );
 
 			$this->log_batch_results( $batch_results );
