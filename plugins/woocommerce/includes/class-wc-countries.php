@@ -651,6 +651,7 @@ class WC_Countries {
 
 		// Handle full state name.
 		$full_state = ( $country && $state && isset( $this->states[ $country ][ $state ] ) ) ? $this->states[ $country ][ $state ] : $state;
+		$full_state = html_entity_decode( $full_state, ENT_QUOTES, 'UTF-8' );
 
 		// Substitute address parts into the string.
 		$replace = array_map(
