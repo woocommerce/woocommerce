@@ -183,7 +183,6 @@ class MigratorTracker {
 	public function get_data(): array {
 		$analytics = $this->get_stored_analytics();
 
-		// Safely extract totals with defaults.
 		$totals = $analytics['totals'] ?? array();
 
 		$data = array(
@@ -194,7 +193,6 @@ class MigratorTracker {
 			'platform_breakdown'       => array(),
 		);
 
-		// Safely build platform breakdown.
 		$platforms = $analytics['platforms'] ?? array();
 		foreach ( $platforms as $platform => $platform_data ) {
 			$data['platform_breakdown'][ $platform ] = array(
