@@ -216,11 +216,6 @@ class MigratorTracker {
 		$analytics['totals']['total_sessions']++;
 		$analytics['totals']['total_migration_time']   += $total_time;
 
-		// Keep only last 10 sessions per platform to avoid unlimited growth.
-		if ( count( $platform_data['sessions'] ) > 10 ) {
-			$platform_data['sessions'] = array_slice( $platform_data['sessions'], -10 );
-		}
-
 		$this->save_analytics( $analytics );
 	}
 
