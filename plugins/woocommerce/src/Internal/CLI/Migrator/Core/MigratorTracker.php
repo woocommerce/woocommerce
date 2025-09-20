@@ -57,13 +57,13 @@ class MigratorTracker {
 	 */
 	public function on_session_started( string $platform, array $metadata ): void {
 		$this->current_session = array(
-			'platform'        => $platform,
-			'started_at'      => time(),
-			'products_total'  => 0,
+			'platform'           => $platform,
+			'started_at'         => time(),
+			'products_total'     => 0,
 			'products_processed' => 0,
-			'product_types'   => array(),
-			'total_time'      => 0,
-			'session_id'      => $metadata['session_id'] ?? uniqid(),
+			'product_types'      => array(),
+			'total_time'         => 0,
+			'session_id'         => $metadata['session_id'] ?? uniqid(),
 		);
 	}
 
