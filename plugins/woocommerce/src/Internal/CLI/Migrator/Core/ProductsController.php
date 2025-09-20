@@ -127,11 +127,21 @@ class ProductsController {
 				return;
 			}
 
-			do_action( 'wc_migrator_session_started', $this->parsed_args['platform'], array(
-				'session_id' => $this->session->get_id(),
-				'filters'    => $this->parsed_args['filters'],
-				'fields'     => $this->fields_to_process,
-			) );
+			/**
+			 * Fires when a migration session starts.
+			 *
+			 * @param string $platform The platform being migrated from.
+			 * @param array  $metadata Session metadata including session_id, filters, and fields.
+			 */
+			do_action(
+				'wc_migrator_session_started',
+				$this->parsed_args['platform'],
+				array(
+					'session_id' => $this->session->get_id(),
+					'filters'    => $this->parsed_args['filters'],
+					'fields'     => $this->fields_to_process,
+				)
+			);
 		}
 		$fetcher = $this->platform_registry->get_fetcher( $this->parsed_args['platform'] );
 		$mapper  = $this->platform_registry->get_mapper( $this->parsed_args['platform'], array( 'fields' => $this->fields_to_process ) );
@@ -167,9 +177,15 @@ class ProductsController {
 
 		if ( ! $this->parsed_args['dry_run'] ) {
 			$final_stats = array(
-				'total_found' => $total_count,
+				'total_found'    => $total_count,
 				'total_imported' => $this->session->count_all_imported_entities(),
 			);
+			/**
+			 * Fires when a migration session completes.
+			 *
+			 * @param string $platform    The platform being migrated from.
+			 * @param array  $final_stats Final migration statistics.
+			 */
 			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
 		}
 
