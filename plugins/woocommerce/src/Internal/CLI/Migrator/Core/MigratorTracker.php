@@ -47,7 +47,6 @@ class MigratorTracker {
 		add_action( 'wc_migrator_session_started', array( $this, 'on_session_started' ), 10, 2 );
 		add_action( 'wc_migrator_batch_processed', array( $this, 'on_batch_processed' ), 10, 3 );
 		add_action( 'wc_migrator_session_completed', array( $this, 'on_session_completed' ), 10, 2 );
-		add_action( 'wc_migrator_error_occurred', array( $this, 'on_error_occurred' ), 10, 3 );
 	}
 
 	/**
@@ -63,7 +62,6 @@ class MigratorTracker {
 			'products_total'  => 0,
 			'products_processed' => 0,
 			'product_types'   => array(),
-			'errors'          => array(),
 			'total_time'      => 0,
 			'session_id'      => $metadata['session_id'] ?? uniqid(),
 		);
@@ -84,10 +82,6 @@ class MigratorTracker {
 		$this->current_session['products_processed'] += $batch_results['stats']['successful'] ?? 0;
 
 		$this->track_product_types( $mapped_data );
-
-		if ( ! empty( $batch_results['results'] ) ) {
-			$this->track_batch_errors( $batch_results['results'] );
-		}
 	}
 
 	/**
@@ -112,25 +106,6 @@ class MigratorTracker {
 		$this->current_session = array();
 	}
 
-	/**
-	 * Handle error occurrence during migration.
-	 *
-	 * @param string $error_type  Type of error (e.g., 'fetch', 'import', 'mapping').
-	 * @param string $message     Error message.
-	 * @param array  $context     Additional error context.
-	 */
-	public function on_error_occurred( string $error_type, string $message, array $context ): void {
-		if ( empty( $this->current_session ) ) {
-			return;
-		}
-
-		$this->current_session['errors'][] = array(
-			'type'      => $error_type,
-			'message'   => $message,
-			'timestamp' => time(),
-			'context'   => $context,
-		);
-	}
 
 	/**
 	 * Track product types from mapped data.
@@ -149,25 +124,6 @@ class MigratorTracker {
 		}
 	}
 
-	/**
-	 * Track errors from batch results.
-	 *
-	 * @param array $batch_results Individual result entries from batch import.
-	 */
-	private function track_batch_errors( array $batch_results ): void {
-		foreach ( $batch_results as $result ) {
-			if ( 'error' === ( $result['status'] ?? '' ) ) {
-				$this->current_session['errors'][] = array(
-					'type'      => 'import',
-					'message'   => $result['message'] ?? 'Unknown import error',
-					'timestamp' => time(),
-					'context'   => array(
-						'product_data' => $result['product_data'] ?? array(),
-					),
-				);
-			}
-		}
-	}
 
 	/**
 	 * Save current session data to persistent storage.
@@ -250,49 +206,7 @@ class MigratorTracker {
 			);
 		}
 
-		$data['recent_errors'] = $this->get_recent_error_stats();
-
 		return $data;
-	}
-
-	/**
-	 * Get error statistics for recent migrations.
-	 *
-	 * @return array Error statistics.
-	 */
-	private function get_recent_error_stats(): array {
-		$analytics   = $this->get_stored_analytics();
-		$cutoff_time = time() - ( 30 * DAY_IN_SECONDS );
-		
-		$error_types  = array();
-		$total_errors = 0;
-
-		$platforms = $analytics['platforms'] ?? array();
-		foreach ( $platforms as $platform_data ) {
-			$sessions = $platform_data['sessions'] ?? array();
-			foreach ( $sessions as $session ) {
-				// Skip sessions older than 30 days.
-				if ( ( $session['completed_at'] ?? 0 ) < $cutoff_time ) {
-					continue;
-				}
-
-				// Process errors from this session.
-				$errors = $session['errors'] ?? array();
-				foreach ( $errors as $error ) {
-					$type = $error['type'] ?? 'unknown';
-					if ( ! isset( $error_types[ $type ] ) ) {
-						$error_types[ $type ] = 0;
-					}
-					$error_types[ $type ]++;
-					$total_errors++;
-				}
-			}
-		}
-
-		return array(
-			'total_errors'  => $total_errors,
-			'error_types'   => $error_types,
-		);
 	}
 
 	/**
