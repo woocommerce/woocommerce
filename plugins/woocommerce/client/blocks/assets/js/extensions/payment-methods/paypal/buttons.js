@@ -5,6 +5,7 @@ import { useState } from '@wordpress/element';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { getPaymentMethodData } from '@woocommerce/settings';
 import { dispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * PayPalButtonsContainer component.
@@ -50,43 +51,35 @@ const PayPalButtonsContainer = ( {
 		let responseData;
 		try {
 			// Create a draft order in WooCommerce.
-			const response = await fetch(
-				payPalData.rest_url + 'wc/store/v1/checkout',
-				{
-					headers: {
-						'Content-Type': 'application/json',
-						Nonce: payPalData.wc_store_api_nonce,
-					},
-				}
-			);
-			responseData = await response.json();
-		} catch ( error ) {
-			console.error( 'Failed to create WooCommerce order', error );
-			return null;
-		}
+			responseData = await apiFetch( {
+				method: 'GET',
+				path: '/wc/store/v1/checkout',
+				headers: {
+					Nonce: payPalData.wc_store_api_nonce,
+				},
+			} );
 
-		try {
+			if ( ! responseData.order_id ) {
+				return null;
+			}
+
 			// Create a PayPal order.
-			const paypalResponse = await fetch(
-				payPalData.rest_url + 'wc/v3/paypal-buttons/create-order',
-				{
-					method: 'POST',
-					body: JSON.stringify( {
-						order_id: responseData.order_id,
-					} ),
-					headers: {
-						'Content-Type': 'application/json',
-						Nonce: payPalData.nonce,
-					},
-				}
-			);
-			const paypalResponseData = await paypalResponse.json();
+			const paypalResponseData = await apiFetch( {
+				method: 'POST',
+				path: '/wc/v3/paypal-buttons/create-order',
+				headers: {
+					Nonce: payPalData.nonce,
+				},
+				data: {
+					order_id: responseData.order_id,
+				},
+			} );
 
 			setOrderReceivedURL( paypalResponseData.return_url );
 
 			return paypalResponseData.paypal_order_id;
 		} catch ( error ) {
-			console.error( 'Failed to create PayPal order', error );
+			console.error( 'Failed to create order', error );
 			return null;
 		}
 	};
