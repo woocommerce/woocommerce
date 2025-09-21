@@ -13,37 +13,35 @@ jQuery(function ($) {
 				let responseData;
 				try {
 					// Create a draft order in WooCommerce.
-					const response = await fetch( paypal_standard.rest_url + 'wc/store/v1/checkout', {
+					responseData = await window.wp.apiFetch( {
+						method: 'GET',
+						path: '/wc/store/v1/checkout',
 						headers: {
-							'Content-Type': 'application/json',
-							'Nonce': paypal_standard.wc_store_api_nonce,
-						},
-						} );
-					responseData = await response.json();
-				} catch ( error ) {
-					console.error( 'Failed to create WooCommerce order', error );
-					return null;
-				}
-
-				try {
-					// Create a PayPal order.
-					const paypalResponse = await fetch( paypal_standard.rest_url + 'wc/v3/paypal-buttons/create-order', {
-						method: 'POST',
-						body: JSON.stringify( {
-							order_id: responseData.order_id,
-						} ),
-						headers: {
-							'Content-Type': 'application/json',
-							'Nonce': paypal_standard.nonce,
+							Nonce: paypal_standard.wc_store_api_nonce,
 						},
 					} );
-					const paypalResponseData = await paypalResponse.json();
 
+					if ( ! responseData.order_id ) {
+						return null;
+					}
+
+					// Create a PayPal order.
+					const paypalResponseData = await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/v3/paypal-buttons/create-order',
+						headers: {
+							Nonce: paypal_standard.nonce,
+						},
+						data: {
+							order_id: responseData.order_id,
+						},
+					} );
+		
 					orderReceivedUrl = paypalResponseData.return_url;
 
 					return paypalResponseData.paypal_order_id;
 				} catch ( error ) {
-					console.error( 'Failed to create PayPal order', error );
+					console.error( 'Failed to create order', error );
 					return null;
 				}
 			},
