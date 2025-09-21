@@ -68,7 +68,7 @@ const PayPalButtonsContainer = ( {
 				method: 'POST',
 				path: '/wc/v3/paypal-buttons/create-order',
 				headers: {
-					Nonce: payPalData.nonce,
+					Nonce: payPalData.create_order_nonce,
 				},
 				data: {
 					order_id: responseData.order_id,

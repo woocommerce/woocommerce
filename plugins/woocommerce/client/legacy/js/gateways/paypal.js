@@ -30,7 +30,7 @@ jQuery(function ($) {
 						method: 'POST',
 						path: '/wc/v3/paypal-buttons/create-order',
 						headers: {
-							Nonce: paypal_standard.nonce,
+							Nonce: paypal_standard.create_order_nonce,
 						},
 						data: {
 							order_id: responseData.order_id,

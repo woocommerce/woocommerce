@@ -707,8 +707,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			array(
 				'gateway_id'         => $this->id,
 				'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
-				'rest_url'           => rest_url(),
-				'nonce'              => wp_create_nonce( 'wp_rest' ),
+				'create_order_nonce' => wp_create_nonce( 'create_order' ),
 			)
 		);
 
