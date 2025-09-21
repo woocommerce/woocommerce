@@ -1840,21 +1840,50 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
 		}
 
-		if ( Features::is_enabled( 'experimental-wc-rest-api' ) ) {
-			$schema['properties']['__experimental_min_price'] = array(
-				'description' => __( 'Product minimum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
+		// New properties added for v4.
 
-			$schema['properties']['__experimental_max_price'] = array(
-				'description' => __( 'Product maximum price.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-			);
-		}
+		$schema['properties']['min_price'] = array(
+			'description' => __( 'Product minimum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
 
-		return $this->add_additional_fields_schema( $schema );
+		$schema['properties']['max_price'] = array(
+			'description' => __( 'Product maximum price.', 'woocommerce' ),
+			'type'        => 'string',
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['add_to_cart'] = array(
+			'description' => __( 'Add to cart details.', 'woocommerce' ),
+			'type'        => 'object',
+			'context'     => array( 'view', 'edit' ),
+			'properties'  => array(
+				'url'         => array(
+					'description' => __( 'Add to cart URL.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'description' => array(
+					'description' => __( 'Add to cart description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'text'        => array(
+					'description' => __( 'Add to cart text.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'single_text' => array(
+					'description' => __( 'Add to cart single text.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+			),
+			'readonly'    => true,
+		);
+
+			return $this->add_additional_fields_schema( $schema );
 	}
 
 	/**
@@ -2065,12 +2094,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				$data['global_unique_id'] = $product->get_global_unique_id( $context );
 			}
 
-			if ( in_array( '__experimental_min_price', $fields, true ) ) {
-				$data['__experimental_min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
+			if ( in_array( 'min_price', $fields, true ) ) {
+				$data['min_price'] = method_exists( $product, 'get_min_price' ) ? $product->get_min_price() : '';
 			}
 
-			if ( in_array( '__experimental_max_price', $fields, true ) ) {
-				$data['__experimental_max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
+			if ( in_array( 'max_price', $fields, true ) ) {
+				$data['max_price'] = method_exists( $product, 'get_max_price' ) ? $product->get_max_price() : '';
 			}
 
 			$post_type_obj = get_post_type_object( $this->post_type );
@@ -2149,6 +2178,12 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
+		$data['add_to_cart'] = array(
+			'url'         => $object_data->add_to_cart_url(),
+			'description' => $object_data->add_to_cart_description(),
+			'text'        => $object_data->add_to_cart_text(),
+			'single_text' => $object_data->single_add_to_cart_text(),
+		);
 		return $data;
 	}
 

@@ -19,6 +19,24 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * @todo Finish up unit testing to verify bug-free product reports.
  */
 class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
+	/**
+	 * Setup test case.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Force new logic of full refund in analytics/products.
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+	}
+
+	/**
+	 * Tear down test case.
+	 */
+	public function tearDown(): void {
+		// Clean in case any test changes options.
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		parent::tearDown();
+	}
 
 	/**
 	 * Test the calculations and querying works correctly for the base case of 1 product.
@@ -796,12 +814,12 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( '-2', $result[0]->product_qty );
-		$this->assertEquals( -60.000000, $result[0]->product_net_revenue );    // -($30 product_2 * 2).
-		$this->assertEquals( -33.333333, $result[0]->shipping_amount );        // -($100 shipping / 6 total items * 2 product_2 ).
-		$this->assertEquals( -3.333333, $result[0]->shipping_tax_amount );     // -($10 shipping tax / 6 total items * 2 product_2 ).
-		$this->assertEquals( -6, $result[0]->tax_amount );                     // -($30 product_2 * 10% tax * 2 quantity).
+		$this->assertEqualsWithDelta( -60.000000, $result[0]->product_net_revenue, 0.000001 );    // -($30 product_2 * 2).
+		$this->assertEqualsWithDelta( -33.333333, $result[0]->shipping_amount, 0.000001 );        // -($100 shipping / 6 total items * 2 product_2 ).
+		$this->assertEqualsWithDelta( -3.333333, $result[0]->shipping_tax_amount, 0.000001 );     // -($10 shipping tax / 6 total items * 2 product_2 ).
+		$this->assertEqualsWithDelta( -6, $result[0]->tax_amount, 0.000001 );                     // -($30 product_2 * 10% tax * 2 quantity).
 		$this->assertEquals( 0, $result[0]->coupon_amount );
-		$this->assertEquals( -102.666667, $result[0]->product_gross_revenue ); // product_net_revenue + shipping_amount + shipping_tax_amount + tax_amount.
+		$this->assertEqualsWithDelta( -102.666667, $result[0]->product_gross_revenue, 0.000001 ); // product_net_revenue + shipping_amount + shipping_tax_amount + tax_amount.
 	}
 
 	/**
@@ -1063,20 +1081,20 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( '-2', $result[0]->product_qty );
-		$this->assertEquals( -60.000000, $result[0]->product_net_revenue ); // -($30 product_2 * 2).
-		$this->assertEquals( -33.333333, $result[0]->shipping_amount );     // -($100 shipping / 6 total items * 2 product_2 ).
+		$this->assertEqualsWithDelta( -60.000000, $result[0]->product_net_revenue, 0.000001 ); // -($30 product_2 * 2).
+		$this->assertEqualsWithDelta( -33.333333, $result[0]->shipping_amount, 0.000001 );     // -($100 shipping / 6 total items * 2 product_2 ).
 
 		// 10% tax: $100 shipping * 0.1 = $10.
 		// 5% compound tax: $100 shipping * 1.1 * 0.05 = $5.5.
 		// -($10 + $5.5) / 6 total items * 2 product_2 = -$5.166667.
-		$this->assertEquals( -5.166667, $result[0]->shipping_tax_amount );
+		$this->assertEqualsWithDelta( -5.166667, $result[0]->shipping_tax_amount, 0.000001 );
 
 		// 10% tax: $30 product_2 * 0.1 = $3.
 		// 5% compound tax: $30 product_2 * 1.1 * 0.05 = $1.65.
 		// -($3 + $1.65) * 2 quantity = -$9.3.
-		$this->assertEquals( -9.3, $result[0]->tax_amount );
+		$this->assertEqualsWithDelta( -9.3, $result[0]->tax_amount, 0.000001 );
 
 		$this->assertEquals( 0, $result[0]->coupon_amount );
-		$this->assertEquals( -107.8, $result[0]->product_gross_revenue ); // product_net_revenue + shipping_amount + shipping_tax_amount + tax_amount.
+		$this->assertEqualsWithDelta( -107.8, $result[0]->product_gross_revenue, 0.000001 ); // product_net_revenue + shipping_amount + shipping_tax_amount + tax_amount.
 	}
 }

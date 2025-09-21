@@ -56,7 +56,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_checkout_order_approved( $event ) {
-		$custom_id = $event['resource']['purchase_units'][0]['custom_id'];
+		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -64,7 +64,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -72,7 +72,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
-			$order->update_meta_data( '_paypal_status', strtolower( $status ) );
+			$order->update_meta_data( '_paypal_status', $status );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID */
@@ -83,8 +83,10 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			$order->save();
 
 			// Authorize or capture the payment after approval.
-			$action = 'CAPTURE' === $event['resource']['intent'] ? 'capture' : 'authorize';
-			$this->authorize_or_capture_payment( $order, $event['resource']['links'], $action );
+			$paypal_intent = $event['resource']['intent'] ?? null;
+			$links         = $event['resource']['links'] ?? null;
+			$action        = WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $paypal_intent ? WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
+			$this->authorize_or_capture_payment( $order, $links, $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
 			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
@@ -105,7 +107,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_payment_capture_completed( $event ) {
-		$custom_id = $event['resource']['custom_id'];
+		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -113,18 +115,20 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
-		$order->set_transaction_id( $event['resource']['id'] );
-		$order->update_meta_data( '_paypal_status', strtolower( $event['resource']['status'] ) );
+		$transaction_id = $event['resource']['id'] ?? null;
+		$status         = $event['resource']['status'] ?? null;
+		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_status', $status );
 		$order->payment_complete();
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment captured. Transaction ID: %1$s.', 'woocommerce' ),
-				$event['resource']['id']
+				$transaction_id
 			)
 		);
 		$order->save();
@@ -136,7 +140,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @param array $event The webhook event data.
 	 */
 	private function process_payment_authorization_created( $event ) {
-		$custom_id = $event['resource']['custom_id'];
+		$custom_id = $event['resource']['custom_id'] ?? '';
 		$order     = $this->get_wc_order( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
@@ -144,16 +148,17 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( 'completed' === $order->get_meta( '_paypal_status', true ) ) {
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
-		$order->set_transaction_id( $event['resource']['id'] );
+		$transaction_id = $event['resource']['id'] ?? null;
+		$order->set_transaction_id( $transaction_id );
 		$order->add_order_note(
 			sprintf(
 				/* translators: %1$s: Transaction ID */
 				__( 'PayPal payment authorized. Transaction ID: %1$s. Change payment status to processing or complete to capture funds.', 'woocommerce' ),
-				$event['resource']['id']
+				$transaction_id
 			)
 		);
 		$order->update_status( OrderStatus::ON_HOLD );
@@ -200,13 +205,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 * @return void
 	 */
 	private function authorize_or_capture_payment( $order, $links, $action ) {
-		$action_url = null;
-		foreach ( $links as $link ) {
-			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
-				$action_url = esc_url_raw( $link['href'] );
-				break;
-			}
-		}
+		$action_url = $this->get_action_url( $links, $action );
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 		if ( ! isset( $payment_gateways['paypal'] ) ) {
@@ -216,5 +215,23 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$gateway        = $payment_gateways['paypal'];
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
 		$paypal_request->authorize_or_capture_payment( $order, $action_url, $action );
+	}
+
+	/**
+	 * Get the action URL from the links.
+	 *
+	 * @param array  $links The links from the webhook event.
+	 * @param string $action The action to perform (capture or authorize).
+	 * @return string|null
+	 */
+	private function get_action_url( $links, $action ) {
+		$action_url = null;
+		foreach ( $links as $link ) {
+			if ( $action === $link['rel'] && 'POST' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
+				$action_url = esc_url_raw( $link['href'] );
+				break;
+			}
+		}
+		return $action_url;
 	}
 }
