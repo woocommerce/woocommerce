@@ -130,8 +130,8 @@ class WooCommerceRestTransport extends RestTransport {
 		// Check if user data was found.
 		if ( empty( $user_data ) ) {
 			return new \WP_Error(
-				'invalid_consumer_key',
-				'Consumer key is invalid.',
+				'authentication_failed',
+				__( 'Authentication failed.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -139,8 +139,8 @@ class WooCommerceRestTransport extends RestTransport {
 		// Validate consumer secret using hash_equals for timing attack protection.
 		if ( ! hash_equals( $user_data->consumer_secret, trim( (string) $consumer_secret ) ) ) {
 			return new \WP_Error(
-				'invalid_consumer_secret',
-				__( 'Invalid credentials.', 'woocommerce' ),
+				'authentication_failed',
+				__( 'Authentication failed.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
