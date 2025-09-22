@@ -1,8 +1,11 @@
 /**
  * External dependencies
  */
+import { useState } from '@wordpress/element';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import { getPaymentMethodData } from '@woocommerce/settings';
 import { dispatch } from '@wordpress/data';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * PayPalButtonsContainer component.
@@ -30,6 +33,8 @@ const PayPalButtonsContainer = ( {
 	partnerAttributionId,
 	pageType,
 } ) => {
+	const [ orderReceivedUrl, setOrderReceivedURL ] = useState();
+	const payPalData = getPaymentMethodData( 'paypal', {} );
 	const options = {
 		clientId: clientId || '',
 		components: components || '',
@@ -43,6 +48,45 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const createOrder = async () => {
+		let responseData;
+		try {
+			// Create a draft order in WooCommerce.
+			responseData = await apiFetch( {
+				method: 'GET',
+				path: '/wc/store/v1/checkout',
+				headers: {
+					Nonce: payPalData.wc_store_api_nonce,
+				},
+			} );
+
+			if ( ! responseData.order_id ) {
+				return null;
+			}
+
+			// Create a PayPal order.
+			const paypalResponseData = await apiFetch( {
+				method: 'POST',
+				path: '/wc/v3/paypal-buttons/create-order',
+				headers: {
+					Nonce: payPalData.create_order_nonce,
+				},
+				data: {
+					order_id: responseData.order_id,
+				},
+			} );
+
+			setOrderReceivedURL( paypalResponseData.return_url );
+
+			return paypalResponseData.paypal_order_id;
+		} catch ( error ) {
+			return null;
+		}
+	};
+
+	const onApprove = ( data ) => {
+		if ( data.paymentID && orderReceivedUrl ) {
+			window.location.href = orderReceivedUrl;
+		}
 		return null;
 	};
 
@@ -57,7 +101,11 @@ const PayPalButtonsContainer = ( {
 
 	return (
 		<PayPalScriptProvider options={ options }>
-			<PayPalButtons createOrder={ createOrder } onError={ onError } />
+			<PayPalButtons
+				createOrder={ createOrder }
+				onApprove={ onApprove }
+				onError={ onError }
+			/>
 		</PayPalScriptProvider>
 	);
 };
