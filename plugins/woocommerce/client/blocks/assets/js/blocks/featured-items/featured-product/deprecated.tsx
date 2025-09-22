@@ -37,24 +37,8 @@ const v1 = {
 	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
 		const { showDesc, showPrice, ...otherAttributes } = attributes;
 
-		innerBlocks.unshift(
-			createBlock( 'core/post-title', {
-				level: 2,
-				isLink: false,
-				textAlign: 'center',
-				__woocommerceNamespace:
-					'woocommerce/product-collection/product-title',
-			} )
-		);
-
-		// We check if these legacy attributes are explicitly set to false, because
-		// the default value is true (i.e. `undefined` meant `true`).
-		if ( showPrice !== false ) {
-			innerBlocks.push( createBlock( 'woocommerce/product-price' ) );
-		}
-
 		if ( showDesc !== false ) {
-			innerBlocks.push(
+			innerBlocks.unshift(
 				createBlock( 'woocommerce/product-summary', {
 					showDescriptionIfEmpty: true,
 					summaryLength: 80,
@@ -66,6 +50,26 @@ const v1 = {
 				} )
 			);
 		}
+
+		// We check if these legacy attributes are explicitly set to false, because
+		// the default value is true (i.e. `undefined` meant `true`).
+		if ( showPrice !== false ) {
+			innerBlocks.unshift(
+				createBlock( 'woocommerce/product-price', {
+					textAlign: 'center',
+				} )
+			);
+		}
+
+		innerBlocks.unshift(
+			createBlock( 'core/post-title', {
+				level: 2,
+				isLink: false,
+				textAlign: 'center',
+				__woocommerceNamespace:
+					'woocommerce/product-collection/product-title',
+			} )
+		);
 
 		return [
 			{
