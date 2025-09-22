@@ -42,6 +42,8 @@ WooCommerce's MCP integration provides AI assistants with structured access to c
 
 All operations respect WooCommerce's existing permission system and are authenticated using WooCommerce REST API keys.
 
+**Data Privacy Notice**: Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Use least-privilege API scopes, rotate and revoke REST API keys regularly, and follow your organization's data retention and handling policies.
+
 ## Architecture
 
 The MCP integration follows this data flow:
@@ -101,7 +103,7 @@ add_filter( 'woocommerce_features', function( $features ) {
 
 MCP clients authenticate using WooCommerce REST API keys in the `X-MCP-API-Key` header:
 
-```
+```http
 X-MCP-API-Key: ck_your_consumer_key:cs_your_consumer_secret
 ```
 
