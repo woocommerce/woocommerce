@@ -51,9 +51,8 @@ const AddressLineFields = ( {
 		}
 	);
 
-	const Address1Component = serverProviders.length
-		? AddressAutocomplete
-		: ValidatedTextInput;
+	const Address1Component =
+		serverProviders.length > 0 ? AddressAutocomplete : ValidatedTextInput;
 
 	return (
 		<>
