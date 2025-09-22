@@ -205,6 +205,42 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 				};
 			}
 			break;
+		case types.ADD_ADDRESS_AUTOCOMPLETE_PROVIDER:
+			if (
+				typeof action.providerId === 'string' &&
+				! state.addressAutocompleteProviders?.includes(
+					action.providerId
+				)
+			) {
+				newState = {
+					...state,
+					addressAutocompleteProviders: [
+						...( state.addressAutocompleteProviders || [] ),
+						action.providerId,
+					],
+				};
+			}
+			break;
+
+		case types.SET_ACTIVE_ADDRESS_AUTOCOMPLETE_PROVIDER:
+			if (
+				typeof action.providerId === 'string' &&
+				( action.addressType === 'billing' ||
+					action.addressType === 'shipping' ) &&
+				action.providerId !==
+					state.activeAddressAutocompleteProvider?.[
+						action.addressType as 'shipping' | 'billing'
+					]
+			) {
+				newState = {
+					...state,
+					activeAddressAutocompleteProvider: {
+						...state.activeAddressAutocompleteProvider,
+						[ action.addressType ]: action.providerId,
+					},
+				};
+			}
+			break;
 	}
 	return newState;
 };
