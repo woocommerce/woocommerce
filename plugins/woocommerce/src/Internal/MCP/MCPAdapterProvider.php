@@ -169,7 +169,7 @@ class MCPAdapterProvider {
 	 *
 	 * @return bool Always returns false to disable validation.
 	 */
-	private static function disable_mcp_validation(): bool {
+	public static function disable_mcp_validation(): bool {
 		return false;
 	}
 
