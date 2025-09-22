@@ -62,8 +62,8 @@ class RestAbilityFactory {
 					'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
 						return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
 					},
-					'permission_callback' => function ( $input ) use ( $controller, $ability_config ) {
-						return self::check_permission( $controller, $ability_config['operation'], $input );
+					'permission_callback' => function () use ( $controller, $ability_config ) {
+						return self::check_permission( $controller, $ability_config['operation'] );
 					},
 					'ability_class'       => RestAbility::class,
 				)
@@ -196,7 +196,7 @@ class RestAbilityFactory {
 			}
 
 			// Collect required fields.
-			if ( isset( $arg['required'] ) && $arg['required'] === true ) {
+			if ( isset( $arg['required'] ) && true === $arg['required'] ) {
 				$required[] = $key;
 			}
 
@@ -243,7 +243,7 @@ class RestAbilityFactory {
 				return array(
 					'type'       => 'object',
 					'properties' => array(
-						'deleted' => array( 'type' => 'boolean' ),
+						'deleted'  => array( 'type' => 'boolean' ),
 						'previous' => $schema,
 					),
 				);
@@ -320,16 +320,16 @@ class RestAbilityFactory {
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param string $operation Operation type.
-	 * @param array  $input Input parameters.
 	 * @return bool Whether permission is granted.
 	 */
-	private static function check_permission( $controller, string $operation, array $input ): bool {
+	private static function check_permission( $controller, string $operation ): bool {
 		// Get HTTP method for the operation.
 		$method = self::get_http_method_for_operation( $operation );
 
 		/**
 		 * Filter to check REST ability permissions for HTTP method.
 		 *
+		 * @since 10.3.0
 		 * @param bool   $allowed    Whether the operation is allowed. Default false.
 		 * @param string $method     HTTP method (GET, POST, PUT, DELETE).
 		 * @param object $controller REST controller instance.

@@ -58,6 +58,7 @@ class WooCommerceRestTransport extends RestTransport {
 	 */
 	public function validate_request( \WP_REST_Request $request ) {
 		// Require TLS by default; allow explicit opt-in for non-SSL (e.g., local dev).
+		/** This filter is documented in the validate_request method. */
 		if ( ! is_ssl() && ! apply_filters( 'woocommerce_mcp_allow_insecure_transport', false, $request ) ) {
 			return new \WP_Error(
 				'insecure_transport',
