@@ -350,7 +350,7 @@ test.describe( 'Shopper → Shipping and Billing Addresses', () => {
 	test.beforeEach( async ( { admin, editor, page } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
@@ -656,7 +656,7 @@ test.describe( 'Billing Address Form', () => {
 	test( 'Enable company field', async ( { page, admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

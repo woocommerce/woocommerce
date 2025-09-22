@@ -19,7 +19,7 @@ test.describe( 'Legacy templates', () => {
 		await test.step( 'Customize existing template to create DB entry', async () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce/woocommerce//${ template.id }`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 
@@ -56,7 +56,7 @@ test.describe( 'Legacy templates', () => {
 		await test.step( 'Verify the template can be edited via a legacy ID ', async () => {
 			await admin.visitSiteEditor( {
 				postId: `woocommerce//${ template.id }`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 

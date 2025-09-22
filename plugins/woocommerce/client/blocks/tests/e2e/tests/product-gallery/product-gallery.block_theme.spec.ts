@@ -75,8 +75,8 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 
 		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
+			postId: template.wp_id,
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

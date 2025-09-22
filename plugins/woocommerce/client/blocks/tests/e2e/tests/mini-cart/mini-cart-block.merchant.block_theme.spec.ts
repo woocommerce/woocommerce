@@ -26,7 +26,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 		test( 'can be inserted in FSE area', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_SLUG }//single-product`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 
@@ -41,7 +41,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 		test( 'can only be inserted once', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_SLUG }//single-product`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 			await editor.openGlobalBlockInserter();

@@ -335,7 +335,7 @@ class ProductCollectionPage {
 	) {
 		await this.admin.visitSiteEditor( {
 			postId: template,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await this.refreshLocators( 'editor' );
@@ -368,7 +368,7 @@ class ProductCollectionPage {
 	) {
 		await this.admin.visitSiteEditor( {
 			postId: template,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await this.editor.setContent( '' );

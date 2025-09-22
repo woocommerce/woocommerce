@@ -15,7 +15,7 @@ test.describe( 'Single Product template', () => {
 			permalink: '/product/belt',
 			templateName: 'Product: Belt',
 			templatePath: 'single-product-belt',
-			templateType: 'wp_template',
+			templateType: 'wp_registered_template',
 		};
 		const userText = 'Hello World in the Belt template';
 

@@ -112,7 +112,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			// Add to Cart with Options block is the default.
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//single-product',
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 			await editor.insertBlock( {

@@ -94,7 +94,7 @@ test.describe( `${ blockData.name }`, () => {
 		test.beforeEach( async ( { admin, editor } ) => {
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_SLUG }//${ blockData.slug }`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 			await editor.setContent( '' );

@@ -23,7 +23,7 @@ const insertInSingleProductTemplate = async (
 ) => {
 	await admin.visitSiteEditor( {
 		postId: `${ BLOCK_THEME_SLUG }//single-product`,
-		postType: 'wp_template',
+		postType: 'wp_registered_template',
 		canvas: 'edit',
 	} );
 	await editor.setContent( '' );
@@ -78,7 +78,7 @@ test.describe( 'registerProductBlockType registers', () => {
 			// Visit site editor with a non-product template
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_SLUG }//coming-soon`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 
@@ -137,7 +137,7 @@ test.describe( 'registerProductBlockType registers', () => {
 		];
 
 		await admin.visitAdminPage(
-			'site-editor.php?postType=wp_template&activeView=WooCommerce'
+			'site-editor.php?p=%2Ftemplate&activeView=WooCommerce'
 		);
 
 		const singleProductTemplate =

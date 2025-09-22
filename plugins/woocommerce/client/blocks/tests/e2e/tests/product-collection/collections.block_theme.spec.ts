@@ -153,7 +153,7 @@ test.describe( 'Product Collection: Collections', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

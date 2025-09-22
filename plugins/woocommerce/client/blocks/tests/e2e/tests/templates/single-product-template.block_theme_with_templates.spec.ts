@@ -11,7 +11,9 @@ const testData = {
 	permalink: '/product/belt',
 	templateName: 'Single Product Belt',
 	templatePath: 'single-product-belt',
-	templateType: 'wp_template' as 'wp_template' | 'wp_template_part',
+	templateType: 'wp_registered_template' as
+		| 'wp_registered_template'
+		| 'wp_template_part',
 };
 
 const userText = 'Hello World in the Belt template';

@@ -15,7 +15,7 @@ class TemplatesPage {
 	async addParagraphToTemplate( templateSlug: string, content: string ) {
 		await this.admin.visitSiteEditor( {
 			postId: templateSlug,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

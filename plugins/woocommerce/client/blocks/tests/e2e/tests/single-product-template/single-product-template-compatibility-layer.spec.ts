@@ -180,7 +180,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		/* Switch to the blockified Add to Cart + Options block to be able to test all hooks */
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//single-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		const addToCartFormBlock = await editor.getBlockByName(

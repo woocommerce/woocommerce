@@ -74,7 +74,7 @@ test.describe( `${ blockData.name } Block `, () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.setContent( '' );
@@ -122,7 +122,7 @@ for ( const {
 			} else {
 				await admin.visitSiteEditor( {
 					postId: `${ BLOCK_THEME_SLUG }//${ slug }`,
-					postType: 'wp_template',
+					postType: 'wp_registered_template',
 					canvas: 'edit',
 				} );
 			}

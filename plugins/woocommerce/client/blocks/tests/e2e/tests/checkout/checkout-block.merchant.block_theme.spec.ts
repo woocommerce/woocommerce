@@ -53,7 +53,7 @@ test.describe( 'Merchant → Checkout', () => {
 	test.beforeEach( async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
@@ -164,7 +164,7 @@ test.describe( 'Merchant → Checkout', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.openDocumentSettingsSidebar();
@@ -207,7 +207,7 @@ test.describe( 'Merchant → Checkout', () => {
 
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-checkout`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.openDocumentSettingsSidebar();

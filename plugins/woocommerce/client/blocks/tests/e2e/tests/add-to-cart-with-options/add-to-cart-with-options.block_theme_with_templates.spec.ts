@@ -36,7 +36,7 @@ test.describe( `Add to Cart + Options Block (block theme with templates)`, () =>
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_WITH_TEMPLATES_SLUG }//single-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

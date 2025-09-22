@@ -153,7 +153,7 @@ test.describe( 'Template priority', () => {
 
 			await test.step( 'custom template with theme slug', async () => {
 				await admin.visitSiteEditor( {
-					postType: 'wp_template',
+					postType: 'wp_registered_template',
 				} );
 				await editor.revertTemplate( {
 					templateName: testData.templateName,

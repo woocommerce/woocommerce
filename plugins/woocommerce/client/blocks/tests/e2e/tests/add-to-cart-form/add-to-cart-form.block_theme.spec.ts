@@ -169,8 +169,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 
 		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
+			postId: template.wp_id,
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
@@ -204,8 +204,8 @@ test.describe( `${ blockData.name } Block`, () => {
 		} );
 
 		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
+			postId: template.wp_id,
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

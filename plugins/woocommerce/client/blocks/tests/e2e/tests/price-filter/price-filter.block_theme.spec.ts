@@ -273,7 +273,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
@@ -376,7 +376,7 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		const template = await templateCompiler.compile();
 
 		await admin.visitSiteEditor( {
-			postId: template.id,
+			postId: template.wp_id,
 			postType: template.type,
 			canvas: 'edit',
 		} );

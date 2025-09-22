@@ -82,7 +82,7 @@ class AddToCartWithOptionsPage {
 	async updateSingleProductTemplate() {
 		await this.admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//single-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 

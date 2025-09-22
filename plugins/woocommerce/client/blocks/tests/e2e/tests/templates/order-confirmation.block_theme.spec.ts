@@ -10,7 +10,7 @@ test.describe( 'Test the order confirmation template', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.transformIntoBlocks();

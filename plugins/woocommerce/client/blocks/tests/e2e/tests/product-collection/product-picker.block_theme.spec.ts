@@ -146,7 +146,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 		} ) => {
 			await admin.visitSiteEditor( {
 				postId: `${ BLOCK_THEME_SLUG }//single-product`,
-				postType: 'wp_template',
+				postType: 'wp_registered_template',
 				canvas: 'edit',
 			} );
 			await editor.canvas.locator( 'body' ).click();
@@ -169,7 +169,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//page-cart`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.canvas.locator( 'body' ).click();
@@ -191,7 +191,7 @@ test.describe( 'Product Collection: Product Picker', () => {
 	} ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//order-confirmation`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 		await editor.canvas.locator( 'body' ).click();

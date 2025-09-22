@@ -13,7 +13,7 @@ test.describe( 'Product Search Results template', () => {
 		await admin.visitSiteEditor( {
 			canvas: 'edit',
 			postId: `${ BLOCK_THEME_SLUG }//product-search-results`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 		} );
 
 		// Make sure the correct template is loaded.

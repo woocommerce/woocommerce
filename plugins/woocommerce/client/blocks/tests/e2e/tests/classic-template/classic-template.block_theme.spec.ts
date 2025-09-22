@@ -58,7 +58,7 @@ test.describe( `${ blockData.name } Block `, () => {
 	test( `is not available in the inserter`, async ( { admin, editor } ) => {
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
@@ -81,7 +81,7 @@ test.describe( `${ blockData.name } Block `, () => {
 		);
 		await admin.visitSiteEditor( {
 			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
-			postType: 'wp_template',
+			postType: 'wp_registered_template',
 			canvas: 'edit',
 		} );
 
