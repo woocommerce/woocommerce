@@ -164,7 +164,7 @@ store< MiniCart >(
 			get drawerOverlayClass() {
 				const baseClasses =
 					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-
+//
 				return state.isOpen
 					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
 					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
@@ -315,7 +315,6 @@ const { state: cartItemState } = store(
 					) || ( {} as CartItem );
 
 				return {
-					// Todo: add the full schema.
 					variation: [],
 					item_data: [],
 					...cartItem,
