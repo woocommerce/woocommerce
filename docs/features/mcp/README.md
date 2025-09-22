@@ -26,6 +26,7 @@ This architecture allows WooCommerce to expose operations as MCP tools through t
 WooCommerce's MCP integration provides AI assistants with structured access to core store operations:
 
 ### Product Management
+
 - List products with filtering and pagination
 - Retrieve detailed product information
 - Create new products
@@ -33,6 +34,7 @@ WooCommerce's MCP integration provides AI assistants with structured access to c
 - Delete products
 
 ### Order Management
+
 - List orders with filtering and pagination
 - Retrieve detailed order information
 - Create new orders
@@ -44,7 +46,7 @@ All operations respect WooCommerce's existing permission system and are authenti
 
 The MCP integration follows this data flow:
 
-```
+```text
 AI Client (Claude, etc.)
     ↓ (MCP protocol over HTTPS)
 WooCommerce MCP Server
@@ -55,21 +57,25 @@ WooCommerce Abilities
 ### Core Components
 
 **MCP Adapter Provider** ([`MCPAdapterProvider.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php))
+
 - Manages MCP server initialization and configuration
 - Handles feature flag checking (`mcp_integration`)
 - Provides ability filtering and namespace management
 
 **Abilities Registry** ([`AbilitiesRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRegistry.php))
+
 - Centralizes WooCommerce ability registration
 - Bridges WordPress Abilities API with WooCommerce operations
 - Enables ability discovery for the MCP server
 
 **REST Bridge Implementation** ([`AbilitiesRestBridge.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRestBridge.php))
+
 - Current preview implementation that maps REST operations to WordPress abilities
 - Provides explicit ability definitions with schemas for products and orders
 - Demonstrates how abilities can be implemented using existing REST controllers
 
 **WooCommerce Transport** ([`WooCommerceRestTransport.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/MCP/Transport/WooCommerceRestTransport.php))
+
 - Handles WooCommerce API key authentication
 - Enforces HTTPS requirements
 - Validates permissions based on API key scope
@@ -117,6 +123,7 @@ add_filter( 'woocommerce_mcp_allow_insecure_transport', '__return_true' );
 ### Permission Validation
 
 The transport layer validates operations against API key permissions:
+
 - `read` permissions: Allow GET requests
 - `write` permissions: Allow POST, PUT, PATCH, DELETE requests
 - `read_write` permissions: Allow all operations
@@ -125,7 +132,7 @@ The transport layer validates operations against API key permissions:
 
 The WooCommerce MCP server is available at:
 
-```
+```text
 https://yourstore.com/wp-json/woocommerce/mcp
 ```
 
@@ -240,17 +247,20 @@ The demo plugin creates a `woocommerce-demo/store-info` ability that retrieves s
 
 ### Common Issues
 
-**MCP Server Not Available**
+## MCP Server Not Available
+
 - Verify the `mcp_integration` feature flag is enabled
 - Check that the MCP adapter is properly loaded
 - Review WooCommerce logs for initialization errors
 
-**Authentication Failures**
+## Authentication Failures
+
 - Confirm API key format: `consumer_key:consumer_secret`
 - Verify API key permissions match operation requirements
 - Ensure HTTPS is used or explicitly allowed for development
 
-**Ability Not Found**
+## Ability Not Found
+
 - Confirm abilities are registered during `abilities_api_init`
 - Check namespace inclusion using the `woocommerce_mcp_include_ability` filter
 - Verify ability callbacks are accessible
