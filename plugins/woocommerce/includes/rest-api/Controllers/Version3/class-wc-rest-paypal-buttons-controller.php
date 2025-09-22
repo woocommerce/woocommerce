@@ -64,7 +64,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function validate_create_order( WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
-			return wp_verify_nonce( $nonce, 'create_order' );
+			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_create_order' );
 		}
 		return false;
 	}
