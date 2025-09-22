@@ -153,6 +153,7 @@ class MCPAdapterProvider {
 				$include = str_starts_with( $ability_id, 'woocommerce/' );
 
 				// Allow filter to override inclusion decision.
+				/** This filter is documented in the get_woocommerce_mcp_abilities method. */
 				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
 			}
 		);

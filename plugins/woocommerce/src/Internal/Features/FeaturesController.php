@@ -546,10 +546,9 @@ class FeaturesController {
 			),
 			'mcp_integration'             => array(
 				'name'               => __( 'WooCommerce MCP', 'woocommerce' ),
-				'description'        => function() {
+				'description'        => function () {
 					$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
-					
-					// Check permalink structure requirement
+					// Check permalink structure requirement.
 					$permalink_structure = get_option( 'permalink_structure' );
 					if ( empty( $permalink_structure ) ) {
 						$permalinks_url = admin_url( 'options-permalink.php' );
@@ -560,7 +559,7 @@ class FeaturesController {
 							$permalinks_url,
 							__( 'Configure Permalinks', 'woocommerce' )
 						);
-						// Add documentation link to permalink warning
+						// Add documentation link to permalink warning.
 						$documentation_link = sprintf(
 							' <a href="%s" target="_blank">%s</a>',
 							'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
@@ -569,7 +568,7 @@ class FeaturesController {
 						return $base_description . $permalink_warning . $documentation_link;
 					}
 
-					// Add documentation link
+					// Add documentation link.
 					$documentation_link = sprintf(
 						' <a href="%s" target="_blank">%s</a>',
 						'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
