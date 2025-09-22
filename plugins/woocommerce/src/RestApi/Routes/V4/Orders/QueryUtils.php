@@ -268,10 +268,14 @@ class QueryUtils {
 				)
 			);
 
-			// Force WP_Query to return an empty array if no order is found.
-			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
-
-			$args['post__in'] = $order_ids;
+			// Force WP_Query to return an empty array of IDs (0) if no matches are found. This forces no results.
+			if ( empty( $order_ids ) ) {
+				$order_ids = array( 0 );
+			} else {
+				$include_ids = $args['post__in'] ?? array();
+				$order_ids = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
+				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
+			}
 		}
 
 		// Search.
@@ -280,6 +284,9 @@ class QueryUtils {
 
 			if ( ! empty( $order_ids ) ) {
 				unset( $args['s'] );
+
+				$include_ids = $args['post__in'] ?? array();
+				$order_ids = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
 				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
 			}
 		}
