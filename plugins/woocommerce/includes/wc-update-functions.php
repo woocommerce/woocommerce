@@ -3105,3 +3105,19 @@ function wc_update_990_remove_email_notes() {
 function wc_update_1000_remove_patterns_toolkit_transient() {
 	delete_transient( 'ptk_patterns' );
 }
+
+/**
+ * Add guest customer role for existing stores.
+ *
+ * @return void
+ */
+function wc_update_1030_add_guest_customer_role() {
+	// Guest customer role.
+	add_role(
+		'guest_customer',
+		'Guest customer',
+		array(
+			'read' => false, // Guest customer cannot read anything.
+		)
+	);
+}

@@ -303,6 +303,9 @@ class WC_Install {
 		'10.2.0' => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
+		'10.3.0' => array(
+			'wc_update_1030_add_guest_customer_role',
+		),
 	);
 
 	/**
@@ -2180,6 +2183,15 @@ $stock_notifications_table_schema;
 			)
 		);
 
+		// Guest customer role.
+		add_role(
+			'guest_customer',
+			'Guest customer',
+			array(
+				'read' => false, // Guest customer cannot read anything.
+			)
+		);
+
 		// Shop manager role.
 		add_role(
 			'shop_manager',
@@ -2735,7 +2747,7 @@ $stock_notifications_table_schema;
 	 * @return string The content for the page
 	 */
 	private static function get_refunds_return_policy_page_content() {
-		return <<<EOT
+		return <<<'EOT'
 <!-- wp:paragraph -->
 <p><b>This is a sample page.</b></p>
 <!-- /wp:paragraph -->
