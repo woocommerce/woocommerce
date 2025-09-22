@@ -369,11 +369,11 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'           => '2',
 					'desc_tip'          => true,
 					'type'              => 'number',
+					'order'             => 50,
 					'custom_attributes' => array(
 						'min'  => 0,
 						'step' => 1,
 					),
-					'order'    => 50,
 				),
 
 				array(
