@@ -553,7 +553,7 @@ class FeaturesController {
 					if ( empty( $permalink_structure ) ) {
 						$permalinks_url = admin_url( 'options-permalink.php' );
 						$permalink_warning = sprintf(
-							'<br><br><strong style="color: #d63638;">⚠ %s:</strong> %s <a href="%s">%s</a>',
+							'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
 							__( 'Configuration Required', 'woocommerce' ),
 							__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
 							$permalinks_url,
