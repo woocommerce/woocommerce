@@ -9,6 +9,7 @@ import { type AddressFormType } from '@woocommerce/settings';
  */
 import { ValidatedTextInputProps } from '../../../../../../packages/components/text-input/types';
 import './style.scss';
+import { useUpdatePreferredAutocompleteProvider } from '../../../hooks/use-update-preferred-autocomplete-provider';
 
 /**
  * Address Autocomplete component.
@@ -23,6 +24,9 @@ export const AddressAutocomplete = ( {
 	id,
 	...props
 }: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
+	// This hook will monitor for changes in country and update the provider accordingly.
+	useUpdatePreferredAutocompleteProvider( addressType );
+
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
 			<ValidatedTextInput { ...props } id={ id } />
