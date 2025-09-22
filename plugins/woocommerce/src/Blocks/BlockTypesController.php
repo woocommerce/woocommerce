@@ -62,6 +62,7 @@ final class BlockTypesController {
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_action( 'woocommerce_delete_product_transients', array( $this, 'delete_product_transients' ) );
+		add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
 	}
 
 	/**
@@ -107,13 +108,6 @@ final class BlockTypesController {
 	 * Register blocks, hooking up assets and render functions as needed.
 	 */
 	public function register_blocks() {
-		if ( ! (
-			( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
-			wp_is_block_theme() ||
-			wp_should_load_separate_core_block_assets() ) ) {
-			add_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10, 2 );
-		}
-
 		$this->register_block_metadata();
 		$block_types = $this->get_block_types();
 
@@ -629,9 +623,25 @@ final class BlockTypesController {
 	 * @return array Block metadata.
 	 */
 	public function enqueue_block_style_for_classic_themes( $args, $block_name ) {
-		if (
-			false === strpos( $block_name, 'woocommerce/' ) ||
-			( empty( $args['style_handles'] ) && empty( $args['style'] ) )
+
+		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
+		static $should_enqueue_block_style_for_classic_themes = null;
+		if ( $should_enqueue_block_style_for_classic_themes === null ) {
+			$should_enqueue_block_style_for_classic_themes = ! (
+				is_admin() ||
+				wp_is_block_theme() ||
+				( function_exists( 'wp_should_load_block_assets_on_demand' ) && wp_should_load_block_assets_on_demand() ) ||
+				wp_should_load_separate_core_block_assets()
+			);
+		}
+		if ( ! $should_enqueue_block_style_for_classic_themes ) {
+			remove_filter( 'register_block_type_args', array( $this, 'enqueue_block_style_for_classic_themes' ), 10 );
+
+			return $args;
+		}
+
+		if( false === strpos( $block_name, 'woocommerce/' ) ||
+		    ( empty( $args['style_handles'] ) && empty( $args['style'] ) )
 		) {
 			return $args;
 		}
@@ -639,15 +649,13 @@ final class BlockTypesController {
 		$style_handlers = $args['style_handles'] ?? $args['style'];
 
 		add_filter(
-			'render_block',
-			static function ( $html, $block ) use ( $style_handlers, $block_name ) {
-				if ( $block['blockName'] === $block_name ) {
-					array_map( 'wp_enqueue_style', $style_handlers );
-				}
+			'render_block_' . $block_name,
+			static function ( $html ) use ( $style_handlers ) {
+				array_map( 'wp_enqueue_style', $style_handlers );
+
 				return $html;
 			},
-			10,
-			2
+			10
 		);
 
 		$args['style_handles'] = array();
