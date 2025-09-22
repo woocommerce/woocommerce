@@ -131,6 +131,7 @@ class CartCheckoutUtils {
 				return true;
 			}
 
+			// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
 			if ( 'woocommerce/classic-shortcode' === $block_id &&
 				'shortcode' === $attribute &&
 				'cart' === $value &&
