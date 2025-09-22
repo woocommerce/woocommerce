@@ -63,4 +63,12 @@ class WC_Gateway_Paypal_Constants {
 	const PAYPAL_STATE_MAX_LENGTH           = 300;
 	const PAYPAL_CITY_MAX_LENGTH            = 120;
 	const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
+
+	/**
+	 * Supported payment sources.
+	 */
+	const PAYMENT_SOURCE_PAYPAL     = 'paypal';
+	const PAYMENT_SOURCE_VENMO      = 'venmo';
+	const PAYMENT_SOURCE_PAYLATER   = 'paylater';
+	const SUPPORTED_PAYMENT_SOURCES = array( self::PAYMENT_SOURCE_PAYPAL, self::PAYMENT_SOURCE_VENMO, self::PAYMENT_SOURCE_PAYLATER );
 }

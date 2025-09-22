@@ -10,7 +10,7 @@ jQuery(function ($) {
 		}
 
 		const buttons = paypal.Buttons( {
-			async createOrder() {
+			async createOrder( data ) {
 				// If we're inside the product page, we need to empty the cart,
 				// and add the current product to the cart.
 				if ( paypal_standard.isProductPage ) {
@@ -79,6 +79,7 @@ jQuery(function ($) {
 						},
 						data: {
 							order_id: responseData.order_id,
+							payment_source: data.paymentSource || '',
 						},
 					} );
 		
