@@ -1,5 +1,6 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
+	let orderReceivedUrl = '';
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -9,12 +10,46 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
-				// TODO: Add createOrder logic here
-				return null;
+				let responseData;
+				try {
+					// Create a draft order in WooCommerce.
+					responseData = await window.wp.apiFetch( {
+						method: 'GET',
+						path: '/wc/store/v1/checkout',
+						headers: {
+							Nonce: paypal_standard.wc_store_api_nonce,
+						},
+					} );
+
+					if ( ! responseData.order_id ) {
+						return null;
+					}
+
+					// Create a PayPal order.
+					const paypalResponseData = await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/v3/paypal-buttons/create-order',
+						headers: {
+							Nonce: paypal_standard.create_order_nonce,
+						},
+						data: {
+							order_id: responseData.order_id,
+						},
+					} );
+		
+					orderReceivedUrl = paypalResponseData.return_url;
+
+					return paypalResponseData.paypal_order_id;
+				} catch ( error ) {
+					console.error( 'Failed to create order', error );
+					return null;
+				}
 			},
 
 			async onApprove( data ) {
-				// TODO: Add onApprove logic here
+				if ( data.paymentID && orderReceivedUrl ) {
+					window.location.href = orderReceivedUrl;
+				}
 			},
 
 			onError: function ( error ) {				
@@ -35,18 +70,6 @@ jQuery(function ($) {
 					'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message'
 				).remove();
 				$noticeContainer.prepend( messageWrapper );
-			},
-
-			onCancel( data ) {
-				// TODO: Add onCancel logic here
-			},
-
-			onInit( data, actions ) {
-				// TODO: Add onInit logic here
-			},
-
-			onClick() {
-				// TODO: Add onClick logic here
 			},
 
 		});

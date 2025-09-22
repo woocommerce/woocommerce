@@ -699,17 +699,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
 		wp_enqueue_script( 'paypal-standard-sdk' );
 
-		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery' ), $version, true );
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
 
 		wp_localize_script(
 			'wc-paypal-frontend',
 			'paypal_standard',
 			array(
-				'gateway_id'          => $this->id,
-				'ajax_url'            => admin_url( 'admin-ajax.php' ),
-				'wc_ajax_url'         => WC_AJAX::get_endpoint( '%%endpoint%%' ),
-				'create_order_nonce'  => wp_create_nonce( 'create_order' ),
-				'capture_order_nonce' => wp_create_nonce( 'capture_order' ),
+				'gateway_id'         => $this->id,
+				'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
+				'create_order_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
 			)
 		);
 
