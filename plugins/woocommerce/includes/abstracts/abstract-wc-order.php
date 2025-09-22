@@ -2605,4 +2605,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->set_prop( 'cogs_total_value', $value );
 		}
 	}
+
+	/**
+	 * Return the HTML to render the total Cost of Goods Sold for the order.
+	 *
+	 * @param array|null $wc_price_arg Arguments to be passed to wc_price, defaults to an array containing only the currency symbol.
+	 * @return string
+	 */
+	public function get_cogs_total_value_html( ?array $wc_price_arg = null ): string {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return '';
+		}
+
+		$cogs_total_value = $this->get_cogs_total_value();
+
+		/**
+		 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string   $total_html The formatted total COGS HTML.
+		 * @param float    $total      The total COGS value.
+		 * @param WC_Order $order      The order object.
+		 */
+		return apply_filters(
+			'woocommerce_order_cogs_total_value_html',
+			wc_price( $cogs_total_value, $wc_price_arg ?? array( 'currency' => $this->get_currency() ) ),
+			$cogs_total_value,
+			$this
+		);
+	}
 }

@@ -192,10 +192,7 @@ describe( 'Stock Indicator Block', () => {
 
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block
-					isDescendentOfQueryLoop={ false }
-					isDescendantOfAllProducts={ false }
-				/>
+				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
 
@@ -214,10 +211,7 @@ describe( 'Stock Indicator Block', () => {
 
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block
-					isDescendentOfQueryLoop={ false }
-					isDescendantOfAllProducts={ false }
-				/>
+				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
 
@@ -236,10 +230,7 @@ describe( 'Stock Indicator Block', () => {
 
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block
-					isDescendentOfQueryLoop={ false }
-					isDescendantOfAllProducts={ false }
-				/>
+				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
 
@@ -256,10 +247,7 @@ describe( 'Stock Indicator Block', () => {
 
 		const { container } = render(
 			<ProductDataContextProvider product={ product } isLoading={ false }>
-				<Block
-					isDescendentOfQueryLoop={ false }
-					isDescendantOfAllProducts={ false }
-				/>
+				<Block isDescendantOfAllProducts={ false } />
 			</ProductDataContextProvider>
 		);
 
