@@ -319,6 +319,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'desc_tip' => true,
 					'options'  => $currency_code_options,
+					'order'    => 10,
 				),
 
 				array(
@@ -335,6 +336,7 @@ class WC_Settings_General extends WC_Settings_Page {
 						'right_space' => __( 'Right with space', 'woocommerce' ),
 					),
 					'desc_tip' => true,
+					'order'    => 40,
 				),
 
 				array(
@@ -345,6 +347,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => ',',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 20,
 				),
 
 				array(
@@ -355,6 +358,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '.',
 					'type'     => 'text',
 					'desc_tip' => true,
+					'order'    => 30,
 				),
 
 				array(
@@ -369,6 +373,7 @@ class WC_Settings_General extends WC_Settings_Page {
 						'min'  => 0,
 						'step' => 1,
 					),
+					'order'    => 50,
 				),
 
 				array(
