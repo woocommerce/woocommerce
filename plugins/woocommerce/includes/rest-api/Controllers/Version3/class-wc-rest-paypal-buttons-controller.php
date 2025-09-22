@@ -74,7 +74,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function validate_request( WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
-			return wp_verify_nonce( $nonce, 'wp_rest' );
+			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_create_order' );
 		}
 		return false;
 	}
@@ -88,7 +88,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function create_order( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		if ( ! is_array( $data ) || empty( $data['order_id'] ) ) {
+		if ( empty( $data['order_id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
@@ -161,4 +161,5 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		return new WP_REST_Response( array( 'success' => true ), 200 );
 	}
+}
 }

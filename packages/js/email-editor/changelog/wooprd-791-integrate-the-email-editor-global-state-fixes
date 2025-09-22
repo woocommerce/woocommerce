@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Refactor usage of hooks and global Gutenberg functions to support preserving and restoring the original state

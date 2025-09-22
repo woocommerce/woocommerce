@@ -8,7 +8,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import { getPaymentMethodData, WC_ASSET_URL } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
-import { sanitizeHTML } from '@woocommerce/utils';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { lazy, Suspense, RawHTML } from '@wordpress/element';
 /**
  * Internal dependencies
@@ -67,6 +67,7 @@ if ( settings.isButtonsEnabled ) {
 			currency: options.currency,
 			intent: options.intent,
 			pageType: options[ 'page-type' ],
+			isCheckout: settings.isCheckout,
 		};
 
 		return (
@@ -77,9 +78,9 @@ if ( settings.isButtonsEnabled ) {
 	};
 
 	registerExpressPaymentMethod( {
-		name: 'paypal',
-		title: 'PayPal',
-		description: 'PayPal Buttons',
+		name: __( 'PayPal', 'woocommerce' ),
+		title: __( 'PayPal', 'woocommerce' ),
+		description: __( 'PayPal Buttons', 'woocommerce' ),
 		gatewayId: 'paypal',
 		paymentMethodId: 'paypal',
 		content: <LazyPayPalButtonsContainer />,

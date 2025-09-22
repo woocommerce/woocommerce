@@ -66,13 +66,7 @@ class AddToCartWithOptionsPage {
 		);
 	}
 
-	async updateSingleProductTemplate() {
-		await this.admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//single-product`,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
-
+	async updateAddToCartWithOptionsBlock() {
 		const addToCartFormBlock = await this.editor.getBlockByName(
 			'woocommerce/add-to-cart-form'
 		);
@@ -83,6 +77,35 @@ class AddToCartWithOptionsPage {
 				name: 'Upgrade to the Add to Cart + Options block',
 			} )
 			.click();
+	}
+
+	async updateSingleProductTemplate() {
+		await this.admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		await this.updateAddToCartWithOptionsBlock();
+	}
+
+	async createPostWithProductBlock( product: string ) {
+		await this.admin.createNewPost();
+		await this.editor.insertBlock( { name: 'woocommerce/single-product' } );
+		const singleProductBlock = await this.editor.getBlockByName(
+			'woocommerce/single-product'
+		);
+
+		await singleProductBlock
+			.locator( `input[type="radio"][value="${ product }"]` )
+			.nth( 0 )
+			.click();
+
+		await singleProductBlock.getByText( 'Done' ).click();
+
+		await this.updateAddToCartWithOptionsBlock();
+
+		await this.editor.publishAndVisitPost();
 	}
 }
 

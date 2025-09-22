@@ -18,6 +18,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
 }
@@ -695,7 +699,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
 		wp_enqueue_script( 'paypal-standard-sdk' );
 
-		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery' ), $version, true );
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
 
 		wp_localize_script(
 			'wc-paypal-frontend',
@@ -703,8 +707,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			array(
 				'gateway_id'         => $this->id,
 				'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
-				'rest_url'           => rest_url(),
-				'nonce'              => wp_create_nonce( 'wp_rest' ),
+				'create_order_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
 			)
 		);
 
@@ -849,12 +852,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
 		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
-		$merchant_account_data    = $transact_account_manager->get_merchant_account_data();
+		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
 		}
 
-		$provider_account_data = $transact_account_manager->get_provider_account_data();
+		$provider_account_data = $transact_account_manager->get_transact_account_data( 'provider' );
 		if ( empty( $provider_account_data ) ) {
 			return false;
 		}
