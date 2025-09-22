@@ -273,10 +273,56 @@ abstract class WC_REST_Settings_Model {
 	 */
 	protected function set_setting_value( $setting_id, $value ) {
 		if ( function_exists( 'update_option' ) ) {
+			// Sanitize the value before saving.
+			$sanitized_value = $this->sanitize_value_for_storage( $setting_id, $value );
 			// @phpcs:ignore WordPress.WP.AlternativeFunctions
-			return update_option( $setting_id, $value );
+			return update_option( $setting_id, $sanitized_value );
 		}
 		return false;
+	}
+
+	/**
+	 * Sanitize value for storage based on setting type.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @param mixed  $value      Setting value.
+	 * @return mixed Sanitized value.
+	 */
+	protected function sanitize_value_for_storage( $setting_id, $value ) {
+		$settings_definitions = $this->get_settings_definitions();
+		$settings_by_id = array_column( $settings_definitions, null, 'id' );
+		
+		if ( ! isset( $settings_by_id[ $setting_id ] ) ) {
+			return $value;
+		}
+
+		$setting_definition = $settings_by_id[ $setting_id ];
+		$setting_type = $setting_definition['type'] ?? 'text';
+
+		switch ( $setting_type ) {
+			case 'checkbox':
+				// Convert boolean/string to WooCommerce checkbox format.
+				if ( $value === true || $value === 'true' || $value === '1' || $value === 1 || $value === 'yes' ) {
+					return 'yes';
+				}
+				return 'no';
+
+			case 'number':
+				return is_numeric( $value ) ? floatval( $value ) : 0;
+
+			case 'text':
+				return function_exists( 'sanitize_text_field' ) ? sanitize_text_field( $value ) : $value;
+
+			case 'multiselect':
+			case 'multi_select_countries':
+				if ( is_array( $value ) ) {
+					return function_exists( 'sanitize_text_field' ) ? array_map( 'sanitize_text_field', $value ) : $value;
+				}
+				return array();
+
+			default:
+				return function_exists( 'sanitize_text_field' ) ? sanitize_text_field( $value ) : $value;
+		}
 	}
 
 	/**
