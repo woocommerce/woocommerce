@@ -162,7 +162,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 			$children['all']     = get_posts( apply_filters( 'woocommerce_variable_children_args', $all_args, $product, false ) );
 			$children['visible'] = get_posts( apply_filters( 'woocommerce_variable_children_args', $visible_only_args, $product, true ) );
-			$children['version'] = $transient_version;
 
 			// Validate the children data before storing it in the transient.
 			if ( $this->validate_children_data( $children, $transient_version ) ) {
@@ -277,13 +276,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
 		$price_hash        = $this->get_price_hash( $product, $for_display );
 
-		// Check if prices array is stale.
-		if ( ! isset( $this->prices_array['version'] ) || $this->prices_array['version'] !== $transient_version ) {
-			$this->prices_array = array(
-				'version' => $transient_version,
-			);
-		}
-
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
 		 * If the value has already been generated, we don't need to grab the values again so just return them. They are already filtered.
@@ -293,9 +285,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 			// If the prices are not valid, reset the transient cache.
 			if ( ! $this->validate_prices_data( $transient_cached_prices_array, $transient_version ) ) {
-				$transient_cached_prices_array = array(
-					'version' => $transient_version,
-				);
+				$transient_cached_prices_array = array();
 			}
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
@@ -735,21 +725,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Validate the children data by checking the structure and type of the data.
 	 *
 	 * @param array  $children The children data.
-	 * @param string $current_version The current transient version.
+	 * @param string $deprecated Was the current transient version, unused since 10.3.0.
 	 * @return bool True if valid, false otherwise.
 	 */
-	protected function validate_children_data( $children, $current_version ) {
+	protected function validate_children_data( $children, $deprecated ) {
 		if ( ! is_array( $children ) ) {
 			return false;
 		}
 
 		// Basic structure checks.
 		if ( empty( $children['all'] ) || ! isset( $children['visible'] ) ) {
-			return false;
-		}
-
-		// Version check - only if version is set.
-		if ( isset( $children['version'] ) && $children['version'] !== $current_version ) {
 			return false;
 		}
 
@@ -776,10 +761,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Validate the prices data by checking the structure and type of the data.
 	 *
 	 * @param  array  $prices_array The prices data.
-	 * @param  string $current_version The current version of the data.
+	 * @param  string $deprecated Was the current transient version, unused since 10.3.0.
 	 * @return bool True if valid, false otherwise.
 	 */
-	protected function validate_prices_data( $prices_array, $current_version ) {
+	protected function validate_prices_data( $prices_array, $deprecated ) {
 		if ( ! is_array( $prices_array ) ) {
 			return false;
 		}
@@ -789,14 +774,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			return false;
 		}
 
-		if ( isset( $prices_array['version'] ) && $prices_array['version'] !== $current_version ) {
-			return false;
-		}
+		$price_data_is_empty = true;
 
-		$data_without_version = array_diff_key( $prices_array, array( 'version' => '' ) );
-		$price_data_is_empty  = true;
-
-		foreach ( $data_without_version as $price_data ) {
+		foreach ( $prices_array as $price_data ) {
 			if ( ! is_array( $price_data ) ) {
 				return false;
 			}
