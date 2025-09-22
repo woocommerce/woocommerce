@@ -261,10 +261,9 @@ class QueryUtils {
 
 			$order_ids = $wpdb->get_col(
 				$wpdb->prepare(
-					"SELECT order_id
-					FROM {$wpdb->prefix}woocommerce_order_items
-					WHERE order_item_id IN ( SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE meta_key = '_product_id' AND meta_value = %d )
-					AND order_item_type = 'line_item'",
+					"SELECT order_id FROM %i WHERE order_item_id IN ( SELECT order_item_id FROM %i WHERE meta_key = '_product_id' AND meta_value = %d ) AND order_item_type = 'line_item'",
+					$wpdb->prefix . 'woocommerce_order_items',
+					$wpdb->prefix . 'woocommerce_order_itemmeta',
 					$request['product']
 				)
 			);
