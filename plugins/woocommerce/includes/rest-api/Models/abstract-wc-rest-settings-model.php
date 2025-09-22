@@ -74,6 +74,46 @@ abstract class WC_REST_Settings_Model {
 	abstract public function get_settings_definitions();
 
 	/**
+	 * Get settings from a WooCommerce settings class by group ID.
+	 * This method extracts settings that belong to a specific group from the settings array.
+	 *
+	 * @param string $settings_class_name The name of the settings class (e.g., 'WC_Settings_General').
+	 * @param string $group_id The group ID to filter by (e.g., 'pricing_options').
+	 * @return array Array of setting definitions for the specified group.
+	 */
+	protected function get_settings_by_group_id( $settings_class_name, $group_id ) {
+		if ( ! class_exists( $settings_class_name ) ) {
+			return array();
+		}
+
+		$settings_instance = new $settings_class_name();
+		$all_settings = $settings_instance->get_settings_for_section( '' );
+		
+		$group_settings = array();
+		$in_group = false;
+
+		foreach ( $all_settings as $setting ) {
+			// Check if this is the start of our target group
+			if ( isset( $setting['type'] ) && 'title' === $setting['type'] && isset( $setting['id'] ) && $setting['id'] === $group_id ) {
+				$in_group = true;
+				continue;
+			}
+
+			// Check if this is the end of our target group
+			if ( $in_group && isset( $setting['type'] ) && 'sectionend' === $setting['type'] && isset( $setting['id'] ) && $setting['id'] === $group_id ) {
+				break;
+			}
+
+			// If we're in the group and this is a setting (not a title/sectionend), add it
+			if ( $in_group && isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
+				$group_settings[] = $setting;
+			}
+		}
+
+		return $group_settings;
+	}
+
+	/**
 	 * Get settings data formatted for REST API.
 	 *
 	 * @return array Formatted settings data.
