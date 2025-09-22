@@ -11,6 +11,7 @@ namespace Automattic;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
+use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
 
 /**
  * Instantiate WooCommerce Analytics
@@ -41,6 +42,9 @@ class Woocommerce_Analytics {
 		// Initialize general store tracking actions.
 		add_action( 'init', array( new Universal(), 'init_hooks' ) );
 		add_action( 'init', array( new My_Account(), 'init_hooks' ) );
+
+		// Initialize REST API endpoints.
+		add_action( 'rest_api_init', array( __CLASS__, 'register_rest_routes' ) );
 
 		/**
 		 * Fires after the WooCommerce Analytics package is initialized
@@ -118,5 +122,13 @@ class Woocommerce_Analytics {
 				'strategy'  => 'defer',
 			)
 		);
+	}
+
+	/**
+	 * Register REST API routes.
+	 */
+	public static function register_rest_routes() {
+		$controller = new WC_Analytics_Tracking_Proxy();
+		$controller->register_routes();
 	}
 }
