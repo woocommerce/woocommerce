@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Abilities Registry class for WooCommerce.
- * 
+ *
  * Centralized registry that initializes all WooCommerce abilities.
  * These abilities can be consumed by MCP, REST API, or other tools.
  */
@@ -36,8 +36,8 @@ class AbilitiesRegistry {
 	 *
 	 * @return array Array of all ability IDs.
 	 */
-	public function getAbilitiesIDs(): array {
-		// Check if the abilities API is available
+	public function get_abilities_ids(): array {
+		// Check if the abilities API is available.
 		if ( ! function_exists( 'wp_get_abilities' ) ) {
 			return array();
 		}
