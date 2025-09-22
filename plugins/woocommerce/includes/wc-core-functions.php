@@ -2812,3 +2812,35 @@ function _wc_delete_transients( $transients ) {
 		}
 	}
 }
+
+/**
+ * Prevent guest customer role from logging in.
+ *
+ * @param WP_User $user     The user object.
+ *
+ * @since 10.3.0
+ * @return WP_User|WP_Error The user object or WP_Error if the user has a blocked role.
+ */
+function wc_prevent_guest_customer_role_from_logging_in( $user ) {
+	if ( is_wp_error( $user ) ) {
+		return $user;
+	}
+
+	$blocked_roles = array( 'guest_customer' );
+
+	// Check if user has any of the blocked roles.
+	if ( ! empty( $user->roles ) ) {
+		foreach ( $blocked_roles as $blocked_role ) {
+			if ( in_array( $blocked_role, $user->roles, true ) ) {
+				return new WP_Error(
+					'login_not_allowed',
+					__( 'Your account does not have permission to access this site.', 'woocommerce' ),
+					$user
+				);
+			}
+		}
+	}
+	return $user;
+}
+
+add_filter( 'wp_authenticate_user', 'wc_prevent_guest_customer_role_from_logging_in', 10, 1 );
