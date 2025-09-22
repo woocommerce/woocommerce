@@ -30,11 +30,13 @@ class WooCommerceRestTransport extends RestTransport {
 
 	/**
 	 * Constructor.
+	 *
+	 * @param mixed ...$args Arguments to pass to parent constructor.
 	 */
 	public function __construct( ...$args ) {
 		parent::__construct( ...$args );
 
-		// Register permission filter callback
+		// This filter is documented in the check_ability_permission method.
 		add_filter( 'woocommerce_check_rest_ability_permissions_for_method', array( $this, 'check_ability_permission' ), 10, 3 );
 	}
 
@@ -64,7 +66,7 @@ class WooCommerceRestTransport extends RestTransport {
 			);
 		}
 
-		// Get X-MCP-API-Key header
+		// Get X-MCP-API-Key header.
 		$api_key = $request->get_header( 'X-MCP-API-Key' );
 
 		if ( empty( $api_key ) ) {
@@ -85,7 +87,7 @@ class WooCommerceRestTransport extends RestTransport {
 
 		list( $consumer_key, $consumer_secret ) = explode( ':', $api_key, 2 );
 
-		// Use our standalone authentication method
+		// Use our standalone authentication method.
 		$result = $this->authenticate( $consumer_key, $consumer_secret );
 
 		if ( is_wp_error( $result ) ) {
@@ -105,10 +107,10 @@ class WooCommerceRestTransport extends RestTransport {
 	private function authenticate( $consumer_key, $consumer_secret ) {
 		global $wpdb;
 
-		// Hash the consumer key as WooCommerce does
+		// Hash the consumer key as WooCommerce does.
 		$hashed_consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
 
-		// Query the WooCommerce API keys table directly
+		// Query the WooCommerce API keys table directly.
 		$user_data = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces
@@ -118,7 +120,7 @@ class WooCommerceRestTransport extends RestTransport {
 			)
 		);
 
-		// Check if user data was found
+		// Check if user data was found.
 		if ( empty( $user_data ) ) {
 			return new \WP_Error(
 				'invalid_consumer_key',
@@ -127,7 +129,7 @@ class WooCommerceRestTransport extends RestTransport {
 			);
 		}
 
-		// Validate consumer secret using hash_equals for timing attack protection
+		// Validate consumer secret using hash_equals for timing attack protection.
 		if ( ! hash_equals( $user_data->consumer_secret, $consumer_secret ) ) {
 			return new \WP_Error(
 				'invalid_consumer_secret',
@@ -136,10 +138,10 @@ class WooCommerceRestTransport extends RestTransport {
 			);
 		}
 
-		// Store permissions for tool-level checking
+		// Store permissions for tool-level checking.
 		self::$current_mcp_permissions = $user_data->permissions;
 
-		// Set the current user
+		// Set the current user.
 		wp_set_current_user( $user_data->user_id );
 
 		return $user_data->user_id;
@@ -163,13 +165,13 @@ class WooCommerceRestTransport extends RestTransport {
 	 * @return bool Whether permission is granted.
 	 */
 	public function check_ability_permission( $allowed, $method, $controller ) {
-		// Only check permissions if we have MCP context
+		// Only check permissions if we have MCP context.
 		$permissions = self::get_current_user_permissions();
-		if ( $permissions === null ) {
+		if ( null === $permissions ) {
 			return $allowed;
 		}
 
-		// Check permissions based on method
+		// Check permissions based on method.
 		switch ( $method ) {
 			case 'HEAD':
 			case 'GET':
@@ -185,5 +187,4 @@ class WooCommerceRestTransport extends RestTransport {
 				return false;
 		}
 	}
-
 }

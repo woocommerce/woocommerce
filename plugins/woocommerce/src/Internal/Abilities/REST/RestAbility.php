@@ -31,7 +31,7 @@ class RestAbility extends \WP_Ability {
 	 * @return true Always returns true (no validation).
 	 */
 	protected function validate_output( $output ) {
-		// Skip validation - trust that REST controllers return valid data
+		// Skip validation - trust that REST controllers return valid data.
 		return true;
 	}
 }

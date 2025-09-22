@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * MCP Adapter Provider class for WooCommerce.
- * 
+ *
  * Manages MCP (Model Context Protocol) adapter initialization and server configuration.
  * Abilities should be registered separately using the WordPress Abilities API.
  */
@@ -44,12 +44,12 @@ class MCPAdapterProvider {
 	 * Check feature flag and initialize MCP adapter if enabled.
 	 */
 	public function maybe_initialize(): void {
-		// Check if MCP integration feature is enabled
+		// Check if MCP integration feature is enabled.
 		if ( ! FeaturesUtil::feature_is_enabled( 'mcp_integration' ) ) {
 			return;
 		}
 
-		// Prevent double initialization
+		// Prevent double initialization.
 		if ( $this->initialized ) {
 			return;
 		}
@@ -63,7 +63,7 @@ class MCPAdapterProvider {
 	 * Initialize the MCP adapter.
 	 */
 	private function initialize_mcp_adapter(): void {
-		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer)
+		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer).
 		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
 			if ( function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->warning(
@@ -74,7 +74,7 @@ class MCPAdapterProvider {
 			return;
 		}
 
-		// Initialize the MCP adapter instance - this triggers the rest_api_init hook registration
+		// Initialize the MCP adapter instance - this triggers the rest_api_init hook registration.
 		\WP\MCP\Core\McpAdapter::instance();
 	}
 
@@ -82,7 +82,7 @@ class MCPAdapterProvider {
 	 * Register WordPress hooks for MCP adapter.
 	 */
 	private function register_hooks(): void {
-		// Initialize MCP server when MCP adapter is ready
+		// Initialize MCP server when MCP adapter is ready.
 		add_action( 'mcp_adapter_init', array( $this, 'initialize_mcp_server' ) );
 	}
 
@@ -92,21 +92,21 @@ class MCPAdapterProvider {
 	 * @param object $adapter MCP adapter instance.
 	 */
 	public function initialize_mcp_server( $adapter ): void {
-		// Get filtered abilities for MCP server
+		// Get filtered abilities for MCP server.
 		$abilities_ids = $this->get_woocommerce_mcp_abilities();
 
-		// Bail if no abilities are available
+		// Bail if no abilities are available.
 		if ( empty( $abilities_ids ) ) {
 			return;
 		}
 
-		// Temporarily disable MCP validation during server creation
-		// Workaround for validator bug with union types (e.g., ["integer", "null"])
-		// TODO: Remove once mcp-adapter validator bug is fixed
+		// Temporarily disable MCP validation during server creation.
+		// Workaround for validator bug with union types (e.g., ["integer", "null"]).
+		// TODO: Remove once mcp-adapter validator bug is fixed.
 		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 
 		try {
-			// Create MCP server
+			// Create MCP server.
 			$adapter->create_server(
 				'woocommerce-mcp',
 				'woocommerce',
@@ -127,7 +127,7 @@ class MCPAdapterProvider {
 				);
 			}
 		} finally {
-			// Re-enable MCP validation immediately after server creation
+			// Re-enable MCP validation immediately after server creation.
 			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 		}
 	}
@@ -141,23 +141,23 @@ class MCPAdapterProvider {
 	 * @return array Array of ability IDs for MCP server.
 	 */
 	private function get_woocommerce_mcp_abilities(): array {
-		// Get all abilities from the registry
+		// Get all abilities from the registry.
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
-		$all_abilities_ids = $abilities_registry->getAbilitiesIDs();
+		$all_abilities_ids  = $abilities_registry->get_abilities_ids();
 
-		// Filter abilities based on namespace and custom filter
+		// Filter abilities based on namespace and custom filter.
 		$mcp_abilities = array_filter(
 			$all_abilities_ids,
-			function( $ability_id ) {
-				// Include WooCommerce abilities by default
+			function ( $ability_id ) {
+				// Include WooCommerce abilities by default.
 				$include = str_starts_with( $ability_id, 'woocommerce/' );
 
-				// Allow filter to override inclusion decision
+				// Allow filter to override inclusion decision.
 				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
 			}
 		);
 
-		// Re-index array
+		// Re-index array.
 		return array_values( $mcp_abilities );
 	}
 

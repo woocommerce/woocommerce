@@ -46,7 +46,7 @@ class RestAbilityFactory {
 	 * @param string $route REST route for this controller.
 	 */
 	private static function register_single_ability( $controller, array $ability_config, string $route ): void {
-		// Only proceed if wp_register_ability function exists
+		// Only proceed if wp_register_ability function exists.
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return;
 		}
@@ -59,17 +59,18 @@ class RestAbilityFactory {
 					'description'         => $ability_config['description'],
 					'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
 					'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
-					'execute_callback'    => function( $input ) use ( $controller, $ability_config, $route ) {
+					'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
 						return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
 					},
-					'permission_callback' => function( $input ) use ( $controller, $ability_config ) {
+					'permission_callback' => function ( $input ) use ( $controller, $ability_config ) {
 						return self::check_permission( $controller, $ability_config['operation'], $input );
 					},
 					'ability_class'       => RestAbility::class,
 				)
 			);
 		} catch ( \Throwable $e ) {
-			// Log the error for debugging but don't break the registration of other abilities
+			// Log the error for debugging but don't break the registration of other abilities.
+			// Log error for debugging purposes.
 			error_log( "Failed to register ability {$ability_config['id']}: " . $e->getMessage() );
 		}
 	}
@@ -84,14 +85,14 @@ class RestAbilityFactory {
 	private static function get_schema_for_operation( $controller, string $operation ): array {
 		switch ( $operation ) {
 			case 'list':
-				// Use controller's collection parameters
+				// Use controller's collection parameters.
 				if ( method_exists( $controller, 'get_collection_params' ) ) {
 					return self::sanitize_args_to_schema( $controller->get_collection_params() );
 				}
 				break;
 
 			case 'create':
-				// Use controller's creatable schema
+				// Use controller's creatable schema.
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
 					$args = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE );
 					return self::sanitize_args_to_schema( $args );
@@ -99,18 +100,18 @@ class RestAbilityFactory {
 				break;
 
 			case 'update':
-				// Use controller's editable schema + ID
+				// Use controller's editable schema + ID.
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
 					$args   = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE );
 					$schema = self::sanitize_args_to_schema( $args );
 
-					// Add ID field for update operations
+					// Add ID field for update operations.
 					$schema['properties']['id'] = array(
 						'type'        => 'integer',
 						'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
 					);
 
-					// Ensure ID is required
+					// Ensure ID is required.
 					if ( ! isset( $schema['required'] ) ) {
 						$schema['required'] = array();
 					}
@@ -124,7 +125,7 @@ class RestAbilityFactory {
 
 			case 'get':
 			case 'delete':
-				// Only need ID
+				// Only need ID.
 				return array(
 					'type'       => 'object',
 					'properties' => array(
@@ -137,7 +138,7 @@ class RestAbilityFactory {
 				);
 		}
 
-		// Fallback
+		// Fallback.
 		return array( 'type' => 'object' );
 	}
 
@@ -160,7 +161,7 @@ class RestAbilityFactory {
 		foreach ( $args as $key => $arg ) {
 			$property = array();
 
-			// Copy valid JSON Schema fields
+			// Copy valid JSON Schema fields.
 			if ( isset( $arg['type'] ) ) {
 				$property['type'] = $arg['type'];
 			}
@@ -189,12 +190,12 @@ class RestAbilityFactory {
 				$property['properties'] = $arg['properties'];
 			}
 
-			// Convert readonly to readOnly (JSON Schema format)
+			// Convert readonly to readOnly (JSON Schema format).
 			if ( isset( $arg['readonly'] ) && $arg['readonly'] ) {
 				$property['readOnly'] = true;
 			}
 
-			// Collect required fields
+			// Collect required fields.
 			if ( isset( $arg['required'] ) && $arg['required'] === true ) {
 				$required[] = $key;
 			}
@@ -226,8 +227,8 @@ class RestAbilityFactory {
 			$schema = $controller->get_item_schema();
 
 			if ( 'list' === $operation ) {
-				// For list operations, return object wrapping array of items
-				// This ensures MCP compatibility while maintaining REST structure
+				// For list operations, return object wrapping array of items.
+				// This ensures MCP compatibility while maintaining REST structure.
 				return array(
 					'type'       => 'object',
 					'properties' => array(
@@ -238,7 +239,7 @@ class RestAbilityFactory {
 					),
 				);
 			} elseif ( 'delete' === $operation ) {
-				// For delete operations, return simple confirmation
+				// For delete operations, return simple confirmation.
 				return array(
 					'type'       => 'object',
 					'properties' => array(
@@ -248,7 +249,7 @@ class RestAbilityFactory {
 				);
 			}
 
-			// For get, create, update operations
+			// For get, create, update operations.
 			return $schema;
 		}
 
@@ -267,20 +268,20 @@ class RestAbilityFactory {
 	private static function execute_operation( $controller, string $operation, array $input, string $route ) {
 		$method = self::get_http_method_for_operation( $operation );
 
-		// Build final route - add ID for single item operations
+		// Build final route - add ID for single item operations.
 		$request_route = $route;
 		if ( isset( $input['id'] ) && in_array( $operation, array( 'get', 'update', 'delete' ), true ) ) {
 			$request_route .= '/' . intval( $input['id'] );
 			unset( $input['id'] );
 		}
 
-		// Create REST request
+		// Create REST request.
 		$request = new \WP_REST_Request( $method, $request_route );
 		foreach ( $input as $key => $value ) {
 			$request->set_param( $key, $value );
 		}
 
-		// Dispatch through REST API for proper validation and permissions
+		// Dispatch through REST API for proper validation and permissions.
 		$response = rest_do_request( $request );
 
 		if ( is_wp_error( $response ) ) {
@@ -289,7 +290,7 @@ class RestAbilityFactory {
 
 		$data = $response instanceof \WP_REST_Response ? $response->get_data() : $response;
 
-		// For list operations, wrap in data object to match schema
+		// For list operations, wrap in data object to match schema.
 		if ( 'list' === $operation ) {
 			return array( 'data' => $data );
 		}
@@ -323,7 +324,7 @@ class RestAbilityFactory {
 	 * @return bool Whether permission is granted.
 	 */
 	private static function check_permission( $controller, string $operation, array $input ): bool {
-		// Get HTTP method for the operation
+		// Get HTTP method for the operation.
 		$method = self::get_http_method_for_operation( $operation );
 
 		/**

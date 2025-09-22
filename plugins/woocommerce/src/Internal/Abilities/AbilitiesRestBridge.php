@@ -97,9 +97,11 @@ class AbilitiesRestBridge {
 
 	/**
 	 * Initialize the ability registration.
+	 *
+	 * @internal
 	 */
-	public static function init(): void {
-		// Register abilities when Abilities API is ready
+	final public static function init(): void {
+		// Register abilities when Abilities API is ready.
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 	}
 
