@@ -626,7 +626,7 @@ final class BlockTypesController {
 
 		// Repeatedly checking the theme is expensive. So statically cache this logic result and remove the filter if not needed.
 		static $should_enqueue_block_style_for_classic_themes = null;
-		if ( $should_enqueue_block_style_for_classic_themes === null ) {
+		if ( null === $should_enqueue_block_style_for_classic_themes ) {
 			$should_enqueue_block_style_for_classic_themes = ! (
 				is_admin() ||
 				wp_is_block_theme() ||
@@ -640,8 +640,10 @@ final class BlockTypesController {
 			return $args;
 		}
 
-		if( false === strpos( $block_name, 'woocommerce/' ) ||
-		    ( empty( $args['style_handles'] ) && empty( $args['style'] ) )
+		if (
+			false === strpos( $block_name, 'woocommerce/' ) ||
+			( empty( $args['style_handles'] ) && empty( $args['style'] )
+			)
 		) {
 			return $args;
 		}
