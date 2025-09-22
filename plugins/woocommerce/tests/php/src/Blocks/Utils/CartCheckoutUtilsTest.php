@@ -317,7 +317,7 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 	 *
 	 * @dataProvider hasBlockVariationDataProvider
 	 *
-	 * @param $block_id The block name to search for.
+	 * @param string $block_id The block name to search for.
 	 * @param string $attribute The attribute name to check.
 	 * @param mixed  $value The expected value of the attribute.
 	 * @param string $content The post content to search within.
