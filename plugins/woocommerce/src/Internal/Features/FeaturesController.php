@@ -545,9 +545,9 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'mcp_integration'             => array(
-				'name'               => __( 'MCP Server', 'woocommerce' ),
+				'name'               => __( 'WooCommerce MCP', 'woocommerce' ),
 				'description'        => function() {
-					$base_description = __( 'Enable Model Context Protocol (MCP) integration for AI-powered WooCommerce operations.', 'woocommerce' );
+					$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
 					
 					// Check permalink structure requirement
 					$permalink_structure = get_option( 'permalink_structure' );
@@ -560,27 +560,23 @@ class FeaturesController {
 							$permalinks_url,
 							__( 'Configure Permalinks', 'woocommerce' )
 						);
-						return $base_description . $permalink_warning;
+						// Add documentation link to permalink warning
+						$documentation_link = sprintf(
+							' <a href="%s" target="_blank">%s</a>',
+							'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
+							__( 'Learn more', 'woocommerce' )
+						);
+						return $base_description . $permalink_warning . $documentation_link;
 					}
-					
-					// Show setup instructions for MCP authentication
-					$site_url = get_site_url();
-					$connection_example = sprintf(
-						'<br><br><strong>%s:</strong><br>
-						<ol>
-							<li>%s</li>
-							<li>%s</li>
-							<li>%s:<br><code>claude mcp add woocommerce_mcp \\<br>  --env WP_API_URL=%s/wp-json/woocommerce/mcp \\<br>  --env CUSTOM_HEADERS=\'{"X-MCP-API-Key": "YOUR_CONSUMER_KEY:YOUR_CONSUMER_SECRET"}\' \\<br>  -- npx -y @automattic/mcp-wordpress-remote@latest</code></li>
-						</ol>',
-						__( 'Connect with Claude Code', 'woocommerce' ),
-						__( 'Go to WooCommerce → Settings → Advanced → REST API', 'woocommerce' ),
-						__( 'Create a new API key with "Read/Write" permissions', 'woocommerce' ),
-						__( 'Configure MCP with your API key', 'woocommerce' ),
-						$site_url
+
+					// Add documentation link
+					$documentation_link = sprintf(
+						' <a href="%s" target="_blank">%s</a>',
+						'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
+						__( 'Learn more', 'woocommerce' )
 					);
-					return $base_description . $connection_example;
-					
-					return $base_description;
+
+					return $base_description . $documentation_link;
 				},
 				'enabled_by_default' => false,
 				'disable_ui'         => false,
