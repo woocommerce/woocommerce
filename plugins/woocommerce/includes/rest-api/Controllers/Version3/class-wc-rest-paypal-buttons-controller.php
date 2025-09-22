@@ -161,7 +161,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function cancel_payment( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		if ( ! is_array( $data ) || empty( $data['order_id'] ) ) {
+		if ( empty( $data['order_id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
