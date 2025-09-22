@@ -269,7 +269,7 @@ class QueryUtils {
 				)
 			);
 
-			// Force WP_Query return empty if don't found any order.
+			// Force WP_Query to return an empty array if no order is found.
 			$order_ids = ! empty( $order_ids ) ? $order_ids : array( 0 );
 
 			$args['post__in'] = $order_ids;
