@@ -92,7 +92,7 @@ const PayPalButtonsContainer = ( {
 		}
 	};
 
-	const onApprove = async ( data ) => {
+	const onApprove = ( data ) => {
 		if ( data.paymentID && orderReceivedUrl ) {
 			window.location.href = orderReceivedUrl;
 		}

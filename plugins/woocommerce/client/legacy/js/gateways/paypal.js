@@ -51,7 +51,7 @@ jQuery(function ($) {
 				}
 			},
 
-			async onApprove( data ) {
+			onApprove( data ) {
 				if ( data.paymentID && orderReceivedUrl ) {
 					window.location.href = orderReceivedUrl;
 				}
