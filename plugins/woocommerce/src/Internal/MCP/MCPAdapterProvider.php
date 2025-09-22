@@ -86,9 +86,8 @@ class MCPAdapterProvider {
 	 * @param object $adapter MCP adapter instance.
 	 */
 	public function initialize_mcp_server( $adapter ): void {
-		// Get abilities from the registry
-		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
-		$abilities_ids = $abilities_registry->getAbilitiesIDs();
+		// Get filtered abilities for MCP server
+		$abilities_ids = $this->get_woocommerce_mcp_abilities();
 
 		// Bail if no abilities are available
 		if ( empty( $abilities_ids ) ) {
@@ -125,6 +124,35 @@ class MCPAdapterProvider {
 			// Re-enable MCP validation immediately after server creation
 			remove_filter( 'mcp_validation_enabled', '__return_false', 999 );
 		}
+	}
+
+	/**
+	 * Get WooCommerce abilities for MCP server.
+	 *
+	 * Filters abilities to include only those with 'woocommerce/' namespace by default,
+	 * with a filter to allow inclusion of abilities from other namespaces.
+	 *
+	 * @return array Array of ability IDs for MCP server.
+	 */
+	private function get_woocommerce_mcp_abilities(): array {
+		// Get all abilities from the registry
+		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
+		$all_abilities_ids = $abilities_registry->getAbilitiesIDs();
+
+		// Filter abilities based on namespace and custom filter
+		$mcp_abilities = array_filter(
+			$all_abilities_ids,
+			function( $ability_id ) {
+				// Include WooCommerce abilities by default
+				$include = str_starts_with( $ability_id, 'woocommerce/' );
+
+				// Allow filter to override inclusion decision
+				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
+			}
+		);
+
+		// Re-index array
+		return array_values( $mcp_abilities );
 	}
 
 	/**
