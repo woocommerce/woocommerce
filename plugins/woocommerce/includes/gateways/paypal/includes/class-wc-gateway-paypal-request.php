@@ -70,6 +70,7 @@ class WC_Gateway_Paypal_Request {
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT      = 'payment/capture';
 	private const WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT    = 'payment/authorize';
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT = 'payment/capture_auth';
+	private const WPCOM_PROXY_CLIENT_ID_ENDPOINT            = 'client_id';
 
 	/**
 	 * Constructor.
@@ -525,6 +526,27 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => $order->{"get_{$address_type}_country"}(),
 			),
 		);
+	}
+
+	/**
+	 * Fetch the PayPal client-id from the Transact platform.
+	 *
+	 * @return string|null The PayPal client-id, or null if the request fails.
+	 */
+	public function fetch_paypal_client_id() {
+		$request_body = array(
+			'test_mode' => $this->gateway->testmode,
+		);
+
+		$response = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_CLIENT_ID_ENDPOINT, $request_body );
+		
+		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return null;
+		}
+
+		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
+
+		return $response_data['client_id'] ?? null;
 	}
 
 	/**
