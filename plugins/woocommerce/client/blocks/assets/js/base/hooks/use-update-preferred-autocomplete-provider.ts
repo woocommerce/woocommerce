@@ -54,6 +54,7 @@ export function useUpdatePreferredAutocompleteProvider(
 				addressType === 'shipping'
 					? 'shippingAddress'
 					: 'billingAddress';
+
 			return {
 				country: (
 					select(
