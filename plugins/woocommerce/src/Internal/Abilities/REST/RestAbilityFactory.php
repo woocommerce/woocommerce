@@ -70,8 +70,12 @@ class RestAbilityFactory {
 			);
 		} catch ( \Throwable $e ) {
 			// Log the error for debugging but don't break the registration of other abilities.
-			// Log error for debugging purposes.
-			error_log( "Failed to register ability {$ability_config['id']}: " . $e->getMessage() );
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error(
+					"Failed to register ability {$ability_config['id']}: " . $e->getMessage(),
+					array( 'source' => 'woocommerce-rest-abilities' )
+				);
+			}
 		}
 	}
 

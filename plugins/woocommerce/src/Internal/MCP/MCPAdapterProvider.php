@@ -102,7 +102,7 @@ class MCPAdapterProvider {
 
 		// Temporarily disable MCP validation during server creation.
 		// Workaround for validator bug with union types (e.g., ["integer", "null"]).
-		// TODO: Remove once mcp-adapter validator bug is fixed.
+		// This will be removed once the mcp-adapter validator bug is fixed.
 		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 
 		try {
@@ -153,7 +153,13 @@ class MCPAdapterProvider {
 				$include = str_starts_with( $ability_id, 'woocommerce/' );
 
 				// Allow filter to override inclusion decision.
-				/** This filter is documented in the get_woocommerce_mcp_abilities method. */
+				/**
+				 * Filter to override MCP ability inclusion decision.
+				 *
+				 * @since 10.3.0
+				 * @param bool   $include    Whether to include the ability.
+				 * @param string $ability_id The ability ID.
+				 */
 				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
 			}
 		);
