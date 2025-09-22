@@ -272,8 +272,8 @@ class QueryUtils {
 			if ( empty( $order_ids ) ) {
 				$order_ids = array( 0 );
 			} else {
-				$include_ids = $args['post__in'] ?? array();
-				$order_ids = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
+				$include_ids      = $args['post__in'] ?? array();
+				$order_ids        = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
 				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
 			}
 		}
@@ -285,8 +285,8 @@ class QueryUtils {
 			if ( ! empty( $order_ids ) ) {
 				unset( $args['s'] );
 
-				$include_ids = $args['post__in'] ?? array();
-				$order_ids = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
+				$include_ids      = $args['post__in'] ?? array();
+				$order_ids        = ! empty( $include_ids ) ? array_intersect( $order_ids, $include_ids ) : $order_ids;
 				$args['post__in'] = array_merge( $order_ids, array( 0 ) );
 			}
 		}
