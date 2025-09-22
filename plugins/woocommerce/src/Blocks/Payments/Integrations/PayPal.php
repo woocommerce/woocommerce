@@ -79,6 +79,7 @@ final class PayPal extends AbstractPaymentMethodType {
 			'description'        => $this->get_setting( 'description' ),
 			'supports'           => $this->get_supported_features(),
 			'isButtonsEnabled'   => $buttons->is_enabled(),
+			'isProductPage'      => is_product(),
 			'buttonsOptions'     => $options,
 			'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
 			'create_order_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),

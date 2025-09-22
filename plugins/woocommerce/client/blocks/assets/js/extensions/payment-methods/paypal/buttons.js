@@ -20,6 +20,7 @@ import apiFetch from '@wordpress/api-fetch';
  * @param {string} [props.merchantId]
  * @param {string} [props.partnerAttributionId]
  * @param {string} [props.pageType]
+ * @param {boolean} [props.isProductPage]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
 const PayPalButtonsContainer = ( {
@@ -32,6 +33,7 @@ const PayPalButtonsContainer = ( {
 	merchantId,
 	partnerAttributionId,
 	pageType,
+	isProductPage,
 } ) => {
 	const [ orderReceivedUrl, setOrderReceivedURL ] = useState();
 	const payPalData = getPaymentMethodData( 'paypal', {} );
@@ -50,6 +52,39 @@ const PayPalButtonsContainer = ( {
 	const createOrder = async () => {
 		let responseData;
 		try {
+			// If we're inside the product page, we need to empty the cart,
+			// and add the current product to the cart.
+			if ( isProductPage ) {
+				await apiFetch( {
+					method: 'DELETE',
+					path: '/wc/store/v1/cart/items',
+				} );
+
+				// Get product ID from the value of the "add-to-cart" input field.
+				const productId = document.querySelector(
+					'[name="add-to-cart"]'
+				)?.value;
+				if ( ! productId ) {
+					return null;
+				}
+
+				// Get quantity from the value of the "quantity" input field.
+				const quantity =
+					document.querySelector( '[name="quantity"]' )?.value;
+				if ( ! quantity ) {
+					return null;
+				}
+
+				await apiFetch( {
+					method: 'POST',
+					path: '/wc/store/v1/cart/items',
+					data: {
+						id: productId,
+						quantity,
+					},
+				} );
+			}
+
 			// Create a draft order in WooCommerce.
 			responseData = await apiFetch( {
 				method: 'GET',

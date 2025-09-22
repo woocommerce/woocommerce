@@ -10,6 +10,34 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
+				if ( paypal_standard.isProductPage ) {
+					await window.wp.apiFetch( {
+						method: 'DELETE',
+						path: '/wc/store/v1/cart/items',
+					} );
+
+					// Get product ID from the value of the "add-to-cart" input field.
+					const productId = document.querySelector( '[name="add-to-cart"]' )?.value;
+					if ( ! productId ) {
+						return null;
+					}
+
+					// Get quantity from the value of the "quantity" input field.
+					const quantity = document.querySelector( '[name="quantity"]' )?.value;
+					if ( ! quantity ) {
+						return null;
+					}
+
+					await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/store/v1/cart/items',
+						data: {
+							id: productId,
+							quantity: quantity,
+						},
+					} );
+				}
+
 				let responseData;
 				try {
 					// Create a draft order in WooCommerce.
@@ -36,7 +64,7 @@ jQuery(function ($) {
 							order_id: responseData.order_id,
 						},
 					} );
-		
+
 					orderReceivedUrl = paypalResponseData.return_url;
 
 					return paypalResponseData.paypal_order_id;
@@ -52,20 +80,20 @@ jQuery(function ($) {
 				}
 			},
 
-			onError: function ( error ) {				
+			onError: function ( error ) {
 				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
 						'PayPal error: ' +
 						sanitizedErrorMessage +
-					'</li></ul>';	
-				
+					'</li></ul>';
+
 				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
 
 				if ( ! $noticeContainer.length ) {
 					return;
 				}
-		
+
 				$(
 					'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message'
 				).remove();
