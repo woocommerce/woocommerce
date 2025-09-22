@@ -265,14 +265,6 @@ The demo plugin creates a `woocommerce-demo/store-info` ability that retrieves s
 - Check namespace inclusion using the `woocommerce_mcp_include_ability` filter
 - Verify ability callbacks are accessible
 
-### Debug Logging
-
-Enable WooCommerce logging to debug MCP operations:
-
-```php
-add_filter( 'woocommerce_logging_enabled', '__return_true' );
-```
-
 Check **WooCommerce → Status → Logs** for entries with source `woocommerce-mcp`.
 
 ## Important Considerations
