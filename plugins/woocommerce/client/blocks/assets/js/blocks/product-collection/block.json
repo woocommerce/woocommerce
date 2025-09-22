@@ -11,7 +11,8 @@
 		"all products",
 		"by attribute",
 		"by category",
-		"by tag"
+		"by tag",
+		"temp keyword"
 	],
 	"textdomain": "woocommerce",
 	"attributes": {
