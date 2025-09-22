@@ -14,6 +14,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema;
 use WP_Http;
 use WP_Error;
 use WP_Comment;
@@ -34,11 +35,37 @@ class Controller extends AbstractController {
 	protected $rest_base = 'order-notes';
 
 	/**
+	 * Schema class for this route.
+	 *
+	 * @var OrderNoteSchema
+	 */
+	protected $item_schema;
+
+	/**
+	 * Query utils class.
+	 *
+	 * @var QueryUtils
+	 */
+	protected $query_utils;
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @param OrderNoteSchema $item_schema Order schema class.
+	 * @param QueryUtils      $query_utils Query utils class.
+	 * @internal
+	 */
+	final public function init( OrderNoteSchema $item_schema, QueryUtils $query_utils ) {
+		$this->item_schema = $item_schema;
+		$this->query_utils = $query_utils;
+	}
+
+	/**
 	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
 	 * after running various hooks on the response.
 	 */
 	protected function get_schema(): array {
-		return OrderNoteSchema::get_item_schema();
+		return $this->item_schema->get_item_schema();
 	}
 
 	/**
@@ -47,7 +74,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_query_schema(): array {
-		return QueryUtils::get_query_schema();
+		return $this->query_utils->get_query_schema();
 	}
 
 	/**
@@ -61,9 +88,12 @@ class Controller extends AbstractController {
 				'schema' => array( $this, 'get_public_item_schema' ),
 				'args'   => array(
 					'order_id' => array(
-						'description' => __( 'The order ID that notes belong to.', 'woocommerce' ),
-						'type'        => 'integer',
-						'required'    => true,
+						'description'       => __( 'The order ID that notes belong to.', 'woocommerce' ),
+						'type'              => 'integer',
+						'validate_callback' => function ( $value ) {
+							return $this->is_valid_order_id( $value );
+						},
+						'required'          => true,
 					),
 				),
 				array(
@@ -111,11 +141,12 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param mixed           $item WordPress representation of the item.
-	 * @param WP_REST_Request $request Request object.
+	 * @param mixed            $item WordPress representation of the item.
+	 * @param WP_REST_Request  $request Request object.
+	 * @param WP_REST_Response $response Response object.
 	 * @return array
 	 */
-	protected function prepare_links( $item, WP_REST_Request $request ): array {
+	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
 		return array(
 			'self'       => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, (int) $item->comment_ID ) ),
@@ -137,33 +168,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_item_response( $note, WP_REST_Request $request ): array {
-		return array(
-			'id'               => (int) $note->comment_ID,
-			'order_id'         => (int) $note->comment_post_ID,
-			'author'           => $note->comment_author,
-			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
-			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
-			'note'             => $note->comment_content,
-			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
-		);
-	}
-
-	/**
-	 * Check if a given request has access to the order.
-	 *
-	 * @param  WC_Order|boolean $order The order object.
-	 * @return WP_Error|boolean
-	 */
-	protected function order_permissions_check( $order ) {
-		if ( ! $order || ! $order instanceof WC_Order ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
-		}
-
-		if ( ! $this->check_permissions( 'order', 'edit', (int) $order->get_id() ) ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_edit', __( 'Sorry, you are not allowed to access notes for this order.', 'woocommerce' ), rest_authorization_required_code() );
-		}
-
-		return true;
+		return $this->item_schema->get_item_response( $note, $request );
 	}
 
 	/**
@@ -173,7 +178,16 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function get_item_permissions_check( $request ) {
-		return $this->order_permissions_check( Utils::get_order_by_note_id( (int) $request['id'] ) );
+		$order = $this->get_order_by_note_id( (int) $request['id'] );
+
+		if ( ! $order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read', $order->get_id() ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
 	}
 
 	/**
@@ -183,7 +197,10 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		return $this->order_permissions_check( Utils::get_order_by_id( (int) $request['order_id'] ) );
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read', (int) $request['order_id'] ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
 	}
 
 	/**
@@ -193,7 +210,10 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		return $this->order_permissions_check( Utils::get_order_by_id( (int) $request['order_id'] ) );
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'create', (int) $request['order_id'] ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
 	}
 
 	/**
@@ -203,7 +223,16 @@ class Controller extends AbstractController {
 	 * @return bool|WP_Error
 	 */
 	public function delete_item_permissions_check( $request ) {
-		return $this->order_permissions_check( Utils::get_order_by_note_id( (int) $request['id'] ) );
+		$order = $this->get_order_by_note_id( (int) $request['id'] );
+
+		if ( ! $order ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'delete', $order->get_id() ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
 	}
 
 	/**
@@ -213,10 +242,10 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_item( $request ) {
-		$note = Utils::get_note_by_id( (int) $request['id'] );
+		$note = $this->get_note_by_id( (int) $request['id'] );
 
 		if ( ! $note ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		return $this->prepare_item_for_response( $note, $request );
@@ -229,13 +258,13 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function get_items( $request ) {
-		$order = Utils::get_order_by_id( (int) $request['order_id'] );
+		$order = $this->get_order_by_id( (int) $request['order_id'] );
 
 		if ( ! $order ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid order ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		$results = QueryUtils::get_query_results( $request, $order );
+		$results = $this->query_utils->get_query_results( $request, $order );
 		$items   = array();
 
 		foreach ( $results as $result ) {
@@ -253,15 +282,14 @@ class Controller extends AbstractController {
 	 */
 	public function create_item( $request ) {
 		if ( ! empty( $request['id'] ) ) {
-			/* translators: %s: post type */
-			return $this->get_route_error_response( $this->get_error_prefix() . 'exists', __( 'Cannot create existing order note.', 'woocommerce' ), WP_Http::BAD_REQUEST );
+			return $this->get_route_error_by_code( self::RESOURCE_EXISTS );
 		}
 
-		$order   = Utils::get_order_by_id( (int) $request['order_id'] );
+		$order   = $this->get_order_by_id( (int) $request['order_id'] );
 		$note_id = $order ? $order->add_order_note( $request['note'], $request['is_customer_note'], true ) : null;
 
 		if ( ! $note_id ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_create', __( 'Cannot create order note.', 'woocommerce' ), WP_Http::INTERNAL_SERVER_ERROR );
+			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
 		$note = get_comment( $note_id );
@@ -291,10 +319,10 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function delete_item( $request ) {
-		$note = Utils::get_note_by_id( (int) $request['id'] );
+		$note = $this->get_note_by_id( (int) $request['id'] );
 
 		if ( empty( $note ) ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'invalid_id', __( 'Invalid resource ID.', 'woocommerce' ), WP_Http::NOT_FOUND );
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		$request->set_param( 'context', 'edit' );
@@ -303,7 +331,7 @@ class Controller extends AbstractController {
 		$result = wc_delete_order_note( (int) $note->comment_ID );
 
 		if ( ! $result ) {
-			return $this->get_route_error_response( $this->get_error_prefix() . 'cannot_delete', __( 'This object cannot be deleted.', 'woocommerce' ), WP_Http::INTERNAL_SERVER_ERROR );
+			return $this->get_route_error_by_code( self::CANNOT_DELETE );
 		}
 
 		/**
@@ -317,5 +345,57 @@ class Controller extends AbstractController {
 		do_action( $this->get_hook_prefix() . 'deleted', $note, $response, $request );
 
 		return $response;
+	}
+
+	/**
+	 * Check if an order is valid.
+	 *
+	 * @param mixed $order_id The order ID.
+	 * @return bool True if the order is valid, false otherwise.
+	 */
+	protected function is_valid_order_id( $order_id ): bool {
+		$order = $this->get_order_by_id( (int) $order_id );
+		return $order && $order instanceof WC_Order;
+	}
+
+	/**
+	 * Get an order by ID.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return WC_Order|null
+	 */
+	protected function get_order_by_id( int $order_id ) {
+		if ( ! $order_id ) {
+			return null;
+		}
+		$order = wc_get_order( $order_id );
+		return $order && 'shop_order' === $order->get_type() ? $order : null;
+	}
+	/**
+	 * Get the parent order of a note.
+	 *
+	 * @param int|WP_Comment $note_id The note ID or note object.
+	 * @return WC_Order|null
+	 */
+	protected function get_order_by_note_id( $note_id ) {
+		$note = $note_id instanceof WP_Comment ? $note_id : $this->get_note_by_id( (int) $note_id );
+		if ( ! $note ) {
+			return null;
+		}
+		return $this->get_order_by_id( (int) $note->comment_post_ID );
+	}
+
+	/**
+	 * Get a note by ID.
+	 *
+	 * @param int $note_id The note ID.
+	 * @return WP_Comment|null
+	 */
+	protected function get_note_by_id( int $note_id ) {
+		if ( ! $note_id ) {
+			return null;
+		}
+		$note = get_comment( $note_id );
+		return $note && 'order_note' === $note->comment_type ? $note : null;
 	}
 }

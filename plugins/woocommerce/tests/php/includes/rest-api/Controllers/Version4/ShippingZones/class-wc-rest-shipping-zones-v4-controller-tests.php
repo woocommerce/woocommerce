@@ -513,10 +513,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		// Test the location formatting directly since we can't easily inject
 		// malformed data without triggering core WooCommerce handling.
-		$controller = new \Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller();
+		$schema = new \Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\ShippingZoneSchema();
 
 		// Use reflection to test the protected method.
-		$reflection = new \ReflectionClass( $controller );
+		$reflection = new \ReflectionClass( $schema );
 		$method     = $reflection->getMethod( 'get_location_name' );
 		$method->setAccessible( true );
 
@@ -525,7 +525,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 			'code' => 'US:CA',
 			'type' => 'state',
 		);
-		$result         = $method->invoke( $controller, $valid_location );
+		$result         = $method->invoke( $schema, $valid_location );
 		$this->assertEquals( 'California', $result );
 
 		// Test malformed state location (missing state part).
@@ -533,7 +533,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 			'code' => 'US',
 			'type' => 'state',
 		);
-		$result             = $method->invoke( $controller, $malformed_location );
+		$result             = $method->invoke( $schema, $malformed_location );
 		$this->assertEquals( 'US', $result ); // Should return raw code as fallback.
 
 		// Test malformed state location (too many parts).
@@ -541,7 +541,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 			'code' => 'US:CA:Extra',
 			'type' => 'state',
 		);
-		$result              = $method->invoke( $controller, $malformed_location2 );
+		$result              = $method->invoke( $schema, $malformed_location2 );
 		$this->assertEquals( 'US:CA:Extra', $result ); // Should return raw code as fallback.
 	}
 
