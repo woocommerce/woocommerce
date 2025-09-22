@@ -121,6 +121,9 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$existing_paypal_order_id = $order->get_meta( '_paypal_order_id' );
 
 		if ( $existing_paypal_order_id ) {
+			$order->update_status( OrderStatus::PENDING );
+			$order->save();
+
 			return new WP_REST_Response(
 				array(
 					'paypal_order_id' => $existing_paypal_order_id,
