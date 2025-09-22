@@ -65,6 +65,12 @@ class MCPAdapterProvider {
 	private function initialize_mcp_adapter(): void {
 		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer)
 		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->warning(
+					'MCP adapter class not found. Skipping MCP initialization.',
+					array( 'source' => 'woocommerce-mcp' )
+				);
+			}
 			return;
 		}
 
@@ -97,7 +103,7 @@ class MCPAdapterProvider {
 		// Temporarily disable MCP validation during server creation
 		// Workaround for validator bug with union types (e.g., ["integer", "null"])
 		// TODO: Remove once mcp-adapter validator bug is fixed
-		add_filter( 'mcp_validation_enabled', '__return_false', 999 );
+		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 
 		try {
 			// Create MCP server
@@ -105,8 +111,8 @@ class MCPAdapterProvider {
 				'woocommerce-mcp',
 				'woocommerce',
 				'mcp',
-				'WooCommerce MCP Server',
-				'AI-accessible WooCommerce operations via MCP',
+				__( 'WooCommerce MCP Server', 'woocommerce' ),
+				__( 'AI-accessible WooCommerce operations via MCP', 'woocommerce' ),
 				'1.0.0',
 				array( WooCommerceRestTransport::class ),
 				\WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler::class,
@@ -122,7 +128,7 @@ class MCPAdapterProvider {
 			}
 		} finally {
 			// Re-enable MCP validation immediately after server creation
-			remove_filter( 'mcp_validation_enabled', '__return_false', 999 );
+			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 		}
 	}
 
@@ -153,6 +159,18 @@ class MCPAdapterProvider {
 
 		// Re-index array
 		return array_values( $mcp_abilities );
+	}
+
+	/**
+	 * Temporarily disable MCP validation.
+	 *
+	 * Used as a callback for the mcp_validation_enabled filter to work around
+	 * validator bugs with union types.
+	 *
+	 * @return bool Always returns false to disable validation.
+	 */
+	private static function disable_mcp_validation(): bool {
+		return false;
 	}
 
 	/**
