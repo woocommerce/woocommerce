@@ -343,17 +343,39 @@ final class AssetsController {
 	 */
 	private function get_script_dependency_src_array( array $dependencies ) {
 		$wp_scripts = wp_scripts();
-		return array_reduce(
-			$dependencies,
-			function ( $src, $handle ) use ( $wp_scripts ) {
-				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-					$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
-					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
+
+		$found_dependencies = array();
+		$this->gather_script_dependency_handles( $dependencies, $wp_scripts, $found_dependencies );
+
+		$src = array();
+		foreach ( $found_dependencies as $handle => $unused ) {
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+		}
+		return $src;
+	}
+
+	/**
+	 * Recursively gather all unique script dependency handles from a starting list.
+	 *
+	 * Traverses the dependency graph for each input handle, collecting any found handles
+	 * and their nested dependencies in the provided array. Used internally to build a
+	 * complete, deduplicated set of handles for further processing (e.g., mapping to src URLs).
+	 *
+	 * @param array       $dependencies       Array of initial script handles to process.
+	 * @param \WP_Scripts $wp_scripts         WP_Scripts instance containing all registered scripts.
+	 * @param array       $found_dependencies Reference to array in which discovered handles are stored.
+	 *
+	 * @return void
+	 */
+	private function gather_script_dependency_handles( array $dependencies, \WP_Scripts $wp_scripts, &$found_dependencies = array() ) {
+		foreach ( $dependencies as $handle ) {
+			if ( isset( $wp_scripts->registered[ $handle ] ) && ! isset( $found_dependencies[ $handle ] ) ) {
+				$found_dependencies[ $handle ] = true;
+				if ( ! empty( $wp_scripts->registered[ $handle ]->deps ) ) {
+					$this->gather_script_dependency_handles( $wp_scripts->registered[ $handle ]->deps, $wp_scripts, $found_dependencies );
 				}
-				return $src;
-			},
-			array()
-		);
+			}
+		}
 	}
 
 	/**
