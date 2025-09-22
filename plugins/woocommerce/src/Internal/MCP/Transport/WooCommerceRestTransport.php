@@ -115,7 +115,7 @@ class WooCommerceRestTransport extends RestTransport {
 		global $wpdb;
 
 		// Hash the consumer key as WooCommerce does.
-		$hashed_consumer_key = wc_api_hash( sanitize_text_field( $consumer_key ) );
+		$hashed_consumer_key = wc_api_hash( trim( (string) $consumer_key ) );
 
 		// Query the WooCommerce API keys table directly.
 		$user_data = $wpdb->get_row(
@@ -137,10 +137,10 @@ class WooCommerceRestTransport extends RestTransport {
 		}
 
 		// Validate consumer secret using hash_equals for timing attack protection.
-		if ( ! hash_equals( $user_data->consumer_secret, $consumer_secret ) ) {
+		if ( ! hash_equals( $user_data->consumer_secret, trim( (string) $consumer_secret ) ) ) {
 			return new \WP_Error(
 				'invalid_consumer_secret',
-				'Consumer secret is invalid.',
+				__( 'Invalid credentials.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -148,10 +148,18 @@ class WooCommerceRestTransport extends RestTransport {
 		// Store permissions for tool-level checking.
 		self::$current_mcp_permissions = $user_data->permissions;
 
-		// Set the current user.
-		wp_set_current_user( $user_data->user_id );
+		// Ensure the user exists before switching context.
+		$user = get_user_by( 'id', (int) $user_data->user_id );
+		if ( ! $user ) {
+			return new \WP_Error(
+				'mcp_user_not_found',
+				__( 'The user associated with this API key no longer exists.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+		wp_set_current_user( $user->ID );
 
-		return $user_data->user_id;
+		return $user->ID;
 	}
 
 	/**
