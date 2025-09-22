@@ -370,9 +370,3 @@ body.wc-block-product-gallery-modal-open {
 .wp-block-group.woocommerce.product .up-sells.upsells.products {
 	max-width: var(--wp--style--global--wide-size);
 }
-
-// These styles are for handling RTL currency symbols in classic themes.
-.woocommerce-Price-bidi {
-	unicode-bidi: bidi-override;
-	direction: ltr;
-}

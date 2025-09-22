@@ -6,6 +6,7 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
+	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
@@ -55,10 +56,11 @@ export const getProductData = (
 	selectedAttributes: SelectedAttributes[]
 ) => {
 	let productId = id;
-	let productData: ProductData | undefined;
+	let productData: ProductData | VariationData | undefined;
 
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
+	let type: ProductData[ 'type' ] | 'variation' | null = null;
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		if ( ! products || ! products[ id ] ) {
 			return null;
@@ -70,13 +72,14 @@ export const getProductData = (
 		);
 		if ( matchedVariation?.variation_id ) {
 			productId = matchedVariation.variation_id;
-			productData =
-				products?.[ id ]?.variations?.[
-					matchedVariation?.variation_id
-				];
+			productData = products?.[ id ]?.variations?.[
+				matchedVariation?.variation_id
+			] as VariationData;
+			type = 'variation';
 		}
 	} else {
-		productData = products?.[ productId ];
+		productData = products?.[ productId ] as ProductData;
+		type = productData?.type;
 	}
 
 	if ( typeof productData !== 'object' || productData === null ) {
@@ -96,6 +99,7 @@ export const getProductData = (
 		min,
 		max,
 		step,
+		type,
 	};
 };
 

@@ -75,20 +75,7 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 				echo wp_kses_post( $item->get_cogs_value_html() );
 
 				$refunded_cost = $order->get_cogs_refunded_for_item( $item_id );
-
-				if ( $refunded_cost ) {
-					/**
-					 * Filter to customize the refunded Cost of Goods Sold (COGS) value HTML for a given order item.
-					 *
-					 * @since 10.3.0
-					 *
-					 * @param string $refunded_html The formatted refunded COGS HTML.
-					 * @param float  $refunded_cost The refunded cost value.
-					 * @param array  $item          The order item data.
-					 * @param WC_Order $order       The order object.
-					 */
-					echo '<small class="refunded">' . apply_filters( 'woocommerce_order_item_cogs_refunded_html', wc_price( $refunded_cost, $wc_price_arg ), $refunded_cost, $item, $order ) . '</small>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				}
+				echo wp_kses_post( $item->get_cogs_refund_value_html( $refunded_cost, $wc_price_arg, $order ) );
 				?>
 			</div>
 		</td>

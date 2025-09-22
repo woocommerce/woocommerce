@@ -137,6 +137,8 @@ class ProductsController {
 
 		$this->display_migration_summary();
 
+		$this->display_feedback_survey();
+
 		WP_CLI::success( 'Migration completed successfully.' );
 	}
 
@@ -631,6 +633,17 @@ class ProductsController {
 			WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RErrors Encountered: %d%%n', $stats['errors_encountered'] ) ) );
 		}
 
+		WP_CLI::line( '' );
+	}
+
+	/**
+	 * Display feedback survey link to collect user feedback.
+	 */
+	private function display_feedback_survey(): void {
+		WP_CLI::line( '' );
+		WP_CLI::line( WP_CLI::colorize( '%GHelp us improve the WooCommerce Migrator!%n' ) );
+		WP_CLI::line( 'Please share your feedback about this migration experience:' );
+		WP_CLI::line( WP_CLI::colorize( '%Chttps://woocommerce.com/migrator-feedback/%n' ) );
 		WP_CLI::line( '' );
 	}
 

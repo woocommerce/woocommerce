@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Move Cost of Goods Sold HTML rendering filters out of template files
