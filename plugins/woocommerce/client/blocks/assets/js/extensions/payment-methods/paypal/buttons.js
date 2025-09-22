@@ -79,8 +79,6 @@ const PayPalButtonsContainer = ( {
 
 			return paypalResponseData.paypal_order_id;
 		} catch ( error ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Failed to create order', error );
 			return null;
 		}
 	};
