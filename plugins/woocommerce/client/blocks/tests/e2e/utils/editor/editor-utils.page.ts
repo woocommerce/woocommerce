@@ -26,9 +26,11 @@ export class Editor extends CoreEditor {
 			.locator( '.editor-styles-wrapper, iframe[name=editor-canvas]' )
 			.first();
 
-		const isFramed = await canvasLocator.evaluate(
-			( node ) => node.tagName === 'IFRAME'
-		);
+		const isFramed = canvasLocator
+			? await canvasLocator.evaluate(
+					( node ) => node.tagName === 'IFRAME'
+			  )
+			: false;
 
 		if ( isFramed ) {
 			return this.canvas.locator( blockSelector );
