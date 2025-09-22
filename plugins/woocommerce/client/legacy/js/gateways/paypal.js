@@ -23,6 +23,8 @@ jQuery(function ($) {
 					} );
 
 					if ( ! responseData.order_id ) {
+						// eslint-disable-next-line no-console
+						console.error( 'Failed to create WooCommerce order', responseData );
 						return null;
 					}
 
@@ -42,6 +44,7 @@ jQuery(function ($) {
 
 					return paypalResponseData.paypal_order_id;
 				} catch ( error ) {
+					// eslint-disable-next-line no-console
 					console.error( 'Failed to create order', error );
 					return null;
 				}
@@ -55,22 +58,21 @@ jQuery(function ($) {
 
 			async onCancel() {
 				try {
-					await fetch(
-						paypal_standard.rest_url + 'wc/v3/paypal-buttons/cancel-payment',
-						{
-							method: 'POST',
-							body: JSON.stringify( {
-								order_id: orderId,
-							} ),
-							headers: {
-								'Content-Type': 'application/json',
-								'Nonce': paypal_standard.nonce,
-							},
-						}
-					);
+					await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/v3/paypal-buttons/cancel-payment',
+						headers: {
+							Nonce: paypal_standard.cancel_payment_nonce,
+						},
+						data: {
+							order_id: orderId,
+						},
+					} );
 		
 					orderReceivedUrl = '';
 				} catch ( error ) {
+					// eslint-disable-next-line no-console
+					console.error( 'Failed to cancel PayPal payment', error );
 				}
 			},
 
@@ -98,6 +100,7 @@ jQuery(function ($) {
 
 
 		buttons.render( container ).catch( function ( err ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Failed to render PayPal buttons', err );
 		});
 	}

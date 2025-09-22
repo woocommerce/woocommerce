@@ -61,6 +61,11 @@ const PayPalButtonsContainer = ( {
 			} );
 
 			if ( ! responseData.order_id ) {
+				// eslint-disable-next-line no-console
+				console.error(
+					'Failed to create WooCommerce order',
+					responseData
+				);
 				return null;
 			}
 
@@ -80,6 +85,8 @@ const PayPalButtonsContainer = ( {
 
 			return paypalResponseData.paypal_order_id;
 		} catch ( error ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Failed to create order', error );
 			return null;
 		}
 	};
@@ -92,22 +99,20 @@ const PayPalButtonsContainer = ( {
 
 	const onCancel = async () => {
 		try {
-			await fetch(
-				payPalData.rest_url + 'wc/v3/paypal-buttons/cancel-payment',
-				{
-					method: 'POST',
-					body: JSON.stringify( {
-						order_id: orderId,
-					} ),
-					headers: {
-						'Content-Type': 'application/json',
-						Nonce: payPalData.nonce,
-					},
-				}
-			);
+			await apiFetch( {
+				method: 'POST',
+				path: '/wc/v3/paypal-buttons/cancel-payment',
+				headers: {
+					Nonce: payPalData.cancel_payment_nonce,
+				},
+				data: {
+					order_id: orderId,
+				},
+			} );
 
 			setOrderReceivedURL( '' );
 		} catch ( error ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Failed to cancel PayPal payment', error );
 		}
 	};
