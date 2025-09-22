@@ -1,4 +1,11 @@
 /**
+ * External dependencies
+ */
+import { getSettingWithCoercion } from '@woocommerce/settings';
+import { ServerAddressAutocompleteProvider } from '@woocommerce/type-defs/address-autocomplete';
+import { ValidatedTextInput } from '@woocommerce/blocks-components';
+
+/**
  * Internal dependencies
  */
 import AddressLine2Field from './address-line-2-field';
@@ -24,10 +31,34 @@ const AddressLineFields = ( {
 		addressType
 	);
 
+	const serverProviders = getSettingWithCoercion<
+		ServerAddressAutocompleteProvider[]
+	>(
+		'addressAutocompleteProviders',
+		[],
+		( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
+			if ( ! Array.isArray( type ) ) {
+				return false;
+			}
+
+			return type.every( ( item ) => {
+				return (
+					typeof item.name === 'string' &&
+					typeof item.id === 'string' &&
+					typeof item.branding_html === 'string'
+				);
+			} );
+		}
+	);
+
+	const Address1Component = serverProviders.length
+		? AddressAutocomplete
+		: ValidatedTextInput;
+
 	return (
 		<>
 			{ address1 && (
-				<AddressAutocomplete
+				<Address1Component
 					{ ...address1FieldProps }
 					type={ address1.field.type }
 					addressType={ addressType }
