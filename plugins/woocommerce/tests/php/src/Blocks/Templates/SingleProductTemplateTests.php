@@ -18,6 +18,7 @@ class SingleProductTemplateTests extends WP_UnitTestCase {
 	 *
 	 */
 	public function test_dont_update_single_product_content_for_other_templates() {
+
 		$single_product_template                  = new SingleProductTemplate();
 		$default_product_catalog_template_content = '
 			<!-- wp:template-part {"slug":"header","theme":"twentytwentythree","tagName":"header"} /-->
