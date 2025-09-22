@@ -144,7 +144,7 @@ if ( ! function_exists( 'wc_create_new_customer' ) ) {
 				'user_login' => $username,
 				'user_pass'  => $password,
 				'user_email' => $email,
-				'role'       => 'customer',
+				'role'       => $args['role'] ?? 'customer',
 			)
 		);
 

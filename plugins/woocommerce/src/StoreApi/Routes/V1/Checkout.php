@@ -873,7 +873,30 @@ class Checkout extends AbstractCartRoute {
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
 			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+		} else {
+			$existing_customer = get_user_by( 'email', $request['billing_address']['email'] );
+			if ( $existing_customer ) {
+				$customer_id = $existing_customer->ID;
+			} else {
+				$customer_id = wc_create_new_customer(
+					$request['billing_address']['email'],
+					'',
+					'',
+					[
+						'first_name'             => $request['billing_address']['first_name'],
+						'last_name'              => $request['billing_address']['last_name'],
+						'source'                 => 'store-api',
+						'role'                   => 'guest_customer',
+						'send_user_notification' => false,
+					]
+				);
 
+				wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
+			}
+
+			// Associate customer with the order.
+			$this->order->set_customer_id( $customer_id );
+			$this->order->save();
 		}
 
 		// Persist customer address data to account.
