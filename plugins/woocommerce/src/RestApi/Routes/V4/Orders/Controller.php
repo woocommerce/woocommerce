@@ -310,7 +310,7 @@ class Controller extends AbstractController {
 		} catch ( \WC_Data_Exception $e ) {
 			$data = $e->getErrorData();
 
-			if ( $order->get_id() ) {
+			if ( $order && $order instanceof WC_Order && $order->get_id() ) {
 				try {
 					$order->set_status( 'checkout-draft' );
 					$order->save();
@@ -320,12 +320,14 @@ class Controller extends AbstractController {
 					// to throw on itself, but we don't have anything meaningful
 					// to do with this failure either.
 				}
-
 				$data['new_draft_order_id'] = $order->get_id();
 			}
+
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), $data );
 		} catch ( \WC_REST_Exception $e ) {
-			$order->delete( true );
+			if ( $order && $order instanceof WC_Order && $order->get_id() ) {
+				$order->delete( true );
+			}
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		}
 	}
