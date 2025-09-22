@@ -11,9 +11,11 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-
 use Automattic\WooCommerce\Enums\OrderStatus;
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+}
 
 
 /**
@@ -50,7 +52,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_order' ),
-				'permission_callback' => array( $this, 'validate_request' ),
+				'permission_callback' => array( $this, 'validate_create_order_request' ),
 			)
 		);
 
@@ -60,7 +62,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'cancel_payment' ),
-				'permission_callback' => array( $this, 'validate_request' ),
+				'permission_callback' => array( $this, 'validate_cancel_payment_request' ),
 			)
 		);
 	}
@@ -71,10 +73,24 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool True if the create order request is valid, false otherwise.
 	 */
-	public function validate_request( WP_REST_Request $request ) {
+	public function validate_create_order_request( WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
 			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_create_order' );
+		}
+		return false;
+	}
+
+	/**
+	 * Validate the cancel payment request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool True if the cancel payment request is valid, false otherwise.
+	 */
+	public function validate_cancel_payment_request( WP_REST_Request $request ) {
+		if ( $request->get_header( 'Nonce' ) ) {
+			$nonce = $request->get_header( 'Nonce' );
+			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_cancel_payment' );
 		}
 		return false;
 	}
@@ -161,5 +177,4 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		return new WP_REST_Response( array( 'success' => true ), 200 );
 	}
-}
 }
