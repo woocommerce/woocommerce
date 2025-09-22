@@ -197,7 +197,7 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function get_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read', $request['order_id'] ) ) {
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'read', (int) $request['order_id'] ) ) {
 			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 		return true;
@@ -210,7 +210,7 @@ class Controller extends AbstractController {
 	 * @return WP_Error|boolean
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! wc_rest_check_post_permissions( 'shop_order', 'create', $request['order_id'] ) ) {
+		if ( ! wc_rest_check_post_permissions( 'shop_order', 'create', (int) $request['order_id'] ) ) {
 			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 		return true;
@@ -374,11 +374,11 @@ class Controller extends AbstractController {
 	/**
 	 * Get the parent order of a note.
 	 *
-	 * @param int|WP_Comment $note The note ID or note object.
+	 * @param int|WP_Comment $note_id The note ID or note object.
 	 * @return WC_Order|null
 	 */
-	protected function get_order_by_note_id( $note ) {
-		$note = $note instanceof WP_Comment ? $note : $this->get_note_by_id( (int) $note );
+	protected function get_order_by_note_id( $note_id ) {
+		$note = $note_id instanceof WP_Comment ? $note_id : $this->get_note_by_id( (int) $note_id );
 		if ( ! $note ) {
 			return null;
 		}
