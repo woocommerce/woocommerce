@@ -382,7 +382,7 @@ class UpdateUtils {
 			return $item;
 		}
 
-		$cogs_value = $request_data['cost_of_goods_sold']['value'] ?? null;
+		$cogs_value = $request_data['cost_of_goods_sold']['total_value'] ?? null;
 		if ( ! is_null( $cogs_value ) ) {
 			$item->set_cogs_value( (float) $cogs_value );
 		}
