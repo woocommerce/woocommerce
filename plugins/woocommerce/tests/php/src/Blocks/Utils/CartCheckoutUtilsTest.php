@@ -11,6 +11,7 @@ use WP_UnitTestCase;
  */
 class CartCheckoutUtilsTest extends WP_UnitTestCase {
 
+
 	/**
 	 * Holds an instance of the dependency injection container.
 	 *
@@ -133,7 +134,7 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 
 		$this->assertNull( $result );
 	}
-	
+
 	/**
 	 * Data provider for has_block_variation test cases
 	 *
@@ -295,7 +296,7 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 				<!-- /wp:woocommerce/cart -->',
 				true,
 			),
-			'nested_block_found'                       => array(
+			'nested_block_found'                           => array(
 				'woocommerce/cart',
 				'displayType',
 				'full',
