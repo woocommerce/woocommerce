@@ -539,7 +539,7 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		$response = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_CLIENT_ID_ENDPOINT, $request_body );
-		
+
 		if ( is_wp_error( $response ) || 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return null;
 		}
