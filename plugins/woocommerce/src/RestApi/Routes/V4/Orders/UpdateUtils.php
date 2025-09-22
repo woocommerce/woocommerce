@@ -94,7 +94,7 @@ class UpdateUtils {
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			// The customer must exist, and in a multisite context must be visible to the current user.
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
-				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), WP_Http::BAD_REQUEST );
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_customer_id', esc_html__( 'Customer ID is invalid.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
 			}
 
 			// Make sure customer is part of blog.
