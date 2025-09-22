@@ -2724,7 +2724,7 @@ $stock_notifications_table_schema;
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
 		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
-			( new WC_Gateway_Paypal() )->should_load();
+			WC_Gateway_Paypal::get_instance()->should_load();
 		}
 	}
 
