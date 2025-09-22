@@ -164,7 +164,6 @@ store< MiniCart >(
 			get drawerOverlayClass() {
 				const baseClasses =
 					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-//
 				return state.isOpen
 					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
 					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
