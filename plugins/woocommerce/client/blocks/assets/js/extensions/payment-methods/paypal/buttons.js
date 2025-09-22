@@ -81,6 +81,7 @@ const PayPalButtonsContainer = ( {
 				},
 			} );
 
+			setOrderId( paypalResponseData.order_id );
 			setOrderReceivedURL( paypalResponseData.return_url );
 
 			return paypalResponseData.paypal_order_id;

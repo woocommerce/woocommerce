@@ -40,6 +40,7 @@ jQuery(function ($) {
 						},
 					} );
 		
+					orderId = paypalResponseData.order_id;
 					orderReceivedUrl = paypalResponseData.return_url;
 
 					return paypalResponseData.paypal_order_id;
