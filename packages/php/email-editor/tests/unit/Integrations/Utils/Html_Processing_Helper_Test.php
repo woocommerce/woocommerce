@@ -143,6 +143,7 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 		$valid_hex_colors = array(
 			'#fff',
 			'#ffffff',
+			'#ffffffff',
 			'#000',
 			'#000000',
 			'#abc',
@@ -174,21 +175,193 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test sanitize_color with rgb/rgba colors.
+	 */
+	public function testSanitizeColorWithRgbRgbaColors(): void {
+		$rgb_colors = array(
+			'rgb(255, 255, 255)',
+			'rgb(0, 0, 0)',
+			'rgb(128, 128, 128)',
+			'rgba(255, 255, 255, 0.5)',
+			'rgba(0, 0, 0, 1)',
+			'rgba(128, 128, 128, 0.8)',
+		);
+
+		foreach ( $rgb_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( $color, $result, "Failed to preserve rgb/rgba color: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with hsl/hsla colors.
+	 */
+	public function testSanitizeColorWithHslHslaColors(): void {
+		$hsl_colors = array(
+			'hsl(0, 0%, 100%)',
+			'hsl(0, 0%, 0%)',
+			'hsl(120, 50%, 50%)',
+			'hsla(0, 0%, 100%, 0.5)',
+			'hsla(0, 0%, 0%, 1)',
+			'hsla(120, 50%, 50%, 0.8)',
+		);
+
+		foreach ( $hsl_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( $color, $result, "Failed to preserve hsl/hsla color: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with named colors and CSS keywords.
+	 *
+	 * Uses a permissive approach that accepts any string that looks like a valid CSS color name.
+	 * This test demonstrates that the method accepts various named colors without maintaining
+	 * a hardcoded list, making it future-proof for new CSS named colors.
+	 */
+	public function testSanitizeColorWithNamedColorsAndKeywords(): void {
+		$valid_colors = array(
+			// Standard named colors.
+			'black',
+			'white',
+			'red',
+			'green',
+			'blue',
+			'yellow',
+			'orange',
+			'purple',
+			'pink',
+			'brown',
+			'gray',
+			'grey',
+			'navy',
+			'lime',
+			'teal',
+			'crimson',
+			'aqua',
+			'fuchsia',
+			'silver',
+			'maroon',
+			'olive',
+			'gold',
+			// CSS keywords.
+			'transparent',
+			'inherit',
+			'initial',
+			'unset',
+			// Future CSS named colors (will work automatically).
+			'rebeccapurple',
+			'lightcoral',
+			'mediumseagreen',
+			// Additional named colors that would work with the permissive approach.
+			'lightblue',
+			'darkgreen',
+			'hotpink',
+			'forestgreen',
+			'royalblue',
+			'orangered',
+			'deepskyblue',
+			'mediumvioletred',
+			'lightsteelblue',
+			'palegoldenrod',
+			// Made-up but valid-looking color names (demonstrates permissiveness).
+			'customcolor',
+			'brandprimary',
+			'accentcolor',
+		);
+
+		foreach ( $valid_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( strtolower( $color ), $result, "Failed to preserve named color: $color" );
+		}
+	}
+
+	/**
 	 * Test sanitize_color with invalid colors returns default.
 	 */
 	public function testSanitizeColorWithInvalidColorsReturnsDefault(): void {
 		$invalid_colors = array(
-			'invalid',
 			'#ggg',
 			'#gggggg',
 			'rgb(256, 256, 256)',
+			'rgba(255, 255, 255, 2.0)', // Invalid alpha > 1.
+			'hsl(400, 50%, 50%)', // Invalid hue > 360.
+			'hsla(120, 150%, 50%, 0.5)', // Invalid saturation > 100%.
 			'var(invalid)',
+			'var(--)', // Invalid CSS variable.
 			'',
 		);
 
 		foreach ( $invalid_colors as $color ) {
 			$result = Html_Processing_Helper::sanitize_color( $color );
 			$this->assertEquals( '#000000', $result, "Failed to return default for invalid color: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with dangerous color values returns default.
+	 */
+	public function testSanitizeColorWithDangerousValuesReturnsDefault(): void {
+		$dangerous_colors = array(
+			'expression(alert(1))',
+			'javascript:alert(1)',
+			'vbscript:alert(1)',
+			'data:text/html,<script>alert(1)</script>',
+			'import(url)',
+			'behavior:url(script.htc)',
+			'binding:url(script.xml)',
+			'filter:progid:DXImageTransform.Microsoft.Alpha(opacity=50)',
+		);
+
+		foreach ( $dangerous_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( '#000000', $result, "Failed to return default for dangerous color: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color permissive approach with various valid-looking color names.
+	 *
+	 * This test specifically demonstrates the permissive nature of the color validation,
+	 * showing that it accepts any string that looks like a valid CSS color name,
+	 * regardless of whether it's a real CSS color or not.
+	 */
+	public function testSanitizeColorPermissiveApproach(): void {
+		$permissive_colors = array(
+			// Real CSS named colors.
+			'red',
+			'blue',
+			'green',
+			// Made-up but valid-looking color names.
+			'brandcolor',
+			'primaryaccent',
+			'secondaryhighlight',
+			'customtheme',
+			'brandprimary',
+			'brandsecondary',
+			'accentcolor',
+			'highlightcolor',
+			'textcolor',
+			'backgroundcolor',
+			'linkcolor',
+			'buttoncolor',
+			'headercolor',
+			'footercolor',
+			'sidebarcolor',
+			'contentcolor',
+			'widgetcolor',
+			'formcolor',
+			'inputcolor',
+			'labelcolor',
+			'errorcolor',
+			'successcolor',
+			'warningcolor',
+			'infocolor',
+		);
+
+		foreach ( $permissive_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( strtolower( $color ), $result, "Failed to preserve permissive color: $color" );
 		}
 	}
 
@@ -597,5 +770,135 @@ class Html_Processing_Helper_Test extends \Email_Editor_Unit_Test {
 		$html   = '<img src="javascript:alert(\'xss\')" alt="Test">';
 		$result = Html_Processing_Helper::sanitize_image_html( $html );
 		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test sanitize_color with valid RGBA alpha values (0-1).
+	 */
+	public function testSanitizeColorWithValidRgbaAlphaValues(): void {
+		$valid_rgba_colors = array(
+			'rgba(255, 255, 255, 0)',      // Alpha 0.
+			'rgba(255, 255, 255, 0.5)',    // Alpha 0.5.
+			'rgba(255, 255, 255, .5)',     // Alpha .5 (no leading zero).
+			'rgba(255, 255, 255, 1)',      // Alpha 1.
+			'rgba(255, 255, 255, 1.0)',    // Alpha 1.0.
+			'rgba(255, 255, 255, 1.00)',   // Alpha 1.00.
+			'rgba(255, 255, 255, 0.25)',   // Alpha 0.25.
+			'rgba(255, 255, 255, 0.75)',   // Alpha 0.75.
+			'rgba(120, 130, 140, .25)',    // Alpha .25 with different RGB values.
+		);
+
+		foreach ( $valid_rgba_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( $color, $result, "Failed to preserve valid RGBA color with alpha: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with invalid RGBA alpha values (>1).
+	 */
+	public function testSanitizeColorWithInvalidRgbaAlphaValues(): void {
+		$invalid_rgba_colors = array(
+			'rgba(255, 255, 255, 1.25)',   // Alpha > 1.
+			'rgba(255, 255, 255, 2)',      // Alpha = 2.
+			'rgba(255, 255, 255, 1.5)',    // Alpha = 1.5.
+			'rgba(255, 255, 255, 10)',     // Alpha = 10.
+			'rgba(255, 255, 255, 2.0)',    // Alpha = 2.0.
+			'rgba(255, 255, 255, 1.01)',   // Alpha slightly > 1.
+		);
+
+		foreach ( $invalid_rgba_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( '#000000', $result, "Failed to reject invalid RGBA color with alpha > 1: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with valid HSLA alpha values (0-1).
+	 */
+	public function testSanitizeColorWithValidHslaAlphaValues(): void {
+		$valid_hsla_colors = array(
+			'hsla(120, 50%, 50%, 0)',      // Alpha 0.
+			'hsla(120, 50%, 50%, 0.5)',    // Alpha 0.5.
+			'hsla(120, 50%, 50%, .5)',     // Alpha .5 (no leading zero).
+			'hsla(120, 50%, 50%, 1)',      // Alpha 1.
+			'hsla(120, 50%, 50%, 1.0)',    // Alpha 1.0.
+			'hsla(120, 50%, 50%, 1.00)',   // Alpha 1.00.
+			'hsla(240, 75%, 25%, 0.25)',   // Alpha 0.25.
+			'hsla(360, 100%, 75%, 0.9)',   // Alpha 0.9.
+			'hsla(0, 0%, 100%, .75)',      // Alpha .75 with white color.
+		);
+
+		foreach ( $valid_hsla_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( $color, $result, "Failed to preserve valid HSLA color with alpha: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_color with invalid HSLA alpha values (>1).
+	 */
+	public function testSanitizeColorWithInvalidHslaAlphaValues(): void {
+		$invalid_hsla_colors = array(
+			'hsla(120, 50%, 50%, 1.25)',   // Alpha > 1.
+			'hsla(120, 50%, 50%, 2)',      // Alpha = 2.
+			'hsla(120, 50%, 50%, 1.5)',    // Alpha = 1.5.
+			'hsla(120, 50%, 50%, 10)',     // Alpha = 10.
+			'hsla(120, 50%, 50%, 2.0)',    // Alpha = 2.0.
+			'hsla(120, 50%, 50%, 1.01)',   // Alpha slightly > 1.
+		);
+
+		foreach ( $invalid_hsla_colors as $color ) {
+			$result = Html_Processing_Helper::sanitize_color( $color );
+			$this->assertEquals( '#000000', $result, "Failed to reject invalid HSLA color with alpha > 1: $color" );
+		}
+	}
+
+	/**
+	 * Test sanitize_dimension_value with valid dimension values.
+	 */
+	public function testSanitizeDimensionValueWithValidValues(): void {
+		$valid_dimensions = array(
+			'430'    => '430px',    // Numeric value gets px added.
+			'430px'  => '430px',    // Already has px.
+			'50%'    => '50%',      // Percentage.
+			'2em'    => '2em',      // Em units.
+			'1.5rem' => '1.5rem',   // Rem units.
+			'100vh'  => '100vh',    // Viewport height.
+			'50vw'   => '50vw',     // Viewport width.
+			'12pt'   => '12pt',     // Points.
+			'1in'    => '1in',      // Inches.
+			'2.5cm'  => '2.5cm',    // Centimeters.
+		);
+
+		foreach ( $valid_dimensions as $input => $expected ) {
+			$result = Html_Processing_Helper::sanitize_dimension_value( $input );
+			$this->assertEquals( $expected, $result, "Failed to sanitize dimension: $input" );
+		}
+	}
+
+	/**
+	 * Test sanitize_dimension_value with invalid dimension values.
+	 */
+	public function testSanitizeDimensionValueWithInvalidValues(): void {
+		$invalid_dimensions = array(
+			'invalid',
+			'<script>alert("xss")</script>',
+			'expression(alert(1))',
+			'javascript:alert(1)',
+			'',
+			'  ',
+			'430invalid',
+			'px430',
+			null,
+			array(),
+			false,
+		);
+
+		foreach ( $invalid_dimensions as $input ) {
+			$result            = Html_Processing_Helper::sanitize_dimension_value( $input );
+			$input_description = is_string( $input ) ? $input : gettype( $input );
+			$this->assertEquals( '', $result, 'Failed to reject invalid dimension: ' . $input_description );
+		}
 	}
 }

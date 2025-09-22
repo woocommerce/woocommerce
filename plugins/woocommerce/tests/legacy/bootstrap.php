@@ -245,7 +245,7 @@ class WC_Unit_Tests_Bootstrap {
 		}
 
 		// Always load PayPal Standard for unit tests.
-		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? WC_Gateway_Paypal::get_instance() : null;
 		if ( $paypal ) {
 			$paypal->update_option( '_should_load', wc_bool_to_string( true ) );
 		}

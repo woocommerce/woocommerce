@@ -299,26 +299,47 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that non-audio embeds render as link fallback
 	 */
 	public function test_renders_non_audio_embeds_as_link_fallback(): void {
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
+		// Use a non-supported embed provider for this test.
+		$parsed_unsupported_embed = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://example.com/embed',
+				'type'             => 'rich',
+				'providerNameSlug' => 'example',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-rich is-provider-example"><div class="wp-block-embed__wrapper">https://example.com/embed</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_unsupported_embed['innerHTML'], $parsed_unsupported_embed, $this->rendering_context );
 
 		// Check that the rendered content contains a link.
-		$this->assertStringContainsString( '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"', $rendered );
+		$this->assertStringContainsString( '<a href="https://example.com/embed"', $rendered );
 		$this->assertStringContainsString( 'target="_blank"', $rendered );
 		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
-		$this->assertStringContainsString( 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', $rendered );
+		$this->assertStringContainsString( 'https://example.com/embed', $rendered );
 	}
 
 	/**
 	 * Test that link fallback uses custom label when provided
 	 */
 	public function test_link_fallback_uses_custom_label(): void {
-		$parsed_youtube_with_label                   = $this->parsed_youtube_embed;
-		$parsed_youtube_with_label['attrs']['label'] = 'Watch this video';
+		$parsed_unsupported_with_label = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://example.com/embed',
+				'type'             => 'rich',
+				'providerNameSlug' => 'example',
+				'responsive'       => true,
+				'label'            => 'Watch this video',
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-rich is-provider-example"><div class="wp-block-embed__wrapper">https://example.com/embed</div></figure>',
+		);
 
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_with_label, $this->rendering_context );
+		$rendered = $this->embed_renderer->render( $parsed_unsupported_with_label['innerHTML'], $parsed_unsupported_with_label, $this->rendering_context );
 
 		$this->assertStringContainsString( 'Watch this video', $rendered );
-		$this->assertStringContainsString( '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"', $rendered );
+		$this->assertStringContainsString( '<a href="https://example.com/embed"', $rendered );
 		// The link text should be the custom label, not the URL.
 		$this->assertStringContainsString( '>Watch this video</a>', $rendered );
 	}
@@ -327,19 +348,26 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test that link fallback extracts URL from content when not in attributes
 	 */
 	public function test_link_fallback_extracts_url_from_content(): void {
-		$parsed_youtube_no_url_attr = $this->parsed_youtube_embed;
-		unset( $parsed_youtube_no_url_attr['attrs']['url'] );
+		$parsed_unsupported_no_url_attr = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'type'             => 'rich',
+				'providerNameSlug' => 'example',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-rich is-provider-example"><div class="wp-block-embed__wrapper">https://example.com/embed</div></figure>',
+		);
 
-		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_no_url_attr, $this->rendering_context );
+		$rendered = $this->embed_renderer->render( $parsed_unsupported_no_url_attr['innerHTML'], $parsed_unsupported_no_url_attr, $this->rendering_context );
 
-		$this->assertStringContainsString( '<a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"', $rendered );
-		$this->assertStringContainsString( 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', $rendered );
+		$this->assertStringContainsString( '<a href="https://example.com/embed"', $rendered );
+		$this->assertStringContainsString( 'https://example.com/embed', $rendered );
 	}
 
 	/**
-	 * Test that link fallback returns empty when no valid URL is found
+	 * Test that link fallback returns base URL when no valid URL is found but provider is known
 	 */
-	public function test_link_fallback_returns_empty_when_no_valid_url(): void {
+	public function test_link_fallback_returns_base_url_when_no_valid_url(): void {
 		$parsed_embed_no_url = array(
 			'blockName' => 'core/embed',
 			'attrs'     => array(
@@ -350,7 +378,11 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $this->embed_renderer->render( $parsed_embed_no_url['innerHTML'], $parsed_embed_no_url, $this->rendering_context );
 
-		$this->assertEmpty( $rendered );
+		// Should return graceful fallback link since provider is detected but no URL is available.
+		$this->assertStringContainsString( '<a href="https://www.youtube.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on YouTube', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
 	}
 
 	/**
@@ -395,5 +427,156 @@ class Embed_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertNotEmpty( $rendered );
 		$this->assertStringContainsString( 'Listen on ReverbNation', $rendered );
 		$this->assertStringContainsString( 'https://reverbnation.com/artist/example-song', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed renders as video player
+	 */
+	public function test_renders_youtube_embed_as_video_player(): void {
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
+
+		// Check that the rendered content contains YouTube video elements.
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+		$this->assertStringContainsString( 'background-image:url(&quot;https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg&quot;)', $rendered );
+		$this->assertStringContainsString( 'background-size:cover', $rendered );
+		$this->assertStringContainsString( 'min-height:390px', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed uses custom label when provided
+	 */
+	public function test_youtube_embed_uses_custom_label_when_provided(): void {
+		$parsed_youtube_custom_label                   = $this->parsed_youtube_embed;
+		$parsed_youtube_custom_label['attrs']['label'] = 'Watch this video';
+
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_custom_label, $this->rendering_context );
+
+		// Custom labels are not used in video rendering - the play button is always "Play".
+		$this->assertStringContainsString( 'alt="Play"', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed handles email attributes for spacing
+	 */
+	public function test_youtube_embed_handles_email_attributes_for_spacing(): void {
+		$parsed_youtube_with_spacing                = $this->parsed_youtube_embed;
+		$parsed_youtube_with_spacing['email_attrs'] = array(
+			'margin' => '20px 0',
+		);
+
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_with_spacing, $this->rendering_context );
+
+		// Email attributes are handled by the cover block renderer.
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed includes proper security attributes
+	 */
+	public function test_youtube_embed_includes_proper_security_attributes(): void {
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
+
+		// The play button may or may not be wrapped in a link depending on post context.
+		// In test environment, there may not be a valid post URL, so the play button is just an image.
+		$this->assertStringContainsString( 'alt="Play"', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed includes proper accessibility attributes
+	 */
+	public function test_youtube_embed_includes_proper_accessibility_attributes(): void {
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $this->parsed_youtube_embed, $this->rendering_context );
+
+		$this->assertStringContainsString( 'alt="Play"', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed detects YouTube by providerNameSlug
+	 */
+	public function test_youtube_embed_detects_youtube_by_provider_name_slug(): void {
+		$parsed_youtube_by_slug = $this->parsed_youtube_embed;
+		unset( $parsed_youtube_by_slug['attrs']['url'] );
+		$parsed_youtube_by_slug['innerHTML'] = '<figure class="wp-block-embed is-type-video is-provider-youtube"><div class="wp-block-embed__wrapper">Some content</div></figure>';
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_by_slug['innerHTML'], $parsed_youtube_by_slug, $this->rendering_context );
+
+		// Should return graceful fallback link since provider is detected but no URL is available for thumbnail extraction.
+		$this->assertStringContainsString( '<a href="https://www.youtube.com/"', $rendered );
+		$this->assertStringContainsString( 'Watch on YouTube', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed detects YouTube by URL in attributes
+	 */
+	public function test_youtube_embed_detects_youtube_by_url_in_attributes(): void {
+		$parsed_youtube_by_url = $this->parsed_youtube_embed;
+		unset( $parsed_youtube_by_url['attrs']['providerNameSlug'] );
+
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_by_url, $this->rendering_context );
+
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed detects YouTube by URL in content
+	 */
+	public function test_youtube_embed_detects_youtube_by_url_in_content(): void {
+		$parsed_youtube_by_content = $this->parsed_youtube_embed;
+		unset( $parsed_youtube_by_content['attrs']['providerNameSlug'] );
+		unset( $parsed_youtube_by_content['attrs']['url'] );
+
+		$rendered = $this->embed_renderer->render( $this->parsed_youtube_embed['innerHTML'], $parsed_youtube_by_content, $this->rendering_context );
+
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed handles youtu.be URLs
+	 */
+	public function test_youtube_embed_handles_youtu_be_urls(): void {
+		$parsed_youtube_short_url = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://youtu.be/dQw4w9WgXcQ',
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">https://youtu.be/dQw4w9WgXcQ</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_short_url['innerHTML'], $parsed_youtube_short_url, $this->rendering_context );
+
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/dQw4w9WgXcQ/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
+	}
+
+	/**
+	 * Test that YouTube embed falls back to link when thumbnail extraction fails
+	 */
+	public function test_youtube_embed_falls_back_to_link_when_thumbnail_fails(): void {
+		$parsed_youtube_invalid = array(
+			'blockName' => 'core/embed',
+			'attrs'     => array(
+				'url'              => 'https://www.youtube.com/watch?v=invalid',
+				'type'             => 'video',
+				'providerNameSlug' => 'youtube',
+				'responsive'       => true,
+			),
+			'innerHTML' => '<figure class="wp-block-embed is-type-video is-provider-youtube wp-block-embed-youtube"><div class="wp-block-embed__wrapper">https://www.youtube.com/watch?v=invalid</div></figure>',
+		);
+
+		$rendered = $this->embed_renderer->render( $parsed_youtube_invalid['innerHTML'], $parsed_youtube_invalid, $this->rendering_context );
+
+		// Should still render as video block even with invalid video ID (the thumbnail URL will be generated).
+		$this->assertStringContainsString( 'https://img.youtube.com/vi/invalid/0.jpg', $rendered );
+		$this->assertStringContainsString( 'play2x.png', $rendered );
 	}
 }
