@@ -142,7 +142,7 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 	 */
 	public function hasBlockVariationDataProvider(): array {
 		return array(
-			// Test case name => [block_id, attribute, value, content, expected_result]
+			// Test case name => [block_id, attribute, value, content, expected_result].
 			'empty_content'                                => array(
 				'woocommerce/cart',
 				'displayType',
@@ -316,6 +316,12 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 	 * Test has_block_variation with all scenarios using data provider
 	 *
 	 * @dataProvider hasBlockVariationDataProvider
+	 *
+	 * @param $block_id The block name to search for.
+	 * @param string $attribute The attribute name to check.
+	 * @param mixed  $value The expected value of the attribute.
+	 * @param string $content The post content to search within.
+	 * @param bool   $expected The expected result.
 	 */
 	public function test_has_block_variation( $block_id, $attribute, $value, $content, $expected ) {
 		$result = CartCheckoutUtils::has_block_variation( $block_id, $attribute, $value, $content );
