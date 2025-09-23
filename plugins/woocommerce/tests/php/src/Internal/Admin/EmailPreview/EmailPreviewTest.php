@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Emails;
-use WC_Order;
 use WC_Product;
 use WC_Unit_Test_Case;
 
