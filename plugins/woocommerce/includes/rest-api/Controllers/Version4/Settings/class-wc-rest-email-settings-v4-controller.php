@@ -302,7 +302,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 				'id'          => 'woocommerce_email_reply_to_enabled',
 				'label'       => __( 'Add "Reply-to" email', 'woocommerce' ),
 				'type'        => 'boolean',
-				'description' => __( 'In case you want to set a different address for replies', 'woocommerce' ),
+				'description' => __( 'Use a different email address for replies.', 'woocommerce' ),
 			),
 			array(
 				'id'    => 'woocommerce_email_reply_to_name',
@@ -332,7 +332,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'groups'      => array(
 				'sender_details' => array(
 					'title'       => __( 'Sender details', 'woocommerce' ),
-					'description' => __( 'Configure how the sender appears in outgoing emails.', 'woocommerce' ),
+					'description' => __( 'This is how your sender name and email address would appear in outgoing emails.', 'woocommerce' ),
 					'order'       => 1,
 					'fields'      => $fields,
 				),
