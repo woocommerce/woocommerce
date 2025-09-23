@@ -192,6 +192,7 @@ class Product_Collection extends Abstract_Block_Renderer {
 				},
 				$query_attrs['woocommerceHandPickedProducts']
 			);
+			$query_args['orderby']  = 'post__in';
 		}
 
 		// Handle featured products - use the WooCommerce way.

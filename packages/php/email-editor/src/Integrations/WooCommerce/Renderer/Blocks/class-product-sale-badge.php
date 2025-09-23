@@ -91,10 +91,16 @@ class Product_Sale_Badge extends Abstract_Block_Renderer {
 			$position_style
 		);
 
-		$custom_styles = Styles_Helper::get_block_styles( $attributes, $rendering_context, array( 'border', 'background-color', 'color', 'typography', 'spacing' ) );
-		$badge_styles  = array_merge( $badge_styles, $custom_styles );
+		$custom_styles = Styles_Helper::get_block_styles(
+			$attributes,
+			$rendering_context,
+			array( 'border', 'background-color', 'color', 'typography', 'spacing' )
+		);
 
-		$style_attr = \WP_Style_Engine::compile_css( $badge_styles, '' );
+		$style_attr = \WP_Style_Engine::compile_css(
+			array_merge( $badge_styles, $custom_styles['declarations'] ?? array() ),
+			''
+		);
 
 		return sprintf(
 			'<span class="wc-block-components-product-sale-badge__text" style="%s">%s</span>',

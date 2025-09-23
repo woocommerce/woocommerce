@@ -74,6 +74,7 @@ class Initializer {
 		'core/embed',
 		'core/cover',
 		'core/video',
+		'core/post-title',
 	);
 
 	/**

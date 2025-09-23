@@ -134,23 +134,23 @@ class Product_Price extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	private function build_simple_product_price( \WC_Product $product ): string {
-		$regular_price = $product->get_regular_price();
-		$sale_price    = $product->get_sale_price();
+		$regular_price = wc_get_price_to_display( $product, array( 'price' => (float) $product->get_regular_price() ) );
+		$sale_price    = $product->get_sale_price() !== '' ? wc_get_price_to_display( $product, array( 'price' => (float) $product->get_sale_price() ) ) : '';
 
 		if ( empty( $regular_price ) ) {
 			return '';
 		}
 
-		if ( $product->is_on_sale() && ! empty( $sale_price ) ) {
+		if ( $product->is_on_sale() && '' !== $sale_price ) {
 			return sprintf(
 				'<del style="text-decoration: line-through; font-size: 0.9em; margin-right: 0.5em;">%s</del><span>%s</span>',
-				$this->format_price_simple( $regular_price ),
-				$this->format_price_simple( $sale_price )
+				wc_price( $regular_price, array( 'in_span' => false ) ),
+				wc_price( $sale_price, array( 'in_span' => false ) )
 			);
 		} else {
 			return sprintf(
 				'<span>%s</span>',
-				$this->format_price_simple( $regular_price )
+				wc_price( $regular_price, array( 'in_span' => false ) )
 			);
 		}
 	}
@@ -167,7 +167,7 @@ class Product_Price extends Abstract_Block_Renderer {
 
 		return sprintf(
 			'<span>%s</span>',
-			$this->format_price_simple( $min_price )
+			wc_price( (float) $min_price, array( 'in_span' => false ) )
 		);
 	}
 
@@ -188,7 +188,7 @@ class Product_Price extends Abstract_Block_Renderer {
 		foreach ( $children as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( $child && $child->get_price() !== '' ) {
-				$prices[] = $child->get_price();
+				$prices[] = wc_get_price_to_display( $child, array( 'price' => (float) $child->get_price() ) );
 			}
 		}
 
@@ -200,33 +200,8 @@ class Product_Price extends Abstract_Block_Renderer {
 
 		return sprintf(
 			'<span style="font-style: italic;">From </span><span>%s</span>',
-			$this->format_price_simple( $min_price )
+			wp_kses_post( wc_price( (float) $min_price, array( 'in_span' => false ) ) )
 		);
-	}
-
-	/**
-	 * Format a single price value for display.
-	 *
-	 * @param string|float $price Price value.
-	 * @return string
-	 */
-	private function format_price_simple( $price ): string {
-		$formatted = number_format_i18n( floatval( $price ), wc_get_price_decimals() );
-		$currency  = get_woocommerce_currency_symbol();
-
-		$currency_pos = get_option( 'woocommerce_currency_pos' );
-
-		switch ( $currency_pos ) {
-			case 'left':
-				return $currency . $formatted;
-			case 'right':
-				return $formatted . '&nbsp;' . $currency;
-			case 'left_space':
-				return $currency . '&nbsp;' . $formatted;
-			case 'right_space':
-			default:
-				return $formatted . '&nbsp;' . $currency;
-		}
 	}
 
 	/**

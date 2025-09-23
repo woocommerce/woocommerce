@@ -51,6 +51,7 @@ class Product_Button extends Abstract_Block_Renderer {
 			array(
 				'display'         => 'block',
 				'text-decoration' => 'none',
+				'width'           => '100%',
 			)
 		);
 	}

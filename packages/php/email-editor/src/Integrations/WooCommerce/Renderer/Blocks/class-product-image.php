@@ -193,13 +193,14 @@ class Product_Image extends Abstract_Block_Renderer {
 			$linked_image_html = $this->wrap_with_link( $image_html, $product );
 		}
 
+		$vml_side     = ( 'left' === $badge_alignment ) ? 'left' : 'right';
 		$overlay_html = sprintf(
 			'<table cellpadding="0" cellspacing="0" border="0" style="width: %dpx; height: %dpx; table-layout: fixed;">
 				<tr>
 					<td style="font-size: 0; line-height: 0; padding: 0; height: %dpx; width: %dpx;">
 					<div style="max-height:0; position:relative; opacity:0.999;">
 						<!--[if mso]>
-						<v:rect xmlns:v="urn:schemas-microsoft-com:vml" stroked="false" filled="false" style="mso-width-percent: 1000; position:absolute; top:16px; right:16px;">
+						<v:rect xmlns:v="urn:schemas-microsoft-com:vml" stroked="false" filled="false" style="mso-width-percent: 1000; position:absolute; top:16px; ' . esc_attr( $vml_side ) . ':16px;">
 						<v:textbox inset="0,0,0,0">
 						<![endif]-->
 						<div style="padding: 12px; box-sizing: border-box; display: inline-block; width: 100%%; text-align: %s;">
@@ -386,7 +387,7 @@ class Product_Image extends Abstract_Block_Renderer {
 		}
 
 		return sprintf(
-			'<img src="%s" alt="%s" style="%s" width="%d" height="%d" />',
+			'<img class="email-editor-product-image skip-lazy" data-skip-lazy="1" loading="eager" decoding="auto" src="%s" alt="%s" style="%s" width="%d" height="%d" />',
 			esc_url( $image_data['url'] ),
 			esc_attr( $image_data['alt'] ),
 			esc_attr( \WP_Style_Engine::compile_css( $style_parts, '' ) ),
