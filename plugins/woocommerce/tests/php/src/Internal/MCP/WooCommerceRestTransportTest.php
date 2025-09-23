@@ -40,7 +40,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 		}
 
 		// Create a mock transport context since we're not testing the full transport integration.
-		$mock_context = $this->createMock( \WP\MCP\Transport\Infrastructure\McpTransportContext::class );
+		$mock_context = $this->createMock( 'WP\MCP\Transport\Infrastructure\McpTransportContext' );
 		$this->sut = new WooCommerceRestTransport( $mock_context );
 	}
 
