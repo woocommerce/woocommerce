@@ -141,21 +141,19 @@ export const NoAIBanner = ( {
 	redirectToCYSFlow: () => void;
 } ) => {
 	return (
-		<>
-			<BaseIntroBanner
-				bannerTitle={ __( 'Design your own', 'woocommerce' ) }
-				bannerText={ __(
-					'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
-					'woocommerce'
-				) }
-				bannerClass="no-ai-banner"
-				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
-				bannerButtonOnClick={ () => {
-					redirectToCYSFlow();
-				} }
-				showAIDisclaimer={ false }
-			/>
-		</>
+		<BaseIntroBanner
+			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+			bannerText={ __(
+				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+				'woocommerce'
+			) }
+			bannerClass="no-ai-banner"
+			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+			bannerButtonOnClick={ () => {
+				redirectToCYSFlow();
+			} }
+			showAIDisclaimer={ false }
+		/>
 	);
 };
 
