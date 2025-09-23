@@ -23,10 +23,27 @@ class PlatformRegistry {
 	private array $platforms = array();
 
 	/**
-	 * Constructor to load platforms when the service is instantiated.
+	 * The credential manager instance.
+	 *
+	 * @var CredentialManager
+	 */
+	private CredentialManager $credential_manager;
+
+	/**
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->load_platforms();
+	}
+
+	/**
+	 * Initialize the registry with dependencies.
+	 *
+	 * @internal
+	 * @param CredentialManager $credential_manager The credential manager.
+	 */
+	final public function init( CredentialManager $credential_manager ): void {
+		$this->credential_manager = $credential_manager;
 	}
 
 	/**
@@ -140,9 +157,9 @@ class PlatformRegistry {
 			);
 		}
 
-		// Use the WooCommerce DI container to properly inject dependencies.
-		$container = wc_get_container();
-		return $container->get( $fetcher_class );
+		// Get credentials from credential manager and pass to fetcher constructor.
+		$credentials = $this->credential_manager->get_credentials( $platform_id );
+		return new $fetcher_class( $credentials );
 	}
 
 	/**
