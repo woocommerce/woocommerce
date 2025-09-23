@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -109,6 +110,14 @@ class AbilitiesRestBridge {
 	 * Register all configured abilities.
 	 */
 	public static function register_abilities(): void {
+		// Only register abilities if this is an MCP endpoint request.
+		// We check here (on abilities_api_init action) rather than earlier
+		// because REST request detection requires the WordPress REST infrastructure
+		// to be fully initialized.
+		if ( ! MCPAdapterProvider::is_mcp_request() ) {
+			return;
+		}
+
 		foreach ( self::get_configurations() as $config ) {
 			RestAbilityFactory::register_controller_abilities( $config );
 		}
