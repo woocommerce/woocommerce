@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add critical metrics to migrator CLI
