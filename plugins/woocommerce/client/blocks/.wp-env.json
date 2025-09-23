@@ -4,8 +4,8 @@
 	"plugins": [
 		"https://github.com/WP-API/Basic-Auth/archive/master.zip",
 		"https://downloads.wordpress.org/plugin/wordpress-importer.0.8.zip",
-		"./gutenberg.zip",
-		"../.."
+		"../..",
+		"./gutenberg/gutenberg.zip"
 	],
 	"env": {
 		"tests": {
