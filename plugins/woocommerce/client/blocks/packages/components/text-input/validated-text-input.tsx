@@ -30,6 +30,7 @@ export type ValidatedTextInputHandle = {
 	revalidate: () => void;
 	isFocused: () => boolean;
 	setErrorMessage: ( errorMessage: string ) => void;
+	inputRef: React.RefObject< HTMLInputElement >;
 };
 
 /**
@@ -177,6 +178,7 @@ const ValidatedTextInput = forwardRef<
 					setErrorMessage( errorMessage: string ) {
 						inputRef.current?.setCustomValidity( errorMessage );
 					},
+					inputRef,
 				};
 			},
 			[ validateInput, value ]
