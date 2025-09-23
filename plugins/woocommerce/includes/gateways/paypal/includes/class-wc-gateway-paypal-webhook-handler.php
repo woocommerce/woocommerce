@@ -13,7 +13,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/class-wc-gateway-paypal-request.php';
+if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
+}
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-request.php';
+}
 
 /**
  * Handles webhook events.
@@ -57,7 +63,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_checkout_order_approved( $event ) {
 		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
-		$order     = $this->get_wc_order( $custom_id );
+		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -108,7 +114,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_payment_capture_completed( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = $this->get_wc_order( $custom_id );
+		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -141,7 +147,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_payment_authorization_created( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = $this->get_wc_order( $custom_id );
+		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -163,37 +169,6 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		);
 		$order->update_status( OrderStatus::ON_HOLD );
 		$order->save();
-	}
-
-	/**
-	 * Get the WC order from the custom ID.
-	 *
-	 * @param string $custom_id The custom ID string from the PayPal order.
-	 * @return WC_Order|null
-	 */
-	private function get_wc_order( $custom_id ) {
-		$data = json_decode( $custom_id, true );
-		if ( ! is_array( $data ) ) {
-			return null;
-		}
-
-		$order_id = $data['order_id'] ?? null;
-		if ( ! $order_id ) {
-			return null;
-		}
-
-		$order = wc_get_order( $order_id );
-		if ( ! $order ) {
-			return null;
-		}
-
-		// Validate the order key.
-		$order_key = $data['order_key'] ?? null;
-		if ( $order_key !== $order->get_order_key() ) {
-			return null;
-		}
-
-		return $order;
 	}
 
 	/**

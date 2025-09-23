@@ -53,4 +53,35 @@ class WC_Gateway_Paypal_Helper {
 	public static function is_orders_v2_feature_flag_enabled() {
 		return false;
 	}
+
+	/**
+	 * Get the WC order from the PayPal custom ID.
+	 *
+	 * @param string $custom_id The custom ID string from the PayPal order.
+	 * @return WC_Order|null
+	 */
+	public static function get_wc_order_from_paypal_custom_id( $custom_id ) {
+		$data = json_decode( $custom_id, true );
+		if ( ! is_array( $data ) ) {
+			return null;
+		}
+
+		$order_id = $data['order_id'] ?? null;
+		if ( ! $order_id ) {
+			return null;
+		}
+
+		$order = wc_get_order( $order_id );
+		if ( ! $order ) {
+			return null;
+		}
+
+		// Validate the order key.
+		$order_key = $data['order_key'] ?? null;
+		if ( $order_key !== $order->get_order_key() ) {
+			return null;
+		}
+
+		return $order;
+	}
 }
