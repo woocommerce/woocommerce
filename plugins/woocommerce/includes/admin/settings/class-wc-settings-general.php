@@ -108,7 +108,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'This is where your business is located. Tax rates and shipping rates will use this address.', 'woocommerce' ),
 					'id'    => 'store_address',
-					'order' => 10,
 				),
 
 				array(
@@ -118,7 +117,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 40,
 				),
 
 				array(
@@ -128,7 +126,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 50,
 				),
 
 				array(
@@ -138,7 +135,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 20,
 				),
 
 				array(
@@ -148,7 +144,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => 'US:CA',
 					'type'     => 'single_select_country',
 					'desc_tip' => true,
-					'order'    => 10,
 				),
 
 				array(
@@ -159,7 +154,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 30,
 				),
 
 				array(
@@ -172,7 +166,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => '',
 					'id'    => 'general_options',
-					'order' => 20,
 				),
 
 				array(
@@ -263,7 +256,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'Enable taxes and coupons and configure how they are calculated.', 'woocommerce' ),
 					'id'    => 'taxes_and_coupons_options',
-					'order' => 30,
 				),
 
 				array(
@@ -307,7 +299,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ),
 					'id'    => 'pricing_options',
-					'order' => 40,
 				),
 
 				array(
@@ -319,7 +310,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'class'    => 'wc-enhanced-select',
 					'desc_tip' => true,
 					'options'  => $currency_code_options,
-					'order'    => 10,
 				),
 
 				array(
@@ -336,7 +326,6 @@ class WC_Settings_General extends WC_Settings_Page {
 						'right_space' => __( 'Right with space', 'woocommerce' ),
 					),
 					'desc_tip' => true,
-					'order'    => 40,
 				),
 
 				array(
@@ -347,7 +336,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => ',',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 20,
 				),
 
 				array(
@@ -358,7 +346,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'  => '.',
 					'type'     => 'text',
 					'desc_tip' => true,
-					'order'    => 30,
 				),
 
 				array(
@@ -369,7 +356,6 @@ class WC_Settings_General extends WC_Settings_Page {
 					'default'           => '2',
 					'desc_tip'          => true,
 					'type'              => 'number',
-					'order'             => 50,
 					'custom_attributes' => array(
 						'min'  => 0,
 						'step' => 1,
