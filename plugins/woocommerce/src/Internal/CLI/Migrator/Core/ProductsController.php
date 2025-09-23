@@ -192,7 +192,6 @@ class ProductsController {
 			}
 
 			if ( empty( $batch_data['items'] ) ) {
-				WP_CLI::line( 'No more products found in this batch.' );
 				break;
 			}
 
@@ -211,27 +210,11 @@ class ProductsController {
 			$limit_remaining -= count( $batch_data['items'] );
 			$has_next_page    = $batch_data['has_next_page'] ?? false;
 
-			$progress->tick( $processed_count );
-
+			$progress->tick( $processed_count, sprintf( 'Processed %d products', $total_processed_in_session ) );
 		} while ( $has_next_page && $limit_remaining > 0 );
 
-		if ( $total_processed_in_session > 0 ) {
-			if ( $this->parsed_args['dry_run'] ) {
-				WP_CLI::success( sprintf( 'Simulated processing %d products in this session', $total_processed_in_session ) );
-			} else {
-				WP_CLI::success( sprintf( 'Processed %d products in this session', $total_processed_in_session ) );
-			}
-		}
-
-		if ( ! $has_next_page ) {
-			if ( ! $this->parsed_args['dry_run'] ) {
-				$this->session->set_stage( ImportSession::STAGE_FINISHED );
-			}
-			if ( $this->parsed_args['dry_run'] ) {
-				WP_CLI::log( 'Dry-run completed - all products simulated.' );
-			} else {
-				WP_CLI::log( 'Migration completed - all products processed.' );
-			}
+		if ( ! $has_next_page && ! $this->parsed_args['dry_run'] ) {
+			$this->session->set_stage( ImportSession::STAGE_FINISHED );
 		}
 	}
 
