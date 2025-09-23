@@ -631,6 +631,7 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
+		// Batch size of 100 and sleep time of 10ms = 10K entries deletion per second.
 		$batch_size = 100;
 		do {
 			$deleted_entries_count = (int) $wpdb->query(
