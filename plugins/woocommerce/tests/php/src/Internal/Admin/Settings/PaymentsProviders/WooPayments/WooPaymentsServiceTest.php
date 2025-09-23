@@ -240,7 +240,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						// Return a current timestamp to simulate locked state
+						// Return a current timestamp to simulate locked state.
 						return $this->current_time;
 					}
 
@@ -5284,7 +5284,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						// Return a current timestamp to simulate locked state
+						// Return a current timestamp to simulate locked state.
 						return $this->current_time;
 					}
 
@@ -5557,7 +5557,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						// Return a current timestamp to simulate locked state
+						// Return a current timestamp to simulate locked state.
 						return $this->current_time;
 					}
 
