@@ -543,7 +543,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	private function get_paypal_shipping_preference( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! $order->needs_shipping() ) {
 			return WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING;
 		}
 
