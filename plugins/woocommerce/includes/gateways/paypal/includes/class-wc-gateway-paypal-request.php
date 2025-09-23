@@ -380,7 +380,7 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_create_order_request_params( $order ) {
 		$payee_email = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 
-		return array(
+		$params = array(
 			'intent'         => $this->get_paypal_order_intent(),
 			'payment_source' => array(
 				'paypal' => array(
@@ -409,10 +409,16 @@ class WC_Gateway_Paypal_Request {
 					'payee'      => array(
 						'email_address' => $payee_email,
 					),
-					'shipping'   => $this->get_paypal_order_shipping( $order ),
 				),
 			),
 		);
+
+		$shipping = $this->get_paypal_order_shipping( $order );
+		if ( $shipping ) {
+			$params['purchase_units'][0]['shipping'] = $shipping;
+		}
+
+		return $params;
 	}
 
 	/**
@@ -537,7 +543,7 @@ class WC_Gateway_Paypal_Request {
 	 * @return string
 	 */
 	private function get_paypal_shipping_preference( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! $order->needs_shipping() ) {
 			return WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING;
 		}
 
@@ -549,26 +555,53 @@ class WC_Gateway_Paypal_Request {
 	 * Get the shipping information for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @return array
+	 * @return array|null Returns null if the shipping is not required,
+	 *  or the address is not set, or is incomplete.
 	 */
 	private function get_paypal_order_shipping( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! $order->needs_shipping() ) {
 			return null;
 		}
 
 		$address_type = 'yes' === $this->gateway->get_option( 'send_shipping' ) ? 'shipping' : 'billing';
 
+		$full_name      = trim( $order->{"get_formatted_{$address_type}_full_name"}() );
+		$address_line_1 = trim( $order->{"get_{$address_type}_address_1"}() );
+		$address_line_2 = trim( $order->{"get_{$address_type}_address_2"}() );
+		$state          = trim( $order->{"get_{$address_type}_state"}() );
+		$city           = trim( $order->{"get_{$address_type}_city"}() );
+		$postcode       = trim( $order->{"get_{$address_type}_postcode"}() );
+		$country        = trim( $order->{"get_{$address_type}_country"}() );
+
+		// If we do not have the complete address,
+		// e.g. PayPal Buttons on product pages, we should not set the 'shipping' param
+		// for the create-order request, otherwise it will fail.
+		// Shipping information will be updated by the shipping callback handlers.
+
+		// Country is a required field.
+		if ( empty( $country ) ) {
+			return null;
+		}
+
+		// Postal code is typically required, but not always. The create-order request
+		// will fail if it is missing for a country that requires it.
+		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
+		// we will assume that postal code is not required.
+		if ( empty( $postcode ) && ( empty( $full_name ) || empty( $address_line_1 ) ) ) {
+			return null;
+		}
+
 		return array(
 			'name'    => array(
-				'full_name' => $order->{"get_formatted_{$address_type}_full_name"}(),
+				'full_name' => $full_name,
 			),
 			'address' => array(
-				'address_line_1' => $this->limit_length( $order->{"get_{$address_type}_address_1"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
-				'address_line_2' => $this->limit_length( $order->{"get_{$address_type}_address_2"}(), WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
-				'admin_area_1'   => $this->limit_length( $order->{"get_{$address_type}_state"}(), WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
-				'admin_area_2'   => $this->limit_length( $order->{"get_{$address_type}_city"}(), WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
-				'postal_code'    => $this->limit_length( $order->{"get_{$address_type}_postcode"}(), WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
-				'country_code'   => $order->{"get_{$address_type}_country"}(),
+				'address_line_1' => $this->limit_length( $address_line_1, WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'address_line_2' => $this->limit_length( $address_line_2, WC_Gateway_Paypal_Constants::PAYPAL_ADDRESS_LINE_MAX_LENGTH ),
+				'admin_area_1'   => $this->limit_length( $state, WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
+				'admin_area_2'   => $this->limit_length( $city, WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
+				'postal_code'    => $this->limit_length( $postcode, WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
+				'country_code'   => $country,
 			),
 		);
 	}

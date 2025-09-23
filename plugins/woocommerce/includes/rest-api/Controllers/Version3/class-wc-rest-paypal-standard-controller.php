@@ -162,7 +162,16 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		wc_load_cart();
 		WC()->cart->empty_cart();
 		foreach ( $order->get_items() as $item ) {
-			WC()->cart->add_to_cart( $item->get_product_id(), $item->get_quantity() );
+			$product_id = $item->get_product_id();
+			$product    = $item->get_product();
+
+			if ( $product->is_type( 'variation' ) ) {
+				$variation_id = $item->get_variation_id();
+				WC()->cart->add_to_cart( $product_id, $item->get_quantity(), $variation_id );
+				continue;
+			}
+
+			WC()->cart->add_to_cart( $product_id, $item->get_quantity() );
 		}
 	}
 
