@@ -52,7 +52,7 @@
 		"makepot": "XDEBUG_MODE=off composer run-script makepot",
 		"test": "pnpm test:unit",
 		"test:api": "pnpm test:e2e:default --project=api --workers 4",
-		"test:api:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
+		"test:api:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=api-hpos-disabled --workers 4",
 		"test:api:object-cache": "pnpm test:e2e:with-env default-object-cache --project=api --workers 4",
 		"test:e2e": "pnpm test:e2e:default --project=e2e",
 		"test:e2e:default": "pnpm test:e2e:install && pnpm test:e2e:with-env default",
@@ -61,7 +61,7 @@
 		"test:e2e:with-env": "pnpm test:e2e:install && bash ./tests/e2e-pw/run-tests-with-env.sh",
 		"test:e2e:pressable": "pnpm test:e2e:with-env default-pressable",
 		"test:e2e:wpcom": "pnpm test:e2e:with-env default-wpcom",
-		"test:e2e:hpos": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
+		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
 		"test:env:start": "pnpm env:test",
@@ -69,10 +69,12 @@
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
 		"test:perf:install-k6": "bash ./tests/performance/bin/install-k6.sh",
 		"test:php": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit -c ./phpunit.xml",
+		"test:php:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && DISABLE_HPOS=1 ./vendor/bin/phpunit -c ./phpunit.xml",
 		"test:php:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && ./vendor/bin/phpunit-watcher watch",
 		"test:metrics": "USE_WP_ENV=1 pnpm playwright test --config=tests/metrics/playwright.config.js",
 		"test:metrics:ci": "../../.github/workflows/scripts/run-metrics.sh",
 		"test:php:env": "sh ./client/blocks/bin/copy-blocks-json.sh && wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit -c phpunit.xml --verbose",
+		"test:php:env:hpos-off": "sh ./client/blocks/bin/copy-blocks-json.sh && wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli env DISABLE_HPOS=1 vendor/bin/phpunit -c phpunit.xml --verbose",
 		"test:php:env:watch": "sh ./client/blocks/bin/copy-blocks-json.sh && wp-env run --env-cwd='wp-content/plugins/woocommerce' tests-cli vendor/bin/phpunit-watcher watch --verbose",
 		"test:plugincheck": "wp-env run tests-cli wp plugin check ${PLUGIN_SLUG:-woocommerce}",
 		"test:unit": "pnpm test:php",
@@ -317,9 +319,9 @@
 					}
 				},
 				{
-					"name": "Core e2e tests - HPOS disabled",
+					"name": "Core e2e tests - (HPOS:off)",
 					"testType": "e2e",
-					"command": "test:e2e:hpos",
+					"command": "test:e2e:hpos-off",
 					"shardingArguments": [],
 					"changes": [
 						"tests/e2e-pw/**"
@@ -484,7 +486,7 @@
 				{
 					"name": "Core API tests (HPOS:off)",
 					"testType": "api",
-					"command": "test:api:hpos",
+					"command": "test:api:hpos-off",
 					"optional": false,
 					"changes": [
 						"composer.json",
@@ -513,6 +515,36 @@
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
+				},
+				{
+					"name": "PHP: 8.4 WP: latest (HPOS:off)",
+					"testType": "unit:php",
+					"command": "test:php:env:hpos-off",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.4",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push",
+						"php-unit-php-8.4-wp-latest-hpos-off"
+					]
 				},
 				{
 					"name": "Core API tests (with object cache plugin)",
