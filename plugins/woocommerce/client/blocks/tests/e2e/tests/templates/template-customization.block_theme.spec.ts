@@ -17,7 +17,7 @@ test.describe( 'Template customization', () => {
 		const userText = `Hello World in the ${ testData.templateName } template`;
 		const fallbackTemplateUserText = `Hello World in the fallback ${ testData.templateName } template`;
 		const templateTypeName =
-			testData.templateType === 'wp_template'
+			testData.templateType === 'wp_registered_template'
 				? 'template'
 				: 'template part';
 
