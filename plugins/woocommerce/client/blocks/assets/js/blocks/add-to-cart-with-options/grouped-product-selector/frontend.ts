@@ -23,7 +23,7 @@ const universalLock =
 export type GroupedProductAddToCartWithOptionsStore =
 	AddToCartWithOptionsStore & {
 		actions: {
-			validateQuantity: ( value?: number ) => void;
+			validateGroupedProductQuantity: () => void;
 			batchAddToCart: () => void;
 		};
 		callbacks: {
@@ -35,7 +35,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		actions: {
-			validateQuantity() {
+			validateGroupedProductQuantity() {
 				actions.clearErrors( 'invalid-quantities' );
 
 				const { errorMessages } = getConfig();
@@ -134,7 +134,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			validateQuantities() {
-				actions.validateQuantity();
+				actions.validateGroupedProductQuantity();
 			},
 		},
 	},
