@@ -49,6 +49,26 @@ class WC_REST_Settings_Groups_Manager {
 	}
 
 	/**
+	 * Check if a group exists.
+	 *
+	 * @param string $group_id Group ID to check.
+	 * @return bool True if group exists, false otherwise.
+	 */
+	public function has_group( $group_id ) {
+		return isset( $this->groups[ $group_id ] );
+	}
+
+	/**
+	 * Replace an existing group with a new one.
+	 *
+	 * @param WC_REST_Settings_Model $group New group to replace with.
+	 * @return void
+	 */
+	public function replace_group( WC_REST_Settings_Model $group ) {
+		$this->groups[ $group->get_group_id() ] = $group;
+	}
+
+	/**
 	 * Get a specific settings group.
 	 *
 	 * @param string $group_id Group ID.
