@@ -633,7 +633,7 @@ class WC_Session_Handler extends WC_Session {
 
 		$batch_size = 100;
 		do {
-			$deleted_count = (int) $wpdb->query(
+			$deleted_entries_count = (int) $wpdb->query(
 				$wpdb->prepare(
 					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
 					$this->_table,
@@ -642,9 +642,9 @@ class WC_Session_Handler extends WC_Session {
 				)
 			);
 			usleep( 10_000 );
-		} while ( $deleted_count === $batch_size );
+		} while ( $deleted_entries_count === $batch_size );
 
-		if ( $deleted_count > 0 && class_exists( 'WC_Cache_Helper' ) ) {
+		if ( $deleted_entries_count > 0 && class_exists( 'WC_Cache_Helper' ) ) {
 			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
