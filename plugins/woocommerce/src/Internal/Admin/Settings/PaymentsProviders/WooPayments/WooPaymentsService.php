@@ -72,6 +72,15 @@ class WooPaymentsService {
 
 	const NOX_PROFILE_OPTION_KEY    = 'woocommerce_woopayments_nox_profile';
 	const NOX_ONBOARDING_LOCKED_KEY = 'woocommerce_woopayments_nox_onboarding_locked';
+	/**
+	 * The TTL for the onboarding lock.
+	 * This is to prevent the onboarding from being locked indefinitely in case of uncaught errors.
+	 * If the lock timestamp is older than this, we consider the lock expired and allow onboarding actions again.
+	 * 2 minutes (120 seconds) should be more than enough for any onboarding action/request to complete.
+	 * If at some point we have more complex onboarding actions that may take longer, we can revisit this value,
+	 * but we should keep it as low as possible to prevent long lockouts.
+	 */
+	const NOX_ONBOARDING_LOCKED_TTL_SECONDS = 120;
 
 	const SESSION_ENTRY_DEFAULT = 'settings_payments';
 	const SESSION_ENTRY_LYS     = 'lys';
@@ -1712,7 +1721,20 @@ class WooPaymentsService {
 	 * @return bool Whether the onboarding is locked.
 	 */
 	private function is_onboarding_locked(): bool {
-		return 'yes' === $this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
+		$lock_timestamp = $this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 );
+		// Ensure the lock timestamp is a valid integer.
+		if ( ! is_numeric( $lock_timestamp ) ) {
+			$lock_timestamp = 0;
+		} else {
+			$lock_timestamp = (int) $lock_timestamp;
+		}
+
+		// If the lock timestamp is empty or older than the TTL, we consider the onboarding unlocked.
+		if ( empty( $lock_timestamp ) || $lock_timestamp < $this->proxy->call_function( 'time' ) - self::NOX_ONBOARDING_LOCKED_TTL_SECONDS ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1726,7 +1748,7 @@ class WooPaymentsService {
 	 * @return void
 	 */
 	private function set_onboarding_lock(): void {
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'yes' );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, $this->proxy->call_function( 'time' ) );
 	}
 
 	/**
@@ -1736,7 +1758,7 @@ class WooPaymentsService {
 	 */
 	private function clear_onboarding_lock(): void {
 		// We update rather than delete the option for performance reasons.
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 );
 	}
 
 	/**
