@@ -158,6 +158,56 @@ class WC_REST_Email_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test updating email settings with invalid reply-to name.
+	 * When reply-to is enabled, the name is required.
+	 */
+	public function test_update_item_with_invalid_reply_to_name() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_email_reply_to_enabled' => true,
+						'woocommerce_email_reply_to_name' => '',
+						'woocommerce_email_reply_to_address' => '',
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$response->get_data();
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'Reply-to name cannot be empty when reply-to is enabled.', $response->get_data()['message'] );
+	}
+
+	/**
+	 * Test updating email settings with invalid reply-to address.
+	 * When reply-to is enabled, the name is required.
+	 */
+	public function test_update_item_with_invalid_reply_to_address() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_email_reply_to_enabled' => true,
+						'woocommerce_email_reply_to_name' => 'Name',
+						'woocommerce_email_reply_to_address' => 'invalid',
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$response->get_data();
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'Please enter a valid reply-to email address.', $response->get_data()['message'] );
+	}
+
+	/**
 	 * Test getting email settings without permission.
 	 */
 	public function test_get_item_without_permission() {

@@ -148,6 +148,11 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$valid_settings     = array( 'woocommerce_email_from_name', 'woocommerce_email_from_address', 'woocommerce_email_reply_to_enabled', 'woocommerce_email_reply_to_name', 'woocommerce_email_reply_to_address' );
 		$validated_settings = array();
 
+		$reply_to_enabled = get_option( 'woocommerce_email_reply_to_enabled', 'no' );
+		if ( isset( $settings_data['woocommerce_email_reply_to_enabled'] ) ) {
+			$reply_to_enabled = $this->sanitize_setting_value( 'woocommerce_email_reply_to_enabled', $settings_data['woocommerce_email_reply_to_enabled'] );
+		}
+
 		// Process each setting in the payload.
 		foreach ( $settings_data as $setting_id => $setting_value ) {
 			// Sanitize the setting ID.
@@ -160,7 +165,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			// Sanitize and validate the value.
 			$sanitized_value   = $this->sanitize_setting_value( $setting_id, $setting_value );
-			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
+			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value, $reply_to_enabled );
 
 			if ( is_wp_error( $validation_result ) ) {
 				return $validation_result;
@@ -188,9 +193,11 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 *
 	 * @param string $setting_id Setting ID.
 	 * @param mixed  $value      Setting value.
+	 * @param string $reply_to_enabled Reply-to enabled.
 	 * @return bool|WP_Error True if valid, WP_Error if invalid.
 	 */
-	private function validate_setting_value( $setting_id, $value ) {
+	private function validate_setting_value( $setting_id, $value, $reply_to_enabled ) {
+		$check_reply_to = 'yes' === $reply_to_enabled;
 		switch ( $setting_id ) {
 			case 'woocommerce_email_from_name':
 				if ( empty( $value ) || ! is_string( $value ) ) {
@@ -228,8 +235,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			case 'woocommerce_email_reply_to_name':
 				// Only validate if reply-to is enabled.
-				$reply_to_enabled = get_option( 'woocommerce_email_reply_to_enabled', false );
-				if ( $reply_to_enabled && ( empty( $value ) || ! is_string( $value ) ) ) {
+				if ( $check_reply_to && ( empty( $value ) || ! is_string( $value ) ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
 						__( 'Reply-to name cannot be empty when reply-to is enabled.', 'woocommerce' ),
@@ -240,8 +246,7 @@ class WC_REST_Email_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			case 'woocommerce_email_reply_to_address':
 				// Only validate if reply-to is enabled.
-				$reply_to_enabled = get_option( 'woocommerce_email_reply_to_enabled', false );
-				if ( $reply_to_enabled && ( empty( $value ) || ! is_email( $value ) ) ) {
+				if ( $check_reply_to && ( empty( $value ) || ! is_email( $value ) ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
 						__( 'Please enter a valid reply-to email address.', 'woocommerce' ),
