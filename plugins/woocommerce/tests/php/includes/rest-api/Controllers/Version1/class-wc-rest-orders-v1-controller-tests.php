@@ -1,15 +1,41 @@
 <?php
 
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
- * Tests relating to WC_REST_Product_Reviews_V1_Controller.
+ * Tests relating to WC_REST_Orders_V1_Controller.
  */
 class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * Stores the previous HPOS state.
+	 * @var bool
+	 */
+	private static $hpos_prev_state;
+
+	/**
+	 * Prepare for running the tests. Disables HPOS, as it's not compatible with this test.
+	 */
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
+		// Store the previous HPOS state.
+		self::$hpos_prev_state = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled();
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( false );
+	}
+
+	/**
+	 * Restore previous state (including HPOS) after all tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( self::$hpos_prev_state );
+		parent::tearDownAfterClass();
+	}
+
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
@@ -30,11 +56,6 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_orders_with_coupons_can_be_fetched(): void {
-		// Create a legacy order (APIv1 does not work with HPOS).
-		if ( get_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION ) !== 'no' ) {
-			$this->markTestSkipped( 'This test only runs when HPOS is not enabled.' );
-		}
-
 		// Create an order and apply a coupon.
 		CouponHelper::create_coupon( 'savebig' );
 		$coupon_line_item = new WC_Order_Item_Coupon();
