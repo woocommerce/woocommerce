@@ -10,7 +10,10 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
+				// If we're inside the product page, we need to empty the cart,
+				// and add the current product to the cart.
 				if ( paypal_standard.isProductPage ) {
+					// Empty the cart.
 					await window.wp.apiFetch( {
 						method: 'DELETE',
 						path: '/wc/store/v1/cart/items',

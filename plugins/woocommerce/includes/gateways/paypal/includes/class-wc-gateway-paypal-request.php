@@ -414,10 +414,7 @@ class WC_Gateway_Paypal_Request {
 		);
 
 		$shipping = $this->get_paypal_order_shipping( $order );
-		// If shipping is set, country code is required. If we do not have the address,
-		// e.g. PayPal Buttons, we should not set the shipping just yet.
-		// Shipping information will be updated by the shipping callback handlers.
-		if ( $shipping && ! empty( $shipping['address']['country_code'] ) ) {
+		if ( $shipping ) {
 			$params['purchase_units'][0]['shipping'] = $shipping;
 		}
 
@@ -558,7 +555,8 @@ class WC_Gateway_Paypal_Request {
 	 * Get the shipping information for the PayPal create-order request.
 	 *
 	 * @param WC_Order $order Order object.
-	 * @return array
+	 * @return array|null Returns null if the shipping is not required,
+	 *  or the address is not set, or is incomplete.
 	 */
 	private function get_paypal_order_shipping( $order ) {
 		if ( ! $order->needs_shipping_address() ) {
@@ -574,6 +572,24 @@ class WC_Gateway_Paypal_Request {
 		$city           = trim( $order->{"get_{$address_type}_city"}() );
 		$postcode       = trim( $order->{"get_{$address_type}_postcode"}() );
 		$country        = trim( $order->{"get_{$address_type}_country"}() );
+
+		// If we do not have the complete address,
+		// e.g. PayPal Buttons on product pages, we should not set the 'shipping' param
+		// for the create-order request, otherwise it will fail.
+		// Shipping information will be updated by the shipping callback handlers.
+
+		// Country is a required field.
+		if ( empty( $country ) ) {
+			return null;
+		}
+
+		// Postal code is typically required, but not always. The create-order request
+		// will fail if it is missing for a country that requires it.
+		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
+		// we will assume that postal code is not required.
+		if ( empty( $postcode ) && ( empty( $full_name ) || empty( $address_line_1 ) ) ) {
+			return null;
+		}
 
 		return array(
 			'name'    => array(

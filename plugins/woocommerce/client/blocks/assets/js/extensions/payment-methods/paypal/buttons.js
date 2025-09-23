@@ -55,6 +55,7 @@ const PayPalButtonsContainer = ( {
 			// If we're inside the product page, we need to empty the cart,
 			// and add the current product to the cart.
 			if ( isProductPage ) {
+				// Empty the cart.
 				await apiFetch( {
 					method: 'DELETE',
 					path: '/wc/store/v1/cart/items',
