@@ -636,10 +636,6 @@ class WC_Session_Handler extends WC_Session {
 		if ( null !== $expired_sessions ) {
 			$batch_size   = 100;
 			$cache_prefix = $this->get_cache_prefix();
-			// Below, we perform the table and cache cleanup in batches, taking into account the following aspects:
-			// - Deleting smaller batches will lower the sessions table locking time (the cleanup impact on sessions performance will be minimal).
-			// - Deleting smaller batches is replication-friendly (relevant to clustered DB environments).
-			// - Alternating between cache and DB cleanups provides a gap between DB queries (although it might not be enough, forcing us to use sleep later).
 			foreach ( array_chunk( $expired_sessions, $batch_size ) as $batch ) {
 				// Cleanup expired cache entries (probably unnecessary, but due to `update_session_timestamp` and the need for a gap between delete SQLs, it's here).
 				$expired_cache_keys = array_map( static fn( $session ) => $cache_prefix . $session->session_key, $batch );
