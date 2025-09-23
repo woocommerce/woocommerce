@@ -193,7 +193,7 @@ class PostsRedirectionController {
 	}
 
 	/**
-	 * Updates legacy menu items to point to the new Orders page.
+	 * Rewrites legacy post type menu items to point to the HPOS orders page when the main WooCommerce menu is not visible.
 	 *
 	 * @since 10.3.0
 	 */
