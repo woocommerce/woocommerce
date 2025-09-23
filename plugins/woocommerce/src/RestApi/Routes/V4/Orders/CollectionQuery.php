@@ -13,6 +13,7 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use WP_REST_Request;
+use WP_Http;
 use WP_Error;
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -194,26 +195,31 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'total'                   => array(
-				'description'       => __( 'Limit result set to orders with specific total amounts.', 'woocommerce' ),
-				'type'              => 'object',
-				'properties'        => array(
-					'value'    => array(
-						'description' => __( 'The value(s) to compare against the order total. Use a single number for most operators, or an array of two numbers for between/not between.', 'woocommerce' ),
-						'type'        => array( 'number', 'array' ),
-						'required'    => true,
-					),
-					'operator' => array(
-						'description' => __( 'The comparison operator to use.', 'woocommerce' ),
-						'type'        => 'string',
-						'enum'        => self::OPERATORS,
-						'default'     => self::OPERATOR_IS,
-					),
+				'description'       => __( 'Limit result set to orders with specific total amounts. For between operators, list two values.', 'woocommerce' ),
+				'type'              => array( 'string', 'array' ),
+				'items'             => array(
+					'type' => 'string',
 				),
-				'validate_callback' => function ( $param ) {
-					return $this->validate_total_field( $param );
-				},
-				'sanitize_callback' => function ( $param ) {
-					return $this->sanitize_total_field( $param );
+				'default'           => array(),
+				'sanitize_callback' => 'wp_parse_list',
+			),
+			'total_operator'          => array(
+				'description'       => __( 'The comparison operator to use for total filtering.', 'woocommerce' ),
+				'type'              => 'string',
+				'enum'              => self::OPERATORS,
+				'default'           => self::OPERATOR_IS,
+				'validate_callback' => function ( $param, $request, $key ) {
+					$valid = rest_validate_request_arg( $param, $request, $key );
+
+					if ( true === $valid && self::OPERATOR_BETWEEN === $param ) {
+						$total_field = wp_parse_list( $request->get_param( 'total' ) );
+
+						if ( ! is_array( $total_field ) || count( $total_field ) !== 2 ) {
+							return new WP_Error( 'rest_invalid_param', __( 'Total value must be an array with exactly 2 numbers for between operators.', 'woocommerce' ), array( 'status' => WP_Http::BAD_REQUEST ) );
+						}
+					}
+
+					return $valid;
 				},
 			),
 		);
@@ -318,37 +324,40 @@ class CollectionQuery extends AbstractCollectionQuery {
 			}
 		}
 
-		// Total query.
+		// Total filtering.
 		if ( isset( $request['total'] ) ) {
 			// WC_Order-Query uses `total` as the key. DataStores handle the operators.
-			$total_param = $request['total'];
+			$total_param    = (array) $request['total']; // List of total values supports single and between.
+			$total_value    = $total_param[0] ?? 0;
+			$total_operator = '=';
 
 			// Map rest api operators to the operators `WC_Order_Query` expects. These are the ones defined in the enum.
-			switch ( $total_param['operator'] ) {
-				case self::OPERATOR_IS:
-					$total_param['operator'] = '=';
-					break;
+			switch ( $request['total_operator'] ?? self::OPERATOR_IS ) {
 				case self::OPERATOR_IS_NOT:
-					$total_param['operator'] = '!=';
+					$total_operator = '!=';
 					break;
 				case self::OPERATOR_LESS_THAN:
-					$total_param['operator'] = '<';
+					$total_operator = '<';
 					break;
 				case self::OPERATOR_GREATER_THAN:
-					$total_param['operator'] = '>';
+					$total_operator = '>';
 					break;
 				case self::OPERATOR_LESS_THAN_OR_EQUAL:
-					$total_param['operator'] = '<=';
+					$total_operator = '<=';
 					break;
 				case self::OPERATOR_GREATER_THAN_OR_EQUAL:
-					$total_param['operator'] = '>=';
+					$total_operator = '>=';
 					break;
 				case self::OPERATOR_BETWEEN:
-					$total_param['operator'] = 'BETWEEN';
+					$total_operator = 'BETWEEN';
+					$total_value    = array( $total_param[0] ?? 0, $total_param[1] ?? 0 );
 					break;
 			}
 
-			$args['total'] = $total_param;
+			$args['total'] = array(
+				'value'    => $total_value,
+				'operator' => $total_operator,
+			);
 		}
 
 		return $args;
@@ -377,69 +386,5 @@ class CollectionQuery extends AbstractCollectionQuery {
 			'total'   => $results->total,
 			'pages'   => $results->max_num_pages,
 		);
-	}
-
-	/**
-	 * Validate the total value parameter.
-	 *
-	 * @param mixed $total_param   The value to validate.
-	 * @return bool|WP_Error True if valid, WP_Error otherwise.
-	 */
-	private function validate_total_field( $total_param ) {
-		if ( empty( $total_param ) ) {
-			return true; // Optional parameter.
-		}
-
-		$value    = $total_param['value'] ?? null;
-		$operator = $total_param['operator'] ?? self::OPERATOR_IS;
-
-		if ( is_null( $value ) ) {
-			return true;
-		}
-
-		if ( ! in_array( $operator, self::OPERATORS, true ) ) {
-			// translators: %s is a list of valid operators.
-			return new WP_Error( 'rest_invalid_param', sprintf( esc_html__( 'Invalid operator. Valid operators are: %s.', 'woocommerce' ), implode( ', ', self::OPERATORS ) ), array( 'status' => 400 ) );
-		}
-
-		// Validate value based on operator.
-		if ( in_array( $operator, array( self::OPERATOR_BETWEEN ), true ) ) {
-			// For between operators, value must be an array with exactly 2 numbers.
-			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
-				return new WP_Error( 'rest_invalid_param', __( 'Total value must be an array with exactly 2 numbers for between operators.', 'woocommerce' ), array( 'status' => 400 ) );
-			}
-			if ( ! is_numeric( $value[0] ) || ! is_numeric( $value[1] ) ) {
-				return new WP_Error( 'rest_invalid_param', __( 'Total value array must contain only numbers.', 'woocommerce' ), array( 'status' => 400 ) );
-			}
-		} elseif ( ! is_numeric( $value ) ) {
-			// For other operators, value must be a single number.
-			return new WP_Error( 'rest_invalid_param', __( 'Total value must be a number for this operator.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Sanitize the total value parameter.
-	 *
-	 * @param mixed $total_param The value to sanitize.
-	 * @return mixed Sanitized value.
-	 */
-	private function sanitize_total_field( $total_param ) {
-		if ( empty( $total_param ) ) {
-			return true; // Optional parameter.
-		}
-
-		if ( is_array( $total_param['value'] ) ) {
-			// For between operators, sanitize each value in the array.
-			foreach ( $total_param['value'] as $key => $val ) {
-				$total_param['value'][ $key ] = wc_format_decimal( $val, wc_get_price_decimals() );
-			}
-		} else {
-			// For other operators, sanitize as a single number.
-			$total_param['value'] = wc_format_decimal( $total_param['value'], wc_get_price_decimals() );
-		}
-
-		return $total_param;
 	}
 }

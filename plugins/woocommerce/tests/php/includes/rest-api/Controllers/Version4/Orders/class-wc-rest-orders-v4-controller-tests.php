@@ -1279,11 +1279,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Unsupported operator should return an error.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => 250.50,
-				'operator' => 'not supported',
+				'total'          => 250.50,
+				'total_operator' => 'not supported',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -1291,11 +1290,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Between operator should return an error if value is not an array.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => 250.50,
-				'operator' => 'between',
+				'total'          => 250.50,
+				'total_operator' => 'between',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -1303,11 +1301,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Between operator should return an error if value is not an array of 2 numbers.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => array( 250.50 ),
-				'operator' => 'between',
+				'total'          => array( 250.50 ),
+				'total_operator' => 'not supported',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -1315,11 +1312,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Test simple equality filtering.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => 250.50,
-				'operator' => 'is',
+				'total'          => 250.50,
+				'total_operator' => 'is',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -1327,11 +1323,10 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $response->get_data() );
 
 		// Test greater than operator.
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => 200.00,
-				'operator' => 'greaterThan',
+				'total'          => '200',
+				'total_operator' => 'greaterThan',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -1340,11 +1335,21 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 3, $response->get_data() );
 
 		// Test between operator.
-		$request->set_param(
-			'total',
+		$request->set_query_params(
 			array(
-				'value'    => array( 200.00, 300.00 ),
-				'operator' => 'between',
+				'total'          => array( 200.00, 300.00 ),
+				'total_operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+
+		$request->set_query_params(
+			array(
+				'total'          => '200,300',
+				'total_operator' => 'between',
 			)
 		);
 		$response = $this->server->dispatch( $request );
