@@ -378,7 +378,7 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 
 		$wp_post_type = get_post_type_object( $order->get_type() ) ?? get_post_type_object( 'shop_order' );
 		if ( ! current_user_can( $wp_post_type->cap->edit_post, $order->get_id() ) ) {
-			return;
+			return '';
 		}
 
 		if ( $order->has_status( array( OrderStatus::PENDING ) ) ) {
