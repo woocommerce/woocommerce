@@ -65,8 +65,9 @@ const PayPalButtonsContainer = ( {
 				let productId = document.querySelector(
 					'[name="add-to-cart"]'
 				)?.value;
-				const variationId =
-					document.querySelector( '[name="variation_id"]' )?.value;
+				const variationId = document.querySelector(
+					'[name="variation_id"]'
+				)?.value;
 
 				if ( variationId ) {
 					productId = variationId;
