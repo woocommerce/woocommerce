@@ -107,15 +107,46 @@ class WC_REST_Settings_Groups_Manager {
 
 	/**
 	 * Update settings across multiple groups.
+	 * All settings are validated first, and only if all are valid do they get saved.
 	 *
 	 * @param array $settings Array of setting_id => value pairs.
-	 * @return array Array of successfully updated setting IDs grouped by group.
+	 * @return array|WP_Error Array of successfully updated setting IDs grouped by group, or WP_Error if validation fails.
 	 */
 	public function update_settings( $settings ) {
 		$updated_settings = array();
+		$group_settings   = array();
 
-		foreach ( $this->groups as $group_id => $group ) {
-			$group_updated = $group->update_settings( $settings );
+		// First pass: validate all settings and group them by their respective groups.
+		foreach ( $settings as $setting_id => $setting_value ) {
+			$group = $this->get_group_for_setting( $setting_id );
+			if ( $group ) {
+				$group_settings[ $group->get_group_id() ][ $setting_id ] = $setting_value;
+			}
+		}
+
+		// Second pass: validate all groups first (without saving).
+		foreach ( $group_settings as $group_id => $group_setting_values ) {
+			$group = $this->groups[ $group_id ];
+
+			// Use the group's validation method to check all settings for this group.
+			foreach ( $group_setting_values as $setting_id => $setting_value ) {
+				$validation_result = $group->validate_setting_value( $setting_id, $setting_value );
+				if ( is_wp_error( $validation_result ) ) {
+					return $validation_result;
+				}
+			}
+		}
+
+		// Third pass: if all validations passed, update all groups.
+		foreach ( $group_settings as $group_id => $group_setting_values ) {
+			$group         = $this->groups[ $group_id ];
+			$group_updated = $group->update_settings( $group_setting_values );
+
+			// Check if the group update returned an error (shouldn't happen after validation, but just in case).
+			if ( is_wp_error( $group_updated ) ) {
+				return $group_updated;
+			}
+
 			if ( ! empty( $group_updated ) ) {
 				$updated_settings[ $group_id ] = $group_updated;
 			}
@@ -154,7 +185,7 @@ class WC_REST_Settings_Groups_Manager {
 		);
 
 		foreach ( $this->groups as $group ) {
-			$group_schema = $group->get_schema();
+			$group_schema                                   = $group->get_schema();
 			$schema['properties'][ $group->get_group_id() ] = $group_schema;
 		}
 
@@ -184,8 +215,8 @@ class WC_REST_Settings_Groups_Manager {
 	public function is_setting_managed( $setting_id ) {
 		foreach ( $this->groups as $group ) {
 			$settings_definitions = $group->get_settings_definitions();
-			$setting_ids = array_column( $settings_definitions, 'id' );
-			
+			$setting_ids          = array_column( $settings_definitions, 'id' );
+
 			if ( in_array( $setting_id, $setting_ids, true ) ) {
 				return true;
 			}
@@ -203,8 +234,8 @@ class WC_REST_Settings_Groups_Manager {
 	public function get_group_for_setting( $setting_id ) {
 		foreach ( $this->groups as $group ) {
 			$settings_definitions = $group->get_settings_definitions();
-			$setting_ids = array_column( $settings_definitions, 'id' );
-			
+			$setting_ids          = array_column( $settings_definitions, 'id' );
+
 			if ( in_array( $setting_id, $setting_ids, true ) ) {
 				return $group;
 			}
