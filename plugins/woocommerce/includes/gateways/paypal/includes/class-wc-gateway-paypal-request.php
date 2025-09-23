@@ -559,7 +559,7 @@ class WC_Gateway_Paypal_Request {
 	 *  or the address is not set, or is incomplete.
 	 */
 	private function get_paypal_order_shipping( $order ) {
-		if ( ! $order->needs_shipping_address() ) {
+		if ( ! $order->needs_shipping() ) {
 			return null;
 		}
 
