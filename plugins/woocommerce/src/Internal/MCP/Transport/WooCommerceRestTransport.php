@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\MCP\Transport;
 
 use WP\MCP\Transport\Http\RestTransport;
+use WP\MCP\Transport\Infrastructure\McpTransportContext;
 use WP_REST_Request;
 use WP_Error;
 
@@ -31,10 +32,10 @@ class WooCommerceRestTransport extends RestTransport {
 	/**
 	 * Constructor.
 	 *
-	 * @param mixed ...$args Arguments to pass to parent constructor.
+	 * @param McpTransportContext $context The transport context.
 	 */
-	public function __construct( ...$args ) {
-		parent::__construct( ...$args );
+	public function __construct( McpTransportContext $context ) {
+		parent::__construct( $context );
 
 		// This filter is documented in the check_ability_permission method.
 		add_filter( 'woocommerce_check_rest_ability_permissions_for_method', array( $this, 'check_ability_permission' ), 10, 3 );
