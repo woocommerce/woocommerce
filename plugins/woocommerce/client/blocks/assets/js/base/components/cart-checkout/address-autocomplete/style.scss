@@ -1,8 +1,64 @@
 /**
 This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, you need to modify: plugins/woocommerce/client/legacy/css/address-autocomplete.scss
- */
+*/
 .wc-block-components-address-autocomplete-container {
 	width: 100%;
 	margin-top: $gap;
 	position: relative;
+}
+
+.wc-block-components-address-autocomplete-suggestions {
+	position: absolute;
+	z-index: 1000;
+	width: 100%;
+	max-width: 100%;
+	margin-top: 4px;
+	background: #fff;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-sizing: border-box;
+
+	.suggestions-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		max-height: 200px;
+		overflow-y: auto;
+
+		li {
+			padding: 8px 12px;
+			font-size: 14px;
+			cursor: pointer;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			color: var(--wc-form-color-text, #444);
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			&:hover,
+			&.active {
+				background-color: #0073aa;
+				color: #fff;
+			}
+
+			&:focus {
+				outline: none;
+				background-color: #0073aa;
+				color: #fff;
+			}
+		}
+	}
+
+	.woocommerce-address-autocomplete-branding {
+		background: #d3d3d3;
+		padding: 8px 12px;
+		color: rgba(34, 34, 34, 0.66);
+		font-size: 12px;
+		display: flex;
+		align-items: center;
+	}
 }

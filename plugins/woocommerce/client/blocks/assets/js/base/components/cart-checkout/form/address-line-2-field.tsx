@@ -43,6 +43,13 @@ const AddressLine2Field = ( {
 		[ onChange ]
 	);
 
+	// Rerender if value changes to anything non-empty.
+	useEffect( () => {
+		if ( value ) {
+			setIsFieldVisible( true );
+		}
+	}, [ value ] );
+
 	return (
 		<Fragment>
 			{ isFieldVisible ? (
