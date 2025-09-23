@@ -788,10 +788,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'wc-paypal-frontend',
 			'paypal_standard',
 			array(
-				'gateway_id'         => $this->id,
-				'isProductPage'      => is_product(),
-				'wc_store_api_nonce' => wp_create_nonce( 'wc_store_api' ),
-				'create_order_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
+				'gateway_id'           => $this->id,
+				'isProductPage'        => is_product(),
+				'wc_store_api_nonce'   => wp_create_nonce( 'wc_store_api' ),
+				'create_order_nonce'   => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
 				'cancel_payment_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
 			)
 		);
