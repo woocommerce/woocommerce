@@ -132,6 +132,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Set the instance of the gateway.
+	 *
+	 * @param WC_Gateway_Paypal $instance The instance of the gateway.
+	 * @return void
+	 */
+	public static function set_instance( $instance ) {
+		self::$instance = $instance;
+	}
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
