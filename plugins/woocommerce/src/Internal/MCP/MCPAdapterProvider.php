@@ -22,6 +22,20 @@ defined( 'ABSPATH' ) || exit;
 class MCPAdapterProvider {
 
 	/**
+	 * MCP server namespace.
+	 *
+	 * @var string
+	 */
+	const MCP_NAMESPACE = 'woocommerce';
+
+	/**
+	 * MCP server route.
+	 *
+	 * @var string
+	 */
+	const MCP_ROUTE = 'mcp';
+
+	/**
 	 * Whether MCP adapter is initialized.
 	 *
 	 * @var bool
@@ -109,8 +123,8 @@ class MCPAdapterProvider {
 			// Create MCP server.
 			$adapter->create_server(
 				'woocommerce-mcp',
-				'woocommerce',
-				'mcp',
+				self::MCP_NAMESPACE,
+				self::MCP_ROUTE,
 				__( 'WooCommerce MCP Server', 'woocommerce' ),
 				__( 'AI-accessible WooCommerce operations via MCP', 'woocommerce' ),
 				'1.0.0',
@@ -187,5 +201,26 @@ class MCPAdapterProvider {
 	 */
 	public function is_initialized(): bool {
 		return $this->initialized;
+	}
+
+	/**
+	 * Check if the current request is for the MCP endpoint.
+	 *
+	 * @return bool True if this is an MCP endpoint request.
+	 */
+	public static function is_mcp_request(): bool {
+		// Check if this is a REST request.
+		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
+			return false;
+		}
+
+		// Get the request URI.
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+		// Build the MCP endpoint path dynamically from constants.
+		$mcp_endpoint = '/' . self::MCP_NAMESPACE . '/' . self::MCP_ROUTE;
+
+		// Check if the request is for the MCP endpoint.
+		return false !== strpos( $request_uri, $mcp_endpoint );
 	}
 }
