@@ -209,7 +209,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			if ( $this->should_use_orders_v2() ) {
 				// Hook for updating the shipping information on order approval (Orders v2).
-				add_action( 'woocommerce_before_thankyou', array( $this, 'update_shipping_information' ), 10 );
+				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -226,13 +226,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
-	 * Update the shipping information for the order.
+	 * Update the shipping and billing information for the order.
 	 * Hooked on 'woocommerce_before_thankyou'.
 	 *
 	 * @param int $order_id The order ID.
 	 * @return void
 	 */
-	public function update_shipping_information( $order_id ) {
+	public function update_addresses_in_order( $order_id ) {
 		$order = wc_get_order( $order_id );
 
 		// Bail early if the order is not a PayPal order.
@@ -255,6 +255,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
+			// Update the shipping information.
 			$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
 			if ( ! empty( $full_name ) ) {
 				$approximate_first_name = explode( ' ', $full_name )[0] ?? '';
@@ -274,8 +275,30 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
 				$order->save();
 			}
+
+			// Update the billing information.
+			$full_name = $paypal_order_details['payer']['name'] ?? array();
+			$email     = $paypal_order_details['payer']['email_address'] ?? '';
+			if ( ! empty( $full_name ) ) {
+				$order->set_billing_first_name( $full_name['given_name'] ?? '' );
+				$order->set_billing_last_name( $full_name['surname'] ?? '' );
+				$order->set_billing_email( $email );
+				$order->save();
+			}
+
+			$billing_address = $paypal_order_details['payer']['address'] ?? array();
+			if ( ! empty( $billing_address ) ) {
+				$order->set_billing_country( $billing_address['country_code'] ?? '' );
+				$order->set_billing_postcode( $billing_address['postal_code'] ?? '' );
+				$order->set_billing_state( $billing_address['admin_area_1'] ?? '' );
+				$order->set_billing_city( $billing_address['admin_area_2'] ?? '' );
+				$order->set_billing_address_1( $billing_address['address_line_1'] ?? '' );
+				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
+				$order->save();
+			}
+			
 		} catch ( Exception $e ) {
-			self::log( 'Error updating shipping information for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
+			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
 	}
 
