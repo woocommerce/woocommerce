@@ -131,7 +131,7 @@ Each platform must implement:
 
 ## Creating a New Platform
 
-New platforms should be created as **external WordPress plugins** that hook into the `woocommerce_migrator_platforms` filter.
+To add support for new platforms, create them as **external WordPress plugins** that register themselves using the `woocommerce_migrator_platforms` filter.
 
 ### 1. Create Plugin Structure
 
