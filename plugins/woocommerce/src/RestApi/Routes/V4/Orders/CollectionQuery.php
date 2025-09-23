@@ -245,7 +245,6 @@ class CollectionQuery extends AbstractCollectionQuery {
 			'created_via'    => $request['created_via'],
 			'status'         => $request['status'],
 			'customer'       => $request['customer'],
-			'total'          => $request['total'],
 		);
 
 		if ( 'date' === $args['orderby'] ) {
