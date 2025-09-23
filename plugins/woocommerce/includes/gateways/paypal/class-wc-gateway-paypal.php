@@ -262,7 +262,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$approximate_last_name  = explode( ' ', $full_name )[1] ?? '';
 				$order->set_shipping_first_name( $approximate_first_name );
 				$order->set_shipping_last_name( $approximate_last_name );
-				$order->save();
 			}
 
 			$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
@@ -273,7 +272,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
 				$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
 				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
-				$order->save();
 			}
 
 			// Update the billing information.
@@ -283,7 +281,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_billing_first_name( $full_name['given_name'] ?? '' );
 				$order->set_billing_last_name( $full_name['surname'] ?? '' );
 				$order->set_billing_email( $email );
-				$order->save();
 			}
 
 			$billing_address = $paypal_order_details['payer']['address'] ?? array();
@@ -294,8 +291,9 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_billing_city( $billing_address['admin_area_2'] ?? '' );
 				$order->set_billing_address_1( $billing_address['address_line_1'] ?? '' );
 				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
-				$order->save();
 			}
+
+			$order->save();
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
