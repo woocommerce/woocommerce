@@ -631,18 +631,21 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		$expired_sessions = $wpdb->get_results( $wpdb->prepare( 'SELECT session_id, session_key FROM %i WHERE session_expiry < %d', $this->_table, time() ) );
-		if ( null !== $expired_sessions ) {
-			$batch_size   = 100;
-			$cache_prefix = $this->get_cache_prefix();
-			foreach ( array_chunk( $expired_sessions, $batch_size ) as $batch ) {
-				// Cleanup expired cache entries (probably unnecessary, but due to `update_session_timestamp` and the need for a gap between delete SQLs, it's here).
-				$expired_cache_keys = array_map( static fn( $session ) => $cache_prefix . $session->session_key, $batch );
-				wp_cache_delete_multiple( $expired_cache_keys, WC_SESSION_CACHE_GROUP );
-				// Drop expired database entries (it'll use PK as index, hence blazing fast).
-				$expired_session_ids = array_column( $batch, 'session_id' );
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_id IN( ' . implode( ', ', $expired_session_ids ) . ' )', $this->_table ) ); // @phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			}
+		$batch_size = 100;
+		do {
+			$deleted_count = (int) $wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
+					$this->_table,
+					time(),
+					$batch_size
+				)
+			);
+			usleep( 10_000 );
+		} while ( $deleted_count === $batch_size );
+
+		if ( $deleted_count > 0 && class_exists( 'WC_Cache_Helper' ) ) {
+			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
 
