@@ -130,6 +130,11 @@
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-no-ai.svg) no-repeat center right;
 	}
 
+	&.pick-your-theme-banner {
+		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-themes.svg) no-repeat center right;
+		background-size: contain;
+	}
+
 	&.existing-ai-theme-banner,
 	&.existing-no-ai-theme-banner {
 		background: rgba(246, 247, 247, 1);
@@ -207,6 +212,28 @@
 				a {
 					text-decoration: none;
 				}
+			}
+		}
+
+		.pick-your-theme-banner__content {
+			display: flex;
+			gap: 1rem;
+			flex-direction: row;
+
+			ul {
+				flex: 1;
+				list-style: disc;
+				padding-left: 1rem;
+
+				li {
+					margin-bottom: 0;
+					line-height: 1.5;
+				}
+			}
+
+			p {
+				line-height: 1.5;
+				max-width: 255px;
 			}
 		}
 	}
