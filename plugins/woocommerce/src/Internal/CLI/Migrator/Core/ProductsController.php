@@ -136,7 +136,7 @@ class ProductsController {
 		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
 
 		if ( ! $this->parsed_args['dry_run'] ) {
-			$progress->tick( $this->session->count_all_imported_entities(), false );
+			$progress->tick( $this->session->count_all_imported_entities() );
 		}
 
 		$this->configure_product_importer();
