@@ -135,24 +135,26 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Mock abilities registry to return test abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
-			->willReturn( [
-				'woocommerce/products-list',
-				'woocommerce/orders-get',
-				'other-plugin/custom-action',
-				'another/namespace/action',
-			] );
+			->willReturn(
+				array(
+					'woocommerce/products-list',
+					'woocommerce/orders-get',
+					'other-plugin/custom-action',
+					'another/namespace/action',
+				)
+			);
 
 		// Use reflection to test the private method.
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->sut );
 
-		$expected = [
+		$expected = array(
 			'woocommerce/products-list',
 			'woocommerce/orders-get',
-		];
+		);
 
 		$this->assertEquals( $expected, $result, 'Should only return woocommerce namespaced abilities' );
 	}
@@ -164,31 +166,38 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Mock abilities registry to return test abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
-			->willReturn( [
-				'woocommerce/products-list',
-				'custom-plugin/special-action',
-				'other-plugin/normal-action',
-			] );
+			->willReturn(
+				array(
+					'woocommerce/products-list',
+					'custom-plugin/special-action',
+					'other-plugin/normal-action',
+				)
+			);
 
 		// Add custom filter to include abilities from custom-plugin namespace.
-		add_filter( 'woocommerce_mcp_include_ability', function ( $include, $ability_id ) {
-			if ( str_starts_with( $ability_id, 'custom-plugin/' ) ) {
-				return true;
-			}
-			return $include;
-		}, 10, 2 );
+		add_filter(
+			'woocommerce_mcp_include_ability',
+			function ( $should_include, $ability_id ) {
+				if ( str_starts_with( $ability_id, 'custom-plugin/' ) ) {
+					return true;
+				}
+				return $should_include;
+			},
+			10,
+			2
+		);
 
 		// Use reflection to test the private method.
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->sut );
 
-		$expected = [
+		$expected = array(
 			'woocommerce/products-list',
 			'custom-plugin/special-action',
-		];
+		);
 
 		$this->assertEquals( $expected, $result, 'Should respect custom filter for including abilities' );
 	}
@@ -222,16 +231,16 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Mock abilities registry to return empty array.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
-			->willReturn( [] );
+			->willReturn( array() );
 
 		// Use reflection to test the private method.
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( [], $result, 'Should handle empty abilities array correctly' );
+		$this->assertEquals( array(), $result, 'Should handle empty abilities array correctly' );
 	}
 
 	/**
@@ -241,20 +250,22 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Mock abilities registry to return only non-woocommerce abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
-			->willReturn( [
-				'other-plugin/action-1',
-				'another-namespace/action-2',
-				'custom/action-3',
-			] );
+			->willReturn(
+				array(
+					'other-plugin/action-1',
+					'another-namespace/action-2',
+					'custom/action-3',
+				)
+			);
 
 		// Use reflection to test the private method.
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( [], $result, 'Should filter out all non-woocommerce abilities' );
+		$this->assertEquals( array(), $result, 'Should filter out all non-woocommerce abilities' );
 	}
 
 	/**
@@ -264,25 +275,31 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Mock abilities registry to return mixed abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
-			->willReturn( [
-				'other-plugin/action-1',
-				'woocommerce/products-list',
-				'another-namespace/action-2',
-				'woocommerce/orders-get',
-			] );
+			->willReturn(
+				array(
+					'other-plugin/action-1',
+					'woocommerce/products-list',
+					'another-namespace/action-2',
+					'woocommerce/orders-get',
+				)
+			);
 
 		// Use reflection to test the private method.
 		$reflection = new \ReflectionClass( $this->sut );
-		$method = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
 		$result = $method->invoke( $this->sut );
 
 		// Check that array is properly re-indexed (keys should be 0, 1).
-		$this->assertEquals( [ 0, 1 ], array_keys( $result ), 'Should re-index array after filtering' );
-		$this->assertEquals( [
-			'woocommerce/products-list',
-			'woocommerce/orders-get',
-		], array_values( $result ), 'Should maintain correct values after re-indexing' );
+		$this->assertEquals( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering' );
+		$this->assertEquals(
+			array(
+				'woocommerce/products-list',
+				'woocommerce/orders-get',
+			),
+			array_values( $result ),
+			'Should maintain correct values after re-indexing'
+		);
 	}
 }

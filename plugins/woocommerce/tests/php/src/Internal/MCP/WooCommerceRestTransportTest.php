@@ -41,7 +41,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 
 		// Create a mock transport context since we're not testing the full transport integration.
 		$mock_context = $this->createMock( 'WP\MCP\Transport\Infrastructure\McpTransportContext' );
-		$this->sut = new WooCommerceRestTransport( $mock_context );
+		$this->sut    = new WooCommerceRestTransport( $mock_context );
 	}
 
 	/**
@@ -271,7 +271,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 	public function test_check_ability_permission_allows_get_with_read_permission() {
 		// Set up MCP context with read permissions.
 		$reflection = new \ReflectionClass( WooCommerceRestTransport::class );
-		$property = $reflection->getProperty( 'current_mcp_permissions' );
+		$property   = $reflection->getProperty( 'current_mcp_permissions' );
 		$property->setAccessible( true );
 		$property->setValue( 'read' );
 
@@ -289,7 +289,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 	public function test_check_ability_permission_denies_post_with_read_permission() {
 		// Set up MCP context with read permissions.
 		$reflection = new \ReflectionClass( WooCommerceRestTransport::class );
-		$property = $reflection->getProperty( 'current_mcp_permissions' );
+		$property   = $reflection->getProperty( 'current_mcp_permissions' );
 		$property->setAccessible( true );
 		$property->setValue( 'read' );
 
@@ -307,7 +307,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 	public function test_check_ability_permission_allows_post_with_write_permission() {
 		// Set up MCP context with write permissions.
 		$reflection = new \ReflectionClass( WooCommerceRestTransport::class );
-		$property = $reflection->getProperty( 'current_mcp_permissions' );
+		$property   = $reflection->getProperty( 'current_mcp_permissions' );
 		$property->setAccessible( true );
 		$property->setValue( 'write' );
 
@@ -325,12 +325,12 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 	public function test_check_ability_permission_allows_all_with_read_write_permission() {
 		// Set up MCP context with read_write permissions.
 		$reflection = new \ReflectionClass( WooCommerceRestTransport::class );
-		$property = $reflection->getProperty( 'current_mcp_permissions' );
+		$property   = $reflection->getProperty( 'current_mcp_permissions' );
 		$property->setAccessible( true );
 		$property->setValue( 'read_write' );
 
-		$get_result = $this->sut->check_ability_permission( false, 'GET', new \stdClass() );
-		$post_result = $this->sut->check_ability_permission( false, 'POST', new \stdClass() );
+		$get_result    = $this->sut->check_ability_permission( false, 'GET', new \stdClass() );
+		$post_result   = $this->sut->check_ability_permission( false, 'POST', new \stdClass() );
 		$delete_result = $this->sut->check_ability_permission( false, 'DELETE', new \stdClass() );
 
 		$this->assertTrue( $get_result, 'Should allow GET requests with read_write permissions' );
@@ -370,7 +370,7 @@ class WooCommerceRestTransportTest extends \WC_Unit_Test_Case {
 	public function test_get_current_user_permissions_returns_set_value() {
 		// Set permissions via reflection (simulating authentication).
 		$reflection = new \ReflectionClass( WooCommerceRestTransport::class );
-		$property = $reflection->getProperty( 'current_mcp_permissions' );
+		$property   = $reflection->getProperty( 'current_mcp_permissions' );
 		$property->setAccessible( true );
 		$property->setValue( 'read_write' );
 
