@@ -149,9 +149,9 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		}
 
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-		$paypal_order   = $paypal_request->create_paypal_order( $order, $payment_source );
+		$paypal_order   = $paypal_request->create_paypal_order( $order, $payment_source, false );
 
-		if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
+		if ( ! $paypal_order || empty( $paypal_order['id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
 		}
 

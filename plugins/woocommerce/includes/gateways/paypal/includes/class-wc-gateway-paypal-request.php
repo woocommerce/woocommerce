@@ -122,10 +122,15 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
+	 * @param bool     $is_redirect_flow Whether the approval flow involves a redirect.
 	 * @return array|null
 	 * @throws Exception If the PayPal order creation fails.
 	 */
-	public function create_paypal_order( $order, $payment_source = WC_Gateway_Paypal_Constants::PAYMENT_SOURCE_PAYPAL ) {
+	public function create_paypal_order(
+		$order,
+		$payment_source = WC_Gateway_Paypal_Constants::PAYMENT_SOURCE_PAYPAL,
+		$is_redirect_flow = true
+	) {
 		$paypal_debug_id = null;
 
 		// While PayPal JS SDK can return 'paylater' as the payment source in the createOrder callback,
@@ -156,9 +161,12 @@ class WC_Gateway_Paypal_Request {
 				throw new Exception( 'PayPal order creation failed. Response status: ' . $http_code . '. Response body: ' . $body );
 			}
 
-			$redirect_url = $this->get_approve_link( $http_code, $response_data );
-			if ( empty( $redirect_url ) ) {
-				throw new Exception( 'PayPal order creation failed. Missing approval link.' );
+			$redirect_url = null;
+			if ( $is_redirect_flow ) {
+				$redirect_url = $this->get_approve_link( $http_code, $response_data );
+				if ( empty( $redirect_url ) ) {
+					throw new Exception( 'PayPal order creation failed. Missing approval link.' );
+				}
 			}
 
 			// Save the PayPal order ID to the order.
