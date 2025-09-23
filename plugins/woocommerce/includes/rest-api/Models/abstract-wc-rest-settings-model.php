@@ -377,7 +377,7 @@ abstract class WC_REST_Settings_Model {
 	 * @param mixed  $value      Setting value.
 	 * @return bool|WP_Error True if valid, WP_Error if invalid.
 	 */
-	public function validate_setting_value( $setting_id, $value ): bool|WP_Error {
+	public function validate_setting_value( $setting_id, $value ) {
 		return true;
 	}
 
