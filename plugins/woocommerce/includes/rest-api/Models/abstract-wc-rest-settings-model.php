@@ -354,6 +354,18 @@ abstract class WC_REST_Settings_Model {
 	}
 
 	/**
+	 * Validate a setting value before updating.
+	 * Override in child classes to add custom validation logic.
+	 *
+	 * @param string $setting_id Setting ID.
+	 * @param mixed  $value      Setting value.
+	 * @return bool|WP_Error True if valid, WP_Error if invalid.
+	 */
+	public function validate_setting_value( $setting_id, $value ): bool|WP_Error {
+		return true;
+	}
+
+	/**
 	 * Get REST API arguments for update operations.
 	 *
 	 * @return array REST API arguments.
