@@ -200,7 +200,6 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'items'             => array(
 					'type' => 'string',
 				),
-				'default'           => array(),
 				'sanitize_callback' => 'wp_parse_list',
 			),
 			'total_operator'          => array(
