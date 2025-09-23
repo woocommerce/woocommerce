@@ -29,9 +29,18 @@ class Server {
 	protected $controllers = array();
 
 	/**
+	 * Flag to track if V4 models have been loaded.
+	 *
+	 * @var bool
+	 */
+	protected static $v4_models_loaded = false;
+
+	/**
 	 * Hook into WordPress ready to init the REST API as needed.
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod -- Not an injection method.
+		$this->load_v4_models();
+		
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
 
 		\WC_REST_System_Status_V2_Controller::register_cache_clean();
@@ -245,6 +254,38 @@ class Server {
 		return array(
 			'tracker' => 'WC_REST_Telemetry_Controller',
 		);
+	}
+
+	/**
+	 * Load V4 REST API models.
+	 * 
+	 * This ensures that core V4 models are available for plugins to extend.
+	 * These models are loaded early so external plugins can use them.
+	 */
+	protected function load_v4_models() {
+		// Only load once.
+		if ( self::$v4_models_loaded ) {
+			return;
+		}
+
+		if ( ! Features::is_enabled( 'rest-api-v4' ) ) {
+			return;
+		}
+
+		$models_path = __DIR__ . '/Models/';
+		
+		// Always load the abstract base model that plugins extend.
+		if ( ! class_exists( 'WC_REST_Settings_Model' ) ) {
+			require_once $models_path . 'abstract-wc-rest-settings-model.php';
+		}
+		
+		// Always load the settings groups manager.
+		if ( ! class_exists( 'WC_REST_Settings_Groups_Manager' ) ) {
+			require_once $models_path . 'class-wc-rest-settings-groups-manager.php';
+		}
+
+		// Mark models as loaded.
+		self::$v4_models_loaded = true;
 	}
 
 	/**
