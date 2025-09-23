@@ -296,7 +296,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
 				$order->save();
 			}
-			
 		} catch ( Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
