@@ -16,24 +16,27 @@ jQuery(function ($) {
 						path: '/wc/store/v1/cart/items',
 					} );
 
-					// Get product ID from the value of the "add-to-cart" input field.
-					const productId = document.querySelector( '[name="add-to-cart"]' )?.value;
+					// Get product ID from the value of the "add-to-cart" button.
+					const addToCartBtn = document.querySelector('[name="add-to-cart"]');
+					const productId = addToCartBtn ? addToCartBtn.value : null;
 					if ( ! productId ) {
 						return null;
 					}
 
 					// Get quantity from the value of the "quantity" input field.
-					const quantity = document.querySelector( '[name="quantity"]' )?.value;
+					const quantityField = document.querySelector( '[name="quantity"]' );
+					const quantity = quantityField ? quantityField.value : null;
 					if ( ! quantity ) {
 						return null;
 					}
 
+					// Add the product to the cart.
 					await window.wp.apiFetch( {
 						method: 'POST',
 						path: '/wc/store/v1/cart/items',
 						data: {
 							id: productId,
-							quantity: quantity,
+							quantity,
 						},
 					} );
 				}

@@ -60,7 +60,7 @@ const PayPalButtonsContainer = ( {
 					path: '/wc/store/v1/cart/items',
 				} );
 
-				// Get product ID from the value of the "add-to-cart" input field.
+				// Get product ID from the value of the "add-to-cart" button.
 				const productId = document.querySelector(
 					'[name="add-to-cart"]'
 				)?.value;
@@ -75,6 +75,7 @@ const PayPalButtonsContainer = ( {
 					return null;
 				}
 
+				// Add the product to the cart.
 				await apiFetch( {
 					method: 'POST',
 					path: '/wc/store/v1/cart/items',
