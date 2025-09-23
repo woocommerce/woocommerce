@@ -39,8 +39,8 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->test_credentials = array(
-			'shop_url'     => 'test-shop.myshopify.com',
-			'access_token' => 'test-access-token',
+			'shop_url'     => 'test-store.myshopify.com',
+			'access_token' => 'test-token-123',
 		);
 
 		$this->client = new ShopifyClient( $this->test_credentials );
