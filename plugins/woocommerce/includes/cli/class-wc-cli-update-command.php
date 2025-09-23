@@ -22,31 +22,6 @@ class WC_CLI_Update_Command {
 	 */
 	public static function register_commands() {
 		WC()->call_static( WP_CLI::class, 'add_command', 'wc update', array( 'WC_CLI_Update_Command', 'update' ) );
-		WC()->call_static( WP_CLI::class, 'add_command', 'wc generate-sessions', array( 'WC_CLI_Update_Command', 'generate_sessions' ) );
-	}
-
-	/**
-	 * `pnpm wp-env run cli wp wc generate-sessions`
-	 *
-	 * @return void
-	 */
-	public static function generate_sessions() {
-		global $wpdb;
-
-		echo 'Generating 500K session entries: ';
-		for ( $index = 1, $max = 500_000, $session_data = serialize( array() ); $index <= $max; ++$index ) {
-			$wpdb->query(
-				$wpdb->prepare(
-					'REPLACE INTO wp_woocommerce_sessions_big (session_key, session_value, session_expiry) VALUES (%s, %s, %s)',
-					't_' . uniqid( true ) . uniqid( true ),
-					$session_data,
-					time()
-				)
-			);
-			if ( ( $index % 10_000 ) === 0 ) {
-				echo '.';
-			}
-		}
 	}
 
 	/**
