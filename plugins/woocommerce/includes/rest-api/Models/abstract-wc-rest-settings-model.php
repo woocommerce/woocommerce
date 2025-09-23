@@ -332,19 +332,35 @@ abstract class WC_REST_Settings_Model {
 	 * @return array Array of successfully updated setting IDs.
 	 */
 	public function update_settings( $settings ) {
-		$updated_settings = array();
 		$settings_definitions = $this->get_settings_definitions();
-		$settings_by_id   = array_column( $settings_definitions, null, 'id' );
-		$valid_setting_ids = array_keys( $settings_by_id );
+		$settings_by_id       = array_column( $settings_definitions, null, 'id' );
+		$valid_setting_ids    = array_keys( $settings_by_id );
+		$validated_settings   = array();
 
+		// First pass: validate all settings without saving.
 		foreach ( $settings as $setting_id => $setting_value ) {
 			// Security check: only allow updating valid settings for this group.
 			if ( ! in_array( $setting_id, $valid_setting_ids, true ) ) {
 				continue;
 			}
 
-			// Update the setting.
-			$update_result = $this->set_setting_value( $setting_id, $setting_value );
+			// Sanitize the value based on the setting type.
+			$sanitized_value    = $this->sanitize_value_for_storage( $setting_id, $setting_value );
+
+			// Validate the setting value.
+			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
+			if ( is_wp_error( $validation_result ) ) {
+				return $validation_result;
+			}
+
+			// Store validated values for later saving.
+			$validated_settings[ $setting_id ] = $sanitized_value;
+		}
+
+		// Second pass: save all validated settings.
+		$updated_settings = array();
+		foreach ( $validated_settings as $setting_id => $value ) {
+			$update_result = $this->set_setting_value( $setting_id, $value );
 			if ( $update_result ) {
 				$updated_settings[] = $setting_id;
 			}
