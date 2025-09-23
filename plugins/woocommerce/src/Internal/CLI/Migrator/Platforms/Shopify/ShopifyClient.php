@@ -9,33 +9,25 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
 
-use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
-
 /**
  * Handles communication with the Shopify REST API.
  */
 class ShopifyClient {
 
 	/**
-	 * The credential manager instance.
+	 * Platform credentials.
 	 *
-	 * @var CredentialManager
+	 * @var array
 	 */
-	private $credential_manager;
+	private array $credentials;
 
 	/**
 	 * Constructor.
-	 */
-	public function __construct() {}
-
-	/**
-	 * Initialize the client with dependencies.
 	 *
-	 * @internal
-	 * @param CredentialManager $credential_manager The credential manager.
+	 * @param array $credentials Platform credentials array.
 	 */
-	final public function init( CredentialManager $credential_manager ): void {
-		$this->credential_manager = $credential_manager;
+	public function __construct( array $credentials ) {
+		$this->credentials = $credentials;
 	}
 
 	/**
@@ -88,9 +80,7 @@ class ShopifyClient {
 	 * @return array|\WP_Error Array with 'domain' and 'access_token' keys, or WP_Error on failure.
 	 */
 	private function get_credentials() {
-		$credentials = $this->credential_manager->get_credentials( 'shopify' );
-
-		if ( empty( $credentials['shop_url'] ) || empty( $credentials['access_token'] ) ) {
+		if ( empty( $this->credentials['shop_url'] ) || empty( $this->credentials['access_token'] ) ) {
 			return new \WP_Error(
 				'api_error',
 				'Shopify API credentials (shop_url, access_token) are not configured. Please run: wp wc migrate setup'
@@ -99,8 +89,8 @@ class ShopifyClient {
 
 		// Map the stored credential keys to the expected format.
 		return array(
-			'domain'       => $credentials['shop_url'],
-			'access_token' => $credentials['access_token'],
+			'domain'       => $this->credentials['shop_url'],
+			'access_token' => $this->credentials['access_token'],
 		);
 	}
 
