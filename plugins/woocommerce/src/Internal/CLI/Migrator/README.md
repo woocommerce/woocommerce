@@ -179,12 +179,19 @@ add_action('init', function() {
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformFetcherInterface;
 
 class YourPlatformFetcher implements PlatformFetcherInterface {
+    private array $credentials;
+
+    public function __construct(array $credentials) {
+        $this->credentials = $credentials;
+    }
+
     public function fetch_batch(array $args): array {
-        // Return: ['items' => [], 'cursor' => '', 'has_next_page' => bool]
+        // Use $this->credentials['api_key'] etc.
+        // Return: ['items' => [], 'cursor' => '', 'has_next_page' => bool].
     }
 
     public function fetch_total_count(array $args): int {
-        // Return: total product count
+        // Return: total product count.
     }
 }
 ```
