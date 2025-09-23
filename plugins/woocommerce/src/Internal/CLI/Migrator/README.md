@@ -192,7 +192,6 @@ class YourPlatformFetcher implements PlatformFetcherInterface {
 
     public function fetch_total_count(array $args): int {
         // Return: total product count.
-        // Return: ['items' => [], 'cursor' => '', 'has_next_page' => bool]
     }
 }
 ```
