@@ -7,12 +7,11 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 	position: relative;
 
 	.wc-block-components-address-autocomplete-icon {
-		width: 16px;
-		height: 16px;
-		margin-right: 12px;
+		width: 24px;
+		height: 24px;
 		position: absolute;
 		top: 50%;
-		right: 0;
+		right: 16px;
 		z-index: 2;
 		transform: translateY(-50%);
 
@@ -25,12 +24,12 @@ This file is part of the WooCommerce Blocks autocomplete. If editing shortcode, 
 
 		mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==)
 		no-repeat center;
-		mask-size: contain;
+		mask-size: 16px;
 
 		// Safari support.
 		-webkit-mask: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxNCAxNCIgZm9jdXNhYmxlPSJmYWxzZSIgYXJpYS1oaWRkZW49InRydWUiPgogIDxjaXJjbGUgY3g9IjYiIGN5PSI2IiByPSI0IiBmaWxsPSJub25lIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSI+PC9jaXJjbGU+CiAgPHBhdGggc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBzdHJva2U9ImJsYWNrIiBzdHJva2Utd2lkdGg9IjEuNSIgZD0ibTkuMjUgOS4yNSAyLjUgMi41Ij48L3BhdGg+Cjwvc3ZnPg==)
 		no-repeat center;
-		-webkit-mask-size: contain;
+		-webkit-mask-size: 16px;
 	}
 }
 
