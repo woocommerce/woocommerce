@@ -10,7 +10,7 @@ declare global {
 			addressAutocomplete: {
 				providers: Record< string, ClientAddressAutocompleteProvider >;
 				activeProvider: {
-					[ key in AddressFormType ]?: ClientAddressAutocompleteProvider;
+					[ key in AddressFormType ]?: ClientAddressAutocompleteProvider | null;
 				};
 				registerAddressAutocompleteProvider: (
 					provider: ClientAddressAutocompleteProvider
