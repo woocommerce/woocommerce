@@ -1547,31 +1547,25 @@ final class WooCommerce {
 
 		}
 
+		$today_3am = strtotime( 'today 3:00 am' );
+		$today_6am = strtotime( 'today 6:00 am' );
+
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
 		// a daily cron that gets lost due to a race condition. WC_Privacy's background
 		// processing instance updates the cron schedule from within a cron job.
-
 		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
 
-		// Schedule daily cleanup logs at 3 AM.
+		as_schedule_recurring_action( $today_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $today_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
 
-		// Schedule twice daily cleanup sessions at 6 AM and 6 PM.
-
-		as_schedule_recurring_action( time() + ( 6 * HOUR_IN_SECONDS ), 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
-
-		// Schedule geoip updater every 15 days.
-
-		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $today_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
 		// Schedule the action to send tracking events if tracking is enabled.
 		$this->schedule_tracking_action();
 
-		// Schedule daily cleanup rate limits at 3 AM.
-
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $today_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
