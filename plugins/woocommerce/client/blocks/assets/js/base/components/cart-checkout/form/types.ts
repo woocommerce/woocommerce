@@ -4,7 +4,7 @@
 import type {
 	FormFields,
 	AddressFormValues,
-	FormType,
+	AddressFormType,
 	AddressForm,
 	ContactFormValues,
 	OrderFormValues,
@@ -21,7 +21,7 @@ export interface FormProps<
 	// Id for component.
 	id?: string;
 	// Type of form (billing or shipping).
-	addressType?: FormType;
+	addressType?: AddressFormType;
 	// aria-describedby attribute to add to the input.
 	ariaDescribedBy?: string;
 	// Array of fields in form.
@@ -60,7 +60,7 @@ export interface AddressLineFieldsProps
 		value: AddressFormValues[ 'address_2' ];
 	};
 	// Overwriting the address type for the fields.
-	addressType: FormType;
+	addressType: AddressFormType;
 	// Called with the new address data when the address form changes. This is only called when all required fields are filled and there are no validation errors.
 	onChange: ( key: 'address_1' | 'address_2', value: string ) => void;
 }

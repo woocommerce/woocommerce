@@ -19,6 +19,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 		// Reset the module before each test
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 	} );
 
@@ -59,6 +60,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -82,6 +84,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -362,7 +365,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Setup window object
 		Object.assign( global.window, {
-			wc_address_autocomplete_params: {
+			wc_address_autocomplete_common_params: {
 				address_providers: JSON.stringify( [
 					{
 						id: 'test-provider',
@@ -484,6 +487,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Reset modules and require fresh instance
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 
 		// Register the mock provider
@@ -501,7 +505,14 @@ describe( 'Address Suggestions Component', () => {
 
 	afterEach( () => {
 		jest.clearAllMocks();
-		window.wc.addressAutocomplete.providers = [];
+		// Reset providers properly
+		if ( window.wc && window.wc.addressAutocomplete ) {
+			window.wc.addressAutocomplete.providers = {};
+			window.wc.addressAutocomplete.activeProvider = {
+				billing: null,
+				shipping: null,
+			};
+		}
 	} );
 
 	describe( 'DOM Initialization', () => {

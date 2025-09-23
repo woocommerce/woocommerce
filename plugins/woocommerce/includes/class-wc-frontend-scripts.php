@@ -381,9 +381,15 @@ class WC_Frontend_Scripts {
 			),
 		);
 
+		$scripts['wc-address-autocomplete-common'] = array(
+			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+			'deps'    => array(),
+			'version' => $version,
+		);
+
 		$scripts['wc-address-autocomplete'] = array(
 			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
+			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
 			'version' => $version,
 		);
 
@@ -489,6 +495,8 @@ class WC_Frontend_Scripts {
 		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
 			$registered_providers = $address_provider_service->get_providers();
 			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+				// Always enqueue the common module if providers are registered.
+				self::enqueue_script( 'wc-address-autocomplete-common' );
 				self::enqueue_script( 'wc-address-autocomplete' );
 				self::enqueue_style( 'wc-address-autocomplete' );
 			}
@@ -658,7 +666,7 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				break;
-			case 'wc-address-autocomplete':
+			case 'wc-address-autocomplete-common':
 				$providers = array();
 				try {
 					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
