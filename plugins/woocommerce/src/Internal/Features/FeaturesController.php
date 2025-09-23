@@ -912,17 +912,15 @@ class FeaturesController {
 		$info                 = $this->compatibility_info_by_plugin[ $plugin_name ];
 		$info['compatible']   = array_values( array_intersect( array_keys( $features ), $info['compatible'] ) );
 		$info['incompatible'] = array_values( array_intersect( array_keys( $features ), $info['incompatible'] ) );
-		$info['uncertain']    = array();
-
-		$uncertain_features = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
+		$info['uncertain']    = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
 
 		if ( $resolve_uncertain ) {
-			foreach ( $uncertain_features as $feature_id ) {
+			foreach ( $info['uncertain'] as $feature_id ) {
 				$key            = $this->get_default_plugin_compatibility( $feature_id );
 				$info[ $key ][] = $feature_id;
 			}
-		} else {
-			$info['uncertain'] = $uncertain_features;
+
+			$info['uncertain'] = array();
 		}
 
 		return $info;
