@@ -1526,10 +1526,11 @@ final class WooCommerce {
 			return;
 		}
 
-		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
+		$gmt_offset   = get_option( 'gmt_offset' );
+		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
 
 		// Schedule daily sales event at midnight tomorrow.
-		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' );
+		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1547,8 +1548,8 @@ final class WooCommerce {
 
 		}
 
-		$today_3am = strtotime( 'today 3:00 am' );
-		$today_6am = strtotime( 'today 6:00 am' );
+		$today_3am = strtotime( 'today 3:00 am ' . $offset_hours );
+		$today_6am = strtotime( 'today 6:00 am ' . $offset_hours );
 
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
