@@ -631,7 +631,6 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		// The initial query can be slow for big session tables, but it doesn't make sense to introduce an index covering session_expiry due to high cardinality.
 		$expired_sessions = $wpdb->get_results( $wpdb->prepare( 'SELECT session_id, session_key FROM %i WHERE session_expiry < %d', $this->_table, time() ) );
 		if ( null !== $expired_sessions ) {
 			$batch_size   = 100;
