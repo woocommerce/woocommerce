@@ -249,7 +249,7 @@ class WC_Cart_Item_Removal_Test extends \WC_Unit_Test_Case {
 		parse_str( $query_string, $query_params );
 
 		$this->assertArrayHasKey( 'undo_data', $query_params );
-		$decoded_data = json_decode( base64_decode( $query_params['undo_data'] ), true );
+		$decoded_data = json_decode( base64_decode( $query_params['undo_data'] ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 
 		$this->assertArrayNotHasKey( 'data', $decoded_data );
 		$this->assertArrayHasKey( 'product_id', $decoded_data );

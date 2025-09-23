@@ -687,7 +687,7 @@ class WC_Form_Handler {
 			// Check if cart item data is provided in the URL (for when removed_cart_contents is not in session).
 			if ( ! empty( $_GET['undo_data'] ) ) {
 				$undo_data = wp_unslash( $_GET['undo_data'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$undo_data = json_decode( base64_decode( $undo_data ), true );
+				$undo_data = json_decode( base64_decode( $undo_data ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 			}
 
 			WC()->cart->restore_cart_item( $cart_item_key, $undo_data );

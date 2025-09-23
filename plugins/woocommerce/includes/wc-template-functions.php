@@ -4219,7 +4219,7 @@ function wc_get_cart_undo_url( $cart_item_key, $cart_item_data = null ) {
 		$item_data_for_url = $cart_item_data;
 		unset( $item_data_for_url['data'] );
 
-		$query_args['undo_data'] = base64_encode( wp_json_encode( $item_data_for_url ) );
+		$query_args['undo_data'] = base64_encode( wp_json_encode( $item_data_for_url ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 	}
 
 	return apply_filters( 'woocommerce_get_undo_url', $cart_page_url ? wp_nonce_url( add_query_arg( $query_args, $cart_page_url ), 'woocommerce-cart' ) : '', $cart_item_key );
