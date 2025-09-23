@@ -15,6 +15,20 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Endpoint instance.
+	 *
+	 * @var OrderNotesController
+	 */
+	private $endpoint;
+
+	/**
+	 * User ID.
+	 *
+	 * @var int
+	 */
+	private $user;
+
+	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
@@ -54,8 +68,17 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+
+		// Create schema instance with dependency injection.
+		$order_note_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
+
+		// Create utils instance.
+		$query_utils = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\QueryUtils();
+
 		$this->endpoint = new OrderNotesController();
-		$this->user     = $this->factory->user->create(
+		$this->endpoint->init( $order_note_schema, $query_utils );
+
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
@@ -233,7 +256,7 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 
-		$this->assertEquals( 404, $response->get_status() );
+		$this->assertEquals( 400, $response->get_status() );
 	}
 
 	/**

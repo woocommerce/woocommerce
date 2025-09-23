@@ -29,6 +29,12 @@ class BatchProcessingControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp() : void {
 		parent::setUp();
+
+		// BatchProcessingController hooks onto actions when instantiated (at bootstrap), so we need to do a reset.
+		$this->reset_container_resolutions();
+		remove_all_actions( BatchProcessingController::WATCHDOG_ACTION_NAME );
+		remove_all_actions( BatchProcessingController::PROCESS_SINGLE_BATCH_ACTION_NAME );
+
 		$this->sut          = wc_get_container()->get( BatchProcessingController::class );
 		$this->test_process = wc_get_container()->get( DataSynchronizer::class );
 		$this->sut->force_clear_all_processes();

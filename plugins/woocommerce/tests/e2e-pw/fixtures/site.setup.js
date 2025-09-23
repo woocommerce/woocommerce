@@ -15,45 +15,43 @@ setup( 'setup site', async ( { baseURL, restApi } ) => {
 		const { DISABLE_HPOS } = process.env;
 		console.log( `DISABLE_HPOS: ${ DISABLE_HPOS }` );
 
-		if ( DISABLE_HPOS ) {
-			const hposSettingRetries = 5;
-			const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
-			let hposConfigured = false;
+		const hposSettingRetries = 5;
+		const value = DISABLE_HPOS === '1' ? 'no' : 'yes';
+		let hposConfigured = false;
 
-			for ( let i = 0; i < hposSettingRetries; i++ ) {
-				try {
-					console.log(
-						`Trying to switch ${
-							value === 'yes' ? 'on' : 'off'
-						} HPOS...`
-					);
-					const response = await restApi.post(
-						`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`,
-						{ value }
-					);
-					if ( response.data.value === value ) {
-						console.log(
-							`HPOS Switched ${
-								value === 'yes' ? 'on' : 'off'
-							} successfully`
-						);
-						hposConfigured = true;
-						break;
-					}
-				} catch ( e ) {
-					console.log(
-						`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
-					);
-					console.log( e );
-				}
-			}
-
-			if ( ! hposConfigured ) {
-				console.error(
-					'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
+		for ( let i = 0; i < hposSettingRetries; i++ ) {
+			try {
+				console.log(
+					`Trying to switch ${
+						value === 'yes' ? 'on' : 'off'
+					} HPOS...`
 				);
-				process.exit( 1 );
+				const response = await restApi.post(
+					`${ WC_API_PATH }/settings/advanced/woocommerce_custom_orders_table_enabled`,
+					{ value }
+				);
+				if ( response.data.value === value ) {
+					console.log(
+						`HPOS Switched ${
+							value === 'yes' ? 'on' : 'off'
+						} successfully`
+					);
+					hposConfigured = true;
+					break;
+				}
+			} catch ( e ) {
+				console.log(
+					`HPOS setup failed. Retrying... ${ i }/${ hposSettingRetries }`
+				);
+				console.log( e );
 			}
+		}
+
+		if ( ! hposConfigured ) {
+			console.error(
+				'Cannot proceed e2e test, HPOS configuration failed. Please check if the correct DISABLE_HPOS value was used and the test site has been setup correctly.'
+			);
+			process.exit( 1 );
 		}
 
 		const response = await restApi.get(

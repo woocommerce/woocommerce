@@ -14,7 +14,8 @@ import clsx from 'clsx';
 import DatePickerContent from './content';
 import DropdownButton from '../dropdown-button';
 
-const shortDateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
+const shortDateFormatPlaceholder = __( 'MM/DD/YYYY', 'woocommerce' );
+const shortDateFormat = 'MM/DD/YYYY';
 
 /**
  * Select a range of dates or single dates.
@@ -170,6 +171,9 @@ class DateRangeFilterPicker extends Component {
 							afterError={ afterError }
 							beforeError={ beforeError }
 							shortDateFormat={ shortDateFormat }
+							shortDateFormatPlaceholder={
+								shortDateFormatPlaceholder
+							}
 						/>
 					) }
 				/>

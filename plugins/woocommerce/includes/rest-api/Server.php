@@ -45,13 +45,9 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				if ( 'wc/v4' === $namespace && ! str_starts_with( $controller_class, 'WC_REST_' ) ) {
-					$this->controllers[ $namespace ][ $controller_name ] = $this->get_v4_controller( $controller_name, $controller_class );
-				} else {
-					$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
+				$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
 					$legacy_proxy->get_instance_of( $controller_class );
-				}
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}

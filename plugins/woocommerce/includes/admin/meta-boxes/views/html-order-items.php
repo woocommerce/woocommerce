@@ -296,18 +296,7 @@ if ( wc_tax_enabled() ) {
 				<td class="label cost-total"><?php esc_html_e( 'Cost Total', 'woocommerce' ); ?>:</td>
 				<td width="1%"></td>
 				<td class="total cost-total">
-					<?php
-					/**
-					 * Filter to customize the total Cost of Goods Sold (COGS) value HTML for a given order.
-					 *
-					 * @since 10.3.0
-					 *
-					 * @param string   $total_html The formatted total COGS HTML.
-					 * @param float    $total      The total COGS value.
-					 * @param WC_Order $order      The order object.
-					 */
-					echo apply_filters( 'woocommerce_order_cogs_total_value_html', wc_price( $order->get_cogs_total_value(), array( 'currency' => $order->get_currency() ) ), $order->get_cogs_total_value(), $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-					?>
+					<?php echo wp_kses_post( $order->get_cogs_total_value_html() ); ?>
 				</td>
 			</tr>
 		</table>
