@@ -35,7 +35,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		if ( is_admin() && ! WC()->is_rest_api_request() ) {
+		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 			$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
 		}
