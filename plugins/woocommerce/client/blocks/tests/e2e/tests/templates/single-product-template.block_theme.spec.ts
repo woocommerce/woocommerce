@@ -15,12 +15,12 @@ test.describe( 'Single Product template', () => {
 			permalink: '/product/belt',
 			templateName: 'Product: Belt',
 			templatePath: 'single-product-belt',
-			templateType: 'wp_registered_template',
+			templateType: 'wp_template',
 		};
 		const userText = 'Hello World in the Belt template';
 
 		// Create the specific product template.
-		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
+		await admin.visitSiteEditor( { postType: `wp_template` } );
 
 		await page
 			.getByRole( 'button', {
