@@ -549,7 +549,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 
-			$product_util->delete_product_specific_transients( $product_id );
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 
@@ -573,7 +573,7 @@ function wc_scheduled_sales() {
 				$product->save();
 			}
 
-			$product_util->delete_product_specific_transients( $product_id );
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 

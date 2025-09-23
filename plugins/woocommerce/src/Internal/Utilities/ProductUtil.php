@@ -10,11 +10,25 @@ namespace Automattic\WooCommerce\Internal\Utilities;
 class ProductUtil {
 	/**
 	 * Delete the transients related to a specific product.
+	 * If the product is a variation, delete the transients for the parent too.
 	 *
-	 * @param int $product_id The product id.
+	 * @param WC_Product|int $product_or_id The product or the product id.
 	 * @return void
 	 */
-	public function delete_product_specific_transients( int $product_id ) {
+	public function delete_product_specific_transients( $product_or_id ) {
+		$parent_id = 0;
+		if ( $product_or_id instanceof \WC_Product ) {
+			$product    = $product_or_id;
+			$product_id = $product->get_id();
+		} else {
+			$product_id = $product_or_id;
+			$product    = wc_get_product( $product_id );
+		}
+
+		if ( $product instanceof \WC_Product_Variation ) {
+			$parent_id = $product->get_parent_id();
+		}
+
 		$product_specific_transient_names = array(
 			'wc_product_children_',
 			'wc_var_prices_',
@@ -25,6 +39,9 @@ class ProductUtil {
 
 		foreach ( $product_specific_transient_names as $transient ) {
 			delete_transient( $transient . $product_id );
+			if ( $parent_id ) {
+				delete_transient( $transient . $parent_id );
+			}
 		}
 	}
 }
