@@ -101,6 +101,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	}
 
 	/**
+	 * Clean up after tests have run.
+	 */
+	public static function tearDownAfterClass(): void {
+		self::clear_hpos_orders();
+		parent::tearDownAfterClass();
+	}
+
+	/**
 	 * Mock the WC session using the abstract class as cookies are not available.
 	 * during tests.
 	 *
@@ -453,6 +461,27 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	protected function skip_if_hpos_enabled( $message ) {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$this->markTestSkipped( $message );
+		}
+	}
+
+	/**
+	 * Helper method to clear all HPOS orders.
+	 */
+	protected static function clear_hpos_orders() {
+		global $wpdb;
+
+		$order_tables = array_merge(
+			array_values( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_all_table_names_with_id() ),
+			array(
+				"{$wpdb->prefix}woocommerce_order_items",
+				"{$wpdb->prefix}woocommerce_order_itemmeta",
+			)
+		);
+
+		$existing_tables = array_unique( array_intersect( $order_tables, $wpdb->get_col( 'SHOW TABLES' ) ) );
+		foreach ( $existing_tables as $table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "TRUNCATE TABLE {$table}" );
 		}
 	}
 }

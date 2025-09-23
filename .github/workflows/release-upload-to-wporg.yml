@@ -211,7 +211,7 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=600
+            --config-option=servers:global:http-timeout=1800
 
       - name: Commit to tag only
         if: ${{ needs.get-and-validate-release-asset.outputs.overwrite_trunk != 1 }}
@@ -238,4 +238,4 @@ jobs:
             --message "Tagging version $RELEASE_TAG." \
             --no-auth-cache \
             --non-interactive \
-            --config-option=servers:global:http-timeout=600
+            --config-option=servers:global:http-timeout=1800

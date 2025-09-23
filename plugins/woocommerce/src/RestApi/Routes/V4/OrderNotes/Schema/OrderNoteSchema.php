@@ -7,11 +7,12 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
+use WP_REST_Request;
 
 /**
  * OrderNoteSchema class.
@@ -33,7 +34,7 @@ class OrderNoteSchema extends AbstractSchema {
 	 *
 	 * @return array
 	 */
-	public static function get_item_schema_properties(): array {
+	public function get_item_schema_properties(): array {
 		$schema = array(
 			'id'               => array(
 				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
@@ -82,5 +83,25 @@ class OrderNoteSchema extends AbstractSchema {
 		);
 
 		return $schema;
+	}
+
+	/**
+	 * Get the item response.
+	 *
+	 * @param WP_Comment      $note Order note object.
+	 * @param WP_REST_Request $request Request object.
+	 * @param array           $include_fields Fields to include in the response.
+	 * @return array The item response.
+	 */
+	public function get_item_response( $note, WP_REST_Request $request, array $include_fields = array() ): array {
+		return array(
+			'id'               => (int) $note->comment_ID,
+			'order_id'         => (int) $note->comment_post_ID,
+			'author'           => $note->comment_author,
+			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
+			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
+			'note'             => $note->comment_content,
+			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+		);
 	}
 }

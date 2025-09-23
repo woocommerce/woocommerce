@@ -13,6 +13,8 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
 defined( 'ABSPATH' ) || exit;
 
+use WP_REST_Request;
+
 /**
  * Abstract REST Schema for WooCommerce REST API V4.
  *
@@ -52,14 +54,24 @@ abstract class AbstractSchema {
 	 * @return array The item schema.
 	 * @since 10.2.0
 	 */
-	public static function get_item_schema(): array {
+	public function get_item_schema(): array {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => static::IDENTIFIER,
 			'type'       => 'object',
-			'properties' => static::get_item_schema_properties(),
+			'properties' => $this->get_item_schema_properties(),
 		);
 	}
+
+	/**
+	 * Get the item response.
+	 *
+	 * @param mixed           $item WordPress representation of the item.
+	 * @param WP_REST_Request $request Request object.
+	 * @param array           $include_fields Fields to include in the response.
+	 * @return array The item response.
+	 */
+	abstract public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array;
 
 	/**
 	 * Return all properties for the item schema.
@@ -67,7 +79,28 @@ abstract class AbstractSchema {
 	 * @return array The schema properties.
 	 * @since 10.2.0
 	 */
-	public static function get_item_schema_properties(): array {
+	public function get_item_schema_properties(): array {
 		return array();
+	}
+
+	/**
+	 * Return all writable properties for the item schema.
+	 *
+	 * @return array The schema properties.
+	 * @since 10.2.0
+	 */
+	public function get_writable_item_schema_properties(): array {
+		return array_filter( $this->get_item_schema_properties(), array( $this, 'filter_writable_props' ) );
+	}
+
+	/**
+	 * Filter schema properties to only return writable ones.
+	 *
+	 * @param array $schema The schema property to check.
+	 * @return bool True if the property is writable, false otherwise.
+	 * @since 10.2.0
+	 */
+	protected function filter_writable_props( array $schema ): bool {
+		return empty( $schema['readonly'] );
 	}
 }
