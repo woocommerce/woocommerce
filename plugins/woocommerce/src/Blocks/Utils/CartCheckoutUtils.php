@@ -1,6 +1,8 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\Block_Scanner;
+
 /**
  * Class containing utility methods for dealing with the Cart and Checkout blocks.
  */
@@ -113,24 +115,28 @@ class CartCheckoutUtils {
 			return false;
 		}
 
-		if ( has_block( $block_id, $post_content ) ) {
-			$blocks = (array) parse_blocks( $post_content );
+		$scanner = Block_Scanner::create( $post_content );
+		if ( ! $scanner ) {
+			return false;
+		}
 
-			foreach ( $blocks as $block ) {
-				$block_name = $block['blockName'] ?? '';
+		while ( $scanner->next_delimiter() ) {
+			if ( ! $scanner->opens_block( $block_id ) ) {
+				continue;
+			}
 
-				if ( $block_name !== $block_id ) {
-					continue;
-				}
+			$attrs = $scanner->allocate_and_return_parsed_attributes();
 
-				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
-					return true;
-				}
+			if ( isset( $attrs[ $attribute ] ) && $value === $attrs[ $attribute ] ) {
+				return true;
+			}
 
-				// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
-				if ( 'woocommerce/classic-shortcode' === $block_id && 'shortcode' === $attribute && 'cart' === $value && ! isset( $block['attrs']['shortcode'] ) ) {
-					return true;
-				}
+			// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
+			if ( 'woocommerce/classic-shortcode' === $block_id &&
+				'shortcode' === $attribute &&
+				'cart' === $value &&
+				! isset( $attrs['shortcode'] ) ) {
+				return true;
 			}
 		}
 
@@ -346,15 +352,15 @@ class CartCheckoutUtils {
 			WC()->countries->get_country_locale()
 		);
 
-		$country_data = [];
+		$country_data = array();
 
 		foreach ( array_keys( $all_countries ) as $country_code ) {
-			$country_data[ $country_code ] = [
+			$country_data[ $country_code ] = array(
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => $country_states[ $country_code ] ?? [],
-				'locale'        => $country_locales[ $country_code ] ?? [],
-			];
+				'states'        => $country_states[ $country_code ] ?? array(),
+				'locale'        => $country_locales[ $country_code ] ?? array(),
+			);
 		}
 
 		return $country_data;
@@ -394,31 +400,33 @@ class CartCheckoutUtils {
 		$formatted_shipping_zones   = array_reduce(
 			$shipping_zones,
 			function ( $acc, $zone ) {
-				$acc[] = [
+				$acc[] = array(
 					'id'          => $zone['id'],
 					'title'       => $zone['zone_name'],
 					'description' => $zone['formatted_zone_location'],
-				];
+				);
 				return $acc;
 			},
-			[]
+			array()
 		);
-		$formatted_shipping_zones[] = [
+		$formatted_shipping_zones[] = array(
 			'id'          => 0,
 			'title'       => __( 'International', 'woocommerce' ),
 			'description' => __( 'Locations outside all other zones', 'woocommerce' ),
-		];
+		);
 		return $formatted_shipping_zones;
 	}
 
 	/**
 	 * Recursively search the checkout block to find the express checkout block and
-	 * get the button style attributes
+	 * get the button style attributes using the parse_blocks function.
 	 *
 	 * @param array  $blocks Blocks to search.
 	 * @param string $cart_or_checkout The block type to check.
+	 *
+	 * @return array Block attributes.
 	 */
-	public static function find_express_checkout_attributes( $blocks, $cart_or_checkout ) {
+	public static function find_express_checkout_attributes_in_parsed_blocks( $blocks, $cart_or_checkout ) {
 		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
 		foreach ( $blocks as $block ) {
 			if ( ! empty( $block['blockName'] ) && $express_block_name === $block['blockName'] && ! empty( $block['attrs'] ) ) {
@@ -426,12 +434,46 @@ class CartCheckoutUtils {
 			}
 
 			if ( ! empty( $block['innerBlocks'] ) ) {
-				$answer = self::find_express_checkout_attributes( $block['innerBlocks'], $cart_or_checkout );
+				$answer = self::find_express_checkout_attributes_in_parsed_blocks( $block['innerBlocks'], $cart_or_checkout );
 				if ( $answer ) {
 					return $answer;
 				}
 			}
 		}
+	}
+
+	/**
+	 * Recursively search the checkout block to find the express checkout block and
+	 * get the button style attributes
+	 *
+	 * @param string|array $post_content The post content.
+	 * @param string       $cart_or_checkout The block type to check.
+	 *
+	 * @return array|null Block attributes, if present and valid, otherwise `null`.
+	 */
+	public static function find_express_checkout_attributes( $post_content, $cart_or_checkout ) {
+		if ( is_array( $post_content ) ) {
+			// If an array is passed, assume it's already been parsed with parse_blocks,
+			// use the old method, and show a deprecation warning.
+			wc_deprecated_argument(
+				'post_content',
+				'10.3.0',
+				'Passing parsed blocks as an array in $post_content is deprecated. Please pass the post content as a string.'
+			);
+			return self::find_express_checkout_attributes_in_parsed_blocks( $post_content, $cart_or_checkout );
+		}
+
+		$express_block_name = 'woocommerce/' . $cart_or_checkout . '-express-payment-block';
+
+		$scanner = Block_Scanner::create( $post_content );
+
+		while ( $scanner->next_delimiter() ) {
+			if ( $scanner->opens_block( $express_block_name ) ) {
+				return $scanner->allocate_and_return_parsed_attributes();
+			}
+		}
+
+		return null;
 	}
 
 	/**

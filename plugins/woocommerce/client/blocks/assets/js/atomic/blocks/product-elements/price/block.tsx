@@ -24,7 +24,7 @@ import type { BlockAttributes } from './types';
 type Props = BlockAttributes &
 	HTMLAttributes< HTMLDivElement > & {
 		isAdmin: boolean;
-		isExperimentalWcRestApiEnabled: boolean;
+		isExperimentalWcRestApiV4Enabled: boolean;
 		product: ProductResponseItem | ProductEntityResponse | undefined;
 	};
 
@@ -72,7 +72,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isDescendentOfSingleProductTemplate,
 		isAdmin,
 		product: productData,
-		isExperimentalWcRestApiEnabled,
+		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
 	const styleProps = useStyleProps( props );
@@ -82,7 +82,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		 * This block can depend on the core-data package only when the experimental WC Rest API feature flag is enabled because
 		 * it depends on experimental fields: https://github.com/woocommerce/woocommerce/pull/60101
 		 */
-		isExperimentalWcRestApiEnabled
+		isExperimentalWcRestApiV4Enabled
 			? {
 					isAdmin,
 					product: productData,
@@ -128,7 +128,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
 
-	if ( isExperimentalWcRestApiEnabled ) {
+	if ( isExperimentalWcRestApiV4Enabled ) {
 		prices = {
 			price: convertAdminPriceToStoreApiFormat(
 				product?.price,
@@ -152,15 +152,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				: {} ),
 			currency_minor_unit: SITE_CURRENCY.minorUnit,
 			price_range:
-				product?.__experimental_max_price &&
-				product?.__experimental_min_price
+				product?.max_price && product?.min_price
 					? {
 							min_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_min_price,
+								product.min_price,
 								currency
 							),
 							max_amount: convertAdminPriceToStoreApiFormat(
-								product.__experimental_max_price,
+								product.max_price,
 								currency
 							),
 					  }

@@ -523,10 +523,35 @@ class OrderController {
 	 */
 	protected function validate_coupon_email_restriction( \WC_Coupon $coupon, \WC_Order $order ) {
 		$restrictions = $coupon->get_email_restrictions();
-		// Email is forced lowercase like in validate_coupon_allowed_emails.
-		$billing_email = strtolower( $order->get_billing_email() );
 
-		if ( ! empty( $restrictions ) && $billing_email && ! DiscountsUtil::is_coupon_emails_allowed( array( $billing_email ), $restrictions ) ) {
+		if ( empty( $restrictions ) ) {
+			return;
+		}
+
+		$check_emails = array();
+
+		// Check the logged-in user's email.
+		$current_user = wp_get_current_user();
+		if ( $current_user->exists() ) {
+			$user_email = trim( sanitize_email( $current_user->user_email ) );
+			if ( ! empty( $user_email ) ) {
+				$check_emails[] = strtolower( $user_email );
+			}
+		}
+
+		// Also check the billing email from the order.
+		$billing_email = $order->get_billing_email();
+		if ( ! empty( $billing_email ) ) {
+			$billing_email = trim( sanitize_email( $billing_email ) );
+			if ( ! empty( $billing_email ) ) {
+				$check_emails[] = strtolower( $billing_email );
+			}
+		}
+
+		// Remove duplicates and empty values.
+		$check_emails = array_unique( array_filter( $check_emails ) );
+
+		if ( ! empty( $check_emails ) && ! DiscountsUtil::is_coupon_emails_allowed( $check_emails, $restrictions ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $coupon->get_coupon_error( \WC_Coupon::E_WC_COUPON_NOT_YOURS_REMOVED ) );
 		}

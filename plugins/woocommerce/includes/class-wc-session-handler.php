@@ -413,7 +413,6 @@ class WC_Session_Handler extends WC_Session {
 		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
 		if ( $expiring_seconds > $max_expiring_seconds ) {
-			$expiring_seconds       = $max_expiring_seconds;
 			$session_limit_exceeded = true;
 		}
 		/**
@@ -426,14 +425,19 @@ class WC_Session_Handler extends WC_Session {
 
 		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
 		if ( $expiration_seconds > $max_expiration_seconds ) {
-			$expiration_seconds     = $max_expiration_seconds;
 			$session_limit_exceeded = true;
 		}
 
 		if ( $session_limit_exceeded ) {
 			$transient_key = 'wc_session_handler_warning';
 			if ( false === get_transient( $transient_key ) ) {
-				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in performance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
+				wc_get_logger()->warning(
+					sprintf(
+						'Keeping sessions for longer than %d days can cause performance issues and larger session tables. Monitor usage and adjust lifetimes via the wc_session_expiring and wc_session_expiration filters as needed.',
+						$max_expiration_seconds / DAY_IN_SECONDS
+					),
+					array( 'source' => 'wc_session_handler' )
+				);
 				set_transient( $transient_key, true, $max_expiration_seconds );
 			}
 		}
