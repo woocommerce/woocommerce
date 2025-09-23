@@ -48,12 +48,13 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			'shop_url'     => 'https://test-shop.myshopify.com',
 			'access_token' => 'test-access-token',
 		);
+
 		$this->fetcher             = new ShopifyFetcher( $credentials );
 		$this->mock_shopify_client = $this->createMock( ShopifyClient::class );
-		
+
 		// Use reflection to inject the mock client.
-		$reflection = new \ReflectionClass( $this->fetcher );
-		$property = $reflection->getProperty( 'shopify_client' );
+		$reflection   = new \ReflectionClass( $this->fetcher );
+		$property     = $reflection->getProperty( 'shopify_client' );
 		$property->setAccessible( true );
 		$property->setValue( $this->fetcher, $this->mock_shopify_client );
 	}
