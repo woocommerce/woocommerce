@@ -1548,8 +1548,8 @@ final class WooCommerce {
 
 		}
 
-		$today_3am = strtotime( 'today 3:00 am ' . $offset_hours );
-		$today_6am = strtotime( 'today 6:00 am ' . $offset_hours );
+		$today_3am = strtotime( '03:00 tomorrow ' . $offset_hours );
+		$today_6am = strtotime( '06:00 tomorrow ' . $offset_hours );
 
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
