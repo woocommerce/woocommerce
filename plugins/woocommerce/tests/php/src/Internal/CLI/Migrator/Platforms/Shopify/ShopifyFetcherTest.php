@@ -45,9 +45,8 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 		}
 
 		$credentials = array(
-			'shop_domain' => 'test-shop.myshopify.com',
-			'api_key'     => 'test-api-key',
-			'api_secret'  => 'test-api-secret',
+			'shop_url'     => 'https://test-shop.myshopify.com',
+			'access_token' => 'test-access-token',
 		);
 		$this->fetcher             = new ShopifyFetcher( $credentials );
 		$this->mock_shopify_client = $this->createMock( ShopifyClient::class );
