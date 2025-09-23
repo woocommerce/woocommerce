@@ -21,7 +21,14 @@ jQuery(function ($) {
 
 					// Get product ID from the value of the "add-to-cart" button.
 					const addToCartBtn = document.querySelector('[name="add-to-cart"]');
-					const productId = addToCartBtn ? addToCartBtn.value : null;
+					let productId = addToCartBtn ? addToCartBtn.value : null;
+					const variationIdField = document.querySelector( '[name="variation_id"]' );
+					const variationId = variationIdField ? variationIdField.value : null;
+
+					if ( variationId ) {
+						productId = variationId;
+					}
+
 					if ( ! productId ) {
 						return null;
 					}
@@ -32,6 +39,7 @@ jQuery(function ($) {
 					if ( ! quantity ) {
 						return null;
 					}
+
 
 					// Add the product to the cart.
 					await window.wp.apiFetch( {

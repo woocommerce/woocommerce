@@ -62,9 +62,16 @@ const PayPalButtonsContainer = ( {
 				} );
 
 				// Get product ID from the value of the "add-to-cart" button.
-				const productId = document.querySelector(
+				let productId = document.querySelector(
 					'[name="add-to-cart"]'
 				)?.value;
+				const variationId =
+					document.querySelector( '[name="variation_id"]' )?.value;
+
+				if ( variationId ) {
+					productId = variationId;
+				}
+
 				if ( ! productId ) {
 					return null;
 				}
