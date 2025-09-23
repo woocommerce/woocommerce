@@ -44,7 +44,12 @@ class ShopifyFetcherTest extends WC_Unit_Test_Case {
 			require_once __DIR__ . '/../../Mocks/MockWPCLI.php';
 		}
 
-		$this->fetcher             = new ShopifyFetcher();
+		$credentials = array(
+			'shop_domain' => 'test-shop.myshopify.com',
+			'api_key'     => 'test-api-key',
+			'api_secret'  => 'test-api-secret',
+		);
+		$this->fetcher             = new ShopifyFetcher( $credentials );
 		$this->mock_shopify_client = $this->createMock( ShopifyClient::class );
 		$this->fetcher->init( $this->mock_shopify_client );
 	}
