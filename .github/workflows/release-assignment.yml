@@ -131,7 +131,7 @@ jobs:
               action: 'release-assignment',
               version: '${{ needs.check-upcoming-release-events.outputs.version }}',
               feature_freeze_date: '${{ needs.check-upcoming-release-events.outputs.feature-freeze-date }}',
-              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+              status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
 
             const requestBody = JSON.stringify({
