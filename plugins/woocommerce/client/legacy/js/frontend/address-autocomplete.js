@@ -560,13 +560,11 @@ if (
 									}
 								);
 								brandingElement.innerHTML = sanitizedHtml;
-							} else {
-								// Fallback to server-side sanitized HTML if DOMPurify is not available
-								brandingElement.innerHTML =
-									serverProvider.branding_html;
+								brandingElement.style.display = 'flex';
+								brandingElement.removeAttribute(
+									'aria-hidden'
+								);
 							}
-							brandingElement.style.display = 'flex';
-							brandingElement.removeAttribute( 'aria-hidden' );
 						}
 					}
 
