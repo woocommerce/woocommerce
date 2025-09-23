@@ -362,7 +362,6 @@ export const AddressAutocomplete = ( {
 	return (
 		<div className="wc-block-components-address-autocomplete-container">
 			<ValidatedTextInput
-				wrapInput={ true }
 				{ ...props }
 				id={ id }
 				ref={ inputRef }
@@ -377,7 +376,7 @@ export const AddressAutocomplete = ( {
 				data-disable-autocomplete={
 					searchValue.length >= 3 ? 'on' : 'off'
 				}
-				wrapperChildren={
+				icon={
 					serverProviders.length > 0 ? (
 						<div
 							className="wc-block-components-address-autocomplete-icon"

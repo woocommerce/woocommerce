@@ -2,7 +2,7 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { forwardRef, useState } from '@wordpress/element';
+import { forwardRef, isValidElement, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
@@ -27,8 +27,7 @@ export interface TextInputProps
 	autoComplete?: string | undefined;
 	onChange: ( newValue: string ) => void;
 	onBlur?: ( newValue: string ) => void;
-	wrapInput?: boolean;
-	wrapperChildren?: ReactNode;
+	icon?: ReactNode;
 }
 
 const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
@@ -52,8 +51,7 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 				/* Do nothing */
 			},
 			feedback,
-			wrapInput = false,
-			wrapperChildren = null,
+			icon = null,
 			...rest
 		},
 		ref
@@ -105,10 +103,10 @@ const TextInput = forwardRef< HTMLInputElement, TextInputProps >(
 					'is-active': isActive || value,
 				} ) }
 			>
-				{ wrapInput ? (
+				{ isValidElement( icon ) ? (
 					<div className="wc-block-components-text-input__wrapper">
 						{ inputWithLabel }
-						{ wrapperChildren }
+						{ icon }
 					</div>
 				) : (
 					inputWithLabel

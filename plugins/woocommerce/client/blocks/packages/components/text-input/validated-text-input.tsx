@@ -59,8 +59,7 @@ const ValidatedTextInput = forwardRef<
 			label,
 			validateOnMount = true,
 			instanceId: preferredInstanceId = '',
-			wrapInput = false,
-			wrapperChildren = null,
+			icon = null,
 			...rest
 		},
 		forwardedRef
@@ -306,8 +305,7 @@ const ValidatedTextInput = forwardRef<
 				value={ value }
 				title="" // This prevents the same error being shown on hover.
 				label={ label }
-				wrapInput={ wrapInput }
-				wrapperChildren={ wrapperChildren }
+				icon={ icon }
 				{ ...rest }
 			/>
 		);
