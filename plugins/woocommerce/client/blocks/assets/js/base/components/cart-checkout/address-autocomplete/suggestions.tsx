@@ -2,15 +2,8 @@
  * External dependencies
  */
 import { AddressAutocompleteResult } from '@woocommerce/types';
-
-/**
- * Sanitize HTML for display by removing any HTML tags.
- */
-function sanitizeForDisplay( html: string ): string {
-	const doc = document.implementation.createHTMLDocument( '' );
-	doc.body.innerHTML = html;
-	return doc.body.textContent || '';
-}
+import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Get highlighted label parts based on matches returned by `search` results.
@@ -20,7 +13,7 @@ function getHighlightedLabel(
 	matches: { offset: number; length: number }[]
 ): React.ReactNode[] {
 	// Sanitize label for display.
-	const sanitizedLabel = sanitizeForDisplay( label );
+	const sanitizedLabel = decodeEntities( label );
 	const parts: React.ReactNode[] = [];
 	let lastIndex = 0;
 
@@ -123,7 +116,9 @@ export const Suggestions = ( {
 			{ branding ? (
 				<div
 					className="woocommerce-address-autocomplete-branding"
-					dangerouslySetInnerHTML={ { __html: branding } }
+					dangerouslySetInnerHTML={ {
+						__html: sanitizeHTML( branding ),
+					} }
 				/>
 			) : null }
 		</div>

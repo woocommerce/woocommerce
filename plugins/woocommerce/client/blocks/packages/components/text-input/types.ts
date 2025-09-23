@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { InputHTMLAttributes } from 'react';
+import type { InputHTMLAttributes, ReactNode } from 'react';
 
 export interface ValidatedTextInputProps
 	extends Omit<
@@ -34,4 +34,6 @@ export interface ValidatedTextInputProps
 	customFormatter?: ( value: string ) => string;
 	// Whether validation should run when mounted - only has an effect when focusOnMount is also true.
 	validateOnMount?: boolean;
+	// An icon to display in the input field.
+	icon?: ReactNode;
 }

@@ -376,6 +376,14 @@ export const AddressAutocomplete = ( {
 				data-disable-autocomplete={
 					searchValue.length >= 3 ? 'on' : 'off'
 				}
+				icon={
+					serverProviders.length > 0 ? (
+						<div
+							className="wc-block-components-address-autocomplete-icon"
+							aria-hidden="true"
+						></div>
+					) : null
+				}
 			/>
 			{ searchValue.length >= 3 && suggestions.length > 0 ? (
 				<Suggestions

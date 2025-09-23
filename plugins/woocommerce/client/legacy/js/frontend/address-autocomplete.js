@@ -498,37 +498,42 @@ if (
 						suggestionsList.appendChild( li );
 					} );
 
-					// Add branding HTML if available from the active provider.
-					const activeProvider =
-						window.wc.addressAutocomplete.activeProvider[ type ];
-					if ( activeProvider && activeProvider.id ) {
-						const serverProvider =
-							window.wc.addressAutocomplete.getServerProvider(
-								activeProvider.id
-							);
-						const brandingHtml =
-							serverProvider &&
-							typeof serverProvider.branding_html === 'string'
-								? serverProvider.branding_html.trim()
-								: '';
-						if ( brandingHtml ) {
-							// Check if branding element already exists.
-							let brandingElement =
-								suggestionsContainer.querySelector(
-									'.woocommerce-address-autocomplete-branding'
+					// Update branding HTML content and make sure it's visible.
+					// Sanitize the HTML using DOMPurify if available
+					if (
+						typeof DOMPurify !== 'undefined' &&
+						typeof DOMPurify.sanitize === 'function'
+					) {
+						// Add branding HTML if available from the active provider.
+						const activeProvider =
+							window.wc.addressAutocomplete.activeProvider[
+								type
+							];
+						if ( activeProvider && activeProvider.id ) {
+							const serverProvider =
+								window.wc.addressAutocomplete.getServerProvider(
+									activeProvider.id
 								);
-							if ( ! brandingElement ) {
-								brandingElement =
-									document.createElement( 'div' );
-								brandingElement.className =
-									'woocommerce-address-autocomplete-branding';
-								suggestionsContainer.appendChild(
-									brandingElement
-								);
-							}
-							// Update branding HTML content and make sure it's visible.
-							// Sanitize the HTML using DOMPurify if available
-							if ( typeof DOMPurify !== 'undefined' ) {
+							const brandingHtml =
+								serverProvider &&
+								typeof serverProvider.branding_html === 'string'
+									? serverProvider.branding_html.trim()
+									: '';
+							if ( brandingHtml ) {
+								// Check if branding element already exists.
+								let brandingElement =
+									suggestionsContainer.querySelector(
+										'.woocommerce-address-autocomplete-branding'
+									);
+								if ( ! brandingElement ) {
+									brandingElement =
+										document.createElement( 'div' );
+									brandingElement.className =
+										'woocommerce-address-autocomplete-branding';
+									suggestionsContainer.appendChild(
+										brandingElement
+									);
+								}
 								// Allow common HTML tags and attributes for branding
 								const sanitizedHtml = DOMPurify.sanitize(
 									serverProvider.branding_html,
@@ -560,13 +565,11 @@ if (
 									}
 								);
 								brandingElement.innerHTML = sanitizedHtml;
-							} else {
-								// Fallback to server-side sanitized HTML if DOMPurify is not available
-								brandingElement.innerHTML =
-									serverProvider.branding_html;
+								brandingElement.style.display = 'flex';
+								brandingElement.removeAttribute(
+									'aria-hidden'
+								);
 							}
-							brandingElement.style.display = 'flex';
-							brandingElement.removeAttribute( 'aria-hidden' );
 						}
 					}
 
