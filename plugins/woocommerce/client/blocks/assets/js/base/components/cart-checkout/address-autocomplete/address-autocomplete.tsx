@@ -37,7 +37,6 @@ export const AddressAutocomplete = ( {
 }: { addressType: AddressFormType; id: string } & ValidatedTextInputProps ) => {
 	// This hook will monitor for changes in country and update the provider accordingly.
 	useUpdatePreferredAutocompleteProvider( addressType );
-    
 	const inputRef = useRef< ValidatedTextInputHandle >( null );
 	const observerRef = useRef< MutationObserver | null >( null );
 	const serverProviders = getSettingWithCoercion<
