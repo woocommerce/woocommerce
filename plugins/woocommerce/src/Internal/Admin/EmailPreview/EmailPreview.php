@@ -518,8 +518,6 @@ class EmailPreview {
 		$product->set_price( 15 );
 		$product->set_virtual( true );
 		$product->set_downloadable( true );
-		$product->set_download_limit( self::DUMMY_DOWNLOAD_LIMIT );
-		$product->set_download_expiry( self::DUMMY_DOWNLOAD_EXPIRY );
 
 		/**
 		 * A dummy downloadable WC_Product used in email preview.
@@ -607,7 +605,7 @@ class EmailPreview {
 		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
 		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
 		// Provide dummy downloadable items for email preview.
-		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 2 );
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
 		// Make sure order has downloadable items and download permissions.
 		// Note: Do not override permission logic or force-render downloads; respect core rules.
 	}
@@ -708,37 +706,17 @@ class EmailPreview {
 	/**
 	 * Get dummy downloadable items for email preview.
 	 *
-	 * @param array    $downloads Existing downloads.
-	 * @param WC_Order $order Order object.
+	 * @param array $downloads Existing downloads.
 	 * @return array
 	 */
-	public function get_dummy_downloadable_items( $downloads, $order ) {
-		// Build secure download URL with proper encoding.
-		$download_url = add_query_arg(
-			array(
-				'download_file' => self::DUMMY_DOWNLOAD_ID,
-				'order'         => $order->get_id(),
-				'email'         => $order->get_billing_email(),
-			),
-			home_url( '/' )
-		);
-
-		// Add dummy downloadable items for email preview.
+	public function get_dummy_downloadable_items( $downloads ) {
 		$dummy_downloads = array(
 			array(
-				'download_url'        => $download_url,
-				'download_id'         => self::DUMMY_DOWNLOAD_ID,
-				'product_id'          => 0,
-				'product_name'        => $this->get_dummy_downloadable_product()->get_name(),
-				'download_name'       => __( 'Sample Download File.pdf', 'woocommerce' ),
-				'order_id'            => $order->get_id(),
-				'order_key'           => $order->get_order_key(),
-				'downloads_remaining' => self::DUMMY_DOWNLOAD_LIMIT,
-				'access_expires'      => time() + ( self::DUMMY_DOWNLOAD_EXPIRY * DAY_IN_SECONDS ),
-				'file'                => array(
-					'name' => 'Sample Download File.pdf',
-					'file' => 'sample-download.pdf',
-				),
+				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
+				'product_id'     => $this->get_dummy_downloadable_product()->get_id(),
+				'download_url'   => 'https://example.com/download',
+				'download_name'  => __( 'Sample Download File.pdf', 'woocommerce' ),
+				'access_expires' => time() + ( self::DUMMY_DOWNLOAD_EXPIRY * DAY_IN_SECONDS ),
 			),
 		);
 
