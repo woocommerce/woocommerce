@@ -90,11 +90,11 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame(
 			array( $customer1->get_id() ),
-			$this->service->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $customer1->get_billing_email() ), true )
+			$this->service->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $customer1->get_billing_email() ) )
 		);
 		$this->assertSame(
 			array( $customer1->get_id() ),
-			$this->service->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $customer1->get_billing_email(), $customer2->get_billing_email() ), true )
+			$this->service->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $customer1->get_billing_email(), $customer2->get_billing_email() ) )
 		);
 
 		$order->delete( true );
