@@ -39,7 +39,6 @@ import {
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/types';
 import './style.scss';
 import { navigateOrParent, attachParentListeners, isIframe } from './utils';
 import useBodyClass from './hooks/use-body-class';
@@ -192,21 +191,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	schema: {
 		context: {} as customizeStoreStateMachineContext,
 		events: {} as customizeStoreStateMachineEvents,
-		services: {} as {
-			fetchThemeCards: { data: ThemeCard[] };
-		},
 	},
 	context: {
 		intro: {
 			hasErrors: false,
-			themeData: {
-				themes: [] as ThemeCard[],
-				_links: {
-					browse_all: {
-						href: getAdminLink( 'themes.php' ),
-					},
-				},
-			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
 		},
@@ -298,7 +286,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								onDone: {
 									target: 'success',
 									actions: [
-										'assignThemeData',
 										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
