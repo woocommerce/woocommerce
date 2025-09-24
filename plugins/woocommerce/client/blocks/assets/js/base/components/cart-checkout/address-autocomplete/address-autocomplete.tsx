@@ -46,7 +46,7 @@ export const AddressAutocomplete = ( {
 		[],
 		( type: unknown ): type is ServerAddressAutocompleteProvider[] => {
 			if ( ! Array.isArray( type ) ) {
-				return true;
+				return false;
 			}
 
 			return type.every( ( item ) => {
