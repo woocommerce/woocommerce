@@ -159,7 +159,7 @@ class PlatformRegistry {
 
 		// Get credentials from credential manager and pass to fetcher constructor.
 		$credentials = $this->credential_manager->get_credentials( $platform_id );
-		if ( null === $credentials ) {
+		if ( ! is_array( $credentials ) ) {
 			throw new InvalidArgumentException(
 				sprintf(
 					/* translators: %s: platform ID */
