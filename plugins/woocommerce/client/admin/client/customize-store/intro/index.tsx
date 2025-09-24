@@ -25,6 +25,7 @@ import {
 	ExistingNoAiThemeBanner,
 	ClassicThemeBanner,
 	NonDefaultBlockThemeBanner,
+	PickYourThemeBanner,
 } from './intro-banners';
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
@@ -218,7 +219,10 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 	}
 
-	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ] as React.ComponentType<{
+		redirectToCYSFlow: () => void;
+		sendEvent: Sender< customizeStoreStateMachineEvents >;
+	}>;
 
 	const sidebarMessage = __(
 		'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
@@ -280,7 +284,9 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					/>
 
 					{ isDefaultTheme && ! customizeStoreTaskCompleted ? (
-						null
+						<PickYourThemeBanner
+							sendEvent={ sendEvent }
+						/>
 					) : (
 						<CustomizedThemeBanners
 							isBlockTheme={ isBlockTheme }
