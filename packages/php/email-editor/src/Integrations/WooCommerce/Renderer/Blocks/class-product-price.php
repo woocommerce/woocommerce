@@ -9,14 +9,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a WooCommerce product price block for email.
  */
-class Product_Price extends Abstract_Block_Renderer {
+class Product_Price extends Abstract_Product_Block_Renderer {
 	/**
 	 * Render the product price block content for email.
 	 *
@@ -26,27 +25,7 @@ class Product_Price extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$post_id = $parsed_block['context']['postId'] ?? 0;
-
-		if ( ! $post_id ) {
-			global $product;
-			if ( $product && is_a( $product, 'WC_Product' ) ) {
-				$post_id = $product->get_id();
-			}
-		}
-
-		if ( ! $post_id ) {
-			global $post;
-			if ( $post && get_post_type( $post->ID ) === 'product' ) {
-				$post_id = $post->ID;
-			}
-		}
-
-		if ( ! $post_id ) {
-			return '';
-		}
-
-		$product = wc_get_product( $post_id );
+		$product = $this->get_product_from_context( $parsed_block );
 		if ( ! $product ) {
 			return '';
 		}
@@ -164,10 +143,12 @@ class Product_Price extends Abstract_Block_Renderer {
 	 */
 	private function build_variable_product_price( \WC_Product_Variable $product ): string {
 		$min_price = $product->get_variation_price( 'min', true );
+		$max_price = $product->get_variation_price( 'max', true );
 
 		return sprintf(
-			'<span>%s</span>',
-			wc_price( (float) $min_price, array( 'in_span' => false ) )
+			'<span>%s — %s</span>',
+			wc_price( (float) $min_price, array( 'in_span' => false ) ),
+			wc_price( (float) $max_price, array( 'in_span' => false ) )
 		);
 	}
 
@@ -197,10 +178,12 @@ class Product_Price extends Abstract_Block_Renderer {
 		}
 
 		$min_price = min( $prices );
+		$max_price = max( $prices );
 
 		return sprintf(
-			'<span style="font-style: italic;">From </span><span>%s</span>',
-			wp_kses_post( wc_price( (float) $min_price, array( 'in_span' => false ) ) )
+			'<span>%s — %s</span>',
+			wc_price( (float) $min_price, array( 'in_span' => false ) ),
+			wc_price( (float) $max_price, array( 'in_span' => false ) )
 		);
 	}
 

@@ -9,14 +9,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a WooCommerce product button block for email.
  */
-class Product_Button extends Abstract_Block_Renderer {
+class Product_Button extends Abstract_Product_Block_Renderer {
 	/**
 	 * Get styles for the wrapper element.
 	 *
@@ -127,32 +126,5 @@ class Product_Button extends Abstract_Block_Renderer {
 
 		$button_html = Table_Wrapper_Helper::render_table_wrapper( $button_content, $table_attrs, $cell_attrs );
 		return Table_Wrapper_Helper::render_table_wrapper( $button_html, array( 'style' => 'width: 100%' ) );
-	}
-
-	/**
-	 * Get product from block context.
-	 *
-	 * @param array $parsed_block Parsed block.
-	 * @return \WC_Product|null
-	 */
-	private function get_product_from_context( array $parsed_block ): ?\WC_Product {
-		$post_id = $parsed_block['context']['postId'] ?? 0;
-
-		if ( ! $post_id ) {
-			global $product;
-			if ( $product && is_a( $product, 'WC_Product' ) ) {
-				$post_id = $product->get_id();
-			}
-		}
-
-		if ( ! $post_id ) {
-			global $post;
-			if ( $post && get_post_type( $post->ID ) === 'product' ) {
-				$post_id = $post->ID;
-			}
-		}
-
-		$product = $post_id ? wc_get_product( $post_id ) : null;
-		return $product ? $product : null;
 	}
 }

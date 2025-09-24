@@ -9,13 +9,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use WP_Query;
 
 /**
  * Renders a product collection block for email.
  */
-class Product_Collection extends Abstract_Block_Renderer {
+class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
 	 * Render the product collection block content for email.
 	 *
@@ -68,7 +67,7 @@ class Product_Collection extends Abstract_Block_Renderer {
 		$products = array_filter(
 			array_map(
 				function ( $post ) {
-					return $post instanceof \WP_Post ? wc_get_product( $post->ID ) : $post;
+					return $post instanceof \WP_Post ? wc_get_product( $post->ID ) : null;
 				},
 				$posts
 			)
@@ -99,12 +98,16 @@ class Product_Collection extends Abstract_Block_Renderer {
 	/**
 	 * Render default product content when no inner blocks are present.
 	 *
-	 * @param \WC_Product $product Product object.
-	 * @param array       $template_block Inner block data.
+	 * @param \WC_Product|null $product Product object.
+	 * @param array            $template_block Inner block data.
 	 * @return string
 	 */
-	private function render_product_content( \WC_Product $product, array $template_block ): string {
+	private function render_product_content( ?\WC_Product $product, array $template_block ): string {
 		$content = '';
+
+		if ( ! $product ) {
+			return $content;
+		}
 
 		foreach ( $template_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
@@ -158,15 +161,15 @@ class Product_Collection extends Abstract_Block_Renderer {
 			'post_type'      => 'product',
 			'post_status'    => 'publish',
 			'posts_per_page' => (int) ( $query_attrs['perPage'] ?? 9 ),
-			'orderby'        => $query_attrs['orderBy'] ?? 'menu_order',
-			'order'          => $query_attrs['order'] ?? 'asc',
+			'orderby'        => sanitize_key( $query_attrs['orderBy'] ?? 'menu_order' ),
+			'order'          => sanitize_key( $query_attrs['order'] ?? 'asc' ),
 			'meta_query'     => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			'tax_query'      => array(), // phpcs:ignore WordPress.DB.SlowDBQuery
 		);
 
 		// Handle search.
 		if ( ! empty( $query_attrs['search'] ) ) {
-			$query_args['s'] = (string) $query_attrs['search'];
+			$query_args['s'] = sanitize_text_field( (string) $query_attrs['search'] );
 		}
 
 		// Handle offset.
@@ -204,7 +207,7 @@ class Product_Collection extends Abstract_Block_Renderer {
 				$query_args['tax_query'][] = array(
 					'taxonomy' => 'product_visibility',
 					'field'    => 'term_taxonomy_id',
-					'terms'    => array( $featured_query['featured'] ),
+					'terms'    => array( (int) $featured_query['featured'] ),
 					'operator' => 'IN',
 				);
 			}

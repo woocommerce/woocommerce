@@ -80,12 +80,15 @@ class Bootstrap {
 			10,
 			1
 		);
-		add_filter(
-			'block_type_metadata_settings',
-			array( $this->woocommerce_email_editor_integration, 'update_block_settings' ),
-			10,
-			1
-		);
+
+		if ( class_exists( 'WooCommerce' ) ) {
+			add_filter(
+				'block_type_metadata_settings',
+				array( $this->woocommerce_email_editor_integration, 'update_block_settings' ),
+				10,
+				1
+			);
+		}
 	}
 
 	/**

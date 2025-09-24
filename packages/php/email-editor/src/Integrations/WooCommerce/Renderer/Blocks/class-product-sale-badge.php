@@ -9,14 +9,13 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Abstract_Block_Renderer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
 /**
  * Renders a WooCommerce product sale badge block for email.
  */
-class Product_Sale_Badge extends Abstract_Block_Renderer {
+class Product_Sale_Badge extends Abstract_Product_Block_Renderer {
 	/**
 	 * Render the product sale badge block content for email.
 	 *
@@ -26,12 +25,7 @@ class Product_Sale_Badge extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$post_id = $parsed_block['context']['postId'] ?? 0;
-		if ( ! $post_id ) {
-			return '';
-		}
-
-		$product = wc_get_product( $post_id );
+		$product = $this->get_product_from_context( $parsed_block );
 		if ( ! $product ) {
 			return '';
 		}
