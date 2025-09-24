@@ -619,7 +619,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test handling onboarding step check with invalid step.
 	 */
-	public function est_onboarding_step_check_with_invalid_step() {
+	public function test_onboarding_step_check_with_invalid_step() {
 		// Arrange.
 		$step_id      = 'invalid_step';
 		$country_code = 'US';
