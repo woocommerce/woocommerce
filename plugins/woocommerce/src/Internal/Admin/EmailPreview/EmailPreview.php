@@ -441,37 +441,20 @@ class EmailPreview {
 	 * @return WC_Order
 	 */
 	private function apply_dummy_order_status( WC_Order $order ): WC_Order {
-		switch ( $this->email_type ) {
-			case 'WC_Email_Customer_Completed_Order':
-				$order->set_status( OrderStatus::COMPLETED );
-				break;
-			case 'WC_Email_Customer_Processing_Order':
-				$order->set_status( OrderStatus::PROCESSING );
-				break;
-			case 'WC_Email_Customer_On_Hold_Order':
-				$order->set_status( OrderStatus::ON_HOLD );
-				break;
-			case 'WC_Email_Customer_Failed_Order':
-				$order->set_status( OrderStatus::FAILED );
-				break;
-			case 'WC_Email_Customer_Cancelled_Order':
-				$order->set_status( OrderStatus::CANCELLED );
-				break;
-			case 'WC_Email_Customer_Refunded_Order':
-				$order->set_status( OrderStatus::REFUNDED );
-				break;
-			case 'WC_Email_New_Order':
-				$order->set_status( OrderStatus::PROCESSING );
-				break;
-			case 'WC_Email_Cancelled_Order':
-				$order->set_status( OrderStatus::CANCELLED );
-				break;
-			case 'WC_Email_Failed_Order':
-				$order->set_status( OrderStatus::FAILED );
-				break;
-			default:
-				$order->set_status( OrderStatus::PROCESSING );
-		}
+		$email_type_status_map = array(
+			'WC_Email_Customer_Completed_Order'  => OrderStatus::COMPLETED,
+			'WC_Email_Customer_Processing_Order' => OrderStatus::PROCESSING,
+			'WC_Email_Customer_On_Hold_Order'    => OrderStatus::ON_HOLD,
+			'WC_Email_Customer_Failed_Order'     => OrderStatus::FAILED,
+			'WC_Email_Customer_Cancelled_Order'  => OrderStatus::CANCELLED,
+			'WC_Email_Customer_Refunded_Order'   => OrderStatus::REFUNDED,
+			'WC_Email_New_Order'                 => OrderStatus::PROCESSING,
+			'WC_Email_Cancelled_Order'           => OrderStatus::CANCELLED,
+			'WC_Email_Failed_Order'              => OrderStatus::FAILED,
+		);
+
+		$status = $email_type_status_map[ $this->email_type ] ?? OrderStatus::PROCESSING;
+		$order->set_status( $status );
 		return $order;
 	}
 
