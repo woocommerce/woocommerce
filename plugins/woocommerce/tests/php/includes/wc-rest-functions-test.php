@@ -74,7 +74,9 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 			$callback_called = true;
 		};
 
-		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback, 'wc/wc-rest-testing/products' );
+		$GLOBALS['wp']->query_vars['rest_route'] = 'wc/wc-rest-testing/products';
+
+		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 
 		$this->assertTrue( $callback_called, 'Callback should be executed when route matches namespace' );
 	}
@@ -87,7 +89,9 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 		$test_callback   = function () use ( &$callback_called ) {
 			$callback_called = true;
 		};
-		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback, '/' );
+		$GLOBALS['wp']->query_vars['rest_route'] = '/';
+
+		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 		$this->assertTrue( $callback_called, 'Callback should be executed for root route to maintain API discovery' );
 	}
 
@@ -99,7 +103,10 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 		$test_callback   = function () use ( &$callback_called ) {
 			$callback_called = true;
 		};
-		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback, 'wp/v2/posts' );
+
+		$GLOBALS['wp']->query_vars['rest_route'] = 'wc/some-other-namespace';
+
+		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback  );
 		$this->assertFalse( $callback_called, 'Callback should not be executed when route doesn\'t match' );
 	}
 
@@ -107,12 +114,12 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	 * Test retrieval of REST route from globals when not provided
 	 */
 	public function test_retrieves_route_from_globals_when_not_provided() {
-		$GLOBALS['wp']->query_vars['rest_route'] = 'wc/wc-rest-testing/products';
-
 		$callback_called = false;
 		$test_callback   = function () use ( &$callback_called ) {
 			$callback_called = true;
 		};
+
+		$GLOBALS['wp']->query_vars['rest_route'] = 'wc/wc-rest-testing/products';
 
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 		$this->assertTrue( $callback_called, 'Should retrieve route from globals and execute callback' );
@@ -122,27 +129,15 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 	 * Test handling of empty REST route
 	 */
 	public function test_handles_empty_rest_route_gracefully() {
+		$callback_called = false;
+		$test_callback   = function () use ( &$callback_called ) {
+			$callback_called = true;
+		};
+
 		$GLOBALS['wp']->query_vars['rest_route'] = '';
 
-		$callback_called = false;
-		$test_callback   = function () use ( &$callback_called ) {
-			$callback_called = true;
-		};
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 		$this->assertFalse( $callback_called, 'Should not execute callback when REST route is empty' );
-	}
-
-	/**
-	 * Test filter registration for deferred loading
-	 */
-	public function test_registers_filter_for_deferred_loading() {
-		$callback_called = false;
-		$test_callback   = function () use ( &$callback_called ) {
-			$callback_called = true;
-		};
-		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback, 'wp/v2/posts' );
-
-		$this->assertFalse( $callback_called, 'Callback should not be executed immediately for non-matching routes' );
 	}
 
 	/**
