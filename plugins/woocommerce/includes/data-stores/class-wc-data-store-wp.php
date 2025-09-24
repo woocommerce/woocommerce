@@ -276,6 +276,8 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args  = array(
+			'orderby'    => 'id',
+			'order'      => 'desc',
 			'errors'     => array(),
 			'meta_query' => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		);
@@ -472,25 +474,23 @@ class WC_Data_Store_WP {
 						'compare' => '<=',
 					);
 			}
-		} else {
-			if ( '...' !== $operator ) {
+		} elseif ( '...' !== $operator ) {
 				$wp_query_args['meta_query'][] = array(
 					'key'     => $key,
 					'value'   => $dates[0]->getTimestamp(),
 					'compare' => $operator,
 				);
-			} else {
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[0]->getTimestamp(),
-					'compare' => '>=',
-				);
-				$wp_query_args['meta_query'][] = array(
-					'key'     => $key,
-					'value'   => $dates[1]->getTimestamp(),
-					'compare' => '<=',
-				);
-			}
+		} else {
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[0]->getTimestamp(),
+				'compare' => '>=',
+			);
+			$wp_query_args['meta_query'][] = array(
+				'key'     => $key,
+				'value'   => $dates[1]->getTimestamp(),
+				'compare' => '<=',
+			);
 		}
 
 		return $wp_query_args;
