@@ -469,7 +469,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request without credentials.
 	 */
 	public function test_graphql_request_no_credentials(): void {
-		$client_no_credentials = new ShopifyClient( array() ); // Empty credentials array.
+		$client_no_credentials = new ShopifyClient( array() );
 
 		$query  = 'query { products { edges { node { id } } } }';
 		$result = $client_no_credentials->graphql_request( $query );
