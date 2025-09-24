@@ -1721,16 +1721,21 @@ class WooPaymentsService {
 	 * @return bool Whether the onboarding is locked.
 	 */
 	private function is_onboarding_locked(): bool {
-		$lock_timestamp = $this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 );
-		// Ensure the lock timestamp is a valid integer.
-		if ( ! is_numeric( $lock_timestamp ) ) {
-			$lock_timestamp = 0;
-		} else {
-			$lock_timestamp = (int) $lock_timestamp;
+		$lock_timestamp = (int) $this->proxy->call_function(
+			'absint',
+			$this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 )
+		);
+
+		if ( 0 === $lock_timestamp ) {
+			return false;
 		}
 
-		// If the lock timestamp is empty or older than the TTL, we consider the onboarding unlocked.
-		if ( empty( $lock_timestamp ) || $lock_timestamp < $this->proxy->call_function( 'time' ) - self::NOX_ONBOARDING_LOCKED_TTL_SECONDS ) {
+		$now = $this->proxy->call_function( 'time' );
+
+		// If the lock timestamp is older than the TTL, consider it unlocked and self-heal.
+		if ( $lock_timestamp < ( $now - self::NOX_ONBOARDING_LOCKED_TTL_SECONDS ) ) {
+			$this->clear_onboarding_lock();
+
 			return false;
 		}
 
