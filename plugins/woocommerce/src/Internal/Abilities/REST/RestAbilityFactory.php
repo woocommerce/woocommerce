@@ -150,9 +150,13 @@ class RestAbilityFactory {
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
+	 * - Converting 'date-time' type to string with format
+	 * - Handling 'mixed' types appropriately
 	 * - Removing PHP callbacks (sanitize_callback, validate_callback)
 	 * - Converting 'required' from boolean-per-field to array-of-names
-	 * - Removing WordPress-specific non-schema fields
+	 * - Removing WordPress-specific non-schema fields (context)
+	 * - Converting 'readonly' to 'readOnly'
+	 * - Recursively sanitizing nested properties and items
 	 * - Preserving valid JSON Schema properties
 	 *
 	 * @param array $args WordPress REST API arguments array.
@@ -163,41 +167,7 @@ class RestAbilityFactory {
 		$required   = array();
 
 		foreach ( $args as $key => $arg ) {
-			$property = array();
-
-			// Copy valid JSON Schema fields.
-			if ( isset( $arg['type'] ) ) {
-				$property['type'] = $arg['type'];
-			}
-			if ( isset( $arg['description'] ) ) {
-				$property['description'] = $arg['description'];
-			}
-			if ( isset( $arg['default'] ) ) {
-				$property['default'] = $arg['default'];
-			}
-			if ( isset( $arg['enum'] ) ) {
-				$property['enum'] = array_values( $arg['enum'] );
-			}
-			if ( isset( $arg['items'] ) ) {
-				$property['items'] = $arg['items'];
-			}
-			if ( isset( $arg['minimum'] ) ) {
-				$property['minimum'] = $arg['minimum'];
-			}
-			if ( isset( $arg['maximum'] ) ) {
-				$property['maximum'] = $arg['maximum'];
-			}
-			if ( isset( $arg['format'] ) ) {
-				$property['format'] = $arg['format'];
-			}
-			if ( isset( $arg['properties'] ) ) {
-				$property['properties'] = $arg['properties'];
-			}
-
-			// Convert readonly to readOnly (JSON Schema format).
-			if ( isset( $arg['readonly'] ) && $arg['readonly'] ) {
-				$property['readOnly'] = true;
-			}
+			$property = self::sanitize_single_property( $arg );
 
 			// Collect required fields.
 			if ( isset( $arg['required'] ) && true === $arg['required'] ) {
@@ -217,6 +187,100 @@ class RestAbilityFactory {
 		}
 
 		return $schema;
+	}
+
+	/**
+	 * Sanitize a single property to JSON Schema 2020-12 format.
+	 *
+	 * @param array $arg Single property definition from WordPress REST API.
+	 * @return array Sanitized property for JSON Schema.
+	 */
+	private static function sanitize_single_property( array $arg ): array {
+		$property = array();
+
+		// Handle type field with JSON Schema 2020-12 compliance.
+		if ( isset( $arg['type'] ) ) {
+			if ( 'date-time' === $arg['type'] ) {
+				// Convert date-time type to string with format.
+				$property['type'] = 'string';
+				$property['format'] = 'date-time';
+			} elseif ( 'mixed' === $arg['type'] ) {
+				// Convert mixed type to array of all possible types.
+				$property['type'] = array( 'string', 'number', 'boolean', 'object', 'array', 'null' );
+			} else {
+				$property['type'] = $arg['type'];
+			}
+		}
+
+		// Copy valid JSON Schema fields.
+		$valid_fields = array( 'description', 'enum', 'minimum', 'maximum', 'format' );
+		foreach ( $valid_fields as $field ) {
+			if ( isset( $arg[ $field ] ) ) {
+				if ( 'enum' === $field ) {
+					$property['enum'] = array_values( $arg['enum'] );
+				} else {
+					$property[ $field ] = $arg[ $field ];
+				}
+			}
+		}
+
+		// Handle items with recursive sanitization.
+		if ( isset( $arg['items'] ) ) {
+			$property['items'] = self::sanitize_nested_schema( $arg['items'] );
+		}
+
+		// Handle nested properties with recursive sanitization.
+		if ( isset( $arg['properties'] ) ) {
+			$property['properties'] = array();
+			foreach ( $arg['properties'] as $nested_key => $nested_prop ) {
+				$property['properties'][ $nested_key ] = self::sanitize_single_property( $nested_prop );
+			}
+		}
+
+		// Convert readonly to readOnly (JSON Schema format).
+		$is_readonly = false;
+		if ( isset( $arg['readonly'] ) && $arg['readonly'] ) {
+			$property['readOnly'] = true;
+			$is_readonly = true;
+		}
+
+		// Add default value only if not readonly (avoid contradiction).
+		if ( isset( $arg['default'] ) && ! $is_readonly ) {
+			$property['default'] = $arg['default'];
+		}
+
+		// Skip WordPress-specific fields like 'context' - they're not copied.
+
+		return $property;
+	}
+
+	/**
+	 * Recursively sanitize nested schema objects.
+	 *
+	 * @param array $schema Nested schema to sanitize.
+	 * @return array Sanitized nested schema.
+	 */
+	private static function sanitize_nested_schema( array $schema ): array {
+		$sanitized = array();
+
+		foreach ( $schema as $key => $value ) {
+			if ( 'properties' === $key && is_array( $value ) ) {
+				// Recursively sanitize nested properties.
+				$sanitized['properties'] = array();
+				foreach ( $value as $prop_key => $prop_value ) {
+					$sanitized['properties'][ $prop_key ] = self::sanitize_single_property( $prop_value );
+				}
+			} elseif ( 'items' === $key && is_array( $value ) ) {
+				// Recursively sanitize items.
+				$sanitized['items'] = self::sanitize_nested_schema( $value );
+			} elseif ( in_array( $key, array( 'type', 'description', 'enum', 'minimum', 'maximum', 'format' ), true ) ) {
+				// Copy valid JSON Schema fields.
+				$sanitized[ $key ] = $value;
+			}
+			// Skip invalid fields like 'context'.
+		}
+
+		return $sanitized;
 	}
 
 	/**
