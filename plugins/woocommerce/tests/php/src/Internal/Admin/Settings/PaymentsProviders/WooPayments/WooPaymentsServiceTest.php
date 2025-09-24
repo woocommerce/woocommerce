@@ -8744,6 +8744,146 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that onboarding lock mechanism works during test account initialization.
+	 */
+	public function test_onboarding_lock_mechanism_during_test_account_init(): void {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Track onboarding lock state changes.
+		$lock_states = array();
+		$current_time = $this->current_time;
+
+		// Arrange the NOX profile and lock tracking.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_states ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return array();
+					}
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return end( $lock_states ) ?: $default_value;
+					}
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$lock_states, $current_time ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						$lock_states[] = $value;
+					}
+					return true;
+				},
+			)
+		);
+
+		// Mock successful REST API response.
+		$expected_response = array(
+			'success' => true,
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return $expected_response;
+						}
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act - call the method that should set and clear the lock.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert that the result is successful.
+		$this->assertEquals( $expected_response, $result );
+
+		// Assert that the lock was set and then cleared.
+		$this->assertCount( 2, $lock_states, 'Expected exactly 2 lock state changes: set lock (timestamp) and clear lock (0)' );
+		$this->assertSame( $current_time, $lock_states[0], 'First lock state should be current timestamp' );
+		$this->assertSame( 0, $lock_states[1], 'Second lock state should be 0 (cleared)' );
+	}
+
+	/**
+	 * Test that onboarding lock is cleared even when an exception occurs.
+	 */
+	public function test_onboarding_lock_cleared_on_exception(): void {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Track onboarding lock state changes.
+		$lock_states = array();
+		$current_time = $this->current_time;
+
+		// Arrange the NOX profile and lock tracking.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_states ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return array();
+					}
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return end( $lock_states ) ?: $default_value;
+					}
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$lock_states, $current_time ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						$lock_states[] = $value;
+					}
+					return true;
+				},
+			)
+		);
+
+		// Mock REST API to throw an exception.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							throw new \Exception( 'Simulated API failure' );
+						}
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act & Assert - expect the method to handle the exception and still clear the lock.
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+
+			$this->fail( 'Expected an exception to be re-thrown as WP_Error' );
+		} catch ( \Throwable $e ) {
+			// The exception handling should have cleared the lock even though an error occurred.
+		}
+
+		// Assert that the lock was set and then cleared despite the exception.
+		$this->assertCount( 2, $lock_states, 'Expected exactly 2 lock state changes even with exception: set lock (timestamp) and clear lock (0)' );
+		$this->assertSame( $current_time, $lock_states[0], 'First lock state should be current timestamp' );
+		$this->assertSame( 0, $lock_states[1], 'Second lock state should be 0 (cleared) even after exception' );
+	}
+
+	/**
 	 * Helper method to invoke private methods for testing.
 	 *
 	 * @param string $method_name The name of the private method.
