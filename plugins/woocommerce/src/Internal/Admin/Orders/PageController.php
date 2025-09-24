@@ -262,7 +262,7 @@ class PageController {
 			$post_type = get_post_type_object( $order_type );
 
 			add_submenu_page(
-				\WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : '',
+				\WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce' : 'admin.php',
 				$post_type->labels->name,
 				$post_type->labels->menu_name,
 				$post_type->cap->edit_posts,
