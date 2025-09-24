@@ -109,11 +109,9 @@ const goBack = () => {
 	redirectToWooHome();
 };
 
-const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
+const redirectToThemes = () => {
 	if ( isWooExpress() ) {
-		window.location.href =
-			_context?.intro?.themeData?._links?.browse_all?.href ??
-			getAdminLink( 'themes.php' );
+		window.location.href = getAdminLink( 'themes.php' );
 	} else if ( isFeatureEnabled( 'marketplace' ) ) {
 		window.location.href = getAdminLink(
 			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
