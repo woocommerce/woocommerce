@@ -59,6 +59,8 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_find_user_ids_by_billing_email(): void {
+		$this->toggle_cot_feature_and_usage( false );
+
 		$customer1 = $this->create_customer( 'customer1', '', 'customer1@example.com' );
 		$customer2 = $this->create_customer( 'customer2', '', 'customer2@example.com' );
 
