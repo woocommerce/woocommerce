@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Session
  */
 
+declare( strict_types=1 );
+
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -429,6 +431,24 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 		$session_handler_spy->expects( $this->never() )->method( 'destroy_session' );
 
 		$session_handler_spy->destroy_session_if_empty();
+	}
+
+	/**
+	 * Tests expired sessions cleanup: indirectly verifies that batched deletion works and targeted caches cleanup.
+	 *
+	 * @return void
+	 */
+	public function test_cleanup_sessions(): void {
+		global $wpdb;
+
+		$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", 'guest', 'expired', time() - DAY_IN_SECONDS ) );
+		$wpdb->query( $wpdb->prepare( 'REPLACE INTO %i (session_key, session_value, session_expiry) VALUES (%s, %s, %d)', "{$wpdb->prefix}woocommerce_sessions", 'customer', 'active', time() + DAY_IN_SECONDS ) );
+
+		$handler = $this->getMockBuilder( WC_Session_Handler::class )->setMethodsExcept( array( 'cleanup_sessions' ) )->getMock();
+		$handler->cleanup_sessions();
+
+		// Verify the DB and cache cleanup results.
+		$this->assertSame( array( array( 'customer' ) ), $wpdb->get_results( $wpdb->prepare( "SELECT session_key FROM %i WHERE session_key IN ('guest', 'customer')", "{$wpdb->prefix}woocommerce_sessions" ), ARRAY_N ) );
 	}
 
 	/**

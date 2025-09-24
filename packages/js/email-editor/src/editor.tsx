@@ -35,6 +35,12 @@ import {
 	useFilterEditorContentStylesheets,
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
+import { getEditorConfigFromWindow } from './store/settings';
+import {
+	EmailEditorSettings,
+	EmailTheme,
+	EmailEditorUrls,
+} from './store/types';
 
 function Editor( {
 	postId,
@@ -123,6 +129,11 @@ export function initialize( elementId: string ) {
 		Editor
 	) as typeof Editor;
 	onInit();
+
+	// Set configuration to store from window object for backward compatibility
+	const editorConfig = getEditorConfigFromWindow();
+	dispatch( storeName ).setEditorConfig( editorConfig );
+
 	const root = createRoot( container );
 	root.render(
 		<WrappedEditor
@@ -137,17 +148,29 @@ export function ExperimentalEmailEditor( {
 	postType,
 	isPreview = false,
 	contentRef = null,
+	config,
 }: {
 	postId: string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
+	config?: {
+		editorSettings: EmailEditorSettings;
+		theme: EmailTheme;
+		urls: EmailEditorUrls;
+		userEmail: string;
+		globalStylesPostId?: number | null;
+	};
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
 		onInit();
+
+		// Set configuration to store from window object for backward compatibility
+		const editorConfig = config || getEditorConfigFromWindow();
+		dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
@@ -159,7 +182,7 @@ export function ExperimentalEmailEditor( {
 				);
 			}
 		};
-	}, [] );
+	}, [ config ] );
 
 	const WrappedEditor = applyFilters(
 		'woocommerce_email_editor_wrap_editor_component',

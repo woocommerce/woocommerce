@@ -74,6 +74,13 @@ jQuery( function ( $ ) {
 				this.queue_update_checkout
 			);
 
+			// Handle blur on address_1 fields when autocomplete provider is available
+			this.$checkout_form.on(
+				'blur',
+				'#billing_address_1, #shipping_address_1',
+				this.address_field_blur
+			);
+
 			// Address fields
 			this.$checkout_form.on(
 				'change',
@@ -193,20 +200,134 @@ jQuery( function ( $ ) {
 		init_checkout: function () {
 			$( document.body ).trigger( 'update_checkout' );
 		},
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should skip checkout updates
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be skipped, false otherwise
+		 */
+		should_skip_address_update: function ( e ) {
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Skip if we're manipulating the DOM for autocomplete
+				if (
+					target.getAttribute( 'data-autocomplete-manipulating' ) ===
+					'true'
+				) {
+					return true;
+				}
+
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
+		/**
+		 * Check if an address_1 field has an active autocomplete provider and should trigger checkout updates on blur
+		 * @param {Event} e - The event object
+		 * @return {boolean} true if updates should be triggered, false otherwise
+		 */
+		should_trigger_address_blur_update: function ( e ) {
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Skip if we're manipulating the DOM for autocomplete
+				if (
+					target.getAttribute( 'data-autocomplete-manipulating' ) ===
+					'true'
+				) {
+					return false;
+				}
+
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						return true;
+					}
+				}
+			}
+			return false;
+		},
 		maybe_input_changed: function ( e ) {
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
+			}
+
 			if ( wc_checkout_form.dirtyInput ) {
 				wc_checkout_form.input_changed( e );
 			}
 		},
 		input_changed: function ( e ) {
+			if ( wc_checkout_form.should_skip_address_update( e ) ) {
+				return;
+			}
+
 			wc_checkout_form.dirtyInput = e.target;
 			wc_checkout_form.maybe_update_checkout();
+		},
+		address_field_blur: function ( e ) {
+			if ( wc_checkout_form.should_trigger_address_blur_update( e ) ) {
+				wc_checkout_form.dirtyInput = e.target;
+				wc_checkout_form.maybe_update_checkout();
+			}
 		},
 		queue_update_checkout: function ( e ) {
 			var code = e.keyCode || e.which || 0;
 
 			if ( code === 9 ) {
 				return true;
+			}
+
+			// Check if we're in an address_1 field with an active provider
+			var target = e.target || e.srcElement;
+			if (
+				target &&
+				( target.id === 'billing_address_1' ||
+					target.id === 'shipping_address_1' )
+			) {
+				// Check if an autocomplete provider is available for this field
+				var type = target.id.replace( '_address_1', '' );
+
+				// Check if window.wc.addressAutocomplete exists and has an active provider
+				if (
+					window.wc &&
+					window.wc.addressAutocomplete &&
+					window.wc.addressAutocomplete.activeProvider
+				) {
+					if (
+						window.wc.addressAutocomplete.activeProvider[ type ]
+					) {
+						// Provider is available - don't queue updates while typing
+						// Updates will be triggered on blur instead
+						return true;
+					}
+				}
 			}
 
 			wc_checkout_form.dirtyInput = this;
@@ -974,11 +1095,11 @@ jQuery( function ( $ ) {
 		clear_coupon_input: function () {
 			const $coupon_field = $( '#coupon_code' );
 			$coupon_field
-				.val('')
-				.removeClass('has-error')
-				.removeAttr('aria-invalid')
-				.removeAttr('aria-describedby')
-				.next('.coupon-error-notice')
+				.val( '' )
+				.removeClass( 'has-error' )
+				.removeAttr( 'aria-invalid' )
+				.removeAttr( 'aria-describedby' )
+				.next( '.coupon-error-notice' )
 				.remove();
 		},
 		submit: function ( evt ) {
