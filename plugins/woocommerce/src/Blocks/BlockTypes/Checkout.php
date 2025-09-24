@@ -411,13 +411,11 @@ class Checkout extends AbstractBlock {
 			$country_data[ $country_code ]['format'] = $format;
 		}
 
-		if ( class_exists( AddressProviderController::class ) ) {
-			if ( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) === 'no' ) {
-				// If address autocomplete is disabled, we don't need to load the providers.
-				$this->asset_data_registry->add( 'addressAutocompleteProviders', [] );
-			} else {
-				$this->asset_data_registry->add( 'addressAutocompleteProviders', wc_get_container()->get( AddressProviderController::class )->get_providers() );
-			}
+		if ( class_exists( AddressProviderController::class ) && get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) === 'yes' ) {
+			$this->asset_data_registry->add( 'addressAutocompleteProviders', wc_get_container()->get( AddressProviderController::class )->get_providers() );
+		} else {
+			// If address autocomplete is disabled, or the class doesn't exist we don't need to load the providers.
+			$this->asset_data_registry->add( 'addressAutocompleteProviders', [] );
 		}
 		$this->asset_data_registry->add( 'countryData', $country_data );
 		$this->asset_data_registry->add( 'defaultAddressFormat', $address_formats['default'] );
