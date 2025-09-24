@@ -978,9 +978,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
+
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( empty( $wp_query_args['orderby'] ) ) {
+			$wp_query_args['orderby'] = 'ID';
+		}
+
+		if ( empty( $wp_query_args['order'] ) ) {
+			$wp_query_args['order'] = 'desc';
 		}
 
 		$date_queries = array(
