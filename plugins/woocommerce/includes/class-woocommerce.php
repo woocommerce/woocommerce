@@ -1526,10 +1526,11 @@ final class WooCommerce {
 			return;
 		}
 
-		$ve = get_option( 'gmt_offset' ) > 0 ? '-' : '+';
+		$gmt_offset   = get_option( 'gmt_offset' );
+		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
 
 		// Schedule daily sales event at midnight tomorrow.
-		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $ve . absint( get_option( 'gmt_offset' ) ) . ' HOURS' );
+		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
 
 		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
 
@@ -1547,31 +1548,29 @@ final class WooCommerce {
 
 		}
 
+		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+
 		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
 		// so it doesn't occur in the same request. WooCommerce Admin also schedules
 		// a daily cron that gets lost due to a race condition. WC_Privacy's background
 		// processing instance updates the cron schedule from within a cron job.
-
 		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
 
-		// Schedule daily cleanup logs at 3 AM.
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+		$next_run_timestamp = as_next_scheduled_action( 'woocommerce_cleanup_sessions', array(), 'woocommerce' );
+		if ( $next_run_timestamp !== $tomorrow_6am ) {
+			as_unschedule_all_actions( 'woocommerce_cleanup_sessions' );
+			as_schedule_recurring_action( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+		}
 
-		// Schedule twice daily cleanup sessions at 6 AM and 6 PM.
-
-		as_schedule_recurring_action( time() + ( 6 * HOUR_IN_SECONDS ), 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
-
-		// Schedule geoip updater every 15 days.
-
-		as_schedule_recurring_action( time() + MINUTE_IN_SECONDS, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
 
 		// Schedule the action to send tracking events if tracking is enabled.
 		$this->schedule_tracking_action();
 
-		// Schedule daily cleanup rate limits at 3 AM.
-
-		as_schedule_recurring_action( time() + ( 3 * HOUR_IN_SECONDS ), DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 

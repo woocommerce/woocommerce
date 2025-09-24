@@ -631,9 +631,23 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_expiry < %d', $this->_table, time() ) );
+		// Batch size of 100 and sleep time of 10ms = max 100 SQL queries and 10K entries deletion per second.
+		$batch_size            = 100;
+		$deleted_entries_total = 0;
+		do {
+			$deleted_entries_count  = (int) $wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
+					$this->_table,
+					time(),
+					$batch_size
+				)
+			);
+			$deleted_entries_total += $deleted_entries_count;
+			usleep( ( 10_000 / $batch_size ) * $deleted_entries_count );
+		} while ( $deleted_entries_count === $batch_size );
 
-		if ( class_exists( 'WC_Cache_Helper' ) ) {
+		if ( $deleted_entries_total > 0 && class_exists( 'WC_Cache_Helper' ) ) {
 			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
