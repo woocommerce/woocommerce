@@ -1261,6 +1261,68 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test order by total functionality.
+	 */
+	public function test_order_by_total(): void {
+		// Create orders with different totals.
+		$order_totals = array( 100.00, 50.00, 250.50, 75.25, 500.00 );
+		$orders       = array();
+		foreach ( $order_totals as $order_total ) {
+			$order = $this->create_test_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		// Test ascending order.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'orderby', 'total' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertGreaterThanOrEqual( 5, count( $response_data ) );
+
+		// Verify ascending order by checking totals.
+		$totals_asc = array();
+		foreach ( $response_data as $order_data ) {
+			$totals_asc[] = (float) $order_data['total'];
+		}
+
+		// Check that totals are in ascending order.
+		$sorted_totals_asc = $totals_asc;
+		sort( $sorted_totals_asc );
+		$this->assertEquals( $sorted_totals_asc, $totals_asc, 'Orders should be sorted by total in ascending order' );
+
+		// Test descending order.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertGreaterThanOrEqual( 5, count( $response_data ) );
+
+		// Verify descending order by checking totals.
+		$totals_desc = array();
+		foreach ( $response_data as $order_data ) {
+			$totals_desc[] = (float) $order_data['total'];
+		}
+
+		// Check that totals are in descending order.
+		$sorted_totals_desc = $totals_desc;
+		rsort( $sorted_totals_desc );
+		$this->assertEquals( $sorted_totals_desc, $totals_desc, 'Orders should be sorted by total in descending order' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
+	}
+
+	/**
 	 * Test total filtering with operators. Only basic tests are needed here because operators are tested in the data stores.
 	 *
 	 * @see WC_Order_Data_Store_CPT_Test
