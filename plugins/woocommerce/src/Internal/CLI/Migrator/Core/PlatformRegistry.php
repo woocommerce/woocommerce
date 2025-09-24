@@ -159,6 +159,15 @@ class PlatformRegistry {
 
 		// Get credentials from credential manager and pass to fetcher constructor.
 		$credentials = $this->credential_manager->get_credentials( $platform_id );
+		if ( null === $credentials ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					/* translators: %s: platform ID */
+					'No credentials found for platform "%s". Please configure credentials using: wp wc migrate setup',
+					$platform_id
+				)
+			);
+		}
 		return new $fetcher_class( $credentials );
 	}
 
