@@ -9,6 +9,8 @@ jQuery(function ($) {
 			return;
 		}
 
+		applyStyles();
+
 		const buttons = paypal.Buttons( {
 			async createOrder( data ) {
 				// If we're inside the product page, we need to empty the cart,
@@ -147,6 +149,17 @@ jQuery(function ($) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to render PayPal buttons', err );
 		});
+	}
+
+	// Align the PayPal buttons to the center of the container on classic checkout page.
+	function applyStyles() {
+		const paypalContainer = document.getElementById( containerSelector );
+		const containerWidth = paypalContainer.offsetWidth;
+
+		// PayPal buttons have max-width: 750px inside the iframe.
+		// Calculate the left margin to center a 750px button container.
+		const leftMargin = Math.max( 0, ( containerWidth - 750 ) / 2 );
+		paypalContainer.style.marginLeft = leftMargin + 'px';
 	}
 
 	// Re-render when cart is updated and the html is rerendered on the Cart page.
