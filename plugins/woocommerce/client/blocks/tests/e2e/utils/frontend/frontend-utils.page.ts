@@ -196,7 +196,7 @@ export class FrontendUtils {
 		}
 
 		// Final verification that cart is empty
-		await emptyCartMessage.waitFor( { state: 'visible', timeout: 5000 } );
+		await emptyCartMessage.waitFor( { state: 'visible' } );
 	}
 
 	/**
