@@ -686,8 +686,7 @@ class WC_Form_Handler {
 
 			// Check if cart item data is provided in the URL (for when removed_cart_contents is not in session).
 			if ( ! empty( $_GET['undo_data'] ) ) {
-				$undo_data = wp_unslash( $_GET['undo_data'] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-				$undo_data = json_decode( base64_decode( $undo_data ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+				$undo_data = self::get_sanitized_cart_item_data( wp_unslash( $_GET['undo_data'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			}
 
 			WC()->cart->restore_cart_item( $cart_item_key, $undo_data );
@@ -1188,6 +1187,75 @@ class WC_Form_Handler {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Get sanitized cart item data.
+	 *
+	 * @param string $input_data Input data as base64 encoded JSON.
+	 * @return array|null
+	 */
+	private static function get_sanitized_cart_item_data( $input_data ) {
+		$cart_item_data = json_decode( base64_decode( $input_data ), true ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
+
+		if ( ! is_array( $cart_item_data ) ) {
+			$cart_item_data = null;
+		} else {
+			$cart_item_data = array_intersect_key(
+				$cart_item_data,
+				array_flip(
+					array(
+						'key',
+						'product_id',
+						'variation_id',
+						'quantity',
+						'variation',
+						'data_hash',
+					)
+				)
+			);
+
+			if ( isset( $cart_item_data['key'] ) ) {
+				if ( ! preg_match( '/^[a-f0-9]{32}$/', $cart_item_data['key'] ) ) {
+					unset( $cart_item_data['key'] );
+				} else {
+					$cart_item_data['key'] = sanitize_text_field( $cart_item_data['key'] );
+				}
+			}
+			if ( isset( $cart_item_data['product_id'] ) ) {
+				$cart_item_data['product_id'] = absint( $cart_item_data['product_id'] );
+			}
+			if ( isset( $cart_item_data['variation_id'] ) ) {
+				$cart_item_data['variation_id'] = absint( $cart_item_data['variation_id'] );
+			}
+			if ( isset( $cart_item_data['quantity'] ) ) {
+				$cart_item_data['quantity'] = absint( $cart_item_data['quantity'] );
+			}
+			if ( isset( $cart_item_data['variation'] ) && is_array( $cart_item_data['variation'] ) ) {
+				$sanitized_variation = array();
+				foreach ( $cart_item_data['variation'] as $key => $value ) {
+					$sanitized_key = sanitize_title( $key );
+					if ( strpos( $sanitized_key, 'attribute_' ) === 0 && is_string( $value ) ) {
+						$sanitized_value = sanitize_text_field( $value );
+						if ( ! empty( $sanitized_value ) || '0' === $sanitized_value ) {
+							$sanitized_variation[ $sanitized_key ] = $sanitized_value;
+						}
+					}
+				}
+				$cart_item_data['variation'] = $sanitized_variation;
+			} else {
+				$cart_item_data['variation'] = array();
+			}
+			if ( isset( $cart_item_data['data_hash'] ) ) {
+				if ( ! preg_match( '/^[a-f0-9]{32}$/', $cart_item_data['data_hash'] ) ) {
+					unset( $cart_item_data['data_hash'] );
+				} else {
+					$cart_item_data['data_hash'] = sanitize_text_field( $cart_item_data['data_hash'] );
+				}
+			}
+		}
+
+		return $cart_item_data;
 	}
 }
 
