@@ -1251,7 +1251,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$emails[] = wp_get_current_user()->user_email;
 		}
 		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
-		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email( $emails, true );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 

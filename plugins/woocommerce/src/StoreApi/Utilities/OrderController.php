@@ -583,7 +583,7 @@ class OrderController {
 		} else {
 			// Otherwise we check if the email doesn't belong to an existing user.
 			// This will get us any user ids for the given billing email.
-			$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email( array( $order->get_billing_email() ), true );
+			$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $order->get_billing_email() ) );
 
 			// Convert all found user ids to a list of email addresses.
 			$user_emails = array_map( array( $this, 'get_email_from_user_id' ), $user_ids );

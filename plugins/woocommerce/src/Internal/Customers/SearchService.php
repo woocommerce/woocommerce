@@ -12,18 +12,17 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 final class SearchService {
 	/**
-	 * Searches users having the billing email as specified and returns their id.
+	 * Searches users having the billing email (when applicable lookup orders as well) as specified and returns their id.
 	 *
-	 * @param string[] $emails      Emails to search for.
-	 * @param bool     $have_orders Lookup existing orders in HPOS tables as pre-selection for users search.
+	 * @param string[] $emails Emails to search for.
 	 *
 	 * @return int[]
 	 */
-	public function find_user_ids_by_billing_email( array $emails, bool $have_orders = false ): array {
+	public function find_user_ids_by_billing_email_for_coupons_usage_lookup( array $emails ): array {
 		$emails = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
 
 		$include_user_ids = array();
-		if ( $have_orders && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			global $wpdb;
 
 			// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
