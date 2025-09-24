@@ -276,6 +276,8 @@ class WC_Data_Store_WP {
 
 		$skipped_values = array( '', array(), null );
 		$wp_query_args  = array(
+			'orderby'    => 'id',
+			'order'      => 'desc',
 			'errors'     => array(),
 			'meta_query' => array(), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		);
