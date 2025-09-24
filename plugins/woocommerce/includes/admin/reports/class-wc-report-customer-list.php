@@ -263,17 +263,28 @@ class WC_Report_Customer_List extends WP_List_Table {
 
 		add_action( 'pre_user_query', array( $this, 'order_by_last_name' ) );
 
-		$privileged_users = new WP_User_Query(
+		/**
+		 * Get users.
+		 */
+		$admin_users = new WP_User_Query(
 			array(
-				'fields'   => 'ID',
-				'role__in' => array( 'administrator', 'shop_manager' ),
-			),
+				'role'   => 'administrator',
+				'fields' => 'ID',
+			)
 		);
-		$query            = new WP_User_Query(
+
+		$manager_users = new WP_User_Query(
+			array(
+				'role'   => 'shop_manager',
+				'fields' => 'ID',
+			)
+		);
+
+		$query = new WP_User_Query(
 			apply_filters(
 				'woocommerce_admin_report_customer_list_user_query_args',
 				array(
-					'exclude' => $privileged_users->get_results(),
+					'exclude' => array_merge( $admin_users->get_results(), $manager_users->get_results() ),
 					'number'  => $per_page,
 					'offset'  => ( $current_page - 1 ) * $per_page,
 				)
