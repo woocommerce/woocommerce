@@ -611,6 +611,7 @@ class WC_Gateway_Paypal_Request {
 	 * Fetch the PayPal client-id from the Transact platform.
 	 *
 	 * @return string|null The PayPal client-id, or null if the request fails.
+	 * @throws Exception If the request fails.
 	 */
 	public function fetch_paypal_client_id() {
 		try {
