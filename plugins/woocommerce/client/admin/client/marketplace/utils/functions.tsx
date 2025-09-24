@@ -89,9 +89,16 @@ async function fetchJsonWithCache(
 		} );
 	}
 
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+	const headers = {
+		'X-VIP-Go-Segmentation': wccomSettings.isConnected
+			? 'connected'
+			: 'no-connection',
+	};
+
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
-		fetch( url, { signal: abortSignal } )
+		fetch( url, { signal: abortSignal, headers } )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
 					throw new Error( response.statusText );
