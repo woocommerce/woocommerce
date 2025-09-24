@@ -954,12 +954,12 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
 		try {
-			$source = $this->validate_onboarding_source( $source );
-
 			// Call the WooPayments API to initialize the test account.
 			$response = $this->proxy->call_static(
 				Utils::class,
@@ -1093,12 +1093,12 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
 		try {
-			$source = $this->validate_onboarding_source( $source );
-
 			// Call the WooPayments API to get the KYC session.
 			$response = $this->proxy->call_static(
 				Utils::class,
@@ -1206,12 +1206,12 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
 		try {
-			$source = $this->validate_onboarding_source( $source );
-
 			// Call the WooPayments API to finalize the KYC session.
 			$response = $this->proxy->call_static(
 				Utils::class,
@@ -1366,13 +1366,12 @@ class WooPaymentsService {
 		WC()->payment_gateways();
 
 		$event_props = array();
+		$source      = $this->validate_onboarding_source( $source );
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
 		try {
-			$source = $this->validate_onboarding_source( $source );
-
 			// Before resetting the onboarding, record its details for tracking purposes.
 			$event_props = array(
 				'has_account'  => $this->has_account(),
@@ -1473,6 +1472,7 @@ class WooPaymentsService {
 		);
 
 		$event_props = array();
+		$source      = $this->validate_onboarding_source( $source );
 
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
@@ -1480,8 +1480,6 @@ class WooPaymentsService {
 		try {
 			$has_test_account    = $this->has_test_account();
 			$has_sandbox_account = $this->has_sandbox_account();
-
-			$source = $this->validate_onboarding_source( $source );
 
 			$event_props = array(
 				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
