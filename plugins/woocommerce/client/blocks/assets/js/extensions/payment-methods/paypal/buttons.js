@@ -50,7 +50,7 @@ const PayPalButtonsContainer = ( {
 		'data-page-type': pageType || '',
 	};
 
-	const createOrder = async () => {
+	const createOrder = async ( data ) => {
 		let responseData;
 		try {
 			// If we're inside the product page, we need to empty the cart,
@@ -123,6 +123,7 @@ const PayPalButtonsContainer = ( {
 				},
 				data: {
 					order_id: responseData.order_id,
+					payment_source: data.paymentSource || '',
 				},
 			} );
 
