@@ -70,6 +70,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	protected int $current_time;
 
+	private const TEST_EPOCH = 1234567890;
+
 	/**
 	 * Set up test.
 	 */
@@ -79,7 +81,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->current_time = 1234567890;
+		$this->current_time = self::TEST_EPOCH;
 
 		$this->mock_providers = $this->getMockBuilder( PaymentsProviders::class )
 									->disableOriginalConstructor()
@@ -906,7 +908,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	public function provider_get_onboarding_details_steps(): array {
 		// Can't use the $this->current_time because providers are run before setUp.
 		// Use the same value as in setUp().
-		$current_time = 1234567890;
+		$current_time = self::TEST_EPOCH;
 
 		$default_recommended_pms = array(
 			array(
