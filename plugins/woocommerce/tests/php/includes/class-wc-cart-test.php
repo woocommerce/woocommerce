@@ -896,7 +896,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Reload cart from session again - this should NOT trigger another removal notice.
 		$cart_session->get_cart_from_session();
 
-		// CRITICAL TEST: Verify no new notices are added (the bug would cause repeated notices).
+		// Verify no new notices are added (the bug would cause repeated notices).
 		$notices_after_reload = wc_get_notices();
 		foreach ( $notices_after_reload as $type => $type_notices ) {
 			foreach ( $type_notices as $notice ) {
@@ -933,7 +933,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->session->set( 'wc_notices', null );
 
 		// Create a simple product.
-		$product = WC_Helper_Product::create_simple_product();
+		$product    = WC_Helper_Product::create_simple_product();
 		$product_id = $product->get_id();
 
 		// Add the product to the cart.
@@ -974,7 +974,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$found_removal_notice = false;
 		foreach ( $notices as $type => $type_notices ) {
 			foreach ( $type_notices as $notice ) {
-				// Handle both string and array notice formats
+				// Handle both string and array notice formats.
 				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
 				if ( strpos( $notice_text, 'has been removed from your cart because it can no longer be purchased' ) !== false ) {
 					$found_removal_notice = true;
@@ -987,7 +987,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Verify the cart is empty.
 		$this->assertCount( 0, WC()->cart->get_cart_contents(), 'Cart should be empty after unpurchasable product removal' );
 
-		// CRITICAL TEST: Verify the persistent cart is also updated.
+		// Verify the persistent cart is also updated.
 		$saved_cart_meta_after = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
 		if ( is_array( $saved_cart_meta_after ) && isset( $saved_cart_meta_after['cart'] ) ) {
 			$this->assertArrayNotHasKey( $cart_item_key, $saved_cart_meta_after['cart'], 'Persistent cart should not contain the removed product' );
@@ -1000,11 +1000,11 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Reload cart from session again - this should NOT trigger another removal notice.
 		$cart_session->get_cart_from_session();
 
-		// CRITICAL TEST: Verify no new notices are added.
+		// Verify no new notices are added.
 		$notices_after_reload = wc_get_notices();
 		foreach ( $notices_after_reload as $type => $type_notices ) {
 			foreach ( $type_notices as $notice ) {
-				// Handle both string and array notice formats
+				// Handle both string and array notice formats.
 				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
 				$this->assertStringNotContainsString(
 					'has been removed from your cart because it can no longer be purchased',
