@@ -40,7 +40,6 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 		$this->original_hpos_status = OrderUtil::custom_orders_table_usage_is_enabled();
 		if ( ! $this->original_hpos_status ) {
 			$this->setup_cot();
-			$this->toggle_cot_feature_and_usage( true );
 		}
 	}
 
@@ -83,6 +82,8 @@ class SearchServiceTest extends \WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_find_user_ids_by_billing_email_with_have_orders_flag(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
 		$customer1 = $this->create_customer( 'customer1', '', 'customer1@example.com' );
 		$customer2 = $this->create_customer( 'customer2', '', 'customer2@example.com' );
 		$order     = $this->create_order_for( $customer1 );
