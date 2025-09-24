@@ -1035,6 +1035,107 @@ describe( 'Address Suggestions Component', () => {
 			);
 		} );
 
+		test( 'should clear existing field values when not present in selected address data', async () => {
+			// Create address_2 field since it's not in the initial setup
+			const billingAddress2 = document.createElement( 'input' );
+			billingAddress2.id = 'billing_address_2';
+			billingAddress2.type = 'text';
+			billingAddress2.value = 'Apt 101';
+			document.querySelector( 'form' ).appendChild( billingAddress2 );
+
+			// Pre-populate some fields
+			document.getElementById( 'billing_city' ).value = 'Old City';
+			document.getElementById( 'billing_postcode' ).value = '99999';
+			document.getElementById( 'billing_state' ).value = 'TX';
+
+			// Mock provider to return data with some fields missing
+			mockProvider.select.mockResolvedValue( {
+				address_1: '456 Oak Avenue',
+				city: 'New City',
+				country: 'US',
+				// Missing address_2, postcode, and state
+			} );
+
+			billingAddressInput.value = '456';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+			firstSuggestion.click();
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			// Check that provided fields are populated
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'456 Oak Avenue'
+			);
+			expect( document.getElementById( 'billing_city' ).value ).toBe(
+				'New City'
+			);
+			expect( document.getElementById( 'billing_country' ).value ).toBe(
+				'US'
+			);
+
+			// Check that missing fields are cleared
+			expect( document.getElementById( 'billing_address_2' ).value ).toBe(
+				''
+			);
+			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
+				''
+			);
+			expect( document.getElementById( 'billing_state' ).value ).toBe(
+				''
+			);
+		} );
+
+		test( 'should only clear fields that exist and have values', async () => {
+			// Pre-populate only some fields
+			document.getElementById( 'billing_city' ).value = 'Existing City';
+			document.getElementById( 'billing_postcode' ).value = '12345';
+
+			// Mock provider to return partial data
+			mockProvider.select.mockResolvedValue( {
+				address_1: '789 Pine Street',
+				state: 'CA',
+				country: 'US',
+				// Missing city and postcode
+			} );
+
+			billingAddressInput.value = '789';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const firstSuggestion = document.querySelector(
+				'#address_suggestions_billing .suggestions-list li'
+			);
+			firstSuggestion.click();
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			// Check that provided fields are populated
+			expect( document.getElementById( 'billing_address_1' ).value ).toBe(
+				'789 Pine Street'
+			);
+			expect( document.getElementById( 'billing_state' ).value ).toBe(
+				'CA'
+			);
+			expect( document.getElementById( 'billing_country' ).value ).toBe(
+				'US'
+			);
+
+			// Check that city and postcode are cleared since they had values but weren't in the response
+			expect( document.getElementById( 'billing_city' ).value ).toBe(
+				''
+			);
+			expect( document.getElementById( 'billing_postcode' ).value ).toBe(
+				''
+			);
+		} );
+
 		test( 'should handle provider selection errors gracefully', async () => {
 			mockProvider.select.mockRejectedValue(
 				new Error( 'Selection failed' )
