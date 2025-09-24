@@ -1753,7 +1753,8 @@ class WooPaymentsService {
 	 * @return void
 	 */
 	private function set_onboarding_lock(): void {
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, $this->proxy->call_function( 'time' ) );
+		$now = $this->proxy->call_function( 'time' );
+		$this->proxy->call_function( 'update_option', $now, false );
 	}
 
 	/**
@@ -1763,7 +1764,7 @@ class WooPaymentsService {
 	 */
 	private function clear_onboarding_lock(): void {
 		// We update rather than delete the option for performance reasons.
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 0, false );
 	}
 
 	/**
