@@ -1754,7 +1754,7 @@ class WooPaymentsService {
 	 */
 	private function set_onboarding_lock(): void {
 		$now = $this->proxy->call_function( 'time' );
-		$this->proxy->call_function( 'update_option', $now, false );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, $now, false );
 	}
 
 	/**
