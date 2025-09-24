@@ -10,16 +10,16 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * PayPalButtonsContainer component.
  *
- * @param {Object} props
- * @param {string} props.clientId
- * @param {string} [props.components]
- * @param {string} [props.disableFunding]
- * @param {string} [props.enableFunding]
- * @param {string} [props.currency]
- * @param {string} [props.intent]
- * @param {string} [props.merchantId]
- * @param {string} [props.partnerAttributionId]
- * @param {string} [props.pageType]
+ * @param {Object}  props
+ * @param {string}  props.clientId
+ * @param {string}  [props.components]
+ * @param {string}  [props.disableFunding]
+ * @param {string}  [props.enableFunding]
+ * @param {string}  [props.currency]
+ * @param {string}  [props.intent]
+ * @param {string}  [props.merchantId]
+ * @param {string}  [props.partnerAttributionId]
+ * @param {string}  [props.pageType]
  * @param {boolean} [props.isProductPage]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
