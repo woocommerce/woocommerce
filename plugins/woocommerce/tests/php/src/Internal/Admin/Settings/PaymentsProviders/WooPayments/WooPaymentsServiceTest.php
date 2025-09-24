@@ -178,6 +178,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->sut->init( $this->mock_providers, $this->mockable_proxy );
 	}
 
+	public function tearDown(): void {
+		// Reset the shared mockable proxy so no mocks leak between tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		parent::tearDown();
+	}
+
 	/**
 	 * Test get onboarding details when the extension is NOT active.
 	 */

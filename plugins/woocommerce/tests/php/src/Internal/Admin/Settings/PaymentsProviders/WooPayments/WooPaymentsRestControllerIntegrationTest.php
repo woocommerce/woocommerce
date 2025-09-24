@@ -264,6 +264,11 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
 		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
+
+		// Reset the shared mockable proxy so no mocks leak between tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		parent::tearDown();
 	}
 
 	/**
