@@ -176,6 +176,7 @@ const PayPalButtonsContainer = ( {
 	return (
 		<PayPalScriptProvider options={ options }>
 			<PayPalButtons
+				appSwitchWhenAvailable={ true }
 				createOrder={ createOrder }
 				onApprove={ onApprove }
 				onCancel={ onCancel }

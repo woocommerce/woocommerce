@@ -12,6 +12,7 @@ jQuery(function ($) {
 		applyStyles();
 
 		const buttons = paypal.Buttons( {
+			appSwitchWhenAvailable: true,
 			async createOrder( data ) {
 				// If we're inside the product page, we need to empty the cart,
 				// and add the current product to the cart.
@@ -84,7 +85,7 @@ jQuery(function ($) {
 							payment_source: data.paymentSource || '',
 						},
 					} );
-		
+
 					orderId = paypalResponseData.order_id;
 					orderReceivedUrl = paypalResponseData.return_url;
 
@@ -114,7 +115,7 @@ jQuery(function ($) {
 							order_id: orderId,
 						},
 					} );
-		
+
 					orderReceivedUrl = '';
 				} catch ( error ) {
 					// eslint-disable-next-line no-console
@@ -122,7 +123,7 @@ jQuery(function ($) {
 				}
 			},
 
-			onError: function ( error ) {				
+			onError: function ( error ) {
 				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
@@ -143,7 +144,6 @@ jQuery(function ($) {
 			},
 
 		});
-
 
 		buttons.render( container ).catch( function ( err ) {
 			// eslint-disable-next-line no-console

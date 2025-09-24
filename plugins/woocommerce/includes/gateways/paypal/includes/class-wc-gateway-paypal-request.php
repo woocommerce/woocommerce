@@ -420,6 +420,9 @@ class WC_Gateway_Paypal_Request {
 							'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
 							'callback_url'    => get_site_url( null, '/wp-json/wc/v3/paypal-standard/update-shipping' ),
 						),
+						'app_switch_preference'        => array(
+							'launch_paypal_app' => true,
+						),
 					),
 				),
 			),
