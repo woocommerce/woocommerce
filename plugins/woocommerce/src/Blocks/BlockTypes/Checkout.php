@@ -2,6 +2,7 @@
 declare( strict_types = 1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\Block_Scanner;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
@@ -353,8 +354,7 @@ class Checkout extends AbstractBlock {
 			return;
 		}
 
-		$post_blocks = parse_blocks( $post->post_content );
-		$title       = $this->find_local_pickup_text_in_checkout_block( $post_blocks );
+		$title = $this->find_local_pickup_text_in_checkout_block( $post->post_content );
 
 		// Set the title to be an empty string if it isn't a string. This will make it fall back to the default value of "Pickup".
 		if ( ! is_string( $title ) ) {
@@ -366,28 +366,24 @@ class Checkout extends AbstractBlock {
 	}
 
 	/**
-	 * Recurse through the blocks to find the shipping methods block, then get the value of the localPickupText attribute from it.
+	 * Find the shipping methods block, then get the value of the localPickupText attribute from it.
 	 *
-	 * @param array $blocks The block(s) to search for the local pickup text.
-	 * @return null|string  The local pickup text if found, otherwise void.
+	 * @param string $post_content The post content to search through.
+	 * @return null|string The local pickup text if found, otherwise null.
 	 */
-	private function find_local_pickup_text_in_checkout_block( $blocks ) {
-		if ( ! is_array( $blocks ) ) {
-			return null;
-		}
-		foreach ( $blocks as $block ) {
-			if ( ! empty( $block['blockName'] ) && 'woocommerce/checkout-shipping-method-block' === $block['blockName'] ) {
-				if ( ! empty( $block['attrs']['localPickupText'] ) ) {
-					return $block['attrs']['localPickupText'];
-				}
-			}
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$answer = $this->find_local_pickup_text_in_checkout_block( $block['innerBlocks'] );
-				if ( $answer ) {
-					return $answer;
+	private function find_local_pickup_text_in_checkout_block( $post_content ) {
+		$scanner = Block_Scanner::create( $post_content );
+
+		while ( $scanner->next_delimiter() ) {
+			if ( $scanner->opens_block( 'woocommerce/checkout-shipping-method-block' ) ) {
+				$attributes = $scanner->allocate_and_return_parsed_attributes();
+				if ( isset( $attributes['localPickupText'] ) ) {
+					return $attributes['localPickupText'];
 				}
 			}
 		}
+
+		return null;
 	}
 
 	/**

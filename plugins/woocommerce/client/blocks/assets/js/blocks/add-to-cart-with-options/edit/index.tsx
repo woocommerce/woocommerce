@@ -4,15 +4,14 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-
 import { Disabled } from '@wordpress/components';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
-import { useProductDataContext } from '@woocommerce/shared-context';
 import {
 	BlockControls,
 	InspectorControls,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import { useProduct } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -23,9 +22,10 @@ import { useProductTypeSelector } from '../../../shared/stores/product-type-temp
 import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 
-const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
-	const { product } = useProductDataContext();
-
+const AddToCartOptionsEdit = (
+	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
+) => {
+	const { product } = useProduct( props.context?.postId );
 	const blockProps = useBlockProps();
 	const blockClientId = blockProps?.id;
 
@@ -43,7 +43,7 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 	}, [ blockClientId, registerListener, unregisterListener ] );
 
 	const productType =
-		product.id === 0 ? currentProductType?.slug : product.type;
+		product?.id === undefined ? currentProductType?.slug : product?.type;
 	const isCoreProductType =
 		productType &&
 		[ 'simple', 'variable', 'external', 'grouped' ].includes( productType );
@@ -69,7 +69,8 @@ const AddToCartOptionsEdit = ( props: BlockEditProps< Attributes > ) => {
 						<button
 							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
 						>
-							{ __( 'Add to cart', 'woocommerce' ) }
+							{ ( product && product.add_to_cart?.single_text ) ||
+								__( 'Add to cart', 'woocommerce' ) }
 						</button>
 					</Disabled>
 				</div>

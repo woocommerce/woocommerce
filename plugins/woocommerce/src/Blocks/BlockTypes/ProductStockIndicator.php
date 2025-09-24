@@ -130,10 +130,12 @@ class ProductStockIndicator extends AbstractBlock {
 			$variations                = $product_to_render->get_available_variations( 'objects' );
 			$formatted_variations_data = array();
 			foreach ( $variations as $variation ) {
-				$variation_availability                            = $variation->get_availability();
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'availability' => $variation_availability['availability'],
-				);
+				$variation_availability = $variation->get_availability();
+				if ( is_string( $variation_availability['availability'] ) && ! empty( $variation_availability['availability'] ) ) {
+					$formatted_variations_data[ $variation->get_id() ] = array(
+						'availability' => $variation_availability['availability'],
+					);
+				}
 			}
 
 			wp_interactivity_config(

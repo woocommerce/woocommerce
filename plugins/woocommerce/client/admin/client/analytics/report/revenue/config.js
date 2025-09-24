@@ -4,6 +4,11 @@
 import { __, _x } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
 
+/**
+ * Internal dependencies
+ */
+import { getAdminSetting } from '~/utils/admin-settings';
+
 const REVENUE_REPORT_CHARTS_FILTER = 'woocommerce_admin_revenue_report_charts';
 const REVENUE_REPORT_FILTERS_FILTER =
 	'woocommerce_admin_revenue_report_filters';
@@ -14,6 +19,7 @@ const REVENUE_REPORT_ADVANCED_FILTERS_FILTER =
  * @typedef {import('../index.js').chart} chart
  */
 
+const usesNewFullRefundData = getAdminSetting( 'usesNewFullRefundData', true );
 /**
  * Revenue Report charts filter.
  *
@@ -36,10 +42,12 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		orderby: 'refunds',
 		type: 'currency',
 		isReverseTrend: true,
-		labelTooltipText: __(
-			'Returns include returned shipping and tax amounts.',
-			'woocommerce'
-		),
+		labelTooltipText: usesNewFullRefundData
+			? __(
+					'Returns include returned shipping and tax amounts.',
+					'woocommerce'
+			  )
+			: null,
 	},
 	{
 		key: 'coupons',
@@ -55,6 +63,12 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		orderby: 'net_revenue',
 		type: 'currency',
 		isReverseTrend: false,
+		labelTooltipText: usesNewFullRefundData
+			? null
+			: __(
+					'Full refunds are not deducted from tax or net sales totals',
+					'woocommerce'
+			  ),
 	},
 	{
 		key: 'taxes',
@@ -63,6 +77,12 @@ export const charts = applyFilters( REVENUE_REPORT_CHARTS_FILTER, [
 		orderby: 'taxes',
 		type: 'currency',
 		isReverseTrend: false,
+		labelTooltipText: usesNewFullRefundData
+			? null
+			: __(
+					'Full refunds are not deducted from tax or net sales totals',
+					'woocommerce'
+			  ),
 	},
 	{
 		key: 'shipping',

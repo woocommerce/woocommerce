@@ -210,7 +210,7 @@
 		"ignore-loader": "0.1.x",
 		"jest": "29.5.x",
 		"jest-circus": "29.5.x",
-		"jest-fixed-jsdom": "0.0.9",
+		"jest-fixed-jsdom": "^0.0.10",
 		"json2md": "1.12.0",
 		"knip": "^5.60.2",
 		"lint-staged": "13.2.0",

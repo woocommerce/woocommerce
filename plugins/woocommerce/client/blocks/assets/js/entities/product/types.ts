@@ -40,10 +40,14 @@ interface ProductEntityResponseBase {
 	/**
 	 * Experimental price fields for grouped products
 	 */
-	// eslint-disable-next-line @typescript-eslint/naming-convention
 	min_price?: string;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
 	max_price?: string;
+	add_to_cart?: {
+		url: string;
+		description: string;
+		text: string;
+		single_text: string;
+	};
 }
 
 /**
@@ -52,10 +56,6 @@ interface ProductEntityResponseBase {
 export interface GroupedProductResponse extends ProductEntityResponseBase {
 	type: 'grouped';
 	grouped_products: number[];
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	min_price: string;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	max_price: string;
 }
 
 /**
@@ -77,6 +77,7 @@ export interface SimpleProductResponse extends ProductEntityResponseBase {
  */
 export interface ExternalProductResponse extends ProductEntityResponseBase {
 	type: 'external';
+	button_text: string;
 }
 
 export type ProductEntityResponse =

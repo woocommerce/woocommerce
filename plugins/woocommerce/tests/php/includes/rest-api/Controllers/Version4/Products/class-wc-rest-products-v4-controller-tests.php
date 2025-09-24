@@ -208,6 +208,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 			'post_password',
 			'min_price',
 			'max_price',
+			'add_to_cart',
 		);
 
 		if ( $with_cogs_enabled ) {

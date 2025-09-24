@@ -469,6 +469,8 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	private function get_test_fulfillment_data( array $overrides = array() ): array {
+		$items = $this->test_order->get_items();
+
 		return array_merge(
 			array(
 				'entity_id'   => (string) $this->test_order->get_id(),
@@ -490,7 +492,7 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 						'key'   => '_items',
 						'value' => array(
 							array(
-								'item_id' => reset( $this->test_order->get_items() )->get_id(),
+								'item_id' => reset( $items )->get_id(),
 								'qty'     => 1,
 							),
 						),

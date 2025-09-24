@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Cart and Checkout blocks layout issues when parent element has flexbox properties

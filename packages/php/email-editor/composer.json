@@ -5,7 +5,7 @@
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
 	"minimum-stability": "dev",
-	"version": "1.4.2",
+	"version": "1.6.0",
 	"autoload": {
 		"classmap": [
 			"src/"
@@ -18,7 +18,7 @@
 	},
 	"require": {
 		"php": ">=7.4",
-		"pelago/emogrifier": "^8.0"
+		"pelago/emogrifier": "7.3.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0",

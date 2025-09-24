@@ -89,6 +89,10 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 								position
 								inventoryItem {
 									tracked
+									unitCost {
+										amount
+										currencyCode
+									}
 									measurement {
 										weight {
 											value

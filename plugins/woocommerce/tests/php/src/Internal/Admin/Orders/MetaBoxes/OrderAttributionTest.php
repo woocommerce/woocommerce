@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use WC_Helper_Order;
 use WP_UnitTestCase;
 
+require_once WC_ABSPATH . '/includes/admin/marketplace-suggestions/class-wc-marketplace-suggestions.php';
+
 /**
  * Tests for the OrderAttribution class.
  */
@@ -29,6 +31,17 @@ class OrderAttributionTest extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 		$this->sut = new OrderAttribution();
+	}
+
+	/**
+	 * Tear down the test fixture.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		wp_set_current_user( 0 );
+		parent::tearDown();
 	}
 
 	/**
@@ -138,5 +151,47 @@ class OrderAttributionTest extends WP_UnitTestCase {
 		$this->sut->output( $order );
 		ob_get_contents();
 		ob_end_clean();
+	}
+
+	/**
+	 * Test that marketplace suggestions banner is shown when suggestions are allowed.
+	 *
+	 * @return void
+	 */
+	public function test_marketplace_suggestions_banner_shown_when_allowed() {
+		$order = WC_Helper_Order::create_order();
+
+		$admin_user = $this->factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+		wp_set_current_user( $admin_user );
+		update_option( 'woocommerce_show_marketplace_suggestions', 'yes' );
+		$this->assertTrue( \WC_Marketplace_Suggestions::allow_suggestions() );
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( '<div id="order-attribution-install-banner-slotfill"></div>', $output );
+	}
+
+	/**
+	 * Test that marketplace suggestions banner is not shown when suggestions are not allowed.
+	 *
+	 * @return void
+	 */
+	public function test_marketplace_suggestions_banner_not_shown_when_not_allowed() {
+		$order = WC_Helper_Order::create_order();
+
+		update_option( 'woocommerce_show_marketplace_suggestions', 'no' );
+		$this->assertFalse( \WC_Marketplace_Suggestions::allow_suggestions() );
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString( '<div id="order-attribution-install-banner-slotfill"></div>', $output );
 	}
 }

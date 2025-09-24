@@ -24,6 +24,27 @@ As discussed in the team conversation:
 
 ## Change Log
 
+### 2025-09-08 - Add Add to Cart Field
+
+**Summary**: Added new `add_to_cart` field to product responses providing comprehensive add-to-cart information. The field includes an object with `url`, `description`, `text`, and `single_text` properties that correspond to the product's add-to-cart methods. This enhancement improves frontend integration by providing all necessary add-to-cart data in a single API call, particularly beneficial for block-based implementations and external product types.
+
+**Field Structure**:
+
+```json
+{
+  "add_to_cart": {
+    "url": "string",         // Add to cart URL
+    "description": "string", // Add to cart description  
+    "text": "string",        // Add to cart text
+    "single_text": "string" // Add to cart single text
+  }
+}
+```
+
+**PR**: [#60715](https://github.com/woocommerce/woocommerce/pull/60715)  
+
+**Breaking Changes**: None
+
 ### 2025-09-02 - Move Experimental Price Fields from v3 to v4
 
 **Summary**: Moved experimental `min_price` and `max_price` fields from v3/products endpoint to v4/products endpoint. These fields were previously named `__experimental_min_price` and `__experimental_max_price` in v3 and are now available as `min_price` and `max_price` in v4. The fields are particularly useful for grouped products to display price ranges.

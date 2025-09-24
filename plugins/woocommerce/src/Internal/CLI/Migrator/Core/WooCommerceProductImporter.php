@@ -15,6 +15,7 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Error;
 use Exception;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -74,6 +75,13 @@ class WooCommerceProductImporter {
 	);
 
 	/**
+	 * Mapping of original attribute names to taxonomy names for current product.
+	 *
+	 * @var array
+	 */
+	private array $current_attribute_mapping = array();
+
+	/**
 	 * Constructor - parameterless to support WooCommerce DI container.
 	 */
 	public function __construct() {
@@ -99,6 +107,8 @@ class WooCommerceProductImporter {
 	public function import_product( array $product_data, array $source_data = array() ): array {
 		$start_time   = microtime( true );
 		$product_name = $product_data['name'] ?? 'Unknown Product';
+
+		$this->current_attribute_mapping = array();
 
 		try {
 			wc_get_logger()->info( "Starting import for product: {$product_name}", array( 'source' => 'wc-migrator' ) );
@@ -508,6 +518,15 @@ class WooCommerceProductImporter {
 		if ( ! empty( $product_data['stock_status'] ) ) {
 			$product->set_stock_status( $product_data['stock_status'] );
 		}
+
+		if ( array_key_exists( 'cost_of_goods', $product_data ) ) {
+			$cogs_is_enabled = FeaturesUtil::feature_is_enabled( 'cost_of_goods_sold' );
+			if ( $cogs_is_enabled ) {
+				$product->set_cogs_value( (float) $product_data['cost_of_goods'] );
+			} else {
+				$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
+			}
+		}
 	}
 
 	/**
@@ -565,10 +584,11 @@ class WooCommerceProductImporter {
 	 * Sets up product attributes for variable products with global taxonomy creation.
 	 *
 	 * @param WC_Product_Variable $product The variable product object.
-	 * @param array               $attributes_data Standardized attribute data from mapper.
+	 * @param array               $attributes_data              Standardized attribute data from mapper.
 	 */
 	private function setup_attributes( WC_Product_Variable $product, array $attributes_data ): void {
-		$woo_attributes = array();
+		$woo_attributes                  = array();
+		$this->current_attribute_mapping = array();
 
 		foreach ( $attributes_data as $attribute_info ) {
 			$attr_name    = $attribute_info['name'] ?? null;
@@ -595,6 +615,37 @@ class WooCommerceProductImporter {
 					wc_get_logger()->warning( "Failed to create attribute '{$attr_name}': " . $attribute_id->get_error_message(), array( 'source' => 'wc-migrator' ) );
 					continue;
 				}
+
+				register_taxonomy(
+					$taxonomy_name,
+					/**
+					 * Filters the object types associated with the attribute taxonomy.
+					 *
+					 * @since 10.2.0
+					 * @param array $object_types Array of object types.
+					 */
+					apply_filters( 'woocommerce_taxonomy_objects_' . $taxonomy_name, array( 'product' ) ),
+					/**
+					 * Filters the arguments for registering the attribute taxonomy.
+					 *
+					 * @since 10.2.0
+					 * @param array $args Array of taxonomy registration arguments.
+					 */
+					apply_filters(
+						'woocommerce_taxonomy_args_' . $taxonomy_name,
+						array(
+							'labels'       => array(
+								'name' => $attr_name,
+							),
+							'hierarchical' => false,
+							'show_ui'      => false,
+							'show_in_rest' => true,
+							'query_var'    => true,
+							'rewrite'      => false,
+							'public'       => false,
+						)
+					)
+				);
 			} else {
 				$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy_name );
 			}
@@ -626,6 +677,8 @@ class WooCommerceProductImporter {
 			$woo_attribute->set_visible( $attribute_info['is_visible'] ?? true );
 			$woo_attribute->set_variation( $attribute_info['is_variation'] ?? true );
 			$woo_attributes[] = $woo_attribute;
+
+			$this->current_attribute_mapping[ $attr_name ] = $taxonomy_name;
 		}
 
 		$product->set_attributes( $woo_attributes );
@@ -645,15 +698,18 @@ class WooCommerceProductImporter {
 		$variation_count = count( $variations_data );
 		wc_get_logger()->debug( "Syncing {$variation_count} variations for product ID {$parent_product_id}", array( 'source' => 'wc-migrator' ) );
 
-		$attribute_taxonomy_map = array();
-		$product_attributes     = $product->get_attributes();
+		$attribute_taxonomy_map = $this->current_attribute_mapping;
 
-		foreach ( $product_attributes as $taxonomy => $attribute_obj ) {
-			if ( $attribute_obj->get_variation() ) {
-				$attribute_label = wc_attribute_label( $taxonomy, $product );
-				// Store mapping with both original case and lowercase for case-insensitive lookup.
-				$attribute_taxonomy_map[ $attribute_label ]               = $taxonomy;
-				$attribute_taxonomy_map[ strtolower( $attribute_label ) ] = $taxonomy;
+		// Build fallback mapping from product attributes if current mapping is empty.
+		if ( empty( $attribute_taxonomy_map ) ) {
+			$product_attributes = $product->get_attributes();
+			foreach ( $product_attributes as $taxonomy => $attribute_obj ) {
+				if ( $attribute_obj->get_variation() ) {
+					$attribute_label = wc_attribute_label( $taxonomy, $product );
+					// Store mapping with both original case and lowercase for case-insensitive lookup.
+					$attribute_taxonomy_map[ $attribute_label ]               = $taxonomy;
+					$attribute_taxonomy_map[ strtolower( $attribute_label ) ] = $taxonomy;
+				}
 			}
 		}
 
@@ -735,9 +791,11 @@ class WooCommerceProductImporter {
 			if ( ! empty( $var_data['attributes'] ) && is_array( $var_data['attributes'] ) ) {
 				foreach ( $var_data['attributes'] as $attr_name => $attr_value ) {
 					if ( isset( $attribute_taxonomy_map[ $attr_name ] ) ) {
-						$taxonomy                             = $attribute_taxonomy_map[ $attr_name ];
-						$term_slug                            = sanitize_title( $attr_value );
-						$wc_variation_attributes[ $taxonomy ] = $term_slug;
+						$taxonomy                  = $attribute_taxonomy_map[ $attr_name ];
+						$term_slug                 = sanitize_title( $attr_value );
+						$normalized_attribute_name = wc_variation_attribute_name( $taxonomy );
+
+						$wc_variation_attributes[ $normalized_attribute_name ] = $term_slug;
 					} else {
 						wc_get_logger()->warning( "Attribute taxonomy mapping not found for option '{$attr_name}' while processing variation {$original_variant_id}.", array( 'source' => 'wc-migrator' ) );
 					}
@@ -754,6 +812,9 @@ class WooCommerceProductImporter {
 			if ( $saved_variation_id ) {
 				$processed_variation_ids[] = $saved_variation_id;
 				$this->migration_data['variations_mapping'][ $original_variant_id ] = $saved_variation_id;
+				if ( ! empty( $var_data['cost_of_goods'] ) ) {
+					update_post_meta( $saved_variation_id, '_cogs_total_value', (float) $var_data['cost_of_goods'] );
+				}
 			} else {
 				wc_get_logger()->error( "Failed to save variation for original variant {$original_variant_id}", array( 'source' => 'wc-migrator' ) );
 			}
@@ -1169,6 +1230,16 @@ class WooCommerceProductImporter {
 			$truncated_desc = mb_substr( $final_seo_description, 0, 160 );
 			update_post_meta( $product_id, '_yoast_wpseo_metadesc', $truncated_desc );
 		}
+	}
+
+	/**
+	 * Set COGS value directly using meta data.
+	 *
+	 * @param WC_Product $product The product object.
+	 * @param float      $cogs_value The COGS value to set.
+	 */
+	private function set_cogs_value_direct( WC_Product $product, float $cogs_value ): void {
+		$product->update_meta_data( '_cogs_total_value', $cogs_value );
 	}
 
 	/**

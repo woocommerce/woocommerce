@@ -10,41 +10,21 @@ exports[`ProductPrice should apply the format if one is provided 1`] = `
   >
     Previous price:
   </span>
-  <span
-    className="wc-block-number-format-container"
+  <del
+    className="wc-block-components-product-price__regular"
   >
-    <del
-      className="wc-block-components-product-price__regular"
-      style={
-        {
-          "direction": "ltr",
-          "unicodeBidi": "bidi-override",
-        }
-      }
-    >
-      £1.00
-    </del>
-  </span>
+    £1.00
+  </del>
   <span
     className="screen-reader-text"
   >
     Discounted price:
   </span>
-  <span
-    className="wc-block-number-format-container"
+  <ins
+    className="wc-block-components-product-price__value is-discounted"
   >
-    <ins
-      className="wc-block-components-product-price__value is-discounted"
-      style={
-        {
-          "direction": "ltr",
-          "unicodeBidi": "bidi-override",
-        }
-      }
-    >
-      £0.50
-    </ins>
-  </span>
+    £0.50
+  </ins>
    Test format
 </span>
 `;
@@ -58,40 +38,20 @@ exports[`ProductPrice should use default price if no format is provided 1`] = `
   >
     Previous price:
   </span>
-  <span
-    className="wc-block-number-format-container"
+  <del
+    className="wc-block-components-product-price__regular"
   >
-    <del
-      className="wc-block-components-product-price__regular"
-      style={
-        {
-          "direction": "ltr",
-          "unicodeBidi": "bidi-override",
-        }
-      }
-    >
-      £1.00
-    </del>
-  </span>
+    £1.00
+  </del>
   <span
     className="screen-reader-text"
   >
     Discounted price:
   </span>
-  <span
-    className="wc-block-number-format-container"
+  <ins
+    className="wc-block-components-product-price__value is-discounted"
   >
-    <ins
-      className="wc-block-components-product-price__value is-discounted"
-      style={
-        {
-          "direction": "ltr",
-          "unicodeBidi": "bidi-override",
-        }
-      }
-    >
-      £0.50
-    </ins>
-  </span>
+    £0.50
+  </ins>
 </span>
 `;

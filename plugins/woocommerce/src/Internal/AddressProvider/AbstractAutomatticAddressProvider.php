@@ -28,6 +28,9 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	public function __construct() {
 		add_filter( 'pre_update_option_woocommerce_address_autocomplete_enabled', array( $this, 'refresh_cache' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'load_scripts' ) );
+
+		// Powered by Google branding.
+		$this->branding_html = 'Powered by&nbsp;<img style="height: 15px; width: 45px; margin-bottom: -2px;" src="' . plugins_url( '/assets/images/address-autocomplete/google.svg', WC_PLUGIN_FILE ) . '" alt="Google logo" />';
 	}
 
 	/**

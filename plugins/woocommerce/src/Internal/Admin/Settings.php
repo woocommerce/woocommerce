@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
 
 /**
@@ -174,13 +175,7 @@ class Settings {
 			}
 		}
 
-		$user_controller = new \WP_REST_Users_Controller();
-		$request         = new \WP_REST_Request();
-		$request->set_query_params( array( 'context' => 'edit' ) );
-		$user_response     = $user_controller->get_current_item( $request );
-		$current_user_data = is_wp_error( $user_response ) ? (object) array() : $user_response->get_data();
-
-		$settings['currentUserData']      = $current_user_data;
+		$settings['currentUserData']      = WCAdminUser::get_user_data();
 		$settings['reviewsEnabled']       = get_option( 'woocommerce_enable_reviews' );
 		$settings['manageStock']          = get_option( 'woocommerce_manage_stock' );
 		$settings['commentModeration']    = get_option( 'comment_moderation' );
@@ -217,6 +212,7 @@ class Settings {
 			// We may have synced orders with a now-unregistered status.
 			// E.g. an extension that added statuses is now inactive or removed.
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
+			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
 		}
 
 		// The separator used for attributes found in Variation titles.
