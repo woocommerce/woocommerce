@@ -50,6 +50,12 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Load WooCommerce so we can access the container, install routines, etc, during uninstall.
 	require_once __DIR__ . '/includes/class-wc-install.php';
 
+	// Drop custom WordPress tables indexes. See \WC_Install::create_tables() for details.
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type';" );
+	if ( null !== $index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_type;" );
+	}
+
 	// Roles + caps.
 	WC_Install::remove_roles();
 
