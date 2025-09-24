@@ -380,6 +380,48 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get onboarding details with legacy `no` string lock value.
+	 *
+	 * In this case, the onboarding is considered unlocked.
+	 */
+	public function test_get_onboarding_details_with_no_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? 'no' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+	}
+
+	/**
+	 * Test get onboarding details with legacy `yes` string lock value.
+	 *
+	 * In this case, the onboarding is considered unlocked.
+	 */
+	public function test_get_onboarding_details_with_yes_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? 'yes' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+	}
+
+	/**
 	 * Test get onboarding details - general state.
 	 */
 	public function test_get_onboarding_details_general_state(): void {
