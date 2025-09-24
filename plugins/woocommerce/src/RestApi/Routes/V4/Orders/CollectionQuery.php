@@ -1,6 +1,6 @@
-<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+<?php
 /**
- * QueryUtils class.
+ * CollectionQuery class.
  *
  * @package WooCommerce\RestApi
  * @internal This file is for internal use only and should not be used by external code.
@@ -13,22 +13,25 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use WP_REST_Request;
+use WP_Http;
+use WP_Error;
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
 
 /**
- * QueryUtils class.
+ * CollectionQuery class.
  *
  * @internal This class is for internal use only and should not be used by external code.
  */
-class QueryUtils {
+class CollectionQuery extends AbstractCollectionQuery {
 	/**
 	 * Get query schema.
 	 *
 	 * @return array
 	 */
-	public function get_query_schema() {
+	public function get_query_schema(): array {
 		return array(
 			'num_decimals'            => array(
 				'default'           => wc_get_price_decimals(),
@@ -191,29 +194,57 @@ class QueryUtils {
 				'default'           => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			),
+			'total'                   => array(
+				'description'       => __( 'Limit result set to orders with specific total amounts. For between operators, list two values.', 'woocommerce' ),
+				'type'              => array( 'string', 'array' ),
+				'items'             => array(
+					'type' => 'string',
+				),
+				'sanitize_callback' => 'wp_parse_list',
+			),
+			'total_operator'          => array(
+				'description'       => __( 'The comparison operator to use for total filtering.', 'woocommerce' ),
+				'type'              => 'string',
+				'enum'              => self::OPERATORS,
+				'default'           => self::OPERATOR_IS,
+				'validate_callback' => function ( $param, $request, $key ) {
+					$valid = rest_validate_request_arg( $param, $request, $key );
+
+					if ( true === $valid && self::OPERATOR_BETWEEN === $param ) {
+						$total_field = wp_parse_list( $request->get_param( 'total' ) );
+
+						if ( ! is_array( $total_field ) || count( $total_field ) !== 2 ) {
+							return new WP_Error( 'rest_invalid_param', __( 'Total value must be an array with exactly 2 numbers for between operators.', 'woocommerce' ), array( 'status' => WP_Http::BAD_REQUEST ) );
+						}
+					}
+
+					return $valid;
+				},
+			),
 		);
 	}
 
 	/**
-	 * Prepare the query.
+	 * Prepares query args.
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @return array
 	 */
-	public function prepare_query( WP_REST_Request $request ): array {
-		$args                   = array();
-		$args['offset']         = $request['offset'];
-		$args['order']          = $request['order'];
-		$args['orderby']        = $request['orderby'];
-		$args['paged']          = $request['page'];
-		$args['post__in']       = $request['include'];
-		$args['post__not_in']   = $request['exclude'];
-		$args['posts_per_page'] = $request['per_page'];
-		$args['name']           = $request['slug'];
-		$args['s']              = $request['search'];
-		$args['created_via']    = $request['created_via'];
-		$args['status']         = $request['status'];
-		$args['customer']       = $request['customer'];
+	public function get_query_args( WP_REST_Request $request ): array {
+		$args = array(
+			'offset'         => $request['offset'],
+			'order'          => $request['order'],
+			'orderby'        => $request['orderby'],
+			'paged'          => $request['page'],
+			'post__in'       => $request['include'],
+			'post__not_in'   => $request['exclude'],
+			'posts_per_page' => $request['per_page'],
+			'name'           => $request['slug'],
+			's'              => $request['search'],
+			'created_via'    => $request['created_via'],
+			'status'         => $request['status'],
+			'customer'       => $request['customer'],
+		);
 
 		if ( 'date' === $args['orderby'] ) {
 			$args['orderby'] = 'date ID';
@@ -291,23 +322,58 @@ class QueryUtils {
 			}
 		}
 
+		// Total filtering.
+		if ( isset( $request['total'] ) ) {
+			// WC_Order-Query uses `total` as the key. DataStores handle the operators.
+			$total_param    = (array) $request['total']; // List of total values supports single and between.
+			$total_value    = $total_param[0] ?? 0;
+			$total_operator = '=';
+
+			// Map rest api operators to the operators `WC_Order_Query` expects. These are the ones defined in the enum.
+			switch ( $request['total_operator'] ?? self::OPERATOR_IS ) {
+				case self::OPERATOR_IS_NOT:
+					$total_operator = '!=';
+					break;
+				case self::OPERATOR_LESS_THAN:
+					$total_operator = '<';
+					break;
+				case self::OPERATOR_GREATER_THAN:
+					$total_operator = '>';
+					break;
+				case self::OPERATOR_LESS_THAN_OR_EQUAL:
+					$total_operator = '<=';
+					break;
+				case self::OPERATOR_GREATER_THAN_OR_EQUAL:
+					$total_operator = '>=';
+					break;
+				case self::OPERATOR_BETWEEN:
+					$total_operator = 'BETWEEN';
+					$total_value    = array( $total_param[0] ?? 0, $total_param[1] ?? 0 );
+					break;
+			}
+
+			$args['total'] = array(
+				'value'    => $total_value,
+				'operator' => $total_operator,
+			);
+		}
+
 		return $args;
 	}
 
 	/**
 	 * Get results of the query.
 	 *
-	 * @param array  $query_args The query arguments from prepare_query().
-	 * @param string $post_type The post type to query.
+	 * @param array           $query_args The query arguments from prepare_query().
+	 * @param WP_REST_Request $request The request object.
 	 * @return array
 	 */
-	public function get_query_results( $query_args, $post_type = 'shop_order' ): array {
+	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
 		$query   = new WC_Order_Query(
 			array_merge(
 				$query_args,
 				array(
-					'post_type' => $post_type,
-					'paginate'  => true,
+					'paginate' => true,
 				)
 			)
 		);

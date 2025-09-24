@@ -14,6 +14,8 @@ use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
 
 /**
  * Orders Controller tests for V4 REST API.
+ *
+ * @group order-query-tests
  */
 class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
@@ -91,11 +93,11 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
 
 		// Create utils instances.
-		$query_utils  = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\QueryUtils();
-		$update_utils = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
+		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\CollectionQuery();
+		$update_utils     = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
 
 		$this->endpoint = new OrdersController();
-		$this->endpoint->init( $this->order_schema, $query_utils, $update_utils );
+		$this->endpoint->init( $this->order_schema, $collection_query, $update_utils );
 
 		$this->user_id = $this->factory->user->create(
 			array(
@@ -1256,6 +1258,109 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order1->delete( true );
 		$order2->delete( true );
+	}
+
+	/**
+	 * Test total filtering with operators. Only basic tests are needed here because operators are tested in the data stores.
+	 *
+	 * @see WC_Order_Data_Store_CPT_Test
+	 * @see OrdersTableQueryTests
+	 */
+	public function test_total_filtering(): void {
+		// Create orders with different totals.
+		$order_totals_to_test = array( 100.00, 100.00, 250.50, 500.75, 1000.00 );
+		$orders               = array();
+		foreach ( $order_totals_to_test as $order_total ) {
+			$order = $this->create_test_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		// Unsupported operator should return an error.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_query_params(
+			array(
+				'total'          => 250.50,
+				'total_operator' => 'not supported',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Between operator should return an error if value is not an array.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_query_params(
+			array(
+				'total'          => 250.50,
+				'total_operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Between operator should return an error if value is not an array of 2 numbers.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_query_params(
+			array(
+				'total'          => array( 250.50 ),
+				'total_operator' => 'not supported',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Test simple equality filtering.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_query_params(
+			array(
+				'total'          => 250.50,
+				'total_operator' => 'is',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+
+		// Test greater than operator.
+		$request->set_query_params(
+			array(
+				'total'          => '200',
+				'total_operator' => 'greaterThan',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 3, $response->get_data() );
+
+		// Test between operator.
+		$request->set_query_params(
+			array(
+				'total'          => array( 200.00, 300.00 ),
+				'total_operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+
+		$request->set_query_params(
+			array(
+				'total'          => '200,300',
+				'total_operator' => 'between',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
 	}
 
 	/**
