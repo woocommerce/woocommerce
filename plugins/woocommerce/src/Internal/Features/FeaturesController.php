@@ -1622,8 +1622,8 @@ class FeaturesController {
 		}
 
 		$features                   = $this->get_feature_definitions();
-		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
-		$incompatible_features      = array_merge( $feature_compatibility_info[ FeaturePluginCompatibility::INCOMPATIBLE ], $feature_compatibility_info[ FeaturePluginCompatibility::UNCERTAIN ] );
+		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true, true );
+		$incompatible_features      = $feature_compatibility_info[ FeaturePluginCompatibility::INCOMPATIBLE ];
 		$incompatible_features      = array_values(
 			array_filter(
 				$incompatible_features,
