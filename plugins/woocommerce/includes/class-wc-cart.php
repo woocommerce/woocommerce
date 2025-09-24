@@ -1394,16 +1394,39 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( $restore_item ) {
-			$this->cart_contents[ $cart_item_key ]         = $restore_item;
-			$this->cart_contents[ $cart_item_key ]['data'] = wc_get_product( $restore_item['variation_id'] ? $restore_item['variation_id'] : $restore_item['product_id'] );
+			$product_id   = $restore_item['product_id'] ?? 0;
+			$variation_id = $restore_item['variation_id'] ?? 0;
+			$quantity     = $restore_item['quantity'] ?? 1;
+			$variation    = $restore_item['variation'] ?? array();
 
-			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this );
+			$cart_item_data = $restore_item;
+			unset( $cart_item_data['key'], $cart_item_data['data'], $cart_item_data['data_hash'] );
 
-			unset( $this->removed_cart_contents[ $cart_item_key ] );
+			/**
+			 * Fires before a cart item is restored.
+			 *
+			 * @since 2.3.0
+			 * @param string $cart_item_key contains the id of the cart item.
+			 * @param WC_Cart $this Cart class.
+			 * @param array $restore_item The cart item data.
+			 */
+			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this, $restore_item );
 
-			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this );
+			$result = $this->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
-			return true;
+			/**
+			 * Fires after a cart item is restored.
+			 *
+			 * @since 2.3.0
+			 * @param string $cart_item_key contains the id of the cart item.
+			 * @param WC_Cart $this Cart class.
+			 * @param array $restore_item The cart item data.
+			 */
+			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this, $restore_item );
+
+			if ( $result ) {
+				return true;
+			}
 		}
 		return false;
 	}
