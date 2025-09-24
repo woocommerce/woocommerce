@@ -104,30 +104,40 @@ class ProductsController {
 			return;
 		}
 
-		$this->session = $this->manage_session_lifecycle( $this->parsed_args );
-		if ( ! $this->session ) {
-			return;
+		if ( $this->parsed_args['dry_run'] ) {
+			WP_CLI::line( WP_CLI::colorize( '%Y--- DRY RUN MODE ENABLED ---%n' ) );
+			WP_CLI::line( 'No products will be created or modified. This is a simulation only.' );
+			WP_CLI::line( '' );
 		}
 
-		// Get platform components.
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$this->session = $this->manage_session_lifecycle( $this->parsed_args );
+			if ( ! $this->session ) {
+				return;
+			}
+		}
+
 		$fetcher = $this->platform_registry->get_fetcher( $this->parsed_args['platform'] );
 		$mapper  = $this->platform_registry->get_mapper( $this->parsed_args['platform'], array( 'fields' => $this->fields_to_process ) );
 
-		// Fetch total count and setup progress tracking.
 		$total_count = $fetcher->fetch_total_count( $this->parsed_args['filters'] );
 
-		// Only set total count if it hasn't been set yet (new session or first time).
-		$existing_total = $this->session->count_all_total_entities();
-		if ( 0 < $total_count && 0 === $existing_total ) {
-			$this->session->bump_total_number_of_entities( array( 'post' => $total_count ) );
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$existing_total = $this->session->count_all_total_entities();
+			if ( 0 < $total_count && 0 === $existing_total ) {
+				$this->session->bump_total_number_of_entities( array( 'post' => $total_count ) );
+			}
 		}
 
 		WP_CLI::line( "Total entities found: {$total_count}" );
-		$progress = \WP_CLI\Utils\make_progress_bar(
-			'Importing Products from ' . ucfirst( $this->parsed_args['platform'] ),
-			$total_count
-		);
-		$progress->tick( $this->session->count_all_imported_entities(), false );
+		$progress_label = $this->parsed_args['dry_run']
+			? 'Simulating Products from ' . ucfirst( $this->parsed_args['platform'] )
+			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
+		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
+
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$progress->tick( $this->session->count_all_imported_entities() );
+		}
 
 		$this->configure_product_importer();
 
@@ -137,9 +147,11 @@ class ProductsController {
 
 		$this->display_migration_summary();
 
-		$this->display_feedback_survey();
-
-		WP_CLI::success( 'Migration completed successfully.' );
+		if ( $this->parsed_args['dry_run'] ) {
+			WP_CLI::success( 'Dry-run completed successfully. No products were actually created or modified.' );
+		} else {
+			WP_CLI::success( 'Migration completed successfully.' );
+		}
 	}
 
 	/**
@@ -152,7 +164,7 @@ class ProductsController {
 	 */
 	private function execute_migration_loop( $fetcher, $mapper, $progress ): void {
 		$limit_remaining            = $this->parsed_args['limit'];
-		$session_cursor             = $this->session->get_reentrancy_cursor();
+		$session_cursor             = $this->parsed_args['dry_run'] ? null : $this->session->get_reentrancy_cursor();
 		$after_cursor               = ! empty( $session_cursor ) ? $session_cursor : null;
 		$has_next_page              = true;
 		$total_processed_in_session = 0;
@@ -180,7 +192,6 @@ class ProductsController {
 			}
 
 			if ( empty( $batch_data['items'] ) ) {
-				WP_CLI::line( 'No more products found in this batch.' );
 				break;
 			}
 
@@ -188,24 +199,22 @@ class ProductsController {
 
 			$total_processed_in_session += $processed_count;
 
-			$this->session->bump_imported_entities_counts( array( 'post' => $processed_count ) );
-			$after_cursor = $batch_data['cursor'];
-			$this->session->set_reentrancy_cursor( $after_cursor );
+			if ( ! $this->parsed_args['dry_run'] ) {
+				$this->session->bump_imported_entities_counts( array( 'post' => $processed_count ) );
+				$after_cursor = $batch_data['cursor'];
+				$this->session->set_reentrancy_cursor( $after_cursor );
+			} else {
+				$after_cursor = $batch_data['cursor'];
+			}
 
 			$limit_remaining -= count( $batch_data['items'] );
 			$has_next_page    = $batch_data['has_next_page'] ?? false;
 
-			$progress->tick( $processed_count );
-
+			$progress->tick( $processed_count, sprintf( 'Processed %d products', $total_processed_in_session ) );
 		} while ( $has_next_page && $limit_remaining > 0 );
 
-		if ( $total_processed_in_session > 0 ) {
-			WP_CLI::success( sprintf( 'Processed %d products in this session', $total_processed_in_session ) );
-		}
-
-		if ( ! $has_next_page ) {
+		if ( ! $has_next_page && ! $this->parsed_args['dry_run'] ) {
 			$this->session->set_stage( ImportSession::STAGE_FINISHED );
-			WP_CLI::log( 'Migration completed - all products processed.' );
 		}
 	}
 
@@ -550,18 +559,124 @@ class ProductsController {
 		}
 
 		if ( ! empty( $mapped_products ) ) {
-			$batch_results = $this->product_importer->import_batch( $mapped_products, $source_data_batch );
+			if ( $this->parsed_args['dry_run'] ) {
+				$batch_results = $this->simulate_import_batch( $mapped_products );
+			} else {
+				$batch_results = $this->product_importer->import_batch( $mapped_products, $source_data_batch );
+			}
 
 			$this->log_batch_results( $batch_results );
 			$processed_count = $batch_results['stats']['successful'];
 
-			if ( $processed_count > 0 ) {
+			if ( $processed_count > 0 && ! $this->parsed_args['dry_run'] ) {
 				$current_count = get_option( 'wc_migrator_products_count', 0 );
 				update_option( 'wc_migrator_products_count', $current_count + $processed_count );
 			}
 		}
 
 		return $processed_count;
+	}
+
+	/**
+	 * Simulate the import process for dry-run mode.
+	 *
+	 * @param array $mapped_products Array of mapped product data.
+	 * @return array Simulated batch results matching real import format.
+	 */
+	private function simulate_import_batch( array $mapped_products ): array {
+		$results = array();
+		$stats   = array(
+			'successful' => 0,
+			'failed'     => 0,
+			'skipped'    => 0,
+		);
+
+		foreach ( $mapped_products as $product_data ) {
+			$product_name = $product_data['name'] ?? 'Unknown Product';
+
+			if ( empty( $product_data['name'] ) ) {
+				$results[] = array(
+					'status'  => 'error',
+					'message' => 'Product name is required',
+					'data'    => $product_data,
+				);
+				++$stats['failed'];
+				$this->simulate_stats_increment( 'errors_encountered' );
+				continue;
+			}
+
+			$existing_product_id = null;
+			if ( ! empty( $product_data['sku'] ) ) {
+				$existing_product_id = wc_get_product_id_by_sku( $product_data['sku'] );
+			}
+
+			$would_skip = false;
+			if ( $existing_product_id && $this->parsed_args['skip_existing'] ) {
+				$would_skip = true;
+			}
+
+			if ( $would_skip ) {
+				$results[] = array(
+					'status'  => 'skipped',
+					'message' => "Product '{$product_name}' would be skipped (already exists)",
+					'data'    => $product_data,
+				);
+				++$stats['skipped'];
+				$this->simulate_stats_increment( 'products_skipped' );
+			} else {
+				$results[] = array(
+					'status'  => 'success',
+					'message' => "Product '{$product_name}' would be imported",
+					'data'    => $product_data,
+				);
+				++$stats['successful'];
+
+				if ( $existing_product_id ) {
+					$this->simulate_stats_increment( 'products_updated' );
+				} else {
+					$this->simulate_stats_increment( 'products_created' );
+				}
+
+				if ( in_array( 'images', $this->fields_to_process, true ) && ! empty( $product_data['images'] ) ) {
+					$image_count = is_array( $product_data['images'] ) ? count( $product_data['images'] ) : 1;
+					for ( $i = 0; $i < $image_count; $i++ ) {
+						$this->simulate_stats_increment( 'images_processed' );
+					}
+				}
+			}
+
+			wc_get_logger()->info( "DRY RUN: Would import product '{$product_name}'", array( 'source' => 'wc-migrator' ) );
+		}
+
+		return array(
+			'results' => $results,
+			'stats'   => $stats,
+		);
+	}
+
+	/**
+	 * Simulate incrementing stats by using reflection to access private properties.
+	 * This ensures dry-run stats match what the real import would show.
+	 *
+	 * @param string $stat_key The stat key to increment.
+	 */
+	private function simulate_stats_increment( string $stat_key ): void {
+		try {
+			$reflection     = new \ReflectionClass( $this->product_importer );
+			$stats_property = $reflection->getProperty( 'import_stats' );
+			$stats_property->setAccessible( true );
+
+			$current_stats = $stats_property->getValue( $this->product_importer );
+			if ( isset( $current_stats[ $stat_key ] ) ) {
+				++$current_stats[ $stat_key ];
+				$stats_property->setValue( $this->product_importer, $current_stats );
+			}
+		} catch ( \ReflectionException $e ) {
+			wc_get_logger()->warning(
+				"DRY RUN: Could not update import stats for '{$stat_key}': " . $e->getMessage(),
+				array( 'source' => 'wc-migrator' )
+			);
+		}
 	}
 
 	/**
@@ -577,7 +692,6 @@ class ProductsController {
 			'create_tags'             => in_array( 'tags', $this->fields_to_process, true ),
 			'handle_variations'       => in_array( 'attributes', $this->fields_to_process, true ),
 			'assign_default_category' => $this->parsed_args['assign_default_category'] ?? false,
-			'dry_run'                 => $this->parsed_args['dry_run'] ?? false,
 			'verbose'                 => $this->parsed_args['verbose'] ?? false,
 		);
 
@@ -623,14 +737,26 @@ class ProductsController {
 		$stats = $this->product_importer->get_import_stats();
 
 		WP_CLI::line( '' );
-		WP_CLI::line( WP_CLI::colorize( '%YMigration Summary:%n' ) );
-		WP_CLI::line( sprintf( '  Products Created: %d', $stats['products_created'] ) );
-		WP_CLI::line( sprintf( '  Products Updated: %d', $stats['products_updated'] ) );
-		WP_CLI::line( sprintf( '  Products Skipped: %d', $stats['products_skipped'] ) );
-		WP_CLI::line( sprintf( '  Images Processed: %d', $stats['images_processed'] ) );
+		if ( $this->parsed_args['dry_run'] ) {
+			WP_CLI::line( WP_CLI::colorize( '%YDry-Run Summary:%n' ) );
+			WP_CLI::line( sprintf( '  Products Would Be Created: %d', $stats['products_created'] ) );
+			WP_CLI::line( sprintf( '  Products Would Be Updated: %d', $stats['products_updated'] ) );
+			WP_CLI::line( sprintf( '  Products Would Be Skipped: %d', $stats['products_skipped'] ) );
+			WP_CLI::line( sprintf( '  Images Would Be Processed: %d', $stats['images_processed'] ) );
+		} else {
+			WP_CLI::line( WP_CLI::colorize( '%YMigration Summary:%n' ) );
+			WP_CLI::line( sprintf( '  Products Created: %d', $stats['products_created'] ) );
+			WP_CLI::line( sprintf( '  Products Updated: %d', $stats['products_updated'] ) );
+			WP_CLI::line( sprintf( '  Products Skipped: %d', $stats['products_skipped'] ) );
+			WP_CLI::line( sprintf( '  Images Processed: %d', $stats['images_processed'] ) );
+		}
 
 		if ( $stats['errors_encountered'] > 0 ) {
-			WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RErrors Encountered: %d%%n', $stats['errors_encountered'] ) ) );
+			if ( $this->parsed_args['dry_run'] ) {
+				WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RValidation Errors Found: %d%%n', $stats['errors_encountered'] ) ) );
+			} else {
+				WP_CLI::line( WP_CLI::colorize( sprintf( '  %%RErrors Encountered: %d%%n', $stats['errors_encountered'] ) ) );
+			}
 		}
 
 		WP_CLI::line( '' );

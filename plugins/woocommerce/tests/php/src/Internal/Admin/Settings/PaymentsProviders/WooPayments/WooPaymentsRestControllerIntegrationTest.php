@@ -56,6 +56,16 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	protected $mock_wpcom_connection_manager;
 
 	/**
+	 * @var object&MockObject
+	 */
+	protected $mock_account_service;
+
+	/**
+	 * @var FakePaymentGateway
+	 */
+	protected FakePaymentGateway $mock_gateway;
+
+	/**
 	 * The ID of the store admin user.
 	 *
 	 * @var int
@@ -253,6 +263,12 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_option( 'woocommerce_gateway_order' );
 
 		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
+		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
+
+		// Reset the shared mockable proxy so no mocks leak between tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -608,7 +624,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test handling onboarding step check with invalid step.
 	 */
-	public function est_onboarding_step_check_with_invalid_step() {
+	public function test_onboarding_step_check_with_invalid_step() {
 		// Arrange.
 		$step_id      = 'invalid_step';
 		$country_code = 'US';
@@ -1147,7 +1163,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 
 		// Assert that the onboarding is unlocked.
-		$this->assertSame( 'no', get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
 
 		// Assert the test account step status.
 		$this->assertSame(
@@ -1226,7 +1242,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 
 		// Assert that the onboarding is unlocked.
-		$this->assertSame( 'no', get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
 
 		// Assert the test account step status.
 		$this->assertSame(
@@ -1305,7 +1321,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $data['success'] );
 
 		// Assert that the onboarding is unlocked.
-		$this->assertSame( 'no', get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
 
 		// Assert the test account step status.
 		$this->assertSame(

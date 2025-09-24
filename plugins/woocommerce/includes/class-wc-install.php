@@ -1710,6 +1710,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_value longtext NOT NULL,
   session_expiry bigint(20) unsigned NOT NULL,
   PRIMARY KEY  (session_id),
+  KEY session_expiry (session_expiry),
   UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (

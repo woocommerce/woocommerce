@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Throwable;
 use WC_Email;
 use WC_Order;
@@ -366,8 +367,9 @@ class EmailPreview {
 	 * @return WC_Order
 	 */
 	private function get_dummy_order() {
-		$product   = $this->get_dummy_product();
-		$variation = $this->get_dummy_product_variation();
+		$product              = $this->get_dummy_product();
+		$variation            = $this->get_dummy_product_variation();
+		$downloadable_product = $this->get_dummy_downloadable_product();
 
 		$order = new WC_Order();
 		if ( $product ) {
@@ -376,15 +378,20 @@ class EmailPreview {
 		if ( $variation ) {
 			$order->add_product( $variation );
 		}
+		if ( $downloadable_product ) {
+			$order->add_product( $downloadable_product );
+		}
 		$order->set_id( 12345 );
 		$order->set_date_created( time() );
 		$order->set_currency( 'USD' );
 		$order->set_discount_total( 10 );
 		$order->set_shipping_total( 5 );
-		$order->set_total( 65 );
+		$order->set_total( 80 );
 		$order->set_payment_method_title( __( 'Direct bank transfer', 'woocommerce' ) );
 		$order->set_transaction_id( '999999999' );
 		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there's no note, this section is hidden.", 'woocommerce' ) );
+
+		$order = $this->apply_dummy_order_status( $order );
 
 		// Add shipping method.
 		$shipping_item = new WC_Order_Item_Shipping();
@@ -410,6 +417,30 @@ class EmailPreview {
 		 * @since 9.6.0
 		 */
 		return apply_filters( 'woocommerce_email_preview_dummy_order', $order, $this->email_type );
+	}
+
+	/**
+	 * Apply a contextual status to the dummy order based on the previewed email type.
+	 *
+	 * @param WC_Order $order Dummy order instance.
+	 * @return WC_Order
+	 */
+	private function apply_dummy_order_status( WC_Order $order ): WC_Order {
+		$email_type_status_map = array(
+			'WC_Email_Customer_Completed_Order'  => OrderStatus::COMPLETED,
+			'WC_Email_Customer_Processing_Order' => OrderStatus::PROCESSING,
+			'WC_Email_Customer_On_Hold_Order'    => OrderStatus::ON_HOLD,
+			'WC_Email_Customer_Failed_Order'     => OrderStatus::FAILED,
+			'WC_Email_Customer_Cancelled_Order'  => OrderStatus::CANCELLED,
+			'WC_Email_Customer_Refunded_Order'   => OrderStatus::REFUNDED,
+			'WC_Email_New_Order'                 => OrderStatus::PROCESSING,
+			'WC_Email_Cancelled_Order'           => OrderStatus::CANCELLED,
+			'WC_Email_Failed_Order'              => OrderStatus::FAILED,
+		);
+
+		$status = $email_type_status_map[ $this->email_type ] ?? OrderStatus::PROCESSING;
+		$order->set_status( $status );
+		return $order;
 	}
 
 	/**
@@ -459,6 +490,29 @@ class EmailPreview {
 		 * @since 9.7.0
 		 */
 		return apply_filters( 'woocommerce_email_preview_dummy_product_variation', $variation, $this->email_type );
+	}
+
+	/**
+	 * Get a dummy downloadable/virtual product.
+	 *
+	 * @return WC_Product
+	 */
+	private function get_dummy_downloadable_product() {
+		$product = new WC_Product();
+		$product->set_name( __( 'Dummy Downloadable Product', 'woocommerce' ) );
+		$product->set_price( 15 );
+		$product->set_virtual( true );
+		$product->set_downloadable( true );
+
+		/**
+		 * A dummy downloadable WC_Product used in email preview.
+		 *
+		 * @param WC_Product $product The dummy downloadable product object.
+		 * @param string     $email_type The email type to preview.
+		 *
+		 * @since 10.3.0
+		 */
+		return apply_filters( 'woocommerce_email_preview_dummy_downloadable_product', $product, $this->email_type );
 	}
 
 	/**
@@ -532,6 +586,11 @@ class EmailPreview {
 		add_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
 		// Use placeholder image included in WooCommerce files.
 		add_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
+		// Make products in preview considered downloadable and provide dummy file so WC core shows downloads.
+		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
+		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
+		// Provide dummy downloadable items for email preview.
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
 	}
 
 	/**
@@ -542,6 +601,9 @@ class EmailPreview {
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
 		remove_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
+		remove_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10 );
+		remove_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10 );
+		remove_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10 );
 		$this->restore_locale();
 	}
 
@@ -572,6 +634,75 @@ class EmailPreview {
 	 */
 	public function get_placeholder_image() {
 		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.webp" width="48" height="48" alt="" />';
+	}
+
+	/**
+	 * Force products in preview to be considered downloadable so core renders downloads section.
+	 *
+	 * @param bool $is_downloadable Current value.
+	 * @return bool
+	 */
+	public function force_product_downloadable( $is_downloadable ) {
+		/**
+		 * Filters whether the current request is an email preview.
+		 *
+		 * When true, products should be considered downloadable so the downloads
+		 * section renders in applicable emails during preview.
+		 *
+		 * @since 9.6.0
+		 *
+		 * @param bool $is_email_preview Whether preview mode is active.
+		 */
+		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
+			return true;
+		}
+		return $is_downloadable;
+	}
+
+	/**
+	 * Provide a dummy product file so product->has_file() returns true in preview.
+	 *
+	 * @param array|null $file Current file array or null.
+	 * @return array|null
+	 */
+	public function provide_dummy_product_file( $file ) {
+		/**
+		 * Filters whether the current request is an email preview.
+		 *
+		 * When true, provide a dummy product file array so downloadable template parts
+		 * can render during preview.
+		 *
+		 * @since 9.6.0
+		 *
+		 * @param bool $is_email_preview Whether preview mode is active.
+		 */
+		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
+			return array(
+				'name' => __( 'Sample Download File.pdf', 'woocommerce' ),
+				'file' => 'sample-download.pdf',
+			);
+		}
+		return $file;
+	}
+
+	/**
+	 * Get dummy downloadable items for email preview.
+	 *
+	 * @param array $downloads Existing downloads.
+	 * @return array
+	 */
+	public function get_dummy_downloadable_items( $downloads ) {
+		$dummy_downloads = array(
+			array(
+				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
+				'product_id'     => $this->get_dummy_downloadable_product()->get_id(),
+				'download_url'   => 'https://example.com/download',
+				'download_name'  => __( 'Sample Download File.pdf', 'woocommerce' ),
+				'access_expires' => time() + ( 30 * DAY_IN_SECONDS ),
+			),
+		);
+
+		return array_merge( $downloads, $dummy_downloads );
 	}
 
 	/**

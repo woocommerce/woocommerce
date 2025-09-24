@@ -70,6 +70,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 */
 	protected int $current_time;
 
+	private const TEST_EPOCH = 1234567890;
+
 	/**
 	 * Set up test.
 	 */
@@ -79,7 +81,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->current_time = 1234567890;
+		$this->current_time = self::TEST_EPOCH;
 
 		$this->mock_providers = $this->getMockBuilder( PaymentsProviders::class )
 									->disableOriginalConstructor()
@@ -177,6 +179,16 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		// Reset the shared mockable proxy so no mocks leak between tests.
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test get onboarding details when the extension is NOT active.
 	 */
 	public function test_get_onboarding_details_throws_when_extension_not_active(): void {
@@ -240,7 +252,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						// Return a current timestamp to simulate locked state.
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -256,6 +269,177 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		} catch ( ApiException $e ) {
 			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
 		}
+	}
+
+	/**
+	 * Test get onboarding details works when onboarding lock has expired.
+	 */
+	public function test_get_onboarding_details_with_expired_onboarding_lock(): void {
+		$location = 'US';
+
+		// Arrange an expired onboarding lock (older than TTL).
+		$expired_timestamp = $this->current_time - WooPaymentsService::NOX_ONBOARDING_LOCKED_TTL_SECONDS - 10;
+		$clears            = 0;
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $expired_timestamp ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return $expired_timestamp;
+					}
+
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$clears ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 0 === $value ) {
+						$clears++;
+					}
+
+					return true;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		// Assert that the method works (doesn't throw exception) because the lock is expired.
+		$this->assertIsArray( $result );
+		$this->assertSame( 1, $clears, 'Expired onboarding lock should be cleared (self-healed).' );
+	}
+
+	/**
+	 * Test get onboarding details with non-numeric lock value.
+	 */
+	public function test_get_onboarding_details_with_invalid_lock_value(): void {
+		$location = 'US';
+
+		// Arrange an invalid (non-numeric) onboarding lock value.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return 'invalid_value';
+					}
+
+					return $default_value;
+				},
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		// Assert that the method works (doesn't throw exception) because invalid lock is treated as unlocked.
+		$this->assertIsArray( $result );
+	}
+
+	/**
+	 * Test get onboarding details with lock at the TTL boundary.
+	 */
+	public function test_get_onboarding_details_with_lock_at_ttl_boundary(): void {
+		$location    = 'US';
+		$boundary_ts = $this->current_time - WooPaymentsService::NOX_ONBOARDING_LOCKED_TTL_SECONDS;
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $boundary_ts ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? $boundary_ts : $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details with a future lock timestamp.
+	 */
+	public function test_get_onboarding_details_with_future_lock_timestamp(): void {
+		$location  = 'US';
+		$future_ts = $this->current_time + 10;
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $future_ts ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? $future_ts : $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details with zero string lock value.
+	 */
+	public function test_get_onboarding_details_with_zero_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? '0' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+	}
+
+	/**
+	 * Test get onboarding details with legacy `no` string lock value.
+	 *
+	 * In this case, the onboarding is considered unlocked.
+	 */
+	public function test_get_onboarding_details_with_no_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? 'no' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+	}
+
+	/**
+	 * Test get onboarding details with legacy `yes` string lock value.
+	 *
+	 * In this case, the onboarding is considered unlocked.
+	 */
+	public function test_get_onboarding_details_with_yes_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? 'yes' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
 	}
 
 	/**
@@ -741,7 +925,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provider_get_onboarding_details_steps(): array {
-		$current_time = 1234567890;
+		// Can't use the $this->current_time because providers are run before setUp.
+		// Use the same value as in setUp().
+		$current_time = self::TEST_EPOCH;
 
 		$default_recommended_pms = array(
 			array(
@@ -5228,7 +5414,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						// Return a current timestamp to simulate locked state.
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -5500,7 +5687,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						// Return a current timestamp to simulate locked state.
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -5833,7 +6021,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -6126,7 +6314,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -6465,7 +6653,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -6795,7 +6983,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -7019,6 +7207,147 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that onboarding lock mechanism works during test account initialization.
+	 */
+	public function test_onboarding_lock_mechanism_during_test_account_init(): void {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Track onboarding lock state changes.
+		$lock_states  = array();
+		$current_time = $this->current_time;
+
+		// Arrange the NOX profile and lock tracking.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_states ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return array();
+					}
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return end( $lock_states ) !== false ? end( $lock_states ) : $default_value;
+					}
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$lock_states, $current_time ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						$lock_states[] = $value;
+					}
+					return true;
+				},
+			)
+		);
+
+		// Mock successful REST API response.
+		$expected_response = array(
+			'success' => true,
+		);
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) use ( $expected_response ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							return $expected_response;
+						}
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act - call the method that should set and clear the lock.
+		$result = $this->sut->onboarding_test_account_init( $location );
+
+		// Assert that the result is successful.
+		$this->assertEquals( $expected_response, $result );
+
+		// Assert that the lock was set and then cleared.
+		$this->assertCount( 2, $lock_states, 'Expected exactly 2 lock state changes: set lock (timestamp) and clear lock (0)' );
+		$this->assertSame( $current_time, $lock_states[0], 'First lock state should be current timestamp' );
+		$this->assertSame( 0, $lock_states[1], 'Second lock state should be 0 (cleared)' );
+	}
+
+	/**
+	 * Test that onboarding lock is cleared even when an exception occurs.
+	 */
+	public function test_onboarding_lock_cleared_on_exception(): void {
+		$location = 'US';
+
+		// Arrange the WPCOM connection.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Track onboarding lock state changes.
+		$lock_states  = array();
+		$current_time = $this->current_time;
+
+		// Arrange the NOX profile and lock tracking.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option'    => function ( $option_name, $default_value = null ) use ( &$lock_states ) {
+					if ( WooPaymentsService::NOX_PROFILE_OPTION_KEY === $option_name ) {
+						return array();
+					}
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						return end( $lock_states ) !== false ? end( $lock_states ) : $default_value;
+					}
+					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$lock_states, $current_time ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
+						$lock_states[] = $value;
+					}
+					return true;
+				},
+			)
+		);
+
+		// Mock REST API to throw an exception.
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( string $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
+							throw new \Exception( 'Simulated API failure' );
+						}
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		// Act & Assert - expect the method to handle the exception and still clear the lock.
+		try {
+			$this->sut->onboarding_test_account_init( $location );
+
+			$this->fail( 'Expected an exception to be re-thrown as WP_Error' );
+		} catch ( \Throwable $e ) {
+			// The exception handling should have cleared the lock even though an error occurred.
+			$this->assertInstanceOf( \Exception::class, $e );
+		}
+
+		// Assert that the lock was set and then cleared despite the exception.
+		$this->assertCount( 2, $lock_states, 'Expected exactly 2 lock state changes even with exception: set lock (timestamp) and clear lock (0)' );
+		$this->assertSame( $current_time, $lock_states[0], 'First lock state should be current timestamp' );
+		$this->assertSame( 0, $lock_states[1], 'Second lock state should be 0 (cleared) even after exception' );
+	}
+
+	/**
 	 * Test onboarding_test_account_init.
 	 *
 	 * @return void
@@ -7168,7 +7497,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -7548,7 +7877,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -7832,7 +8161,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -7880,7 +8209,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'no';
+						return 0;
 					}
 
 					return $default_value;
@@ -7923,7 +8252,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'no';
+						return 0;
 					}
 
 					return $default_value;
@@ -7999,7 +8328,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			array(
 				'get_option' => function ( $option_name, $default_value = null ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
-						return 'yes';
+						return $this->current_time;
 					}
 
 					return $default_value;
@@ -8195,7 +8524,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
-					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 'no' === $value ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 0 === $value ) {
 						$onboarding_lock_cleared++;
 
 						return true;
@@ -8270,7 +8599,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_function_mocks(
 			array(
 				'update_option' => function ( $option_name, $value ) use ( &$onboarding_lock_cleared ) {
-					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 'no' === $value ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 0 === $value ) {
 						$onboarding_lock_cleared++;
 
 						return true;
