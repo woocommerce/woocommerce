@@ -89,6 +89,7 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 		$test_callback   = function () use ( &$callback_called ) {
 			$callback_called = true;
 		};
+
 		$GLOBALS['wp']->query_vars['rest_route'] = '/';
 
 		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
@@ -106,7 +107,7 @@ class WCRestFunctionsTest extends WC_REST_Unit_Test_Case {
 
 		$GLOBALS['wp']->query_vars['rest_route'] = 'wc/some-other-namespace';
 
-		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback  );
+		wc_rest_lazy_load_namespace( 'wc/wc-rest-testing', $test_callback );
 		$this->assertFalse( $callback_called, 'Callback should not be executed when route doesn\'t match' );
 	}
 
