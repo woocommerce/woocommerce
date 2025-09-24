@@ -269,14 +269,22 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange an expired onboarding lock (older than TTL).
 		$expired_timestamp = $this->current_time - WooPaymentsService::NOX_ONBOARDING_LOCKED_TTL_SECONDS - 10;
+		$clears            = 0;
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'get_option' => function ( $option_name, $default_value = null ) use ( $expired_timestamp ) {
+				'get_option'    => function ( $option_name, $default_value = null ) use ( $expired_timestamp ) {
 					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ) {
 						return $expired_timestamp;
 					}
 
 					return $default_value;
+				},
+				'update_option' => function ( $option_name, $value ) use ( &$clears ) {
+					if ( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name && 0 === $value ) {
+						$clears ++;
+					}
+
+					return true;
 				},
 			)
 		);
@@ -286,6 +294,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Assert that the method works (doesn't throw exception) because the lock is expired.
 		$this->assertIsArray( $result );
+		$this->assertSame( 1, $clears, 'Expired onboarding lock should be cleared (self-healed).' );
 	}
 
 	/**
