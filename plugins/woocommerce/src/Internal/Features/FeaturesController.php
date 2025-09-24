@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -235,7 +236,7 @@ class FeaturesController {
 			'disable_ui'                   => false,
 			'enabled_by_default'           => false,
 			'is_experimental'              => true,
-			'default_plugin_compatibility' => 'compatible',
+			'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			'skip_compatibility_checks'    => false,
 			'name'                         => $name,
 			'order'                        => 10,
@@ -256,8 +257,8 @@ class FeaturesController {
 		$args = wp_parse_args( $args, $defaults );
 
 		// Sanitize 'default_plugin_compatibility'.
-		if ( ! in_array( $args['default_plugin_compatibility'], array( 'compatible', 'incompatible' ), true ) ) {
-			$args['default_plugin_compatibility'] = wc_string_to_bool( $args['default_plugin_compatibility'] ) ? 'compatible' : 'incompatible';
+		if ( ! in_array( $args['default_plugin_compatibility'], FeaturePluginCompatibility::VALID_REGISTRATION_VALUES, true ) ) {
+			$args['default_plugin_compatibility'] = wc_string_to_bool( $args['default_plugin_compatibility'] ) ? FeaturePluginCompatibility::COMPATIBLE : FeaturePluginCompatibility::INCOMPATIBLE;
 		}
 
 		// Support 'is_legacy' flag for backwards compatibility.
@@ -316,7 +317,7 @@ class FeaturesController {
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'product_block_editor'        => array(
 				'name'                         => __( 'New product editor', 'woocommerce' ),
@@ -324,14 +325,14 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'cart_checkout_blocks'        => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'rate_limit_checkout'         => array(
 				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
@@ -344,7 +345,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'marketplace'                 => array(
 				'name'                         => __( 'Marketplace', 'woocommerce' ),
@@ -356,7 +357,7 @@ class FeaturesController {
 				'enabled_by_default'           => true,
 				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
@@ -369,7 +370,7 @@ class FeaturesController {
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
 			'site_visibility_badge'       => array(
@@ -381,7 +382,7 @@ class FeaturesController {
 				'enabled_by_default'           => true,
 				'disable_ui'                   => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 				'disabled'                     => false,
 			),
@@ -394,7 +395,7 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
 			'hpos_datastore_caching'      => array(
@@ -406,7 +407,7 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'disable_ui'                   => false,
 				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
@@ -430,7 +431,7 @@ class FeaturesController {
 				 * @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				 */
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 				'setting'                      => array(
 					'disabled' => function () use ( $tracking_enabled ) {
@@ -461,7 +462,7 @@ class FeaturesController {
 				 * @see https://github.com/woocommerce/woocommerce/issues/55540
 				 */
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
 			'blueprint'                   => array(
@@ -482,7 +483,7 @@ class FeaturesController {
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
 			'block_email_editor'          => array(
@@ -502,7 +503,7 @@ class FeaturesController {
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
 			'point_of_sale'               => array(
@@ -523,7 +524,7 @@ class FeaturesController {
 				* @see https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959
 				*/
 				'skip_compatibility_checks'    => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
 			'fulfillments'                => array(
@@ -535,13 +536,13 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'disable_ui'                   => true,
 				'is_experimental'              => false,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'experimental-iapi-mini-cart' => array(
 				'name'                         => __( 'Interactivity API powered Mini Cart', 'woocommerce' ),
 				'description'                  => __( 'Enable the new version of the Mini Cart that uses the Interactivity API instead of React in the frontend.', 'woocommerce' ),
 				'is_experimental'              => true,
-				'default_plugin_compatibility' => 'compatible',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 		);
 
@@ -564,8 +565,8 @@ class FeaturesController {
 		foreach ( array_keys( $this->features ) as $feature_id ) {
 			if ( ! isset( $this->compatibility_info_by_feature[ $feature_id ] ) ) {
 				$this->compatibility_info_by_feature[ $feature_id ] = array(
-					'compatible'   => array(),
-					'incompatible' => array(),
+					FeaturePluginCompatibility::COMPATIBLE => array(),
+					FeaturePluginCompatibility::INCOMPATIBLE => array(),
 				);
 			}
 		}
@@ -678,7 +679,7 @@ class FeaturesController {
 			throw new \InvalidArgumentException( esc_html( "The WooCommerce feature '$feature_id' doesn't exist" ) );
 		}
 
-		$default_plugin_compatibility = $feature_definition['default_plugin_compatibility'] ?? 'compatible';
+		$default_plugin_compatibility = $feature_definition['default_plugin_compatibility'] ?? FeaturePluginCompatibility::COMPATIBLE;
 
 		// Filter below is only fired for backwards compatibility with (now removed) get_plugins_are_incompatible_by_default().
 		/**
@@ -690,9 +691,9 @@ class FeaturesController {
 		 *
 		 * @since 9.2.0
 		 */
-		$incompatible_by_default = (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', 'incompatible' === $default_plugin_compatibility, $feature_id );
+		$incompatible_by_default = (bool) apply_filters( 'woocommerce_plugins_are_incompatible_with_feature_by_default', FeaturePluginCompatibility::INCOMPATIBLE === $default_plugin_compatibility, $feature_id );
 
-		return $incompatible_by_default ? 'incompatible' : 'compatible';
+		return $incompatible_by_default ? FeaturePluginCompatibility::INCOMPATIBLE : FeaturePluginCompatibility::COMPATIBLE;
 	}
 
 	/**
@@ -814,8 +815,8 @@ class FeaturesController {
 		// Register compatibility by plugin.
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin, $plugin_id );
 
-		$key          = $positive_compatibility ? 'compatible' : 'incompatible';
-		$opposite_key = $positive_compatibility ? 'incompatible' : 'compatible';
+		$key          = $positive_compatibility ? FeaturePluginCompatibility::COMPATIBLE : FeaturePluginCompatibility::INCOMPATIBLE;
+		$opposite_key = $positive_compatibility ? FeaturePluginCompatibility::INCOMPATIBLE : FeaturePluginCompatibility::COMPATIBLE;
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $key );
 		ArrayUtil::ensure_key_is_array( $this->compatibility_info_by_plugin[ $plugin_id ], $opposite_key );
 
@@ -828,7 +829,7 @@ class FeaturesController {
 		}
 
 		// Register compatibility by feature.
-		$key = $positive_compatibility ? 'compatible' : 'incompatible';
+		$key = $positive_compatibility ? FeaturePluginCompatibility::COMPATIBLE : FeaturePluginCompatibility::INCOMPATIBLE;
 
 		if ( ! in_array( $plugin_id, $this->compatibility_info_by_feature[ $feature_id ][ $key ], true ) ) {
 			$this->compatibility_info_by_feature[ $feature_id ][ $key ][] = $plugin_id;
@@ -903,24 +904,24 @@ class FeaturesController {
 
 		if ( ! isset( $this->compatibility_info_by_plugin[ $plugin_name ] ) ) {
 			return array(
-				'compatible'   => array(),
-				'incompatible' => array(),
-				'uncertain'    => array_keys( $features ),
+				FeaturePluginCompatibility::COMPATIBLE   => array(),
+				FeaturePluginCompatibility::INCOMPATIBLE => array(),
+				FeaturePluginCompatibility::UNCERTAIN    => array_keys( $features ),
 			);
 		}
 
-		$info                 = $this->compatibility_info_by_plugin[ $plugin_name ];
-		$info['compatible']   = array_values( array_intersect( array_keys( $features ), $info['compatible'] ) );
-		$info['incompatible'] = array_values( array_intersect( array_keys( $features ), $info['incompatible'] ) );
-		$info['uncertain']    = array_values( array_diff( array_keys( $features ), $info['compatible'], $info['incompatible'] ) );
+		$info = $this->compatibility_info_by_plugin[ $plugin_name ];
+		$info[ FeaturePluginCompatibility::COMPATIBLE ]   = array_values( array_intersect( array_keys( $features ), $info[ FeaturePluginCompatibility::COMPATIBLE ] ) );
+		$info[ FeaturePluginCompatibility::INCOMPATIBLE ] = array_values( array_intersect( array_keys( $features ), $info[ FeaturePluginCompatibility::INCOMPATIBLE ] ) );
+		$info[ FeaturePluginCompatibility::UNCERTAIN ]    = array_values( array_diff( array_keys( $features ), $info[ FeaturePluginCompatibility::COMPATIBLE ], $info[ FeaturePluginCompatibility::INCOMPATIBLE ] ) );
 
 		if ( $resolve_uncertain ) {
-			foreach ( $info['uncertain'] as $feature_id ) {
+			foreach ( $info[ FeaturePluginCompatibility::UNCERTAIN ] as $feature_id ) {
 				$key            = $this->get_default_plugin_compatibility( $feature_id );
 				$info[ $key ][] = $feature_id;
 			}
 
-			$info['uncertain'] = array();
+			$info[ FeaturePluginCompatibility::UNCERTAIN ] = array();
 		}
 
 		return $info;
@@ -941,18 +942,18 @@ class FeaturesController {
 		$woo_aware_plugins = $this->plugin_util->get_woocommerce_aware_plugins( $active_only );
 		if ( ! $this->feature_exists( $feature_id ) ) {
 			return array(
-				'compatible'   => array(),
-				'incompatible' => array(),
-				'uncertain'    => $woo_aware_plugins,
+				FeaturePluginCompatibility::COMPATIBLE   => array(),
+				FeaturePluginCompatibility::INCOMPATIBLE => array(),
+				FeaturePluginCompatibility::UNCERTAIN    => $woo_aware_plugins,
 			);
 		}
 
 		$info = $this->compatibility_info_by_feature[ $feature_id ];
-		ArrayUtil::ensure_key_is_array( $info, 'uncertain' );
+		ArrayUtil::ensure_key_is_array( $info, FeaturePluginCompatibility::UNCERTAIN );
 
 		// Resolve uncertain plugin compatibility?
-		$uncertain_plugins = array_values( array_diff( $woo_aware_plugins, $info['compatible'], $info['incompatible'] ) );
-		$key               = $resolve_uncertain ? $this->get_default_plugin_compatibility( $feature_id ) : 'uncertain';
+		$uncertain_plugins = array_values( array_diff( $woo_aware_plugins, $info[ FeaturePluginCompatibility::COMPATIBLE ], $info[ FeaturePluginCompatibility::INCOMPATIBLE ] ) );
+		$key               = $resolve_uncertain ? $this->get_default_plugin_compatibility( $feature_id ) : FeaturePluginCompatibility::UNCERTAIN;
 		$info[ $key ]      = array_merge( $info[ $key ], $uncertain_plugins );
 
 		return $info;
@@ -1370,11 +1371,11 @@ class FeaturesController {
 		unset( $this->compatibility_info_by_plugin[ $plugin_name ] );
 
 		foreach ( array_keys( $this->compatibility_info_by_feature ) as $feature ) {
-			$compatibles = $this->compatibility_info_by_feature[ $feature ]['compatible'];
-			$this->compatibility_info_by_feature[ $feature ]['compatible'] = array_diff( $compatibles, array( $plugin_name ) );
+			$compatibles = $this->compatibility_info_by_feature[ $feature ][ FeaturePluginCompatibility::COMPATIBLE ];
+			$this->compatibility_info_by_feature[ $feature ][ FeaturePluginCompatibility::COMPATIBLE ] = array_diff( $compatibles, array( $plugin_name ) );
 
-			$incompatibles = $this->compatibility_info_by_feature[ $feature ]['incompatible'];
-			$this->compatibility_info_by_feature[ $feature ]['incompatible'] = array_diff( $incompatibles, array( $plugin_name ) );
+			$incompatibles = $this->compatibility_info_by_feature[ $feature ][ FeaturePluginCompatibility::INCOMPATIBLE ];
+			$this->compatibility_info_by_feature[ $feature ][ FeaturePluginCompatibility::INCOMPATIBLE ] = array_diff( $incompatibles, array( $plugin_name ) );
 		}
 	}
 
@@ -1478,15 +1479,15 @@ class FeaturesController {
 		foreach ( $relevant_plugins as $plugin ) {
 			$compatibility_info = $this->get_compatible_features_for_plugin( $plugin, true );
 
-			$incompatibles = array_filter( $compatibility_info['incompatible'], fn( $id ) => ! $this->should_skip_compatibility_checks( $id ) );
+			$incompatibles = array_filter( $compatibility_info[ FeaturePluginCompatibility::INCOMPATIBLE ], fn( $id ) => ! $this->should_skip_compatibility_checks( $id ) );
 			if ( ! empty( $incompatibles ) ) {
 				$incompatible_plugins = true;
 				break;
 			}
 
-			$uncertains = array_filter( $compatibility_info['uncertain'], fn( $id ) => ! $this->should_skip_compatibility_checks( $id ) );
+			$uncertains = array_filter( $compatibility_info[ FeaturePluginCompatibility::UNCERTAIN ], fn( $id ) => ! $this->should_skip_compatibility_checks( $id ) );
 			foreach ( $uncertains as $feature_id ) {
-				if ( 'compatible' !== $this->get_default_plugin_compatibility( $feature_id ) ) {
+				if ( FeaturePluginCompatibility::COMPATIBLE !== $this->get_default_plugin_compatibility( $feature_id ) ) {
 					$incompatible_plugins = true;
 					break;
 				}
@@ -1622,7 +1623,7 @@ class FeaturesController {
 
 		$features                   = $this->get_feature_definitions();
 		$feature_compatibility_info = $this->get_compatible_features_for_plugin( $plugin_file, true );
-		$incompatible_features      = array_merge( $feature_compatibility_info['incompatible'], $feature_compatibility_info['uncertain'] );
+		$incompatible_features      = array_merge( $feature_compatibility_info[ FeaturePluginCompatibility::INCOMPATIBLE ], $feature_compatibility_info[ FeaturePluginCompatibility::UNCERTAIN ] );
 		$incompatible_features      = array_values(
 			array_filter(
 				$incompatible_features,

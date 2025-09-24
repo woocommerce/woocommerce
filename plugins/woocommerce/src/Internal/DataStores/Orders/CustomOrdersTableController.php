@@ -581,7 +581,7 @@ class CustomOrdersTableController {
 			'enabled_by_default'           => false,
 			'order'                        => 50,
 			'setting'                      => $this->get_hpos_setting_for_feature(),
-			'default_plugin_compatibility' => 'incompatible',
+			'default_plugin_compatibility' => \Automattic\WooCommerce\Enums\FeaturePluginCompatibility::INCOMPATIBLE,
 			'additional_settings'          => array(
 				$this->get_hpos_setting_for_sync(),
 			),

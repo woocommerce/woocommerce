@@ -56,7 +56,7 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 			'description'                  => __( 'Allows entering cost of goods sold information for products.', 'woocommerce' ),
 			'is_experimental'              => false,
 			'enabled_by_default'           => false,
-			'default_plugin_compatibility' => 'compatible',
+			'default_plugin_compatibility' => \Automattic\WooCommerce\Enums\FeaturePluginCompatibility::COMPATIBLE,
 		);
 
 		$features_controller->add_feature_definition(
