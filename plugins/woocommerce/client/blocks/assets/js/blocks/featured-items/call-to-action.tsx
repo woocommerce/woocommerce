@@ -55,7 +55,6 @@ export const CallToAction = ( {
 					],
 				],
 			] }
-			templateLock="all"
 		/>
 	);
 };

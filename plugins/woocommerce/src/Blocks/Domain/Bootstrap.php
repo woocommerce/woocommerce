@@ -132,12 +132,12 @@ class Bootstrap {
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
 		$this->container->get( CheckoutLink::class )->init();
+		$this->container->get( AssetDataRegistry::class );
+		$this->container->get( AssetsController::class );
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
 			$this->add_build_notice();
-			$this->container->get( AssetDataRegistry::class );
-			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
 			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();

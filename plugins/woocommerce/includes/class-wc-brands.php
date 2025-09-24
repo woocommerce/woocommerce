@@ -77,7 +77,6 @@ class WC_Brands {
 		add_filter( 'woocommerce_layered_nav_term_html', array( $this, 'woocommerce_brands_update_layered_nav_link' ), 10, 4 );
 
 		// Filter the list of taxonomies overridden for the original term count.
-		add_filter( 'woocommerce_change_term_counts', array( $this, 'add_brands_to_terms' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( $this, 'recount_after_stock_change' ) );
 		add_action( 'woocommerce_update_options_products_inventory', array( $this, 'recount_all_brands' ) );
 
@@ -87,18 +86,6 @@ class WC_Brands {
 		// Block theme integration.
 		add_filter( 'hooked_block_types', array( $this, 'hook_product_brand_block' ), 10, 4 );
 		add_filter( 'hooked_block_core/post-terms', array( $this, 'configure_product_brand_block' ), 10, 5 );
-	}
-
-	/**
-	 * Add product_brand to the taxonomies overridden for the original term count.
-	 *
-	 * @param array $taxonomies List of taxonomies.
-	 *
-	 * @return array
-	 */
-	public function add_brands_to_terms( $taxonomies ) {
-		$taxonomies[] = 'product_brand';
-		return $taxonomies;
 	}
 
 	/**
@@ -274,7 +261,7 @@ class WC_Brands {
 				'register_taxonomy_product_brand',
 				array(
 					'hierarchical'          => true,
-					'update_count_callback' => '_update_post_term_count',
+					'update_count_callback' => '_wc_term_recount',
 					'label'                 => __( 'Brands', 'woocommerce' ),
 					'labels'                => array(
 						'name'              => __( 'Brands', 'woocommerce' ),
@@ -289,6 +276,7 @@ class WC_Brands {
 						'add_new_item'      => __( 'Add New Brand', 'woocommerce' ),
 						'new_item_name'     => __( 'New Brand Name', 'woocommerce' ),
 						'not_found'         => __( 'No Brands Found', 'woocommerce' ),
+						'no_terms'          => __( 'No brands', 'woocommerce' ),
 						'back_to_items'     => __( '&larr; Go to Brands', 'woocommerce' ),
 					),
 
@@ -444,10 +432,14 @@ class WC_Brands {
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.
+			$brand_thumbnail = wc_get_brand_thumbnail_url( $brands[0]->term_id, 'full' );
 			$markup['brand'] = array(
 				'@type' => 'Brand',
 				'name'  => $brands[0]->name,
 			);
+			if ( $brand_thumbnail ) {
+				$markup['brand']['logo'] = $brand_thumbnail;
+			}
 		}
 
 		return $markup;

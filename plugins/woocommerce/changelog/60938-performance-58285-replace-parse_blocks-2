@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Use `Block_Scanner` to find the local pickup text instead of `parse_blocks`.

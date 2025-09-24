@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils as AddToCartWithOptionsUtils;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * Block type for quantity selector in add to cart with options.
@@ -76,22 +77,8 @@ class QuantitySelector extends AbstractBlock {
 
 		woocommerce_quantity_input(
 			array(
-				/**
-				 * Filter the minimum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $min_value Minimum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'min_value'   => apply_filters( 'woocommerce_quantity_input_min', $product->get_min_purchase_quantity(), $product ),
-				/**
-				 * Filter the maximum quantity value allowed for the product.
-				 *
-				 * @since 2.0.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
-				 */
-				'max_value'   => apply_filters( 'woocommerce_quantity_input_max', $product->get_max_purchase_quantity(), $product ),
+				'min_value'   => $product->get_min_purchase_quantity(),
+				'max_value'   => $product->get_max_purchase_quantity(),
 				'input_value' => isset( $_POST['quantity'] ) ? wc_stock_amount( wp_unslash( $_POST['quantity'] ) ) : $product->get_min_purchase_quantity(), // phpcs:ignore WordPress.Security.NonceVerification.Missing
 			)
 		);
@@ -115,14 +102,71 @@ class QuantitySelector extends AbstractBlock {
 			)
 		);
 
-		$wrapper_attributes = get_block_wrapper_attributes(
+		$wrapper_attributes = array(
+			'class' => $classes,
+			'style' => esc_attr( $classes_and_styles['styles'] ),
+		);
+		$input_attributes   = array();
+
+		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
+
+		wp_interactivity_config(
+			'woocommerce',
 			array(
-				'class' => $classes,
-				'style' => esc_attr( $classes_and_styles['styles'] ),
+				'products' => array(
+					$product->get_id() => array(
+						'min'  => $product_quantity_constraints['min'],
+						'max'  => $product_quantity_constraints['max'],
+						'step' => $product_quantity_constraints['step'],
+					),
+				),
 			)
 		);
 
-		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes );
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
+			wp_enqueue_script_module( 'woocommerce/product-elements' );
+
+			$variations_data           = $product->get_available_variations( 'objects' );
+			$formatted_variations_data = array();
+			foreach ( $variations_data as $variation ) {
+				$variation_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
+				$variation_data                 = array();
+
+				// Only add variation data if it's different than the defaults.
+				if ( 1 !== $variation_quantity_constraints['min'] ) {
+					$variation_data['min'] = $variation_quantity_constraints['min'];
+				}
+				if ( null !== $variation_quantity_constraints['max'] ) {
+					$variation_data['max'] = $variation_quantity_constraints['max'];
+				}
+				if ( 1 !== $variation_quantity_constraints['step'] ) {
+					$variation_data['step'] = $variation_quantity_constraints['step'];
+				}
+				if ( $variation->is_sold_individually() ) {
+					$variation_data['sold_individually'] = true;
+				}
+				$formatted_variations_data[ $variation->get_id() ] = $variation_data;
+			}
+
+			wp_interactivity_config(
+				'woocommerce',
+				array(
+					'products' => array(
+						$product->get_id() => array(
+							'variations' => $formatted_variations_data,
+						),
+					),
+				)
+			);
+
+			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/product-elements::state.productData.sold_individually';
+			$input_attributes['data-wp-bind--min']      = 'woocommerce/product-elements::state.productData.min';
+			$input_attributes['data-wp-bind--max']      = 'woocommerce/product-elements::state.productData.max';
+			$input_attributes['data-wp-bind--step']     = 'woocommerce/product-elements::state.productData.step';
+			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
+		}
+
+		$form = AddToCartWithOptionsUtils::make_quantity_input_interactive( $product_html, $wrapper_attributes, $input_attributes );
 
 		$product = $previous_product;
 

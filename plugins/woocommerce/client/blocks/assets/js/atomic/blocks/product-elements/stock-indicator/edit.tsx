@@ -5,21 +5,15 @@ import EditProductLink from '@woocommerce/editor-components/edit-product-link';
 import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { ProductQueryContext as Context } from '@woocommerce/blocks/product-query/types';
-import { useEffect } from '@wordpress/element';
-import { useProductDataContext } from '@woocommerce/shared-context';
 
 /**
  * Internal dependencies
  */
 import Block from './block';
-import withProductSelector from '../shared/with-product-selector';
-import { BLOCK_ICON as icon } from './constants';
-import metadata from './block.json';
 import type { BlockAttributes } from './types';
 
 const Edit = ( {
 	attributes,
-	setAttributes,
 	context,
 }: BlockEditProps< BlockAttributes > & { context: Context } ): JSX.Element => {
 	const { style, ...blockProps } = useBlockProps( {
@@ -30,12 +24,6 @@ const Edit = ( {
 		...attributes,
 		...context,
 	};
-	const isDescendentOfQueryLoop = Number.isFinite( context.queryId );
-
-	useEffect(
-		() => setAttributes( { isDescendentOfQueryLoop } ),
-		[ setAttributes, isDescendentOfQueryLoop ]
-	);
 
 	return (
 		<div
@@ -56,15 +44,7 @@ const Edit = ( {
 const StockIndicatorEdit: React.FC<
 	BlockEditProps< BlockAttributes > & { context: Context }
 > = ( props ) => {
-	const { product } = useProductDataContext();
-	if ( product.id === 0 ) {
-		return <Edit { ...props } />;
-	}
-	return withProductSelector( {
-		icon,
-		label: metadata.title,
-		description: metadata.description,
-	} )( Edit )( props );
+	return <Edit { ...props } />;
 };
 
 export default StockIndicatorEdit;

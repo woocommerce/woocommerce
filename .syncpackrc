@@ -162,6 +162,15 @@
 		},
 		{
 			"dependencies": [
+				"jest-fixed-jsdom"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "^0.0.10"
+		},
+		{
+			"dependencies": [
 				"eslint"
 			],
 			"packages": [
@@ -571,7 +580,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "27.5.x"
+			"pinVersion": "29.5.x"
 		},
 		{
 			"dependencies": [
@@ -607,7 +616,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^2.5.7"
+			"pinVersion": "^3.2.6"
 		},
 		{
 			"dependencies": [

@@ -1,21 +1,23 @@
 /**
  * External dependencies
  */
-import { getElement, store, getContext } from '@wordpress/interactivity';
+import {
+	getElement,
+	store,
+	getContext,
+	getConfig,
+} from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import { sanitize } from 'dompurify'; // eslint-disable-line import/named
+import type {
+	ProductData,
+	WooCommerceConfig,
+} from '@woocommerce/stores/woocommerce/cart';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',
@@ -47,12 +49,38 @@ const ALLOWED_ATTR = [
 ];
 
 export type Context = {
-	productElementKey: 'price_html' | 'availability';
+	productElementKey:
+		| 'price_html'
+		| 'availability'
+		| 'sku'
+		| 'weight'
+		| 'dimensions';
 };
 
 const productElementStore = store(
 	'woocommerce/product-elements',
 	{
+		state: {
+			get productData(): ProductData | undefined {
+				if ( ! productDataState?.productId ) {
+					return undefined;
+				}
+
+				const { products } = getConfig(
+					'woocommerce'
+				) as WooCommerceConfig;
+
+				if ( ! products ) {
+					return undefined;
+				}
+
+				return (
+					products?.[ productDataState.productId ]?.variations?.[
+						productDataState?.variationId || 0
+					] || products?.[ productDataState.productId ]
+				);
+			},
+		},
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
@@ -64,18 +92,14 @@ const productElementStore = store(
 				const { productElementKey } = getContext< Context >();
 
 				const productElementHtml =
-					wooState?.products?.[ productDataState?.productId ]
-						?.variations?.[ productDataState?.variationId || 0 ]?.[
-						productElementKey
-					] ||
-					wooState?.products?.[ productDataState?.productId ]?.[
+					productElementStore?.state?.productData?.[
 						productElementKey
 					];
 
 				if ( typeof productElementHtml === 'string' ) {
-					element.ref.innerHTML = sanitize( productElementHtml, {
-						ALLOWED_TAGS,
-						ALLOWED_ATTR,
+					element.ref.innerHTML = sanitizeHTML( productElementHtml, {
+						tags: ALLOWED_TAGS,
+						attr: ALLOWED_ATTR,
 					} );
 				}
 			},

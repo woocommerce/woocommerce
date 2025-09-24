@@ -118,6 +118,13 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-components', 'assets/client/blocks/blocks-components.js' );
 		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
 
+		// Sanitize.
+		$this->api->register_script(
+			'wc-sanitize',
+			'assets/client/admin/sanitize/index.js',
+			array()
+		);
+
 		// Customer Effort Score.
 		$this->api->register_script(
 			'wc-customer-effort-score',
@@ -145,15 +152,6 @@ final class AssetsController {
 	 * Register and enqueue assets for exclusive usage within the Site Editor.
 	 */
 	public function register_and_enqueue_site_editor_assets() {
-		$this->api->register_script( 'wc-blocks-classic-template-revert-button', 'assets/client/blocks/wc-blocks-classic-template-revert-button.js' );
-		$this->api->register_style( 'wc-blocks-classic-template-revert-button-style', 'assets/client/blocks/wc-blocks-classic-template-revert-button-style.css' );
-
-		$current_screen = get_current_screen();
-		if ( $current_screen instanceof \WP_Screen && 'site-editor' === $current_screen->base ) {
-			wp_enqueue_script( 'wc-blocks-classic-template-revert-button' );
-			wp_enqueue_style( 'wc-blocks-classic-template-revert-button-style' );
-		}
-
 		// Customer Effort Score.
 		wp_enqueue_script( 'wc-customer-effort-score' );
 		wp_enqueue_style( 'wc-customer-effort-score' );
@@ -345,17 +343,39 @@ final class AssetsController {
 	 */
 	private function get_script_dependency_src_array( array $dependencies ) {
 		$wp_scripts = wp_scripts();
-		return array_reduce(
-			$dependencies,
-			function ( $src, $handle ) use ( $wp_scripts ) {
-				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-					$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
-					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
+
+		$found_dependencies = array();
+		$this->gather_script_dependency_handles( $dependencies, $wp_scripts, $found_dependencies );
+
+		$src = array();
+		foreach ( $found_dependencies as $handle => $unused ) {
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+		}
+		return $src;
+	}
+
+	/**
+	 * Recursively gather all unique script dependency handles from a starting list.
+	 *
+	 * Traverses the dependency graph for each input handle, collecting any found handles
+	 * and their nested dependencies in the provided array. Used internally to build a
+	 * complete, deduplicated set of handles for further processing (e.g., mapping to src URLs).
+	 *
+	 * @param array       $dependencies       Array of initial script handles to process.
+	 * @param \WP_Scripts $wp_scripts         WP_Scripts instance containing all registered scripts.
+	 * @param array       $found_dependencies Reference to array in which discovered handles are stored.
+	 *
+	 * @return void
+	 */
+	private function gather_script_dependency_handles( array $dependencies, \WP_Scripts $wp_scripts, &$found_dependencies = array() ) {
+		foreach ( $dependencies as $handle ) {
+			if ( isset( $wp_scripts->registered[ $handle ] ) && ! isset( $found_dependencies[ $handle ] ) ) {
+				$found_dependencies[ $handle ] = true;
+				if ( ! empty( $wp_scripts->registered[ $handle ]->deps ) ) {
+					$this->gather_script_dependency_handles( $wp_scripts->registered[ $handle ]->deps, $wp_scripts, $found_dependencies );
 				}
-				return $src;
-			},
-			array()
-		);
+			}
+		}
 	}
 
 	/**
