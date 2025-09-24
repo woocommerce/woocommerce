@@ -175,6 +175,8 @@ class WC_Gateway_Paypal_Request {
 			// Remember the payment source: payment_source is not patchable.
 			// If the payment source is changed, we need to create a new PayPal order.
 			$order->update_meta_data( '_paypal_payment_source', $payment_source );
+
+			$order->set_payment_method( $this->gateway->id );
 			$order->save();
 
 			return array(
