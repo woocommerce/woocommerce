@@ -919,8 +919,8 @@ class WooPaymentsService {
 	 *
 	 * @return array The result of the test account initialization.
 	 * @throws ApiException If the given onboarding step ID or step data is invalid.
-	 *                                           If the onboarding action can not be performed due to the current state
-	 *                                           of the site or there was an error initializing the test account.
+	 *                      If the onboarding action can not be performed due to the current state
+	 *                      of the site or there was an error initializing the test account.
 	 */
 	public function onboarding_test_account_init( string $location, ?string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
