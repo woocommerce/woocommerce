@@ -643,10 +643,8 @@ class WC_Session_Handler extends WC_Session {
 					$batch_size
 				)
 			);
-			if ( $deleted_entries_count > 0 ) {
-				$deleted_entries_total += $deleted_entries_count;
-				usleep(10_000);
-			}
+			$deleted_entries_total += $deleted_entries_count;
+			usleep( ( 10_000 / $batch_size ) * $deleted_entries_count );
 		} while ( $deleted_entries_count === $batch_size );
 
 		if ( $deleted_entries_total > 0 && class_exists( 'WC_Cache_Helper' ) ) {
