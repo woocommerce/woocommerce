@@ -106,8 +106,7 @@ class PlatformRegistry {
 	 *
 	 * @return PlatformFetcherInterface An instance of the platform's fetcher class.
 	 *
-	 * @throws InvalidArgumentException If the platform is not found or the fetcher class is invalid.
-	 * @throws InvalidArgumentException If credentials are not configured for the platform.
+	 * @throws InvalidArgumentException If the platform is not found, fetcher class is invalid, or credentials are not configured.
 	 */
 	public function get_fetcher( string $platform_id ): PlatformFetcherInterface {
 		$platform = $this->get_platform( $platform_id );
@@ -161,7 +160,7 @@ class PlatformRegistry {
 		// Get credentials from credential manager and pass to fetcher constructor.
 		$credentials = $this->credential_manager->get_credentials( $platform_id );
 		if ( null === $credentials ) {
-			throw new \InvalidArgumentException(
+			throw new InvalidArgumentException(
 				sprintf(
 					/* translators: %s: platform ID */
 					'No credentials found for platform "%s". Please configure credentials using: wp wc migrate setup',
