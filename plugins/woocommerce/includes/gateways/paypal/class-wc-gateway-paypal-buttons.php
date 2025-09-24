@@ -86,7 +86,6 @@ class WC_Gateway_Paypal_Buttons {
 		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
 
 		return array(
-			// phpcs:ignore Generic.Commenting.Todo.TaskFound
 			'client-id'       => $this->get_client_id(),
 			'components'      => 'buttons,funding-eligibility,messages',
 			'disable-funding' => 'card,applepay',
