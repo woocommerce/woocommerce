@@ -476,13 +476,6 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  * @return void
  */
 function wc_rest_lazy_load_namespace( string $route_namespace, callable $callback ) {
-	if ( function_exists( 'register_rest_namespace' ) ) {
-		add_action( 'rest_lazy_load_namespace_' . $route_namespace, $callback );
-		register_rest_namespace( $route_namespace );
-
-		return;
-	}
-
 	$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 	if ( is_callable( array( $rest_api_util, 'lazy_load_namespace' ) ) ) {
 		/**
