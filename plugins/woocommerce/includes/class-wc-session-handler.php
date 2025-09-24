@@ -635,7 +635,7 @@ class WC_Session_Handler extends WC_Session {
 		$batch_size            = 100;
 		$deleted_entries_total = 0;
 		do {
-			$deleted_entries_count = (int) $wpdb->query(
+			$deleted_entries_count  = (int) $wpdb->query(
 				$wpdb->prepare(
 					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
 					$this->_table,
