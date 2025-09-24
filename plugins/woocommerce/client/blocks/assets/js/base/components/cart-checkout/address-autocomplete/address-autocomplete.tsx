@@ -205,10 +205,12 @@ export const AddressAutocomplete = ( {
 				// Restore focus and cursor position if it had focus
 				if ( hasFocus ) {
 					inputElement.focus();
-					inputElement.setSelectionRange(
-						selectionStart,
-						selectionEnd
-					);
+					if ( selectionStart !== null && selectionEnd !== null ) {
+						inputElement.setSelectionRange(
+							selectionStart,
+							selectionEnd
+						);
+					}
 				}
 			}
 		} );
