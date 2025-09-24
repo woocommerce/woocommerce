@@ -1,6 +1,6 @@
-<?php // phpcs:ignore WordPress.Files.FileName.InvalidClassFileName
+<?php
 /**
- * QueryUtils class.
+ * CollectionQuery class.
  *
  * @package WooCommerce\RestApi
  * @internal This file is for internal use only and should not be used by external code.
@@ -12,21 +12,22 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
 use WP_REST_Request;
 use WC_Order;
 
 /**
- * QueryUtils class.
+ * CollectionQuery class.
  *
  * @internal This class is for internal use only and should not be used by external code.
  */
-final class QueryUtils {
+final class CollectionQuery extends AbstractCollectionQuery {
 	/**
 	 * Get query schema.
 	 *
 	 * @return array
 	 */
-	public function get_query_schema() {
+	public function get_query_schema(): array {
 		return array(
 			'note_type' => array(
 				'default'           => 'all',
@@ -40,15 +41,14 @@ final class QueryUtils {
 	}
 
 	/**
-	 * Get results of the query.
+	 * Prepares query args.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @param WC_Order        $order The order object.
 	 * @return array
 	 */
-	public function get_query_results( WP_REST_Request $request, WC_Order $order ): array {
+	public function get_query_args( WP_REST_Request $request ): array {
 		$args = array(
-			'post_id' => $order->get_id(),
+			'post_id' => $request['order_id'] ?? 0,
 			'status'  => 'approve',
 			'type'    => 'order_note',
 		);
@@ -71,8 +71,19 @@ final class QueryUtils {
 			);
 		}
 
+		return $args;
+	}
+
+	/**
+	 * Get results of the query.
+	 *
+	 * @param array           $query_args The query arguments.
+	 * @param WP_REST_Request $request The request object.
+	 * @return array
+	 */
+	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
-		$results = get_comments( $args );
+		$results = get_comments( $query_args );
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
 		return (array) $results;

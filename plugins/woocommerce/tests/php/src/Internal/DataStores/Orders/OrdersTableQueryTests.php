@@ -13,6 +13,8 @@ use WC_Order;
 
 /**
  * Class OrdersTableQueryTests.
+ *
+ * @group order-query-tests
  */
 class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
@@ -608,5 +610,73 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 		$query = new OrdersTableQuery( $args );
 		$this->assertEquals( $args, $query->get_query_args() );
+	}
+
+	/**
+	 * @testDox Total filtering with operators works as expected for HPOS storage.
+	 */
+	public function test_total_filtering_with_operators() {
+		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
+		foreach ( $order_totals_to_test as $order_total ) {
+			$order = OrderHelper::create_order();
+			$order->set_total( $order_total );
+			$order->save();
+		}
+
+		$test_matrix = array(
+			array(
+				'value'          => 250.50,
+				'operator'       => '=',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '!=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>',
+				'expected_count' => 2,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '>=',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<',
+				'expected_count' => 5,
+			),
+			array(
+				'value'          => 250.50,
+				'operator'       => '<=',
+				'expected_count' => 7,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'BETWEEN',
+				'expected_count' => 4,
+			),
+			array(
+				'value'          => array( 100, 500 ),
+				'operator'       => 'NOT BETWEEN',
+				'expected_count' => 5,
+			),
+		);
+
+		foreach ( $test_matrix as $test ) {
+			$orders = wc_get_orders(
+				array(
+					'total' => array(
+						'value'    => $test['value'],
+						'operator' => $test['operator'],
+					),
+				)
+			);
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			$this->assertCount( $test['expected_count'], $orders, print_r( $test, true ) );
+		}
 	}
 }
