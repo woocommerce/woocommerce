@@ -313,6 +313,73 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get onboarding details with lock at the TTL boundary.
+	 */
+	public function test_get_onboarding_details_with_lock_at_ttl_boundary(): void {
+		$location    = 'US';
+		$boundary_ts = $this->current_time - WooPaymentsService::NOX_ONBOARDING_LOCKED_TTL_SECONDS;
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $boundary_ts ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? $boundary_ts : $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details with a future lock timestamp.
+	 */
+	public function test_get_onboarding_details_with_future_lock_timestamp(): void {
+		$location  = 'US';
+		$future_ts = $this->current_time + 10;
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) use ( $future_ts ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? $future_ts : $default_value;
+				},
+			)
+		);
+
+		try {
+			$this->sut->get_onboarding_details( $location, '/some/path' );
+
+			$this->fail( 'Expected ApiException not thrown.' );
+		} catch ( ApiException $e ) {
+			$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $e->getErrorCode() );
+		}
+	}
+
+	/**
+	 * Test get onboarding details with zero string lock value.
+	 */
+	public function test_get_onboarding_details_with_zero_string_lock_value(): void {
+		$location = 'US';
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'get_option' => function ( $option_name, $default_value = null ) {
+					return WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY === $option_name ? '0' : $default_value;
+				},
+			)
+		);
+
+		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
+
+		$this->assertIsArray( $result );
+	}
+
+	/**
 	 * Test get onboarding details - general state.
 	 */
 	public function test_get_onboarding_details_general_state(): void {
