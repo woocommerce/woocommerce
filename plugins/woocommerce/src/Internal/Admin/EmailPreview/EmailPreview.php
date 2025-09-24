@@ -34,21 +34,6 @@ class EmailPreview {
 	const TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS = 'woocommerce_preview_email_improvements';
 
 	/**
-	 * Dummy download ID used in email previews.
-	 */
-	private const DUMMY_DOWNLOAD_ID = 'dummy_download_1';
-
-	/**
-	 * Default download limit for dummy downloadable products.
-	 */
-	private const DUMMY_DOWNLOAD_LIMIT = 5;
-
-	/**
-	 * Default download expiry (in days) for dummy downloadable products.
-	 */
-	private const DUMMY_DOWNLOAD_EXPIRY = 30;
-
-	/**
 	 * All fields IDs that can customize email styles in Settings.
 	 *
 	 * @var array
@@ -716,7 +701,7 @@ class EmailPreview {
 				'product_id'     => $this->get_dummy_downloadable_product()->get_id(),
 				'download_url'   => 'https://example.com/download',
 				'download_name'  => __( 'Sample Download File.pdf', 'woocommerce' ),
-				'access_expires' => time() + ( self::DUMMY_DOWNLOAD_EXPIRY * DAY_IN_SECONDS ),
+				'access_expires' => time() + ( 30 * DAY_IN_SECONDS ),
 			),
 		);
 
