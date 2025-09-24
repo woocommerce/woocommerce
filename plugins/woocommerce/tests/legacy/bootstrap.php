@@ -6,15 +6,12 @@
  * @package WooCommerce Tests
  */
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\Admin\FeaturePlugin;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\CodeHacker;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\BypassFinalsHack;
-use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
-use Automattic\Jetpack\Constants;
 
 /**
  * Class WC_Unit_Tests_Bootstrap
@@ -102,9 +99,7 @@ class WC_Unit_Tests_Bootstrap {
 		// re-initialize dependency injection, this needs to be the last operation after everything else is in place.
 		$this->initialize_dependency_injection();
 
-		if ( getenv( 'HPOS' ) ) {
-			$this->initialize_hpos();
-		}
+		$this->maybe_initialize_hpos();
 
 		// phpcs:ignore WordPress.PHP.DevelopmentFunctions, WordPress.PHP.DiscouragedPHPFunctions
 		error_reporting( error_reporting() & ~E_DEPRECATED );
@@ -173,14 +168,13 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
-	 * Initialize HPOS if tests need to run in HPOS context.
+	 * Configure the order datastore based on the DISABLE_HPOS environment variable.
 	 *
 	 * @return void
 	 */
-	private function initialize_hpos() {
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::delete_order_custom_tables();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order_custom_table_if_not_exist();
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( true );
+	private function maybe_initialize_hpos() {
+		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
+		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
 	}
 
 	/**
@@ -220,7 +214,10 @@ class WC_Unit_Tests_Bootstrap {
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
-		Constants::set_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
+		// Enable Back In Stock alpha during tests.
+		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		update_option( 'woocommerce_onboarding_opt_in', 'yes' );
@@ -239,10 +236,6 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WP_UNINSTALL_PLUGIN', true );
 		define( 'WC_REMOVE_ALL_DATA', true );
 		include $this->plugin_dir . '/uninstall.php';
-
-		if ( ! getenv( 'HPOS' ) ) {
-			add_filter( 'woocommerce_enable_hpos_by_default_for_new_shops', '__return_false' );
-		}
 
 		// Always load PayPal Standard for unit tests.
 		$paypal = class_exists( 'WC_Gateway_Paypal' ) ? WC_Gateway_Paypal::get_instance() : null;

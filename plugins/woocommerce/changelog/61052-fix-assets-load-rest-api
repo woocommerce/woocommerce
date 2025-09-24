@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Refactor asset loading in Bootstrap class.
