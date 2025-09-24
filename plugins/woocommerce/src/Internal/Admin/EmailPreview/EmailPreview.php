@@ -591,8 +591,6 @@ class EmailPreview {
 		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
 		// Provide dummy downloadable items for email preview.
 		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
-		// Make sure order has downloadable items and download permissions.
-		// Note: Do not override permission logic or force-render downloads; respect core rules.
 	}
 
 	/**
@@ -606,7 +604,6 @@ class EmailPreview {
 		remove_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10 );
 		remove_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10 );
 		remove_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10 );
-		// No additional cleanup needed for downloads rendering/permissions.
 		$this->restore_locale();
 	}
 
