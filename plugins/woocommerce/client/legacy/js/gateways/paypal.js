@@ -1,6 +1,7 @@
 jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
+	let orderId = '';
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -10,6 +11,48 @@ jQuery(function ($) {
 
 		const buttons = paypal.Buttons( {
 			async createOrder() {
+				// If we're inside the product page, we need to empty the cart,
+				// and add the current product to the cart.
+				if ( paypal_standard.isProductPage ) {
+					// Empty the cart.
+					await window.wp.apiFetch( {
+						method: 'DELETE',
+						path: '/wc/store/v1/cart/items',
+					} );
+
+					// Get product ID from the value of the "add-to-cart" button.
+					const addToCartBtn = document.querySelector('[name="add-to-cart"]');
+					let productId = addToCartBtn ? addToCartBtn.value : null;
+					const variationIdField = document.querySelector( '[name="variation_id"]' );
+					const variationId = variationIdField ? variationIdField.value : null;
+
+					if ( variationId ) {
+						productId = variationId;
+					}
+
+					if ( ! productId ) {
+						return null;
+					}
+
+					// Get quantity from the value of the "quantity" input field.
+					const quantityField = document.querySelector( '[name="quantity"]' );
+					const quantity = quantityField ? quantityField.value : null;
+					if ( ! quantity ) {
+						return null;
+					}
+
+
+					// Add the product to the cart.
+					await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/store/v1/cart/items',
+						data: {
+							id: productId,
+							quantity,
+						},
+					} );
+				}
+
 				let responseData;
 				try {
 					// Create a draft order in WooCommerce.
@@ -22,6 +65,8 @@ jQuery(function ($) {
 					} );
 
 					if ( ! responseData.order_id ) {
+						// eslint-disable-next-line no-console
+						console.error( 'Failed to create WooCommerce order', responseData );
 						return null;
 					}
 
@@ -37,18 +82,40 @@ jQuery(function ($) {
 						},
 					} );
 		
+					orderId = paypalResponseData.order_id;
 					orderReceivedUrl = paypalResponseData.return_url;
 
 					return paypalResponseData.paypal_order_id;
 				} catch ( error ) {
+					// eslint-disable-next-line no-console
 					console.error( 'Failed to create order', error );
 					return null;
 				}
 			},
 
-			async onApprove( data ) {
+			onApprove( data ) {
 				if ( data.paymentID && orderReceivedUrl ) {
 					window.location.href = orderReceivedUrl;
+				}
+			},
+
+			async onCancel() {
+				try {
+					await window.wp.apiFetch( {
+						method: 'POST',
+						path: '/wc/v3/paypal-buttons/cancel-payment',
+						headers: {
+							Nonce: paypal_standard.cancel_payment_nonce,
+						},
+						data: {
+							order_id: orderId,
+						},
+					} );
+		
+					orderReceivedUrl = '';
+				} catch ( error ) {
+					// eslint-disable-next-line no-console
+					console.error( 'Failed to cancel PayPal payment', error );
 				}
 			},
 
@@ -58,14 +125,14 @@ jQuery(function ($) {
 					'<ul class="woocommerce-error" role="alert"><li>' +
 						'PayPal error: ' +
 						sanitizedErrorMessage +
-					'</li></ul>';	
-				
+					'</li></ul>';
+
 				const $noticeContainer = $( '.woocommerce-notices-wrapper' ).first();
 
 				if ( ! $noticeContainer.length ) {
 					return;
 				}
-		
+
 				$(
 					'.woocommerce-NoticeGroup-checkout, .woocommerce-error, .woocommerce-message'
 				).remove();
@@ -76,6 +143,7 @@ jQuery(function ($) {
 
 
 		buttons.render( container ).catch( function ( err ) {
+			// eslint-disable-next-line no-console
 			console.error( 'Failed to render PayPal buttons', err );
 		});
 	}

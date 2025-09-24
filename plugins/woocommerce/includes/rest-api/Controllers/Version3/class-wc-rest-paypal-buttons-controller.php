@@ -11,9 +11,11 @@ declare(strict_types=1);
 
 defined( 'ABSPATH' ) || exit;
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-
 use Automattic\WooCommerce\Enums\OrderStatus;
+
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+}
 
 
 /**
@@ -50,7 +52,17 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_order' ),
-				'permission_callback' => array( $this, 'validate_create_order' ),
+				'permission_callback' => array( $this, 'validate_create_order_request' ),
+			)
+		);
+
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/cancel-payment',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'cancel_payment' ),
+				'permission_callback' => array( $this, 'validate_cancel_payment_request' ),
 			)
 		);
 	}
@@ -61,10 +73,24 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool True if the create order request is valid, false otherwise.
 	 */
-	public function validate_create_order( WP_REST_Request $request ) {
+	public function validate_create_order_request( WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
 			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_create_order' );
+		}
+		return false;
+	}
+
+	/**
+	 * Validate the cancel payment request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool True if the cancel payment request is valid, false otherwise.
+	 */
+	public function validate_cancel_payment_request( WP_REST_Request $request ) {
+		if ( $request->get_header( 'Nonce' ) ) {
+			$nonce = $request->get_header( 'Nonce' );
+			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_cancel_payment' );
 		}
 		return false;
 	}
@@ -95,6 +121,9 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$existing_paypal_order_id = $order->get_meta( '_paypal_order_id' );
 
 		if ( $existing_paypal_order_id ) {
+			$order->update_status( OrderStatus::PENDING );
+			$order->save();
+
 			return new WP_REST_Response(
 				array(
 					'paypal_order_id' => $existing_paypal_order_id,
@@ -124,5 +153,31 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Cancel a PayPal payment. This is used to move the woocommerce order back to a draft status.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
+	 */
+	public function cancel_payment( WP_REST_Request $request ) {
+		$data = $request->get_json_params();
+
+		if ( empty( $data['order_id'] ) ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
+		}
+
+		$order_id = $data['order_id'];
+		$order    = wc_get_order( $order_id );
+
+		if ( ! $order ) {
+			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+		}
+
+		$order->update_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		return new WP_REST_Response( array( 'success' => true ), 200 );
 	}
 }
