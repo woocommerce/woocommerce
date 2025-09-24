@@ -8,7 +8,6 @@ import type {
 	AddressForm,
 	ContactFormValues,
 	OrderFormValues,
-	AddressFormType,
 } from '@woocommerce/settings';
 
 /**
