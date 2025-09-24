@@ -34,7 +34,7 @@ class RestApiUtil {
 	 * and behavior is not guaranteed.  It solely exists so that $callback_filter_id does not need to be part of the
 	 * public interface to `wc_rest_lazy_load_namespace()`. Do not call it directly.
 	 *
-	 * @param string   $ns                 The namespace to check.
+	 * @param string   $route_namespace    The namespace to check.
 	 * @param callable $callback           The callback to execute if the namespace should be loaded.
 	 * @param string   $rest_route         (Optional) The REST route to check against.
 	 * @param string   $callback_filter_id (Internal) Used to prevent recursive filter registration.
@@ -44,15 +44,15 @@ class RestApiUtil {
 	 * @see      \wc_rest_lazy_load_namespace()
 	 * @internal Do not call this function directly. Use `\wc_rest_lazy_load_namespace()`.  Backward compatibility is not guaranteed.
 	 */
-	public function lazy_load_namespace( string $ns, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
+	public function lazy_load_namespace( string $route_namespace, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
 		if ( '' === $rest_route ) {
 			$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 		}
 
 		if ( '' !== $rest_route ) {
-			$rest_route = trailingslashit( ltrim( $rest_route, '/' ) );
-			$ns         = trailingslashit( $ns );
-			if ( '/' === $rest_route || str_starts_with( $rest_route, $ns ) ) {
+			$rest_route      = trailingslashit( ltrim( $rest_route, '/' ) );
+			$route_namespace = trailingslashit( $route_namespace );
+			if ( '/' === $rest_route || str_starts_with( $rest_route, $route_namespace ) ) {
 				// Load all namespaces for root requests (/wp-json/) to maintain API discovery functionality.
 				if ( '' !== $callback_filter_id ) {
 					// Remove the current filter prior to the callback, to prevent recursive callback issues.
@@ -68,9 +68,9 @@ class RestApiUtil {
 
 		// Register a filter to check again on rest_pre_dispatch for dynamic loading.
 		if ( '' === $callback_filter_id ) {
-			$callback_filter    = function ( $filter_result, $server, $request ) use ( $ns, $callback, &$callback_filter_id ) {
+			$callback_filter    = function ( $filter_result, $server, $request ) use ( $route_namespace, $callback, &$callback_filter_id ) {
 				if ( is_callable( array( $request, 'get_route' ) ) ) {
-					$this->lazy_load_namespace( $ns, $callback, $request->get_route(), $callback_filter_id );
+					$this->lazy_load_namespace( $route_namespace, $callback, $request->get_route(), $callback_filter_id );
 				}
 
 				return $filter_result;

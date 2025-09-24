@@ -470,26 +470,26 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
  * route, a callback will be registered to possibly load the namespace again on `rest_pre_dispatch`;
  * this is done to allow the namespace to be loaded on the fly during `rest_do_request()` calls.
  *
- * @param string   $ns         The namespace to check.
- * @param callable $callback   The callback to execute if the namespace should be loaded.
- * @param string   $rest_route (Optional) The REST route to check against.
+ * @param string   $route_namespace The namespace to check.
+ * @param callable $callback        The callback to execute if the namespace should be loaded.
+ * @param string   $rest_route      (Optional) The REST route to check against.
  *
  * @return void
  */
-function wc_rest_lazy_load_namespace( string $ns, callable $callback, string $rest_route = '' ) {
+function wc_rest_lazy_load_namespace( string $route_namespace, callable $callback, string $rest_route = '' ) {
 	$rest_api_util = wc_get_container()->get( RestApiUtil::class );
 	if ( is_callable( array( $rest_api_util, 'lazy_load_namespace' ) ) ) {
 		/**
 		 * Filter whether to lazy load the namespace.  When set to false, the namespace will be loaded immediately during initialization.
 		 *
 		 * @param bool   $should_lazy_load_namespace Whether to lazy load the namespace instead of loading immediately.
-		 * @param string $ns                         The namespace.
+		 * @param string $route_namespace            The namespace.
 		 *
 		 * @since 10.3.0
 		 */
-		$should_lazy_load_namespace = apply_filters( 'woocommerce_rest_should_lazy_load_namespace', true, $ns );
+		$should_lazy_load_namespace = apply_filters( 'woocommerce_rest_should_lazy_load_namespace', true, $route_namespace );
 		if ( $should_lazy_load_namespace ) {
-			$rest_api_util->lazy_load_namespace( $ns, $callback, $rest_route );
+			$rest_api_util->lazy_load_namespace( $route_namespace, $callback, $rest_route );
 
 			return;
 		}
