@@ -84,51 +84,32 @@ export const AddressAutocomplete = ( {
 	const [ activeProviderBranding, setActiveProviderBranding ] =
 		useState< string >( '' );
 
+	const activeProvider = useSelect(
+		( select ) => {
+			return select( checkoutStore ).getActiveAutocompleteProvider(
+				addressType
+			);
+		},
+		[ addressType ]
+	);
+
 	// Used to set active provider on mount and when country changes.
 	useEffect( () => {
 		if ( ! window?.wc?.addressAutocomplete?.providers ) {
 			return;
 		}
-		// Check providers in preference order (server handles preferred provider ordering).
-		for ( const serverProvider of serverProviders ) {
-			const provider =
-				window?.wc?.addressAutocomplete?.providers?.[
-					serverProvider.id
-				];
 
-			if ( provider && provider.canSearch( country ) ) {
-				setActiveAddressAutocompleteProvider(
-					provider.id,
-					addressType
-				);
-
-				setActiveProviderBranding(
-					serverProviders.find( ( p ) => p.id === provider.id )
-						?.branding_html || ''
-				);
-
-				// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-				if ( window?.wc?.addressAutocomplete?.activeProvider ) {
-					window.wc.addressAutocomplete.activeProvider[
-						addressType
-					] = provider;
-				}
-				return;
-			}
-		}
-
-		setActiveProviderBranding( '' );
-		setActiveAddressAutocompleteProvider( '', addressType );
-		// Set globally as this is going to be the source of truth where the actual provider objects are stored.
-		if ( window?.wc?.addressAutocomplete?.activeProvider ) {
-			window.wc.addressAutocomplete.activeProvider[ addressType ] = null;
-		}
+		const activeProviderBrandingHtml =
+			serverProviders.find( ( p ) => p.id === activeProvider )
+				?.branding_html || '';
+		setActiveProviderBranding( activeProviderBrandingHtml );
 	}, [
 		country,
 		registeredProviders,
 		setActiveAddressAutocompleteProvider,
 		addressType,
 		serverProviders,
+		activeProvider,
 	] );
 
 	const [ suggestions, setSuggestions ] = useState<
