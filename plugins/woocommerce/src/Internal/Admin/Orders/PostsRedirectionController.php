@@ -198,7 +198,12 @@ class PostsRedirectionController {
 	 * @since 10.3.0
 	 */
 	private function maybe_update_menu_items(): void {
-		global $submenu;
+		global $pagenow, $submenu;
+
+		// Do not conflict with CPT > HPOS redirection.
+		if ( 'edit.php' === $pagenow && in_array( $_GET['post_type'] ?? '', wc_get_order_types( 'admin-menu' ), true ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return;
+		}
 
 		if ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ) {
 			return;
