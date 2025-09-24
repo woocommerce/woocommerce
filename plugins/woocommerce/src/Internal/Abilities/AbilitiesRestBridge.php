@@ -29,35 +29,59 @@ class AbilitiesRestBridge {
 		return array(
 			array(
 				'controller' => \WC_REST_Products_Controller::class,
-				'route'      => '/wc/v3/products',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/products-list',
 						'operation'   => 'list',
+						'route'       => '/wc/v3/products',
+						'route_params' => array(),
 						'label'       => __( 'List Products', 'woocommerce' ),
 						'description' => __( 'Retrieve a paginated list of products with optional filters for status, category, price range, and other attributes.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/products-get',
 						'operation'   => 'get',
+						'route'       => '/wc/v3/products/{id}',
+						'route_params' => array(
+							'id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Product ID', 'woocommerce' ),
+							),
+						),
 						'label'       => __( 'Get Product', 'woocommerce' ),
 						'description' => __( 'Retrieve detailed information about a single product by ID, including price, description, images, and metadata.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/products-create',
 						'operation'   => 'create',
+						'route'       => '/wc/v3/products',
+						'route_params' => array(),
 						'label'       => __( 'Create Product', 'woocommerce' ),
 						'description' => __( 'Create a new product in WooCommerce with name, price, description, and other product attributes.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/products-update',
 						'operation'   => 'update',
+						'route'       => '/wc/v3/products/{id}',
+						'route_params' => array(
+							'id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Product ID', 'woocommerce' ),
+							),
+						),
 						'label'       => __( 'Update Product', 'woocommerce' ),
 						'description' => __( 'Update an existing product by modifying its attributes such as price, stock, description, or metadata.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/products-delete',
 						'operation'   => 'delete',
+						'route'       => '/wc/v3/products/{id}',
+						'route_params' => array(
+							'id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Product ID', 'woocommerce' ),
+							),
+						),
 						'label'       => __( 'Delete Product', 'woocommerce' ),
 						'description' => __( 'Permanently delete a product from the store. This action cannot be undone.', 'woocommerce' ),
 					),
@@ -65,29 +89,46 @@ class AbilitiesRestBridge {
 			),
 			array(
 				'controller' => \WC_REST_Orders_Controller::class,
-				'route'      => '/wc/v3/orders',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/orders-list',
 						'operation'   => 'list',
+						'route'       => '/wc/v3/orders',
+						'route_params' => array(),
 						'label'       => __( 'List Orders', 'woocommerce' ),
 						'description' => __( 'Retrieve a paginated list of orders with optional filters for status, customer, date range, and other criteria.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/orders-get',
 						'operation'   => 'get',
+						'route'       => '/wc/v3/orders/{id}',
+						'route_params' => array(
+							'id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Order ID', 'woocommerce' ),
+							),
+						),
 						'label'       => __( 'Get Order', 'woocommerce' ),
 						'description' => __( 'Retrieve detailed information about a single order by ID, including line items, customer details, and payment information.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/orders-create',
 						'operation'   => 'create',
+						'route'       => '/wc/v3/orders',
+						'route_params' => array(),
 						'label'       => __( 'Create Order', 'woocommerce' ),
 						'description' => __( 'Create a new order with customer information, line items, shipping details, and payment information.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/orders-update',
 						'operation'   => 'update',
+						'route'       => '/wc/v3/orders/{id}',
+						'route_params' => array(
+							'id' => array(
+								'type'        => 'integer',
+								'description' => __( 'Order ID', 'woocommerce' ),
+							),
+						),
 						'label'       => __( 'Update Order', 'woocommerce' ),
 						'description' => __( 'Update an existing order by modifying status, customer information, line items, or other order details.', 'woocommerce' ),
 					),
@@ -95,11 +136,12 @@ class AbilitiesRestBridge {
 			),
 			array(
 				'controller' => \WC_REST_System_Status_Controller::class,
-				'route'      => '/wc/v3/system_status',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/system-status-get',
 						'operation'   => 'list',
+						'route'       => '/wc/v3/system_status',
+						'route_params' => array(),
 						'label'       => __( 'Get System Status', 'woocommerce' ),
 						'description' => __( 'Retrieve comprehensive system status information including environment details, database info, active plugins, theme, and WooCommerce settings.', 'woocommerce' ),
 					),

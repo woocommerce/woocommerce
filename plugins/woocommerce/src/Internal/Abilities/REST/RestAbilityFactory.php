@@ -34,7 +34,7 @@ class RestAbilityFactory {
 		$controller = new $controller_class();
 
 		foreach ( $config['abilities'] as $ability_config ) {
-			self::register_single_ability( $controller, $ability_config, $config['route'] );
+			self::register_single_ability( $controller, $ability_config );
 		}
 	}
 
@@ -43,13 +43,16 @@ class RestAbilityFactory {
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param array  $ability_config Ability configuration array.
-	 * @param string $route REST route for this controller.
 	 */
-	private static function register_single_ability( $controller, array $ability_config, string $route ): void {
+	private static function register_single_ability( $controller, array $ability_config ): void {
 		// Only proceed if wp_register_ability function exists.
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return;
 		}
+
+		// Get route and route_params from ability configuration.
+		$ability_route = $ability_config['route'];
+		$route_params = isset( $ability_config['route_params'] ) ? $ability_config['route_params'] : array();
 
 		try {
 			wp_register_ability(
@@ -57,10 +60,10 @@ class RestAbilityFactory {
 				array(
 					'label'               => $ability_config['label'],
 					'description'         => $ability_config['description'],
-					'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
+					'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'], $route_params ),
 					'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
-					'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
-						return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
+					'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $ability_route ) {
+						return self::execute_operation( $controller, $ability_config['operation'], $input, $ability_route );
 					},
 					'permission_callback' => function () use ( $controller, $ability_config ) {
 						return self::check_permission( $controller, $ability_config['operation'] );
@@ -84,14 +87,20 @@ class RestAbilityFactory {
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param string $operation Operation type (list, get, create, update, delete).
+	 * @param array  $route_params Route parameters configuration.
 	 * @return array Input schema array.
 	 */
-	private static function get_schema_for_operation( $controller, string $operation ): array {
+	private static function get_schema_for_operation( $controller, string $operation, array $route_params = array() ): array {
 		switch ( $operation ) {
 			case 'list':
 				// Use controller's collection parameters.
 				if ( method_exists( $controller, 'get_collection_params' ) ) {
-					return self::sanitize_args_to_schema( $controller->get_collection_params() );
+					$schema = self::sanitize_args_to_schema( $controller->get_collection_params() );
+
+					// Add route parameters from ability configuration.
+					$schema = self::merge_route_params_into_schema( $schema, $route_params );
+
+					return $schema;
 				}
 				break;
 
@@ -99,51 +108,89 @@ class RestAbilityFactory {
 				// Use controller's creatable schema.
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
 					$args = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE );
-					return self::sanitize_args_to_schema( $args );
+					$schema = self::sanitize_args_to_schema( $args );
+
+					// Add route parameters from ability configuration.
+					$schema = self::merge_route_params_into_schema( $schema, $route_params );
+
+					return $schema;
 				}
 				break;
 
 			case 'update':
-				// Use controller's editable schema + ID.
+				// Use controller's editable schema.
 				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
 					$args   = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE );
 					$schema = self::sanitize_args_to_schema( $args );
 
-					// Add ID field for update operations.
-					$schema['properties']['id'] = array(
-						'type'        => 'integer',
-						'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
-					);
-
-					// Ensure ID is required.
-					if ( ! isset( $schema['required'] ) ) {
-						$schema['required'] = array();
-					}
-					if ( ! in_array( 'id', $schema['required'], true ) ) {
-						$schema['required'][] = 'id';
-					}
+					// Add route parameters from ability configuration.
+					$schema = self::merge_route_params_into_schema( $schema, $route_params );
 
 					return $schema;
 				}
 				break;
 
 			case 'get':
-			case 'delete':
-				// Only need ID.
-				return array(
-					'type'       => 'object',
-					'properties' => array(
-						'id' => array(
-							'type'        => 'integer',
-							'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
-						),
-					),
-					'required'   => array( 'id' ),
+				// Start with route parameters from ability configuration.
+				$schema = self::merge_route_params_into_schema(
+					array( 'type' => 'object', 'properties' => array() ),
+					$route_params
 				);
+
+				return $schema;
+
+			case 'delete':
+				// Use controller's deletable schema for additional parameters like 'force'.
+				if ( method_exists( $controller, 'get_endpoint_args_for_item_schema' ) ) {
+					$args = $controller->get_endpoint_args_for_item_schema( \WP_REST_Server::DELETABLE );
+					$schema = self::sanitize_args_to_schema( $args );
+
+					// Add route parameters from ability configuration.
+					$schema = self::merge_route_params_into_schema( $schema, $route_params );
+
+					return $schema;
+				}
+
+				// Fallback to just route parameters if controller method doesn't exist.
+				$schema = self::merge_route_params_into_schema(
+					array( 'type' => 'object', 'properties' => array() ),
+					$route_params
+				);
+
+				return $schema;
 		}
 
 		// Fallback.
 		return array( 'type' => 'object' );
+	}
+
+	/**
+	 * Merge route parameters into schema.
+	 *
+	 * @param array $schema Base schema.
+	 * @param array $route_params Route parameters configuration.
+	 * @return array Schema with route parameters merged in.
+	 */
+	private static function merge_route_params_into_schema( array $schema, array $route_params ): array {
+		// Ensure schema has required structure.
+		if ( ! isset( $schema['properties'] ) ) {
+			$schema['properties'] = array();
+		}
+		if ( ! isset( $schema['required'] ) ) {
+			$schema['required'] = array();
+		}
+
+		// Add each route parameter to the schema.
+		foreach ( $route_params as $param_name => $param_config ) {
+			$schema['properties'][ $param_name ] = $param_config;
+
+			// Mark all route parameters as required.
+			if ( ! in_array( $param_name, $schema['required'], true ) ) {
+				$schema['required'][] = $param_name;
+			}
+		}
+
+		return $schema;
 	}
 
 	/**
@@ -330,18 +377,14 @@ class RestAbilityFactory {
 	 * @param object $controller REST controller instance.
 	 * @param string $operation Operation type.
 	 * @param array  $input Input parameters.
-	 * @param string $route REST route for this controller.
+	 * @param string $route REST route template with named placeholders.
 	 * @return mixed Operation result.
 	 */
 	private static function execute_operation( $controller, string $operation, array $input, string $route ) {
 		$method = self::get_http_method_for_operation( $operation );
 
-		// Build final route - add ID for single item operations.
-		$request_route = $route;
-		if ( isset( $input['id'] ) && in_array( $operation, array( 'get', 'update', 'delete' ), true ) ) {
-			$request_route .= '/' . intval( $input['id'] );
-			unset( $input['id'] );
-		}
+		// Build final route by replacing named placeholders.
+		$request_route = self::fill_route_params( $route, $input );
 
 		// Create REST request.
 		$request = new \WP_REST_Request( $method, $request_route );
@@ -364,6 +407,32 @@ class RestAbilityFactory {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Fill route parameters in a route template.
+	 *
+	 * Replaces named placeholders like {id} and {order_id} with values from input parameters.
+	 * Route parameters are removed from the input array after being used.
+	 *
+	 * @param string $route Route template with named placeholders.
+	 * @param array  $input Input parameters (passed by reference).
+	 * @return string Route with placeholders replaced.
+	 */
+	private static function fill_route_params( string $route, array &$input ): string {
+		return preg_replace_callback(
+			'/\{(\w+)\}/',
+			function ( $matches ) use ( &$input ) {
+				$param = $matches[1];
+				if ( ! isset( $input[ $param ] ) ) {
+					throw new \InvalidArgumentException( "Missing route parameter: {$param}" );
+				}
+				$value = intval( $input[ $param ] );
+				unset( $input[ $param ] );
+				return $value;
+			},
+			$route
+		);
 	}
 
 	/**
