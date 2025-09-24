@@ -56,6 +56,16 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	protected $mock_wpcom_connection_manager;
 
 	/**
+	 * @var object&MockObject
+	 */
+	protected $mock_account_service;
+
+	/**
+	 * @var FakePaymentGateway
+	 */
+	protected FakePaymentGateway $mock_gateway;
+
+	/**
 	 * The ID of the store admin user.
 	 *
 	 * @var int
@@ -253,6 +263,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_option( 'woocommerce_gateway_order' );
 
 		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
+		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
 	}
 
 	/**
