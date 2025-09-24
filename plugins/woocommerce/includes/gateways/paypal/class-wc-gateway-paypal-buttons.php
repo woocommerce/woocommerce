@@ -102,6 +102,10 @@ class WC_Gateway_Paypal_Buttons {
 	 * @return string|null The PayPal client-id, or null if the request fails.
 	 */
 	public function get_client_id() {
+		if ( ! $this->gateway->should_use_orders_v2() ) {
+			return null;
+		}
+
 		$client_id = get_option( self::CLIENT_ID_OPTION, null );
 
 		if ( empty( $client_id ) ) {
