@@ -213,7 +213,7 @@ class CustomMetaBox {
 	 *
 	 * @return void
 	 */
-	public function search_metakeys_ajax(): void { // Entry point
+	public function search_metakeys_ajax(): void {
 		check_ajax_referer( 'search-order-metakeys', 'security' );
 
 		if ( ! isset( $_GET['order_id'] ) || ! current_user_can( 'edit_shop_orders' ) ) {
