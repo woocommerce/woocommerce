@@ -22,3 +22,13 @@ export interface QueuedEvent {
 	eventName: string;
 	props?: Record< string, unknown >;
 }
+
+export interface ApiEvent {
+	event_name: string;
+	properties: Record< string, unknown >;
+}
+
+export interface ApiFetchResponse {
+	success: boolean;
+	results: Array< { success: boolean; error?: string } >;
+}

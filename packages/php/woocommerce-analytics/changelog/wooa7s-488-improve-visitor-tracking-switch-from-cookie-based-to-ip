@@ -1,0 +1,4 @@
+Significance: minor
+Type: added
+
+Add IP-based visitor tracking as fallback when proxy tracking is enabled and cookies are unavailable

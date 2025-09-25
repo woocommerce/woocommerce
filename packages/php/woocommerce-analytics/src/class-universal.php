@@ -73,7 +73,10 @@ class Universal {
 	 * Inject analytics data into the window object
 	 */
 	public function inject_analytics_data() {
-		$is_clickhouse_enabled = $this->is_clickhouse_enabled();
+		$is_clickhouse_enabled     = Features::is_clickhouse_enabled();
+		$is_proxy_tracking_enabled = Features::is_proxy_tracking_enabled();
+		// When proxy tracking is enabled, we don't need to send the common properties to the client.
+		$common_properties = $is_proxy_tracking_enabled ? array() : $this->get_common_properties();
 		?>
 		<script type="text/javascript">
 			(function() {
@@ -81,7 +84,7 @@ class Universal {
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set common properties for all events.
-				wcAnalytics.commonProps = <?php echo wp_json_encode( $this->get_common_properties() ); ?>;
+				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties ); ?>;
 
 				// Set the event queue.
 				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue() ); ?>;
@@ -90,6 +93,7 @@ class Universal {
 				wcAnalytics.features = {
 					ch: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
 					sessionTracking: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
+					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
 
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles() ); ?>;
@@ -272,7 +276,7 @@ class Universal {
 			}
 
 			$data['pq'] = $cart_item['quantity'];
-			$this->enqueue_event( 'product_checkout', $data, $product->get_id() );
+			$this->enqueue_event( 'product_checkout', $this->get_cart_checkout_event_properties( $data ), $product->get_id() );
 		}
 	}
 
@@ -446,7 +450,7 @@ class Universal {
 		);
 		$cart_checkout_info    = $this->get_cart_checkout_info();
 
-		$event_properties = array_merge( $event_properties, $product_details, $checkout_cart_details, $cart_checkout_info );
+		$event_properties = array_merge( $product_details, $checkout_cart_details, $cart_checkout_info, $event_properties ); // event properties should be last to allow for overrides
 
 		return $event_properties;
 	}
@@ -505,10 +509,12 @@ class Universal {
 
 			$this->enqueue_event(
 				'post_account_creation',
-				array(
-					'from_checkout' => $checkout_page_used,
-					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
-					'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+				$this->get_cart_checkout_event_properties(
+					array(
+						'from_checkout' => $checkout_page_used,
+						'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
+						'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+					)
 				)
 			);
 		}
@@ -550,9 +556,8 @@ class Universal {
 
 		$this->enqueue_event(
 			'cart_view',
-			array_merge(
-				$this->get_cart_checkout_shared_data(),
-				array()
+			$this->get_cart_checkout_event_properties(
+				$this->get_cart_checkout_shared_data()
 			)
 		);
 	}
@@ -617,26 +622,28 @@ class Universal {
 		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
 		$this->enqueue_event(
 			'order_confirmation_view',
-			array(
-				'coupon_used'                           => $coupon_used,
-				'create_account'                        => $create_account,
-				'express_checkout'                      => 'null', // TODO: not solved yet.
-				'guest_checkout'                        => $order->get_customer_id() ? 'No' : 'Yes',
-				'delayed_account_creation'              => $delayed_account_creation,
-				'oi'                                    => $order->get_id(),
-				'order_value'                           => $order->get_subtotal(),
-				'order_total'                           => $order->get_total(),
-				'products_count'                        => $order->get_item_count(),
-				'total_discount'                        => $order->get_discount_total(),
-				'total_shipping'                        => $order->get_shipping_total(),
-				'total_tax'                             => $order->get_total_tax(),
-				'payment_option'                        => $order->get_payment_method(),
-				'products'                              => $this->format_items_to_json( $order->get_items() ),
-				'order_note'                            => $order->get_customer_note(),
-				'shipping_option'                       => $order->get_shipping_method(),
-				'from_checkout'                         => $checkout_page_used,
-				'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
-				'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+			$this->get_cart_checkout_event_properties(
+				array(
+					'coupon_used'              => $coupon_used,
+					'create_account'           => $create_account,
+					'express_checkout'         => 'null', // TODO: not solved yet.
+					'guest_checkout'           => $order->get_customer_id() ? 'No' : 'Yes',
+					'delayed_account_creation' => $delayed_account_creation,
+					'oi'                       => $order->get_id(),
+					'order_value'              => $order->get_subtotal(),
+					'order_total'              => $order->get_total(),
+					'products_count'           => $order->get_item_count(),
+					'total_discount'           => $order->get_discount_total(),
+					'total_shipping'           => $order->get_shipping_total(),
+					'total_tax'                => $order->get_total_tax(),
+					'payment_option'           => $order->get_payment_method(),
+					'products'                 => $this->format_items_to_json( $order->get_items() ),
+					'order_note'               => $order->get_customer_note(),
+					'shipping_option'          => $order->get_shipping_method(),
+					'from_checkout'            => $checkout_page_used,
+					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
+					'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+				)
 			)
 		);
 	}
@@ -684,12 +691,14 @@ class Universal {
 
 		$this->enqueue_event(
 			'checkout_view',
-			array_merge(
-				$this->get_cart_checkout_shared_data(),
-				array(
-					'from_checkout' => $is_in_checkout_page,
-					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
-					'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+			$this->get_cart_checkout_event_properties(
+				array_merge(
+					$this->get_cart_checkout_shared_data(),
+					array(
+						'from_checkout' => $is_in_checkout_page,
+						'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
+						'checkout_page_contains_checkout_shortcode' => $checkout_page_contains_checkout_shortcode,
+					)
 				)
 			)
 		);

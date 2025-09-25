@@ -25,6 +25,7 @@
 		"watch": "pnpm build && pnpm build-client --watch"
 	},
 	"dependencies": {
+		"@wordpress/api-fetch": "7.31.0",
 		"debug": "4.4.3"
 	},
 	"devDependencies": {

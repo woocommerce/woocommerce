@@ -5,6 +5,7 @@ import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
+import { ApiClient } from './api-client';
 import { EVENT_NAME_REGEX, EVENT_PREFIX, CLICK_HOUSE_EVENTS } from './constants';
 import SessionManager from './session-manager';
 import type { AnalyticsConfig } from './types/shared';
@@ -17,6 +18,7 @@ const debug = debugFactory( 'wc-analytics:analytics' );
 export class Analytics {
 	private isInitialized: boolean;
 	private sessionManager: SessionManager;
+	private apiClient: ApiClient;
 	private eventQueue: AnalyticsConfig[ 'eventQueue' ];
 	private commonProps: AnalyticsConfig[ 'commonProps' ];
 	private features: AnalyticsConfig[ 'features' ];
@@ -29,6 +31,7 @@ export class Analytics {
 		this.isInitialized = false;
 
 		this.sessionManager = sessionManager;
+		this.apiClient = new ApiClient();
 		this.eventQueue = eventQueue;
 		this.commonProps = commonProps;
 		this.features = features;
@@ -43,6 +46,11 @@ export class Analytics {
 			return;
 		}
 
+		// Initialize API client if proxy tracking is enabled
+		if ( this.features.proxy ) {
+			this.apiClient.init();
+		}
+
 		/*
 		 * Initialize the session manager and record the page_view event
 		 * only if the ClickHouse (ch) feature is enabled as these events are relevant exclusively when ClickHouse is active.
@@ -51,12 +59,15 @@ export class Analytics {
 			this.sessionManager.init();
 			const { sessionId, landingPage, isNewSession } = this.sessionManager;
 
-			// Add session ID and landing page to common properties.
-			this.commonProps = {
-				...this.commonProps,
-				session_id: sessionId,
-				landing_page: landingPage,
-			};
+			// Not needed if proxy tracking is enabled.
+			if ( ! this.features.proxy ) {
+				// Add session ID and landing page to common properties.
+				this.commonProps = {
+					...this.commonProps,
+					session_id: sessionId,
+					landing_page: landingPage,
+				};
+			}
 
 			if ( isNewSession ) {
 				this.maybeRecordSessionStartedEvent();
@@ -99,11 +110,6 @@ export class Analytics {
 	 * @param properties - The properties of the event.
 	 */
 	recordEvent = ( event: string, properties: Record< string, unknown > = {} ): void => {
-		if ( ! window._wca ) {
-			debug( 'Skipping event recording because _wca is not defined' );
-			return;
-		}
-
 		// Validate event name
 		if ( typeof event !== 'string' || ! EVENT_NAME_REGEX.test( event ) ) {
 			debug( 'Skipping event recording because event name is not valid' );
@@ -114,6 +120,32 @@ export class Analytics {
 			...this.commonProps,
 			...properties,
 		};
+		// Use API client if enabled, otherwise fall back to _wca.push
+		if ( this.features.proxy ) {
+			// Add client specific properties to the event properties. We don't need to do this for direct pixel tracking since it's already done there.
+			this.addClientProperties( eventProperties );
+			this.apiClient.addEvent( event, eventProperties );
+		} else {
+			this.fireDirectPixel( event, eventProperties );
+		}
+
+		// Post initialization, maybe record engagement event.
+		if ( this.isInitialized ) {
+			this.maybeRecordEngagementEvent();
+		}
+	};
+
+	/**
+	 * Fire a pixel event.
+	 * @param event           - The name of the event.
+	 * @param eventProperties - The properties of the event.
+	 */
+	fireDirectPixel = ( event: string, eventProperties: Record< string, unknown > ): void => {
+		// Legacy _wca tracking
+		if ( ! window._wca ) {
+			debug( 'Skipping event recording because _wca is not defined' );
+			return;
+		}
 
 		if ( this.features.ch && CLICK_HOUSE_EVENTS.includes( event ) ) {
 			eventProperties.ch = 1;
@@ -121,15 +153,45 @@ export class Analytics {
 			delete eventProperties.ch;
 		}
 
-		const eventName = `${ EVENT_PREFIX }${ event }`;
-		eventProperties._en = eventName;
+		debug( 'Recording event via _wca: "%s" with props %o', event, eventProperties );
 
-		debug( 'Record event "%s" called with props %o', eventName, eventProperties );
+		eventProperties._en = `${ EVENT_PREFIX }${ event }`;
 		window._wca.push( eventProperties );
+	};
 
-		// Post initialization, maybe record engagement event.
-		if ( this.isInitialized ) {
-			this.maybeRecordEngagementEvent();
+	/**
+	 * Add client properties to the event properties.
+	 * @param eventProperties - The properties of the event.
+	 */
+	addClientProperties = ( eventProperties: Record< string, unknown > ): void => {
+		const date = new Date();
+		eventProperties._ts = date.getTime();
+		eventProperties._tz = date.getTimezoneOffset() / 60;
+
+		const nav = window.navigator;
+		const screen = window.screen;
+		eventProperties._lg = nav.language;
+		eventProperties._pf = navigator?.platform;
+		eventProperties._ht = screen.height;
+		eventProperties._wd = screen.width;
+
+		const sx =
+			window.pageXOffset !== undefined
+				? window.pageXOffset
+				: ( document.documentElement || document.body ).scrollLeft;
+		const sy =
+			window.pageYOffset !== undefined
+				? window.pageYOffset
+				: ( document.documentElement || document.body ).scrollTop;
+
+		eventProperties._sx = sx !== undefined ? sx : 0;
+		eventProperties._sy = sy !== undefined ? sy : 0;
+
+		if ( document.location !== undefined ) {
+			eventProperties._dl = document.location.toString();
+		}
+		if ( document.referrer !== undefined ) {
+			eventProperties._dr = document.referrer;
 		}
 	};
 
