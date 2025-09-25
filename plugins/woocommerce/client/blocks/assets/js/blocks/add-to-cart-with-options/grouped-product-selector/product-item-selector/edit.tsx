@@ -5,6 +5,7 @@ import { useProductDataContext } from '@woocommerce/shared-context';
 import { Disabled, Spinner } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -14,7 +15,7 @@ import QuantityStepper from '../../components/quantity-stepper';
 const CTA = () => {
 	const { isLoading, product } = useProductDataContext();
 
-	if ( isLoading ) {
+	if ( isLoading || ! isProductResponseItem( product ) ) {
 		return <Spinner />;
 	}
 
