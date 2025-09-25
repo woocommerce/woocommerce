@@ -123,7 +123,7 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
-	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request..
+	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array|null
 	 * @throws Exception If the PayPal order creation fails.
 	 */
