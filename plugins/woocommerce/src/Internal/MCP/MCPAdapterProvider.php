@@ -215,16 +215,27 @@ class MCPAdapterProvider {
 	public static function is_mcp_request(): bool {
 		// Check if this is a REST request.
 		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
-			return false;
+			$is_mcp = false;
+		} else {
+			// Get the request URI.
+			$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+			// Build the MCP endpoint path dynamically from constants.
+			$mcp_endpoint = '/' . self::MCP_NAMESPACE . '/' . self::MCP_ROUTE;
+
+			// Check if the request is for the MCP endpoint.
+			$is_mcp = false !== strpos( $request_uri, $mcp_endpoint );
 		}
 
-		// Get the request URI.
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
-
-		// Build the MCP endpoint path dynamically from constants.
-		$mcp_endpoint = '/' . self::MCP_NAMESPACE . '/' . self::MCP_ROUTE;
-
-		// Check if the request is for the MCP endpoint.
-		return false !== strpos( $request_uri, $mcp_endpoint );
+		/**
+		 * Filter to override MCP request detection.
+		 *
+		 * Allows testing and other scenarios to mock MCP context by overriding
+		 * the default request detection logic.
+		 *
+		 * @since 10.3.0
+		 * @param bool $is_mcp Whether this is detected as an MCP request.
+		 */
+		return apply_filters( 'woocommerce_is_mcp_request', $is_mcp );
 	}
 }

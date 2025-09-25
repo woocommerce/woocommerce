@@ -292,6 +292,34 @@ add_filter( 'woocommerce_mcp_include_ability', function( $include, $ability_id )
 }, 10, 2 );
 ```
 
+### Testing and Development Filters
+
+#### Overriding MCP Request Detection
+
+For testing purposes or custom integrations, you can override the default MCP request detection:
+
+```php
+add_filter( 'woocommerce_is_mcp_request', function( $is_mcp ) {
+    // Force MCP context for testing
+    if ( defined( 'WP_PHPUNIT_TEST' ) && WP_PHPUNIT_TEST ) {
+        return true;
+    }
+
+    return $is_mcp;
+} );
+```
+
+This filter is particularly useful for:
+
+- **Integration Testing**: Mock MCP context in automated tests
+- **Development**: Enable MCP behavior in non-standard environments
+- **Debugging**: Force or disable MCP mode for troubleshooting
+
+**Parameters:**
+- `$is_mcp` (bool): The default detection result based on request URI analysis
+
+**Note**: This filter should only be used for testing and development. Production code should rely on the default MCP request detection logic.
+
 ## Development Example
 
 For a complete working example, see the [WooCommerce MCP Ability Demo Plugin](https://github.com/woocommerce/wc-mcp-ability). This demonstration plugin shows how third-party developers can:
