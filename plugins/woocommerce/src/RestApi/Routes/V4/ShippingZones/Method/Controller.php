@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Methods;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method;
 
 defined( 'ABSPATH' ) || exit;
 
