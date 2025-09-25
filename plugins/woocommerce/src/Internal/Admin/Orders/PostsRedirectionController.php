@@ -201,7 +201,7 @@ class PostsRedirectionController {
 		global $pagenow, $submenu;
 
 		// Do not conflict with CPT > HPOS redirection.
-		if ( 'edit.php' === $pagenow && in_array( $_GET['post_type'] ?? '', wc_get_order_types( 'admin-menu' ), true ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( 'edit.php' === $pagenow && in_array( $_GET['post_type'] ?? '', wc_get_order_types( 'admin-menu' ), true ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
@@ -225,6 +225,4 @@ class PostsRedirectionController {
 			unset( $post_type_menu[ $menu_indexes[ "post-new.php?post_type={$post_type->name}" ] ] );
 		}
 	}
-
 }
-
