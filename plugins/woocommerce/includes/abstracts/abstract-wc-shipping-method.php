@@ -630,6 +630,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		/**
 		 * Filter the instance settings values before saving.
 		 *
+		 * @since 9.4.0
 		 * @param array                $instance_settings Instance settings.
 		 * @param WC_Shipping_Method   $this              Shipping method instance.
 		 */

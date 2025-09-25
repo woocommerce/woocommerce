@@ -535,6 +535,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 				/**
 				 * Fires when a shipping method status is toggled.
 				 *
+				 * @since 9.4.0
 				 * @param int    $instance_id Method instance ID.
 				 * @param string $method_id   Method ID.
 				 * @param int    $zone_id     Zone ID.
