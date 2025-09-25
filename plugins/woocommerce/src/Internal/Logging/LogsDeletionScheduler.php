@@ -81,9 +81,9 @@ class LogsDeletionScheduler {
 			)
 		);
 
-		$this->wait_seconds       = absint( $parameters['wait_seconds'] ) ?? 0;
-		$this->max_queue_length   = absint( $parameters['max_queue_length'] ) ?? 0;
-		$this->max_items_per_step = absint( $parameters['max_items_per_step'] ) ?? 0;
+		$this->wait_seconds       = absint( $parameters['wait_seconds'] ?? 0 );
+		$this->max_queue_length   = absint( $parameters['max_queue_length'] ?? 0 );
+		$this->max_items_per_step = absint( $parameters['max_items_per_step'] ?? 0 );
 		if ( ! $this->wait_seconds || ! $this->max_queue_length || ! $this->max_items_per_step ) {
 			$this->is_enabled = false;
 			return;
@@ -162,7 +162,7 @@ class LogsDeletionScheduler {
 
 		$still_pending_count = count( $sources_pending_deletion ) - $step_count;
 		if ( $still_pending_count ) {
-			$sources_pending_deletion = array_values( array_slice( $sources_pending_deletion, -$still_pending_count, $still_pending_count, true ) );
+			$sources_pending_deletion = array_slice( $sources_pending_deletion, $step_count );
 			update_option( self::SOURCES_LIST_OPTION_NAME, $sources_pending_deletion );
 			$this->schedule_action();
 		} else {

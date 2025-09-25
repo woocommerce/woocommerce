@@ -78,6 +78,9 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 		// Clears the log if instructed and all steps are unique.
 		if ( $final_step && count( array_unique( $steps ) ) === count( $steps ) ) {
 			wc_get_container()->get( LogsDeletionScheduler::class )->register_source_pending_deletion( $context['source'], true );
+			// Prevent further logging for this request.
+			$logging_active = false;
+			$steps          = array();
 		} else {
 			// Logging the place order flow step. Log files are grouped per order to make is easier to navigate.
 			$logger->log( WC_Log_Levels::DEBUG, $message, $context );
