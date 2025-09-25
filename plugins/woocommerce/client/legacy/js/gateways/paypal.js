@@ -103,7 +103,7 @@ jQuery(function ($) {
 				}
 			},
 
-			async onCancel() {
+			async onCancel( data ) {
 				try {
 					await window.wp.apiFetch( {
 						method: 'POST',
@@ -113,6 +113,7 @@ jQuery(function ($) {
 						},
 						data: {
 							order_id: orderId,
+							paypal_order_id: data.orderID,
 						},
 					} );
 

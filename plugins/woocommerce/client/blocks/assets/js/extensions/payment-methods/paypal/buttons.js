@@ -144,7 +144,7 @@ const PayPalButtonsContainer = ( {
 		}
 	};
 
-	const onCancel = async () => {
+	const onCancel = async ( data ) => {
 		try {
 			await apiFetch( {
 				method: 'POST',
@@ -154,6 +154,7 @@ const PayPalButtonsContainer = ( {
 				},
 				data: {
 					order_id: orderId,
+					paypal_order_id: data.orderID,
 				},
 			} );
 
