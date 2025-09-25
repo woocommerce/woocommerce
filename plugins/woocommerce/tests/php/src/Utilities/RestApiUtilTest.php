@@ -24,7 +24,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 		$this->rest_api_util = new RestApiUtil();
 
-		// Clear any existing filters
+		// Clear any existing filters.
 		remove_all_filters( 'woocommerce_rest_should_lazy_load_namespace' );
 		remove_all_filters( 'rest_pre_dispatch' );
 	}
@@ -39,7 +39,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 
 		// Clear global wp query vars.
 		if ( isset( $GLOBALS['wp'] ) ) {
-			$GLOBALS['wp']->query_vars = array();
+			$GLOBALS['wp']->query_vars = array(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
 		parent::tearDown();
@@ -96,11 +96,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		};
 
 		// Set up matching REST route.
-		$GLOBALS['wp'] = (object) array(
-			'query_vars' => array(
-				'rest_route' => '/wc/v3/products'
-			)
-		);
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/v3/products';
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
@@ -117,11 +113,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		};
 
 		// Set up non-matching REST route.
-		$GLOBALS['wp'] = (object) array(
-			'query_vars' => array(
-				'rest_route' => '/wp/v2/posts'
-			)
-		);
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wp/v2/posts';
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
@@ -139,11 +131,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		};
 
 		// Set up root REST route.
-		$GLOBALS['wp'] = (object) array(
-			'query_vars' => array(
-				'rest_route' => '/'
-			)
-		);
+		$GLOBALS['wp']->query_vars['rest_route'] = '/';
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
@@ -160,11 +148,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 		};
 
 		// Set up root REST route.
-		$GLOBALS['wp'] = (object) array(
-			'query_vars' => array(
-				'rest_route' => '/wc/v3/'
-			)
-		);
+		$GLOBALS['wp']->query_vars['rest_route'] = '/wc/v3/';
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
@@ -180,10 +164,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 			$callback_executed = true;
 		};
 
-		// Set up wp object without rest_route.
-		$GLOBALS['wp'] = (object) array(
-			'query_vars' => array()
-		);
+		// query_vars should be empty by default
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
