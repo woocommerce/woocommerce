@@ -251,8 +251,9 @@ abstract class CustomMetaDataStore {
 
 		return $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DISTINCT meta_key FROM %i WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE '\\_%' ORDER BY meta_key ASC LIMIT %d",
+				"SELECT DISTINCT meta_key FROM %i WHERE meta_key != '' AND meta_key NOT BETWEEN '_' AND '_z' AND meta_key NOT LIKE %s ORDER BY meta_key ASC LIMIT %d",
 				$this->get_db_info()['table'],
+				$wpdb->esc_like( '_' ) . '%',
 				$limit
 			)
 		);
