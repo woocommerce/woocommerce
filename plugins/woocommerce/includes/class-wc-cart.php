@@ -1412,19 +1412,25 @@ class WC_Cart extends WC_Legacy_Cart {
 			 */
 			do_action( 'woocommerce_restore_cart_item', $cart_item_key, $this, $restore_item );
 
-			$result = $this->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
+			$validation_result = $this->add_to_cart( $product_id, $quantity, $variation_id, $variation, $cart_item_data );
 
-			/**
-			 * Fires after a cart item is restored.
-			 *
-			 * @since 2.3.0
-			 * @param string $cart_item_key contains the id of the cart item.
-			 * @param WC_Cart $this Cart class.
-			 * @param array $restore_item The cart item data.
-			 */
-			do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this, $restore_item );
+			if ( $validation_result ) {
+				// Move the validated item from the new key to the original key if different.
+				if ( $cart_item_key !== $validation_result ) {
+					$this->cart_contents[ $cart_item_key ] = $this->cart_contents[ $validation_result ];
+					unset( $this->cart_contents[ $validation_result ] );
+				}
 
-			if ( $result ) {
+				/**
+				 * Fires after a cart item is restored.
+				 *
+				 * @since 2.3.0
+				 * @param string $cart_item_key contains the id of the cart item.
+				 * @param WC_Cart $this Cart class.
+				 * @param array $restore_item The cart item data.
+				 */
+				do_action( 'woocommerce_cart_item_restored', $cart_item_key, $this, $restore_item );
+
 				return true;
 			}
 		}
