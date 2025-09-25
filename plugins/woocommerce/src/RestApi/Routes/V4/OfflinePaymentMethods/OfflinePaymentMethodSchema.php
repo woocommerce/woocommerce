@@ -242,15 +242,59 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$response = array_intersect_key(
-			(array) $item,
-			$this->get_item_schema_properties()
-		);
+		$response = $this->filter_item_by_schema( (array) $item, $this->get_item_schema_properties() );
 
 		if ( ! empty( $include_fields ) ) {
 			$response = array_intersect_key( $response, array_flip( $include_fields ) );
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Recursively filter an item by the given schema properties.
+	 *
+	 * @param array $item       Data to filter.
+	 * @param array $properties Schema properties (name => schema).
+	 * @return array
+	 */
+	private function filter_item_by_schema( array $item, array $properties ): array {
+		$filtered = array();
+
+		foreach ( $properties as $key => $prop_schema ) {
+			if ( ! array_key_exists( $key, $item ) ) {
+				continue;
+			}
+
+			$value = $item[ $key ];
+
+			// Object with defined properties.
+			if ( is_array( $value ) && isset( $prop_schema['properties'] ) && is_array( $prop_schema['properties'] ) ) {
+				$filtered[ $key ] = $this->filter_item_by_schema( (array) $value, $prop_schema['properties'] );
+				continue;
+			}
+
+			// Array of objects with defined item properties.
+			if (
+				is_array( $value ) &&
+				( $prop_schema['type'] ?? null ) === 'array' &&
+				isset( $prop_schema['items']['properties'] ) &&
+				is_array( $prop_schema['items']['properties'] )
+			) {
+				$filtered[ $key ] = array_map(
+					function ( $row ) use ( $prop_schema ) {
+						return is_array( $row )
+							? $this->filter_item_by_schema( $row, $prop_schema['items']['properties'] )
+							: $row;
+					},
+					$value
+				);
+				continue;
+			}
+
+			$filtered[ $key ] = $value;
+		}
+
+		return $filtered;
 	}
 }

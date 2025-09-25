@@ -123,6 +123,10 @@ class Controller extends AbstractController {
 			);
 		}
 
+		if ( is_wp_error( $offline_methods ) ) {
+			return $offline_methods;
+		}
+
 		$data = array();
 		foreach ( $offline_methods as $method ) {
 			$prepared_item = $this->prepare_item_for_response( $method, $request );
