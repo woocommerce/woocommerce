@@ -1,5 +1,5 @@
 <?php
-declare(strict_types=1);
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Utilities;
 
@@ -33,11 +33,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 * Clean up after tests.
 	 */
 	public function tearDown(): void {
-		// Clear any filters that may have been added during tests
+		// Clear any filters that may have been added during tests.
 		remove_all_filters( 'woocommerce_rest_should_lazy_load_namespace' );
 		remove_all_filters( 'rest_pre_dispatch' );
 
-		// Clear global wp query vars
+		// Clear global wp query vars.
 		if ( isset( $GLOBALS['wp'] ) ) {
 			$GLOBALS['wp']->query_vars = array();
 		}
@@ -50,11 +50,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_executes_callback_immediately_when_disabled() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Disable lazy loading via filter
+		// Disable lazy loading via filter.
 		add_filter( 'woocommerce_rest_should_lazy_load_namespace', '__return_false' );
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
@@ -67,12 +67,14 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_passes_namespace_to_filter() {
 		$filter_namespace = null;
-		$callback = function() {};
+		$callback         = function () {
+		};
 
 		add_filter(
 			'woocommerce_rest_should_lazy_load_namespace',
-			function( $should_lazy_load, $namespace ) use ( &$filter_namespace ) {
+			function ( $should_lazy_load, $namespace ) use ( &$filter_namespace ) {
 				$filter_namespace = $namespace;
+
 				return true;
 			},
 			10,
@@ -89,11 +91,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_executes_callback_on_matching_route() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Set up matching REST route
+		// Set up matching REST route.
 		$GLOBALS['wp'] = (object) array(
 			'query_vars' => array(
 				'rest_route' => '/wc/v3/products'
@@ -110,11 +112,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_defers_callback_on_non_matching_route() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Set up non-matching REST route
+		// Set up non-matching REST route.
 		$GLOBALS['wp'] = (object) array(
 			'query_vars' => array(
 				'rest_route' => '/wp/v2/posts'
@@ -123,7 +125,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
-		// Callback should not be executed immediately for non-matching routes
+		// Callback should not be executed immediately for non-matching routes.
 		$this->assertFalse( $callback_executed );
 	}
 
@@ -132,11 +134,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_executes_callback_for_root_requests() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Set up root REST route
+		// Set up root REST route.
 		$GLOBALS['wp'] = (object) array(
 			'query_vars' => array(
 				'rest_route' => '/'
@@ -153,11 +155,11 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_executes_callback_for_namespace_index_requests() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Set up root REST route
+		// Set up root REST route.
 		$GLOBALS['wp'] = (object) array(
 			'query_vars' => array(
 				'rest_route' => '/wc/v3/'
@@ -174,21 +176,21 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_lazy_load_namespace_handles_missing_rest_route() {
 		$callback_executed = false;
-		$callback = function() use ( &$callback_executed ) {
+		$callback          = function () use ( &$callback_executed ) {
 			$callback_executed = true;
 		};
 
-		// Set up wp object without rest_route
+		// Set up wp object without rest_route.
 		$GLOBALS['wp'] = (object) array(
 			'query_vars' => array()
 		);
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
-		// Should register filter but not execute callback immediately
+		// Should register filter but not execute callback immediately.
 		$this->assertFalse( $callback_executed );
 
-		// Verify that rest_pre_dispatch filter was added
+		// Verify that rest_pre_dispatch filter was added.
 		$this->assertTrue( has_filter( 'rest_pre_dispatch' ) );
 	}
 }

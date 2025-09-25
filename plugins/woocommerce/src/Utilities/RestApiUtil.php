@@ -55,7 +55,7 @@ class RestApiUtil {
 		 */
 		$should_lazy_load_namespace = apply_filters( 'woocommerce_rest_should_lazy_load_namespace', true, $route_namespace );
 		if ( $should_lazy_load_namespace ) {
-			$this->_lazy_load_namespace( $route_namespace, $callback );
+			$this->attach_lazy_loaded_namespace( $route_namespace, $callback );
 		} else {
 			call_user_func( $callback );
 		}
@@ -76,7 +76,7 @@ class RestApiUtil {
 	 * @see      self::lazy_load_namespace()
 	 * @internal Do not call this function directly. Backward compatibility is not guaranteed.
 	 */
-	public function _lazy_load_namespace( string $route_namespace, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
+	public function attach_lazy_loaded_namespace( string $route_namespace, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
 		if ( '' === $rest_route ) {
 			$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 		}
@@ -102,7 +102,7 @@ class RestApiUtil {
 		if ( '' === $callback_filter_id ) {
 			$callback_filter    = function ( $filter_result, $server, $request ) use ( $route_namespace, $callback, &$callback_filter_id ) {
 				if ( is_callable( array( $request, 'get_route' ) ) ) {
-					$this->_lazy_load_namespace( $route_namespace, $callback, $request->get_route(), $callback_filter_id );
+					$this->attach_lazy_loaded_namespace( $route_namespace, $callback, $request->get_route(), $callback_filter_id );
 				}
 
 				return $filter_result;
