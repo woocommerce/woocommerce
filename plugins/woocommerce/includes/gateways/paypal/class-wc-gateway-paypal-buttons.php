@@ -11,10 +11,22 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+}
+
 /**
  * Handles PayPal Buttons.
  */
 class WC_Gateway_Paypal_Buttons {
+
+	/**
+	 * The option for the client-id.
+	 *
+	 * @var string
+	 */
+	private const CLIENT_ID_OPTION = 'woocommerce_paypal_client_id';
+
 
 	/**
 	 * The gateway instance.
@@ -31,12 +43,20 @@ class WC_Gateway_Paypal_Buttons {
 	private $enabled = false;
 
 	/**
+	 * The request instance.
+	 *
+	 * @var WC_Gateway_Paypal_Request
+	 */
+	private $request;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param WC_Gateway_Paypal $gateway The gateway instance.
 	 */
 	public function __construct( WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
+		$this->request = new WC_Gateway_Paypal_Request( $this->gateway );
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
@@ -66,8 +86,7 @@ class WC_Gateway_Paypal_Buttons {
 		$intent = $this->gateway->get_option( 'paymentaction' ) === 'authorization' ? 'authorize' : 'capture';
 
 		return array(
-			// phpcs:ignore Generic.Commenting.Todo.TaskFound
-			'client-id'       => 'sb', // TODO: Get the client ID.
+			'client-id'       => $this->get_client_id(),
 			'components'      => 'buttons,funding-eligibility,messages',
 			'disable-funding' => 'card,applepay',
 			'enable-funding'  => 'venmo,paylater',
@@ -75,6 +94,29 @@ class WC_Gateway_Paypal_Buttons {
 			'intent'          => $intent,
 			'merchant-id'     => $this->gateway->email,
 		);
+	}
+
+	/**
+	 * Get the client-id for the PayPal buttons.
+	 *
+	 * @return string|null The PayPal client-id, or null if the request fails.
+	 */
+	public function get_client_id() {
+		if ( ! $this->gateway->should_use_orders_v2() ) {
+			return null;
+		}
+
+		$client_id = get_option( self::CLIENT_ID_OPTION, null );
+
+		if ( empty( $client_id ) ) {
+			$client_id = $this->request->fetch_paypal_client_id();
+			if ( empty( $client_id ) ) {
+				return null;
+			}
+			update_option( self::CLIENT_ID_OPTION, $client_id );
+		}
+
+		return $client_id;
 	}
 
 	/**
