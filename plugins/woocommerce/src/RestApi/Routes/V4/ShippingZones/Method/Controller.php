@@ -90,12 +90,16 @@ class Controller extends AbstractController {
 	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
 	 */
 	public function create_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error(
-				'woocommerce_rest_cannot_create',
-				__( 'Sorry, you cannot create shipping methods.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
+				'rest_shipping_disabled',
+				__( 'Shipping is disabled.', 'woocommerce' ),
+				array( 'status' => 503 )
 			);
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 
 		return true;
@@ -108,12 +112,16 @@ class Controller extends AbstractController {
 	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
 	 */
 	public function update_item_permissions_check( $request ) {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error(
-				'woocommerce_rest_cannot_update',
-				__( 'Sorry, you cannot update shipping methods.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
+				'rest_shipping_disabled',
+				__( 'Shipping is disabled.', 'woocommerce' ),
+				array( 'status' => 503 )
 			);
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 
 		return true;
@@ -153,4 +161,5 @@ class Controller extends AbstractController {
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
 		return $this->method_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
 	}
+
 }
