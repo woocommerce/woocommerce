@@ -196,7 +196,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$result  = $this->controller->create_item_permissions_check( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertStringContainsString( 'authorization', strtolower( $result->get_error_message() ) );
+		$this->assertStringContainsString( 'sorry, you cannot', strtolower( $result->get_error_message() ) );
 
 		wp_set_current_user( 0 );
 		self::delete_user( $user_id );

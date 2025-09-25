@@ -332,6 +332,4 @@ class Controller extends AbstractController {
 
 		return $this->validate_zone( $zone_id );
 	}
-
-
 }
