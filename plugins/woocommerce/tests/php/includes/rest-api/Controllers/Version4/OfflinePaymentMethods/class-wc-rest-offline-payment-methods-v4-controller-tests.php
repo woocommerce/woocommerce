@@ -70,8 +70,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		parent::setUp();
 		$this->enable_rest_api_v4_feature();
 
-		// Create a fresh Payments instance to avoid container pollution.
-		$this->payments = new Payments();
+		$this->payments = wc_get_container()->get( Payments::class );
 		$schema         = new Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema();
 
 		$this->endpoint = new OfflinePaymentMethodsController();
@@ -89,12 +88,8 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Clean up after tests.
 	 */
 	public function tearDown(): void {
-		// Reset current user to prevent user state interference.
-		wp_set_current_user( 0 );
-
-		// Clear service references to prevent state persistence.
-		$this->payments = null;
-		$this->endpoint = null;
+		// Reset the entire container to clear all cached services and state.
+		$this->reset_container_resolutions();
 
 		// Disable feature flag.
 		$this->disable_rest_api_v4_feature();
