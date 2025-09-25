@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Admin\Features\Features;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
  * Init class.
@@ -63,7 +64,12 @@ class Init {
 			$this->rest_api_init_wc_admin();
 		}
 
-		wc_rest_lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
+		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
+		if ( is_callable( array( $rest_api_util, 'lazy_load_namespace' ) ) ) {
+			$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
+		} else {
+			$this->rest_api_init_wc_analytics();
+		}
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
 			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
