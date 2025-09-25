@@ -43,13 +43,14 @@ class ShippingMethodSchema extends AbstractSchema {
 				'description' => __( 'Shipping zone ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
+				'required'    => true,
+				'readonly'    => true, // Cannot change zone after creation
 			),
 			'enabled'     => array(
 				'description' => __( 'Whether the shipping method is enabled.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
-				'default'     => true,
+				'required'    => true,
 			),
 			'method_id'   => array(
 				'description' => __( 'Shipping method ID.', 'woocommerce' ),
@@ -61,11 +62,13 @@ class ShippingMethodSchema extends AbstractSchema {
 				'description'          => __( 'Shipping method settings including title and configuration.', 'woocommerce' ),
 				'type'                 => 'object',
 				'context'              => array( 'view', 'edit' ),
+				'required'             => true,
 				'properties'           => array(
 					'title' => array(
 						'description' => __( 'Shipping method title.', 'woocommerce' ),
 						'type'        => 'string',
 						'context'     => array( 'view', 'edit' ),
+						'required'    => true,
 					),
 				),
 				'additionalProperties' => true,
