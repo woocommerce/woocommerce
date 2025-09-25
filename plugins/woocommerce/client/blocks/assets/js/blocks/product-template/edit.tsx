@@ -6,7 +6,7 @@
 import clsx from 'clsx';
 import { memo, useMemo, useState } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import {
 	BlockContextProvider,
 	__experimentalUseBlockPreview as useBlockPreview,
@@ -35,7 +35,7 @@ import { getDefaultStockStatuses } from '../product-collection/constants';
 
 const DEFAULT_QUERY_CONTEXT_ATTRIBUTES = [ 'collection' ];
 
-const MAX_PREVIEWS_PER_PAGE = 20;
+const MAX_PREVIEWS_PER_PAGE = 1;
 
 const capProductsPerPage = ( perPage: number ): number => {
 	return Math.min( perPage, MAX_PREVIEWS_PER_PAGE );
@@ -50,18 +50,6 @@ const getRemainingProductsCount = (
 		return Math.max( loopShopPerPage - MAX_PREVIEWS_PER_PAGE, 0 );
 	}
 	return Math.max( perPage - MAX_PREVIEWS_PER_PAGE, 0 );
-};
-
-const MoreProductsPlaceholder = ( {
-	remainingCount,
-}: {
-	remainingCount: number;
-} ) => {
-	return Array.from( { length: remainingCount } ).map( () => (
-		<li className="wc-block-product-template__more-products-placeholder">
-			<p>{ __( 'Product', 'woocommerce' ) }</p>
-		</li>
-	) );
 };
 
 const ProductTemplateInnerBlocks = () => {
@@ -498,10 +486,19 @@ const ProductTemplateEdit = (
 						/>
 					);
 				} ) }
-			{ remainingProductsCount > 0 && (
-				<MoreProductsPlaceholder
-					remainingCount={ remainingProductsCount }
-				/>
+			{ Array.from( { length: remainingProductsCount } ).map(
+				( _, index ) => (
+					<ProductContent
+						key={ `placeholder-${ index }` }
+						blocks={ blocks }
+						blockContext={ {
+							postType: 'product',
+							postId: `placeholder`,
+						} }
+						setActiveBlockContextId={ setActiveBlockContextId }
+						displayTemplate={ false }
+					/>
+				)
 			) }
 		</ul>
 	);
