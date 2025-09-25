@@ -72,8 +72,8 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 
 		add_filter(
 			'woocommerce_rest_should_lazy_load_namespace',
-			function ( $should_lazy_load, $namespace ) use ( &$filter_namespace ) {
-				$filter_namespace = $namespace;
+			function ( $should_lazy_load, $route_namespace ) use ( &$filter_namespace ) {
+				$filter_namespace = $route_namespace;
 
 				return true;
 			},
@@ -164,7 +164,7 @@ class RestApiUtilTest extends \WC_Unit_Test_Case {
 			$callback_executed = true;
 		};
 
-		// query_vars should be empty by default
+		// query_vars should be empty by default.
 
 		$this->rest_api_util->lazy_load_namespace( 'wc/v3', $callback );
 
