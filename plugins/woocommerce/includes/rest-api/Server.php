@@ -14,6 +14,7 @@ use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -216,6 +217,7 @@ class Server {
 			'products'         => 'WC_REST_Products_V4_Controller',
 			'order-notes'      => OrderNotesController::class,
 			'shipping-zones'   => ShippingZonesController::class,
+			'orders'           => OrdersController::class,
 			'settings-general' => 'WC_REST_General_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'         => 'WC_REST_Settings_V4_Controller',

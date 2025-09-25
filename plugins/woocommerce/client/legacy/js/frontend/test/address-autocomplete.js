@@ -19,6 +19,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 		// Reset the module before each test
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 	} );
 
@@ -59,6 +60,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -82,6 +84,7 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc; // ensure fresh load
 		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -362,7 +365,10 @@ describe( 'Address Suggestions Component', () => {
 
 		// Setup window object
 		Object.assign( global.window, {
-			wc_address_autocomplete_params: {
+			DOMPurify: {
+				sanitize: ( input ) => input, // No-op for testing
+			},
+			wc_address_autocomplete_common_params: {
 				address_providers: JSON.stringify( [
 					{
 						id: 'test-provider',
@@ -484,6 +490,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Reset modules and require fresh instance
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 
 		// Register the mock provider
@@ -501,7 +508,14 @@ describe( 'Address Suggestions Component', () => {
 
 	afterEach( () => {
 		jest.clearAllMocks();
-		window.wc.addressAutocomplete.providers = [];
+		// Reset providers properly
+		if ( window.wc && window.wc.addressAutocomplete ) {
+			window.wc.addressAutocomplete.providers = {};
+			window.wc.addressAutocomplete.activeProvider = {
+				billing: null,
+				shipping: null,
+			};
+		}
 	} );
 
 	describe( 'DOM Initialization', () => {
@@ -1388,12 +1402,13 @@ describe( 'Address Suggestions Component', () => {
 			expect( brandingElement ).toBeFalsy();
 		} );
 
-		test( 'should display branding HTML for both billing and shipping', async () => {
+		test( 'should display branding HTML for both billing and shipping if DOMPurify is present', async () => {
 			// Show suggestions for billing
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			window.DOMPurify = { sanitize: ( html ) => html }; // Mock DOMPurify
 
 			const billingSuggestionsContainer = document.getElementById(
 				'address_suggestions_billing'
@@ -1426,6 +1441,40 @@ describe( 'Address Suggestions Component', () => {
 			expect( shippingBrandingElement.innerHTML ).toBe(
 				'<div class="provider-branding">Powered by Test Provider</div>'
 			);
+		} );
+
+		test( 'should not display branding HTML for both billing and shipping if DOMPurify is not present', async () => {
+			delete window.DOMPurify;
+			// Show suggestions for billing
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			const billingSuggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			const billingBrandingElement =
+				billingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
+
+			expect( billingBrandingElement ).toBeNull();
+
+			// Show suggestions for shipping
+			shippingAddressInput.value = '456';
+			shippingAddressInput.focus();
+			shippingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const shippingSuggestionsContainer = document.getElementById(
+				'address_suggestions_shipping'
+			);
+			const shippingBrandingElement =
+				shippingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
+
+			expect( shippingBrandingElement ).toBeNull();
 		} );
 	} );
 

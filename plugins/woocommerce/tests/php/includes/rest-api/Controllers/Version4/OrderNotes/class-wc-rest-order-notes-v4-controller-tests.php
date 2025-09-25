@@ -73,10 +73,10 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order_note_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
 
 		// Create utils instance.
-		$query_utils = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\QueryUtils();
+		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\CollectionQuery();
 
 		$this->endpoint = new OrderNotesController();
-		$this->endpoint->init( $order_note_schema, $query_utils );
+		$this->endpoint->init( $order_note_schema, $collection_query );
 
 		$this->user = $this->factory->user->create(
 			array(

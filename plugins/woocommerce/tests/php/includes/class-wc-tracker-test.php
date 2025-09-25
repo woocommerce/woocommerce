@@ -274,7 +274,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		foreach ( $order_snapshot['first_20_orders'] as $order_details ) {
 			$this->assertEquals( $order_details['order_rank'], $counter++ );
 			$this->assertEquals( $order_details['currency'], 'USD' );
-			$this->assertEquals( $order_details['total_amount'], '10.00' );
+			$this->assertEquals( floatval( $order_details['total_amount'] ), 10.0 );
 			$this->assertEquals( $order_details['recorded_sales'], 'yes' );
 			$this->assertEquals( $order_details['woocommerce_version'], WOOCOMMERCE_VERSION );
 		}
@@ -284,7 +284,7 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		foreach ( $order_snapshot['last_20_orders'] as $order_details ) {
 			$this->assertEquals( $order_details['order_rank'], $counter-- );
 			$this->assertEquals( $order_details['currency'], 'USD' );
-			$this->assertEquals( $order_details['total_amount'], '10.00' );
+			$this->assertEquals( floatval( $order_details['total_amount'] ), 10.00 );
 			$this->assertEquals( $order_details['recorded_sales'], 'yes' );
 			$this->assertEquals( $order_details['woocommerce_version'], WOOCOMMERCE_VERSION );
 		}
