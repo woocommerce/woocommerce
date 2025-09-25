@@ -3,7 +3,7 @@
  */
 /* eslint-disable @woocommerce/dependency-group */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-import { useContext } from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import {
 	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
@@ -11,6 +11,7 @@ import {
 	__experimentalNavigatorButton as NavigatorButton,
 	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
+	Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import {
@@ -35,7 +36,39 @@ import {
 } from '../components/sidebar';
 import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 import { trackEvent } from '~/customize-store/tracking';
+import { redirectToThemes } from '~/customize-store/utils';
 
+const PickYourTheme = () => {
+	return (
+		<div className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner">
+			<h2 className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__title">
+				{ __( 'Pick your perfect theme', 'woocommerce' ) }
+			</h2>
+			<p className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__description">
+				{ createInterpolateElement(
+					__( 'Bring your vision to life<br />— no coding required.', 'woocommerce' ),
+					{
+						br: (
+							<br />
+						),
+					}
+				) }
+			</p>
+			<Button
+				variant="tertiary"
+				className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__button"
+				onClick={ () => {
+					trackEvent( 'customize_your_store_sidebar_all_themes_click' );
+					redirectToThemes();
+				} }
+			>
+				{ __( 'Browse free and paid themes', 'woocommerce' ) }
+			</Button>
+		</div>
+	);
+};
+
+// small banner
 export const SidebarNavigationScreenMain = () => {
 	const { navigate } = useContext( SidebarNavigationContext );
 
@@ -226,6 +259,7 @@ export const SidebarNavigationScreenMain = () => {
 							{ __( 'Choose your footer', 'woocommerce' ) }
 						</NavigatorButton>
 					</ItemGroup>
+					<PickYourTheme />
 				</>
 			}
 		/>
