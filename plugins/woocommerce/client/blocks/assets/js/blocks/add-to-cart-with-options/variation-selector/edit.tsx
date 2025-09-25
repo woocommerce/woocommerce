@@ -4,6 +4,7 @@
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 import { BlockEditProps } from '@wordpress/blocks';
 import { useProductDataContext } from '@woocommerce/shared-context';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -21,8 +22,6 @@ export default function AddToCartWithOptionsVariationSelectorEdit(
 	const { className } = props.attributes;
 	const { current: currentProductType } = useProductTypeSelector();
 	const { product } = useProductDataContext();
-	const productType =
-		product.id === 0 ? currentProductType?.slug : product.type;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -32,9 +31,11 @@ export default function AddToCartWithOptionsVariationSelectorEdit(
 		templateLock: 'all',
 	} );
 
-	// If a valid product has been provided but it's not a
-	// variable product, then don't render anything.
-	if ( product.id !== 0 && productType !== 'variable' ) {
+	const productType = ! isProductResponseItem( product )
+		? currentProductType?.slug
+		: product.type;
+
+	if ( productType !== 'variable' ) {
 		return null;
 	}
 
