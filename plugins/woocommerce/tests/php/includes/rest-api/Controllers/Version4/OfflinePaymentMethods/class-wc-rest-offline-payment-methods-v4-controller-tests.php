@@ -88,7 +88,17 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Clean up after tests.
 	 */
 	public function tearDown(): void {
+		// Reset current user to prevent user state interference.
+		wp_set_current_user( 0 );
+
+		// Clear service references to prevent state persistence.
+		$this->payments = null;
+		$this->endpoint = null;
+
+		// Disable feature flag.
 		$this->disable_rest_api_v4_feature();
+
+		// Always call parent last.
 		parent::tearDown();
 	}
 
