@@ -24,6 +24,13 @@ class Woocommerce_Analytics {
 	const PACKAGE_VERSION = '0.8.0';
 
 	/**
+	 * Proxy speed module version.
+	 *
+	 * @var string
+	*/
+	const PROXY_SPEED_MODULE_VERSION = '1.0.0';
+
+	/**
 	 * Initializer.
 	 * Used to configure the WooCommerce Analytics package.
 	 *
@@ -150,5 +157,59 @@ class Woocommerce_Analytics {
 	public static function register_rest_routes() {
 		$controller = new WC_Analytics_Tracking_Proxy();
 		$controller->register_routes();
+	}
+
+	/**
+	 * Maybe add proxy speed module.
+	 */
+	public static function maybe_add_proxy_speed_module() {
+		if ( ! function_exists( 'WP_Filesystem' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+
+		// Initialize the WP filesystem.
+		WP_Filesystem();
+
+		// Create the mu-plugin directory if it doesn't exist.
+		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
+			wp_mkdir_p( WPMU_PLUGIN_DIR );
+		}
+
+		// If the mu-plugin directory doesn't exist, we can't copy the files.
+		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
+			return;
+		}
+
+		if ( get_option( 'woocommerce_analytics_proxy_speed_module_version' ) === self::PROXY_SPEED_MODULE_VERSION ) {
+			// No need to copy the files again.
+			return;
+		}
+
+		update_option( 'woocommerce_analytics_proxy_speed_module_version', self::PROXY_SPEED_MODULE_VERSION );
+		$mu_plugin_src_file  = __DIR__ . '/mu-plugin/woocommerce-analytics-proxy-speed-module.php';
+		$mu_plugin_dest_file = WPMU_PLUGIN_DIR . '/woocommerce-analytics-proxy-speed-module.php';
+		$results             = copy( $mu_plugin_src_file, $mu_plugin_dest_file );
+
+		if ( ! $results ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'Failed to copy the WooCommerce Analytics proxy speed module files.', array( 'source' => 'woocommerce-analytics' ) );
+			}
+		}
+	}
+
+	/**
+	 * Maybe removes the proxy speed module. This should be invoked when the plugin is deactivated.
+	 */
+	public static function maybe_remove_proxy_speed_module() {
+		/**
+		 * Clean up MU plugin.
+		 */
+		$file_path = WPMU_PLUGIN_DIR . '/woocommerce-analytics-proxy-speed-module.php';
+
+		if ( file_exists( $file_path ) ) {
+			wp_delete_file( $file_path );
+		}
+
+		delete_option( 'woocommerce_analytics_proxy_speed_module_version' );
 	}
 }
