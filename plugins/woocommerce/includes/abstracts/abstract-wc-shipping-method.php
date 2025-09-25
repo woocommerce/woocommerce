@@ -600,76 +600,34 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Update instance settings from REST API request.
+	 * Update shipping method settings with validation.
 	 *
-	 * This method handles validation and saving of shipping method settings from REST API requests.
-	 *
-	 * @since 9.4.0
-	 * @param array $settings Settings to update (key-value pairs with clean field names, e.g., ['title' => 'Express', 'cost' => '10']).
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
+	 * @param array $settings Settings to update.
+	 * @return true|\WP_Error True on success, WP_Error on failure.
 	 */
-	public function update_instance_settings_from_api( $settings ) {
+	public function update_settings( $settings ) {
 		if ( ! is_array( $settings ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_shipping_method_invalid_settings',
-				__( 'Settings must be an array.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
+			return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_settings', __( 'Settings must be an array.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		$this->init_instance_settings();
 		$instance_settings = $this->instance_settings;
+		$form_fields       = $this->get_instance_form_fields();
 
-		/**
-		 * Key Transformation Explanation:
-		 *
-		 * The get_field_value() method (from WC_Settings_API) was designed for admin forms
-		 * where POST data has prefixed keys like 'woocommerce_flat_rate_1_title'.
-		 *
-		 * Internally, get_field_value() does this:
-		 *   $field_key = $this->get_field_key($key);  // e.g., 'woocommerce_flat_rate_1_title'
-		 *   $value = $post_data[$field_key];          // Looks for the PREFIXED key
-		 *
-		 * Since REST API sends clean JSON keys (e.g., 'title', 'cost'), we must transform
-		 * them to prefixed keys before passing to get_field_value(), or it will return null.
-		 *
-		 * Example:
-		 *   REST API sends: ['title' => 'Express']
-		 *   We transform to: ['woocommerce_flat_rate_1_title' => 'Express']
-		 *   Then get_field_value('title', ...) finds the value at 'woocommerce_flat_rate_1_title'
-		 */
-		$post_data = array();
-		foreach ( $settings as $key => $value ) {
-			$field_key               = $this->get_field_key( $key );
-			$post_data[ $field_key ] = $value;
-		}
-
-		// Validate and sanitize each field using get_field_value().
-		$form_fields = $this->get_instance_form_fields();
 		foreach ( $settings as $key => $value ) {
 			if ( isset( $form_fields[ $key ] ) ) {
-				try {
-					$instance_settings[ $key ] = $this->get_field_value( $key, $form_fields[ $key ], $post_data );
-				} catch ( \Exception $e ) {
-					return new \WP_Error(
-						'woocommerce_rest_shipping_method_invalid_setting',
-						$e->getMessage(),
-						array( 'status' => 400 )
-					);
+				$validated_value = $this->validate_setting( $key, $value, $form_fields[ $key ] );
+				if ( is_wp_error( $validated_value ) ) {
+					return $validated_value;
 				}
+				$instance_settings[ $key ] = $validated_value;
+			} else {
+				// Allow additional settings for extensibility.
+				$instance_settings[ $key ] = sanitize_text_field( $value );
 			}
 		}
 
-		// Save to database.
-		/**
-		 * Filter the instance settings values before saving.
-		 *
-		 * @since 9.4.0
-		 * @param array                $instance_settings Instance settings.
-		 * @param WC_Shipping_Method   $this              Shipping method instance.
-		 */
-		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this );
-		$result            = update_option( $this->get_instance_option_key(), $filtered_settings );
+		$result = update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this ) );
 
 		if ( $result ) {
 			$this->instance_settings = $instance_settings;
@@ -679,39 +637,66 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	}
 
 	/**
-	 * Update shipping method from REST API request.
+	 * Validate a single setting value.
 	 *
-	 * Handles updating settings, enabled status, and order from REST API requests.
-	 * This method can be used by any API version (v2, v3, v4) for consistent behavior.
-	 *
-	 * @since 9.4.0
-	 * @param \WC_Shipping_Zone $zone Zone object that contains this method.
-	 * @param int               $instance_id Method instance ID.
-	 * @param array             $data Request data containing 'settings', 'enabled', and/or 'order'.
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
+	 * @param string $key   Setting key.
+	 * @param mixed  $value Setting value.
+	 * @param array  $field Field definition.
+	 * @return mixed|\WP_Error Validated value or WP_Error.
 	 */
-	public function update_from_api_request( $zone, $instance_id, $data ) {
-		// Update settings if present.
-		if ( isset( $data['settings'] ) ) {
-			$result = $this->update_instance_settings_from_api( $data['settings'] );
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
-		}
+	public function validate_setting( $key, $value, $field ) {
+		$field_type = isset( $field['type'] ) ? $field['type'] : 'text';
 
-		// Update order if present.
-		if ( isset( $data['order'] ) ) {
-			$zone->set_method_order( $instance_id, absint( $data['order'] ) );
-			$this->method_order = absint( $data['order'] );
-		}
+		switch ( $field_type ) {
+			case 'text':
+			case 'password':
+			case 'email':
+			case 'number':
+				return wp_kses_post( trim( (string) $value ) );
 
-		// Update enabled status if present.
-		if ( isset( $data['enabled'] ) ) {
-			$zone->set_method_enabled( $instance_id, $data['enabled'] );
-			$this->enabled = $data['enabled'] ? 'yes' : 'no';
-		}
+			case 'textarea':
+				return wp_kses(
+					trim( (string) $value ),
+					array_merge(
+						array(
+							'iframe' => array(
+								'src'   => true,
+								'style' => true,
+								'id'    => true,
+								'class' => true,
+							),
+						),
+						wp_kses_allowed_html( 'post' )
+					)
+				);
 
-		return true;
+			case 'checkbox':
+				return wc_string_to_bool( $value ) ? 'yes' : 'no';
+
+			case 'select':
+			case 'radio':
+				if ( isset( $field['options'] ) && array_key_exists( $value, $field['options'] ) ) {
+					return $value;
+				}
+				return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Invalid value for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+
+			case 'multiselect':
+				if ( ! is_array( $value ) ) {
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %s must be an array.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+				}
+				$valid_values = array();
+				if ( isset( $field['options'] ) ) {
+					foreach ( $value as $single_value ) {
+						if ( array_key_exists( $single_value, $field['options'] ) ) {
+							$valid_values[] = $single_value;
+						}
+					}
+				}
+				return $valid_values;
+
+			default:
+				return sanitize_text_field( $value );
+		}
 	}
 
 	/**
