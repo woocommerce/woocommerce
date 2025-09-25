@@ -33,37 +33,37 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 	public function get_item_schema_properties(): array {
 		return array(
 			'id'          => array(
-				'description' => __( 'The unique identifier for the payment method.', 'woocommerce' ),
+				'description' => __( 'The unique identifier for the provider.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'_order'      => array(
-				'description' => __( 'The sort order of the payment method.', 'woocommerce' ),
+				'description' => __( 'The sort order of the provider.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'_type'       => array(
-				'description' => __( 'The type of payment provider.', 'woocommerce' ),
+				'description' => __( 'The type of payment provider. Use this to differentiate between the various items in the list and determine their intended use.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'title'       => array(
-				'description' => __( 'The title of the payment method.', 'woocommerce' ),
+				'description' => __( 'The title of the provider.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'description' => array(
-				'description' => __( 'The description of the payment method.', 'woocommerce' ),
+				'description' => __( 'The description of the provider.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
 			'supports'    => array(
-				'description' => __( 'Supported features for this payment method.', 'woocommerce' ),
+				'description' => __( 'Supported features for this provider.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
@@ -71,32 +71,103 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 					'type' => 'string',
 				),
 			),
+			'plugin'      => array(
+				'description' => __( 'The corresponding plugin details of the provider.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+				'properties'  => array(
+					'_type'  => array(
+						'description' => __( 'The type of the containing entity. Generally this is a regular plugin but it can also be a non-standard entity like a theme or a must-user plugin.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'slug'   => array(
+						'description' => __( 'The slug of the containing entity.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'file'   => array(
+						'description' => __( 'The plugin main file. This is a relative path to the plugins directory.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'status' => array(
+						'description' => __( 'The status of the containing entity.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+				),
+			),
+			'image'       => array(
+				'description' => __( 'The URL of the provider image.', 'woocommerce' ),
+				'type'        => 'string',
+				'readonly'    => true,
+			),
+			'icon'        => array(
+				'description' => __( 'The URL of the provider icon (square aspect ratio - 72px by 72px).', 'woocommerce' ),
+				'type'        => 'string',
+				'readonly'    => true,
+			),
+			'links'       => array(
+				'description' => __( 'Links for the provider.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'_type' => array(
+							'description' => __( 'The type of the link.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+							'readonly'    => true,
+						),
+						'url'   => array(
+							'description' => __( 'The URL of the link.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+							'readonly'    => true,
+						),
+					),
+				),
+			),
 			'state'       => array(
-				'description' => __( 'The general state of the payment method.', 'woocommerce' ),
+				'description' => __( 'The general state of the provider with regards to it\'s payments processing.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 				'properties'  => array(
 					'enabled'           => array(
-						'description' => __( 'Whether the payment method is enabled for use on checkout.', 'woocommerce' ),
+						'description' => __( 'Whether the provider is enabled for use on checkout.', 'woocommerce' ),
 						'type'        => 'boolean',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
 					),
 					'account_connected' => array(
-						'description' => __( 'Whether the payment method has a processing account connected.', 'woocommerce' ),
+						'description' => __( 'Whether the provider has a payments processing account connected.', 'woocommerce' ),
 						'type'        => 'boolean',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
 					),
 					'needs_setup'       => array(
-						'description' => __( 'Whether the payment method needs setup.', 'woocommerce' ),
+						'description' => __( 'Whether the provider needs setup.', 'woocommerce' ),
 						'type'        => 'boolean',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
 					),
 					'test_mode'         => array(
-						'description' => __( 'Whether the payment method is in test mode.', 'woocommerce' ),
+						'description' => __( 'Whether the provider is in test mode for payments processing.', 'woocommerce' ),
+						'type'        => 'boolean',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'dev_mode'          => array(
+						'description' => __( 'Whether the provider is in dev mode. Having this true usually leads to forcing test payments.', 'woocommerce' ),
 						'type'        => 'boolean',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
@@ -104,25 +175,25 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 				),
 			),
 			'management'  => array(
-				'description' => __( 'The management details of the payment method.', 'woocommerce' ),
+				'description' => __( 'Management-related details for the provider.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 				'properties'  => array(
 					'_links' => array(
-						'description' => __( 'Links related to payment method management.', 'woocommerce' ),
+						'description' => __( 'Management-related links for the provider.', 'woocommerce' ),
 						'type'        => 'object',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
 						'properties'  => array(
 							'settings' => array(
-								'description' => __( 'The link to the settings page for the payment method.', 'woocommerce' ),
+								'description' => __( 'The link to the settings page for the payment gateway.', 'woocommerce' ),
 								'type'        => 'object',
 								'context'     => self::VIEW_EDIT_CONTEXT,
 								'readonly'    => true,
 								'properties'  => array(
 									'href' => array(
-										'description' => __( 'The URL to the settings page for the payment method.', 'woocommerce' ),
+										'description' => __( 'The URL to the settings page for the payment gateway.', 'woocommerce' ),
 										'type'        => 'string',
 										'context'     => self::VIEW_EDIT_CONTEXT,
 										'readonly'    => true,
@@ -130,6 +201,32 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 								),
 							),
 						),
+					),
+				),
+			),
+			'onboarding'  => array(
+				'description' => __( 'Onboarding-related details for the provider.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+				'properties'  => array(
+					'type'   => array(
+						'description' => __( 'The type of onboarding process the provider supports.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'state'  => array(
+						'description' => __( 'The state of the onboarding process.', 'woocommerce' ),
+						'type'        => 'object',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
+					),
+					'_links' => array(
+						'description' => __( 'Onboarding-related links for the provider.', 'woocommerce' ),
+						'type'        => 'object',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+						'readonly'    => true,
 					),
 				),
 			),
