@@ -130,6 +130,8 @@ class ProductsController {
 			/**
 			 * Fires when a migration session starts.
 			 *
+			 * @since 10.3.0
+			 *
 			 * @param string $platform The platform being migrated from.
 			 * @param array  $metadata Session metadata including session_id, filters, and fields.
 			 */
@@ -184,6 +186,8 @@ class ProductsController {
 			/**
 			 * Fires when a migration session completes.
 			 *
+			 * @since 10.3.0
+			 *
 			 * @param string $platform    The platform being migrated from.
 			 * @param array  $final_stats Final migration statistics.
 			 */
@@ -232,6 +236,8 @@ class ProductsController {
 			} catch ( Exception $e ) {
 				/**
 				 * Fires when an error occurs during migration.
+				 *
+				 * @since 10.3.0
 				 *
 				 * @param string $error_type The type of error (fetch, mapping, import).
 				 * @param string $message    The error message.
@@ -616,6 +622,8 @@ class ProductsController {
 				/**
 				 * Fires when an error occurs during migration.
 				 *
+				 * @since 10.3.0
+				 *
 				 * @param string $error_type The type of error (fetch, mapping, import).
 				 * @param string $message    The error message.
 				 * @param array  $context    Additional error context.
@@ -644,6 +652,8 @@ class ProductsController {
 
 			/**
 			 * Fires when a batch has been processed during migration.
+			 *
+			 * @since 10.3.0
 			 *
 			 * @param array $batch_results   Results from the batch import.
 			 * @param array $source_data     Source platform data for the batch.
