@@ -443,12 +443,12 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
-		if ( ! empty( $js_sdk_params['is_js_sdk_flow'] ) && ! empty( $js_sdk_params['request_origin'] ) ) {
+		if ( ! empty( $js_sdk_params['is_js_sdk_flow'] ) && ! empty( $js_sdk_params['app_switch_request_origin'] ) ) {
 			$cancel_url = add_query_arg(
 				array(
 					'order_id' => $order->get_id(),
 				),
-				$js_sdk_params['request_origin']
+				$js_sdk_params['app_switch_request_origin']
 			);
 			$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
 		}

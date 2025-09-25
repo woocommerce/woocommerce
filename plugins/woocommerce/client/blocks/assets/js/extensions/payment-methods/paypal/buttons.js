@@ -21,6 +21,7 @@ import apiFetch from '@wordpress/api-fetch';
  * @param {string} [props.partnerAttributionId]
  * @param {string} [props.pageType]
  * @param {boolean} [props.isProductPage]
+ * @param {string} [props.appSwitchRequestOrigin]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
 const PayPalButtonsContainer = ( {
@@ -34,6 +35,7 @@ const PayPalButtonsContainer = ( {
 	partnerAttributionId,
 	pageType,
 	isProductPage,
+	appSwitchRequestOrigin,
 } ) => {
 	const [ orderReceivedUrl, setOrderReceivedURL ] = useState( '' );
 	const [ orderId, setOrderId ] = useState( '' );
@@ -124,7 +126,7 @@ const PayPalButtonsContainer = ( {
 				data: {
 					order_id: responseData.order_id,
 					payment_source: data.paymentSource || '',
-					request_origin: window.location.href,
+					app_switch_request_origin: appSwitchRequestOrigin,
 				},
 			} );
 

@@ -153,8 +153,8 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			$order,
 			$payment_source,
 			array(
-				'is_js_sdk_flow' => true,
-				'request_origin' => $data['request_origin'] ?? '',
+				'is_js_sdk_flow'            => true,
+				'app_switch_request_origin' => $data['app_switch_request_origin'] ?? '',
 			)
 		);
 

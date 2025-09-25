@@ -16,7 +16,7 @@ jQuery(function ($) {
 			async createOrder( data ) {
 				// If we're inside the product page, we need to empty the cart,
 				// and add the current product to the cart.
-				if ( paypal_standard.isProductPage ) {
+				if ( paypal_standard.is_product_page ) {
 					// Empty the cart.
 					await window.wp.apiFetch( {
 						method: 'DELETE',
@@ -83,7 +83,7 @@ jQuery(function ($) {
 						data: {
 							order_id: responseData.order_id,
 							payment_source: data.paymentSource || '',
-							request_origin: window.location.href,
+							app_switch_request_origin: paypal_standard.app_switch_request_origin,
 						},
 					} );
 
