@@ -455,7 +455,9 @@ class WC_Gateway_Paypal_Request {
 			if (
 				filter_var( $request_origin, FILTER_VALIDATE_URL ) &&
 				isset( $origin_parts['host'], $site_parts['host'] ) &&
-				strcasecmp( $origin_parts['host'], $site_parts['host'] ) === 0
+				strcasecmp( $origin_parts['host'], $site_parts['host'] ) === 0 &&
+				isset( $origin_parts['scheme'], $site_parts['scheme'] ) &&
+				strcasecmp( $origin_parts['scheme'], $site_parts['scheme'] ) === 0
 			) {
 				$cancel_url = add_query_arg(
 					array(
