@@ -93,7 +93,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		$this->assertArrayHasKey( 'groups', $data );
 		$this->assertIsArray( $data['values'] );
 		$this->assertIsArray( $data['groups'] );
-		
+
 		// Verify that values contains actual setting values.
 		$this->assertArrayHasKey( 'woocommerce_default_country', $data['values'] );
 		$this->assertIsString( $data['values']['woocommerce_default_country'] );

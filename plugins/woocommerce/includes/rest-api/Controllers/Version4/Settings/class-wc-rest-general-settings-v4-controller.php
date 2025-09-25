@@ -617,9 +617,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'readonly'    => true,
 				),
 				'values'      => array(
-					'description' => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
-					'type'        => 'object',
-					'context'     => array( 'view', 'edit' ),
+					'description'          => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view', 'edit' ),
 					'additionalProperties' => array(
 						'description' => __( 'Setting field value.', 'woocommerce' ),
 						'type'        => array( 'string', 'number', 'array', 'boolean' ),
