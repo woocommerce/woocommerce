@@ -163,8 +163,8 @@ export class FrontendUtils {
 		await this.goToCart();
 
 		// Check if cart is already empty
-		const emptyCartMessage = this.page.locator(
-			'text=Your cart is currently empty!'
+		const emptyCartMessage = this.page.getByText(
+			'Your cart is currently empty!'
 		);
 		if ( await emptyCartMessage.isVisible() ) {
 			return; // Cart is already empty
@@ -174,9 +174,7 @@ export class FrontendUtils {
 		const { waitForCartRequests } = this.trackCartRequests();
 
 		// Count initial remove buttons and remove all items
-		const removeButtons = this.page.locator(
-			'.wc-block-cart-item__remove-link'
-		);
+		const removeButtons = this.page.getByLabel( /Remove .* from cart/ );
 		let itemCount = await removeButtons.count();
 
 		while ( itemCount > 0 ) {
