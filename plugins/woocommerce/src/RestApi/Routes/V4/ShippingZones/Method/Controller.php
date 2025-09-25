@@ -47,6 +47,7 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller with schema dependency injection.
 	 *
+	 * @internal
 	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
 	 */
 	final public function init( ShippingMethodSchema $method_schema ) {
@@ -57,7 +58,7 @@ class Controller extends AbstractController {
 	 * Register the routes for shipping zone methods.
 	 */
 	public function register_routes() {
-		// POST - Create shipping method
+		// POST - Create shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -69,7 +70,7 @@ class Controller extends AbstractController {
 			)
 		);
 
-		// PUT - Update shipping method
+		// PUT - Update shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -236,11 +237,18 @@ class Controller extends AbstractController {
 	 * @return string
 	 */
 	protected function get_error_prefix(): string {
-		// Convert 'shipping-zones/method' to 'shipping_zones_method_'
+		// Convert 'shipping-zones/method' to 'shipping_zones_method_'.
 		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
 		return 'woocommerce_rest_api_v4_' . $prefix . '_';
 	}
 
+	/**
+	 * Get the item response for a shipping method.
+	 *
+	 * @param mixed           $zone    Shipping method data.
+	 * @param WP_REST_Request $request Request object.
+	 * @return array
+	 */
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
 		return $this->method_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
 	}

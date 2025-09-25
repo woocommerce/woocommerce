@@ -44,7 +44,7 @@ class ShippingMethodSchema extends AbstractSchema {
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'required'    => true,
-				'readonly'    => true, // Cannot change zone after creation
+				'readonly'    => true, // Cannot change zone after creation.
 			),
 			'enabled'     => array(
 				'description' => __( 'Whether the shipping method is enabled.', 'woocommerce' ),
@@ -110,7 +110,7 @@ class ShippingMethodSchema extends AbstractSchema {
 		$settings['title'] = $method->get_title();
 
 		// Get common method settings.
-		// @todo: ensure this is more flexible
+		// TODO: Ensure this is more flexible.
 		$common_fields = array( 'cost', 'min_amount', 'requires', 'class_cost', 'no_class_cost', 'tax_status' );
 
 		foreach ( $common_fields as $field ) {

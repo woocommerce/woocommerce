@@ -520,7 +520,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		global $wpdb;
 
 		$enabled = wc_string_to_bool( $enabled );
-		$result = $wpdb->update(
+		$result  = $wpdb->update(
 			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
 			array( 'is_enabled' => (int) $enabled ),
 			array( 'instance_id' => absint( $instance_id ) ),
@@ -528,10 +528,18 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			array( '%d' )
 		);
 
-		if ( $result !== false ) {
+		if ( false !== $result ) {
 			$method = $this->get_shipping_method( $instance_id );
 			if ( $method ) {
 				$method->enabled = $enabled ? 'yes' : 'no';
+				/**
+				 * Fires when a shipping method status is toggled.
+				 *
+				 * @param int    $instance_id Method instance ID.
+				 * @param string $method_id   Method ID.
+				 * @param int    $zone_id     Zone ID.
+				 * @param bool   $enabled     Whether method is enabled.
+				 */
 				do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method->id, $this->get_id(), $enabled );
 			}
 			return true;
@@ -558,7 +566,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			array( '%d' )
 		);
 
-		if ( $result !== false ) {
+		if ( false !== $result ) {
 			$method = $this->get_shipping_method( $instance_id );
 			if ( $method ) {
 				$method->method_order = absint( $order );
