@@ -222,7 +222,7 @@ class Server {
 			'offline-payment-methods' => OfflinePaymentMethodsController::class,
 			'settings-general'        => 'WC_REST_General_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
-			'settings'                         => 'WC_REST_Settings_V4_Controller',
+			'settings'                => 'WC_REST_Settings_V4_Controller',
 		);
 	}
 
