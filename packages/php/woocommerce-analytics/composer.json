@@ -30,8 +30,12 @@
 		"test-php": [
 			"@composer phpunit"
 		],
-		"build-production": "pnpm run build",
-		"build-development": "pnpm run build"
+		"build-production": [
+			"pnpm run build-production"
+		],
+		"build-development": [
+			"pnpm run build"
+		]
 	},
 	"repositories": [
 		{
