@@ -2,7 +2,7 @@
 /**
  * REST API Offline Payment Methods Controller
  *
- * Handles requests to the /settings/payments/offline-methods endpoint.
+ * Handles requests to the /payments/offline-methods endpoint.
  *
  * @package WooCommerce\RestApi
  */
@@ -31,7 +31,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'settings/payments/offline-methods';
+	protected $rest_base = 'payments/offline-methods';
 
 	/**
 	 * PaymentsProviders instance.
