@@ -287,11 +287,13 @@ class BlockTemplatesController {
 						break;
 					}
 				}
-				$fits_slug_query =
+				$fits_slug_query    =
 					! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
-				$fits_area_query =
+				$fits_area_query    =
 					! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-				$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
+				$is_from_filesystem = isset( $template_file->path );
+				$should_include     = ! $is_custom && $fits_slug_query && $fits_area_query && $is_from_filesystem;
+
 				if ( $should_include ) {
 					$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 					$query_result[] = $template;

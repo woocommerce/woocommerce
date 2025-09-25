@@ -14,6 +14,7 @@ use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -45,13 +46,9 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				if ( 'wc/v4' === $namespace && ! str_starts_with( $controller_class, 'WC_REST_' ) ) {
-					$this->controllers[ $namespace ][ $controller_name ] = $this->get_v4_controller( $controller_name, $controller_class );
-				} else {
-					$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
+				$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
 					$legacy_proxy->get_instance_of( $controller_class );
-				}
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
@@ -222,6 +219,7 @@ class Server {
 			'products'         => 'WC_REST_Products_V4_Controller',
 			'order-notes'      => OrderNotesController::class,
 			'shipping-zones'   => ShippingZonesController::class,
+			'orders'           => OrdersController::class,
 			'settings-general' => 'WC_REST_General_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'         => 'WC_REST_Settings_V4_Controller',

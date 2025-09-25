@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Replace the usage of `parse_blocks` function with the `Block_Scanner` in `CartCheckoutUtils::has_block_variation`.

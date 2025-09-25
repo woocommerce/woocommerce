@@ -53,7 +53,7 @@ if ( settings.isButtonsEnabled ) {
 	const PayPalButtonsContainer = lazy( () => import( './buttons' ) );
 	const LazyPayPalButtonsContainer = () => {
 		const options = settings?.buttonsOptions;
-		if ( ! options ) {
+		if ( ! options || ! options[ 'client-id' ] ) {
 			return null;
 		}
 
