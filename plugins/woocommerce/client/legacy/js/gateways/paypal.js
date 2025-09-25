@@ -106,7 +106,8 @@ jQuery(function ($) {
 
 			async onCancel( data ) {
 				if ( ! orderId ) {
-					// Try to get order ID from the URL.
+					// When coming from App Switch, the order ID may not be available in the client-side data.
+					// Check the URL for the order ID.
 					orderId = new URLSearchParams( window.location.search ).get( 'order_id' );
 				}
 

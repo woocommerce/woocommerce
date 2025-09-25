@@ -443,7 +443,10 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
+		// If the request is from PayPal JS SDK (Buttons), we need a cancel URL that is compatible with App Switch.
 		if ( ! empty( $js_sdk_params['is_js_sdk_flow'] ) && ! empty( $js_sdk_params['app_switch_request_origin'] ) ) {
+			// App Switch may open a new tab, so we cannot rely on client-side data. We need to pass the order ID manually.
+			// See https://developer.paypal.com/docs/checkout/standard/customize/app-switch/#resume-flow.
 			$cancel_url = add_query_arg(
 				array(
 					'order_id' => $order->get_id(),
@@ -452,8 +455,6 @@ class WC_Gateway_Paypal_Request {
 			);
 			$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
 		}
-
-		error_log( $params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] );
 
 		$shipping = $this->get_paypal_order_shipping( $order );
 		if ( $shipping ) {

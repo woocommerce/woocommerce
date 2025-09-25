@@ -148,6 +148,19 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onCancel = async ( data ) => {
+		if ( ! orderId ) {
+			// When coming from App Switch, the order ID may not be available in the client-side state.
+			// Check the URL for the order ID.
+			const orderIdFromUrl = new URLSearchParams( window.location.search ).get( 'order_id' );
+			if ( orderIdFromUrl ) {
+				setOrderId( orderIdFromUrl );
+			}
+		}
+
+		if ( ! orderId ) {
+			return;
+		}
+
 		try {
 			await apiFetch( {
 				method: 'POST',
