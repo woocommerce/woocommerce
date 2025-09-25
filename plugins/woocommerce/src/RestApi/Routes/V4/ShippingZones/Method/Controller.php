@@ -158,6 +158,17 @@ class Controller extends AbstractController {
 		return $this->method_schema->get_item_schema();
 	}
 
+	/**
+	 * Get error prefix for this controller.
+	 *
+	 * @return string
+	 */
+	protected function get_error_prefix(): string {
+		// Convert 'shipping-zones/method' to 'shipping_zones_method_'
+		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
+		return 'woocommerce_rest_api_v4_' . $prefix . '_';
+	}
+
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
 		return $this->method_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
 	}
