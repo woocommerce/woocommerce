@@ -200,8 +200,8 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 			$flat_rate_id,
 			array(
 				'settings' => array(
-					'title'    => 'Flat Rate Test',
-					'cost'     => '15.50',
+					'title'      => 'Flat Rate Test',
+					'cost'       => '15.50',
 					'tax_status' => 'taxable',
 				),
 			)
@@ -251,7 +251,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 		$method      = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 
-		$request = new WP_REST_Request( 'GET' );
+		$request  = new WP_REST_Request( 'GET' );
 		$response = $this->schema->get_item_response(
 			$method,
 			$request,
@@ -299,3 +299,4 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$this->assertEquals( '50.00', $response['settings']['min_amount'] );
 	}
 }
+

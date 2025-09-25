@@ -627,6 +627,12 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 			}
 		}
 
+		/**
+		 * Filter the instance settings values before saving.
+		 *
+		 * @param array                $instance_settings Instance settings.
+		 * @param WC_Shipping_Method   $this              Shipping method instance.
+		 */
 		$result = update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this ) );
 
 		if ( $result ) {
@@ -678,10 +684,12 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				if ( isset( $field['options'] ) && array_key_exists( $value, $field['options'] ) ) {
 					return $value;
 				}
+				/* translators: %s: setting key */
 				return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Invalid value for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
 
 			case 'multiselect':
 				if ( ! is_array( $value ) ) {
+					/* translators: %s: setting key */
 					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %s must be an array.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
 				}
 				$valid_values = array();

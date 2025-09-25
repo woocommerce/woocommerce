@@ -426,3 +426,4 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_method_', $prefix );
 	}
 }
+
