@@ -598,4 +598,114 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
 	}
+
+	/**
+	 * Update shipping method settings with validation.
+	 *
+	 * @param array $settings Settings to update.
+	 * @return true|\WP_Error True on success, WP_Error on failure.
+	 */
+	public function update_settings( $settings ) {
+		if ( ! is_array( $settings ) ) {
+			return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_settings', __( 'Settings must be an array.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$this->init_instance_settings();
+		$instance_settings = $this->instance_settings;
+		$form_fields       = $this->get_instance_form_fields();
+
+		foreach ( $settings as $key => $value ) {
+			if ( isset( $form_fields[ $key ] ) ) {
+				$validated_value = $this->validate_setting( $key, $value, $form_fields[ $key ] );
+				if ( is_wp_error( $validated_value ) ) {
+					return $validated_value;
+				}
+				$instance_settings[ $key ] = $validated_value;
+			} else {
+				// Allow additional settings for extensibility.
+				$instance_settings[ $key ] = sanitize_text_field( $value );
+			}
+		}
+
+		$result = update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this ) );
+
+		if ( $result ) {
+			$this->instance_settings = $instance_settings;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Validate a single setting value.
+	 *
+	 * @param string $key   Setting key.
+	 * @param mixed  $value Setting value.
+	 * @param array  $field Field definition.
+	 * @return mixed|\WP_Error Validated value or WP_Error.
+	 */
+	public function validate_setting( $key, $value, $field ) {
+		$field_type = isset( $field['type'] ) ? $field['type'] : 'text';
+
+		switch ( $field_type ) {
+			case 'text':
+			case 'password':
+			case 'email':
+			case 'number':
+				return wp_kses_post( trim( (string) $value ) );
+
+			case 'textarea':
+				return wp_kses(
+					trim( (string) $value ),
+					array_merge(
+						array(
+							'iframe' => array(
+								'src'   => true,
+								'style' => true,
+								'id'    => true,
+								'class' => true,
+							),
+						),
+						wp_kses_allowed_html( 'post' )
+					)
+				);
+
+			case 'checkbox':
+				return wc_string_to_bool( $value ) ? 'yes' : 'no';
+
+			case 'select':
+			case 'radio':
+				if ( isset( $field['options'] ) && array_key_exists( $value, $field['options'] ) ) {
+					return $value;
+				}
+				return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Invalid value for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+
+			case 'multiselect':
+				if ( ! is_array( $value ) ) {
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %s must be an array.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+				}
+				$valid_values = array();
+				if ( isset( $field['options'] ) ) {
+					foreach ( $value as $single_value ) {
+						if ( array_key_exists( $single_value, $field['options'] ) ) {
+							$valid_values[] = $single_value;
+						}
+					}
+				}
+				return $valid_values;
+
+			default:
+				return sanitize_text_field( $value );
+		}
+	}
+
+	/**
+	 * Set shipping method enabled status.
+	 *
+	 * @param bool $enabled Whether the method is enabled.
+	 * @return void
+	 */
+	public function set_enabled( $enabled ) {
+		$this->enabled = wc_string_to_bool( $enabled ) ? 'yes' : 'no';
+	}
 }
