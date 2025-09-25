@@ -151,7 +151,9 @@ const PayPalButtonsContainer = ( {
 		if ( ! orderId ) {
 			// When coming from App Switch, the order ID may not be available in the client-side state.
 			// Check the URL for the order ID.
-			const orderIdFromUrl = new URLSearchParams( window.location.search ).get( 'order_id' );
+			const orderIdFromUrl = new URLSearchParams(
+				window.location.search
+			).get( 'order_id' );
 			if ( orderIdFromUrl ) {
 				setOrderId( orderIdFromUrl );
 			}
