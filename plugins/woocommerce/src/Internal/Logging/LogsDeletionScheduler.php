@@ -132,13 +132,23 @@ class LogsDeletionScheduler {
 	 * @return bool True if queueing succeeded, false if it failed (queue is full or failed to set the option).
 	 */
 	private function add_source_to_pending_deletions_list( string $source ): bool {
-		$sources_pending_deletion = get_option( self::SOURCES_LIST_OPTION_NAME, array() );
+		$new_option               = false;
+		$sources_pending_deletion = get_option( self::SOURCES_LIST_OPTION_NAME );
+		if ( false === $sources_pending_deletion ) {
+			$sources_pending_deletion = array();
+			$new_option               = true;
+		}
+
 		if ( count( $sources_pending_deletion ) >= $this->max_queue_length ) {
 			return false;
 		}
 
 		$sources_pending_deletion[] = $source;
-		return update_option( self::SOURCES_LIST_OPTION_NAME, $sources_pending_deletion );
+
+		// Use add_option if the option doesn't exist already to create it as not-autoloading.
+		return $new_option ?
+			add_option( self::SOURCES_LIST_OPTION_NAME, $sources_pending_deletion, '', false ) :
+			update_option( self::SOURCES_LIST_OPTION_NAME, $sources_pending_deletion );
 	}
 
 	/**
