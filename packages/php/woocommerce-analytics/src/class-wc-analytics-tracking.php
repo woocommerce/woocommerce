@@ -45,6 +45,13 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	);
 
 	/**
+	 * Event queue.
+	 *
+	 * @var array
+	 */
+	protected static $event_queue = array();
+
+	/**
 	 * Record an event in Tracks and ClickHouse (If enabled).
 	 *
 	 * @param string $event_name The name of the event.
@@ -82,6 +89,28 @@ class WC_Analytics_Tracking extends WC_Tracks {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Queue an event in the event queue which will be processed on the page load in client-side analytics.
+	 *
+	 * @param string $event_name The name of the event.
+	 * @param array  $properties The event properties.
+	 */
+	public static function add_event_to_queue( $event_name, $properties = array() ) {
+		self::$event_queue[] = array(
+			'eventName' => $event_name,
+			'props'     => $properties,
+		);
+	}
+
+	/**
+	 * Get the event queue.
+	 *
+	 * @return array The event queue.
+	 */
+	public static function get_event_queue() {
+		return self::$event_queue;
 	}
 
 	/**
@@ -141,7 +170,7 @@ class WC_Analytics_Tracking extends WC_Tracks {
 				'device'         => wp_is_mobile() ? 'mobile' : 'desktop',
 				'store_currency' => get_woocommerce_currency(),
 				'timezone'       => wp_timezone_string(),
-				'is_guest'       => $blog_user_id === null,
+				'is_guest'       => ( $blog_user_id === null ) ? 1 : 0,
 			),
 			$server_details
 		);

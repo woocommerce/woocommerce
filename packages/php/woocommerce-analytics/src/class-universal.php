@@ -35,11 +35,7 @@ class Universal {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'capture_add_to_cart' ), 10, 6 );
 		add_action( 'woocommerce_after_cart_item_quantity_update', array( $this, 'capture_cart_quantity_update' ), 10, 4 );
 		add_action( 'woocommerce_cart_item_removed', array( $this, 'capture_remove_from_cart' ), 10, 2 );
-		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart' ) );
-		add_action( 'woocommerce_after_mini_cart', array( $this, 'remove_from_cart' ) );
-		add_action( 'wcct_before_cart_widget', array( $this, 'remove_from_cart' ) );
 		add_filter( 'woocommerce_cart_item_remove_link', array( $this, 'remove_from_cart_attributes' ), 10, 2 );
-		add_action( 'woocommerce_after_cart', array( $this, 'remove_from_cart_via_quantity' ), 10, 1 );
 
 		// Checkout.
 		// Send events after checkout template (shortcode).
@@ -69,37 +65,43 @@ class Universal {
 		// cart page view
 		add_action( 'wp_footer', array( $this, 'capture_cart_view' ), 11 );
 
-		// page view
-		add_action( 'wp_footer', array( $this, 'capture_page_view' ), 11 );
+		// Enqueue events to track.
+		add_action( 'wp_footer', array( $this, 'inject_analytics_data' ), 999 );
 	}
 
 	/**
-	 * On the cart page, add an event listener for removal of product click
+	 * Inject analytics data into the window object
 	 */
-	public function remove_from_cart() {
-		$common_props = $this->render_properties_as_js(
-			$this->get_common_properties()
-		);
+	public function inject_analytics_data() {
+		$is_clickhouse_enabled = $this->is_clickhouse_enabled();
+		?>
+		<script type="text/javascript">
+			(function() {
+				window.wcAnalytics = window.wcAnalytics || {};
+				const wcAnalytics = window.wcAnalytics;
 
-		// We listen at div.woocommerce because the cart 'form' contents get forcibly
-		// updated and subsequent removals from cart would then not have this click
-		// handler attached.
-		wc_enqueue_js(
-			"jQuery( 'div.woocommerce' ).on( 'click', 'a.remove', function() {
-				var productID = jQuery( this ).data( 'product_id' );
-				var quantity = jQuery( this ).parent().parent().find( '.qty' ).val()
-				var productDetails = {
-					'id': productID,
-					'quantity': quantity ? quantity : '1',
+				// Set common properties for all events.
+				wcAnalytics.commonProps = <?php echo wp_json_encode( $this->get_common_properties() ); ?>;
+
+				// Set the event queue.
+				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue() ); ?>;
+
+				// Features.
+				wcAnalytics.features = {
+					ch: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
+					sessionTracking: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
 				};
-				_wca.push( {
-					'_en': 'woocommerceanalytics_remove_from_cart',
-					'pi': productDetails.id,
-					'pq': productDetails.quantity, " .
-			$common_props . '
-				} );
-			} );'
-		);
+
+				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles() ); ?>;
+
+				// Page context flags.
+				wcAnalytics.pages = {
+					isAccountPage: <?php echo is_account_page() ? 'true' : 'false'; ?>,
+					isCart: <?php echo is_cart() ? 'true' : 'false'; ?>,
+				};
+			})();
+		</script>
+		<?php
 	}
 
 	/**
@@ -270,7 +272,7 @@ class Universal {
 			}
 
 			$data['pq'] = $cart_item['quantity'];
-			$this->record_event( 'woocommerceanalytics_product_checkout', $data, $product->get_id() );
+			$this->enqueue_event( 'product_checkout', $data, $product->get_id() );
 		}
 	}
 
@@ -375,45 +377,6 @@ class Universal {
 			);
 		}
 	}
-
-	/**
-	 * Listen for clicks on the "Update Cart" button to know if an item has been removed by
-	 * updating its quantity to zero
-	 */
-	public function remove_from_cart_via_quantity() {
-		$common_props = $this->render_properties_as_js(
-			$this->get_common_properties()
-		);
-
-		wc_enqueue_js(
-			"
-			function trigger_cart_remove() {
-			    let cartItems = document.querySelectorAll( '.cart_item' );
-				[...cartItems].forEach( function( item ) {
-					let qtyInput = item.querySelector('input.qty');
-					if ( qtyInput && qtyInput.value === '0' ) {
-					    let productRemoveLink = item.querySelector('.product-remove a');
-						let productID = productRemoveLink ? productRemoveLink.dataset.product_id : null;
-						_wca.push( {
-							'_en': 'woocommerceanalytics_remove_from_cart',
-							'pi': productID, " .
-			$common_props . "
-						} );
-					}
-				} );
-			}
-
-	        document.querySelector( 'button[name=update_cart]' ).addEventListener( 'click', trigger_cart_remove );
-
-			// The duplicated listener is needed because updated_wc_div replaces all the DOM and then the initial listener stops working.
-			document.body.onupdated_wc_div = function () {
-		        document.querySelector( 'button[name=update_cart]' ).addEventListener( 'click', trigger_cart_remove );
-	        };
-
-			"
-		);
-	}
-
 	/**
 	 * Gets the inner blocks of a block.
 	 *
@@ -489,7 +452,7 @@ class Universal {
 	}
 
 	/**
-	 * Save createaccount post data to be used in $this->order_process.
+	 * Save create account post data to be used in $this->order_process.
 	 *
 	 * @param array|null $data Post data from the checkout page.
 	 *
@@ -540,8 +503,8 @@ class Universal {
 			$checkout_page_contains_checkout_block     = '1';
 			$checkout_page_contains_checkout_shortcode = '0';
 
-			$this->record_event(
-				'woocommerceanalytics_post_account_creation',
+			$this->enqueue_event(
+				'post_account_creation',
 				array(
 					'from_checkout' => $checkout_page_used,
 					'checkout_page_contains_checkout_block' => $checkout_page_contains_checkout_block,
@@ -552,20 +515,13 @@ class Universal {
 	}
 
 	/**
-	 * Track page views
-	 */
-	public function capture_page_view() {
-		$this->record_event( 'woocommerceanalytics_page_view' );
-	}
-
-	/**
 	 * Capture a search event.
 	 */
 	public function capture_search_query() {
 		if ( is_search() ) {
 			global $wp_query;
-			$this->record_event(
-				'woocommerceanalytics_search',
+			$this->enqueue_event(
+				'search',
 				array(
 					'search_query' => $wp_query->get( 's' ),
 					'qty'          => $wp_query->found_posts,
@@ -592,8 +548,8 @@ class Universal {
 			return;
 		}
 
-		$this->record_event(
-			'woocommerceanalytics_cart_view',
+		$this->enqueue_event(
+			'cart_view',
 			array_merge(
 				$this->get_cart_checkout_shared_data(),
 				array()
@@ -610,8 +566,8 @@ class Universal {
 			return;
 		}
 
-		$this->record_event(
-			'woocommerceanalytics_product_view',
+		$this->enqueue_event(
+			'product_view',
 			array(),
 			$product->get_id()
 		);
@@ -659,8 +615,8 @@ class Universal {
 		}
 
 		$delayed_account_creation = ucfirst( get_option( 'woocommerce_enable_delayed_account_creation', 'Yes' ) );
-		$this->record_event(
-			'woocommerceanalytics_order_confirmation_view',
+		$this->enqueue_event(
+			'order_confirmation_view',
 			array(
 				'coupon_used'                           => $coupon_used,
 				'create_account'                        => $create_account,
@@ -726,8 +682,8 @@ class Universal {
 			return;
 		}
 
-		$this->record_event(
-			'woocommerceanalytics_checkout_view',
+		$this->enqueue_event(
+			'checkout_view',
 			array_merge(
 				$this->get_cart_checkout_shared_data(),
 				array(

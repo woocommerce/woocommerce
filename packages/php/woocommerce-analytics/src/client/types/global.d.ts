@@ -1,0 +1,21 @@
+/**
+ * Global type declarations for WooCommerce Analytics
+ */
+
+declare global {
+	interface Window {
+		wcAnalytics?: {
+			eventQueue: Array< { eventName: string; props?: Record< string, unknown > } >;
+			commonProps: Record< string, unknown >;
+			features: Record< string, boolean >;
+			pages: Record< string, boolean >;
+			breadcrumbs?: string[];
+		};
+		_wca?: {
+			push: ( props: Record< string, unknown > ) => void;
+		};
+	}
+}
+
+// This export statement is required to make this file a module
+export {};

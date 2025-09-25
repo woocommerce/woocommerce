@@ -54,34 +54,6 @@ trait Woo_Analytics_Trait {
 	protected $additional_blocks_on_checkout_page;
 
 	/**
-	 *  Session ID.
-	 *
-	 *  @var string
-	 */
-	protected $session_id = '';
-
-	/**
-	 *  Landing page breadcrumb trail where session started (stored as JSON string).
-	 *
-	 *  @var string
-	 */
-	protected $landing_page = '';
-
-	/**
-	 *  Indicates when a session is engaged in the current request.
-	 *
-	 *  @var bool
-	 */
-	protected $engaged_session = false;
-
-	/**
-	 *  Indicates when a new session has been created in the current request.
-	 *
-	 *  @var bool
-	 */
-	protected $is_new_session = false;
-
-	/**
 	 *  Locks Add to Cart Events Tracking in the current request avoiding duplications.
 	 *  i.e. If update_cart and add_to_cart actions happens in the same request.
 	 *
@@ -286,15 +258,11 @@ trait Woo_Analytics_Trait {
 	 * @return array Array of standard event props.
 	 */
 	public function get_common_properties() {
-		$session_id         = $this->get_session_id();
-		$landing_page       = $this->get_landing_page();
 		$site_info          = array(
-			'session_id'                         => $session_id,
 			'blog_id'                            => Jetpack_Connection::get_site_id(),
 			'store_id'                           => defined( '\\WC_Install::STORE_ID_OPTION' ) ? get_option( \WC_Install::STORE_ID_OPTION ) : false,
 			'ui'                                 => $this->get_user_id(),
 			'url'                                => home_url(),
-			'landing_page'                       => $landing_page,
 			'woo_version'                        => WC()->version,
 			'wp_version'                         => get_bloginfo( 'version' ),
 			'store_admin'                        => in_array( array( 'administrator', 'shop_manager' ), wp_get_current_user()->roles, true ) ? 1 : 0,
@@ -304,7 +272,7 @@ trait Woo_Analytics_Trait {
 			'additional_blocks_on_checkout_page' => $this->additional_blocks_on_checkout_page,
 			'store_currency'                     => get_woocommerce_currency(),
 			'timezone'                           => wp_timezone_string(),
-			'is_guest'                           => $this->get_user_id() === null,
+			'is_guest'                           => ( $this->get_user_id() === null ) ? 1 : 0,
 			'order_value'                        => $this->get_cart_subtotal(),
 			'order_total'                        => $this->get_cart_total(),
 			'total_tax'                          => $this->get_cart_taxes(),
@@ -313,29 +281,26 @@ trait Woo_Analytics_Trait {
 			'products_count'                     => $this->get_cart_items_count(),
 		);
 		$cart_checkout_info = $this->get_cart_checkout_info();
-		return array_merge( $site_info, $cart_checkout_info );
+
+		/**
+		 * Allow defining custom event properties in WooCommerce Analytics.
+		 *
+		 * @module woocommerce-analytics
+		 *
+		 * @since 12.5
+		 *
+		 * @param array $properties Array of event props to be filtered.
+		 */
+		$properties = apply_filters(
+			'jetpack_woocommerce_analytics_event_props',
+			array_merge( $site_info, $cart_checkout_info )
+		);
+
+		return $properties;
 	}
 
 	/**
-	 * Render tracks event properties as string of JavaScript object props.
-	 *
-	 * @param  array $properties Array of key/value pairs.
-	 * @return string String of the form "key1: value1, key2: value2, " (etc).
-	 */
-	private function render_properties_as_js( $properties ) {
-		$js_args_string = '';
-		foreach ( $properties as $key => $value ) {
-			if ( is_array( $value ) ) {
-				$js_args_string = $js_args_string . "'$key': " . wp_json_encode( $value ) . ',';
-			} else {
-				$js_args_string = $js_args_string . "'$key': '" . esc_js( $value ) . "', ";
-			}
-		}
-		return $js_args_string;
-	}
-
-	/**
-	 * Record an event with optional product and custom properties.
+	 * Enqueue an event with optional product and custom properties.
 	 *
 	 * @param string       $event_name The name of the event to record.
 	 * @param array        $properties Optional array of (key => value) event properties.
@@ -343,90 +308,19 @@ trait Woo_Analytics_Trait {
 	 *
 	 * @return void
 	 */
-	public function record_event( $event_name, $properties = array(), $product_id = null ) {
-		if ( ! isset( $properties['session_id'] ) && $this->should_send_to_clickhouse( $event_name ) ) {
-			$this->maybe_start_session();
+	public function enqueue_event( $event_name, $properties = array(), $product_id = null ) {
+		// Only set product details if we have a product id.
+		if ( $product_id ) {
+			$product = wc_get_product( $product_id );
+			if ( ! $product instanceof WC_Product ) {
+				return;
+			}
+			$product_details = $this->get_product_details( $product );
 		}
 
-		$js = $this->process_event_properties( $event_name, $properties, $product_id );
-		wc_enqueue_js( "_wca.push({$js});" );
+		$event_properties = array_merge( $product_details ?? array(), $properties );
 
-		// If the event is an initial page view, we don't need to record engagement.
-		if ( $this->is_initial_page_view( $event_name ) ) {
-			return;
-		}
-		$this->maybe_record_engagement( $properties );
-	}
-
-	/**
-	 * Record woocommerceanalytics_session_engagement event and set a flag in the session cookie.
-	 *
-	 * @param array $properties Optional array of (key => value) event properties.
-	 * @return void
-	 */
-	private function maybe_record_engagement( $properties = array() ) {
-		if ( ! $this->is_clickhouse_enabled() ) {
-			// For now, engagement is only recorded when ClickHouse is enabled to prevent changes to current event tracking.
-			return;
-		}
-
-		if ( ! empty( $properties['is_engaged'] ) || $this->is_engaged_session() ) {
-			// Engagement event was already recorded.
-			return;
-		}
-
-		$event_js = $this->process_event_properties( 'woocommerceanalytics_session_engagement', $properties );
-
-		$session_data = $this->get_session_cookie();
-		if ( empty( $session_data ) ) {
-			return;
-		}
-		$session_data['is_engaged'] = true;
-		$encoded_session_data       = rawurlencode( wp_json_encode( $session_data ) );
-		$cookie_js                  = "document.cookie = 'woocommerceanalytics_session={$encoded_session_data}; expires={$session_data['expires']}; path=/; secure; samesite=strict';";
-		wc_enqueue_js( $cookie_js );
-
-		wc_enqueue_js( "_wca.push({$event_js});" );
-		$this->engaged_session = true;
-	}
-
-	/**
-	 * In case session_id is empty and woocommerceanalytics_session cookie is not set. A new session should be created.
-	 *
-	 * @return void
-	 */
-	public function maybe_start_session() {
-		if ( ! $this->get_session_id() ) {
-			$session_id           = wp_generate_uuid4();
-			$this->session_id     = $session_id;
-			$this->landing_page   = wp_json_encode( $this->get_breadcrumb_titles() );
-			$this->is_new_session = true;
-
-			$session_expiration = $this->get_session_expiration_time();
-			$session_data       = array(
-				'session_id'   => $this->session_id,
-				'landing_page' => $this->landing_page,
-				'expires'      => $session_expiration,
-			);
-			$encoded_data       = rawurlencode( wp_json_encode( $session_data ) );
-			$cookie_js          = "document.cookie = 'woocommerceanalytics_session={$encoded_data}; expires={$session_expiration}; path=/; secure; samesite=strict';";
-			wc_enqueue_js( $cookie_js ); // save the session cookie for further events in the session
-
-			$event_js = $this->process_event_properties( 'woocommerceanalytics_session_started' );
-			wc_enqueue_js( "_wca.push({$event_js});" ); // trigger session started event
-		}
-	}
-
-	/**
-	 * Get a 30 minutes expiration time from now or at midnight UTC, whichever comes first.
-	 *
-	 * @return string
-	 */
-	public function get_session_expiration_time() {
-		$thirty_minutes_from_now = time() + ( 30 * 60 ); // 30 minutes from now
-		$midnight                = strtotime( 'tomorrow UTC' ) - 1; // 1 second before midnight
-		$expiration_time         = min( $thirty_minutes_from_now, $midnight ); // Get the earliest expiration time
-		return gmdate( 'D, d M Y H:i:s \G\M\T', $expiration_time );
+		WC_Analytics_Tracking::add_event_to_queue( $event_name, $event_properties );
 	}
 
 	/**
@@ -474,62 +368,9 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Compose event properties.
-	 *
-	 * @param string       $event_name The name of the event to record.
-	 * @param array        $properties Optional array of (key => value) event properties.
-	 * @param integer|null $product_id Optional id of the product relating to the event.
-	 *
-	 * @return string|void
-	 */
-	public function process_event_properties( $event_name, $properties = array(), $product_id = null ) {
-
-		// Only set product details if we have a product id.
-		if ( $product_id ) {
-			$product = wc_get_product( $product_id );
-			if ( ! $product instanceof WC_Product ) {
-				return;
-			}
-			$product_details = $this->get_product_details( $product );
-		}
-
-		/**
-		 * Allow defining custom event properties in WooCommerce Analytics.
-		 *
-		 * @module woocommerce-analytics
-		 *
-		 * @since 12.5
-		 *
-		 * @param array $all_props Array of event props to be filtered.
-		 */
-		$all_props = apply_filters(
-			'jetpack_woocommerce_analytics_event_props',
-			array_merge(
-				$this->get_common_properties(), // We put this here to allow override of common props.
-				$properties
-			)
-		);
-
-		$js = "{'_en': '" . esc_js( $event_name ) . "'";
-
-		// ch param is needed to identify ClickHouse queries in the JS Analytics library.
-		if ( $this->should_send_to_clickhouse( $event_name ) ) {
-			$js .= ",'ch':'1'";
-		}
-
-		if ( isset( $product_details ) ) {
-			$all_props = array_merge( $all_props, $product_details );
-		}
-
-		$js .= ',' . $this->render_properties_as_js( $all_props ) . '}';
-
-		return $js;
-	}
-
-	/**
 	 * Get the current user id
 	 *
-	 * @return int
+	 * @return string|null
 	 */
 	public function get_user_id() {
 		if ( is_user_logged_in() ) {
@@ -777,86 +618,6 @@ trait Woo_Analytics_Trait {
 	}
 
 	/**
-	 * Return the session_id.
-	 * First try to get it from the cookie. Fallback to $this->session_id.
-	 *
-	 * @return string
-	 */
-	public function get_session_id() {
-		$cookie = $this->get_session_cookie();
-		return $cookie['session_id'] ?? $this->session_id;
-	}
-
-	/**
-	 * Check if the session is engaged.
-	 *
-	 * @return bool
-	 */
-	public function is_engaged_session() {
-		$cookie = $this->get_session_cookie();
-		return $cookie['is_engaged'] ?? $this->engaged_session;
-	}
-
-	/**
-	 * Return the landing page.
-	 * First try to get it from the cookie. Fallback to $this->landing_page.
-	 *
-	 * @return string
-	 */
-	public function get_landing_page() {
-		$cookie = $this->get_session_cookie();
-		return $cookie['landing_page'] ?? $this->landing_page;
-	}
-
-	/**
-	 * Get the sanitized session cookie as an array
-	 *
-	 * @return array
-	 */
-	public function get_session_cookie() {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- JSON is decoded and validated below. We don't need to sanitize the cookie value because we're not outputting it but decoding it as JSON. Sanitization might break the JSON.
-		$raw_cookie = isset( $_COOKIE['woocommerceanalytics_session'] ) ? wp_unslash( $_COOKIE['woocommerceanalytics_session'] ) : '';
-
-		if ( ! $raw_cookie ) {
-			return array();
-		}
-
-		$decoded = json_decode( rawurldecode( $raw_cookie ), true );
-		return is_array( $decoded ) ? $decoded : array();
-	}
-
-	/**
-	 * Get the current request URL
-	 *
-	 * @return string
-	 */
-	public function get_current_url() {
-		return home_url( add_query_arg( null, null ) );
-	}
-
-	/**
-	 * Get the allowed CH Events.
-	 *
-	 * @return string[] The allowed CH Events.
-	 */
-	private function get_clickhouse_events() {
-		return array(
-			'woocommerceanalytics_session_started',
-			'woocommerceanalytics_session_engagement',
-			'woocommerceanalytics_product_view',
-			'woocommerceanalytics_cart_view',
-			'woocommerceanalytics_add_to_cart',
-			'woocommerceanalytics_remove_from_cart',
-			'woocommerceanalytics_checkout_view',
-			'woocommerceanalytics_product_checkout',
-			'woocommerceanalytics_product_purchase',
-			'woocommerceanalytics_order_confirmation_view',
-			'woocommerceanalytics_search',
-			'woocommerceanalytics_page_view',
-		);
-	}
-
-	/**
 	 * Check if ClickHouse is enabled.
 	 *
 	 * @return bool
@@ -872,28 +633,6 @@ trait Woo_Analytics_Trait {
 		 * @param bool $enabled Whether ClickHouse event tracking is enabled.
 		 */
 		return apply_filters( 'woocommerce_analytics_clickhouse_enabled', false );
-	}
-
-	/**
-	 * Check if the event should be sent to ClickHouse
-	 *
-	 * @param string $event The event name.
-	 * @return bool True if it should be sent to ClickHouse
-	 */
-	private function should_send_to_clickhouse( $event ) {
-		return $this->is_clickhouse_enabled() &&
-			in_array( $event, $this->get_clickhouse_events(), true );
-	}
-
-	/**
-	 * Check if the event is the initial page view event starting the session.
-	 *
-	 * @param string $event The event name.
-	 * @return bool
-	 */
-	private function is_initial_page_view( $event ) {
-		$initial_events = array( 'woocommerceanalytics_page_view', 'woocommerceanalytics_product_view', 'woocommerceanalytics_cart_view' );
-		return in_array( $event, $initial_events, true ) && ( ! $this->get_session_id() || $this->is_new_session );
 	}
 
 	/**

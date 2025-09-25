@@ -19,7 +19,6 @@ class My_Account {
 	 */
 	public function init_hooks() {
 		add_action( 'woocommerce_account_content', array( $this, 'track_tabs' ) );
-		add_action( 'woocommerce_account_content', array( $this, 'track_logouts' ) );
 		add_action( 'woocommerce_customer_save_address', array( $this, 'track_save_address' ), 10, 2 );
 		add_action( 'wp', array( $this, 'track_add_payment_method' ) );
 		add_action( 'wp', array( $this, 'track_delete_payment_method' ) );
@@ -64,11 +63,11 @@ class My_Account {
 				if ( isset( $core_endpoints['view-order'] ) && $core_endpoints['view-order'] === $key && is_numeric( $value ) ) {
 					$initiator = get_query_var( '_wca_initiator' );
 					if ( 'number' === $initiator ) {
-						$this->record_event( 'woocommerceanalytics_my_account_order_number_click' );
+						$this->enqueue_event( 'my_account_order_number_click' );
 						continue;
 					}
 					if ( 'action' === $initiator ) {
-						$this->record_event( 'woocommerceanalytics_my_account_order_action_click', array( 'action' => 'view' ) );
+						$this->enqueue_event( 'my_account_order_action_click', array( 'action' => 'view' ) );
 						continue;
 					}
 				}
@@ -80,12 +79,12 @@ class My_Account {
 						continue;
 					}
 
-					$this->record_event( 'woocommerceanalytics_my_account_address_click', array( 'address' => $value ) );
+					$this->enqueue_event( 'my_account_address_click', array( 'address' => $value ) );
 					continue;
 				}
 
 				if ( isset( $core_endpoints['add-payment-method'] ) && $core_endpoints['add-payment-method'] === $key ) {
-					$this->record_event( 'woocommerceanalytics_my_account_payment_add' );
+					$this->enqueue_event( 'my_account_payment_add' );
 					continue;
 				}
 
@@ -111,7 +110,6 @@ class My_Account {
 				if ( isset( $core_endpoints[ $key ] ) && $core_endpoints[ $key ] !== $key ) {
 					continue;
 				}
-
 				/**
 				 * $core_endpoints is an array of core_permalink => custom_permalink,
 				 * query_vars gives us the custom_permalink, but we want to track it as core_permalink.
@@ -120,7 +118,7 @@ class My_Account {
 					$key = array_search( $key, $core_endpoints, true );
 				}
 
-				$this->record_event( 'woocommerceanalytics_my_account_page_view', array( 'tab' => $key ) );
+				$this->enqueue_event( 'my_account_page_view', array( 'tab' => $key ) );
 			}
 		}
 	}
@@ -186,30 +184,6 @@ class My_Account {
 	 */
 	public function track_save_account_details() {
 		WC_Analytics_Tracking::record_event( 'my_account_details_save' );
-	}
-
-	/**
-	 * Track logout events.
-	 */
-	public function track_logouts() {
-		$common_props = $this->render_properties_as_js(
-			$this->get_common_properties()
-		);
-
-		wc_enqueue_js(
-			"
-			jQuery(document).ready(function($) {
-					// Attach event listener to the logout link
-				jQuery('.woocommerce-MyAccount-navigation-link--customer-logout').on('click', function() {
-					_wca.push({
-							'_en': 'woocommerceanalytics_my_account_tab_click',
-							'tab': 'logout'," .
-							$common_props . '
-					});
-				});
-			});
-			'
-		);
 	}
 
 	/**

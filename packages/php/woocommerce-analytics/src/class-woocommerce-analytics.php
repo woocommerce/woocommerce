@@ -8,6 +8,7 @@
 
 namespace Automattic;
 
+use Automattic\Jetpack\Assets;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
@@ -38,6 +39,9 @@ class Woocommerce_Analytics {
 
 		// loading s.js.
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_tracking_script' ) );
+
+		// loading client-side analytics script.
+		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'enqueue_client_script' ) );
 
 		// Initialize general store tracking actions.
 		add_action( 'init', array( new Universal(), 'init_hooks' ) );
@@ -120,6 +124,22 @@ class Woocommerce_Analytics {
 			array(
 				'in_footer' => false,
 				'strategy'  => 'defer',
+			)
+		);
+	}
+
+	/**
+	 * Enqueue client-side analytics script.
+	 */
+	public static function enqueue_client_script() {
+		Assets::register_script(
+			'woocommerce-analytics-client',
+			'../build/woocommerce-analytics-client.js',
+			__FILE__,
+			array(
+				'in_footer' => true,
+				'strategy'  => 'defer',
+				'enqueue'   => true,
 			)
 		);
 	}
