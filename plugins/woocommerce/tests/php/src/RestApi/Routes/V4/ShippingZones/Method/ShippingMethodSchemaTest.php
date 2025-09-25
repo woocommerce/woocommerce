@@ -86,39 +86,39 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'method_id', $properties );
 		$this->assertArrayHasKey( 'settings', $properties );
 
-		// Test instance_id properties
+		// Test instance_id properties.
 		$this->assertEquals( 'integer', $properties['instance_id']['type'] );
 		$this->assertTrue( $properties['instance_id']['readonly'] );
 		$this->assertContains( 'view', $properties['instance_id']['context'] );
 		$this->assertContains( 'edit', $properties['instance_id']['context'] );
 
-		// Test zone_id properties
+		// Test zone_id properties.
 		$this->assertEquals( 'integer', $properties['zone_id']['type'] );
 		$this->assertTrue( $properties['zone_id']['required'] );
 		$this->assertTrue( $properties['zone_id']['readonly'] );
 		$this->assertContains( 'view', $properties['zone_id']['context'] );
 		$this->assertContains( 'edit', $properties['zone_id']['context'] );
 
-		// Test enabled properties
+		// Test enabled properties.
 		$this->assertEquals( 'boolean', $properties['enabled']['type'] );
 		$this->assertTrue( $properties['enabled']['required'] );
 		$this->assertContains( 'view', $properties['enabled']['context'] );
 		$this->assertContains( 'edit', $properties['enabled']['context'] );
 
-		// Test method_id properties
+		// Test method_id properties.
 		$this->assertEquals( 'string', $properties['method_id']['type'] );
 		$this->assertTrue( $properties['method_id']['required'] );
 		$this->assertContains( 'view', $properties['method_id']['context'] );
 		$this->assertContains( 'edit', $properties['method_id']['context'] );
 
-		// Test settings properties
+		// Test settings properties.
 		$this->assertEquals( 'object', $properties['settings']['type'] );
 		$this->assertTrue( $properties['settings']['required'] );
 		$this->assertTrue( $properties['settings']['additionalProperties'] );
 		$this->assertContains( 'view', $properties['settings']['context'] );
 		$this->assertContains( 'edit', $properties['settings']['context'] );
 
-		// Test settings.title property
+		// Test settings.title property.
 		$this->assertArrayHasKey( 'title', $properties['settings']['properties'] );
 		$this->assertEquals( 'string', $properties['settings']['properties']['title']['type'] );
 		$this->assertTrue( $properties['settings']['properties']['title']['required'] );
@@ -143,15 +143,15 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 	 * Test get item response.
 	 */
 	public function test_get_item_response() {
-		// Create zone and add flat rate method
+		// Create zone and add flat rate method.
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
-		// Get the method instance
+		// Get the method instance.
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$this->assertNotNull( $method );
 
-		// Update method settings using our extended model method
+		// Update method settings using our extended model method.
 		$zone->update_shipping_method(
 			$instance_id,
 			array(
@@ -163,7 +163,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Re-fetch the method to get updated data
+		// Re-fetch the method to get updated data.
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 
 		$request  = new WP_REST_Request( 'GET' );
@@ -180,7 +180,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $response['enabled'] );
 		$this->assertEquals( 'flat_rate', $response['method_id'] );
 
-		// Test settings structure
+		// Test settings structure.
 		$this->assertArrayHasKey( 'title', $response['settings'] );
 		$this->assertEquals( 'Test Flat Rate Method', $response['settings']['title'] );
 		$this->assertEquals( '10.00', $response['settings']['cost'] );
@@ -192,7 +192,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 	public function test_get_method_settings_different_types() {
 		$zone = $this->create_shipping_zone();
 
-		// Test flat rate method
+		// Test flat rate method.
 		$flat_rate_id = $zone->add_shipping_method( 'flat_rate' );
 		$flat_rate    = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
 
@@ -207,7 +207,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Re-fetch to get updated settings
+		// Re-fetch to get updated settings.
 		$flat_rate = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
 
 		$reflection = new \ReflectionClass( $this->schema );
@@ -238,7 +238,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 
 		$settings = $get_method->invoke( $this->schema, $method );
 
-		// Should at least have title
+		// Should at least have title.
 		$this->assertArrayHasKey( 'title', $settings );
 		$this->assertIsString( $settings['title'] );
 	}
@@ -258,7 +258,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 			array( 'instance_id', 'method_id' )
 		);
 
-		// Should still return all fields since include_fields isn't implemented
+		// Should still return all fields since include_fields isn't implemented.
 		// This is for future extensibility.
 		$this->assertArrayHasKey( 'instance_id', $response );
 		$this->assertArrayHasKey( 'zone_id', $response );
