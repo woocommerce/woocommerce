@@ -77,6 +77,17 @@ class Products extends AbstractRoute {
 			$query_results    = $product_query->get_objects( $request );
 			$response_objects = [];
 
+			$variation_ids = [];
+			foreach ( $query_results['objects'] as $product ) {
+				if ( $product->get_type() === 'variable' ) {
+					$children = $product->get_children();
+					foreach ( $children as $child_id ) {
+						$variation_ids[] = $child_id;
+					}
+				}
+			}
+			_prime_post_caches($variation_ids);
+
 			foreach ( $query_results['objects'] as $object ) {
 				$data               = rest_ensure_response( $this->schema->get_item_response( $object ) );
 				$response_objects[] = $this->prepare_response_for_collection( $data );
