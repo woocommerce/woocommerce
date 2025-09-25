@@ -140,25 +140,17 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 		remove_all_filters( 'mcp_validation_enabled' );
 		remove_all_filters( 'rest_pre_dispatch' );
 
-		// Reset WordPress actions - critical for MCP reinitialization.
-		global $wp_actions;
-		unset( $wp_actions['rest_api_init'] );
-		unset( $wp_actions['mcp_adapter_init'] );
-		unset( $wp_actions['abilities_api_init'] );
+		// Don't reset WordPress actions to keep MCP routes registered between tests.
+		// This prevents the 404 errors that occur when routes are unset after the first test.
 
 		// Reset global abilities registry to prevent duplication warnings.
 		global $wp_abilities;
 		$wp_abilities = array();
 
-		// Clear REST server routes cache.
-		if ( function_exists( 'rest_get_server' ) ) {
-			rest_get_server()->override_by_default = false;
-		}
-
 		// Clean up feature flag options.
 		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
 
-		// Reset MCP initialization flag for next test.
+		// Reset MCP initialization flag to ensure MCP reinitializes for each test.
 		self::$mcp_initialized = false;
 
 		// Reset user.
@@ -202,23 +194,27 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * Initialize MCP server and abilities.
 	 */
 	private function initialize_mcp(): void {
-		// Trigger abilities API initialization to register WooCommerce abilities.
-		do_action( 'abilities_api_init' );
-
-		// Initialize abilities registry (this will call AbilitiesRestBridge::init()).
-		$container = wc_get_container();
-		if ( $container->has( \Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry::class ) ) {
-			$abilities_registry = $container->get( \Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry::class );
-			// Registry constructor already calls init_abilities(), so abilities should be registered.
+		// Clear existing WooCommerce abilities to prevent duplication warnings.
+		if ( function_exists( 'wp_get_abilities' ) ) {
+			$existing_abilities = wp_get_abilities();
+			foreach ( $existing_abilities as $ability_name => $ability ) {
+				if ( str_starts_with( $ability_name, 'woocommerce/' ) ) {
+					wp_unregister_ability( $ability_name );
+				}
+			}
 		}
 
-		// Initialize WooCommerce container and MCP provider.
+		// Trigger abilities API initialization.
+		do_action( 'abilities_api_init' );
+
+		// Get MCP provider from container and initialize.
+		$container = wc_get_container();
 		if ( $container->has( \Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class ) ) {
 			$mcp_provider = $container->get( \Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class );
 			$mcp_provider->maybe_initialize();
 		}
 
-		// Ensure MCP server is initialized.
+		// Trigger REST API initialization.
 		do_action( 'rest_api_init' );
 	}
 
