@@ -67,10 +67,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
-		$this->enable_rest_api_v4_feature();
 		parent::setUp();
+		$this->enable_rest_api_v4_feature();
 
-		$this->payments = wc_get_container()->get( Payments::class );
+		// Create a fresh Payments instance to avoid container pollution.
+		$this->payments = new Payments();
 		$schema         = new Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema();
 
 		$this->endpoint = new OfflinePaymentMethodsController();
