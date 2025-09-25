@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1054,6 +1055,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			if ( $total_query ) {
 				$wp_query_args['meta_query'][] = $total_query;
 			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$wp_query_args['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
 		// Handle custom orderby paramers.

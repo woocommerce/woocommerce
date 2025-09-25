@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_REST_Request;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 /**
  * OrderSchema class.
@@ -516,6 +517,12 @@ class OrderSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'fulfillment_status'   => array(
+				'description' => __( 'The fulfillment status of the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		if ( $this->cogs_is_enabled() ) {
@@ -621,6 +628,7 @@ class OrderSchema extends AbstractSchema {
 			'is_editable'          => $order->is_editable(),
 			'needs_payment'        => $order->needs_payment(),
 			'needs_processing'     => $order->needs_processing(),
+			'fulfillment_status'   => FulfillmentUtils::get_order_fulfillment_status( $order ),
 		);
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
