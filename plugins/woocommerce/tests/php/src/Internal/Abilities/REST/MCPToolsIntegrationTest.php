@@ -52,19 +52,12 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 	private $api_key;
 
 	/**
-	 * Flag to track if MCP has been initialized.
-	 *
-	 * @var bool
+	 * Set up once before all tests in this class.
 	 */
-	private static $mcp_initialized = false;
+	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
 
-
-
-	/**
-	 * Set up before each test.
-	 */
-	public function set_up() {
-		// Enable MCP feature flag FIRST before parent setup.
+		// Enable MCP feature flag for all tests.
 		add_filter( 'woocommerce_features', function( $features ) {
 			$features['mcp_integration'] = true;
 			return $features;
@@ -73,8 +66,6 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Also try enabling via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 
-		parent::set_up();
-
 		// Bootstrap Abilities API.
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
@@ -82,6 +73,34 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 				require $bootstrap_file;
 			}
 		}
+
+		// Mock MCP transport authentication for all tests.
+		add_filter( 'woocommerce_mcp_allow_insecure_transport', '__return_true' );
+		add_filter( 'woocommerce_is_mcp_request', '__return_true' );
+		add_filter( 'woocommerce_check_rest_ability_permissions_for_method', '__return_true' );
+	}
+
+	/**
+	 * Clean up once after all tests in this class.
+	 */
+	public static function tearDownAfterClass(): void {
+		// Reset filters added in setUpBeforeClass.
+		remove_all_filters( 'woocommerce_features' );
+		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
+		remove_all_filters( 'woocommerce_is_mcp_request' );
+		remove_all_filters( 'woocommerce_check_rest_ability_permissions_for_method' );
+
+		// Clean up feature flag options.
+		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
+
+		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Set up before each test.
+	 */
+	public function set_up() {
+		parent::set_up();
 
 		// Skip if abilities API not available.
 		if ( ! function_exists( 'wp_get_ability' ) ) {
@@ -104,19 +123,11 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->test_order->set_status( 'processing' );
 		$this->test_order->save();
 
-		// Mock MCP transport authentication for testing.
-		add_filter( 'woocommerce_mcp_allow_insecure_transport', '__return_true' );
-		add_filter( 'woocommerce_is_mcp_request', '__return_true' );
-		add_filter( 'woocommerce_check_rest_ability_permissions_for_method', '__return_true' );
-
 		// Create a real WooCommerce API key for testing.
 		$this->api_key = $this->create_api_key();
 
-		// Initialize MCP only once across all tests.
-		if ( ! self::$mcp_initialized ) {
-			$this->initialize_mcp();
-			self::$mcp_initialized = true;
-		}
+		// Initialize MCP for each test to ensure clean state.
+		$this->initialize_mcp();
 	}
 
 	/**
@@ -131,27 +142,14 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$this->test_order->delete( true );
 		}
 
-		// Reset any filters that might have been added.
-		remove_all_filters( 'woocommerce_features' );
-		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
-		remove_all_filters( 'woocommerce_is_mcp_request' );
-		remove_all_filters( 'woocommerce_check_rest_ability_permissions_for_method' );
+		// Reset any test-specific filters.
 		remove_all_filters( 'woocommerce_mcp_include_ability' );
 		remove_all_filters( 'mcp_validation_enabled' );
 		remove_all_filters( 'rest_pre_dispatch' );
 
-		// Don't reset WordPress actions to keep MCP routes registered between tests.
-		// This prevents the 404 errors that occur when routes are unset after the first test.
-
 		// Reset global abilities registry to prevent duplication warnings.
 		global $wp_abilities;
 		$wp_abilities = array();
-
-		// Clean up feature flag options.
-		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
-
-		// Reset MCP initialization flag to ensure MCP reinitializes for each test.
-		self::$mcp_initialized = false;
 
 		// Reset user.
 		wp_set_current_user( 0 );
