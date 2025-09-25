@@ -447,16 +447,23 @@ class WC_Gateway_Paypal_Request {
 			// App Switch may open a new tab, so we cannot rely on client-side data.
 			// We need to pass the order ID manually.
 			// See https://developer.paypal.com/docs/checkout/standard/customize/app-switch/#resume-flow.
+
 			$request_origin = $js_sdk_params['app_switch_request_origin'];
-			// Check if $request_origin is a valid URL, and it is a URL of the current site.
-			if ( filter_var( $request_origin, FILTER_VALIDATE_URL ) && str_starts_with( $request_origin, get_site_url() ) ) {
+			// Check if $request_origin is a valid URL, and matches the current site.
+			$origin_parts = wp_parse_url( $request_origin );
+			$site_parts   = wp_parse_url( get_site_url() );
+			if (
+				filter_var( $request_origin, FILTER_VALIDATE_URL ) &&
+				isset( $origin_parts['host'], $site_parts['host'] ) &&
+				strcasecmp( $origin_parts['host'], $site_parts['host'] ) === 0
+			) {
 				$cancel_url = add_query_arg(
 					array(
 						'order_id' => $order->get_id(),
 					),
-					$js_sdk_params['app_switch_request_origin']
+					$request_origin
 				);
-				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
+				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = esc_url_raw( $cancel_url );
 			}
 		}
 
