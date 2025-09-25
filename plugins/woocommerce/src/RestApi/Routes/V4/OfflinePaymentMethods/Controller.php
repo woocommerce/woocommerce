@@ -116,10 +116,10 @@ class Controller extends AbstractController {
 		try {
 			$offline_methods = $this->get_offline_payment_methods_data( $request );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 
-				'woocommerce_rest_offline_payment_methods_error', 
-				$e->getMessage(), 
-				array( 'status' => 500 ) 
+			return new WP_Error(
+				'woocommerce_rest_offline_payment_methods_error',
+				$e->getMessage(),
+				array( 'status' => 500 )
 			);
 		}
 
@@ -130,7 +130,7 @@ class Controller extends AbstractController {
 		$data = array();
 		foreach ( $offline_methods as $method ) {
 			$prepared_item = $this->prepare_item_for_response( $method, $request );
-			$data[] = $this->prepare_response_for_collection( $prepared_item );
+			$data[]        = $this->prepare_response_for_collection( $prepared_item );
 		}
 
 		return rest_ensure_response( $data );
@@ -139,6 +139,7 @@ class Controller extends AbstractController {
 	/**
 	 * Get offline payment methods data.
 	 *
+	 * @param WP_REST_Request $request Full details about the request.
 	 * @return array The offline payment methods data.
 	 * @throws \Exception If there's an error retrieving the data.
 	 */
@@ -201,7 +202,6 @@ class Controller extends AbstractController {
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $item, $request );
 	}
-
 
 	/**
 	 * Prepare links for the request.

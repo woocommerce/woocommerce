@@ -112,7 +112,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		// Verify each item has the expected offline payment method type
+		// Verify each item has the expected offline payment method type.
 		foreach ( $data as $item ) {
 			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $item['_type'] );
 			$this->assertArrayHasKey( 'id', $item );
@@ -133,7 +133,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		// Verify each item has the expected offline payment method type
+		// Verify each item has the expected offline payment method type.
 		foreach ( $data as $item ) {
 			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $item['_type'] );
 		}
@@ -148,7 +148,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
-		// Should still return 200 as the Payments service handles invalid locations gracefully
+		// Should still return 200 as the Payments service handles invalid locations gracefully.
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 	}
@@ -196,7 +196,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 'array', $schema['type'] );
 		$this->assertArrayHasKey( 'items', $schema );
 
-		// Verify the item schema has all expected properties
+		// Verify the item schema has all expected properties.
 		$item_schema = $schema['items'];
 		$this->assertArrayHasKey( 'properties', $item_schema );
 
@@ -241,15 +241,15 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		if ( ! empty( $data ) ) {
 			$first_item = $data[0];
 
-			// Test required fields are present
+			// Test required fields are present.
 			$this->assertArrayHasKey( 'id', $first_item );
 			$this->assertArrayHasKey( '_type', $first_item );
 			$this->assertArrayHasKey( 'title', $first_item );
 
-			// Test _type is correct for offline payment methods
+			// Test _type is correct for offline payment methods.
 			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $first_item['_type'] );
 
-			// Test data types
+			// Test data types.
 			$this->assertIsString( $first_item['id'] );
 			$this->assertIsString( $first_item['title'] );
 
@@ -268,7 +268,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Test that response has proper links structure if settings links are present
+		// Test that response has proper links structure if settings links are present.
 		$data = $response->get_data();
 		if ( ! empty( $data ) ) {
 			$links = $response->get_links();
@@ -287,7 +287,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		// Test that results are sorted by _order field
+		// Test that results are sorted by _order field.
 		if ( count( $data ) > 1 ) {
 			$orders        = array_column( $data, '_order' );
 			$sorted_orders = $orders;
@@ -311,7 +311,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		if ( ! empty( $data ) ) {
 			$first_item = $data[0];
 
-			// Should only contain the requested fields
+			// Should only contain the requested fields.
 			$this->assertArrayHasKey( 'id', $first_item );
 			$this->assertArrayHasKey( 'title', $first_item );
 
@@ -320,7 +320,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 			$this->assertArrayNotHasKey( '_type', $first_item );
 			$this->assertArrayNotHasKey( 'supports', $first_item );
 
-			// Test that we only have exactly the requested fields
+			// Test that we only have exactly the requested fields.
 			$this->assertCount( 2, $first_item );
 		}
 	}
@@ -340,15 +340,14 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 			$first_item        = $data[0];
 			$schema_properties = array_keys( $this->endpoint->get_collection_schema()['items']['properties'] );
 
-			// Allow framework-added fields like _links
+			// Allow framework-added fields like _links.
 			$allowed_framework_fields = array( '_links' );
 			$allowed_fields           = array_merge( $schema_properties, $allowed_framework_fields );
 
-			// Test that response only contains fields from schema or allowed framework fields
+			// Test that response only contains fields from schema or allowed framework fields.
 			foreach ( array_keys( $first_item ) as $field ) {
 				$this->assertContains( $field, $allowed_fields, "Field '{$field}' not declared in schema or allowed framework fields" );
 			}
 		}
 	}
 }
-
