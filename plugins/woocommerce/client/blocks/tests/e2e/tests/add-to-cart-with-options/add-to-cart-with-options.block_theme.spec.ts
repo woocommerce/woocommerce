@@ -379,6 +379,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
+			// Wait for the API response to ensure the DB has been updated.
+			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
 			await expect(
 				page.getByLabel(
 					config.features[ 'experimental-iapi-mini-cart' ]
