@@ -83,6 +83,7 @@ jQuery(function ($) {
 						data: {
 							order_id: responseData.order_id,
 							payment_source: data.paymentSource || '',
+							request_origin: window.location.href,
 						},
 					} );
 
@@ -104,6 +105,15 @@ jQuery(function ($) {
 			},
 
 			async onCancel( data ) {
+				if ( ! orderId ) {
+					// Try to get order ID from the URL.
+					orderId = new URLSearchParams( window.location.search ).get( 'order_id' );
+				}
+
+				if ( ! orderId ) {
+					return;
+				}
+
 				try {
 					await window.wp.apiFetch( {
 						method: 'POST',
@@ -146,10 +156,14 @@ jQuery(function ($) {
 
 		});
 
-		buttons.render( container ).catch( function ( err ) {
-			// eslint-disable-next-line no-console
-			console.error( 'Failed to render PayPal buttons', err );
-		});
+		if ( buttons.hasReturned() ) {
+			buttons.resume();
+		} else {
+			buttons.render( container ).catch( function ( err ) {
+				// eslint-disable-next-line no-console
+				console.error( 'Failed to render PayPal buttons', err );
+			});
+		}
 	}
 
 	// Align the PayPal buttons to the center of the container on classic checkout page.

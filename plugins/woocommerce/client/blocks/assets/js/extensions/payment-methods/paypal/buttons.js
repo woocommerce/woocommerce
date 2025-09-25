@@ -124,6 +124,7 @@ const PayPalButtonsContainer = ( {
 				data: {
 					order_id: responseData.order_id,
 					payment_source: data.paymentSource || '',
+					request_origin: window.location.href,
 				},
 			} );
 

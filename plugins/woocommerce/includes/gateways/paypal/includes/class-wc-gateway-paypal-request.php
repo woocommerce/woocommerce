@@ -122,14 +122,14 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
-	 * @param bool     $is_redirect_flow Whether the approval flow involves a redirect.
+	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request..
 	 * @return array|null
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function create_paypal_order(
 		$order,
 		$payment_source = WC_Gateway_Paypal_Constants::PAYMENT_SOURCE_PAYPAL,
-		$is_redirect_flow = true
+		$js_sdk_params = array()
 	) {
 		$paypal_debug_id = null;
 
@@ -144,7 +144,7 @@ class WC_Gateway_Paypal_Request {
 		try {
 			$request_body = array(
 				'test_mode' => $this->gateway->testmode,
-				'order'     => $this->get_paypal_create_order_request_params( $order, $payment_source ),
+				'order'     => $this->get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ),
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_ORDER_ENDPOINT, $request_body );
 
@@ -162,7 +162,8 @@ class WC_Gateway_Paypal_Request {
 			}
 
 			$redirect_url = null;
-			if ( $is_redirect_flow ) {
+			if ( empty( $js_sdk_params['is_js_sdk_flow'] ) ) {
+				// We only need an approve link for the classic, redirect flow.
 				$redirect_url = $this->get_approve_link( $http_code, $response_data );
 				if ( empty( $redirect_url ) ) {
 					throw new Exception( 'PayPal order creation failed. Missing approval link.' );
@@ -400,9 +401,10 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
+	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request..
 	 * @return array
 	 */
-	private function get_paypal_create_order_request_params( $order, $payment_source ) {
+	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
 		$payee_email = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 
 		$params = array(
@@ -440,6 +442,18 @@ class WC_Gateway_Paypal_Request {
 				),
 			),
 		);
+
+		if ( ! empty( $js_sdk_params['is_js_sdk_flow'] ) && ! empty( $js_sdk_params['request_origin'] ) ) {
+			$cancel_url = add_query_arg(
+				array(
+					'order_id' => $order->get_id(),
+				),
+				$js_sdk_params['request_origin']
+			);
+			$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
+		}
+
+		error_log( $params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] );
 
 		$shipping = $this->get_paypal_order_shipping( $order );
 		if ( $shipping ) {
