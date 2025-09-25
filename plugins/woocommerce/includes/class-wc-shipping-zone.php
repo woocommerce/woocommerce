@@ -459,4 +459,113 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		return true;
 	}
+
+	/**
+	 * Get a specific shipping method by instance ID.
+	 *
+	 * @param int $instance_id Method instance ID.
+	 * @return WC_Shipping_Method|false Method instance or false if not found.
+	 */
+	public function get_shipping_method( $instance_id ) {
+		return WC_Shipping_Zones::get_shipping_method( $instance_id );
+	}
+
+	/**
+	 * Update a shipping method comprehensively.
+	 *
+	 * @param int   $instance_id Method instance ID.
+	 * @param array $data        Data to update (settings, enabled, order).
+	 * @return WC_Shipping_Method|\WP_Error Updated method instance or error.
+	 */
+	public function update_shipping_method( $instance_id, $data ) {
+		$method = $this->get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Shipping method not found.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		global $wpdb;
+
+		// Update settings if provided.
+		if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
+			$result = $method->update_settings( $data['settings'] );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
+		}
+
+		// Update method order if provided.
+		if ( isset( $data['order'] ) ) {
+			$this->set_method_order( $instance_id, absint( $data['order'] ) );
+		}
+
+		// Update enabled status if provided.
+		if ( isset( $data['enabled'] ) ) {
+			$this->set_method_enabled( $instance_id, $data['enabled'] );
+		}
+
+		// Clear shipping transients.
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
+
+		return $method;
+	}
+
+	/**
+	 * Set shipping method enabled status.
+	 *
+	 * @param int  $instance_id Method instance ID.
+	 * @param bool $enabled     Whether the method is enabled.
+	 * @return bool True on success, false on failure.
+	 */
+	public function set_method_enabled( $instance_id, $enabled ) {
+		global $wpdb;
+
+		$enabled = wc_string_to_bool( $enabled );
+		$result = $wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
+			array( 'is_enabled' => (int) $enabled ),
+			array( 'instance_id' => absint( $instance_id ) ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		if ( $result !== false ) {
+			$method = $this->get_shipping_method( $instance_id );
+			if ( $method ) {
+				$method->enabled = $enabled ? 'yes' : 'no';
+				do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method->id, $this->get_id(), $enabled );
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Set shipping method display order.
+	 *
+	 * @param int $instance_id Method instance ID.
+	 * @param int $order       Display order.
+	 * @return bool True on success, false on failure.
+	 */
+	public function set_method_order( $instance_id, $order ) {
+		global $wpdb;
+
+		$result = $wpdb->update(
+			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
+			array( 'method_order' => absint( $order ) ),
+			array( 'instance_id' => absint( $instance_id ) ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		if ( $result !== false ) {
+			$method = $this->get_shipping_method( $instance_id );
+			if ( $method ) {
+				$method->method_order = absint( $order );
+			}
+			return true;
+		}
+
+		return false;
+	}
 }
