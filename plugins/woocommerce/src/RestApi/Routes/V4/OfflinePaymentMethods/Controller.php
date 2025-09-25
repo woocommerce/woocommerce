@@ -11,6 +11,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
 use WP_REST_Server;
@@ -34,11 +35,11 @@ class Controller extends AbstractController {
 	protected $rest_base = 'payments/offline-methods';
 
 	/**
-	 * PaymentsProviders instance.
+	 * Payments instance.
 	 *
-	 * @var PaymentsProviders
+	 * @var Payments
 	 */
-	protected $payments_providers;
+	protected $payments;
 
 	/**
 	 * Schema instance.
@@ -50,13 +51,13 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param PaymentsProviders           $payments_providers PaymentsProviders service.
-	 * @param OfflinePaymentMethodSchema $schema             Schema class.
+	 * @param Payments                   $payments Payments service.
+	 * @param OfflinePaymentMethodSchema $schema   Schema class.
 	 * @internal
 	 */
-	public function __construct( PaymentsProviders $payments_providers, OfflinePaymentMethodSchema $schema ) {
-		$this->payments_providers = $payments_providers;
-		$this->item_schema        = $schema;
+	final public function init( Payments $payments, OfflinePaymentMethodSchema $schema ) {
+		$this->payments    = $payments;
+		$this->item_schema = $schema;
 	}
 
 	/**
@@ -71,6 +72,16 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array_merge(
+						$this->get_collection_params(),
+						array(
+							'location' => array(
+								'description' => __( 'Country code to retrieve offline payment methods for.', 'woocommerce' ),
+								'type'        => 'string',
+								'required'    => false,
+							),
+						)
+					),
 				),
 				'schema' => array( $this, 'get_collection_schema' ),
 			)
@@ -103,7 +114,7 @@ class Controller extends AbstractController {
 	 */
 	public function get_items( $request ) {
 		try {
-			$offline_methods = $this->get_offline_payment_methods_data();
+			$offline_methods = $this->get_offline_payment_methods_data( $request );
 		} catch ( \Exception $e ) {
 			return new WP_Error( 
 				'woocommerce_rest_offline_payment_methods_error', 
@@ -121,28 +132,28 @@ class Controller extends AbstractController {
 	 * @return array The offline payment methods data.
 	 * @throws \Exception If there's an error retrieving the data.
 	 */
-	private function get_offline_payment_methods_data(): array {
-		$base_location    = wc_get_base_location();
-		$location         = $base_location['country'];
-		$offline_gateways = $this->payments_providers->get_offline_payment_methods_gateways();
-		$offline_methods  = array();
-
-		foreach ( $offline_gateways as $gateway ) {
-			$provider_data = $this->payments_providers->get_payment_provider_details_from_gateway( $gateway, $location );
-			if ( $provider_data && PaymentsProviders::TYPE_OFFLINE_PM === $provider_data['_type'] ) {
-				$offline_methods[] = $provider_data;
-			}
+	private function get_offline_payment_methods_data( $request ) {
+		$location = $request->get_param( 'location' );
+		if ( empty( $location ) ) {
+			// Fall back to the payments country if no location is provided.
+			$location = $this->payments->get_country();
 		}
 
-		// Sort by _order field
-		usort(
-			$offline_methods,
-			function( $a, $b ) {
-				return ( $a['_order'] ?? 0 ) <=> ( $b['_order'] ?? 0 );
-			}
+		try {
+			$providers = $this->payments->get_payment_providers( $location );
+		} catch ( \Exception $e ) {
+			return new \WP_Error( 'woocommerce_rest_payment_providers_error', $e->getMessage(), array( 'status' => 500 ) );
+		}
+
+		// Retrieve the offline PMs from the main providers list.
+		$offline_payment_providers = array_values(
+			array_filter(
+				$providers,
+				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM === $provider['_type']
+			)
 		);
 
-		return $offline_methods;
+		return $offline_payment_providers;
 	}
 
 	/**
