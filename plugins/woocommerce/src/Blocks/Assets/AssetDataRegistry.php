@@ -387,7 +387,7 @@ class AssetDataRegistry {
 			$this->execute_lazy_data();
 
 			$data                          = rawurlencode( wp_json_encode( $this->data ) );
-			$wc_settings_script            = "var wcSettings = wcSettings || JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
+			$wc_settings_script            = "var wcSettings = JSON.parse( decodeURIComponent( '" . esc_js( $data ) . "' ) );";
 			$preloaded_api_requests_script = '';
 
 			if ( count( $this->preloaded_api_requests ) > 0 ) {

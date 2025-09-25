@@ -14,7 +14,8 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
 /**
  * Internal dependencies
  */
-import { dispatchChangeEvent, getProductData } from '../frontend';
+import { getProductData } from '../frontend';
+import { dispatchChangeEvent } from '../quantity-selector/frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -346,17 +347,20 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					const { min, max } = productObject;
 
 					let newValue = currentValue;
-					if ( quantity[ productObject.id ] < min ) {
+					if ( currentValue < min ) {
 						newValue = min;
-					} else if ( quantity[ productObject.id ] > max ) {
+					} else if ( currentValue > max ) {
 						newValue = max;
 					}
 
 					if (
 						newValue !== ref.valueAsNumber ||
-						newValue !== quantity[ productObject.id ]
+						newValue !== currentValue
 					) {
-						actions.setQuantity( newValue );
+						actions.setQuantity(
+							productDataState.productId,
+							newValue
+						);
 
 						ref.value = newValue.toString();
 						dispatchChangeEvent( ref );

@@ -23,10 +23,10 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options::actions.decreaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options::!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options-quantity-selector::actions.decreaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options::actions.increaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options::!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options-quantity-selector::actions.increaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -71,7 +71,7 @@ class Utils {
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options::actions.handleQuantityBlur' );
+			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
 
 			foreach ( $input_attributes as $attribute => $value ) {
 				$processor->set_attribute( $attribute, $value );
@@ -80,29 +80,29 @@ class Utils {
 
 		$quantity_html = $processor->get_updated_html();
 
-		$context = array();
-		if ( $child_product_id ) {
-			$context['childProductId'] = $child_product_id;
-		}
-		$context_attribute = ! empty( $context ) ? wp_interactivity_data_wp_context( $context ) : '';
-
 		$wrapper_attributes = array_merge(
 			array(
-				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options-quantity-selector',
 			),
 			$wrapper_attributes
 		);
 
-		if ( ! empty( $wrapper_attributes ) ) {
-			return sprintf(
-				'<div %1$s %2$s>%3$s</div>',
-				get_block_wrapper_attributes( $wrapper_attributes ),
-				$context_attribute,
-				$quantity_html
-			);
-		}
+		global $product;
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_attribute . '>' . $quantity_html . '</div>';
+		$context_attribute = wp_interactivity_data_wp_context(
+			array(
+				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
+					$child_product_id :
+					$product->get_id(),
+			)
+		);
+
+		return sprintf(
+			'<div %1$s %2$s>%3$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$context_attribute,
+			$quantity_html
+		);
 	}
 
 	/**

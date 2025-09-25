@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add to Cart + Options block: trigger legacy mode only if PHP hooks are used to add form inner elements

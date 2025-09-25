@@ -108,6 +108,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'This is where your business is located. Tax rates and shipping rates will use this address.', 'woocommerce' ),
 					'id'    => 'store_address',
+					'order' => 10,
 				),
 
 				array(
@@ -166,6 +167,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => '',
 					'id'    => 'general_options',
+					'order' => 20,
 				),
 
 				array(
@@ -247,6 +249,19 @@ class WC_Settings_General extends WC_Settings_Page {
 				$address_autocomplete_preferred_provider_setting,
 
 				array(
+					'type' => 'sectionend',
+					'id'   => 'general_options',
+				),
+
+				array(
+					'title' => __( 'Taxes and coupons', 'woocommerce' ),
+					'type'  => 'title',
+					'desc'  => __( 'Enable taxes and coupons and configure how they are calculated.', 'woocommerce' ),
+					'id'    => 'taxes_and_coupons_options',
+					'order' => 30,
+				),
+
+				array(
 					'title'    => __( 'Enable taxes', 'woocommerce' ),
 					'desc'     => __( 'Enable tax rates and calculations', 'woocommerce' ),
 					'id'       => 'woocommerce_calc_taxes',
@@ -279,7 +294,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 				array(
 					'type' => 'sectionend',
-					'id'   => 'general_options',
+					'id'   => 'taxes_and_coupons_options',
 				),
 
 				array(
@@ -287,6 +302,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'type'  => 'title',
 					'desc'  => __( 'The following options affect how prices are displayed on the frontend.', 'woocommerce' ),
 					'id'    => 'pricing_options',
+					'order' => 40,
 				),
 
 				array(

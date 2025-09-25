@@ -72,13 +72,25 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Hook into the add to cart button action.
+	 * Hook into the add to cart button action with a <select> element.
 	 *
-	 * Outputs a test message when the `woocommerce_before_add_to_cart_button` action is triggered.
-	 * Used for testing that hooks are properly called during add to cart.
+	 * Outputs a select element with an option.
+	 * Used for testing that hooks are properly called during add to cart and
+	 * fall back to a regular HTML form.
 	 */
 	public function hook_into_add_to_cart_button_action() {
-		echo 'Hook into add to cart button action';
+		echo '<select><option>Hook into add to cart button action</option></select>';
+	}
+
+	/**
+	 * Hook into the add to cart button action with a text element.
+	 *
+	 * Outputs a text element.
+	 * Used for testing that text output doesn't trigger a fall back to a
+	 * regular HTML form.
+	 */
+	public function hook_into_add_to_cart_button_action_text() {
+		echo '<p>Hook into add to cart button action</p>';
 	}
 
 	/**
@@ -247,6 +259,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$product->set_regular_price( 10 );
 		$product_id = $product->save();
 
+		// Test when cart redirect is enabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'yes' );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
@@ -254,6 +267,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when redirect after add is enabled.' );
 
+		// Test when cart redirect is disabled.
 		update_option( 'woocommerce_cart_redirect_after_add', 'no' );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
@@ -261,14 +275,26 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when redirect after add is disabled.' );
 		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when redirect after add is disabled.' );
 
+		// Test when an extension hooks into the form.
 		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
 
 		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
 
-		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter.' );
+		$this->assertStringContainsString( 'action="https://example.com"', $markup, 'The form has an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form.' );
 		$this->assertStringNotContainsString( 'data-wp-on--submit', $markup, 'The form doesn\'t have an on submit event when an extension hooks into the form.' );
 
 		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action' ) );
+
+		// Test when an extension hooks into the form but not adding a form element.
+		add_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringNotContainsString( 'action="https://example.com"', $markup, 'The form doesn\'t have an action that redirects to the page defined by the woocommerce_add_to_cart_form_action filter when an extension hooks into the form but not adding a form element.' );
+		$this->assertStringContainsString( 'data-wp-on--submit', $markup, 'The form has an on submit event when an extension hooks into the form but not adding a form element.' );
+
+		remove_action( 'woocommerce_before_add_to_cart_button', array( $this, 'hook_into_add_to_cart_button_action_text' ) );
+
 		remove_filter( 'woocommerce_add_to_cart_form_action', array( $this, 'hook_into_woocommerce_add_to_cart_form_action_filter' ) );
 	}
 

@@ -35,7 +35,7 @@ class AddToCartWithOptions extends AbstractBlock {
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
 
-		if ( is_admin() && ! WC()->is_rest_api_request() ) {
+		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'productTypes', wc_get_product_types() );
 			$this->asset_data_registry->add( 'addToCartWithOptionsTemplatePartIds', $this->get_template_part_ids() );
 		}
@@ -80,6 +80,23 @@ class AddToCartWithOptions extends AbstractBlock {
 		}
 
 		return $context;
+	}
+
+	/**
+	 * Check if HTML content has form elements.
+	 *
+	 * @param string $html_content The HTML content.
+	 * @return bool True if the HTML content has form elements, false otherwise.
+	 */
+	public function has_form_elements( $html_content ) {
+		$processor     = new \WP_HTML_Tag_Processor( $html_content );
+		$form_elements = array( 'INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'FORM' );
+		while ( $processor->next_tag() ) {
+			if ( in_array( $processor->get_tag(), $form_elements, true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -241,7 +258,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			);
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$variation_data                = array();
+				$variations_data               = array();
 				$context['selectedAttributes'] = array();
 				$available_variations          = $product->get_available_variations( 'objects' );
 				foreach ( $available_variations as $variation ) {
@@ -250,11 +267,14 @@ class AddToCartWithOptions extends AbstractBlock {
 					// input for all variations, so we want quantities to be in sync.
 					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 
-					$variation_data[ $variation->get_id() ] = array(
-						'is_in_stock' => $variation->is_in_stock(),
-						'attributes'  => $variation->get_variation_attributes(),
-						'type'        => $variation->get_type(),
+					$variation_data = array(
+						'attributes' => $variation->get_variation_attributes(),
 					);
+					if ( $variation->is_in_stock() ) {
+						$variation_data['is_in_stock'] = true;
+					}
+
+					$variations_data[ $variation->get_id() ] = $variation_data;
 				}
 
 				wp_interactivity_config(
@@ -262,7 +282,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					array(
 						'products' => array(
 							$product->get_id() => array(
-								'variations' => $variation_data,
+								'variations' => $variations_data,
 							),
 						),
 					)
@@ -502,11 +522,11 @@ class AddToCartWithOptions extends AbstractBlock {
 
 			$cart_redirect_after_add = get_option( 'woocommerce_cart_redirect_after_add' );
 			$form_attributes         = '';
-			$legacy_mode             = $hooks_before || $hooks_after || 'yes' === $cart_redirect_after_add;
+			$legacy_mode             = 'yes' === $cart_redirect_after_add || $this->has_form_elements( $hooks_before ) || $this->has_form_elements( $hooks_after );
 			if ( $legacy_mode ) {
 				$action_url = home_url( add_query_arg( null, null ) );
 
-				// If an extension is hoooking into the form or we need to redirect to the cart,
+				// If an extension is hooking into the form or we need to redirect to the cart,
 				// we fall back to a regular HTML form.
 				$form_attributes = array(
 					'action'  => esc_url(

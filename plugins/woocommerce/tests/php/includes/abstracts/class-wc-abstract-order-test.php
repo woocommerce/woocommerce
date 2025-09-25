@@ -18,6 +18,14 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		$this->disable_cogs_feature();
+	}
+
+	/**
 	 * Test when rounding is different when doing per line and in subtotal.
 	 */
 	public function test_order_calculate_26582() {
@@ -650,5 +658,80 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_before_order_item_object_save', $callback );
 		remove_action( 'woocommerce_order_status_' . $refunded_status, $should_not_be_called_callback );
+	}
+
+	/**
+	 * @testdox get_cogs_total_value_html throws 'doing it wrong' if the Cost of Goods Sold feature is disabled.
+	 */
+	public function test_get_cogs_total_value_html_with_cogs_disabled() {
+		$order = new WC_Order();
+
+		$this->expect_doing_it_wrong_cogs_disabled( 'WC_Abstract_Order::get_cogs_total_value_html' );
+
+		$order->get_cogs_total_value_html();
+	}
+
+	/**
+	 * @testdox Test get_cogs_total_value_html with implicit WC_Price argument value.
+	 */
+	public function test_get_cogs_total_value_html_with_implicit_arguments() {
+		$this->enable_cogs_feature();
+
+		$order = $this->get_order_with_fixed_cogs_total_value();
+
+		$actual   = $order->get_cogs_total_value_html();
+		$expected = wc_price( 12.34, array( 'currency' => $order->get_currency() ) );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox Test get_cogs_total_value_html with explicit WC_Price argument value.
+	 */
+	public function test_get_cogs_total_value_html_with_explicit_arguments() {
+		$this->enable_cogs_feature();
+
+		$order = $this->get_order_with_fixed_cogs_total_value();
+
+		$actual   = $order->get_cogs_total_value_html( array( 'currency' => '!' ) );
+		$expected = wc_price( 12.34, array( 'currency' => '!' ) );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox Test the woocommerce_order_cogs_total_value_html filter invoked by get_cogs_total_value_html.
+	 */
+	public function test_get_cogs_total_value_html_with_filter() {
+		$this->enable_cogs_feature();
+
+		$order = $this->get_order_with_fixed_cogs_total_value();
+
+		add_filter(
+			'woocommerce_order_cogs_total_value_html',
+			function ( $html, $amount, $the_order ) {
+				return sprintf( 'amount: %s, order: %s', $amount, $the_order->get_id() );
+			},
+			10,
+			3
+		);
+
+		$actual = $order->get_cogs_total_value_html();
+		remove_all_filters( 'woocommerce_order_cogs_total_value_html' );
+		$expected = sprintf( 'amount: %s, order: %s', 12.34, $order->get_id() );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Get an order object with a fixed total COGS value.
+	 *
+	 * @return WC_Order
+	 */
+	private function get_order_with_fixed_cogs_total_value(): WC_Order {
+		// phpcs:disable Squiz.Commenting
+		return new class() extends WC_Order {
+			public function get_cogs_total_value(): float {
+				return 12.34;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
 	}
 }

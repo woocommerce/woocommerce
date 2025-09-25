@@ -7,18 +7,19 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		delete global.window.wc;
 		// Reset the window object and providers before each test
 		Object.assign( global.window, {
-			wc_checkout_params: {
-				address_providers: [
+			wc_address_autocomplete_params: {
+				address_providers: JSON.stringify( [
 					{ id: 'test-provider', name: 'Test provider' },
 					{ id: 'wc-payments', name: 'WooCommerce Payments' },
 					{ id: 'provider-1', name: 'Provider 1' },
 					{ id: 'provider-2', name: 'Provider 2' },
-				],
+				] ),
 			},
 		} );
 
 		// Reset the module before each test
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 	} );
 
@@ -55,10 +56,11 @@ describe( 'Address Autocomplete Provider Registration', () => {
 		} );
 	} );
 
-	test( 'should handle missing wc_checkout_params', () => {
+	test( 'should handle missing wc_address_autocomplete_params', () => {
 		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
+		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -80,8 +82,9 @@ describe( 'Address Autocomplete Provider Registration', () => {
 
 	test( 'should handle invalid address_providers type', () => {
 		delete global.window.wc; // ensure fresh load
-		global.window.wc_checkout_params = undefined;
+		global.window.wc_address_autocomplete_params = undefined;
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 		const validProvider = {
 			id: 'test-provider',
@@ -362,15 +365,22 @@ describe( 'Address Suggestions Component', () => {
 
 		// Setup window object
 		Object.assign( global.window, {
-			wc_checkout_params: {
-				address_providers: [
+			DOMPurify: {
+				sanitize: ( input ) => input, // No-op for testing
+			},
+			wc_address_autocomplete_common_params: {
+				address_providers: JSON.stringify( [
 					{
 						id: 'test-provider',
 						name: 'Test provider',
 						branding_html:
 							'<div class="provider-branding">Powered by Test Provider</div>',
 					},
-				],
+					{
+						id: 'test-provider-unbranded',
+						name: 'Test provider unbranded',
+					},
+				] ),
 			},
 		} );
 
@@ -480,6 +490,7 @@ describe( 'Address Suggestions Component', () => {
 
 		// Reset modules and require fresh instance
 		jest.resetModules();
+		require( '../utils/address-autocomplete-common' );
 		require( '../address-autocomplete' );
 
 		// Register the mock provider
@@ -497,6 +508,14 @@ describe( 'Address Suggestions Component', () => {
 
 	afterEach( () => {
 		jest.clearAllMocks();
+		// Reset providers properly
+		if ( window.wc && window.wc.addressAutocomplete ) {
+			window.wc.addressAutocomplete.providers = {};
+			window.wc.addressAutocomplete.activeProvider = {
+				billing: null,
+				shipping: null,
+			};
+		}
 	} );
 
 	describe( 'DOM Initialization', () => {
@@ -886,10 +905,6 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should select address with Enter key', async () => {
-			const suggestions = document.querySelectorAll(
-				'#address_suggestions_billing .suggestions-list li'
-			);
-
 			// Navigate to first suggestion first
 			let keydownEvent = new KeyboardEvent( 'keydown', {
 				key: 'ArrowDown',
@@ -1086,7 +1101,7 @@ describe( 'Address Suggestions Component', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
 
 			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
+				'none'
 			);
 			expect( billingAddressInput.getAttribute( 'data-lpignore' ) ).toBe(
 				'true'
@@ -1288,23 +1303,18 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should not create branding element when provider has no branding_html', async () => {
-			// Update window object to have no branding_html
-			global.window.wc_checkout_params.address_providers = [
-				{
-					id: 'test-provider',
-					name: 'Test provider',
-					// No branding_html
-				},
-			];
-
 			// Re-initialize the module
 			jest.resetModules();
+			window.wc.addressAutocomplete.providers = [];
 			require( '../address-autocomplete' );
 
 			// Re-register provider
-			window.wc.addressAutocomplete.registerAddressAutocompleteProvider(
-				mockProvider
-			);
+			window.wc.addressAutocomplete.registerAddressAutocompleteProvider( {
+				search: mockProvider,
+				select: mockProvider,
+				canSearch: mockProvider,
+				id: 'mock-provider-unbranded',
+			} );
 
 			// Trigger DOMContentLoaded again
 			const event = new Event( 'DOMContentLoaded' );
@@ -1392,12 +1402,13 @@ describe( 'Address Suggestions Component', () => {
 			expect( brandingElement ).toBeFalsy();
 		} );
 
-		test( 'should display branding HTML for both billing and shipping', async () => {
+		test( 'should display branding HTML for both billing and shipping if DOMPurify is present', async () => {
 			// Show suggestions for billing
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
 			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			window.DOMPurify = { sanitize: ( html ) => html }; // Mock DOMPurify
 
 			const billingSuggestionsContainer = document.getElementById(
 				'address_suggestions_billing'
@@ -1430,6 +1441,40 @@ describe( 'Address Suggestions Component', () => {
 			expect( shippingBrandingElement.innerHTML ).toBe(
 				'<div class="provider-branding">Powered by Test Provider</div>'
 			);
+		} );
+
+		test( 'should not display branding HTML for both billing and shipping if DOMPurify is not present', async () => {
+			delete window.DOMPurify;
+			// Show suggestions for billing
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			const billingSuggestionsContainer = document.getElementById(
+				'address_suggestions_billing'
+			);
+			const billingBrandingElement =
+				billingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
+
+			expect( billingBrandingElement ).toBeNull();
+
+			// Show suggestions for shipping
+			shippingAddressInput.value = '456';
+			shippingAddressInput.focus();
+			shippingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			const shippingSuggestionsContainer = document.getElementById(
+				'address_suggestions_shipping'
+			);
+			const shippingBrandingElement =
+				shippingSuggestionsContainer.querySelector(
+					'.woocommerce-address-autocomplete-branding'
+				);
+
+			expect( shippingBrandingElement ).toBeNull();
 		} );
 	} );
 
@@ -1507,7 +1552,7 @@ describe( 'Address Suggestions Component', () => {
 
 			// Verify autofill is disabled
 			expect( billingAddressInput.getAttribute( 'autocomplete' ) ).toBe(
-				'off'
+				'none'
 			);
 
 			// Blur the input

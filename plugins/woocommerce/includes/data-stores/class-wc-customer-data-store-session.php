@@ -87,41 +87,14 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 			return;
 		}
 
-		$data = array();
-		foreach ( $this->session_keys as $session_key ) {
-			$function_key = $session_key;
-			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
-				$session_key = str_replace( 'billing_', '', $session_key );
-			}
-			if ( 'meta_data' === $session_key ) {
-				/**
-				 * Filter the allowed session meta data keys.
-				 *
-				 * If the customer object contains any meta data with these keys, it will be stored within the WooCommerce session.
-				 *
-				 * @since 8.7.0
-				 * @param array $allowed_keys The allowed meta data keys.
-				 * @param WC_Customer $customer The customer object.
-				 */
-				$allowed_keys = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
+		$data = $this->get_customer_session_data( $customer );
 
-				$session_value = array();
-				foreach ( $customer->get_meta_data() as $meta_data ) {
-					if ( in_array( $meta_data->key, $allowed_keys, true ) ) {
-						$session_value[] = array(
-							'key'   => $meta_data->key,
-							'value' => $meta_data->value,
-						);
-					}
-				}
-				$data['meta_data'] = $session_value;
-			} else {
-				$session_value        = $customer->{"get_$function_key"}( 'edit' );
-				$data[ $session_key ] = (string) $session_value;
-			}
+		if ( $this->is_default_customer_data( $data ) ) {
+			// Clear the customer from the session if it matches the default.
+			WC()->session->set( 'customer', null );
+		} else {
+			WC()->session->set( 'customer', $data );
 		}
-
-		WC()->session->set( 'customer', $data );
 	}
 
 	/**
@@ -244,5 +217,62 @@ class WC_Customer_Data_Store_Session extends WC_Data_Store_WP implements WC_Cust
 	 */
 	public function get_total_spent( &$customer ) {
 		return 0;
+	}
+
+	/**
+	 * Get the customer data to store in the session.
+	 *
+	 * @param WC_Customer $customer Customer object.
+	 * @return array
+	 */
+	private function get_customer_session_data( $customer ) {
+		$data = array();
+		foreach ( $this->session_keys as $session_key ) {
+			$function_key = $session_key;
+			if ( 'billing_' === substr( $session_key, 0, 8 ) ) {
+				$session_key = str_replace( 'billing_', '', $session_key );
+			}
+			if ( 'meta_data' === $session_key ) {
+				/**
+				 * Filter the allowed session meta data keys.
+				 *
+				 * If the customer object contains any meta data with these keys, it will be stored within the WooCommerce session.
+				 *
+				 * @since 8.7.0
+				 * @param array $allowed_keys The allowed meta data keys.
+				 * @param WC_Customer $customer The customer object.
+				 */
+				$allowed_keys = apply_filters( 'woocommerce_customer_allowed_session_meta_keys', array(), $customer );
+
+				$session_value = array();
+				foreach ( $customer->get_meta_data() as $meta_data ) {
+					if ( in_array( $meta_data->key, $allowed_keys, true ) ) {
+						$session_value[] = array(
+							'key'   => $meta_data->key,
+							'value' => $meta_data->value,
+						);
+					}
+				}
+				$data['meta_data'] = $session_value;
+			} else {
+				$session_value        = $customer->{"get_$function_key"}( 'edit' );
+				$data[ $session_key ] = (string) $session_value;
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Returns whether the customer data is the same as a default customer.
+	 *
+	 * @param array $customer_data The customer data to check.
+	 * @return bool
+	 */
+	private function is_default_customer_data( array $customer_data ): bool {
+		$default_customer = new WC_Customer();
+		$this->set_defaults( $default_customer );
+
+		return $customer_data === $this->get_customer_session_data( $default_customer );
 	}
 }

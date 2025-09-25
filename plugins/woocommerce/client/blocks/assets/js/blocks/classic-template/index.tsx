@@ -4,9 +4,7 @@
 import {
 	BlockInstance,
 	createBlock,
-	getBlockType,
 	registerBlockType,
-	unregisterBlockType,
 } from '@wordpress/blocks';
 import type { BlockEditProps } from '@wordpress/blocks';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -18,7 +16,7 @@ import {
 import { Button, Placeholder, Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { box, Icon } from '@wordpress/icons';
-import { useDispatch, subscribe, useSelect, select } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { useEffect, useState } from '@wordpress/element';
 import { store as noticesStore } from '@wordpress/notices';
 import { useEntityRecord } from '@wordpress/core-data';
@@ -30,11 +28,7 @@ import { store as editorStore } from '@wordpress/editor';
 import './editor.scss';
 import './style.scss';
 import { BLOCK_SLUG, TEMPLATES, TYPES } from './constants';
-import {
-	isClassicTemplateBlockRegisteredWithAnotherTitle,
-	hasTemplateSupportForClassicTemplateBlock,
-	getTemplateDetailsBySlug,
-} from './utils';
+import { getTemplateDetailsBySlug } from './utils';
 import {
 	blockifiedProductCatalogConfig,
 	blockifiedProductTaxonomyConfig,
@@ -194,18 +188,16 @@ const Edit = ( {
 		};
 	}, [] );
 
-	const template = useEntityRecord< {
-		slug: string;
-		title: {
-			rendered?: string;
-			row: string;
-		};
-	} >( 'postType', 'wp_template', currentPostId );
-
-	const templateDetails = getTemplateDetailsBySlug(
-		attributes.template,
-		TEMPLATES
+	const template = useEntityRecord(
+		'postType',
+		'wp_template',
+		currentPostId
 	);
+
+	const templateSlug = template.record?.slug as string;
+
+	const templateDetails = getTemplateDetailsBySlug( templateSlug, TEMPLATES );
+
 	const templateTitle =
 		template.record?.title.rendered?.toLowerCase() ?? attributes.template;
 	const templatePlaceholder = templateDetails?.placeholder ?? 'fallback';
@@ -214,7 +206,7 @@ const Edit = ( {
 	useEffect(
 		() =>
 			setAttributes( {
-				template: attributes.template,
+				template: templateSlug ?? attributes.template,
 				align: attributes.align ?? 'wide',
 			} ),
 		[ attributes.align, attributes.template, setAttributes ]
@@ -278,166 +270,53 @@ const Edit = ( {
 	);
 };
 
-const registerClassicTemplateBlock = ( {
-	template,
-	inserter,
-}: {
-	template?: string | null;
-	inserter: boolean;
-} ) => {
-	/**
-	 * The 'WooCommerce Legacy Template' block was renamed to 'WooCommerce Classic Template', however, the internal block
-	 * name 'woocommerce/legacy-template' needs to remain the same. Otherwise, it would result in a corrupt block when
-	 * loaded for users who have customized templates using the legacy-template (since the internal block name is
-	 * stored in the database).
-	 *
-	 * See https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/5861 for more context
-	 */
-	registerBlockType( BLOCK_SLUG, {
-		title:
-			template && TEMPLATES[ template ]
-				? TEMPLATES[ template ].title
-				: __( 'WooCommerce Classic Template', 'woocommerce' ),
-		icon: (
-			<Icon
-				icon={ box }
-				className="wc-block-editor-components-block-icon"
+registerBlockType( BLOCK_SLUG, {
+	title: __( 'WooCommerce Classic Template', 'woocommerce' ),
+	icon: (
+		<Icon icon={ box } className="wc-block-editor-components-block-icon" />
+	),
+	category: 'woocommerce',
+	apiVersion: 3,
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	description: __(
+		'Renders classic WooCommerce PHP template.',
+		'woocommerce'
+	),
+	supports: {
+		interactivity: {
+			clientNavigation: false,
+		},
+		align: [ 'wide', 'full' ],
+		html: false,
+		multiple: false,
+		reusable: false,
+		inserter: false,
+	},
+	attributes: {
+		/**
+		 * Template attribute is used to determine which core PHP template gets rendered.
+		 */
+		template: {
+			type: 'string',
+			default: 'any',
+		},
+		align: {
+			type: 'string',
+			default: 'wide',
+		},
+	},
+	edit: ( {
+		attributes,
+		clientId,
+		setAttributes,
+	}: BlockEditProps< Attributes > ) => {
+		return (
+			<Edit
+				attributes={ attributes }
+				setAttributes={ setAttributes }
+				clientId={ clientId }
 			/>
-		),
-		category: 'woocommerce',
-		apiVersion: 3,
-		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-		description:
-			template && TEMPLATES[ template ]
-				? TEMPLATES[ template ].description
-				: __(
-						'Renders classic WooCommerce PHP templates.',
-						'woocommerce'
-				  ),
-		supports: {
-			interactivity: {
-				clientNavigation: false,
-			},
-			align: [ 'wide', 'full' ],
-			html: false,
-			multiple: false,
-			reusable: false,
-			inserter,
-		},
-		attributes: {
-			/**
-			 * Template attribute is used to determine which core PHP template gets rendered.
-			 */
-			template: {
-				type: 'string',
-				default: 'any',
-			},
-			align: {
-				type: 'string',
-				default: 'wide',
-			},
-		},
-		edit: ( {
-			attributes,
-			clientId,
-			setAttributes,
-		}: BlockEditProps< Attributes > ) => {
-			const newTemplate = template ?? attributes.template;
-
-			return (
-				<Edit
-					attributes={ {
-						...attributes,
-						template: newTemplate,
-					} }
-					setAttributes={ setAttributes }
-					clientId={ clientId }
-				/>
-			);
-		},
-		save: () => null,
-	} );
-};
-
-// @todo Refactor when there will be possible to show a block according on a template/post with a Gutenberg API. https://github.com/WordPress/gutenberg/pull/41718
-let previousEditedTemplate: string | number | null = null;
-let isBlockRegistered = false;
-let isBlockInInserter = false;
-const handleRegisterClassicTemplateBlock = ( {
-	template,
-	inserter,
-}: {
-	template: string | null;
-	inserter: boolean;
-} ) => {
-	if ( isBlockRegistered ) {
-		unregisterBlockType( BLOCK_SLUG );
-	}
-	isBlockInInserter = inserter;
-	isBlockRegistered = true;
-	registerClassicTemplateBlock( {
-		template,
-		inserter,
-	} );
-};
-
-subscribe( () => {
-	// We use blockCount to know if we are editing a template or in the navigation.
-	const blockCount = select( blockEditorStore )?.getBlockCount() as number;
-	const templateSlug = select( 'core/editor' )?.getEditedPostSlug() as
-		| string
-		| null;
-	const editedTemplate = blockCount && blockCount > 0 ? templateSlug : null;
-
-	// Skip if we are in the same template, except if the block hasn't been registered yet.
-	if ( isBlockRegistered && previousEditedTemplate === editedTemplate ) {
-		return;
-	}
-	previousEditedTemplate = editedTemplate;
-
-	// Handle the case when we are not editing a template (ie: in the navigation screen).
-	if ( ! editedTemplate ) {
-		if ( ! isBlockRegistered ) {
-			handleRegisterClassicTemplateBlock( {
-				template: editedTemplate,
-				inserter: false,
-			} );
-		}
-		return;
-	}
-
-	const templateSupportsClassicTemplateBlock =
-		hasTemplateSupportForClassicTemplateBlock( editedTemplate, TEMPLATES );
-
-	// Handle the case when we are editing a template that doesn't support the Classic Template block (ie: Blog Home).
-	if ( ! templateSupportsClassicTemplateBlock && isBlockInInserter ) {
-		handleRegisterClassicTemplateBlock( {
-			template: editedTemplate,
-			inserter: false,
-		} );
-		return;
-	}
-
-	// Handle the case when we are editing a template that does support the Classic Template block (ie: Product Catalog).
-	if ( templateSupportsClassicTemplateBlock && ! isBlockInInserter ) {
-		handleRegisterClassicTemplateBlock( {
-			template: editedTemplate,
-			inserter: true,
-		} );
-		return;
-	}
-
-	// Handle the case when we are editing a template that does support the Classic Template block but it's currently registered with another title (ie: navigating from the Product Catalog template to the Product Search Results template).
-	if (
-		templateSupportsClassicTemplateBlock &&
-		isClassicTemplateBlockRegisteredWithAnotherTitle(
-			getBlockType( BLOCK_SLUG ),
-			editedTemplate
-		)
-	) {
-		handleRegisterClassicTemplateBlock( {
-			template: editedTemplate,
-			inserter: true,
-		} );
-	}
-}, 'core/blocks-editor' );
+		);
+	},
+	save: () => null,
+} );

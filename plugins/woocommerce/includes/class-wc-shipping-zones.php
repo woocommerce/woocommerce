@@ -24,16 +24,45 @@ class WC_Shipping_Zones {
 	 * @return array Array of arrays.
 	 */
 	public static function get_zones( $context = 'admin' ) {
-		$data_store = WC_Data_Store::load( 'shipping-zone' );
-		$raw_zones  = $data_store->get_zones();
-		$zones      = array();
+		$zone_objects = self::get_shipping_zones();
+		$zones        = array();
 
-		foreach ( $raw_zones as $raw_zone ) {
-			$zone                                = new WC_Shipping_Zone( $raw_zone );
-			$zones[ $zone->get_id() ]            = $zone->get_data();
-			$zones[ $zone->get_id() ]['zone_id'] = $zone->get_id();
-			$zones[ $zone->get_id() ]['formatted_zone_location'] = $zone->get_formatted_location();
-			$zones[ $zone->get_id() ]['shipping_methods']        = $zone->get_shipping_methods( false, $context );
+		foreach ( $zone_objects as $zone_object ) {
+			$zones[ $zone_object->get_id() ]                            = $zone_object->get_data();
+			$zones[ $zone_object->get_id() ]['zone_id']                 = $zone_object->get_id();
+			$zones[ $zone_object->get_id() ]['formatted_zone_location'] = $zone_object->get_formatted_location();
+			$zones[ $zone_object->get_id() ]['shipping_methods']        = $zone_object->get_shipping_methods( false, $context );
+		}
+
+		return $zones;
+	}
+
+	/**
+	 * Retrieve Shipping_Zone data objects for the given zone_ids.
+	 *
+	 * @param array|null $zone_ids The zone_ids of the zones to retrieve. An empty array will return no results. Use null for all zones.
+	 *
+	 * @return WC_Shipping_Zone[]
+	 */
+	public static function get_shipping_zones( ?array $zone_ids = null ) {
+		$data_store = WC_Data_Store::load( 'shipping-zone' );
+		if ( null === $zone_ids ) {
+			$raw_zones = $data_store->get_zones();
+			$zone_ids  = array_column( $raw_zones, 'zone_id' );
+		} elseif ( empty( $zone_ids ) ) {
+			return array();
+		}
+
+		$zones = array();
+		foreach ( $zone_ids as $zone_id ) {
+			$zone = new WC_Shipping_Zone();
+			$zone->set_object_read( false );
+			$zone->set_id( $zone_id );
+			$zones[ $zone_id ] = $zone;
+		}
+
+		if ( ! empty( $zones ) ) {
+			$data_store->read_multiple( $zones );
 		}
 
 		return $zones;

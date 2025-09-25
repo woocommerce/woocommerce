@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fix index key length for status on wc_order_stats table

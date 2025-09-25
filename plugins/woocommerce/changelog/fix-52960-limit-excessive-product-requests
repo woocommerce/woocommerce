@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Product Collection: limit the number of requests for product data in Editor

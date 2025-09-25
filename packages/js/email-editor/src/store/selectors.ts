@@ -352,7 +352,7 @@ export function getPaletteColors(
 	state: State
 ): State[ 'editorSettings' ][ '__experimentalFeatures' ][ 'color' ][ 'palette' ] {
 	// eslint-disable-next-line no-underscore-dangle
-	return state.editorSettings.__experimentalFeatures.color.palette;
+	return state.editorSettings?.__experimentalFeatures?.color?.palette;
 }
 
 export function getPreviewState( state: State ): State[ 'preview' ] {
@@ -400,7 +400,7 @@ export const getPersonalizationTagsList = createRegistrySelector(
 );
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
-	return state.theme.styles;
+	return state.theme?.styles;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {
