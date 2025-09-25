@@ -104,26 +104,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	}
 
 	/**
-	 * Map WooCommerce setting types to REST API types.
-	 *
-	 * @param string $wc_type WooCommerce setting type.
-	 * @return string REST API type.
-	 */
-	private function map_wc_type_to_rest_type( $wc_type ) {
-		switch ( $wc_type ) {
-			case 'number':
-				return 'number';
-			case 'checkbox':
-				return 'boolean';
-			case 'multiselect':
-			case 'multi_select_countries':
-				return 'array';
-			default:
-				return 'string';
-		}
-	}
-
-	/**
 	 * Check permissions for updating general settings.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -332,6 +312,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 			case 'number':
 				return is_numeric( $value ) ? floatval( $value ) : 0;
+
+			case 'checkbox':
+				return wc_bool_to_string( $value );
 
 			case 'select':
 			case 'single_select_country':
