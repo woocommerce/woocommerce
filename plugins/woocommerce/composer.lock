@@ -4,29 +4,29 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a47a5ef1e660263a7e8eb2c1a1c5615",
+    "content-hash": "c5c9996d3691446bdb66794fbca5e41f",
     "packages": [
         {
             "name": "automattic/block-delimiter",
-            "version": "v0.2.1",
+            "version": "v0.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/block-delimiter.git",
-                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04"
+                "reference": "f36d786abdd4e10cfec8b261796dac9cdd192457"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/block-delimiter/zipball/b303cdc29656df4efbd0753adb8c284d8b986f04",
-                "reference": "b303cdc29656df4efbd0753adb8c284d8b986f04",
+                "url": "https://api.github.com/repos/Automattic/block-delimiter/zipball/f36d786abdd4e10cfec8b261796dac9cdd192457",
+                "reference": "f36d786abdd4e10cfec8b261796dac9cdd192457",
                 "shasum": ""
             },
             "require": {
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.5",
-                "automattic/phpunit-select-config": "^1.0.3",
-                "yoast/phpunit-polyfills": "^4.0.0"
+                "automattic/jetpack-changelogger": "^6.0.6",
+                "automattic/jetpack-test-environment": "@dev",
+                "automattic/phpunit-select-config": "^1.0.3"
             },
             "suggest": {
                 "automattic/jetpack-autoloader": "Allow for better interoperability with other plugins that use this package."
@@ -37,7 +37,7 @@
                 "textdomain": "jetpack-block-delimiter",
                 "mirror-repo": "Automattic/block-delimiter",
                 "branch-alias": {
-                    "dev-trunk": "0.2.x-dev"
+                    "dev-trunk": "0.3.x-dev"
                 },
                 "changelogger": {
                     "link-template": "https://github.com/Automattic/block-delimiter/compare/v${old}...v${new}"
@@ -54,9 +54,9 @@
             ],
             "description": "Efficiently work with block structure",
             "support": {
-                "source": "https://github.com/Automattic/block-delimiter/tree/v0.2.1"
+                "source": "https://github.com/Automattic/block-delimiter/tree/v0.3.4"
             },
-            "time": "2025-06-23T19:59:34+00:00"
+            "time": "2025-09-01T13:50:05+00:00"
         },
         {
             "name": "automattic/jetpack-a8c-mc-stats",

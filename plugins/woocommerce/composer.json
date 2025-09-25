@@ -36,7 +36,7 @@
 	],
 	"require": {
 		"php": ">=7.4",
-		"automattic/block-delimiter": "0.2.1",
+		"automattic/block-delimiter": "0.3.4",
 		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
 		"automattic/jetpack-autoloader": "5.0.0",
 		"automattic/jetpack-config": "3.0.0",

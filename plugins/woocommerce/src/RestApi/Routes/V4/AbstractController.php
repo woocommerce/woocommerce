@@ -13,7 +13,6 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4;
 
 use WP_Error;
 use WP_Http;
-use WP_REST_Server;
 use WP_REST_Controller;
 use WP_REST_Response;
 use WP_REST_Request;
@@ -29,6 +28,16 @@ defined( 'ABSPATH' ) || exit;
  * @since 10.2.0
  */
 abstract class AbstractController extends WP_REST_Controller {
+	/**
+	 * Shared error codes.
+	 */
+	const INVALID_ID          = 'invalid_id';
+	const RESOURCE_EXISTS     = 'resource_exists';
+	const CANNOT_CREATE       = 'cannot_create';
+	const CANNOT_DELETE       = 'cannot_delete';
+	const CANNOT_TRASH        = 'cannot_trash';
+	const TRASH_NOT_SUPPORTED = 'trash_not_supported';
+
 	/**
 	 * Route namespace.
 	 *
@@ -121,11 +130,12 @@ abstract class AbstractController extends WP_REST_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param mixed           $item WordPress representation of the item.
-	 * @param WP_REST_Request $request Request object.
+	 * @param mixed            $item WordPress representation of the item.
+	 * @param WP_REST_Request  $request Request object.
+	 * @param WP_REST_Response $response Response object.
 	 * @return array
 	 */
-	protected function prepare_links( $item, WP_REST_Request $request ): array {
+	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
 		return array();
 	}
 
@@ -144,7 +154,7 @@ abstract class AbstractController extends WP_REST_Controller {
 		$response_data = $this->filter_response_by_context( $response_data, $request['context'] ?? 'view' );
 
 		$response = rest_ensure_response( $response_data );
-		$response->add_links( $this->prepare_links( $item, $request ) );
+		$response->add_links( $this->prepare_links( $item, $request, $response ) );
 
 		/**
 		 * Filter the data for a response.
@@ -179,17 +189,6 @@ abstract class AbstractController extends WP_REST_Controller {
 	 */
 	protected function get_error_prefix(): string {
 		return 'woocommerce_rest_api_v4_' . str_replace( '-', '_', $this->rest_base ) . '_';
-	}
-
-	/**
-	 * Filter schema properties to only return writable ones.
-	 *
-	 * @param array $schema The schema property to check.
-	 * @return bool True if the property is writable, false otherwise.
-	 * @since 10.2.0
-	 */
-	protected function filter_writable_props( array $schema ): bool {
-		return empty( $schema['readonly'] );
 	}
 
 	/**
@@ -240,90 +239,73 @@ abstract class AbstractController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Check permissions for REST API V4 requests.
+	 * Returns an authentication error for a given HTTP verb.
 	 *
-	 * This function provides enhanced permission checking for V4 API endpoints,
-	 * supporting both post types and other object types with proper object-level
-	 * permission validation.
-	 *
-	 * @param string $object_type The type of object (e.g., 'order', 'product', 'customer').
-	 * @param string $context The operation context ('read', 'create', 'edit', 'delete', 'batch').
-	 * @param int    $object_id The object ID. Defaults to 0 for general permissions.
-	 * @return bool True if permission is granted, false otherwise.
-	 * @since 10.2.0
+	 * @param string $method HTTP method.
+	 * @return WP_Error|false WP Error object or false if no error is found.
 	 */
-	protected function check_permissions( string $object_type, string $context = 'read', int $object_id = 0 ): bool {
-		// Map object types to post types for permission checking.
-		$post_type_mapping = array(
-			'order'             => 'shop_order',
-			'product'           => 'product',
-			'product_variation' => 'product_variation',
-			'coupon'            => 'shop_coupon',
-			'order_note'        => 'shop_order', // Order notes belong to orders.
+	protected function get_authentication_error_by_method( string $method ) {
+		$errors = array(
+			'GET'    => array(
+				'code'    => $this->get_error_prefix() . 'cannot_view',
+				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
+			),
+			'POST'   => array(
+				'code'    => $this->get_error_prefix() . 'cannot_create',
+				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
+			),
+			'PUT'    => array(
+				'code'    => $this->get_error_prefix() . 'cannot_update',
+				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
+			),
+			'PATCH'  => array(
+				'code'    => $this->get_error_prefix() . 'cannot_update',
+				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
+			),
+			'DELETE' => array(
+				'code'    => $this->get_error_prefix() . 'cannot_delete',
+				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
+			),
 		);
 
-		$post_type  = $post_type_mapping[ $object_type ] ?? null;
-		$permission = false;
-
-		// Handle unsupported object types.
-		if ( null === $post_type ) {
-			$permission = false;
-		} else {
-			$permission = $this->check_post_type_permissions( $post_type, $context, $object_id );
+		if ( ! isset( $errors[ $method ] ) ) {
+			return false;
 		}
 
-		/**
-		 * Provides an opportunity to override the permission check made before acting on an object in relation to
-		 * REST API V4 requests.
-		 *
-		 * @since 10.2.0
-		 *
-		 * @param bool   $permission  If we have permission to act on this object.
-		 * @param string $context     Describes the operation being performed: 'read', 'edit', 'delete', etc.
-		 * @param int    $object_id   Object ID. This could be a user ID, order ID, post ID, etc.
-		 * @param string $object_type Type of object ('order', 'product', 'customer', etc) for which checks are being made.
-		 */
-		return apply_filters( $this->get_hook_prefix() . 'check_permissions', $permission, $context, $object_id, $object_type );
+		return new WP_Error(
+			$errors[ $method ]['code'],
+			$errors[ $method ]['message'],
+			array( 'status' => rest_authorization_required_code() )
+		);
 	}
 
 	/**
-	 * Check permissions for post type objects.
+	 * Get an error response for a given error code.
 	 *
-	 * @param string $post_type The post type.
-	 * @param string $context The operation context.
-	 * @param int    $object_id The object ID.
-	 * @return bool True if permission is granted, false otherwise.
-	 * @since 10.2.0
+	 * @param string $error_code The error code.
+	 * @return WP_Error WP Error object.
 	 */
-	private function check_post_type_permissions( string $post_type, string $context, int $object_id ): bool {
-		$contexts = array(
-			'read'   => 'read_private_posts',
-			'create' => 'publish_posts',
-			'edit'   => 'edit_posts',
-			'delete' => 'delete_posts',
-			'batch'  => 'edit_others_posts',
+	protected function get_route_error_by_code( string $error_code ): WP_Error {
+		$error_messages    = array(
+			self::INVALID_ID          => __( 'Invalid ID.', 'woocommerce' ),
+			self::RESOURCE_EXISTS     => __( 'Resource already exists.', 'woocommerce' ),
+			self::CANNOT_CREATE       => __( 'Cannot create resource.', 'woocommerce' ),
+			self::CANNOT_DELETE       => __( 'Cannot delete resource.', 'woocommerce' ),
+			self::CANNOT_TRASH        => __( 'Cannot trash resource.', 'woocommerce' ),
+			self::TRASH_NOT_SUPPORTED => __( 'Trash not supported.', 'woocommerce' ),
 		);
-
-		$capability = $contexts[ $context ] ?? null;
-		$permission = false;
-
-		if ( $capability ) {
-			$post_type_object = get_post_type_object( $post_type );
-
-			if ( $post_type_object instanceof \WP_Post_Type ) {
-				$permission = current_user_can( $post_type_object->cap->$capability );
-
-				// Special handling when object ID is provided for object-level permissions.
-				if ( $object_id && 'edit_posts' === $capability ) {
-					$permission = $permission && current_user_can( $post_type_object->cap->edit_post, $object_id );
-				} elseif ( $object_id && 'delete_posts' === $capability ) {
-					$permission = $permission && current_user_can( $post_type_object->cap->delete_post, $object_id );
-				} elseif ( $object_id && 'read_private_posts' === $capability ) {
-					$permission = $permission && current_user_can( $post_type_object->cap->read_post, $object_id );
-				}
-			}
-		}
-
-		return $permission;
+		$http_status_codes = array(
+			self::INVALID_ID          => WP_Http::NOT_FOUND,
+			self::RESOURCE_EXISTS     => WP_Http::BAD_REQUEST,
+			self::CANNOT_CREATE       => WP_Http::INTERNAL_SERVER_ERROR,
+			self::CANNOT_DELETE       => WP_Http::INTERNAL_SERVER_ERROR,
+			self::CANNOT_TRASH        => WP_Http::GONE,
+			self::TRASH_NOT_SUPPORTED => WP_Http::NOT_IMPLEMENTED,
+		);
+		return $this->get_route_error_response(
+			$this->get_error_prefix() . $error_code,
+			$error_messages[ $error_code ] ?? __( 'An error occurred while processing your request.', 'woocommerce' ),
+			$http_status_codes[ $error_code ] ?? WP_Http::BAD_REQUEST
+		);
 	}
 }

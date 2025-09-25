@@ -34,6 +34,9 @@ export const getContributorData = async (
 	baseRef: string,
 	headRef: string
 ) => {
+	const isValidAuthor = ( commit: { author?: { login?: string | null; } | null; } ) => {
+		return !! commit.author && !! commit.author.login && ! commit.author.login.includes( 'bot' ) && 'invalid-email-address' !== commit.author.login;
+	};
 	const octokit = new Octokit( {
 		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
 	} );
@@ -53,11 +56,7 @@ export const getContributorData = async (
 	// add page 1 commits
 	allAuthors.push(
 		...commits
-			.filter( ( commit ) => {
-				return (
-					!! commit.author && ! commit.author.login.includes( 'bot' )
-				);
-			} )
+			.filter( isValidAuthor )
 			.map( ( commit ) => commit.author )
 	);
 
@@ -74,12 +73,7 @@ export const getContributorData = async (
 
 		allAuthors.push(
 			...pageCommits
-				.filter( ( commit ) => {
-					return (
-						!! commit.author &&
-						! commit.author.login.includes( 'bot' )
-					);
-				} )
+				.filter( isValidAuthor )
 				.map( ( commit ) => commit.author )
 		);
 	}
