@@ -295,6 +295,11 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 			$filtered[ $key ] = $value;
 		}
 
+		// Preserve _links added by WP REST API framework
+		if ( array_key_exists( '_links', $item ) ) {
+			$filtered['_links'] = $item['_links'];
+		}
+
 		return $filtered;
 	}
 }
