@@ -2,6 +2,7 @@ jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
 	let orderId = '';
+	let productPageCartData = {};
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -11,49 +12,76 @@ jQuery(function ($) {
 
 		applyStyles();
 
+		/**
+		 * Manage the cart contents when placing an order from the product page.
+		 *
+		 * @returns {Promise<boolean>}
+		 */
+		const manageCartForProductPageOrder = async () => {
+			// Get product ID from the value of the "add-to-cart" button.
+			const addToCartBtn = document.querySelector('[name="add-to-cart"]');
+			let productId = addToCartBtn ? addToCartBtn.value : null;
+			const variationIdField = document.querySelector( '[name="variation_id"]' );
+			const variationId = variationIdField ? variationIdField.value : null;
+
+			if ( variationId ) {
+				productId = variationId;
+			}
+
+			if ( ! productId ) {
+				return false;
+			}
+
+			// Get quantity from the value of the "quantity" input field.
+			const quantityField = document.querySelector( '[name="quantity"]' );
+			const quantity = quantityField ? quantityField.value : null;
+			if ( ! quantity ) {
+				return false;
+			}
+
+			// Clearing the cart and re-adding the item causes the current WooCommerce draft order to be lost.
+			// If the user is re-opening the payment modal and has not changed anything, do nothing;
+			// we want to resume the existing draft order if the cart has not changed.
+			if ( orderId && productPageCartData.id === productId && productPageCartData.quantity === quantity ) {
+				return true;
+			}
+
+			// Empty the cart before adding the product.
+			await window.wp.apiFetch( {
+				method: 'DELETE',
+				path: '/wc/store/v1/cart/items',
+			} );
+
+			// Add the product to the cart.
+			await window.wp.apiFetch( {
+				method: 'POST',
+				path: '/wc/store/v1/cart/items',
+				data: {
+					id: productId,
+					quantity,
+				},
+			} );
+
+			// Remember what we added to the cart, so we don't have to repeat the action
+			// when the user re-opens the payment modal.
+			productPageCartData = {
+				id: productId,
+				quantity,
+			};
+
+			return true;
+		}
+
 		const buttons = paypal.Buttons( {
 			appSwitchWhenAvailable: true,
 			async createOrder( data ) {
-				// If we're inside the product page, we need to empty the cart,
-				// and add the current product to the cart.
+				// If we're inside the product page, we need to manage the cart contents
+				// ourselves.
 				if ( paypal_standard.is_product_page ) {
-					// Empty the cart.
-					await window.wp.apiFetch( {
-						method: 'DELETE',
-						path: '/wc/store/v1/cart/items',
-					} );
-
-					// Get product ID from the value of the "add-to-cart" button.
-					const addToCartBtn = document.querySelector('[name="add-to-cart"]');
-					let productId = addToCartBtn ? addToCartBtn.value : null;
-					const variationIdField = document.querySelector( '[name="variation_id"]' );
-					const variationId = variationIdField ? variationIdField.value : null;
-
-					if ( variationId ) {
-						productId = variationId;
-					}
-
-					if ( ! productId ) {
+					const cartSuccess = await manageCartForProductPageOrder();
+					if ( ! cartSuccess ) {
 						return null;
 					}
-
-					// Get quantity from the value of the "quantity" input field.
-					const quantityField = document.querySelector( '[name="quantity"]' );
-					const quantity = quantityField ? quantityField.value : null;
-					if ( ! quantity ) {
-						return null;
-					}
-
-
-					// Add the product to the cart.
-					await window.wp.apiFetch( {
-						method: 'POST',
-						path: '/wc/store/v1/cart/items',
-						data: {
-							id: productId,
-							quantity,
-						},
-					} );
 				}
 
 				let responseData;
