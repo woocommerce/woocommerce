@@ -147,9 +147,6 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 		remove_all_filters( 'mcp_validation_enabled' );
 		remove_all_filters( 'rest_pre_dispatch' );
 
-		// Reset global abilities registry to prevent duplication warnings.
-		global $wp_abilities;
-		$wp_abilities = array();
 
 		// Reset user.
 		wp_set_current_user( 0 );
