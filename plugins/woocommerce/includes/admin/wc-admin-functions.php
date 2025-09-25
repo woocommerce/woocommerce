@@ -454,14 +454,6 @@ function wc_save_order_items( $order_id, $items ) {
 	}
 
 	$order->update_taxes();
-
-	// Only recalculate when a coupon is applied.
-	// This allows manual discounts to be preserved when order items are saved.
-	$order_coupons = $order->get_coupons();
-	if ( ! empty( $order_coupons ) ) {
-		$order->recalculate_coupons();
-	}
-
 	$order->calculate_totals( false );
 
 	// Inform other plugins that the items have been saved.

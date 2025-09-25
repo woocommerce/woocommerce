@@ -87,7 +87,8 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Get the WC order.
 		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $purchase_units[0]['custom_id'] ?? '{}' );
+			$custom_id = isset( $purchase_units[0]['custom_id'] ) ? $purchase_units[0]['custom_id'] : '{}';
+			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
 		}
@@ -164,6 +165,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		foreach ( $order->get_items() as $item ) {
 			$product_id = $item->get_product_id();
 			$product    = $item->get_product();
+
+			if ( ! $product ) {
+				continue;
+			}
 
 			if ( $product->is_type( 'variation' ) ) {
 				$variation_id = $item->get_variation_id();

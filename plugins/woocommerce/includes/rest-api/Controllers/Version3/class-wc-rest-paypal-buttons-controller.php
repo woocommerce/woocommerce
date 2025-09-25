@@ -13,6 +13,10 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
+}
+
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
@@ -108,6 +112,11 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
+		$payment_source = $data['payment_source'] ?? '';
+		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
+			return new WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
+		}
+
 		$order_id = $data['order_id'];
 		$order    = wc_get_order( $order_id );
 
@@ -121,23 +130,28 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$existing_paypal_order_id = $order->get_meta( '_paypal_order_id' );
 
 		if ( $existing_paypal_order_id ) {
+			// Since payment_source is not patchable, we need to create a new PayPal order if
+			// we are changing the payment source.
+			$original_payment_source = $order->get_meta( '_paypal_payment_source' );
+			if ( $original_payment_source === $payment_source ) {
+				return new WP_REST_Response(
+					array(
+						'paypal_order_id' => $existing_paypal_order_id,
+						'order_id'        => $order_id,
+						'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
+					),
+					200
+				);
+			}
+
 			$order->update_status( OrderStatus::PENDING );
 			$order->save();
-
-			return new WP_REST_Response(
-				array(
-					'paypal_order_id' => $existing_paypal_order_id,
-					'order_id'        => $order_id,
-					'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
-				),
-				200
-			);
 		}
 
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-		$paypal_order   = $paypal_request->create_paypal_order( $order );
+		$paypal_order   = $paypal_request->create_paypal_order( $order, $payment_source, false );
 
-		if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
+		if ( ! $paypal_order || empty( $paypal_order['id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
 		}
 

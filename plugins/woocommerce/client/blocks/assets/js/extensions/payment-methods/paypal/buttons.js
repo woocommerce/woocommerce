@@ -10,16 +10,16 @@ import apiFetch from '@wordpress/api-fetch';
 /**
  * PayPalButtonsContainer component.
  *
- * @param {Object} props
- * @param {string} props.clientId
- * @param {string} [props.components]
- * @param {string} [props.disableFunding]
- * @param {string} [props.enableFunding]
- * @param {string} [props.currency]
- * @param {string} [props.intent]
- * @param {string} [props.merchantId]
- * @param {string} [props.partnerAttributionId]
- * @param {string} [props.pageType]
+ * @param {Object}  props
+ * @param {string}  props.clientId
+ * @param {string}  [props.components]
+ * @param {string}  [props.disableFunding]
+ * @param {string}  [props.enableFunding]
+ * @param {string}  [props.currency]
+ * @param {string}  [props.intent]
+ * @param {string}  [props.merchantId]
+ * @param {string}  [props.partnerAttributionId]
+ * @param {string}  [props.pageType]
  * @param {boolean} [props.isProductPage]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
@@ -50,7 +50,7 @@ const PayPalButtonsContainer = ( {
 		'data-page-type': pageType || '',
 	};
 
-	const createOrder = async () => {
+	const createOrder = async ( data ) => {
 		let responseData;
 		try {
 			// If we're inside the product page, we need to empty the cart,
@@ -123,6 +123,7 @@ const PayPalButtonsContainer = ( {
 				},
 				data: {
 					order_id: responseData.order_id,
+					payment_source: data.paymentSource || '',
 				},
 			} );
 
