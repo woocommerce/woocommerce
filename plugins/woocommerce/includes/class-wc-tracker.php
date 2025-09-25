@@ -984,7 +984,7 @@ class WC_Tracker {
 			try {
 				$tracker = wc_get_container()->get( MigratorTracker::class );
 				return $tracker->get_data();
-			} catch ( Exception $e ) {
+			} catch ( \Throwable $e ) {
 				// If tracker not available in container, return empty array.
 				return array();
 			}
