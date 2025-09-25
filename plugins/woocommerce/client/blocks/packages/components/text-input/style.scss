@@ -4,6 +4,10 @@
 	margin-top: $gap;
 	white-space: nowrap;
 
+	.wc-block-components-text-input__wrapper {
+		position: relative;
+	}
+
 	label {
 		@include reset-color();
 		@include reset-typography();
