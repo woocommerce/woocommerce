@@ -361,6 +361,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await addToCartButton.click();
 
+			// Wait for the add to cart request to complete before proceeding.
+			// This prevents a race condition where the subsequent page.reload()
+			// could execute before the product is fully added to the cart.
+			const addToCartRequest = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await expect(
 				page.getByRole( 'button', {
 					name: 'Added to cart',
@@ -369,6 +376,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 
 			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
+
+			await addToCartRequest;
 		} );
 
 		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {

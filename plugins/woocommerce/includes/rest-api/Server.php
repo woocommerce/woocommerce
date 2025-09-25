@@ -219,6 +219,7 @@ class Server {
 			'shipping-zones'   => ShippingZonesController::class,
 			'orders'           => OrdersController::class,
 			'settings-general' => 'WC_REST_General_Settings_V4_Controller',
+			'settings-email'   => 'WC_REST_Email_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'         => 'WC_REST_Settings_V4_Controller',
 		);
