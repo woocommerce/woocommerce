@@ -419,7 +419,7 @@ class Checkout extends AbstractBlock {
 				static function ( $provider ) {
 					return array(
 						'id'            => (string) $provider->id,
-						'name'          => (string) $provider->name,
+						'name'          => sanitize_text_field( (string) $provider->name ),
 						'branding_html' => wp_kses_post( (string) $provider->branding_html ),
 					);
 				},
