@@ -40,7 +40,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
-		// Clean up created zones
+		// Clean up created zones.
 		foreach ( $this->created_zones as $zone ) {
 			$zone->delete();
 		}
@@ -259,7 +259,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		);
 
 		// Should still return all fields since include_fields isn't implemented
-		// This is for future extensibility
+		// This is for future extensibility.
 		$this->assertArrayHasKey( 'instance_id', $response );
 		$this->assertArrayHasKey( 'zone_id', $response );
 		$this->assertArrayHasKey( 'enabled', $response );
@@ -292,11 +292,10 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( $instance_id, $response['instance_id'] );
 		$this->assertEquals( $zone->get_id(), $response['zone_id'] );
-		$this->assertIsBool( $response['enabled'] ); // Just verify it's a boolean, not specific value
+		$this->assertIsBool( $response['enabled'] ); // Just verify it's a boolean, not specific value.
 		$this->assertEquals( 'free_shipping', $response['method_id'] );
 		$this->assertEquals( 'Free Shipping Test', $response['settings']['title'] );
 		$this->assertEquals( 'min_amount', $response['settings']['requires'] );
 		$this->assertEquals( '50.00', $response['settings']['min_amount'] );
 	}
 }
-

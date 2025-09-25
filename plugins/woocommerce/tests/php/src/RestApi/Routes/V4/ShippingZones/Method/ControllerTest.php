@@ -5,12 +5,10 @@ namespace Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZones\Method;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method\Controller;
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method\ShippingMethodSchema;
-use WC_Helper_Shipping;
 use WC_REST_Unit_Test_Case;
 use WC_Shipping_Zone;
 use WP_Error;
 use WP_REST_Request;
-use WP_REST_Server;
 
 /**
  * Class ControllerTest
@@ -54,7 +52,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->controller->init( $this->schema );
 		$this->controller->register_routes();
 
-		// Ensure shipping is enabled for tests
+		// Ensure shipping is enabled for tests.
 		update_option( 'woocommerce_ship_to_countries', '' );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 	}
@@ -76,7 +74,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
-		// Clean up created zones
+		// Clean up created zones.
 		foreach ( $this->created_zones as $zone ) {
 			$zone->delete();
 		}
@@ -153,7 +151,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test create item permissions when shipping is disabled.
 	 */
 	public function test_create_item_permissions_check_shipping_disabled() {
-		// Disable shipping
+		// Disable shipping.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
@@ -163,7 +161,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
 		$this->assertEquals( 503, $result->get_error_data()['status'] );
 
-		// Re-enable shipping
+		// Re-enable shipping.
 		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
@@ -171,7 +169,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test update item permissions when shipping is disabled.
 	 */
 	public function test_update_item_permissions_check_shipping_disabled() {
-		// Disable shipping
+		// Disable shipping.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/method/1' );
@@ -181,7 +179,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
 		$this->assertEquals( 503, $result->get_error_data()['status'] );
 
-		// Re-enable shipping
+		// Re-enable shipping.
 		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
@@ -327,11 +325,11 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_item_zone_mismatch() {
 		wp_set_current_user( self::$admin_user_id );
 
-		// Create zone and method
+		// Create zone and method.
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
-		// Create another zone
+		// Create another zone.
 		$other_zone = $this->create_shipping_zone( 'Other Zone' );
 
 		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zones/method/{$instance_id}" );
@@ -354,7 +352,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_item_success() {
 		wp_set_current_user( self::$admin_user_id );
 
-		// Create zone and method
+		// Create zone and method.
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
@@ -371,7 +369,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertEquals( $instance_id, $data['instance_id'] );
 		$this->assertEquals( $zone->get_id(), $data['zone_id'] );
-		$this->assertIsBool( $data['enabled'] ); // Just verify it's a boolean - specific value testing is covered elsewhere
+		$this->assertIsBool( $data['enabled'] ); // Just verify it's a boolean - specific value testing is covered elsewhere.
 		$this->assertEquals( 'Updated Title', $data['settings']['title'] );
 
 		wp_set_current_user( 0 );
@@ -383,7 +381,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_item_zone_id_only() {
 		wp_set_current_user( self::$admin_user_id );
 
-		// Create zone and method
+		// Create zone and method.
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
@@ -426,4 +424,3 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_method_', $prefix );
 	}
 }
-
