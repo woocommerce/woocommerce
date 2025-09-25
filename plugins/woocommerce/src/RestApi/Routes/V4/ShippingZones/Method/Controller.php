@@ -12,6 +12,8 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use WC_Shipping_Zones;
+use WC_Cache_Helper;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_Error;
@@ -36,14 +38,11 @@ class Controller extends AbstractController {
 	protected $method_schema;
 
 	/**
-	 * Error constants for consistent error handling.
+	 * Custom error constants for shipping-specific errors.
 	 */
-	const INVALID_ZONE_ID      = 'invalid_zone_id';
-	const INVALID_METHOD_TYPE  = 'invalid_method_type';
-	const INVALID_INSTANCE_ID  = 'invalid_instance_id';
-	const CANNOT_CREATE_METHOD = 'cannot_create_method';
-	const CANNOT_UPDATE_METHOD = 'cannot_update_method';
-	const ZONE_MISMATCH        = 'zone_mismatch';
+	const INVALID_ZONE_ID     = 'invalid_zone_id';
+	const INVALID_METHOD_TYPE = 'invalid_method_type';
+	const ZONE_MISMATCH       = 'zone_mismatch';
 
 	/**
 	 * Initialize the controller with schema dependency injection.
@@ -134,8 +133,40 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		// TODO: Implement create_item
-		return rest_ensure_response( array( 'message' => 'Create method endpoint - not implemented yet' ) );
+		// Validate zone exists.
+		$zone = $this->validate_zone( $request['zone_id'] );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		// Validate method type.
+		$method_validation = $this->validate_method_type( $request['method_id'] );
+		if ( is_wp_error( $method_validation ) ) {
+			return $method_validation;
+		}
+
+		// Add the shipping method to the zone.
+		$instance_id = $zone->add_shipping_method( $request['method_id'] );
+
+		if ( ! $instance_id ) {
+			return $this->get_route_error_by_code( self::CANNOT_CREATE );
+		}
+
+		// Get the newly created method instance.
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::CANNOT_CREATE );
+		}
+
+		// Update method using zone's business logic.
+		$method = $zone->update_shipping_method( $instance_id, $request->get_params() );
+		if ( is_wp_error( $method ) ) {
+			return $method;
+		}
+
+		$response = rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
+		$response->set_status( 201 );
+		return $response;
 	}
 
 	/**
@@ -145,8 +176,49 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object or WP_Error.
 	 */
 	public function update_item( $request ) {
-		// TODO: Implement update_item
-		return rest_ensure_response( array( 'message' => 'Update method endpoint - not implemented yet' ) );
+		$instance_id = (int) $request['id'];
+
+		// Get the method by instance ID.
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		// Validate zone_id matches if provided.
+		if ( isset( $request['zone_id'] ) ) {
+			$zone = $this->validate_zone( $request['zone_id'] );
+			if ( is_wp_error( $zone ) ) {
+				return $zone;
+			}
+
+			// Ensure the method belongs to the specified zone.
+			global $wpdb;
+			$actual_zone_id = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d",
+					$instance_id
+				)
+			);
+
+			if ( (int) $request['zone_id'] !== (int) $actual_zone_id ) {
+				return $this->get_route_error_by_code( self::ZONE_MISMATCH );
+			}
+		}
+
+		// Update method using zone's business logic if any updates provided.
+		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
+			$zone = $this->validate_zone_by_method_instance( $instance_id );
+			if ( is_wp_error( $zone ) ) {
+				return $zone;
+			}
+
+			$method = $zone->update_shipping_method( $instance_id, $request->get_params() );
+			if ( is_wp_error( $method ) ) {
+				return $method;
+			}
+		}
+
+		return rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
 	}
 
 	/**
@@ -172,5 +244,94 @@ class Controller extends AbstractController {
 	protected function get_item_response( $zone, WP_REST_Request $request ): array {
 		return $this->method_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
 	}
+
+	/**
+	 * Get route error by code, including custom shipping method errors.
+	 *
+	 * @param string $error_code Error code.
+	 * @return WP_Error
+	 */
+	protected function get_route_error_by_code( string $error_code ): WP_Error {
+		$custom_errors = array(
+			self::INVALID_ZONE_ID     => array(
+				'message' => __( 'Invalid shipping zone ID.', 'woocommerce' ),
+				'status'  => 404,
+			),
+			self::INVALID_METHOD_TYPE => array(
+				'message' => __( 'Invalid shipping method type.', 'woocommerce' ),
+				'status'  => 400,
+			),
+			self::ZONE_MISMATCH       => array(
+				'message' => __( 'Shipping method does not belong to the specified zone.', 'woocommerce' ),
+				'status'  => 400,
+			),
+		);
+
+		if ( isset( $custom_errors[ $error_code ] ) ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . $error_code,
+				$custom_errors[ $error_code ]['message'],
+				$custom_errors[ $error_code ]['status']
+			);
+		}
+
+		return parent::get_route_error_by_code( $error_code );
+	}
+
+	/**
+	 * Validate that a shipping zone exists.
+	 *
+	 * @param int $zone_id Zone ID.
+	 * @return WC_Shipping_Zone|WP_Error Zone object or error.
+	 */
+	protected function validate_zone( $zone_id ) {
+		$zone = WC_Shipping_Zones::get_zone( $zone_id );
+
+		if ( ! $zone || ( 0 !== $zone->get_id() && ! $zone->get_zone_name() ) ) {
+			return $this->get_route_error_by_code( self::INVALID_ZONE_ID );
+		}
+
+		return $zone;
+	}
+
+	/**
+	 * Validate that a shipping method type is valid.
+	 *
+	 * @param string $method_id Shipping method ID.
+	 * @return true|WP_Error True if valid, error otherwise.
+	 */
+	protected function validate_method_type( $method_id ) {
+		$available_methods = WC()->shipping()->get_shipping_methods();
+
+		if ( ! isset( $available_methods[ $method_id ] ) ) {
+			return $this->get_route_error_by_code( self::INVALID_METHOD_TYPE );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Get zone by method instance ID.
+	 *
+	 * @param int $instance_id Method instance ID.
+	 * @return WC_Shipping_Zone|WP_Error Zone object or error.
+	 */
+	protected function validate_zone_by_method_instance( $instance_id ) {
+		global $wpdb;
+
+		$zone_id = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d",
+				$instance_id
+			)
+		);
+
+		if ( null === $zone_id ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		return $this->validate_zone( $zone_id );
+	}
+
 
 }

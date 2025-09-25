@@ -85,9 +85,12 @@ class ShippingMethodSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $method, WP_REST_Request $request, array $include_fields = array() ): array {
+		$data_store = \WC_Data_Store::load( 'shipping-zone' );
+		$zone_id    = $data_store->get_zone_id_by_instance_id( $method->instance_id );
+
 		return array(
 			'instance_id' => (int) $method->instance_id,
-			'zone_id'     => (int) $method->get_zone_id(),
+			'zone_id'     => (int) $zone_id,
 			'enabled'     => wc_string_to_bool( $method->enabled ),
 			'method_id'   => $method->id,
 			'settings'    => $this->get_method_settings( $method ),
