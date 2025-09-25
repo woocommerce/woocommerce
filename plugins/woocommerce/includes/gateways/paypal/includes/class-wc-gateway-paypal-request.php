@@ -177,8 +177,6 @@ class WC_Gateway_Paypal_Request {
 			// Remember the payment source: payment_source is not patchable.
 			// If the payment source is changed, we need to create a new PayPal order.
 			$order->update_meta_data( '_paypal_payment_source', $payment_source );
-
-			$order->set_payment_method( $this->gateway->id );
 			$order->save();
 
 			return array(
@@ -402,7 +400,7 @@ class WC_Gateway_Paypal_Request {
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param string   $payment_source The payment source.
-	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request..
+	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
 	 */
 	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
@@ -446,15 +444,20 @@ class WC_Gateway_Paypal_Request {
 
 		// If the request is from PayPal JS SDK (Buttons), we need a cancel URL that is compatible with App Switch.
 		if ( ! empty( $js_sdk_params['is_js_sdk_flow'] ) && ! empty( $js_sdk_params['app_switch_request_origin'] ) ) {
-			// App Switch may open a new tab, so we cannot rely on client-side data. We need to pass the order ID manually.
+			// App Switch may open a new tab, so we cannot rely on client-side data.
+			// We need to pass the order ID manually.
 			// See https://developer.paypal.com/docs/checkout/standard/customize/app-switch/#resume-flow.
-			$cancel_url = add_query_arg(
-				array(
-					'order_id' => $order->get_id(),
-				),
-				$js_sdk_params['app_switch_request_origin']
-			);
-			$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
+			$request_origin = $js_sdk_params['app_switch_request_origin'];
+			// Check if $request_origin is a valid URL, and it is a URL of the current site.
+			if ( filter_var( $request_origin, FILTER_VALIDATE_URL ) && str_starts_with( $request_origin, get_site_url() ) ) {
+				$cancel_url = add_query_arg(
+					array(
+						'order_id' => $order->get_id(),
+					),
+					$js_sdk_params['app_switch_request_origin']
+				);
+				$params['payment_source'][ $payment_source ]['experience_context']['cancel_url'] = $cancel_url;
+			}
 		}
 
 		$shipping = $this->get_paypal_order_shipping( $order );

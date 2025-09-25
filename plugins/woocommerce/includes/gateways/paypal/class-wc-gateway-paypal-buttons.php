@@ -145,8 +145,8 @@ class WC_Gateway_Paypal_Buttons {
 	}
 
 	/**
-	 * Get the current page URL, to be used for app switch.
-	 * Limited to checkout, cart, product pages for security.
+	 * Get the current page URL, to be used for App Switch.
+	 * Limited to checkout, cart, and product pages for security.
 	 *
 	 * @return string
 	 */

@@ -106,8 +106,8 @@ jQuery(function ($) {
 
 			async onCancel( data ) {
 				if ( ! orderId ) {
-					// When coming from App Switch, the order ID may not be available in the client-side data.
-					// Check the URL for the order ID.
+					// When coming back from App Switch, the order ID may not be available in the
+					// client-side data. Check the URL for the order ID.
 					orderId = new URLSearchParams( window.location.search ).get( 'order_id' );
 				}
 
@@ -158,6 +158,7 @@ jQuery(function ($) {
 		});
 
 		if ( buttons.hasReturned() ) {
+			// App Switch resume flow.
 			buttons.resume();
 		} else {
 			buttons.render( container ).catch( function ( err ) {
