@@ -13,14 +13,14 @@ final class FeaturePluginCompatibility {
 	 *
 	 * @var string
 	 */
-	const COMPATIBLE = 'compatible';
+	public const COMPATIBLE = 'compatible';
 
 	/**
 	 * Plugins are incompatible by default with the feature.
 	 *
 	 * @var string
 	 */
-	const INCOMPATIBLE = 'incompatible';
+	public const INCOMPATIBLE = 'incompatible';
 
 	/**
 	 * Plugin compatibility with the feautre is yet to be determined. Internal use only.
@@ -28,14 +28,14 @@ final class FeaturePluginCompatibility {
 	 * @internal
 	 * @var string
 	 */
-	const UNCERTAIN = 'uncertain';
+	public const UNCERTAIN = 'uncertain';
 
 	/**
 	 * Valid values for registration of feature compatibility.
 	 *
 	 * @var string[]
 	 */
-	const VALID_REGISTRATION_VALUES = array(
+	public const VALID_REGISTRATION_VALUES = array(
 		self::COMPATIBLE,
 		self::INCOMPATIBLE,
 	);

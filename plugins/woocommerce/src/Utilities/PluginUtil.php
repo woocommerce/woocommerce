@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\PluginInstaller;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -320,7 +321,7 @@ class PluginUtil {
 	 * @return array Items in 'incompatible' and 'uncertain' if plugins are incompatible by default with the feature; only items in 'incompatible' otherwise.
 	 */
 	public function get_items_considered_incompatible( string $feature_id, array $compatibility_info ): array {
-		$incompatible_by_default = 'compatible' !== wc_get_container()->get( FeaturesController::class )->get_default_plugin_compatibility( $feature_id );
+		$incompatible_by_default = FeaturePluginCompatibility::COMPATIBLE !== wc_get_container()->get( FeaturesController::class )->get_default_plugin_compatibility( $feature_id );
 
 		return $incompatible_by_default ?
 			array_merge( $compatibility_info['incompatible'], $compatibility_info['uncertain'] ) :

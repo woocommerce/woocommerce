@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CostOfGoodsSold;
 
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
@@ -56,7 +57,7 @@ class CostOfGoodsSoldController implements RegisterHooksInterface {
 			'description'                  => __( 'Allows entering cost of goods sold information for products.', 'woocommerce' ),
 			'is_experimental'              => false,
 			'enabled_by_default'           => false,
-			'default_plugin_compatibility' => \Automattic\WooCommerce\Enums\FeaturePluginCompatibility::COMPATIBLE,
+			'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 		);
 
 		$features_controller->add_feature_definition(

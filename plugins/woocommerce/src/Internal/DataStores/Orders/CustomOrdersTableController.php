@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -581,7 +582,7 @@ class CustomOrdersTableController {
 			'enabled_by_default'           => false,
 			'order'                        => 50,
 			'setting'                      => $this->get_hpos_setting_for_feature(),
-			'default_plugin_compatibility' => \Automattic\WooCommerce\Enums\FeaturePluginCompatibility::INCOMPATIBLE,
+			'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
 			'additional_settings'          => array(
 				$this->get_hpos_setting_for_sync(),
 			),
