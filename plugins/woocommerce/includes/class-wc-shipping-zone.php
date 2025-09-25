@@ -483,14 +483,25 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Shipping method not found.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Update method using the standardized, validated API.
-		$result = $method->update_from_api_request( $this, $instance_id, $data );
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		global $wpdb;
+
+		// Update settings if provided.
+		if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
+			$result = $method->update_settings( $data['settings'] );
+			if ( is_wp_error( $result ) ) {
+				return $result;
+			}
 		}
 
-		// Re-fetch method to get fresh state after updates.
-		$method = $this->get_shipping_method( $instance_id );
+		// Update method order if provided.
+		if ( isset( $data['order'] ) ) {
+			$this->set_method_order( $instance_id, absint( $data['order'] ) );
+		}
+
+		// Update enabled status if provided.
+		if ( isset( $data['enabled'] ) ) {
+			$this->set_method_enabled( $instance_id, $data['enabled'] );
+		}
 
 		// Clear shipping transients.
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
@@ -509,7 +520,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 		global $wpdb;
 
 		$enabled = wc_string_to_bool( $enabled );
-		$result  = $wpdb->update(
+		$result = $wpdb->update(
 			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
 			array( 'is_enabled' => (int) $enabled ),
 			array( 'instance_id' => absint( $instance_id ) ),
@@ -517,19 +528,10 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			array( '%d' )
 		);
 
-		if ( false !== $result ) {
+		if ( $result !== false ) {
 			$method = $this->get_shipping_method( $instance_id );
 			if ( $method ) {
 				$method->enabled = $enabled ? 'yes' : 'no';
-				/**
-				 * Fires when a shipping method status is toggled.
-				 *
-				 * @since 9.4.0
-				 * @param int    $instance_id Method instance ID.
-				 * @param string $method_id   Method ID.
-				 * @param int    $zone_id     Zone ID.
-				 * @param bool   $enabled     Whether method is enabled.
-				 */
 				do_action( 'woocommerce_shipping_zone_method_status_toggled', $instance_id, $method->id, $this->get_id(), $enabled );
 			}
 			return true;
@@ -556,7 +558,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			array( '%d' )
 		);
 
-		if ( false !== $result ) {
+		if ( $result !== false ) {
 			$method = $this->get_shipping_method( $instance_id );
 			if ( $method ) {
 				$method->method_order = absint( $order );
