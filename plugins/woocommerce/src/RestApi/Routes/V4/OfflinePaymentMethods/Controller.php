@@ -123,7 +123,13 @@ class Controller extends AbstractController {
 			);
 		}
 
-		return rest_ensure_response( $offline_methods );
+		$data = array();
+		foreach ( $offline_methods as $method ) {
+			$prepared_item = $this->prepare_item_for_response( $method, $request );
+			$data[] = $this->prepare_response_for_collection( $prepared_item );
+		}
+
+		return rest_ensure_response( $data );
 	}
 
 	/**
@@ -190,5 +196,26 @@ class Controller extends AbstractController {
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $item, $request );
+	}
+
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param mixed            $item Payment method data.
+	 * @param WP_REST_Request  $request Request object.
+	 * @param WP_REST_Response $response Response object.
+	 * @return array Links for the given payment method.
+	 */
+	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
+		$links = array();
+
+		if ( isset( $item['management']['_links']['settings']['href'] ) ) {
+			$links['settings'] = array(
+				'href' => $item['management']['_links']['settings']['href'],
+			);
+		}
+
+		return $links;
 	}
 }

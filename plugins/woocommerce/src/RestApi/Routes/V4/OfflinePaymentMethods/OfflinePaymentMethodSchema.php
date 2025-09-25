@@ -242,8 +242,15 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		// Since our $item is already in the correct format from PaymentsProviders,
-		// we can return it directly. The schema will handle validation.
-		return $item;
+		$response = array_intersect_key(
+			(array) $item,
+			$this->get_item_schema_properties()
+		);
+
+		if ( ! empty( $include_fields ) ) {
+			$response = array_intersect_key( $response, array_flip( $include_fields ) );
+		}
+
+		return $response;
 	}
 }
