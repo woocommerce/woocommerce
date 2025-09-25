@@ -188,12 +188,13 @@ jQuery(function ($) {
 		if ( buttons.hasReturned() ) {
 			// App Switch resume flow.
 			buttons.resume();
-		} else {
-			buttons.render( container ).catch( function ( err ) {
-				// eslint-disable-next-line no-console
-				console.error( 'Failed to render PayPal buttons', err );
-			});
 		}
+
+		buttons.render( container ).catch( function ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'Failed to render PayPal buttons', err );
+		});
+
 	}
 
 	// Align the PayPal buttons to the center of the container on classic checkout page.
