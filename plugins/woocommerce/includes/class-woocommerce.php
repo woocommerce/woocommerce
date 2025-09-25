@@ -33,6 +33,7 @@ use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\WooCommerce\Internal\Logging\LogsDeletionScheduler;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -353,6 +354,7 @@ final class WooCommerce {
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
 		$container->get( AddressProviderController::class );
+		$container->get( LogsDeletionScheduler::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {

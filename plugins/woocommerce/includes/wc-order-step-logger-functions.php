@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Logging\LogsDeletionScheduler;
+
 /**
  * Log an order-related message. This is not public API and should not be used by plugins or themes.
  *
@@ -72,12 +74,13 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 		$context['remote-logging'] = false; // forcing disable on remote logging.
 
 		$steps[] = $message;
-		// Logging the place order flow step. Log files are grouped per order to make is easier to navigate.
-		$logger->log( WC_Log_Levels::DEBUG, $message, $context );
 
 		// Clears the log if instructed and all steps are unique.
 		if ( $final_step && count( array_unique( $steps ) ) === count( $steps ) ) {
-			$logger->clear( $context['source'], true );
+			wc_get_container()->get( LogsDeletionScheduler::class )->register_source_pending_deletion( $context['source'], true );
+		} else {
+			// Logging the place order flow step. Log files are grouped per order to make is easier to navigate.
+			$logger->log( WC_Log_Levels::DEBUG, $message, $context );
 		}
 	} catch ( Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
 		// Since this runs in a critical path, we need to catch any exceptions and ignore them.
