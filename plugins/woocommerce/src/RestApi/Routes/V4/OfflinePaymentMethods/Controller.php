@@ -160,7 +160,7 @@ class Controller extends AbstractController {
 		$offline_payment_providers = array_values(
 			array_filter(
 				$providers,
-				fn( $provider ) => PaymentsProviders::TYPE_OFFLINE_PM === $provider['_type']
+				fn( $provider ) => isset( $provider['_type'] ) && PaymentsProviders::TYPE_OFFLINE_PM === $provider['_type']
 			)
 		);
 

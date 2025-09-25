@@ -106,11 +106,15 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 			'image'       => array(
 				'description' => __( 'The URL of the provider image.', 'woocommerce' ),
 				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'format'      => 'uri',
 				'readonly'    => true,
 			),
 			'icon'        => array(
 				'description' => __( 'The URL of the provider icon (square aspect ratio - 72px by 72px).', 'woocommerce' ),
 				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'format'      => 'uri',
 				'readonly'    => true,
 			),
 			'links'       => array(
@@ -130,6 +134,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 						'url'   => array(
 							'description' => __( 'The URL of the link.', 'woocommerce' ),
 							'type'        => 'string',
+							'format'      => 'uri',
 							'context'     => self::VIEW_EDIT_CONTEXT,
 							'readonly'    => true,
 						),
@@ -137,7 +142,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 				),
 			),
 			'state'       => array(
-				'description' => __( 'The general state of the provider with regards to it\'s payments processing.', 'woocommerce' ),
+				'description' => __( 'The general state of the provider with regards to its payments processing.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
@@ -195,6 +200,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 									'href' => array(
 										'description' => __( 'The URL to the settings page for the payment gateway.', 'woocommerce' ),
 										'type'        => 'string',
+										'format'      => 'uri',
 										'context'     => self::VIEW_EDIT_CONTEXT,
 										'readonly'    => true,
 									),
