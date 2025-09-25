@@ -122,7 +122,7 @@ class CustomMetaBox {
 			 *
 			 * @param int $limit Number of custom fields to retrieve. Default 30.
 			 */
-			$limit = apply_filters( 'postmeta_form_limit', 30 );
+			$limit = (int) apply_filters( 'postmeta_form_limit', 30 );
 			$keys  = wc_get_container()->get( OrdersTableDataStoreMeta::class )->get_meta_keys( $limit );
 		}
 
@@ -213,7 +213,7 @@ class CustomMetaBox {
 	 *
 	 * @return void
 	 */
-	public function search_metakeys_ajax(): void {
+	public function search_metakeys_ajax(): void { // Entry point
 		check_ajax_referer( 'search-order-metakeys', 'security' );
 
 		if ( ! isset( $_GET['order_id'] ) || ! current_user_can( 'edit_shop_orders' ) ) {
