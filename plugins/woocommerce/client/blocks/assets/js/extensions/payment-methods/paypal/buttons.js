@@ -195,7 +195,8 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onCancel = async ( data ) => {
-		if ( ! orderId ) {
+		let currentOrderId = orderId;
+		if ( ! currentOrderId ) {
 			// When coming back from App Switch, the order ID may not be available in the
 			// client-side data. Check the URL for the order ID.
 			const orderIdFromUrl = new URLSearchParams(
@@ -203,10 +204,11 @@ const PayPalButtonsContainer = ( {
 			).get( 'order_id' );
 			if ( orderIdFromUrl ) {
 				setOrderId( orderIdFromUrl );
+				currentOrderId = orderIdFromUrl;
 			}
 		}
 
-		if ( ! orderId ) {
+		if ( ! currentOrderId ) {
 			return;
 		}
 
@@ -218,7 +220,7 @@ const PayPalButtonsContainer = ( {
 					Nonce: payPalData.cancel_payment_nonce,
 				},
 				data: {
-					order_id: orderId,
+					order_id: currentOrderId,
 					paypal_order_id: data.orderID,
 				},
 			} );
