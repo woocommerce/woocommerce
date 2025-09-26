@@ -236,9 +236,6 @@ class WooCommerceProductImporter {
 		foreach ( $products_data as $index => $product_data ) {
 			$source_data  = $source_data_batch[ $index ] ?? array();
 			$product_name = $product_data['name'] ?? 'Unknown Product';
-			if ( $this->progress_callback ) {
-				call_user_func( $this->progress_callback, $index + 1, $total_count, $product_name, null );
-			}
 
 			$result = $this->import_product( $product_data, $source_data );
 
