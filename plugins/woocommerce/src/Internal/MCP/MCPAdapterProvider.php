@@ -114,9 +114,13 @@ class MCPAdapterProvider {
 			return;
 		}
 
-		// Temporarily disable MCP validation during server creation.
-		// Workaround for validator bug with union types (e.g., ["integer", "null"]).
-		// This will be removed once the mcp-adapter validator bug is fixed.
+		/*
+		 * Temporarily disable MCP validation during server creation.
+		 * Workaround for validator bug with union types (e.g., ["integer", "null"]).
+		 * This will be removed once the mcp-adapter validator bug is fixed.
+		 *
+		 * @see https://github.com/WordPress/mcp-adapter/issues/47
+		 */
 		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 
 		try {
