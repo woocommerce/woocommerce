@@ -229,6 +229,94 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test create item with missing zone_id parameter.
+	 */
+	public function test_create_item_missing_zone_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		// Deliberately omit zone_id (absint sanitizer will convert to 0)
+		$request->set_param( 'method_id', 'flat_rate' );
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
+
+		$response = $this->controller->create_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_zone_id', $response->get_error_code() );
+		$this->assertEquals( 404, $response->get_error_data()['status'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test create item with missing method_id parameter.
+	 */
+	public function test_create_item_missing_method_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request->set_param( 'zone_id', $zone->get_id() );
+		// Deliberately omit method_id (will default to empty string)
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
+
+		$response = $this->controller->create_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_method_type', $response->get_error_code() );
+		$this->assertEquals( 400, $response->get_error_data()['status'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test create item with missing enabled parameter (should succeed with default value).
+	 */
+	public function test_create_item_missing_enabled() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request->set_param( 'zone_id', $zone->get_id() );
+		$request->set_param( 'method_id', 'flat_rate' );
+		// Deliberately omit enabled (should default to false)
+		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
+
+		$response = $this->controller->create_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 201, $response->get_status() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test create item with missing settings parameter (should succeed with defaults).
+	 */
+	public function test_create_item_missing_settings() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request->set_param( 'zone_id', $zone->get_id() );
+		$request->set_param( 'method_id', 'flat_rate' );
+		$request->set_param( 'enabled', true );
+		// Deliberately omit settings (should use defaults)
+
+		$response = $this->controller->create_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 201, $response->get_status() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * Test create item with invalid zone ID.
 	 */
 	public function test_create_item_invalid_zone_id() {
