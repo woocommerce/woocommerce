@@ -161,7 +161,6 @@ class MigratorTracker {
 		if ( ! isset( $analytics['totals'] ) || ! is_array( $analytics['totals'] ) ) {
 			$analytics['totals'] = array();
 		}
-		
 		$analytics['totals']['products_migrated_in'] = ( $analytics['totals']['products_migrated_in'] ?? 0 ) + $products_processed;
 		$analytics['totals']['total_sessions']       = ( $analytics['totals']['total_sessions'] ?? 0 ) + 1;
 		$analytics['totals']['total_migration_time'] = ( $analytics['totals']['total_migration_time'] ?? 0 ) + $total_time;
