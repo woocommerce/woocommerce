@@ -2,6 +2,7 @@ jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
 	let orderId = '';
+	let productPageCartData = {};
 
 	function renderButtons() {
 		const container = document.getElementById( containerSelector );
@@ -11,48 +12,89 @@ jQuery(function ($) {
 
 		applyStyles();
 
+		/**
+		 * Manage the cart contents when placing an order from the product page.
+		 *
+		 * @returns {Promise<boolean>}
+		 */
+		const manageCartForProductPageOrder = async () => {
+			// Get product ID from the value of the "add-to-cart" button.
+			const addToCartBtn = document.querySelector('[name="add-to-cart"]');
+			let productId = addToCartBtn ? addToCartBtn.value : null;
+			const variationIdField = document.querySelector( '[name="variation_id"]' );
+			const variationId = variationIdField ? variationIdField.value : null;
+
+			if ( variationId ) {
+				productId = variationId;
+			}
+
+			if ( ! productId ) {
+				return false;
+			}
+
+			// Get quantity from the value of the "quantity" input field.
+			const quantityField = document.querySelector( '[name="quantity"]' );
+			const quantity = quantityField ? quantityField.value : null;
+			if ( ! quantity ) {
+				return false;
+			}
+
+			// Clearing the cart and re-adding the item causes the current WooCommerce draft order to be lost.
+			// If the user is re-opening the payment modal and has not changed anything, do nothing;
+			// we want to resume the existing draft order if the cart has not changed.
+			if ( orderId && productPageCartData.id === productId && productPageCartData.quantity === quantity ) {
+				return true;
+			}
+
+			try {
+				// Empty the cart before adding the product.
+				const emptyCartResponse = await window.wp.apiFetch( {
+					method: 'DELETE',
+					path: '/wc/store/v1/cart/items',
+				} );
+
+				// Expected response is an empty array.
+				if ( ! emptyCartResponse || emptyCartResponse.length != 0 ) {
+					throw new Error( 'Failed to empty cart' );
+				}
+
+				// Add the product to the cart.
+				const addToCartResponse = await window.wp.apiFetch( {
+					method: 'POST',
+					path: '/wc/store/v1/cart/items',
+					data: {
+						id: productId,
+						quantity,
+					},
+				} );
+
+				if ( ! addToCartResponse || ! addToCartResponse.key ) {
+					throw new Error( 'Failed to add product to cart' );
+				}
+			} catch ( error ) {
+				return false;
+			}
+
+			// Remember what we added to the cart, so we don't have to repeat the action
+			// when the user re-opens the payment modal.
+			productPageCartData = {
+				id: productId,
+				quantity,
+			};
+
+			return true;
+		}
+
 		const buttons = paypal.Buttons( {
+			appSwitchWhenAvailable: true,
 			async createOrder( data ) {
-				// If we're inside the product page, we need to empty the cart,
-				// and add the current product to the cart.
-				if ( paypal_standard.isProductPage ) {
-					// Empty the cart.
-					await window.wp.apiFetch( {
-						method: 'DELETE',
-						path: '/wc/store/v1/cart/items',
-					} );
-
-					// Get product ID from the value of the "add-to-cart" button.
-					const addToCartBtn = document.querySelector('[name="add-to-cart"]');
-					let productId = addToCartBtn ? addToCartBtn.value : null;
-					const variationIdField = document.querySelector( '[name="variation_id"]' );
-					const variationId = variationIdField ? variationIdField.value : null;
-
-					if ( variationId ) {
-						productId = variationId;
-					}
-
-					if ( ! productId ) {
+				// If we're inside the product page, we need to manage the cart contents
+				// ourselves.
+				if ( paypal_standard.is_product_page ) {
+					const cartSuccess = await manageCartForProductPageOrder();
+					if ( ! cartSuccess ) {
 						return null;
 					}
-
-					// Get quantity from the value of the "quantity" input field.
-					const quantityField = document.querySelector( '[name="quantity"]' );
-					const quantity = quantityField ? quantityField.value : null;
-					if ( ! quantity ) {
-						return null;
-					}
-
-
-					// Add the product to the cart.
-					await window.wp.apiFetch( {
-						method: 'POST',
-						path: '/wc/store/v1/cart/items',
-						data: {
-							id: productId,
-							quantity,
-						},
-					} );
 				}
 
 				let responseData;
@@ -82,9 +124,10 @@ jQuery(function ($) {
 						data: {
 							order_id: responseData.order_id,
 							payment_source: data.paymentSource || '',
+							app_switch_request_origin: paypal_standard.app_switch_request_origin,
 						},
 					} );
-		
+
 					orderId = paypalResponseData.order_id;
 					orderReceivedUrl = paypalResponseData.return_url;
 
@@ -102,7 +145,17 @@ jQuery(function ($) {
 				}
 			},
 
-			async onCancel() {
+			async onCancel( data ) {
+				if ( ! orderId ) {
+					// When coming back from App Switch, the order ID may not be available in the
+					// client-side data. Check the URL for the order ID.
+					orderId = new URLSearchParams( window.location.search ).get( 'order_id' );
+				}
+
+				if ( ! orderId ) {
+					return;
+				}
+
 				try {
 					await window.wp.apiFetch( {
 						method: 'POST',
@@ -112,9 +165,10 @@ jQuery(function ($) {
 						},
 						data: {
 							order_id: orderId,
+							paypal_order_id: data.orderID,
 						},
 					} );
-		
+
 					orderReceivedUrl = '';
 				} catch ( error ) {
 					// eslint-disable-next-line no-console
@@ -122,7 +176,7 @@ jQuery(function ($) {
 				}
 			},
 
-			onError: function ( error ) {				
+			onError: function ( error ) {
 				const sanitizedErrorMessage = $( '<div>' ).text( error.message || paypal_standard.generic_error_message ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
@@ -143,11 +197,16 @@ jQuery(function ($) {
 
 		});
 
+		if ( buttons.hasReturned() ) {
+			// App Switch resume flow.
+			buttons.resume();
+		}
 
 		buttons.render( container ).catch( function ( err ) {
 			// eslint-disable-next-line no-console
 			console.error( 'Failed to render PayPal buttons', err );
 		});
+
 	}
 
 	// Align the PayPal buttons to the center of the container on classic checkout page.

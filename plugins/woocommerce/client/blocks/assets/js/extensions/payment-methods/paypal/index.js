@@ -68,6 +68,7 @@ if ( settings.isButtonsEnabled ) {
 			intent: options.intent,
 			pageType: options[ 'page-type' ],
 			isProductPage: settings.isProductPage,
+			appSwitchRequestOrigin: settings.appSwitchRequestOrigin,
 		};
 
 		return (

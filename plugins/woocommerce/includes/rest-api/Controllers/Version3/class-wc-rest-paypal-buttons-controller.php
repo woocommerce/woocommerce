@@ -126,30 +126,19 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		$gateway = WC_Gateway_Paypal::get_instance();
 
-		// Check if the order already has a PayPal order ID.
-		$existing_paypal_order_id = $order->get_meta( '_paypal_order_id' );
-
-		if ( $existing_paypal_order_id ) {
-			// Since payment_source is not patchable, we need to create a new PayPal order if
-			// we are changing the payment source.
-			$original_payment_source = $order->get_meta( '_paypal_payment_source' );
-			if ( $original_payment_source === $payment_source ) {
-				return new WP_REST_Response(
-					array(
-						'paypal_order_id' => $existing_paypal_order_id,
-						'order_id'        => $order_id,
-						'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
-					),
-					200
-				);
-			}
-
-			$order->update_status( OrderStatus::PENDING );
-			$order->save();
-		}
+		// For Buttons requests, we need to explicitly set the payment method to PayPal.
+		$order->set_payment_method( $gateway->id );
+		$order->save();
 
 		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
-		$paypal_order   = $paypal_request->create_paypal_order( $order, $payment_source, false );
+		$paypal_order   = $paypal_request->create_paypal_order(
+			$order,
+			$payment_source,
+			array(
+				'is_js_sdk_flow'            => true,
+				'app_switch_request_origin' => $data['app_switch_request_origin'] ?? '',
+			)
+		);
 
 		if ( ! $paypal_order || empty( $paypal_order['id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
@@ -178,7 +167,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function cancel_payment( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		if ( empty( $data['order_id'] ) ) {
+		if ( empty( $data['order_id'] ) || empty( $data['paypal_order_id'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
@@ -187,6 +176,13 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		if ( ! $order ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+		}
+
+		// Verify order by checking the PayPal order ID.
+		$paypal_order_id           = $data['paypal_order_id'];
+		$paypal_order_id_from_meta = $order->get_meta( '_paypal_order_id' );
+		if ( $paypal_order_id_from_meta !== $paypal_order_id ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid PayPal order' ), 404 );
 		}
 
 		$order->update_status( OrderStatus::CHECKOUT_DRAFT );

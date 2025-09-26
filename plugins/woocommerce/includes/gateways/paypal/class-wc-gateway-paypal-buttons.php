@@ -144,4 +144,19 @@ class WC_Gateway_Paypal_Buttons {
 	public function is_enabled() {
 		return $this->enabled;
 	}
+
+	/**
+	 * Get the current page URL, to be used for App Switch.
+	 * Limited to checkout, cart, and product pages for security.
+	 *
+	 * @return string
+	 */
+	public function get_current_page_for_app_switch() {
+		// If checkout, cart or product page, return the current page URL.
+		if ( is_checkout() || is_cart() || is_product() ) {
+			return get_permalink( get_the_ID() );
+		}
+
+		return '';
+	}
 }
