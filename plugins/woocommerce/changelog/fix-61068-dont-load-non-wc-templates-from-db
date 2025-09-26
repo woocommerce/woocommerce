@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip loading non-WooCommerce templates when adding backwards compatibility for templates saved with the woocommerce slug
