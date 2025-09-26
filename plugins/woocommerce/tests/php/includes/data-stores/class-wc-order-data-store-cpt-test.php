@@ -607,4 +607,33 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertCount( $test['expected_count'], $orders, print_r( $test, true ) );
 		}
 	}
+
+	/**
+	 * Test reading an order works as expected.
+	 */
+	public function test_reading_order() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_currency( 'EUR' );
+		$order->set_discount_tax( 2 );
+		$order->set_discount_total( 3 );
+		$order->set_shipping_total( 4 );
+		$order->set_shipping_tax( 5 );
+		$order->set_cart_tax( 6 );
+		$order->set_total( 100 );
+		$order->set_prices_include_tax( true );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertEquals( 'EUR', $read_order->get_currency() );
+		$this->assertEquals( 2, $read_order->get_discount_tax() );
+		$this->assertEquals( 3, $read_order->get_discount_total() );
+		$this->assertEquals( 4, $read_order->get_shipping_total() );
+		$this->assertEquals( 5, $read_order->get_shipping_tax() );
+		$this->assertEquals( 6, $read_order->get_cart_tax() );
+		$this->assertEquals( 100, $read_order->get_total() );
+		$this->assertEquals( WC_VERSION, $read_order->get_version() );
+		$this->assertTrue( $read_order->get_prices_include_tax() );
+	}
 }
