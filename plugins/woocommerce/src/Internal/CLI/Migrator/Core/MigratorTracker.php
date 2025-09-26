@@ -58,12 +58,11 @@ class MigratorTracker {
 	public function on_session_started( string $platform, array $metadata ): void {
 		$this->current_session = array(
 			'platform'           => $platform,
-			'started_at'         => time(),
+			'started_at'         => current_time( 'timestamp' ),
 			'products_total'     => 0,
 			'products_processed' => 0,
 			'product_types'      => array(),
 			'total_time'         => 0,
-			'session_id'         => $metadata['session_id'] ?? uniqid(),
 		);
 	}
 
@@ -95,9 +94,9 @@ class MigratorTracker {
 			return;
 		}
 
-		$this->current_session['total_time'] = time() - $this->current_session['started_at'];
+		$this->current_session['total_time'] = current_time( 'timestamp' ) - $this->current_session['started_at'];
 
-		$this->current_session['completed_at'] = time();
+		$this->current_session['completed_at'] = current_time( 'timestamp' );
 
 		$this->current_session['products_total'] = $final_stats['total_found'] ?? $this->current_session['products_processed'];
 
@@ -132,7 +131,6 @@ class MigratorTracker {
 
 		if ( ! isset( $analytics['platforms'][ $platform ] ) ) {
 			$analytics['platforms'][ $platform ] = array(
-				'sessions'       => array(),
 				'total_products' => 0,
 				'total_sessions' => 0,
 				'total_time'     => 0,
@@ -148,7 +146,6 @@ class MigratorTracker {
 		$completed_at       = $this->current_session['completed_at'] ?? time();
 		$product_types      = $this->current_session['product_types'] ?? array();
 
-		$platform_data['sessions'][]      = $this->current_session;
 		$platform_data['total_products'] += $products_processed;
 		++$platform_data['total_sessions'];
 		$platform_data['total_time']    += $total_time;
@@ -225,7 +222,11 @@ class MigratorTracker {
 	 * @param array $analytics Analytics data to save.
 	 */
 	private function save_analytics( array $analytics ): void {
-		update_option( self::OPTION_NAME, $analytics );
+		if ( false === get_option( self::OPTION_NAME ) ) {
+			add_option( self::OPTION_NAME, $analytics, '', 'no' );
+		} else {
+			update_option( self::OPTION_NAME, $analytics, 'no' );
+		}
 	}
 
 	/**
