@@ -979,18 +979,16 @@ class WC_Tracker {
 	 * @return array
 	 */
 	private static function get_migrator_data() {
-		if ( class_exists( MigratorTracker::class ) ) {
-			// Get tracker instance from WooCommerce container.
-			try {
-				$tracker = wc_get_container()->get( MigratorTracker::class );
-				return $tracker->get_data();
-			} catch ( \Throwable $e ) {
-				// If tracker not available in container, return empty array.
-				return array();
-			}
+		if ( ! class_exists( MigratorTracker::class ) ) {
+			return array();
 		}
 
-		return array();
+		try {
+			$tracker = wc_get_container()->get( MigratorTracker::class );
+			return $tracker->get_data();
+		} catch ( \Throwable $e ) {
+			return array();
+		}
 	}
 
 	/**
