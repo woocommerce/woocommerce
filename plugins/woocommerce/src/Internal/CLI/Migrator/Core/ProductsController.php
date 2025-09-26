@@ -142,6 +142,8 @@ class ProductsController {
 					'session_id' => $this->session->get_id(),
 					'filters'    => $this->parsed_args['filters'],
 					'fields'     => $this->fields_to_process,
+					'is_dry_run' => $this->parsed_args['dry_run'],
+					'resume'     => $this->parsed_args['resume'],
 				)
 			);
 		}
