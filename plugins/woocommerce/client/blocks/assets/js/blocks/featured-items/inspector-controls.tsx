@@ -48,7 +48,6 @@ interface InspectorControlsRequiredAttributes
 	> {
 	alt: string;
 	backgroundImageSrc: string;
-	contentPanel: JSX.Element | undefined;
 }
 
 interface InspectorControlsProps extends InspectorControlsRequiredAttributes {
@@ -79,7 +78,6 @@ interface WithInspectorControlsProductProps< T >
 	extends WithInspectorControlsRequiredProps< T > {
 	category: never;
 	product: ProductResponseItem;
-	showPrice: boolean;
 }
 
 type WithInspectorControlsProps< T extends EditorBlock< T > > =
@@ -89,7 +87,6 @@ type WithInspectorControlsProps< T extends EditorBlock< T > > =
 export const InspectorControls = ( {
 	alt,
 	backgroundImageSrc,
-	contentPanel,
 	dimRatio,
 	focalPoint,
 	hasParallax,
@@ -321,19 +318,6 @@ export const withInspectorControls =
 			customGradientAttribute: 'overlayGradient',
 		} );
 
-		const contentPanel =
-			name === BLOCK_NAMES.featuredProduct ? (
-				<ToggleControl
-					label={ __( 'Show price', 'woocommerce' ) }
-					checked={ showPrice }
-					onChange={ () =>
-						setAttributes( {
-							showPrice: ! showPrice,
-						} )
-					}
-				/>
-			) : undefined;
-
 		const { backgroundImageSrc } = useBackgroundImage( {
 			item,
 			mediaId,
@@ -346,7 +330,6 @@ export const withInspectorControls =
 				<InspectorControls
 					alt={ alt }
 					backgroundImageSrc={ backgroundImageSrc }
-					contentPanel={ contentPanel }
 					dimRatio={ dimRatio }
 					focalPoint={ focalPoint }
 					hasParallax={ hasParallax }

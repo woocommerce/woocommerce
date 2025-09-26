@@ -71,37 +71,43 @@ class FeaturedProduct extends FeaturedItem {
 	 * @return string
 	 */
 	protected function render_attributes( $product, $attributes ) {
-		$desc_str = sprintf(
-			'<div class="wc-block-featured-product__description">%s</div>',
-			wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
-		);
-
-		$price_str = sprintf(
-			'<div class="wc-block-featured-product__price">%s</div>',
-			wp_kses_post( $product->get_price_html() )
-		);
-
-		// Legacy title for backward compatibility when no inner title blocks exist.
-		$legacy_title = sprintf(
-			'<h2 class="wc-block-featured-product__title">%s</h2>',
-			wp_kses_post( $product->get_title() )
-		);
-		if ( $product->is_type( ProductType::VARIATION ) ) {
-			$legacy_title .= sprintf(
-				'<h3 class="wc-block-featured-product__variation">%s</h3>',
-				wp_kses_post( wc_get_formatted_variation( $product, true, true, false ) )
-			);
-		}
-
 		$output = '';
-		if ( ! empty( $attributes['useLegacyTitle'] ) ) {
+
+		if ( ! isset( $attributes['__woocommerceBlockVersion'] ) ) {
+			$legacy_title = sprintf(
+				'<h2 class="wc-block-featured-product__title">%s</h2>',
+				wp_kses_post( $product->get_title() )
+			);
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				$legacy_title .= sprintf(
+					'<h3 class="wc-block-featured-product__variation">%s</h3>',
+					wp_kses_post( wc_get_formatted_variation( $product, true, true, false ) )
+				);
+			}
+
 			$output .= $legacy_title;
-		}
-		if ( $attributes['showDesc'] ) {
-			$output .= $desc_str;
-		}
-		if ( $attributes['showPrice'] ) {
-			$output .= $price_str;
+
+			if (
+				! isset( $attributes['showDesc'] ) ||
+				( isset( $attributes['showDesc'] ) && false !== $attributes['showDesc'] )
+			) {
+				$desc_str = sprintf(
+					'<div class="wc-block-featured-product__description">%s</div>',
+					wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
+				);
+				$output   .= $desc_str;
+			}
+
+			if (
+				! isset( $attributes['showPrice'] ) ||
+				( isset( $attributes['showPrice'] ) && false !== $attributes['showPrice'] )
+			) {
+				$price_str = sprintf(
+					'<div class="wc-block-featured-product__price">%s</div>',
+					wp_kses_post( $product->get_price_html() )
+				);
+				$output   .= $price_str;
+			}
 		}
 
 		return $output;

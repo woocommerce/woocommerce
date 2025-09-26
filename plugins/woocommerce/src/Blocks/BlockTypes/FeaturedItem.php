@@ -113,20 +113,20 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 
 			if ( $block_name === $block['blockName'] ) {
 				array_pop( $this->featured_item_inner_blocks_names );
-				
-				// Handle core blocks that need global post manipulation
+
+				// Handle core blocks that need global post manipulation.
 				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
 					global $post;
 					$post = get_post( $this->featured_item_id );
-					
+
 					if ( $post instanceof \WP_Post ) {
 						setup_postdata( $post );
 					}
 				}
-				
-				$context['postId'] = $this->featured_item_id;
+
+				$context['postId']   = $this->featured_item_id;
 				$context['postType'] = 'product';
-				$this->current_item = wc_get_product( $this->featured_item_id );
+				$this->current_item  = wc_get_product( $this->featured_item_id );
 			}
 		}
 	}
@@ -141,23 +141,23 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 	 * @return array Updated block context.
 	 */
 	public function update_context( $context, $parsed_block, $parent_block ) {
-		// Check if this is a featured item block and extract all inner block names
+		// Check if this is a featured item block and extract all inner block names.
 		if ( ( 'woocommerce/featured-product' === $parsed_block['blockName'] || 'woocommerce/featured-category' === $parsed_block['blockName'] )
 			&& isset( $parsed_block['attrs'] ) ) {
-				
+
 			$item = $this->get_item( $parsed_block['attrs'] );
 			if ( $item instanceof \WC_Product ) {
 				$this->featured_item_id = $item->get_id();
-				
+
 				$this->featured_item_inner_blocks_names = array_reverse(
 					$this->extract_featured_item_inner_block_names( $parsed_block )
 				);
 			}
 		}
 
-		// Replace post context for featured item inner blocks
+		// Replace post context for featured item inner blocks.
 		$this->replace_post_for_featured_item_inner_block( $parsed_block, $context );
-		
+
 		return $context;
 	}
 
@@ -174,7 +174,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 		if ( $this->current_item ) {
 			wp_reset_postdata();
 		}
-		
+
 		return $block_content;
 	}
 
@@ -255,12 +255,13 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 			}
 		}
 
+		// Render additional attributes (e.g. description/price) for legacy compatibility.
+		$output .= $this->render_attributes( $item, $attributes );
+
 		if ( ! empty( $content ) ) {
 			$output .= sprintf( '<div class="wc-block-%s__inner-blocks">%s</div>', $this->block_name, $content );
 		}
 
-		// Render additional attributes (e.g. description/price) for legacy compatibility.
-		$output .= $this->render_attributes( $item, $attributes );
 		$output .= '</div>';
 		$output .= '</div>';
 

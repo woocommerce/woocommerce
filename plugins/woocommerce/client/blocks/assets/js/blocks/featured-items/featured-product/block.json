@@ -30,6 +30,13 @@
 		},
 		"multiple": true
 	},
+	"allowedBlocks": [
+		"core/post-title",
+		"core/buttons",
+		"core/heading",
+		"woocommerce/product-price",
+		"woocommerce/product-summary"
+	],
 	"attributes": {
 		"alt": {
 			"type": "string",
@@ -99,6 +106,9 @@
 		"showPrice": {
 			"type": "boolean",
 			"default": true
+		},
+		"__woocommerceBlockVersion": {
+			"type": "number"
 		}
 	},
 	"textdomain": "woocommerce",

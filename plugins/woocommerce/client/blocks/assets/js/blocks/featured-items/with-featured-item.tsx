@@ -40,8 +40,6 @@ import {
 	getClassPrefixFromName,
 } from './utils';
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
@@ -70,6 +68,7 @@ export interface FeaturedItemRequiredAttributes {
 		isBackgroundVisible: boolean;
 		message?: string | null;
 	};
+	__woocommerceBlockVersion: number;
 }
 
 interface FeaturedCategoryRequiredAttributes
@@ -156,6 +155,17 @@ export const withFeaturedItem =
 		const [ parentContainerDimension, setParentContainerDimension ] =
 			useState< BgImageDimensions >( { height: 0, width: 0 } );
 
+		// We need to manually set this property to make sure we can reliably
+		// distinguish between legacy and new block versions. We can't just
+		// set the default value in the block.json.
+		useEffect( () => {
+			setAttributes( {
+				showDesc: false,
+				showPrice: false,
+				__woocommerceBlockVersion: 2,
+			} );
+		}, [ setAttributes ] );
+
 		useEffect( () => {
 			// Observes the resizable block's dimension changes.
 			const observer = new ResizeObserver( ( entries ) => {
@@ -230,56 +240,75 @@ export const withFeaturedItem =
 					<BlockContextProvider
 						value={ { postId: product.id, postType: 'product' } }
 					>
-						<div className={ `${ className }__inner-blocks` }>
-							<InnerBlocks
-								allowedBlocks={ [
-									'core/post-title',
-									'core/buttons',
-									'core/heading',
-								] }
-								template={ [
-									[
-										'core/post-title',
-										{
-											isLink: true,
-											level: 2,
-											textAlign: 'center',
-											__woocommerceNamespace:
-												PRODUCT_TITLE_VARIATION_NAME,
-										},
-									],
-									[
-										'core/buttons',
-										{
-											layout: {
-												type: 'flex',
-												justifyContent: 'center',
-											},
-										},
+						<ProductDataContextProvider
+							product={ product }
+							isLoading={ isLoading }
+						>
+							<div className={ `${ className }__inner-blocks` }>
+								<InnerBlocks
+									template={ [
 										[
-											[
-												'core/button',
-												{
-													text: __(
-														'Shop now',
-														'woocommerce'
-													),
-													url: product.permalink,
+											'core/post-title',
+											{
+												isLink: true,
+												level: 2,
+												textAlign: 'center',
+												__woocommerceNamespace:
+													PRODUCT_TITLE_VARIATION_NAME,
+											},
+										],
+										[
+											'woocommerce/product-price',
+											{ textAlign: 'center' },
+										],
+										[
+											'woocommerce/product-summary',
+											{
+												showDescriptionIfEmpty: true,
+												style: {
+													typography: {
+														textAlign: 'center',
+													},
 												},
+												summaryLength: 80,
+											},
+										],
+										[
+											'core/buttons',
+											{
+												layout: {
+													type: 'flex',
+													justifyContent: 'center',
+												},
+											},
+											[
+												[
+													'core/button',
+													{
+														text: __(
+															'Shop now',
+															'woocommerce'
+														),
+														url: product.permalink,
+													},
+												],
 											],
 										],
-									],
-								] }
-								templateLock={ false }
-							/>
-						</div>
+									] }
+									templateLock={ false }
+								/>
+							</div>
+						</ProductDataContextProvider>
 					</BlockContextProvider>
 				);
 			}
 
 			return (
 				<BlockContextProvider
-					value={ { termId: category.term_id, termTaxonomy: 'product_cat' } }
+					value={ {
+						termId: category.term_id,
+						termTaxonomy: 'product_cat',
+					} }
 				>
 					<div className={ `${ className }__inner-blocks` }>
 						<InnerBlocks
@@ -348,8 +377,6 @@ export const withFeaturedItem =
 				minHeight,
 				overlayColor,
 				overlayGradient,
-				showDesc,
-				showPrice,
 				style,
 				textColor,
 			} = attributes;
@@ -447,14 +474,6 @@ export const withFeaturedItem =
 									className={ `${ className }__variation` }
 									dangerouslySetInnerHTML={ {
 										__html: product.variation,
-									} }
-								/>
-							) }
-							{ showPrice && (
-								<div
-									className={ `${ className }__price` }
-									dangerouslySetInnerHTML={ {
-										__html: product.price_html,
 									} }
 								/>
 							) }
