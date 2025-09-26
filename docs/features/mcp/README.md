@@ -11,8 +11,10 @@ category_slug: mcp
 WooCommerce includes native support for the Model Context Protocol (MCP), enabling AI assistants and tools to interact directly with WooCommerce stores through a standardized protocol. This integration exposes WooCommerce functionality as discoverable tools that AI clients can use to perform store operations with proper authentication and permissions.
 
 :::info
+
 **Developer Preview Notice**
 The MCP implementation in WooCommerce is currently in developer preview. Implementation details, APIs, and integration patterns may change in future releases as the feature matures.
+
 :::
 
 ## Background
@@ -46,8 +48,10 @@ WooCommerce's MCP integration provides AI assistants with structured access to c
 All operations respect WooCommerce's existing permission system and are authenticated using WooCommerce REST API keys.
 
 :::warning
+
 **Data Privacy Notice**
 Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Use least-privilege API scopes, rotate and revoke REST API keys regularly, and follow your organization's data retention and handling policies.
+
 :::
 
 ## Architecture
