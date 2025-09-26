@@ -867,7 +867,7 @@ class ProductsController {
 		WP_CLI::line( '' );
 		WP_CLI::line( WP_CLI::colorize( '%GHelp us improve the WooCommerce Migrator!%n' ) );
 		WP_CLI::line( 'Please share your feedback about this migration experience:' );
-		WP_CLI::line( WP_CLI::colorize( '%Chttps://woocommerce.com/migrator-feedback/%n' ) );
+		WP_CLI::line( WP_CLI::colorize( '%Chttps://developer.woocommerce.com/migrator-feedback/%n' ) );
 		WP_CLI::line( '' );
 	}
 
