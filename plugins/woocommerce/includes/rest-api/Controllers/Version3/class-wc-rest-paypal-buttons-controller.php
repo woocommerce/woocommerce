@@ -176,19 +176,18 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function cancel_payment( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		if ( empty( $data['order_id'] ) || empty( $data['paypal_order_id'] ) ) {
+		$order_id        = isset( $data['order_id'] ) ? absint( $data['order_id'] ) : 0;
+		$paypal_order_id = isset( $data['paypal_order_id'] ) ? wc_clean( $data['paypal_order_id'] ) : '';
+		if ( ! $order_id || '' === $paypal_order_id ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
-		$order_id = $data['order_id'];
-		$order    = wc_get_order( $order_id );
-
+		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
 		}
 
 		// Verify order by checking the PayPal order ID.
-		$paypal_order_id           = $data['paypal_order_id'];
 		$paypal_order_id_from_meta = $order->get_meta( '_paypal_order_id' );
 		if ( $paypal_order_id_from_meta !== $paypal_order_id ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid PayPal order' ), 404 );
