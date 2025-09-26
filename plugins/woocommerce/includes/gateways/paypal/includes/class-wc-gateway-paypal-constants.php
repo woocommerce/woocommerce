@@ -78,7 +78,6 @@ class WC_Gateway_Paypal_Constants {
 	 * @var array
 	 */
 	const FIELDS_TO_REDACT = array(
-		'email_address',
 		'given_name',
 		'surname',
 		'full_name',

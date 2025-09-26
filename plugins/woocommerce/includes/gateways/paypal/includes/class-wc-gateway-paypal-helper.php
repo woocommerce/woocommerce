@@ -106,6 +106,12 @@ class WC_Gateway_Paypal_Helper {
 		$redacted_data = array();
 
 		foreach ( $data as $key => $value ) {
+			// Mask the email address.
+			if ( 'email_address' === $key || 'email' === $key ) {
+				$redacted_data[ $key ] = self::mask_email( $value );
+				continue;
+			}
+
 			if ( is_array( $value ) ) {
 				$redacted_data[ $key ] = self::redact_data( $value );
 			} elseif ( in_array( $key, WC_Gateway_Paypal_Constants::FIELDS_TO_REDACT, true ) ) {
@@ -117,5 +123,33 @@ class WC_Gateway_Paypal_Helper {
 		}
 
 		return $redacted_data;
+	}
+
+	/**
+	 * Mask email address before @ keeping the full domain.
+	 *
+	 * @param string $email The email address to mask.
+	 * @return string The masked email address or original input if invalid.
+	 */
+	public static function mask_email( $email ) {
+		if ( ! is_string( $email ) || empty( $email ) ) {
+			return $email;
+		}
+
+		list( $local, $domain ) = explode( '@', $email, 2 );
+
+		if ( ! $domain ) {
+			return $email;
+		}
+
+		if ( strlen( $local ) <= 3 ) {
+			$masked_local = str_repeat( '*', strlen( $local ) );
+		} else {
+			$masked_local = substr( $local, 0, 2 )
+						. str_repeat( '*', max( 1, strlen( $local ) - 3 ) )
+						. substr( $local, -1 );
+		}
+
+		return $masked_local . '@' . $domain;
 	}
 }
