@@ -194,8 +194,8 @@ class ProductsController {
 			 * @param array  $final_stats Final migration statistics.
 			 */
 			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
-			
-			$this->log_session_time_metrics( $final_stats );
+
+			$this->log_session_time_metrics();
 		}
 
 		if ( $this->parsed_args['dry_run'] ) {
@@ -864,10 +864,8 @@ class ProductsController {
 
 	/**
 	 * Log session time metrics using the tracker data.
-	 *
-	 * @param array $final_stats Final migration statistics.
 	 */
-	private function log_session_time_metrics( array $final_stats ): void {
+	private function log_session_time_metrics(): void {
 		$tracker_data = $this->tracker->get_data();
 
 		if ( empty( $tracker_data['total_migration_time'] ) || empty( $tracker_data['products_attempted'] ) ) {
