@@ -137,6 +137,7 @@ class CollectionQuery extends AbstractCollectionQuery {
 					'title',
 					'slug',
 					'modified',
+					'total',
 				),
 				'validate_callback' => 'rest_validate_request_arg',
 			),

@@ -23,10 +23,27 @@ class PlatformRegistry {
 	private array $platforms = array();
 
 	/**
-	 * Constructor to load platforms when the service is instantiated.
+	 * The credential manager instance.
+	 *
+	 * @var CredentialManager
+	 */
+	private CredentialManager $credential_manager;
+
+	/**
+	 * Constructor.
 	 */
 	public function __construct() {
 		$this->load_platforms();
+	}
+
+	/**
+	 * Initialize the registry with dependencies.
+	 *
+	 * @internal
+	 * @param CredentialManager $credential_manager The credential manager.
+	 */
+	final public function init( CredentialManager $credential_manager ): void {
+		$this->credential_manager = $credential_manager;
 	}
 
 	/**
@@ -89,7 +106,7 @@ class PlatformRegistry {
 	 *
 	 * @return PlatformFetcherInterface An instance of the platform's fetcher class.
 	 *
-	 * @throws InvalidArgumentException If the platform is not found or the fetcher class is invalid.
+	 * @throws InvalidArgumentException If the platform is not found, fetcher class is invalid, or credentials are not configured.
 	 */
 	public function get_fetcher( string $platform_id ): PlatformFetcherInterface {
 		$platform = $this->get_platform( $platform_id );
@@ -140,9 +157,18 @@ class PlatformRegistry {
 			);
 		}
 
-		// Use the WooCommerce DI container to properly inject dependencies.
-		$container = wc_get_container();
-		return $container->get( $fetcher_class );
+		// Get credentials from credential manager and pass to fetcher constructor.
+		$credentials = $this->credential_manager->get_credentials( $platform_id );
+		if ( ! is_array( $credentials ) ) {
+			throw new InvalidArgumentException(
+				sprintf(
+					/* translators: %s: platform ID */
+					'No credentials found for platform "%s". Please configure credentials using: wp wc migrate setup',
+					esc_html( $platform_id )
+				)
+			);
+		}
+		return new $fetcher_class( $credentials );
 	}
 
 	/**

@@ -55,6 +55,8 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * Loads up a JWT from cache or from the implementor side.
 	 *
 	 * @return void
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function load_jwt() {
 
@@ -83,6 +85,8 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 				// Clear retry data on success.
 				$this->delete_cached_option( 'jwt_retry_data' );
 				return;
+			} else {
+				throw new \Exception( 'Invalid JWT received from address service.' );
 			}
 		} catch ( \Exception $e ) {
 			$retry_data['attempts'] = isset( $retry_data['attempts'] ) ? $retry_data['attempts'] + 1 : 1;
@@ -261,6 +265,10 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * Enqueues the checkout script, checks if it's already registered or not so we don't duplicate, and prints out the JWT to the page to be consumed.
 	 */
 	public function load_scripts() {
+		if ( ! is_checkout() ) {
+			return;
+		}
+
 		if ( ! $this->get_jwt() ) {
 			return;
 		}

@@ -92,7 +92,7 @@ export const Suggestions = ( {
 				role="listbox"
 				aria-label="Address suggestions"
 			>
-				{ suggestions.map( ( item, index ) => (
+				{ suggestions.slice( 0, 5 ).map( ( item, index ) => (
 					// eslint-disable-next-line jsx-a11y/click-events-have-key-events -- keypress is handled by AddressAutocomplete component.
 					<li
 						key={ item.id }
