@@ -74,24 +74,28 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	public function register_dummy_features( $features_controller ) {
 		$features = array(
 			'mature1'       => array(
-				'name'            => 'Mature feature 1',
-				'description'     => 'The mature feature number 1',
-				'is_experimental' => false,
+				'name'                         => 'Mature feature 1',
+				'description'                  => 'The mature feature number 1',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'mature2'       => array(
-				'name'            => 'Mature feature 2',
-				'description'     => 'The mature feature number 2',
-				'is_experimental' => false,
+				'name'                         => 'Mature feature 2',
+				'description'                  => 'The mature feature number 2',
+				'is_experimental'              => false,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental1' => array(
-				'name'            => 'Experimental feature 1',
-				'description'     => 'The experimental feature number 1',
-				'is_experimental' => true,
+				'name'                         => 'Experimental feature 1',
+				'description'                  => 'The experimental feature number 1',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
 			),
 			'experimental2' => array(
-				'name'            => 'Experimental feature 2',
-				'description'     => 'The experimental feature number 2',
-				'is_experimental' => true,
+				'name'                         => 'Experimental feature 2',
+				'description'                  => 'The experimental feature number 2',
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => 'compatible',
 			),
 		);
 
@@ -547,34 +551,40 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'mature1'       => array(
-						'name'            => 'Mature feature 1',
-						'description'     => 'The mature feature number 1',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 1',
+						'description'                  => 'The mature feature number 1',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature2'       => array(
-						'name'            => 'Mature feature 2',
-						'description'     => 'The mature feature number 2',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 2',
+						'description'                  => 'The mature feature number 2',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'mature3'       => array(
-						'name'            => 'Mature feature 3',
-						'description'     => 'The mature feature number 3',
-						'is_experimental' => false,
+						'name'                         => 'Mature feature 3',
+						'description'                  => 'The mature feature number 3',
+						'is_experimental'              => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental1' => array(
-						'name'            => 'Experimental feature 1',
-						'description'     => 'The experimental feature number 1',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 1',
+						'description'                  => 'The experimental feature number 1',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental2' => array(
-						'name'            => 'Experimental feature 2',
-						'description'     => 'The experimental feature number 2',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 2',
+						'description'                  => 'The experimental feature number 2',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'experimental3' => array(
-						'name'            => 'Experimental feature 3',
-						'description'     => 'The experimental feature number 3',
-						'is_experimental' => true,
+						'name'                         => 'Experimental feature 3',
+						'description'                  => 'The experimental feature number 3',
+						'is_experimental'              => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
@@ -890,15 +900,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => true,
-						'enabled_by_default' => false,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => true,
+						'enabled_by_default'           => false,
+						'default_plugin_compatibility' => 'compatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 
@@ -988,17 +1000,18 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 			function ( $features_controller ) {
 				$features = array(
 					'custom_order_tables'  => array(
-						'name'               => __( 'High-Performance order storage', 'woocommerce' ),
-						'is_experimental'    => false,
-						'enabled_by_default' => false,
-						'option_key'         => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-						'plugins_are_incompatible_by_default' => true,
+						'name'                         => __( 'High-Performance order storage', 'woocommerce' ),
+						'is_experimental'              => false,
+						'enabled_by_default'           => false,
+						'option_key'                   => CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+						'default_plugin_compatibility' => 'incompatible',
 					),
 					'cart_checkout_blocks' => array(
-						'name'            => __( 'Cart & Checkout Blocks', 'woocommerce' ),
-						'description'     => __( 'Optimize for faster checkout', 'woocommerce' ),
-						'is_experimental' => false,
-						'disable_ui'      => true,
+						'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
+						'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
+						'is_experimental'              => false,
+						'disable_ui'                   => true,
+						'default_plugin_compatibility' => 'compatible',
 					),
 				);
 

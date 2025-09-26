@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Allow passing editor configuration to ExperimentalEmailEditor via props

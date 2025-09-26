@@ -118,41 +118,36 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 
 		update_option( 'active_plugins', array( 'plugin1', 'plugin2' ) );
 
-		$pluginutil_mock = new class() extends PluginUtil {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
-			public function is_woocommerce_aware_plugin( $plugin ): bool {
-				if ( 'plugin1' === $plugin ) {
-					return false;
+		$pluginutil_mock = $this->createMock( PluginUtil::class );
+		$pluginutil_mock->method( 'is_woocommerce_aware_plugin' )
+			->willReturnCallback( fn ( $plugin ) => 'plugin1' === $plugin ? false : true );
+
+		$featurescontroller_mock = $this->createMock( FeaturesController::class );
+		$featurescontroller_mock
+			->method( 'get_compatible_features_for_plugin' )
+			->willReturnCallback(
+				function ( $plugin_name ) {
+					switch ( $plugin_name ) {
+						case 'plugin1':
+							return array();
+						case 'plugin2':
+							return array(
+								'compatible'   => array( 'feature1' ),
+								'incompatible' => array( 'feature2' ),
+								'uncertain'    => array( 'feature3' ),
+							);
+						case 'plugin3':
+							return array(
+								'compatible'   => array( 'feature2' ),
+								'incompatible' => array(),
+								'uncertain'    => array(
+									'feature1',
+									'feature3',
+								),
+							);
+					}
 				}
-
-				return true;
-			}
-		};
-
-		$featurescontroller_mock = new class() extends FeaturesController {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing
-			public function get_compatible_features_for_plugin( string $plugin_name, bool $enabled_features_only = false ): array {
-				$compat = array();
-				switch ( $plugin_name ) {
-					case 'plugin2':
-						$compat = array(
-							'compatible'   => array( 'feature1' ),
-							'incompatible' => array( 'feature2' ),
-							'uncertain'    => array( 'feature3' ),
-						);
-						break;
-					case 'plugin3':
-						$compat = array(
-							'compatible'   => array( 'feature2' ),
-							'incompatible' => array(),
-							'uncertain'    => array( 'feature1', 'feature3' ),
-						);
-						break;
-				}
-
-				return $compat;
-			}
-		};
+			);
 
 		$container = wc_get_container();
 		$container->get( PluginUtil::class ); // Ensure that the class is loaded.
