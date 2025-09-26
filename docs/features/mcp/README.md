@@ -46,15 +46,40 @@ All operations respect WooCommerce's existing permission system and are authenti
 
 ## Architecture
 
-The MCP integration follows this data flow:
+### Data Flow Overview
+
+The MCP integration uses a multi-layered architecture to bridge between MCP clients and WordPress:
 
 ```text
 AI Client (Claude, etc.)
-    ↓ (MCP protocol over HTTPS)
-WooCommerce MCP Server
+    ↓ (MCP protocol over stdio/JSON-RPC)
+Local MCP Proxy (mcp-wordpress-remote)
+    ↓ (HTTP/HTTPS requests with authentication)
+Remote WordPress MCP Server (mcp-adapter)
     ↓ (WordPress Abilities API)
 WooCommerce Abilities
+    ↓ (REST API calls or direct operations)
+WooCommerce Core
 ```
+
+### Architecture Components
+
+**Local MCP Proxy** (`mcp-wordpress-remote`)
+- Runs locally on the developer's machine as a Node.js process
+- Converts MCP protocol messages to HTTP requests
+- Handles authentication header injection
+- Bridges the protocol gap between MCP clients and WordPress REST endpoints
+
+**Remote WordPress MCP Server** (`mcp-adapter`)
+- Runs within WordPress as a plugin
+- Exposes the `/wp-json/woocommerce/mcp` endpoint
+- Processes incoming HTTP requests and converts them to MCP protocol messages
+- Manages tool discovery and execution
+
+**WordPress Abilities System**
+- Provides a standardized way to register and execute capabilities
+- Acts as an abstraction layer between MCP tools and actual operations
+- Enables flexible implementation approaches (REST bridging, direct DB operations, etc.)
 
 ### Core Components
 
@@ -140,7 +165,17 @@ https://yourstore.com/wp-json/woocommerce/mcp
 
 ## Connecting to the MCP Server
 
-**Current Implementation Note**: The MCP integration currently requires the `@automattic/mcp-wordpress-remote` proxy package to bridge between the MCP protocol and WordPress REST API. This proxy requirement is temporary and may change in future releases as the implementation evolves.
+### Proxy Architecture
+
+The current MCP implementation uses a **local proxy approach** to connect MCP clients with WordPress servers:
+
+- **MCP Clients** (like Claude Code) communicate using the MCP protocol over stdio/JSON-RPC
+- **Local Proxy** (`@automattic/mcp-wordpress-remote`) runs on your machine and translates MCP protocol messages to HTTP requests
+- **WordPress MCP Server** receives HTTP requests and processes them through the WordPress Abilities system
+
+This proxy pattern is commonly used in MCP integrations to bridge protocol differences and handle authentication. The `mcp-wordpress-remote` package acts as a protocol translator, converting the stdio-based MCP communication that clients expect into the HTTP REST API calls that WordPress understands.
+
+**Future Evolution**: While this proxy approach provides a robust foundation, future implementations may explore direct MCP protocol support within WordPress or alternative connection methods as the MCP ecosystem evolves.
 
 ### Claude Code Integration
 
@@ -159,7 +194,7 @@ claude mcp add woocommerce_mcp \
 
 ### Manual MCP Client Configuration
 
-For other MCP clients, add this configuration to your MCP settings:
+For other MCP clients, add this configuration to your MCP settings. This configuration tells the MCP client to run the `mcp-wordpress-remote` proxy locally, which will handle the communication with your WordPress server:
 
 ```json
 {
