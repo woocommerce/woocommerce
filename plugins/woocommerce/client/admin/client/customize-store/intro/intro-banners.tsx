@@ -28,6 +28,7 @@ export const BaseIntroBanner = ( {
 	secondaryButton,
 	previewBanner,
 	children,
+	isSecondaryBanner,
 }: {
 	bannerTitle: string;
 	bannerText: string | React.ReactNode;
@@ -39,8 +40,10 @@ export const BaseIntroBanner = ( {
 	secondaryButton?: React.ReactNode;
 	previewBanner?: React.ReactNode;
 	children?: React.ReactNode;
+	isSecondaryBanner?: boolean;
 } ) => {
 	const TextTag = typeof bannerText === 'string' ? 'p' : 'div';
+	const TitleTag = isSecondaryBanner ? 'h2' : 'h1';
 	return (
 		<div
 			className={ clsx(
@@ -50,7 +53,7 @@ export const BaseIntroBanner = ( {
 		>
 			<div className={ `woocommerce-customize-store-banner-content` }>
 				<div className="banner-actions">
-					<h1>{ bannerTitle }</h1>
+					<TitleTag>{ bannerTitle }</TitleTag>
 					<TextTag>{ bannerText }</TextTag>
 					{ bannerButtonText && (
 						<Button
@@ -250,6 +253,7 @@ export const PickYourThemeBanner = ( {
 } ) => {
 	return (
 		<BaseIntroBanner
+			isSecondaryBanner
 			bannerTitle={ __( 'Pick your perfect theme', 'woocommerce' ) }
 			bannerText={
 				<div className="pick-your-theme-banner__content">
