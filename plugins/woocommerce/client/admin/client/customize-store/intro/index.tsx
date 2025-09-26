@@ -8,15 +8,13 @@ import { chevronLeft } from '@wordpress/icons';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getNewPath } from '@woocommerce/navigation';
 import { Sender } from 'xstate';
-import { Notice, Card, CardHeader, CardFooter } from '@wordpress/components';
-import { Text } from '@woocommerce/experimental';
+import { Notice } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { CustomizeStoreComponent } from '../types';
 import { SiteHub } from '../assembler-hub/site-hub';
-import { ThemeCard } from './theme-card';
 import { ThemeSwitchWarningModal } from './warning-modals';
 import { useNetworkStatus } from '~/utils/react-hooks/use-network-status';
 import './intro.scss';
@@ -27,11 +25,11 @@ import {
 	ExistingNoAiThemeBanner,
 	ClassicThemeBanner,
 	NonDefaultBlockThemeBanner,
+	PickYourThemeBanner,
 } from './intro-banners';
 import welcomeTourImg from '../assets/images/design-your-own.svg';
 import professionalThemeImg from '../assets/images/professional-theme.svg';
 import { navigateOrParent } from '~/customize-store/utils';
-import { RecommendThemesAPIResponse } from '~/customize-store/types';
 import { customizeStoreStateMachineEvents } from '~/customize-store';
 import { trackEvent } from '~/customize-store/tracking';
 
@@ -55,88 +53,6 @@ const BANNER_COMPONENTS = {
 	'existing-no-ai-theme': ExistingNoAiThemeBanner,
 	'classic-theme': ClassicThemeBanner,
 	'non-default-block-theme': NonDefaultBlockThemeBanner,
-};
-
-const ThemeCards = ( {
-	sendEvent,
-	themeData,
-}: {
-	sendEvent: Sender< customizeStoreStateMachineEvents >;
-	themeData: RecommendThemesAPIResponse;
-} ) => {
-	return (
-		<>
-			<p className="select-theme-text">
-				{ __(
-					'Or select a professionally designed theme to customize and make your own.',
-					'woocommerce'
-				) }
-			</p>
-
-			<div className="woocommerce-customize-store-theme-cards">
-				{ themeData.themes?.map( ( theme ) => (
-					<ThemeCard
-						key={ theme.slug }
-						slug={ theme.slug }
-						description={ theme.description }
-						thumbnail_url={ theme.thumbnail_url }
-						name={ theme.name }
-						color_palettes={ theme.color_palettes }
-						total_palettes={ theme.total_palettes }
-						link_url={ theme?.link_url }
-						is_active={ theme.is_active }
-						is_free={ theme.is_free }
-						price={ theme.price }
-						onClick={ () => {
-							if ( theme.is_active ) {
-								sendEvent( {
-									type: 'SELECTED_ACTIVE_THEME',
-									payload: { theme: theme.slug },
-								} );
-							} else {
-								sendEvent( {
-									type: 'SELECTED_NEW_THEME',
-									payload: { theme: theme.slug },
-								} );
-							}
-						} }
-					/>
-				) ) }
-			</div>
-
-			<Card className="woocommerce-customize-store-browse-themes">
-				<CardHeader>
-					<Text
-						variant="title.small"
-						as="h2"
-						className="woocommerce-browse-themes-card__title"
-					>
-						{ __(
-							'Visit the WooCommerce Theme Marketplace',
-							'woocommerce'
-						) }
-					</Text>
-				</CardHeader>
-				<CardFooter>
-					<Text variant="body.small" as="p">
-						{ __(
-							'Browse more than 100 free and paid themes tailored to different industries—30-day money-back guarantee. If you change your mind within 30 days of your purchase, we’ll give you a full refund — hassle-free.',
-							'woocommerce'
-						) }
-					</Text>
-					<button
-						onClick={ () =>
-							sendEvent( {
-								type: 'SELECTED_BROWSE_ALL_THEMES',
-							} )
-						}
-					>
-						{ __( 'Browse all themes', 'woocommerce' ) }
-					</button>
-				</CardFooter>
-			</Card>
-		</>
-	);
 };
 
 const CustomizedThemeBanners = ( {
@@ -247,7 +163,7 @@ const CustomizedThemeBanners = ( {
 
 export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 	const {
-		intro: { activeTheme, themeData, customizeStoreTaskCompleted },
+		intro: { activeTheme, customizeStoreTaskCompleted },
 	} = context;
 
 	const isJetpackOffline = false;
@@ -303,7 +219,12 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 			break;
 	}
 
-	const BannerComponent = BANNER_COMPONENTS[ bannerStatus ];
+	const BannerComponent = BANNER_COMPONENTS[
+		bannerStatus
+	] as React.ComponentType< {
+		redirectToCYSFlow: () => void;
+		sendEvent: Sender< customizeStoreStateMachineEvents >;
+	} >;
 
 	const sidebarMessage = __(
 		'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
@@ -365,10 +286,7 @@ export const Intro: CustomizeStoreComponent = ( { sendEvent, context } ) => {
 					/>
 
 					{ isDefaultTheme && ! customizeStoreTaskCompleted ? (
-						<ThemeCards
-							sendEvent={ sendEvent }
-							themeData={ themeData }
-						/>
+						<PickYourThemeBanner sendEvent={ sendEvent } />
 					) : (
 						<CustomizedThemeBanners
 							isBlockTheme={ isBlockTheme }
