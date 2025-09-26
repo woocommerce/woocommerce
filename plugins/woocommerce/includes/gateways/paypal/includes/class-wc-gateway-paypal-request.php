@@ -449,16 +449,14 @@ class WC_Gateway_Paypal_Request {
 			// See https://developer.paypal.com/docs/checkout/standard/customize/app-switch/#resume-flow.
 
 			$request_origin = $js_sdk_params['app_switch_request_origin'];
+
 			// Check if $request_origin is a valid URL, and matches the current site.
-			$origin_parts = wp_parse_url( $request_origin );
-			$site_parts   = wp_parse_url( get_site_url() );
-			if (
-				filter_var( $request_origin, FILTER_VALIDATE_URL ) &&
-				isset( $origin_parts['host'], $site_parts['host'] ) &&
-				strcasecmp( $origin_parts['host'], $site_parts['host'] ) === 0 &&
-				isset( $origin_parts['scheme'], $site_parts['scheme'] ) &&
-				strcasecmp( $origin_parts['scheme'], $site_parts['scheme'] ) === 0
-			) {
+			$origin_parts       = wp_parse_url( $request_origin );
+			$site_parts         = wp_parse_url( get_site_url() );
+			$is_valid_url       = filter_var( $request_origin, FILTER_VALIDATE_URL );
+			$is_expected_scheme = isset( $origin_parts['scheme'], $site_parts['scheme'] ) && strcasecmp( $origin_parts['scheme'], $site_parts['scheme'] ) === 0;
+			$is_expected_host   = isset( $origin_parts['host'], $site_parts['host'] ) && strcasecmp( $origin_parts['host'], $site_parts['host'] ) === 0;
+			if ( $is_valid_url && $is_expected_scheme && $is_expected_host ) {
 				$cancel_url = add_query_arg(
 					array(
 						'order_id' => $order->get_id(),
