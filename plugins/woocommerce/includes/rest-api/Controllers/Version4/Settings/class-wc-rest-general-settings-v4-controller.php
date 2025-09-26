@@ -88,50 +88,19 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_update_args() {
-		$args = array();
-
-		// Get valid setting IDs and their types.
-		$settings = $this->get_settings_general_instance()->get_settings_for_section( '' );
-
-		foreach ( $settings as $setting ) {
-			if ( isset( $setting['id'] ) && ! in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
-				$setting_id   = $setting['id'];
-				$setting_type = $setting['type'] ?? 'text';
-
-				$args[ $setting_id ] = array(
-					'description' => $setting['title'] ?? $setting_id,
-					'type'        => $this->map_wc_type_to_rest_type( $setting_type ),
-					'required'    => false,
-				);
-
-				// Add validation for specific setting types.
-				if ( 'number' === $setting_type ) {
-					$args[ $setting_id ]['minimum'] = 0;
-				}
-			}
-		}
+		$args = array(
+			'values' => array(
+				'description'          => __( 'Flat key-value mapping of setting field values to update.', 'woocommerce' ),
+				'type'                 => 'object',
+				'required'             => false,
+				'additionalProperties' => array(
+					'description' => __( 'Setting field value.', 'woocommerce' ),
+					'type'        => array( 'string', 'number', 'array', 'boolean' ),
+				),
+			),
+		);
 
 		return $args;
-	}
-
-	/**
-	 * Map WooCommerce setting types to REST API types.
-	 *
-	 * @param string $wc_type WooCommerce setting type.
-	 * @return string REST API type.
-	 */
-	private function map_wc_type_to_rest_type( $wc_type ) {
-		switch ( $wc_type ) {
-			case 'number':
-				return 'number';
-			case 'checkbox':
-				return 'boolean';
-			case 'multiselect':
-			case 'multi_select_countries':
-				return 'array';
-			default:
-				return 'string';
-		}
 	}
 
 	/**
@@ -175,6 +144,15 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			);
 		}
 
+		// Check if the request contains a 'values' field with the flat key-value mapping.
+		$values_to_update = array();
+		if ( isset( $params['values'] ) && is_array( $params['values'] ) ) {
+			$values_to_update = $params['values'];
+		} else {
+			// Fallback to the old format for backward compatibility.
+			$values_to_update = $params;
+		}
+
 		// Get all general settings definitions.
 		$settings           = $this->get_settings_general_instance()->get_settings_for_section( '' );
 		$settings_by_id     = array_column( $settings, null, 'id' );
@@ -182,7 +160,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$validated_settings = array();
 
 		// Process each setting in the payload.
-		foreach ( $params as $setting_id => $setting_value ) {
+		foreach ( $values_to_update as $setting_id => $setting_value ) {
 			// Sanitize the setting ID.
 			$setting_id = sanitize_text_field( $setting_id );
 
@@ -335,6 +313,9 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			case 'number':
 				return is_numeric( $value ) ? floatval( $value ) : 0;
 
+			case 'checkbox':
+				return wc_bool_to_string( $value );
+
 			case 'select':
 			case 'single_select_country':
 				return sanitize_text_field( $value );
@@ -352,9 +333,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 
 				// If it's a string, convert to array (for single values).
 				return is_string( $value ) ? array( sanitize_text_field( $value ) ) : array();
-
-			case 'checkbox':
-				return wc_bool_to_string( $value );
 
 			default:
 				return sanitize_text_field( $value );
@@ -388,6 +366,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 		$groups            = array();
 		$current_group     = null;
 		$current_group_key = null;
+		$values            = array();
 
 		foreach ( $raw_settings as $setting ) {
 			$setting_type = $setting['type'] ?? '';
@@ -424,6 +403,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				$field = $this->transform_setting_to_field( $setting );
 				if ( $field ) {
 					$current_group['fields'][] = $field;
+					// Add field value to the flat values array.
+					$values[ $field['id'] ] = get_option( $field['id'], $setting['default'] ?? '' );
 				}
 			}
 		}
@@ -432,6 +413,7 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'id'          => 'general',
 			'title'       => __( 'General', 'woocommerce' ),
 			'description' => __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' ),
+			'values'      => $values,
 			'groups'      => $groups,
 		);
 	}
@@ -461,7 +443,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'id'    => $setting_id,
 			'label' => $setting['title'] ?? $setting_id,
 			'type'  => $this->normalize_field_type( $setting_type ),
-			'value' => get_option( $setting_id, $setting['default'] ?? '' ),
 		);
 
 		// Add tip if available.
@@ -618,6 +599,15 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
+				'values'      => array(
+					'description'          => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
+					'type'                 => 'object',
+					'context'              => array( 'view', 'edit' ),
+					'additionalProperties' => array(
+						'description' => __( 'Setting field value.', 'woocommerce' ),
+						'type'        => array( 'string', 'number', 'array', 'boolean' ),
+					),
+				),
 				'groups'      => array(
 					'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
 					'type'                 => 'object',
@@ -680,11 +670,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
 					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox' ),
-					'context'     => array( 'view', 'edit' ),
-				),
-				'value'   => array(
-					'description' => __( 'Setting field value.', 'woocommerce' ),
-					'type'        => array( 'string', 'number', 'array', 'boolean' ),
 					'context'     => array( 'view', 'edit' ),
 				),
 				'options' => array(
