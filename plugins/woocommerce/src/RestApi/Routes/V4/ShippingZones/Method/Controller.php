@@ -65,7 +65,18 @@ class Controller extends AbstractController {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'create_item_permissions_check' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge(
+					$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					array(
+						'zone_id' => array(
+							'description'       => __( 'Shipping zone ID.', 'woocommerce' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+					)
+				),
 			)
 		);
 
