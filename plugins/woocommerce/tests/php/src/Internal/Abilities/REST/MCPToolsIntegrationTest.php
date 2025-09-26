@@ -191,6 +191,9 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * Initialize MCP server and abilities.
 	 */
 	private static function initializeMcpOnce(): void {
+		// Trigger REST API initialization FIRST to load controller classes.
+		do_action( 'rest_api_init' );
+
 		// Manually instantiate AbilitiesRegistry to ensure AbilitiesRestBridge::init() is called.
 		$container = wc_get_container();
 		$container->get( \Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry::class );
@@ -203,9 +206,6 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$mcp_provider = $container->get( \Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider::class );
 			$mcp_provider->maybe_initialize();
 		}
-
-		// Trigger REST API initialization.
-		do_action( 'rest_api_init' );
 	}
 
 
@@ -527,6 +527,42 @@ class MCPToolsIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// The error should be handled by the MCP server
 		$this->assertTrue( true, 'Invalid method error should be handled' );
+	}
+
+	/**
+	 * Test that customers list ability works.
+	 */
+	public function test_customers_list_tool_works() {
+		$response = $this->call_mcp_tool( 'woocommerce-customers-list' );
+
+		// Should return successful response.
+		$this->assertEquals( 200, $response->get_status(), 'MCP REST request should return 200' );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data, 'Response should be array' );
+		$this->assertArrayHasKey( 'content', $data, 'Response should have content field' );
+
+		// Content should be an array (list of customers)
+		$content = $data['content'];
+		$this->assertIsArray( $content, 'Content should be array of customers' );
+	}
+
+	/**
+	 * Test that coupons list ability works.
+	 */
+	public function test_coupons_list_tool_works() {
+		$response = $this->call_mcp_tool( 'woocommerce-coupons-list' );
+
+		// Should return successful response.
+		$this->assertEquals( 200, $response->get_status(), 'MCP REST request should return 200' );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data, 'Response should be array' );
+		$this->assertArrayHasKey( 'content', $data, 'Response should have content field' );
+
+		// Content should be an array (list of coupons)
+		$content = $data['content'];
+		$this->assertIsArray( $content, 'Content should be array of coupons' );
 	}
 
 	/**
