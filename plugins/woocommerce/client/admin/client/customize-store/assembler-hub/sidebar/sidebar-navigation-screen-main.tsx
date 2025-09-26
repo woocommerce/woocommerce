@@ -13,7 +13,7 @@ import {
 	__experimentalHeading as Heading,
 	Button,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
 	siteLogo,
 	color,
@@ -46,11 +46,16 @@ const PickYourTheme = () => {
 			</h2>
 			<p className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__description">
 				{ createInterpolateElement(
-					__( 'Bring your vision to life<br />— no coding required.', 'woocommerce' ),
-					{
-						br: (
-							<br />
+					sprintf(
+						/* translators: %s is a line break */
+						__(
+							'Bring your vision to life%s— no coding required.',
+							'woocommerce'
 						),
+						'<br />'
+					),
+					{
+						br: <br />,
 					}
 				) }
 			</p>
@@ -58,7 +63,9 @@ const PickYourTheme = () => {
 				variant="tertiary"
 				className="woocommerce-edit-site-sidebar-navigation-screen-theme-banner__button"
 				onClick={ () => {
-					trackEvent( 'customize_your_store_sidebar_all_themes_click' );
+					trackEvent(
+						'customize_your_store_sidebar_all_themes_click'
+					);
 					redirectToThemes();
 				} }
 			>
@@ -68,7 +75,6 @@ const PickYourTheme = () => {
 	);
 };
 
-// small banner
 export const SidebarNavigationScreenMain = () => {
 	const { navigate } = useContext( SidebarNavigationContext );
 

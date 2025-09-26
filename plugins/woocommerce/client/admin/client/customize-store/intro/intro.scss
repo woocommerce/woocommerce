@@ -133,6 +133,14 @@
 	&.pick-your-theme-banner {
 		background: rgba(242, 237, 255, 0.6) url(../assets/images/intro-banner-themes.svg) no-repeat center right;
 		background-size: contain;
+
+		.woocommerce-customize-store-banner-content {
+			width: 550px;
+
+			@media only screen and (min-width: 1400px) {
+				width: 710px;
+			}
+		}
 	}
 
 	&.existing-ai-theme-banner,
