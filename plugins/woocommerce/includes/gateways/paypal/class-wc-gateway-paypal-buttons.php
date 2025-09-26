@@ -106,14 +106,15 @@ class WC_Gateway_Paypal_Buttons {
 			return null;
 		}
 
-		$client_id = get_option( self::CLIENT_ID_OPTION, null );
+		$option_key = self::CLIENT_ID_OPTION . ( $this->gateway->testmode ? '_sandbox' : '_live' );
+		$client_id  = get_option( $option_key, null );
 
 		if ( empty( $client_id ) ) {
 			$client_id = $this->request->fetch_paypal_client_id();
 			if ( empty( $client_id ) ) {
 				return null;
 			}
-			update_option( self::CLIENT_ID_OPTION, $client_id );
+			update_option( $option_key, $client_id );
 		}
 
 		return $client_id;

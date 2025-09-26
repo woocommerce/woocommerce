@@ -6,6 +6,7 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { getPaymentMethodData } from '@woocommerce/settings';
 import { dispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 
 /**
  * PayPalButtonsContainer component.
@@ -217,12 +218,11 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onError = ( error ) => {
-		dispatch( 'core/notices' ).createErrorNotice(
-			'PayPal error: ' + error.message,
-			{
-				context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
-			}
-		);
+		const errorMessage =
+			error.message || __( 'An unknown error occurred', 'woocommerce' );
+		dispatch( 'core/notices' ).createErrorNotice( errorMessage, {
+			context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
+		} );
 	};
 
 	return (
