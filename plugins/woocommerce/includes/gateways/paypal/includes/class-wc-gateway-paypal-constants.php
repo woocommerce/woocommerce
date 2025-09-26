@@ -87,5 +87,7 @@ class WC_Gateway_Paypal_Constants {
 		'admin_area_2',
 		'postal_code',
 		'phone',
+		'phone_number',
+		'national_number',
 	);
 }
