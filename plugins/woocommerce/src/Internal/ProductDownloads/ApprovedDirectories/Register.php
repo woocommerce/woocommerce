@@ -32,6 +32,13 @@ class Register {
 	private $mode_option = 'wc_downloads_approved_directories_mode';
 
 	/**
+	 * Internal cache for memoization of valid URLs and parent directories.
+	 *
+	 * @var array
+	 */
+	private $cache = array();
+
+	/**
 	 * Sets up the approved directories sub-system.
 	 *
 	 * @internal
@@ -240,34 +247,39 @@ class Register {
 	public function is_valid_path( string $download_url ): bool {
 		global $wpdb;
 
-		$parent_directories = array();
-
-		foreach ( ( new URL( $this->normalize_url( $download_url ) ) )->get_all_parent_urls() as $parent ) {
-			$parent_directories[] = "'" . esc_sql( $parent ) . "'";
+		$url_cache_key = 'url:' . $download_url;
+		if ( isset( $this->cache[ $url_cache_key ] ) ) {
+			return $this->cache[ $url_cache_key ];
 		}
 
-		if ( empty( $parent_directories ) ) {
-			return false;
+		$url     = new URL( $this->normalize_url( $download_url ) );
+		$parents = $url->get_all_parent_urls();
+
+		if ( ! empty( $parents ) ) {
+			sort( $parents );
+
+			$parents_sql       = "'" . implode( "','", array_map( 'esc_sql', $parents ) ) . "'";
+			$parents_cache_key = 'parents:' . md5( $parents_sql );
+
+			if ( ! isset( $this->cache[ $parents_cache_key ] ) ) {
+				// Look for a rule that matches the start of the download URL being tested. Since rules describe parent
+				// directories, we also ensure it ends with a trailing slash.
+				//
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $parents_sql is already escaped.
+				$this->cache[ $parents_cache_key ] = (bool) $wpdb->get_var(
+					"SELECT 1
+					 FROM `{$this->get_table()}`
+					 WHERE enabled = 1 AND url IN ({$parents_sql})"
+				);
+				// phpcs:enable
+			}
+
+			$this->cache[ $url_cache_key ] = $this->cache[ $parents_cache_key ];
+		} else {
+			$this->cache[ $url_cache_key ] = false;
 		}
 
-		$parent_directories = join( ',', $parent_directories );
-		$table              = $this->get_table();
-
-		// Look for a rule that matches the start of the download URL being tested. Since rules describe parent
-		// directories, we also ensure it ends with a trailing slash.
-		//
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$matches = (int) $wpdb->get_var(
-			"
-				SELECT COUNT(*)
-				FROM   {$table}
-				WHERE  enabled = 1
-				       AND url IN ( {$parent_directories} )
-			"
-		);
-		// phpcs:enable
-
-		return $matches > 0;
+		return $this->cache[ $url_cache_key ];
 	}
 
 	/**
