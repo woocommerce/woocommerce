@@ -814,10 +814,10 @@ class ProductsController {
 	/**
 	 * Display progress indicator for individual product imports.
 	 *
-	 * @param int         $current_index Current product index (1-based).
-	 * @param int         $total_count   Total number of products in batch.
-	 * @param string      $product_name  Name of the product being processed.
-	 * @param array|null  $result        Import result (null when starting, array when finished).
+	 * @param int        $current_index Current product index (1-based).
+	 * @param int        $total_count   Total number of products in batch.
+	 * @param string     $product_name  Name of the product being processed.
+	 * @param array|null $result        Import result (null when starting, array when finished).
 	 */
 	public function display_product_progress( int $current_index, int $total_count, string $product_name, ?array $result ): void {
 		if ( null === $result ) {
@@ -825,23 +825,23 @@ class ProductsController {
 		}
 
 		$display_name = strlen( $product_name ) > 40 ? substr( $product_name, 0, 37 ) . '...' : $product_name;
-		
-		$status_char = '✓';
+
+		$status_char  = '✓';
 		$status_color = '%G';
-		
+
 		if ( 'error' === $result['status'] ) {
-			$status_char = '✗';
+			$status_char  = '✗';
 			$status_color = '%R';
 		} elseif ( 'success' === $result['status'] && 'skipped' === $result['action'] ) {
-			$status_char = '−';
+			$status_char  = '−';
 			$status_color = '%Y';
 		}
 
 		$progress = sprintf( '[%d/%d]', $current_index, $total_count );
-		WP_CLI::line( 
-			WP_CLI::colorize( 
+		WP_CLI::line(
+			WP_CLI::colorize(
 				sprintf( '%s%s%s %s %s', $status_color, $status_char, '%n', $progress, $display_name )
-			) 
+			)
 		);
 	}
 
