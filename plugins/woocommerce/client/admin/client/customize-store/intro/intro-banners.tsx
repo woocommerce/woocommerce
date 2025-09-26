@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { Button } from '@wordpress/components';
@@ -11,8 +12,8 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
+import type { customizeStoreStateMachineEvents } from '~/customize-store';
 import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { trackEvent } from '../tracking';
@@ -114,7 +115,7 @@ export const NetworkOfflineBanner = () => {
 export const JetpackOfflineBanner = ( {
 	sendEvent,
 }: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	return (
 		<BaseIntroBanner
@@ -249,7 +250,7 @@ export const NonDefaultBlockThemeBanner = () => {
 export const PickYourThemeBanner = ( {
 	sendEvent,
 }: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	return (
 		<BaseIntroBanner
