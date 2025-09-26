@@ -2,6 +2,7 @@ jQuery(function ($) {
 	const containerSelector = 'paypal-standard-container';
 	let orderReceivedUrl = '';
 	let orderId = '';
+	let orderKey = '';
 	let productPageCartData = {};
 
 	function renderButtons() {
@@ -130,6 +131,7 @@ jQuery(function ($) {
 					} );
 
 					orderId = paypalResponseData.order_id;
+					orderKey = responseData.order_key;
 					orderReceivedUrl = paypalResponseData.return_url;
 
 					return paypalResponseData.paypal_order_id;

@@ -65,6 +65,10 @@ class WC_Gateway_Paypal_Helper {
 	 * @return WC_Order|null
 	 */
 	public static function get_wc_order_from_paypal_custom_id( $custom_id ) {
+		if ( ! is_string( $custom_id ) || '' === $custom_id ) {
+			return null;
+		}
+
 		$data = json_decode( $custom_id, true );
 		if ( ! is_array( $data ) ) {
 			return null;
