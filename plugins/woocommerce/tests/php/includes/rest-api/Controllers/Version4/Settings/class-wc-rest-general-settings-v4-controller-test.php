@@ -89,11 +89,18 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'general', $data['id'] );
+		$this->assertArrayHasKey( 'values', $data );
 		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertIsArray( $data['values'] );
+		$this->assertIsArray( $data['groups'] );
+
+		// Verify that values contains actual setting values.
+		$this->assertArrayHasKey( 'woocommerce_default_country', $data['values'] );
+		$this->assertIsString( $data['values']['woocommerce_default_country'] );
 	}
 
 	/**
-	 * Test updating general settings.
+	 * Test updating general settings with new values format.
 	 */
 	public function test_update_item() {
 		wp_set_current_user( $this->user_id );
@@ -102,7 +109,9 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'woocommerce_default_country' => 'US:CA',
+					'values' => array(
+						'woocommerce_default_country' => 'US:CA',
+					),
 				)
 			)
 		);
@@ -111,6 +120,9 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'US:CA', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertEquals( 'US:CA', $data['values']['woocommerce_default_country'] );
 	}
 
 	/**
@@ -126,6 +138,30 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * Test updating general settings with backward compatibility (old format).
+	 */
+	public function test_update_item_backward_compatibility() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'woocommerce_default_country' => 'US:NY',
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'US:NY', get_option( 'woocommerce_default_country' ) );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertEquals( 'US:NY', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
 	 * Test updating general settings without permission.
 	 */
 	public function test_update_item_without_permission() {
@@ -135,7 +171,9 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'woocommerce_default_country' => 'US:CA',
+					'values' => array(
+						'woocommerce_default_country' => 'US:CA',
+					),
 				)
 			)
 		);
