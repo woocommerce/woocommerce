@@ -2,6 +2,11 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.7.0](https://github.com/woocommerce/email-editor/releases/tag/1.7.0) - 2025-09-26 
+
+-   Patch - Fix Fatal error when reading site styles for some themes [#60967]
+-   Minor - Add email rendering instructions for the core/video block and YouTube embeds. [#60957]
+
 ## [1.6.0](https://github.com/woocommerce/email-editor/releases/tag/1.6.0) - 2025-09-18 
 
 -   Patch - Downgrade Emogrifier dependency to avoid conflict [#60994]
