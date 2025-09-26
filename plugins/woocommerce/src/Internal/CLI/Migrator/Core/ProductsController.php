@@ -194,6 +194,9 @@ class ProductsController {
 			 * @param array  $final_stats Final migration statistics.
 			 */
 			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
+			
+			// Log time metrics after session completion
+			$this->log_session_time_metrics( $final_stats );
 		}
 
 		if ( $this->parsed_args['dry_run'] ) {
@@ -858,6 +861,63 @@ class ProductsController {
 		}
 
 		WP_CLI::line( '' );
+	}
+
+	/**
+	 * Log session time metrics using the tracker data.
+	 *
+	 * @param array $final_stats Final migration statistics.
+	 */
+	private function log_session_time_metrics( array $final_stats ): void {
+		// Get the most recent session data from tracker
+		$tracker_data = $this->tracker->get_data();
+		
+		if ( empty( $tracker_data['total_migration_time'] ) || empty( $tracker_data['products_successful'] ) ) {
+			return;
+		}
+		
+		$total_time_seconds = $tracker_data['total_migration_time'];
+		$total_products     = $tracker_data['products_successful'];
+		$platform           = $this->parsed_args['platform'];
+		
+		// Calculate average time per product
+		$avg_time_per_product = $total_products > 0 ? $total_time_seconds / $total_products : 0;
+		
+		// Format times for readability
+		$total_time_formatted = $this->format_duration( $total_time_seconds );
+		$avg_time_formatted   = number_format( $avg_time_per_product, 2 );
+		
+		$metrics_message = sprintf(
+			'Migration completed for %s: %d products in %s (avg: %s seconds per product)',
+			$platform,
+			$total_products,
+			$total_time_formatted,
+			$avg_time_formatted
+		);
+		
+		// Log to WooCommerce logger
+		wc_get_logger()->info( $metrics_message, array( 'source' => 'wc-migrator' ) );
+	}
+	
+	/**
+	 * Format duration in seconds to human-readable format.
+	 *
+	 * @param int $seconds Duration in seconds.
+	 * @return string Formatted duration string.
+	 */
+	private function format_duration( int $seconds ): string {
+		if ( $seconds < 60 ) {
+			return sprintf( '%d seconds', $seconds );
+		} elseif ( $seconds < 3600 ) {
+			$minutes = floor( $seconds / 60 );
+			$secs    = $seconds % 60;
+			return sprintf( '%d minutes %d seconds', $minutes, $secs );
+		} else {
+			$hours   = floor( $seconds / 3600 );
+			$minutes = floor( ( $seconds % 3600 ) / 60 );
+			$secs    = $seconds % 60;
+			return sprintf( '%d hours %d minutes %d seconds', $hours, $minutes, $secs );
+		}
 	}
 
 	/**
