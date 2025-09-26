@@ -141,11 +141,11 @@ class WC_Gateway_Paypal_Helper {
 			return $email;
 		}
 
-		list( $local, $domain ) = explode( '@', $email, 2 );
-
-		if ( ! $domain ) {
+		$parts = explode( '@', $email, 2 );
+		if ( count( $parts ) !== 2 || empty( $parts[0] ) || empty( $parts[1] ) ) {
 			return $email;
 		}
+		list( $local, $domain ) = $parts;
 
 		if ( strlen( $local ) <= 3 ) {
 			$masked_local = str_repeat( '*', strlen( $local ) );
