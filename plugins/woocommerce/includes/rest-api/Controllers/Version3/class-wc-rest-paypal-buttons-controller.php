@@ -112,7 +112,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
-		$payment_source = $data['payment_source'] ?? '';
+		$payment_source = isset( $data['payment_source'] ) ? sanitize_text_field( $data['payment_source'] ) : '';
 		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
 			return new WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
 		}
