@@ -21,11 +21,19 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 
 		// Create a mock shipping method to test the abstract class methods.
 		$this->shipping_method = new class() extends WC_Shipping_Method {
+			/**
+			 * Constructor for test shipping method.
+			 */
 			public function __construct() {
-				$this->id = 'test_method';
+				$this->id           = 'test_method';
 				$this->method_title = 'Test Method';
 			}
 
+			/**
+			 * Calculate shipping cost.
+			 *
+			 * @param array $package Package data.
+			 */
 			public function calculate_shipping( $package = array() ) {
 				// Not needed for validation tests.
 			}
@@ -140,7 +148,7 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_setting_number_field_with_constraints() {
 		$field = array(
-			'type' => 'number',
+			'type'              => 'number',
 			'custom_attributes' => array(
 				'min' => '10',
 				'max' => '100',
@@ -196,7 +204,7 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 
 		// Test multiple lines with HTML.
 		$multiline = "Line 1 with <strong>bold</strong>\nLine 2 with <em>italic</em>";
-		$result = $this->shipping_method->validate_setting( 'test_key', $multiline, $field );
+		$result    = $this->shipping_method->validate_setting( 'test_key', $multiline, $field );
 		$this->assertEquals( "Line 1 with <strong>bold</strong>\nLine 2 with <em>italic</em>", $result );
 	}
 
@@ -226,7 +234,7 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_setting_select_field() {
 		$field = array(
-			'type' => 'select',
+			'type'    => 'select',
 			'options' => array(
 				'option1' => 'Option 1',
 				'option2' => 'Option 2',
@@ -259,10 +267,10 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_setting_radio_field() {
 		$field = array(
-			'type' => 'radio',
+			'type'    => 'radio',
 			'options' => array(
 				'yes' => 'Yes',
-				'no' => 'No',
+				'no'  => 'No',
 			),
 		);
 
@@ -280,7 +288,7 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_validate_setting_multiselect_field() {
 		$field = array(
-			'type' => 'multiselect',
+			'type'    => 'multiselect',
 			'options' => array(
 				'option1' => 'Option 1',
 				'option2' => 'Option 2',
@@ -360,9 +368,9 @@ class WC_Shipping_Method_Validation_Test extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( 'onerror', $result );
 
 		// Test select field with XSS in value.
-		$field = array(
-			'type' => 'select',
-			'options' => array( 'safe' => 'Safe Option' )
+		$field  = array(
+			'type'    => 'select',
+			'options' => array( 'safe' => 'Safe Option' ),
 		);
 		$result = $this->shipping_method->validate_setting( 'test', 'safe' . $xss_payload, $field );
 		// After sanitization, HTML tags are removed but 'safe' part remains, which matches the valid option.
