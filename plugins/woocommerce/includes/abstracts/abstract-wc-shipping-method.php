@@ -657,33 +657,51 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		switch ( $field_type ) {
 			case 'text':
 			case 'password':
+				return sanitize_text_field( trim( @(string) $value ) );
+
 			case 'email':
+				$email = sanitize_email( trim( (string) $value ) );
+				if ( ! empty( $value ) && ! is_email( $email ) ) {
+					/* translators: %s: setting key */
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Invalid email format for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+				}
+				return $email;
+
 			case 'number':
-				return wp_kses_post( trim( (string) $value ) );
+				$cleaned_value = trim( (string) $value );
+				if ( ! is_numeric( $cleaned_value ) ) {
+					/* translators: %s: setting key */
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %s must be a valid number.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+				}
+
+				// Use wc_format_decimal for consistent decimal handling.
+				$number = wc_format_decimal( $cleaned_value );
+
+				// Check min/max constraints if defined.
+				if ( isset( $field['custom_attributes']['min'] ) && $number < floatval( $field['custom_attributes']['min'] ) ) {
+					/* translators: %1$s: setting key, %2$s: minimum value */
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %1$s must be at least %2$s.', 'woocommerce' ), $key, $field['custom_attributes']['min'] ), array( 'status' => 400 ) );
+				}
+				if ( isset( $field['custom_attributes']['max'] ) && $number > floatval( $field['custom_attributes']['max'] ) ) {
+					/* translators: %1$s: setting key, %2$s: maximum value */
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %1$s must be no more than %2$s.', 'woocommerce' ), $key, $field['custom_attributes']['max'] ), array( 'status' => 400 ) );
+				}
+
+				return $number;
 
 			case 'textarea':
-				return wp_kses(
-					trim( (string) $value ),
-					array_merge(
-						array(
-							'iframe' => array(
-								'src'   => true,
-								'style' => true,
-								'id'    => true,
-								'class' => true,
-							),
-						),
-						wp_kses_allowed_html( 'post' )
-					)
-				);
+				// Use wp_kses_post without iframe allowance.
+				return wp_kses( trim( (string) $value ), wp_kses_allowed_html( 'post' ) );
 
 			case 'checkbox':
 				return wc_string_to_bool( $value ) ? 'yes' : 'no';
 
 			case 'select':
 			case 'radio':
-				if ( isset( $field['options'] ) && array_key_exists( $value, $field['options'] ) ) {
-					return $value;
+				// Sanitize the value before validation.
+				$sanitized_value = sanitize_text_field( $value );
+				if ( isset( $field['options'] ) && array_key_exists( $sanitized_value, $field['options'] ) ) {
+					return $sanitized_value;
 				}
 				/* translators: %s: setting key */
 				return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Invalid value for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
@@ -693,14 +711,25 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 					/* translators: %s: setting key */
 					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'Setting %s must be an array.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
 				}
+
 				$valid_values = array();
 				if ( isset( $field['options'] ) ) {
 					foreach ( $value as $single_value ) {
-						if ( array_key_exists( $single_value, $field['options'] ) ) {
-							$valid_values[] = $single_value;
+						// Sanitize each value.
+						$sanitized_value = sanitize_text_field( $single_value );
+						// Validate against options.
+						if ( array_key_exists( $sanitized_value, $field['options'] ) ) {
+							$valid_values[] = $sanitized_value;
 						}
 					}
 				}
+
+				// Return error if no valid values after validation.
+				if ( empty( $valid_values ) && ! empty( $value ) ) {
+					/* translators: %s: setting key */
+					return new \WP_Error( 'woocommerce_rest_shipping_method_invalid_setting', sprintf( __( 'No valid options selected for setting %s.', 'woocommerce' ), $key ), array( 'status' => 400 ) );
+				}
+
 				return $valid_values;
 
 			default:
