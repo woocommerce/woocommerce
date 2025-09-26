@@ -722,7 +722,7 @@ class BlockTemplateUtils {
 				array(
 					'taxonomy' => 'wp_theme',
 					'field'    => 'name',
-					'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG, get_stylesheet() ),
+					'terms'    => array( self::DEPRECATED_PLUGIN_SLUG, self::PLUGIN_SLUG ),
 				),
 			),
 		);
