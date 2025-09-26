@@ -213,13 +213,13 @@ jobs:
               action: 'feature-freeze',
               version: '${{ needs.prepare-for-code-freeze.outputs.nextReleaseVersion }}',
               build_zip: '${{ needs.publish-dev-release.outputs.release-zip }}',
-              post_status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
+              status: process.env.ENVIRONMENT === 'production' ? 'publish' : 'draft'
             };
 
             console.log('Webhook payload:');
             console.log(`  Version: ${payload.version}`);
             console.log(`  Build ZIP: ${payload.build_zip}`);
-            console.log(`  Post Status: ${payload.post_status}`);
+            console.log(`  Post Status: ${payload.status}`);
 
             const requestBody = JSON.stringify({
               payload

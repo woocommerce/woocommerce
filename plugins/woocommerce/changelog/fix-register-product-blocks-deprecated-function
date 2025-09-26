@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Replace deprecated core/edit-site methods with core/editor methods

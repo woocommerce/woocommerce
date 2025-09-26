@@ -593,35 +593,35 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 */
 	public function test_wc_price() {
 		// Common prices.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1.00</bdi></span>', wc_price( 1 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1.10</bdi></span>', wc_price( 1.1 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( 1.17 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</bdi></span>', wc_price( 1111.17 ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 0 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1.00</bdi></span>', wc_price( 1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1.10</bdi></span>', wc_price( 1.1 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( 1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</bdi></span>', wc_price( 1111.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 0 ) );
 
 		// Different currency.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</bdi></span>', wc_price( 1111.17, array( 'currency' => 'GBP' ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&pound;</span>1,111.17</bdi></span>', wc_price( 1111.17, array( 'currency' => 'GBP' ) ) );
 
 		// Negative price.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi">-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17 ) );
 
 		// Aria hidden option.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi class="woocommerce-Price-bidi">-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi>-<span class="woocommerce-Price-currencySymbol">&#36;</span>1.17</bdi></span>', wc_price( -1.17, array( 'aria-hidden' => true ) ) );
 
 		// Bogus prices.
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( null ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 'Q' ) );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 'ಠ_ಠ' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( null ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 'Q' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>0.00</bdi></span>', wc_price( 'ಠ_ಠ' ) );
 
 		// Trim zeros.
 		add_filter( 'woocommerce_price_trim_zeros', '__return_true' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1</bdi></span>', wc_price( 1.00 ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1</bdi></span>', wc_price( 1.00 ) );
 		remove_filter( 'woocommerce_price_trim_zeros', '__return_true' );
 
 		// Ex tax label.
 		$calc_taxes = get_option( 'woocommerce_calc_taxes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>1,111.17</bdi></span> <small class="woocommerce-Price-taxLabel tax_label">(ex. tax)</small>', wc_price( '1111.17', array( 'ex_tax_label' => true ) ) );
 		update_option( 'woocommerce_calc_taxes', $calc_taxes );
 	}
 
@@ -935,7 +935,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_sale_price() {
-		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins class="woocommerce-Price-salePrice" aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;5.00.</span>', wc_format_sale_price( '10', '5' ) );
+		$this->assertEquals( '<del aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span></del> <span class="screen-reader-text">Original price was: &#036;10.00.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span></ins><span class="screen-reader-text">Current price is: &#036;5.00.</span>', wc_format_sale_price( '10', '5' ) );
 	}
 
 	/**
@@ -944,7 +944,7 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	 * @since 3.3.0
 	 */
 	public function test_wc_format_price_range() {
-		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi class="woocommerce-Price-bidi"><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
+		$this->assertEquals( '<span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>10.00</bdi></span> <span aria-hidden="true">&ndash;</span> <span class="woocommerce-Price-amount amount" aria-hidden="true"><bdi><span class="woocommerce-Price-currencySymbol">&#36;</span>5.00</bdi></span><span class="screen-reader-text">Price range: &#36;10.00 through &#36;5.00</span>', wc_format_price_range( '10', '5' ) );
 	}
 
 	/**

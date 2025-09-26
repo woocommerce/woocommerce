@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Optimize DB-based sessions cleanup.
