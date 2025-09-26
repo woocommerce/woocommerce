@@ -53,7 +53,6 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return void
 	 */
 	public function register_routes() {
-		// POST /v3/paypal-standard/update-shipping.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/update-shipping',
@@ -143,7 +142,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			'id'             => $paypal_order_id,
 			'purchase_units' => array(
 				array(
-					'reference_id'     => $purchase_units[0]['reference_id'], // No change.
+					'reference_id'     => isset( $purchase_units[0]['reference_id'] ) ? $purchase_units[0]['reference_id'] : '', // No change.
 					'amount'           => $updated_amount,
 					'shipping_options' => $updated_shipping_options,
 				),
@@ -258,7 +257,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 					'type'     => 'SHIPPING',
 					'amount'   => array(
 						'currency_code' => $order->get_currency(),
-						'value'         => $rate->get_cost(),
+						'value'         => wc_format_decimal( (float) $rate->get_cost(), wc_get_price_decimals() ),
 					),
 					'label'    => $rate->get_label(),
 					'selected' => $is_selected,
