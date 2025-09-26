@@ -58,6 +58,13 @@ class ProductImageGallery extends AbstractBlock {
 		wp_enqueue_script( 'wc-photoswipe-ui-default' );
 		wp_enqueue_style( 'photoswipe-default-skin' );
 		wp_enqueue_script( 'wc-single-product' );
+
+		add_action(
+			'wp_footer',
+			function () {
+				wc_get_template( 'single-product/photoswipe.php' );
+			}
+		);
 	}
 
 	/**
@@ -84,13 +91,6 @@ class ProductImageGallery extends AbstractBlock {
 
 			return '';
 		}
-
-		add_action(
-			'wp_footer',
-			function () {
-				wc_get_template( 'single-product/photoswipe.php' );
-			}
-		);
 
 		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
 		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
