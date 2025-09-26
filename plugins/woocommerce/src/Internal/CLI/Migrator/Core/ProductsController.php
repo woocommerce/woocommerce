@@ -876,7 +876,7 @@ class ProductsController {
 		$total_products     = $tracker_data['products_attempted'];
 		$platform           = $this->parsed_args['platform'];
 
-		$avg_time_per_product = $total_products > 0 ? $total_time_seconds / $total_products : 0;
+		$avg_time_per_product = $total_time_seconds / $total_products;
 		$total_time_formatted = human_time_diff( 0, $total_time_seconds );
 		$avg_time_formatted   = number_format( $avg_time_per_product, 2 );
 
