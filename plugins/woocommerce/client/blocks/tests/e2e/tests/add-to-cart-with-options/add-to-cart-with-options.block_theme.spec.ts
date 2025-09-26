@@ -305,9 +305,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
-			const increaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const increaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await increaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -384,6 +386,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
+			// Wait for the API response to ensure the DB has been updated.
+			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
 			await expect(
 				page.getByLabel(
 					config.features[ 'experimental-iapi-mini-cart' ]
@@ -406,9 +411,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await individuallySoldProductCheckbox.click();
 
 			// Try to add another product to cart again (it will succeed).
-			const beanieIncreaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const beanieIncreaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await beanieIncreaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -429,7 +436,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
-			await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
 		} );
 	} );
 
