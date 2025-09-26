@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\CLI\Migrator\Platforms\Shopify;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify\ShopifyClient;
-use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
 use WC_Unit_Test_Case;
 use WP_Error;
 
@@ -27,11 +26,11 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	private $client;
 
 	/**
-	 * Mock credential manager.
+	 * Test credentials.
 	 *
-	 * @var CredentialManager|\PHPUnit\Framework\MockObject\MockObject
+	 * @var array
 	 */
-	private $mock_credential_manager;
+	private $test_credentials;
 
 	/**
 	 * Set up test fixtures.
@@ -39,24 +38,18 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->client                  = new ShopifyClient();
-		$this->mock_credential_manager = $this->createMock( CredentialManager::class );
-		$this->client->init( $this->mock_credential_manager );
+		$this->test_credentials = array(
+			'shop_url'     => 'test-store.myshopify.com',
+			'access_token' => 'test-token-123',
+		);
+
+		$this->client = new ShopifyClient( $this->test_credentials );
 	}
 
 	/**
 	 * Test successful REST API request.
 	 */
 	public function test_rest_request_success(): void {
-		// Mock credentials.
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->with( 'shopify' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		// Mock successful HTTP response.
 		$mock_response = array(
@@ -90,13 +83,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with query parameters.
 	 */
 	public function test_rest_request_with_query_params(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		add_filter(
 			'pre_http_request',
@@ -131,11 +117,9 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with missing credentials.
 	 */
 	public function test_rest_request_missing_credentials(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->with( 'shopify' )
-			->willReturn( array() );
+		$client_with_empty_credentials = new ShopifyClient( array() );
 
-		$result = $this->client->rest_request( '/products/count.json' );
+		$result = $client_with_empty_credentials->rest_request( '/products/count.json' );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
@@ -146,16 +130,14 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with partial credentials.
 	 */
 	public function test_rest_request_partial_credentials(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->with( 'shopify' )
-			->willReturn(
-				array(
-					'shop_url' => 'test-store.myshopify.com',
+		$client_with_partial_credentials = new ShopifyClient(
+			array(
+				'shop_url' => 'test-store.myshopify.com',
 				// Missing access_token.
-				)
-			);
+			)
+		);
 
-		$result = $this->client->rest_request( '/products/count.json' );
+		$result = $client_with_partial_credentials->rest_request( '/products/count.json' );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );
@@ -165,13 +147,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with HTTP error.
 	 */
 	public function test_rest_request_http_error(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		add_filter(
 			'pre_http_request',
@@ -193,13 +168,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with API error response.
 	 */
 	public function test_rest_request_api_error(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'invalid-token',
-				)
-			);
 
 		add_filter(
 			'pre_http_request',
@@ -229,13 +197,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test REST request with invalid JSON response.
 	 */
 	public function test_rest_request_invalid_json(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		add_filter(
 			'pre_http_request',
@@ -260,13 +221,12 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test URL building with protocol handling.
 	 */
 	public function test_url_building_protocol_handling(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com', // No protocol.
-					'access_token' => 'test-token-123',
-				)
-			);
+		$client_no_protocol = new ShopifyClient(
+			array(
+				'shop_url'     => 'test-store.myshopify.com', // No protocol.
+				'access_token' => 'test-token-123',
+			)
+		);
 
 		add_filter(
 			'pre_http_request',
@@ -282,7 +242,7 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 			3
 		);
 
-		$this->client->rest_request( '/products/count.json' );
+		$client_no_protocol->rest_request( '/products/count.json' );
 
 		remove_all_filters( 'pre_http_request' );
 	}
@@ -291,13 +251,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test POST request with body.
 	 */
 	public function test_post_request_with_body(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		$request_body = array( 'product' => array( 'title' => 'Test Product' ) );
 
@@ -328,15 +281,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test successful GraphQL request.
 	 */
 	public function test_graphql_request_success(): void {
-		// Mock credentials.
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->with( 'shopify' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		$mock_response_data = array(
 			'data' => array(
@@ -397,13 +341,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request with variables.
 	 */
 	public function test_graphql_request_with_variables(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		$variables = array(
 			'first' => 5,
@@ -440,13 +377,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request with HTTP error.
 	 */
 	public function test_graphql_request_http_error(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		// Mock HTTP error response.
 		$mock_response = array(
@@ -475,13 +405,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request with GraphQL errors.
 	 */
 	public function test_graphql_request_graphql_errors(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		$mock_response_data = array(
 			'errors' => array(
@@ -519,13 +442,6 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request with invalid JSON response.
 	 */
 	public function test_graphql_request_invalid_json(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->willReturn(
-				array(
-					'shop_url'     => 'test-store.myshopify.com',
-					'access_token' => 'test-token-123',
-				)
-			);
 
 		// Mock response with invalid JSON.
 		$mock_response = array(
@@ -553,12 +469,10 @@ class ShopifyClientTest extends WC_Unit_Test_Case {
 	 * Test GraphQL request without credentials.
 	 */
 	public function test_graphql_request_no_credentials(): void {
-		$this->mock_credential_manager->method( 'get_credentials' )
-			->with( 'shopify' )
-			->willReturn( array() ); // Empty credentials array.
+		$client_no_credentials = new ShopifyClient( array() );
 
 		$query  = 'query { products { edges { node { id } } } }';
-		$result = $this->client->graphql_request( $query );
+		$result = $client_no_credentials->graphql_request( $query );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'api_error', $result->get_error_code() );

@@ -2,13 +2,17 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.1) - 2025-09-26 
+
+-   Patch - Allow passing editor configuration to ExperimentalEmailEditor via props [#60974]
+
 ## [1.1.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.0) - 2025-09-09 
 
 -   Minor - Export `SendPreviewEmail` component and `createStore` [#60796]
--   Patch - Display warning message when user clicks on "Preview in new tab" without saving the edited changes [#60307]
 -   Minor - Bump jest package dependency to 29.5.x [#60324]
 -   Minor - Add support for contentRef property to the experimental editor component [#60821]
 -   Minor - Refactor usage of hooks and global Gutenberg functions to support preserving and restoring the original state [#60741]
+-   Patch - Display warning message when user clicks on "Preview in new tab" without saving the edited changes [#60307]
 
 ## [1.0.4](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.4) - 2025-08-21 
 
