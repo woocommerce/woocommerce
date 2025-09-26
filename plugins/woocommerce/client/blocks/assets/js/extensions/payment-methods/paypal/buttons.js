@@ -78,8 +78,9 @@ const PayPalButtonsContainer = ( {
 		}
 
 		// Get quantity from the value of the "quantity" input field.
-		const quantity = document.querySelector( '[name="quantity"]' )?.value;
-		if ( ! quantity ) {
+		const quantityField = document.querySelector( '[name="quantity"]' );
+		const quantity = quantityField?.value ?? '1';
+		if ( quantity === '' ) {
 			return false;
 		}
 

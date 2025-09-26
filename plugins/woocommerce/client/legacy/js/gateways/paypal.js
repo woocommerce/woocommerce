@@ -35,8 +35,8 @@ jQuery(function ($) {
 
 			// Get quantity from the value of the "quantity" input field.
 			const quantityField = document.querySelector( '[name="quantity"]' );
-			const quantity = quantityField ? quantityField.value : null;
-			if ( ! quantity ) {
+			const quantity = quantityField ? quantityField.value : '1';
+			if ( quantity === '' ) {
 				return false;
 			}
 
