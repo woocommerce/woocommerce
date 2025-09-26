@@ -38,7 +38,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			return;
 		}
 
-		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( $data, true ) );
+		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
 
 		switch ( $data['event_type'] ) {
 			case 'CHECKOUT.ORDER.APPROVED':
@@ -51,7 +51,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				$this->process_payment_authorization_created( $data );
 				break;
 			default:
-				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( $data, true ) );
+				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
 				break;
 		}
 	}

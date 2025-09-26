@@ -11,6 +11,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-constants.php';
+}
+
 /**
  * Helper for PayPal gateway.
  */
@@ -83,5 +87,74 @@ class WC_Gateway_Paypal_Helper {
 		}
 
 		return $order;
+	}
+
+	/**
+	 * Remove PII (Personally Identifiable Information) from data for logging.
+	 *
+	 * This function recursively traverses the data array and redacts sensitive information
+	 * while preserving the structure for debugging purposes.
+	 *
+	 * @param mixed $data The data to remove PII from (array, string, or other types).
+	 * @return mixed The data with PII redacted.
+	 */
+	public static function redact_data( $data ) {
+		if ( ! is_array( $data ) ) {
+			return $data;
+		}
+
+		$redacted_data = array();
+
+		foreach ( $data as $key => $value ) {
+			// Skip redacting the payee information as it belongs to the store merchant.
+			if ( 'payee' === $key ) {
+				$redacted_data[ $key ] = $value;
+				continue;
+			}
+			// Mask the email address.
+			if ( 'email_address' === $key || 'email' === $key ) {
+				$redacted_data[ $key ] = self::mask_email( $value );
+				continue;
+			}
+
+			if ( is_array( $value ) ) {
+				$redacted_data[ $key ] = self::redact_data( $value );
+			} elseif ( in_array( $key, WC_Gateway_Paypal_Constants::FIELDS_TO_REDACT, true ) ) {
+				$redacted_data[ $key ] = '[redacted]';
+			} else {
+				// Keep non-PII data as is.
+				$redacted_data[ $key ] = $value;
+			}
+		}
+
+		return $redacted_data;
+	}
+
+	/**
+	 * Mask email address before @ keeping the full domain.
+	 *
+	 * @param string $email The email address to mask.
+	 * @return string The masked email address or original input if invalid.
+	 */
+	public static function mask_email( $email ) {
+		if ( ! is_string( $email ) || empty( $email ) ) {
+			return $email;
+		}
+
+		$parts = explode( '@', $email, 2 );
+		if ( count( $parts ) !== 2 || empty( $parts[0] ) || empty( $parts[1] ) ) {
+			return $email;
+		}
+		list( $local, $domain ) = $parts;
+
+		if ( strlen( $local ) <= 3 ) {
+			$masked_local = str_repeat( '*', strlen( $local ) );
+		} else {
+			$masked_local = substr( $local, 0, 2 )
+						. str_repeat( '*', max( 1, strlen( $local ) - 3 ) )
+						. substr( $local, -1 );
+		}
+
+		return $masked_local . '@' . $domain;
 	}
 }
