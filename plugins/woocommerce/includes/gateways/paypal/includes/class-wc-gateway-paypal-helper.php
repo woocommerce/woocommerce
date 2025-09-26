@@ -106,6 +106,11 @@ class WC_Gateway_Paypal_Helper {
 		$redacted_data = array();
 
 		foreach ( $data as $key => $value ) {
+			// Skip redacting the payee information as it belongs to the store merchant.
+			if ( 'payee' === $key ) {
+				$redacted_data[ $key ] = $value;
+				continue;
+			}
 			// Mask the email address.
 			if ( 'email_address' === $key || 'email' === $key ) {
 				$redacted_data[ $key ] = self::mask_email( $value );
