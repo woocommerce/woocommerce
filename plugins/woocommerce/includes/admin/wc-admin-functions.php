@@ -77,7 +77,7 @@ function wc_get_page_screen_id( $for ) {
 
 	if ( in_array( $for, wc_get_order_types( 'admin-menu' ), true ) ) {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$screen_id = 'woocommerce_page_wc-orders' . ( 'shop_order' === $for ? '' : '--' . $for );
+			$screen_id = ( \WC_Admin_Menus::can_view_woocommerce_menu_item() ? 'woocommerce_page_wc-orders' : 'admin_page_wc-orders' ) . ( 'shop_order' === $for ? '' : '--' . $for );
 		} else {
 			$screen_id = $for;
 		}
