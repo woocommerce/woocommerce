@@ -131,6 +131,9 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
 					'autoload' => false,
 					'desc_tip' => true,
+					'field'   => array(
+						'required' => true,
+					),
 				),
 
 				array(
@@ -145,6 +148,55 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'default'           => get_option( 'admin_email' ),
 					'autoload'          => false,
 					'desc_tip'          => true,
+					'field'   => array(
+						'required' => true,
+					),
+				),
+				array(
+					'title'             => __( 'Add "Reply-to" email', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_reply_to_enabled',
+					'type'              => 'checkbox',
+					'css'               => 'min-width:400px;',
+					'default'           => 'no',
+					'autoload'          => false,
+					'desc_tip'          => true,
+				),
+				array(
+					'title'             => __( '"Reply-to" address', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_reply_to_address',
+					'type'              => 'email',
+					'custom_attributes' => array(
+						'multiple' => 'multiple',
+					),
+					'css'               => 'min-width:400px;',
+					'autoload'          => false,
+					'desc_tip'          => true,
+					'field'   => array(
+						'required' => true,
+					),
+				),
+				array(
+					'title'    => __( '"Reply-to" name', 'woocommerce' ),
+					'desc'     => '',
+					'id'       => 'woocommerce_email_reply_to_name',
+					'type'     => 'text',
+					'css'      => 'min-width:400px;',
+					'autoload' => false,
+					'desc_tip' => true,
+					'field'   => array(
+						'required' => true,
+					),
+				),
+				array(
+					'title'    => __( 'Sender preview', 'woocommerce' ),
+					'desc'     => '',
+					'id'       => 'sender_preview',
+					'type'     => 'text',
+					'css'      => 'min-width:400px;display:none;',
+					'autoload' => false,
+					'desc_tip' => true,
 				),
 				array(
 					'type' => 'sectionend',
