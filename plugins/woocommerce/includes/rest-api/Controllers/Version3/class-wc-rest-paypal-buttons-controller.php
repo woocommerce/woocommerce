@@ -126,29 +126,6 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		$gateway = WC_Gateway_Paypal::get_instance();
 
-		// Check if the order already has a PayPal order ID.
-		$existing_paypal_order_id = $order->get_meta( '_paypal_order_id' );
-
-		if ( $existing_paypal_order_id ) {
-			$original_payment_source = $order->get_meta( '_paypal_payment_source' );
-			if ( $original_payment_source === $payment_source ) {
-				// Since payment_source is not patchable, we can only reuse the existing
-				// PayPal order if the payment source is the same.
-				$order->set_payment_method( $gateway->id );
-				$order->update_status( OrderStatus::PENDING );
-				$order->save();
-
-				return new WP_REST_Response(
-					array(
-						'paypal_order_id' => $existing_paypal_order_id,
-						'order_id'        => $order_id,
-						'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
-					),
-					200
-				);
-			}
-		}
-
 		// For Buttons requests, we need to explicitly set the payment method to PayPal.
 		$order->set_payment_method( $gateway->id );
 		$order->save();
