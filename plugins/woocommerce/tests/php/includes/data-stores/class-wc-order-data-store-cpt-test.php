@@ -609,9 +609,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test reading an order works as expected.
+	 * Test that basic order props are saved and read correctly.
 	 */
-	public function test_reading_order() {
+	public function test_reading_order_basic_props() {
 		$order = WC_Helper_Order::create_order();
 		$order->set_currency( 'EUR' );
 		$order->set_discount_tax( 2 );
@@ -635,5 +635,104 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 100, $read_order->get_total() );
 		$this->assertEquals( WC_VERSION, $read_order->get_version() );
 		$this->assertTrue( $read_order->get_prices_include_tax() );
+	}
+
+	/**
+	 * Test that order props saved by data stores are read correctly.
+	 */
+	public function test_reading_complete_order_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->set_order_key( 'wc_order_test_key_123' );
+		$order->set_customer_id( 1 );
+
+		$order->set_billing_first_name( 'John' );
+		$order->set_billing_last_name( 'Doe' );
+		$order->set_billing_company( 'Acme Inc' );
+		$order->set_billing_address_1( '123 Main St' );
+		$order->set_billing_address_2( 'Apt 4B' );
+		$order->set_billing_city( 'New York' );
+		$order->set_billing_state( 'NY' );
+		$order->set_billing_postcode( '10001' );
+		$order->set_billing_country( 'US' );
+		$order->set_billing_email( 'john@example.com' );
+		$order->set_billing_phone( '555-1234' );
+
+		$order->set_shipping_first_name( 'Jane' );
+		$order->set_shipping_last_name( 'Smith' );
+		$order->set_shipping_company( 'Tech Corp' );
+		$order->set_shipping_address_1( '456 Oak Ave' );
+		$order->set_shipping_address_2( 'Suite 200' );
+		$order->set_shipping_city( 'Boston' );
+		$order->set_shipping_state( 'MA' );
+		$order->set_shipping_postcode( '02101' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_phone( '555-5678' );
+
+		$order->set_payment_method( 'stripe' );
+		$order->set_payment_method_title( 'Credit Card (Stripe)' );
+		$order->set_transaction_id( 'txn_abc123def456' );
+
+		$order->set_customer_ip_address( '192.168.1.1' );
+		$order->set_customer_user_agent( 'Mozilla/5.0' );
+		$order->set_created_via( 'checkout' );
+
+		$date_completed = '2024-01-15 10:30:00';
+		$date_paid      = '2024-01-15 10:25:00';
+		$order->set_date_completed( $date_completed );
+		$order->set_date_paid( $date_paid );
+
+		$order->set_cart_hash( 'cart_hash_xyz789' );
+
+		$order->set_customer_note( 'Please ring doorbell twice' );
+
+		$order->set_download_permissions_granted( true );
+
+		$order->save();
+		$order_id = $order->get_id();
+
+		$read_order = wc_get_order( $order_id );
+
+		$this->assertEquals( 'wc_order_test_key_123', $read_order->get_order_key() );
+		$this->assertEquals( 1, $read_order->get_customer_id() );
+
+		$this->assertEquals( 'John', $read_order->get_billing_first_name() );
+		$this->assertEquals( 'Doe', $read_order->get_billing_last_name() );
+		$this->assertEquals( 'Acme Inc', $read_order->get_billing_company() );
+		$this->assertEquals( '123 Main St', $read_order->get_billing_address_1() );
+		$this->assertEquals( 'Apt 4B', $read_order->get_billing_address_2() );
+		$this->assertEquals( 'New York', $read_order->get_billing_city() );
+		$this->assertEquals( 'NY', $read_order->get_billing_state() );
+		$this->assertEquals( '10001', $read_order->get_billing_postcode() );
+		$this->assertEquals( 'US', $read_order->get_billing_country() );
+		$this->assertEquals( 'john@example.com', $read_order->get_billing_email() );
+		$this->assertEquals( '555-1234', $read_order->get_billing_phone() );
+
+		$this->assertEquals( 'Jane', $read_order->get_shipping_first_name() );
+		$this->assertEquals( 'Smith', $read_order->get_shipping_last_name() );
+		$this->assertEquals( 'Tech Corp', $read_order->get_shipping_company() );
+		$this->assertEquals( '456 Oak Ave', $read_order->get_shipping_address_1() );
+		$this->assertEquals( 'Suite 200', $read_order->get_shipping_address_2() );
+		$this->assertEquals( 'Boston', $read_order->get_shipping_city() );
+		$this->assertEquals( 'MA', $read_order->get_shipping_state() );
+		$this->assertEquals( '02101', $read_order->get_shipping_postcode() );
+		$this->assertEquals( 'US', $read_order->get_shipping_country() );
+		$this->assertEquals( '555-5678', $read_order->get_shipping_phone() );
+
+		$this->assertEquals( 'stripe', $read_order->get_payment_method() );
+		$this->assertEquals( 'Credit Card (Stripe)', $read_order->get_payment_method_title() );
+		$this->assertEquals( 'txn_abc123def456', $read_order->get_transaction_id() );
+
+		$this->assertEquals( '192.168.1.1', $read_order->get_customer_ip_address() );
+		$this->assertEquals( 'Mozilla/5.0', $read_order->get_customer_user_agent() );
+		$this->assertEquals( 'checkout', $read_order->get_created_via() );
+
+		$this->assertEquals( $date_completed, $read_order->get_date_completed()->date( 'Y-m-d H:i:s' ) );
+		$this->assertEquals( $date_paid, $read_order->get_date_paid()->date( 'Y-m-d H:i:s' ) );
+
+		$this->assertEquals( 'cart_hash_xyz789', $read_order->get_cart_hash() );
+
+		$this->assertEquals( 'Please ring doorbell twice', $read_order->get_customer_note() );
+
+		$this->assertTrue( $read_order->get_download_permissions_granted() );
 	}
 }
