@@ -80,6 +80,13 @@ class ProductsController {
 	private MigratorTracker $tracker;
 
 	/**
+	 * Session start time.
+	 *
+	 * @var int
+	 */
+	private int $session_start_time = 0;
+
+	/**
 	 * Initialize the controller with its dependencies.
 	 * Called automatically by the WooCommerce DI container.
 	 *
@@ -114,6 +121,8 @@ class ProductsController {
 		if ( empty( $this->parsed_args ) ) {
 			return;
 		}
+
+		$this->session_start_time = time();
 
 		if ( $this->parsed_args['dry_run'] ) {
 			WP_CLI::line( WP_CLI::colorize( '%Y--- DRY RUN MODE ENABLED ---%n' ) );
@@ -195,7 +204,7 @@ class ProductsController {
 			 */
 			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
 
-			$this->log_session_time_metrics();
+			$this->log_session_time_metrics( $final_stats );
 		}
 
 		if ( $this->parsed_args['dry_run'] ) {
@@ -863,28 +872,33 @@ class ProductsController {
 	}
 
 	/**
-	 * Log session time metrics using the tracker data.
+	 * Log session time metrics using session-specific data.
+	 *
+	 * @param array $final_stats Final migration statistics.
 	 */
-	private function log_session_time_metrics(): void {
-		$tracker_data = $this->tracker->get_data();
+	private function log_session_time_metrics( array $final_stats ): void {
+		$session_products = $final_stats['total_imported'] ?? 0;
 
-		if ( empty( $tracker_data['total_migration_time'] ) || empty( $tracker_data['products_attempted'] ) ) {
+		if ( empty( $session_products ) ) {
 			return;
 		}
 
-		$total_time_seconds = $tracker_data['total_migration_time'];
-		$total_products     = $tracker_data['products_attempted'];
-		$platform           = $this->parsed_args['platform'];
+		if ( empty( $this->session_start_time ) ) {
+			return;
+		}
 
-		$avg_time_per_product = $total_time_seconds / $total_products;
-		$total_time_formatted = human_time_diff( 0, $total_time_seconds );
-		$avg_time_formatted   = number_format( $avg_time_per_product, 2 );
+		$session_duration_seconds = time() - $this->session_start_time;
+		$platform                 = $this->parsed_args['platform'];
+
+		$avg_time_per_product   = $session_duration_seconds / $session_products;
+		$session_time_formatted = human_time_diff( 0, $session_duration_seconds );
+		$avg_time_formatted     = number_format( $avg_time_per_product, 2 );
 
 		$metrics_message = sprintf(
-			'Migration completed for %s: %d products in %s (avg: %s seconds per product)',
+			'Session completed for %s: %d products in %s (avg: %s seconds per product)',
 			$platform,
-			$total_products,
-			$total_time_formatted,
+			$session_products,
+			$session_time_formatted,
 			$avg_time_formatted
 		);
 
