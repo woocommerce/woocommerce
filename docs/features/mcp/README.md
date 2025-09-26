@@ -65,18 +65,21 @@ WooCommerce Core
 ### Architecture Components
 
 **Local MCP Proxy** (`mcp-wordpress-remote`)
+
 - Runs locally on the developer's machine as a Node.js process
 - Converts MCP protocol messages to HTTP requests
 - Handles authentication header injection
 - Bridges the protocol gap between MCP clients and WordPress REST endpoints
 
 **Remote WordPress MCP Server** (`mcp-adapter`)
+
 - Runs within WordPress as a plugin
 - Exposes the `/wp-json/woocommerce/mcp` endpoint
 - Processes incoming HTTP requests and converts them to MCP protocol messages
 - Manages tool discovery and execution
 
-**WordPress Abilities System**
+#### WordPress Abilities System
+
 - Provides a standardized way to register and execute capabilities
 - Acts as an abstraction layer between MCP tools and actual operations
 - Enables flexible implementation approaches (REST bridging, direct DB operations, etc.)
