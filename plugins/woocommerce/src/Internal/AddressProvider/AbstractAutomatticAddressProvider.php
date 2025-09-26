@@ -56,7 +56,7 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 *
 	 * @return void
 	 *
-	 * @throws \Exception
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public function load_jwt() {
 
