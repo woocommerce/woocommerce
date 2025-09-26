@@ -10,14 +10,17 @@ category_slug: mcp
 
 WooCommerce includes native support for the Model Context Protocol (MCP), enabling AI assistants and tools to interact directly with WooCommerce stores through a standardized protocol. This integration exposes WooCommerce functionality as discoverable tools that AI clients can use to perform store operations with proper authentication and permissions.
 
-**Developer Preview Notice**: The MCP implementation in WooCommerce is currently in developer preview. Implementation details, APIs, and integration patterns may change in future releases as the feature matures.
+:::info
+**Developer Preview Notice**
+The MCP implementation in WooCommerce is currently in developer preview. Implementation details, APIs, and integration patterns may change in future releases as the feature matures.
+:::
 
 ## Background
 
 The Model Context Protocol (MCP) is an open standard that enables AI applications to securely connect to external data sources and tools. WooCommerce's MCP integration builds on two core technologies:
 
 - **[WordPress Abilities API](https://github.com/WordPress/abilities-api)** - A standardized system for registering capabilities in WordPress
-- **[WooCommerce MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation
+- **[WordPress MCP Adapter](https://github.com/WordPress/mcp-adapter)** - The core MCP protocol implementation
 
 This architecture allows WooCommerce to expose operations as MCP tools through the flexible WordPress Abilities system while maintaining existing security and permission models.
 
@@ -42,7 +45,10 @@ WooCommerce's MCP integration provides AI assistants with structured access to c
 
 All operations respect WooCommerce's existing permission system and are authenticated using WooCommerce REST API keys.
 
-**Data Privacy Notice**: Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Use least-privilege API scopes, rotate and revoke REST API keys regularly, and follow your organization's data retention and handling policies.
+:::warning
+**Data Privacy Notice**
+Order and customer operations may expose personally identifiable information (PII) including names, email addresses, physical addresses, and payment details. You are responsible for ensuring compliance with applicable data protection regulations. Use least-privilege API scopes, rotate and revoke REST API keys regularly, and follow your organization's data retention and handling policies.
+:::
 
 ## Architecture
 
@@ -123,6 +129,12 @@ add_filter( 'woocommerce_features', function( $features ) {
     $features['mcp_integration'] = true;
     return $features;
 });
+```
+
+Alternatively, you can enable it via WooCommerce CLI:
+
+```bash
+wp option update woocommerce_feature_mcp_integration_enabled yes
 ```
 
 ## Authentication and Security
@@ -220,6 +232,8 @@ For other MCP clients, add this configuration to your MCP settings. This configu
 
 **Important**: Replace `YOUR_CONSUMER_KEY:YOUR_CONSUMER_SECRET` with your actual WooCommerce API credentials.
 
+**Troubleshooting**: For common setup issues with npx versions or SSL in local environments, see the [mcp-wordpress-remote troubleshooting guide](https://github.com/Automattic/mcp-wordpress-remote/blob/trunk/Docs/troubleshooting.md).
+
 ## Extending MCP Capabilities
 
 ### Adding Custom Abilities
@@ -233,8 +247,10 @@ add_action( 'abilities_api_init', function() {
         array(
             'label'       => __( 'Custom Store Operation', 'your-plugin' ),
             'description' => __( 'Performs a custom store operation.', 'your-plugin' ),
-            'callback'    => 'your_custom_ability_handler',
-            'permission'  => 'manage_woocommerce',
+            'execute_callback' => 'your_custom_ability_handler',
+            'permission_callback' => function () {
+                return current_user_can( 'manage_woocommerce' );
+            },
             'input_schema' => array(
                 'type' => 'object',
                 'properties' => array(
@@ -274,7 +290,7 @@ add_filter( 'woocommerce_mcp_include_ability', function( $include, $ability_id )
 
 ## Development Example
 
-For a complete working example, see the [WooCommerce MCP Ability Demo Plugin](https://github.com/WordPress/wc-mcp-ability). This demonstration plugin shows how third-party developers can:
+For a complete working example, see the [WooCommerce MCP Ability Demo Plugin](https://github.com/woocommerce/wc-mcp-ability). This demonstration plugin shows how third-party developers can:
 
 - Register custom abilities using the WordPress Abilities API
 - Define comprehensive input and output schemas
@@ -318,7 +334,7 @@ Check **WooCommerce → Status → Logs** for entries with source `woocommerce-m
 ## Related Resources
 
 - [WordPress Abilities API Repository](https://github.com/WordPress/abilities-api)
-- [WooCommerce MCP Adapter Repository](https://github.com/WordPress/mcp-adapter)
-- [WooCommerce MCP Demo Plugin](https://github.com/WordPress/wc-mcp-ability)
+- [WordPress MCP Adapter Repository](https://github.com/WordPress/mcp-adapter)
+- [WooCommerce MCP Demo Plugin](https://github.com/woocommerce/wc-mcp-ability)
 - [Model Context Protocol Specification](https://modelcontextprotocol.io/)
 - [WooCommerce REST API Documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/)
