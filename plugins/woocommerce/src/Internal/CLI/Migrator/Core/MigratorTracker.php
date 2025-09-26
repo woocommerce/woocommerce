@@ -83,7 +83,7 @@ class MigratorTracker {
 		}
 
 		// Track detailed statistics for better telemetry accuracy.
-		$batch_stats                                  = $batch_results['stats'] ?? array();
+		$batch_stats                                   = $batch_results['stats'] ?? array();
 		$this->current_session['products_attempted']  += count( $mapped_data );
 		$this->current_session['products_successful'] += $batch_stats['successful'] ?? 0;
 		$this->current_session['products_failed']     += $batch_stats['failed'] ?? 0;
@@ -194,7 +194,7 @@ class MigratorTracker {
 			$platform_data['total_products_successful'] += $products_successful;
 			$platform_data['total_products_failed']     += $products_failed;
 			$platform_data['total_products_skipped']    += $products_skipped;
-			$platform_data['last_migration'] = $completed_at;
+			$platform_data['last_migration']             = $completed_at;
 		} else {
 			++$platform_data['dry_run_sessions'];
 		}
