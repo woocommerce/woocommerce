@@ -5462,7 +5462,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-add/mcp-to-woocommerce",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
