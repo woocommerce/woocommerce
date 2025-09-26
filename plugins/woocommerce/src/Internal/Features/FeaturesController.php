@@ -283,7 +283,7 @@ class FeaturesController {
 		$tracking_enabled                 = WC_Site_Tracking::is_tracking_enabled();
 
 		$legacy_features = array(
-			'analytics'                    => array(
+			'analytics'              => array(
 				'name'                         => __( 'Analytics', 'woocommerce' ),
 				'description'                  => __( 'Enable WooCommerce Analytics', 'woocommerce' ),
 				'option_key'                   => Analytics::TOGGLE_OPTION_NAME,
@@ -293,7 +293,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'product_block_editor'         => array(
+			'product_block_editor'   => array(
 				'name'                         => __( 'New product editor', 'woocommerce' ),
 				'description'                  => __( 'Try the new product editor (Beta)', 'woocommerce' ),
 				'is_experimental'              => true,
@@ -301,14 +301,14 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'cart_checkout_blocks'         => array(
+			'cart_checkout_blocks'   => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),
 				'is_experimental'              => false,
 				'disable_ui'                   => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'rate_limit_checkout'          => array(
+			'rate_limit_checkout'    => array(
 				'name'                         => __( 'Rate limit Checkout', 'woocommerce' ),
 				'description'                  => sprintf(
 					// translators: %s is the URL to the rate limiting documentation.
@@ -321,7 +321,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			'marketplace'                  => array(
+			'marketplace'            => array(
 				'name'                         => __( 'Marketplace', 'woocommerce' ),
 				'description'                  => __(
 					'New, faster way to find extensions and themes for your WooCommerce store',
@@ -335,7 +335,7 @@ class FeaturesController {
 			),
 			// Marked as a legacy feature to avoid compatibility checks, which aren't really relevant to this feature.
 			// https://github.com/woocommerce/woocommerce/pull/39701#discussion_r1376976959.
-			'order_attribution'            => array(
+			'order_attribution'      => array(
 				'name'                         => __( 'Order Attribution', 'woocommerce' ),
 				'description'                  => __(
 					'Enable this feature to track and credit channels and campaigns that contribute to orders on your site',
@@ -347,7 +347,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'site_visibility_badge'        => array(
+			'site_visibility_badge'  => array(
 				'name'                         => __( 'Site visibility badge', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the site visibility badge in the WordPress admin bar',
@@ -360,7 +360,7 @@ class FeaturesController {
 				'is_experimental'              => false,
 				'disabled'                     => false,
 			),
-			'hpos_fts_indexes'             => array(
+			'hpos_fts_indexes'       => array(
 				'name'                         => __( 'HPOS Full text search indexes', 'woocommerce' ),
 				'description'                  => __(
 					'Create and use full text search indexes for orders. This feature only works with high-performance order storage.',
@@ -372,7 +372,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'option_key'                   => CustomOrdersTableController::HPOS_FTS_INDEX_OPTION,
 			),
-			'hpos_datastore_caching'       => array(
+			'hpos_datastore_caching' => array(
 				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'                  => __(
 					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
@@ -385,7 +385,7 @@ class FeaturesController {
 				'disable_ui'                   => false,
 				'option_key'                   => CustomOrdersTableController::HPOS_DATASTORE_CACHING_ENABLED_OPTION,
 			),
-			'remote_logging'               => array(
+			'remote_logging'         => array(
 				'name'                         => __( 'Remote Logging', 'woocommerce' ),
 				'description'                  => sprintf(
 					/* translators: %1$s: opening link tag, %2$s: closing link tag */
@@ -419,7 +419,7 @@ class FeaturesController {
 					},
 				),
 			),
-			'email_improvements'           => array(
+			'email_improvements'     => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
 					'Enable modern email design for transactional emails',
@@ -439,7 +439,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'blueprint'                    => array(
+			'blueprint'              => array(
 				'name'                         => __( 'Blueprint (beta)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable blueprint to import and export settings in bulk',
@@ -460,7 +460,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
-			'block_email_editor'           => array(
+			'block_email_editor'     => array(
 				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the block-based email editor for transactional emails.',
@@ -480,7 +480,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
-			'point_of_sale'                => array(
+			'point_of_sale'          => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
 				'description'                  => __(
 					'Enable Point of Sale functionality in the WooCommerce mobile apps.',
@@ -501,7 +501,7 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => true,
 			),
-			'fulfillments'                 => array(
+			'fulfillments'           => array(
 				'name'                         => __( 'Order Fulfillments', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the Order Fulfillments feature to manage order fulfillment and shipping.',
