@@ -5462,7 +5462,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-main",
+            "version": "dev-trunk",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",
