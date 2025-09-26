@@ -70,7 +70,8 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		$paypal_status = $order->get_meta( '_paypal_status', true );
+		if ( in_array( $paypal_status, [ WC_Gateway_Paypal_Constants::STATUS_COMPLETED, WC_Gateway_Paypal_Constants::STATUS_APPROVED ], true ) ) {
 			return;
 		}
 

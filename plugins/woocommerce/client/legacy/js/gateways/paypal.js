@@ -123,10 +123,9 @@ jQuery(function ($) {
 			},
 
 			onError: function ( error ) {				
-				const sanitizedErrorMessage = $( '<div>' ).text( error.message || 'An unknown error occurred' ).html();
+				const sanitizedErrorMessage = $( '<div>' ).text( error.message || paypal_standard.generic_error_message ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
-						'PayPal error: ' +
 						sanitizedErrorMessage +
 					'</li></ul>';
 

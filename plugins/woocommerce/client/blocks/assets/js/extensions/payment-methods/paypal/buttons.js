@@ -6,20 +6,21 @@ import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import { getPaymentMethodData } from '@woocommerce/settings';
 import { dispatch } from '@wordpress/data';
 import apiFetch from '@wordpress/api-fetch';
+import { __ } from '@wordpress/i18n';
 
 /**
  * PayPalButtonsContainer component.
  *
- * @param {Object} props
- * @param {string} props.clientId
- * @param {string} [props.components]
- * @param {string} [props.disableFunding]
- * @param {string} [props.enableFunding]
- * @param {string} [props.currency]
- * @param {string} [props.intent]
- * @param {string} [props.merchantId]
- * @param {string} [props.partnerAttributionId]
- * @param {string} [props.pageType]
+ * @param {Object}  props
+ * @param {string}  props.clientId
+ * @param {string}  [props.components]
+ * @param {string}  [props.disableFunding]
+ * @param {string}  [props.enableFunding]
+ * @param {string}  [props.currency]
+ * @param {string}  [props.intent]
+ * @param {string}  [props.merchantId]
+ * @param {string}  [props.partnerAttributionId]
+ * @param {string}  [props.pageType]
  * @param {boolean} [props.isProductPage]
  * @return {JSX.Element} The PayPal Buttons container component.
  */
@@ -165,12 +166,11 @@ const PayPalButtonsContainer = ( {
 	};
 
 	const onError = ( error ) => {
-		dispatch( 'core/notices' ).createErrorNotice(
-			'PayPal error: ' + error.message,
-			{
-				context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
-			}
-		);
+		const errorMessage =
+			error.message || __( 'An unknown error occurred', 'woocommerce' );
+		dispatch( 'core/notices' ).createErrorNotice( errorMessage, {
+			context: pageType === 'checkout' ? 'wc/checkout' : 'wc/cart',
+		} );
 	};
 
 	return (

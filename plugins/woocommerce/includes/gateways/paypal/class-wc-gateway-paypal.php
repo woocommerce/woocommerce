@@ -211,16 +211,19 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for updating the shipping information on order approval (Orders v2).
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
-				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
-				add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
+				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				if ( $buttons->is_enabled() ) {
+					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
 
-				// Render the buttons container to load the buttons via PayPal JS SDK.
-				// Classic checkout page.
-				add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
-				// Classic cart page.
-				add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
-				// Product page.
-				add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+					// Render the buttons container to load the buttons via PayPal JS SDK.
+					// Classic checkout page.
+					add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+					// Classic cart page.
+					add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+					// Product page.
+					add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+				}
 			}
 		}
 	}
@@ -236,7 +239,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		// Bail early if the order is not a PayPal order.
-		if ( ! $order || ! $order->get_payment_method() === $this->id ) {
+		if ( ! $order || $order->get_payment_method() !== $this->id ) {
 			return;
 		}
 
@@ -788,11 +791,12 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			'wc-paypal-frontend',
 			'paypal_standard',
 			array(
-				'gateway_id'           => $this->id,
-				'isProductPage'        => is_product(),
-				'wc_store_api_nonce'   => wp_create_nonce( 'wc_store_api' ),
-				'create_order_nonce'   => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
-				'cancel_payment_nonce' => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
+				'gateway_id'            => $this->id,
+				'isProductPage'         => is_product(),
+				'wc_store_api_nonce'    => wp_create_nonce( 'wc_store_api' ),
+				'create_order_nonce'    => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
+				'cancel_payment_nonce'  => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
+				'generic_error_message' =>  __( 'An unknown error occurred', 'woocommerce' ),
 			)
 		);
 

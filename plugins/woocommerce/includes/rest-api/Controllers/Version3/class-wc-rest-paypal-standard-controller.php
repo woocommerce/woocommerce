@@ -53,7 +53,6 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return void
 	 */
 	public function register_routes() {
-		// POST /v3/paypal-standard/update-shipping.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/update-shipping',
@@ -87,7 +86,8 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Get the WC order.
 		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $purchase_units[0]['custom_id'] ?? '{}' );
+			$custom_id = isset( $purchase_units[0]['custom_id'] ) ? $purchase_units[0]['custom_id'] : '{}';
+			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
 			$response = $this->get_update_shipping_error_response();
 			return new WP_REST_Response( $response, 422 );
 		}
@@ -142,7 +142,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			'id'             => $paypal_order_id,
 			'purchase_units' => array(
 				array(
-					'reference_id'     => $purchase_units[0]['reference_id'], // No change.
+					'reference_id'     => isset( $purchase_units[0]['reference_id'] ) ? $purchase_units[0]['reference_id'] : '', // No change.
 					'amount'           => $updated_amount,
 					'shipping_options' => $updated_shipping_options,
 				),
@@ -164,6 +164,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		foreach ( $order->get_items() as $item ) {
 			$product_id = $item->get_product_id();
 			$product    = $item->get_product();
+
+			if ( ! $product ) {
+				continue;
+			}
 
 			if ( $product->is_type( 'variation' ) ) {
 				$variation_id = $item->get_variation_id();
@@ -253,7 +257,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 					'type'     => 'SHIPPING',
 					'amount'   => array(
 						'currency_code' => $order->get_currency(),
-						'value'         => $rate->get_cost(),
+						'value'         => wc_format_decimal( (float) $rate->get_cost(), wc_get_price_decimals() ),
 					),
 					'label'    => $rate->get_label(),
 					'selected' => $is_selected,

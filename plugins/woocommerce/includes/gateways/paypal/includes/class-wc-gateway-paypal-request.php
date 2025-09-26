@@ -70,6 +70,7 @@ class WC_Gateway_Paypal_Request {
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_ENDPOINT      = 'payment/capture';
 	private const WPCOM_PROXY_PAYMENT_AUTHORIZE_ENDPOINT    = 'payment/authorize';
 	private const WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT = 'payment/capture_auth';
+	private const WPCOM_PROXY_CLIENT_ID_ENDPOINT            = 'client_id';
 
 	/**
 	 * Constructor.
@@ -627,6 +628,39 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => $country,
 			),
 		);
+	}
+
+	/**
+	 * Fetch the PayPal client-id from the Transact platform.
+	 *
+	 * @return string|null The PayPal client-id, or null if the request fails.
+	 * @throws Exception If the request fails.
+	 */
+	public function fetch_paypal_client_id() {
+		try {
+			$request_body = array(
+				'test_mode' => $this->gateway->testmode,
+			);
+
+			$response = $this->send_wpcom_proxy_request( 'GET', self::WPCOM_PROXY_CLIENT_ID_ENDPOINT, $request_body );
+
+			if ( is_wp_error( $response ) ) {
+				throw new Exception( 'Failed to fetch the client ID. Response error: ' . $response->get_error_message() );
+			}
+
+			$http_code     = wp_remote_retrieve_response_code( $response );
+			$body          = wp_remote_retrieve_body( $response );
+			$response_data = json_decode( $body, true );
+
+			if ( 200 !== $http_code ) {
+				throw new Exception( 'Failed to fetch the client ID. Response status: ' . $http_code . '. Response body: ' . $body );
+			}
+
+			return $response_data['client_id'] ?? null;
+		} catch ( Exception $e ) {
+			WC_Gateway_Paypal::log( $e->getMessage() );
+			return null;
+		}
 	}
 
 	/**

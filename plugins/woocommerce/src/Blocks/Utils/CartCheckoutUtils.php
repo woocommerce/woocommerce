@@ -115,24 +115,28 @@ class CartCheckoutUtils {
 			return false;
 		}
 
-		if ( has_block( $block_id, $post_content ) ) {
-			$blocks = (array) parse_blocks( $post_content );
+		$scanner = Block_Scanner::create( $post_content );
+		if ( ! $scanner ) {
+			return false;
+		}
 
-			foreach ( $blocks as $block ) {
-				$block_name = $block['blockName'] ?? '';
+		while ( $scanner->next_delimiter() ) {
+			if ( ! $scanner->opens_block( $block_id ) ) {
+				continue;
+			}
 
-				if ( $block_name !== $block_id ) {
-					continue;
-				}
+			$attrs = $scanner->allocate_and_return_parsed_attributes();
 
-				if ( isset( $block['attrs'][ $attribute ] ) && $value === $block['attrs'][ $attribute ] ) {
-					return true;
-				}
+			if ( isset( $attrs[ $attribute ] ) && $value === $attrs[ $attribute ] ) {
+				return true;
+			}
 
-				// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
-				if ( 'woocommerce/classic-shortcode' === $block_id && 'shortcode' === $attribute && 'cart' === $value && ! isset( $block['attrs']['shortcode'] ) ) {
-					return true;
-				}
+			// `Cart` is default for `woocommerce/classic-shortcode` so it will be empty in the block attributes.
+			if ( 'woocommerce/classic-shortcode' === $block_id &&
+				'shortcode' === $attribute &&
+				'cart' === $value &&
+				! isset( $attrs['shortcode'] ) ) {
+				return true;
 			}
 		}
 
