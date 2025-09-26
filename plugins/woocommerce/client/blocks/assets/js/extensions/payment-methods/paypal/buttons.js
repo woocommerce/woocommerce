@@ -102,7 +102,7 @@ const PayPalButtonsContainer = ( {
 			} );
 
 			// Expected response is an empty array.
-			if ( ! emptyCartResponse || emptyCartResponse.length != 0 ) {
+			if ( ! emptyCartResponse || emptyCartResponse.length !== 0 ) {
 				throw new Error( 'Failed to empty cart' );
 			}
 
