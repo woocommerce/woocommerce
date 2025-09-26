@@ -55,6 +55,8 @@ abstract class AbstractAutomatticAddressProvider extends WC_Address_Provider {
 	 * Loads up a JWT from cache or from the implementor side.
 	 *
 	 * @return void
+	 *
+	 * @throws \Exception
 	 */
 	public function load_jwt() {
 
