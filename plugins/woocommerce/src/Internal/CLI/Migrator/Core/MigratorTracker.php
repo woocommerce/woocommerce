@@ -83,7 +83,7 @@ class MigratorTracker {
 		}
 
 		// Track detailed statistics for better telemetry accuracy.
-		$batch_stats = $batch_results['stats'] ?? array();
+		$batch_stats                                  = $batch_results['stats'] ?? array();
 		$this->current_session['products_attempted']  += count( $mapped_data );
 		$this->current_session['products_successful'] += $batch_stats['successful'] ?? 0;
 		$this->current_session['products_failed']     += $batch_stats['failed'] ?? 0;
@@ -111,7 +111,7 @@ class MigratorTracker {
 		}
 
 		// Use consistent time() calls to avoid any timezone issues.
-		$completion_time = time();
+		$completion_time                       = time();
 		$this->current_session['total_time']   = $completion_time - $this->current_session['started_at'];
 		$this->current_session['completed_at'] = $completion_time;
 
@@ -134,7 +134,7 @@ class MigratorTracker {
 	private function track_product_types( array $mapped_data, array $batch_results ): void {
 		$successful_results = array_filter(
 			$batch_results['results'] ?? array(),
-			function( $result ) {
+			function ( $result ) {
 				return 'success' === ( $result['status'] ?? '' ) && 'skipped' !== ( $result['action'] ?? '' );
 			}
 		);
