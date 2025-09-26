@@ -1,9 +1,9 @@
 <?php
 /**
- * WooCommerce Custom Sniff: No New Functions in Includes Directory
+ * WooCommerce Custom Sniff: No New Functions in Src Directory
  *
- * This sniff prevents the addition of new functions in the includes directory.
- * No new functions or classes are allowed in the includes directory.
+ * This sniff prevents the addition of new functions in the src directory.
+ * Only new classes are allowed in the src directory, not standalone functions.
  *
  * @package WooCommerce\Sniffs\Functions
  */
@@ -15,12 +15,12 @@ use PHP_CodeSniffer\Sniffs\Sniff;
 use PHP_CodeSniffer\Util\Tokens;
 
 /**
- * NoNewFunctionsInIncludesSniff
+ * NoNewFunctionsInSrcSniff
  *
- * Detects function declarations in the includes directory and reports them as errors.
- * No new functions are allowed in the includes directory.
+ * Detects function declarations in the src directory and reports them as errors.
+ * Only classes are allowed in the src directory, not standalone functions.
  */
-class NoNewFunctionsInIncludesSniff implements Sniff
+class NoNewFunctionsInSrcSniff implements Sniff
 {
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -44,8 +44,8 @@ class NoNewFunctionsInIncludesSniff implements Sniff
     {
         $fileName = $phpcsFile->getFilename();
         
-        // Check if the file is in the includes directory
-        if (strpos($fileName, DIRECTORY_SEPARATOR . 'includes' . DIRECTORY_SEPARATOR) === false) {
+        // Check if the file is in the src directory
+        if (strpos($fileName, DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR) === false) {
             return;
         }
 
@@ -90,11 +90,11 @@ class NoNewFunctionsInIncludesSniff implements Sniff
             }
         }
 
-        // This is a standalone function in the includes directory - report as error
+        // This is a standalone function in the src directory - report as error
         $phpcsFile->addError(
-            'New functions are not allowed in the includes directory. No new functions or classes are allowed in the includes directory.',
+            'New standalone functions are not allowed in the src directory. Only new classes are allowed in the src directory.',
             $stackPtr,
-            'NewFunctionInIncludes'
+            'NewFunctionInSrc'
         );
     }
 }

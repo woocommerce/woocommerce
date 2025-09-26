@@ -1,63 +1,127 @@
 # WooCommerce Custom PHPCS Sniffs
 
-This directory contains custom PHP_CodeSniffer (PHPCS) rules for WooCommerce development.
+This directory contains custom PHP_CodeSniffer (PHPCS) rules for WooCommerce development to enforce proper directory structure and coding standards.
 
-## NoNewFunctionsInIncludesSniff
+## Directory Structure Rules
 
-### Purpose
-This sniff prevents the addition of new standalone functions in the `includes` directory. All new code should be added as classes in the `src` directory to maintain a consistent and organized codebase.
+The following rules enforce the proper organization of code in WooCommerce:
 
-### What it detects
+### 1. NoNewFunctionsInIncludesSniff
+
+**Purpose**: Prevents the addition of new standalone functions in the `includes` directory.
+
+**What it detects**:
 - Standalone function declarations in files within the `includes` directory
 - Functions that are not methods inside classes
 
-### What it ignores
+**What it ignores**:
 - Methods inside classes (these are allowed)
-- Functions in other directories (like `src/`)
+- Functions in other directories
 
-### Usage
-The sniff is automatically enabled when running PHPCS with the WooCommerce ruleset. It will report errors for any new standalone functions found in the `includes` directory.
+**Error message**:
+```
+ERROR | New functions are not allowed in the includes directory. No new functions or classes are allowed in the includes directory.
+```
 
-### Example violation
+### 2. NoNewClassesInIncludesSniff
+
+**Purpose**: Prevents the addition of new classes, interfaces, and traits in the `includes` directory.
+
+**What it detects**:
+- Class declarations (`class`)
+- Interface declarations (`interface`)
+- Trait declarations (`trait`)
+
+**Error message**:
+```
+ERROR | New classes, interfaces, and traits are not allowed in the includes directory. No new functions or classes are allowed in the includes directory.
+```
+
+### 3. NoNewFunctionsInSrcSniff
+
+**Purpose**: Prevents the addition of new standalone functions in the `src` directory. Only classes are allowed in `src`.
+
+**What it detects**:
+- Standalone function declarations in files within the `src` directory
+- Functions that are not methods inside classes
+
+**What it ignores**:
+- Methods inside classes (these are allowed)
+- Functions in other directories
+
+**Error message**:
+```
+ERROR | New standalone functions are not allowed in the src directory. Only new classes are allowed in the src directory.
+```
+
+## Summary of Rules
+
+| Directory | Functions | Classes/Interfaces/Traits |
+|-----------|-----------|---------------------------|
+| `includes/` | ❌ Not allowed | ❌ Not allowed |
+| `src/` | ❌ Not allowed | ✅ Allowed |
+
+## Example Violations
+
+### includes/ directory violations:
 ```php
 <?php
 // File: includes/some-file.php
 
-// This will trigger an error
+// This will trigger an error (function)
 function new_function_in_includes() {
-    return 'This should be in a class in src/';
+    return 'This should not be here';
+}
+
+// This will also trigger an error (class)
+class NewClassInIncludes {
+    public function method() {
+        return 'This should not be here either';
+    }
 }
 ```
 
-### Example that passes
+### src/ directory violations:
 ```php
 <?php
-// File: includes/some-file.php
+// File: src/some-file.php
 
-// This is allowed - it's a method inside a class
-class SomeClass {
-    public function some_method() {
+// This will trigger an error (standalone function)
+function new_function_in_src() {
+    return 'This should not be here';
+}
+
+// This is allowed (class)
+class NewClassInSrc {
+    public function method() {
         return 'This is fine';
     }
 }
 ```
 
-### Error message
-When a violation is detected, PHPCS will report:
-```
-ERROR | New functions are not allowed in the includes directory. Please add new code as classes in the src directory instead.
-```
+## Configuration
 
-### Configuration
-The sniff is configured in `phpcs.xml` with the following rule:
+All sniffs are configured in `phpcs.xml`:
+
 ```xml
+<!-- Custom rules to enforce directory structure -->
 <rule ref="WooCommerce.Sniffs.Functions.NoNewFunctionsInIncludesSniff">
     <include-pattern>includes/</include-pattern>
 </rule>
+
+<rule ref="WooCommerce.Sniffs.Classes.NoNewClassesInIncludesSniff">
+    <include-pattern>includes/</include-pattern>
+</rule>
+
+<rule ref="WooCommerce.Sniffs.Functions.NoNewFunctionsInSrcSniff">
+    <include-pattern>src/</include-pattern>
+</rule>
 ```
 
-### Running the linter
-To run PHPCS with this custom rule:
+## Running the Linter
+
+To run PHPCS with these custom rules:
+
 ```bash
 # Run on all files
 composer run-script phpcs
