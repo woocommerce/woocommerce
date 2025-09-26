@@ -13,7 +13,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
 use WC_Shipping_Zones;
-use WC_Cache_Helper;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_Error;

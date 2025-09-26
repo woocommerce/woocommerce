@@ -110,7 +110,7 @@ class ShippingMethodSchema extends AbstractSchema {
 		$settings['title'] = $method->get_title();
 
 		// Get common method settings.
-		// @todo: Ensure this is more flexible.
+		// @todo Ensure this is more flexible.
 		$common_fields = array( 'cost', 'min_amount', 'requires', 'class_cost', 'no_class_cost', 'tax_status' );
 
 		foreach ( $common_fields as $field ) {
