@@ -218,8 +218,11 @@ class WC_Gateway_Paypal_Request {
 		$http_code     = wp_remote_retrieve_response_code( $response );
 		$body          = wp_remote_retrieve_body( $response );
 		$response_data = json_decode( $body, true );
+
 		if ( 200 !== $http_code ) {
-			throw new Exception( 'PayPal order details request failed. Response status: ' . esc_html( $http_code ) . '. Response body: ' . esc_html( $body ) );
+			$debug_id = isset( $response_data['debug_id'] ) ? $response_data['debug_id'] : null;
+			$message  = 'PayPal order details request failed. HTTP ' . (int) $http_code . ( $debug_id ? '. Debug ID: ' . $debug_id : '' );
+			throw new Exception( esc_html( $message ) );
 		}
 
 		return $response_data;
