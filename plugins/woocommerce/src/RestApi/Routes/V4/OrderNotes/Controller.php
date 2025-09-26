@@ -52,12 +52,12 @@ class Controller extends AbstractController {
 	 * Initialize the controller.
 	 *
 	 * @param OrderNoteSchema $item_schema Order schema class.
-	 * @param QueryUtils      $query_utils Query utils class.
+	 * @param CollectionQuery $query_utils Query utils class.
 	 * @internal
 	 */
-	final public function init( OrderNoteSchema $item_schema, QueryUtils $query_utils ) {
-		$this->item_schema = $item_schema;
-		$this->query_utils = $query_utils;
+	final public function init( OrderNoteSchema $item_schema, CollectionQuery $query_utils ) {
+		$this->item_schema      = $item_schema;
+		$this->collection_query = $query_utils;
 	}
 
 	/**
@@ -74,7 +74,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_query_schema(): array {
-		return $this->query_utils->get_query_schema();
+		return $this->collection_query->get_query_schema();
 	}
 
 	/**
@@ -264,8 +264,9 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		$results = $this->query_utils->get_query_results( $request, $order );
-		$items   = array();
+		$query_args = $this->collection_query->get_query_args( $request );
+		$results    = $this->collection_query->get_query_results( $query_args, $request );
+		$items      = array();
 
 		foreach ( $results as $result ) {
 			$items[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $result, $request ) );

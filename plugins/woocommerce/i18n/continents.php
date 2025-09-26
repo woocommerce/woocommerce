@@ -197,6 +197,7 @@ return array(
 			'TR',
 			'UA',
 			'VA',
+			'XK',
 		),
 	),
 	'NA' => array(

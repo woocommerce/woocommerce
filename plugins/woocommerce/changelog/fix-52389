@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow readonly use of orders menu separate from WC menu (HPOS).
