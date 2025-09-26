@@ -108,7 +108,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 	public function create_order( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		if ( empty( $data['order_id'] ) ) {
+		if ( empty( $data['order_id'] ) || empty( $data['order_key'] ) ) {
 			return new WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
 
@@ -122,6 +122,15 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 
 		if ( ! $order ) {
 			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+		}
+
+		$order_key = $data['order_key'];
+		if ( ! $order_key || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+			return new WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+		}
+
+		if ( ! in_array( $order->get_status(), array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING ), true ) ) {
+			return new WP_REST_Response( array( 'error' => 'Invalid order status' ), 409 );
 		}
 
 		$gateway = WC_Gateway_Paypal::get_instance();

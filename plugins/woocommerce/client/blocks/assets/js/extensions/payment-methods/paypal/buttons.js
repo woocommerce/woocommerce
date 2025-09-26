@@ -154,7 +154,7 @@ const PayPalButtonsContainer = ( {
 				},
 			} );
 
-			if ( ! responseData.order_id ) {
+			if ( ! responseData.order_id || ! responseData.order_key ) {
 				// eslint-disable-next-line no-console
 				console.error(
 					'Failed to create WooCommerce order',
@@ -172,6 +172,7 @@ const PayPalButtonsContainer = ( {
 				},
 				data: {
 					order_id: responseData.order_id,
+					order_key: responseData.order_key,
 					payment_source: data.paymentSource || '',
 					app_switch_request_origin: appSwitchRequestOrigin,
 				},
