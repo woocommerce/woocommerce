@@ -88,7 +88,8 @@
 		],
 		"psr-4": {
 			"Automattic\\WooCommerce\\": "src/",
-			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"
+			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/",
+			"WooCommerce\\Sniffs\\": "includes/Sniffs/"
 		},
 		"psr-0": {
 			"Automattic\\WooCommerce\\Vendor\\": "lib/packages/"

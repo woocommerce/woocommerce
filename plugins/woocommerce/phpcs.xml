@@ -33,6 +33,11 @@
 	<!-- Rules -->
 	<rule ref="WooCommerce-Core" />
 
+	<!-- Custom rule to prevent new functions in includes directory -->
+	<rule ref="WooCommerce.Sniffs.Functions.NoNewFunctionsInIncludesSniff">
+		<include-pattern>includes/</include-pattern>
+	</rule>
+
 	<rule ref="WooCommerce.Functions.InternalInjectionMethod">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>

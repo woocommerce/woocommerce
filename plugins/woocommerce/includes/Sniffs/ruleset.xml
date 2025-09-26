@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce Custom Sniffs">
+    <description>Custom coding standards for WooCommerce development.</description>
+    
+    <!-- Include custom sniffs -->
+    <rule ref="WooCommerce.Sniffs.Functions.NoNewFunctionsInIncludesSniff"/>
+</ruleset>
