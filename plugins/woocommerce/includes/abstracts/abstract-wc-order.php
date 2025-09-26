@@ -10,11 +10,11 @@
  * @package     WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -1170,7 +1170,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					if ( ! isset( $user_ids_and_emails ) ) {
 						$user_alias          = get_current_user_id() ? wp_get_current_user()->ID : sanitize_email( $billing_email );
-						$user_ids_and_emails = $this->get_billing_and_current_user_aliases( $billing_email );
+						$user_ids_and_emails = $this->get_billing_and_current_user_ids_and_aliases( $billing_email );
 					}
 
 					$held_key_for_user = $this->hold_coupon_for_users( $coupon, $user_ids_and_emails, $user_alias );
@@ -1238,23 +1238,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Helper method to get all aliases for current user and provide billing email.
+	 * Helper method to get all aliases and IDs for current user and provided billing email.
 	 *
-	 * @param string $billing_email Billing email provided in form.
+	 * @param string $billing_email Billing email to look up for.
 	 *
-	 * @return array     Array of all aliases.
+	 * @return array     Array of all aliases and IDs.
 	 * @throws Exception When validation fails.
 	 */
-	private function get_billing_and_current_user_aliases( $billing_email ) {
+	private function get_billing_and_current_user_ids_and_aliases( $billing_email ): array {
 		$emails = array( $billing_email );
 		if ( get_current_user_id() ) {
 			$emails[] = wp_get_current_user()->user_email;
 		}
-		$emails              = array_unique(
-			array_map( 'strtolower', array_map( 'sanitize_email', $emails ) )
-		);
-		$customer_data_store = WC_Data_Store::load( 'customer' );
-		$user_ids            = $customer_data_store->get_user_ids_for_billing_email( $emails );
+		$emails   = array_unique( array_map( 'strtolower', array_map( 'sanitize_email', $emails ) ) );
+		$user_ids = wc_get_container()->get( CustomersSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( $emails );
 		return array_merge( $user_ids, $emails );
 	}
 
