@@ -46,21 +46,34 @@ jQuery(function ($) {
 				return true;
 			}
 
-			// Empty the cart before adding the product.
-			await window.wp.apiFetch( {
-				method: 'DELETE',
-				path: '/wc/store/v1/cart/items',
-			} );
+			try {
+				// Empty the cart before adding the product.
+				const emptyCartResponse = await window.wp.apiFetch( {
+					method: 'DELETE',
+					path: '/wc/store/v1/cart/items',
+				} );
 
-			// Add the product to the cart.
-			await window.wp.apiFetch( {
-				method: 'POST',
-				path: '/wc/store/v1/cart/items',
-				data: {
-					id: productId,
-					quantity,
-				},
-			} );
+				// Expected response is an empty array.
+				if ( ! emptyCartResponse || emptyCartResponse.length != 0 ) {
+					throw new Error( 'Failed to empty cart' );
+				}
+
+				// Add the product to the cart.
+				const addToCartResponse = await window.wp.apiFetch( {
+					method: 'POST',
+					path: '/wc/store/v1/cart/items',
+					data: {
+						id: productId,
+						quantity,
+					},
+				} );
+
+				if ( ! addToCartResponse || ! addToCartResponse.key ) {
+					throw new Error( 'Failed to add product to cart' );
+				}
+			} catch ( error ) {
+				return false;
+			}
 
 			// Remember what we added to the cart, so we don't have to repeat the action
 			// when the user re-opens the payment modal.
@@ -163,7 +176,7 @@ jQuery(function ($) {
 				}
 			},
 
-			onError: function ( error ) {				
+			onError: function ( error ) {
 				const sanitizedErrorMessage = $( '<div>' ).text( error.message || paypal_standard.generic_error_message ).html();
 				const messageWrapper =
 					'<ul class="woocommerce-error" role="alert"><li>' +
