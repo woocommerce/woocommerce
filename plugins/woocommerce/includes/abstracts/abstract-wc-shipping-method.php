@@ -657,7 +657,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		switch ( $field_type ) {
 			case 'text':
 			case 'password':
-				return sanitize_text_field( trim( @(string) $value ) );
+				// Handle potential array/object inputs gracefully.
+				if ( is_array( $value ) || is_object( $value ) ) {
+					return sanitize_text_field( 'Array' );
+				}
+				return sanitize_text_field( trim( (string) $value ) );
 
 			case 'email':
 				$email = sanitize_email( trim( (string) $value ) );

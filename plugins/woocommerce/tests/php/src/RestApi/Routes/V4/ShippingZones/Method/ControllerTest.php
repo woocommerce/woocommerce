@@ -235,7 +235,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
-		// Deliberately omit zone_id (absint sanitizer will convert to 0)
+		// Deliberately omit zone_id (absint sanitizer will convert to 0).
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
 		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
@@ -259,7 +259,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
-		// Deliberately omit method_id (will default to empty string)
+		// Deliberately omit method_id (will default to empty string).
 		$request->set_param( 'enabled', true );
 		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
 
@@ -283,7 +283,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'flat_rate' );
-		// Deliberately omit enabled (should default to false)
+		// Deliberately omit enabled (should default to false).
 		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
 
 		$response = $this->controller->create_item( $request );
@@ -306,7 +306,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
-		// Deliberately omit settings (should use defaults)
+		// Deliberately omit settings (should use defaults).
 
 		$response = $this->controller->create_item( $request );
 
