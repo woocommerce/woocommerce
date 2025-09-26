@@ -131,6 +131,7 @@ class Register {
 		);
 
 		if ( false !== $wpdb->insert( $this->get_table(), $insert_fields ) ) {
+			unset( $this->cache );
 			return $wpdb->insert_id;
 		}
 
@@ -427,9 +428,13 @@ class Register {
 	 */
 	public function delete_by_id( int $id ): bool {
 		global $wpdb;
-		$table = $this->get_table();
 
-		return (bool) $wpdb->delete( $table, array( 'url_id' => $id ) );
+		if ( ! $wpdb->delete( $this->get_table(), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -439,9 +444,13 @@ class Register {
 	 */
 	public function delete_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "DELETE FROM $table" );
+
+		if ( ! $wpdb->query( "DELETE FROM {$this->get_table()}" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -454,7 +463,13 @@ class Register {
 	public function enable_by_id( int $id ): bool {
 		global $wpdb;
 		$table = $this->get_table();
-		return (bool) $wpdb->update( $table, array( 'enabled' => 1 ), array( 'url_id' => $id ) );
+
+		if ( ! $wpdb->update( $table, array( 'enabled' => 1 ), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -466,8 +481,13 @@ class Register {
 	 */
 	public function disable_by_id( int $id ): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		return (bool) $wpdb->update( $table, array( 'enabled' => 0 ), array( 'url_id' => $id ) );
+
+		if ( ! $wpdb->update( $this->get_table(), array( 'enabled' => 0 ), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -477,9 +497,13 @@ class Register {
 	 */
 	public function enable_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "UPDATE {$table} SET enabled = 1" );
+
+		if ( ! $wpdb->query( "UPDATE {$this->get_table()} SET enabled = 1" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -489,9 +513,14 @@ class Register {
 	 */
 	public function disable_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "UPDATE {$table} SET enabled = 0" );
+		if ( ! $wpdb->query( "UPDATE {$this->get_table()} SET enabled = 0" ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
