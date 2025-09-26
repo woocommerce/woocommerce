@@ -251,24 +251,33 @@ export const PickYourThemeBanner = ( {
 	return (
 		<BaseIntroBanner
 			bannerTitle={ __( 'Pick your perfect theme', 'woocommerce' ) }
-			bannerText={ (
+			bannerText={
 				<div className="pick-your-theme-banner__content">
 					<p>
-						{ __( 'Bring your vision to life — no coding required. Explore hundreds of free and paid ecommerce-optimized themes.', 'woocommerce' ) }
+						{ __(
+							'Bring your vision to life — no coding required. Explore hundreds of free and paid ecommerce-optimized themes.',
+							'woocommerce'
+						) }
 					</p>
 					<ul>
 						<li>
 							{ __( 'Themes for every industry', 'woocommerce' ) }
 						</li>
 						<li>
-							{ __( 'Ready to use out of the box', 'woocommerce' ) }
+							{ __(
+								'Ready to use out of the box',
+								'woocommerce'
+							) }
 						</li>
 						<li>
-							{ __( '30-day money-back guarantee', 'woocommerce' ) }
+							{ __(
+								'30-day money-back guarantee',
+								'woocommerce'
+							) }
 						</li>
 					</ul>
 				</div>
-			) }
+			}
 			bannerButtonText={ __( 'Browse the Marketplace', 'woocommerce' ) }
 			bannerButtonOnClick={ () => {
 				sendEvent( {

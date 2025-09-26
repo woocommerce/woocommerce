@@ -39,7 +39,12 @@ import {
 	customizeStoreStateMachineContext,
 } from './types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners, isIframe, redirectToThemes } from './utils';
+import {
+	navigateOrParent,
+	attachParentListeners,
+	isIframe,
+	redirectToThemes,
+} from './utils';
 import useBodyClass from './hooks/use-body-class';
 import { useXStateInspect } from '~/xstate';
 

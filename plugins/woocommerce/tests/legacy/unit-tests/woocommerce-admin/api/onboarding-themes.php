@@ -4,6 +4,7 @@
  *
  * @package WooCommerce\Admin\Tests\API
  */
+
 /**
  * WC Tests API Onboarding Themes
  */

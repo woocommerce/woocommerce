@@ -30,8 +30,9 @@ export const fetchCustomizeStoreCompleted = async () => {
 };
 
 export const fetchIntroData = async () => {
-	const task = await
-		resolveSelect( onboardingStore ).getTask( 'customize-store' );
+	const task = await resolveSelect( onboardingStore ).getTask(
+		'customize-store'
+	);
 
 	const customizeStoreTaskCompleted = task?.isComplete;
 
