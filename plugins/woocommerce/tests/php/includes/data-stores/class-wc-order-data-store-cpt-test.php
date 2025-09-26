@@ -607,4 +607,66 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertCount( $test['expected_count'], $orders, print_r( $test, true ) );
 		}
 	}
+
+	/**
+	 * Test orderby total functionality works as expected for CPT storage.
+	 */
+	public function test_orderby_total() {
+		// Create orders with different totals.
+		$order_totals = array( 100.00, 50.00, 250.50, 75.25, 500.00 );
+		$orders       = array();
+		foreach ( $order_totals as $order_total ) {
+			$order = OrderHelper::create_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		// Test ascending order.
+		$orders_asc = wc_get_orders(
+			array(
+				'orderby' => 'total',
+				'order'   => 'asc',
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertCount( 5, $orders_asc );
+
+		// Verify ascending order by checking totals.
+		$totals_asc = array();
+		foreach ( $orders_asc as $order_id ) {
+			$order        = wc_get_order( $order_id );
+			$totals_asc[] = $order->get_total();
+		}
+
+		$expected_totals_asc = array( 50.00, 75.25, 100.00, 250.50, 500.00 );
+		$this->assertEquals( $expected_totals_asc, $totals_asc, 'Orders should be sorted by total in ascending order' );
+
+		// Test descending order.
+		$orders_desc = wc_get_orders(
+			array(
+				'orderby' => 'total',
+				'order'   => 'desc',
+				'return'  => 'ids',
+			)
+		);
+
+		$this->assertCount( 5, $orders_desc );
+
+		// Verify descending order by checking totals.
+		$totals_desc = array();
+		foreach ( $orders_desc as $order_id ) {
+			$order         = wc_get_order( $order_id );
+			$totals_desc[] = $order->get_total();
+		}
+
+		$expected_totals_desc = array( 500.00, 250.50, 100.00, 75.25, 50.00 );
+		$this->assertEquals( $expected_totals_desc, $totals_desc, 'Orders should be sorted by total in descending order' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
+	}
 }
