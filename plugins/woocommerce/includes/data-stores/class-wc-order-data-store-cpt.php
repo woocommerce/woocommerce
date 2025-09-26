@@ -1059,7 +1059,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		// Handle fulfillment status filtering.
 		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
-			$wp_query_args['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+			$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+			if ( ! empty( $meta_query ) ) {
+				$wp_query_args['meta_query'][] = $meta_query;
+			}
 		}
 
 		// Handle custom orderby paramers.

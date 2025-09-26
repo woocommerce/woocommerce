@@ -470,10 +470,13 @@ class FulfillmentsRenderer {
 
 			// Ensure the fulfillment status is one of the allowed values.
 			if ( FulfillmentUtils::is_valid_order_fulfillment_status( $fulfillment_status ) ) {
-				if ( ! isset( $args['meta_query'] ) ) {
-					$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
+				if ( ! empty( $meta_query ) ) {
+					if ( ! isset( $args['meta_query'] ) ) {
+						$args['meta_query'] = array(); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+					}
+					$args['meta_query'][] = $meta_query;
 				}
-				$args['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $fulfillment_status );
 			}
 		}
 
