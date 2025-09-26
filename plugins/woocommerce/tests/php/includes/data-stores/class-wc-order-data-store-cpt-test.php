@@ -734,6 +734,29 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test reading refund data.
+	 */
+	public function test_reading_refund_data() {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+
+		$refund = new WC_Order_Refund();
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_amount( 50.00 );
+		$refund->set_refunded_by( 8 );
+		$refund->set_refunded_payment( true );
+		$refund->set_reason( 'Customer requested refund' );
+		$refund->save();
+
+		$read_refund = wc_get_order( $refund->get_id() );
+
+		$this->assertEquals( 50.00, $read_refund->get_amount() );
+		$this->assertEquals( 8, $read_refund->get_refunded_by() );
+		$this->assertTrue( $read_refund->get_refunded_payment() );
+		$this->assertEquals( 'Customer requested refund', $read_refund->get_reason() );
+	}
+
+	/**
 	 * Test orderby total functionality works as expected for CPT storage.
 	 */
 	public function test_orderby_total() {
@@ -794,5 +817,4 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$order->delete( true );
 		}
 	}
-
 }
