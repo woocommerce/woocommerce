@@ -188,8 +188,8 @@ const PayPalButtonsContainer = ( {
 		}
 	};
 
-	const onApprove = ( data ) => {
-		if ( data.paymentID && orderReceivedUrl ) {
+	const onApprove = () => {
+		if ( orderReceivedUrl ) {
 			window.location.href = orderReceivedUrl;
 		}
 	};

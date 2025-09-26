@@ -139,8 +139,8 @@ jQuery(function ($) {
 				}
 			},
 
-			onApprove( data ) {
-				if ( data.paymentID && orderReceivedUrl ) {
+			onApprove() {
+				if ( orderReceivedUrl ) {
 					window.location.href = orderReceivedUrl;
 				}
 			},
