@@ -55,10 +55,10 @@ class MigratorTracker {
 	 * @param string $platform Platform identifier (e.g., 'shopify').
 	 * @param array  $metadata Session metadata.
 	 */
-	public function on_session_started( string $platform, array $metadata ): void {
+	public function on_session_started( string $platform, array $metadata ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$this->current_session = array(
 			'platform'           => $platform,
-			'started_at'         => current_time( 'timestamp' ),
+			'started_at'         => time(),
 			'products_total'     => 0,
 			'products_processed' => 0,
 			'product_types'      => array(),
@@ -94,9 +94,9 @@ class MigratorTracker {
 			return;
 		}
 
-		$this->current_session['total_time'] = current_time( 'timestamp' ) - $this->current_session['started_at'];
+		$this->current_session['total_time'] = time() - $this->current_session['started_at'];
 
-		$this->current_session['completed_at'] = current_time( 'timestamp' );
+		$this->current_session['completed_at'] = time();
 
 		$this->current_session['products_total'] = $final_stats['total_found'] ?? $this->current_session['products_processed'];
 
