@@ -100,8 +100,6 @@ class ShippingMethodSchema extends AbstractSchema {
 	/**
 	 * Get shipping method settings with title included.
 	 *
-	 * @todo Ensure the `common_fields` are more flexible.
-	 *
 	 * @param object $method Shipping method instance.
 	 * @return array Method settings including title.
 	 */
