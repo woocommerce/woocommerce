@@ -95,12 +95,11 @@ class AbilitiesRestBridge {
 			),
 			array(
 				'controller' => \WC_REST_System_Status_Controller::class,
+				'route'      => '/wc/v3/system_status',
 				'abilities'  => array(
 					array(
 						'id'          => 'woocommerce/system-status-get',
 						'operation'   => 'list',
-						'route'       => '/wc/v3/system_status',
-						'route_params' => array(),
 						'label'       => __( 'Get System Status', 'woocommerce' ),
 						'description' => __( 'Retrieve comprehensive system status information including environment details, database info, active plugins, theme, and WooCommerce settings.', 'woocommerce' ),
 					),
