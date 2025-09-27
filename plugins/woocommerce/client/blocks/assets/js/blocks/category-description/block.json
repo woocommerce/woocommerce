@@ -3,7 +3,6 @@
 	"title": "Category Description",
 	"description": "Displays the current category description.",
 	"category": "woocommerce",
-	"icon": "text",
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
 	"attributes": {

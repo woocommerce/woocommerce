@@ -3,7 +3,7 @@
 	"title": "Category Title",
 	"description": "Displays the current category title and lets permitted users edit it.",
 	"category": "woocommerce",
-	"icon": "category",
+	"icon": "heading",
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
 	"attributes": {
