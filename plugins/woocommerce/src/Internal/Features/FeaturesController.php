@@ -577,10 +577,11 @@ class FeaturesController {
 
 					return $base_description . $documentation_link;
 				},
-				'enabled_by_default' => false,
-				'disable_ui'         => false,
-				'is_experimental'    => true,
-				'is_legacy'          => false,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_legacy'                    => false,
 			),
 		);
 
