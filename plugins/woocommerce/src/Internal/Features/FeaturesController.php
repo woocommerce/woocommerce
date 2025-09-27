@@ -592,7 +592,7 @@ class FeaturesController {
 		// Check permalink structure requirement.
 		$permalink_structure = get_option( 'permalink_structure' );
 		if ( empty( $permalink_structure ) ) {
-			$permalinks_url = admin_url( 'options-permalink.php' );
+			$permalinks_url    = admin_url( 'options-permalink.php' );
 			$permalink_warning = sprintf(
 				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
 				__( 'Configuration Required', 'woocommerce' ),
