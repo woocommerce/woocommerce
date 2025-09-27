@@ -25,12 +25,12 @@ const v1 = {
 	},
 	save: () => <InnerBlocks.Content />,
 	isEligible: ( attributes: BlockAttributes ) => {
-		// If the block has showDesc attribute as boolean value, it's a legacy block
+		// If the block has editMode attribute as boolean value, it's a legacy block
 		// and it should be migrated to use inner blocks instead.
-		return typeof attributes.showDesc === 'boolean';
+		return typeof attributes.editMode === 'boolean';
 	},
 	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
-		const { showDesc, ...otherAttributes } = attributes;
+		const { editMode, showDesc, ...otherAttributes } = attributes;
 
 		// Always add category title as first inner block
 		innerBlocks.unshift(

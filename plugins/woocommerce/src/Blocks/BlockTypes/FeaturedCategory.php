@@ -84,9 +84,9 @@ class FeaturedCategory extends FeaturedItem {
 	protected function render_attributes( $category, $attributes ) {
 		$output = '';
 
-		// Backwards compatibility: Only render legacy attributes if they exist as boolean values
-		// This allows us to distinguish between old blocks (with boolean props) and new blocks (without these props)
-		if ( array_key_exists( 'showDesc', $attributes ) && is_bool( $attributes['showDesc'] ) ) {
+		// Backwards compatibility: Only render legacy attributes if `editMode` exists as boolean value
+		// This allows us to distinguish between old and new version of the block (which accept inner blocks).
+		if ( array_key_exists( 'editMode', $attributes ) && is_bool( $attributes['editMode'] ) ) {
 			$legacy_title = sprintf(
 				'<h2 class="wc-block-featured-category__title">%s</h2>',
 				wp_kses_post( $category->name )
