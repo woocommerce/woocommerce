@@ -28,22 +28,28 @@ This architecture allows WooCommerce to expose operations as MCP tools through t
 
 ## What's Available
 
-WooCommerce's MCP integration provides AI assistants with structured access to core store operations:
+WooCommerce's MCP integration provides AI assistants with structured access to core store operations through the [WordPress Abilities API](https://github.com/WordPress/abilities-api). The current implementation exposes WooCommerce REST API endpoints as MCP tools, with future versions potentially including custom implementations optimized for AI interactions.
 
-### Product Management
+**📖 [Complete MCP Abilities Reference →](abilities.md)**
 
-- List products with filtering and pagination
-- Retrieve detailed product information
-- Create new products
-- Update existing products
-- Delete products
+### Current Capabilities
 
-### Order Management
+**Product Management**
+- List, get, create, update, and delete products
+- Manage product variations (for variable products)
 
-- List orders with filtering and pagination
-- Retrieve detailed order information
-- Create new orders
-- Update existing orders
+**Order Management**
+- List, get, create, and update orders
+- Manage order notes and refunds
+
+**Customer Management**
+- List, get, create, update, and delete customers
+
+**Coupon Management**
+- List, get, create, update, and delete coupons
+
+**System Information**
+- Retrieve store information and system status
 
 All operations respect WooCommerce's existing permission system and are authenticated using WooCommerce REST API keys.
 
