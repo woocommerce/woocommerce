@@ -117,7 +117,7 @@ export const withFeaturedItem =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: FeaturedItemProps< T > ) => {
 		const [ isEditingImage ] = props.useEditingImage;
-		const [ _, setEditMode ] = props.useEditMode;
+		const [ , setEditMode ] = props.useEditMode;
 
 		const {
 			attributes,
