@@ -41,19 +41,21 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Store original global post
+		// Store original global post.
 		global $post;
 		$this->original_post = $post;
 
-		// Create a mock gateway
-		$this->mock_gateway = $this->createMock( WC_Gateway_Paypal::class );
-		$this->mock_gateway->email = 'paypalmerchant@paypal.com';
+		// Create a mock gateway.
+		$this->mock_gateway           = $this->createMock( WC_Gateway_Paypal::class );
+		$this->mock_gateway->email    = 'paypalmerchant@paypal.com';
 		$this->mock_gateway->testmode = false;
 		$this->mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
-		$this->mock_gateway->method( 'get_option' )->willReturnMap( [
-			[ 'paypal_buttons', 'yes', 'yes' ],
-			[ 'paymentaction', 'sale', 'sale' ],
-		] );
+		$this->mock_gateway->method( 'get_option' )->willReturnMap(
+			array(
+				array( 'paypal_buttons', 'yes', 'yes' ),
+				array( 'paymentaction', 'sale', 'sale' ),
+			)
+		);
 
 		$this->buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
 	}
@@ -62,15 +64,15 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
-		// Clean up any options that might have been set during tests
 		delete_option( 'woocommerce_paypal_client_id_live' );
 		delete_option( 'woocommerce_paypal_client_id_sandbox' );
 
-		// Restore original global post
+		// Restore original global post.
 		global $post;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = $this->original_post;
 
-		// Remove any filters that might have been added
+		// Remove any filters that might have been added.
 		remove_all_filters( 'woocommerce_is_checkout' );
 		remove_all_filters( 'woocommerce_is_cart' );
 		remove_all_filters( 'woocommerce_is_product' );
@@ -84,8 +86,8 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	public function test_get_options_returns_correct_structure() {
 		// Mock get_client_id and get_page_type to return test values.
 		$buttons = $this->getMockBuilder( WC_Gateway_Paypal_Buttons::class )
-			->setConstructorArgs( [ $this->mock_gateway ] )
-			->onlyMethods( [ 'get_client_id', 'get_page_type' ] )
+			->setConstructorArgs( array( $this->mock_gateway ) )
+			->onlyMethods( array( 'get_client_id', 'get_page_type' ) )
 			->getMock();
 
 		$buttons->method( 'get_client_id' )->willReturn( 'test_client_id' );
@@ -111,8 +113,8 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	public function test_get_common_options_returns_correct_defaults() {
 		// Mock get_client_id to return a test client ID.
 		$buttons = $this->getMockBuilder( WC_Gateway_Paypal_Buttons::class )
-			->setConstructorArgs( [ $this->mock_gateway ] )
-			->onlyMethods( [ 'get_client_id' ] )
+			->setConstructorArgs( array( $this->mock_gateway ) )
+			->onlyMethods( array( 'get_client_id' ) )
 			->getMock();
 
 		$buttons->method( 'get_client_id' )->willReturn( 'test_client_id' );
@@ -132,10 +134,13 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Test get_page_type returns correct values based on page context.
 	 *
+	 * @param bool   $is_cart Whether the current page is a cart page.
+	 * @param string $expected_page_type The expected page type.
+	 *
 	 * @dataProvider provider_page_type_scenarios
 	 */
 	public function test_get_page_type_returns_correct_value( $is_cart, $expected_page_type ) {
-		// Mock WordPress conditional functions using filters
+		// Mock WordPress conditional functions using filters.
 		if ( $is_cart ) {
 			add_filter( 'woocommerce_is_cart', '__return_true' );
 		} else {
@@ -154,14 +159,14 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provider_page_type_scenarios() {
 		return array(
-			'cart_page' => array(
-				'is_cart' => true,
-				'expected_page_type' => 'cart'
-            ),
+			'cart_page'     => array(
+				'is_cart'            => true,
+				'expected_page_type' => 'cart',
+			),
 			'checkout_page' => array(
-				'is_cart' => false,
-				'expected_page_type' => 'checkout'
-			)
+				'is_cart'            => false,
+				'expected_page_type' => 'checkout',
+			),
 		);
 	}
 
@@ -208,12 +213,12 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * Test get_client_id fetches from API when not cached.
 	 */
 	public function test_get_client_id_fetches_from_api_when_not_cached() {
-        $mock_request = $this->createMock( WC_Gateway_Paypal_Request::class );
+		$mock_request = $this->createMock( WC_Gateway_Paypal_Request::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( 'test_client_id' );
 
 		$buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
 
-		$reflection = new ReflectionClass( $buttons );
+		$reflection       = new ReflectionClass( $buttons );
 		$request_property = $reflection->getProperty( 'request' );
 		$request_property->setAccessible( true );
 		$request_property->setValue( $buttons, $mock_request );
@@ -234,7 +239,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 		$buttons = new WC_Gateway_Paypal_Buttons( $this->mock_gateway );
 
 		// Use reflection to set the request property.
-		$reflection = new ReflectionClass( $buttons );
+		$reflection       = new ReflectionClass( $buttons );
 		$request_property = $reflection->getProperty( 'request' );
 		$request_property->setAccessible( true );
 		$request_property->setValue( $buttons, $mock_request );
@@ -248,23 +253,31 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * Test get_current_page_for_app_switch returns URL for allowed pages.
 	 *
 	 * @dataProvider provider_app_switch_url_scenarios
+	 *
+	 * @param string $page_type The page type.
+	 * @param string $filter_name The filter name.
+	 * @param string $post_type The post type.
+	 * @param bool   $expected_contains Whether the expected contains.
 	 */
 	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type, $expected_contains ) {
 		// Create a test post.
-		$post_id = $this->factory->post->create( array(
-			'post_title'  => "Test {$page_type}",
-			'post_type'   => $post_type,
-			'post_status' => 'publish'
-		) );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_title'  => "Test {$page_type}",
+				'post_type'   => $post_type,
+				'post_status' => 'publish',
+			)
+		);
 
-		// Set global post
+		// Set global post.
 		global $post;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
 
-		// Mock the appropriate page type
-        if ( $filter_name ) {
-            add_filter( $filter_name, '__return_true' );
-        }
+		// Mock the appropriate page type.
+		if ( $filter_name ) {
+			add_filter( $filter_name, '__return_true' );
+		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
 
@@ -275,7 +288,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 			$this->assertEquals( '', $url );
 		}
 
-		// Clean up
+		// Clean up.
 		wp_delete_post( $post_id, true );
 	}
 
@@ -287,23 +300,23 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	public function provider_app_switch_url_scenarios() {
 		return array(
 			'checkout_page' => array(
-				'page_type' => 'checkout',
-				'filter_name' => 'woocommerce_is_checkout',
-				'post_type' => 'page',
-				'expected_contains' => true
+				'page_type'         => 'checkout',
+				'filter_name'       => 'woocommerce_is_checkout',
+				'post_type'         => 'page',
+				'expected_contains' => true,
 			),
-			'cart_page' => array(
-				'page_type' => 'cart',
-				'filter_name' => 'woocommerce_is_cart',
-				'post_type' => 'page',
-				'expected_contains' => true
+			'cart_page'     => array(
+				'page_type'         => 'cart',
+				'filter_name'       => 'woocommerce_is_cart',
+				'post_type'         => 'page',
+				'expected_contains' => true,
 			),
-            'other_page' => array(
-                'page_type' => 'other',
-                'filter_name' => null,
-                'post_type' => 'page',
-                'expected_contains' => false
-            )
+			'other_page'    => array(
+				'page_type'         => 'other',
+				'filter_name'       => null,
+				'post_type'         => 'page',
+				'expected_contains' => false,
+			),
 		);
 	}
 
@@ -312,15 +325,18 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages() {
 		// Create a test post.
-		$post_id = $this->factory->post->create( array(
-			'post_title'  => 'Test Page',
-			'post_type'   => 'page',
-			'post_status' => 'publish'
-		) );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_title'  => 'Test Page',
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
 
 		global $post;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
-		
+
 		// Mock all page types to return false.
 		add_filter( 'woocommerce_is_checkout', '__return_false' );
 		add_filter( 'woocommerce_is_cart', '__return_false' );
@@ -329,7 +345,7 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( '', $url );
 
-		// Clean up
+		// Clean up.
 		wp_delete_post( $post_id, true );
 	}
 
@@ -344,11 +360,11 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 	 * @param string $description       Description of the test scenario.
 	 */
 	public function test_is_enabled_returns_correct_value( $orders_v2_enabled, $buttons_option, $expected_result, $description ) {
-		// Create a fresh mock gateway for each test scenario
-		$mock_gateway = $this->createMock( WC_Gateway_Paypal::class );
-		$mock_gateway->email = 'paypalmerchant@paypal.com';
+		// Create a fresh mock gateway for each test scenario.
+		$mock_gateway           = $this->createMock( WC_Gateway_Paypal::class );
+		$mock_gateway->email    = 'paypalmerchant@paypal.com';
 		$mock_gateway->testmode = false;
-		
+
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( $orders_v2_enabled );
 		$mock_gateway->method( 'get_option' )->with( 'paypal_buttons', 'yes' )->willReturn( $buttons_option );
 
@@ -366,28 +382,28 @@ class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
 		return array(
 			'enabled_when_orders_v2_and_buttons_enabled' => array(
 				'orders_v2_enabled' => true,
-				'buttons_option' => 'yes',
-				'expected_result' => true,
-				'description' => 'Should be enabled when Orders v2 is enabled and buttons option is yes'
+				'buttons_option'    => 'yes',
+				'expected_result'   => true,
+				'description'       => 'Should be enabled when Orders v2 is enabled and buttons option is yes',
 			),
-			'disabled_when_buttons_option_no' => array(
+			'disabled_when_buttons_option_no'            => array(
 				'orders_v2_enabled' => true,
-				'buttons_option' => 'no',
-				'expected_result' => false,
-				'description' => 'Should be disabled when buttons option is no'
+				'buttons_option'    => 'no',
+				'expected_result'   => false,
+				'description'       => 'Should be disabled when buttons option is no',
 			),
-			'disabled_when_orders_v2_disabled' => array(
+			'disabled_when_orders_v2_disabled'           => array(
 				'orders_v2_enabled' => false,
-				'buttons_option' => 'yes',
-				'expected_result' => false,
-				'description' => 'Should be disabled when Orders v2 is disabled'
+				'buttons_option'    => 'yes',
+				'expected_result'   => false,
+				'description'       => 'Should be disabled when Orders v2 is disabled',
 			),
-			'disabled_when_both_disabled' => array(
+			'disabled_when_both_disabled'                => array(
 				'orders_v2_enabled' => false,
-				'buttons_option' => 'no',
-				'expected_result' => false,
-				'description' => 'Should be disabled when both Orders v2 and buttons are disabled'
-			)
+				'buttons_option'    => 'no',
+				'expected_result'   => false,
+				'description'       => 'Should be disabled when both Orders v2 and buttons are disabled',
+			),
 		);
 	}
 }
