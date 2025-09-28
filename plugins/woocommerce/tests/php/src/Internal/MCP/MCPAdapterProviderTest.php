@@ -92,10 +92,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
 		remove_all_filters( 'mcp_validation_enabled' );
 
-		// Reset WordPress actions.
-		global $wp_actions;
-		unset( $wp_actions['rest_api_init'] );
-		unset( $wp_actions['mcp_adapter_init'] );
+		// Remove actions registered by the system under test.
+		remove_action( 'rest_api_init', array( $this->sut, 'maybe_initialize' ), 10 );
+		remove_action( 'mcp_adapter_init', array( $this->sut, 'initialize_mcp_server' ), 10 );
 
 		// Clean up feature flag options.
 		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
