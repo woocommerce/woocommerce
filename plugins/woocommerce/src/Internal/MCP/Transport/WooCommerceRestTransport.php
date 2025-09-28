@@ -80,7 +80,7 @@ class WooCommerceRestTransport extends RestTransport {
 		if ( empty( $api_key ) ) {
 			return new \WP_Error(
 				'missing_api_key',
-				'X-MCP-API-Key header required. Format: consumer_key:consumer_secret',
+				__( 'X-MCP-API-Key header required. Format: consumer_key:consumer_secret', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -88,7 +88,7 @@ class WooCommerceRestTransport extends RestTransport {
 		if ( strpos( $api_key, ':' ) === false ) {
 			return new \WP_Error(
 				'invalid_api_key',
-				'X-MCP-API-Key must be in format consumer_key:consumer_secret',
+				__( 'X-MCP-API-Key must be in format consumer_key:consumer_secret', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
