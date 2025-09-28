@@ -49,14 +49,14 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 function attributesAutoselect( $variation_selectors ) {
-	const { selectedAttributes, availableVariations } =
-		getContext< AddToCartWithOptionsStoreContext >(
+	const { selectedAttributes } =
+		getContext< Context >(
 			'woocommerce/add-to-cart-with-options'
 		);
 	$variation_selectors.each( function () {
 		const $current_variation_selector = $( this ),
-			// 'pill' is not actually a possible fieldStyle value, pills are simply the default option, and they don't give a value to fieldStyle
-			fieldStyle = $current_variation_selector.data( 'style' ) || 'pill';
+			// 'pill' is not actually a possible optionStyle value, pills are simply the default option, and they don't give a value to optionStyle
+			optionStyle = $current_variation_selector.data( 'optionStyle' ) || 'pills';
 		// Dropdown options or Pill inputs,
 		// that HAVE a value (Choose an Option has an empty value of ""),
 		// are NOT disabled (disabled by attribute is when you cannot click it, disabled by class is when it is simply grayed-out/crossed-out, but you can still click it),
@@ -64,22 +64,21 @@ function attributesAutoselect( $variation_selectors ) {
 		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], :disabled, .disabled)' ).filter( ( i, e ) => {
 			const $el = $( e );
 			var name = '';
-			switch ( fieldStyle ) {
-				case 'pill':
+			switch ( optionStyle ) {
+				case 'pills':
 					name = $el.attr( 'name' )
 					break;
 				case 'dropdown':
 					name = $el.data( 'wpContext' )['name'];
 					break;
 				default:
-					throw new Error( 'fieldStyle not implemented!: ', fieldStyle );
+					throw new Error( 'optionStyle not implemented!: ', optionStyle );
 					break;
 			}
 			return isAttributeValueValid( {
 				attributeName: name,
 				attributeValue: $el.val(),
 				selectedAttributes,
-				availableVariations,
 			} );
 		} );
 		if ( $valid_choices.length === 1 ) {
@@ -88,8 +87,8 @@ function attributesAutoselect( $variation_selectors ) {
 			if ( $selected.length === 0 || $selected.val() !== $valid_choices.val() ) {
 				// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
 				in_autoselect_scope = true;
-				switch ( fieldStyle ) {
-					case 'pill':
+				switch ( optionStyle ) {
+					case 'pills':
 						$valid_choices.click();
 						break;
 					case 'dropdown':
@@ -100,7 +99,7 @@ function attributesAutoselect( $variation_selectors ) {
 						$select[0].dispatchEvent(ev);
 						break;
 					default:
-						throw new Error( 'fieldStyle not implemented!: ', fieldStyle );
+						throw new Error( 'optionStyle not implemented!: ', optionStyle );
 						break;
 				}
 				in_autoselect_scope = false;
@@ -314,8 +313,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			handlePillClick() {
 				const disabled = state.isOptionDisabled;
 				const context = getContext< Context >();
-				const { selectedAttributes, availableVariations } =
-					getContext< AddToCartWithOptionsStoreContext >(
+				const { selectedAttributes } =
+					getContext< Context >(
 						'woocommerce/add-to-cart-with-options'
 					);
 				const $form = $( 'form.wc-block-add-to-cart-with-options' ),
@@ -338,7 +337,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 								attributeName: attrName,
 								attributeValue: context.option.value,
 								selectedAttributes: fakeSelectedAttributes,
-								availableVariations,
 							} );
 							if ( ! valid ) {
 								// deselect this attribute by clicking on it
