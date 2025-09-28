@@ -31,6 +31,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	private $mock_abilities_registry;
 
 	/**
+	 * Original abilities registry instance.
+	 *
+	 * @var AbilitiesRegistry
+	 */
+	private $original_abilities_registry;
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
@@ -59,8 +66,11 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Create mock abilities registry.
 		$this->mock_abilities_registry = $this->createMock( AbilitiesRegistry::class );
 
-		// Replace in container for testing.
+		// Capture original abilities registry before replacing.
 		$container = wc_get_container();
+		$this->original_abilities_registry = $container->resolve( AbilitiesRegistry::class );
+
+		// Replace in container for testing.
 		$container->replace( AbilitiesRegistry::class, $this->mock_abilities_registry );
 
 		$this->sut = new MCPAdapterProvider();
@@ -70,6 +80,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * Clean up after each test.
 	 */
 	public function tearDown(): void {
+		// Restore original abilities registry if it was captured.
+		if ( $this->original_abilities_registry ) {
+			$container = wc_get_container();
+			$container->replace( AbilitiesRegistry::class, $this->original_abilities_registry );
+			$this->original_abilities_registry = null;
+		}
+
 		// Reset any filters that might have been added.
 		remove_all_filters( 'woocommerce_mcp_include_ability' );
 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
