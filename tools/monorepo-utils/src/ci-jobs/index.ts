@@ -33,11 +33,6 @@ const program = new Command( 'ci-jobs' )
 		'Github event for which to run the jobs. If not specified, all events will be considered.',
 		''
 	)
-	.option(
-		'--test-type <testType>',
-		'Filter jobs to only include specific test types (e.g., "e2e", "unit", "unit:php", "api", "performance"). Can be comma-separated for multiple types.',
-		''
-	)
 	.option( '--json', 'Save the jobs in a json file.' )
 	.option( '--list', 'List jobs in table format console.' )
 	.action( async ( options ) => {
@@ -88,27 +83,6 @@ const program = new Command( 'ci-jobs' )
 			},
 		} );
 		Logger.endTask( true );
-
-		// Filter jobs by test type if specified
-		if ( options.testType ) {
-			const allowedTestTypes = options.testType
-				.split( ',' )
-				.map( ( t ) => t.trim().toLowerCase() );
-			Logger.notice(
-				`Filtering jobs to only include test types: ${ allowedTestTypes.join(
-					', '
-				) }`
-			);
-
-			const originalTestJobsCount = jobs.test.length;
-			jobs.test = jobs.test.filter( ( job ) =>
-				allowedTestTypes.includes( job.testType.toLowerCase() )
-			);
-
-			Logger.notice(
-				`Filtered test jobs from ${ originalTestJobsCount } to ${ jobs.test.length }`
-			);
-		}
 
 		// Rename the test jobs to include the project name and test type.
 		for ( const job of jobs.test ) {
