@@ -608,6 +608,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Test that order props saved by data stores are read correctly.
+	 */
 	public function test_reading_order_basic_props() {
 		$order = WC_Helper_Order::create_order();
 		$order->set_currency( 'EUR' );
