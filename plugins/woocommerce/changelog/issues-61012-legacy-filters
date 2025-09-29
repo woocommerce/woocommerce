@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make legacy gallery filters available while rendering blocks
