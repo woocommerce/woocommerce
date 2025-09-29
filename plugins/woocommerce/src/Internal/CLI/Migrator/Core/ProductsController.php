@@ -80,6 +80,13 @@ class ProductsController {
 	private MigratorTracker $tracker;
 
 	/**
+	 * Run start time for this CLI invocation (used for timing metrics).
+	 *
+	 * @var int
+	 */
+	private int $session_start_time = 0;
+
+	/**
 	 * Initialize the controller with its dependencies.
 	 * Called automatically by the WooCommerce DI container.
 	 *
@@ -114,6 +121,8 @@ class ProductsController {
 		if ( empty( $this->parsed_args ) ) {
 			return;
 		}
+
+		$this->session_start_time = time();
 
 		if ( $this->parsed_args['dry_run'] ) {
 			WP_CLI::line( WP_CLI::colorize( '%Y--- DRY RUN MODE ENABLED ---%n' ) );
@@ -194,6 +203,8 @@ class ProductsController {
 			 * @param array  $final_stats Final migration statistics.
 			 */
 			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
+
+			$this->log_session_time_metrics( $final_stats );
 		}
 
 		if ( $this->parsed_args['dry_run'] ) {
@@ -794,6 +805,49 @@ class ProductsController {
 		);
 
 		$this->product_importer->configure( $import_options );
+
+		if ( $this->parsed_args['verbose'] ?? false ) {
+			$this->product_importer->set_progress_callback( array( $this, 'display_product_progress' ) );
+		}
+	}
+
+	/**
+	 * Display progress indicator for individual product imports.
+	 *
+	 * @param int        $current_index Current product index (1-based).
+	 * @param int        $total_count   Total number of products in batch.
+	 * @param string     $product_name  Name of the product being processed.
+	 * @param array|null $result        Import result (null when starting, array when finished).
+	 */
+	public function display_product_progress( int $current_index, int $total_count, string $product_name, ?array $result ): void {
+		if ( null === $result ) {
+			return;
+		}
+
+		$display_name = strlen( $product_name ) > 40 ? substr( $product_name, 0, 37 ) . '...' : $product_name;
+
+		$status_char  = '✓';
+		$status_color = '%G';
+
+		if ( 'error' === $result['status'] ) {
+			$status_char  = '✗';
+			$status_color = '%R';
+		} elseif ( 'success' === $result['status'] && 'skipped' === $result['action'] ) {
+			$status_char  = '−';
+			$status_color = '%Y';
+		}
+
+		$progress = sprintf( '[%d/%d]', $current_index, $total_count );
+
+		if ( 1 === $current_index ) {
+			WP_CLI::line( '' );
+		}
+
+		WP_CLI::line(
+			WP_CLI::colorize(
+				sprintf( '%s%s%s %s %s', $status_color, $status_char, '%n', $progress, $display_name )
+			)
+		);
 	}
 
 	/**
@@ -858,6 +912,40 @@ class ProductsController {
 		}
 
 		WP_CLI::line( '' );
+	}
+
+	/**
+	 * Log session time metrics using session-specific data.
+	 *
+	 * @param array $final_stats Final migration statistics.
+	 */
+	private function log_session_time_metrics( array $final_stats ): void {
+		$session_products = $final_stats['total_imported'] ?? 0;
+
+		if ( empty( $session_products ) ) {
+			return;
+		}
+
+		if ( empty( $this->session_start_time ) ) {
+			return;
+		}
+
+		$session_duration_seconds = time() - $this->session_start_time;
+		$platform                 = $this->parsed_args['platform'];
+
+		$avg_time_per_product   = $session_duration_seconds / $session_products;
+		$session_time_formatted = human_time_diff( 0, $session_duration_seconds );
+		$avg_time_formatted     = number_format( $avg_time_per_product, 2 );
+
+		$metrics_message = sprintf(
+			'Session completed for %s: %d products in %s (avg: %s seconds per product)',
+			$platform,
+			$session_products,
+			$session_time_formatted,
+			$avg_time_formatted
+		);
+
+		wc_get_logger()->info( $metrics_message, array( 'source' => 'wc-migrator' ) );
 	}
 
 	/**
