@@ -80,6 +80,7 @@
 		"test:e2e:block-theme": "pnpm run test:e2e block_theme",
 		"test:e2e:classic-theme": "pnpm run test:e2e classic_theme",
 		"test:e2e:block-theme-with-templates": "pnpm run test:e2e block_theme_with_templates",
+		"test:e2e:legacy-mini-cart": "sh ./bin/check-env.sh && pnpm playwright test --config=tests/e2e/playwright.config.ts --project=legacy-mini-cart",
 		"test:e2e:jest": "echo 'test:e2e:jest is no more. Use test:e2e instead.'",
 		"test:e2e:jest:dev": "echo 'test:e2e:jest is no more. Use test:e2e instead.'",
 		"test:e2e:jest:dev-watch": "echo 'test:e2e:jest is no more. Use test:e2e instead.'",

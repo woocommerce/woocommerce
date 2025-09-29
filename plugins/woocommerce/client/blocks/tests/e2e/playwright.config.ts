@@ -55,6 +55,17 @@ const config: PlaywrightTestConfig = {
 			use: { ...devices[ 'Desktop Chrome' ] },
 			fullyParallel: true,
 		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [
+				'**/tests/mini-cart/**',
+				'**/tests/add-to-cart-with-options/**',
+				'**/tests/product-button/**',
+				'**/tests/product-collection/**',
+			],
+			fullyParallel: true,
+			use: { ...devices[ 'Desktop Chrome' ] },
+		},
 	],
 };
 

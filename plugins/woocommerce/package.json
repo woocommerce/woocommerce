@@ -64,10 +64,10 @@
 		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
-		"ci:legacy:minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
-		"test:e2e:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:e2e",
-		"test:e2e:blocks:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:e2e:blocks",
-		"test:php:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:php:env",
+		"ci:legacy-minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
+		"test:e2e:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:e2e:default --project=legacy-mini-cart",
+		"test:e2e:blocks:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm --filter='@woocommerce/block-library' test:e2e:legacy-mini-cart",
+		"test:php:legacy-mini-cart": "pnpm ci:legacy-minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
 		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
@@ -147,9 +147,9 @@
 					]
 				},
 				{
-					"name": "Legacy MiniCart - PHP: 8.4 WP: latest",
+					"name": "PHP: 8.4 WP: latest - Legacy MiniCart",
 					"testType": "unit:php",
-					"command": "test:php:legacy",
+					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
 						"--testsuite=wc-phpunit-main"
@@ -290,16 +290,12 @@
 					}
 				},
 				{
-					"name": "Legacy MiniCart - Core e2e tests",
+					"name": "Core e2e tests - Legacy MiniCart",
 					"testType": "e2e",
-					"command": "test:e2e:legacy",
+					"command": "test:e2e:legacy-mini-cart",
 					"shardingArguments": [
-						"--shard=1/6",
-						"--shard=2/6",
-						"--shard=3/6",
-						"--shard=4/6",
-						"--shard=5/6",
-						"--shard=6/6"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"client/admin/config/*.json",
@@ -744,20 +740,12 @@
 					}
 				},
 				{
-					"name": "Legacy MiniCart - Blocks e2e tests",
+					"name": "Blocks e2e tests - Legacy MiniCart",
 					"testType": "e2e",
-					"command": "test:e2e:blocks:legacy",
+					"command": "test:e2e:blocks:legacy-mini-cart",
 					"shardingArguments": [
-						"--shard=1/10",
-						"--shard=2/10",
-						"--shard=3/10",
-						"--shard=4/10",
-						"--shard=5/10",
-						"--shard=6/10",
-						"--shard=7/10",
-						"--shard=8/10",
-						"--shard=9/10",
-						"--shard=10/10"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"patterns/**/*.php",
