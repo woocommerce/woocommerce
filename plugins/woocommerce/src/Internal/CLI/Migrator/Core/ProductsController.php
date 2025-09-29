@@ -80,7 +80,7 @@ class ProductsController {
 	private MigratorTracker $tracker;
 
 	/**
-	 * Session start time.
+	 * Run start time for this CLI invocation (used for timing metrics).
 	 *
 	 * @var int
 	 */
