@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce the number of slow SQL queries in customers reports.

@@ -752,7 +752,7 @@ if (
 							addressData.address_2
 						);
 					} else {
-						// Clear address_2 if not provided in address data
+						// Clear address_2 if not provided in address data.
 						const addr2El = addressInputs[ type ][ 'address_2' ];
 						if ( addr2El && addr2El.value ) {
 							setFieldValue( addr2El, '' );
@@ -763,18 +763,36 @@ if (
 							addressInputs[ type ][ 'city' ],
 							addressData.city
 						);
+					} else {
+						// Clear city if not provided in address data.
+						const cityEl = addressInputs[ type ][ 'city' ];
+						if ( cityEl && cityEl.value ) {
+							setFieldValue( cityEl, '' );
+						}
 					}
 					if ( addressData.postcode ) {
 						setFieldValue(
 							addressInputs[ type ][ 'postcode' ],
 							addressData.postcode
 						);
+					} else {
+						// Clear postcode if not provided in address data.
+						const postcodeEl = addressInputs[ type ][ 'postcode' ];
+						if ( postcodeEl && postcodeEl.value ) {
+							setFieldValue( postcodeEl, '' );
+						}
 					}
 					if ( addressData.state ) {
 						setFieldValue(
 							addressInputs[ type ][ 'state' ],
 							addressData.state
 						);
+					} else {
+						// Clear state if not provided in address data.
+						const stateEl = addressInputs[ type ][ 'state' ];
+						if ( stateEl && stateEl.value ) {
+							setFieldValue( stateEl, '' );
+						}
 					}
 				}, 50 );
 			}

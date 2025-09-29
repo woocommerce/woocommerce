@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Coupons: optimize coupon usage lookup for per-user limited coupons.

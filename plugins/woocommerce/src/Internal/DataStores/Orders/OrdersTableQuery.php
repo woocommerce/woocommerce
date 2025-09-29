@@ -711,12 +711,14 @@ class OrdersTableQuery {
 	/**
 	 * Parses and sanitizes the 'orderby' query var.
 	 *
-	 * @return void
+	 * @param string|array $orderby The unsanitized orderby param which can be a string or an array of orderby keys and direction (ASC, DESC).
+	 * @return string|array The sanitized orderby param which can be a string or an array of orderby keys and direction (ASC, DESC).
 	 */
-	private function sanitize_order_orderby(): void {
-		// Allowed keys.
-		// TODO: rand, meta keys, etc.
-		$allowed_keys = array( 'ID', 'id', 'type', 'date', 'modified', 'parent' );
+	private function sanitize_order_orderby( $orderby ) {
+		// No need to sanitize, will be processed in calling function.
+		if ( 'include' === $orderby || 'post__in' === $orderby || 'none' === $orderby ) {
+			return $orderby;
+		}
 
 		// Translate $orderby to a valid field.
 		$mapping = array(
@@ -732,18 +734,10 @@ class OrdersTableQuery {
 			'order_total'   => "{$this->tables['orders']}.total_amount",
 		);
 
-		$order   = $this->args['order'] ?? '';
-		$orderby = $this->args['orderby'] ?? '';
+		$order           = $this->sanitize_order( $this->args['order'] ?? '' );
+		$allowed_orderby = array_merge( array_keys( $mapping ), array_values( $mapping ), $this->meta_query ? $this->meta_query->get_orderby_keys() : array() );
 
-		if ( 'none' === $orderby ) {
-			return;
-		}
-
-		// No need to sanitize, will be processed in calling function.
-		if ( 'include' === $orderby || 'post__in' === $orderby ) {
-			return;
-		}
-
+		// Convert string orderby to an array of orderby keys and direction (ASC, DESC).
 		if ( is_string( $orderby ) ) {
 			$orderby_fields = array_map( 'trim', explode( ' ', $orderby ) );
 			$orderby        = array();
@@ -752,13 +746,8 @@ class OrdersTableQuery {
 			}
 		}
 
-		$allowed_orderby = array_merge(
-			array_keys( $mapping ),
-			array_values( $mapping ),
-			$this->meta_query ? $this->meta_query->get_orderby_keys() : array()
-		);
+		$sanitized_orderby = array();
 
-		$this->args['orderby'] = array();
 		foreach ( $orderby as $order_key => $order ) {
 			if ( ! in_array( $order_key, $allowed_orderby, true ) ) {
 				continue;
@@ -768,8 +757,10 @@ class OrdersTableQuery {
 				$order_key = $mapping[ $order_key ];
 			}
 
-			$this->args['orderby'][ $order_key ] = $this->sanitize_order( $order );
+			$sanitized_orderby[ $order_key ] = $this->sanitize_order( $order );
 		}
+
+		return $sanitized_orderby;
 	}
 
 	/**
@@ -1349,15 +1340,11 @@ class OrdersTableQuery {
 	 */
 	private function process_orderby(): void {
 		// 'order' and 'orderby' vars.
-		$this->args['order'] = $this->sanitize_order( $this->args['order'] ?? '' );
-		$this->sanitize_order_orderby();
+		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
+		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		$orderby = $this->args['orderby'];
-
-		if ( 'none' === $orderby ) {
-			$this->orderby = '';
-			return;
-		}
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {
 			$ids = $this->args['id'] ?? $this->args['includes'];
@@ -1369,18 +1356,20 @@ class OrdersTableQuery {
 			return;
 		}
 
-		$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+		if ( is_array( $orderby ) ) {
+			$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+			$orderby_array     = array();
 
-		$orderby_array = array();
-		foreach ( $this->args['orderby'] as $_orderby => $order ) {
-			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
-				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+			foreach ( $orderby as $_orderby => $order ) {
+				if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
+					$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+				}
+
+				$orderby_array[] = "{$_orderby} {$order}";
 			}
 
-			$orderby_array[] = "{$_orderby} {$order}";
+			$this->orderby = $orderby_array;
 		}
-
-		$this->orderby = $orderby_array;
 	}
 
 	/**
