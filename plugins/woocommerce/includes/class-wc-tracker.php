@@ -177,12 +177,13 @@ class WC_Tracker {
 		$data['helper_connected']   = self::get_helper_connected();
 
 		// Store count info.
-		$data['users']      = self::get_user_counts();
-		$data['products']   = self::get_product_counts();
-		$data['orders']     = self::get_orders();
-		$data['reviews']    = self::get_review_counts();
-		$data['categories'] = self::get_category_counts();
-		$data['brands']     = self::get_brands_counts();
+		$data['users']           = self::get_user_counts();
+		$data['products']        = self::get_product_counts();
+		$data['active_products'] = self::get_active_product_counts();
+		$data['orders']          = self::get_orders();
+		$data['reviews']         = self::get_review_counts();
+		$data['categories']      = self::get_category_counts();
+		$data['brands']          = self::get_brands_counts();
 
 		// Migrator CLI statistics.
 		$data['migrator'] = self::get_migrator_data();
@@ -498,6 +499,55 @@ class WC_Tracker {
 		}
 
 		return $product_count;
+	}
+
+	/**
+	 * Gets active (published) product totals broken down by product type.
+	 *
+	 * @return array
+	 */
+	private static function get_active_product_counts(): array {
+		global $wpdb;
+
+		$counts             = [];
+		$counts_by_id       = [];
+		$product_type_terms = get_terms( array( 'taxonomy' => 'product_type', 'hide_empty' => false, 'fields' => 'id=>slug' ) );
+		$term_ids           = implode( ', ', array_map( 'intval', array_keys( $product_type_terms ) ) );
+
+		// Should result in an array of objects, with each object containing a `product_type` (numeric ID) and a `count` property.
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"
+					SELECT product_types.term_taxonomy_id AS product_type,
+					       COUNT(*) AS count
+
+					FROM %i AS products
+
+					INNER JOIN %i AS product_types ON (
+						products.ID = product_types.object_id
+					)
+
+					WHERE products.post_status = 'publish'
+					      AND product_types.term_taxonomy_id IN ( $term_ids )
+
+					GROUP BY product_type
+				",
+				$wpdb->posts,
+				$wpdb->term_relationships
+			)
+		);
+
+		// Rework the results into an array of counts keyed by product term ID.
+		foreach ( $results as $result ) {
+			$counts_by_id[ $result->product_type ] = (int) $result->count;
+		}
+
+		// Further rework the results into an array of counts keyed by product term slug.
+		foreach ( $product_type_terms as $id => $term_name ) {
+			$counts[ $term_name ] = $counts_by_id[ $id ] ?? 0;
+		}
+
+		return $counts;
 	}
 
 	/**

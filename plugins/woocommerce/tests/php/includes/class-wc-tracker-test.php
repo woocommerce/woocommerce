@@ -458,6 +458,40 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Describes our expectations for the `get_active_product_counts` method.
+	 *
+	 * @return void
+	 */
+	public function test_get_active_product_counts(): void {
+		// Active (published) products of various types. We expect to retrieve counts for these.
+		WC_Helper_Product::create_external_product();
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_simple_product();
+		WC_Helper_Product::create_variation_product();
+		WC_Helper_Product::create_variation_product();
+		WC_Helper_Product::create_variation_product();
+
+		// Inactive products of various types. We do not expect these to be counted.
+		$inactive_products = array(
+			WC_Helper_Product::create_external_product(),
+			WC_Helper_Product::create_simple_product(),
+			WC_Helper_Product::create_variation_product(),
+		);
+
+		foreach ( $inactive_products as $product ) {
+			$product->set_status( 'draft' );
+			$product->save();
+		}
+
+		$method_under_test = new ReflectionMethod( WC_Tracker::class, 'get_active_product_counts' );
+		$results           = $method_under_test->invoke( null );
+
+		$this->assertSame( 1, $results['external'], 'We correctly determine the number of active external products.' );
+		$this->assertSame( 2, $results['simple'], 'We correctly determine the number of active simple products.' );
+		$this->assertSame( 3, $results['variable'], 'We correctly determine the number of active variable products.' );
+	}
+
+	/**
 	 * Helper method to register a mock address provider.
 	 */
 	private function register_mock_address_provider() {
