@@ -19,6 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -3092,6 +3093,11 @@ FROM $order_meta_table
 					'compare' => 'NOT EXISTS',
 				);
 			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
 		try {

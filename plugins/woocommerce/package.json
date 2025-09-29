@@ -304,7 +304,6 @@
 						"@woocommerce/e2e-utils-playwright"
 					],
 					"events": [
-						"pull_request",
 						"nightly-checks",
 						"release-checks",
 						"core-e2e-gutenberg"
