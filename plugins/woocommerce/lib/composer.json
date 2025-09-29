@@ -29,10 +29,23 @@
 			"dep_directory": "/packages/",
 			"packages": [
 				"psr/container",
-				"mobiledetect/mobiledetectlib"
+				"mobiledetect/mobiledetectlib",
+				"pelago/emogrifier"
 			],
 			"excluded_packages": [
 			],
+			"override_autoload": {
+				"mobiledetect/mobiledetectlib": {
+					"psr-4": {
+						"Detection\\": "src/"
+					}
+				},
+				"thecodingmachine/safe": {
+					"psr-4": {
+						"Safe\\": ""
+					}
+				}
+			},
 			"classmap_directory": "/classes/",
 			"classmap_prefix": "WC_Vendor_",
 			"delete_vendor_directories": true
