@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Introduce experimental feature to remove customer sessions once empty.

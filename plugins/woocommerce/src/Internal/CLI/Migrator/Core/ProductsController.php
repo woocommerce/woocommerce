@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Core;
 
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\CredentialManager;
+use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\PlatformRegistry;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\WooCommerceProductImporter;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Lib\ImportSession;
@@ -72,6 +73,13 @@ class ProductsController {
 	private WooCommerceProductImporter $product_importer;
 
 	/**
+	 * Migration tracker instance.
+	 *
+	 * @var MigratorTracker
+	 */
+	private MigratorTracker $tracker;
+
+	/**
 	 * Initialize the controller with its dependencies.
 	 * Called automatically by the WooCommerce DI container.
 	 *
@@ -80,15 +88,18 @@ class ProductsController {
 	 * @param CredentialManager          $credential_manager The credential manager.
 	 * @param PlatformRegistry           $platform_registry  The platform registry.
 	 * @param WooCommerceProductImporter $product_importer   The product importer.
+	 * @param MigratorTracker            $tracker            The migration tracker.
 	 */
 	final public function init(
 		CredentialManager $credential_manager,
 		PlatformRegistry $platform_registry,
-		WooCommerceProductImporter $product_importer
+		WooCommerceProductImporter $product_importer,
+		MigratorTracker $tracker
 	): void {
 		$this->credential_manager = $credential_manager;
 		$this->platform_registry  = $platform_registry;
 		$this->product_importer   = $product_importer;
+		$this->tracker            = $tracker;
 	}
 
 	/**
@@ -115,6 +126,26 @@ class ProductsController {
 			if ( ! $this->session ) {
 				return;
 			}
+
+			/**
+			 * Fires when a migration session starts.
+			 *
+			 * @since 10.3.0
+			 *
+			 * @param string $platform The platform being migrated from.
+			 * @param array  $metadata Session metadata including session_id, filters, and fields.
+			 */
+			do_action(
+				'wc_migrator_session_started',
+				$this->parsed_args['platform'],
+				array(
+					'session_id' => $this->session->get_id(),
+					'filters'    => $this->parsed_args['filters'],
+					'fields'     => $this->fields_to_process,
+					'is_dry_run' => $this->parsed_args['dry_run'],
+					'resume'     => $this->parsed_args['resume'],
+				)
+			);
 		}
 
 		$fetcher = $this->platform_registry->get_fetcher( $this->parsed_args['platform'] );
@@ -146,6 +177,24 @@ class ProductsController {
 		$progress->finish();
 
 		$this->display_migration_summary();
+
+		$this->display_feedback_survey();
+
+		if ( ! $this->parsed_args['dry_run'] ) {
+			$final_stats = array(
+				'total_found'    => $total_count,
+				'total_imported' => $this->session->count_all_imported_entities(),
+			);
+			/**
+			 * Fires when a migration session completes.
+			 *
+			 * @since 10.3.0
+			 *
+			 * @param string $platform    The platform being migrated from.
+			 * @param array  $final_stats Final migration statistics.
+			 */
+			do_action( 'wc_migrator_session_completed', $this->parsed_args['platform'], $final_stats );
+		}
 
 		if ( $this->parsed_args['dry_run'] ) {
 			WP_CLI::success( 'Dry-run completed successfully. No products were actually created or modified.' );
@@ -187,6 +236,25 @@ class ProductsController {
 			try {
 				$batch_data = $fetcher->fetch_batch( $batch_args );
 			} catch ( Exception $e ) {
+				/**
+				 * Fires when an error occurs during migration.
+				 *
+				 * @since 10.3.0
+				 *
+				 * @param string $error_type The type of error (fetch, mapping, import).
+				 * @param string $message    The error message.
+				 * @param array  $context    Additional error context.
+				 */
+				do_action(
+					'wc_migrator_error_occurred',
+					'fetch',
+					$e->getMessage(),
+					array(
+						'batch_args' => $batch_args,
+						'platform'   => $this->parsed_args['platform'],
+					)
+				);
+
 				WP_CLI::warning( "Error fetching batch: {$e->getMessage()}" );
 				break;
 			}
@@ -553,6 +621,25 @@ class ProductsController {
 					$source_data_batch[] = is_object( $product_data ) ? (array) $product_data : $product_data;
 				}
 			} catch ( Exception $e ) {
+				/**
+				 * Fires when an error occurs during migration.
+				 *
+				 * @since 10.3.0
+				 *
+				 * @param string $error_type The type of error (fetch, mapping, import).
+				 * @param string $message    The error message.
+				 * @param array  $context    Additional error context.
+				 */
+				do_action(
+					'wc_migrator_error_occurred',
+					'mapping',
+					$e->getMessage(),
+					array(
+						'product_data' => $product_data,
+						'platform'     => $this->parsed_args['platform'],
+					)
+				);
+
 				WP_CLI::warning( sprintf( 'Error mapping product: %s', $e->getMessage() ) );
 				continue;
 			}
@@ -564,6 +651,17 @@ class ProductsController {
 			} else {
 				$batch_results = $this->product_importer->import_batch( $mapped_products, $source_data_batch );
 			}
+
+			/**
+			 * Fires when a batch has been processed during migration.
+			 *
+			 * @since 10.3.0
+			 *
+			 * @param array $batch_results   Results from the batch import.
+			 * @param array $source_data     Source platform data for the batch.
+			 * @param array $mapped_products Mapped WooCommerce data for the batch.
+			 */
+			do_action( 'wc_migrator_batch_processed', $batch_results, $source_data_batch, $mapped_products );
 
 			$this->log_batch_results( $batch_results );
 			$processed_count = $batch_results['stats']['successful'];
@@ -769,7 +867,7 @@ class ProductsController {
 		WP_CLI::line( '' );
 		WP_CLI::line( WP_CLI::colorize( '%GHelp us improve the WooCommerce Migrator!%n' ) );
 		WP_CLI::line( 'Please share your feedback about this migration experience:' );
-		WP_CLI::line( WP_CLI::colorize( '%Chttps://woocommerce.com/migrator-feedback/%n' ) );
+		WP_CLI::line( WP_CLI::colorize( '%Chttps://developer.woocommerce.com/migrator-feedback/%n' ) );
 		WP_CLI::line( '' );
 	}
 

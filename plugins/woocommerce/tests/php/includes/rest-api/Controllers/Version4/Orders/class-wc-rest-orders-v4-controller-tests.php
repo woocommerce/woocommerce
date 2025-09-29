@@ -1261,6 +1261,68 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test order by total functionality.
+	 */
+	public function test_order_by_total(): void {
+		// Create orders with different totals.
+		$order_totals = array( 100.00, 50.00, 250.50, 75.25, 500.00 );
+		$orders       = array();
+		foreach ( $order_totals as $order_total ) {
+			$order = $this->create_test_order();
+			$order->set_total( $order_total );
+			$order->save();
+			$orders[] = $order;
+		}
+
+		// Test ascending order.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'orderby', 'total' );
+		$request->set_param( 'order', 'asc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertGreaterThanOrEqual( 5, count( $response_data ) );
+
+		// Verify ascending order by checking totals.
+		$totals_asc = array();
+		foreach ( $response_data as $order_data ) {
+			$totals_asc[] = (float) $order_data['total'];
+		}
+
+		// Check that totals are in ascending order.
+		$sorted_totals_asc = $totals_asc;
+		sort( $sorted_totals_asc );
+		$this->assertEquals( $sorted_totals_asc, $totals_asc, 'Orders should be sorted by total in ascending order' );
+
+		// Test descending order.
+		$request->set_param( 'order', 'desc' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertGreaterThanOrEqual( 5, count( $response_data ) );
+
+		// Verify descending order by checking totals.
+		$totals_desc = array();
+		foreach ( $response_data as $order_data ) {
+			$totals_desc[] = (float) $order_data['total'];
+		}
+
+		// Check that totals are in descending order.
+		$sorted_totals_desc = $totals_desc;
+		rsort( $sorted_totals_desc );
+		$this->assertEquals( $sorted_totals_desc, $totals_desc, 'Orders should be sorted by total in descending order' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
+	}
+
+	/**
 	 * Test total filtering with operators. Only basic tests are needed here because operators are tested in the data stores.
 	 *
 	 * @see WC_Order_Data_Store_CPT_Test
@@ -1448,5 +1510,144 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$order1->delete( true );
 		$order2->delete( true );
+	}
+
+	/**
+	 * Test fulfillment status filtering.
+	 */
+	public function test_fulfillment_status_filtering(): void {
+		// Create orders with different fulfillment statuses.
+		$order1 = $this->create_test_order();
+		$order1->add_meta_data( '_fulfillment_status', 'fulfilled' );
+		$order1->save();
+
+		$order2 = $this->create_test_order();
+		$order2->add_meta_data( '_fulfillment_status', 'partially_fulfilled' );
+		$order2->save();
+
+		$order3 = $this->create_test_order();
+		$order3->add_meta_data( '_fulfillment_status', 'unfulfilled' );
+		$order3->save();
+
+		$order4 = $this->create_test_order();
+		// Order4 has no fulfillment status meta (no_fulfillments).
+
+		// Test filtering by 'fulfilled' status.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'fulfillment_status', 'fulfilled' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1       = false;
+		$found_other_orders = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( in_array( $order_data['id'], array( $order2->get_id(), $order3->get_id(), $order4->get_id() ), true ) ) {
+				$found_other_orders = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with fulfilled status' );
+		$this->assertFalse( $found_other_orders, 'Should not find orders with other fulfillment statuses' );
+
+		// Test filtering by 'partially_fulfilled' status.
+		$request->set_param( 'fulfillment_status', 'partially_fulfilled' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order2       = false;
+		$found_other_orders = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order2->get_id() ) {
+				$found_order2 = true;
+			}
+			if ( in_array( $order_data['id'], array( $order1->get_id(), $order3->get_id(), $order4->get_id() ), true ) ) {
+				$found_other_orders = true;
+			}
+		}
+		$this->assertTrue( $found_order2, 'Should find order with partially_fulfilled status' );
+		$this->assertFalse( $found_other_orders, 'Should not find orders with other fulfillment statuses' );
+
+		// Test filtering by 'unfulfilled' status.
+		$request->set_param( 'fulfillment_status', 'unfulfilled' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order3       = false;
+		$found_other_orders = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order3->get_id() ) {
+				$found_order3 = true;
+			}
+			if ( in_array( $order_data['id'], array( $order1->get_id(), $order2->get_id(), $order4->get_id() ), true ) ) {
+				$found_other_orders = true;
+			}
+		}
+		$this->assertTrue( $found_order3, 'Should find order with unfulfilled status' );
+		$this->assertFalse( $found_other_orders, 'Should not find orders with other fulfillment statuses' );
+
+		// Test filtering by 'no_fulfillments' status.
+		$request->set_param( 'fulfillment_status', 'no_fulfillments' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order4       = false;
+		$found_other_orders = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order4->get_id() ) {
+				$found_order4 = true;
+			}
+			if ( in_array( $order_data['id'], array( $order1->get_id(), $order2->get_id(), $order3->get_id() ), true ) ) {
+				$found_other_orders = true;
+			}
+		}
+		$this->assertTrue( $found_order4, 'Should find order with no fulfillments' );
+		$this->assertFalse( $found_other_orders, 'Should not find orders with fulfillment statuses' );
+
+		// Test filtering by multiple fulfillment statuses.
+		$request->set_param( 'fulfillment_status', array( 'fulfilled', 'unfulfilled' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$found_order1       = false;
+		$found_order3       = false;
+		$found_other_orders = false;
+		foreach ( $response_data as $order_data ) {
+			if ( $order_data['id'] === $order1->get_id() ) {
+				$found_order1 = true;
+			}
+			if ( $order_data['id'] === $order3->get_id() ) {
+				$found_order3 = true;
+			}
+			if ( in_array( $order_data['id'], array( $order2->get_id(), $order4->get_id() ), true ) ) {
+				$found_other_orders = true;
+			}
+		}
+		$this->assertTrue( $found_order1, 'Should find order with fulfilled status' );
+		$this->assertTrue( $found_order3, 'Should find order with unfulfilled status' );
+		$this->assertFalse( $found_other_orders, 'Should not find orders with other fulfillment statuses' );
+
+		// Test filtering by invalid fulfillment status.
+		$request->set_param( 'fulfillment_status', 'invalid_status' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Clean up.
+		$order1->delete( true );
+		$order2->delete( true );
+		$order3->delete( true );
+		$order4->delete( true );
 	}
 }
