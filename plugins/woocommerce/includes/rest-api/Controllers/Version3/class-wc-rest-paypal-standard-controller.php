@@ -245,6 +245,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return array The shipping options.
 	 */
 	private function get_updated_shipping_options( $order, $selected_shipping_option ) {
+		WC()->cart->calculate_shipping();
 		$packages = WC()->shipping()->get_packages();
 
 		$has_selected_shipping_option = false;
