@@ -40,11 +40,11 @@ class WC_Gateway_Paypal_Webhook_Handler_Test extends \WC_Unit_Test_Case {
 		$this->mock_request    = $this->createMock( WP_REST_Request::class );
 		
 		// Prevent real network calls to PayPal during tests.
-		add_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ), 10, 3 );
+		add_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
 	}
 
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ), 10 );
+		remove_filter( 'pre_http_request', array( $this, 'mock_paypal_http_response' ) );
 		$this->webhook_handler = null;
 		$this->mock_request    = null;
 		parent::tearDown();
