@@ -18,13 +18,7 @@ class Email_Css_Inliner implements Css_Inliner {
 	/**
 	 * The CSS inliner instance.
 	 *
-	 * Runtime type: Pelago\Emogrifier\CssInliner | Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner
-	 * Both classes extend AbstractHtmlProcessor and implement:
-	 * - static fromHtml(string $html): static
-	 * - inlineCss(string $css = ''): self
-	 * - render(): string
-	 *
-	 * @var object|null
+	 * @var object
 	 */
 	private $inliner;
 
@@ -74,10 +68,7 @@ class Email_Css_Inliner implements Css_Inliner {
 	/**
 	 * Get the inliner class.
 	 *
-	 * Returns the fully qualified class name for the available CSS inliner.
-	 * Runtime return type: 'Pelago\Emogrifier\CssInliner' | 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner'
-	 *
-	 * @return string Fully qualified class name
+	 * @return string
 	 * @throws \Exception If the inliner class is not found.
 	 */
 	private function get_inliner_class(): string {
