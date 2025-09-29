@@ -838,11 +838,11 @@ class ProductsController {
 		}
 
 		$progress = sprintf( '[%d/%d]', $current_index, $total_count );
-		
+
 		if ( 1 === $current_index ) {
 			WP_CLI::line( '' );
 		}
-		
+
 		WP_CLI::line(
 			WP_CLI::colorize(
 				sprintf( '%s%s%s %s %s', $status_color, $status_char, '%n', $progress, $display_name )
