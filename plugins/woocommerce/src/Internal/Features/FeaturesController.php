@@ -562,6 +562,7 @@ class FeaturesController {
 				'enabled_by_default' => false,
 				'is_experimental'    => true,
 				'disable_ui'         => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 		);
 
