@@ -170,6 +170,13 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.2.2 2025-09-22 =
+= 10.2.2 2025-09-29 =
+
+**WooCommerce**
+
+* Fix - Check if template part is from file system before building the result from file [#61171](https://github.com/woocommerce/woocommerce/pull/61171)
+* Fix - Fix low-resolution images displayed in the Classic Template block gallery [#61182](https://github.com/woocommerce/woocommerce/pull/61182)
+* Fix - Make legacy gallery filters available while rendering blocks [#61173](https://github.com/woocommerce/woocommerce/pull/61173)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
