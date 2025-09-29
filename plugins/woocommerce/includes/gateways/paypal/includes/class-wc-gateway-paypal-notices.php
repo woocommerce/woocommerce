@@ -29,6 +29,9 @@ class WC_Gateway_Paypal_Notices {
 	 */
 	public function __construct() {
 		$this->gateway = WC_Gateway_Paypal::get_instance();
+		if ( ! $this->gateway ) {
+			return;
+		}
 
 		add_action( 'admin_notices', array( $this, 'add_paypal_migration_notice' ) );
 
