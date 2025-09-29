@@ -18,7 +18,13 @@ class Email_Css_Inliner implements Css_Inliner {
 	/**
 	 * The CSS inliner instance.
 	 *
-	 * @var object
+	 * Runtime type: Pelago\Emogrifier\CssInliner | Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner
+	 * Both classes extend AbstractHtmlProcessor and implement:
+	 * - static fromHtml(string $html): static
+	 * - inlineCss(string $css = ''): self
+	 * - render(): string
+	 *
+	 * @var object|null
 	 */
 	private $inliner;
 
@@ -46,7 +52,7 @@ class Email_Css_Inliner implements Css_Inliner {
 		if ( ! isset( $this->inliner ) ) {
 			throw new \LogicException( 'You must call from_html before calling inline_css' );
 		}
-		/** Ignore PHPStan analysis for dynamic inliner method call. @phpstan-ignore-next-line */
+		/** @phpstan-ignore-next-line */
 		$this->inliner->inlineCss( $css );
 		return $this;
 	}
@@ -61,14 +67,17 @@ class Email_Css_Inliner implements Css_Inliner {
 		if ( ! isset( $this->inliner ) ) {
 			throw new \LogicException( 'You must call from_html before calling render' );
 		}
-		/** Ignore PHPStan analysis for dynamic inliner method call. @phpstan-ignore-next-line */
+		/** @phpstan-ignore-next-line */
 		return $this->inliner->render();
 	}
 
 	/**
 	 * Get the inliner class.
 	 *
-	 * @return string
+	 * Returns the fully qualified class name for the available CSS inliner.
+	 * Runtime return type: 'Pelago\Emogrifier\CssInliner' | 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner'
+	 *
+	 * @return string Fully qualified class name
 	 * @throws \Exception If the inliner class is not found.
 	 */
 	private function get_inliner_class(): string {
