@@ -33,9 +33,9 @@ class LegacyProxyTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_instance_of_throws_when_trying_to_get_a_woo_namespaced_class() {
 		$this->expectException( \Exception::class );
-		$this->expectExceptionMessage( 'The LegacyProxy class is not intended for getting instances of classes whose namespace starts with \'Automattic\\WooCommerce\', please use ' . Definition::INJECTION_METHOD . ' method injection or the instance of Automattic\WooCommerce\Vendor\Psr\Container\ContainerInterface for that.' );
+		$this->expectExceptionMessage( 'The LegacyProxy class is not intended for getting instances of classes whose namespace starts with \'Automattic\\WooCommerce\', please use \'init\' method injection or \'wc_get_container()->get()\' for that.' );
 
-		$this->sut->get_instance_of( DependencyClass::class );
+		$this->sut->get_instance_of( LegacyProxy::class );
 	}
 
 	/**

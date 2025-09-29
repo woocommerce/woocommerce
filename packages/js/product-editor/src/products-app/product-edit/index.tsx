@@ -8,7 +8,7 @@ import { createElement, useState, useMemo } from '@wordpress/element';
 import { FormEvent } from 'react';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
 	__experimentalHeading as Heading,
 	__experimentalText as Text,
@@ -51,7 +51,7 @@ export default function ProductEdit( {
 	postType,
 	postId = '',
 }: ProductEditProps ) {
-	const classes = classNames( 'edit-product-page', className, {
+	const classes = clsx( 'edit-product-page', className, {
 		'is-empty': ! postId,
 	} );
 	const ids = useMemo( () => postId.split( ',' ), [ postId ] );

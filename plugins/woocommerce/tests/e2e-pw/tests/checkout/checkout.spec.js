@@ -5,6 +5,7 @@ import {
 	addAProductToCart,
 	fillBillingCheckoutBlocks,
 	fillShippingCheckoutBlocks,
+	WC_API_PATH,
 } from '@woocommerce/e2e-utils-playwright';
 import { faker } from '@faker-js/faker';
 
@@ -19,7 +20,6 @@ import {
 } from '../../utils/pages';
 import { logInFromMyAccount } from '../../utils/login';
 import { updateIfNeeded, resetValue } from '../../utils/settings';
-import { WC_API_PATH } from '../../utils/api-client';
 
 //todo handle other countries and states than the default (US, CA) when filling the addresses
 

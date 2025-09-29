@@ -6,7 +6,6 @@
 		margin: 0;
 		display: flex;
 		flex-direction: column;
-		margin-top: 0;
 
 		&::before {
 			margin: 0;
@@ -35,12 +34,12 @@
 				font-size: 15px;
 				line-height: 1.333;
 				font-weight: 500;
-				color: #1e1e1e;
+				color: $gray-900;
 				margin: 0;
 			}
 
 			&-steps {
-				color: #1e1e1e;
+				color: $gray-900;
 				font-size: 12px;
 				font-style: normal;
 				line-height: 20px;
@@ -63,40 +62,42 @@
 		}
 
 		&--list {
-			padding: 0 $gap;
+			padding: 0 0 0 $gap;
 			overflow-y: auto;
 			flex: 1;
 
 			&-item {
 				display: flex;
 				align-items: center;
-				gap: 4px;
+				gap: $gap-smaller;
 				padding: $gap-smaller;
 				border-radius: 2px;
 				font-size: 13px;
-				line-height: 1.538;
-				color: #757575;
-				margin-bottom: 4px;
+				line-height: 20px;
+				color: $gray-800;
 				cursor: default;
 
 				&.is-active {
-					background-color: #e0e0e0;
-					color: #1e1e1e;
+					background-color: $gray-200;
+					color: $gray-900;
+					font-weight: 500;
 
 					&-icon {
-						color: #1e1e1e;
+						color: $gray-900;
 					}
 				}
 
 				&.is-completed {
+					text-decoration: line-through;
+
 					&-icon {
 						color: #00a32a;
 					}
 				}
 
 				&-icon {
-					width: 20px;
-					height: 20px;
+					width: 24px;
+					height: 24px;
 					display: flex;
 					align-items: center;
 					justify-content: center;
@@ -135,7 +136,6 @@
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		overflow-y: auto;
 		overflow-x: hidden;
 		min-height: 0; // Important for Firefox
 		margin: $gap;
@@ -144,8 +144,15 @@
 	}
 
 	&__step {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+
 		&--content {
 			padding: $gap 32px;
+			overflow-y: auto; // Enable scrolling in the content area
+			flex: 1;
+			height: 100%;
 		}
 	}
 

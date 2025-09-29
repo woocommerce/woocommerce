@@ -7,7 +7,7 @@ import { type BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import { GROUPED_PRODUCT_ITEM_TEMPLATE } from './product-item-template/constants';
+import { GROUPED_PRODUCT_ITEM_TEMPLATE } from './product-item/constants';
 
 interface Attributes {
 	className?: string;

@@ -63,11 +63,11 @@ export const registerSettingsEmailColorPaletteFill = () => {
 	let defaultColors = {} as DefaultColors;
 	try {
 		const {
-			base_color_default: baseColor,
-			bg_color_default: bgColor,
-			body_bg_color_default: bodyBgColor,
-			body_text_color_default: bodyTextColor,
-			footer_text_color_default: footerTextColor,
+			base: baseColor,
+			bg: bgColor,
+			body_bg: bodyBgColor,
+			body_text: bodyTextColor,
+			footer_text: footerTextColor,
 		} = JSON.parse( defaultColorsData || '' );
 		defaultColors = {
 			baseColor,

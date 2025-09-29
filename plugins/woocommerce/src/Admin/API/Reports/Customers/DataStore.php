@@ -469,7 +469,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$email = $order->get_billing_email( 'edit' );
 
 			if ( $email ) {
-				return self::get_guest_id_by_email( $email );
+				return self::get_customer_id_by_email( $email );
 			} else {
 				return false;
 			}
@@ -518,7 +518,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$this->subquery->clear_sql_clause( 'select' );
 		$this->subquery->add_sql_clause( 'select', $selections );
-		$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+		// For aggregated fields, ensure deterministic ordering by including GROUP BY field.
+		$order_by = $this->get_sql_clause( 'order_by' );
+		if ( in_array( $order_by, array( 'orders_count', 'total_spend', 'avg_order_value' ), true ) ) {
+			$this->subquery->add_sql_clause( 'order_by', $order_by . ', customer_id' );
+		} else {
+			$this->subquery->add_sql_clause( 'order_by', $order_by );
+		}
 		$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 
 		$customer_data = $wpdb->get_results(
@@ -644,6 +650,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				"SELECT customer_id FROM {$table_name} WHERE email = %s AND user_id IS NULL LIMIT 1",
+				$email
+			)
+		);
+
+		return $customer_id ? (int) $customer_id : false;
+	}
+
+	/**
+	 * Retrieve a customer ID by email address, regardless of user registration status.
+	 * Prioritizes registered customers over guest customers when both exist.
+	 *
+	 * @param string $email Email address.
+	 * @return false|int Customer ID if found, boolean false if not.
+	 */
+	public static function get_customer_id_by_email( $email ) {
+		global $wpdb;
+
+		if ( empty( $email ) || ! is_email( $email ) ) {
+			return false;
+		}
+
+		$table_name  = self::get_db_table_name();
+		$customer_id = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				"SELECT customer_id FROM {$table_name} WHERE email = %s ORDER BY user_id IS NOT NULL DESC LIMIT 1",
 				$email
 			)
 		);

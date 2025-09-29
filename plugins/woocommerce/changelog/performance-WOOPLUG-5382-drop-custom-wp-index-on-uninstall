@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Drop custom WordPress index on uninstall.

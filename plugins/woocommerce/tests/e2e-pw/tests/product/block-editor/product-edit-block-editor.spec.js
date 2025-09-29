@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest } from '../../../fixtures/block-editor-fixtures';
 import { expect, tags } from '../../../fixtures/fixtures';
-import { WC_API_PATH } from '../../../utils/api-client';
 
 const test = baseTest.extend( {
 	product: async ( { restApi }, use ) => {

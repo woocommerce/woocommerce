@@ -82,18 +82,6 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
-	 * By the time we hit this test method, we should have the following cron jobs.
-	 * - wc_admin_daily
-	 * - generate_category_lookup_table
-	 *
-	 * @return void
-	 */
-	public function test_cron_job_creation() {
-		$this->assertNotFalse( wp_next_scheduled( 'wc_admin_daily' ) );
-		$this->assertNotFalse( wp_next_scheduled( 'generate_category_lookup_table' ) );
-	}
-
-	/**
 	 * Data provider that returns DB Update version string and # of expected pending jobs.
 	 *
 	 * @return array[]
@@ -234,5 +222,4 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 			$this->assertNotFalse( get_option( $new_option ), $new_option );
 		}
 	}
-
 }

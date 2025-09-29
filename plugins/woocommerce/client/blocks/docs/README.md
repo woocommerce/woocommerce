@@ -109,7 +109,7 @@ The WooCommerce Blocks Handbook provides documentation for designers and develop
 
 ## Block References
 
--   [Block References](/docs/building-a-woo-store/block-references.md)
+-   [Block References](/docs/block-development/block-references.md)
 
 ## Developer Resources
 

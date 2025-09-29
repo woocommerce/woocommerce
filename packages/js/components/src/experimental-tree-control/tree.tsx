@@ -3,7 +3,7 @@
  */
 import { Button, Icon } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { createElement, forwardRef, Fragment, useRef } from 'react';
 import { plus } from '@wordpress/icons';
 import { useMergeRefs } from '@wordpress/compose';
@@ -39,7 +39,7 @@ export const Tree = forwardRef( function ForwardedTree(
 			{ items.length || isCreateButtonVisible ? (
 				<ol
 					{ ...treeProps }
-					className={ classNames(
+					className={ clsx(
 						treeProps.className,
 						'experimental-woocommerce-tree',
 						`experimental-woocommerce-tree--level-${ level }`
@@ -79,13 +79,10 @@ export const Tree = forwardRef( function ForwardedTree(
 						'woocommerce-experimental-tree-control__menu-item-' +
 						numberOfItems
 					}
-					className={ classNames(
-						'experimental-woocommerce-tree__button',
-						{
-							'experimental-woocommerce-tree__button--highlighted':
-								props.highlightedIndex === numberOfItems,
-						}
-					) }
+					className={ clsx( 'experimental-woocommerce-tree__button', {
+						'experimental-woocommerce-tree__button--highlighted':
+							props.highlightedIndex === numberOfItems,
+					} ) }
 					onClick={ () => {
 						if ( props.onCreateNew ) {
 							props.onCreateNew();

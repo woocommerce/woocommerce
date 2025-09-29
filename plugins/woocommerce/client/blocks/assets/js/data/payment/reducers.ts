@@ -128,6 +128,13 @@ const reducer: Reducer< PaymentState > = (
 			};
 			break;
 
+		case ACTION_TYPES.SET_REGISTERED_EXPRESS_PAYMENT_METHODS:
+			newState = {
+				...state,
+				registeredExpressPaymentMethods: action.paymentMethods,
+			};
+			break;
+
 		case ACTION_TYPES.SET_ACTIVE_PAYMENT_METHOD:
 			newState = {
 				...state,

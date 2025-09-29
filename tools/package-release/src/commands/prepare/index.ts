@@ -29,7 +29,7 @@ export default class PackagePrepare extends Command {
 	/**
 	 * CLI description
 	 */
-	static description = 'Prepare Monorepo JS packages for Release';
+	static description = 'Prepare Monorepo JS or PHP packages for Release';
 
 	/**
 	 * CLI arguments

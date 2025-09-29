@@ -4,6 +4,9 @@
 import type { StoryFn, Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { useArgs } from '@storybook/client-api';
+import { useDispatch } from '@wordpress/data';
+import { validationStore } from '@woocommerce/block-data';
+import { useState, useEffect } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -214,12 +217,70 @@ export default {
 const Template: StoryFn< ValidatedTextInputProps > = ( args ) => {
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const [ _, updateArgs ] = useArgs();
-	const onChange = ( value: string ) => {
-		action( 'change' )( value || '' );
-		updateArgs( { value } );
+	const getFormattedValue = (
+		val: string | number | readonly string[] | undefined
+	) => {
+		const stringVal = typeof val === 'string' ? val : String( val || '' );
+		return args.customFormatter
+			? args.customFormatter( stringVal )
+			: stringVal;
 	};
 
-	return <ValidatedTextInput { ...args } onChange={ onChange } />;
+	const [ inputValue, setInputValue ] = useState(
+		getFormattedValue( args.value )
+	);
+	const { setValidationErrors, showValidationError } =
+		useDispatch( validationStore );
+
+	useEffect( () => {
+		setInputValue( getFormattedValue( args.value ) );
+	}, [ args.value, args.customFormatter ] );
+
+	const onChange = ( newValue: string ) => {
+		const formattedValue = args.customFormatter
+			? args.customFormatter( newValue )
+			: newValue;
+
+		setInputValue( formattedValue );
+
+		action( 'change' )( newValue || '' );
+		updateArgs( { value: newValue } );
+
+		// Always show error for WithError story.
+		if ( args.id === 'with-error-id' ) {
+			setValidationErrors( {
+				[ args.id ]: {
+					message: 'This field cannot be empty',
+					hidden: true,
+				},
+			} );
+			showValidationError( args.id );
+			return;
+		}
+
+		// Default: only show error if input is empty and showError is true.
+		if (
+			args.showError &&
+			! newValue.trim() &&
+			args.id !== 'with-error-id'
+		) {
+			setValidationErrors( {
+				[ args.id || 'unique-id' ]: {
+					message: 'This field cannot be empty',
+					hidden: true,
+				},
+			} );
+			showValidationError( args.id || 'unique-id' );
+		}
+	};
+
+	return (
+		<ValidatedTextInput
+			{ ...args }
+			value={ inputValue }
+			onChange={ onChange }
+		/>
+	);
 };
 
 export const Default: StoryFn< ValidatedTextInputProps > = Template.bind( {} );
@@ -233,11 +294,11 @@ export const WithError: StoryFn< ValidatedTextInputProps > = Template.bind(
 	{}
 );
 WithError.args = {
-	id: 'unique-id',
-	showError: true,
-	errorMessage: 'This is an error message',
+	id: 'with-error-id',
 	label: 'Enter your value',
-	value: 'Lorem ipsum',
+	value: '',
+	errorMessage: 'This is an error message',
+	showError: true,
 };
 
 export const WithCustomFormatter: StoryFn< ValidatedTextInputProps > =

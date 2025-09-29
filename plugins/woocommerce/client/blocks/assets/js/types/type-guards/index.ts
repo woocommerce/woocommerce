@@ -1,6 +1,7 @@
 export * from './boolean';
 export * from './cart-response-totals';
 export * from './error';
+export * from './form-fields';
 export * from './function';
 export * from './null';
 export * from './number';

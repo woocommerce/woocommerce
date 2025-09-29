@@ -129,7 +129,7 @@ class WC_Admin_Addons {
 		return array(
 			'wccom-site'          => site_url(),
 			'wccom-back'          => rawurlencode( $back_admin_path ),
-			'wccom-woo-version'   => Constants::get_constant( 'WC_VERSION' ),
+			'wccom-woo-version'   => WC()->stable_version(),
 			'wccom-connect-nonce' => wp_create_nonce( 'connect' ),
 		);
 	}

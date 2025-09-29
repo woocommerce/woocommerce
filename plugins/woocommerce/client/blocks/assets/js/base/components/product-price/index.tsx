@@ -309,7 +309,7 @@ const ProductPrice = ( {
 				priceStyle={ priceStyle }
 			/>
 		);
-	} else if ( price ) {
+	} else if ( price || price === 0 ) {
 		priceComponent = (
 			<FormattedMonetaryAmount
 				className={ clsx(

@@ -6,7 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { BlockAttributes } from '@wordpress/blocks';
 import { DropZone } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, useState } from '@wordpress/element';
 import { Icon, trash } from '@wordpress/icons';
 import { MediaItem } from '@wordpress/media-utils';
@@ -58,7 +58,7 @@ export function ImageBlockEdit( {
 	);
 
 	const blockProps = useWooBlockProps( attributes, {
-		className: classnames( {
+		className: clsx( {
 			'has-images': Array.isArray( propertyValue )
 				? propertyValue.length > 0
 				: Boolean( propertyValue ),

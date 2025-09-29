@@ -88,8 +88,33 @@ function wc_add_to_cart_message( $products, $show_qty = false, $return = false )
 
 	$product_id = null;
 	foreach ( $products as $product_id => $qty ) {
-		/* translators: %s: product name */
-		$titles[] = apply_filters( 'woocommerce_add_to_cart_qty_html', ( $qty > 1 ? absint( $qty ) . ' &times; ' : '' ), $product_id ) . apply_filters( 'woocommerce_add_to_cart_item_name_in_quotes', sprintf( _x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ), strip_tags( get_the_title( $product_id ) ) ), $product_id );
+		/**
+		 * Filters the quantity HTML for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $qty_html The quantity HTML.
+		 * @param int    $product_id The product ID.
+		 */
+		$title = apply_filters( 'woocommerce_add_to_cart_qty_html', ( 1 !== $qty ? wc_stock_amount( $qty ) . ' &times; ' : '' ), $product_id );
+
+		/**
+		 * Filters the item name in quotes for the add to cart message.
+		 *
+		 * @since 2.6.1
+		 * @param string $item_name_in_quotes The item name in quotes.
+		 * @param int    $product_id The product ID.
+		 */
+		$title .= apply_filters(
+			'woocommerce_add_to_cart_item_name_in_quotes',
+			sprintf(
+				/* translators: %s: product name */
+				_x( '&ldquo;%s&rdquo;', 'Item name in quotes', 'woocommerce' ),
+				wp_strip_all_tags( get_the_title( $product_id ) )
+			),
+			$product_id
+		);
+
+		$titles[] = $title;
 		$count   += $qty;
 	}
 
@@ -294,7 +319,7 @@ function wc_cart_totals_coupon_html( $coupon ) {
 
 	$discount_amount_html = apply_filters( 'woocommerce_coupon_discount_amount_html', $discount_amount_html, $coupon );
 	// translators: %s: coupon code.
-	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . sprintf( esc_attr__( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
+	$coupon_html = $discount_amount_html . ' <a role="button" aria-label="' . esc_attr( sprintf( __( 'Remove %s coupon', 'woocommerce' ), $coupon->get_code() ) ) . '" href="' . esc_url( add_query_arg( 'remove_coupon', rawurlencode( $coupon->get_code() ), Constants::is_defined( 'WOOCOMMERCE_CHECKOUT' ) ? wc_get_checkout_url() : wc_get_cart_url() ) ) . '" class="woocommerce-remove-coupon" data-coupon="' . esc_attr( $coupon->get_code() ) . '">' . __( '[Remove]', 'woocommerce' ) . '</a>';
 
 	echo wp_kses( apply_filters( 'woocommerce_cart_totals_coupon_html', $coupon_html, $coupon, $discount_amount_html ), array_replace_recursive( wp_kses_allowed_html( 'post' ), array( 'a' => array( 'data-coupon' => true ) ) ) ); // phpcs:ignore PHPCompatibility.PHP.NewFunctions.array_replace_recursiveFound
 }
@@ -471,9 +496,24 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * @return string
  */
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
-	$chosen_method_id     = current( explode( ':', $chosen_method ) );
-	$rate_keys            = array_keys( $package['rates'] );
-	$chosen_method_exists = in_array( $chosen_method, $rate_keys, true );
+	$rate_keys               = array_keys( $package['rates'] );
+	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+
+	if ( 'shortcode' === WC()->cart->cart_context ) {
+		$default = current( $rate_keys );
+	} else {
+		// No default means that when you enter block checkout, shipping is chosen rather than pickup. We should only do this if there are shipping methods available other than local pickup.
+		$default = CartCheckoutUtils::shipping_methods_exist() ? '' : current( $rate_keys );
+
+		// Default to the first method in the package that isn't a local pickup method.
+		foreach ( $rate_keys as $rate_key ) {
+			$rate_method_id = current( explode( ':', $rate_key ) );
+			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+				$default = $rate_key;
+				break;
+			}
+		}
+	}
 
 	/**
 	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
@@ -481,11 +521,9 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	 *
 	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
 	 */
-	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
-	$is_local_pickup_chosen  = in_array( $chosen_method_id, $local_pickup_method_ids, true );
-
-	// Default to the first method in the package. This can be sorted in the backend by the merchant.
-	$default = current( $rate_keys );
+	$chosen_method_id       = current( explode( ':', $chosen_method ) );
+	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
+	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
 
 	// Default to local pickup if its chosen already.
 	if ( $chosen_method_exists && $is_local_pickup_chosen ) {

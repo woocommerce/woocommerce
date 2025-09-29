@@ -8,21 +8,26 @@ import { dispatch, useDispatch } from '@wordpress/data';
 import {
 	EnableGatewayResponse,
 	paymentSettingsStore,
-	PaymentIncentive,
-	PaymentProviderState,
+	PaymentsProviderIncentive,
+	PaymentGatewayProvider,
+	OfflinePaymentMethodProvider,
 } from '@woocommerce/data';
 import { getHistory, getNewPath } from '@woocommerce/navigation';
-import { recordEvent } from '@woocommerce/tracks';
+
+/**
+ * Internal dependencies
+ */
+import {
+	recordPaymentsOnboardingEvent,
+	recordPaymentsProviderEvent,
+} from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
 
 interface EnableGatewayButtonProps {
 	/**
-	 * The ID of the gateway to enable.
+	 * The details of the payment gateway to enable.
 	 */
-	gatewayId: string;
-	/**
-	 * The state of the gateway.
-	 */
-	gatewayState: PaymentProviderState;
+	gatewayProvider: PaymentGatewayProvider | OfflinePaymentMethodProvider;
 	/**
 	 * The settings URL to navigate to when the enable gateway button is clicked.
 	 */
@@ -56,7 +61,7 @@ interface EnableGatewayButtonProps {
 	/**
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
-	incentive?: PaymentIncentive | null;
+	incentive?: PaymentsProviderIncentive | null;
 	/**
 	 * Function to set the onboarding modal open.
 	 */
@@ -73,8 +78,7 @@ interface EnableGatewayButtonProps {
  * If incentive data is provided, it will trigger the `acceptIncentive` callback with the incentive ID.
  */
 export const EnableGatewayButton = ( {
-	gatewayId,
-	gatewayState,
+	gatewayProvider,
 	settingsHref,
 	onboardingHref,
 	isOffline,
@@ -108,13 +112,13 @@ export const EnableGatewayButton = ( {
 		e.preventDefault();
 
 		// Since this logic can toggle the gateway state on and off, we make sure we don't accidentally disable the gateway.
-		if ( gatewayState.enabled ) {
+		if ( gatewayProvider.state.enabled ) {
 			return;
 		}
 
 		// Record the event when user clicks on a gateway's enable button.
-		recordEvent( 'settings_payments_provider_enable_click', {
-			provider_id: gatewayId,
+		recordPaymentsProviderEvent( 'enable_click', gatewayProvider, {
+			incentive_id: incentive ? incentive.promo_id : 'none',
 		} );
 
 		const gatewayToggleNonce =
@@ -133,22 +137,26 @@ export const EnableGatewayButton = ( {
 		}
 
 		togglePaymentGateway(
-			gatewayId,
+			gatewayProvider.id,
 			window.woocommerce_admin.ajax_url,
 			gatewayToggleNonce
 		)
 			.then( ( response: EnableGatewayResponse ) => {
+				// The backend will return 'needs_setup' if the gateway needs additional setup and could not be enabled.
 				if ( response.data === 'needs_setup' ) {
-					// We only need to perform additional logic/redirects if no account connected.
-					if ( ! gatewayState.account_connected ) {
-						// Record the event when user successfully enables a gateway.
-						recordEvent( 'settings_payments_provider_enable', {
-							provider_id: gatewayId,
-						} );
+					// We only need to perform additional logic/redirects if no account is connected.
+					if ( ! gatewayProvider.state.account_connected ) {
 						if (
 							onboardingType === 'native_in_context' &&
 							setOnboardingModalOpen
 						) {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_opened',
+								{
+									from: 'enable_gateway_button',
+									source: wooPaymentsOnboardingSessionEntrySettings,
+								}
+							);
 							setOnboardingModalOpen( true );
 						} else if ( gatewayHasRecommendedPaymentMethods ) {
 							// Redirect to the recommended payment methods page if available, or the onboarding URL.
@@ -178,17 +186,40 @@ export const EnableGatewayButton = ( {
 								],
 							}
 						);
+
+						// Record the event when the gateway could not be enabled.
+						recordPaymentsProviderEvent(
+							'enable_failed',
+							gatewayProvider,
+							{
+								reason: 'needs_setup',
+								incentive_id: incentive
+									? incentive.promo_id
+									: 'none',
+							}
+						);
 					}
 				}
+
 				// If no redirect occurred, the data needs to be refreshed.
-				invalidateResolutionForStoreSelector(
-					isOffline
-						? 'getOfflinePaymentGateways'
-						: 'getPaymentProviders'
-				);
+				invalidateResolutionForStoreSelector( 'getPaymentProviders' );
+
+				if ( isOffline ) {
+					// We need to invalidate both selectors since they share the same data source and resolver chain.
+					invalidateResolutionForStoreSelector(
+						'getOfflinePaymentGateways'
+					);
+				}
+
 				setIsUpdating( false );
 			} )
 			.catch( () => {
+				// Record the event when the gateway could not be enabled.
+				recordPaymentsProviderEvent( 'enable_failed', gatewayProvider, {
+					reason: 'error',
+					incentive_id: incentive ? incentive.promo_id : 'none',
+				} );
+
 				// In case of errors, redirect to the gateway settings page.
 				setIsUpdating( false );
 				throwError();

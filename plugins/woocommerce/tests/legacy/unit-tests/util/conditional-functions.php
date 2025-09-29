@@ -104,5 +104,6 @@ class WC_Tests_Conditional_Functions extends WC_Unit_Test_Case {
 		$this->assertTrue( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
 		$this->assertFalse( wc_is_file_valid_csv( '/srv/www/woodev/wp-content/uploads/2018/10/img.jpg' ) );
 		$this->assertFalse( wc_is_file_valid_csv( 'file:///srv/www/woodev/wp-content/uploads/2018/10/1098488_single.csv' ) );
+		$this->assertTrue( wc_is_file_valid_csv( 's3://awsbucket/uploads/wc-imports/1098488_single.csv' ) );
 	}
 }

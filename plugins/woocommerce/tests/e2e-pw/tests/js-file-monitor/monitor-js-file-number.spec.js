@@ -61,6 +61,7 @@ test.describe( 'Keeps track of the number of JS files included on key shopper pa
 				'script[src]',
 				( scripts ) => scripts.length
 			);
+
 			await expect
 				.soft(
 					javascriptFiles,

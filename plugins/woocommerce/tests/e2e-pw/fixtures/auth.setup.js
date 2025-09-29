@@ -32,10 +32,11 @@ setup.beforeAll( 'clear existing state', async () => {
 	} );
 } );
 
-setup( 'authenticate admin', async ( { request } ) => {
-	await authenticate( request, admin, ADMIN_STATE_PATH );
-} );
-
-setup( 'authenticate customer', async ( { request } ) => {
-	await authenticate( request, customer, CUSTOMER_STATE_PATH );
+setup( 'authenticate users', async ( { request } ) => {
+	await setup.step( 'authenticate admin', async () => {
+		await authenticate( request, admin, ADMIN_STATE_PATH );
+	} );
+	await setup.step( 'authenticate customer', async () => {
+		await authenticate( request, customer, CUSTOMER_STATE_PATH );
+	} );
 } );

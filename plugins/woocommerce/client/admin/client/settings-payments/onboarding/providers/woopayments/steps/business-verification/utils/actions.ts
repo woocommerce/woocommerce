@@ -8,26 +8,32 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import {
 	OnboardingFields,
-	FinalizeOnboardingResponse,
-	AccountKycResult,
+	FinalizeEmbeddedKycSessionResponse,
+	EmbeddedKycSessionCreateResult,
 } from '../types';
 import { fromDotNotation } from './';
 
 /**
- * Make an API request to finalize the onboarding process.
+ * Instruct the backend to finalize the embedded KYC session.
  *
  * @param apiUrl The API URL.
+ * @param source Optional source for the entire onboarding session flow.
  */
-export const finalizeOnboarding = async ( apiUrl: string ) => {
-	return await apiFetch< FinalizeOnboardingResponse >( {
+export const finalizeEmbeddedKycSession = async (
+	apiUrl: string,
+	source?: string
+) => {
+	return await apiFetch< FinalizeEmbeddedKycSessionResponse >( {
 		url: apiUrl,
 		method: 'POST',
-		data: {},
+		data: {
+			source,
+		},
 	} );
 };
 
 /**
- * Make an API request to create an KYC account session.
+ * Make an API request to mark a sub-step as completed.
  *
  * @param stepName The sub-step name.
  * @param apiUrl   The API URL.
@@ -42,10 +48,10 @@ export const completeSubStep = (
 			status: string;
 		}
 	>
-) => {
-	// Send POST request to the href with the Business Verification completed status
+): Promise< void > => {
+	// Store the sub-step completed status on the backend.
 	if ( apiUrl ) {
-		apiFetch( {
+		return apiFetch( {
 			url: apiUrl,
 			method: 'POST',
 			data: {
@@ -58,18 +64,23 @@ export const completeSubStep = (
 			},
 		} );
 	}
+
+	// If no API URL is provided, just return a resolved promise.
+	return Promise.resolve();
 };
 
 /**
- * Make an API request to create an KYC account session.
+ * Create an embedded KYC session.
  *
  * @param data   The form data.
  * @param apiUrl The API URL.
+ * @param source Optional source for the entire onboarding session flow.
  */
-export const createKycAccountSession = async (
+export const createEmbeddedKycSession = async (
 	data: OnboardingFields,
-	apiUrl: string
-): Promise< AccountKycResult > => {
+	apiUrl: string,
+	source?: string
+): Promise< EmbeddedKycSessionCreateResult > => {
 	const selfAssessmentData = fromDotNotation( data );
 	const requestData: Record< string, unknown > = {};
 
@@ -78,7 +89,12 @@ export const createKycAccountSession = async (
 		requestData.self_assessment = selfAssessmentData;
 	}
 
-	return await apiFetch< AccountKycResult >( {
+	// If a source is provided, include it in the request data.
+	if ( source ) {
+		requestData.source = source;
+	}
+
+	return await apiFetch< EmbeddedKycSessionCreateResult >( {
 		url: apiUrl,
 		method: 'POST',
 		data: requestData,

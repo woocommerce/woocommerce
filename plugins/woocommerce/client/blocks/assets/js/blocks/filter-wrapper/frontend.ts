@@ -14,4 +14,8 @@ renderParentBlock( {
 	selector: '.wp-block-woocommerce-filter-wrapper',
 	Block,
 	blockMap: getRegisteredBlockComponents( 'woocommerce/filter-wrapper' ),
+	options: {
+		multiple: true,
+	},
+	getProps: () => ( {} ),
 } );

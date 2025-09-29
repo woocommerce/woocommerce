@@ -11,6 +11,8 @@ on:
             - '**/changelog.txt'
             - '**/readme.txt'
             - '.gitignore'
+            - '.coderabbit.yml'
+            - 'CODEOWNERS'
             - '**/tests/**'
             - '**/*.md'
             - '.husky/**'

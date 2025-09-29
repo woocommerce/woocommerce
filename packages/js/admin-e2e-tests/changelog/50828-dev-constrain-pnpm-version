@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix pnpm version to 9.1.3 to avoid dependency installation issues.

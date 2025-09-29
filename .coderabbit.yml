@@ -1,0 +1,17 @@
+reviews:
+    assess_linked_issues: false
+    collapse_walkthrough: true
+    high_level_summary: false
+    review_status: false
+    suggested_labels: false
+    suggested_reviewers: false
+    poem: false
+    path_instructions:
+    - path: '**/*.{php,js,ts,jsx,tsx}'
+      instructions: |
+        Don't trust that extension developers will follow the best practices, make sure the code:
+        - Guards against unexpected inputs.
+        - Sanitizes and validates any potentially dangerous inputs.
+        - Is backwards compatible.
+        - Is readable and intuitive.
+        - Has unit or E2E tests where applicable.

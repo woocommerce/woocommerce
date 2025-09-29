@@ -1,12 +1,13 @@
 {
 	"require-dev": {
 		"woocommerce/woocommerce-sniffs": "1.0.0",
+		"phpcompatibility/php-compatibility": "dev-develop#9013cd039fe5740953f9fdeebd19d901b80e26f2 as 9.3.10",
 		"sirbrillig/phpcs-changed": "^2.11.1",
 		"suin/phpcs-psr4-sniff": "^3.0"
 	},
 	"config": {
 		"platform": {
-			"php": "7.2"
+			"php": "7.4"
 		},
 		"allow-plugins": {
 			"dealerdirect/phpcodesniffer-composer-installer": true

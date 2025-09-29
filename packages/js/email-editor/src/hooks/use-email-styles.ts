@@ -8,40 +8,32 @@ import { useCallback, useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { storeName, TypographyProperties } from '../store';
+import { storeName, EmailStyles } from '../store';
 import { useUserTheme } from './use-user-theme';
 
 // Shared reference to an empty object for cases where it is important to avoid
 // returning a new object reference on every invocation
 const EMPTY_OBJECT = {};
 
-interface ElementProperties {
-	typography: TypographyProperties;
-}
-export interface StyleProperties {
-	spacing?: {
-		padding: {
-			top: string;
-			right: string;
-			bottom: string;
-			left: string;
-		};
-		blockGap: string;
-	};
-	typography?: TypographyProperties;
-	color?: {
-		background: string;
-		text: string;
-	};
-	elements?: Record< string, ElementProperties >;
+interface EmailStylesData {
+	styles: EmailStyles;
+	userStyles: EmailStyles;
+	defaultStyles: EmailStyles;
+	updateStyleProp: ( path, newValue ) => void;
+	updateStyles: ( newStyles: EmailStyles ) => void;
 }
 
-interface EmailStylesData {
-	styles: StyleProperties;
-	userStyles: StyleProperties;
-	defaultStyles: StyleProperties;
-	updateStyleProp: ( path, newValue ) => void;
-	updateStyles: ( newStyles: StyleProperties ) => void;
+/**
+ * Check if a nested object is empty.
+ *
+ * @param {Object} obj The object to check.
+ * @return {boolean} True if the nested object is empty, false otherwise.
+ */
+function isNestedEmpty( obj ) {
+	const isNotEmpty = Object.keys( obj ).some(
+		( key ) => Object.keys( obj[ key ] ).length > 0
+	);
+	return ! isNotEmpty;
 }
 
 /**
@@ -135,7 +127,10 @@ function cleanupUserStyles( obj ) {
 			for ( const key in current ) {
 				if ( current.hasOwnProperty( key ) ) {
 					const cleanedValue = cleanObject( current[ key ] );
-					if ( cleanedValue === undefined ) {
+					if (
+						cleanedValue === undefined ||
+						isNestedEmpty( cleanedValue )
+					) {
 						delete current[ key ]; // Remove keys with undefined values
 					} else {
 						current[ key ] = cleanedValue;

@@ -123,7 +123,10 @@
 			}
 		}
 		.woocommerce-task-list__item-text {
-			display: block;
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			gap: $gap;
 			padding: 0;
 			margin-top: 0;
 		}
@@ -183,6 +186,11 @@
 		border: 1px solid var(--wp-admin-theme-color);
 		background: transparent;
 	}
+
+	.woocommerce-task-list__item.in_progress .woocommerce-task__icon {
+		background: linear-gradient(to right, var(--wp-admin-theme-color) 50%, transparent 50%);
+	}
+
 	.woocommerce-task-list__item.complete:not(.complete) .woocommerce-task__icon {
 		border: none;
 	}
@@ -193,9 +201,10 @@
 	}
 
 	.woocommerce-task-list__item-text {
-		display: block;
-		padding: 0;
-		margin-top: 10px;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: $gap;
 	}
 
 	.numbered-circle {
@@ -210,7 +219,7 @@
 
 
 	@for $i from 1 through 10 {
-		.woocommerce-task-list__item:not(.complete).index-#{$i} .woocommerce-task__icon::after {
+		.woocommerce-task-list__item:not(.in_progress):not(.complete).index-#{$i} .woocommerce-task__icon::after {
 			content: "#{$i}";
 			@extend .numbered-circle;
 			color: var(--wp-admin-theme-color);

@@ -33,6 +33,7 @@ import {
 	SponsoredProductPlacementType,
 } from './constants';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { isFeatureEnabled } from '~/utils/features';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -195,13 +196,22 @@ export const Products = () => {
 					} }
 					message={ __(
 						// translators: {{Link}} is a placeholder for a html element.
-						'Visit the {{Link}}Official WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
+						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
 						'woocommerce'
 					) }
 					eventName="tasklist_add_product_visit_marketplace_click"
-					targetUrl={ getAdminLink(
-						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
-					) }
+					targetUrl={
+						isFeatureEnabled( 'marketplace' )
+							? getAdminLink(
+									'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+							  )
+							: 'https://woocommerce.com/product-category/woocommerce-extensions/merchandising/'
+					}
+					linkType={
+						isFeatureEnabled( 'marketplace' )
+							? 'wc-admin'
+							: 'external'
+					}
 				/>
 			</div>
 			{ isLoadingSampleProducts ? (

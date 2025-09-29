@@ -40,12 +40,20 @@ class Theme_Controller {
 	private User_Theme $user_theme;
 
 	/**
+	 * Site style sync controller
+	 *
+	 * @var Site_Style_Sync_Controller
+	 */
+	private Site_Style_Sync_Controller $site_style_sync_controller;
+
+	/**
 	 * Theme_Controller constructor.
 	 */
 	public function __construct() {
-		$this->core_theme = WP_Theme_JSON_Resolver::get_core_data();
-		$this->base_theme = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
-		$this->user_theme = new User_Theme();
+		$this->core_theme                 = WP_Theme_JSON_Resolver::get_core_data();
+		$this->base_theme                 = new WP_Theme_JSON( (array) json_decode( (string) file_get_contents( __DIR__ . '/theme.json' ), true ), 'default' );
+		$this->user_theme                 = new User_Theme();
+		$this->site_style_sync_controller = new Site_Style_Sync_Controller();
 	}
 
 	/**
@@ -61,7 +69,7 @@ class Theme_Controller {
 	}
 
 	/**
-	 * Gets combined theme data from the core and base theme.
+	 * Gets combined theme data from the core and base theme and some handpicked settings from the site theme.
 	 *
 	 * @return WP_Theme_JSON
 	 */
@@ -69,6 +77,13 @@ class Theme_Controller {
 		$theme = new WP_Theme_JSON();
 		$theme->merge( $this->core_theme );
 		$theme->merge( $this->base_theme );
+
+		// Merge synced styles from current active theme.
+		if ( $this->site_style_sync_controller->is_sync_enabled() ) {
+			/** @var WP_Theme_JSON $site_theme */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$site_theme = $this->site_style_sync_controller->get_theme();
+			$theme->merge( $site_theme );
+		}
 
 		return apply_filters( 'woocommerce_email_editor_theme_json', $theme );
 	}
@@ -103,7 +118,7 @@ class Theme_Controller {
 		foreach ( $styles as $key => $style_value ) {
 			if ( is_array( $style_value ) ) {
 				$styles[ $key ] = $this->recursive_extract_preset_variables( $style_value );
-			} elseif ( strpos( $style_value, 'var:preset|' ) === 0 ) {
+			} elseif ( is_string( $style_value ) && strpos( $style_value, 'var:preset|' ) === 0 ) {
 				/** @var string $style_value */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$styles[ $key ] = 'var(--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $style_value ) ) . ')';
 			} else {
@@ -154,13 +169,7 @@ class Theme_Controller {
 	 * @return array
 	 */
 	public function get_settings(): array {
-		$email_editor_theme_settings                              = $this->get_theme()->get_settings();
-		$site_theme_settings                                      = WP_Theme_JSON_Resolver::get_theme_data()->get_settings();
-		$email_editor_theme_settings['color']['palette']['theme'] = array();
-		if ( isset( $site_theme_settings['color']['palette']['theme'] ) ) {
-			$email_editor_theme_settings['color']['palette']['theme'] = $site_theme_settings['color']['palette']['theme'];
-		}
-		return $email_editor_theme_settings;
+		return $this->get_theme()->get_settings();
 	}
 
 	/**
@@ -203,7 +212,7 @@ class Theme_Controller {
 			$css_presets .= ".has-{$font_size['slug']}-font-size { font-size: {$font_size['size']}; } \n";
 		}
 		// Color palette classes.
-		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'], $email_theme_settings['color']['palette']['default'] );
+		$color_definitions = array_merge( $email_theme_settings['color']['palette']['theme'] ?? array(), $email_theme_settings['color']['palette']['default'] ?? array() );
 		foreach ( $color_definitions as $color ) {
 			$css_presets .= ".has-{$color['slug']}-color { color: {$color['color']}; } \n";
 			$css_presets .= ".has-{$color['slug']}-background-color { background-color: {$color['color']}; } \n";
@@ -244,9 +253,9 @@ class Theme_Controller {
 
 			if ( 'button' === $key ) {
 				$selector      = '.wp-block-button';
-				$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => '.wp-block-button' ) )['css'];
+				$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => '.wp-block-button' ) )['css'] ?? '';
 				// Add color to link element.
-				$css_elements .= wp_style_engine_get_styles( array( 'color' => array( 'text' => $elements_style['color']['text'] ?? '' ) ), array( 'selector' => '.wp-block-button a' ) )['css'];
+				$css_elements .= wp_style_engine_get_styles( array( 'color' => array( 'text' => $elements_style['color']['text'] ?? '' ) ), array( 'selector' => '.wp-block-button a' ) )['css'] ?? '';
 				continue;
 			}
 
@@ -259,7 +268,7 @@ class Theme_Controller {
 					break;
 			}
 
-			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'];
+			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'] ?? '';
 		}
 
 		$result = $css_presets . $css_blocks . $css_elements;
@@ -295,7 +304,7 @@ class Theme_Controller {
 	 */
 	public function translate_slug_to_color( string $color_slug ): string {
 		$settings          = $this->get_settings();
-		$color_definitions = array_merge( $settings['color']['palette']['theme'], $settings['color']['palette']['default'] );
+		$color_definitions = array_merge( $settings['color']['palette']['theme'] ?? array(), $settings['color']['palette']['default'] ?? array() );
 		foreach ( $color_definitions as $color_definition ) {
 			if ( $color_definition['slug'] === $color_slug ) {
 				return strtolower( $color_definition['color'] );

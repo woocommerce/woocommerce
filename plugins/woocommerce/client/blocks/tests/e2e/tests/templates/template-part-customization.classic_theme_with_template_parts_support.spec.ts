@@ -43,11 +43,6 @@ const test = base.extend< { testUtils: TestUtils } >( {
 } );
 
 test.describe( 'Template part customization', () => {
-	test.skip(
-		( { wpCoreVersion } ) => wpCoreVersion <= 6.6,
-		'Skipping on WP 6.6 and below'
-	);
-
 	test.beforeEach( async ( { requestUtils } ) => {
 		await requestUtils.activateTheme(
 			CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SUPPORT_SLUG
@@ -67,9 +62,11 @@ test.describe( 'Template part customization', () => {
 			testUtils,
 		} ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
+			} );
+
+			await editor.openTemplate( {
+				templateName,
 			} );
 
 			await editor.insertBlock( {
@@ -113,9 +110,10 @@ test.describe( 'Template part customization', () => {
 		} ) => {
 			// Edit the WooCommerce default template
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//${ templatePath }`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
+			} );
+			await editor.openTemplate( {
+				templateName,
 			} );
 
 			await editor.insertBlock( {

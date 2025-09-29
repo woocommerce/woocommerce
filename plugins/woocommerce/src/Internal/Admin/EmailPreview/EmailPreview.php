@@ -8,13 +8,14 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\EmailPreview;
 
 use Automattic\WooCommerce\Internal\EmailEditor\WooContentProcessor;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Throwable;
 use WC_Email;
 use WC_Order;
 use WC_Product;
 use WC_Product_Variation;
 use WP_User;
+use WC_Order_Item_Shipping;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -84,6 +85,13 @@ class EmailPreview {
 	 * @var object
 	 */
 	protected static $instance = null;
+
+	/**
+	 * Whether the locale has been switched when rendering the preview.
+	 *
+	 * @var bool
+	 */
+	private bool $locale_switched = false;
 
 	/**
 	 * Get class instance.
@@ -168,6 +176,8 @@ class EmailPreview {
 	 * @throws \InvalidArgumentException When the email type is invalid.
 	 */
 	public function set_email_type( string $email_type ) {
+		$this->switch_to_site_locale();
+
 		$wc_emails = WC()->mailer()->get_emails();
 		$emails    = array_combine(
 			array_map( 'get_class', $wc_emails ),
@@ -225,6 +235,8 @@ class EmailPreview {
 		 * @since 9.6.0
 		 */
 		$this->email = apply_filters( 'woocommerce_prepare_email_for_preview', $this->email );
+
+		$this->restore_locale();
 	}
 
 	/**
@@ -253,16 +265,45 @@ class EmailPreview {
 	 * @return string
 	 */
 	public function ensure_links_open_in_new_tab( string $content ) {
-		return (string) preg_replace_callback(
-			'/<a\s+([^>]*?)(target=["\']?[^"\']*["\']?)?([^>]*)>/i',
-			function ( $matches ) {
-				$before = $matches[1];
-				$target = 'target="_blank"';
-				$after  = $matches[3];
-				return "<a $before $target $after>";
-			},
-			$content
-		);
+		if ( empty( $content ) || strpos( $content, '<a' ) === false ) {
+			return $content;
+		}
+
+		if ( ! class_exists( 'DOMDocument' ) ) {
+			return $content;
+		}
+
+		// Suppress libxml errors to prevent them from being displayed.
+		$previous_use_internal_errors = libxml_use_internal_errors( true );
+
+		try {
+			$dom = new \DOMDocument();
+
+			// Add UTF-8 encoding and load with error suppression flags.
+			$html_with_encoding = '<?xml encoding="UTF-8">' . $content;
+			$dom->loadHTML(
+				$html_with_encoding,
+				LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NOWARNING | LIBXML_NOERROR
+			);
+
+			$links = $dom->getElementsByTagName( 'a' );
+			foreach ( $links as $link ) {
+				$link->setAttribute( 'target', '_blank' );
+				$link->setAttribute( 'rel', 'noopener' );
+			}
+
+			$result = $dom->saveHTML();
+
+			// Remove the XML declaration we added earlier, it's not meant to be used in an HTML document.
+			$result = preg_replace( '/<\?xml[^>]*>\s*/i', '', $result );
+
+			return $result;
+		} catch ( \Exception $e ) {
+			return $content;
+		} finally {
+			libxml_use_internal_errors( $previous_use_internal_errors );
+			libxml_clear_errors();
+		}
 	}
 
 	/**
@@ -299,14 +340,14 @@ class EmailPreview {
 	 * @return string
 	 */
 	private function render_preview_email() {
-		$this->set_up_filters();
-
 		if ( ! $this->email_type ) {
 			$this->set_email_type( self::DEFAULT_EMAIL_TYPE );
 		}
 
+		$this->set_up_filters();
+
 		if ( 'plain' === $this->email->get_email_type() ) {
-			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap;">';
+			$content  = '<pre style="word-wrap: break-word; white-space: pre-wrap; text-align: ' . ( is_rtl() ? 'right' : 'left' ) . ';">';
 			$content .= $this->email->get_content_plain();
 			$content .= '</pre>';
 		} else {
@@ -326,8 +367,9 @@ class EmailPreview {
 	 * @return WC_Order
 	 */
 	private function get_dummy_order() {
-		$product   = $this->get_dummy_product();
-		$variation = $this->get_dummy_product_variation();
+		$product              = $this->get_dummy_product();
+		$variation            = $this->get_dummy_product_variation();
+		$downloadable_product = $this->get_dummy_downloadable_product();
 
 		$order = new WC_Order();
 		if ( $product ) {
@@ -336,14 +378,31 @@ class EmailPreview {
 		if ( $variation ) {
 			$order->add_product( $variation );
 		}
+		if ( $downloadable_product ) {
+			$order->add_product( $downloadable_product );
+		}
 		$order->set_id( 12345 );
 		$order->set_date_created( time() );
 		$order->set_currency( 'USD' );
 		$order->set_discount_total( 10 );
 		$order->set_shipping_total( 5 );
-		$order->set_total( 65 );
+		$order->set_total( 80 );
 		$order->set_payment_method_title( __( 'Direct bank transfer', 'woocommerce' ) );
-		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there’s no note, this section is hidden.", 'woocommerce' ) );
+		$order->set_transaction_id( '999999999' );
+		$order->set_customer_note( __( "This is a customer note. Customers can add a note to their order on checkout.\n\nIt can be multiple lines. If there's no note, this section is hidden.", 'woocommerce' ) );
+
+		$order = $this->apply_dummy_order_status( $order );
+
+		// Add shipping method.
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => __( 'Flat rate', 'woocommerce' ),
+				'method_id'    => 'flat_rate',
+				'total'        => '5.00',
+			)
+		);
+		$order->add_item( $shipping_item );
 
 		$address = $this->get_dummy_address();
 		$order->set_billing_address( $address );
@@ -358,6 +417,30 @@ class EmailPreview {
 		 * @since 9.6.0
 		 */
 		return apply_filters( 'woocommerce_email_preview_dummy_order', $order, $this->email_type );
+	}
+
+	/**
+	 * Apply a contextual status to the dummy order based on the previewed email type.
+	 *
+	 * @param WC_Order $order Dummy order instance.
+	 * @return WC_Order
+	 */
+	private function apply_dummy_order_status( WC_Order $order ): WC_Order {
+		$email_type_status_map = array(
+			'WC_Email_Customer_Completed_Order'  => OrderStatus::COMPLETED,
+			'WC_Email_Customer_Processing_Order' => OrderStatus::PROCESSING,
+			'WC_Email_Customer_On_Hold_Order'    => OrderStatus::ON_HOLD,
+			'WC_Email_Customer_Failed_Order'     => OrderStatus::FAILED,
+			'WC_Email_Customer_Cancelled_Order'  => OrderStatus::CANCELLED,
+			'WC_Email_Customer_Refunded_Order'   => OrderStatus::REFUNDED,
+			'WC_Email_New_Order'                 => OrderStatus::PROCESSING,
+			'WC_Email_Cancelled_Order'           => OrderStatus::CANCELLED,
+			'WC_Email_Failed_Order'              => OrderStatus::FAILED,
+		);
+
+		$status = $email_type_status_map[ $this->email_type ] ?? OrderStatus::PROCESSING;
+		$order->set_status( $status );
+		return $order;
 	}
 
 	/**
@@ -407,6 +490,29 @@ class EmailPreview {
 		 * @since 9.7.0
 		 */
 		return apply_filters( 'woocommerce_email_preview_dummy_product_variation', $variation, $this->email_type );
+	}
+
+	/**
+	 * Get a dummy downloadable/virtual product.
+	 *
+	 * @return WC_Product
+	 */
+	private function get_dummy_downloadable_product() {
+		$product = new WC_Product();
+		$product->set_name( __( 'Dummy Downloadable Product', 'woocommerce' ) );
+		$product->set_price( 15 );
+		$product->set_virtual( true );
+		$product->set_downloadable( true );
+
+		/**
+		 * A dummy downloadable WC_Product used in email preview.
+		 *
+		 * @param WC_Product $product The dummy downloadable product object.
+		 * @param string     $email_type The email type to preview.
+		 *
+		 * @since 10.3.0
+		 */
+		return apply_filters( 'woocommerce_email_preview_dummy_downloadable_product', $product, $this->email_type );
 	}
 
 	/**
@@ -470,6 +576,7 @@ class EmailPreview {
 	 * Set up filters for email preview.
 	 */
 	public function set_up_filters() {
+		$this->switch_to_site_locale();
 		// Always show shipping address in the preview email.
 		add_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		// Email templates fetch product from the database to show additional information, which are not
@@ -477,10 +584,13 @@ class EmailPreview {
 		add_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10, 1 );
 		// Enable email preview mode - this way transient values are fetched for live preview.
 		add_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
-		// Get shipping method without needing to save it in the order.
-		add_filter( 'woocommerce_order_shipping_method', array( $this, 'get_shipping_method' ) );
 		// Use placeholder image included in WooCommerce files.
 		add_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
+		// Make products in preview considered downloadable and provide dummy file so WC core shows downloads.
+		add_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10, 1 );
+		add_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10, 1 );
+		// Provide dummy downloadable items for email preview.
+		add_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10, 1 );
 	}
 
 	/**
@@ -490,17 +600,11 @@ class EmailPreview {
 		remove_filter( 'woocommerce_order_needs_shipping_address', array( $this, 'enable_shipping_address' ) );
 		remove_filter( 'woocommerce_order_item_product', array( $this, 'get_dummy_product_when_not_set' ), 10 );
 		remove_filter( 'woocommerce_is_email_preview', array( $this, 'enable_preview_mode' ) );
-		remove_filter( 'woocommerce_order_shipping_method', array( $this, 'get_shipping_method' ) );
 		remove_filter( 'woocommerce_order_item_thumbnail', array( $this, 'get_placeholder_image' ) );
-	}
-
-	/**
-	 * Get the shipping method for the preview email.
-	 *
-	 * @return string
-	 */
-	public function get_shipping_method() {
-		return __( 'Flat rate', 'woocommerce' );
+		remove_filter( 'woocommerce_is_downloadable', array( $this, 'force_product_downloadable' ), 10 );
+		remove_filter( 'woocommerce_product_file', array( $this, 'provide_dummy_product_file' ), 10 );
+		remove_filter( 'woocommerce_order_get_downloadable_items', array( $this, 'get_dummy_downloadable_items' ), 10 );
+		$this->restore_locale();
 	}
 
 	/**
@@ -529,7 +633,76 @@ class EmailPreview {
 	 * @return string
 	 */
 	public function get_placeholder_image() {
-		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.png" width="48" height="48" alt="" />';
+		return '<img src="' . WC()->plugin_url() . '/assets/images/placeholder.webp" width="48" height="48" alt="" />';
+	}
+
+	/**
+	 * Force products in preview to be considered downloadable so core renders downloads section.
+	 *
+	 * @param bool $is_downloadable Current value.
+	 * @return bool
+	 */
+	public function force_product_downloadable( $is_downloadable ) {
+		/**
+		 * Filters whether the current request is an email preview.
+		 *
+		 * When true, products should be considered downloadable so the downloads
+		 * section renders in applicable emails during preview.
+		 *
+		 * @since 9.6.0
+		 *
+		 * @param bool $is_email_preview Whether preview mode is active.
+		 */
+		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
+			return true;
+		}
+		return $is_downloadable;
+	}
+
+	/**
+	 * Provide a dummy product file so product->has_file() returns true in preview.
+	 *
+	 * @param array|null $file Current file array or null.
+	 * @return array|null
+	 */
+	public function provide_dummy_product_file( $file ) {
+		/**
+		 * Filters whether the current request is an email preview.
+		 *
+		 * When true, provide a dummy product file array so downloadable template parts
+		 * can render during preview.
+		 *
+		 * @since 9.6.0
+		 *
+		 * @param bool $is_email_preview Whether preview mode is active.
+		 */
+		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
+			return array(
+				'name' => __( 'Sample Download File.pdf', 'woocommerce' ),
+				'file' => 'sample-download.pdf',
+			);
+		}
+		return $file;
+	}
+
+	/**
+	 * Get dummy downloadable items for email preview.
+	 *
+	 * @param array $downloads Existing downloads.
+	 * @return array
+	 */
+	public function get_dummy_downloadable_items( $downloads ) {
+		$dummy_downloads = array(
+			array(
+				'product_name'   => $this->get_dummy_downloadable_product()->get_name(),
+				'product_id'     => $this->get_dummy_downloadable_product()->get_id(),
+				'download_url'   => 'https://example.com/download',
+				'download_name'  => __( 'Sample Download File.pdf', 'woocommerce' ),
+				'access_expires' => time() + ( 30 * DAY_IN_SECONDS ),
+			),
+		);
+
+		return array_merge( $downloads, $dummy_downloads );
 	}
 
 	/**
@@ -582,5 +755,26 @@ class EmailPreview {
 		}
 
 		return $message;
+	}
+
+	/**
+	 * Switch to the site locale. This is to ensure the email is displayed
+	 * in the store's language, as the customer would see it, not the admin's language.
+	 */
+	private function switch_to_site_locale() {
+		if ( ! $this->locale_switched ) {
+			wc_switch_to_site_locale();
+			$this->locale_switched = true;
+		}
+	}
+
+	/**
+	 * Restore the original locale.
+	 */
+	private function restore_locale() {
+		if ( $this->locale_switched ) {
+			wc_restore_locale();
+			$this->locale_switched = false;
+		}
 	}
 }

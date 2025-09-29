@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Implement optimistic updates to the PMs selection page in WooPayments onboarding

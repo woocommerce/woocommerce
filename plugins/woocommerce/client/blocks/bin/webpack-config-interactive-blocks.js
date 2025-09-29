@@ -27,11 +27,24 @@ const entries = {
 	...styleEntries,
 	...editorStyleEntries,
 
+	// Experimental mini cart frontend modules, only enqueued when experimental-iapi-mini-cart feature flag is enabled.
+	'woocommerce/mini-cart': './assets/js/blocks/mini-cart/iapi-frontend.ts',
+
+	// Product elements frontend module. Share by several blocks.
+	'woocommerce/product-elements':
+		'./assets/js/atomic/blocks/product-elements/frontend.ts',
+	// Add to cart with options quantity selector frontend module used by the
+	// Product Quantity block and the Grouped Product Selector block.
+	'woocommerce/add-to-cart-with-options-quantity-selector':
+		'./assets/js/blocks/add-to-cart-with-options/quantity-selector/frontend.ts',
+
 	// Other
 	'@woocommerce/stores/woocommerce/cart':
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
+	'@woocommerce/stores/woocommerce/product-data':
+		'./assets/js/base/stores/woocommerce/product-data.ts',
 };
 
 module.exports = {
@@ -64,7 +77,11 @@ module.exports = {
 			combineAssets: true,
 			combinedOutputFile: './interactivity-blocks-frontend-assets.php',
 			requestToExternalModule( request ) {
-				if ( request.startsWith( '@woocommerce/stores/' ) ) {
+				if (
+					request.startsWith( '@woocommerce/stores/woocommerce/' )
+				) {
+					return `module ${ request }`;
+				} else if ( request.startsWith( '@woocommerce/stores/' ) ) {
 					return `import ${ request }`;
 				}
 			},

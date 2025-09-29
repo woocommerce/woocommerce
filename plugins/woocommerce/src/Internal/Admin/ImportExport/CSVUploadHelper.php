@@ -96,6 +96,7 @@ class CSVUploadHelper {
 		add_filter( 'wp_unique_filename', array( $this, 'override_unique_filename' ), 0, 2 );
 		add_filter( 'wp_handle_upload_overrides', $overrides_callback, 999 );
 		add_filter( 'wp_handle_upload_prefilter', array( $this, 'remove_txt_from_uploaded_file' ), 0 );
+		add_filter( 'wp_check_filetype_and_ext', array( $this, 'filter_woocommerce_check_filetype_for_csv' ), 10, 5 );
 
 		$orig_files_import = $_FILES['import'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized,WordPress.Security.NonceVerification.Missing
 		$_FILES['import']  = $file;  // wp_import_handle_upload() expects the file to be in 'import'.
@@ -106,6 +107,7 @@ class CSVUploadHelper {
 		remove_filter( 'wp_unique_filename', array( $this, 'override_unique_filename' ), 0 );
 		remove_filter( 'wp_handle_upload_overrides', $overrides_callback, 999 );
 		remove_filter( 'wp_handle_upload_prefilter', array( $this, 'remove_txt_from_uploaded_file' ), 0 );
+		remove_filter( 'wp_check_filetype_and_ext', array( $this, 'filter_woocommerce_check_filetype_for_csv' ), 10 );
 
 		if ( $orig_files_import ) {
 			$_FILES['import'] = $orig_files_import;
@@ -174,5 +176,35 @@ class CSVUploadHelper {
 	public function remove_txt_from_uploaded_file( array $file ): array {
 		$file['name'] = substr( $file['name'], 0, -4 );
 		return $file;
+	}
+
+	/**
+	 * Filters the WordPress determination of a file's type and extension, specifically to correct
+	 * CSV files that are misidentified as 'text/html'.
+	 *
+	 * @param array  $data      An array of file data: ['ext'] (string), ['type'] (string), ['proper_filename'] (string|false).
+	 * @param string $file      Full path to the file.
+	 * @param string $filename  The Mime type of the file.
+	 * @param array  $mimes     Array of mime types.
+	 * @param string $real_mime The actual mime type or empty string.
+	 * @return array Filtered file data.
+	 */
+	public function filter_woocommerce_check_filetype_for_csv( $data, $file, $filename, $mimes, $real_mime ) {
+		// Check if the file was misidentified as 'text/html' by PHP.
+		if ( 'text/html' === $real_mime ) {
+			// Determine the expected file type based on the filename extension.
+			// $mimes here is the context-specific list of mimes for the current upload.
+			$filename_check = wp_check_filetype( $filename, $mimes );
+
+			$file_ext  = $filename_check['ext'];
+			$file_type = $filename_check['type'];
+
+			if ( ( 'csv' === $file_ext && 'text/csv' === $file_type ) ) {
+				$data['ext']  = 'csv';
+				$data['type'] = 'text/csv';
+			}
+		}
+
+		return $data;
 	}
 }

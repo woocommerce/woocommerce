@@ -8,11 +8,11 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import { ACTION_TYPES } from './action-types';
 import {
-	PaymentProvider,
+	PaymentsProvider,
 	OfflinePaymentMethodProvider,
 	OrderMap,
-	SuggestedPaymentExtension,
-	SuggestedPaymentExtensionCategory,
+	SuggestedPaymentsExtension,
+	SuggestedPaymentsExtensionCategory,
 	EnableGatewayResponse,
 } from './types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
@@ -26,16 +26,16 @@ export function getPaymentProvidersRequest(): {
 }
 
 export function getPaymentProvidersSuccess(
-	providers: PaymentProvider[],
+	providers: PaymentsProvider[],
 	offlinePaymentGateways: OfflinePaymentMethodProvider[],
-	suggestions: SuggestedPaymentExtension[],
-	suggestionCategories: SuggestedPaymentExtensionCategory[]
+	suggestions: SuggestedPaymentsExtension[],
+	suggestionCategories: SuggestedPaymentsExtensionCategory[]
 ): {
 	type: ACTION_TYPES.GET_PAYMENT_PROVIDERS_SUCCESS;
-	providers: PaymentProvider[];
+	providers: PaymentsProvider[];
 	offlinePaymentGateways: OfflinePaymentMethodProvider[];
-	suggestions: SuggestedPaymentExtension[];
-	suggestionCategories: SuggestedPaymentExtensionCategory[];
+	suggestions: SuggestedPaymentsExtension[];
+	suggestionCategories: SuggestedPaymentsExtensionCategory[];
 } {
 	return {
 		type: ACTION_TYPES.GET_PAYMENT_PROVIDERS_SUCCESS,
@@ -56,6 +56,18 @@ export function getPaymentProvidersError( error: unknown ): {
 	};
 }
 
+/**
+ * Toggle the enabled state of a payment gateway.
+ * This function makes an AJAX request to the server to toggle the gateway's enabled state.
+ *
+ * See `WC_AJAX::toggle_gateway_enabled()` for the response structure.
+ *
+ * @param {string} gatewayId          The ID of the payment gateway to toggle.
+ * @param {string} ajaxUrl            The URL to send the AJAX request to, typically the admin-ajax.php endpoint.
+ * @param {string} gatewayToggleNonce The nonce for security, used to verify the request.
+ *
+ * @return {Generator<void, EnableGatewayResponse, unknown>} Server response with the updated gateway state.
+ */
 export function* togglePaymentGateway(
 	gatewayId: string,
 	ajaxUrl: string,

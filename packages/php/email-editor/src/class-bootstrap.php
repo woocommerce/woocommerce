@@ -47,7 +47,7 @@ class Bootstrap {
 	/**
 	 * Initialize the email editor functionality.
 	 */
-	public function init() {
+	public function init(): void {
 		add_action(
 			'init',
 			array(
@@ -63,19 +63,26 @@ class Bootstrap {
 				'setup_email_editor_integrations',
 			)
 		);
+		add_filter(
+			'block_type_metadata_settings',
+			array( $this->core_email_editor_integration, 'update_block_settings' ),
+			10,
+			1
+		);
 	}
 
 	/**
 	 * Initialize the email editor.
 	 */
-	public function initialize() {
+	public function initialize(): void {
 		$this->email_editor->initialize();
 	}
 
 	/**
 	 * Setup email editor integrations.
 	 */
-	public function setup_email_editor_integrations() {
+	public function setup_email_editor_integrations(): bool {
 		$this->core_email_editor_integration->initialize();
+		return true; // PHPStan expect returning a value from the filter.
 	}
 }

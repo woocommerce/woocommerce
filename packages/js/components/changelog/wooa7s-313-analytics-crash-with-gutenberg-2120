@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix areas where undefined can be passed into sprintf and cause a fatal error with Gutenberg 21.2.0, in particular in Analytics reports.

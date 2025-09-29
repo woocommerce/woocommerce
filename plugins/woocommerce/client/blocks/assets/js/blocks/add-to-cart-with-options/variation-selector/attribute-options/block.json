@@ -5,13 +5,12 @@
 	"category": "woocommerce-product-elements",
 	"keywords": [ "WooCommerce" ],
 	"ancestor": [
-		"woocommerce/add-to-cart-with-options-variation-selector-item"
+		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"attributes": {
-		"style": {
+		"optionStyle": {
 			"type": "string",
-			"enum": [ "pills", "dropdown" ],
-			"default": "pills"
+			"enum": [ "pills", "dropdown" ]
 		}
 	},
 	"textdomain": "woocommerce",
@@ -26,6 +25,5 @@
 		"woocommerce/attributeName",
 		"woocommerce/attributeTerms"
 	],
-	"viewScriptModule": "woocommerce/add-to-cart-with-options-variation-selector-attribute-options",
 	"style": "file:../woocommerce/add-to-cart-with-options-variation-selector-attribute-options-style.css"
 }

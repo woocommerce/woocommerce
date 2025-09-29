@@ -1,0 +1,12 @@
+.wc-block-components-skeleton.wc-block-components-skeleton--checkout-payment {
+	border: 1px solid color-mix(in srgb, currentColor 10%, transparent);
+	border-radius: $universal-border-radius;
+	padding: em($gap-small);
+}
+
+.wc-block-components-skeleton--checkout-payment-container {
+	display: grid;
+	grid-template-columns: 20px 1fr 50px;
+	gap: em($gap-small);
+	align-items: center;
+}

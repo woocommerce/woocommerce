@@ -6,13 +6,17 @@
 	"description": "Display the Thumbnails of a product.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce" ],
-	"usesContext": [ "postId", "cropImages" ],
+	"usesContext": [ "postId" ],
 	"textdomain": "woocommerce",
 	"ancestor": [ "woocommerce/product-gallery" ],
 	"attributes": {
 		"thumbnailSize": {
 			"type": "string",
 			"default": "25%"
+		},
+		"aspectRatio": {
+			"type": "string",
+			"default": "1"
 		}
 	},
 	"supports": {

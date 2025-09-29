@@ -98,6 +98,11 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 				'expected_output' => 'Mobile app',
 			),
 			array(
+				'source_type'     => 'pos',
+				'source'          => '',
+				'expected_output' => 'Point of Sale',
+			),
+			array(
 				'source_type'     => '',
 				'source'          => '',
 				'expected_output' => 'Unknown',

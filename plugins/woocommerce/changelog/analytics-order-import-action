@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add action 'woocommerce_order_scheduler_after_import_order' fired after WooCommerce Analytics imports an order or refund and invalidates reports cache.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Introduce Variation Description block, used inside the Add to Cart + Options block to display the description of the selected variation

@@ -14,7 +14,7 @@ import {
 	useRef,
 	useState,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -208,12 +208,9 @@ const AttributesComboboxControl = ( {
 
 	return (
 		<div
-			className={ classnames(
-				'woocommerce-attributes-combobox-container',
-				{
-					'no-items': ! options.length,
-				}
-			) }
+			className={ clsx( 'woocommerce-attributes-combobox-container', {
+				'no-items': ! options.length,
+			} ) }
 			ref={ comboRef }
 		>
 			<BaseControl label={ label } help={ help } id={ labelFor }>

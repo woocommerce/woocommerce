@@ -1,0 +1,72 @@
+/**
+ * Any CSS included here will be global. The classic template
+ * bundles Infima by default. Infima is a CSS framework designed to
+ * work well for content-centric websites.
+ */
+
+/* You can override the default Infima variables here. */
+:root {
+  --ifm-color-primary: #720eec; /* WooCommerce Purple 50 */
+  --ifm-color-primary-dark: #6108ce; /* WooCommerce Purple 60 */
+  --ifm-color-primary-darker: #5007aa; /* WooCommerce Purple 70 */
+  --ifm-color-primary-darkest: #3c087e; /* WooCommerce Purple 80 */
+  --ifm-color-primary-light: #a77eff; /* WooCommerce Purple 30 */
+  --ifm-color-primary-lighter: #b999ff; /* WooCommerce Purple 20 */
+  --ifm-color-primary-lightest: #d1c1ff; /* WooCommerce Purple 10 */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+/* For readability concerns, you should choose a lighter palette in dark mode. */
+[data-theme='dark'] {
+  --ifm-color-primary: #a77eff; /* WooCommerce Purple 30 */
+  --ifm-color-primary-dark: #b999ff; /* WooCommerce Purple 20 */
+  --ifm-color-primary-darker: #d1c1ff; /* WooCommerce Purple 10 */
+  --ifm-color-primary-darkest: #e1d7ff; /* WooCommerce Purple 5 */
+  --ifm-color-primary-light: #f2edff; /* WooCommerce Purple 0 */
+  --ifm-color-primary-lighter: #e1d7ff; /* WooCommerce Purple 5 */
+  --ifm-color-primary-lightest: #f2edff; /* WooCommerce Purple 0 */
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+.footer__copyright {
+  padding-top: 20px;
+  font-size: 12px;
+}
+
+
+.docusaurus-footer-for-automattic {
+  padding-top: 10px;
+
+  a {
+    text-decoration: none;
+  }
+  img {
+    height: 10px;
+  }
+}
+
+/* Hide dark mode logo in light mode */
+html[data-theme='light'] .automattic-logo-dark {
+  display: none;
+}
+
+/* Hide light mode logo in dark mode */
+html[data-theme='dark'] .automattic-logo-light {
+  display: none;
+}
+
+/* Hide the pagination nav */
+.pagination-nav {
+  display: none;
+}
+
+/* Show pagination nav in Getting Started */
+html[class*=docs-doc-id-getting-started] .pagination-nav {
+  display: grid;
+}
+
+/* Hide next pagination nav at end of Getting Started */
+html.docs-doc-id-getting-started\/version-control-deployment .pagination-nav .pagination-nav__link--next {
+  display: none;
+}

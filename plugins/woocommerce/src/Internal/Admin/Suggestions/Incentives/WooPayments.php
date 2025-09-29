@@ -11,6 +11,8 @@ use WC_Abstract_Order;
 
 /**
  * WooPayments incentives provider class.
+ *
+ * @internal
  */
 class WooPayments extends Incentive {
 	/**

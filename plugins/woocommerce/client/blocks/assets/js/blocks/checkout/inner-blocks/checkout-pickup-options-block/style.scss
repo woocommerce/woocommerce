@@ -44,7 +44,7 @@
 		}
 		.wc-block-components-radio-control__description-group {
 			display: block;
-			width: calc(100% + em($gap-huge / 0.875));
+			width: calc(100% + em(math.div($gap-huge, 0.875)));
 			box-sizing: border-box;
 			border-radius: $universal-border-radius;
 			padding: 1px em($gap-small);

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Define the capabilities for the `woo_email` post type

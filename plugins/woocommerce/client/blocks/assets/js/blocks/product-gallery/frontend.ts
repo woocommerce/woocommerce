@@ -6,7 +6,10 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
+	getConfig,
 } from '@wordpress/interactivity';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
@@ -14,12 +17,16 @@ import {
 import type { ProductGalleryContext } from './types';
 import { checkOverflow } from './utils';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
 
 const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
-	disableLeft: imageIndex === 0,
-	disableRight: imageIndex === totalImages - 1,
+	isDisabledPrevious: imageIndex === 0,
+	isDisabledNext: imageIndex === totalImages - 1,
 } );
 
 /**
@@ -44,7 +51,6 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	// Find the closest gallery container
 	const galleryContainer = element.closest(
 		'.wp-block-woocommerce-product-gallery'
 	);
@@ -53,15 +59,34 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const imageElement = galleryContainer.querySelector(
-		`.wp-block-woocommerce-product-gallery-large-image img[data-image-id="${ imageId }"]`
+	// Find the scrollable container for the large image gallery
+	const scrollableContainer = galleryContainer.querySelector(
+		'.wc-block-product-gallery-large-image__container'
+	);
+
+	if ( ! scrollableContainer ) {
+		return;
+	}
+
+	const imageElement = scrollableContainer.querySelector(
+		`img[data-image-id="${ imageId }"]`
 	);
 
 	if ( imageElement ) {
-		imageElement.scrollIntoView( {
+		// Calculate the scroll position to center the image horizontally
+		const containerRect = scrollableContainer.getBoundingClientRect();
+		const imageRect = imageElement.getBoundingClientRect();
+
+		const scrollLeft =
+			scrollableContainer.scrollLeft +
+			( imageRect.left - containerRect.left ) -
+			( containerRect.width - imageRect.width ) / 2;
+
+		// Use scrollTo as scrollIntoView with inline: 'center'
+		// is not supported in iOS (Safari and Chrome).
+		scrollableContainer.scrollTo( {
+			left: scrollLeft,
 			behavior: 'smooth',
-			block: 'nearest',
-			inline: 'center',
 		} );
 	}
 };
@@ -139,6 +164,12 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
+
 const productGallery = {
 	state: {
 		/**
@@ -157,13 +188,13 @@ const productGallery = {
 			const { imageData } = context;
 
 			const imageId = imageData[ newImageIndex ];
-			const { disableLeft, disableRight } = getArrowsState(
+			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
 				newImageIndex,
 				imageData.length
 			);
 
-			context.disableLeft = disableLeft;
-			context.disableRight = disableRight;
+			context.isDisabledPrevious = isDisabledPrevious;
+			context.isDisabledNext = isDisabledNext;
 			context.selectedImageId = imageId;
 
 			if ( imageId !== -1 ) {
@@ -233,21 +264,52 @@ const productGallery = {
 				actions.selectPreviousImage();
 			}
 		},
-		onThumbnailKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
-			) {
-				if ( event.code === 'Space' ) {
-					event.preventDefault();
-				}
-				actions.selectCurrentImage();
-			}
-		},
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
 			if ( event.code === 'Escape' ) {
 				actions.closeDialog();
+			}
+
+			if ( event.code === 'Tab' ) {
+				const focusableElementsSelectors =
+					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+				const dialogPopUp = getElement()?.ref as HTMLElement;
+				const focusableElements = dialogPopUp.querySelectorAll(
+					focusableElementsSelectors
+				);
+
+				if ( ! focusableElements.length ) {
+					return;
+				}
+
+				const firstFocusableElement =
+					focusableElements[ 0 ] as HTMLElement;
+				const lastFocusableElement = focusableElements[
+					focusableElements.length - 1
+				] as HTMLElement;
+
+				if (
+					! event.shiftKey &&
+					event.target === lastFocusableElement
+				) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+					return;
+				}
+
+				if (
+					event.shiftKey &&
+					event.target === firstFocusableElement
+				) {
+					event.preventDefault();
+					lastFocusableElement.focus();
+					return;
+				}
+
+				if ( event.target === dialogPopUp ) {
+					event.preventDefault();
+					firstFocusableElement.focus();
+				}
 			}
 		},
 		openDialog: () => {
@@ -278,7 +340,12 @@ const productGallery = {
 			}
 			const { clientX } = event.touches[ 0 ];
 			context.touchCurrentX = clientX;
-			event.preventDefault();
+
+			// Only prevent default if there's significant horizontal movement
+			const delta = clientX - context.touchStartX;
+			if ( Math.abs( delta ) > 10 ) {
+				event.preventDefault();
+			}
 		},
 		onTouchEnd: () => {
 			const context = getContext();
@@ -293,9 +360,9 @@ const productGallery = {
 
 			// Only trigger swipe actions if there was significant movement
 			if ( Math.abs( delta ) > imageWidth * SNAP_THRESHOLD ) {
-				if ( delta > 0 && ! context.disableLeft ) {
+				if ( delta > 0 && ! context.isDisabledPrevious ) {
 					actions.selectPreviousImage();
-				} else if ( delta < 0 && ! context.disableRight ) {
+				} else if ( delta < 0 && ! context.isDisabledNext ) {
 					actions.selectNextImage();
 				}
 			}
@@ -315,8 +382,80 @@ const productGallery = {
 
 			context.thumbnailsOverflow = overflowState;
 		},
+		onArrowsKeyDown: ( event: KeyboardEvent ) => {
+			if ( event.code === 'ArrowRight' ) {
+				event.preventDefault();
+				actions.selectNextImage();
+			}
+
+			if ( event.code === 'ArrowLeft' ) {
+				event.preventDefault();
+				actions.selectPreviousImage();
+			}
+		},
+		onThumbnailsArrowsKeyDown: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+
+			// Find and focus the newly selected image
+			const element = getElement()?.ref as HTMLElement;
+			const { selectedImageId } = getContext();
+
+			if ( element ) {
+				const galleryContainer = element.closest(
+					'.wp-block-woocommerce-product-gallery'
+				);
+				if ( galleryContainer ) {
+					const selectedImage = galleryContainer.querySelector(
+						`img[data-image-id="${ selectedImageId }"]`
+					) as HTMLElement;
+					if ( selectedImage ) {
+						selectedImage.focus( { preventScroll: true } );
+					}
+				}
+			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: ( event?: MouseEvent ) => {
+			actions.selectPreviousImage( event );
+		},
+		onClickNext: ( event?: MouseEvent ) => {
+			actions.selectNextImage( event );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			actions.onArrowsKeyDown( event );
+		},
 	},
 	callbacks: {
+		listenToProductDataChanges: () => {
+			const productId = productDataState?.productId;
+			if ( ! productId ) {
+				return;
+			}
+
+			const { products } = getConfig(
+				'woocommerce'
+			) as WooCommerceConfig;
+
+			const productData =
+				products?.[ productId ]?.variations?.[
+					productDataState?.variationId || 0
+				] || products?.[ productId ];
+
+			const imageId = productData?.image_id;
+			if ( ! imageId ) {
+				return;
+			}
+
+			const { imageData } = getContext();
+			const imageIndex = imageData.indexOf( imageId );
+
+			if ( imageIndex >= 0 ) {
+				actions.selectImage( imageIndex );
+			}
+		},
 		watchForChangesOnAddToCartForm: () => {
 			const context = getContext();
 			const variableProductCartForm = document.querySelector(
@@ -392,11 +531,10 @@ const productGallery = {
 						behavior: 'auto',
 						block: 'center',
 					} );
-					selectedImage.focus();
 				}
 			}
 		},
-		toggleActiveImageAttributes: () => {
+		toggleActiveThumbnailAttributes: () => {
 			const element = getElement()?.ref as HTMLElement;
 			if ( ! element ) return false;
 
@@ -407,11 +545,54 @@ const productGallery = {
 			const imageId = Number( imageIdValue );
 
 			if ( selectedImageId === imageId ) {
-				element.classList.add( 'is-active' );
+				element.classList.add(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '0' );
 			} else {
-				element.classList.remove( 'is-active' );
+				element.classList.remove(
+					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
+				);
 				element.setAttribute( 'tabIndex', '-1' );
+			}
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext();
+			const resizeObserver = new ResizeObserver( () => {
+				const overflowState = checkOverflow( scrollableElement );
+				context.thumbnailsOverflow = overflowState;
+			} );
+
+			// Observe both the scrollable element and its parent for size changes
+			resizeObserver.observe( scrollableElement );
+			if ( scrollableElement.parentElement ) {
+				resizeObserver.observe( scrollableElement.parentElement );
+			}
+
+			return () => {
+				resizeObserver.disconnect();
+			};
+		},
+		// There's this issue with the scrollbar on the thumbnails block,
+		// that in certain cases thumbnails overflow slightly the container.
+		// This triggers the overflow and scrollbar makes thumbnails smaller
+		// so they no longer overflow resulting in a ghost scrollbar (no scroll).
+		// scrollbar-gutter doesn't work well in flexbox and doesn't solve it,
+		// hence programmatic solution.
+		// See https://github.com/woocommerce/woocommerce/issues/59810.
+		hideGhostOverflow: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) return;
+
+			const { clientWidth, scrollWidth } = element;
+
+			if ( clientWidth >= scrollWidth ) {
+				element.style.scrollbarWidth = 'none';
 			}
 		},
 	},

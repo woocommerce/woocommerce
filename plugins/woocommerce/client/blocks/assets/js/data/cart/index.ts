@@ -31,6 +31,7 @@ import {
 import { defaultCartState } from './default-state';
 import { getTriggerStoreSyncEvent } from './utils';
 import type { QuantityChanges } from './notify-quantity-changes';
+import { isEditor } from '../utils';
 
 export const config = {
 	reducer,
@@ -58,10 +59,17 @@ register( store );
 // Likewise, if we have a valid persistent cart, we can skip the request.
 // The only reliable way to check if the cart is empty is to check the cookies.
 window.addEventListener( 'load', () => {
+	const cachedCart = persistenceLayer.get();
+	// On login, if a customer had a cart session, the cached cart is equal to the default cart data, with no items.
+	// We need to check if the cached cart has items, otherwise we will wrongly skip the API request.
+	const hasItemsInCachedCart = cachedCart?.itemsCount > 0;
+
 	if (
-		( ! hasCartSession() || persistenceLayer.get() ) &&
-		! isAddingToCart
+		( ! hasCartSession() || hasItemsInCachedCart ) &&
+		! isAddingToCart() &&
+		! isEditor() // Don't finish resolution in editor,but only for real carts
 	) {
+		// Prevent the API request from being made.
 		wpDispatch( store ).finishResolution( 'getCartData' );
 	}
 } );

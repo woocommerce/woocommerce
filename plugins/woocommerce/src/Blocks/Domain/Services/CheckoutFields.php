@@ -1381,14 +1381,31 @@ class CheckoutFields {
 	/**
 	 * Filter fields for order confirmation.
 	 *
-	 * @param array $fields The fields to filter.
+	 * @param array $fields  The fields to filter.
+	 * @param array $context Additional context for the filter.
 	 * @return array The filtered fields.
 	 */
-	public function filter_fields_for_order_confirmation( $fields ) {
+	public function filter_fields_for_order_confirmation( $fields, $context = array() ) {
 		return array_filter(
 			$fields,
-			function ( $field ) {
-				return ! empty( $field['show_in_order_confirmation'] );
+			function ( $field ) use ( $fields, $context ) {
+				/**
+				 * Filter fields for order confirmation (thank you page, email).
+				 *
+				 * Used in methods:
+				 * WC_Email::additional_checkout_fields
+				 * WC_Email::additional_address_fields
+				 * CheckoutFieldsFrontend::render_order_other_fields
+				 * AdditionalFields::render_content
+				 *
+				 * @param bool                    Whether the field should be shown.
+				 * @param array          $field   Field data.
+				 * @param array          $fields  All fields for better context when field should be shown or hidden based on other fields values.
+				 * @param array          $context Additional context for the filter. Data depends in which method filter_fields_for_order_confirmation is called.
+				 * @param CheckoutFields $this    The CheckoutFields instance.
+				 * @since 10.1.0
+				 */
+				return apply_filters( 'woocommerce_filter_fields_for_order_confirmation', ! empty( $field['show_in_order_confirmation'] ), $field, $fields, $context, $this );
 			}
 		);
 	}

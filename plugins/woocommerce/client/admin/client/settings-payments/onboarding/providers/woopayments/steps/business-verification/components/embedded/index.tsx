@@ -17,7 +17,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import { createKycAccountSession } from '../../utils/actions';
+import { createEmbeddedKycSession } from '../../utils/actions';
 import appearance from './appearance';
 import { OnboardingFields } from '../../types';
 import BannerNotice from '../../../../components/banner-notice';
@@ -45,7 +45,8 @@ interface EmbeddedAccountOnboardingProps extends EmbeddedComponentProps {
 const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 	const [ stripeConnectInstance, setStripeConnectInstance ] =
 		useState< StripeConnectInstance | null >( null );
-	const { currentStep } = useOnboardingContext();
+	const { currentStep, sessionEntryPoint: onboardingSource } =
+		useOnboardingContext();
 	const [ initializationError, setInitializationError ] = useState<
 		string | null
 	>( null );
@@ -54,19 +55,18 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 	useEffect( () => {
 		const initializeStripe = async () => {
 			try {
-				const accountSession = await createKycAccountSession(
+				const accountSession = await createEmbeddedKycSession(
 					onboardingData,
-					currentStep?.actions?.kyc_session?.href ?? ''
+					currentStep?.actions?.kyc_session?.href ?? '',
+					onboardingSource
 				);
-
-				// To-Do: Track the embedded component redirection event.
 
 				const { clientSecret, publishableKey } = accountSession.session;
 
 				if ( ! publishableKey ) {
 					throw new Error(
 						__(
-							'Unable to start onboarding. If this problem persists, please contact support.',
+							'Unable to start the business verification session. If this problem persists, please contact support.',
 							'woocommerce'
 						)
 					);
@@ -88,7 +88,7 @@ const useInitializeStripe = ( onboardingData: OnboardingFields ) => {
 					err instanceof Error
 						? err.message
 						: __(
-								'Unable to start onboarding. If this problem persists, please contact support.',
+								'Unable to start the business verification session. If this problem persists, please contact support.',
 								'woocommerce'
 						  )
 				);

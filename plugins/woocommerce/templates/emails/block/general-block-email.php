@@ -6,20 +6,23 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 9.9.0
+ * @version 10.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
+
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
 if ( 'customer_invoice' === $email->id ) :
 	// Customer invoice email
 	// We are keeping this here until we have a better way to handle conditional content in the email editor.
 	?>
 	<?php if ( $order->needs_payment() ) { ?>
-		<p>
-		<?php
+		<p><?php
 		if ( $order->has_status( OrderStatus::FAILED ) ) {
 			printf(
 				wp_kses(
@@ -49,16 +52,13 @@ if ( 'customer_invoice' === $email->id ) :
 				'<a href="' . esc_url( $order->get_checkout_payment_url() ) . '">' . esc_html__( 'Pay for this order', 'woocommerce' ) . '</a>'
 			);
 		}
-		?>
-		</p>
+		?></p>
 
 	<?php } else { ?>
-		<p>
-		<?php
+		<p><?php
 		/* translators: %s Order date */
 		printf( esc_html__( 'Here are the details of your order placed on %s:', 'woocommerce' ), esc_html( wc_format_datetime( $order->get_date_created() ) ) );
-		?>
-		</p>
+		?></p>
 		<?php
 	}
 endif;
@@ -116,3 +116,59 @@ if ( isset( $order ) && ! in_array( $email->id, $accounts_related_emails, true )
 	 */
 	do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 }
+
+if ( 'customer_pos_completed_order' === $email->id || 'customer_pos_refunded_order' === $email->id ) :
+	if ( ! empty( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) )
+		|| ! empty( get_option( 'woocommerce_pos_store_phone' ) )
+		|| ! empty( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ) ) :
+		?>
+		<!-- wp:group -->
+		<div class="wp-block-group">
+			<?php if ( ! empty( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ) ) : ?>
+			<!-- wp:heading {"level":3} -->
+			<h3 class="wp-block-heading"><?php echo esc_html( get_option( 'woocommerce_pos_store_name', PointOfSaleDefaultSettings::get_default_store_name() ) ); ?></h3>
+			<!-- /wp:heading -->
+			<?php else : ?>
+			<!-- wp:heading {"level":3} -->
+			<h3 class="wp-block-heading"><?php echo esc_html__( 'Store Information', 'woocommerce' ); ?></h3>
+			<!-- /wp:heading -->
+			<?php endif; ?>
+
+			<?php if ( ! empty( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) ) ) : ?>
+			<!-- wp:paragraph -->
+			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_email', PointOfSaleDefaultSettings::get_default_store_email() ) ); ?></p>
+			<!-- /wp:paragraph -->
+			<?php endif; ?>
+
+			<?php if ( ! empty( get_option( 'woocommerce_pos_store_phone' ) ) ) : ?>
+			<!-- wp:paragraph -->
+			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_phone' ) ); ?></p>
+			<!-- /wp:paragraph -->
+			<?php endif; ?>
+
+			<?php if ( ! empty( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ) ) : ?>
+			<!-- wp:paragraph -->
+			<p><?php echo esc_html( get_option( 'woocommerce_pos_store_address', PointOfSaleDefaultSettings::get_default_store_address() ) ); ?></p>
+			<!-- /wp:paragraph -->
+			<?php endif; ?>
+		</div>
+		<!-- /wp:group -->
+		<?php
+	endif;
+
+	if ( ! empty( get_option( 'woocommerce_pos_refund_returns_policy' ) ) ) :
+		?>
+		<!-- wp:group -->
+		<div class="wp-block-group">
+			<!-- wp:heading {"level":3} -->
+			<h3><?php echo esc_html__( 'Refund & Returns Policy', 'woocommerce' ); ?></h3>
+			<!-- /wp:heading -->
+
+			<!-- wp:paragraph -->
+			<p><?php echo esc_html( get_option( 'woocommerce_pos_refund_returns_policy' ) ); ?></p>
+			<!-- /wp:paragraph -->
+		</div>
+		<!-- /wp:group -->
+		<?php
+	endif;
+endif;

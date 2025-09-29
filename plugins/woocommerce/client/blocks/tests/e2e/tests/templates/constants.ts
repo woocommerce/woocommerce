@@ -99,7 +99,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 			const block = await frontendUtils.getBlockByName(
 				'woocommerce/mini-cart'
 			);
-			await block.click();
+			await block.getByRole( 'button' ).click();
 		},
 		templateName: 'Mini-Cart',
 		templatePath: 'mini-cart',
@@ -107,11 +107,9 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		canBeOverriddenByThemes: true,
 	},
 	{
-		visitPage: async ( { admin, editor, requestUtils, page } ) => {
+		visitPage: async ( { admin, editor, page } ) => {
 			// We will be able to simplify this logic once the blockified
 			// Add to Cart with Options block is the default.
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-			await requestUtils.setFeatureFlag( 'blockified-add-to-cart', true );
 			await admin.visitSiteEditor( {
 				postId: 'woocommerce/woocommerce//single-product',
 				postType: 'wp_template',
@@ -126,7 +124,7 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 
 			await page.goto( '/product/wordpress-pennant/' );
 		},
-		templateName: 'External Product Add To Cart With Options',
+		templateName: 'External Product Add to Cart + Options',
 		templatePath: 'external-product-add-to-cart-with-options',
 		templateType: 'wp_template_part',
 		canBeOverriddenByThemes: true,

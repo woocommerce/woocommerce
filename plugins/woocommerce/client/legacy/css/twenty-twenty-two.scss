@@ -443,8 +443,8 @@ $tt2-gray: #f7f7f7;
 
 		a {
 			position: relative;
-			height: 1em;
-			width: 1em;
+			height: 1.3em;
+			width: 1.3em;
 			text-indent: -999em;
 			display: inline-block;
 			text-decoration: none;
@@ -459,6 +459,7 @@ $tt2-gray: #f7f7f7;
 				height: 1em;
 				line-height: 1;
 				font-family: WooCommerce;
+				font-size: 24px;
 				content: "\e021";
 				text-indent: 0;
 			}

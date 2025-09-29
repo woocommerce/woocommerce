@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix race conditions when quickly switching between delivery options

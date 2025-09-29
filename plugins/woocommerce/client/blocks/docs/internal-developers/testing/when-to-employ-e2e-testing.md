@@ -1,6 +1,6 @@
 # When to employ end to end (E2E) testing
 
-We use [Puppeteer](https://pptr.dev/) to run tests in a real browser, these are called End to End tests. These tests are fairly expensive to run and often fail randomly due to flaky browser behaviour, with this in mind, we should be careful about when we use them.
+We use [Playwright](https://playwright.dev/) to run tests in a real browser, these are called End to End tests. These tests are fairly expensive to run and often fail randomly due to flaky browser behaviour, with this in mind, we should be careful about when we use them.
 
 Ultimately, the front-end is a representation of our application's state, and in most cases we will be able to reliably determine that it is behaving the way we want it to without setting up a full browser environment to verify this. For example, if we want to test that the quantity of an item in the cart is increased when the `+` button is pressed, we can mock the store and ensure the correct action is dispatched, we can also mock the function used to make requests to the API and test that it is called with the correct parameters. We can then use PHP tests to ensure the API returns the correct response, and then test the cart to ensure receiving new cart data results in an updated DOM (with the new quantity in the quantity selector!)
 

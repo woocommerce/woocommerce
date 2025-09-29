@@ -1,6 +1,6 @@
 <?php
 /**
- * ExtendedContainer class file.
+ * ContainerException class file.
  */
 
 namespace Automattic\WooCommerce\Internal\DependencyManagement;

@@ -1,9 +1,10 @@
 .wc-block-components-order-summary {
-	&.is-large {
-		// Compensate for removing Panel.
+	@include cart-checkout-large-container {
 		padding: 0 $gap;
 	}
+}
 
+.wc-block-components-order-summary {
 	.wc-block-components-order-summary__button-text {
 		font-weight: 500;
 	}

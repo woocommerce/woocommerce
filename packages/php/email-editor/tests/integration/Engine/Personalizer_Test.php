@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 
 /**
  * Integration test for Personalizer class which validate the functionality
@@ -34,7 +35,7 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->tags_registry = new Personalization_Tags_Registry();
+		$this->tags_registry = new Personalization_Tags_Registry( $this->di_container->get( Email_Editor_Logger::class ) );
 		$this->personalizer  = new Personalizer( $this->tags_registry );
 	}
 
@@ -226,5 +227,93 @@ class Personalizer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testPersonalizeContentWithNonExistentHrefTag(): void {
 		$html_content = '<a href="http://[woocommerce/non-existent-tag]">Click here</a>';
 		$this->assertSame( '<a href="http://[woocommerce/non-existent-tag]">Click here</a>', $this->personalizer->personalize_content( $html_content ) );
+	}
+
+	/**
+	 * Test parsing tokens with various formats.
+	 */
+	public function testParsingPersonalizationTagAttributes(): void {
+		// Use reflection to access the private method.
+		$reflection = new \ReflectionClass( $this->personalizer );
+		$method     = $reflection->getMethod( 'parse_token' );
+		$method->setAccessible( true );
+
+		// Test case 1: Simple token without attributes.
+		$result = $method->invoke( $this->personalizer, '[user/firstname]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/firstname]', $result['token'] );
+		$this->assertEmpty( $result['arguments'] );
+
+		// Test case 2: Token with a single attribute.
+		$result = $method->invoke( $this->personalizer, '[user/firstname default="Guest"]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/firstname]', $result['token'] );
+		$this->assertSame( array( 'default' => 'Guest' ), $result['arguments'] );
+
+		// Test case 3: Token with multiple attributes.
+		$result = $method->invoke( $this->personalizer, '[user/firstname default="Guest" fallback="Unknown" max_length="10"]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/firstname]', $result['token'] );
+		$this->assertSame(
+			array(
+				'default'    => 'Guest',
+				'fallback'   => 'Unknown',
+				'max_length' => '10',
+			),
+			$result['arguments']
+		);
+
+		// Test case 4: Token with spaces and different quote types.
+		$result = $method->invoke( $this->personalizer, '[user/firstname  default="Guest"  fallback=\'Unknown\' ]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/firstname]', $result['token'] );
+		$this->assertSame(
+			array(
+				'default'  => 'Guest',
+				'fallback' => 'Unknown',
+			),
+			$result['arguments']
+		);
+
+		// Test case 5: Token with empty attribute value.
+		$result = $method->invoke( $this->personalizer, '[user/firstname  default=""]' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '[user/firstname]', $result['token'] );
+		$this->assertSame(
+			array(
+				'default' => '',
+			),
+			$result['arguments']
+		);
+
+		// Test case 6 Invalid token format.
+		$result = $method->invoke( $this->personalizer, 'invalid-token' );
+		/**
+		 * Typehint needed by PHPStan.
+		 *
+		 * @var array{token: string, arguments: array<string, string>} $result
+		 */
+		$this->assertSame( '', $result['token'] );
+		$this->assertEmpty( $result['arguments'] );
 	}
 }

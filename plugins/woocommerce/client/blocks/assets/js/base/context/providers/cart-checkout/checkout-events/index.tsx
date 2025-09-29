@@ -22,6 +22,14 @@ import {
 import { store as noticesStore } from '@wordpress/notices';
 import type { WPNotice } from '@wordpress/notices/build-types/store/selectors';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
+import {
+	ExpressPaymentMethods,
+	PlainExpressPaymentMethods,
+} from '@woocommerce/types';
+import {
+	getExpressPaymentMethods,
+	getPaymentMethods,
+} from '@woocommerce/blocks-registry';
 
 /**
  * Internal dependencies
@@ -29,10 +37,7 @@ import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
 import { reducer as emitReducer } from './event-emit';
 import { emitterCallback, noticeContexts } from '../../../event-emit';
 import { useStoreEvents } from '../../../hooks/use-store-events';
-import {
-	getExpressPaymentMethods,
-	getPaymentMethods,
-} from '../../../../../blocks-registry/payment-methods/registry';
+
 import { useEditorContext } from '../../editor-context';
 import { EventListenerRegistrationFunction } from '../../../../../events/event-emitter';
 
@@ -82,15 +87,53 @@ export const CheckoutEventsProvider = ( {
 	children,
 	redirectUrl,
 }: {
-	children: React.ReactChildren;
+	children: React.ReactNode;
 	redirectUrl: string;
 } ): JSX.Element => {
 	const paymentMethods = getPaymentMethods();
 	const expressPaymentMethods = getExpressPaymentMethods();
+	/**
+	 * Converts registered express payment methods from registry format to plain format
+	 * suitable for storage in data stores.
+	 *
+	 * @param registeredMethods Express payment methods from the registry
+	 * @return Plain express payment methods object
+	 */
+	const convertToPlainExpressPaymentMethods = (
+		registeredMethods: ExpressPaymentMethods
+	): PlainExpressPaymentMethods => {
+		const plainRegisteredMethods: PlainExpressPaymentMethods = {};
+
+		Object.keys( registeredMethods ).forEach( ( methodName ) => {
+			const method = registeredMethods[ methodName ];
+			plainRegisteredMethods[ methodName ] = {
+				name: method.name,
+				title: method.title,
+				description: method.description,
+				gatewayId: method.gatewayId,
+				supportsStyle: method.supports?.style || [],
+			};
+		} );
+
+		return plainRegisteredMethods;
+	};
+
+	// Convert registered express payment methods from registry to plain format
+	const registeredMethods = getExpressPaymentMethods();
+
 	const { isEditor } = useEditorContext();
 
-	const { __internalUpdateAvailablePaymentMethods } =
-		useDispatch( paymentStore );
+	const {
+		__internalUpdateAvailablePaymentMethods,
+		__internalSetRegisteredExpressPaymentMethods,
+	} = useDispatch( paymentStore );
+
+	// Set the registered express payment methods
+	useEffect( () => {
+		__internalSetRegisteredExpressPaymentMethods(
+			convertToPlainExpressPaymentMethods( registeredMethods )
+		);
+	}, [ registeredMethods ] );
 
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects

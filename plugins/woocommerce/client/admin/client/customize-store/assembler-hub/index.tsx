@@ -101,10 +101,7 @@ const initializeAssembleHub = () => {
 	settings.__experimentalFetchRichUrlData = fetchUrlData;
 
 	const reapplyBlockTypeFilters =
-		// @ts-ignore No types for this exist yet.
-		dispatch( blocksStore ).__experimentalReapplyBlockTypeFilters || // GB < 16.6
-		// @ts-ignore No types for this exist yet.
-		dispatch( blocksStore ).reapplyBlockTypeFilters; // GB >= 16.6
+		dispatch( blocksStore ).reapplyBlockTypeFilters;
 	reapplyBlockTypeFilters();
 
 	const coreBlocks = __experimentalGetCoreBlocks().filter(

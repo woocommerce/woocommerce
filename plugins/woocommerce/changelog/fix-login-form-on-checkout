@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure login form is rendered on classic checkout for guests

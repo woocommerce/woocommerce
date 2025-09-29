@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent concurrent fetches of WooPayments onboarding data.

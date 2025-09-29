@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
-import { useSelect, subscribe } from '@wordpress/data';
+import { useCallback, useEffect } from '@wordpress/element';
+import { useSelect, subscribe, dispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import { applyFilters } from '@wordpress/hooks';
 
@@ -21,8 +21,42 @@ import { useValidationNotices } from './use-validation-notices';
 const EMPTY_ARRAY = [];
 
 export type ContentValidationData = {
-	isInvalid: boolean;
 	validateContent: () => boolean;
+};
+
+export const validateEmailContent = (
+	content: string,
+	templateContent: string,
+	{
+		addValidationNotice,
+		hasValidationNotice,
+		removeValidationNotice,
+	}: {
+		addValidationNotice: (
+			id: string,
+			message: string,
+			actions: unknown[]
+		) => void;
+		hasValidationNotice: ( id?: string ) => boolean;
+		removeValidationNotice: ( id: string ) => void;
+	}
+): boolean => {
+	const rules: EmailContentValidationRule[] = applyFilters(
+		'woocommerce_email_editor_content_validation_rules',
+		EMPTY_ARRAY
+	) as EmailContentValidationRule[];
+
+	let isValid = true;
+	rules.forEach( ( { id, testContent, message, actions } ) => {
+		// Check both content and template content for the rule.
+		if ( testContent( content + templateContent ) ) {
+			addValidationNotice( id, message, actions );
+			isValid = false;
+		} else if ( hasValidationNotice( id ) ) {
+			removeValidationNotice( id );
+		}
+	} );
+	return isValid;
 };
 
 export const useContentValidation = (): ContentValidationData => {
@@ -38,45 +72,47 @@ export const useContentValidation = (): ContentValidationData => {
 		} )
 	);
 
-	const rules: EmailContentValidationRule[] = applyFilters(
-		'woocommerce_email_editor_content_validation_rules',
-		EMPTY_ARRAY
-	) as EmailContentValidationRule[];
-
 	const content = useShallowEqual( editedContent );
 	const templateContent = useShallowEqual( editedTemplateContent );
 
 	const validateContent = useCallback( (): boolean => {
-		let isValid = true;
-		rules.forEach( ( { id, testContent, message, actions } ) => {
-			// Check both content and template content for the rule.
-			if ( testContent( content + templateContent ) ) {
-				addValidationNotice( id, message, actions );
-				isValid = false;
-			} else if ( hasValidationNotice( id ) ) {
-				removeValidationNotice( id );
-			}
+		return validateEmailContent( content, templateContent, {
+			addValidationNotice,
+			hasValidationNotice,
+			removeValidationNotice,
 		} );
-		return isValid;
 	}, [
 		content,
 		templateContent,
 		addValidationNotice,
 		removeValidationNotice,
 		hasValidationNotice,
-		rules,
 	] );
 
+	// Register the validation function with the store
+	useEffect( () => {
+		dispatch( emailEditorStore ).setContentValidation( {
+			validateContent,
+		} );
+
+		return () => {
+			dispatch( emailEditorStore ).setContentValidation( undefined );
+		};
+	}, [ validateContent ] );
+
 	// Subscribe to updates so notices can be dismissed once resolved.
-	subscribe( () => {
-		if ( ! hasValidationNotice() ) {
-			return;
-		}
-		validateContent();
-	}, coreDataStore );
+	useEffect( () => {
+		const unsubscribe = subscribe( () => {
+			if ( ! hasValidationNotice() ) {
+				return;
+			}
+			validateContent();
+		}, coreDataStore );
+
+		return () => unsubscribe();
+	}, [ hasValidationNotice, validateContent ] );
 
 	return {
-		isInvalid: hasValidationNotice(),
 		validateContent,
 	};
 };

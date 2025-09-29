@@ -7,7 +7,7 @@ import {
 	store,
 } from '@wordpress/interactivity';
 
-type Notice = {
+export type Notice = {
 	notice: string;
 	type: 'error' | 'success' | 'notice';
 	dismissible: boolean;
@@ -18,6 +18,7 @@ type NoticeWithId = Notice & {
 };
 
 const getStoreNoticeContext = getContextFn< {
+	notices: NoticeWithId[];
 	notice: NoticeWithId;
 } >;
 
@@ -66,7 +67,7 @@ const generateNoticeId = () => {
 };
 
 // Todo: export this store once the store is public.
-store< Store >(
+const { state } = store< Store >(
 	'woocommerce/store-notices',
 	{
 		state: {
@@ -99,25 +100,45 @@ store< Store >(
 				return notice.type === 'notice';
 			},
 			get notices() {
-				const { notices } = getProductCollectionContext();
-				return notices;
+				const productCollectionContext = getProductCollectionContext();
+				if ( productCollectionContext ) {
+					return productCollectionContext?.notices;
+				}
+
+				const context = getStoreNoticeContext();
+
+				if ( context && context.notices ) {
+					return context.notices;
+				}
+
+				return [];
 			},
 		},
 		actions: {
-			addNotice: ( notice: Notice ) => {
-				const { notices } = getProductCollectionContext();
-				const noticeId = generateNoticeId();
-				const noticeWithId = {
-					...notice,
-					id: noticeId,
-				};
-				notices.push( noticeWithId );
+			addNotice: ( notice: Notice ): string => {
+				const { notices } = state;
+
+				// Prevent adding an extra notice with the same message.
+				const existingNotice = notices.find(
+					( n ) => n.notice === notice.notice
+				);
+				const noticeId = existingNotice
+					? existingNotice.id
+					: generateNoticeId();
+
+				if ( ! existingNotice ) {
+					notices.push( {
+						...notice,
+						id: noticeId,
+					} );
+				}
 
 				return noticeId;
 			},
 
 			removeNotice: ( noticeId: string | PointerEvent ) => {
-				const { notices } = getProductCollectionContext();
+				const { notices } = state;
+
 				noticeId =
 					typeof noticeId === 'string'
 						? noticeId

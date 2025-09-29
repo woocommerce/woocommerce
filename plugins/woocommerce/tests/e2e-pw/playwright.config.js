@@ -103,6 +103,9 @@ export default defineConfig( {
 		video: 'retain-on-failure',
 		actionTimeout: CI ? 20 * 1000 : 10 * 1000,
 		navigationTimeout: CI ? 20 * 1000 : 10 * 1000,
+		contextOptions: {
+			reducedMotion: 'reduce',
+		},
 		channel: 'chrome',
 		...devices[ 'Desktop Chrome' ],
 	},

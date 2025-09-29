@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks;
 
 use WC_Tax;
@@ -13,9 +15,7 @@ final class QueryFilters {
 	 *
 	 * @internal
 	 */
-	public function init() {
-		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
-	}
+	public function init() {}
 
 	/**
 	 * Filter the posts clauses of the main query to support global filters.
@@ -427,7 +427,12 @@ final class QueryFilters {
 		$attribute_ids_for_and_filtering = array();
 
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
-			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
+			$all_terms                  = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+				)
+			);
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );

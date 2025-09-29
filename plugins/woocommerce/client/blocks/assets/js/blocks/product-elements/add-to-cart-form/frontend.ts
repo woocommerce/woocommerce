@@ -43,7 +43,7 @@ const getInputData = ( event: HTMLElementEvent< HTMLButtonElement > ) => {
 };
 
 const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change' );
+	const event = new Event( 'change', { bubbles: true } );
 
 	inputElement.dispatchEvent( event );
 };

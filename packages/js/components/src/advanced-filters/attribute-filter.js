@@ -3,7 +3,7 @@
  */
 import PropTypes from 'prop-types';
 import { SelectControl as Select, Spinner } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	Fragment,
@@ -143,18 +143,15 @@ const AttributeFilter = ( props ) => {
 		>
 			<legend className="screen-reader-text">{ labels.add || '' }</legend>
 			<div
-				className={ classnames(
-					'woocommerce-filters-advanced__fieldset',
-					{
-						'is-english': isEnglish,
-					}
-				) }
+				className={ clsx( 'woocommerce-filters-advanced__fieldset', {
+					'is-english': isEnglish,
+				} ) }
 			>
 				{ createInterpolateElement( labels.title, {
 					title: <span className={ className } />,
 					rule: (
 						<Select
-							className={ classnames(
+							className={ clsx(
 								className,
 								'woocommerce-filters-advanced__rule'
 							) }
@@ -171,7 +168,7 @@ const AttributeFilter = ( props ) => {
 					),
 					filter: (
 						<div
-							className={ classnames(
+							className={ clsx(
 								className,
 								'woocommerce-filters-advanced__attribute-fieldset'
 							) }

@@ -45,6 +45,9 @@ const config: PlaywrightTestConfig = {
 		storageState: STORAGE_STATE_PATH,
 		actionTimeout: 10_000,
 		navigationTimeout: 10_000,
+		contextOptions: {
+			reducedMotion: 'reduce',
+		},
 	},
 	projects: [
 		{

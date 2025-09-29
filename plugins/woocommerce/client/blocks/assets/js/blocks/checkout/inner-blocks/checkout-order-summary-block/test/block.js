@@ -350,7 +350,7 @@ describe( 'Checkout Order Summary', () => {
 		setUseStoreCartReturnValue();
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
 		expect(
-			await findByText( container, 'Add a coupon' )
+			await findByText( container, 'Add coupons' )
 		).toBeInTheDocument();
 	} );
 
@@ -523,9 +523,7 @@ describe( 'Checkout Order Summary', () => {
 		expect(
 			await findByText(
 				container,
-				textContentMatcherAcrossSiblings(
-					'Delivery $40.00 Free shipping'
-				)
+				textContentMatcherAcrossSiblings( 'Free shipping $40.00' )
 			)
 		).toBeInTheDocument();
 	} );

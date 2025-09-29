@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Popover, Spinner } from '@wordpress/components';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import {
 	createElement,
 	useEffect,
@@ -100,7 +100,7 @@ export const SelectTreeMenu = ( {
 				<Popover
 					focusOnMount={ false }
 					inline
-					className={ classnames(
+					className={ clsx(
 						'woocommerce-experimental-select-tree-control__popover-menu',
 						className,
 						{

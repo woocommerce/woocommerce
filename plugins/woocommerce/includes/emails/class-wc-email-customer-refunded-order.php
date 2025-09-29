@@ -46,6 +46,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			$this->customer_email = true;
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
+			$this->email_group    = 'order-exceptions';
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
 			$this->placeholders   = array(
@@ -62,7 +63,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
 			$this->description = $this->email_improvements_enabled
-				? __( 'Let shoppers know when a full or partial refund is on its way to them.', 'woocommerce' )
+				? __( 'Send an email to customers notifying them when an order has been partially or fully refunded', 'woocommerce' )
 				: __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
 		}
 

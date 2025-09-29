@@ -1,10 +1,14 @@
 /**
  * External dependencies
  */
-import { useContainerWidthContext } from '@woocommerce/base-context';
+import {
+	useContainerWidthContext,
+	useStoreCart,
+} from '@woocommerce/base-context';
 import type { CartItem } from '@woocommerce/types';
 import clsx from 'clsx';
-
+import { CartLineItemsCheckoutSkeleton } from '@woocommerce/base-components/skeleton/patterns/cart-line-items';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 /**
  * Internal dependencies
  */
@@ -20,32 +24,39 @@ const OrderSummary = ( {
 	cartItems = [],
 	disableProductDescriptions = false,
 }: OrderSummaryProps ): null | JSX.Element => {
-	const { isLarge, hasContainerWidth } = useContainerWidthContext();
-
-	if ( ! hasContainerWidth ) {
-		return null;
-	}
+	const { isLarge } = useContainerWidthContext();
+	const { cartIsLoading, hasPendingItemsOperations } = useStoreCart();
+	const showSkeleton = cartIsLoading || hasPendingItemsOperations;
 
 	return (
-		<div
-			className={ clsx( 'wc-block-components-order-summary', {
-				'is-large': isLarge,
-			} ) }
+		<DelayedContentWithSkeleton
+			isLoading={ showSkeleton }
+			skeleton={
+				<CartLineItemsCheckoutSkeleton
+					rows={ cartItems?.length || 2 }
+				/>
+			}
 		>
-			<div className="wc-block-components-order-summary__content">
-				{ cartItems.map( ( cartItem ) => {
-					return (
-						<OrderSummaryItem
-							disableProductDescriptions={
-								disableProductDescriptions
-							}
-							key={ cartItem.key }
-							cartItem={ cartItem }
-						/>
-					);
+			<div
+				className={ clsx( 'wc-block-components-order-summary', {
+					'is-large': isLarge,
 				} ) }
+			>
+				<div className="wc-block-components-order-summary__content">
+					{ cartItems.map( ( cartItem ) => {
+						return (
+							<OrderSummaryItem
+								disableProductDescriptions={
+									disableProductDescriptions
+								}
+								key={ cartItem.key }
+								cartItem={ cartItem }
+							/>
+						);
+					} ) }
+				</div>
 			</div>
-		</div>
+		</DelayedContentWithSkeleton>
 	);
 };
 

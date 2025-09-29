@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix email-restricted coupons being removed during Apple Pay/Google Pay checkout

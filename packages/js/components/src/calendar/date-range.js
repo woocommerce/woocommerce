@@ -4,7 +4,7 @@
 import 'core-js/features/object/assign';
 import 'core-js/features/array/from';
 import { __, sprintf } from '@wordpress/i18n';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { createElement, Component, createRef } from '@wordpress/element';
 import { DayPickerRangeController } from 'react-dates';
 import moment from 'moment';
@@ -175,6 +175,7 @@ class DateRange extends Component {
 			afterError,
 			beforeError,
 			shortDateFormat,
+			shortDateFormatPlaceholder,
 			isViewportMobile,
 			isViewportSmall,
 			isInvalidDate,
@@ -182,7 +183,7 @@ class DateRange extends Component {
 		const isDoubleCalendar = isViewportMobile && ! isViewportSmall;
 		return (
 			<div
-				className={ classnames( 'woocommerce-calendar', {
+				className={ clsx( 'woocommerce-calendar', {
 					'is-mobile': isViewportMobile,
 				} ) }
 			>
@@ -190,7 +191,9 @@ class DateRange extends Component {
 					<DateInput
 						value={ afterText }
 						onChange={ partial( this.onInputChange, 'after' ) }
-						dateFormat={ shortDateFormat }
+						dateFormat={
+							shortDateFormatPlaceholder || shortDateFormat
+						}
 						label={ __( 'Start Date', 'woocommerce' ) }
 						error={ afterError }
 						describedBy={ sprintf(
@@ -199,7 +202,7 @@ class DateRange extends Component {
 								"Date input describing a selected date range's start date in format %s",
 								'woocommerce'
 							),
-							shortDateFormat
+							shortDateFormatPlaceholder || shortDateFormat
 						) }
 						onFocus={ () => this.onFocusChange( 'startDate' ) }
 					/>
@@ -209,7 +212,9 @@ class DateRange extends Component {
 					<DateInput
 						value={ beforeText }
 						onChange={ partial( this.onInputChange, 'before' ) }
-						dateFormat={ shortDateFormat }
+						dateFormat={
+							shortDateFormatPlaceholder || shortDateFormat
+						}
 						label={ __( 'End Date', 'woocommerce' ) }
 						error={ beforeError }
 						describedBy={ sprintf(
@@ -218,7 +223,7 @@ class DateRange extends Component {
 								"Date input describing a selected date range's end date in format %s",
 								'woocommerce'
 							),
-							shortDateFormat
+							shortDateFormatPlaceholder || shortDateFormat
 						) }
 						onFocus={ () => this.onFocusChange( 'endDate' ) }
 					/>
@@ -307,6 +312,10 @@ DateRange.propTypes = {
 	 * The date format in moment.js-style tokens.
 	 */
 	shortDateFormat: PropTypes.string.isRequired,
+	/**
+	 * The date format in human-readable format.
+	 */
+	shortDateFormatPlaceholder: PropTypes.string,
 	/**
 	 * A ref that the DateRange can lose focus to.
 	 * See: https://github.com/woocommerce/woocommerce-admin/pull/2929.

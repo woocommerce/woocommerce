@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import {
 	__experimentalHStack as HStack, // eslint-disable-line
 	__experimentalVStack as VStack, // eslint-disable-line
@@ -13,6 +13,10 @@ import {
  * Internal dependencies
  */
 import { storeName } from '../../../store';
+import { useEmailStyles } from '../../../hooks';
+import { getCompressedVariableValue } from '../../../style-variables';
+
+const EMPTY_ARRAY = [];
 
 const firstFrame = {
 	start: {
@@ -56,7 +60,7 @@ type Props = {
 
 /**
  * Component to render the styles preview based on the component from the site editor:
- * https://github.com/WordPress/gutenberg/blob/trunk/packages/edit-site/src/components/global-styles/preview.js
+ * https://github.com/WordPress/gutenberg/blob/5c7c4e7751df5e05fc70a354cd0d81414ac9c7e7/packages/edit-site/src/components/global-styles/preview-styles.js
  *
  * @param root0
  * @param root0.label
@@ -68,31 +72,83 @@ export function Preview( {
 	isFocused,
 	withHoverView,
 }: Props ): JSX.Element {
-	const { styles, colors } = useSelect(
+	const { colors } = useSelect(
 		( select ) => ( {
-			styles: select( storeName ).getStyles(),
 			colors: select( storeName ).getPaletteColors(),
 		} ),
 		[]
 	);
+	const paletteColors = useMemo(
+		() =>
+			( colors?.theme || EMPTY_ARRAY ).concat(
+				colors?.default || EMPTY_ARRAY
+			),
+		[ colors ]
+	);
+	const { styles } = useEmailStyles();
 
-	const backgroundColor = styles?.color?.background || '#ffffff';
-	const headingFontFamily =
-		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
-	const headingColor = styles?.elements?.heading?.color?.text || 'inherit';
+	const { backgroundColor, headingColor, highlightedColors } =
+		useMemo( () => {
+			const backgroundCol =
+				getCompressedVariableValue( styles?.color?.background ) ||
+				'white';
+			const textCol =
+				getCompressedVariableValue( styles?.color?.text ) || 'black';
+			const headingCol =
+				getCompressedVariableValue(
+					styles?.elements?.h1?.color?.text
+				) || textCol;
+			const linkColor =
+				getCompressedVariableValue(
+					styles?.elements?.link?.color?.text
+				) || headingCol;
+			const buttonBackgroundCol =
+				getCompressedVariableValue(
+					styles?.elements?.button?.color?.background
+				) || linkColor;
+
+			const textColorPaletteObj = paletteColors.find(
+				( { color } ) => color.toLowerCase() === textCol.toLowerCase()
+			);
+			const buttonBackgroundColorPaletteObj = paletteColors.find(
+				( { color } ) =>
+					color.toLowerCase() === buttonBackgroundCol.toLowerCase()
+			);
+
+			// We pick the colors for the highlighted colors the same way as the site editor
+			// https://github.com/WordPress/gutenberg/blob/7b3850b6a39ce45948f09efe750451c6323a4613/packages/edit-site/src/components/global-styles/hooks.js#L83-L95
+			const highlightedColorsObj = [
+				...( textColorPaletteObj
+					? [ textColorPaletteObj ]
+					: EMPTY_ARRAY ),
+				...( buttonBackgroundColorPaletteObj
+					? [ buttonBackgroundColorPaletteObj ]
+					: EMPTY_ARRAY ),
+				...paletteColors,
+			]
+				.filter(
+					( { color }, index, self ) =>
+						color.toLowerCase() !== backgroundCol.toLowerCase() &&
+						index ===
+							self.findIndex(
+								( item ) =>
+									item.color.toLowerCase() ===
+									color.toLowerCase() // remove duplicates
+							)
+				)
+				.slice( 0, 2 );
+
+			return {
+				backgroundColor: backgroundCol,
+				headingColor: headingCol,
+				highlightedColors: highlightedColorsObj,
+			};
+		}, [ styles, paletteColors ] );
+
 	const headingFontWeight =
 		styles?.elements?.heading?.typography?.fontWeight || 'inherit';
-
-	const paletteColors = colors.theme.concat( colors.theme );
-
-	// https://github.com/WordPress/gutenberg/blob/7fa03fafeb421ab4c3604564211ce6007cc38e84/packages/edit-site/src/components/global-styles/hooks.js#L68-L73
-	const highlightedColors = paletteColors
-		.filter(
-			( { color } ) =>
-				color.toLowerCase() !== backgroundColor.toLowerCase() &&
-				color.toLowerCase() !== headingColor.toLowerCase()
-		)
-		.slice( 0, 2 );
+	const headingFontFamily =
+		styles?.elements?.heading?.typography?.fontFamily || 'inherit';
 
 	const ratio = 1;
 	// When is set label, the preview animates the hover state and displays the label

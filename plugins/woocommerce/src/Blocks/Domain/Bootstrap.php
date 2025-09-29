@@ -21,6 +21,7 @@ use Automattic\WooCommerce\Blocks\Domain\Services\Hydration;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsAdmin;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFieldsFrontend;
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutLink;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Installer;
 use Automattic\WooCommerce\Blocks\Payments\Api as PaymentsApi;
@@ -130,12 +131,13 @@ class Bootstrap {
 		$this->container->get( DraftOrders::class )->init();
 		$this->container->get( ShippingController::class )->init();
 		$this->container->get( CheckoutFields::class )->init();
+		$this->container->get( CheckoutLink::class )->init();
+		$this->container->get( AssetDataRegistry::class );
+		$this->container->get( AssetsController::class );
 
 		// Load assets in admin and on the frontend.
 		if ( ! $is_rest ) {
 			$this->add_build_notice();
-			$this->container->get( AssetDataRegistry::class );
-			$this->container->get( AssetsController::class );
 			$this->container->get( Installer::class )->init();
 			$this->container->get( GoogleAnalytics::class )->init();
 			$this->container->get( is_admin() ? CheckoutFieldsAdmin::class : CheckoutFieldsFrontend::class )->init();
@@ -298,6 +300,12 @@ class Bootstrap {
 				$payment_method_registry = $container->get( PaymentMethodRegistry::class );
 				$asset_data_registry     = $container->get( AssetDataRegistry::class );
 				return new PaymentsApi( $payment_method_registry, $asset_data_registry );
+			}
+		);
+		$this->container->register(
+			CheckoutLink::class,
+			function () {
+				return new CheckoutLink();
 			}
 		);
 		$this->container->register(

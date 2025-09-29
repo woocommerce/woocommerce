@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import {
 	formatShippingAddress,
 	hasShippingRate,
-	isAddressComplete,
+	hasAllFieldsForShippingRates,
 } from '@woocommerce/base-utils';
 import { useStoreCart } from '@woocommerce/base-context';
 import {
@@ -42,12 +42,7 @@ export const ShippingAddress = (): JSX.Element => {
 		: // Translators: <address/> is the formatted shipping address.
 		  __( 'No delivery options available for <address/>', 'woocommerce' );
 
-	const addressComplete = isAddressComplete( shippingAddress, [
-		'state',
-		'city',
-		'country',
-		'postcode',
-	] );
+	const addressComplete = hasAllFieldsForShippingRates( shippingAddress );
 
 	const shippingCostRequiresAddress = getSetting< boolean >(
 		'shippingCostRequiresAddress',

@@ -6,16 +6,23 @@ import {
 	expect as baseExpect,
 	request as baseRequest,
 } from '@playwright/test';
+import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { random } from '../utils/helpers';
-import ApiClient, { WP_API_PATH } from '../utils/api-client';
+import { admin } from '../test-data/data';
 
 export const test = baseTest.extend( {
-	restApi: async ( {}, use ) => {
-		await use( ApiClient.getInstance() );
+	restApi: async ( { baseURL }, use ) => {
+		await use(
+			createClient( baseURL, {
+				type: 'basic',
+				username: admin.username,
+				password: admin.password,
+			} )
+		);
 	},
 
 	testPageTitlePrefix: [ '', { option: true } ],

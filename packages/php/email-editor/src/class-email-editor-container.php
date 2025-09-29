@@ -8,14 +8,14 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
-use Automattic\WooCommerce\Blocks\Registry\Container;
+use Automattic\WooCommerce\EmailEditor\Container;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
@@ -33,6 +33,8 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
 
 defined( 'ABSPATH' ) || exit;
@@ -43,6 +45,8 @@ defined( 'ABSPATH' ) || exit;
 class Email_Editor_Container {
 	/**
 	 * Init method.
+	 *
+	 * @return void
 	 */
 	public static function init() {
 		self::container()->get( Bootstrap::class )->init();
@@ -55,7 +59,7 @@ class Email_Editor_Container {
 	 * with a different compatible container.
 	 *
 	 * @param boolean $reset Used to reset the container to a fresh instance. Note: this means all dependencies will be reconstructed.
-	 * @return mixed
+	 * @return Container
 	 */
 	public static function container( $reset = false ) {
 		static $container;
@@ -70,106 +74,109 @@ class Email_Editor_Container {
 
 		$container = new Container();
 
-		// Start: MailPoet plugin dependencies.
-		$container->register(
+		$container->set(
 			Initializer::class,
 			function () {
 				return new Initializer();
 			}
 		);
-		// End: MailPoet plugin dependencies.
 		// Start: Email editor dependencies.
-		$container->register(
+		$container->set(
 			Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
 			}
 		);
-		$container->register(
+		$container->set(
 			User_Theme::class,
 			function () {
 				return new User_Theme();
 			}
 		);
-		$container->register(
+		$container->set(
 			Settings_Controller::class,
 			function ( $container ) {
 				return new Settings_Controller( $container->get( Theme_Controller::class ) );
 			}
 		);
-		$container->register(
-			Settings_Controller::class,
-			function ( $container ) {
-				return new Settings_Controller( $container->get( Theme_Controller::class ) );
-			}
-		);
-		$container->register(
+		$container->set(
 			Templates_Registry::class,
 			function () {
 				return new Templates_Registry();
 			}
 		);
-		$container->register(
+		$container->set(
 			Templates::class,
 			function ( $container ) {
 				return new Templates( $container->get( Templates_Registry::class ) );
 			}
 		);
-		$container->register(
+		$container->set(
 			Patterns::class,
 			function () {
 				return new Patterns();
 			}
 		);
-		$container->register(
+		$container->set(
 			Cleanup_Preprocessor::class,
 			function () {
 				return new Cleanup_Preprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
 			Blocks_Width_Preprocessor::class,
 			function () {
 				return new Blocks_Width_Preprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
 			Typography_Preprocessor::class,
 			function ( $container ) {
 				return new Typography_Preprocessor( $container->get( Settings_Controller::class ) );
 			}
 		);
-		$container->register(
+		$container->set(
 			Spacing_Preprocessor::class,
 			function () {
 				return new Spacing_Preprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
 			Quote_Preprocessor::class,
 			function () {
 				return new Quote_Preprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
 			Highlighting_Postprocessor::class,
 			function () {
 				return new Highlighting_Postprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
 			Variables_Postprocessor::class,
 			function ( $container ) {
 				return new Variables_Postprocessor( $container->get( Theme_Controller::class ) );
 			}
 		);
-		$container->register(
+		$container->set(
 			Border_Style_Postprocessor::class,
 			function () {
 				return new Border_Style_Postprocessor();
 			}
 		);
-		$container->register(
+		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
+				);
+			}
+		);
+		$container->set(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -184,25 +191,18 @@ class Email_Editor_Container {
 				);
 			}
 		);
-		$container->register(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
-			}
-		);
-		$container->register(
+		$container->set(
 			Content_Renderer::class,
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class )
 				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Renderer::class,
 			function ( $container ) {
 				return new Renderer(
@@ -210,16 +210,19 @@ class Email_Editor_Container {
 					$container->get( Templates::class ),
 					new Email_Css_Inliner(),
 					$container->get( Theme_Controller::class ),
+					$container->get( Personalization_Tags_Registry::class ),
 				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Personalization_Tags_Registry::class,
-			function () {
-				return new Personalization_Tags_Registry();
+			function ( $container ) {
+				return new Personalization_Tags_Registry(
+					$container->get( Email_Editor_Logger::class )
+				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Personalizer::class,
 			function ( $container ) {
 				return new Personalizer(
@@ -227,7 +230,7 @@ class Email_Editor_Container {
 				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Send_Preview_Email::class,
 			function ( $container ) {
 				return new Send_Preview_Email(
@@ -236,7 +239,7 @@ class Email_Editor_Container {
 				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Email_Api_Controller::class,
 			function ( $container ) {
 				return new Email_Api_Controller(
@@ -244,13 +247,25 @@ class Email_Editor_Container {
 				);
 			}
 		);
-		$container->register(
+		$container->set(
 			Dependency_Check::class,
 			function () {
 				return new Dependency_Check();
 			}
 		);
-		$container->register(
+		$container->set(
+			Email_Editor_Logger::class,
+			function () {
+				return new Email_Editor_Logger();
+			}
+		);
+		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
+			}
+		);
+		$container->set(
 			Email_Editor::class,
 			function ( $container ) {
 				return new Email_Editor(
@@ -259,13 +274,15 @@ class Email_Editor_Container {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);
 		// End: Email editor dependencies.
 
 		// Start: Woo dependencies.
-		$container->register(
+		$container->set(
 			Bootstrap::class,
 			function ( $container ) {
 				return new Bootstrap(

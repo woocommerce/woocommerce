@@ -306,8 +306,9 @@ class WC_Product_Variable extends WC_Product {
 	 * @return array[]|WC_Product_Variation[]
 	 */
 	public function get_available_variations( $return = 'array' ) {
-		$variation_ids        = $this->get_children();
-		$available_variations = array();
+		$variation_ids           = $this->get_children();
+		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
+		$available_variations    = array();
 
 		if ( is_callable( '_prime_post_caches' ) ) {
 			_prime_post_caches( $variation_ids );
@@ -318,11 +319,19 @@ class WC_Product_Variable extends WC_Product {
 			$variation = wc_get_product( $variation_id );
 
 			// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-			if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
+			if ( ! $variation || ! $variation->exists() || ( $hide_out_of_stock_items && ! $variation->is_in_stock() ) ) {
 				continue;
 			}
 
-			// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			/**
+			 * Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
+			 *
+			 * @since 2.6.8
+			 *
+			 * @param  bool                  $hide        Whether to hide invisible variations. Default true.
+			 * @param  int                   $product_id  The ID of the variation.
+			 * @param  WC_Product_Variation  $variation   The variation object.
+			 */
 			if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
 				continue;
 			}
@@ -342,24 +351,34 @@ class WC_Product_Variable extends WC_Product {
 	}
 
 	/**
-	 * Check if a given variation is currently available.
+	 * Check if there are variations that can be purchased for the current product.
 	 *
-	 * @param WC_Product_Variation $variation Variation to check.
+	 * @internal
 	 *
-	 * @return bool True if the variation is available, false otherwise.
+	 * @since  10.0.0
+	 * @return bool
 	 */
-	private function variation_is_available( WC_Product_Variation $variation ) {
-		// Hide out of stock variations if 'Hide out of stock items from the catalog' is checked.
-		if ( ! $variation || ! $variation->exists() || ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && ! $variation->is_in_stock() ) ) {
-			return false;
+	public function has_purchasable_variations() {
+		$variation_ids = $this->get_children();
+
+		if ( is_callable( '_prime_post_caches' ) ) {
+			_prime_post_caches( $variation_ids );
 		}
 
-		// Filter 'woocommerce_hide_invisible_variations' to optionally hide invisible variations (disabled variations and variations with empty price).
-		if ( apply_filters( 'woocommerce_hide_invisible_variations', true, $this->get_id(), $variation ) && ! $variation->variation_is_visible() ) {
-			return false;
+		foreach ( $variation_ids as $variation_id ) {
+
+			$variation = wc_get_product( $variation_id );
+
+			if ( ! $variation || ! $variation->is_purchasable() || ! $variation->is_in_stock() ) {
+				continue;
+			}
+
+			// We found at least one available variation, so return true.
+			return true;
 		}
 
-		return true;
+		// There were either no variations, or they were hidden because of the "continues" above.
+		return false;
 	}
 
 	/**

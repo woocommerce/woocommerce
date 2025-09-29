@@ -119,10 +119,8 @@ test.describe( 'Customers API tests: CRUD', () => {
 			const response = await request.get( './wp-json/wc/v3/customers/0' );
 			const responseJSON = await response.json();
 			expect( response.status() ).toEqual( 404 );
-			expect( responseJSON.code ).toEqual(
-				'woocommerce_rest_invalid_id'
-			);
-			expect( responseJSON.message ).toEqual( 'Invalid resource ID.' );
+			expect( responseJSON.code ).toEqual( 'wc_user_invalid_id' );
+			expect( responseJSON.message ).toEqual( 'Invalid user ID.' );
 		} );
 
 		test( 'can retrieve customers', async ( { request } ) => {

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Added the woocommerce-enable-cot plugin to the list of skipped plugins at WC reset.

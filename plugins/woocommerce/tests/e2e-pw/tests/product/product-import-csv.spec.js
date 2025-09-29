@@ -2,13 +2,13 @@
  * External dependencies
  */
 import path from 'path';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { test, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const filePath = path.resolve( 'tests/e2e-pw/test-data/sample_products.csv' );
 const filePathOverride = path.resolve(
@@ -100,19 +100,8 @@ const productAttributes = [ 'Color', 'Size' ];
 
 const errorMessage = 'File is empty. Please upload something more substantial.';
 
-//todo remove serial mode
-test.describe.serial( 'Import Products from a CSV file', () => {
+test.describe( 'Import Products from a CSV file', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
-
-	test.beforeAll( async ( { restApi } ) => {
-		// make sure the currency is USD
-		await restApi.put(
-			`${ WC_API_PATH }/settings/general/woocommerce_currency`,
-			{
-				value: 'USD',
-			}
-		);
-	} );
 
 	test.afterAll( async ( { restApi } ) => {
 		// get a list of all products

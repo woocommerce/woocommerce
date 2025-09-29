@@ -3,18 +3,6 @@
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
 
-// Todo: Remove after support for WP .6.6 is dropped.
-const htmlMap = new Map< string, string >();
-const data = document.getElementById( 'wp-interactivity-data' );
-if ( data ) {
-	const interactivityData = JSON.parse( data.textContent );
-	if ( interactivityData.state?.[ 'woocommerce/product-button' ] ) {
-		interactivityData.state[ 'woocommerce/product-button' ].addToCartText =
-			undefined;
-		data.textContent = JSON.stringify( interactivityData );
-	}
-}
-
 /**
  * Internal dependencies
  */
@@ -30,7 +18,18 @@ export type ProductCollectionStoreContext = {
 	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
+	// Next/Previous Buttons block context
+	hideNextPreviousButtons: boolean;
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+	ariaLabelPrevious: string;
+	ariaLabelNext: string;
 };
+
+// @wordpress/i18n is not available on the frontend.
+function isRTL(): boolean {
+	return document.documentElement?.dir === 'rtl';
+}
 
 function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	return (
@@ -42,6 +41,100 @@ function isValidLink( ref: HTMLElement | null ): ref is HTMLAnchorElement {
 	);
 }
 
+const checkIfButtonsDisabled = (
+	productTemplate: HTMLElement | null,
+	currentScroll: number
+): {
+	isDisabledPrevious: boolean;
+	isDisabledNext: boolean;
+} => {
+	if ( ! productTemplate ) {
+		return {
+			isDisabledPrevious: true,
+			isDisabledNext: true,
+		};
+	}
+
+	const SCROLL_OFFSET = 5;
+	const { scrollWidth, clientWidth } = productTemplate;
+
+	if ( isRTL() ) {
+		return {
+			isDisabledPrevious: currentScroll > -SCROLL_OFFSET,
+			isDisabledNext:
+				currentScroll <= clientWidth - scrollWidth + SCROLL_OFFSET,
+		};
+	}
+
+	return {
+		isDisabledPrevious: currentScroll < SCROLL_OFFSET,
+		isDisabledNext:
+			currentScroll >= scrollWidth - clientWidth - SCROLL_OFFSET,
+	};
+};
+
+/**
+ * Scrolls the carousel by 90% of the container width and updates
+ * the isDisabledPrevious and isDisabledNext context values.
+ *
+ * @param direction - The direction to scroll.
+ */
+const scrollCarousel = ( direction: 'left' | 'right' ) => {
+	const { ref } = getElement();
+
+	const productCollection = ref?.closest(
+		'.wp-block-woocommerce-product-collection'
+	);
+	const productTemplate = productCollection?.querySelector(
+		'.wc-block-product-template'
+	) as HTMLElement;
+
+	if ( ! productTemplate ) {
+		return;
+	}
+
+	const productCollectionWidth = productCollection?.clientWidth;
+	// Arbitrary value to scroll the carousel by 90% of the container width.
+	const scrollBy = productCollectionWidth
+		? 0.9 * productCollectionWidth
+		: 400;
+
+	const multiplier = isRTL() ? -1 : 1;
+
+	productTemplate?.scrollBy( {
+		left: multiplier * ( direction === 'left' ? -scrollBy : scrollBy ),
+		behavior: 'smooth',
+	} );
+
+	const context = getContext< ProductCollectionStoreContext >();
+	const { scrollLeft } = productTemplate;
+	// scrollBy doesn't return the final position, so we need to calculate it.
+	const finalPosition =
+		direction === 'left'
+			? scrollLeft - multiplier * scrollBy
+			: scrollLeft + multiplier * scrollBy;
+
+	const { isDisabledPrevious, isDisabledNext } = checkIfButtonsDisabled(
+		productTemplate,
+		finalPosition
+	);
+
+	context.isDisabledPrevious = isDisabledPrevious;
+	context.isDisabledNext = isDisabledNext;
+};
+
+const onKeyDown = ( event: KeyboardEvent ) => {
+	if ( event.code === 'ArrowRight' ) {
+		event.preventDefault();
+		scrollCarousel( 'right' );
+	}
+
+	if ( event.code === 'ArrowLeft' ) {
+		event.preventDefault();
+		scrollCarousel( 'left' );
+	}
+};
+
 function isValidEvent( event: MouseEvent ): boolean {
 	return (
 		event.button === 0 && // Left clicks only.
@@ -51,27 +144,6 @@ function isValidEvent( event: MouseEvent ): boolean {
 		! event.shiftKey &&
 		! event.defaultPrevented
 	);
-}
-
-// Todo: Remove after support for WP .6.6 is dropped.
-async function fetchUrlAndReplaceState( url: string ): Promise< string > {
-	if ( ! htmlMap.has( url ) ) {
-		const response = await window.fetch( url );
-		const html = await response.text();
-		const dom = new window.DOMParser().parseFromString( html, 'text/html' );
-		const dataElement = dom.getElementById( 'wp-interactivity-data' );
-		const interactivityData = JSON.parse( data.textContent );
-
-		if ( interactivityData.state?.[ 'woocommerce/product-button' ] ) {
-			interactivityData.state[
-				'woocommerce/product-button'
-			].addToCartText = undefined;
-			dataElement.textContent = JSON.stringify( interactivityData );
-		}
-
-		htmlMap.set( url, dom.documentElement.outerHTML );
-	}
-	return htmlMap.get( url ) || '';
 }
 
 const productCollectionStore = {
@@ -92,13 +164,7 @@ const productCollectionStore = {
 					'@wordpress/interactivity-router'
 				);
 
-				// Todo: Remove after support for WP .6.6 is dropped.
-				if ( document.getElementById( 'wp-interactivity-data' ) ) {
-					const html = yield fetchUrlAndReplaceState( ref.href );
-					yield actions.navigate( ref.href, { html } );
-				} else {
-					yield actions.navigate( ref.href );
-				}
+				yield actions.navigate( ref.href );
 
 				ctx.isPrefetchNextOrPreviousLink = ref.href;
 
@@ -126,13 +192,7 @@ const productCollectionStore = {
 					'@wordpress/interactivity-router'
 				);
 
-				// Todo: Remove after support for WP .6.6 is dropped.
-				if ( document.getElementById( 'wp-interactivity-data' ) ) {
-					const html = yield fetchUrlAndReplaceState( ref.href );
-					yield actions.prefetch( ref.href, { html } );
-				} else {
-					yield actions.prefetch( ref.href );
-				}
+				yield actions.prefetch( ref.href );
 			}
 		},
 		*viewProduct() {
@@ -141,6 +201,30 @@ const productCollectionStore = {
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
+			}
+		},
+		// Next/Previous Buttons block actions
+		onClickPrevious: () => {
+			scrollCarousel( 'left' );
+		},
+		onClickNext: () => {
+			scrollCarousel( 'right' );
+		},
+		onKeyDownPrevious: ( event: KeyboardEvent ) => {
+			onKeyDown( event );
+		},
+		onKeyDownNext: ( event: KeyboardEvent ) => {
+			onKeyDown( event );
+		},
+		watchScroll: () => {
+			const context = getContext< ProductCollectionStoreContext >();
+			const { ref } = getElement();
+			if ( ref ) {
+				const { isDisabledPrevious, isDisabledNext } =
+					checkIfButtonsDisabled( ref, ref.scrollLeft );
+
+				context.isDisabledPrevious = isDisabledPrevious;
+				context.isDisabledNext = isDisabledNext;
 			}
 		},
 	},
@@ -158,13 +242,7 @@ const productCollectionStore = {
 					'@wordpress/interactivity-router'
 				);
 
-				// Todo: Remove after support for WP .6.6 is dropped.
-				if ( document.getElementById( 'wp-interactivity-data' ) ) {
-					const html = yield fetchUrlAndReplaceState( ref.href );
-					yield actions.prefetch( ref.href, { html } );
-				} else {
-					yield actions.prefetch( ref.href );
-				}
+				yield actions.prefetch( ref.href );
 			}
 		},
 		*onRender() {
@@ -172,6 +250,22 @@ const productCollectionStore = {
 				getContext< ProductCollectionStoreContext >();
 
 			triggerProductListRenderedEvent( { collection } );
+		},
+		initResizeObserver: () => {
+			const scrollableElement = getElement()?.ref;
+			if ( ! scrollableElement ) {
+				return;
+			}
+
+			const context = getContext< ProductCollectionStoreContext >();
+			const observer = new ResizeObserver( () => {
+				const hasOverflowX =
+					scrollableElement.scrollWidth >
+					scrollableElement.clientWidth;
+				context.hideNextPreviousButtons = ! hasOverflowX;
+			} );
+
+			observer.observe( scrollableElement );
 		},
 	},
 };

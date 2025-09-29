@@ -1,18 +1,13 @@
-const { test } = require( '@playwright/test' );
+const { test, expect } = require( '@playwright/test' );
 const {
 	clickAddNewMenuItem,
 	expectBlockProductEditor,
 	expectOldProductEditor,
-	isBlockProductEditorEnabled,
-	toggleBlockProductEditor,
 } = require( '../../../utils/simple-products' );
 const { toggleBlockProductTour } = require( '../../../utils/tours' );
 const { tags } = require( '../../../fixtures/fixtures' );
 const { ADMIN_STATE_PATH } = require( '../../../playwright.config' );
-
-let isNewProductEditorEnabled = false;
-
-const isTrackingSupposedToBeEnabled = !! process.env.ENABLE_TRACKING;
+const { wpCLI } = require( '../../../utils/cli' );
 
 async function dismissFeedbackModalIfShown( page ) {
 	try {
@@ -32,37 +27,28 @@ test.describe.serial(
 			await toggleBlockProductTour( request, false );
 		} );
 
-		test.beforeEach( async ( { page } ) => {
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
+		test.beforeEach( async () => {
+			await wpCLI(
+				'wp option set woocommerce_feature_product_block_editor_enabled yes'
 			);
-			if ( ! isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'enable', page );
-			}
 		} );
 
-		test.afterEach( async ( { browser } ) => {
-			const context = await browser.newContext();
-			const page = await context.newPage();
-			isNewProductEditorEnabled = await isBlockProductEditorEnabled(
-				page
+		test.afterAll( async () => {
+			await wpCLI(
+				'wp option set woocommerce_feature_product_block_editor_enabled no'
 			);
-			if ( isNewProductEditorEnabled ) {
-				await toggleBlockProductEditor( 'disable', page );
-			}
 		} );
 
-		test.skip(
-			isNewProductEditorEnabled && isTrackingSupposedToBeEnabled,
-			'The block product editor is not being tested'
-		);
-
+		// expectBlockProductEditor function contains the assertion
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'is hooked up to sidebar "Add New"', async ( { page } ) => {
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectBlockProductEditor( page );
 		} );
 
+		// expectOldProductEditor function contains the assertion
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'can be disabled from the header', async ( { page } ) => {
 			await page.goto(
 				'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product'
@@ -86,8 +72,28 @@ test.describe.serial(
 			await expectOldProductEditor( page );
 		} );
 
+		// expectOldProductEditor function contains the assertion
+		// eslint-disable-next-line playwright/expect-expect
 		test( 'can be disabled from settings', async ( { page } ) => {
-			await toggleBlockProductEditor( 'disable', page );
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
+			);
+
+			await page
+				.locator( '#woocommerce_feature_product_block_editor_enabled' )
+				.click();
+
+			await page
+				.getByRole( 'button', {
+					name: 'Save changes',
+				} )
+				.click();
+
+			await expect(
+				page
+					.locator( '#message' )
+					.getByText( 'Your settings have been saved' )
+			).toBeVisible();
 			await page.goto( 'wp-admin/edit.php?post_type=product' );
 			await clickAddNewMenuItem( page );
 			await expectOldProductEditor( page );

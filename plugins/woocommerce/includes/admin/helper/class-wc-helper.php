@@ -1141,6 +1141,7 @@ class WC_Helper {
 	 * Activate helper subscription.
 	 *
 	 * @throws Exception If the subscription could not be activated or found.
+	 * @throws WC_Data_Exception If the activation fails with error details.
 	 * @param string $product_key Subscription product key.
 	 * @return bool True if activated, false otherwise.
 	 */
@@ -1172,7 +1173,16 @@ class WC_Helper {
 			 * @param array  $activation_response The response object from wp_safe_remote_request().
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
-			throw new Exception( $body['message'] ?? __( 'Unknown error', 'woocommerce' ) );
+
+			// Include HTTP status code and any extra data from the API response in the exception so callers can surface it.
+			$status_code = function_exists( 'wp_remote_retrieve_response_code' ) ? (int) wp_remote_retrieve_response_code( $activation_response ) : (int) ( $body['data']['status'] ?? 400 );
+			$error_data  = isset( $body['data'] ) && is_array( $body['data'] ) ? $body['data'] : array();
+			throw new WC_Data_Exception(
+				esc_html( $body['code'] ?? 'unknown_error' ),
+				isset( $body['message'] ) ? esc_html( $body['message'] ) : esc_html__( 'Unknown error', 'woocommerce' ),
+				(int) $status_code,
+				function_exists( 'map_deep' ) ? map_deep( $error_data, 'esc_html' ) : array_map( 'esc_html', $error_data ),
+			);
 		}
 
 		self::_flush_subscriptions_cache();
@@ -1682,7 +1692,8 @@ class WC_Helper {
 	 * Get rules for displaying notice regarding marketplace product usage.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting product usage notice rules.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_product_usage_notice_rules() {
 		$cache_key = '_woocommerce_helper_product_usage_notice_rules';
@@ -1720,7 +1731,7 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, DAY_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
@@ -1813,12 +1824,12 @@ class WC_Helper {
 		return $connection_data;
 	}
 
-
 	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
-	 * @throws Exception If there is an error getting subscriptions.
+	 *
+	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
@@ -1873,7 +1884,7 @@ class WC_Helper {
 				throw new Exception( __( 'WooCommerce.com API returned an invalid response.', 'woocommerce' ), 422 );
 			}
 
-			set_transient( $cache_key, $data, 1 * HOUR_IN_SECONDS );
+			set_transient( $cache_key, $data, 3 * HOUR_IN_SECONDS );
 
 			// Remove notice after successful API call as it's no longer applicable.
 			self::remove_api_error_notice();
@@ -2198,6 +2209,9 @@ class WC_Helper {
 		$product_id   = $plugin['_product_id'];
 		$subscription = self::get_available_subscription( $product_id );
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		// No valid subscription found.
 		if ( ! $subscription ) {
 			return;
@@ -2230,9 +2244,6 @@ class WC_Helper {
 			 */
 			do_action( 'woocommerce_helper_subscription_activate_error', $product_id, $product_key, $activation_response );
 		}
-
-		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
 	}
 
 	/**
@@ -2380,10 +2391,11 @@ class WC_Helper {
 			}
 		}
 
+		self::_flush_subscriptions_cache();
+		self::_flush_updates_cache();
+
 		if ( $deactivated ) {
 			self::log( sprintf( 'Auto-deactivated %d subscription(s) for %s', $deactivated, $filename ) );
-			self::_flush_subscriptions_cache();
-			self::_flush_updates_cache();
 		}
 	}
 

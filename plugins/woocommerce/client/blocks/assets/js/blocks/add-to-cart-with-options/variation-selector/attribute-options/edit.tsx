@@ -22,7 +22,7 @@ import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
 
 interface Attributes {
 	className?: string;
-	style?: 'pills' | 'dropdown';
+	optionStyle?: 'pills' | 'dropdown';
 }
 
 function Pills( {
@@ -61,7 +61,7 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes } = props;
-	const { className, style } = attributes;
+	const { className, optionStyle } = attributes;
 
 	const blockProps = useBlockProps( {
 		className,
@@ -72,9 +72,8 @@ export default function AttributeOptionsEdit(
 		'add-to-cart-with-options-variation-selector-attribute-options',
 		( { editorBackgroundColor, editorColor } ) => `
 			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-				background-color: ${ editorColor };
-				color: ${ editorBackgroundColor };
-				border-color: ${ editorColor };
+				--pill-color: ${ editorBackgroundColor };
+				--pill-background-color: ${ editorColor };
 			}
 		`
 	);
@@ -82,7 +81,7 @@ export default function AttributeOptionsEdit(
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return;
+	if ( ! attribute ) return null;
 
 	const options = attribute.terms.map( ( term, index ) => ( {
 		value: term.slug,
@@ -95,9 +94,17 @@ export default function AttributeOptionsEdit(
 			<InspectorControls>
 				<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 					<ToggleGroupControl
-						value={ style }
-						onChange={ ( option: 'pills' | 'dropdown' ) => {
-							setAttributes( { style: option } );
+						label={ __( 'Style', 'woocommerce' ) }
+						value={ optionStyle ?? 'pills' }
+						onChange={ ( newOptionStyle ) => {
+							if (
+								newOptionStyle === 'pills' ||
+								newOptionStyle === 'dropdown'
+							) {
+								setAttributes( {
+									optionStyle: newOptionStyle,
+								} );
+							}
 						} }
 						isBlock
 						hideLabelFromVision
@@ -116,9 +123,7 @@ export default function AttributeOptionsEdit(
 			</InspectorControls>
 
 			<Disabled>
-				{ style === 'pills' ? (
-					<Pills id={ attribute.taxonomy } options={ options } />
-				) : (
+				{ optionStyle === 'dropdown' ? (
 					<select
 						id={ attribute.taxonomy }
 						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
@@ -129,6 +134,8 @@ export default function AttributeOptionsEdit(
 							</option>
 						) ) }
 					</select>
+				) : (
+					<Pills id={ attribute.taxonomy } options={ options } />
 				) }
 			</Disabled>
 		</div>

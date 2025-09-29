@@ -1,5 +1,7 @@
 .wc-blocks-components-select {
 	width: 100%;
+	// override the max-width set in the editor
+	max-width: none;
 
 	.wc-blocks-components-select__container {
 		border-radius: $universal-border-radius;

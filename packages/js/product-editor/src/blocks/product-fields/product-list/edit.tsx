@@ -16,7 +16,7 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { CurrencyContext } from '@woocommerce/currency';
 import { productsStore, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -248,7 +248,7 @@ export function ProductListBlockEdit( {
 
 										{ product.regular_price && (
 											<span
-												className={ classNames( {
+												className={ clsx( {
 													'wp-block-woocommerce-product-list-field__price--on-sale':
 														product.on_sale,
 												} ) }
@@ -264,7 +264,7 @@ export function ProductListBlockEdit( {
 										role="cell"
 									>
 										<span
-											className={ classNames(
+											className={ clsx(
 												'woocommerce-product-variations__status-dot',
 												getProductStockStatusClass(
 													product

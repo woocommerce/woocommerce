@@ -4,7 +4,6 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use WC_Tax;
 
 /**
@@ -338,11 +337,8 @@ class CartSchema extends AbstractSchema {
 		// Get cart errors first so if recalculations are performed, it's reflected in the response.
 		$cart_errors = $this->get_cart_errors( $cart );
 
-		// Get shipping packages to return in the response from the cart. Always get the shipping packages if local
-		// pickup is enabled and has methods. If the address is required then regular shipping rates will be filtered
-		// out later.
-		$has_local_pickup_methods = LocalPickupUtils::is_local_pickup_enabled() && count( LocalPickupUtils::get_local_pickup_method_ids() ) > 0;
-		$shipping_packages        = $cart->has_calculated_shipping() || $has_local_pickup_methods ? $controller->get_shipping_packages() : [];
+		// Get shipping packages to return in the response from the cart.
+		$shipping_packages = $cart->has_calculated_shipping() ? $controller->get_shipping_packages() : [];
 
 		// Get visible cross sells products.
 		$cross_sells = array_filter( array_map( 'wc_get_product', $cart->get_cross_sells() ), 'wc_products_array_filter_visible' );

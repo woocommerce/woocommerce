@@ -2596,7 +2596,7 @@ class AdditionalFields extends MockeryTestCase {
 								'properties' => array(
 									'country' => array(
 										'type' => 'string',
-										'enum' => 'GB',
+										'enum' => array( 'GB' ),
 									),
 								),
 							),

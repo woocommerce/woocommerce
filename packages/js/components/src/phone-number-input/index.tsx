@@ -8,7 +8,7 @@ import {
 	useLayoutEffect,
 } from '@wordpress/element';
 import { useSelect } from 'downshift';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -158,7 +158,7 @@ const PhoneNumberInput = ( {
 
 	return (
 		<div
-			className={ classNames(
+			className={ clsx(
 				className,
 				'wcpay-component-phone-number-input'
 			) }
@@ -167,14 +167,14 @@ const PhoneNumberInput = ( {
 				{ ...getToggleButtonProps( {
 					ref: menuRef,
 					type: 'button',
-					className: classNames(
+					className: clsx(
 						'wcpay-component-phone-number-input__button'
 					),
 				} ) }
 			>
 				{ selectedRender( countries[ countryKey ] ) }
 				<span
-					className={ classNames(
+					className={ clsx(
 						'wcpay-component-phone-number-input__button-arrow',
 						{ invert: isOpen }
 					) }
@@ -206,7 +206,7 @@ const PhoneNumberInput = ( {
 								key,
 								index,
 								item: key,
-								className: classNames(
+								className: clsx(
 									'wcpay-component-phone-number-input__menu-item',
 									{ highlighted: highlightedIndex === index }
 								),

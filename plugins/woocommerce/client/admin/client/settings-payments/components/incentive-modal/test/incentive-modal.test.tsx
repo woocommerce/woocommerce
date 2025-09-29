@@ -4,9 +4,9 @@
 import { recordEvent } from '@woocommerce/tracks';
 import { render, fireEvent } from '@testing-library/react';
 import {
-	PaymentIncentive,
-	PaymentProvider,
-	PaymentProviderType,
+	PaymentsProviderIncentive,
+	PaymentsProvider,
+	PaymentsProviderType,
 	PluginData,
 } from '@woocommerce/data';
 
@@ -19,7 +19,7 @@ jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
 } ) );
 
-const testIncentive: PaymentIncentive = {
+const testIncentive: PaymentsProviderIncentive = {
 	id: 'test-incentive',
 	description: 'Test Incentive',
 	promo_id: 'test-promo-id',
@@ -36,10 +36,10 @@ const testIncentive: PaymentIncentive = {
 	},
 };
 
-const testProvider: PaymentProvider = {
+const testProvider: PaymentsProvider = {
 	id: 'test-provider',
 	_order: 1,
-	_type: PaymentProviderType.Gateway, // or any valid PaymentProviderType
+	_type: PaymentsProviderType.Gateway, // or any valid PaymentsProviderType
 	title: 'Test Title',
 	description: 'Test Description',
 	icon: 'test-icon',
@@ -52,6 +52,8 @@ const testProvider: PaymentProvider = {
 		file: 'test-plugin-file',
 		status: 'active',
 	} as PluginData,
+	_links: {},
+	_suggestion_id: 'test-suggestion-id',
 };
 
 describe( 'IncentiveModal', () => {
@@ -63,17 +65,19 @@ describe( 'IncentiveModal', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ jest.fn() }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_show',
-			{
+			expect.objectContaining( {
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
-			}
+				suggestion_id: 'test-suggestion-id',
+			} )
 		);
 	} );
 
@@ -86,7 +90,7 @@ describe( 'IncentiveModal', () => {
 				onboardingUrl="https://example.com"
 				onAccept={ onAccept }
 				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
+				setUpPlugin={ jest.fn() }
 			/>
 		);
 
@@ -94,36 +98,13 @@ describe( 'IncentiveModal', () => {
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_incentive_accept',
-			{
+			expect.objectContaining( {
+				business_country: expect.any( String ),
 				display_context: 'wc_settings_payments__modal',
 				incentive_id: 'test-promo-id',
 				provider_id: 'test-provider',
-			}
-		);
-	} );
-
-	it( 'should record settings_payments_incentive_dismiss event when the close button is clicked', () => {
-		const onAccept = jest.fn();
-		const { getByRole } = render(
-			<IncentiveModal
-				incentive={ testIncentive }
-				provider={ testProvider }
-				onboardingUrl="https://example.com"
-				onAccept={ onAccept }
-				onDismiss={ jest.fn() }
-				setupPlugin={ jest.fn() }
-			/>
-		);
-
-		fireEvent.click( getByRole( 'button', { name: 'Close' } ) );
-
-		expect( recordEvent ).toHaveBeenCalledWith(
-			'settings_payments_incentive_dismiss',
-			{
-				display_context: 'wc_settings_payments__modal',
-				incentive_id: 'test-promo-id',
-				provider_id: 'test-provider',
-			}
+				suggestion_id: 'test-suggestion-id',
+			} )
 		);
 	} );
 } );

@@ -24,34 +24,6 @@ export class ShippingUtils {
 		await this.page.getByRole( 'button', { name: 'Save changes' } ).click();
 	}
 
-	async enableShippingCalculator() {
-		await this.openShippingSettings();
-
-		const enable = this.page.getByLabel(
-			'Enable the shipping calculator on the cart page'
-		);
-
-		if ( ! ( await enable.isChecked() ) ) {
-			await enable.check();
-
-			await this.saveShippingSettings();
-		}
-	}
-
-	async disableShippingCalculator() {
-		await this.openShippingSettings();
-
-		const enable = this.page.getByLabel(
-			'Enable the shipping calculator on the cart page'
-		);
-
-		if ( await enable.isChecked() ) {
-			await enable.uncheck();
-
-			await this.saveShippingSettings();
-		}
-	}
-
 	async enableShippingCostsRequireAddress() {
 		await this.openShippingSettings();
 

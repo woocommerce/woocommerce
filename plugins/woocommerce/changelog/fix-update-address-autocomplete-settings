@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update Address Autocomplete settings to be tied to the correct script and escaped as JSON

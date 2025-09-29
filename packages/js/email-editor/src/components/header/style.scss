@@ -10,3 +10,83 @@
 		display: none;
 	}
 }
+
+.woocommerce-email-editor__view-mode-toggle {
+	/* stylelint-disable -- Disable reason: View Transitions not supported properly by stylelint. */
+	view-transition-name: toggle;
+	/* stylelint-enable */
+	top: 0;
+	left: 0;
+	height: 60px;
+	width: 60px;
+	z-index: 100;
+
+	.components-button {
+		color: #fff;
+		height: 100%;
+		width: 100%;
+		border-radius: 0;
+		overflow: hidden;
+		padding: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		&:hover,
+		&:active {
+			color: #fff;
+		}
+
+		&:focus {
+			box-shadow: none;
+		}
+	}
+
+	.woocommerce-email-editor__view-mode-toggle-icon {
+		svg,
+		img {
+			background: $gray-900;
+			display: block;
+		}
+	}
+}
+
+.woocommerce-email-editor-icon {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 60px;
+	height: 60px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	pointer-events: none;
+	background-color: hsla(0, 0%, 100%, 0.6);
+	-webkit-backdrop-filter: saturate(180%) blur(15px);
+	backdrop-filter: saturate(180%) blur(15px);
+
+	svg {
+		fill: currentColor;
+	}
+}
+
+.woocommerce-email-editor-icon__icon {
+	fill: currentColor;
+	width: 100%;
+	height: 100%;
+	padding: 12px;
+}
+
+.woocommerce-email-editor__view-mode-toggle button:focus {
+	position: relative;
+
+	&::before {
+		content: "";
+		display: block;
+		position: absolute;
+		z-index: 1;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+	}
+}

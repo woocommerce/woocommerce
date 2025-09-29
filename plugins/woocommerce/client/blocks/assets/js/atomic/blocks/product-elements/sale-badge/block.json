@@ -4,7 +4,16 @@
 	"description": "Displays an on-sale badge if the product is on-sale.",
 	"category": "woocommerce-product-elements",
 	"attributes": {
-		"productId": { "type": "number", "default": 0 }
+		"productId": { "type": "number", "default": 0 },
+		"isDescendentOfQueryLoop": { "type": "boolean", "default": false },
+		"isDescendentOfSingleProductBlock": {
+			"type": "boolean",
+			"default": false
+		},
+		"isDescendentOfSingleProductTemplate": {
+			"type": "boolean",
+			"default": false
+		}
 	},
 	"supports": {
 		"interactivity": {

@@ -5,7 +5,6 @@ import {
 	InnerBlocks,
 	InspectorControls,
 	useBlockProps,
-	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
@@ -22,6 +21,13 @@ const TEMPLATE: InnerBlockTemplate[] = [
 		'woocommerce/product-gallery-large-image',
 		{},
 		[
+			[
+				'woocommerce/product-image',
+				{
+					showProductLink: false,
+					showSaleBadge: false,
+				},
+			],
 			[
 				'woocommerce/product-sale-badge',
 				{
@@ -61,9 +67,3 @@ export const Edit = withProductDataContext(
 		);
 	}
 );
-
-export const Save = () => {
-	const blockProps = useBlockProps.save();
-	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
-	return <div { ...innerBlocksProps } />;
-};

@@ -45,6 +45,10 @@ jest.mock( '@wordpress/data', () => ( {
 	dispatch: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/utils', () => ( {
+	isSiteEditorPage: jest.fn().mockReturnValue( true ),
+} ) );
+
 // Mocking processErrorResponse because we don't actually care about processing the error response, we just don't want
 // pushChanges to throw an error.
 jest.mock( '../../utils', () => ( {
@@ -59,22 +63,6 @@ jest.mock( '../update-payment-methods', () => ( {
 	debouncedUpdatePaymentMethods: jest.fn(),
 	updatePaymentMethods: jest.fn(),
 } ) );
-
-jest.mock( '@woocommerce/settings', () => {
-	const originalModule = jest.requireActual( '@woocommerce/settings' );
-
-	return {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore We know @woocommerce/settings is an object.
-		...originalModule,
-		getSetting: ( setting, ...rest ) => {
-			if ( setting === 'addressFieldsForShippingRates' ) {
-				return [ 'postcode', 'state', 'country', 'city' ];
-			}
-			return originalModule.getSetting( setting, ...rest );
-		},
-	};
-} );
 
 async function resetToInitialAddressMock() {
 	pushChanges( false );

@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -27,12 +34,6 @@ const test = baseTest.extend( {
 			`${ WC_ADMIN_API_PATH }/options`,
 			initialTaskListState.data
 		);
-
-		// Make sure the new Payments settings page feature is not enabled.
-		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
-			'woocommerce_feature_reactify-classic-payments-settings_enabled':
-				'no',
-		} );
 	},
 
 	nonSupportedWooPaymentsCountryPage: async ( { page, restApi }, use ) => {
@@ -57,12 +58,6 @@ const test = baseTest.extend( {
 				value: initialDefaultCountry.data.value,
 			}
 		);
-
-		// Make sure the new Payments settings page feature is not enabled.
-		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
-			'woocommerce_feature_reactify-classic-payments-settings_enabled':
-				'no',
-		} );
 	},
 } );
 
@@ -97,7 +92,7 @@ test(
 );
 
 test(
-	'Can visit the payment setup task from from the task list',
+	'Payments task list item links to Payments settings page',
 	{ tag: [ tags.NOT_E2E ] },
 	/**
 	 * @param {{ nonSupportedWooPaymentsCountryPage: import('@playwright/test').Page }} page
@@ -108,14 +103,14 @@ test(
 		);
 		await nonSupportedWooPaymentsCountryPage
 			.locator( '.woocommerce-task-list__item' )
-			.filter( { hasText: 'Get paid' } )
+			.filter( { hasText: 'Set up payments' } )
 			.click();
 
 		await expect(
 			nonSupportedWooPaymentsCountryPage.locator(
 				'.woocommerce-layout__header-wrapper > h1'
 			)
-		).toHaveText( 'Get paid' );
+		).toHaveText( 'Settings' );
 	}
 );
 
@@ -162,7 +157,7 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Log in to your account',
+				name: 'Log in to Woo with WordPress.com',
 			} )
 		).toBeVisible( { timeout: 30000 } );
 	} );

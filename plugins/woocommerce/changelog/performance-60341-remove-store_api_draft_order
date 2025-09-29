@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove store_api_draft_order from session when empty or cart session is destroyed

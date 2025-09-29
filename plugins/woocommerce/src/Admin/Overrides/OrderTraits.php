@@ -30,7 +30,7 @@ trait OrderTraits {
 		// Use the passed order_items_count if provided, otherwise get the total number of items in the order.
 		// This is useful when calculating refunds for partial items in an order.
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping fee of the refunded items distributed to them.
-		$order_items = $order_items_count ? $order_items_count : $this->get_item_count();
+		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
 		if ( 0 === $order_items ) {
 			return 0;
@@ -39,7 +39,7 @@ trait OrderTraits {
 		// Use the passed shipping_amount if provided, otherwise get the total shipping amount in the order.
 		// This is useful when calculating refunds for partial shipping in an order.
 		// For example, if $10 shipping is refunded from an order with $30 shipping, the remaining $20 should be distributed to the remaining items.
-		$total_shipping_amount = $shipping_amount ? $shipping_amount : (float) $this->get_shipping_total();
+		$total_shipping_amount = null !== $shipping_amount ? $shipping_amount : (float) $this->get_shipping_total();
 
 		return $total_shipping_amount / $order_items * $product_qty;
 	}
@@ -61,13 +61,13 @@ trait OrderTraits {
 		// Use the passed order_items_count if provided, otherwise get the total number of items in the order.
 		// This is useful when calculating refunds for partial items in an order.
 		// For example, if 2 items are refunded from an order with 4 items. The remaining 2 items should have the shipping tax of the refunded items distributed to them.
-		$order_items = $order_items_count ? $order_items_count : $this->get_item_count();
+		$order_items = null !== $order_items_count ? $order_items_count : $this->get_item_count();
 
 		if ( 0 === $order_items ) {
 			return 0;
 		}
 
-		// Use the passed shipping_tax_amount if provided, otherwise initiliase it to 0 and calculate the total shipping tax amount in the order.
+		// Use the passed shipping_tax_amount if provided, otherwise initialize it to 0 and calculate the total shipping tax amount in the order.
 		// This is useful when calculating refunds for partial shipping tax in an order.
 		// For example, if $1 shipping tax is refunded from an order with $3 shipping tax, the remaining $2 should be distributed to the remaining items.
 		$total_shipping_tax_amount = $shipping_tax_amount ? $shipping_tax_amount : 0;

@@ -25,7 +25,7 @@ describe( 'checkout blocks registry', () => {
 					},
 					component,
 				} )
-			).toThrowError( /blockName/ );
+			).toThrow( /blockName/ );
 			expect(
 				invokeTest( {
 					metadata: {
@@ -34,7 +34,7 @@ describe( 'checkout blocks registry', () => {
 					},
 					component,
 				} )
-			).toThrowError( /blockName/ );
+			).toThrow( /blockName/ );
 		} );
 		it( 'throws an error when registered block is missing a valid parent', () => {
 			expect(
@@ -45,7 +45,7 @@ describe( 'checkout blocks registry', () => {
 					},
 					component,
 				} )
-			).toThrowError( /parent/ );
+			).toThrow( /parent/ );
 			expect(
 				invokeTest( {
 					metadata: {
@@ -54,7 +54,7 @@ describe( 'checkout blocks registry', () => {
 					},
 					component,
 				} )
-			).toThrowError( /parent/ );
+			).toThrow( /parent/ );
 			expect(
 				invokeTest( {
 					metadata: {
@@ -66,7 +66,7 @@ describe( 'checkout blocks registry', () => {
 					},
 					component,
 				} )
-			).not.toThrowError( /parent/ );
+			).not.toThrow( /parent/ );
 		} );
 		it( 'throws an error when registered block is missing `component`', () => {
 			expect(
@@ -76,7 +76,7 @@ describe( 'checkout blocks registry', () => {
 						parent: innerBlockAreas.CHECKOUT_FIELDS,
 					},
 				} )
-			).toThrowError( /component/ );
+			).toThrow( /component/ );
 		} );
 	} );
 

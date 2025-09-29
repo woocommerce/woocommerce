@@ -5,10 +5,12 @@ import { act, render, screen, waitFor } from '@testing-library/react';
 import { previewCart } from '@woocommerce/resource-previews';
 import * as wpDataFunctions from '@wordpress/data';
 import { CART_STORE_KEY, paymentStore } from '@woocommerce/block-data';
-import { default as fetchMock } from 'jest-fetch-mock';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 import {
 	registerPaymentMethod,
+	registerExpressPaymentMethod,
 	__experimentalDeRegisterPaymentMethod,
+	__experimentalDeRegisterExpressPaymentMethod,
 } from '@woocommerce/blocks-registry';
 import userEvent from '@testing-library/user-event';
 import { dispatch } from '@wordpress/data';
@@ -98,20 +100,38 @@ const registerMockPaymentMethods = () => {
 	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 };
 
+const registerMockExpressPaymentMethods = () => {
+	registerExpressPaymentMethod( {
+		name: 'dummy-express',
+		label: 'dummy express',
+		content: <div>A payment method</div>,
+		edit: <div>A payment method</div>,
+		canMakePayment: () => true,
+	} );
+	dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
+};
+
 const resetMockPaymentMethods = () => {
 	[ 'cod', 'credit-card' ].forEach( ( name ) => {
 		__experimentalDeRegisterPaymentMethod( name );
 	} );
 };
 
+const resetMockExpressPaymentMethods = () => {
+	[ 'dummy-express' ].forEach( ( name ) => {
+		__experimentalDeRegisterExpressPaymentMethod( name );
+	} );
+};
+
 describe( 'PaymentMethods', () => {
 	beforeEach( () => {
-		fetchMock.mockResponse( ( req ) => {
-			if ( req.url.match( /wc\/store\/v1\/cart/ ) ) {
-				return Promise.resolve( JSON.stringify( previewCart ) );
-			}
-			return Promise.resolve( '' );
-		} );
+		// Setup MSW handlers for cart API
+		server.use(
+			http.get( '/wc/store/v1/cart', () => {
+				return HttpResponse.json( previewCart );
+			} )
+		);
+
 		// need to clear the store resolution state between tests.
 		wpDataFunctions
 			.dispatch( CART_STORE_KEY )
@@ -120,10 +140,6 @@ describe( 'PaymentMethods', () => {
 			...previewCart,
 			payment_methods: [ 'cod', 'credit-card' ],
 		} );
-	} );
-
-	afterEach( () => {
-		fetchMock.resetMocks();
 	} );
 
 	test( 'should show no payment methods component when there are no payment methods', async () => {
@@ -136,6 +152,42 @@ describe( 'PaymentMethods', () => {
 			// We might get more than one match because the `speak()` function
 			// creates an extra `div` with the notice contents used for a11y.
 			expect( noPaymentMethods.length ).toBeGreaterThanOrEqual( 1 );
+		} );
+	} );
+
+	test( 'should show only express payments component when only express payment methods are available', async () => {
+		// Register only express payment methods, no regular payment methods
+		act( () => {
+			registerMockExpressPaymentMethods();
+		} );
+
+		// Wait for express payment methods to be initialized
+		await waitFor( () => {
+			expect(
+				wpDataFunctions
+					.select( paymentStore )
+					.expressPaymentMethodsInitialized()
+			).toBe( true );
+		} );
+
+		const customOnlyExpressPayments = (
+			<div>Only express payments available</div>
+		);
+
+		render(
+			<PaymentMethods onlyExpressPayments={ customOnlyExpressPayments } />
+		);
+
+		await waitFor( () => {
+			const onlyExpressPayments = screen.getByText(
+				'Only express payments available'
+			);
+			expect( onlyExpressPayments ).toBeInTheDocument();
+		} );
+
+		// Clean up
+		act( () => {
+			resetMockExpressPaymentMethods();
 		} );
 	} );
 

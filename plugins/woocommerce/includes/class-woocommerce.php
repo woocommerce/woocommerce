@@ -8,6 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonAdminBarBadge;
@@ -16,6 +17,8 @@ use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as ProductDownloadDirectories;
@@ -31,6 +34,8 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, RestApiUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -44,7 +49,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.0.0';
+	public $version = '10.3.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -230,6 +235,17 @@ final class WooCommerce {
 	}
 
 	/**
+	 * Get the WooCommerce version.
+	 *
+	 * @since 10.3.0
+	 *
+	 * @return string The WooCommerce version.
+	 */
+	public function stable_version(): string {
+		return explode( '-', $this->version, 2 )[0];
+	}
+
+	/**
 	 * WooCommerce Constructor.
 	 */
 	public function __construct() {
@@ -285,6 +301,7 @@ final class WooCommerce {
 		register_shutdown_function( array( $this, 'log_errors' ) );
 
 		add_action( 'plugins_loaded', array( $this, 'on_plugins_loaded' ), -1 );
+		add_action( 'plugins_loaded', array( $this, 'init_customizer' ) );
 		add_action( 'plugins_loaded', array( $this, 'init_jetpack_connection_config' ), 1 );
 		add_action( 'admin_notices', array( $this, 'build_dependencies_notice' ) );
 		add_action( 'after_setup_theme', array( $this, 'setup_environment' ) );
@@ -308,6 +325,9 @@ final class WooCommerce {
 		add_action( 'woocommerce_updated', array( $this, 'add_woocommerce_remote_variant' ) );
 		add_action( 'woocommerce_newly_installed', 'wc_set_hooked_blocks_version', 10 );
 		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'get_tracking_history' ), 10, 2 );
+		add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'handle_tracking_setting_change' ), 10, 2 );
+		add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'register_recurring_actions' ) );
+		add_action( 'action_scheduler_init', array( $this, 'add_recurring_action_wrappers' ) );
 
 		add_filter( 'robots_txt', array( $this, 'robots_txt' ) );
 		add_filter( 'wp_plugin_dependencies_slug', array( $this, 'convert_woocommerce_slug' ) );
@@ -334,6 +354,14 @@ final class WooCommerce {
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
+		$container->get( AddressProviderController::class );
+		$container->get( AbilitiesRegistry::class );
+		$container->get( MCPAdapterProvider::class );
+
+		// Feature flags.
+		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			$container->get( StockNotifications::class );
+		}
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -344,17 +372,19 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderAttributionBlocksController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		Automattic\WooCommerce\Internal\Admin\WcPayWelcomePage::instance()->register();
+		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentProviders\WooPayments\WooPaymentsRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Admin\Emails\EmailListingRestController::class )->register();
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
@@ -752,11 +782,6 @@ final class WooCommerce {
 			$this->frontend_includes();
 		}
 
-		if ( $this->is_request( 'cron' ) && 'yes' === get_option( 'woocommerce_allow_tracking', 'no' ) ) {
-			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
-			WC_Tracker::init();
-		}
-
 		$this->theme_support_includes();
 		$this->query = new WC_Query();
 	}
@@ -1109,6 +1134,8 @@ final class WooCommerce {
 		$above[] = "Disallow: $path/wp-content/uploads/wc-logs/";
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_transient_files/";
 		$above[] = "Disallow: $path/wp-content/uploads/woocommerce_uploads/";
+		$above[] = 'Disallow: /*?add-to-cart=';
+		$above[] = 'Disallow: /*?*add-to-cart=';
 
 		$lines = array_merge( $above, $below );
 
@@ -1380,5 +1407,238 @@ final class WooCommerce {
 
 		// Always update the last change.
 		update_option( 'woocommerce_allow_tracking_last_modified', time() );
+	}
+
+	/**
+	 * For actions that may fail at execution time due to missing callbacks, register the recurring action in a wrapper
+	 * to prevent errors, and load the classes where the callback is added.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_recurring_action_wrappers() {
+		add_action( 'woocommerce_tracker_send_event_wrapper', array( $this, 'add_woocommerce_tracker_send_event_wrapper' ) );
+		add_action( 'wc_admin_daily_wrapper', array( $this, 'add_wc_admin_daily_wrapper' ) );
+		add_action( 'generate_category_lookup_table_wrapper', array( $this, 'add_generate_category_lookup_table_wrapper' ) );
+		add_action( 'woocommerce_cleanup_rate_limits_wrapper', array( $this, 'add_woocommerce_cleanup_rate_limits_wrapper' ) );
+	}
+
+	/**
+	 * Unschedule unwrapped actions that may have been added to the site.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function unschedule_unwrapped_actions() {
+		// Unschedule the unwrapped actions.
+		as_unschedule_all_actions( 'woocommerce_tracker_send_event' );
+		as_unschedule_all_actions( 'wc_admin_daily' );
+		as_unschedule_all_actions( 'generate_category_lookup_table' );
+		as_unschedule_all_actions( 'woocommerce_cleanup_rate_limits' );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_tracker_send_event` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_woocommerce_tracker_send_event_wrapper() {
+		if ( true !== wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-tracker.php';
+			if ( class_exists( WC_Tracker::class ) ) {
+				WC_Tracker::init();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing WC_Tracker: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_tracker_send_event' );
+	}
+
+	/**
+	 * Wrapper for the `wc_admin_daily` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_wc_admin_daily_wrapper() {
+		try {
+			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\Events::class ) ) {
+				\Automattic\WooCommerce\Internal\Admin\Events::instance();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error initializing wc_admin_daily: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_admin_daily' );
+	}
+
+	/**
+	 * Wrapper for the `generate_category_lookup_table` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_generate_category_lookup_table_wrapper() {
+		try {
+			if ( class_exists( \Automattic\WooCommerce\Internal\Admin\CategoryLookup::class ) ) {
+				\Automattic\WooCommerce\Internal\Admin\CategoryLookup::instance();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error in category lookup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'generate_category_lookup_table' );
+	}
+
+	/**
+	 * Wrapper for the `woocommerce_cleanup_rate_limits` action. This prevents the event failing when the class is not loaded.
+	 * It loads the class if it exists, and then calls the actual action.
+	 *
+	 * @return void
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function add_woocommerce_cleanup_rate_limits_wrapper() {
+		try {
+			include_once WC_ABSPATH . 'includes/class-wc-rate-limiter.php';
+			if ( class_exists( WC_Rate_Limiter::class ) ) {
+				WC_Rate_Limiter::init();
+			}
+		} catch ( Throwable $e ) {
+			wc_get_logger()->error( 'Error in rate limiter cleanup wrapper: ' . $e->getMessage(), array( 'source' => 'woocommerce-scheduled-actions' ) );
+		}
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'woocommerce_cleanup_rate_limits' );
+	}
+
+	/**
+	 * Register recurring actions.
+	 */
+	public function register_recurring_actions() {
+		// Remove any unwrapped actions that may have been scheduled before scheduling the new wrapped ones.
+		$this->unschedule_unwrapped_actions();
+
+		// Check if Action Scheduler is available.
+		if ( ! function_exists( 'as_schedule_recurring_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
+			return;
+		}
+
+		$gmt_offset   = get_option( 'gmt_offset' );
+		$offset_hours = ( $gmt_offset > 0 ? '-' : '+' ) . absint( $gmt_offset ) . ' hours';
+
+		// Schedule daily sales event at midnight tomorrow.
+		$scheduled_sales_time = strtotime( '00:00 tomorrow ' . $offset_hours );
+
+		as_schedule_recurring_action( $scheduled_sales_time, DAY_IN_SECONDS, 'woocommerce_scheduled_sales', array(), 'woocommerce', true );
+
+		$held_duration = get_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		if ( '' !== $held_duration ) {
+			/**
+			 * Determines the interval at which to cancel unpaid orders in minutes.
+			 *
+			 * @since 5.1.0
+			 */
+			$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $held_duration ) );
+
+			as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
+
+		}
+
+		$tomorrow_3am = strtotime( 'tomorrow 03:00 am ' . $offset_hours );
+		$tomorrow_6am = strtotime( 'tomorrow 06:00 am ' . $offset_hours );
+
+		// Delay the first run of `woocommerce_cleanup_personal_data` by 10 seconds
+		// so it doesn't occur in the same request. WooCommerce Admin also schedules
+		// a daily cron that gets lost due to a race condition. WC_Privacy's background
+		// processing instance updates the cron schedule from within a cron job.
+		as_schedule_recurring_action( time() + 10, DAY_IN_SECONDS, 'woocommerce_cleanup_personal_data', array(), 'woocommerce', true );
+
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_logs', array(), 'woocommerce', true );
+
+		$next_run_timestamp = as_next_scheduled_action( 'woocommerce_cleanup_sessions', array(), 'woocommerce' );
+		if ( $next_run_timestamp !== $tomorrow_6am ) {
+			as_unschedule_all_actions( 'woocommerce_cleanup_sessions' );
+			as_schedule_recurring_action( $tomorrow_6am, 12 * HOUR_IN_SECONDS, 'woocommerce_cleanup_sessions', array(), 'woocommerce', true );
+		}
+
+		as_schedule_recurring_action( $tomorrow_6am, 15 * DAY_IN_SECONDS, 'woocommerce_geoip_updater', array(), 'woocommerce', true );
+
+		// Schedule the action to send tracking events if tracking is enabled.
+		$this->schedule_tracking_action();
+
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
+
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+
+		// Note: this is potentially redundant when the core package exists.
+		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );
+	}
+
+	/**
+	 * Schedule the action send tracking events if tracking is enabled, or unregister it if tracking is disabled.
+	 * This will be called when the `woocommerce_allow_tracking` option is updated.
+	 *
+	 * @param string $old_value The old value of the `woocommerce_allow_tracking` option.
+	 * @param string $value     The new value of the `woocommerce_allow_tracking` option.
+	 *
+	 * @return void
+	 */
+	public function handle_tracking_setting_change( $old_value, $value ) {
+		if ( $old_value === $value ) {
+			return;
+		}
+		if ( false === wc_string_to_bool( $value ) ) {
+			as_unschedule_all_actions( 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce' );
+		} else {
+			$this->schedule_tracking_action();
+		}
+	}
+
+	/**
+	 * Schedule the action to send tracking events if tracking is enabled.
+	 *
+	 * @return void
+	 */
+	public function schedule_tracking_action() {
+		if ( false === wc_string_to_bool( get_option( 'woocommerce_allow_tracking', 'no' ) ) ) {
+			return;
+		}
+
+		/**
+		 * How frequent to schedule the tracker send event.
+		 *
+		 * @since 2.3.0
+		 */
+		$tracker_recurrence = apply_filters( 'woocommerce_tracker_event_recurrence', 'daily' );
+		$core_internals     = wp_get_schedules();
+		as_schedule_recurring_action( time() + 10, $core_internals[ $tracker_recurrence ]['interval'], 'woocommerce_tracker_send_event_wrapper', array(), 'woocommerce', true );
+	}
+
+	/**
+	 * Initialize the customizer on the plugins_loaded action.
+	 * If WooCommerce is network activated, wp_is_block_theme() will be called too early,
+	 * which cause the warning in #58364. By initializing the customizer on plugins_loaded,
+	 * we ensure that wp_is_block_theme() is called after theme directories registration.
+	 *
+	 * @internal
+	 * @see https://github.com/woocommerce/woocommerce/issues/58364
+	 */
+	public function init_customizer() {
+		global $pagenow;
+		if (
+			'customize.php' === $pagenow ||
+			isset( $_REQUEST['customize_theme'] ) || // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			! wp_is_block_theme()
+		) {
+			new WC_Shop_Customizer();
+		}
 	}
 }

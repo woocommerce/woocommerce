@@ -329,7 +329,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$coupons_query = $this->get_query_statement();
 		} else {
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'amount', 'orders_count' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', coupon_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$coupons_query = $this->subquery->get_query_statement();
 
@@ -412,7 +416,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			if ( ! $coupon_id ) {
 				// Insert a unique, but obviously invalid ID for this deleted coupon.
-				$num_deleted++;
+				++$num_deleted;
 				$coupon_id = -1 * $num_deleted;
 			}
 

@@ -6,6 +6,8 @@
  */
 class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
+
+
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
@@ -63,7 +65,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
 
-		$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon();
+		$coupon   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/coupons/' . $coupon->get_id() ) );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -81,7 +83,7 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function test_coupons_get_each_field_one_by_one() {
 		wp_set_current_user( $this->user );
 		$expected_response_fields = $this->get_expected_response_fields();
-		$coupon = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon();
+		$coupon                   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon();
 
 		foreach ( $expected_response_fields as $field ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/coupons/' . $coupon->get_id() );
@@ -102,12 +104,12 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$coupon_1 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-1', 'draft' );
 		$post_1   = get_post( $coupon_1->get_id() );
-		$coupon_2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-2');
+		$coupon_2 = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper::create_coupon( 'dummycoupon-2' );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v3/coupons' );
 		$request->set_query_params(
 			array(
-				'status'    => 'publish'
+				'status' => 'publish',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -142,5 +144,114 @@ class WC_REST_Coupons_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'trash', get_post_status( $coupon->get_id() ) );
+	}
+
+	/**
+	 * Test creating coupon with invalid percentage amount.
+	 */
+	public function test_create_coupon_invalid_percentage_amount() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'invalid-percent-test',
+				'discount_type' => 'percent',
+				'amount'        => '200',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Should contain validation error message.
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
+
+		// Ensure coupon was not created.
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'invalid-percent-test' ) );
+	}
+
+	/**
+	 * Test creating coupon with valid percentage amount.
+	 */
+	public function test_create_coupon_valid_percentage_amount() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'valid-percent-test',
+				'discount_type' => 'percent',
+				'amount'        => '50',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		// Should succeed.
+		$this->assertEquals( 201, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertEquals( '50.00', $data['amount'] );
+		$this->assertEquals( 'percent', $data['discount_type'] );
+	}
+
+	/**
+	 * Test creating coupon with negative amount.
+	 */
+	public function test_create_coupon_negative_amount() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'negative-amount-test',
+				'discount_type' => 'fixed_cart',
+				'amount'        => '-10',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Should contain validation error message.
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
+
+		// Ensure coupon was not created.
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-amount-test' ) );
+	}
+
+	/**
+	 * Test creating coupon with negative percentage amount.
+	 */
+	public function test_create_coupon_negative_percentage_amount() {
+		wp_set_current_user( $this->user );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/coupons' );
+		$request->set_body_params(
+			array(
+				'code'          => 'negative-percent-test',
+				'discount_type' => 'percent',
+				'amount'        => '-25',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $response->get_status() );
+
+		// Should contain validation error message from coupon class.
+		$data = $response->get_data();
+		$this->assertStringContainsString( 'Invalid discount amount', $data['message'] );
+
+		// Ensure coupon was not created.
+		$this->assertEquals( 0, wc_get_coupon_id_by_code( 'negative-percent-test' ) );
 	}
 }

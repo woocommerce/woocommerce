@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Accessibility: Remove unneeded title attribute from product images to avoid duplicate screen reader announcements

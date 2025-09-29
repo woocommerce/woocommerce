@@ -453,32 +453,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 *
-	 * @since 9.9.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded( $order ) {
-		global $wpdb;
-
-		$total = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $wpdb->posts AS posts ON ( posts.post_type = 'shop_order_refund' AND posts.post_parent = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = posts.ID AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$order->get_id()
-			)
-		) ?? 0;
-
-		return abs( $total );
-	}
-
-	/**
 	 * Get the total shipping refunded.
 	 *
 	 * @param  WC_Order $order Order object.
@@ -684,7 +658,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			);
 		}
 
-		return apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+		/**
+		 * Filter the order ids to be returned.
+		 *
+		 * @since 3.0.0
+		 * @param array $order_ids The order ids.
+		 * @param string $term The search term.
+		 * @param array $search_fields The search fields.
+		 * @return array
+		 */
+		$order_ids = apply_filters( 'woocommerce_shop_order_search_results', $order_ids, $term, $search_fields );
+
+		return array_map( 'absint', $order_ids );
 	}
 
 	/**
@@ -889,7 +874,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( $save ) {
 			$order->save_meta_data();
 		}
-
 	}
 
 	/**
@@ -957,7 +941,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
-
 		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
 		$key_mapping = array(
 			'customer_id'    => 'customer_user',
@@ -969,7 +952,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'shipping_total' => 'order_shipping',
 			'shipping_tax'   => 'order_shipping_tax',
 			'cart_tax'       => 'order_tax',
-			'total'          => 'order_total',
 			'page'           => 'paged',
 		);
 
@@ -996,9 +978,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
+
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( empty( $wp_query_args['orderby'] ) ) {
+			$wp_query_args['orderby'] = 'ID';
+		}
+
+		if ( empty( $wp_query_args['order'] ) ) {
+			$wp_query_args['order'] = 'desc';
 		}
 
 		$date_queries = array(
@@ -1043,6 +1034,33 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'compare' => 'NOT EXISTS',
 				);
 			}
+		}
+
+		// Handle total filtering with support for operators.
+		if ( isset( $query_vars['total'] ) ) {
+			$total_param = $query_vars['total'];
+			unset( $query_vars['total'] );
+
+			// If it's a simple number, convert to array format.
+			if ( is_numeric( $total_param ) ) {
+				$total_param = array(
+					'value'    => $total_param,
+					'operator' => '=',
+				);
+			}
+
+			$total_query = $this->generate_total_query( (array) $total_param );
+
+			if ( $total_query ) {
+				$wp_query_args['meta_query'][] = $total_query;
+			}
+		}
+
+		// Handle custom orderby paramers.
+		if ( 'total' === $wp_query_args['orderby'] ) {
+			$wp_query_args['orderby']   = 'meta_value_num';
+			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$wp_query_args['meta_type'] = 'DECIMAL(10,' . wc_get_price_decimals() . ')';
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
@@ -1295,5 +1313,66 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
 		return (bool) $order->save();
+	}
+
+	/**
+	 * Generate meta query for total filtering with operators.
+	 *
+	 * @param array $total_params Total query parameters with value, operator.
+	 * @return array|false Meta query array or false if invalid.
+	 */
+	private function generate_total_query( array $total_params ) {
+		if ( ! isset( $total_params['value'] ) ) {
+			return false;
+		}
+
+		$operator            = $total_params['operator'] ?? '=';
+		$value               = $total_params['value'];
+		$supported_operators = array( '=', '!=', '>', '>=', '<', '<=', 'BETWEEN', 'NOT BETWEEN' );
+
+		if ( ! in_array( $operator, $supported_operators, true ) ) {
+			return false;
+		}
+
+		// Handle between operators.
+		if ( 'BETWEEN' === $operator || 'NOT BETWEEN' === $operator ) {
+			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+				return false;
+			}
+			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
+			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
+
+			if ( 'BETWEEN' === $operator ) {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			} else {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'NOT BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			}
+		}
+
+		// Handle other operators - value must be a single number.
+		if ( ! is_numeric( $value ) ) {
+			return false;
+		}
+
+		return array(
+			'key'     => '_order_total',
+			'value'   => wc_format_decimal( $value, wc_get_price_decimals() ),
+			'compare' => $operator,
+			'type'    => '=' === $operator ? 'CHAR' : 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		);
 	}
 }

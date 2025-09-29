@@ -74,7 +74,6 @@ final class WC_Cart_Session {
 		add_action( 'wp_loaded', array( $this, 'get_cart_from_session' ) );
 		add_action( 'woocommerce_cart_emptied', array( $this, 'destroy_cart_session' ) );
 		add_action( 'woocommerce_after_calculate_totals', array( $this, 'set_session' ), 1000 );
-		add_action( 'woocommerce_cart_loaded_from_session', array( $this, 'set_session' ) );
 		add_action( 'woocommerce_removed_coupon', array( $this, 'set_session' ) );
 
 		// Persistent cart stored to usermeta.
@@ -95,7 +94,13 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function get_cart_from_session() {
+		/**
+		 * Fires when cart is loaded from session.
+		 *
+		 * @since 3.2.0
+		 */
 		do_action( 'woocommerce_load_cart_from_session' );
+
 		$this->cart->set_totals( WC()->session->get( 'cart_totals', null ) );
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
@@ -118,8 +123,8 @@ final class WC_Cart_Session {
 		}
 
 		// Populate cart from order.
-		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // WPCS: input var ok, sanitization ok.
-			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart ); // WPCS: input var ok.
+		if ( isset( $_GET['order_again'], $_GET['_wpnonce'] ) && is_user_logged_in() && wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'woocommerce-order_again' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$cart                = $this->populate_cart_from_order( absint( $_GET['order_again'] ), $cart );
 			$order_again         = true;
 			$update_cart_session = true;
 		}
@@ -188,14 +193,38 @@ final class WC_Cart_Session {
 				 */
 				$message = apply_filters( 'woocommerce_cart_item_removed_message', $message, $product );
 				wc_add_notice( $message, 'error' );
+				/**
+				 * Fires when cart item is removed from the session.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
-
 			} elseif ( ! empty( $values['data_hash'] ) && ! hash_equals( $values['data_hash'], wc_get_cart_item_data_hash( $product ) ) ) { // phpcs:ignore PHPCompatibility.PHP.NewFunctions.hash_equalsFound
 				$update_cart_session = true;
 				/* translators: %1$s: product name. %2$s product permalink */
 				$message = sprintf( __( '%1$s has been removed from your cart because it has since been modified. You can add it back to your cart <a href="%2$s">here</a>.', 'woocommerce' ), $product->get_name(), $product->get_permalink() );
+
+				/**
+				 * Filter message about item removed from the cart because it has since been modified.
+				 *
+				 * @since 3.8.0
+				 * @param string     $message Message.
+				 * @param WC_Product $product Product data.
+				 */
 				$message = apply_filters( 'woocommerce_cart_item_removed_because_modified_message', $message, $product );
 				wc_add_notice( $message, 'notice' );
+
+				/**
+				 * Fires when cart item is removed from the session.
+				 *
+				 * @since 3.6.0
+				 *
+				 * @param string     $key Cart item key.
+				 * @param array      $values Cart item values e.g. quantity and product_id.
+				 */
 				do_action( 'woocommerce_remove_cart_item_from_session', $key, $values );
 
 			} else {
@@ -236,16 +265,31 @@ final class WC_Cart_Session {
 
 		// If it's not empty, it's been already populated by the loop above.
 		if ( ! empty( $cart_contents ) ) {
+			/**
+			 * Filter the cart contents.
+			 *
+			 * @since 3.2.0
+			 *
+			 * @param array $cart_contents The cart contents.
+			 */
 			$this->cart->set_cart_contents( apply_filters( 'woocommerce_cart_contents_changed', $cart_contents ) );
 		}
 
+		/**
+		 * Fires when cart is loaded from session.
+		 *
+		 * @since 3.2.0
+		 *
+		 * @param WC_Cart $cart The cart object.
+		 */
 		do_action( 'woocommerce_cart_loaded_from_session', $this->cart );
 
 		if ( $update_cart_session || is_null( WC()->session->get( 'cart_totals', null ) ) ) {
-			WC()->session->set( 'cart', $this->get_cart_for_session() );
+			$cart_for_session = $this->get_cart_for_session();
+			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
-			if ( $merge_saved_cart ) {
+			if ( $merge_saved_cart || $update_cart_session ) {
 				$this->persistent_cart_update();
 			}
 		}
@@ -263,13 +307,20 @@ final class WC_Cart_Session {
 	 * @since 3.2.0
 	 */
 	public function destroy_cart_session() {
-		WC()->session->set( 'cart', null );
-		WC()->session->set( 'cart_totals', null );
-		WC()->session->set( 'applied_coupons', null );
-		WC()->session->set( 'coupon_discount_totals', null );
-		WC()->session->set( 'coupon_discount_tax_totals', null );
-		WC()->session->set( 'removed_cart_contents', null );
-		WC()->session->set( 'order_awaiting_payment', null );
+		$wc_session = WC()->session;
+
+		$wc_session->set( 'cart', null );
+		$wc_session->set( 'cart_totals', null );
+		$wc_session->set( 'applied_coupons', null );
+		$wc_session->set( 'coupon_discount_totals', null );
+		$wc_session->set( 'coupon_discount_tax_totals', null );
+		$wc_session->set( 'removed_cart_contents', null );
+		$wc_session->set( 'order_awaiting_payment', null );
+		$wc_session->set( 'store_api_draft_order', null );
+		$wc_session->set( 'shipping_method_counts', null );
+		$wc_session->set( 'previous_shipping_methods', null );
+		$wc_session->set( 'chosen_shipping_methods', null );
+		$this->remove_shipping_for_package_from_session();
 	}
 
 	/**
@@ -297,7 +348,7 @@ final class WC_Cart_Session {
 	private function dedupe_cookies() {
 		$all_cookies    = array_filter(
 			headers_list(),
-			function( $header ) {
+			function ( $header ) {
 				return stripos( $header, 'Set-Cookie:' ) !== false;
 			}
 		);
@@ -347,13 +398,39 @@ final class WC_Cart_Session {
 	 * Sets the php session data for the cart and coupons.
 	 */
 	public function set_session() {
-		WC()->session->set( 'cart', $this->get_cart_for_session() );
-		WC()->session->set( 'cart_totals', $this->cart->get_totals() );
-		WC()->session->set( 'applied_coupons', $this->cart->get_applied_coupons() );
-		WC()->session->set( 'coupon_discount_totals', $this->cart->get_coupon_discount_totals() );
-		WC()->session->set( 'coupon_discount_tax_totals', $this->cart->get_coupon_discount_tax_totals() );
-		WC()->session->set( 'removed_cart_contents', $this->cart->get_removed_cart_contents() );
+		$wc_session = WC()->session;
 
+		$cart                       = $this->get_cart_for_session();
+		$applied_coupons            = $this->cart->get_applied_coupons();
+		$coupon_discount_totals     = $this->cart->get_coupon_discount_totals();
+		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
+		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
+
+		/*
+		 * We want to clear out any empty/default data from the session that have no value in being stored so the session
+		 * can be forgotten if empty.
+		 */
+		$wc_session->set( 'cart_totals', empty( $cart ) ? null : $this->cart->get_totals() );
+		$wc_session->set( 'cart', empty( $cart ) ? null : $cart );
+		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
+		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
+		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
+		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		if ( empty( $cart ) ) {
+			$this->remove_draft_order();
+		}
+		if ( ! $this->cart_has_shippable_products() ) {
+			$wc_session->set( 'shipping_method_counts', null );
+			$wc_session->set( 'previous_shipping_methods', null );
+			$wc_session->set( 'chosen_shipping_methods', null );
+			$this->remove_shipping_for_package_from_session();
+		}
+
+		/**
+		 * Fires when cart is updated.
+		 *
+		 * @since 3.2.0
+		 */
 		do_action( 'woocommerce_cart_updated' );
 	}
 
@@ -377,6 +454,12 @@ final class WC_Cart_Session {
 	 * Save the persistent cart when the cart is updated.
 	 */
 	public function persistent_cart_update() {
+		/**
+		 * Filters whether the persistent cart is enabled.
+		 *
+		 * @since 3.4.0
+		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 */
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			update_user_meta(
 				get_current_user_id(),
@@ -392,6 +475,12 @@ final class WC_Cart_Session {
 	 * Delete the persistent cart permanently.
 	 */
 	public function persistent_cart_destroy() {
+		/**
+		 * Filters whether the persistent cart is enabled.
+		 *
+		 * @since 3.4.0
+		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 */
 		if ( get_current_user_id() && apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			delete_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id() );
 		}
@@ -439,10 +528,16 @@ final class WC_Cart_Session {
 	private function get_saved_cart() {
 		$saved_cart = array();
 
+		/**
+		 * Filters whether the persistent cart is enabled.
+		 *
+		 * @since 3.4.0
+		 * @param bool $enabled Whether the persistent cart is enabled. Default true.
+		 */
 		if ( apply_filters( 'woocommerce_persistent_cart_enabled', true ) ) {
 			$saved_cart_meta = get_user_meta( get_current_user_id(), '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
 
-			if ( isset( $saved_cart_meta['cart'] ) ) {
+			if ( is_array( $saved_cart_meta ) && isset( $saved_cart_meta['cart'] ) ) {
 				$saved_cart = array_filter( (array) $saved_cart_meta['cart'] );
 			}
 		}
@@ -562,5 +657,53 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
+	}
+
+	/**
+	 * Remove the draft order from the session and delete it.
+	 */
+	private function remove_draft_order() {
+		$wc_session = WC()->session;
+
+		$draft_order = $wc_session->get( 'store_api_draft_order' );
+		if ( ! $draft_order ) {
+			return;
+		}
+
+		$order = wc_get_order( $draft_order );
+		if ( $order ) {
+			$order->delete( true );
+		}
+
+		WC()->session->set( 'store_api_draft_order', null );
+	}
+
+	/**
+	 * Remove shipping data for all packages from session.
+	 *
+	 * @return void
+	 */
+	private function remove_shipping_for_package_from_session() {
+		$wc_session = WC()->session;
+
+		foreach ( array_keys( $wc_session->get_session_data() ) as $key ) {
+			if ( 0 === strpos( $key, 'shipping_for_package_' ) ) {
+				$wc_session->set( $key, null );
+			}
+		}
+	}
+
+	/**
+	 * Check if the cart has shippable products.
+	 *
+	 * @return bool
+	 */
+	private function cart_has_shippable_products() {
+		foreach ( $this->cart->get_cart() as $cart_item ) {
+			if ( $cart_item['data']->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

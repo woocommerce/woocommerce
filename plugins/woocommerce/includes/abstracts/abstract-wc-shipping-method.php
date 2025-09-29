@@ -324,6 +324,11 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		// Round the total cost after taxes have been calculated.
 		$total_cost = wc_format_decimal( $total_cost, $args['price_decimals'] );
 
+		// If the total cost is empty, set it to 0 to prevent issues with arithmetic operations.
+		if ( '' === $total_cost ) {
+			$total_cost = '0';
+		}
+
 		// Create rate object.
 		$rate = new WC_Shipping_Rate();
 		$rate->set_id( $args['id'] );

@@ -247,23 +247,35 @@ test.describe(
 				assembler.getByText( 'Access more fonts' )
 			).toBeVisible();
 
+			const responseFontFamilies = page.waitForResponse(
+				async ( response ) => {
+					if (
+						response
+							.url()
+							.includes( '/wp-json/wp/v2/font-families' ) &&
+						response.status() === 200
+					) {
+						const json = await response.json();
+						return json.length >= 12;
+					}
+
+					return false;
+				}
+			);
+
 			await assembler.getByRole( 'button', { name: 'Opt in' } ).click();
 
 			await assembler
 				.getByText( 'Access more fonts' )
 				.waitFor( { state: 'hidden' } );
 
-			await page.waitForResponse(
-				( response ) =>
-					response.url().includes( '/wp-json/wp/v2/font-families' ) &&
-					response.status() === 200
-			);
+			await responseFontFamilies;
 
 			const fontPickers = assembler.locator(
 				'.woocommerce-customize-store_global-styles-variations_item'
 			);
 
-			await expect.poll( () => fontPickers.count() ).toEqual( 10 );
+			await expect( fontPickers ).toHaveCount( 10 );
 
 			await assembler
 				.locator(

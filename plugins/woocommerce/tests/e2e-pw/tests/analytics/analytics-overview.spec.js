@@ -207,6 +207,7 @@ test.describe(
 					} );
 
 					await test.step( `Check the bottom section`, async () => {
+						await expect( buttons_ellipsis.nth( 2 ) ).toBeVisible();
 						await buttons_ellipsis.last().click();
 						await expect( menuitem_moveDown ).toBeHidden();
 						await expect( menuitem_moveUp ).toBeVisible();

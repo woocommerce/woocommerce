@@ -87,6 +87,12 @@ const importBlueprint = async ( steps: BlueprintStep[] ) => {
 		let sessionToken = '';
 		// Loop through each step and send it to the endpoint
 		for ( const step of steps ) {
+			// Skip steps that set the Site Visibility to Live.
+			// Admins should have a chance to review their store before it is set to Live.
+			if ( step?.options?.woocommerce_coming_soon === 'no' ) {
+				continue;
+			}
+
 			const stepJson = JSON.stringify( {
 				step_definition: step,
 			} );

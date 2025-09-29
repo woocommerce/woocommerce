@@ -1,9 +1,13 @@
 /**
+ * External dependencies
+ */
+import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WP_API_PATH } from '../../utils/api-client';
 
 // test case for bug https://github.com/woocommerce/woocommerce/pull/46429
 const test = baseTest.extend( {

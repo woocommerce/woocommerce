@@ -311,7 +311,13 @@
 			display: flex;
 			align-items: center;
 			gap: $grid-unit-15;
+
+			.components-notice__actions {
+				flex-shrink: 0;
+				margin-left: auto;
+			}
 		}
+
 		.components-notice__dismiss.has-icon {
 			width: 24px;
 			min-width: 24px;
@@ -355,7 +361,7 @@
 		}
 
 		&.is-error,
-		&.is-warning, {
+		&.is-warning {
 			align-items: start;
 
 			.components-notice__content {

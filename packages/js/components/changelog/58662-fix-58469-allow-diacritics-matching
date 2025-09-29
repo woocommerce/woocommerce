@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Add support for accented letter matching to country search in Onboarding Wizard

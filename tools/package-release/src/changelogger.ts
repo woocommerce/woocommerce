@@ -66,7 +66,7 @@ export const validateChangelogEntries = ( name: string ) => {
 export const writeChangelog = ( name: string, nextVersion?: string ) => {
 	try {
 		execSync(
-			`pnpm --filter="${ name }" changelog write --add-pr-num ${
+			`pnpm --filter="${ name }" changelog write --yes --add-pr-num ${
 				nextVersion ? '--use-version ' + nextVersion : ''
 			}`,
 			{

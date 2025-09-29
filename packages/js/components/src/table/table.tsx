@@ -9,7 +9,7 @@ import {
 	useState,
 	useEffect,
 } from '@wordpress/element';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import { Button } from '@wordpress/components';
 import { find, get, noop } from 'lodash';
 import { withInstanceId } from '@wordpress/compose';
@@ -94,15 +94,10 @@ const Table: React.VFC< TableProps > = ( {
 		} );
 	}
 
-	const classes = classnames(
-		'woocommerce-table__table',
-		classNames,
-		className,
-		{
-			'is-scrollable-right': isScrollableRight,
-			'is-scrollable-left': isScrollableLeft,
-		}
-	);
+	const classes = clsx( 'woocommerce-table__table', classNames, className, {
+		'is-scrollable-right': isScrollableRight,
+		'is-scrollable-left': isScrollableLeft,
+	} );
 
 	const sortBy = ( key: string ) => {
 		return () => {
@@ -134,22 +129,36 @@ const Table: React.VFC< TableProps > = ( {
 	const updateTableShadow = () => {
 		const table = container.current;
 
-		if ( table?.scrollWidth && table?.scrollHeight && table?.offsetWidth ) {
-			const scrolledToEnd =
-				table.scrollWidth - table.scrollLeft <= table.offsetWidth;
-			if ( scrolledToEnd && isScrollableRight ) {
-				setIsScrollableRight( false );
-			} else if ( ! scrolledToEnd && ! isScrollableRight ) {
-				setIsScrollableRight( true );
-			}
-
-			const scrolledToStart = table.scrollLeft === 0;
-			if ( scrolledToStart && isScrollableLeft ) {
-				setIsScrollableLeft( false );
-			} else if ( ! scrolledToStart && ! isScrollableLeft ) {
-				setIsScrollableLeft( true );
-			}
+		if ( ! table ) {
+			return;
 		}
+
+		// Get current dimensions
+		const scrollWidth = table.scrollWidth;
+		const offsetWidth = table.offsetWidth;
+		const scrollLeft = table.scrollLeft;
+
+		// Check if the table is actually scrollable
+		const isTableScrollable = scrollWidth > offsetWidth;
+
+		// If table is not scrollable, remove all scroll indicators
+		if ( ! isTableScrollable ) {
+			setIsScrollableRight( false );
+			setIsScrollableLeft( false );
+			// Reset scroll position when table is no longer scrollable
+			if ( scrollLeft !== 0 ) {
+				table.scrollLeft = 0;
+			}
+			return;
+		}
+
+		// Calculate scroll states
+		const scrolledToEnd = scrollWidth - scrollLeft <= offsetWidth;
+		const scrolledToStart = scrollLeft === 0;
+
+		// Update scroll indicators based on current state
+		setIsScrollableRight( ! scrolledToEnd );
+		setIsScrollableLeft( ! scrolledToStart );
 	};
 
 	const sortedBy =
@@ -171,10 +180,18 @@ const Table: React.VFC< TableProps > = ( {
 		const scrollable = scrollWidth > clientWidth;
 		setTabIndex( scrollable ? 0 : undefined );
 		updateTableShadow();
-		window.addEventListener( 'resize', updateTableShadow );
+
+		const handleResize = () => {
+			// Use requestAnimationFrame to ensure DOM has updated
+			requestAnimationFrame( () => {
+				updateTableShadow();
+			} );
+		};
+
+		window.addEventListener( 'resize', handleResize );
 
 		return () => {
-			window.removeEventListener( 'resize', updateTableShadow );
+			window.removeEventListener( 'resize', handleResize );
 		};
 	}, [] );
 
@@ -216,7 +233,7 @@ const Table: React.VFC< TableProps > = ( {
 							} = header;
 							const labelId = `header-${ instanceId }-${ i }`;
 							const thProps: { [ key: string ]: string } = {
-								className: classnames(
+								className: clsx(
 									'woocommerce-table__header',
 									cellClassName,
 									{
@@ -326,7 +343,7 @@ const Table: React.VFC< TableProps > = ( {
 									} = headers[ j ];
 									const isHeader = rowHeader === j;
 									const Cell = isHeader ? 'th' : 'td';
-									const cellClasses = classnames(
+									const cellClasses = clsx(
 										'woocommerce-table__item',
 										cellClassName,
 										{

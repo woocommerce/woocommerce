@@ -38,7 +38,6 @@ class ImportSetSiteOptions implements StepProcessor {
 		'wp_user_roles',
 	);
 
-
 	/**
 	 * Process the step.
 	 *
@@ -55,15 +54,20 @@ class ImportSetSiteOptions implements StepProcessor {
 				continue;
 			}
 
-			$value   = json_decode( wp_json_encode( $value ), true );
-			$updated = $this->wp_update_option( $key, $value );
+			$value         = json_decode( wp_json_encode( $value ), true );
+			$updated       = $this->wp_update_option( $key, $value );
+			$current_value = $this->wp_get_option( $key );
+
+			if ( $current_value !== $value ) {
+				$result->add_warn( "{$key} was intended to be set, but the stored value may have been overridden by a hook." );
+				continue;
+			}
 
 			if ( $updated ) {
 				$result->add_info( "{$key} has been updated." );
 				continue;
 			}
 
-			$current_value = $this->wp_get_option( $key );
 			if ( $current_value === $value ) {
 				$result->add_info( "{$key} has not been updated because the current value is already up to date." );
 			}

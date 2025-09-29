@@ -73,6 +73,65 @@ class UsersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Test that we can retrieve a user in the current site.
+	 */
+	public function test_get_user_in_current_site() {
+		$this->skipWithoutMultisite();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'user_can' => function ( $user, $capability ) use ( &$manage_network_users ) {
+					return 'manage_network_users' === $capability ? $manage_network_users : user_can( $user, $capability );
+				},
+			)
+		);
+
+		// We start with a customer and we make the active user a regular (non super-)admin within the same site.
+		$customer             = WC_Helper_Customer::create_customer( 'users_test1', 'pass1', 'users_test1@example.com' );
+		$active_user          = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		$manage_network_users = false;
+
+		wp_set_current_user( $active_user );
+		$this->assertEquals(
+			$customer->get_id(),
+			Users::get_user_in_current_site( $customer->get_id() )->ID,
+			'The active user can see customers who belong to the same site.'
+		);
+
+		// We create and switch to a new site within the network. Initially, neither test user is added to this site.
+		$subsite = $this->make_network_site( '/independently-operated-site-within-network/' );
+		switch_to_blog( $subsite );
+
+		$this->assertWPError(
+			Users::get_user_in_current_site( $customer->get_id() ),
+			'The active user cannot see the customer, as neither are part of the same site.'
+		);
+
+		add_user_to_blog( $subsite, $active_user, 'administrator' );
+		$this->assertWPError(
+			Users::get_user_in_current_site( $customer->get_id() ),
+			'The active user cannot see a customer who is not part of the same site.'
+		);
+
+		$manage_network_users = true;
+		$this->assertEquals(
+			$customer->get_id(),
+			Users::get_user_in_current_site( $customer->get_id() )->ID,
+			'An active user with manage_network_users capabilities can see customers even if they do not belong to the current site.'
+		);
+
+		$manage_network_users = false;
+		update_site_option( 'woocommerce_network_wide_customers', 'yes' );
+		$this->assertEquals(
+			$customer->get_id(),
+			Users::get_user_in_current_site( $customer->get_id() )->ID,
+			'An active user can see customers who do not belong to the current site if the legacy woocommerce_network_wide_customers mode is enabled.'
+		);
+
+		wp_delete_site( $subsite );
+		restore_current_blog();
+	}
+
+	/**
 	 * Creates a new subsite on the network.
 	 *
 	 * This work is expensive, so should probably be moved to the bootstrap phase (if we detect the tests are running in
@@ -84,9 +143,11 @@ class UsersTest extends WC_Unit_Test_Case {
 	 * @return int
 	 */
 	private function make_network_site( string $path ): int {
-		$blog_id = $this->factory->blog->create( array(
-			'path'   => $path,
-		) );
+		$blog_id = $this->factory->blog->create(
+			array(
+				'path' => $path,
+			)
+		);
 
 		switch_to_blog( $blog_id );
 		WC_Install::install();

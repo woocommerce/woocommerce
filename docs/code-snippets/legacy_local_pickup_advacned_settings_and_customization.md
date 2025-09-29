@@ -1,9 +1,11 @@
 ---
 post_title: Advanced settings and customization for legacy Local Pickup
-tags: code-snippet
+
 current wccom url: https://woocommerce.com/document/local-pickup/#advanced-settings-customization
 note: Docs links out to Skyverge's site for howto add a custom email - do we have our own alternative?
 ---
+
+# Advanced settings and customization for legacy Local Pickup
 
 ## Disable local taxes when using local pickup
 

@@ -34,7 +34,6 @@ final class ProductFilterPrice extends AbstractBlock {
 	protected function initialize() {
 		parent::initialize();
 
-		add_filter( 'woocommerce_blocks_product_filters_param_keys', array( $this, 'get_filter_query_param_keys' ), 10, 2 );
 		add_filter( 'woocommerce_blocks_product_filters_selected_items', array( $this, 'prepare_selected_filters' ), 10, 2 );
 	}
 
@@ -86,27 +85,7 @@ final class ProductFilterPrice extends AbstractBlock {
 		return $items;
 	}
 
-	/**
-	 * Register the query param keys.
-	 *
-	 * @param array $filter_param_keys The active filters data.
-	 * @param array $url_param_keys    The query param parsed from the URL.
-	 *
-	 * @return array Active filters param keys.
-	 */
-	public function get_filter_query_param_keys( $filter_param_keys, $url_param_keys ) {
-		$price_param_keys = array_filter(
-			$url_param_keys,
-			function ( $param ) {
-				return self::MIN_PRICE_QUERY_VAR === $param || self::MAX_PRICE_QUERY_VAR === $param;
-			}
-		);
 
-		return array_merge(
-			$filter_param_keys,
-			$price_param_keys
-		);
-	}
 
 	/**
 	 * Render the block.
@@ -133,12 +112,13 @@ final class ProductFilterPrice extends AbstractBlock {
 		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
 
 		$filter_context = array(
-			'price' => array(
+			'price'      => array(
 				'minPrice' => $min_price,
 				'maxPrice' => $max_price,
 				'minRange' => $min_range,
 				'maxRange' => $max_range,
 			),
+			'groupLabel' => __( 'Price', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -215,6 +195,10 @@ final class ProductFilterPrice extends AbstractBlock {
 	 * @param WP_Block $block Block instance.
 	 */
 	private function get_filtered_price( $block ) {
+		if ( ! isset( $block->context['filterParams'] ) ) {
+			return array();
+		}
+
 		$query_vars = ProductCollectionUtils::get_query_vars( $block, 1 );
 
 		unset( $query_vars['min_price'], $query_vars['max_price'] );

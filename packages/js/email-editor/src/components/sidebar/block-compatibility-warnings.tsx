@@ -51,6 +51,11 @@ export function BlockCompatibilityWarnings(): JSX.Element {
 							'Border display may vary or be unsupported in some email clients.',
 							'woocommerce'
 						) }
+						<br />
+						{ __(
+							'Units other than pixels (px) lack support in old email clients.',
+							'woocommerce'
+						) }
 					</Notice>
 				</Fill>
 			) }

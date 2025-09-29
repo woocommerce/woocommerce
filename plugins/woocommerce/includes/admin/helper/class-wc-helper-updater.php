@@ -409,11 +409,8 @@ class WC_Helper_Updater {
 		$payload = array();
 
 		// Scan subscriptions.
-		try {
-			$subscriptions = WC_Helper::get_subscriptions();
-		} catch ( Exception $e ) {
-			$subscriptions = array();
-		}
+		$subscriptions = WC_Helper::get_subscriptions();
+
 		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
 				'product_id' => $subscription['product_id'],
@@ -448,11 +445,7 @@ class WC_Helper_Updater {
 		$payload = array();
 
 		// Scan subscriptions.
-		try {
-			$subscriptions = WC_Helper::get_subscriptions();
-		} catch ( Exception $e ) {
-			$subscriptions = array();
-		}
+		$subscriptions = WC_Helper::get_subscriptions();
 
 		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
@@ -701,6 +694,10 @@ class WC_Helper_Updater {
 				continue;
 			}
 
+			if ( ! is_plugin_active( $plugin['_filename'] ) ) {
+				continue;
+			}
+
 			if ( version_compare( $plugin['Version'], $update_data[ $plugin['_product_id'] ]['version'], '<' ) ) {
 				++$count;
 			}
@@ -709,6 +706,10 @@ class WC_Helper_Updater {
 		// Scan local themes.
 		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
 			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
+				continue;
+			}
+
+			if ( get_stylesheet() !== $theme['_stylesheet'] ) {
 				continue;
 			}
 

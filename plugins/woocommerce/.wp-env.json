@@ -1,6 +1,6 @@
 {
 	"core": "https://wordpress.org/wordpress-latest.zip",
-	"phpVersion": "7.4",
+	"phpVersion": "8.1",
 	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,

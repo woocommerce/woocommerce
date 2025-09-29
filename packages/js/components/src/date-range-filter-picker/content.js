@@ -10,7 +10,7 @@ import {
 } from '@wordpress/element';
 import { TabPanel, Button } from '@wordpress/components';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 import moment from 'moment';
 
 /**
@@ -61,6 +61,7 @@ class DatePickerContent extends Component {
 			afterError,
 			beforeError,
 			shortDateFormat,
+			shortDateFormatPlaceholder,
 		} = this.props;
 		return (
 			<div>
@@ -111,13 +112,16 @@ class DatePickerContent extends Component {
 										afterError={ afterError }
 										beforeError={ beforeError }
 										shortDateFormat={ shortDateFormat }
+										shortDateFormatPlaceholder={
+											shortDateFormatPlaceholder
+										}
 										losesFocusTo={
 											this.controlsRef.current
 										}
 									/>
 								) }
 								<div
-									className={ classnames(
+									className={ clsx(
 										'woocommerce-filters-date__content-controls',
 										{
 											'is-custom':
@@ -196,6 +200,7 @@ DatePickerContent.propTypes = {
 	afterError: PropTypes.string,
 	beforeError: PropTypes.string,
 	shortDateFormat: PropTypes.string.isRequired,
+	shortDateFormatPlaceholder: PropTypes.string,
 };
 
 export default DatePickerContent;

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Utilities;
 
@@ -16,7 +17,7 @@ class BlocksUtil {
 	public static function flatten_blocks( $blocks ) {
 		return array_reduce(
 			$blocks,
-			function( $carry, $block ) {
+			function ( $carry, $block ) {
 				array_push( $carry, array_diff_key( $block, array_flip( array( 'innerBlocks' ) ) ) );
 				if ( isset( $block['innerBlocks'] ) ) {
 					$inner_blocks = self::flatten_blocks( $block['innerBlocks'] );
@@ -36,13 +37,18 @@ class BlocksUtil {
 	 * @return array Array of blocks as returned by parse_blocks().
 	 */
 	public static function get_blocks_from_widget_area( $block_name ) {
+		$blocks = get_option( 'widget_block' );
+
+		if ( ! is_array( $blocks ) || empty( $blocks ) ) {
+			return array();
+		}
+
 		return array_reduce(
-			get_option( 'widget_block' ),
+			$blocks,
 			function ( $acc, $block ) use ( $block_name ) {
-				$parsed_blocks = ! empty( $block ) && is_array( $block ) ? parse_blocks( $block['content'] ) : array();
+				$parsed_blocks = ! empty( $block['content'] ) ? parse_blocks( $block['content'] ) : array();
 				if ( ! empty( $parsed_blocks ) && $block_name === $parsed_blocks[0]['blockName'] ) {
 					array_push( $acc, $parsed_blocks[0] );
-					return $acc;
 				}
 				return $acc;
 			},

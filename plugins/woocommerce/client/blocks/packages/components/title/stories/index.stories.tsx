@@ -8,6 +8,7 @@ import type { StoryFn, Meta } from '@storybook/react';
  */
 import Title, { type TitleProps } from '..';
 import '../style.scss';
+import './style.stories.scss';
 
 export default {
 	title: 'External Components/Title',
@@ -47,8 +48,16 @@ export default {
 } as Meta< TitleProps >;
 
 const Template: StoryFn< TitleProps > = ( args ) => {
-	const { children, ...rest } = args;
-	return <Title { ...rest }>{ children }</Title>;
+	const { children, headingLevel, ...rest } = args;
+	return (
+		<Title
+			{ ...rest }
+			headingLevel={ headingLevel }
+			className={ `h${ headingLevel }` }
+		>
+			{ children }
+		</Title>
+	);
 };
 
 export const Default: StoryFn< TitleProps > = Template.bind( {} );

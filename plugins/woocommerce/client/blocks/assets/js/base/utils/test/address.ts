@@ -3,7 +3,7 @@
  */
 import {
 	emptyHiddenAddressFields,
-	isAddressComplete,
+	hasAllFieldsForShippingRates,
 	formatShippingAddress,
 } from '@woocommerce/base-utils';
 
@@ -27,7 +27,7 @@ describe( 'emptyHiddenAddressFields', () => {
 	} );
 } );
 
-describe( 'isAddressComplete', () => {
+describe( 'hasAllFieldsForShippingRates', () => {
 	it( 'correctly checks empty addresses', () => {
 		const address = {
 			first_name: '',
@@ -42,7 +42,7 @@ describe( 'isAddressComplete', () => {
 			email: '',
 			phone: '',
 		};
-		expect( isAddressComplete( address ) ).toBe( false );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
 	} );
 
 	it( 'correctly checks incomplete addresses', () => {
@@ -59,17 +59,20 @@ describe( 'isAddressComplete', () => {
 			email: 'john.doe@company',
 			phone: '+1234567890',
 		};
-		expect( isAddressComplete( address ) ).toBe( false );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
 
 		address.city = 'London';
-		expect( isAddressComplete( address ) ).toBe( false );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
 
 		address.postcode = 'W1T 4JG';
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+
+		// UK does not require state.
 		address.country = 'GB';
-		expect( isAddressComplete( address ) ).toBe( true );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
 	} );
 
-	it( 'correctly checks complete addresses', () => {
+	it( 'correctly checks complete addresses with optional fields', () => {
 		const address = {
 			first_name: 'John',
 			last_name: 'Doe',
@@ -83,7 +86,37 @@ describe( 'isAddressComplete', () => {
 			email: 'john.doe@company',
 			phone: '+1234567890',
 		};
-		expect( isAddressComplete( address ) ).toBe( true );
+		// UK does not require state.
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
+	} );
+
+	it( 'correctly checks complete addresses with required fields', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'Sacramento',
+			postcode: '95814',
+			country: 'US',
+			state: 'CA',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		// US address requires state and all other fields are filled
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
+
+		address.state = '';
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+
+		address.state = 'CA';
+		address.city = '';
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
+
+		address.city = 'Sacramento';
+		address.postcode = '';
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
 	} );
 
 	it( 'correctly checks addresses against country locale', () => {
@@ -101,35 +134,10 @@ describe( 'isAddressComplete', () => {
 			phone: '+1234567890',
 		};
 		// US address requires state.
-		expect( isAddressComplete( address ) ).toBe( false );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( false );
 
 		address.state = 'CA';
-		expect( isAddressComplete( address ) ).toBe( true );
-	} );
-
-	it( 'Correctly assesses only fields specified in the keysToCheck arg', () => {
-		const address = {
-			first_name: 'John',
-			last_name: 'Doe',
-			company: 'Company',
-			address_1: '409 Main Street',
-			address_2: 'Apt 1',
-			city: 'California',
-			postcode: '90210',
-			country: 'US',
-			state: '',
-			email: 'john.doe@company',
-			phone: '+1234567890',
-		};
-		// US address requires state, but if we skip it in keysToCheck it should validate.
-		expect(
-			isAddressComplete( address, [
-				'first_name',
-				'last_name',
-				'city',
-				'postcode',
-			] )
-		).toBe( true );
+		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
 	} );
 } );
 

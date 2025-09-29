@@ -8,6 +8,34 @@ namespace Automattic\WooCommerce\Internal\Admin\ProductReviews;
 class ReviewsUtil {
 
 	/**
+	 * Modifies the moderation URLs in the email notifications for product reviews.
+	 *
+	 * @param string $message The email notification message.
+	 * @param int    $comment_id The comment ID.
+	 * @return string The modified email notification message.
+	 */
+	public static function modify_product_review_moderation_urls( $message, $comment_id ) {
+		$comment = get_comment( $comment_id );
+
+		// Only modify URLs for product reviews.
+		if ( ! $comment || get_post_type( $comment->comment_post_ID ) !== 'product' ) {
+			return $message;
+		}
+
+		// Replace the WordPress comment moderation URLs with WooCommerce product review URLs.
+		$product_reviews_url = admin_url( 'edit.php?post_type=product&page=product-reviews' );
+
+		// Replace the moderation panel URL (this is the "show all reviews pending" link).
+		$message = str_replace(
+			admin_url( 'edit-comments.php?comment_status=moderated#wpbody-content' ),
+			$product_reviews_url . '&comment_status=moderated',
+			$message
+		);
+
+		return $message;
+	}
+
+	/**
 	 * Removes product reviews from the edit-comments page to fix the "Mine" tab counter.
 	 *
 	 * @param array|mixed       $clauses A compacted array of comment query clauses.

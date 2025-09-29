@@ -292,8 +292,8 @@ class WC_Discounts {
 	 * @return int
 	 */
 	protected function sort_by_price( $a, $b ) {
-		$price_1 = $a->price * $a->quantity;
-		$price_2 = $b->price * $b->quantity;
+		$price_1 = $a->quantity > 1 ? $a->price / $a->quantity : $a->price;
+		$price_2 = $b->quantity > 1 ? $b->price / $b->quantity : $b->price;
 		if ( $price_1 === $price_2 ) {
 			return 0;
 		}
@@ -565,7 +565,9 @@ class WC_Discounts {
 		$total_discount = 0;
 
 		foreach ( $items_to_apply as $item ) {
-			for ( $i = 0; $i < $item->quantity; $i++ ) {
+			$quantity = NumberUtil::ceil( $item->quantity );
+
+			for ( $i = 0; $i < $quantity; $i++ ) {
 				// Find out how much price is available to discount for the item.
 				$price_to_discount = $this->get_discounted_price_in_cents( $item );
 
@@ -605,7 +607,7 @@ class WC_Discounts {
 			throw new Exception(
 				sprintf(
 					/* translators: %s: coupon code */
-					esc_html__( 'Coupon "%s" does not exist!', 'woocommerce' ),
+					esc_html__( 'Coupon "%s" cannot be applied because it does not exist.', 'woocommerce' ),
 					esc_html( $coupon->get_code() )
 				),
 				105

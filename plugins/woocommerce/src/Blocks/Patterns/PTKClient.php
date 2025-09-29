@@ -15,6 +15,67 @@ class PTKClient {
 	const PATTERNS_TOOLKIT_URL = 'https://public-api.wordpress.com/rest/v1/ptk/patterns/';
 
 	/**
+	 * The schema for the patterns toolkit.
+	 *
+	 * @var array
+	 */
+	private $schema;
+
+	/**
+	 * Constructor.
+	 */
+	public function __construct() {
+		$this->schema = [
+			'type'  => 'array',
+			'items' => [
+				'type'       => 'object',
+				'properties' => [
+					'ID'         => [
+						'type'     => 'integer',
+						'required' => true,
+					],
+					'site_id'    => [
+						'type'     => 'integer',
+						'required' => true,
+					],
+					'title'      => [
+						'type'     => 'string',
+						'required' => true,
+					],
+					'name'       => [
+						'type'     => 'string',
+						'required' => true,
+					],
+					'html'       => [
+						'type'     => 'string',
+						'required' => true,
+					],
+					'categories' => [
+						'type'                 => 'object',
+						'additionalProperties' => [
+							'type'       => 'object',
+							'properties' => [
+								'slug'        => [
+									'type'     => 'string',
+									'required' => true,
+								],
+								'title'       => [
+									'type'     => 'string',
+									'required' => true,
+								],
+								'description' => [
+									'type'     => 'string',
+									'required' => true,
+								],
+							],
+						],
+					],
+				],
+			],
+		];
+	}
+
+	/**
 	 * Fetch the WooCommerce patterns from the Patterns Toolkit (PTK) API.
 	 *
 	 * @param array $options Options for fetching patterns.
@@ -57,7 +118,9 @@ class PTKClient {
 
 		$decoded_body = json_decode( $body, true );
 
-		if ( ! is_array( $decoded_body ) ) {
+		$is_pattern_payload_valid = $this->is_valid_schema( $decoded_body );
+
+		if ( ! $is_pattern_payload_valid ) {
 			return new WP_Error(
 				'patterns_toolkit_api_error',
 				__( 'Wrong response received from the Patterns Toolkit API: try again later.', 'woocommerce' )
@@ -65,5 +128,17 @@ class PTKClient {
 		}
 
 		return $decoded_body;
+	}
+
+	/**
+	 * Validate the patterns toolkit patterns.
+	 *
+	 * @param array $patterns The patterns to validate.
+	 * @return bool
+	 */
+	public function is_valid_schema( $patterns ) {
+		$is_pattern_payload_valid = rest_validate_value_from_schema( $patterns, $this->schema );
+
+		return ! is_wp_error( $is_pattern_payload_valid );
 	}
 }

@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Caches\OrderCacheController;
+use Automattic\WooCommerce\Enums\FeaturePluginCompatibility;
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessingController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
@@ -273,7 +274,7 @@ class CustomOrdersTableController {
 		$tools_array = array_merge( $tools_array, $this->data_cleanup->get_tools_entries() );
 
 		// Delete HPOS tables tool.
-		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() ) {
+		if ( $this->custom_orders_table_usage_is_enabled() || $this->data_synchronizer->data_sync_is_enabled() || $this->batch_processing_controller->is_enqueued( get_class( $this->data_synchronizer ) ) ) {
 			$disabled = true;
 			$message  = __( 'This will delete the custom orders tables. The tables can be deleted only if the "High-Performance order storage" is not authoritative and sync is disabled (via Settings > Advanced > Features).', 'woocommerce' );
 		} else {
@@ -289,7 +290,11 @@ class CustomOrdersTableController {
 				$message
 			),
 			'requires_refresh' => true,
-			'callback'         => function () {
+			'callback'         => function () use ( $disabled ) {
+				if ( $disabled ) {
+					return;
+				}
+
 				$this->features_controller->change_feature_enable( self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, false );
 				$this->delete_custom_orders_tables();
 				return __( 'Custom orders tables have been deleted.', 'woocommerce' );
@@ -459,8 +464,7 @@ class CustomOrdersTableController {
 			return 'no';
 		}
 
-		$sync_is_pending = $this->data_synchronizer->has_orders_pending_sync();
-		if ( $sync_is_pending && ! $this->changing_data_source_with_sync_pending_is_allowed() ) {
+		if ( ! $this->changing_data_source_with_sync_pending_is_allowed() && $this->data_synchronizer->has_orders_pending_sync() ) {
 			throw new \Exception( "The authoritative table for orders storage can't be changed while there are orders out of sync" );
 		}
 
@@ -500,6 +504,13 @@ class CustomOrdersTableController {
 		$this->data_cleanup->toggle_flag( false );
 
 		if ( 'sync-now' === $action ) {
+			if ( ! $this->data_synchronizer->check_orders_table_exists() && ! $this->data_synchronizer->create_database_tables() ) {
+				WC_Admin_Settings::add_error(
+					__( 'Unable to create HPOS tables for synchronization.', 'woocommerce' )
+				);
+				return;
+			}
+
 			$this->batch_processing_controller->enqueue_processor( DataSynchronizer::class );
 		} else {
 			$this->batch_processing_controller->remove_processor( DataSynchronizer::class );
@@ -566,13 +577,13 @@ class CustomOrdersTableController {
 	 */
 	public function add_feature_definition( $features_controller ) {
 		$definition = array(
-			'option_key'                          => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
-			'is_experimental'                     => false,
-			'enabled_by_default'                  => false,
-			'order'                               => 50,
-			'setting'                             => $this->get_hpos_setting_for_feature(),
-			'plugins_are_incompatible_by_default' => true,
-			'additional_settings'                 => array(
+			'option_key'                   => self::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION,
+			'is_experimental'              => false,
+			'enabled_by_default'           => false,
+			'order'                        => 50,
+			'setting'                      => $this->get_hpos_setting_for_feature(),
+			'default_plugin_compatibility' => FeaturePluginCompatibility::INCOMPATIBLE,
+			'additional_settings'          => array(
 				$this->get_hpos_setting_for_sync(),
 			),
 		);

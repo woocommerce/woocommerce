@@ -3,7 +3,7 @@
  */
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
-import { type ElementType, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import {
@@ -16,7 +16,6 @@ import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
 	PanelBody,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
 } from '@wordpress/components';
@@ -31,6 +30,8 @@ import {
 	ProductCollectionContentProps,
 	CoreFilterNames,
 	FilterName,
+	LayoutOptions,
+	CoreCollectionNames,
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import UpgradeNotice from './upgrade-notice';
@@ -39,6 +40,7 @@ import {
 	InheritQueryControl,
 	FilterableControl,
 } from './use-page-context-control';
+import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -68,8 +70,9 @@ const prepareShouldShowFilter =
 const ProductCollectionInspectorControls = (
 	props: ProductCollectionContentProps
 ) => {
-	const { attributes, context, setAttributes } = props;
-	const { query, hideControls, dimensions, displayLayout } = attributes;
+	const { attributes, context, setAttributes, clientId } = props;
+	const { query, hideControls, dimensions, displayLayout, collection } =
+		attributes;
 
 	const tracksLocation = useTracksLocation( context.templateSlug );
 	const trackInteraction = ( filter: FilterName ) =>
@@ -87,6 +90,10 @@ const ProductCollectionInspectorControls = (
 		tracksLocation === 'product-catalog' ||
 		tracksLocation === 'product-archive';
 
+	// Carousel layout influences the visibility and behavior of some controls.
+	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
+	useCarouselLayoutAdjustments( clientId, attributes );
+
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
@@ -97,8 +104,10 @@ const ProductCollectionInspectorControls = (
 	const showDefaultOrderControl = ! showCustomQueryControls;
 	const showOffsetControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.OFFSET );
+	const showColumnsControl = ! isCarouselLayout;
 	const showMaxPagesToShowControl =
 		showCustomQueryControls &&
+		! isCarouselLayout &&
 		shouldShowFilter( CoreFilterNames.MAX_PAGES_TO_SHOW );
 	const showProductsPerPageControl =
 		showCustomQueryControls &&
@@ -178,9 +187,14 @@ const ProductCollectionInspectorControls = (
 				<LayoutOptionsControl { ...displayControlProps } />
 				<WidthOptionsControl { ...dimensionsControlProps } />
 				{ showProductsPerPageControl && (
-					<ProductsPerPageControl { ...queryControlProps } />
+					<ProductsPerPageControl
+						{ ...queryControlProps }
+						carouselVariant={ isCarouselLayout }
+					/>
 				) }
-				<ColumnsControl { ...displayControlProps } />
+				{ showColumnsControl && (
+					<ColumnsControl { ...displayControlProps } />
+				) }
 				{ showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
@@ -215,7 +229,11 @@ const ProductCollectionInspectorControls = (
 						<AttributesControl { ...queryControlProps } />
 					) }
 					{ showTaxonomyControls && (
-						<TaxonomyControls { ...queryControlProps } />
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="panel"
+						/>
 					) }
 					{ showFeaturedControl && (
 						<FeaturedProductsControl { ...queryControlProps } />
@@ -278,7 +296,7 @@ const shouldDisplayUpgradeNotice = (
 // - notice was displayed more than X times
 // We do that to prevent showing the notice again after Products on
 // other page were updated or local storage was cleared or user
-// switched to another machine/browser etc.
+// switched to another machine/browser.
 const shouldBeUnmarkedAsConverted = (
 	props: ProductCollectionEditComponentProps
 ) => {
@@ -297,6 +315,7 @@ const shouldBeUnmarkedAsConverted = (
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
+	const { collection } = props.attributes;
 	const setQueryAttributeBind = useMemo(
 		() => setQueryAttribute.bind( null, props ),
 		[ props ]
@@ -306,7 +325,7 @@ const CollectionSpecificControls = (
 		return recordEvent(
 			'blocks_product_collection_inspector_control_clicked',
 			{
-				collection: props.attributes.collection,
+				collection,
 				location: tracksLocation,
 				filter,
 			}
@@ -318,14 +337,17 @@ const CollectionSpecificControls = (
 		query: props.attributes.query,
 	};
 
+	const isByCategoryOrTag =
+		collection === CoreCollectionNames.BY_CATEGORY ||
+		collection === CoreCollectionNames.BY_TAG;
+
 	return (
 		<InspectorControls>
 			{
 				/**
-				 * Hand-Picked collection-specific controls.
+				 * "Hand-Picked" collection-specific controls.
 				 */
-				props.attributes.collection ===
-					'woocommerce/product-collection/hand-picked' && (
+				collection === CoreCollectionNames.HAND_PICKED && (
 					<PanelBody>
 						<HandPickedProductsControlField
 							{ ...queryControlProps }
@@ -337,9 +359,22 @@ const CollectionSpecificControls = (
 				/**
 				 * "Related Products" collection-specific controls.
 				 */
-				props.attributes.collection ===
-					'woocommerce/product-collection/related' && (
+				collection === CoreCollectionNames.RELATED && (
 					<RelatedByControl { ...queryControlProps } />
+				)
+			}
+			{
+				/**
+				 * "Category and Tag" collection-specific controls.
+				 */
+				isByCategoryOrTag && (
+					<PanelBody>
+						<TaxonomyControls
+							{ ...queryControlProps }
+							collection={ collection }
+							renderMode="standalone"
+						/>
+					</PanelBody>
 				)
 			}
 		</InspectorControls>
@@ -349,7 +384,7 @@ const CollectionSpecificControls = (
 const withCollectionSpecificControls =
 	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
 	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) || ! props.isSelected ) {
+		if ( ! isProductCollection( props.name ) ) {
 			return <BlockEdit { ...props } />;
 		}
 

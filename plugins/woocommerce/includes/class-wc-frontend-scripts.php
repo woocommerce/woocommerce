@@ -10,6 +10,8 @@
  // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -25,7 +27,7 @@ class WC_Frontend_Scripts {
 	 *
 	 * @var array
 	 */
-	private static $scripts = array();
+	private static $registered_scripts = array();
 
 	/**
 	 * Contains an array of script handles registered by WC.
@@ -48,6 +50,31 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
+	}
+
+	/**
+	 * Add warnings for deprecated script handles.
+	 */
+	public static function add_legacy_script_warnings() {
+		$scripts = self::get_scripts();
+
+		foreach ( $scripts as $handle => $script ) {
+			if ( ! isset( $script['legacy_handle'] ) ) {
+				continue;
+			}
+
+			$exists = wp_script_is( $script['legacy_handle'] );
+
+			if ( $exists ) {
+				wc_deprecated_argument(
+					'wp_enqueue_script',
+					'10.3.0',
+					/* translators: %1$s: new script handle, %2$s: previous script handle */
+					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
+				);
+			}
+		}
 	}
 
 	/**
@@ -122,7 +149,7 @@ class WC_Frontend_Scripts {
 	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
 	 */
 	private static function register_script( $handle, $path, $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
-		self::$scripts[] = $handle;
+		self::$registered_scripts[] = $handle;
 		wp_register_script( $handle, $path, $deps, $version, $in_footer );
 	}
 
@@ -137,7 +164,7 @@ class WC_Frontend_Scripts {
 	 * @param  boolean  $in_footer Whether to enqueue the script before </body> instead of in the <head>. Default 'false'.
 	 */
 	private static function enqueue_script( $handle, $path = '', $deps = array( 'jquery' ), $version = WC_VERSION, $in_footer = array( 'strategy' => 'defer' ) ) {
-		if ( ! in_array( $handle, self::$scripts, true ) && $path ) {
+		if ( ! in_array( $handle, self::$registered_scripts, true ) && $path ) {
 			self::register_script( $handle, $path, $deps, $version, $in_footer );
 		}
 		wp_enqueue_script( $handle );
@@ -182,76 +209,48 @@ class WC_Frontend_Scripts {
 	}
 
 	/**
-	 * Register all WC scripts.
+	 * Get scripts for the frontend.
+	 *
+	 * @return array
 	 */
-	private static function register_scripts() {
+	private static function get_scripts(): array {
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		$register_scripts = array(
-			'flexslider'                 => array(
-				'src'     => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '2.7.2-wc.' . $version,
-			),
-			'js-cookie'                  => array(
-				'src'     => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
-				'deps'    => array(),
-				'version' => '2.1.4-wc.' . $version,
-			),
-			'jquery-blockui'             => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '2.7.0-wc.' . $version,
-			),
-			'jquery-cookie'              => array( // deprecated.
-				'src'     => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '1.4.1-wc.' . $version,
-			),
-			'jquery-payment'             => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
-			),
-			'photoswipe'                 => array(
-				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
-				'deps'    => array(),
-				'version' => '4.1.1-wc.' . $version,
-			),
-			'photoswipe-ui-default'      => array(
-				'src'     => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
-				'deps'    => array( 'photoswipe' ),
-				'version' => '4.1.1-wc.' . $version,
-			),
-			'prettyPhoto'                => array( // deprecated.
-				'src'     => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.1.6-wc.' . $version,
-			),
-			'prettyPhoto-init'           => array( // deprecated.
-				'src'     => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'prettyPhoto' ),
-				'version' => $version,
-			),
-			'select2'                    => array(
-				'src'     => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '4.0.3-wc.' . $version,
-			),
+		$scripts = array(
 			'selectWoo'                  => array(
 				'src'     => self::get_asset_url( 'assets/js/selectWoo/selectWoo.full' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => '1.0.9-wc.' . $version,
+			),
+			'wc-account-i18n'            => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => $version,
+			),
+			'wc-add-payment-method'      => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'woocommerce' ),
+				'version' => $version,
+			),
+			'wc-add-to-cart'             => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'wc-jquery-blockui' ),
+				'version' => $version,
+			),
+			'wc-add-to-cart-variation'   => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
+				'deps'    => array( 'jquery', 'wp-util', 'wc-jquery-blockui' ),
+				'version' => $version,
 			),
 			'wc-address-i18n'            => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/address-i18n' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'wc-country-select' ),
 				'version' => $version,
 			),
-			'wc-add-payment-method'      => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/add-payment-method' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'woocommerce' ),
+			'wc-back-in-stock-form'      => array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/back-in-stock-form' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
 			'wc-cart'                    => array(
@@ -261,7 +260,7 @@ class WC_Frontend_Scripts {
 			),
 			'wc-cart-fragments'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/cart-fragments' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'js-cookie' ),
+				'deps'    => array( 'jquery', 'wc-js-cookie' ),
 				'version' => $version,
 			),
 			'wc-checkout'                => array(
@@ -276,32 +275,57 @@ class WC_Frontend_Scripts {
 			),
 			'wc-credit-card-form'        => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/credit-card-form' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-payment' ),
+				'deps'    => array( 'jquery', 'wc-jquery-payment' ),
 				'version' => $version,
 			),
-			'wc-add-to-cart'             => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-blockui' ),
+			'wc-dompurify'               => array(
+				'src'     => self::get_asset_url( 'assets/js/dompurify/purify' . $suffix . '.js' ),
+				'deps'    => array(),
 				'version' => $version,
 			),
-			'wc-add-to-cart-variation'   => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/add-to-cart-variation' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'wp-util', 'jquery-blockui' ),
-				'version' => $version,
+			'wc-flexslider'              => array(
+				'src'           => self::get_asset_url( 'assets/js/flexslider/jquery.flexslider' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '2.7.2-wc.' . $version,
+				'legacy_handle' => 'flexslider',
 			),
 			'wc-geolocation'             => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/geolocation' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
+			'wc-jquery-blockui'          => array(
+				'src'           => self::get_asset_url( 'assets/js/jquery-blockui/jquery.blockUI' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '2.7.0-wc.' . $version,
+				'legacy_handle' => 'jquery-blockui',
+			),
+			'wc-jquery-cookie'           => array( // deprecated.
+				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '1.4.1-wc.' . $version,
+				'legacy_handle' => 'jquery-cookie',
+			),
+			'wc-jquery-payment'          => array(
+				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'    => array( 'jquery' ),
+				'version' => '3.0.0-wc.' . $version,
+			),
+			'wc-jquery-tiptip'           => array(
+				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
+				'deps'          => array( 'jquery', 'wc-dompurify' ),
+				'version'       => $version,
+				'legacy_handle' => 'jquery-tiptip',
+			),
+			'wc-js-cookie'               => array(
+				'src'           => self::get_asset_url( 'assets/js/js-cookie/js.cookie' . $suffix . '.js' ),
+				'deps'          => array(),
+				'version'       => '2.1.4-wc.' . $version,
+				'legacy_handle' => 'js-cookie',
+			),
 			'wc-lost-password'           => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/lost-password' . $suffix . '.js' ),
 				'deps'    => array( 'jquery', 'woocommerce' ),
-				'version' => $version,
-			),
-			'wc-account-i18n'            => array(
-				'src'     => self::get_asset_url( 'assets/js/frontend/account-i18n' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
 			'wc-password-strength-meter' => array(
@@ -309,24 +333,81 @@ class WC_Frontend_Scripts {
 				'deps'    => array( 'jquery', 'password-strength-meter' ),
 				'version' => $version,
 			),
+			'wc-photoswipe'              => array(
+				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe' . $suffix . '.js' ),
+				'deps'          => array(),
+				'version'       => '4.1.1-wc.' . $version,
+				'legacy_handle' => 'photoswipe',
+			),
+			'wc-photoswipe-ui-default'   => array(
+				'src'           => self::get_asset_url( 'assets/js/photoswipe/photoswipe-ui-default' . $suffix . '.js' ),
+				'deps'          => array( 'wc-photoswipe' ),
+				'version'       => '4.1.1-wc.' . $version,
+				'legacy_handle' => 'photoswipe-ui-default',
+			),
+			'wc-prettyPhoto'             => array( // deprecated.
+				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.1.6-wc.' . $version,
+				'legacy_handle' => 'prettyPhoto',
+			),
+			'wc-prettyPhoto-init'        => array( // deprecated.
+				'src'           => self::get_asset_url( 'assets/js/prettyPhoto/jquery.prettyPhoto.init' . $suffix . '.js' ),
+				'deps'          => array( 'jquery', 'wc-prettyPhoto' ),
+				'version'       => $version,
+				'legacy_handle' => 'prettyPhoto-init',
+			),
+			'wc-select2'                 => array(
+				'src'           => self::get_asset_url( 'assets/js/select2/select2.full' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '4.0.3-wc.' . $version,
+				'legacy_handle' => 'select2',
+			),
 			'wc-single-product'          => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/single-product' . $suffix . '.js' ),
 				'deps'    => array( 'jquery' ),
 				'version' => $version,
 			),
+			'wc-zoom'                    => array(
+				'src'           => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '1.7.21-wc.' . $version,
+				'legacy_handle' => 'zoom',
+			),
 			'woocommerce'                => array(
 				'src'     => self::get_asset_url( 'assets/js/frontend/woocommerce' . $suffix . '.js' ),
-				'deps'    => array( 'jquery', 'jquery-blockui', 'js-cookie' ),
+				'deps'    => array( 'jquery', 'wc-jquery-blockui', 'wc-js-cookie' ),
 				'version' => $version,
 			),
-			'zoom'                       => array(
-				'src'     => self::get_asset_url( 'assets/js/zoom/jquery.zoom' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '1.7.21-wc.' . $version,
-			),
 		);
+
+		$scripts['wc-address-autocomplete-common'] = array(
+			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+			'deps'    => array(),
+			'version' => $version,
+		);
+
+		$scripts['wc-address-autocomplete'] = array(
+			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
+			'version' => $version,
+		);
+
+		return $scripts;
+	}
+
+	/**
+	 * Register all WC scripts.
+	 */
+	private static function register_scripts() {
+		$register_scripts = self::get_scripts();
+
 		foreach ( $register_scripts as $name => $props ) {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
+
+			if ( isset( $props['legacy_handle'] ) ) {
+				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+			}
 		}
 	}
 
@@ -362,6 +443,14 @@ class WC_Frontend_Scripts {
 				'has_rtl' => true,
 			),
 		);
+
+		$register_styles['wc-address-autocomplete'] = array(
+			'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+			'deps'    => array(),
+			'version' => $version,
+			'has_rtl' => false,
+		);
+
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
 		}
@@ -401,6 +490,18 @@ class WC_Frontend_Scripts {
 		if ( is_checkout() ) {
 			self::enqueue_script( 'wc-checkout' );
 		}
+
+		$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+			$registered_providers = $address_provider_service->get_providers();
+			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+				// Always enqueue the common module if providers are registered.
+				self::enqueue_script( 'wc-address-autocomplete-common' );
+				self::enqueue_script( 'wc-address-autocomplete' );
+				self::enqueue_style( 'wc-address-autocomplete' );
+			}
+		}
+
 		if ( is_add_payment_method_page() ) {
 			self::enqueue_script( 'wc-add-payment-method' );
 		}
@@ -411,16 +512,17 @@ class WC_Frontend_Scripts {
 		// Load gallery scripts on product pages only if supported.
 		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
-				self::enqueue_script( 'zoom' );
+				self::enqueue_script( 'wc-zoom' );
 			}
 			if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
-				self::enqueue_script( 'flexslider' );
+				self::enqueue_script( 'wc-flexslider' );
 			}
 			if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
-				self::enqueue_script( 'photoswipe-ui-default' );
+				self::enqueue_script( 'wc-photoswipe-ui-default' );
 				self::enqueue_style( 'photoswipe-default-skin' );
 				add_action( 'wp_footer', 'woocommerce_photoswipe' );
 			}
+
 			self::enqueue_script( 'wc-single-product' );
 		}
 
@@ -562,7 +664,32 @@ class WC_Frontend_Scripts {
 					'debug_mode'                => Constants::is_true( 'WP_DEBUG' ),
 					/* translators: %s: Order history URL on My Account section */
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
-
+				);
+				break;
+			case 'wc-address-autocomplete-common':
+				$providers = array();
+				try {
+					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
+				} catch ( Throwable $e ) {
+					wc_get_logger()->error( 'Could not get address providers for wc-address-autocomplete script: ' . $e->getMessage(), array( 'source' => 'address-autocomplete' ) );
+				}
+				$params = array(
+					'address_providers' => wp_json_encode(
+						array_map(
+							function ( $provider ) {
+								// Escape provider data before sending to frontend.
+								return array(
+									'id'            => $provider->id,
+									'name'          => $provider->name,
+									'branding_html' => wp_kses(
+										trim( (string) ( $provider->branding_html ?? '' ) ),
+										'post'
+									),
+								);
+							},
+							$providers
+						),
+					),
 				);
 				break;
 			case 'wc-address-i18n':
@@ -650,7 +777,7 @@ class WC_Frontend_Scripts {
 	 * Localize scripts only when enqueued.
 	 */
 	public static function localize_printed_scripts() {
-		foreach ( self::$scripts as $handle ) {
+		foreach ( self::$registered_scripts as $handle ) {
 			self::localize_script( $handle );
 		}
 	}

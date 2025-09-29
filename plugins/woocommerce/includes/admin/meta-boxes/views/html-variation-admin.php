@@ -236,7 +236,7 @@ defined( 'ABSPATH' ) || exit;
 			<?php endif; ?>
 
 			<?php if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) : ?>
-				<div class="show_if_variation_manage_stock" style="display: none;">
+				<div class="show_if_variation_manage_stock form-row form-row-full" style="display: none;">
 					<?php
 					woocommerce_wp_text_input(
 						array(

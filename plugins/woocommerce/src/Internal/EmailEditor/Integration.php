@@ -9,11 +9,11 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
+use Automattic\WooCommerce\Internal\EmailEditor\Renderer\Blocks\WooContent;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
-use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
-use Throwable;
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use WP_Post;
 
 defined( 'ABSPATH' ) || exit;
@@ -78,10 +78,22 @@ class Integration {
 	 * Initialize the integration.
 	 */
 	public function initialize() {
+		$this->init_logger();
 		$this->init_hooks();
 		$this->extend_post_api();
 		$this->extend_template_post_api();
 		$this->register_hooks();
+	}
+
+	/**
+	 * Initialize the logger.
+	 */
+	public function init_logger() {
+		$editor_container = Email_Editor_Container::container();
+		$logger           = $editor_container->get( Email_Editor_Logger::class );
+
+		// Register the WooCommerce logger with the email editor package.
+		$logger->set_logger( new Logger( wc_get_logger() ) );
 	}
 
 	/**
@@ -122,7 +134,7 @@ class Integration {
 		$post_types[] = array(
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
-				'labels'   => array(
+				'labels'          => array(
 					'name'          => __( 'Emails', 'woocommerce' ),
 					'singular_name' => __( 'Email', 'woocommerce' ),
 					'add_new_item'  => __( 'Add Email', 'woocommerce' ),
@@ -131,13 +143,27 @@ class Integration {
 					'view_item'     => __( 'View Email', 'woocommerce' ),
 					'search_items'  => __( 'Search Emails', 'woocommerce' ),
 				),
-				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
-				'supports' => array(
+				'rewrite'         => array( 'slug' => self::EMAIL_POST_TYPE ),
+				'supports'        => array(
 					'title',
 					'editor' => array(
 						'default-mode' => 'template-locked',
 					),
+					'excerpt',
 				),
+				'capability_type' => self::EMAIL_POST_TYPE,
+				'capabilities'    => array(
+					'edit_post'          => 'manage_woocommerce',
+					'read_post'          => 'manage_woocommerce',
+					'delete_post'        => 'manage_woocommerce',
+					'edit_posts'         => 'manage_woocommerce',
+					'edit_others_posts'  => 'manage_woocommerce',
+					'delete_posts'       => 'manage_woocommerce',
+					'publish_posts'      => 'manage_woocommerce',
+					'read_private_posts' => 'manage_woocommerce',
+					'create_posts'       => 'manage_woocommerce',
+				),
+				'map_meta_cap'    => false,
 			),
 		);
 		return $post_types;

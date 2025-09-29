@@ -1066,9 +1066,10 @@ class QueryBuilder {
 		}
 
 		if ( 'menu_order' === $orderby ) {
+			add_filter( 'posts_clauses', array( $this, 'add_menu_order_with_title_fallback_posts_clauses' ), 10, 2 );
 			return array(
-				'orderby' => 'menu_order',
-				'order'   => 'ASC',
+				'isProductCollection' => true,
+				'orderby'             => $orderby,
 			);
 		}
 
@@ -1206,5 +1207,34 @@ class QueryBuilder {
 		}
 
 		return array_values( array_unique( $post__in, SORT_NUMERIC ) );
+	}
+
+	/**
+	 * Add the `posts_clauses` filter to add menu order with title fallback sorting
+	 *
+	 * @param array    $clauses The list of clauses for the query.
+	 * @param WP_Query $query   The WP_Query instance.
+	 * @return array   Modified list of clauses.
+	 */
+	public function add_menu_order_with_title_fallback_posts_clauses( $clauses, $query ) {
+		$query_vars                  = $query->query_vars;
+		$is_product_collection_block = $query_vars['isProductCollection'] ?? false;
+
+		if ( ! $is_product_collection_block ) {
+			return $clauses;
+		}
+
+		$orderby = $query_vars['orderby'] ?? null;
+		if ( 'menu_order' !== $orderby ) {
+			return $clauses;
+		}
+
+		$is_ascending_order = ! isset( $query_vars['order'] ) || 'asc' === strtolower( $query_vars['order'] );
+
+		$clauses['orderby'] = $is_ascending_order ?
+			'menu_order ASC, post_title ASC' :
+			'menu_order DESC, post_title DESC';
+
+		return $clauses;
 	}
 }

@@ -2,7 +2,7 @@
 	"private": true,
 	"name": "@woocommerce/plugin-woocommerce-beta-tester",
 	"description": "Setting up the local beta tester scripts.",
-	"license": "GPL-2.0",
+	"license": "GPL-2.0-or-later",
 	"repository": {
 		"type": "git",
 		"url": "git://github.com/woocommerce/woocommerce-beta-tester.git"

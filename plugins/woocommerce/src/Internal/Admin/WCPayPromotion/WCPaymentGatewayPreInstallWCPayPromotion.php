@@ -62,7 +62,7 @@ class WCPaymentGatewayPreInstallWCPayPromotion extends \WC_Payment_Gateway {
 				PaymentGatewayFeature::SUBSCRIPTION_PAYMENT_METHOD_CHANGE,
 				// Saved cards features.
 				PaymentGatewayFeature::TOKENIZATION,
-				PaymentGatewayFeature::ADD_PAYMENT_METHODS,
+				PaymentGatewayFeature::ADD_PAYMENT_METHOD,
 			);
 		}
 

@@ -479,7 +479,7 @@ class WC_Admin_Notices {
 	 */
 	public static function no_shipping_methods_notice() {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
+		if ( wc_shipping_enabled() && ( ! is_wc_admin_settings_page() || empty( $_GET['tab'] ) || 'shipping' !== $_GET['tab'] ) ) {
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 

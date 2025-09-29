@@ -7,7 +7,6 @@ namespace Automattic\WooCommerce\Tests\Internal\DependencyManagement;
 use Automattic\WooCommerce\Blocks\Assets\Api as BlocksAssetsApi;
 use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
-use Automattic\WooCommerce\Internal\DependencyManagement\ExtendedContainer;
 use Automattic\WooCommerce\Internal\DependencyManagement\RuntimeContainer;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\StoreApi;
@@ -25,6 +24,7 @@ use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\De
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\InnerDependencyClass;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassThatThrowsOnInit;
 use Automattic\WooCommerce\Tests\Internal\DependencyManagement\ExampleClasses\ClassWithStoreApiDependency;
+use Automattic\WooCommerce\Internal\DependencyManagement\ExampleClasses\ClassWithConstructorWithOptionalParameters;
 
 /**
  * Tests for RuntimeContainer.
@@ -34,7 +34,7 @@ class RuntimeContainerTest extends \WC_Unit_Test_Case {
 	/**
 	 * The system under test.
 	 *
-	 * @var ExtendedContainer
+	 * @var RuntimeContainer
 	 */
 	private $sut;
 
@@ -65,6 +65,45 @@ class RuntimeContainerTest extends \WC_Unit_Test_Case {
 		$this->expectExceptionMessage( "Attempt to get an instance of class 'Automattic\WooCommerce\Fizz\Buzz', which doesn't exist." );
 
 		$this->sut->get( 'Automattic\WooCommerce\Fizz\Buzz' );
+	}
+
+	/**
+	 * @testdox 'get' throws 'ContainerException' when trying to resolve a class that has a private or protected constructor.
+	 *
+	 * @testWith ["ClassWithPrivateConstructor"]
+	 *           ["ClassWithProtectedConstructor"]
+	 *
+	 * @param string $class_name The name of the class to try to instantiate, without the namespace.
+	 */
+	public function test_exception_when_trying_to_resolve_class_with_private_constructor( string $class_name ) {
+		$class_name = "Automattic\\WooCommerce\\Internal\\DependencyManagement\\ExampleClasses\\$class_name";
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Error resolving '$class_name': the class doesn't have a public constructor." );
+
+		$this->sut->get( $class_name );
+	}
+
+	/**
+	 * @testdox 'get' throws 'ContainerException' when trying to resolve a class that has a constructor with non-optional arguments.
+	 *
+	 */
+	public function test_exception_when_trying_to_resolve_class_with_constructor_with_non_optional_arguments() {
+		$class_name = 'Automattic\\WooCommerce\\Internal\\DependencyManagement\\ExampleClasses\\ClassWithConstructorWithParameters';
+		$this->expectException( ContainerException::class );
+		$this->expectExceptionMessage( "Error resolving '$class_name': the class constructor has non-optional arguments." );
+
+		$this->sut->get( $class_name );
+	}
+
+	/**
+	 * @testdox 'get' can resolve classes with constructor arguments as long as all the arguments are optional.
+	 */
+	public function test_class_with_optional_constructor_arguments_can_be_resolved() {
+		$instance = $this->sut->get( ClassWithConstructorWithOptionalParameters::class );
+
+		$this->assertInstanceOf( ClassWithConstructorWithOptionalParameters::class, $instance );
+		$this->assertEquals( 34, $instance->the_num );
+		$this->assertNull( $instance->the_string );
 	}
 
 	/**

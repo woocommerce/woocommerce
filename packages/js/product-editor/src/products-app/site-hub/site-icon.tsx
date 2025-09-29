@@ -7,7 +7,7 @@ import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { wordpress } from '@wordpress/icons';
 import { store as coreDataStore } from '@wordpress/core-data';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 type SiteIconProps = {
 	className: string;
@@ -46,7 +46,7 @@ function SiteIcon( { className }: SiteIconProps ) {
 	);
 
 	return (
-		<div className={ classNames( className, 'edit-site-site-icon' ) }>
+		<div className={ clsx( className, 'edit-site-site-icon' ) }>
 			{ icon }
 		</div>
 	);

@@ -18,7 +18,7 @@ import { compose, withInstanceId } from '@wordpress/compose';
 import { escapeRegExp, findIndex } from 'lodash';
 import NoticeOutlineIcon from 'gridicons/dist/notice-outline';
 import PropTypes from 'prop-types';
-import classnames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -166,7 +166,7 @@ export const SearchListControl = ( props ) => {
 					<span className="woocommerce-search-list__not-found-text">
 						{ searchValue
 							? // eslint-disable-next-line @wordpress/valid-sprintf
-							  sprintf( messages.noResults, searchValue )
+							  sprintf( messages.noResults || '', searchValue )
 							: messages.noItems }
 					</span>
 				</div>
@@ -220,7 +220,7 @@ export const SearchListControl = ( props ) => {
 
 	return (
 		<div
-			className={ classnames( 'woocommerce-search-list', className, {
+			className={ clsx( 'woocommerce-search-list', className, {
 				'is-compact': isCompact,
 			} ) }
 		>

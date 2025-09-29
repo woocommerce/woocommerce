@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+Comment: Use wc_get_page_permalink() in patterns to reduce unnecessary queries for shops without
+
