@@ -108,7 +108,9 @@ export async function createMessage( options: Options ) {
 	const buttons = [];
 
 	const lastRunBlock = getTextContextElement(
-		`Run: ${ runId }/${ runAttempt }, triggered by ${ triggeringActor }`
+		eventName === 'schedule'
+			? `Run: ${ runId }/${ runAttempt }`
+			: `Run: ${ runId }/${ runAttempt }, triggered by ${ triggeringActor }`
 	);
 	const actorBlock = getTextContextElement( `Actor: ${ actor }` );
 	const lastRunButtonBlock = getButton( 'Run', getRunUrl( options, false ) );
@@ -143,9 +145,12 @@ export async function createMessage( options: Options ) {
 		contextElements.push(
 			getTextContextElement(
 				`Commit: ${ sha.substring( 0, 8 ) } ${ truncatedMessage }`
-			),
-			actorBlock
+			)
 		);
+
+		if ( eventName !== 'schedule' ) {
+			contextElements.push( actorBlock );
+		}
 		buttons.push(
 			getButton(
 				`Commit ${ sha.substring( 0, 8 ) }`,
