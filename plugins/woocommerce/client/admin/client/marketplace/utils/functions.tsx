@@ -90,8 +90,6 @@ async function fetchJsonWithCache(
 		} );
 	}
 
-	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
-
 	// Failing that, fetch from net:
 	return new Promise( ( resolve, reject ) => {
 		fetch( url, { signal: abortSignal, headers } )
