@@ -462,12 +462,8 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 			'label' => $setting['title'] ?? $setting_id,
 			'type'  => $this->normalize_field_type( $setting_type ),
 			'value' => get_option( $setting_id, $setting['default'] ?? '' ),
+			'desc'  => $setting['desc'] ?? '',
 		);
-
-		// Add tip if available.
-		if ( ! empty( $setting['desc'] ) && ! empty( $setting['desc_tip'] ) ) {
-			$field['tip'] = $setting['desc'];
-		}
 
 		// Add options for select fields.
 		if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
@@ -694,6 +690,11 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 				),
 				'tip'     => array(
 					'description' => __( 'Help text for the setting field.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => array( 'view', 'edit' ),
+				),
+				'desc'    => array(
+					'description' => __( 'Description for the setting field.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
