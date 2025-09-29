@@ -2,16 +2,14 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Exception;
-use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchService;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\PaymentUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\ArrayUtils;
-use Automattic\WooCommerce\Utilities\ArrayUtil;
+use Exception;
 
 /**
  * OrderController class.
@@ -584,10 +582,8 @@ class OrderController {
 			);
 		} else {
 			// Otherwise we check if the email doesn't belong to an existing user.
-			$customer_data_store = \WC_Data_Store::load( 'customer' );
-
 			// This will get us any user ids for the given billing email.
-			$user_ids = $customer_data_store->get_user_ids_for_billing_email( array( $order->get_billing_email() ) );
+			$user_ids = wc_get_container()->get( CustomerSearchService::class )->find_user_ids_by_billing_email_for_coupons_usage_lookup( array( $order->get_billing_email() ) );
 
 			// Convert all found user ids to a list of email addresses.
 			$user_emails = array_map( array( $this, 'get_email_from_user_id' ), $user_ids );

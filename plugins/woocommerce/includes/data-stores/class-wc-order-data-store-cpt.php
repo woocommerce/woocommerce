@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -978,9 +979,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
+
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( empty( $wp_query_args['orderby'] ) ) {
+			$wp_query_args['orderby'] = 'ID';
+		}
+
+		if ( empty( $wp_query_args['order'] ) ) {
+			$wp_query_args['order'] = 'desc';
 		}
 
 		$date_queries = array(
@@ -1045,6 +1055,21 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			if ( $total_query ) {
 				$wp_query_args['meta_query'][] = $total_query;
 			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+			if ( ! empty( $meta_query ) ) {
+				$wp_query_args['meta_query'][] = $meta_query;
+			}
+		}
+
+		// Handle custom orderby paramers.
+		if ( 'total' === $wp_query_args['orderby'] ) {
+			$wp_query_args['orderby']   = 'meta_value_num';
+			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$wp_query_args['meta_type'] = 'DECIMAL(10,' . wc_get_price_decimals() . ')';
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
