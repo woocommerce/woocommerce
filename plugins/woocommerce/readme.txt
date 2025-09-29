@@ -170,16 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.2.1 2025-09-22 =
-
-**WooCommerce**
-
-* Fix - Address update script issue where refunded $order may not exist, and disable refunded orders tool. [#61022](https://github.com/woocommerce/woocommerce/pull/61022)
-* Fix - Downgrade Emogrifier dependency to avoid conflict [#60997](https://github.com/woocommerce/woocommerce/pull/60997)
-* Fix - Fix product price display in RTL languages [#61000](https://github.com/woocommerce/woocommerce/pull/61000)
-* Update - Improve template slug recognition in mechanism registering product blocks. Assure compatibility with WordPress 6.9 [#61009](https://github.com/woocommerce/woocommerce/pull/61009)
-* Dev - Replace deprecated core/edit-site methods with core/editor methods [#61009](https://github.com/woocommerce/woocommerce/pull/61009)
-* Dev - Stop relying on deprecated core/edit-site methods [#61009](https://github.com/woocommerce/woocommerce/pull/61009)
-
+= 10.2.2 2025-09-22 =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
