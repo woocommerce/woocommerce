@@ -52,6 +52,13 @@ class WooCommerceProductImporter {
 	private array $import_options;
 
 	/**
+	 * Progress callback function for per-product updates.
+	 *
+	 * @var callable|null
+	 */
+	private $progress_callback = null;
+
+	/**
 	 * Statistics tracking for import operations.
 	 *
 	 * @var array
@@ -95,6 +102,16 @@ class WooCommerceProductImporter {
 	 */
 	public function configure( array $options ): void {
 		$this->import_options = array_merge( $this->import_options, $options );
+	}
+
+	/**
+	 * Set progress callback for per-product import updates.
+	 *
+	 * @param callable|null $callback Function to call with progress updates.
+	 * Receives: (current_index, total_count, product_name, result).
+	 */
+	public function set_progress_callback( ?callable $callback ): void {
+		$this->progress_callback = $callback;
 	}
 
 	/**
@@ -214,9 +231,13 @@ class WooCommerceProductImporter {
 			'skipped'    => 0,
 		);
 
+		$total_count = count( $products_data );
+
 		foreach ( $products_data as $index => $product_data ) {
-			$source_data = $source_data_batch[ $index ] ?? array();
-			$result      = $this->import_product( $product_data, $source_data );
+			$source_data  = $source_data_batch[ $index ] ?? array();
+			$product_name = $product_data['name'] ?? 'Unknown Product';
+
+			$result = $this->import_product( $product_data, $source_data );
 
 			$results[] = $result;
 
@@ -228,6 +249,10 @@ class WooCommerceProductImporter {
 				}
 			} else {
 				++$batch_stats['failed'];
+			}
+
+			if ( $this->progress_callback ) {
+				call_user_func( $this->progress_callback, $index + 1, $total_count, $product_name, $result );
 			}
 		}
 

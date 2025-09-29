@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Check if template part is from file system before building the result from file

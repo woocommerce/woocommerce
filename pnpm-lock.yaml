@@ -3663,6 +3663,9 @@ importers:
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../../../../packages/js/sanitize
+      '@woocommerce/email-editor':
+          specifier: workspace:*
+          version: link:../../../../packages/js/email-editor
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../../../../packages/js/tracks

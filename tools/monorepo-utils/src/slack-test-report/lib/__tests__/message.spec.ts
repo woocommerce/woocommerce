@@ -214,12 +214,7 @@ describe( 'createMessage', () => {
 						},
 						{
 							type: 'plain_text',
-							text: 'Actor: test-actor',
-							emoji: false,
-						},
-						{
-							type: 'plain_text',
-							text: 'Run: 456/1, triggered by trigger-actor',
+							text: 'Run: 456/1',
 							emoji: false,
 						},
 					],
