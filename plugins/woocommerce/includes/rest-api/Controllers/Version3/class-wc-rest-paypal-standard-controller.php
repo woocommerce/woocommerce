@@ -177,6 +177,15 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 
 			WC()->cart->add_to_cart( $product_id, $item->get_quantity() );
 		}
+
+		// Re-apply coupons present on the order so discounts/totals are accurate.
+		if ( method_exists( $order, 'get_coupon_codes' ) ) {
+			foreach ( (array) $order->get_coupon_codes() as $code ) {
+				if ( $code ) {
+					WC()->cart->apply_coupon( $code );
+				}
+			}
+		}
 	}
 
 	/**
