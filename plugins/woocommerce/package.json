@@ -64,6 +64,10 @@
 		"test:e2e:hpos-off": "pnpm test:e2e:with-env default-hpos-disabled --project=e2e-hpos-disabled",
 		"test:e2e:gb-stable": "pnpm test:e2e:with-env gutenberg-stable",
 		"test:e2e:gb-nightly": "pnpm test:e2e:with-env gutenberg-nightly",
+		"ci:legacy:minicart-flag-off": "node ./bin/set-legacy-minicart-flag.js && php bin/generate-feature-config.php",
+		"test:e2e:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:e2e",
+		"test:e2e:blocks:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:e2e:blocks",
+		"test:php:legacy": "pnpm ci:legacy:minicart-flag-off && pnpm test:php:env",
 		"test:env:start": "pnpm env:test",
 		"test:perf": "./tests/performance/bin/k6 run ./tests/performance/tests/gh-action-pr-requests.js",
 		"test:perf:ci-setup": "pnpm test:perf:install-k6 && pnpm env:perf",
@@ -140,6 +144,35 @@
 						"pull_request",
 						"push",
 						"php-unit-php-8.4-wp-latest"
+					]
+				},
+				{
+					"name": "Legacy MiniCart - PHP: 8.4 WP: latest",
+					"testType": "unit:php",
+					"command": "test:php:legacy",
+					"shardingArguments": [
+						"--testsuite=wc-phpunit-legacy",
+						"--testsuite=wc-phpunit-main"
+					],
+					"onlyForDependencies": [],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"**/*.php",
+						".wp-env.json",
+						"phpunit.xml"
+					],
+					"testEnv": {
+						"start": "env:test",
+						"config": {
+							"phpVersion": "8.4",
+							"wpVersion": "latest"
+						}
+					},
+					"events": [
+						"pull_request",
+						"push"
 					]
 				},
 				{
@@ -252,6 +285,45 @@
 					],
 					"report": {
 						"resultsBlobName": "core-e2e-report",
+						"resultsPath": "tests/e2e-pw/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Legacy MiniCart - Core e2e tests",
+					"testType": "e2e",
+					"command": "test:e2e:legacy",
+					"shardingArguments": [
+						"--shard=1/6",
+						"--shard=2/6",
+						"--shard=3/6",
+						"--shard=4/6",
+						"--shard=5/6",
+						"--shard=6/6"
+					],
+					"changes": [
+						"client/admin/config/*.json",
+						"composer.json",
+						"composer.lock",
+						"i18n/**/*.php",
+						"includes/**/*.php",
+						"patterns/**/*.php",
+						"src/**/*.php",
+						"templates/**/*.php",
+						"tests/e2e-pw/**",
+						".wp-env.json",
+						"woocommerce.php",
+						"uninstall.php"
+					],
+					"testEnv": {
+						"start": "env:test"
+					},
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "legacy-core-e2e-report",
 						"resultsPath": "tests/e2e-pw/test-results",
 						"allure": true
 					}
@@ -667,6 +739,45 @@
 					],
 					"report": {
 						"resultsBlobName": "blocks-e2e-report",
+						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
+						"allure": true
+					}
+				},
+				{
+					"name": "Legacy MiniCart - Blocks e2e tests",
+					"testType": "e2e",
+					"command": "test:e2e:blocks:legacy",
+					"shardingArguments": [
+						"--shard=1/10",
+						"--shard=2/10",
+						"--shard=3/10",
+						"--shard=4/10",
+						"--shard=5/10",
+						"--shard=6/10",
+						"--shard=7/10",
+						"--shard=8/10",
+						"--shard=9/10",
+						"--shard=10/10"
+					],
+					"changes": [
+						"patterns/**/*.php",
+						"includes/**/*.php",
+						"src/Blocks/**/*.php",
+						"templates/**/*.php",
+						"templates/**/*.html"
+					],
+					"onlyForDependencies": [
+						"@woocommerce/block-library"
+					],
+					"testEnv": {
+						"start": "env:start:blocks"
+					},
+					"events": [
+						"pull_request",
+						"push"
+					],
+					"report": {
+						"resultsBlobName": "legacy-blocks-e2e-report",
 						"resultsPath": "./client/blocks/tests/e2e/artifacts/test-results",
 						"allure": true
 					}
