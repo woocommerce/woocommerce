@@ -9,7 +9,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Css_Inliner;
-use Pelago\Emogrifier\CssInliner;
 
 /**
  * Class for inlining CSS in HTML emails.
@@ -19,9 +18,9 @@ class Email_Css_Inliner implements Css_Inliner {
 	/**
 	 * The CSS inliner instance.
 	 *
-	 * @var CssInliner
+	 * @var object
 	 */
-	private CssInliner $inliner;
+	private $inliner;
 
 	/**
 	 * Creates a new instance from HTML content.
@@ -30,8 +29,9 @@ class Email_Css_Inliner implements Css_Inliner {
 	 * @return self
 	 */
 	public function from_html( string $unprocessed_html ): self {
+		$inliner_class = $this->get_inliner_class();
 		$that          = new self();
-		$that->inliner = CssInliner::fromHtml( $unprocessed_html );
+		$that->inliner = $inliner_class::fromHtml( $unprocessed_html );
 		return $that;
 	}
 
@@ -61,5 +61,21 @@ class Email_Css_Inliner implements Css_Inliner {
 			throw new \LogicException( 'You must call from_html before calling inline_css' );
 		}
 		return $this->inliner->render();
+	}
+
+	/**
+	 * Get the inliner class.
+	 *
+	 * @return string
+	 * @throws \Exception If the inliner class is not found.
+	 */
+	private function get_inliner_class(): string {
+		if ( class_exists( 'Pelago\Emogrifier\CssInliner' ) ) {
+			return 'Pelago\Emogrifier\CssInliner';
+		}
+		if ( class_exists( 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner' ) ) {
+			return 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner';
+		}
+		throw new \Exception( 'CssInliner class not found' );
 	}
 }
