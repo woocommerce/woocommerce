@@ -32,22 +32,23 @@ const v1 = {
 	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
 		const { editMode, showDesc, ...otherAttributes } = attributes;
 
-		// Always add category title as first inner block
-		innerBlocks.unshift(
-			createBlock( 'woocommerce/category-title', {
-				level: 2,
-				isLink: false,
-			} )
-		);
-
 		// Conditionally add category description if showDesc was true
 		if ( showDesc ) {
-			innerBlocks.push(
+			innerBlocks.unshift(
 				createBlock( 'woocommerce/category-description', {
 					textAlign: 'center',
 				} )
 			);
 		}
+
+		// Always add category title as first inner block
+		innerBlocks.unshift(
+			createBlock( 'woocommerce/category-title', {
+				level: 2,
+				isLink: false,
+				textAlign: 'center',
+			} )
+		);
 
 		return [ otherAttributes, innerBlocks ];
 	},
