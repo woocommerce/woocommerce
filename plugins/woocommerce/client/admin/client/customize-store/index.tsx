@@ -15,7 +15,6 @@ import {
 import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
 import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
@@ -39,13 +38,15 @@ import {
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners, isIframe } from './utils';
+import {
+	navigateOrParent,
+	attachParentListeners,
+	isIframe,
+	redirectToThemes,
+} from './utils';
 import useBodyClass from './hooks/use-body-class';
-import { isWooExpress } from '~/utils/is-woo-express';
 import { useXStateInspect } from '~/xstate';
-import { isFeatureEnabled } from '~/utils/features';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
@@ -108,21 +109,6 @@ const goBack = () => {
 	}
 
 	redirectToWooHome();
-};
-
-const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	if ( isWooExpress() ) {
-		window.location.href =
-			_context?.intro?.themeData?._links?.browse_all?.href ??
-			getAdminLink( 'themes.php' );
-	} else if ( isFeatureEnabled( 'marketplace' ) ) {
-		window.location.href = getAdminLink(
-			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
-		);
-	} else {
-		window.location.href =
-			'https://woocommerce.com/product-category/themes/';
-	}
 };
 
 const markTaskComplete = async () => {
@@ -192,21 +178,10 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	schema: {
 		context: {} as customizeStoreStateMachineContext,
 		events: {} as customizeStoreStateMachineEvents,
-		services: {} as {
-			fetchThemeCards: { data: ThemeCard[] };
-		},
 	},
 	context: {
 		intro: {
 			hasErrors: false,
-			themeData: {
-				themes: [] as ThemeCard[],
-				_links: {
-					browse_all: {
-						href: getAdminLink( 'themes.php' ),
-					},
-				},
-			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
 		},
@@ -298,7 +273,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								onDone: {
 									target: 'success',
 									actions: [
-										'assignThemeData',
 										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
