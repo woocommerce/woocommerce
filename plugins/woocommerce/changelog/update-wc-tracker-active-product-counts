@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Adds active product counts to the information reported by `WC_Tracker`.
