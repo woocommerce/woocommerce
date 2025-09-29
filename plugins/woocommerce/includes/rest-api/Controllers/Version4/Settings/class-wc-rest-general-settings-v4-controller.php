@@ -673,11 +673,6 @@ class WC_REST_General_Settings_V4_Controller extends WC_REST_V4_Controller {
 					'type'        => 'object',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'tip'     => array(
-					'description' => __( 'Help text for the setting field.', 'woocommerce' ),
-					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
-				),
 				'desc'    => array(
 					'description' => __( 'Description for the setting field.', 'woocommerce' ),
 					'type'        => 'string',
