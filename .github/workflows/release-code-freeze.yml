@@ -261,7 +261,7 @@ jobs:
     name: Notify Slack on Failure
     runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
     needs: [check-feature-freeze-event, prepare-for-code-freeze, run-code-freeze, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook]
-    if: failure()
+    if: always() && contains(needs.*.result, 'failure')
     steps:
       - name: Notify Slack on failure
         uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
