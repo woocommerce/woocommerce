@@ -518,6 +518,12 @@ class WC_Tracker {
 				'fields'     => 'id=>slug'
 			)
 		);
+
+		if ( is_wp_error( $product_type_terms ) || empty( $product_type_terms ) ) {
+			wc_get_logger()->debug( 'Unable to get product type terms.', array( 'source' => __METHOD__ ) );
+			return array();
+		}
+
 		$term_ids = implode( ', ', array_map( 'intval', array_keys( $product_type_terms ) ) );
 
 		// Should result in an array of objects, with each object containing a `product_type` (numeric ID) and a `count` property.
