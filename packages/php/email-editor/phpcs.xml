@@ -35,4 +35,7 @@
 
 	<!-- Skip the PHPStan temp directory -->
 	<exclude-pattern>tasks/phpstan/temp/*</exclude-pattern>
+
+	<!-- Skip the vendor-prefixed directories -->
+	<exclude-pattern>vendor-prefixed/*</exclude-pattern>
 </ruleset>

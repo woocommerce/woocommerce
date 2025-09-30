@@ -49,8 +49,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		).toContainText( `New order: #[woocommerce/order-number],` );
 	} );
 
-	// Skipping this test for now.
-	test.skip( 'Can preview in new tab', async ( { page } ) => {
+	test( 'Can preview in new tab', async ( { page } ) => {
 		await accessTheEmailEditor( page, 'New order' );
 		await page.getByRole( 'button', { name: 'View', exact: true } ).click();
 
@@ -93,7 +92,7 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 		await page.getByRole( 'button', { name: 'Close' } ).click();
 	} );
 
-	test.skip( 'Can edit and save content', async ( { page } ) => {
+	test( 'Can edit and save content', async ( { page } ) => {
 		await accessTheEmailEditor( page, 'New order' );
 		await expect(
 			page
