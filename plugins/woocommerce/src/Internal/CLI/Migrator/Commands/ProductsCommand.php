@@ -154,7 +154,7 @@ final class ProductsCommand {
 	 * @param array  $assoc_args  The associative arguments.
 	 */
 	private function handle_count_request( string $platform, array $assoc_args ): void {
-		WP_CLI::log( "Fetching product count from " . ucfirst( $platform ) . "..." );
+		WP_CLI::log( 'Fetching product count from ' . ucfirst( $platform ) . '...' );
 
 		$fetcher = $this->platform_registry->get_fetcher( $platform );
 		if ( ! $fetcher ) {
@@ -197,7 +197,7 @@ final class ProductsCommand {
 			}
 
 			$filter_description = empty( $filters ) ? '' : ' with ' . implode( ', ', $filters );
-			WP_CLI::success( "Found {$count} products{$filter_description} on " . ucfirst( $platform ) . "." );
+			WP_CLI::success( "Found {$count} products{$filter_description} on " . ucfirst( $platform ) . '.' );
 		}
 	}
 }
