@@ -4,6 +4,7 @@
  * External dependencies
  */
 import type { BlockAlignment } from '@wordpress/blocks';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import {
@@ -23,13 +24,11 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
-import type { ComponentType, Dispatch, SetStateAction } from 'react';
-import { trimCharacters } from '@woocommerce/utils';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
-import { CallToAction } from './call-to-action';
 import { ConstrainedResizable } from './constrained-resizable';
 import { EditorBlock, GenericBlockUIConfig } from './types';
 import { BgImageDimensions, useBackgroundImage } from './use-background-image';
@@ -39,7 +38,6 @@ import {
 	getBackgroundImageStyles,
 	getClassPrefixFromName,
 } from './utils';
-import { __ } from '@wordpress/i18n';
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {

@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
@@ -15,8 +16,8 @@ class CategoryDescription extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
 	 * @param \WP_Block $block     Block instance.
 	 *
 	 * @return string Rendered block output.
@@ -46,9 +47,11 @@ class CategoryDescription extends AbstractBlock {
 			$classes[] = 'has-text-align-' . $text_align;
 		}
 
-		$wrapper_attributes = get_block_wrapper_attributes( array( 
-			'class' => implode( ' ', $classes ),
-		) );
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => implode( ' ', $classes ),
+			)
+		);
 
 		return sprintf(
 			'<p %1$s>%2$s</p>',

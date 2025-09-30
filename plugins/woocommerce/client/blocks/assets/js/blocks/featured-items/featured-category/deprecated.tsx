@@ -11,7 +11,7 @@ import metadata from './block.json';
 
 interface BlockAttributes {
 	showDesc?: boolean;
-	[ key: string ]: any;
+	[ key: string ]: unknown;
 }
 
 // Version 1: Migration from legacy showDesc attribute to inner blocks

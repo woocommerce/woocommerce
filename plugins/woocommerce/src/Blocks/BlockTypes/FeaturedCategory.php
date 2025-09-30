@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
@@ -99,7 +100,7 @@ class FeaturedCategory extends FeaturedItem {
 					'<div class="wc-block-featured-category__description">%s</div>',
 					wc_format_content( wp_kses_post( $category->description ) )
 				);
-				$output .= $desc_str;
+				$output  .= $desc_str;
 			}
 		}
 
