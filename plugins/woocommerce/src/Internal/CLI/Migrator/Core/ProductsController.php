@@ -333,7 +333,7 @@ class ProductsController {
 			WP_CLI::error(
 				sprintf(
 					"No credentials found for platform '%s'. Please run: wp wc migrate setup --platform=%s",
-					$platform,
+					ucfirst( $platform ),
 					$platform
 				)
 			);
@@ -939,7 +939,7 @@ class ProductsController {
 
 		$metrics_message = sprintf(
 			'Session completed for %s: %d products in %s (avg: %s seconds per product)',
-			$platform,
+			ucfirst( $platform ),
 			$session_products,
 			$session_time_formatted,
 			$avg_time_formatted
