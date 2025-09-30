@@ -36,11 +36,11 @@
 	},
 	"scripts": {
 		"post-install-cmd": [
-			"composer install -d vendor-prefixed --quiet",
+			"composer install -d vendor-prefixed",
 			"composer dump-autoload -o"
 		],
 		"post-update-cmd": [
-			"composer update -d vendor-prefixed --quiet",
+			"composer update -d vendor-prefixed",
 			"composer dump-autoload -o"
 		],
 		"env:destroy": "wp-env destroy",
