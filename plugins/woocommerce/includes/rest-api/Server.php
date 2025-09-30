@@ -201,7 +201,9 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
+			'paypal-standard'          => 'WC_REST_Paypal_Standard_Controller',
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
+			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
 	}
 
