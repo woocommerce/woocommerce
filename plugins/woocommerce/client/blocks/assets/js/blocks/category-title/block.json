@@ -6,36 +6,36 @@
 	"apiVersion": 3,
 	"textdomain": "woocommerce",
 	"attributes": {
+		"isLink": {
+			"type": "boolean",
+			"default": false
+		},
 		"level": {
 			"type": "number",
 			"default": 2
 		},
-		"textAlign": {
-			"type": "string"
-		},
-		"isLink": {
-			"type": "boolean",
-			"default": false
+		"linkTarget": {
+			"type": "string",
+			"default": "_self"
 		},
 		"rel": {
 			"type": "string",
 			"default": ""
 		},
-		"linkTarget": {
-			"type": "string",
-			"default": "_self"
+		"textAlign": {
+			"type": "string"
 		}
 	},
 	"supports": {
 		"align": false,
-		"html": false,
-		"typography": true,
 		"color": {
 			"text": true
 		},
+		"html": false,
 		"spacing": {
 			"margin": true
-		}
+		},
+		"typography": true
 	},
 	"usesContext": [ "termId", "termTaxonomy" ]
 }

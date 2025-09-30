@@ -9,8 +9,7 @@ import { ProductResponseItem, isEmpty } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import {
 	InnerBlocks,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
+	// @ts-expect-error BlockContextProvider is not exported from @wordpress/block-editor
 	BlockContextProvider,
 } from '@wordpress/block-editor';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
@@ -206,8 +205,6 @@ export const withFeaturedItem =
 			[ setAttributes ]
 		);
 
-		const renderButton = () => null;
-
 		const renderNoItemButton = () => {
 			return (
 				<>
@@ -379,17 +376,6 @@ export const withFeaturedItem =
 									/>
 								) ) }
 							{ renderInnerBlocks() }
-							{ ! isEmpty( product?.variation ) && (
-								<h3
-									className={ `${ className }__variation` }
-									dangerouslySetInnerHTML={ {
-										__html: product.variation,
-									} }
-								/>
-							) }
-							<div className={ `${ className }__link` }>
-								{ renderButton() }
-							</div>
 						</div>
 					</div>
 				</>

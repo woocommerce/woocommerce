@@ -10,7 +10,6 @@ import { heading as icon } from '@wordpress/icons';
 import metadata from './block.json';
 import edit from './edit';
 
-// @ts-expect-error registerBlockType typing
 registerBlockType( metadata, {
 	edit,
 	icon,

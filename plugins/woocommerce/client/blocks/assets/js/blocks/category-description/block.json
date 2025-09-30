@@ -12,14 +12,14 @@
 	},
 	"supports": {
 		"align": false,
-		"html": false,
-		"typography": true,
 		"color": {
 			"text": true
 		},
+		"html": false,
 		"spacing": {
 			"margin": true
-		}
+		},
+		"typography": true
 	},
 	"usesContext": [ "termId", "termTaxonomy" ]
 }

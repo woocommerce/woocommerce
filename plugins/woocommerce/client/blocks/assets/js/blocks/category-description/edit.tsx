@@ -9,12 +9,9 @@ import {
 	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
 	BlockControls,
-	InspectorControls,
 	useBlockProps,
 	PlainText,
 } from '@wordpress/block-editor';
-import { PanelBody } from '@wordpress/components';
-
 interface Props {
 	attributes: {
 		textAlign?: string;
@@ -42,23 +39,26 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, termTaxonomy ]
 	);
 
-	const [ rawDescription = '', setDescription, fullDescription ] = (
-		useEntityProp as any
-	 )( 'taxonomy', termTaxonomy || 'product_cat', 'description', termId );
+	const [ rawDescription = '', setDescription, fullDescription ] =
+		useEntityProp(
+			'taxonomy',
+			termTaxonomy || 'product_cat',
+			'description',
+			String( termId )
+		);
 
 	const blockProps = useBlockProps( {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
 	} );
 
-	const PlainTextAny = PlainText as any;
-
-	let descriptionElement: JSX.Element = (
+	let descriptionElement = (
 		<p { ...blockProps }>{ __( 'Category description', 'woocommerce' ) }</p>
 	);
 
 	if ( termId ) {
 		descriptionElement = userCanEdit ? (
-			<PlainTextAny
+			<PlainText
+				// @ts-expect-error PlainText component types are not up-to-date
 				tagName="p"
 				placeholder={ __( 'No description', 'woocommerce' ) as string }
 				value={ rawDescription }
@@ -90,11 +90,6 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					}
 				/>
 			</BlockControls>
-			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
-					{ /* Add any additional settings here if needed */ }
-				</PanelBody>
-			</InspectorControls>
 			{ descriptionElement }
 		</>
 	);

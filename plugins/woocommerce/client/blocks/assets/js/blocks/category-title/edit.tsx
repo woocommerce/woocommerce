@@ -2,9 +2,6 @@
  * External dependencies
  */
 import clsx from 'clsx';
-import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { store as coreStore, useEntityProp } from '@wordpress/core-data';
 import {
 	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
@@ -16,14 +13,19 @@ import {
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
 import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
+import { store as coreStore, useEntityProp } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
+import { createElement, forwardRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { WP_REST_API_Category } from 'wp-types';
 
 interface Props {
 	attributes: {
-		level: number;
-		textAlign?: string;
 		isLink: boolean;
-		rel: string;
+		level: number;
 		linkTarget: string;
+		rel: string;
+		textAlign?: string;
 	};
 	setAttributes: ( attrs: Partial< Props[ 'attributes' ] > ) => void;
 	context: {
@@ -32,8 +34,19 @@ interface Props {
 	};
 }
 
+// Helper component to handle dynamic tag names without TypeScript union type issues
+const ContainerElement = forwardRef<
+	HTMLElement,
+	React.HTMLAttributes< HTMLElement > & {
+		tagName?: string;
+		children?: React.ReactNode;
+	}
+>( ( { tagName, children, ...props }, ref ) => {
+	return createElement( tagName as string, { ...props, ref }, children );
+} );
+
 export default function Edit( { attributes, setAttributes, context }: Props ) {
-	const { level, textAlign, isLink, rel, linkTarget } = attributes;
+	const { isLink, level, linkTarget, rel, textAlign } = attributes;
 	const TagName = (
 		level === 0 ? 'p' : `h${ level }`
 	) as keyof JSX.IntrinsicElements;
@@ -43,7 +56,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			return ( select( coreStore ) as any ).canUser( 'update', {
+			// @ts-expect-error canUser is not typed correctly
+			// This use actually reflects the use seen in `core/post-title` block.
+			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
 				name: termTaxonomy || 'product_cat',
 				id: termId,
@@ -52,22 +67,25 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		[ termId, termTaxonomy ]
 	);
 
-	const [ rawTitle = '', setTitle, fullTitle ] = ( useEntityProp as any )(
+	const [ rawTitle = '', setTitle, fullTitle ] = useEntityProp(
 		'taxonomy',
 		termTaxonomy || 'product_cat',
 		'name',
-		termId
+		String( termId )
 	);
 
-	const link: string | undefined = useSelect(
+	const link = useSelect(
 		( select ) => {
 			if ( ! termId ) return undefined;
-			const rec = ( select( coreStore ) as any ).getEntityRecord(
+			const record = select(
+				coreStore
+			).getEntityRecord< WP_REST_API_Category >(
 				'taxonomy',
 				termTaxonomy || 'product_cat',
 				termId
 			);
-			return rec?.link as string | undefined;
+
+			return record?.link;
 		},
 		[ termId, termTaxonomy ]
 	);
@@ -76,33 +94,29 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		className: clsx( { [ `has-text-align-${ textAlign }` ]: textAlign } ),
 	} );
 
-	const PlainTextAny = PlainText as any;
-
-	const DynamicTag: any = TagName;
-
-	let titleElement: JSX.Element = (
-		<DynamicTag { ...blockProps }>
-			{ __( 'Category title', 'woocommerce' ) }
-		</DynamicTag>
-	);
+	let titleElement: JSX.Element = createElement(
+		TagName,
+		blockProps,
+		__( 'Category title', 'woocommerce' )
+	) as JSX.Element;
 
 	if ( termId ) {
 		titleElement = userCanEdit ? (
-			<PlainTextAny
-				tagName={ TagName as any }
-				placeholder={ __( 'No title', 'woocommerce' ) as string }
+			<PlainText
+				// @ts-expect-error PlainText component types are not up-to-date
+				tagName={ TagName }
+				placeholder={ __( 'No title', 'woocommerce' ) }
 				value={ rawTitle }
-				onChange={ ( v: string ) =>
-					( setTitle as ( v: string ) => void )( v )
-				}
+				onChange={ ( v ) => setTitle( v ) }
 				__experimentalVersion={ 2 }
 				{ ...blockProps }
 			/>
 		) : (
-			<DynamicTag
+			<ContainerElement
+				tagName={ TagName }
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: ( fullTitle as any )?.rendered,
+					__html: fullTitle?.rendered,
 				} }
 			/>
 		);
@@ -110,26 +124,25 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 
 	if ( isLink && termId ) {
 		titleElement = userCanEdit ? (
-			<DynamicTag { ...blockProps }>
-				<PlainTextAny
+			<ContainerElement tagName={ TagName } { ...blockProps }>
+				<PlainText
+					// @ts-expect-error PlainText component types are not up-to-date
 					tagName="a"
 					href={ link }
 					target={ linkTarget }
 					rel={ rel }
 					placeholder={
 						! rawTitle?.length
-							? ( __( 'No title', 'woocommerce' ) as string )
+							? __( 'No title', 'woocommerce' )
 							: undefined
 					}
 					value={ rawTitle }
-					onChange={ ( v: string ) =>
-						( setTitle as ( v: string ) => void )( v )
-					}
+					onChange={ ( v ) => setTitle( v ) }
 					__experimentalVersion={ 2 }
 				/>
-			</DynamicTag>
+			</ContainerElement>
 		) : (
-			<DynamicTag { ...blockProps }>
+			<ContainerElement tagName={ TagName } { ...blockProps }>
 				<a
 					href={ link }
 					target={ linkTarget }
@@ -139,7 +152,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 						__html: ( fullTitle as any )?.rendered,
 					} }
 				/>
-			</DynamicTag>
+			</ContainerElement>
 		);
 	}
 
@@ -149,14 +162,12 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }
-					onChange={ ( newLevel: number ) =>
-						setAttributes( { level: newLevel } )
-					}
+					onChange={ ( level: number ) => setAttributes( { level } ) }
 				/>
 				<AlignmentControl
 					value={ textAlign }
-					onChange={ ( nextAlign: string ) =>
-						setAttributes( { textAlign: nextAlign || '' } )
+					onChange={ ( textAlign = '' ) =>
+						setAttributes( { textAlign } )
 					}
 				/>
 			</BlockControls>
@@ -173,9 +184,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 							<ToggleControl
 								__nextHasNoMarginBottom
 								label={ __( 'Open in new tab', 'woocommerce' ) }
-								onChange={ ( value: boolean ) =>
+								onChange={ ( v ) =>
 									setAttributes( {
-										linkTarget: value ? '_blank' : '_self',
+										linkTarget: v ? '_blank' : '_self',
 									} )
 								}
 								checked={ linkTarget === '_blank' }
@@ -185,9 +196,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 								__nextHasNoMarginBottom
 								label={ __( 'Link rel', 'woocommerce' ) }
 								value={ rel }
-								onChange={ ( newRel: string ) =>
-									setAttributes( { rel: newRel } )
-								}
+								onChange={ ( rel ) => setAttributes( { rel } ) }
 							/>
 						</>
 					) }
