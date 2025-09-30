@@ -256,12 +256,6 @@ export const withFeaturedItem =
 				>
 					<div className={ `${ className }__inner-blocks` }>
 						<InnerBlocks
-							allowedBlocks={ [
-								'woocommerce/category-title',
-								'woocommerce/category-description',
-								'core/heading',
-								'core/buttons',
-							] }
 							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
 								category
 							) }
