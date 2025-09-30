@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+WC_Tracks class not found fatal error and key undefined warnings

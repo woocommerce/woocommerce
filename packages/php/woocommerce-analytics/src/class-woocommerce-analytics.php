@@ -91,6 +91,17 @@ class Woocommerce_Analytics {
 			return false;
 		}
 
+		// Ensure the WC Tracks classes exist.
+		if ( ! class_exists( 'WC_Tracks' ) ) {
+			if ( ! defined( 'WC_ABSPATH' ) || ! file_exists( WC_ABSPATH . 'includes/tracks/class-wc-tracks.php' ) ) {
+				return false;
+			}
+
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-event.php';
+			include_once WC_ABSPATH . 'includes/tracks/class-wc-tracks-client.php';
+		}
+
 		// Tracking only Site pages.
 		if ( is_admin() || wp_doing_ajax() || wp_is_xml_request() || is_login() || is_feed() || ( defined( 'WP_CLI' ) && WP_CLI ) ) {
 			return false;
