@@ -536,18 +536,23 @@ class WC_Tracker {
 
 					FROM %i AS products
 
+					INNER JOIN %i AS product_type_relationships ON (
+						products.ID = product_type_relationships.object_id
+					)
+
 					INNER JOIN %i AS product_types ON (
-						products.ID = product_types.object_id
+						product_type_relationships.term_taxonomy_id = product_types.term_taxonomy_id
 					)
 
 					WHERE products.post_status = 'publish'
 					      AND products.post_type = 'product'
-					      AND product_types.term_taxonomy_id IN ( $term_ids )
+					      AND product_types.term_id IN ( $term_ids )
 
 					GROUP BY product_type
 				",
 				$wpdb->posts,
-				$wpdb->term_relationships
+				$wpdb->term_relationships,
+				$wpdb->term_taxonomy
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
