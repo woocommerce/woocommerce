@@ -52,8 +52,8 @@ const AddToCartOptionsEdit = (
 	return (
 		<>
 			<InspectorControls>
-				<DowngradeNotice blockClientId={ props?.clientId } />
 				<UpgradeProductImageGallery />
+				<DowngradeNotice blockClientId={ props?.clientId } />
 			</InspectorControls>
 			<BlockControls>
 				<ToolbarProductTypeGroup />
