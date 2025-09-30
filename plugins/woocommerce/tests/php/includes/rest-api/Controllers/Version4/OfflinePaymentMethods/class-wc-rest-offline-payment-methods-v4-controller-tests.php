@@ -75,7 +75,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		parent::setUp();
 		$this->enable_rest_api_v4_feature();
 
-		// Mock the Payments service to avoid promotional content interference
+		// Mock the Payments service to avoid promotional content interference.
 		$this->payments = $this->getMockBuilder( Payments::class )->getMock();
 		$this->payments->method( 'get_country' )->willReturn( 'US' );
 		$this->payments->method( 'get_payment_providers' )->willReturn( $this->get_mock_payment_providers() );
@@ -85,14 +85,15 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->endpoint = new OfflinePaymentMethodsController();
 		$this->endpoint->init( $this->payments, $schema );
 
-		// Manually trigger REST API route registration.
-		do_action( 'rest_api_init' );
+		// Manually register ONLY our controller's routes to avoid triggering global REST API init.
+		$this->endpoint->register_routes();
 
 		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+		wp_set_current_user( $this->user );
 	}
 
 	/**
@@ -201,7 +202,6 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test getting offline payment methods without location parameter.
 	 */
 	public function test_get_offline_payment_methods_without_location() {
-		wp_set_current_user( $this->user );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -222,7 +222,6 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test getting offline payment methods with location parameter.
 	 */
 	public function test_get_offline_payment_methods_with_location() {
-		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
