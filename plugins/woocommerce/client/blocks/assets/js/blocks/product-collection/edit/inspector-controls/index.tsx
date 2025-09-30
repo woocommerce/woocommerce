@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
+import { useIsEmailEditor } from '@woocommerce/email-editor';
 import {
 	revertMigration,
 	getUpgradeStatus,
@@ -41,6 +42,8 @@ import {
 	FilterableControl,
 } from './use-page-context-control';
 import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
+import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
+import useEmailColumnAdjustments from './use-email-column-adjustments';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -92,7 +95,10 @@ const ProductCollectionInspectorControls = (
 
 	// Carousel layout influences the visibility and behavior of some controls.
 	const isCarouselLayout = displayLayout?.type === LayoutOptions.CAROUSEL;
+	const isEmailEditor = useIsEmailEditor();
 	useCarouselLayoutAdjustments( clientId, attributes );
+	useEmailPaginationAdjustments( clientId, attributes );
+	useEmailColumnAdjustments( attributes, setAttributes );
 
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
@@ -184,21 +190,25 @@ const ProductCollectionInspectorControls = (
 						trackInteraction={ trackInteraction }
 					/>
 				) }
-				<LayoutOptionsControl { ...displayControlProps } />
-				<WidthOptionsControl { ...dimensionsControlProps } />
+				{ ! isEmailEditor && (
+					<LayoutOptionsControl { ...displayControlProps } />
+				) }
+				{ ! isEmailEditor && (
+					<WidthOptionsControl { ...dimensionsControlProps } />
+				) }
 				{ showProductsPerPageControl && (
 					<ProductsPerPageControl
 						{ ...queryControlProps }
 						carouselVariant={ isCarouselLayout }
 					/>
 				) }
-				{ showColumnsControl && (
+				{ ! isEmailEditor && showColumnsControl && (
 					<ColumnsControl { ...displayControlProps } />
 				) }
-				{ showOffsetControl && (
+				{ ! isEmailEditor && showOffsetControl && (
 					<OffsetControl { ...queryControlProps } />
 				) }
-				{ showMaxPagesToShowControl && (
+				{ showMaxPagesToShowControl && ! isEmailEditor && (
 					<MaxPagesToShowControl { ...queryControlProps } />
 				) }
 			</ToolsPanel>

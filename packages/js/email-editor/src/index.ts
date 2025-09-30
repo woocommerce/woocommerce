@@ -8,6 +8,7 @@ import { initialize } from './editor';
  * This store manages the email editor's state and settings.
  */
 export { storeName, createStore } from './store';
+export { useIsEmailEditor } from './hooks';
 
 /**
  * This method is used to initialize the email editor.

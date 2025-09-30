@@ -441,6 +441,7 @@ class FeaturesController {
 						if ( ! $tracking_enabled ) {
 							return __( '⚠ Usage tracking must be enabled to use remote logging.', 'woocommerce' );
 						}
+
 						return '';
 					},
 				),
@@ -544,6 +545,26 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'mcp_integration'             => array(
+				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
+				'description'                  => $this->get_mcp_integration_description(),
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'is_experimental'              => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'is_legacy'                    => false,
+			),
+			'destroy-empty-sessions'      => array(
+				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
+				'description'                  => __(
+					'[Performance] Removes session cookies for non-logged in customers when session data is empty, improving page caching performance. May cause compatibility issues with extensions that depend on the session cookie without using session data.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
@@ -570,6 +591,44 @@ class FeaturesController {
 				);
 			}
 		}
+	}
+
+	/**
+	 * Generate the description for the MCP integration feature.
+	 *
+	 * @return string The feature description with conditional permalink warning and documentation link.
+	 */
+	private function get_mcp_integration_description() {
+		$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
+
+		// Check permalink structure requirement.
+		$permalink_structure = get_option( 'permalink_structure' );
+		if ( empty( $permalink_structure ) ) {
+			$permalinks_url    = admin_url( 'options-permalink.php' );
+			$permalink_warning = sprintf(
+				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
+				__( 'Configuration Required', 'woocommerce' ),
+				__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
+				$permalinks_url,
+				__( 'Configure Permalinks', 'woocommerce' )
+			);
+			// Add documentation link to permalink warning.
+			$documentation_link = sprintf(
+				' <a href="%s" target="_blank">%s</a>',
+				'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
+				__( 'Learn more', 'woocommerce' )
+			);
+			return $base_description . $permalink_warning . $documentation_link;
+		}
+
+		// Add documentation link.
+		$documentation_link = sprintf(
+			' <a href="%s" target="_blank">%s</a>',
+			'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
+			__( 'Learn more', 'woocommerce' )
+		);
+
+		return $base_description . $documentation_link;
 	}
 
 	/**
