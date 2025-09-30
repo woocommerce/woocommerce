@@ -60,12 +60,12 @@ class ResetCommand {
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
-			WP_CLI::warning( "No credentials found for '{$platform}' to reset." );
+			WP_CLI::warning( "No credentials found for '" . ucfirst( $platform ) . "' to reset." );
 			return;
 		}
 
 		$this->credential_manager->delete_credentials( $platform );
 
-		WP_CLI::success( "Credentials for the '{$platform}' platform have been cleared." );
+		WP_CLI::success( "Credentials for the '" . ucfirst( $platform ) . "' platform have been cleared." );
 	}
 }
