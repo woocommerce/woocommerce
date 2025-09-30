@@ -123,12 +123,12 @@ final class ProductsCommand {
 		$platform = $this->platform_registry->resolve_platform( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
-			WP_CLI::log( "Credentials for '{$platform}' not found. Let's set them up." );
+			WP_CLI::log( "Credentials for '" . ucfirst( $platform ) . "' not found. Let's set them up." );
 
 			// Get platform-specific credential fields and set them up.
 			$required_fields = $this->platform_registry->get_platform_credential_fields( $platform );
 			if ( empty( $required_fields ) ) {
-				WP_CLI::error( "The platform '{$platform}' does not have configured credential fields." );
+				WP_CLI::error( "The platform '" . ucfirst( $platform ) . "' does not have configured credential fields." );
 				return;
 			}
 
@@ -154,11 +154,11 @@ final class ProductsCommand {
 	 * @param array  $assoc_args  The associative arguments.
 	 */
 	private function handle_count_request( string $platform, array $assoc_args ): void {
-		WP_CLI::log( "Fetching product count from {$platform}..." );
+		WP_CLI::log( "Fetching product count from " . ucfirst( $platform ) . "..." );
 
 		$fetcher = $this->platform_registry->get_fetcher( $platform );
 		if ( ! $fetcher ) {
-			WP_CLI::error( "Could not get fetcher for platform '{$platform}'" );
+			WP_CLI::error( "Could not get fetcher for platform '" . ucfirst( $platform ) . "'" );
 			return;
 		}
 
@@ -197,7 +197,7 @@ final class ProductsCommand {
 			}
 
 			$filter_description = empty( $filters ) ? '' : ' with ' . implode( ', ', $filters );
-			WP_CLI::success( "Found {$count} products{$filter_description} on {$platform}." );
+			WP_CLI::success( "Found {$count} products{$filter_description} on " . ucfirst( $platform ) . "." );
 		}
 	}
 }
