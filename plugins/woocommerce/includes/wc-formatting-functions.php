@@ -288,6 +288,10 @@ function wc_format_refund_total( $amount ) {
 function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 	$number = $number ?? '';
 
+	if ( '' === $number ) {
+		return '';
+	}
+
 	$locale   = localeconv();
 	$decimals = array( wc_get_price_decimal_separator(), $locale['decimal_point'], $locale['mon_decimal_point'] );
 
