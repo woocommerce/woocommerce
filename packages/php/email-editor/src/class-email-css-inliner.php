@@ -52,7 +52,7 @@ class Email_Css_Inliner implements Css_Inliner {
 		if ( ! isset( $this->inliner ) ) {
 			throw new \LogicException( 'You must call from_html before calling inline_css' );
 		}
-		/** @phpstan-ignore-next-line */
+		/** Ignore PHPStan analysis for dynamic inliner method call. @phpstan-ignore-next-line */
 		$this->inliner->inlineCss( $css );
 		return $this;
 	}
@@ -67,7 +67,7 @@ class Email_Css_Inliner implements Css_Inliner {
 		if ( ! isset( $this->inliner ) ) {
 			throw new \LogicException( 'You must call from_html before calling render' );
 		}
-		/** @phpstan-ignore-next-line */
+		/** Ignore PHPStan analysis for dynamic inliner method call. @phpstan-ignore-next-line */
 		return $this->inliner->render();
 	}
 
