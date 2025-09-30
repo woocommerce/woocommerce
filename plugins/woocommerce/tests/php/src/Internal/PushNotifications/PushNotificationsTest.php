@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_Unit_Test_Case;
 
 /**
  * PushNotifications test.
