@@ -73,6 +73,11 @@ class Controller extends AbstractController {
 					'callback'            => array( $this, 'get_items' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_items' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
@@ -191,5 +196,33 @@ class Controller extends AbstractController {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Check if a given request has access to create Shipping Zones.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function create_item_permissions_check( $request ) {
+		if ( ! wc_shipping_enabled() ) {
+			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Create a new zone
+	 *
+	 * @param WP_REST_Request $request Full details about the request
+	 * @return WP_Error|WP_REST_Response
+	* */
+	public function create_item($request)
+	{
 	}
 }
