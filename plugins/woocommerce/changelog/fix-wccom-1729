@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Send `X-VIP-Go-Segmentation` to WCCOM for better caching segmentation

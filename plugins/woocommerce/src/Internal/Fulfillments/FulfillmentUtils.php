@@ -224,6 +224,20 @@ class FulfillmentUtils {
 	}
 
 	/**
+	 * Get the fulfillment status of an order.
+	 *
+	 * @param WC_Order $order The order object.
+	 * @return string The fulfillment status.
+	 */
+	public static function get_order_fulfillment_status( WC_Order $order ): string {
+		if ( ! $order instanceof WC_Order ) {
+			return 'no_fulfillments';
+		}
+
+		return $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
+	}
+
+	/**
 	 * Get the fulfillment status text for an order.
 	 *
 	 * @param WC_Order $order The order object.
@@ -237,8 +251,7 @@ class FulfillmentUtils {
 		}
 
 		// Check if the order meta exists for fulfillment status.
-		$fulfillment_status = $order->meta_exists( '_fulfillment_status' ) ? $order->get_meta( '_fulfillment_status', true ) : 'no_fulfillments';
-
+		$fulfillment_status      = self::get_order_fulfillment_status( $order );
 		$fulfillment_status_text = '';
 		switch ( $fulfillment_status ) {
 			case 'fulfilled':
@@ -269,6 +282,44 @@ class FulfillmentUtils {
 			$fulfillment_status_text,
 			$fulfillment_status,
 			$order
+		);
+	}
+
+	/**
+	 * Get the meta query for the order fulfillment status.
+	 *
+	 * @param array|string $statuses The fulfillment statuses, or single status.
+	 * @return array The meta query.
+	 */
+	public static function get_order_fulfillment_status_meta_query( $statuses ): array {
+		if ( is_string( $statuses ) ) {
+			$statuses = array( $statuses );
+		}
+
+		$valid_statuses = array_filter( $statuses, array( self::class, 'is_valid_order_fulfillment_status' ) );
+		if ( empty( $valid_statuses ) ) {
+			return array();
+		}
+
+		if ( in_array( 'no_fulfillments', $valid_statuses, true ) ) {
+			return array(
+				'relation' => 'OR',
+				array(
+					'key'     => '_fulfillment_status',
+					'value'   => $valid_statuses,
+					'compare' => 'IN',
+				),
+				array(
+					'key'     => '_fulfillment_status',
+					'compare' => 'NOT EXISTS',
+				),
+			);
+		}
+
+		return array(
+			'key'     => '_fulfillment_status',
+			'value'   => $valid_statuses,
+			'compare' => 'IN',
 		);
 	}
 

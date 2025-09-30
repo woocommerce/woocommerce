@@ -101,8 +101,11 @@ class WC_Payment_Gateways {
 				$gateway = new $gateway();
 			}
 
-			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) && ! $this->should_load_paypal_standard() ) {
-				continue;
+			if ( is_a( $gateway, 'WC_Gateway_Paypal' ) ) {
+				WC_Gateway_Paypal::set_instance( $gateway );
+				if ( ! $this->should_load_paypal_standard() ) {
+					continue;
+				}
 			}
 
 			// Gateways need to be valid and extend WC_Payment_Gateway.

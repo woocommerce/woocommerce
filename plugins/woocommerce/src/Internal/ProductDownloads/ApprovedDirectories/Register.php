@@ -32,6 +32,13 @@ class Register {
 	private $mode_option = 'wc_downloads_approved_directories_mode';
 
 	/**
+	 * Internal cache for memoization of valid URLs and parent directories.
+	 *
+	 * @var array
+	 */
+	private $cache = array();
+
+	/**
 	 * Sets up the approved directories sub-system.
 	 *
 	 * @internal
@@ -124,6 +131,7 @@ class Register {
 		);
 
 		if ( false !== $wpdb->insert( $this->get_table(), $insert_fields ) ) {
+			unset( $this->cache );
 			return $wpdb->insert_id;
 		}
 
@@ -240,34 +248,39 @@ class Register {
 	public function is_valid_path( string $download_url ): bool {
 		global $wpdb;
 
-		$parent_directories = array();
-
-		foreach ( ( new URL( $this->normalize_url( $download_url ) ) )->get_all_parent_urls() as $parent ) {
-			$parent_directories[] = "'" . esc_sql( $parent ) . "'";
+		$url_cache_key = 'url:' . $download_url;
+		if ( isset( $this->cache[ $url_cache_key ] ) ) {
+			return $this->cache[ $url_cache_key ];
 		}
 
-		if ( empty( $parent_directories ) ) {
-			return false;
+		$url     = new URL( $this->normalize_url( $download_url ) );
+		$parents = $url->get_all_parent_urls();
+
+		if ( ! empty( $parents ) ) {
+			sort( $parents );
+
+			$parents_sql       = "'" . implode( "','", array_map( 'esc_sql', $parents ) ) . "'";
+			$parents_cache_key = 'parents:' . md5( $parents_sql );
+
+			if ( ! isset( $this->cache[ $parents_cache_key ] ) ) {
+				// Look for a rule that matches the start of the download URL being tested. Since rules describe parent
+				// directories, we also ensure it ends with a trailing slash.
+				//
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $parents_sql is already escaped.
+				$this->cache[ $parents_cache_key ] = (bool) $wpdb->get_var(
+					"SELECT 1
+					 FROM `{$this->get_table()}`
+					 WHERE enabled = 1 AND url IN ({$parents_sql})"
+				);
+				// phpcs:enable
+			}
+
+			$this->cache[ $url_cache_key ] = $this->cache[ $parents_cache_key ];
+		} else {
+			$this->cache[ $url_cache_key ] = false;
 		}
 
-		$parent_directories = join( ',', $parent_directories );
-		$table              = $this->get_table();
-
-		// Look for a rule that matches the start of the download URL being tested. Since rules describe parent
-		// directories, we also ensure it ends with a trailing slash.
-		//
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$matches = (int) $wpdb->get_var(
-			"
-				SELECT COUNT(*)
-				FROM   {$table}
-				WHERE  enabled = 1
-				       AND url IN ( {$parent_directories} )
-			"
-		);
-		// phpcs:enable
-
-		return $matches > 0;
+		return $this->cache[ $url_cache_key ];
 	}
 
 	/**
@@ -415,9 +428,13 @@ class Register {
 	 */
 	public function delete_by_id( int $id ): bool {
 		global $wpdb;
-		$table = $this->get_table();
 
-		return (bool) $wpdb->delete( $table, array( 'url_id' => $id ) );
+		if ( ! $wpdb->delete( $this->get_table(), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -427,9 +444,13 @@ class Register {
 	 */
 	public function delete_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "DELETE FROM $table" );
+
+		if ( ! $wpdb->query( "DELETE FROM {$this->get_table()}" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -442,7 +463,13 @@ class Register {
 	public function enable_by_id( int $id ): bool {
 		global $wpdb;
 		$table = $this->get_table();
-		return (bool) $wpdb->update( $table, array( 'enabled' => 1 ), array( 'url_id' => $id ) );
+
+		if ( ! $wpdb->update( $table, array( 'enabled' => 1 ), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -454,8 +481,13 @@ class Register {
 	 */
 	public function disable_by_id( int $id ): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		return (bool) $wpdb->update( $table, array( 'enabled' => 0 ), array( 'url_id' => $id ) );
+
+		if ( ! $wpdb->update( $this->get_table(), array( 'enabled' => 0 ), array( 'url_id' => $id ) ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -465,9 +497,13 @@ class Register {
 	 */
 	public function enable_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "UPDATE {$table} SET enabled = 1" );
+
+		if ( ! $wpdb->query( "UPDATE {$this->get_table()} SET enabled = 1" ) ) { // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
@@ -477,9 +513,14 @@ class Register {
 	 */
 	public function disable_all(): bool {
 		global $wpdb;
-		$table = $this->get_table();
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		return (bool) $wpdb->query( "UPDATE {$table} SET enabled = 0" );
+		if ( ! $wpdb->query( "UPDATE {$this->get_table()} SET enabled = 0" ) ) {
+			return false;
+		}
+
+		unset( $this->cache );
+		return true;
 	}
 
 	/**
