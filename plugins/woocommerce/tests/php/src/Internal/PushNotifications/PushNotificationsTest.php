@@ -2,6 +2,8 @@
 
 declare( strict_types = 1 );
 
+namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
+
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -17,6 +19,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 */
 	private $jetpack_connection_manager_mock;
 
+	/**
+	 * Tests the functionality is enabled if Jetpack is connected.
+	 */
 	public function test_it_can_tell_push_notifications_should_be_enabled_if_jetpack_is_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
@@ -30,6 +35,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $push_notifications->should_be_enabled() );
 	}
 
+	/**
+	 * Tests the functionality is disabled if Jetpack is not connected.
+	 */
 	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_jetpack_is_not_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
@@ -43,6 +51,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $push_notifications->should_be_enabled() );
 	}
 
+	/**
+	 * Sets up the Jetpack connection manager mocking.
+	 */
 	private function set_up_jetpack_connection_manager_mock( array $methods ) {
 		$this->jetpack_connection_manager_mock = $this
 			->getMockBuilder( Jetpack_Connection_Manager::class )
