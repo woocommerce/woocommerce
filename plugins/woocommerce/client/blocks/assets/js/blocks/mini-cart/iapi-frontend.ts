@@ -164,7 +164,6 @@ store< MiniCart >(
 			get drawerOverlayClass() {
 				const baseClasses =
 					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-
 				return state.isOpen
 					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
 					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
@@ -309,9 +308,16 @@ const { state: cartItemState } = store(
 					cartItem: { id },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				return woocommerceState.cart.items.find(
-					( item ) => item.id === id
-				) as CartItem;
+				const cartItem =
+					woocommerceState.cart.items.find(
+						( item ) => item.id === id
+					) || ( {} as CartItem );
+
+				return {
+					variation: [],
+					item_data: [],
+					...cartItem,
+				};
 			},
 
 			get currency(): Currency {
