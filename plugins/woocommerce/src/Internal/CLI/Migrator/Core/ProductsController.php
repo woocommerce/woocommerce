@@ -330,10 +330,11 @@ class ProductsController {
 		$parsed['filters'] = $this->parse_query_filters( $assoc_args );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
+			$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
 			WP_CLI::error(
 				sprintf(
 					"No credentials found for platform '%s'. Please run: wp wc migrate setup --platform=%s",
-					$platform,
+					$platform_display_name,
 					$platform
 				)
 			);
@@ -937,9 +938,10 @@ class ProductsController {
 		$session_time_formatted = human_time_diff( 0, $session_duration_seconds );
 		$avg_time_formatted     = number_format( $avg_time_per_product, 2 );
 
-		$metrics_message = sprintf(
+		$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
+		$metrics_message       = sprintf(
 			'Session completed for %s: %d products in %s (avg: %s seconds per product)',
-			$platform,
+			$platform_display_name,
 			$session_products,
 			$session_time_formatted,
 			$avg_time_formatted
