@@ -43,7 +43,7 @@ export const UpgradeProductImageGallery = () => {
 	}, [ getBlocks, setProductImageGalleryBlock ] );
 
 	if ( ! productImageGalleryBlock ) {
-		return false;
+		return null;
 	}
 
 	const notice = __(
