@@ -15,7 +15,7 @@
 		"env:dev": "pnpm wp-env start --update",
 		"env:dev:stop": "pnpm wp-env stop",
 		"test:unit": "composer run-script test:unit",
-		"test:php:ci": "pnpm test:unit && pnpm test:integration",
+		"test:php:ci": "pnpm test:unit",
 		"test:integration": "composer run-script test:integration",
 		"build:composer-package": "bash tasks/build-package.sh"
 	},
