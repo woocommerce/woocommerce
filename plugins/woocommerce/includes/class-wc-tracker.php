@@ -515,7 +515,7 @@ class WC_Tracker {
 			array(
 				'taxonomy'   => 'product_type',
 				'hide_empty' => false,
-				'fields'     => 'id=>slug'
+				'fields'     => 'id=>slug',
 			)
 		);
 
@@ -527,7 +527,7 @@ class WC_Tracker {
 		$term_ids = implode( ', ', array_map( 'intval', array_keys( $product_type_terms ) ) );
 
 		// Should result in an array of objects, with each object containing a `product_type` (numeric ID) and a `count` property.
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepare
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"
@@ -549,7 +549,7 @@ class WC_Tracker {
 				$wpdb->term_relationships
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepare
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Rework the results into an array of counts keyed by product term ID.
 		foreach ( $results as $result ) {
