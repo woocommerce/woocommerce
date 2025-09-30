@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
-use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -16,7 +16,7 @@ use WC_Unit_Test_Case;
  */
 class PushNotificationsTest extends WC_Unit_Test_Case {
 	/**
-	 * @var Jetpack_Connection_Manager|MockObject
+	 * @var JetpackConnectionManager|MockObject
 	 */
 	private $jetpack_connection_manager_mock;
 
@@ -59,13 +59,13 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 */
 	private function set_up_jetpack_connection_manager_mock( array $methods ) {
 		$this->jetpack_connection_manager_mock = $this
-			->getMockBuilder( Jetpack_Connection_Manager::class )
+			->getMockBuilder( JetpackConnectionManager::class )
 			->disableOriginalConstructor()
 			->onlyMethods( $methods )
 			->getMock();
 
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks(
-			array( Jetpack_Connection_Manager::class => $this->jetpack_connection_manager_mock )
+			array( JetpackConnectionManager::class => $this->jetpack_connection_manager_mock )
 		);
 	}
 }
