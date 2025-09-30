@@ -37,7 +37,7 @@ const Edit = ( props: BlockEditProps< { className: string } > ) => {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				<UpgradeNotice blockClientId={ props?.clientId } />
+				<UpgradeNotice blockClientId={ props.clientId } />
 			</InspectorControls>
 			<Disabled>
 				<Placeholder />

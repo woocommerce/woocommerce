@@ -35,6 +35,10 @@ export const UpgradeNotice = ( {
 }: {
 	blockClientId: string;
 } ) => {
+	if ( ! blockClientId ) {
+		return null;
+	}
+
 	const notice = createInterpolateElement(
 		__(
 			'Gain access to more customization options when you upgrade to the <strongText />.',
