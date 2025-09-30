@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Migrator: capitalized first letter of the platform for migrator

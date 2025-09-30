@@ -82,7 +82,7 @@ class WC_Settings_General extends WC_Settings_Page {
 			if ( count( $address_autocomplete_providers ) > 1 ) {
 				$address_provider_options = array();
 				foreach ( $address_autocomplete_providers as $address_provider ) {
-					$address_provider_options[ $address_provider->id ] = $address_provider->name;
+					$address_provider_options[ $address_provider->id ] = sanitize_text_field( $address_provider->name );
 				}
 				$address_autocomplete_preferred_provider_setting = array(
 					'id'      => 'woocommerce_address_autocomplete_provider',

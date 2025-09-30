@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/email-editor",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "Gutenberg based email editor that is used in WooCommerce emails.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
