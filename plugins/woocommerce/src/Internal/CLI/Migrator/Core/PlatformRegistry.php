@@ -300,7 +300,7 @@ class PlatformRegistry {
 	 */
 	public function get_platform_display_name( string $platform_slug ): string {
 		$platform = $this->get_platform( $platform_slug );
-		
+
 		if ( is_array( $platform ) && isset( $platform['name'] ) ) {
 			return $platform['name'];
 		}

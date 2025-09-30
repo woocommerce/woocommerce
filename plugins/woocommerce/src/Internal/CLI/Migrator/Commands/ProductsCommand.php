@@ -120,7 +120,7 @@ final class ProductsCommand {
 	 */
 	public function __invoke( array $args, array $assoc_args ): void {
 		// Resolve and validate the platform.
-		$platform = $this->platform_registry->resolve_platform( $assoc_args );
+		$platform              = $this->platform_registry->resolve_platform( $assoc_args );
 		$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {

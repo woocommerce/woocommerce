@@ -57,7 +57,7 @@ class SetupCommand {
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
 		// Resolve and validate the platform.
-		$platform = $this->platform_registry->resolve_platform( $assoc_args );
+		$platform              = $this->platform_registry->resolve_platform( $assoc_args );
 		$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
 
 		// Get platform-specific credential fields and set them up.

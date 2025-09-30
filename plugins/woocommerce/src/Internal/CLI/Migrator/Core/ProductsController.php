@@ -939,7 +939,7 @@ class ProductsController {
 		$avg_time_formatted     = number_format( $avg_time_per_product, 2 );
 
 		$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
-		$metrics_message = sprintf(
+		$metrics_message       = sprintf(
 			'Session completed for %s: %d products in %s (avg: %s seconds per product)',
 			$platform_display_name,
 			$session_products,
