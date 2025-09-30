@@ -58,10 +58,10 @@ const config: PlaywrightTestConfig = {
 		{
 			name: 'legacy-mini-cart',
 			testMatch: [
-				'**/tests/mini-cart/**',
-				'**/tests/add-to-cart-with-options/**',
-				'**/tests/product-button/**',
-				'**/tests/product-collection/**',
+				'**/tests/mini-cart/**/*.spec.ts',
+				'**/tests/add-to-cart-with-options/**/*.spec.ts',
+				'**/tests/product-button/**/*.spec.ts',
+				'**/tests/product-collection/**/*.spec.ts',
 			],
 			fullyParallel: true,
 			use: { ...devices[ 'Desktop Chrome' ] },
