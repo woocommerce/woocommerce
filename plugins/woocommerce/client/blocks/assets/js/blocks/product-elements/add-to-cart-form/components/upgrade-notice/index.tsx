@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch, select } from '@wordpress/data';
-import { UpgradeDowngradeNotice as Notice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
+import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { findBlock } from '@woocommerce/utils';
 import { createBlock } from '@wordpress/blocks';
 
@@ -73,12 +73,12 @@ export const UpgradeNotice = ( {
 	};
 
 	return (
-		<Notice
+		<UpgradeDowngradeNotice
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
 			onActionClick={ handleClick }
 		>
 			{ notice }
-		</Notice>
+		</UpgradeDowngradeNotice>
 	);
 };
