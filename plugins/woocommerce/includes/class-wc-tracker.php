@@ -509,12 +509,19 @@ class WC_Tracker {
 	private static function get_active_product_counts(): array {
 		global $wpdb;
 
-		$counts             = [];
-		$counts_by_id       = [];
-		$product_type_terms = get_terms( array( 'taxonomy' => 'product_type', 'hide_empty' => false, 'fields' => 'id=>slug' ) );
-		$term_ids           = implode( ', ', array_map( 'intval', array_keys( $product_type_terms ) ) );
+		$counts             = array();
+		$counts_by_id       = array();
+		$product_type_terms = get_terms(
+			array(
+				'taxonomy'   => 'product_type',
+				'hide_empty' => false,
+				'fields'     => 'id=>slug'
+			)
+		);
+		$term_ids = implode( ', ', array_map( 'intval', array_keys( $product_type_terms ) ) );
 
 		// Should result in an array of objects, with each object containing a `product_type` (numeric ID) and a `count` property.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepare
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"
@@ -536,6 +543,7 @@ class WC_Tracker {
 				$wpdb->term_relationships
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepare
 
 		// Rework the results into an array of counts keyed by product term ID.
 		foreach ( $results as $result ) {
