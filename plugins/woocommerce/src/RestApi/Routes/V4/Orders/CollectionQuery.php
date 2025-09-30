@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Internal\Orders\PaymentStatus\PaymentStatusUtils;
 
 /**
  * CollectionQuery class.
@@ -117,6 +118,15 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'items'             => array(
 					'type' => 'string',
 					'enum' => array_map( OrderUtil::class . '::remove_status_prefix', array_merge( array( 'any', OrderStatus::TRASH ), array_keys( wc_get_order_statuses() ) ) ),
+				),
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+			'payment_method'          => array(
+				'description'       => __( 'Limit result set to orders with specific payment methods.', 'woocommerce' ),
+				'type'              => 'array',
+				'items'             => array(
+					'type' => 'string',
+					'enum' => array_values( WC()->payment_gateways->get_payment_gateway_ids() ),
 				),
 				'validate_callback' => 'rest_validate_request_arg',
 			),
@@ -222,6 +232,16 @@ class CollectionQuery extends AbstractCollectionQuery {
 
 					return $valid;
 				},
+			),
+			'payment_status'          => array(
+				'description'       => __( 'Limit result set to orders with specific payment statuses.', 'woocommerce' ),
+				'type'              => 'array',
+				'items'             => array(
+					'type' => 'string',
+					'enum' => array_keys( PaymentStatusUtils::get_order_payment_statuses() ),
+				),
+				'sanitize_callback' => 'wp_parse_list',
+				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'fulfillment_status'      => array(
 				'description'       => __( 'Limit result set to orders with specific fulfillment statuses.', 'woocommerce' ),
@@ -382,6 +402,16 @@ class CollectionQuery extends AbstractCollectionQuery {
 			}
 
 			$args['fulfillment_status'] = $fulfillment_status;
+		}
+
+		// Payment method filtering.
+		if ( isset( $request['payment_method'] ) ) {
+			$args['payment_method'] = $request['payment_method'];
+		}
+
+		// Payment status filtering.
+		if ( isset( $request['payment_status'] ) ) {
+			$args['payment_status'] = $request['payment_status'];
 		}
 
 		return $args;

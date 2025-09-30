@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Internal\Orders\PaymentStatus\PaymentStatusUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -1063,6 +1064,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		// Handle fulfillment status filtering.
 		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
 			$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+			if ( ! empty( $meta_query ) ) {
+				$wp_query_args['meta_query'][] = $meta_query;
+			}
+		}
+
+		// Handle payment status filtering.
+		if ( ! empty( $query_vars['payment_status'] ) ) {
+			$meta_query = PaymentStatusUtils::get_order_payment_status_meta_query( $query_vars['payment_status'] );
 			if ( ! empty( $meta_query ) ) {
 				$wp_query_args['meta_query'][] = $meta_query;
 			}

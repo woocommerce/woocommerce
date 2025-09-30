@@ -20,6 +20,7 @@ use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Internal\Orders\PaymentStatus\PaymentStatusUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -3098,6 +3099,11 @@ FROM $order_meta_table
 		// Handle fulfillment status filtering.
 		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
 			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+		}
+
+		// Handle payment status filtering.
+		if ( ! empty( $query_vars['payment_status'] ) ) {
+			$query_vars['meta_query'][] = PaymentStatusUtils::get_order_payment_status_meta_query( $query_vars['payment_status'] );
 		}
 
 		try {
