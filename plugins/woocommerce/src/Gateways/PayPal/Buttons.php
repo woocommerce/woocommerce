@@ -32,7 +32,7 @@ class Buttons {
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -46,18 +46,18 @@ class Buttons {
 	/**
 	 * The request instance.
 	 *
-	 * @var WC_Gateway_Paypal_Request
+	 * @var \WC_Gateway_Paypal_Request
 	 */
 	private $request;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param WC_Gateway_Paypal $gateway The gateway instance.
+	 * @param \WC_Gateway_Paypal $gateway The gateway instance.
 	 */
-	public function __construct( WC_Gateway_Paypal $gateway ) {
+	public function __construct( \WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
-		$this->request = new WC_Gateway_Paypal_Request( $this->gateway );
+		$this->request = new \WC_Gateway_Paypal_Request( $this->gateway );
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
