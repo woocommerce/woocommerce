@@ -53,6 +53,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Sets up the Jetpack connection manager mocking.
+	 *
+	 * @param array $methods The methods that will be mocked.
 	 */
 	private function set_up_jetpack_connection_manager_mock( array $methods ) {
 		$this->jetpack_connection_manager_mock = $this
