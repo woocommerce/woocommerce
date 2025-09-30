@@ -62,7 +62,7 @@ class SetupCommand {
 		// Get platform-specific credential fields and set them up.
 		$required_fields = $this->platform_registry->get_platform_credential_fields( $platform );
 		if ( empty( $required_fields ) ) {
-			WP_CLI::error( "The platform '{$platform}' does not have configured credential fields." );
+			WP_CLI::error( "The platform '" . ucfirst( $platform ) . "' does not have configured credential fields." );
 		}
 
 		$this->credential_manager->setup_credentials( $platform, $required_fields );
