@@ -9,6 +9,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -48,6 +49,13 @@ class PushNotifications {
 		if (
 			! class_exists( JetpackConnectionManager::class )
 			|| ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
+		) {
+			return false;
+		}
+
+		if (
+			! class_exists( WCConnectionHelper::class )
+			|| ! wc_get_container()->get( WCConnectionHelper::class )->is_connected()
 		) {
 			return false;
 		}
