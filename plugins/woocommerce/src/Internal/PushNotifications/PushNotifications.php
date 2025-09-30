@@ -8,7 +8,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -45,7 +45,7 @@ class PushNotifications {
 	public function should_be_enabled(): bool {
 		$proxy = wc_get_container()->get( LegacyProxy::class );
 
-		if ( ! $proxy->get_instance_of( Jetpack_Connection_Manager::class )->is_connected() ) {
+		if ( ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected() ) {
 			return false;
 		}
 
