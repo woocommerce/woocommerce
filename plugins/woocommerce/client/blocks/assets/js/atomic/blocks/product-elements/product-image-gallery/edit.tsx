@@ -31,7 +31,7 @@ const Placeholder = () => {
 	);
 };
 
-const Edit = ( props: BlockEditProps< {} > ) => {
+const Edit = ( props: BlockEditProps< Record< string, never > > ) => {
 	const blockProps = useBlockProps();
 
 	return (
