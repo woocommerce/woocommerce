@@ -153,17 +153,6 @@ export const withFeaturedItem =
 		const [ parentContainerDimension, setParentContainerDimension ] =
 			useState< BgImageDimensions >( { height: 0, width: 0 } );
 
-		// We need to manually set this property to make sure we can reliably
-		// distinguish between legacy and new block versions. We can't just
-		// set the default value in the block.json.
-		useEffect( () => {
-			setAttributes( {
-				showDesc: false,
-				showPrice: false,
-				__woocommerceBlockVersion: 2,
-			} );
-		}, [ setAttributes ] );
-
 		useEffect( () => {
 			// Observes the resizable block's dimension changes.
 			const observer = new ResizeObserver( ( entries ) => {
