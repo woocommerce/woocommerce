@@ -484,11 +484,14 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		}
 
 		$method_under_test = new ReflectionMethod( WC_Tracker::class, 'get_active_product_counts' );
+		$method_under_test = $method_under_test->setAccessible( true );
 		$results           = $method_under_test->invoke( null );
 
 		$this->assertSame( 1, $results['external'], 'We correctly determine the number of active external products.' );
 		$this->assertSame( 2, $results['simple'], 'We correctly determine the number of active simple products.' );
 		$this->assertSame( 3, $results['variable'], 'We correctly determine the number of active variable products.' );
+
+		$method_under_test->setAccessible( false );
 	}
 
 	/**
