@@ -253,7 +253,7 @@ class PlatformRegistry {
 
 		if ( empty( $platform ) ) {
 			$platform = $default_platform;
-			WP_CLI::log( "Platform not specified, using default: '" . ucfirst( $platform ) . "'." );
+			WP_CLI::log( "Platform not specified, using default: '" . $this->get_platform_display_name( $platform ) . "'." );
 		}
 
 		// Validate the platform exists.
@@ -289,5 +289,23 @@ class PlatformRegistry {
 		}
 		$credentials = $platform['credentials'] ?? array();
 		return is_array( $credentials ) ? $credentials : array();
+	}
+
+	/**
+	 * Gets the display name for a platform.
+	 *
+	 * @param string $platform_slug The platform identifier (e.g., 'shopify').
+	 *
+	 * @return string The proper display name (e.g., 'Shopify').
+	 */
+	public function get_platform_display_name( string $platform_slug ): string {
+		$platform = $this->get_platform( $platform_slug );
+		
+		if ( is_array( $platform ) && isset( $platform['name'] ) ) {
+			return $platform['name'];
+		}
+
+		// Fallback to ucfirst if platform not found or no name configured.
+		return ucfirst( $platform_slug );
 	}
 }
