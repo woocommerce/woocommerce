@@ -328,7 +328,7 @@ class BlockTemplateUtils {
 		);
 
 		/*
-		 * This may return the blockified directory for wp_templates.
+		 * This may return the blockified directory for `wp_templates`.
 		 * At the moment every template file has a corresponding blockified file.
 		 * If we decide to add a new template file that doesn't, we will need to update this logic.
 		 */
