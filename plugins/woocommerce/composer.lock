@@ -1182,7 +1182,7 @@
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "93415309862268dacb4924f7d544a2ebd9560522"
+                "reference": "cb8f68b660212b31f99ce847b8b423e3f4163210"
             },
             "require": {
                 "php": ">=7.4"
@@ -1213,7 +1213,8 @@
             },
             "autoload": {
                 "classmap": [
-                    "src/"
+                    "src/",
+                    "vendor-prefixed/"
                 ]
             },
             "autoload-dev": {
@@ -1222,6 +1223,12 @@
                 ]
             },
             "scripts": {
+                "post-install-cmd": [
+                    "composer dump-autoload -o"
+                ],
+                "post-update-cmd": [
+                    "composer dump-autoload -o"
+                ],
                 "env:destroy": [
                     "wp-env destroy"
                 ],

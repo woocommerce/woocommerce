@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Temporarily remove the CSSInliner package and verify that the WooCommerce integration of the email editor continues to function properly.
