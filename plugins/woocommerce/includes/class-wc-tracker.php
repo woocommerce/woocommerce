@@ -541,6 +541,7 @@ class WC_Tracker {
 					)
 
 					WHERE products.post_status = 'publish'
+					      AND products.post_type = 'product'
 					      AND product_types.term_taxonomy_id IN ( $term_ids )
 
 					GROUP BY product_type
