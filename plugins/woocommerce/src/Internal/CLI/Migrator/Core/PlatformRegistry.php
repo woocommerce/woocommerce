@@ -253,7 +253,7 @@ class PlatformRegistry {
 
 		if ( empty( $platform ) ) {
 			$platform = $default_platform;
-			WP_CLI::log( "Platform not specified, using default: '{$platform}'." );
+			WP_CLI::log( "Platform not specified, using default: '" . ucfirst( $platform ) . "'." );
 		}
 
 		// Validate the platform exists.
