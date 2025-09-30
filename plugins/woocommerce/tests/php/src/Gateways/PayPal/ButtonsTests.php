@@ -7,13 +7,10 @@
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal-buttons.php';
-
 /**
  * Class WC_Gateway_Paypal_Buttons_Test.
  */
-class WC_Gateway_Paypal_Buttons_Test extends \WC_Unit_Test_Case {
-
+class ButtonsTests extends \WC_Unit_Test_Case {
 	/**
 	 * The buttons instance.
 	 *
