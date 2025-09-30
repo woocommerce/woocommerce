@@ -117,7 +117,7 @@ abstract class FeaturedItem extends AbstractDynamicBlock {
 				// Handle core blocks that need global post manipulation.
 				if ( 'core/post-excerpt' === $block_name || 'core/post-title' === $block_name ) {
 					global $post;
-					$post = get_post( $this->featured_item_id );
+					$post = get_post( $this->featured_item_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 					if ( $post instanceof \WP_Post ) {
 						setup_postdata( $post );

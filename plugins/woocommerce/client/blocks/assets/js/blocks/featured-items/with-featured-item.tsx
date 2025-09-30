@@ -5,7 +5,7 @@
  */
 import type { BlockAlignment } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
-import { ProductResponseItem, isEmpty } from '@woocommerce/types';
+import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
 import {
 	InnerBlocks,
@@ -23,7 +23,6 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
-import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
