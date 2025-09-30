@@ -1,0 +1,10 @@
+log in as customer
+click exactly "Cart"
+check that page contains "Cart"
+check that page contains "Pencils"
+click "Add to cart" below "Pencils"
+log out from site
+log in as customer
+click "mini-cart" on the right of "My account"
+check that page contains "Pencils"
+click "Remove item"

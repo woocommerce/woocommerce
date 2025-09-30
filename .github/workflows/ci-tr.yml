@@ -1,0 +1,103 @@
+name: 'CI-tr'
+on:
+  pull_request:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '**/changelog/**'
+      - '.cursor/**'
+      - '**/*.md'
+      - '**/changelog.txt'
+      - '.gitignore'
+      - '.coderabbit.yml'
+      - 'CODEOWNERS'
+      #- '.github/**'
+      - '!.github/workflows/ci.yml'
+    branches:
+      - 'trunk'
+      - 'release/*'
+      - 'tR-e2e-tests'
+  workflow_call:
+    inputs:
+      trigger:
+        description: 'Type of run to trigger. E.g. nightly-checks, release-checks, etc.'
+        required: true
+        default: 'default'
+        type: string
+      refName:
+        description: 'The ref name to run tests on. It needs to have a corresponding release published.'
+        required: false
+        type: string
+      artifactName:
+        description: 'The release artifact name to download and run tests for.'
+        required: false
+        type: string
+
+jobs:
+  project-jobs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install testRigor command line tool
+        run: |
+          set -e
+          echo "Installing testrigor-cli..."
+          npm install -g testrigor-cli
+          
+          echo "Verifying testrigor-cli installation..."
+          if command -v testrigor >/dev/null 2>&1; then
+            echo "SUCCESS: testrigor-cli is installed"
+            testrigor --version
+          else
+            echo "ERROR: testrigor-cli installation failed"
+            exit 1
+          fi
+
+      - uses: 'actions/checkout@v4'
+        name: 'Checkout'
+        with:
+          ref: ${{ inputs.refName != '' && inputs.refName || '' }}
+
+      - name: Set up PHP
+        run: |
+          sudo apt install php-mysql php-curl
+          
+      - name: Setup - node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+
+      - name: Install - nvm
+        run: |
+          curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+      
+      - name: Set up Composer
+        run: |
+          php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+          php -r "if (hash_file('sha384', 'composer-setup.php') === 'ed0feb545ba87161262f2d45a633e34f591ebb3381f2e0063c345ebea4d228dd0043083717770234ec00c5a9f9593792') { echo 'Installer verified'.PHP_EOL; } else { echo 'Installer corrupt'.PHP_EOL; unlink('composer-setup.php'); exit(1); }"
+          php composer-setup.php
+          php -r "unlink('composer-setup.php');"
+          sudo mv composer.phar /usr/local/bin/composer
+
+      - name: Setup - pnpm
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda
+
+      - uses: './.github/actions/setup-woocommerce-monorepo'
+        name: 'Install Monorepo'
+        id: 'install-monorepo'
+
+      - name: 'Start Test Environment'
+        id: 'prepare-test-environment'
+        run: |
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+          nvm install
+          nvm use
+          pnpm install
+          pnpm --filter='@woocommerce/plugin-woocommerce' build
+          cd plugins/woocommerce
+          pnpm env:start
+
+      - name: Run testRigor tests
+        run: |
+          echo "Port is $WP_ENV_TESTS_PORT"
+          echo "URL is $WP_BASE_URL"
+          testrigor test-suite run ${{ vars.SUITE_ID }} --token ${{ secrets.CI_TOKEN }} --localhost --url http://localhost:8086/ --test-cases-path plugins/woocommerce/tests/e2e-tR/testcases/**/*.txt

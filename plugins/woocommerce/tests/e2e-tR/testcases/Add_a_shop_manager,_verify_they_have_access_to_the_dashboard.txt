@@ -1,0 +1,31 @@
+click "My account"
+log in
+click "Live"
+click "Users"
+click "Add user"
+select "Shop manager" from "Role"
+enter "password" into "password"
+click "Confirm use of weak password"
+enter "Shop" into "Username"
+enter "shop@manager.com" into "Email"
+click button "Add User" roughly below "Role"
+check that page contains "New user created. Edit user"
+go to site
+log out from site
+enter "Shop" into "Username"
+enter "password" into input "password-input"
+click exactly "Log in"
+check that page contains button "Live"
+click button "Live"
+click "Products"
+check that page contains "Add new product"
+go to site
+log out from site
+//Clean up
+log in
+click "Live"
+click "Users"
+hover over "Shop"
+click "Delete"
+click button "Confirm Deletion"
+check that page contains "User deleted"

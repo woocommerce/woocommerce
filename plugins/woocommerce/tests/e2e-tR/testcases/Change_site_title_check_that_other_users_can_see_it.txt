@@ -1,0 +1,17 @@
+click "My account"
+log in
+click "Live"
+click "Settings" below "Tools"
+enter "Awesome store" into "Site title"
+click button "Save changes"
+go to site
+log out from site
+log in as customer
+check that page contains "Awesome store"
+log out from site
+//Clean up
+log in
+click "Live"
+click "Settings" below "Tools"
+enter "WooCommerce Core E2E Test Suite" into "Site title"
+click button "Save changes"

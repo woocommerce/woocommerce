@@ -1,0 +1,22 @@
+click "My account"
+log in
+click "Live"
+click "Products"
+click "Pencils"
+click "Attributes" below "Linked Products"
+enter "Pieces" into "e.g. length or weight"
+enter "333" into "Enter some descriptive text"
+click "Save attributes"
+go to site
+click "Shop"
+click "Pencils"
+check that page contains "Pieces"
+check that page contains "333"
+//Clean up
+click "Live"
+click "Products"
+click "Pencils"
+hover over "Pieces"
+click "Attributes" below "Linked Products"
+click "Remove" on the right of "Pieces"
+click "Save attributes"

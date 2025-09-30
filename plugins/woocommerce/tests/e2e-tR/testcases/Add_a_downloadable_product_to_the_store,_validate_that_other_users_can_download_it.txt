@@ -1,0 +1,27 @@
+click "My account"
+login
+click "Live"
+click "Products"
+click "Add new product"
+enter "Free royalty image" into "Product name"
+enter "0" into "Regular price"
+enter "1" into checkbox "Virtual"
+enter "1" into checkbox "Downloadable"
+click "Add file"
+click "Choose file"
+click "Media Library"
+click 1st "thumbnail"
+click "Insert file URL"
+click "Publish"
+check that page contains "Product published"
+click "View"
+log out from site
+log in as customer
+click "Shop"
+check that page contains "Free royalty image"
+click "Add to cart" below "Free royalty image"
+checkout and place order
+click "My account"
+click "Downloads"
+click on table at 1st row and 4th column
+check that file was downloaded

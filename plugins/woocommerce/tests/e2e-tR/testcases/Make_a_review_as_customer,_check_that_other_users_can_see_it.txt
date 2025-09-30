@@ -1,0 +1,17 @@
+log in as customer
+click "Shop"
+click "Pencils"
+click "star-4"
+click button "Submit"
+type "Test review"
+click button "Submit"
+check that page contains "Your review is awaiting approval"
+log out from site
+log in
+click "Live"
+click "Products"
+click "Reviews"
+hover over "Jane Smith"
+click "Approve"
+click "View product"
+check that page contains "Test review"

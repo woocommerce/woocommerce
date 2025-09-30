@@ -1,0 +1,27 @@
+click "My account"
+log in
+click "Live"
+click "Products"
+click button "Add new product" on the left of "Import"
+enter "Sold out" into "Product name"
+enter "0" into "Regular price"
+click "Inventory"
+click radiobutton "Out of stock"
+click "Publish"
+go to site
+log out from site
+log in as customer
+click "Shop"
+click "Sold out"
+check that page contains "Sold out"
+log out from site
+//Cleanup
+log in
+click "Live"
+click "Products"
+hover over "Sold out"
+click "Trash"
+click "Trash" on the right of "Published"
+enter "1" into checkbox on the left of "Name"
+select "Delete permanently" from "Bulk actions"
+click button "Apply"
