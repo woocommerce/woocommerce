@@ -224,5 +224,6 @@ class Controller extends AbstractController {
 	* */
 	public function create_item($request)
 	{
+		return rest_ensure_response('test'  );
 	}
 }
