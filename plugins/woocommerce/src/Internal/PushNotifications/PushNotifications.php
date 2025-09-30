@@ -45,7 +45,10 @@ class PushNotifications {
 	public function should_be_enabled(): bool {
 		$proxy = wc_get_container()->get( LegacyProxy::class );
 
-		if ( ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected() ) {
+		if (
+			! class_exists( JetpackConnectionManager::class )
+			|| ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
+		) {
 			return false;
 		}
 
