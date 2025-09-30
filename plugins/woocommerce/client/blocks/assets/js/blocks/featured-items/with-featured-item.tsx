@@ -38,7 +38,10 @@ import {
 	getBackgroundImageStyles,
 	getClassPrefixFromName,
 } from './utils';
-import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
+import {
+	FEATURED_CATEGORY_DEFAULT_TEMPLATE,
+	FEATURED_PRODUCT_DEFAULT_TEMPLATE,
+} from './constants';
 
 interface WithFeaturedItemConfig extends GenericBlockUIConfig {
 	emptyMessage: string;
@@ -233,55 +236,9 @@ export const withFeaturedItem =
 						>
 							<div className={ `${ className }__inner-blocks` }>
 								<InnerBlocks
-									template={ [
-										[
-											'core/post-title',
-											{
-												isLink: true,
-												level: 2,
-												textAlign: 'center',
-												__woocommerceNamespace:
-													PRODUCT_TITLE_VARIATION_NAME,
-											},
-										],
-										[
-											'woocommerce/product-price',
-											{ textAlign: 'center' },
-										],
-										[
-											'woocommerce/product-summary',
-											{
-												showDescriptionIfEmpty: true,
-												style: {
-													typography: {
-														textAlign: 'center',
-													},
-												},
-												summaryLength: 80,
-											},
-										],
-										[
-											'core/buttons',
-											{
-												layout: {
-													type: 'flex',
-													justifyContent: 'center',
-												},
-											},
-											[
-												[
-													'core/button',
-													{
-														text: __(
-															'Shop now',
-															'woocommerce'
-														),
-														url: product.permalink,
-													},
-												],
-											],
-										],
-									] }
+									template={ FEATURED_PRODUCT_DEFAULT_TEMPLATE(
+										product
+									) }
 									templateLock={ false }
 								/>
 							</div>
@@ -305,37 +262,9 @@ export const withFeaturedItem =
 								'core/heading',
 								'core/buttons',
 							] }
-							template={ [
-								[
-									'woocommerce/category-title',
-									{ level: 2, textAlign: 'center' },
-								],
-								[
-									'woocommerce/category-description',
-									{ textAlign: 'center' },
-								],
-								[
-									'core/buttons',
-									{
-										layout: {
-											type: 'flex',
-											justifyContent: 'center',
-										},
-									},
-									[
-										[
-											'core/button',
-											{
-												text: __(
-													'Shop now',
-													'woocommerce'
-												),
-												url: category.permalink,
-											},
-										],
-									],
-								],
-							] }
+							template={ FEATURED_CATEGORY_DEFAULT_TEMPLATE(
+								category
+							) }
 							templateLock={ false }
 						/>
 					</div>
