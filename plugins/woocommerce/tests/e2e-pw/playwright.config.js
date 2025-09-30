@@ -123,5 +123,10 @@ export default defineConfig( {
 			testMatch: '**/api-tests/**',
 			dependencies: [ 'site setup' ],
 		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [ '**/tests/cart/**', '**/tests/checkout/**' ],
+			dependencies: [ 'site setup' ],
+		},
 	],
 } );

@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -122,60 +123,63 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 */
 	protected function read_order_data( &$order, $post_object ) {
 		parent::read_order_data( $order, $post_object );
-		$id             = $order->get_id();
-		$date_completed = get_post_meta( $id, '_date_completed', true );
-		$date_paid      = get_post_meta( $id, '_date_paid', true );
+		$id = $order->get_id();
+
+		$post_meta = get_post_meta( $id );
+
+		$date_completed = $post_meta['_date_completed'][0] ?? '';
+		$date_paid      = $post_meta['_date_paid'][0] ?? '';
 
 		if ( ! $date_completed ) {
-			$date_completed = get_post_meta( $id, '_completed_date', true );
+			$date_completed = $post_meta['_completed_date'][0] ?? '';
 		}
 
 		if ( ! $date_paid ) {
-			$date_paid = get_post_meta( $id, '_paid_date', true );
+			$date_paid = $post_meta['_paid_date'][0] ?? '';
 		}
 
 		$order->set_props(
 			array(
-				'order_key'                    => get_post_meta( $id, '_order_key', true ),
-				'customer_id'                  => get_post_meta( $id, '_customer_user', true ),
-				'billing_first_name'           => get_post_meta( $id, '_billing_first_name', true ),
-				'billing_last_name'            => get_post_meta( $id, '_billing_last_name', true ),
-				'billing_company'              => get_post_meta( $id, '_billing_company', true ),
-				'billing_address_1'            => get_post_meta( $id, '_billing_address_1', true ),
-				'billing_address_2'            => get_post_meta( $id, '_billing_address_2', true ),
-				'billing_city'                 => get_post_meta( $id, '_billing_city', true ),
-				'billing_state'                => get_post_meta( $id, '_billing_state', true ),
-				'billing_postcode'             => get_post_meta( $id, '_billing_postcode', true ),
-				'billing_country'              => get_post_meta( $id, '_billing_country', true ),
-				'billing_email'                => get_post_meta( $id, '_billing_email', true ),
-				'billing_phone'                => get_post_meta( $id, '_billing_phone', true ),
-				'shipping_first_name'          => get_post_meta( $id, '_shipping_first_name', true ),
-				'shipping_last_name'           => get_post_meta( $id, '_shipping_last_name', true ),
-				'shipping_company'             => get_post_meta( $id, '_shipping_company', true ),
-				'shipping_address_1'           => get_post_meta( $id, '_shipping_address_1', true ),
-				'shipping_address_2'           => get_post_meta( $id, '_shipping_address_2', true ),
-				'shipping_city'                => get_post_meta( $id, '_shipping_city', true ),
-				'shipping_state'               => get_post_meta( $id, '_shipping_state', true ),
-				'shipping_postcode'            => get_post_meta( $id, '_shipping_postcode', true ),
-				'shipping_country'             => get_post_meta( $id, '_shipping_country', true ),
-				'shipping_phone'               => get_post_meta( $id, '_shipping_phone', true ),
-				'payment_method'               => get_post_meta( $id, '_payment_method', true ),
-				'payment_method_title'         => get_post_meta( $id, '_payment_method_title', true ),
-				'transaction_id'               => get_post_meta( $id, '_transaction_id', true ),
-				'customer_ip_address'          => get_post_meta( $id, '_customer_ip_address', true ),
-				'customer_user_agent'          => get_post_meta( $id, '_customer_user_agent', true ),
-				'created_via'                  => get_post_meta( $id, '_created_via', true ),
+				'order_key'                    => $post_meta['_order_key'][0] ?? '',
+				'customer_id'                  => $post_meta['_customer_user'][0] ?? '',
+				'billing_first_name'           => $post_meta['_billing_first_name'][0] ?? '',
+				'billing_last_name'            => $post_meta['_billing_last_name'][0] ?? '',
+				'billing_company'              => $post_meta['_billing_company'][0] ?? '',
+				'billing_address_1'            => $post_meta['_billing_address_1'][0] ?? '',
+				'billing_address_2'            => $post_meta['_billing_address_2'][0] ?? '',
+				'billing_city'                 => $post_meta['_billing_city'][0] ?? '',
+				'billing_state'                => $post_meta['_billing_state'][0] ?? '',
+				'billing_postcode'             => $post_meta['_billing_postcode'][0] ?? '',
+				'billing_country'              => $post_meta['_billing_country'][0] ?? '',
+				'billing_email'                => $post_meta['_billing_email'][0] ?? '',
+				'billing_phone'                => $post_meta['_billing_phone'][0] ?? '',
+				'shipping_first_name'          => $post_meta['_shipping_first_name'][0] ?? '',
+				'shipping_last_name'           => $post_meta['_shipping_last_name'][0] ?? '',
+				'shipping_company'             => $post_meta['_shipping_company'][0] ?? '',
+				'shipping_address_1'           => $post_meta['_shipping_address_1'][0] ?? '',
+				'shipping_address_2'           => $post_meta['_shipping_address_2'][0] ?? '',
+				'shipping_city'                => $post_meta['_shipping_city'][0] ?? '',
+				'shipping_state'               => $post_meta['_shipping_state'][0] ?? '',
+				'shipping_postcode'            => $post_meta['_shipping_postcode'][0] ?? '',
+				'shipping_country'             => $post_meta['_shipping_country'][0] ?? '',
+				'shipping_phone'               => $post_meta['_shipping_phone'][0] ?? '',
+				'payment_method'               => $post_meta['_payment_method'][0] ?? '',
+				'payment_method_title'         => $post_meta['_payment_method_title'][0] ?? '',
+				'transaction_id'               => $post_meta['_transaction_id'][0] ?? '',
+				'customer_ip_address'          => $post_meta['_customer_ip_address'][0] ?? '',
+				'customer_user_agent'          => $post_meta['_customer_user_agent'][0] ?? '',
+				'created_via'                  => $post_meta['_created_via'][0] ?? '',
 				'date_completed'               => $date_completed,
 				'date_paid'                    => $date_paid,
-				'cart_hash'                    => get_post_meta( $id, '_cart_hash', true ),
+				'cart_hash'                    => $post_meta['_cart_hash'][0] ?? '',
 				'customer_note'                => $post_object->post_excerpt,
 
 				// Operational data props.
-				'order_stock_reduced'          => get_post_meta( $id, '_order_stock_reduced', true ),
-				'download_permissions_granted' => get_post_meta( $id, '_download_permissions_granted', true ),
-				'new_order_email_sent'         => get_post_meta( $id, '_new_order_email_sent', true ),
-				'recorded_sales'               => wc_string_to_bool( get_post_meta( $id, '_recorded_sales', true ) ),
-				'recorded_coupon_usage_counts' => get_post_meta( $id, '_recorded_coupon_usage_counts', true ),
+				'order_stock_reduced'          => $post_meta['_order_stock_reduced'][0] ?? '',
+				'download_permissions_granted' => $post_meta['_download_permissions_granted'][0] ?? '',
+				'new_order_email_sent'         => $post_meta['_new_order_email_sent'][0] ?? '',
+				'recorded_sales'               => wc_string_to_bool( $post_meta['_recorded_sales'][0] ?? '' ),
+				'recorded_coupon_usage_counts' => $post_meta['_recorded_coupon_usage_counts'][0] ?? '',
 			)
 		);
 	}
@@ -941,7 +945,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	 * @return array
 	 */
 	protected function get_wp_query_args( $query_vars ) {
-
 		// Map query vars to ones that get_wp_query_args or WP_Query recognize.
 		$key_mapping = array(
 			'customer_id'    => 'customer_user',
@@ -953,7 +956,6 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'shipping_total' => 'order_shipping',
 			'shipping_tax'   => 'order_shipping_tax',
 			'cart_tax'       => 'order_tax',
-			'total'          => 'order_total',
 			'page'           => 'paged',
 		);
 
@@ -980,9 +982,18 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
+
 		if ( ! isset( $wp_query_args['meta_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 			$wp_query_args['meta_query'] = array();
+		}
+
+		if ( empty( $wp_query_args['orderby'] ) ) {
+			$wp_query_args['orderby'] = 'ID';
+		}
+
+		if ( empty( $wp_query_args['order'] ) ) {
+			$wp_query_args['order'] = 'desc';
 		}
 
 		$date_queries = array(
@@ -1027,6 +1038,41 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 					'compare' => 'NOT EXISTS',
 				);
 			}
+		}
+
+		// Handle total filtering with support for operators.
+		if ( isset( $query_vars['total'] ) ) {
+			$total_param = $query_vars['total'];
+			unset( $query_vars['total'] );
+
+			// If it's a simple number, convert to array format.
+			if ( is_numeric( $total_param ) ) {
+				$total_param = array(
+					'value'    => $total_param,
+					'operator' => '=',
+				);
+			}
+
+			$total_query = $this->generate_total_query( (array) $total_param );
+
+			if ( $total_query ) {
+				$wp_query_args['meta_query'][] = $total_query;
+			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$meta_query = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
+			if ( ! empty( $meta_query ) ) {
+				$wp_query_args['meta_query'][] = $meta_query;
+			}
+		}
+
+		// Handle custom orderby paramers.
+		if ( 'total' === $wp_query_args['orderby'] ) {
+			$wp_query_args['orderby']   = 'meta_value_num';
+			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$wp_query_args['meta_type'] = 'DECIMAL(10,' . wc_get_price_decimals() . ')';
 		}
 
 		if ( ! isset( $query_vars['paginate'] ) || ! $query_vars['paginate'] ) {
@@ -1279,5 +1325,66 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$order->set_status( get_post_field( 'post_status', $order->get_id() ) );
 		return (bool) $order->save();
+	}
+
+	/**
+	 * Generate meta query for total filtering with operators.
+	 *
+	 * @param array $total_params Total query parameters with value, operator.
+	 * @return array|false Meta query array or false if invalid.
+	 */
+	private function generate_total_query( array $total_params ) {
+		if ( ! isset( $total_params['value'] ) ) {
+			return false;
+		}
+
+		$operator            = $total_params['operator'] ?? '=';
+		$value               = $total_params['value'];
+		$supported_operators = array( '=', '!=', '>', '>=', '<', '<=', 'BETWEEN', 'NOT BETWEEN' );
+
+		if ( ! in_array( $operator, $supported_operators, true ) ) {
+			return false;
+		}
+
+		// Handle between operators.
+		if ( 'BETWEEN' === $operator || 'NOT BETWEEN' === $operator ) {
+			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+				return false;
+			}
+			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
+			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
+
+			if ( 'BETWEEN' === $operator ) {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			} else {
+				return array(
+					array(
+						'key'     => '_order_total',
+						'value'   => array( $value1, $value2 ),
+						'compare' => 'NOT BETWEEN',
+						'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+					),
+				);
+			}
+		}
+
+		// Handle other operators - value must be a single number.
+		if ( ! is_numeric( $value ) ) {
+			return false;
+		}
+
+		return array(
+			'key'     => '_order_total',
+			'value'   => wc_format_decimal( $value, wc_get_price_decimals() ),
+			'compare' => $operator,
+			'type'    => '=' === $operator ? 'CHAR' : 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		);
 	}
 }

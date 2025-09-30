@@ -257,14 +257,13 @@ class BlockTemplatesController {
 		foreach ( $template_files as $template_file ) {
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if (
-				'custom' === $template_file->source &&
-				(
+			if ( 'custom' === $template_file->source ) {
+				if (
 					BlockTemplateUtils::PLUGIN_SLUG === $template_file->theme ||
 					BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === $template_file->theme
-				)
-			) {
-				array_unshift( $new_templates, $template_file );
+				) {
+					array_unshift( $new_templates, $template_file );
+				}
 				continue;
 			}
 
@@ -287,11 +286,13 @@ class BlockTemplatesController {
 						break;
 					}
 				}
-				$fits_slug_query =
+				$fits_slug_query    =
 					! isset( $query['slug__in'] ) || in_array( $template_file->slug, $query['slug__in'], true );
-				$fits_area_query =
+				$fits_area_query    =
 					! isset( $query['area'] ) || ( property_exists( $template_file, 'area' ) && $template_file->area === $query['area'] );
-				$should_include  = ! $is_custom && $fits_slug_query && $fits_area_query;
+				$is_from_filesystem = isset( $template_file->path );
+				$should_include     = ! $is_custom && $fits_slug_query && $fits_area_query && $is_from_filesystem;
+
 				if ( $should_include ) {
 					$template       = BlockTemplateUtils::build_template_result_from_file( $template_file, $template_type );
 					$query_result[] = $template;
