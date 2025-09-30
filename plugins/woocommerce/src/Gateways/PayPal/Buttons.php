@@ -28,7 +28,6 @@ class Buttons {
 	 */
 	private const CLIENT_ID_OPTION = 'woocommerce_paypal_client_id';
 
-
 	/**
 	 * The gateway instance.
 	 *

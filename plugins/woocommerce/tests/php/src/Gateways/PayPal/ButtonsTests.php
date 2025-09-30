@@ -278,6 +278,11 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		// Mock the appropriate page type.
 		if ( $filter_name ) {
 			add_filter( $filter_name, '__return_true' );
+		} else {
+			// Ensure all page types return false.
+			add_filter( 'woocommerce_is_checkout', '__return_false' );
+			add_filter( 'woocommerce_is_cart', '__return_false' );
+			add_filter( 'woocommerce_is_product', '__return_false' );
 		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
