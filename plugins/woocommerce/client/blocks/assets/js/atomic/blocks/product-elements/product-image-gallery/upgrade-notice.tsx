@@ -13,7 +13,7 @@ import { createBlock } from '@wordpress/blocks';
  */
 import metadata from './block.json';
 
-const upgradeToBlockifiedProductGallery = async ( blockClientId: string ) => {
+const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	const blocks = select( 'core/block-editor' ).getBlocks();
 	const foundBlock = findBlock( {
 		blocks,
