@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
 /**
  * Class WC_Gateway_Paypal_Buttons_Test.
  */
