@@ -18,6 +18,7 @@ import { useProduct } from '@woocommerce/entities';
  */
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
+import { UpgradeProductImageGallery } from '../components/upgrade-product-image-gallery';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 import type { Attributes } from '../types';
@@ -52,6 +53,7 @@ const AddToCartOptionsEdit = (
 		<>
 			<InspectorControls>
 				<DowngradeNotice blockClientId={ props?.clientId } />
+				<UpgradeProductImageGallery />
 			</InspectorControls>
 			<BlockControls>
 				<ToolbarProductTypeGroup />
