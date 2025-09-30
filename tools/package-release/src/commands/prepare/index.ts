@@ -179,6 +179,7 @@ export default class PackagePrepare extends Command {
 						{
 							encoding: 'utf-8',
 							cwd: WOOCOMMERCE_PLUGIN_ROOT,
+							stdio: 'ignore',
 						}
 					);
 					execSync(
