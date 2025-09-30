@@ -73,7 +73,9 @@ class FeaturedProduct extends FeaturedItem {
 	protected function render_attributes( $product, $attributes ) {
 		$output = '';
 
-		if ( ! isset( $attributes['__woocommerceBlockVersion'] ) ) {
+		// Backwards compatibility: Only render legacy attributes if `editMode` exists as boolean value
+		// This allows us to distinguish between old and new version of the block (which accept inner blocks).
+		if ( array_key_exists( 'editMode', $attributes ) && is_bool( $attributes['editMode'] ) ) {
 			$legacy_title = sprintf(
 				'<h2 class="wc-block-featured-product__title">%s</h2>',
 				wp_kses_post( $product->get_title() )

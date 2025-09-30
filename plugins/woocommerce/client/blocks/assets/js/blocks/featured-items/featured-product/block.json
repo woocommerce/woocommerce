@@ -98,17 +98,6 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
-		},
-		"showDesc": {
-			"type": "boolean",
-			"default": true
-		},
-		"showPrice": {
-			"type": "boolean",
-			"default": true
-		},
-		"__woocommerceBlockVersion": {
-			"type": "number"
 		}
 	},
 	"textdomain": "woocommerce",

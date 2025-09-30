@@ -30,12 +30,13 @@ const v1 = {
 	},
 	save: () => <InnerBlocks.Content />,
 	isEligible: ( attributes: BlockAttributes ) => {
-		// If the block has showDesc or showPrice attributes are not explicitly set to false,
-		// it's a legacy block and it should be migrated to use inner blocks instead.
-		return attributes.showDesc !== false || attributes.showPrice !== false;
+		// If the block has editMode attribute as boolean value, it's a legacy block
+		// and it should be migrated to use inner blocks instead.
+		return typeof attributes.editMode === 'boolean';
 	},
 	migrate: ( attributes: BlockAttributes, innerBlocks: BlockInstance[] ) => {
-		const { showDesc, showPrice, ...otherAttributes } = attributes;
+		const { editMode, showDesc, showPrice, ...otherAttributes } =
+			attributes;
 
 		if ( showDesc !== false ) {
 			innerBlocks.unshift(
@@ -71,15 +72,7 @@ const v1 = {
 			} )
 		);
 
-		return [
-			{
-				...otherAttributes,
-				showDesc: false,
-				showPrice: false,
-				__woocommerceBlockVersion: 2,
-			},
-			innerBlocks,
-		];
+		return [ otherAttributes, innerBlocks ];
 	},
 };
 
