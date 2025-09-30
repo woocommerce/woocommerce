@@ -21,17 +21,13 @@ const upgradeToBlockifiedProductGallery = async ( blockClientId: string ) => {
 			block.name === metadata.name && block.clientId === blockClientId,
 	} );
 
-	if ( ! foundBlock ) {
-		return false;
+	if ( foundBlock ) {
+		const newBlock = createBlock( 'woocommerce/product-gallery' );
+		dispatch( 'core/block-editor' ).replaceBlock(
+			foundBlock.clientId,
+			newBlock
+		);
 	}
-
-	const newBlock = createBlock( 'woocommerce/product-gallery' );
-	dispatch( 'core/block-editor' ).replaceBlock(
-		foundBlock.clientId,
-		newBlock
-	);
-
-	return true;
 };
 
 export const UpgradeNotice = ( {
