@@ -3,11 +3,13 @@
  *
  * REST API PayPal buttons controller
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  * @since   10.3.0
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\RestApi\Routes\V3\PayPal;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -25,12 +27,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 /**
  * REST API PayPal buttons controller class.
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  * @extends WC_REST_Controller
- *
- * @deprecated 10.3.0 Use Automattic\WooCommerce\RestApi\Routes\V3\PayPal\ButtonsController instead.
  */
-class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
+class ButtonsController extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.

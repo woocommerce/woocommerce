@@ -1,11 +1,13 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Buttons file.
+ * Class Buttons file.
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -17,11 +19,8 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 
 /**
  * Handles PayPal Buttons.
- *
- * @deprecated 10.3.0 Use Automattic\WooCommerce\Gateways\PayPal\Buttons instead.
  */
-class WC_Gateway_Paypal_Buttons {
-
+class Buttons {
 	/**
 	 * The option for the client-id.
 	 *

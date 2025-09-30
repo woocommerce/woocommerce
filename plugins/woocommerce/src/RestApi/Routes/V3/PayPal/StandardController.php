@@ -5,11 +5,13 @@
  *
  * Handles requests to the /paypal-standard endpoint.
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  * @since   10.3.0
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\RestApi\Routes\V3\PayPal;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -28,12 +30,10 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 /**
  * REST API PayPal Standard controller class.
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  * @extends WC_REST_Controller
- *
- * @deprecated 10.3.0 Use Automattic\WooCommerce\RestApi\Routes\V3\PayPal\StandardController instead.
  */
-class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
+class StandardController extends WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
