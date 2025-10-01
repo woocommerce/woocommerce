@@ -79,9 +79,9 @@ class StandardController extends \WC_REST_Controller {
 		$shipping_option  = $request->get_param( 'shipping_option' );
 		$purchase_units   = $request->get_param( 'purchase_units' );
 
-		// Ensure we have arrays before indexing
+		// Ensure we have arrays before indexing.
 		$shipping_address = is_array( $shipping_address ) ? $shipping_address : array();
-		$purchase_units   = is_array( $purchase_units )   ? $purchase_units   : array();
+		$purchase_units   = is_array( $purchase_units ) ? $purchase_units : array();
 		if ( ! empty( $shipping_option ) && ! is_array( $shipping_option ) ) {
 			$shipping_option = array();
 		}
@@ -229,7 +229,7 @@ class StandardController extends \WC_REST_Controller {
 	 * Update the WooCommerce order with the new shipping address.
 	 *
 	 * @param \WC_Order $order The order object.
-	 * @param array    $shipping_address The shipping address.
+	 * @param array     $shipping_address The shipping address.
 	 * @return void
 	 */
 	private function update_order_shipping_address( $order, $shipping_address ) {
@@ -262,7 +262,7 @@ class StandardController extends \WC_REST_Controller {
 	 * Get the shipping options for the order.
 	 *
 	 * @param \WC_Order $order The order object.
-	 * @param array    $selected_shipping_option The selected shipping option.
+	 * @param array     $selected_shipping_option The selected shipping option.
 	 * @return array The shipping options.
 	 */
 	private function get_updated_shipping_options( $order, $selected_shipping_option ) {
