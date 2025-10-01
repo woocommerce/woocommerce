@@ -149,7 +149,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 					rel={ rel }
 					onClick={ ( event ) => event.preventDefault() }
 					dangerouslySetInnerHTML={ {
-						__html: ( fullTitle as any )?.rendered,
+						__html: fullTitle?.rendered,
 					} }
 				/>
 			</ContainerElement>
@@ -162,12 +162,14 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<BlockControls group="block">
 				<HeadingLevelDropdown
 					value={ level }
-					onChange={ ( level: number ) => setAttributes( { level } ) }
+					onChange={ ( newLevel: number ) =>
+						setAttributes( { level: newLevel } )
+					}
 				/>
 				<AlignmentControl
 					value={ textAlign }
-					onChange={ ( textAlign = '' ) =>
-						setAttributes( { textAlign } )
+					onChange={ ( newTextAlign: string | undefined ) =>
+						setAttributes( { textAlign: newTextAlign || '' } )
 					}
 				/>
 			</BlockControls>
@@ -196,7 +198,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 								__nextHasNoMarginBottom
 								label={ __( 'Link rel', 'woocommerce' ) }
 								value={ rel }
-								onChange={ ( rel ) => setAttributes( { rel } ) }
+								onChange={ ( newRel ) =>
+									setAttributes( { rel: newRel } )
+								}
 							/>
 						</>
 					) }

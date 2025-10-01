@@ -30,7 +30,9 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 	const userCanEdit = useSelect(
 		( select ) => {
 			if ( ! termId ) return false;
-			return ( select( coreStore ) as any ).canUser( 'update', {
+			// @ts-expect-error canUser is not typed correctly
+			// This use actually reflects the use seen in `core/post-title` block.
+			return select( coreStore ).canUser( 'update', {
 				kind: 'taxonomy',
 				name: termTaxonomy || 'product_cat',
 				id: termId,
@@ -72,8 +74,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<p
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html:
-						( fullDescription as any )?.rendered || rawDescription,
+					__html: fullDescription?.rendered || rawDescription,
 				} }
 			/>
 		);
