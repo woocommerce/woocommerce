@@ -1,7 +1,11 @@
 <?php
 /**
  * Agentic Checkout Sessions Tests.
+ *
+ * @package Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes
  */
+
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
@@ -113,15 +117,15 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertArrayHasKey( 'messages', $data );
 		$this->assertArrayHasKey( 'links', $data );
 
-		// Verify line items
+		// Verify line items.
 		$this->assertCount( 1, $data['line_items'] );
 		$this->assertEquals( (string) $this->products[0]->get_id(), $data['line_items'][0]['item']['id'] );
 		$this->assertEquals( 2, $data['line_items'][0]['item']['quantity'] );
 
-		// Verify status (should be not_ready_for_payment without address)
+		// Verify status (should be not_ready_for_payment without address).
 		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
 
-		// Verify amounts are in cents (integers)
+		// Verify amounts are in cents (integers).
 		$this->assertIsInt( $data['line_items'][0]['base_amount'] );
 		$this->assertIsInt( $data['line_items'][0]['total'] );
 		$this->assertEquals( 2000, $data['line_items'][0]['base_amount'] ); // $10 * 2 = $20 = 2000 cents
@@ -160,7 +164,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Verify address is set
+		// Verify address is set.
 		$this->assertArrayHasKey( 'fulfillment_address', $data );
 		$this->assertNotNull( $data['fulfillment_address'] );
 		$this->assertEquals( 'John Doe', $data['fulfillment_address']['name'] );
@@ -171,7 +175,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertEquals( 'US', $data['fulfillment_address']['country'] );
 		$this->assertEquals( '94102', $data['fulfillment_address']['postal_code'] );
 
-		// Verify fulfillment options are available
+		// Verify fulfillment options are available.
 		$this->assertNotEmpty( $data['fulfillment_options'] );
 		$this->assertIsArray( $data['fulfillment_options'] );
 	}
@@ -206,7 +210,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Verify buyer info is set
+		// Verify buyer info is set.
 		$this->assertArrayHasKey( 'buyer', $data );
 		$this->assertNotNull( $data['buyer'] );
 		$this->assertEquals( 'Jane', $data['buyer']['first_name'] );
@@ -237,7 +241,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// Without address and shipping method, should be not_ready_for_payment
+		// Without address and shipping method, should be not_ready_for_payment.
 		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
 	}
 
@@ -248,7 +252,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_header( 'Content-Type', 'application/json' );
 
-		// Get shipping methods first
+		// Get shipping methods first.
 		wc()->customer->set_shipping_address_1( '555 Golden Gate Avenue' );
 		wc()->customer->set_shipping_city( 'San Francisco' );
 		wc()->customer->set_shipping_state( 'CA' );
@@ -256,7 +260,7 @@ class CheckoutSessions extends ControllerTestCase {
 		wc()->customer->set_shipping_country( 'US' );
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
 		wc()->cart->calculate_shipping();
-		$packages = wc()->shipping()->get_packages();
+		$packages           = wc()->shipping()->get_packages();
 		$shipping_method_id = ! empty( $packages[0]['rates'] ) ? array_key_first( $packages[0]['rates'] ) : null;
 		wc_empty_cart();
 
@@ -285,7 +289,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// With address and shipping method, should be ready_for_payment
+		// With address and shipping method, should be ready_for_payment.
 		$this->assertEquals( 'ready_for_payment', $data['status'] );
 	}
 
@@ -320,7 +324,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test out of stock product returns error.
 	 */
 	public function test_out_of_stock_product_returns_error() {
-		// Set product out of stock
+		// Set product out of stock.
 		$this->products[0]->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$this->products[0]->save();
 
@@ -358,7 +362,7 @@ class CheckoutSessions extends ControllerTestCase {
 				array(
 					'items' => array(
 						array(
-							'id'       => (string) $this->products[2]->get_id(), // Virtual product
+							'id'       => (string) $this->products[2]->get_id(), // Virtual product.
 							'quantity' => 1,
 						),
 					),
@@ -370,7 +374,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		// Virtual product should be ready_for_payment without address
+		// Virtual product should be ready_for_payment without address.
 		$this->assertEquals( 'ready_for_payment', $data['status'] );
 	}
 
@@ -399,13 +403,13 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertIsArray( $data['totals'] );
 		$this->assertNotEmpty( $data['totals'] );
 
-		// Verify required total types exist
+		// Verify required total types exist.
 		$total_types = array_column( $data['totals'], 'type' );
 		$this->assertContains( 'items_base_amount', $total_types );
 		$this->assertContains( 'subtotal', $total_types );
 		$this->assertContains( 'total', $total_types );
 
-		// Verify each total has required fields
+		// Verify each total has required fields.
 		foreach ( $data['totals'] as $total ) {
 			$this->assertArrayHasKey( 'type', $total );
 			$this->assertArrayHasKey( 'display_text', $total );
@@ -436,7 +440,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// Should have payment_provider even if null
+		// Should have payment_provider even if null.
 		$this->assertArrayHasKey( 'payment_provider', $data );
 	}
 
@@ -464,7 +468,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		$this->assertIsArray( $data['links'] );
 
-		// Verify each link has required fields
+		// Verify each link has required fields.
 		foreach ( $data['links'] as $link ) {
 			$this->assertArrayHasKey( 'type', $link );
 			$this->assertArrayHasKey( 'url', $link );
@@ -477,7 +481,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test feature flag disabled returns 403.
 	 */
 	public function test_feature_flag_disabled_returns_403() {
-		// Disable feature
+		// Disable feature.
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
@@ -522,7 +526,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// Currency should be lowercase (e.g., "usd" not "USD")
+		// Currency should be lowercase (e.g., "usd" not "USD").
 		$this->assertArrayHasKey( 'currency', $data );
 		$this->assertSame( strtolower( $data['currency'] ), $data['currency'] );
 	}
@@ -545,7 +549,7 @@ class CheckoutSessions extends ControllerTestCase {
 					'fulfillment_address' => array(
 						'name'        => 'John Doe',
 						'line_one'    => '555 Golden Gate Avenue',
-						// line_two not provided
+						// line_two not provided.
 						'city'        => 'San Francisco',
 						'state'       => 'CA',
 						'country'     => 'US',
@@ -558,12 +562,12 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// line_two should be empty string, not null
+		// line_two should be empty string, not null.
 		$this->assertArrayHasKey( 'fulfillment_address', $data );
 		$this->assertNotNull( $data['fulfillment_address'] );
 		$this->assertArrayHasKey( 'line_two', $data['fulfillment_address'] );
 		$this->assertSame( '', $data['fulfillment_address']['line_two'] );
-		$this->assertNotNull( $data['fulfillment_address']['line_two'] ); // Explicitly not null
+		$this->assertNotNull( $data['fulfillment_address']['line_two'] ); // Explicitly not null.
 	}
 
 	/**
@@ -597,7 +601,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
 
-		// line_two should preserve the provided value
+		// line_two should preserve the provided value.
 		$this->assertEquals( 'Apt 401', $data['fulfillment_address']['line_two'] );
 	}
 }
