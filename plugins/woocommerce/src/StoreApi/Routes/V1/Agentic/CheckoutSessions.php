@@ -175,13 +175,18 @@ class CheckoutSessions extends AbstractCartRoute {
 		return true;
 	}
 
+	protected function requires_nonce(\WP_REST_Request $request) {
+		// Should use `is_authorized` to validate Bearer token authentication.
+		return false;
+	}
+
 	/**
 	 * Handle the request and return a valid response for this endpoint.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
-	protected function get_route_response( \WP_REST_Request $request ) {
+	protected function get_route_post_response( \WP_REST_Request $request ) {
 		// Ensure we have a session
 		if ( ! WC()->session ) {
 			WC()->session = new \WC_Session_Handler();
