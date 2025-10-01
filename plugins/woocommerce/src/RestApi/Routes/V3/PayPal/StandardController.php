@@ -31,9 +31,9 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
  * REST API PayPal Standard controller class.
  *
  * @package Automattic\WooCommerce\RestApi
- * @extends WC_REST_Controller
+ * @extends \WC_REST_Controller
  */
-class StandardController extends WC_REST_Controller {
+class StandardController extends \WC_REST_Controller {
 
 	/**
 	 * Endpoint namespace.
@@ -59,7 +59,7 @@ class StandardController extends WC_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/update-shipping',
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
+				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_shipping_callback' ),
 				'permission_callback' => '__return_true',
 			)
@@ -70,10 +70,10 @@ class StandardController extends WC_REST_Controller {
 	 * Callback for when the customer updates their shipping details in PayPal.
 	 * https://developer.paypal.com/docs/checkout/standard/customize/shipping-module/#server-side-shipping-callbacks
 	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response The response object.
+	 * @param \WP_REST_Request $request The request object.
+	 * @return \WP_REST_Response The response object.
 	 */
-	public function process_shipping_callback( WP_REST_Request $request ) {
+	public function process_shipping_callback( \WP_REST_Request $request ) {
 		$paypal_order_id  = $request->get_param( 'id' );
 		$shipping_address = $request->get_param( 'shipping_address' );
 		$shipping_option  = $request->get_param( 'shipping_option' );
@@ -82,32 +82,32 @@ class StandardController extends WC_REST_Controller {
 		// Note: shipping_option may or may not be present.
 		if ( empty( $paypal_order_id ) || empty( $shipping_address ) || empty( $purchase_units ) ) {
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Get the WC order.
-		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
+		$order = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
 			$custom_id = isset( $purchase_units[0]['custom_id'] ) ? $purchase_units[0]['custom_id'] : '{}';
-			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
+			\WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Compare PayPal order IDs.
 		$paypal_order_id_from_order_meta = $order->get_meta( '_paypal_order_id', true );
 		if ( $paypal_order_id !== $paypal_order_id_from_order_meta ) {
-			WC_Gateway_Paypal::log(
+			\WC_Gateway_Paypal::log(
 				'PayPal order ID mismatch. Order ID: ' . $order->get_id() .
 				'. PayPal order ID (request): ' . $paypal_order_id .
 				'. PayPal order ID (order meta): ' . $paypal_order_id_from_order_meta
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		if ( ! WC()->session ) {
-			WC()->session = new WC_Session_Handler();
+			WC()->session = new \WC_Session_Handler();
 		}
 		WC()->session->init();
 
@@ -121,12 +121,12 @@ class StandardController extends WC_REST_Controller {
 		// Get the new shipping options, which depend on the new shipping address.
 		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
 		if ( empty( $updated_shipping_options ) ) {
-			WC_Gateway_Paypal::log(
+			\WC_Gateway_Paypal::log(
 				'No shipping options found for address. Order ID: ' . $order->get_id() .
 				'. Address: ' . wp_json_encode( $shipping_address )
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Set the chosen shipping method in the session.
@@ -137,7 +137,7 @@ class StandardController extends WC_REST_Controller {
 		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		$paypal_request = new WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
+		$paypal_request = new \WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
 		$response = array(
@@ -151,13 +151,13 @@ class StandardController extends WC_REST_Controller {
 			),
 		);
 
-		return new WP_REST_Response( $response, 200 );
+		return new \WP_REST_Response( $response, 200 );
 	}
 
 	/**
 	 * Rebuild the session cart.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @return void
 	 */
 	private function rebuild_cart_from_order( $order ) {
@@ -193,7 +193,7 @@ class StandardController extends WC_REST_Controller {
 	/**
 	 * Recompute the fees for the order.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @return void
 	 */
 	private function recompute_fees( $order ) {
@@ -209,7 +209,7 @@ class StandardController extends WC_REST_Controller {
 	/**
 	 * Update the WooCommerce order with the new shipping address.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @param array    $shipping_address The shipping address.
 	 * @return void
 	 */
@@ -232,7 +232,7 @@ class StandardController extends WC_REST_Controller {
 		$order->save();
 
 		// Get customer from order and update their shipping location.
-		$customer = new WC_Customer();
+		$customer = new \WC_Customer();
 		$customer->set_location( $country, $state, $postcode, $city );
 		$customer->set_shipping_location( $country, $state, $postcode, $city );
 		$customer->set_calculated_shipping( true );
@@ -242,7 +242,7 @@ class StandardController extends WC_REST_Controller {
 	/**
 	 * Get the shipping options for the order.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @param array    $selected_shipping_option The selected shipping option.
 	 * @return array The shipping options.
 	 */
