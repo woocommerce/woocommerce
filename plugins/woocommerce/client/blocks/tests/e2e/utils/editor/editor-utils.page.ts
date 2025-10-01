@@ -118,6 +118,7 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
+		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		// Wait for the search to finish.
@@ -157,26 +158,28 @@ export class Editor extends CoreEditor {
 			.first()
 			.click();
 		await this.page
-			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.getByRole( 'menuitem', { name: /Reset|Delete|Deactivate/ } )
 			.click();
 
-		const responsePromise = this.page.waitForResponse(
-			( response ) =>
-				( response.url().includes( 'wp-json/wp/v2/templates' ) ||
-					response
-						.url()
-						.includes( 'wp-json/wp/v2/template-parts' ) ) &&
-				response.status() === 200 &&
-				response.request().method() === 'POST'
-		);
+		// const responsePromise = this.page.waitForResponse(
+		// 	( response ) =>
+		// 		( response.url().includes( 'wp-json/wp/v2/templates' ) ||
+		// 			response
+		// 				.url()
+		// 				.includes( 'wp-json/wp/v2/template-parts' ) ) &&
+		// 		response.status() === 200 &&
+		// 		response.request().method() === 'POST'
+		// );
 
-		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+		// await this.page
+		// 	.getByRole( 'button', { name: /Reset|Delete/ } )
+		// 	.click();
 
-		await responsePromise;
+		// await responsePromise;
 
 		await this.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText( /reset|deleted/ )
+			.locator( 'div' )
+			.filter( { hasText: /^Saved$/ } )
 			.waitFor();
 	}
 

@@ -10,7 +10,10 @@ import {
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
+import {
+	CUSTOMIZABLE_WC_TEMPLATES,
+	saveAndActivateTemplate,
+} from './constants';
 
 test.describe( 'Template customization', () => {
 	test.beforeEach( async ( { requestUtils } ) => {
@@ -47,8 +50,9 @@ test.describe( 'Template customization', () => {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
+				await saveAndActivateTemplate( {
+					editor,
+					page,
 				} );
 
 				// Verify template name didn't change.
@@ -118,8 +122,9 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
+					await saveAndActivateTemplate( {
+						editor,
+						page,
 					} );
 					await testData.visitPage( {
 						admin,

@@ -6,11 +6,16 @@ import {
 	expect,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
+import type { Page } from '@playwright/test';
+import type { Editor } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
-import { CUSTOMIZABLE_WC_TEMPLATES } from './constants';
+import {
+	CUSTOMIZABLE_WC_TEMPLATES,
+	saveAndActivateTemplate,
+} from './constants';
 
 test.describe( 'Template customization', () => {
 	CUSTOMIZABLE_WC_TEMPLATES.forEach( ( testData ) => {
@@ -38,9 +43,8 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+
+			await saveAndActivateTemplate( { editor, page } );
 
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
@@ -97,9 +101,9 @@ test.describe( 'Template customization', () => {
 						content: fallbackTemplateUserText,
 					},
 				} );
-				await editor.saveSiteEditorEntities( {
-					isOnlyCurrentEntityDirty: true,
-				} );
+
+				await saveAndActivateTemplate( { editor, page } );
+
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -158,9 +162,8 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: woocommerceTemplateUserText },
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+
+			await saveAndActivateTemplate( { editor, page } );
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
@@ -177,9 +180,8 @@ test.describe( 'Template customization', () => {
 				name: 'core/paragraph',
 				attributes: { content: userText },
 			} );
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+
+			await saveAndActivateTemplate( { editor, page } );
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( {

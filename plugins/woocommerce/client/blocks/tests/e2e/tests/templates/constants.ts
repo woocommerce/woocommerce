@@ -180,3 +180,23 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 ];
 
 export const WC_TEMPLATES_SLUG = 'woocommerce/woocommerce';
+
+export const saveAndActivateTemplate = async ( {
+	editor,
+	page,
+}: {
+	editor: Editor;
+	page: Page;
+} ) => {
+	await editor.saveSiteEditorEntities( {
+		isOnlyCurrentEntityDirty: true,
+	} );
+
+	const acitvatedLabel = page
+		.getByLabel( 'Editor content' )
+		.getByText( 'Template activated.' );
+
+	await page.getByRole( 'button', { name: 'Activate' } ).click();
+
+	await acitvatedLabel.waitFor();
+};
