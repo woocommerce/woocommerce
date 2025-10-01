@@ -59,6 +59,7 @@ class Controller extends AbstractController {
 			$this->payments = wc_get_container()->get( Payments::class );
 		} catch ( \Throwable $e ) {
 			wc_get_logger()->error( 'Could not get Payments service for offline payment methods controller: ' . $e->getMessage(), array( 'source' => 'offline-payment-methods' ) );
+			throw new \RuntimeException( 'Failed to initialize OfflinePaymentMethods controller: Payments service unavailable.', 0, $e );
 		}
 		$this->item_schema = $schema;
 	}
