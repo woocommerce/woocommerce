@@ -86,7 +86,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 			// We'll schedule the deletion for later in order to speed up the checkout process
 			// unless a custom (non-Woo core) orders data store is in use, because in that case there's
 			// no reliable way to query orders by meta key.
-			if ( count( array_unique( $steps ) ) === count( $steps ) ) {
+			if ( $order && ( count( array_unique( $steps ) ) === count( $steps ) ) ) {
 				$order->delete_meta_data( '_debug_log_source' );
 				if ( OrderUtil::unknown_orders_data_store_in_use() ) {
 					$logger->clear( $context['source'] );
