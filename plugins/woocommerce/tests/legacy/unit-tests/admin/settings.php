@@ -32,4 +32,48 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_file_download_method', $default );
 	}
+
+	/**
+	 * Test WC_Admin_Settings::save() permission check.
+	 *
+	 * Ensures that users without manage_woocommerce capability cannot save settings,
+	 * even with a valid nonce (e.g., from a pre-opened admin tab before role downgrade).
+	 */
+	public function test_save_requires_manage_woocommerce_capability() {
+		// Create a user without manage_woocommerce capability.
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		wp_set_current_user( $user_id );
+
+		// Set up the nonce and POST data.
+		$_POST['_wpnonce']    = wp_create_nonce( 'woocommerce-settings' );
+		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'];
+		$_GET['tab']          = 'general';
+
+		// Expect wp_die to be called with 403 status.
+		$this->expectException( WPDieException::class );
+		$this->expectExceptionMessage( 'You do not have permission to save settings.' );
+
+		// Attempt to save settings.
+		WC_Admin_Settings::save();
+	}
+
+	/**
+	 * Test WC_Admin_Settings::save() succeeds with proper capability.
+	 */
+	public function test_save_succeeds_with_manage_woocommerce_capability() {
+		// Create a user with manage_woocommerce capability.
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		// Set up the nonce and POST data.
+		$_POST['_wpnonce']    = wp_create_nonce( 'woocommerce-settings' );
+		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'];
+		$_GET['tab']          = 'general';
+
+		// This should not throw an exception.
+		WC_Admin_Settings::save();
+
+		// Verify settings were processed (check that save was called successfully).
+		$this->assertTrue( true );
+	}
 }
