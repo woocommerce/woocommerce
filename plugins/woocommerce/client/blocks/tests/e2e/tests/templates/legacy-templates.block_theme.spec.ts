@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test, expect, wpCLI } from '@woocommerce/e2e-utils';
+import { saveAndActivateTemplate } from './constants';
 
 test.describe( 'Legacy templates', () => {
 	test( 'woocommerce//* slug is supported', async ( {
@@ -39,8 +40,9 @@ test.describe( 'Legacy templates', () => {
 				editor.canvas.getByText( template.customText )
 			).toBeVisible();
 
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			await saveAndActivateTemplate( {
+				editor,
+				page,
 			} );
 		} );
 

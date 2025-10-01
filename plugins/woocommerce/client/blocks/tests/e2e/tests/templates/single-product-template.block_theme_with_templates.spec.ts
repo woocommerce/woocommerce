@@ -6,6 +6,7 @@ import {
 	expect,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
+import { saveAndActivateTemplate } from './constants';
 
 const testData = {
 	permalink: '/product/belt',
@@ -40,8 +41,9 @@ test.describe( 'Single Product Template', () => {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+		await saveAndActivateTemplate( {
+			editor,
+			page,
 		} );
 		await page.goto( testData.permalink );
 
@@ -55,8 +57,9 @@ test.describe( 'Single Product Template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
+		// TODO: Raise a problem that custom templates are displayed with slugs not titles
 		await editor.revertTemplate( {
-			templateName: testData.templateName,
+			templateName: testData.templatePath,
 		} );
 		await page.goto( testData.permalink );
 
