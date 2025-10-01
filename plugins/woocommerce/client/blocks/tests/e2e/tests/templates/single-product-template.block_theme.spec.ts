@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { test, expect } from '@woocommerce/e2e-utils';
+import { saveAndActivateTemplate } from './constants';
 
 test.describe( 'Single Product template', () => {
 	test( 'loads the Single Product template for a specific product', async ( {
@@ -15,7 +16,7 @@ test.describe( 'Single Product template', () => {
 			permalink: '/product/belt',
 			templateName: 'Product: Belt',
 			templatePath: 'single-product-belt',
-			templateType: 'wp_template',
+			templateType: 'wp_registered_template',
 		};
 		const userText = 'Hello World in the Belt template';
 
@@ -33,20 +34,24 @@ test.describe( 'Single Product template', () => {
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();
 		await page
+			.getByRole( 'button', { name: 'Product For a specific item' } )
+			.click();
+		await page
 			.getByPlaceholder( 'Search products' )
 			.fill( testData.productName );
 		await page
 			.getByRole( 'option', { name: testData.productName } )
 			.click();
-		await page.getByLabel( 'Close', { exact: true } ).click();
+		await page.getByRole( 'button', { name: 'Skip' } ).click();
 
 		// Edit the template.
 		await editor.insertBlock( {
 			name: 'core/paragraph',
 			attributes: { content: userText },
 		} );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+		await saveAndActivateTemplate( {
+			editor,
+			page,
 		} );
 
 		// Verify edits are visible.
@@ -57,7 +62,7 @@ test.describe( 'Single Product template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
-		await editor.revertTemplate( { templateName: testData.templateName } );
+		await editor.revertTemplate( { templateName: testData.templatePath } );
 		await page.goto( testData.permalink );
 
 		// Verify the edits are no longer visible.
