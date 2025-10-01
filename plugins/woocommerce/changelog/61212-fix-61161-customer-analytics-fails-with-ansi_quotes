@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-This will PR will fix the Bug where Customer Analytics are not getting populated for DBs with ANSI_QUOTES enabled
