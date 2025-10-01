@@ -497,7 +497,7 @@ class WC_Frontend_Scripts {
 		}
 
 		// Load gallery scripts on product pages only if supported.
-		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+		if ( ( is_product() && ! wp_is_block_theme() ) || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
 				self::enqueue_script( 'wc-zoom' );
 			}
