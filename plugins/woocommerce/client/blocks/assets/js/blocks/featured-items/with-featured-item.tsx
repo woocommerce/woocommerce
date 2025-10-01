@@ -7,11 +7,6 @@ import type { BlockAlignment } from '@wordpress/blocks';
 import type { ComponentType, Dispatch, SetStateAction } from 'react';
 import { ProductResponseItem } from '@woocommerce/types';
 import { Icon, Placeholder, Spinner } from '@wordpress/components';
-import {
-	InnerBlocks,
-	// @ts-expect-error BlockContextProvider is not exported from @wordpress/block-editor
-	BlockContextProvider,
-} from '@wordpress/block-editor';
 import { ProductDataContextProvider } from '@woocommerce/shared-context';
 import clsx from 'clsx';
 import {
@@ -23,6 +18,11 @@ import {
 } from '@wordpress/element';
 import { WP_REST_API_Category } from 'wp-types';
 import { useStyleProps } from '@woocommerce/base-hooks';
+import {
+	InnerBlocks,
+	// @ts-expect-error BlockContextProvider is not exported from @wordpress/block-editor
+	BlockContextProvider,
+} from '@wordpress/block-editor';
 
 /**
  * Internal dependencies

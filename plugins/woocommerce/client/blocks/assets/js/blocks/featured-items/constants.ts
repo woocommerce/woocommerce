@@ -6,7 +6,7 @@ import { ProductResponseItem } from '@woocommerce/types';
 import { InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
-/*
+/**
  * Internal dependencies
  */
 import { VARIATION_NAME as PRODUCT_TITLE_VARIATION_NAME } from '../product-collection/variations/elements/product-title';
