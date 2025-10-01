@@ -277,9 +277,20 @@ class CheckoutSessions extends AbstractCartRoute {
 		WC()->session->set( 'agentic_draft_order_id', $draft_order->get_id() );
 
 		// Build response.
-		$response = $this->schema->get_item_response( WC()->cart );
+		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
 
-		return rest_ensure_response( $response );
+		// Echo Agentic Commerce Protocol headers if provided.
+		$idempotency_key = $request->get_header( 'Idempotency-Key' );
+		if ( $idempotency_key ) {
+			$response->header( 'Idempotency-Key', $idempotency_key );
+		}
+
+		$request_id = $request->get_header( 'Request-Id' );
+		if ( $request_id ) {
+			$response->header( 'Request-Id', $request_id );
+		}
+
+		return $response;
 	}
 
 	/**
