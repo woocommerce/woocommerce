@@ -5,14 +5,15 @@ sidebar_label: Email editor integration
 
 # WooCommerce email editor integration guide
 
-This guide shows how extensions can add custom email notifications that integrate with the WooCommerce Email Editor.
+This guide shows how extensions can add custom email notifications that integrate with the WooCommerce Email Editor.  
+**Note:** The WooCommerce Email Editor is currently in alpha. To enable it, go to **WooCommerce > Settings > Advanced > Features** and enable **Block Email Editor (alpha)**.
 
 ## Quick start
 
-1. **Extend `WC_Email`** - Create your email class
-2. **Register with `woocommerce_email_classes`** - Make it available in admin
-3. **Create block template** - For email editor compatibility
-4. **Set up triggers** - When to send the email
+1. **Extend `WC_Email`** – Create a custom email class for your notification by extending the core WooCommerce email class.
+2. **Register with `woocommerce_email_classes`** – Add your new email class to WooCommerce so it appears in the admin email settings.
+3. **Create a block template** – Design a block-based template to ensure your email works seamlessly with the WooCommerce Email Editor.
+4. **Set up triggers** – Define when and under what conditions your custom email should be sent (for example, after a specific user action or event).
 
 ## 1. Create email class
 
@@ -56,6 +57,26 @@ class YourPlugin_Custom_Email extends WC_Email {
 
         $this->restore_locale();
     }
+
+    public function get_content_html() {
+        return wc_get_template_html( $this->template_html, array(
+            'order'         => $this->object,
+            'email_heading' => $this->get_heading(),
+            'sent_to_admin' => false,
+            'plain_text'    => false,
+            'email'         => $this,
+        ) );
+    }
+
+    public function get_content_plain() {
+        return wc_get_template_html( $this->template_plain, array(
+            'order'         => $this->object,
+            'email_heading' => $this->get_heading(),
+            'sent_to_admin' => false,
+            'plain_text'    => true,
+            'email'         => $this,
+        ) );
+    }
 }
 ```
 
@@ -64,16 +85,26 @@ class YourPlugin_Custom_Email extends WC_Email {
 Add your email to WooCommerce:
 
 ```php
+// Add the custom email class to the WooCommerce Emails.
 function your_plugin_add_email_class( $email_classes ) {
     $email_classes['YourPlugin_Custom_Email'] = new YourPlugin_Custom_Email();
     return $email_classes;
 }
 add_filter( 'woocommerce_email_classes', 'your_plugin_add_email_class' );
+
+// Add the custom email group.
+function your_plugin_add_email_group( $email_groups ) {
+    $email_groups['your-plugin'] = __( 'Your Plugin', 'your-plugin' );
+    return $email_groups;
+}
+add_filter( 'woocommerce_email_groups', 'your_plugin_add_email_group' );
 ```
 
 ## 3. Create block template
 
 Create `templates/emails/block/your-custom-email.php`:
+
+**Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. This ensures your emails continue to work even without block template support.
 
 ```php
 <?php
@@ -93,6 +124,12 @@ defined( 'ABSPATH' ) || exit;
 <div class="wp-block-woocommerce-email-content"><?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?></div>
 <!-- /wp:woocommerce/email-content -->
 ```
+
+**Email content placeholder:**
+
+The `BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER` is a special placeholder that gets replaced with the main email content when the email is rendered. This placeholder is essential for integrating with WooCommerce's email system and allows the email editor to inject the core email content (like order details, customer information, etc.) into your custom template.
+
+When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context, ensuring your custom template works seamlessly with WooCommerce's email system.
 
 **Register the template:**
 
@@ -249,6 +286,8 @@ add_filter( 'woocommerce_email_editor_register_personalization_tags', 'your_plug
 
 **Usage in templates:** Use `<!--[your-plugin/custom-field]-->` in your block template, and they will be replaced with the values returned by your callback functions.
 
+To learn more about personalization tags, please see the [personalization tags documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/php/email-editor/docs/personalization-tags.md) in the `woocommerce/email-editor` package.
+
 ## Complete example
 
 Below is an example of a loyalty program welcome email implementation:
@@ -262,6 +301,10 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
         $this->title          = __( 'Loyalty Welcome Email', 'your-plugin' );
         $this->customer_email = true;
         $this->email_group    = 'loyalty';
+
+        $this->template_html  = 'templates/emails/loyalty-welcome.php';
+        $this->template_plain = 'templates/emails/plain/loyalty-welcome.php';
+
         parent::__construct();
     }
 
@@ -279,6 +322,26 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
             $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
         }
         $this->restore_locale();
+    }
+
+    public function get_content_html() {
+        return wc_get_template_html( $this->template_html, array(
+            'customer'       => $this->object,
+            'email_heading'  => $this->get_heading(),
+            'sent_to_admin'  => false,
+            'plain_text'     => false,
+            'email'          => $this,
+        ) );
+    }
+
+    public function get_content_plain() {
+        return wc_get_template_html( $this->template_plain, array(
+            'customer'       => $this->object,
+            'email_heading'  => $this->get_heading(),
+            'sent_to_admin'  => false,
+            'plain_text'     => true,
+            'email'          => $this,
+        ) );
     }
 }
 ```
@@ -304,10 +367,16 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
 This code ties everything together - registering the email class, template, and trigger:
 
 ```php
-// Register email class with WooCommerce
+// Add the custom email class to the WooCommerce Emails.
 add_filter( 'woocommerce_email_classes', function( $classes ) {
     $classes['YourPlugin_Loyalty_Welcome_Email'] = new YourPlugin_Loyalty_Welcome_Email();
     return $classes;
+} );
+
+// Add the custom email group.
+add_filter( 'woocommerce_email_groups', function( $email_groups ) {
+    $email_groups['loyalty'] = __( 'Loyalty Program', 'your-plugin' );
+    return $email_groups;
 } );
 
 // Register block template for the email editor
@@ -343,7 +412,7 @@ add_action( 'your_plugin_customer_joined_loyalty', function( $customer_id, $poin
 ## Best practices
 
 -   **Sanitize inputs and escape outputs:** Always validate and sanitize any data used in your email logic, and escape outputs in your templates to prevent security issues and display problems.
--   **Test across email clients:** Email layouts can look different in various clients. Preview your emails in popular clients (like Gmail, Outlook, and Apple Mail) to ensure they look as intended.
+-   **Test across email clients:** Email layouts can look different in various clients. Tools like Litmus or Email on Acid can help with testing your emails in popular clients (such as Gmail, Outlook, and Apple Mail) to ensure they look as intended.
 -   **Use efficient queries and cache data:** When fetching data for your emails, use optimized queries and cache results if possible to avoid slowing down your site.
 -   **Follow WordPress coding standards:** Write your code according to WordPress standards for better readability and compatibility.
 -   **Include proper error handling:** Add checks and error handling so that issues (like missing data or failed sends) are caught and can be debugged easily.
