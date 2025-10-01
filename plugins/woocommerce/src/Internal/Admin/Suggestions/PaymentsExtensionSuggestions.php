@@ -1351,25 +1351,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.ar/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1451,25 +1432,6 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.br/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1500,25 +1462,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.cl/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1529,25 +1472,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.co/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1727,25 +1651,6 @@ class PaymentsExtensionSuggestions {
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.mx/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::KLARNA       => array(
 				'_merge_on_type' => array(
@@ -1807,25 +1712,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.pe/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1937,25 +1823,6 @@ class PaymentsExtensionSuggestions {
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.uy/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -3591,7 +3458,6 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
 					),
 				),
-				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::MOLLIE            => array(
 				'_type'       => self::TYPE_PSP,
