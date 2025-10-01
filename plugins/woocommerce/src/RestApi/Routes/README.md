@@ -6,7 +6,6 @@ This directory contains route controllers and schemas for WooCommerce REST API e
 
 Each major version of the REST API has its own directory:
 
-- `V3/` - REST API v3 controllers and schemas
 - `V4/` - REST API v4 controllers and schemas
 - `V5/` - REST API v5 controllers and schemas (future)
 - `V6/` - REST API v6 controllers and schemas (future)
