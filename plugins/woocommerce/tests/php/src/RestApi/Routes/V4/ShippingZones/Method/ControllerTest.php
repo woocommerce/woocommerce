@@ -8,6 +8,7 @@ use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method\ShippingMethod
 use WC_REST_Unit_Test_Case;
 use WC_Shipping_Zone;
 use WP_Error;
+use WP_Http;
 use WP_REST_Request;
 
 /**
@@ -131,7 +132,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'POST', $route[0]['methods']['POST'] );
 		$this->assertEquals( array( $this->controller, 'create_item' ), $route[0]['callback'] );
-		$this->assertEquals( array( $this->controller, 'create_item_permissions_check' ), $route[0]['permission_callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[0]['permission_callback'] );
 	}
 
 	/**
@@ -144,54 +145,36 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'PUT', $route[0]['methods']['PUT'] );
 		$this->assertEquals( 'PATCH', $route[0]['methods']['PATCH'] );
 		$this->assertEquals( array( $this->controller, 'update_item' ), $route[0]['callback'] );
-		$this->assertEquals( array( $this->controller, 'update_item_permissions_check' ), $route[0]['permission_callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[0]['permission_callback'] );
 	}
 
 	/**
-	 * Test create item permissions when shipping is disabled.
+	 * Test permissions when shipping is disabled.
 	 */
-	public function test_create_item_permissions_check_shipping_disabled() {
+	public function test_check_permissions_shipping_disabled() {
 		// Disable shipping.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
-		$result  = $this->controller->create_item_permissions_check( $request );
+		$result  = $this->controller->check_permissions( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
-		$this->assertEquals( 503, $result->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::SERVICE_UNAVAILABLE, $result->get_error_data()['status'] );
 
 		// Re-enable shipping.
 		remove_filter( 'wc_shipping_enabled', '__return_false' );
 	}
 
 	/**
-	 * Test update item permissions when shipping is disabled.
+	 * Test permissions without proper capabilities.
 	 */
-	public function test_update_item_permissions_check_shipping_disabled() {
-		// Disable shipping.
-		add_filter( 'wc_shipping_enabled', '__return_false' );
-
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zone-method/1' );
-		$result  = $this->controller->update_item_permissions_check( $request );
-
-		$this->assertInstanceOf( WP_Error::class, $result );
-		$this->assertEquals( 'rest_shipping_disabled', $result->get_error_code() );
-		$this->assertEquals( 503, $result->get_error_data()['status'] );
-
-		// Re-enable shipping.
-		remove_filter( 'wc_shipping_enabled', '__return_false' );
-	}
-
-	/**
-	 * Test create item permissions without proper capabilities.
-	 */
-	public function test_create_item_permissions_check_insufficient_permissions() {
+	public function test_check_permissions_insufficient_permissions() {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
-		$result  = $this->controller->create_item_permissions_check( $request );
+		$result  = $this->controller->check_permissions( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
 		$this->assertStringContainsString( 'sorry, you cannot', strtolower( $result->get_error_message() ) );
@@ -201,13 +184,13 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test create item permissions with proper capabilities.
+	 * Test permissions with proper capabilities.
 	 */
-	public function test_create_item_permissions_check_with_permissions() {
+	public function test_check_permissions_with_permissions() {
 		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
-		$result  = $this->controller->create_item_permissions_check( $request );
+		$result  = $this->controller->check_permissions( $request );
 
 		$this->assertTrue( $result );
 
@@ -215,16 +198,27 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test update item permissions with proper capabilities.
+	 * Test that woocommerce_rest_check_permissions filter is applied.
 	 */
-	public function test_update_item_permissions_check_with_permissions() {
+	public function test_check_permissions_applies_filter() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zone-method/1' );
-		$result  = $this->controller->update_item_permissions_check( $request );
+		// Add filter to deny permissions.
+		$filter_callback = function ( $permission, $context, $object_id, $object_type ) {
+			if ( 'settings' === $object_type && 'edit' === $context ) {
+				return false;
+			}
+			return $permission;
+		};
+		add_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10, 4 );
 
-		$this->assertTrue( $result );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
+		$result  = $this->controller->check_permissions( $request );
 
+		// Should be denied by filter.
+		$this->assertInstanceOf( WP_Error::class, $result );
+
+		remove_filter( 'woocommerce_rest_check_permissions', $filter_callback, 10 );
 		wp_set_current_user( 0 );
 	}
 
@@ -244,7 +238,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertStringContainsString( 'invalid_zone_id', $response->get_error_code() );
-		$this->assertEquals( 404, $response->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}
@@ -267,7 +261,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertStringContainsString( 'invalid_method_type', $response->get_error_code() );
-		$this->assertEquals( 400, $response->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}
@@ -332,7 +326,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertStringContainsString( 'invalid_zone_id', $response->get_error_code() );
-		$this->assertEquals( 404, $response->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}
@@ -355,7 +349,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertStringContainsString( 'invalid_method_type', $response->get_error_code() );
-		$this->assertEquals( 400, $response->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}
@@ -429,7 +423,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( WP_Error::class, $response );
 		$this->assertStringContainsString( 'zone_mismatch', $response->get_error_code() );
-		$this->assertEquals( 400, $response->get_error_data()['status'] );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}

@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
 use WC_Shipping_Zones;
+use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_Error;
@@ -64,7 +65,7 @@ class Controller extends AbstractController {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
-				'permission_callback' => array( $this, 'create_item_permissions_check' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
 				'args'                => array_merge(
 					$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 					array(
@@ -87,50 +88,28 @@ class Controller extends AbstractController {
 			array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'update_item_permissions_check' ),
+				'permission_callback' => array( $this, 'check_permissions' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 			)
 		);
 	}
 
 	/**
-	 * Check if a given request has permission to create shipping methods.
+	 * Check if a given request has permission to manage shipping methods.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
 	 */
-	public function create_item_permissions_check( $request ) {
+	public function check_permissions( $request ) {
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error(
 				'rest_shipping_disabled',
 				__( 'Shipping is disabled.', 'woocommerce' ),
-				array( 'status' => 503 )
+				array( 'status' => WP_Http::SERVICE_UNAVAILABLE )
 			);
 		}
 
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has permission to update shipping methods.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
-	 */
-	public function update_item_permissions_check( $request ) {
-		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error(
-				'rest_shipping_disabled',
-				__( 'Shipping is disabled.', 'woocommerce' ),
-				array( 'status' => 503 )
-			);
-		}
-
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
 			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 
@@ -273,15 +252,15 @@ class Controller extends AbstractController {
 		$custom_errors = array(
 			self::INVALID_ZONE_ID     => array(
 				'message' => __( 'Invalid shipping zone ID.', 'woocommerce' ),
-				'status'  => 404,
+				'status'  => WP_Http::NOT_FOUND,
 			),
 			self::INVALID_METHOD_TYPE => array(
 				'message' => __( 'Invalid shipping method type.', 'woocommerce' ),
-				'status'  => 400,
+				'status'  => WP_Http::BAD_REQUEST,
 			),
 			self::ZONE_MISMATCH       => array(
 				'message' => __( 'Shipping method does not belong to the specified zone.', 'woocommerce' ),
-				'status'  => 400,
+				'status'  => WP_Http::BAD_REQUEST,
 			),
 		);
 
