@@ -121,7 +121,7 @@ function your_plugin_register_email_templates( $templates_registry ) {
 
     $templates_registry->register( $template );
 
-    return $registry;
+    return $templates_registry;
 }
 add_filter( 'woocommerce_email_editor_register_templates', 'your_plugin_register_email_templates' );
 ```
