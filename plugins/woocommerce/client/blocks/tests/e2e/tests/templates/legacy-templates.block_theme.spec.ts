@@ -57,10 +57,16 @@ test.describe( 'Legacy templates', () => {
 
 		await test.step( 'Verify the template can be edited via a legacy ID ', async () => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce//${ template.id }`,
 				postType: 'wp_registered_template',
-				canvas: 'edit',
 			} );
+			await editor.searchTemplate( {
+				templateName: template.name,
+			} );
+
+			await page
+				.getByRole( 'button', { name: template.name } )
+				.first()
+				.click();
 
 			await expect(
 				editor.canvas.getByText( template.customText )
