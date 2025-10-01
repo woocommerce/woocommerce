@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Buttons class.
+ * Unit tests for Buttons class.
  *
  * @package WooCommerce\Tests\Paypal.
  */
@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 use Automattic\WooCommerce\Gateways\PayPal\Buttons;
 
 /**
- * Class WC_Gateway_Paypal_Buttons_Test.
+ * Class ButtonsTest.
  */
 class ButtonsTests extends \WC_Unit_Test_Case {
 	/**
@@ -76,7 +76,6 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		// Remove any filters that might have been added.
 		remove_all_filters( 'woocommerce_is_checkout' );
 		remove_all_filters( 'woocommerce_is_cart' );
-		remove_all_filters( 'woocommerce_is_product' );
 
 		parent::tearDown();
 	}
@@ -261,6 +260,10 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * @param bool   $expected_contains Whether the expected contains.
 	 */
 	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type, $expected_contains ) {
+		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
+		}
+
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
@@ -272,17 +275,13 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 
 		// Set global post.
 		global $post;
+
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$post = get_post( $post_id );
 
 		// Mock the appropriate page type.
 		if ( $filter_name ) {
 			add_filter( $filter_name, '__return_true' );
-		} else {
-			// Ensure all page types return false.
-			add_filter( 'woocommerce_is_checkout', '__return_false' );
-			add_filter( 'woocommerce_is_cart', '__return_false' );
-			add_filter( 'woocommerce_is_product', '__return_false' );
 		}
 
 		$url = $this->buttons->get_current_page_for_app_switch();
@@ -330,6 +329,10 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * Test get_current_page_for_app_switch returns empty string for other pages.
 	 */
 	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages() {
+		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
+		}
+
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
