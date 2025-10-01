@@ -305,10 +305,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce cart to the Agentic Checkout session format.
 	 *
-	 * @param array $cart_data Cart data from WooCommerce.
+	 * @param mixed $cart_data Cart data from WooCommerce (unused, uses WC()->cart directly).
 	 * @return array Formatted checkout session data.
 	 */
 	public function get_item_response( $cart_data ) {
+		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
 		$cart = WC()->cart;
 
 		// Get draft order if exists
@@ -317,10 +318,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 
 		return [
 			'id'                    => $session_id ? (string) $session_id : '',
-			'buyer'                 => $this->format_buyer( $draft_order ),
+			'buyer'                 => $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
 			'status'                => $this->calculate_status( $cart, $draft_order ),
-			'currency'              => get_woocommerce_currency(),
+			'currency'              => strtolower( get_woocommerce_currency() ),
 			'line_items'            => $this->format_line_items( $cart->get_cart() ),
 			'fulfillment_address'   => $this->format_fulfillment_address(),
 			'fulfillment_options'   => $this->format_fulfillment_options(),
@@ -334,10 +335,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Format buyer information.
 	 *
-	 * @param \WC_Order|null $order Draft order if exists.
 	 * @return array|null Buyer data or null.
 	 */
-	protected function format_buyer( $order ) {
+	protected function format_buyer() {
 		$customer = WC()->customer;
 
 		if ( ! $customer ) {
@@ -479,7 +479,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		return [
 			'name'        => $name ?: 'Customer',
 			'line_one'    => $customer->get_shipping_address_1(),
-			'line_two'    => $customer->get_shipping_address_2() ?: null,
+			'line_two'    => $customer->get_shipping_address_2() ?: '',
 			'city'        => $customer->get_shipping_city(),
 			'state'       => $customer->get_shipping_state(),
 			'country'     => $customer->get_shipping_country(),
@@ -496,7 +496,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$options  = [];
 		$packages = WC()->shipping()->get_packages();
 
-		foreach ( $packages as $package_id => $package ) {
+		foreach ( $packages as $package ) {
 			if ( empty( $package['rates'] ) ) {
 				continue;
 			}
@@ -624,19 +624,25 @@ class CheckoutSessionSchema extends AbstractSchema {
 		// Terms of use
 		$terms_page_id = wc_terms_and_conditions_page_id();
 		if ( $terms_page_id ) {
-			$links[] = [
-				'type' => 'terms_of_use',
-				'url'  => get_permalink( $terms_page_id ),
-			];
+			$permalink = get_permalink( $terms_page_id );
+			if ( $permalink ) {
+				$links[] = [
+					'type' => 'terms_of_use',
+					'url'  => $permalink,
+				];
+			}
 		}
 
 		// Privacy policy
 		$privacy_page_id = get_option( 'wp_page_for_privacy_policy' );
 		if ( $privacy_page_id ) {
-			$links[] = [
-				'type' => 'privacy_policy',
-				'url'  => get_permalink( $privacy_page_id ),
-			];
+			$permalink = get_permalink( $privacy_page_id );
+			if ( $permalink ) {
+				$links[] = [
+					'type' => 'privacy_policy',
+					'url'  => $permalink,
+				];
+			}
 		}
 
 		return $links;

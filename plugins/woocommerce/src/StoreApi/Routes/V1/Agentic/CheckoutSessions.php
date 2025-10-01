@@ -168,7 +168,11 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Check if feature is enabled
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
-			return false;
+			return new \WP_Error(
+				'woocommerce_rest_agentic_checkout_disabled',
+				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
 		}
 
 		// V1: Allow all requests (implement proper auth in future)
@@ -187,18 +191,6 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Ensure we have a session
-		if ( ! WC()->session ) {
-			WC()->session = new \WC_Session_Handler();
-			WC()->session->init();
-		}
-
-		// Ensure we have a cart
-		if ( ! WC()->cart ) {
-			WC()->frontend_includes();
-			WC()->cart = new \WC_Cart();
-		}
-
 		// Clear existing cart
 		WC()->cart->empty_cart();
 
@@ -257,16 +249,19 @@ class CheckoutSessions extends AbstractCartRoute {
 		$address = $request->get_param( 'fulfillment_address' );
 		if ( $address ) {
 			$this->set_fulfillment_address( $address );
+		} else {
+			// Clear address when not provided (POST creates fresh session)
+			$this->clear_fulfillment_address();
 		}
-
-		// Calculate totals
-		WC()->cart->calculate_totals();
 
 		// Set selected shipping method if provided
 		$fulfillment_option_id = $request->get_param( 'fulfillment_option_id' );
 		if ( $fulfillment_option_id ) {
-			WC()->session->set( 'chosen_shipping_methods', [ $fulfillment_option_id ] );
+			WC()->session->set( 'chosen_shipping_methods', array( $fulfillment_option_id ) );
 		}
+
+		// Calculate totals after shipping method is set
+		WC()->cart->calculate_totals();
 
 		// Create/update draft order
 		$draft_order = $this->create_or_update_draft_order();
@@ -351,6 +346,28 @@ class CheckoutSessions extends AbstractCartRoute {
 	}
 
 	/**
+	 * Clear fulfillment address from customer.
+	 */
+	protected function clear_fulfillment_address() {
+		$customer = WC()->customer;
+
+		// Clear shipping address
+		$customer->set_shipping_first_name( '' );
+		$customer->set_shipping_last_name( '' );
+		$customer->set_shipping_address_1( '' );
+		$customer->set_shipping_address_2( '' );
+		$customer->set_shipping_city( '' );
+		$customer->set_shipping_state( '' );
+		$customer->set_shipping_postcode( '' );
+		$customer->set_shipping_country( '' );
+
+		$customer->save();
+
+		// Recalculate shipping
+		WC()->cart->calculate_shipping();
+	}
+
+	/**
 	 * Create or update draft order.
 	 *
 	 * @return \WC_Order Draft order.
@@ -392,7 +409,7 @@ class CheckoutSessions extends AbstractCartRoute {
 		}
 
 		// Add cart items to order
-		foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
+		foreach ( $cart->get_cart() as $cart_item ) {
 			$product = $cart_item['data'];
 			$item    = new \WC_Order_Item_Product();
 			$item->set_props(
