@@ -16,6 +16,7 @@ import ProductCollectionPage, {
 	BLOCK_LABELS,
 	SELECTORS,
 } from './product-collection.page';
+import { saveAndActivateTemplate } from '../templates/constants';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -702,6 +703,7 @@ test.describe( 'Product Collection', () => {
 		} );
 
 		test( 'On Sale Products collection should be visible after Refresh', async ( {
+			admin,
 			page,
 			pageObject,
 			editor,
@@ -717,10 +719,18 @@ test.describe( 'Product Collection', () => {
 			await expect( productTemplate ).toHaveCount( 2 );
 
 			// Refresh the template and verify "On Sale Products" collection is still visible
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
+			await saveAndActivateTemplate( {
+				editor,
+				page,
 			} );
-			await page.reload();
+
+			// Go to custom active Product Catalog template
+			await admin.visitAdminPage( 'site-editor.php?p=%2Ftemplate' );
+			await page
+				.getByRole( 'button', { name: 'Product Catalog' } )
+				.first()
+				.click();
+
 			await expect( productTemplate ).toHaveCount( 2 );
 		} );
 
