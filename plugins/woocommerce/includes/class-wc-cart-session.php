@@ -86,6 +86,8 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
+
+		add_action( 'template_redirect', array( $this, 'clean_up_removed_cart_contents' ) );
 	}
 
 	/**
@@ -105,7 +107,10 @@ final class WC_Cart_Session {
 		$this->cart->set_applied_coupons( WC()->session->get( 'applied_coupons', array() ) );
 		$this->cart->set_coupon_discount_totals( WC()->session->get( 'coupon_discount_totals', array() ) );
 		$this->cart->set_coupon_discount_tax_totals( WC()->session->get( 'coupon_discount_tax_totals', array() ) );
-		$this->cart->set_removed_cart_contents( WC()->session->get( 'removed_cart_contents', array() ) );
+
+		// Get removed cart contents with time-based expiration.
+		$removed_cart_contents = $this->get_processed_removed_cart_contents();
+		$this->cart->set_removed_cart_contents( $removed_cart_contents );
 
 		$update_cart_session = false; // Flag to indicate the stored cart should be updated.
 		$order_again         = false; // Flag to indicate whether this is a re-order.
@@ -406,6 +411,9 @@ final class WC_Cart_Session {
 		$coupon_discount_tax_totals = $this->cart->get_coupon_discount_tax_totals();
 		$removed_cart_contents      = $this->cart->get_removed_cart_contents();
 
+		// Process removed cart contents with timestamps and expiration.
+		$processed_removed_contents = $this->set_removed_cart_contents( $removed_cart_contents );
+
 		/*
 		 * We want to clear out any empty/default data from the session that have no value in being stored so the session
 		 * can be forgotten if empty.
@@ -415,7 +423,7 @@ final class WC_Cart_Session {
 		$wc_session->set( 'applied_coupons', empty( $applied_coupons ) ? null : $applied_coupons );
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
-		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		$wc_session->set( 'removed_cart_contents', empty( $processed_removed_contents ) ? null : $processed_removed_contents );
 		if ( empty( $cart ) ) {
 			$this->remove_draft_order();
 		}
@@ -705,5 +713,82 @@ final class WC_Cart_Session {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Get removed cart contents with time-based expiration (5 minutes).
+	 *
+	 * @return array Processed removed cart contents.
+	 */
+	private function get_processed_removed_cart_contents() {
+		$removed_contents = WC()->session->get( 'removed_cart_contents', array() );
+
+		if ( empty( $removed_contents ) ) {
+			return array();
+		}
+
+		$current_time       = time();
+		$expiration_time    = 5 * MINUTE_IN_SECONDS;
+		$processed_contents = array();
+		$has_expired_items  = false;
+
+		foreach ( $removed_contents as $key => $item ) {
+			$item_timestamp = isset( $item['removed_timestamp'] ) ? $item['removed_timestamp'] : 0;
+
+			if ( 0 === $item_timestamp ) {
+				$item['removed_timestamp'] = $current_time;
+			}
+
+			if ( ( $current_time - $item_timestamp ) > $expiration_time ) {
+				$has_expired_items = true;
+				continue;
+			}
+
+			$processed_contents[ $key ] = $item;
+		}
+
+		if ( $has_expired_items ) {
+			WC()->session->set( 'removed_cart_contents', empty( $processed_contents ) ? null : $processed_contents );
+		}
+
+		return $processed_contents;
+	}
+
+	/**
+	 * Set removed cart contents with timestamps for expiration tracking.
+	 *
+	 * @param array $removed_contents The removed cart contents to process.
+	 * @return array Processed removed cart contents with timestamps.
+	 */
+	private function set_removed_cart_contents( $removed_contents ) {
+		if ( empty( $removed_contents ) ) {
+			return array();
+		}
+
+		$current_time       = time();
+		$processed_contents = array();
+
+		foreach ( $removed_contents as $key => $item ) {
+			if ( ! isset( $item['removed_timestamp'] ) ) {
+				$item['removed_timestamp'] = $current_time;
+			}
+			$processed_contents[ $key ] = $item;
+		}
+
+		return $processed_contents;
+	}
+
+	/**
+	 * Removes items from the removed cart contents on next user initiatedrequest.
+	 *
+	 * @return bool True if expired items should be removed, false otherwise.
+	 */
+	public function clean_up_removed_cart_contents() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['undo_item'] ) ) {
+			return;
+		}
+
+		WC()->session->set( 'removed_cart_contents', null );
 	}
 }
