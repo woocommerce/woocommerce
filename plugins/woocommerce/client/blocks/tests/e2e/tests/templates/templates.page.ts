@@ -2,14 +2,26 @@
  * External dependencies
  */
 import { Editor, Admin } from '@woocommerce/e2e-utils';
+import { Page } from '@playwright/test';
+import { saveAndActivateTemplate } from './constants';
 
 class TemplatesPage {
 	private admin: Admin;
 	private editor: Editor;
+	private page: Page;
 
-	constructor( { admin, editor }: { admin: Admin; editor: Editor } ) {
+	constructor( {
+		admin,
+		editor,
+		page,
+	}: {
+		admin: Admin;
+		editor: Editor;
+		page: Page;
+	} ) {
 		this.admin = admin;
 		this.editor = editor;
+		this.page = page;
 	}
 
 	async addParagraphToTemplate( templateSlug: string, content: string ) {
@@ -26,8 +38,9 @@ class TemplatesPage {
 			},
 		} );
 
-		await this.editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
+		await saveAndActivateTemplate( {
+			editor: this.editor,
+			page: this.page,
 		} );
 	}
 }

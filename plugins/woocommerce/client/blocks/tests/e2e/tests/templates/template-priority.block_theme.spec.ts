@@ -12,12 +12,14 @@ import {
  * Internal dependencies
  */
 import TemplatesPage from './templates.page';
+import { saveAndActivateTemplate } from './constants';
 
 const test = base.extend< { pageObject: TemplatesPage } >( {
-	pageObject: async ( { admin, editor }, use ) => {
+	pageObject: async ( { admin, editor, page }, use ) => {
 		const pageObject = new TemplatesPage( {
 			admin,
 			editor,
+			page,
 		} );
 		await use( pageObject );
 	},
@@ -179,8 +181,9 @@ test.describe( 'Template priority', () => {
 						},
 					} );
 
-					await editor.saveSiteEditorEntities( {
-						isOnlyCurrentEntityDirty: true,
+					await saveAndActivateTemplate( {
+						editor,
+						page,
 					} );
 				} else {
 					await pageObject.addParagraphToTemplate(
