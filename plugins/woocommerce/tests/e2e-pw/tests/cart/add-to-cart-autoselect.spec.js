@@ -134,17 +134,14 @@ async function saveBlockEditor( editor, isOnlyCurrentEntityDirty ) {
 	if ( await firstSaveButton.isEnabled() ) {
 		firstSaveButton.click();
 
-		const secondSaveButton = await editor.page
-			.getByLabel( /(Editor publish|Save panel)/ )
-			.getByRole( 'button', {
-				name: 'Save', exact: true
-			} );
-		try {
-			// If the second save button is present, click it.
-			await secondSaveButton.waitFor( { timeout: 1000 } );
-			secondSaveButton.click();
-		} catch {}
-
+		if ( ! isOnlyCurrentEntityDirty ) {
+			await editor.page
+				.getByLabel( /(Editor publish|Save panel)/ )
+				.getByRole( 'button', {
+					name: 'Save', exact: true
+				} )
+				.click();
+		}
 		await editor.page
 			.getByRole('button', { name: 'Dismiss this notice' })
 			.getByText(/(updated|published)\./)
@@ -164,6 +161,7 @@ async function setCartBlockAttributes(
 	}
 ) {
 	const page = editor.page;
+	let isOnlyCurrentEntityDirty = true;
 	if ( disabledAttributesAction === undefined ) {
 		if ( targetBlockVersion === 'legacy' ) {
 			disabledAttributesAction = 'hide';
@@ -179,13 +177,30 @@ async function setCartBlockAttributes(
 		await page.getByRole( 'button', { name: 'Switch product type' } ).click();
 		await page.getByRole( 'menuitem', { name: 'Variable product' } ).click();
 		await editor.canvas.getByLabel( 'Block: Add to Cart + Options' ).getByLabel( 'Block: Variation Selector: Attribute Options' ).first().click();
-		await page.getByRole( 'radio', { name: optionStyle, exact: true } ).click();
+		const optionStyleInput = await page.getByRole( 'radio', { name: optionStyle, exact: true } )
+		if ( ! await optionStyleInput.isChecked() ) {
+			isOnlyCurrentEntityDirty = false;
+		}
+		await optionStyleInput.click();
 	}
 
-	await page.getByRole( 'checkbox', { name: 'Auto-select other attributes' } ).setChecked( autoselect );
-	await page.getByRole( 'checkbox', { name: 'Auto-select on page load' } ).setChecked( autoselectOnPageLoad );
-	await page.getByLabel( 'Values in conflict').selectOption( { value: disabledAttributesAction } );
-	await saveBlockEditor( editor, targetBlockVersion === 'new' );
+	const autoselectInput = await page.getByRole( 'checkbox', { name: 'Auto-select other attributes' } )
+	const autoselectOnPageLoadInput = await page.getByRole( 'checkbox', { name: 'Auto-select on page load' } );
+	const disabledAttributesActionInput = await page.getByLabel( 'Values in conflict');
+
+	if ( targetBlockVersion === 'new' ) {
+		if (
+			autoselectInput.isChecked !== autoselect ||
+			autoselectOnPageLoadInput.isChecked !== autoselectOnPageLoad ||
+			disabledAttributesActionInput.getAttribute( 'value' ) !== disabledAttributesAction
+		) {
+			isOnlyCurrentEntityDirty = false;
+		}
+	}
+	await autoselectInput.setChecked( autoselect );
+	await autoselectOnPageLoadInput.setChecked( autoselectOnPageLoad );
+	await disabledAttributesActionInput.selectOption( { value: disabledAttributesAction } );
+	await saveBlockEditor( editor, isOnlyCurrentEntityDirty );
 }
 
 test.describe(
@@ -193,7 +208,6 @@ test.describe(
 	{ tag: [] },
 	() => {
 		let productId;
-		let variationIds = [];
 
 		test.beforeAll( async ( { restApi } ) => {
 			await restApi
