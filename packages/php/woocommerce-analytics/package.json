@@ -1,6 +1,6 @@
 {
 	"name": "@automattic/woocommerce-analytics",
-	"version": "0.9.1",
+	"version": "0.9.2",
 	"private": true,
 	"description": "WooCommerce Analytics package to track frontend events",
 	"homepage": "https://github.com/Automattic/jetpack/tree/HEAD/projects/packages/woocommerce-analytics/#readme",
