@@ -167,6 +167,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 		$reason         = $event['resource']['status_details']['reason'] ?? 'Unknown';
 		$order->set_transaction_id( $transaction_id );
 		$order->update_meta_data( '_paypal_status', $status );
+		/* translators: %s: reason */
 		$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Payment pending (reason: %s).', 'woocommerce' ), $reason ) );
 		$order->save();
 	}
