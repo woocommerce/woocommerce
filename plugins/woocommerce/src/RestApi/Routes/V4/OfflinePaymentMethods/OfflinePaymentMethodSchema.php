@@ -265,33 +265,40 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function filter_item_by_schema( array $item, array $properties ): array {
+		// Early return for empty data.
+		if ( empty( $item ) || empty( $properties ) ) {
+			return isset( $item['_links'] ) ? array( '_links' => $item['_links'] ) : array();
+		}
+
 		$filtered = array();
 
 		foreach ( $properties as $key => $prop_schema ) {
-			if ( ! array_key_exists( $key, $item ) ) {
+			if ( ! isset( $item[ $key ] ) ) {
 				continue;
 			}
 
 			$value = $item[ $key ];
 
+			// Cache common checks.
+			$is_array_value = is_array( $value );
+			$has_properties = isset( $prop_schema['properties'] ) && is_array( $prop_schema['properties'] );
+
 			// Object with defined properties.
-			if ( is_array( $value ) && isset( $prop_schema['properties'] ) && is_array( $prop_schema['properties'] ) ) {
-				$filtered[ $key ] = $this->filter_item_by_schema( (array) $value, $prop_schema['properties'] );
+			if ( $is_array_value && $has_properties ) {
+				$filtered[ $key ] = $this->filter_item_by_schema( $value, $prop_schema['properties'] );
 				continue;
 			}
 
 			// Array of objects with defined item properties.
-			if (
-				is_array( $value ) &&
-				( $prop_schema['type'] ?? null ) === 'array' &&
-				isset( $prop_schema['items']['properties'] ) &&
-				is_array( $prop_schema['items']['properties'] )
-			) {
+			if ( $is_array_value && 
+				 ( $prop_schema['type'] ?? null ) === 'array' &&
+				 isset( $prop_schema['items']['properties'] ) &&
+				 is_array( $prop_schema['items']['properties'] ) ) {
+				
+				$item_properties = $prop_schema['items']['properties'];
 				$filtered[ $key ] = array_map(
-					function ( $row ) use ( $prop_schema ) {
-						return is_array( $row )
-							? $this->filter_item_by_schema( $row, $prop_schema['items']['properties'] )
-							: $row;
+					function ( $row ) use ( $item_properties ) {
+						return is_array( $row ) ? $this->filter_item_by_schema( $row, $item_properties ) : $row;
 					},
 					$value
 				);
@@ -302,7 +309,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 		}
 
 		// Preserve _links added by WP REST API framework.
-		if ( array_key_exists( '_links', $item ) ) {
+		if ( isset( $item['_links'] ) ) {
 			$filtered['_links'] = $item['_links'];
 		}
 
