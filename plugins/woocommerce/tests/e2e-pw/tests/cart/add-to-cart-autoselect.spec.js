@@ -249,9 +249,26 @@ test.describe(
 		} );
 
 		test(
-			'Add to Cart with Options: Autoselect on page load should work',
+			'Add to Cart with Options: Auto-select on page load should work',
 			{ tag: [] },
 			async ( { page, editor } ) => {
+				await test.step( 'Set the autoselect_on_page_load setting to false', async () => {
+					await setCartBlockAttributes( editor, 'legacy', { autoselectOnPageLoad: false } );
+				} );
+				await test.step( 'Expect NOTHING to be auto-selected (on page load)', async () => {
+					await page.goto( productPermalink );
+
+					await expect(
+						page.getByLabel( 'Type' )
+					).toHaveValue( '' );
+					await expect(
+						page.getByLabel( 'Colour' )
+					).toHaveValue( '' );
+					await expect(
+						page.getByLabel( 'Size' )
+					).toHaveValue( '' );
+				} );
+
 				await test.step( 'Set the autoselect_on_page_load setting to true', async () => {
 					await setCartBlockAttributes( editor, 'legacy', { autoselectOnPageLoad: true } );
 				} );
@@ -272,9 +289,29 @@ test.describe(
 			}
 		);
 		test(
-			'Add to Cart with Options: Autoselect on user selection should work',
+			'Add to Cart with Options: Auto-select on user selection should work',
 			{ tag: [] },
 			async ( { page, editor } ) => {
+				await test.step( 'Set the autoselect setting to false', async () => {
+					await setCartBlockAttributes( editor, 'legacy', { autoselect: false } );
+				} );
+				await test.step( 'Expect attributes to NOT auto-select when user selects something', async () => {
+					await page.goto( productPermalink );
+
+					await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
+
+					// Expect nothing to have been auto-selected
+					await expect(
+						page.getByLabel( 'Type' )
+					).toHaveValue( '' );
+					await expect(
+						page.getByLabel( 'Colour' )
+					).toHaveValue( 'Blue' );
+					await expect(
+						page.getByLabel( 'Size' )
+					).toHaveValue( '' );
+				} );
+
 				await test.step( 'Set the autoselect setting to true', async () => {
 					await setCartBlockAttributes( editor, 'legacy', { autoselect: true } );
 				} );
@@ -344,9 +381,49 @@ test.describe(
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
 			test(
-				`${ optionStyle }: Add to Cart + Options: Autoselect on page load should work`,
+				`${ optionStyle }: Add to Cart + Options: Auto-select on page load should work`,
 				{ tag: [] },
 				async ( { page, editor } ) => {
+					await test.step( `${ optionStyle }: Set the autoselect_on_page_load setting to false`, async () => {
+						await setCartBlockAttributes( editor, 'new', { optionStyle: optionStyle, autoselectOnPageLoad: false } );
+					} );
+					await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
+						await page.goto( productPermalink );
+
+						if ( optionStyle === 'Pills' ) {
+							await expect(
+								page.getByLabel( 'Type' )
+									.getByLabel( 'T-Shirt' )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Colour' )
+									.getByLabel( 'Red' )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Colour' )
+									.getByLabel( 'Blue' )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Size' )
+									.getByLabel( 'L', { exact: true } )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Size' )
+									.getByLabel( 'XL' )
+							).not.toBeChecked();
+						} else {
+							await expect(
+								page.getByLabel( 'Type' )
+							).toHaveValue( '' );
+							await expect(
+								page.getByLabel( 'Colour' )
+							).toHaveValue( '' );
+							await expect(
+								page.getByLabel( 'Size' )
+							).toHaveValue( '' );
+						}
+					} );
+
 					await test.step( `${ optionStyle }: Set the autoselect_on_page_load setting to true`, async () => {
 						await setCartBlockAttributes( editor, 'new', { optionStyle: optionStyle, autoselectOnPageLoad: true } );
 					} );
@@ -390,9 +467,52 @@ test.describe(
 				}
 			);
 			test(
-				`${ optionStyle }: Add to Cart + Options: Autoselect on user selection should work`,
+				`${ optionStyle }: Add to Cart + Options: Auto-select on user selection should work`,
 				{ tag: [] },
 				async ( { page, editor } ) => {
+					await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
+						await setCartBlockAttributes( editor, 'new', { optionStyle: optionStyle, autoselect: false } );
+					} );
+					await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
+						await page.goto( productPermalink );
+
+						// Expect nothing to be auto-selected
+						if ( optionStyle === 'Pills' ) {
+							await page.getByLabel( 'Colour' ).getByText( 'Blue' ).click();
+						} else if ( optionStyle === 'Dropdown' ) {
+							await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
+						}
+
+						if ( optionStyle === 'Pills' ) {
+							await expect(
+								page.getByLabel( 'Type' )
+									.getByLabel( 'T-Shirt' )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Colour' )
+									.getByLabel( 'Blue' )
+							).toBeChecked();
+							await expect(
+								page.getByLabel( 'Size' )
+									.getByLabel( 'L', { exact: true } )
+							).not.toBeChecked();
+							await expect(
+								page.getByLabel( 'Size' )
+									.getByLabel( 'XL' )
+							).not.toBeChecked();
+						} else {
+							await expect(
+								page.getByLabel( 'Type' )
+							).toHaveValue( '' );
+							await expect(
+								page.getByLabel( 'Colour' )
+							).toHaveValue( 'Blue' );
+							await expect(
+								page.getByLabel( 'Size' )
+							).toHaveValue( '' );
+						}
+					} );
+
 					await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
 						await setCartBlockAttributes( editor, 'new', { optionStyle: optionStyle, autoselect: true } );
 					} );
