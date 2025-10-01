@@ -227,12 +227,49 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 						'type'        => 'object',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
+						'properties'  => array(
+							'started'   => array(
+								'description' => __( 'Whether onboarding has been started.', 'woocommerce' ),
+								'type'        => 'boolean',
+								'context'     => self::VIEW_EDIT_CONTEXT,
+								'readonly'    => true,
+							),
+							'completed' => array(
+								'description' => __( 'Whether onboarding has been completed.', 'woocommerce' ),
+								'type'        => 'boolean',
+								'context'     => self::VIEW_EDIT_CONTEXT,
+								'readonly'    => true,
+							),
+							'test_mode' => array(
+								'description' => __( 'Whether the provider is in test mode onboarding.', 'woocommerce' ),
+								'type'        => 'boolean',
+								'context'     => self::VIEW_EDIT_CONTEXT,
+								'readonly'    => true,
+							),
+						),
 					),
 					'_links' => array(
 						'description' => __( 'Onboarding-related links for the provider.', 'woocommerce' ),
 						'type'        => 'object',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 						'readonly'    => true,
+						'properties'  => array(
+							'onboard' => array(
+								'description' => __( 'The link to start onboarding.', 'woocommerce' ),
+								'type'        => 'object',
+								'context'     => self::VIEW_EDIT_CONTEXT,
+								'readonly'    => true,
+								'properties'  => array(
+									'href' => array(
+										'description' => __( 'The URL to start onboarding.', 'woocommerce' ),
+										'type'        => 'string',
+										'format'      => 'uri',
+										'context'     => self::VIEW_EDIT_CONTEXT,
+										'readonly'    => true,
+									),
+								),
+							),
+						),
 					),
 				),
 			),
@@ -290,11 +327,11 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 			}
 
 			// Array of objects with defined item properties.
-			if ( $is_array_value && 
-				 ( $prop_schema['type'] ?? null ) === 'array' &&
-				 isset( $prop_schema['items']['properties'] ) &&
-				 is_array( $prop_schema['items']['properties'] ) ) {
-				
+			if ( $is_array_value &&
+				( $prop_schema['type'] ?? null ) === 'array' &&
+				isset( $prop_schema['items']['properties'] ) &&
+				is_array( $prop_schema['items']['properties'] ) ) {
+
 				$item_properties = $prop_schema['items']['properties'];
 				$filtered[ $key ] = array_map(
 					function ( $row ) use ( $item_properties ) {
