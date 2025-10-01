@@ -174,7 +174,7 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		// Validate zone_id matches if provided.
+		// Get the zone - either from request or by looking up the method's zone.
 		if ( isset( $request['zone_id'] ) ) {
 			$zone = $this->validate_zone( $request['zone_id'] );
 			if ( is_wp_error( $zone ) ) {
@@ -182,26 +182,20 @@ class Controller extends AbstractController {
 			}
 
 			// Ensure the method belongs to the specified zone.
-			global $wpdb;
-			$actual_zone_id = $wpdb->get_var(
-				$wpdb->prepare(
-					"SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d",
-					$instance_id
-				)
-			);
-
-			if ( (int) $request['zone_id'] !== (int) $actual_zone_id ) {
+			$zone_methods = $zone->get_shipping_methods();
+			if ( ! isset( $zone_methods[ $instance_id ] ) ) {
 				return $this->get_route_error_by_code( self::ZONE_MISMATCH );
+			}
+		} else {
+			// No zone_id provided, get the zone by method instance.
+			$zone = $this->validate_zone_by_method_instance( $instance_id );
+			if ( is_wp_error( $zone ) ) {
+				return $zone;
 			}
 		}
 
 		// Update method using zone's business logic if any updates provided.
 		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
-			$zone = $this->validate_zone_by_method_instance( $instance_id );
-			if ( is_wp_error( $zone ) ) {
-				return $zone;
-			}
-
 			$method = $zone->update_shipping_method( $instance_id, $request->get_params() );
 			if ( is_wp_error( $method ) ) {
 				return $method;
@@ -314,19 +308,12 @@ class Controller extends AbstractController {
 	 * @return WC_Shipping_Zone|WP_Error Zone object or error.
 	 */
 	protected function validate_zone_by_method_instance( $instance_id ) {
-		global $wpdb;
+		$zone = WC_Shipping_Zones::get_zone_by( 'instance_id', $instance_id );
 
-		$zone_id = $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT zone_id FROM {$wpdb->prefix}woocommerce_shipping_zone_methods WHERE instance_id = %d",
-				$instance_id
-			)
-		);
-
-		if ( null === $zone_id ) {
+		if ( ! $zone ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		return $this->validate_zone( $zone_id );
+		return $zone;
 	}
 }
