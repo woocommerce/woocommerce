@@ -14,7 +14,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles Refunds and other API requests such as capture.
  *
- * @since 3.0.0
+ * @since 10.3.0
  */
 class ApiHandler {
 	/**
@@ -164,7 +164,7 @@ class ApiHandler {
 /**
  * Here for backwards compatibility.
  *
- * @since 3.0.0
+ * @since 10.3.0
  */
 class Refund extends ApiHandler {
 	/**

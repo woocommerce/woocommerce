@@ -331,7 +331,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * When this gateway is toggled on via AJAX, if this returns true a
 	 * redirect will occur to the settings page instead.
 	 *
-	 * @since 3.4.0
+	 * @since 10.3.0
 	 * @return bool
 	 */
 	public function needs_setup() {
@@ -517,7 +517,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 * Admin Panel Options.
 	 * - Options for bits like 'title' and availability on a country-by-country basis.
 	 *
-	 * @since 1.0.0
+	 * @since 10.3.0
 	 */
 	public function admin_options() {
 		if ( $this->is_valid_for_use() ) {
@@ -724,7 +724,7 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Load admin scripts.
 	 *
-	 * @since 3.3.0
+	 * @since 10.3.0
 	 */
 	public function admin_scripts() {
 		$screen    = get_current_screen();
@@ -813,7 +813,7 @@ class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Custom PayPal order received text.
 	 *
-	 * @since 3.9.0
+	 * @since 10.3.0
 	 * @param string   $text Default text.
 	 * @param \WC_Order $order Order data.
 	 * @return string
@@ -845,7 +845,7 @@ class Gateway extends \WC_Payment_Gateway {
 	 *
 	 * By default PayPal Standard isn't loaded on new installs or on existing sites which haven't set up the gateway.
 	 *
-	 * @since 5.5.0
+	 * @since 10.3.0
 	 *
 	 * @return bool Whether PayPal Standard should be loaded.
 	 */

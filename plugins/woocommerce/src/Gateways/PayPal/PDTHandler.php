@@ -111,7 +111,7 @@ class PDTHandler extends Response {
 	/**
 	 * Check Response for PDT.
 	 *
-	 * @since 6.4
+	 * @since 10.3.0
 	 *
 	 * @param mixed $wc_order_id The order id to check the response against.
 	 */
