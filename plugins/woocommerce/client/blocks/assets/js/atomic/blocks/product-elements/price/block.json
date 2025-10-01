@@ -39,6 +39,7 @@
 			"__experimentalLetterSpacing": true
 		},
 		"__experimentalSelector": ".wp-block-woocommerce-product-price .wc-block-components-product-price",
+		"email": true,
 		"spacing": {
 			"margin": true,
 			"padding": true
@@ -50,5 +51,7 @@
 		"woocommerce/product-template",
 		"core/post-template"
 	],
+	"viewScriptModule": "product-price",
+	"style": "file:../product-price.css",
 	"$schema": "https://schemas.wp.org/trunk/block.json"
 }

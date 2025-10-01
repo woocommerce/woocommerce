@@ -18,12 +18,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
+	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+}
+
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
+if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
+	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
 
 /**
@@ -65,6 +69,13 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @var bool
 	 */
 	public $debug;
+
+	/**
+	 * The intent of the payment (capture or authorize).
+	 *
+	 * @var string
+	 */
+	public $intent;
 
 	/**
 	 * Email address to send payments to.
@@ -121,6 +132,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	}
 
 	/**
+	 * Set the instance of the gateway.
+	 *
+	 * @param WC_Gateway_Paypal $instance The instance of the gateway.
+	 * @return void
+	 */
+	public static function set_instance( $instance ) {
+		self::$instance = $instance;
+	}
+
+	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
@@ -143,6 +164,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$this->title                        = $this->get_option( 'title' );
 		$this->description                  = $this->get_option( 'description' );
 		$this->testmode                     = 'yes' === $this->get_option( 'testmode', 'no' );
+		$this->intent                       = 'sale' === $this->get_option( 'paymentaction', 'sale' ) ? 'capture' : 'authorize';
 		$this->debug                        = 'yes' === $this->get_option( 'debug', 'no' );
 		$this->email                        = $this->get_option( 'email' );
 		$this->receiver_email               = $this->get_option( 'receiver_email', $this->email );
@@ -184,6 +206,99 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			// Hook for plugin upgrades.
 			add_action( 'woocommerce_updated', array( $this, 'maybe_onboard_with_transact' ) );
+
+			if ( $this->should_use_orders_v2() ) {
+				// Hook for updating the shipping information on order approval (Orders v2).
+				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
+
+				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				if ( $buttons->is_enabled() ) {
+					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
+					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
+
+					// Render the buttons container to load the buttons via PayPal JS SDK.
+					// Classic checkout page.
+					add_action( 'woocommerce_checkout_before_customer_details', array( $this, 'render_buttons_container' ) );
+					// Classic cart page.
+					add_action( 'woocommerce_after_cart_totals', array( $this, 'render_buttons_container' ) );
+					// Product page.
+					add_action( 'woocommerce_after_add_to_cart_form', array( $this, 'render_buttons_container' ) );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Update the shipping and billing information for the order.
+	 * Hooked on 'woocommerce_before_thankyou'.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
+	public function update_addresses_in_order( $order_id ) {
+		$order = wc_get_order( $order_id );
+
+		// Bail early if the order is not a PayPal order.
+		if ( ! $order || $order->get_payment_method() !== $this->id ) {
+			return;
+		}
+
+		// Bail early if not on Orders v2.
+		if ( ! $this->should_use_orders_v2() ) {
+			return;
+		}
+
+		$paypal_order_id = $order->get_meta( '_paypal_order_id' );
+		if ( empty( $paypal_order_id ) ) {
+			return;
+		}
+
+		try {
+			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
+			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
+
+			// Update the shipping information.
+			$full_name = $paypal_order_details['purchase_units'][0]['shipping']['name']['full_name'] ?? '';
+			if ( ! empty( $full_name ) ) {
+				$approximate_first_name = explode( ' ', $full_name )[0] ?? '';
+				$approximate_last_name  = explode( ' ', $full_name )[1] ?? '';
+				$order->set_shipping_first_name( $approximate_first_name );
+				$order->set_shipping_last_name( $approximate_last_name );
+			}
+
+			$shipping_address = $paypal_order_details['purchase_units'][0]['shipping']['address'] ?? array();
+			if ( ! empty( $shipping_address ) ) {
+				$order->set_shipping_country( $shipping_address['country_code'] ?? '' );
+				$order->set_shipping_postcode( $shipping_address['postal_code'] ?? '' );
+				$order->set_shipping_state( $shipping_address['admin_area_1'] ?? '' );
+				$order->set_shipping_city( $shipping_address['admin_area_2'] ?? '' );
+				$order->set_shipping_address_1( $shipping_address['address_line_1'] ?? '' );
+				$order->set_shipping_address_2( $shipping_address['address_line_2'] ?? '' );
+			}
+
+			// Update the billing information.
+			$full_name = $paypal_order_details['payer']['name'] ?? array();
+			$email     = $paypal_order_details['payer']['email_address'] ?? '';
+			if ( ! empty( $full_name ) ) {
+				$order->set_billing_first_name( $full_name['given_name'] ?? '' );
+				$order->set_billing_last_name( $full_name['surname'] ?? '' );
+				$order->set_billing_email( $email );
+			}
+
+			$billing_address = $paypal_order_details['payer']['address'] ?? array();
+			if ( ! empty( $billing_address ) ) {
+				$order->set_billing_country( $billing_address['country_code'] ?? '' );
+				$order->set_billing_postcode( $billing_address['postal_code'] ?? '' );
+				$order->set_billing_state( $billing_address['admin_area_1'] ?? '' );
+				$order->set_billing_city( $billing_address['admin_area_2'] ?? '' );
+				$order->set_billing_address_1( $billing_address['address_line_1'] ?? '' );
+				$order->set_billing_address_2( $billing_address['address_line_2'] ?? '' );
+			}
+
+			$order->save();
+		} catch ( Exception $e ) {
+			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
 	}
 
@@ -455,6 +570,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				}
 			}
 		}
+
+		if ( ! $this->should_use_orders_v2() ) {
+			unset( $form_fields['paypal_buttons'] );
+		}
 		return $form_fields;
 	}
 
@@ -493,10 +612,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 					esc_html__( 'We are unable to process your PayPal payment at this time. Please try again or use a different payment method.', 'woocommerce' )
 				);
 			}
-
-			// Save the PayPal order ID. This is different from the WooCommerce order ID.
-			$order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
-			$order->save();
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
@@ -644,6 +759,76 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$version = Constants::get_constant( 'WC_VERSION' );
 
 		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
+	}
+
+	/**
+	 * Enqueue scripts.
+	 */
+	public function enqueue_scripts() {
+		if ( 'no' === $this->enabled ) {
+			return;
+		}
+
+		$version           = Constants::get_constant( 'WC_VERSION' );
+		$is_page_supported = is_checkout() || is_cart() || is_product();
+		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$options           = $buttons->get_common_options();
+
+		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
+			return;
+		}
+
+		$sdk_host = $this->testmode ? 'https://www.sandbox.paypal.com/sdk/js' : 'https://www.paypal.com/sdk/js';
+
+		// Add PayPal JS SDK script.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'paypal-standard-sdk', add_query_arg( $options, $sdk_host ), array(), null, false );
+		wp_enqueue_script( 'paypal-standard-sdk' );
+
+		wp_register_script( 'wc-paypal-frontend', WC()->plugin_url() . '/client/legacy/js/gateways/paypal.js', array( 'jquery', 'wp-api-fetch' ), $version, true );
+
+		wp_localize_script(
+			'wc-paypal-frontend',
+			'paypal_standard',
+			array(
+				'gateway_id'                => $this->id,
+				'is_product_page'           => is_product(),
+				'app_switch_request_origin' => $buttons->get_current_page_for_app_switch(),
+				'wc_store_api_nonce'        => wp_create_nonce( 'wc_store_api' ),
+				'create_order_nonce'        => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
+				'cancel_payment_nonce'      => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
+				'generic_error_message'     => __( 'An unknown error occurred', 'woocommerce' ),
+			)
+		);
+
+		wp_enqueue_script( 'wc-paypal-frontend' );
+	}
+
+	/**
+	 * Add PayPal SDK attributes to the script.
+	 *
+	 * @param array $attrs Attributes.
+	 * @return array
+	 */
+	public function add_paypal_sdk_attributes( $attrs ) {
+		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
+			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$page_type = $buttons->get_page_type();
+
+			$attrs['data-page-type']              = $page_type;
+			$attrs['data-partner-attribution-id'] = 'Woo_Cart_CoreUpgrade';
+		}
+
+		return $attrs;
+	}
+
+	/**
+	 * Builds the PayPal payment fields area.
+	 *
+	 * @since 10.3.0
+	 */
+	public function render_buttons_container() {
+		echo '<div id="paypal-standard-container"></div>';
 	}
 
 	/**
