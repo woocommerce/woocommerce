@@ -177,7 +177,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 * Set the properties of an object and log the first error found while doing so.
 	 *
 	 * @param $order WC_Order $order Order object.
-	 * @param array          $props The properties to set.
+	 * @param array $props The properties to set.
 	 */
 	private function set_order_props( &$order, array $props ) {
 		$errors = $order->set_props( $props );
@@ -423,18 +423,22 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected function read_order_data( &$order, $post_object ) {
 		$id = $order->get_id();
 
+		$meta_data = get_post_meta( $id );
+
+		$prices_include_tax = $meta_data['_prices_include_tax'][0] ?? '';
+
 		$this->set_order_props(
 			$order,
 			array(
-				'currency'           => get_post_meta( $id, '_order_currency', true ),
-				'discount_total'     => get_post_meta( $id, '_cart_discount', true ),
-				'discount_tax'       => get_post_meta( $id, '_cart_discount_tax', true ),
-				'shipping_total'     => get_post_meta( $id, '_order_shipping', true ),
-				'shipping_tax'       => get_post_meta( $id, '_order_shipping_tax', true ),
-				'cart_tax'           => get_post_meta( $id, '_order_tax', true ),
-				'total'              => get_post_meta( $id, '_order_total', true ),
-				'version'            => get_post_meta( $id, '_order_version', true ),
-				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === get_post_meta( $id, '_prices_include_tax', true ) : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+				'currency'           => $meta_data['_order_currency'][0] ?? '',
+				'discount_total'     => $meta_data['_cart_discount'][0] ?? '',
+				'discount_tax'       => $meta_data['_cart_discount_tax'][0] ?? '',
+				'shipping_total'     => $meta_data['_order_shipping'][0] ?? '',
+				'shipping_tax'       => $meta_data['_order_shipping_tax'][0] ?? '',
+				'cart_tax'           => $meta_data['_order_tax'][0] ?? '',
+				'total'              => $meta_data['_order_total'][0] ?? '',
+				'version'            => $meta_data['_order_version'][0] ?? '',
+				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
 			)
 		);
 
@@ -442,7 +446,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		foreach ( $order->get_extra_data_keys() as $key ) {
 			$function = 'set_' . $key;
 			if ( is_callable( array( $order, $function ) ) ) {
-				$order->{$function}( get_post_meta( $order->get_id(), '_' . $key, true ) );
+				$order->{$function}( $meta_data[ '_' . $key ][0] ?? '' );
 			}
 		}
 	}

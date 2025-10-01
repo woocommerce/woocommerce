@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Migrator: Fixed the import for variation with spaces
