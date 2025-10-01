@@ -51,12 +51,11 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param Payments                   $payments Payments service.
-	 * @param OfflinePaymentMethodSchema $schema   Schema class.
+	 * @param OfflinePaymentMethodSchema $schema Schema class.
 	 * @internal
 	 */
-	final public function init( Payments $payments, OfflinePaymentMethodSchema $schema ) {
-		$this->payments    = $payments;
+	final public function init( OfflinePaymentMethodSchema $schema ) {
+		$this->payments    = wc_get_container()->get( Payments::class );
 		$this->item_schema = $schema;
 	}
 
