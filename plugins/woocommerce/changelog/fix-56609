@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Implement approved download dirs cache to prevent duplicate queries.

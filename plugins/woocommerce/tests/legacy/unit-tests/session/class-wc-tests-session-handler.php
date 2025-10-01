@@ -7,10 +7,20 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+
 /**
  * Tests for the WC_Session_Handler class.
  */
 class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
+
+	const DESTROY_EMPTY_SESSION_FEATURE = 'destroy-empty-sessions';
+
+	/**
+	 * Session handler instance under test.
+	 * @var WC_Session_Handler
+	 */
+	private $handler;
 
 	/**
 	 * Setup.
@@ -20,6 +30,18 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		$this->handler = new WC_Session_Handler();
 		$this->create_session();
+	}
+
+	/**
+	 * Teardown.
+	 */
+	public function tearDown(): void {
+		// Reset any feature settings.
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$features            = $features_controller->get_features( true );
+		$features_controller->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, ! empty( $features[ self::DESTROY_EMPTY_SESSION_FEATURE ]['enabled_by_default'] ) );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -231,41 +253,184 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test that session is destroyed if the session data is empty and the cart is not yet initialized.
+	 * Test that method destroys session when all conditions are met.
 	 */
-	public function test_destroy_session_data_is_empty() {
-		$this->markTestSkipped( 'This change was reverted due to a conflict in https://github.com/woocommerce/woocommerce/pull/59530' );
+	public function test_destroy_session_if_empty_should_destroy_session_when_all_conditions_met() {
+		// Use a logged out user.
+		wp_set_current_user( 0 );
 
-		$customer_id        = (string) get_current_user_id();
-		$session_expiration = time() + 50000;
-		$session_expiring   = time() + 5000;
-		$cookie_hash        = '';
+		// Enable the empty session feature.
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, true );
 
-		$handler = $this
-			->getMockBuilder( WC_Session_Handler::class )
-			->setMethods( array( 'get_session_cookie' ) )
+		// Spy on destroy_session method - this time expect it to be called.
+		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'destroy_session' ) )
 			->getMock();
 
-		$handler
-			->method( 'get_session_cookie' )
-			->willReturn( array( $customer_id, $session_expiration, $session_expiring, $cookie_hash ) );
+		$reflection = new ReflectionClass( $session_handler_spy );
 
-		$handler->init();
-		// Verify that we loaded the session from $this->create_session() properly.
-		$this->assertEquals( 'fake cart', $handler->get( 'cart' ) );
-		// Empty the only session data before initializing.
-		$handler->set( 'cart', null );
-		$handler->save_data();
-		WC()->cart = null;
+		// Setup the session cookie how most extensions trigger it.
+		$session_handler_spy->set_customer_session_cookie( true );
 
-		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+		// Set the $_COOOKIE value as if it were passed by the browser.
+		$cookie_property = $reflection->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
+		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
 
-		$handler->init_session_cookie();
+		// Make sure the cart is empty.
+		wc_empty_cart();
 
-		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+		// Verify that the session won't get destroyed based on all passing conditions except the one we're currently testing.
+		$session_handler_spy->expects( $this->once() )->method( 'destroy_session' );
 
-		$this->assertFalse( wp_cache_get( $this->cache_prefix . $this->session_key, WC_SESSION_CACHE_GROUP ) );
-		$this->assertNull( $this->get_session_from_db( $this->session_key ) );
+		$session_handler_spy->destroy_session_if_empty();
+	}
+
+	/**
+	 * Test that method returns early if user is logged in.
+	 */
+	public function test_should_return_early_if_user_is_logged_in() {
+		// Create and log in a user.
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		// Enable the empty session feature.
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, true );
+
+		// Spy on destroy_session method - this time expect it to be called.
+		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'destroy_session' ) )
+			->getMock();
+
+		$reflection = new ReflectionClass( $session_handler_spy );
+
+		// Setup the session cookie how most extensions trigger it.
+		$session_handler_spy->set_customer_session_cookie( true );
+
+		// Set the $_COOOKIE value as if it were passed by the browser.
+		$cookie_property = $reflection->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
+		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
+
+		// Make sure the cart is empty.
+		wc_empty_cart();
+
+		// Verify that the session won't get destroyed based on all passing conditions except the one we're currently testing.
+		$session_handler_spy->expects( $this->never() )->method( 'destroy_session' );
+
+		$session_handler_spy->destroy_session_if_empty();
+	}
+
+	/**
+	 * Test that method returns early if no cookie exists.
+	 */
+	public function test_should_return_early_if_has_cookie_is_false() {
+		// Make sure the user isn't currently logged in.
+		wp_set_current_user( 0 );
+
+		// Enable the empty session feature.
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, true );
+
+		// Spy on destroy_session method - this time expect it to be called.
+		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'destroy_session' ) )
+			->getMock();
+
+		$reflection = new ReflectionClass( $session_handler_spy );
+
+		// Make sure ::_has_cookie is false to mimic cases where something already destroyed the session or the session wasn't loaded for some reason.
+		$has_cookie_property = $reflection->getProperty( '_has_cookie' );
+		$has_cookie_property->setAccessible( true );
+		$has_cookie_property->setValue( $session_handler_spy, false );
+
+		// Set the $_COOOKIE value as if it were passed by the browser.
+		$cookie_property = $reflection->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
+		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
+
+		// Make sure the cart is empty.
+		wc_empty_cart();
+
+		// Verify that the session won't get destroyed based on all passing conditions except the one we're currently testing.
+		$session_handler_spy->expects( $this->never() )->method( 'destroy_session' );
+
+		$session_handler_spy->destroy_session_if_empty();
+	}
+
+	/**
+	 * Test that method returns early if $_COOKIE is not set but cookie was set during request.
+	 */
+	public function test_should_return_early_if_cookie_set_during_request() {
+		// Make sure the user isn't currently logged in.
+		wp_set_current_user( 0 );
+
+		// Enable the empty session feature.
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, true );
+
+		// Spy on destroy_session method - this time expect it to be called.
+		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'destroy_session' ) )
+			->getMock();
+
+		$reflection = new ReflectionClass( $session_handler_spy );
+
+		// Setup the session cookie how most extensions trigger it.
+		$session_handler_spy->set_customer_session_cookie( true );
+
+		// Clear the $_COOOKIE to show that the browser didn't send it - meaning it was set during this request.
+		$cookie_property = $reflection->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+		$cookie_name = $cookie_property->getValue( $session_handler_spy );
+		unset( $_COOKIE[ $cookie_name ] );
+
+		// Make sure the cart is empty.
+		wc_empty_cart();
+
+		// Verify that the session won't get destroyed based on all passing conditions except the one we're currently testing.
+		$session_handler_spy->expects( $this->never() )->method( 'destroy_session' );
+
+		$session_handler_spy->destroy_session_if_empty();
+	}
+
+	/**
+	 * Test that method returns early if session data is not empty.
+	 */
+	public function test_should_return_early_if_session_data_not_empty() {
+		// Make sure the user isn't currently logged in.
+		wp_set_current_user( 0 );
+
+		// Enable the empty session feature.
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( self::DESTROY_EMPTY_SESSION_FEATURE, true );
+
+		// Spy on destroy_session method - this time expect it to be called.
+		$session_handler_spy = $this->getMockBuilder( WC_Session_Handler::class )
+			->onlyMethods( array( 'destroy_session' ) )
+			->getMock();
+
+		$reflection = new ReflectionClass( $session_handler_spy );
+
+		// Setup the session cookie how most extensions trigger it.
+		$session_handler_spy->set_customer_session_cookie( true );
+
+		// Set the $_COOOKIE value as if it were passed by the browser.
+		$cookie_property = $reflection->getProperty( '_cookie' );
+		$cookie_property->setAccessible( true );
+		$cookie_name             = $cookie_property->getValue( $session_handler_spy );
+		$_COOKIE[ $cookie_name ] = 'test_cookie_value';
+
+		// Make sure the cart is empty.
+		wc_empty_cart();
+
+		// Add some data to the session so it isn't empty.
+		$session_handler_spy->set( 'foo', 'bar' );
+
+		// Verify that the session won't get destroyed based on all passing conditions except the one we're currently testing.
+		$session_handler_spy->expects( $this->never() )->method( 'destroy_session' );
+
+		$session_handler_spy->destroy_session_if_empty();
 	}
 
 	/**
