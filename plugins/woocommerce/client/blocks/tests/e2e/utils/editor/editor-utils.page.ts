@@ -118,7 +118,13 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
-		await this.page.getByRole( 'button', { name: 'Templates' } ).click();
+		const templatesButton = this.page.getByRole( 'button', {
+			name: 'Templates',
+			exact: true,
+		} );
+		if ( await templatesButton.isVisible() ) {
+			await templatesButton.click();
+		}
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		// Wait for the search to finish.
@@ -150,6 +156,7 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
+	// TODO: We need separate util for templates and template parts now
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		await this.searchTemplate( { templateName } );
 
@@ -161,26 +168,36 @@ export class Editor extends CoreEditor {
 			.getByRole( 'menuitem', { name: /Reset|Delete|Deactivate/ } )
 			.click();
 
-		// const responsePromise = this.page.waitForResponse(
-		// 	( response ) =>
-		// 		( response.url().includes( 'wp-json/wp/v2/templates' ) ||
-		// 			response
-		// 				.url()
-		// 				.includes( 'wp-json/wp/v2/template-parts' ) ) &&
-		// 		response.status() === 200 &&
-		// 		response.request().method() === 'POST'
-		// );
-
-		// await this.page
-		// 	.getByRole( 'button', { name: /Reset|Delete/ } )
-		// 	.click();
-
-		// await responsePromise;
-
 		await this.page
 			.locator( 'div' )
 			.filter( { hasText: /^Saved$/ } )
 			.waitFor();
+	}
+
+	async revertTemplatePart( { templateName }: { templateName: string } ) {
+		await this.searchTemplate( { templateName } );
+
+		await this.page
+			.getByRole( 'button', { name: 'Actions' } )
+			.first()
+			.click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.click();
+
+		const responsePromise = this.page.waitForResponse(
+			( response ) =>
+				( response.url().includes( 'wp-json/wp/v2/templates' ) ||
+					response
+						.url()
+						.includes( 'wp-json/wp/v2/template-parts' ) ) &&
+				response.status() === 200 &&
+				response.request().method() === 'POST'
+		);
+
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await responsePromise;
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {

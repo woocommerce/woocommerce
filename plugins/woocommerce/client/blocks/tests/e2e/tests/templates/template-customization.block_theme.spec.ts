@@ -42,7 +42,13 @@ test.describe( 'Template customization', () => {
 				attributes: { content: userText },
 			} );
 
-			await saveAndActivateTemplate( { editor, page } );
+			if ( testData.templateType === 'wp_registered_template' ) {
+				await saveAndActivateTemplate( { editor, page } );
+			} else {
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
+			}
 
 			// Verify template name didn't change.
 			// See: https://github.com/woocommerce/woocommerce/issues/42221
@@ -65,9 +71,15 @@ test.describe( 'Template customization', () => {
 			await admin.visitSiteEditor( {
 				postType: testData.templateType,
 			} );
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
+			if ( testData.templateType === 'wp_template_part' ) {
+				await editor.revertTemplatePart( {
+					templateName: testData.templateName,
+				} );
+			} else {
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
+				} );
+			}
 			await testData.visitPage( {
 				admin,
 				editor,

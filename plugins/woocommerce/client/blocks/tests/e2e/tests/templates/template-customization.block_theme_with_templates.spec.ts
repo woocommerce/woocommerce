@@ -50,10 +50,16 @@ test.describe( 'Template customization', () => {
 					name: 'core/paragraph',
 					attributes: { content: userText },
 				} );
-				await saveAndActivateTemplate( {
-					editor,
-					page,
-				} );
+				if ( testData.templateType === 'wp_registered_template' ) {
+					await saveAndActivateTemplate( {
+						editor,
+						page,
+					} );
+				} else {
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
+				}
 
 				// Verify template name didn't change.
 				// See: https://github.com/woocommerce/woocommerce/issues/42221
@@ -79,9 +85,25 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
-				await editor.revertTemplate( {
-					templateName: testData.templateName,
-				} );
+				// TODO: Bug in GB - custom templates display slugs not titles
+				if (
+					testData.templateName === 'Products by Category' ||
+					testData.templateName === 'Products by Tag'
+				) {
+					await editor.revertTemplate( {
+						templateName: testData.templatePath,
+					} );
+				} else {
+					if ( testData.templateType === 'wp_template_part' ) {
+						await editor.revertTemplatePart( {
+							templateName: testData.templateName,
+						} );
+					} else {
+						await editor.revertTemplate( {
+							templateName: testData.templateName,
+						} );
+					}
+				}
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -122,10 +144,16 @@ test.describe( 'Template customization', () => {
 							content: fallbackTemplateUserText,
 						},
 					} );
-					await saveAndActivateTemplate( {
-						editor,
-						page,
-					} );
+					if ( testData.templateType === 'wp_registered_template' ) {
+						await saveAndActivateTemplate( {
+							editor,
+							page,
+						} );
+					} else {
+						await editor.saveSiteEditorEntities( {
+							isOnlyCurrentEntityDirty: true,
+						} );
+					}
 					await testData.visitPage( {
 						admin,
 						editor,
