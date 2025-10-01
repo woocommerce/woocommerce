@@ -74,6 +74,10 @@ class RoutesController {
 				// This route should be moved outside of the Store API namespace.
 				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
 			],
+			'agentic' => [
+				// Agentic Commerce Protocol endpoints.
+				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER => Routes\V1\Agentic\CheckoutSessions::class,
+			],
 		];
 	}
 
@@ -84,6 +88,7 @@ class RoutesController {
 		$this->register_routes( 'v1', self::$api_namespace );
 		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
 		$this->register_routes( 'private', 'wc/private' );
+		$this->register_routes( 'agentic', 'wc/agentic/v1' );
 	}
 
 	/**
