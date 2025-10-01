@@ -2,9 +2,11 @@
 /**
  * Handles responses from PayPal IPN.
  *
- * @package WooCommerce\PayPal
+ * @package Automattic\WooCommerce\Gateways
  * @version 3.3.0
  */
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
@@ -12,15 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php';
-
 /**
- * WC_Gateway_Paypal_IPN_Handler class.
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\IPNHandler`.
+ * IPNHandler class.
  */
-class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
-
+class IPNHandler extends Response {
 	/**
 	 * Receiver email address to validate.
 	 *
@@ -70,8 +67,8 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 			// Lowercase returned variables.
 			$posted['payment_status'] = strtolower( $posted['payment_status'] );
 
-			WC_Gateway_Paypal::log( 'Found order #' . $order->get_id() );
-			WC_Gateway_Paypal::log( 'Payment status: ' . $posted['payment_status'] );
+			Gateway::log( 'Found order #' . $order->get_id() );
+			Gateway::log( 'Payment status: ' . $posted['payment_status'] );
 
 			if ( method_exists( $this, 'payment_status_' . $posted['payment_status'] ) ) {
 				call_user_func( array( $this, 'payment_status_' . $posted['payment_status'] ), $order, $posted );
@@ -83,7 +80,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check PayPal IPN validity.
 	 */
 	public function validate_ipn() {
-		WC_Gateway_Paypal::log( 'Checking IPN response is valid' );
+		Gateway::log( 'Checking IPN response is valid' );
 
 		// Get received values from post data.
 		$validate_ipn        = wp_unslash( $_POST ); // WPCS: CSRF ok, input var ok.
@@ -102,18 +99,18 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		// Post back to get a response.
 		$response = wp_safe_remote_post( $this->sandbox ? 'https://www.sandbox.paypal.com/cgi-bin/webscr' : 'https://www.paypal.com/cgi-bin/webscr', $params );
 
-		WC_Gateway_Paypal::log( 'IPN Response: ' . wc_print_r( $response, true ) );
+		Gateway::log( 'IPN Response: ' . wc_print_r( $response, true ) );
 
 		// Check to see if the request was valid.
 		if ( ! is_wp_error( $response ) && $response['response']['code'] >= 200 && $response['response']['code'] < 300 && strstr( $response['body'], 'VERIFIED' ) ) {
-			WC_Gateway_Paypal::log( 'Received valid response from PayPal IPN' );
+			Gateway::log( 'Received valid response from PayPal IPN' );
 			return true;
 		}
 
-		WC_Gateway_Paypal::log( 'Received invalid response from PayPal IPN' );
+		Gateway::log( 'Received invalid response from PayPal IPN' );
 
 		if ( is_wp_error( $response ) ) {
-			WC_Gateway_Paypal::log( 'Error response: ' . $response->get_error_message() );
+			Gateway::log( 'Error response: ' . $response->get_error_message() );
 		}
 
 		return false;
@@ -128,7 +125,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 		$accepted_types = array( 'cart', 'instant', 'express_checkout', 'web_accept', 'masspay', 'send_money', 'paypal_here' );
 
 		if ( ! in_array( strtolower( $txn_type ), $accepted_types, true ) ) {
-			WC_Gateway_Paypal::log( 'Aborting, Invalid type:' . $txn_type );
+			Gateway::log( 'Aborting, Invalid type:' . $txn_type );
 			exit;
 		}
 	}
@@ -136,12 +133,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check currency from IPN matches the order.
 	 *
-	 * @param WC_Order $order    Order object.
+	 * @param \WC_Order $order    Order object.
 	 * @param string   $currency Currency code.
 	 */
 	protected function validate_currency( $order, $currency ) {
 		if ( $order->get_currency() !== $currency ) {
-			WC_Gateway_Paypal::log( 'Payment error: Currencies do not match (sent "' . $order->get_currency() . '" | returned "' . $currency . '")' );
+			Gateway::log( 'Payment error: Currencies do not match (sent "' . $order->get_currency() . '" | returned "' . $currency . '")' );
 
 			/* translators: %s: currency code. */
 			$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Validation error: PayPal currencies do not match (code %s).', 'woocommerce' ), $currency ) );
@@ -152,12 +149,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Check payment amount from IPN matches the order.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param int      $amount Amount to validate.
 	 */
 	protected function validate_amount( $order, $amount ) {
 		if ( number_format( $order->get_total(), 2, '.', '' ) !== number_format( $amount, 2, '.', '' ) ) {
-			WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (gross ' . $amount . ')' );
+			Gateway::log( 'Payment error: Amounts do not match (gross ' . $amount . ')' );
 
 			/* translators: %s: Amount. */
 			$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Validation error: PayPal amounts do not match (gross %s).', 'woocommerce' ), $amount ) );
@@ -169,12 +166,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	 * Check receiver email from PayPal. If the receiver email in the IPN is different than what is stored in.
 	 * WooCommerce -> Settings -> Checkout -> PayPal, it will log an error about it.
 	 *
-	 * @param WC_Order $order          Order object.
+	 * @param \WC_Order $order          Order object.
 	 * @param string   $receiver_email Email to validate.
 	 */
 	protected function validate_receiver_email( $order, $receiver_email ) {
 		if ( strcasecmp( trim( $receiver_email ), trim( $this->receiver_email ) ) !== 0 ) {
-			WC_Gateway_Paypal::log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
+			Gateway::log( "IPN Response is for another account: {$receiver_email}. Your email is {$this->receiver_email}" );
 
 			/* translators: %s: email address . */
 			$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Validation error: PayPal IPN response from a different email address (%s).', 'woocommerce' ), $receiver_email ) );
@@ -185,12 +182,12 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a completed payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_completed( $order, $posted ) {
 		if ( $order->has_status( wc_get_is_paid_statuses() ) ) {
-			WC_Gateway_Paypal::log( 'Aborting, Order #' . $order->get_id() . ' is already complete.' );
+			Gateway::log( 'Aborting, Order #' . $order->get_id() . ' is already complete.' );
 			exit;
 		}
 
@@ -223,7 +220,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a pending payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_pending( $order, $posted ) {
@@ -233,7 +230,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a failed payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_failed( $order, $posted ) {
@@ -244,7 +241,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a denied payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_denied( $order, $posted ) {
@@ -254,7 +251,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle an expired payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_expired( $order, $posted ) {
@@ -264,7 +261,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a voided payment.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_voided( $order, $posted ) {
@@ -274,7 +271,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * When a user cancelled order is marked paid.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_paid_cancelled_order( $order, $posted ) {
@@ -289,7 +286,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a refunded order.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_refunded( $order, $posted ) {
@@ -311,7 +308,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a reversal.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_reversed( $order, $posted ) {
@@ -329,7 +326,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Handle a cancelled reversal.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function payment_status_canceled_reversal( $order, $posted ) {
@@ -344,7 +341,7 @@ class WC_Gateway_Paypal_IPN_Handler extends WC_Gateway_Paypal_Response {
 	/**
 	 * Save important data from the IPN to the order.
 	 *
-	 * @param WC_Order $order  Order object.
+	 * @param \WC_Order $order  Order object.
 	 * @param array    $posted Posted data.
 	 */
 	protected function save_paypal_meta_data( $order, $posted ) {

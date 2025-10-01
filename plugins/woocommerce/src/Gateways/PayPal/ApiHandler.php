@@ -1,9 +1,11 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_API_Handler file.
+ * Class APIHandler file.
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -13,10 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Handles Refunds and other API requests such as capture.
  *
  * @since 3.0.0
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\APIHandler`.
  */
-class WC_Gateway_Paypal_API_Handler {
+class ApiHandler {
 	/**
 	 * API Username
 	 *
@@ -49,7 +49,7 @@ class WC_Gateway_Paypal_API_Handler {
 	 * Get capture request args.
 	 * See https://developer.paypal.com/docs/classic/api/merchant/DoCapture_API_Operation_NVP/.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  float    $amount Amount.
 	 * @return array
 	 */
@@ -71,7 +71,7 @@ class WC_Gateway_Paypal_API_Handler {
 	/**
 	 * Get refund request args.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  float    $amount Refund amount.
 	 * @param  string   $reason Refund reason.
 	 * @return array
@@ -98,7 +98,7 @@ class WC_Gateway_Paypal_API_Handler {
 	/**
 	 * Capture an authorization.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  float    $amount Amount.
 	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
 	 */
@@ -114,12 +114,12 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'DoCapture Response: ' . wc_print_r( $raw_response, true ) );
+		Gateway::log( 'DoCapture Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( is_wp_error( $raw_response ) ) {
 			return $raw_response;
 		} elseif ( empty( $raw_response['body'] ) ) {
-			return new WP_Error( 'paypal-api', 'Empty Response' );
+			return new \WP_Error( 'paypal-api', 'Empty Response' );
 		}
 
 		parse_str( $raw_response['body'], $response );
@@ -130,7 +130,7 @@ class WC_Gateway_Paypal_API_Handler {
 	/**
 	 * Refund an order via PayPal.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  float    $amount Refund amount.
 	 * @param  string   $reason Refund reason.
 	 * @return object Either an object of name value pairs for a success, or a WP_ERROR object.
@@ -147,12 +147,12 @@ class WC_Gateway_Paypal_API_Handler {
 			)
 		);
 
-		WC_Gateway_Paypal::log( 'Refund Response: ' . wc_print_r( $raw_response, true ) );
+		Gateway::log( 'Refund Response: ' . wc_print_r( $raw_response, true ) );
 
 		if ( is_wp_error( $raw_response ) ) {
 			return $raw_response;
 		} elseif ( empty( $raw_response['body'] ) ) {
-			return new WP_Error( 'paypal-api', 'Empty Response' );
+			return new \WP_Error( 'paypal-api', 'Empty Response' );
 		}
 
 		parse_str( $raw_response['body'], $response );
@@ -166,11 +166,11 @@ class WC_Gateway_Paypal_API_Handler {
  *
  * @since 3.0.0
  */
-class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
+class Refund extends ApiHandler {
 	/**
-	 * Get refund request args. Proxy to WC_Gateway_Paypal_API_Handler::get_refund_request().
+	 * Get refund request args. Proxy to APIHandler::get_refund_request().
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param \WC_Order $order Order object.
 	 * @param float    $amount Refund amount.
 	 * @param string   $reason Refund reason.
 	 *
@@ -183,7 +183,7 @@ class WC_Gateway_Paypal_Refund extends WC_Gateway_Paypal_API_Handler {
 	/**
 	 * Process an order refund.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  float    $amount Refund amount.
 	 * @param  string   $reason Refund reason.
 	 * @param  bool     $sandbox Whether to use sandbox mode or not.

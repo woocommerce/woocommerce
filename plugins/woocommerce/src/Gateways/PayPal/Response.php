@@ -2,8 +2,10 @@
 /**
  * Class WC_Gateway_Paypal_Response file.
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
@@ -13,11 +15,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Handles Responses.
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\Response`.
  */
-abstract class WC_Gateway_Paypal_Response {
-
+abstract class Response {
 	/**
 	 * Sandbox mode
 	 *
@@ -29,7 +28,7 @@ abstract class WC_Gateway_Paypal_Response {
 	 * Get the order from the PayPal 'Custom' variable.
 	 *
 	 * @param  string $raw_custom JSON Data passed back by PayPal.
-	 * @return bool|WC_Order object
+	 * @return bool|\WC_Order object
 	 */
 	protected function get_paypal_order( $raw_custom ) {
 		// We have the data in the correct format, so get the order.
@@ -39,7 +38,7 @@ abstract class WC_Gateway_Paypal_Response {
 			$order_key = $custom->order_key;
 		} else {
 			// Nothing was found.
-			WC_Gateway_Paypal::log( 'Order ID and key were not found in "custom".', 'error' );
+			Gateway::log( 'Order ID and key were not found in "custom".', 'error' );
 			return false;
 		}
 
@@ -52,7 +51,7 @@ abstract class WC_Gateway_Paypal_Response {
 		}
 
 		if ( ! $order || ! hash_equals( $order->get_order_key(), $order_key ) ) {
-			WC_Gateway_Paypal::log( 'Order Keys do not match.', 'error' );
+			Gateway::log( 'Order Keys do not match.', 'error' );
 			return false;
 		}
 
@@ -62,7 +61,7 @@ abstract class WC_Gateway_Paypal_Response {
 	/**
 	 * Complete order, add transaction ID and note.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  string   $txn_id Transaction ID.
 	 * @param  string   $note Payment note.
 	 */
@@ -80,7 +79,7 @@ abstract class WC_Gateway_Paypal_Response {
 	/**
 	 * Hold order and add note.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @param  string   $reason Reason why the payment is on hold.
 	 */
 	protected function payment_on_hold( $order, $reason = '' ) {

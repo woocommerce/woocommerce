@@ -13,10 +13,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-}
-
 /**
  * Handles PayPal Buttons.
  */
@@ -45,18 +41,18 @@ class Buttons {
 	/**
 	 * The request instance.
 	 *
-	 * @var \WC_Gateway_Paypal_Request
+	 * @var Request
 	 */
 	private $request;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param \WC_Gateway_Paypal $gateway The gateway instance.
+	 * @param Gateway $gateway The gateway instance.
 	 */
-	public function __construct( \WC_Gateway_Paypal $gateway ) {
+	public function __construct( Gateway $gateway ) {
 		$this->gateway = $gateway;
-		$this->request = new \WC_Gateway_Paypal_Request( $this->gateway );
+		$this->request = new Request( $this->gateway );
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );

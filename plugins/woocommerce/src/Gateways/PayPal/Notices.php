@@ -2,27 +2,25 @@
 /**
  * PayPal Notices Class
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
-
 /**
- * Class WC_Gateway_Paypal_Notices.
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\Notices`.
+ * Class Notices.
  */
-class WC_Gateway_Paypal_Notices {
+class Notices {
 	/**
 	 * The PayPal gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var Gateway
 	 */
 	private $gateway;
 
@@ -30,7 +28,7 @@ class WC_Gateway_Paypal_Notices {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->gateway = WC_Gateway_Paypal::get_instance();
+		$this->gateway = Gateway::get_instance();
 		if ( ! $this->gateway ) {
 			return;
 		}
@@ -55,7 +53,7 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		// Skip if the gateway is not available or the merchant has not been onboarded.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! $this->gateway->should_use_orders_v2() ) {
+		if ( ! Helper::is_paypal_gateway_available() || ! $this->gateway->should_use_orders_v2() ) {
 			return;
 		}
 

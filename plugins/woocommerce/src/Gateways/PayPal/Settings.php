@@ -2,18 +2,17 @@
 /**
  * Settings for PayPal Standard Gateway.
  *
- * @package WooCommerce\Classes\Payment
+ * @package Automattic\WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Utilities\LoggingUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-/**
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Gateways\PayPal\Settings`.
- */
 $settings = array(
 	'enabled'          => array(
 		'title'   => __( 'Enable/Disable', 'woocommerce' ),

@@ -2,8 +2,10 @@
 /**
  * Class WC_Gateway_Paypal_PDT_Handler file.
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -12,15 +14,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-require_once dirname( __FILE__ ) . '/class-wc-gateway-paypal-response.php';
-
 /**
  * Handle PDT Responses from PayPal.
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\PDTHandler`.
  */
-class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
-
+class PDTHandler extends Response {
 	/**
 	 * Identity token for PDT support
 	 *
@@ -145,25 +142,25 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 
 			if ( $wc_order->get_id() !== $order->get_id() ) {
 				/* translators: 1: order ID, 2: order ID. */
-				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for order %1$d on endpoint for order %2$d.', 'woocommerce' ), $order->get_id(), $wc_order_id ), 'error' );
+				Gateway::log( sprintf( __( 'Received PDT notification for order %1$d on endpoint for order %2$d.', 'woocommerce' ), $order->get_id(), $wc_order_id ), 'error' );
 				return;
 			}
 
 			if ( 0 !== strcasecmp( trim( $transaction_result['receiver_email'] ), trim( $this->receiver_email ) ) ) {
 				/* translators: 1: email address, 2: order ID . */
-				WC_Gateway_Paypal::log( sprintf( __( 'Received PDT notification for another account: %1$s. Order ID: %2$d.', 'woocommerce' ), $transaction_result['receiver_email'], $order->get_id() ), 'error' );
+				Gateway::log( sprintf( __( 'Received PDT notification for another account: %1$s. Order ID: %2$d.', 'woocommerce' ), $transaction_result['receiver_email'], $order->get_id() ), 'error' );
 				return;
 			}
 
 			// We have a valid response from PayPal.
-			WC_Gateway_Paypal::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
+			Gateway::log( 'PDT Transaction Status: ' . wc_print_r( $status, true ) );
 
 			$order->add_meta_data( '_paypal_status', $status );
 			$order->set_transaction_id( $transaction );
 
 			if ( OrderStatus::COMPLETED === $status ) {
 				if ( number_format( $order->get_total(), 2, '.', '' ) !== number_format( $amount, 2, '.', '' ) ) {
-					WC_Gateway_Paypal::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
+					Gateway::log( 'Payment error: Amounts do not match (amt ' . $amount . ')', 'error' );
 					/* translators: 1: Payment amount */
 					$this->payment_on_hold( $order, sprintf( __( 'Validation error: PayPal amounts do not match (amt %s).', 'woocommerce' ), $amount ) );
 				} else {
@@ -186,7 +183,7 @@ class WC_Gateway_Paypal_PDT_Handler extends WC_Gateway_Paypal_Response {
 				}
 			}
 		} else {
-			WC_Gateway_Paypal::log( 'Received invalid response from PayPal PDT' );
+			Gateway::log( 'Received invalid response from PayPal PDT' );
 		}
 	}
 }

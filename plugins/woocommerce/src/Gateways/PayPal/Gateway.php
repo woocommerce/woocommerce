@@ -5,10 +5,12 @@
  * Provides a PayPal Standard Payment Gateway.
  *
  * @class       WC_Gateway_Paypal
- * @extends     WC_Payment_Gateway
+ * @extends     \WC_Payment_Gateway
  * @version     2.3.0
- * @package     WooCommerce\Classes\Payment
+ * @package     Automattic\WooCommerce\Gateways
  */
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
@@ -18,25 +20,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
-}
-
 /**
- * WC_Gateway_Paypal Class.
- *
- * @deprecated 10.3.0 Deprecated in favor of `Automattic\WooCommerce\Payments\Gateways\PayPal\Gateway`.
+ * Gateway Class.
  */
-class WC_Gateway_Paypal extends WC_Payment_Gateway {
-
+class Gateway extends \WC_Payment_Gateway {
 	/**
 	 * Unique ID for this gateway.
 	 *
@@ -54,7 +41,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Logger instance
 	 *
-	 * @var WC_Logger
+	 * @var \WC_Logger
 	 */
 	public static $log = false;
 
@@ -117,14 +104,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * The *Singleton* instance of this class
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var Gateway
 	 */
 	private static $instance;
 
 	/**
 	 * Returns the *Singleton* instance of this class.
 	 *
-	 * @return WC_Gateway_Paypal The *Singleton* instance.
+	 * @return Gateway The *Singleton* instance.
 	 */
 	public static function get_instance() {
 		if ( null === self::$instance ) {
@@ -136,7 +123,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Set the instance of the gateway.
 	 *
-	 * @param WC_Gateway_Paypal $instance The instance of the gateway.
+	 * @param Gateway $instance The instance of the gateway.
 	 * @return void
 	 */
 	public static function set_instance( $instance ) {
@@ -189,12 +176,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		if ( ! $this->is_valid_for_use() ) {
 			$this->enabled = 'no';
 		} else {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-ipn-handler.php';
-			new WC_Gateway_Paypal_IPN_Handler( $this->testmode, $this->receiver_email );
+			new IPNHandler( $this->testmode, $this->receiver_email );
 
 			if ( $this->identity_token ) {
-				include_once __DIR__ . '/includes/class-wc-gateway-paypal-pdt-handler.php';
-				$pdt_handler = new WC_Gateway_Paypal_PDT_Handler( $this->testmode, $this->identity_token );
+				$pdt_handler = new PDTHandler( $this->testmode, $this->identity_token );
 				$pdt_handler->set_receiver_email( $this->receiver_email );
 			}
 		}
@@ -213,7 +198,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for updating the shipping information on order approval (Orders v2).
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new Buttons( $this );
 				if ( $buttons->is_enabled() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -256,8 +241,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		try {
-			include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-			$paypal_request       = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request       = new Request( $this );
 			$paypal_order_details = $paypal_request->get_paypal_order_details( $paypal_order_id );
 
 			// Update the shipping information.
@@ -299,7 +283,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			}
 
 			$order->save();
-		} catch ( Exception $e ) {
+		} catch ( \Exception $e ) {
 			self::log( 'Error updating addresses for order #' . $order_id . ': ' . $e->getMessage(), 'error' );
 		}
 	}
@@ -328,7 +312,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			Helper::is_orders_v2_migration_eligible() && Helper::is_orders_v2_feature_flag_enabled()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -337,8 +321,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new TransactAccountManager( $this );
 		$transact_account_manager->do_onboarding();
 	}
 
@@ -508,7 +491,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg';
 				break;
 			default:
-				$icon = WC_HTTPS::force_https_url( WC()->plugin_url() . '/includes/gateways/paypal/assets/images/paypal.png' );
+				$icon = \WC_HTTPS::force_https_url( WC()->plugin_url() . '/src/Gateways/PayPal/Assets/Images/paypal.png' );
 				break;
 		}
 		return apply_filters( 'woocommerce_paypal_icon', $icon );
@@ -554,7 +537,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Initialise Gateway Settings Form Fields.
 	 */
 	public function init_form_fields() {
-		$this->form_fields = include __DIR__ . '/includes/settings-paypal.php';
+		$this->form_fields = include __DIR__ . '/Settings.php';
 	}
 
 	/**
@@ -582,7 +565,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Get the transaction URL.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @return string
 	 */
 	public function get_transaction_url( $order ) {
@@ -599,18 +582,16 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @param  int $order_id Order ID.
 	 * @return array
-	 * @throws Exception If the PayPal order creation fails.
+	 * @throws \Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
 		$order          = wc_get_order( $order_id );
-		$paypal_request = new WC_Gateway_Paypal_Request( $this );
+		$paypal_request = new Request( $this );
 
 		if ( $this->should_use_orders_v2() ) {
 			$paypal_order = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
-				throw new Exception(
+				throw new \Exception(
 					esc_html__( 'We are unable to process your PayPal payment at this time. Please try again or use a different payment method.', 'woocommerce' )
 				);
 			}
@@ -629,7 +610,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	/**
 	 * Can the order be refunded via PayPal?
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param  \WC_Order $order Order object.
 	 * @return bool
 	 */
 	public function can_refund_order( $order ) {
@@ -648,12 +629,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Init the API class and set the username/password etc.
 	 */
 	protected function init_api() {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-api-handler.php';
-
-		WC_Gateway_Paypal_API_Handler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
-		WC_Gateway_Paypal_API_Handler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
-		WC_Gateway_Paypal_API_Handler::$api_signature = $this->testmode ? $this->get_option( 'sandbox_api_signature' ) : $this->get_option( 'api_signature' );
-		WC_Gateway_Paypal_API_Handler::$sandbox       = $this->testmode;
+		APIHandler::$api_username  = $this->testmode ? $this->get_option( 'sandbox_api_username' ) : $this->get_option( 'api_username' );
+		APIHandler::$api_password  = $this->testmode ? $this->get_option( 'sandbox_api_password' ) : $this->get_option( 'api_password' );
+		APIHandler::$api_signature = $this->testmode ? $this->get_option( 'sandbox_api_signature' ) : $this->get_option( 'api_signature' );
+		APIHandler::$sandbox       = $this->testmode;
 	}
 
 	/**
@@ -662,22 +641,22 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @param  int    $order_id Order ID.
 	 * @param  float  $amount Refund amount.
 	 * @param  string $reason Refund reason.
-	 * @return bool|WP_Error
+	 * @return bool|\WP_Error
 	 */
 	public function process_refund( $order_id, $amount = null, $reason = '' ) {
 		$order = wc_get_order( $order_id );
 
 		if ( ! $this->can_refund_order( $order ) ) {
-			return new WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
+			return new \WP_Error( 'error', __( 'Refund failed.', 'woocommerce' ) );
 		}
 
 		$this->init_api();
 
-		$result = WC_Gateway_Paypal_API_Handler::refund_transaction( $order, $amount, $reason );
+		$result = APIHandler::refund_transaction( $order, $amount, $reason );
 
 		if ( is_wp_error( $result ) ) {
 			static::log( 'Refund Failed: ' . $result->get_error_message(), 'error' );
-			return new WP_Error( 'error', $result->get_error_message() );
+			return new \WP_Error( 'error', $result->get_error_message() );
 		}
 
 		static::log( 'Refund Result: ' . wc_print_r( $result, true ) );
@@ -692,7 +671,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				return true;
 		}
 
-		return isset( $result->L_LONGMESSAGE0 ) ? new WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+		return isset( $result->L_LONGMESSAGE0 ) ? new \WP_Error( 'error', $result->L_LONGMESSAGE0 ) : false; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 	}
 
 	/**
@@ -704,16 +683,14 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$order = wc_get_order( $order_id );
 
 		if ( $this->should_use_orders_v2() ) {
-			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
-			$paypal_request = new WC_Gateway_Paypal_Request( $this );
+			$paypal_request = new Request( $this );
 			$paypal_request->capture_authorized_payment( $order );
 			return;
 		}
 
 		if ( self::ID === $order->get_payment_method() && 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
-			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
+			$result = ApiHandler::do_capture( $order );
 
 			if ( is_wp_error( $result ) ) {
 				static::log( 'Capture Failed: ' . $result->get_error_message(), 'error' );
@@ -760,7 +737,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version = Constants::get_constant( 'WC_VERSION' );
 
-		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/includes/gateways/paypal/assets/js/paypal-admin' . $suffix . '.js', array(), $version, true );
+		wp_enqueue_script( 'woocommerce_paypal_admin', WC()->plugin_url() . '/src/Gateways/PayPal/Assets/JS/PaypalAdmin' . $suffix . '.js', array(), $version, true );
 	}
 
 	/**
@@ -773,7 +750,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new Buttons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -814,7 +791,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new Buttons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;
@@ -838,7 +815,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @since 3.9.0
 	 * @param string   $text Default text.
-	 * @param WC_Order $order Order data.
+	 * @param \WC_Order $order Order data.
 	 * @return string
 	 */
 	public function order_received_text( $text, $order ) {
@@ -853,7 +830,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * Hide "Pay" and "Cancel" action buttons for pending orders as orders v2 takes a while to be captured.
 	 *
 	 * @param array    $actions An array with the default actions.
-	 * @param WC_Order $order The order.
+	 * @param \WC_Order $order The order.
 	 * @return array
 	 */
 	public function hide_action_buttons( $actions, $order ) {
@@ -921,7 +898,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			Helper::is_orders_v2_migration_eligible() && Helper::is_orders_v2_feature_flag_enabled()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -942,8 +919,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		}
 
 		// We need merchant and provider accounts with Transact to be able to use the proxy.
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-transact-account-manager.php';
-		$transact_account_manager = new WC_Gateway_Paypal_Transact_Account_Manager( $this );
+		$transact_account_manager = new TransactAccountManager( $this );
 		$merchant_account_data    = $transact_account_manager->get_transact_account_data( 'merchant' );
 		if ( empty( $merchant_account_data ) ) {
 			return false;
@@ -1001,7 +977,6 @@ add_action(
 			return;
 		}
 
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-notices.php';
-		new WC_Gateway_Paypal_Notices();
+		new Notices();
 	}
 );
