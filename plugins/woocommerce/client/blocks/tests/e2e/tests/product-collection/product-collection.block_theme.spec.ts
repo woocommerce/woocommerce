@@ -725,6 +725,7 @@ test.describe( 'Product Collection', () => {
 			} );
 
 			// Go to custom active Product Catalog template
+			// TODO: Create util that goes to "new, custom" template upon saving
 			await admin.visitAdminPage( 'site-editor.php?p=%2Ftemplate' );
 			await page
 				.getByRole( 'button', { name: 'Product Catalog' } )
