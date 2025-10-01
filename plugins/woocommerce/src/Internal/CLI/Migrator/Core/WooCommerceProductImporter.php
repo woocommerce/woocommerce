@@ -697,7 +697,7 @@ class WooCommerceProductImporter {
 			$woo_attribute = new \WC_Product_Attribute();
 			$woo_attribute->set_name( $taxonomy_name );
 			$woo_attribute->set_id( $attribute_id );
-			$woo_attribute->set_options( $term_slugs );
+			$woo_attribute->set_options( $term_ids );
 			$woo_attribute->set_position( $attribute_info['position'] ?? 0 );
 			$woo_attribute->set_visible( $attribute_info['is_visible'] ?? true );
 			$woo_attribute->set_variation( $attribute_info['is_variation'] ?? true );
