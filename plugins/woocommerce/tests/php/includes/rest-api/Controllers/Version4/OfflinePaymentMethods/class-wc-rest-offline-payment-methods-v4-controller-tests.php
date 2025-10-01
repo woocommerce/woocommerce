@@ -196,6 +196,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v4/payments/offline-methods', $routes );
 		$this->assertCount( 1, $routes['/wc/v4/payments/offline-methods'] );
+		$this->assertArrayHasKey( '/wc/v4/payments/offline-methods/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
@@ -446,5 +447,193 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 				$this->assertContains( $field, $allowed_fields, "Field '{$field}' not declared in schema or allowed framework fields" );
 			}
 		}
+	}
+
+	/**
+	 * Test getting a single offline payment method.
+	 */
+	public function test_get_single_offline_payment_method() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods/bacs' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertEquals( 'bacs', $data['id'] );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'enabled', $data );
+	}
+
+	/**
+	 * Test getting a single offline payment method with invalid ID.
+	 */
+	public function test_get_single_offline_payment_method_invalid_id() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods/invalid' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting a non-offline payment method returns 404.
+	 */
+	public function test_get_non_offline_payment_method() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods/stripe' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test getting single offline payment method without permission.
+	 */
+	public function test_get_single_offline_payment_method_without_permission() {
+		wp_set_current_user( 0 );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods/bacs' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test updating a single offline payment method.
+	 */
+	public function test_update_offline_payment_method() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/bacs' );
+		$request->set_body_params(
+			array(
+				'enabled'     => false,
+				'title'       => 'Updated Bank Transfer',
+				'description' => 'Updated description',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'bacs', $data['id'] );
+		$this->assertEquals( false, $data['enabled'] );
+		$this->assertEquals( 'Updated Bank Transfer', $data['title'] );
+		$this->assertEquals( 'Updated description', $data['description'] );
+	}
+
+	/**
+	 * Test updating offline payment method settings.
+	 */
+	public function test_update_offline_payment_method_settings() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/bacs' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'instructions' => 'New payment instructions',
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'settings', $data );
+
+		// Verify the instruction was updated.
+		$settings = $data['settings'];
+		$instructions_setting = array_values(
+			array_filter(
+				$settings,
+				function ( $setting ) {
+					return isset( $setting['id'] ) && 'instructions' === $setting['id'];
+				}
+			)
+		);
+
+		if ( ! empty( $instructions_setting ) ) {
+			$this->assertEquals( 'New payment instructions', $instructions_setting[0]['value'] );
+		}
+	}
+
+	/**
+	 * Test updating offline payment method with invalid ID.
+	 */
+	public function test_update_offline_payment_method_invalid_id() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/invalid' );
+		$request->set_body_params(
+			array(
+				'enabled' => true,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test updating a non-offline payment method returns 404.
+	 */
+	public function test_update_non_offline_payment_method() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/stripe' );
+		$request->set_body_params(
+			array(
+				'enabled' => true,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test updating offline payment method without permission.
+	 */
+	public function test_update_offline_payment_method_without_permission() {
+		wp_set_current_user( 0 );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/bacs' );
+		$request->set_body_params(
+			array(
+				'enabled' => false,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test updating offline payment method with insufficient permission.
+	 */
+	public function test_update_offline_payment_method_with_insufficient_permission() {
+		$user = $this->factory->user->create(
+			array(
+				'role' => 'subscriber',
+			)
+		);
+		wp_set_current_user( $user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/bacs' );
+		$request->set_body_params(
+			array(
+				'enabled' => false,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 403, $response->get_status() );
+	}
+
+	/**
+	 * Test updating payment method order.
+	 */
+	public function test_update_offline_payment_method_order() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payments/offline-methods/bacs' );
+		$request->set_body_params(
+			array(
+				'order' => 5,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 5, $data['order'] );
 	}
 }
