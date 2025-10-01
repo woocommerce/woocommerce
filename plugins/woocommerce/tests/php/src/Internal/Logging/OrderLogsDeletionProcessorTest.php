@@ -44,6 +44,13 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 */
 	private TestingContainer $container;
 
+	/**
+	 * Temporary storage of the target for the data store class filter.
+	 *
+	 * @var callable
+	 */
+	private $data_store_filter_callback = null;
+
 	// phpcs:disable WordPress.DB.SlowDBQuery
 
 	/**
@@ -92,6 +99,17 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 			)
 		);
 		self::$fake_logger->reset();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+		if ( $this->data_store_filter_callback ) {
+				remove_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999 );
+				$this->data_store_filter_callback = null;
+		}
 	}
 
 	/**
@@ -177,6 +195,21 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox process_batch throws an exception if an invalid batch is supplied.
+	 *
+	 * @testWith [[null]]
+	 *           [[34]]
+	 *           [[{"meta_id": 34}]]
+	 *           [[{"meta_value": "MSX"}]]
+	 *
+	 * @param mixed $batch Batch to try to process.
+	 */
+	public function test_process_invalid_batch( $batch ) {
+		$this->expectExceptionMessage( "\$batch must be an array of arrays, each having a 'meta_id' key and a 'meta_value' key" );
+		$this->sut->process_batch( $batch );
+	}
+
+	/**
 	 * @testdox Public methods throw "doing it wrong" when an unknown orders data store is in use.
 	 *
 	 * @testWith ["get_next_batch_to_process", 5]
@@ -187,8 +220,11 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 * @param mixed  $argument Argument to pass to the method, null to pass none.
 	 */
 	public function test_unknown_data_source( string $method_name, $argument ) {
-		$data_store = new class() extends \WC_Order_Data_Store_CPT {};
-		add_filter( 'woocommerce_order_data_store', fn()=>$data_store, 99999, 0 );
+		$data_store                       = new class() extends \WC_Order_Data_Store_CPT {};
+		$this->data_store_filter_callback = function () use ( $data_store ) {
+			return $data_store;
+		};
+		add_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999, 0 );
 
 		$this->setup_hpos_and_reset_container( false );
 

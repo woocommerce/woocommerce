@@ -216,6 +216,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 * Items are expected to be in the format returned by get_next_batch_to_process.
 	 *
 	 * @param array $batch Batch of items to process.
+	 * @throws \Exception Invalid input.
 	 */
 	public function process_batch( array $batch ): void {
 		if ( empty( $batch ) ) {
@@ -227,6 +228,11 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
+		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_id'] ) || ! isset( $item['meta_value'] ) );
+		if ( $invalid_items ) {
+			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_id' key and a 'meta_value' key" );
+		}
+
 		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
 		foreach ( $batch as $item ) {
 			$logger->clear( $item['meta_value'] );
@@ -236,8 +242,8 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
 		$id_column_name = $this->hpos_in_use ? 'id' : 'meta_id';
 
-		$meta_ids     = array_map( fn( $item ) => $item['meta_id'], $batch );
-		$placeholders = implode( ',', $meta_ids );
+		$meta_ids     = array_map( fn( $item ) => absint( $item['meta_id'] ), $batch );
+		$placeholders = implode( ',', array_map( 'absint', $meta_ids ) );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
