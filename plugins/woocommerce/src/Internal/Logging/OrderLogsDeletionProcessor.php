@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 /**
@@ -38,11 +39,11 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	private bool $cpt_in_use = false;
 
 	/**
-	 * The logger to use to delete log entries.
+	 * The instance of LegacyProxy to use.
 	 *
-	 * @var \WC_Logger_Interface
+	 * @var LegacyProxy
 	 */
-	private \WC_Logger_Interface $logger;
+	private LegacyProxy $legacy_proxy;
 
 	/**
 	 * Initialize the instance.
@@ -51,14 +52,15 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 * @internal
 	 *
 	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
+	 * @param LegacyProxy                 $legacy_proxy The instance of LegacyProxy to use.
 	 */
-	final public function init( CustomOrdersTableController $hpos_controller ) {
+	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy ) {
 		$this->hpos_in_use = $hpos_controller->custom_orders_table_usage_is_enabled();
 		if ( ! $this->hpos_in_use ) {
 			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
 		}
 
-		$this->logger = wc_get_logger();
+		$this->legacy_proxy = $legacy_proxy;
 	}
 
 	/**
@@ -112,7 +114,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	private function get_total_pending_count_hpos(): int {
 		global $wpdb;
 
-		return $wpdb->get_var(
+		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*)
                  FROM {$wpdb->prefix}wc_orders_meta
@@ -130,7 +132,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	private function get_total_pending_count_cpt(): int {
 		global $wpdb;
 
-		return (int)$wpdb->get_var(
+		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*)
                  FROM {$wpdb->postmeta} pm
@@ -145,7 +147,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 	/**
 	 * Get the next batch of items to process.
-	 * An item will be an associative array of 'meta_key' and 'meta_value'.
+	 * An item will be an associative array of 'meta_id' and 'meta_value'.
 	 *
 	 * @param int $size Maximum size of the batch to return.
 	 * @return array
@@ -216,17 +218,22 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 * @param array $batch Batch of items to process.
 	 */
 	public function process_batch( array $batch ): void {
+		if ( empty( $batch ) ) {
+			return;
+		}
+
 		if ( ! $this->hpos_in_use && ! $this->cpt_in_use ) {
 			$this->throw_doing_it_wrong( StringUtil::class_name_without_namespace( __CLASS__ ) . '::' . __FUNCTION__ );
 			return;
 		}
 
+		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
 		foreach ( $batch as $item ) {
-			$this->logger->clear( $item['meta_value'] );
+			$logger->clear( $item['meta_value'] );
 		}
 
 		global $wpdb;
-		$table_name = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
+		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
 		$id_column_name = $this->hpos_in_use ? 'id' : 'meta_id';
 
 		$meta_ids     = array_map( fn( $item ) => $item['meta_id'], $batch );
@@ -242,7 +249,8 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 * @param string $function_name Class and function name to include in the error.
 	 */
 	private function throw_doing_it_wrong( string $function_name ) {
-		wc_doing_it_wrong(
+		$this->legacy_proxy->call_function(
+			'wc_doing_it_wrong',
 			$function_name,
 			"This processor shouldn't be enqueued when the orders data store in use is neither the HPOS one nor the CPT one. Just delete the order debug logs directly.",
 			'10.3.0'
