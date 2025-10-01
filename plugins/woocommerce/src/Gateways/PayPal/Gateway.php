@@ -491,7 +491,7 @@ class Gateway extends \WC_Payment_Gateway {
 				$icon = 'https://www.paypalobjects.com/webstatic/mktg/logo/AM_mc_vs_dc_ae.jpg';
 				break;
 			default:
-				$icon = \WC_HTTPS::force_https_url( WC()->plugin_url() . '/src/Gateways/PayPal/Assets/Images/paypal.png' );
+				$icon = \WC_HTTPS::force_https_url( WC()->plugin_url() . '/assets/images/paypal-standard.png' );
 				break;
 		}
 		return apply_filters( 'woocommerce_paypal_icon', $icon );
