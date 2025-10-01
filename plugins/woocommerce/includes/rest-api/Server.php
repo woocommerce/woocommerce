@@ -220,7 +220,7 @@ class Server {
 			'products'              => 'WC_REST_Products_V4_Controller',
 			'order-notes'           => OrderNotesController::class,
 			'shipping-zones'        => ShippingZonesController::class,
-			'shipping-zones/method' => ShippingZoneMethodController::class,
+			'shipping-zone-method'  => ShippingZoneMethodController::class,
 			'orders'                => OrdersController::class,
 			'settings-general'      => 'WC_REST_General_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.

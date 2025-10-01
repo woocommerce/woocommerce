@@ -27,7 +27,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'shipping-zones/method';
+	protected $rest_base = 'shipping-zone-method';
 
 	/**
 	 * Shipping method schema instance.
@@ -247,7 +247,7 @@ class Controller extends AbstractController {
 	 * @return string
 	 */
 	protected function get_error_prefix(): string {
-		// Convert 'shipping-zones/method' to 'shipping_zones_method_'.
+		// Convert 'shipping-zone-method' to 'shipping_zone_method_'.
 		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
 		return 'woocommerce_rest_api_v4_' . $prefix . '_';
 	}
