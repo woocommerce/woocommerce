@@ -389,6 +389,9 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		// Push notifications.
+		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 	}
 
 	/**
