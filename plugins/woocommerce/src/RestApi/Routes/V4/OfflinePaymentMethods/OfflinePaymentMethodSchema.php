@@ -310,7 +310,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 		$filtered = array();
 
 		foreach ( $properties as $key => $prop_schema ) {
-			if ( ! isset( $item[ $key ] ) ) {
+			if ( ! array_key_exists( $key, $item ) ) {
 				continue;
 			}
 
