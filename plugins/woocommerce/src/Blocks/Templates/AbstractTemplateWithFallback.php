@@ -49,7 +49,7 @@ abstract class AbstractTemplateWithFallback extends AbstractTemplate {
 	}
 
 	/**
-	 * Render the block template.
+	 * Run template-specific logic when the query matches the template.
 	 */
 	abstract public function render_block_template();
 }
