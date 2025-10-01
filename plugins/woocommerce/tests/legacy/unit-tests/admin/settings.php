@@ -1,9 +1,11 @@
 <?php
 /**
- * Checkout tests.
+ * Admin settings tests.
  *
- * @package WooCommerce\Tests\Checkout
+ * @package WooCommerce\Tests\Admin
  */
+
+declare( strict_types = 1 );
 
 /**
  * Class WC_Tests_Admin_Settings.
@@ -21,13 +23,15 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 		// Test with "force" downloads method.
 		update_option( 'woocommerce_file_download_method', 'force' );
 		WC_Admin_Settings::check_download_folder_protection();
-		$file_content = @file_get_contents( $file_path );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$file_content = file_exists( $file_path ) ? file_get_contents( $file_path ) : '';
 		$this->assertEquals( 'deny from all', $file_content );
 
 		// Test with "redirect" downloads method.
 		update_option( 'woocommerce_file_download_method', 'redirect' );
 		WC_Admin_Settings::check_download_folder_protection();
-		$file_content = @file_get_contents( $file_path );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
+		$file_content = file_exists( $file_path ) ? file_get_contents( $file_path ) : '';
 		$this->assertEquals( 'Options -Indexes', $file_content );
 
 		update_option( 'woocommerce_file_download_method', $default );
@@ -45,9 +49,11 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		// Set up the nonce and POST data.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 		$_POST['_wpnonce']    = wp_create_nonce( 'woocommerce-settings' );
 		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'];
 		$_GET['tab']          = 'general';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 
 		// Expect wp_die to be called with 403 status.
 		$this->expectException( WPDieException::class );
@@ -66,9 +72,11 @@ class WC_Tests_Admin_Settings extends WC_Unit_Test_Case {
 		wp_set_current_user( $user_id );
 
 		// Set up the nonce and POST data.
+		// phpcs:disable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 		$_POST['_wpnonce']    = wp_create_nonce( 'woocommerce-settings' );
 		$_REQUEST['_wpnonce'] = $_POST['_wpnonce'];
 		$_GET['tab']          = 'general';
+		// phpcs:enable WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput
 
 		// This should not throw an exception.
 		WC_Admin_Settings::save();
