@@ -84,6 +84,12 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		$this->endpoint = new OfflinePaymentMethodsController();
 		$this->endpoint->init( $schema );
+		
+		// Override the payments property with our mock using reflection
+		$reflection = new \ReflectionClass( $this->endpoint );
+		$payments_property = $reflection->getProperty( 'payments' );
+		$payments_property->setAccessible( true );
+		$payments_property->setValue( $this->endpoint, $this->payments );
 
 		// Manually register ONLY our controller's routes to avoid triggering global REST API init.
 		$this->endpoint->register_routes();
