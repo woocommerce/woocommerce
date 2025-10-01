@@ -123,7 +123,13 @@ class StandardController extends \WC_REST_Controller {
 		if ( empty( $updated_shipping_options ) ) {
 			\WC_Gateway_Paypal::log(
 				'No shipping options found for address. Order ID: ' . $order->get_id() .
-				'. Address: ' . wp_json_encode( $shipping_address )
+				'. Address (redacted): ' . wp_json_encode(
+					array(
+						'country_code' => $shipping_address['country_code'] ?? '',
+						'postal_code'  => $shipping_address['postal_code'] ?? '',
+						'region'       => $shipping_address['admin_area_1'] ?? '',
+					)
+				)
 			);
 			$response = $this->get_update_shipping_error_response();
 			return new \WP_REST_Response( $response, 422 );
