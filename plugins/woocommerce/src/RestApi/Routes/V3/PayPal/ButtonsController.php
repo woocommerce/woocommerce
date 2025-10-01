@@ -119,7 +119,7 @@ class ButtonsController extends \WC_REST_Controller {
 			return new \WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
 		}
 
-		$order_id = $data['order_id'];
+		$order_id = absint( $data['order_id'] );
 		$order    = wc_get_order( $order_id );
 
 		if ( ! $order ) {
