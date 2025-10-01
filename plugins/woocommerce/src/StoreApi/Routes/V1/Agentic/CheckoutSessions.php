@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
@@ -67,7 +68,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	 */
 	protected function get_create_params() {
 		return [
-			'items'                => [
+			'items'                 => [
 				'description' => __( 'Line items to add to the cart.', 'woocommerce' ),
 				'type'        => 'array',
 				'required'    => true,
@@ -88,7 +89,7 @@ class CheckoutSessions extends AbstractCartRoute {
 					],
 				],
 			],
-			'buyer'                => [
+			'buyer'                 => [
 				'description' => __( 'Buyer information.', 'woocommerce' ),
 				'type'        => 'object',
 				'properties'  => [
@@ -110,7 +111,7 @@ class CheckoutSessions extends AbstractCartRoute {
 					],
 				],
 			],
-			'fulfillment_address'  => [
+			'fulfillment_address'   => [
 				'description' => __( 'Fulfillment/shipping address.', 'woocommerce' ),
 				'type'        => 'object',
 				'properties'  => [
@@ -165,7 +166,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return bool True if authorized.
 	 */
 	public function is_authorized( \WP_REST_Request $request ) {
-		// Check if feature is enabled
+		// Check if feature is enabled.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
 			return new \WP_Error(
@@ -175,11 +176,17 @@ class CheckoutSessions extends AbstractCartRoute {
 			);
 		}
 
-		// V1: Allow all requests (implement proper auth in future)
+		// V1: Allow all requests (implement proper auth in future).
 		return true;
 	}
 
-	protected function requires_nonce(\WP_REST_Request $request) {
+	/**
+	 * Check if a nonce is required for the route.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool False, Bearer token auth used instead.
+	 */
+	protected function requires_nonce( \WP_REST_Request $request ) {
 		// Should use `is_authorized` to validate Bearer token authentication.
 		return false;
 	}
@@ -191,16 +198,16 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Clear existing cart
+		// Clear existing cart.
 		WC()->cart->empty_cart();
 
-		// Add items to cart
+		// Add items to cart.
 		$items = $request->get_param( 'items' );
 		foreach ( $items as $item ) {
 			$product_id = (int) $item['id'];
 			$quantity   = (int) $item['quantity'];
 
-			// Get product
+			// Get product.
 			$product = wc_get_product( $product_id );
 			if ( ! $product ) {
 				return new \WP_REST_Response(
@@ -218,7 +225,7 @@ class CheckoutSessions extends AbstractCartRoute {
 				);
 			}
 
-			// Check stock
+			// Check stock.
 			if ( ! $product->is_in_stock() || ! $product->has_enough_stock( $quantity ) ) {
 				return new \WP_REST_Response(
 					[
@@ -235,41 +242,41 @@ class CheckoutSessions extends AbstractCartRoute {
 				);
 			}
 
-			// Add to cart
+			// Add to cart.
 			WC()->cart->add_to_cart( $product_id, $quantity );
 		}
 
-		// Set buyer information
+		// Set buyer information.
 		$buyer = $request->get_param( 'buyer' );
 		if ( $buyer ) {
 			$this->set_buyer_data( $buyer );
 		}
 
-		// Set fulfillment address
+		// Set fulfillment address.
 		$address = $request->get_param( 'fulfillment_address' );
 		if ( $address ) {
 			$this->set_fulfillment_address( $address );
 		} else {
-			// Clear address when not provided (POST creates fresh session)
+			// Clear address when not provided (POST creates fresh session).
 			$this->clear_fulfillment_address();
 		}
 
-		// Set selected shipping method if provided
+		// Set selected shipping method if provided.
 		$fulfillment_option_id = $request->get_param( 'fulfillment_option_id' );
 		if ( $fulfillment_option_id ) {
 			WC()->session->set( 'chosen_shipping_methods', array( $fulfillment_option_id ) );
 		}
 
-		// Calculate totals after shipping method is set
+		// Calculate totals after shipping method is set.
 		WC()->cart->calculate_totals();
 
-		// Create/update draft order
+		// Create/update draft order.
 		$draft_order = $this->create_or_update_draft_order();
 
-		// Store draft order ID in session
+		// Store draft order ID in session.
 		WC()->session->set( 'agentic_draft_order_id', $draft_order->get_id() );
 
-		// Build response
+		// Build response.
 		$response = $this->schema->get_item_response( WC()->cart );
 
 		return rest_ensure_response( $response );
@@ -312,12 +319,12 @@ class CheckoutSessions extends AbstractCartRoute {
 	protected function set_fulfillment_address( $address ) {
 		$customer = WC()->customer;
 
-		// Parse name into first and last
+		// Parse name into first and last.
 		$name_parts = isset( $address['name'] ) ? explode( ' ', $address['name'], 2 ) : [ '', '' ];
 		$first_name = $name_parts[0];
 		$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
 
-		// Set shipping address
+		// Set shipping address.
 		$customer->set_shipping_first_name( $first_name );
 		$customer->set_shipping_last_name( $last_name );
 		$customer->set_shipping_address_1( $address['line_one'] );
@@ -327,7 +334,7 @@ class CheckoutSessions extends AbstractCartRoute {
 		$customer->set_shipping_postcode( $address['postal_code'] );
 		$customer->set_shipping_country( $address['country'] );
 
-		// Also set as billing address if not already set
+		// Also set as billing address if not already set.
 		if ( ! $customer->get_billing_address_1() ) {
 			$customer->set_billing_first_name( $first_name );
 			$customer->set_billing_last_name( $last_name );
@@ -341,7 +348,7 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		$customer->save();
 
-		// Recalculate shipping
+		// Recalculate shipping.
 		WC()->cart->calculate_shipping();
 	}
 
@@ -351,7 +358,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	protected function clear_fulfillment_address() {
 		$customer = WC()->customer;
 
-		// Clear shipping address
+		// Clear shipping address.
 		$customer->set_shipping_first_name( '' );
 		$customer->set_shipping_last_name( '' );
 		$customer->set_shipping_address_1( '' );
@@ -363,7 +370,7 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		$customer->save();
 
-		// Recalculate shipping
+		// Recalculate shipping.
 		WC()->cart->calculate_shipping();
 	}
 
@@ -373,11 +380,11 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WC_Order Draft order.
 	 */
 	protected function create_or_update_draft_order() {
-		// Check if we already have a draft order in session
+		// Check if we already have a draft order in session.
 		$session_id = WC()->session->get( 'agentic_draft_order_id' );
 		$order      = $session_id ? wc_get_order( $session_id ) : null;
 
-		// Create new draft order if none exists
+		// Create new draft order if none exists.
 		if ( ! $order ) {
 			$order = wc_create_order(
 				[
@@ -387,10 +394,10 @@ class CheckoutSessions extends AbstractCartRoute {
 			);
 		}
 
-		// Update order from cart
+		// Update order from cart.
 		$this->update_order_from_cart( $order, WC()->cart );
 
-		// Save and return
+		// Save and return.
 		$order->save();
 
 		return $order;
@@ -403,12 +410,12 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @param \WC_Cart  $cart  Cart object.
 	 */
 	protected function update_order_from_cart( $order, $cart ) {
-		// Remove existing items
+		// Remove existing items.
 		foreach ( $order->get_items() as $item_id => $item ) {
 			$order->remove_item( $item_id );
 		}
 
-		// Add cart items to order
+		// Add cart items to order.
 		foreach ( $cart->get_cart() as $cart_item ) {
 			$product = $cart_item['data'];
 			$item    = new \WC_Order_Item_Product();
@@ -423,12 +430,12 @@ class CheckoutSessions extends AbstractCartRoute {
 			$order->add_item( $item );
 		}
 
-		// Set addresses
+		// Set addresses.
 		$customer = WC()->customer;
 		$order->set_address( $customer->get_billing(), 'billing' );
 		$order->set_address( $customer->get_shipping(), 'shipping' );
 
-		// Set shipping
+		// Set shipping.
 		if ( ! empty( $cart->get_shipping_total() ) ) {
 			$shipping_item = new \WC_Order_Item_Shipping();
 			$shipping_item->set_method_title( __( 'Shipping', 'woocommerce' ) );
@@ -436,7 +443,7 @@ class CheckoutSessions extends AbstractCartRoute {
 			$order->add_item( $shipping_item );
 		}
 
-		// Calculate totals
+		// Calculate totals.
 		$order->calculate_totals();
 	}
 }

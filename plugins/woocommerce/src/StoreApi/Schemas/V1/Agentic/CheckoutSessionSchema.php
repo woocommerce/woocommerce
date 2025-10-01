@@ -1,11 +1,16 @@
 <?php
+/**
+ * CheckoutSessionSchema class.
+ *
+ * @package Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic
+ */
+
+declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 
 /**
- * CheckoutSessionSchema class.
- *
  * Handles the schema for Agentic Checkout API checkout sessions.
  * This schema formats WooCommerce cart/order data according to the
  * Agentic Commerce Protocol specification.
@@ -66,11 +71,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 				'type'        => [ 'object', 'null' ],
 				'context'     => [ 'view', 'edit' ],
 				'properties'  => [
-					'provider'                   => [
+					'provider'                  => [
 						'description' => __( 'Payment provider identifier.', 'woocommerce' ),
 						'type'        => 'string',
 					],
-					'supported_payment_methods'  => [
+					'supported_payment_methods' => [
 						'description' => __( 'List of supported payment methods.', 'woocommerce' ),
 						'type'        => 'array',
 						'items'       => [
@@ -309,11 +314,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array Formatted checkout session data.
 	 */
 	public function get_item_response( $cart_data ) {
-		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable.
 		$cart = WC()->cart;
 
-		// Get draft order if exists
-		$session_id = WC()->session->get( 'agentic_draft_order_id' );
+		// Get draft order if exists.
+		$session_id  = WC()->session->get( 'agentic_draft_order_id' );
 		$draft_order = $session_id ? wc_get_order( $session_id ) : null;
 
 		return [
@@ -344,8 +349,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$first_name = $customer->get_billing_first_name() ?: $customer->get_shipping_first_name();
-		$last_name  = $customer->get_billing_last_name() ?: $customer->get_shipping_last_name();
+		$first_name = $customer->get_billing_first_name() ? $customer->get_billing_first_name() : $customer->get_shipping_first_name();
+		$last_name  = $customer->get_billing_last_name() ? $customer->get_billing_last_name() : $customer->get_shipping_last_name();
 		$email      = $customer->get_billing_email();
 		$phone      = $customer->get_billing_phone();
 
@@ -354,10 +359,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		return [
-			'first_name'   => $first_name ?: '',
-			'last_name'    => $last_name ?: '',
-			'email'        => $email ?: '',
-			'phone_number' => $phone ?: '',
+			'first_name'   => $first_name ? $first_name : '',
+			'last_name'    => $last_name ? $last_name : '',
+			'email'        => $email ? $email : '',
+			'phone_number' => $phone ? $phone : '',
 		];
 	}
 
@@ -367,7 +372,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Payment provider data or null.
 	 */
 	protected function format_payment_provider() {
-		// Default to first available payment gateway
+		// Default to first available payment gateway.
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		if ( empty( $available_gateways ) ) {
@@ -378,7 +383,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 
 		return [
 			'provider'                  => $first_gateway->id,
-			'supported_payment_methods' => [ 'card' ], // Default, can be expanded
+			'supported_payment_methods' => [ 'card' ], // Default, can be expanded.
 		];
 	}
 
@@ -390,17 +395,17 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return string Status value.
 	 */
 	protected function calculate_status( $cart, $order ) {
-		// Check if canceled
+		// Check if canceled.
 		if ( $order && $order->get_meta( '_agentic_checkout_canceled' ) === 'yes' ) {
 			return 'canceled';
 		}
 
-		// Check if completed
+		// Check if completed.
 		if ( $order && in_array( $order->get_status(), [ 'pending', 'processing', 'completed' ], true ) ) {
 			return 'completed';
 		}
 
-		// Check if ready for payment
+		// Check if ready for payment.
 		$needs_shipping = $cart->needs_shipping();
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
 		$has_shipping   = WC()->session && WC()->session->get( 'chosen_shipping_methods' );
@@ -409,7 +414,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return 'not_ready_for_payment';
 		}
 
-		// Check for cart validation errors
+		// Check for cart validation errors.
 		if ( ! empty( wc_get_notices( 'error' ) ) ) {
 			return 'not_ready_for_payment';
 		}
@@ -437,13 +442,13 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$items = [];
 
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
-			$product      = $cart_item['data'];
-			$quantity     = $cart_item['quantity'];
-			$base_amount  = $this->amount_to_cents( $product->get_price() * $quantity );
-			$discount     = $this->amount_to_cents( $cart_item['line_subtotal'] - $cart_item['line_total'] );
-			$subtotal     = $base_amount - $discount;
-			$tax          = $this->amount_to_cents( $cart_item['line_tax'] );
-			$total        = $subtotal + $tax;
+			$product     = $cart_item['data'];
+			$quantity    = $cart_item['quantity'];
+			$base_amount = $this->amount_to_cents( $product->get_price() * $quantity );
+			$discount    = $this->amount_to_cents( $cart_item['line_subtotal'] - $cart_item['line_total'] );
+			$subtotal    = $base_amount - $discount;
+			$tax         = $this->amount_to_cents( $cart_item['line_tax'] );
+			$total       = $subtotal + $tax;
 
 			$items[] = [
 				'id'          => (string) $cart_item_key,
@@ -477,9 +482,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$name = trim( $customer->get_shipping_first_name() . ' ' . $customer->get_shipping_last_name() );
 
 		return [
-			'name'        => $name ?: 'Customer',
+			'name'        => $name ? $name : 'Customer',
 			'line_one'    => $customer->get_shipping_address_1(),
-			'line_two'    => $customer->get_shipping_address_2() ?: '',
+			'line_two'    => $customer->get_shipping_address_2() ? $customer->get_shipping_address_2() : '',
 			'city'        => $customer->get_shipping_city(),
 			'state'       => $customer->get_shipping_state(),
 			'country'     => $customer->get_shipping_country(),
@@ -540,10 +545,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 	protected function format_totals( $cart ) {
 		$totals = [];
 
-		// Items base amount
+		// Items base amount.
 		$items_base = 0;
 		foreach ( $cart->get_cart() as $cart_item ) {
-			$product = $cart_item['data'];
+			$product     = $cart_item['data'];
 			$items_base += $product->get_price() * $cart_item['quantity'];
 		}
 		$totals[] = [
@@ -552,7 +557,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'amount'       => $this->amount_to_cents( $items_base ),
 		];
 
-		// Items discount
+		// Items discount.
 		$discount = $cart->get_cart_discount_total();
 		$totals[] = [
 			'type'         => 'items_discount',
@@ -560,28 +565,28 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'amount'       => $this->amount_to_cents( $discount ),
 		];
 
-		// Subtotal
+		// Subtotal.
 		$totals[] = [
 			'type'         => 'subtotal',
 			'display_text' => __( 'Subtotal', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_subtotal() - $discount ),
 		];
 
-		// Fulfillment (shipping)
+		// Fulfillment (shipping).
 		$totals[] = [
 			'type'         => 'fulfillment',
 			'display_text' => __( 'Shipping', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_shipping_total() ),
 		];
 
-		// Tax
+		// Tax.
 		$totals[] = [
 			'type'         => 'tax',
 			'display_text' => __( 'Tax', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_total_tax() ),
 		];
 
-		// Total
+		// Total.
 		$totals[] = [
 			'type'         => 'total',
 			'display_text' => __( 'Total', 'woocommerce' ),
@@ -600,7 +605,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	protected function get_messages( $cart ) {
 		$messages = [];
 
-		// Add info message if shipping is needed
+		// Add info message if shipping is needed.
 		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
 			$messages[] = [
 				'type'         => 'info',
@@ -621,7 +626,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	protected function get_links() {
 		$links = [];
 
-		// Terms of use
+		// Terms of use.
 		$terms_page_id = wc_terms_and_conditions_page_id();
 		if ( $terms_page_id ) {
 			$permalink = get_permalink( $terms_page_id );
@@ -633,7 +638,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			}
 		}
 
-		// Privacy policy
+		// Privacy policy.
 		$privacy_page_id = get_option( 'wp_page_for_privacy_policy' );
 		if ( $privacy_page_id ) {
 			$permalink = get_permalink( $privacy_page_id );
