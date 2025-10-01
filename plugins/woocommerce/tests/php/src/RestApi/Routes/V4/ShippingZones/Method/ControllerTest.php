@@ -118,8 +118,8 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_register_routes() {
 		$routes = rest_get_server()->get_routes();
 
-		$this->assertArrayHasKey( '/wc/v4/shipping-zones/method', $routes );
-		$this->assertArrayHasKey( '/wc/v4/shipping-zones/method/(?P<id>[\\d]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v4/shipping-zone-method', $routes );
+		$this->assertArrayHasKey( '/wc/v4/shipping-zone-method/(?P<id>[\\d]+)', $routes );
 	}
 
 	/**
@@ -127,7 +127,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_post_route_configuration() {
 		$routes = rest_get_server()->get_routes();
-		$route  = $routes['/wc/v4/shipping-zones/method'];
+		$route  = $routes['/wc/v4/shipping-zone-method'];
 
 		$this->assertEquals( 'POST', $route[0]['methods']['POST'] );
 		$this->assertEquals( array( $this->controller, 'create_item' ), $route[0]['callback'] );
@@ -139,7 +139,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_put_route_configuration() {
 		$routes = rest_get_server()->get_routes();
-		$route  = $routes['/wc/v4/shipping-zones/method/(?P<id>[\\d]+)'];
+		$route  = $routes['/wc/v4/shipping-zone-method/(?P<id>[\\d]+)'];
 
 		$this->assertEquals( 'PUT', $route[0]['methods']['PUT'] );
 		$this->assertEquals( 'PATCH', $route[0]['methods']['PATCH'] );
@@ -154,7 +154,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		// Disable shipping.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$result  = $this->controller->create_item_permissions_check( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -172,7 +172,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		// Disable shipping.
 		add_filter( 'wc_shipping_enabled', '__return_false' );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/method/1' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zone-method/1' );
 		$result  = $this->controller->update_item_permissions_check( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -190,7 +190,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $user_id );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$result  = $this->controller->create_item_permissions_check( $request );
 
 		$this->assertInstanceOf( WP_Error::class, $result );
@@ -206,7 +206,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_create_item_permissions_check_with_permissions() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$result  = $this->controller->create_item_permissions_check( $request );
 
 		$this->assertTrue( $result );
@@ -220,7 +220,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_item_permissions_check_with_permissions() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/method/1' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zone-method/1' );
 		$result  = $this->controller->update_item_permissions_check( $request );
 
 		$this->assertTrue( $result );
@@ -234,7 +234,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_create_item_missing_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		// Deliberately omit zone_id (absint sanitizer will convert to 0).
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
@@ -257,7 +257,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$zone = $this->create_shipping_zone();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		// Deliberately omit method_id (will default to empty string).
 		$request->set_param( 'enabled', true );
@@ -280,7 +280,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$zone = $this->create_shipping_zone();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'flat_rate' );
 		// Deliberately omit enabled (should default to false).
@@ -302,7 +302,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$zone = $this->create_shipping_zone();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
@@ -322,7 +322,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_create_item_invalid_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', 99999 );
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
@@ -345,7 +345,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$zone = $this->create_shipping_zone();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'invalid_method' );
 		$request->set_param( 'enabled', true );
@@ -368,7 +368,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$zone = $this->create_shipping_zone();
 
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones/method' );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
 		$request->set_param( 'zone_id', $zone->get_id() );
 		$request->set_param( 'method_id', 'flat_rate' );
 		$request->set_param( 'enabled', true );
@@ -395,7 +395,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_item_invalid_id() {
 		wp_set_current_user( self::$admin_user_id );
 
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/method/99999' );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zone-method/99999' );
 		$request->set_param( 'id', 99999 );
 		$request->set_param( 'enabled', false );
 
@@ -420,7 +420,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		// Create another zone.
 		$other_zone = $this->create_shipping_zone( 'Other Zone' );
 
-		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zones/method/{$instance_id}" );
+		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
 		$request->set_param( 'zone_id', $other_zone->get_id() );
 		$request->set_param( 'enabled', false );
@@ -444,7 +444,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
-		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zones/method/{$instance_id}" );
+		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
 		$request->set_param( 'enabled', false );
 		$request->set_param( 'settings', array( 'title' => 'Updated Title' ) );
@@ -473,7 +473,7 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'flat_rate' );
 
-		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zones/method/{$instance_id}" );
+		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
 		$request->set_param( 'zone_id', $zone->get_id() );
 
@@ -509,6 +509,6 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 
 		$prefix = $method->invoke( $this->controller );
 
-		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_method_', $prefix );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zone_method_', $prefix );
 	}
 }
