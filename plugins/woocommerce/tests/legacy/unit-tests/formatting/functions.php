@@ -365,6 +365,24 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 		// Trim zeros and round.
 		$this->assertEquals( '10', wc_format_decimal( 9.9999, '', true ) );
 
+		// Use a null value.
+		$this->assertEquals( '', wc_format_decimal( null ) );
+
+		// DP of zero, null value.
+		$this->assertEquals( '', wc_format_decimal( null, 0 ) );
+
+		// DP of zero, zero value.
+		$this->assertEquals( '0', wc_format_decimal( '0', false ) );
+
+		// DP of two, zero value.
+		$this->assertEquals( '0.00', wc_format_decimal( '0', 2 ) );
+
+		// DP false, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', false ) );
+
+		// DP of zero, empty value.
+		$this->assertEquals( '', wc_format_decimal( '', 0 ) );
+
 		update_option( 'woocommerce_price_num_decimals', '8' );
 
 		// Floats.
