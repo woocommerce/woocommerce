@@ -6,8 +6,6 @@ import {
 	expect,
 	BLOCK_THEME_WITH_TEMPLATES_SLUG,
 } from '@woocommerce/e2e-utils';
-import type { Page } from '@playwright/test';
-import type { Editor } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
