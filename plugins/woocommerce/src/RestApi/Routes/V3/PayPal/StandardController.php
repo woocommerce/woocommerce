@@ -79,8 +79,21 @@ class StandardController extends \WC_REST_Controller {
 		$shipping_option  = $request->get_param( 'shipping_option' );
 		$purchase_units   = $request->get_param( 'purchase_units' );
 
+		// Ensure we have arrays before indexing
+		$shipping_address = is_array( $shipping_address ) ? $shipping_address : array();
+		$purchase_units   = is_array( $purchase_units )   ? $purchase_units   : array();
+		if ( ! empty( $shipping_option ) && ! is_array( $shipping_option ) ) {
+			$shipping_option = array();
+		}
+
 		// Note: shipping_option may or may not be present.
-		if ( empty( $paypal_order_id ) || empty( $shipping_address ) || empty( $purchase_units ) ) {
+		if (
+			empty( $paypal_order_id )
+			|| empty( $shipping_address )
+			|| empty( $purchase_units )
+			|| ! isset( $purchase_units[0] )
+			|| ! is_array( $purchase_units[0] )
+		) {
 			$response = $this->get_update_shipping_error_response();
 			return new \WP_REST_Response( $response, 422 );
 		}
