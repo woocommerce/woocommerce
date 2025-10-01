@@ -332,7 +332,7 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 				isset( $prop_schema['items']['properties'] ) &&
 				is_array( $prop_schema['items']['properties'] ) ) {
 
-				$item_properties = $prop_schema['items']['properties'];
+				$item_properties  = $prop_schema['items']['properties'];
 				$filtered[ $key ] = array_map(
 					function ( $row ) use ( $item_properties ) {
 						return is_array( $row ) ? $this->filter_item_by_schema( $row, $item_properties ) : $row;
