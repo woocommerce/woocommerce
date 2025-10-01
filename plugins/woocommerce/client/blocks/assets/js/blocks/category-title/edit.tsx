@@ -2,6 +2,12 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
+import { store as coreStore, useEntityProp } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
+import { createElement, forwardRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
+import { WP_REST_API_Category } from 'wp-types';
 import {
 	// @ts-expect-error AlignmentControl is not exported from @wordpress/block-editor
 	AlignmentControl,
@@ -12,12 +18,6 @@ import {
 	// @ts-expect-error HeadingLevelDropdown is not exported from @wordpress/block-editor
 	HeadingLevelDropdown,
 } from '@wordpress/block-editor';
-import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
-import { store as coreStore, useEntityProp } from '@wordpress/core-data';
-import { useSelect } from '@wordpress/data';
-import { createElement, forwardRef } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import { WP_REST_API_Category } from 'wp-types';
 
 interface Props {
 	attributes: {
