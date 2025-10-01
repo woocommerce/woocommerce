@@ -44,6 +44,11 @@ class WC_Template_Loader {
 		if ( self::$theme_support ) {
 			add_filter( 'template_include', array( __CLASS__, 'template_loader' ) );
 			add_filter( 'comments_template', array( __CLASS__, 'comments_template_loader' ) );
+
+			// Loads gallery scripts on Product page for FSE themes.
+			if ( wp_is_block_theme() ) {
+				self::add_support_for_product_page_gallery();
+			}
 		} else {
 			// Unsupported themes.
 			add_action( 'template_redirect', array( __CLASS__, 'unsupported_theme_init' ) );

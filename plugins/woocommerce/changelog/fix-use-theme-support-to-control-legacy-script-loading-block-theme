@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Legacy assets: respect theme support when using Classic Template or Product Image Gallery blocks with block themes.
