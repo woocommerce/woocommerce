@@ -259,11 +259,10 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * @param string $post_type The post type.
 	 * @param bool   $expected_contains Whether the expected contains.
 	 */
-	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type, $expected_contains ) {
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
-		}
-
+ 	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type = 'page', $expected_contains = false ) {
+ 		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
+ 			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
+ 		}
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
