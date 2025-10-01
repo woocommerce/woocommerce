@@ -1325,27 +1325,19 @@ class PaymentsExtensionSuggestions {
 
 		// LATAM & Caribbeans.
 		'AG' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'AI' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'AR' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1355,55 +1347,35 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'AW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'BS' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BB' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BZ' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1416,16 +1388,12 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BQ' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE       => array(
+			self::STRIPE => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1436,27 +1404,19 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'VG' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'KY' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1466,7 +1426,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CO' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1476,13 +1436,9 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'CR' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1494,33 +1450,21 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'CW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'DM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'DO' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1535,13 +1479,9 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'SV' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1564,13 +1504,9 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'GD' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1585,23 +1521,15 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'GT' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'GY' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'HT' => array(
@@ -1612,24 +1540,16 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'HN' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'JM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1644,7 +1564,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE       => array(
+			self::STRIPE => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1652,7 +1572,7 @@ class PaymentsExtensionSuggestions {
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
 			self::PAYPAL_WALLET,
-			self::KLARNA       => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1676,24 +1596,16 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NI' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'PA' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1706,7 +1618,7 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1732,24 +1644,16 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'KN' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'LC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1761,21 +1665,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'VC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'SX' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'GS' => array(
@@ -1786,38 +1682,26 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'SR' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'TT' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'TC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
@@ -1827,12 +1711,8 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'VI' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'VE' => array(
@@ -3889,6 +3769,7 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://cst.support.tilopay.com/servicedesk/customer/portals',
 					),
 				),
+				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::VIVA_WALLET       => array(
 				'_type'       => self::TYPE_PSP,
