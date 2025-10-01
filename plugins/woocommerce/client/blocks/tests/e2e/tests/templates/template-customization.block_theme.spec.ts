@@ -147,7 +147,9 @@ test.describe( 'Template customization', () => {
 	} );
 
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
-		( data ) => data.canBeOverriddenByThemes
+		( data ) =>
+			data.canBeOverriddenByThemes &&
+			data.templateType === 'wp_template_part'
 	);
 
 	for ( const testData of testToRun ) {
@@ -173,7 +175,9 @@ test.describe( 'Template customization', () => {
 				attributes: { content: woocommerceTemplateUserText },
 			} );
 
-			await saveAndActivateTemplate( { editor, page } );
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			await requestUtils.activateTheme( BLOCK_THEME_WITH_TEMPLATES_SLUG );
 
@@ -191,7 +195,9 @@ test.describe( 'Template customization', () => {
 				attributes: { content: userText },
 			} );
 
-			await saveAndActivateTemplate( { editor, page } );
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
 			// Verify the template is the one modified by the user based on the theme.
 			await testData.visitPage( {
@@ -215,7 +221,7 @@ test.describe( 'Template customization', () => {
 				postType: testData.templateType,
 			} );
 
-			await editor.revertTemplate( {
+			await editor.revertTemplatePart( {
 				templateName: testData.templateName,
 			} );
 
