@@ -5,23 +5,26 @@
  *
  * Handles requests to the /paypal-webhooks endpoint.
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  * @since   2.6.0
  */
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\RestApi\Routes\V3\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Gateway;
+use Automattic\WooCommerce\Gateways\PayPal\WebhookHandler;
+
 defined( 'ABSPATH' ) || exit;
+
 /**
  * REST API PayPal webhook handler controller class.
  *
- * @package WooCommerce\RestApi
- * @extends WC_REST_Controller
- *
- * @deprecated 10.3.0 Deprecated in favor of \Automattic\WooCommerce\RestApi\Routes\V3\PayPal\WebhooksController
+ * @package Automattic\WooCommerce\RestApi
+ * @extends \WC_REST_Controller
  */
-class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
-
+class WebhooksController extends \WC_REST_Controller {
 	/**
 	 * Endpoint namespace.
 	 *
@@ -47,7 +50,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base,
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
+				'methods'             => \WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'process_webhook' ),
 				'permission_callback' => array( $this, 'validate_webhook' ),
 			)
@@ -57,10 +60,10 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	/**
 	 * Validate the webhook.
 	 *
-	 * @param WP_REST_Request $request The request object.
+	 * @param \WP_REST_Request $request The request object.
 	 * @return bool True if the webhook is valid, false otherwise.
 	 */
-	public function validate_webhook( WP_REST_Request $request ) {
+	public function validate_webhook( \WP_REST_Request $request ) {
 		try {
 			if (
 					class_exists( 'Automattic\Jetpack\Connection\REST_Authentication' ) &&
@@ -70,7 +73,7 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 			}
 			return false;
 		} catch ( \Throwable $e ) {
-			WC_Gateway_Paypal::log( 'REST authentication method not available. Webhook data: ' . wc_print_r( $request->get_json_params(), true ), 'error' );
+			Gateway::log( 'REST authentication method not available. Webhook data: ' . wc_print_r( $request->get_json_params(), true ), 'error' );
 			return false;
 		}
 	}
@@ -78,18 +81,17 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 	/**
 	 * Process the webhook.
 	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response The response object.
+	 * @param \WP_REST_Request $request The request object.
+	 * @return \WP_REST_Response The response object.
 	 */
-	public function process_webhook( WP_REST_Request $request ) {
-		include_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-webhook-handler.php';
-		$webhook_handler = new WC_Gateway_Paypal_Webhook_Handler();
+	public function process_webhook( \WP_REST_Request $request ) {
+		$webhook_handler = new WebhookHandler();
 
 		try {
 			$webhook_handler->process_webhook( $request );
-			return new WP_REST_Response( array( 'message' => 'Webhook processed successfully' ), 200 );
+			return new \WP_REST_Response( array( 'message' => 'Webhook processed successfully' ), 200 );
 		} catch ( Exception $e ) {
-			return new WP_REST_Response( array( 'error' => $e->getMessage() ), 500 );
+			return new \WP_REST_Response( array( 'error' => $e->getMessage() ), 500 );
 		}
 	}
 }
