@@ -304,7 +304,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * @return string The shipping rate id.
 	 */
 	private function get_order_shipping_rate_id( $order ) {
-		$order_shipping_item = ! empty( $order->get_items( 'shipping' ) ) ? current( $order->get_items( 'shipping' ) ) : null;
+		$order_shipping_item = current( $order->get_items( 'shipping' ) ) ?? null;
 
 		if ( $order_shipping_item ) {
 			$method_id   = $order_shipping_item->get_method_id();
