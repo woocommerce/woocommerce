@@ -44,6 +44,7 @@ final class AssetsController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_wc_entities' ), 100 );
 		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
 
 		if ( Features::is_enabled( 'experimental-iapi-runtime' ) ) {
@@ -96,6 +97,7 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
 
 		$this->api->register_script( 'wc-types', $this->api->get_block_asset_build_path( 'wc-types' ), array(), false );
+		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
 		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
@@ -520,5 +522,12 @@ final class AssetsController {
 
 			}
 		}
+	}
+
+	/**
+	 * Enqueue the wc-entities script.
+	 */
+	public function enqueue_wc_entities() {
+		wp_enqueue_script( 'wc-entities' );
 	}
 }
