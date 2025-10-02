@@ -416,16 +416,12 @@ class CheckoutSessionSchema extends AbstractSchema {
 		// Check if ready for payment.
 		$needs_shipping = $cart->needs_shipping();
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
-		$has_shipping   = WC()->session && WC()->session->get( 'chosen_shipping_methods' );
 
-		// DEBUG: Log status calculation
-		error_log( '=== DEBUG: calculate_status ===' );
-		error_log( 'needs_shipping: ' . ( $needs_shipping ? 'true' : 'false' ) );
-		error_log( 'has_address: ' . ( $has_address ? 'true (' . WC()->customer->get_shipping_address_1() . ')' : 'false' ) );
-		error_log( 'has_shipping: ' . ( $has_shipping ? 'true (' . print_r( WC()->session->get( 'chosen_shipping_methods' ), true ) . ')' : 'false' ) );
-		error_log( 'Returning: ' . ( $needs_shipping && ( ! $has_address || empty( $has_shipping ) ) ? 'not_ready_for_payment' : '(checking further)' ) );
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( 'chosen_shipping_methods' ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
 
-		if ( $needs_shipping && ( ! $has_address || empty( $has_shipping ) ) ) {
+		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
 			return 'not_ready_for_payment';
 		}
 
