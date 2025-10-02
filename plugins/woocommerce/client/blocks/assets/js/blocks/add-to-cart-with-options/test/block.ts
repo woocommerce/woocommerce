@@ -5,6 +5,8 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
+import { readFileSync } from 'fs';
+import { join } from 'path';
 
 /**
  * Internal dependencies
@@ -28,81 +30,22 @@ import '../variation-selector/attribute-name';
 import '../variation-selector/attribute-options';
 import '../variation-description';
 
-const mockSimpleTemplatePartHTML = `<!-- wp:woocommerce/product-stock-indicator {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
-<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
-<div class="wp-block-group"><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"quantitySelectorStyle":"stepper"} /-->
-<!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
-<!-- /wp:group -->`;
-const mockExternalTemplatePartHTML = `<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
-<!-- /wp:group -->`;
-const mockGroupedTemplatePartHTML = `<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-selector -->
-<div
-	class="wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector"
-	role="list"
->
-	<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item -->
-	<div
-		class="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item"
-		role="listitem"
-	>
-		<!-- wp:group {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":null}} -->
-		<div
-			class="wp-block-group"
-			style="margin-top: 1rem; margin-bottom: 1rem"
-		>
-			<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item-selector /-->
+const mockTemplatePartsHTML: Record< string, string > = {
+	simple: '',
+	external: '',
+	grouped: '',
+	variable: '',
+};
 
-			<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item-label {"style":{"layout":{"selfStretch":"fill"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"fontWeight":400}}} /-->
-
-			<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"right"}} -->
-			<div class="wp-block-group">
-				<!-- wp:woocommerce/product-price {"textAlign":"right","isDescendentOfSingleProductTemplate":true,"isDescendentOfSingleProductBlock":true,"style":{"typography":{"fontWeight":400,"fontStyle":"normal"}}} /-->
-				<!-- wp:woocommerce/product-stock-indicator {"fontSize":"small"} /--></div>
-			<!-- /wp:group -->
-		</div>
-		<!-- /wp:group -->
-	</div>
-	<!-- /wp:woocommerce/add-to-cart-with-options-grouped-product-item -->
-</div>
-<!-- /wp:woocommerce/add-to-cart-with-options-grouped-product-selector -->
-<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
-<div class="wp-block-group"><!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
-<!-- /wp:group -->`;
-const mockVariableTemplatePartHTML = `<!-- wp:woocommerce/add-to-cart-with-options-variation-selector -->
-<div
-	class="wp-block-woocommerce-add-to-cart-with-options-variation-selector"
-	role="list"
->
-	<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
-	<div
-		class="wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute"
-		role="listitem"
-	>
-		<!-- wp:group {"style":{"spacing":{"blockGap":"0.5rem","margin":{"top":"1rem","bottom":"1rem"}}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
-		<div
-			class="wp-block-group"
-			style="margin-top: 1rem; margin-bottom: 1rem"
-		>
-			<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-name /-->
-
-			<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-options /-->
-		</div>
-		<!-- /wp:group -->
-	</div>
-	<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
-</div>
-<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector -->
-<!-- wp:woocommerce/add-to-cart-with-options-variation-description {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
-<!-- wp:woocommerce/product-stock-indicator {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
-<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
-<div class="wp-block-group">
-	<!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"quantitySelectorStyle":"stepper"} /-->
-
-	<!-- wp:woocommerce/product-button {"textAlign":"left"} /-->
-</div>
-<!-- /wp:group -->
-`;
+Object.keys( mockTemplatePartsHTML ).forEach( ( key ) => {
+	mockTemplatePartsHTML[ key ] = readFileSync(
+		join(
+			__dirname,
+			`../../../../../../../templates/parts/${ key }-product-add-to-cart-with-options.html`
+		),
+		'utf-8'
+	);
+} );
 
 jest.mock( '@woocommerce/settings', () => {
 	return {
@@ -172,7 +115,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//simple-product-add-to-cart-with-options',
 				content: {
-					raw: mockSimpleTemplatePartHTML,
+					raw: mockTemplatePartsHTML.simple,
 				},
 			} );
 		}
@@ -183,7 +126,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//external-product-add-to-cart-with-options',
 				content: {
-					raw: mockExternalTemplatePartHTML,
+					raw: mockTemplatePartsHTML.external,
 				},
 			} );
 		}
@@ -194,7 +137,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//grouped-product-add-to-cart-with-options',
 				content: {
-					raw: mockGroupedTemplatePartHTML,
+					raw: mockTemplatePartsHTML.grouped,
 				},
 			} );
 		}
@@ -206,7 +149,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//variable-product-add-to-cart-with-options',
 				content: {
-					raw: mockVariableTemplatePartHTML,
+					raw: mockTemplatePartsHTML.variable,
 				},
 			} );
 		}
