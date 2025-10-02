@@ -876,26 +876,22 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->set_date_created( $order_time++ );
 			$order->set_status( OrderStatus::COMPLETED );
 
+			foreach ( $coupons as $amount => $coupon ) {
+				if ( $amount >= $order_number ) {
+					$order->apply_coupon( $coupon );
+					++$applied_coupons;
+					$applied_amount += $amount;
+				}
+			}
 
+			$order->calculate_totals();
+			$orders_total += $order->get_total();
 			$order->save();
 
 			$orders[] = $order;
 		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
-
-
-		// Check what was written to the analytics tables
-		global $wpdb;
-		$analytics_coupons = $wpdb->get_results(
-			"SELECT order_id, coupon_id, discount_amount FROM {$wpdb->prefix}wc_order_coupon_lookup ORDER BY order_id, coupon_id",
-			ARRAY_A
-		);
-		}
-
-		$analytics_total_coupons = $wpdb->get_var(
-			"SELECT SUM(discount_amount) FROM {$wpdb->prefix}wc_order_coupon_lookup"
-		);
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -921,7 +917,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$shipping        = $orders_count * $order_shipping;
 		$net_revenue     = $orders_total - $shipping;
 		$gross_sales     = $product_price * $num_items_sold;
-
 		$subtotals       = array(
 			'orders_count'        => $orders_count,
 			'num_items_sold'      => $num_items_sold,
@@ -957,10 +952,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 
-		$actual_stats = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
-
-
-		$this->assertEquals( $expected_stats, $actual_stats, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
+		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 	}
 
 	/**
