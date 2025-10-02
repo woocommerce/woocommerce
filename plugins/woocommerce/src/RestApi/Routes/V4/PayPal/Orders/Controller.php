@@ -70,8 +70,8 @@ class Controller extends AbstractController {
 				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
 					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'create_order' ),
-					'permission_callback' => array( $this, 'validate_create_order_request' ),
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'create_item_permissions_check' ),
 				),
 			),
 		);
@@ -83,8 +83,8 @@ class Controller extends AbstractController {
 				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'cancel_order' ),
-					'permission_callback' => array( $this, 'validate_cancel_order_request' ),
+					'callback'            => array( $this, 'cancel_item' ),
+					'permission_callback' => array( $this, 'cancel_item_permissions_check' ),
 				),
 			),
 		);
@@ -96,7 +96,7 @@ class Controller extends AbstractController {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return bool True if the create order request is valid, false otherwise.
 	 */
-	public function validate_create_order_request( \WP_REST_Request $request ) {
+	public function create_item_permissions_check( \WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
 			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_create_order' );
@@ -110,7 +110,7 @@ class Controller extends AbstractController {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return bool True if the cancel order request is valid, false otherwise.
 	 */
-	public function validate_cancel_order_request( \WP_REST_Request $request ) {
+	public function cancel_item_permissions_check( \WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
 			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_cancel_order' );
@@ -122,34 +122,54 @@ class Controller extends AbstractController {
 	 * Create a PayPal order.
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @return \WP_REST_Response The response object.
+	 * @return \WP_REST_Response|\WP_Error The response object (or error).
 	 */
-	public function create_order( \WP_REST_Request $request ) {
+	public function create_item( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
 		if ( empty( $data['order_id'] ) || empty( $data['order_key'] ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_request',
+				__( 'Invalid request.', 'woocommerce' ),
+				400
+			);
 		}
 
 		$payment_source = isset( $data['payment_source'] ) ? sanitize_text_field( $data['payment_source'] ) : '';
 		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_payment_source',
+				__( 'Missing/Invalid payment source.', 'woocommerce' ),
+				400
+			);
 		}
 
 		$order_id = absint( $data['order_id'] );
 		$order    = wc_get_order( $order_id );
 
 		if ( ! $order ) {
-			return new \WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_id',
+				__( 'Order not found.', 'woocommerce' ),
+				404
+			);
 		}
 
 		$order_key = $data['order_key'];
 		if ( ! $order_key || ! hash_equals( $order->get_order_key(), $order_key ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_order_key',
+				__( 'Order not found.', 'woocommerce' ),
+				404
+			);
 		}
 
 		if ( ! in_array( $order->get_status(), array( OrderStatus::CHECKOUT_DRAFT, OrderStatus::PENDING ), true ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Invalid order status' ), 409 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_order_status',
+				__( 'Invalid order status.', 'woocommerce' ),
+				409
+			);
 		}
 
 		$gateway = \WC_Gateway_Paypal::get_instance();
@@ -169,7 +189,11 @@ class Controller extends AbstractController {
 		);
 
 		if ( ! $paypal_order || empty( $paypal_order['id'] ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Failed to create PayPal order' ), 400 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'create_paypal_order_failed',
+				__( 'Failed to create PayPal order.', 'woocommerce' ),
+				400
+			);
 		}
 
 		$order->update_meta_data( '_paypal_order_id', $paypal_order['id'] );
@@ -197,7 +221,7 @@ class Controller extends AbstractController {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return \WP_REST_Response The response object.
 	 */
-	public function cancel_order( \WP_REST_Request $request ) {
+	public function cancel_item( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
 		$paypal_order_id = isset( $request['id'] ) ? wc_clean( $request['id'] ) : '';
