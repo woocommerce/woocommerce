@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\Logging;
 
 use Automattic\WooCommerce\Internal\BatchProcessing\BatchProcessorInterface;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
@@ -46,21 +47,30 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	private LegacyProxy $legacy_proxy;
 
 	/**
+	 * The instance of DataSynchronizer to use.
+	 *
+	 * @var DataSynchronizer
+	 */
+	private DataSynchronizer $data_synchronizer;
+
+	/**
 	 * Initialize the instance.
 	 * This is invoked by the dependency injection container.
 	 *
-	 * @internal
-	 *
 	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
 	 * @param LegacyProxy                 $legacy_proxy The instance of LegacyProxy to use.
+	 * @param DataSynchronizer            $data_synchronizer The instance of DataSynchronizer to use.
+	 * 
+	 * @internal
 	 */
-	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy ) {
+	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy, DataSynchronizer $data_synchronizer ) {
 		$this->hpos_in_use = $hpos_controller->custom_orders_table_usage_is_enabled();
 		if ( ! $this->hpos_in_use ) {
 			$this->cpt_in_use = \WC_Order_Data_Store_CPT::class === \WC_Data_Store::load( 'order' )->get_current_class_name();
 		}
 
-		$this->legacy_proxy = $legacy_proxy;
+		$this->legacy_proxy      = $legacy_proxy;
+		$this->data_synchronizer = $data_synchronizer;
 	}
 
 	/**
@@ -174,7 +184,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id as meta_id, meta_value
+				"SELECT id as meta_id, meta_value, order_id
                  FROM {$wpdb->prefix}wc_orders_meta
                  WHERE meta_key = %s
                  ORDER BY id
@@ -197,7 +207,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT pm.meta_id, pm.meta_value
+				"SELECT p.ID as order_id,pm.meta_id, pm.meta_value
                  FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
                  WHERE pm.meta_key = %s
@@ -228,9 +238,9 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_id'] ) || ! isset( $item['meta_value'] ) );
+		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_id'] ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) );
 		if ( $invalid_items ) {
-			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_id' key and a 'meta_value' key" );
+			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_id' key, a 'meta_value' key and an 'order_id' key" );
 		}
 
 		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
@@ -244,6 +254,22 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		$meta_ids     = array_map( fn( $item ) => absint( $item['meta_id'] ), $batch );
 		$placeholders = implode( ',', array_map( 'absint', $meta_ids ) );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
+
+		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
+			return;
+		}
+
+		// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
+		// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
+
+		$order_ids    = array_map( fn( $item ) => absint( $item['order_id'] ), $batch );
+		$placeholders = implode( ',', array_map( 'absint', $order_ids ) );
+
+		$table_name     = $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
+		$id_column_name = $this->hpos_in_use ? 'post_id' : 'order_id';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );

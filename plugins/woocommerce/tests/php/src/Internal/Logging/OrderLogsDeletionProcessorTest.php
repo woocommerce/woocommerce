@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Logging;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsDeletionProcessor;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
@@ -138,19 +139,22 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	public function test_get_next_batch_to_process( bool $with_hpos ) {
 		$this->setup_hpos_and_reset_container( $with_hpos );
 
-		$this->create_orders_with_logs( 5 );
+		$order_ids = $this->create_orders_with_logs( 5 );
 
 		$actual_meta_ids = $this->get_meta_ids( $with_hpos, 3 );
 		$expected_batch  = array(
 			array(
+				'order_id'   => $order_ids[0],
 				'meta_id'    => $actual_meta_ids[0],
 				'meta_value' => 'place-order-debug-0',
 			),
 			array(
+				'order_id'   => $order_ids[1],
 				'meta_id'    => $actual_meta_ids[1],
 				'meta_value' => 'place-order-debug-1',
 			),
 			array(
+				'order_id'   => $order_ids[2],
 				'meta_id'    => $actual_meta_ids[2],
 				'meta_value' => 'place-order-debug-2',
 			),
@@ -171,7 +175,7 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	public function test_process_batch( bool $with_hpos ) {
 		$this->setup_hpos_and_reset_container( $with_hpos );
 
-		$this->create_orders_with_logs( 5 );
+		$order_ids = $this->create_orders_with_logs( 5 );
 
 		$batch = $this->sut->get_next_batch_to_process( 3 );
 		$this->sut->process_batch( $batch );
@@ -181,10 +185,12 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 		$actual_meta_ids = $this->get_meta_ids( $with_hpos, 3 );
 		$expected_batch  = array(
 			array(
+				'order_id'   => $order_ids[3],
 				'meta_id'    => $actual_meta_ids[0],
 				'meta_value' => 'place-order-debug-3',
 			),
 			array(
+				'order_id'   => $order_ids[4],
 				'meta_id'    => $actual_meta_ids[1],
 				'meta_value' => 'place-order-debug-4',
 			),
@@ -195,17 +201,89 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * process_batch correctly processes the supplied batch of items when HPOS data sync is enabled.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $with_hpos Test with HPOS active or not.
+	 */
+	public function test_process_batch_with_sync_enabled( bool $with_hpos ) {
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		global $wpdb;
+
+		$this->setup_hpos_and_reset_container( true );
+		$order_ids = $this->create_orders_with_logs( 5 );
+
+		// Force a manual sync and verify that the meta entries
+		// have been replicated in the backup table.
+
+		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+		$batch             = $data_synchronizer->get_next_batch_to_process( 5 );
+		$data_synchronizer->process_batch( $batch );
+
+		$order_ids_string = implode( ',', $batch );
+
+		$table_name    = $with_hpos ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
+		$id_field_name = $with_hpos ? 'post_id' : 'order_id';
+		$count         =
+			$wpdb->get_var(
+				$wpdb->prepare(
+					"select count(*) from {$table_name} where {$id_field_name} in ({$order_ids_string}) and meta_key=%s",
+					'_debug_log_source_pending_deletion'
+				)
+			);
+		$this->assertEquals( 5, $count );
+
+		// Process a batch of logs pending deletion and verify that:
+		// 1. The processed meta entries have been removed from the backup table.
+		// 2. The meta entries not yet processed are still present in the backup table.
+
+		$previous_data_sync_option = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
+
+		$batch = $this->sut->get_next_batch_to_process( 3 );
+		$this->sut->process_batch( $batch );
+
+		$batch                     = $this->sut->get_next_batch_to_process( 3 );
+		$actual_order_ids_in_batch = array_map( fn( $item ) => $item['order_id'], $batch );
+		$expected_order_ids        = array( $order_ids[3], $order_ids[4] );
+		$this->assertEquals( $expected_order_ids, $actual_order_ids_in_batch );
+
+		$order_ids_in_backup_table =
+			$wpdb->get_results(
+				$wpdb->prepare(
+					"select {$id_field_name} from {$table_name} where {$id_field_name} in ({$order_ids_string}) and meta_key=%s",
+					'_debug_log_source_pending_deletion'
+				),
+				ARRAY_N
+			);
+		$order_ids_in_backup_table = array_map( fn( $item ) => absint( $item[0] ), $order_ids_in_backup_table );
+		$this->assertEquals( $expected_order_ids, $order_ids_in_backup_table );
+
+		if ( false === $previous_data_sync_option ) {
+			delete_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
+		} else {
+			update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, $previous_data_sync_option );
+		}
+
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
 	 * @testdox process_batch throws an exception if an invalid batch is supplied.
 	 *
 	 * @testWith [[null]]
 	 *           [[34]]
 	 *           [[{"meta_id": 34}]]
 	 *           [[{"meta_value": "MSX"}]]
+	 *           [[{"order_id": 34}]]
 	 *
 	 * @param mixed $batch Batch to try to process.
 	 */
 	public function test_process_invalid_batch( $batch ) {
-		$this->expectExceptionMessage( "\$batch must be an array of arrays, each having a 'meta_id' key and a 'meta_value' key" );
+		$this->expectExceptionMessage( "\$batch must be an array of arrays, each having a 'meta_id' key, a 'meta_value' key and an 'order_id' key" );
 		$this->sut->process_batch( $batch );
 	}
 
@@ -258,13 +336,19 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 * Create a set of orders with debug logs.
 	 *
 	 * @param int $count How many orders to create.
+	 * @return array Ids of the created orders.
 	 */
-	private function create_orders_with_logs( int $count ) {
+	private function create_orders_with_logs( int $count ): array {
+		$order_ids = array();
+
 		for ( $i = 0; $i < $count; $i++ ) {
 			$order = OrderHelper::create_order();
 			$order->add_meta_data( '_debug_log_source_pending_deletion', 'place-order-debug-' . $i );
 			$order->save();
+			$order_ids[] = $order->get_id();
 		}
+
+		return $order_ids;
 	}
 
 	/**
@@ -280,8 +364,8 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$meta_ids =
 			$with_hpos ?
-				$wpdb->get_results( $wpdb->prepare( "select id from {$wpdb->prefix}wc_orders_meta where meta_key=%s order by id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N ) :
-				$wpdb->get_results( $wpdb->prepare( "select meta_id from {$wpdb->postmeta} where meta_key=%s order by meta_id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N );
+				$wpdb->get_results( $wpdb->prepare( "select id from {$wpdb->prefix}wc_orders_meta where meta_key=%s order by order_id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N ) :
+				$wpdb->get_results( $wpdb->prepare( "select meta_id from {$wpdb->postmeta} where meta_key=%s order by post_id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N );
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return array_map( fn( $item ) => $item[0], $meta_ids );
