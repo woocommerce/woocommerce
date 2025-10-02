@@ -127,15 +127,18 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'Get Test Ability',
-						'description'      => 'A test ability for testing retrieval',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'Get Test Ability',
+						'description'         => 'A test ability for testing retrieval',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array(
 								'success' => true,
 								'input'   => $input,
 							);
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -167,9 +170,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'Execute Test Ability',
-						'description'      => 'A test ability for testing execution',
-						'input_schema'     => array(
+						'label'               => 'Execute Test Ability',
+						'description'         => 'A test ability for testing execution',
+						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
 								'input_value' => array(
@@ -177,7 +180,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'output_schema'    => array(
+						'output_schema'       => array(
 							'type'       => 'object',
 							'properties' => array(
 								'processed_value' => array(
@@ -185,10 +188,13 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'execute_callback' => function ( $input ) {
+						'execute_callback'    => function ( $input ) {
 							return array(
 								'processed_value' => 'Processed: ' . ( $input['input_value'] ?? 'empty' ),
 							);
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -243,12 +249,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_1,
 					array(
-						'label'            => 'REST Fetch Test 1',
-						'description'      => 'First ability for REST API testing',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'REST Fetch Test 1',
+						'description'         => 'First ability for REST API testing',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -256,12 +265,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_2,
 					array(
-						'label'            => 'REST Fetch Test 2',
-						'description'      => 'Second ability for REST API testing',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'REST Fetch Test 2',
+						'description'         => 'Second ability for REST API testing',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -312,9 +324,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'REST Execute Test',
-						'description'      => 'Test ability for REST API execution',
-						'input_schema'     => array(
+						'label'               => 'REST Execute Test',
+						'description'         => 'Test ability for REST API execution',
+						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
 								'test_value' => array(
@@ -322,7 +334,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'output_schema'    => array(
+						'output_schema'       => array(
 							'type'       => 'object',
 							'properties' => array(
 								'result' => array(
@@ -330,12 +342,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'execute_callback' => function ( $input ) {
+						'execute_callback'    => function ( $input ) {
 							$test_value = isset( $input['test_value'] ) ? $input['test_value'] : 'default';
 							return array(
 								'result'     => 'Executed with: ' . $test_value,
 								'input_echo' => $input,
 							);
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -387,12 +402,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_1,
 					array(
-						'label'            => 'List Test 1',
-						'description'      => 'First test ability',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'List Test 1',
+						'description'         => 'First test ability',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
@@ -400,12 +418,15 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_2,
 					array(
-						'label'            => 'List Test 2',
-						'description'      => 'Second test ability',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'List Test 2',
+						'description'         => 'Second test ability',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
+						},
+						'permission_callback' => function ( $input ) {
+							return true;
 						},
 					)
 				);
