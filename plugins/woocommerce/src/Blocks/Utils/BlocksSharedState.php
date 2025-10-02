@@ -103,8 +103,8 @@ trait BlocksSharedState {
 			$cart_exists       = isset( WC()->cart );
 			$cart_has_contents = $cart_exists && ! WC()->cart->is_empty();
 			if ( $cart_exists ) {
-				$cart_response = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart'  );				
-				self::$blocks_shared_cart_state = $cart_response[ 'body' ] ?? array();
+				$cart_response                  = Package::container()->get( Hydration::class )->get_rest_api_response_data( '/wc/store/v1/cart' );
+				self::$blocks_shared_cart_state = $cart_response['body'] ?? array();
 			} else {
 				self::$blocks_shared_cart_state = array();
 			}
