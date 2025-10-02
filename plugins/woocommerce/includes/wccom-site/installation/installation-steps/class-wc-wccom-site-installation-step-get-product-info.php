@@ -6,6 +6,8 @@
  * @since   7.7.0
  */
 
+declare(strict_types=1);
+
 use WC_REST_WCCOM_Site_Installer_Error_Codes as Installer_Error_Codes;
 use WC_REST_WCCOM_Site_Installer_Error as Installer_Error;
 
@@ -52,13 +54,13 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $request ) ) {
-			throw new Installer_Error( Installer_Error_Codes::FAILED_GETTING_PRODUCT_INFO );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::FAILED_GETTING_PRODUCT_INFO ) );
 		}
 
 		$result = json_decode( wp_remote_retrieve_body( $request ), true );
 
 		if ( ! isset( $result['_product_type'], $result['name'] ) ) {
-			throw new Installer_Error( Installer_Error_Codes::INVALID_PRODUCT_INFO_RESPONSE );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::INVALID_PRODUCT_INFO_RESPONSE ) );
 		}
 
 		if ( ! empty( $result['_wporg_product'] ) ) {
@@ -88,7 +90,7 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 		}
 
 		if ( empty( $data['download_link'] ) ) {
-			throw new Installer_Error( Installer_Error_Codes::WPORG_PRODUCT_MISSING_DOWNLOAD_LINK );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::WPORG_PRODUCT_MISSING_DOWNLOAD_LINK ) );
 		}
 
 		return $data['download_link'];
@@ -106,15 +108,15 @@ class WC_WCCOM_Site_Installation_Step_Get_Product_Info implements WC_WCCOM_Site_
 		WC_Helper::_flush_subscriptions_cache();
 
 		if ( ! WC_Helper::has_product_subscription( $product_id ) ) {
-			throw new Installer_Error( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_SUBSCRIPTION );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_SUBSCRIPTION ) );
 		}
 
 		// Retrieve download URL for non-wporg product.
 		WC_Helper_Updater::flush_updates_cache();
-		$updates = WC_Helper_Updater::get_update_data();
+		$updates = WC_Helper_Updater::get_update_data( $product_id );
 
 		if ( empty( $updates[ $product_id ]['package'] ) ) {
-			throw new Installer_Error( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_PACKAGE );
+			throw new Installer_Error( esc_html( Installer_Error_Codes::WCCOM_PRODUCT_MISSING_PACKAGE ) );
 		}
 
 		return $updates[ $product_id ]['package'];

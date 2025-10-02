@@ -6,6 +6,8 @@
  * @package WooCommerce\Admin\Helper
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Admin\PluginsHelper;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -439,9 +441,10 @@ class WC_Helper_Updater {
 	 * as all Woo extensions without a subscription, and obtains update
 	 * data for each product.
 	 *
+	 * @param int $additional_product_id Additional product id to include in the payload.
 	 * @return array Update data {product_id => data}
 	 */
-	public static function get_update_data() {
+	public static function get_update_data( $additional_product_id = null ) {
 		$payload = array();
 
 		// Scan subscriptions.
@@ -450,6 +453,13 @@ class WC_Helper_Updater {
 		foreach ( $subscriptions as $subscription ) {
 			$payload[ $subscription['product_id'] ] = array(
 				'product_id' => $subscription['product_id'],
+				'file_id'    => '',
+			);
+		}
+
+		if ( null !== $additional_product_id ) {
+			$payload[ $additional_product_id ] = array(
+				'product_id' => $additional_product_id,
 				'file_id'    => '',
 			);
 		}
