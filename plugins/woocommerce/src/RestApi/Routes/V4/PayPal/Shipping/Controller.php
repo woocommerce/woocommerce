@@ -69,11 +69,11 @@ class Controller extends AbstractController {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			'/' . $this->rest_base . '/shipping',
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => '__return_true',
 				),

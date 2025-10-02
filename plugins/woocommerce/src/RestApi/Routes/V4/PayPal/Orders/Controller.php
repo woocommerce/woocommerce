@@ -64,7 +64,7 @@ class Controller extends AbstractController {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base,
+			'/' . $this->rest_base . '/orders',
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
@@ -77,7 +77,7 @@ class Controller extends AbstractController {
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\d]+)',
+			'/' . $this->rest_base . '/orders/(?P<id>[\d]+)',
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
 				array(
