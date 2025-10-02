@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix - Preserve coupon discount amounts on finalized orders to prevent retroactive changes when coupons are modified or recalculated.
