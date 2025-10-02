@@ -219,7 +219,7 @@ class Controller extends AbstractController {
 	 * Cancel a PayPal order. This is used to move the woocommerce order back to a draft status.
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @return \WP_REST_Response The response object.
+	 * @return \WP_REST_Response|\WP_Error The response object (or error).
 	 */
 	public function cancel_item( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
@@ -227,40 +227,56 @@ class Controller extends AbstractController {
 		$paypal_order_id = isset( $request['id'] ) ? wc_clean( $request['id'] ) : '';
 		$order_id        = isset( $data['order_id'] ) ? absint( $data['order_id'] ) : 0;
 		if ( ! $order_id || '' === $paypal_order_id ) {
-			return new \WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_request',
+				__( 'Invalid request.', 'woocommerce' ),
+				400
+			);
 		}
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
-			return new \WP_REST_Response( array( 'error' => 'Order not found' ), 404 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_id',
+				__( 'Order not found.', 'woocommerce' ),
+				404
+			);
 		}
 
 		// Verify order by checking the PayPal order ID.
 		$paypal_order_id_from_meta = $order->get_meta( '_paypal_order_id' );
 		if ( $paypal_order_id_from_meta !== $paypal_order_id ) {
-			return new \WP_REST_Response( array( 'error' => 'Invalid PayPal order' ), 404 );
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_paypal_order',
+				__( 'Order not found.', 'woocommerce' ),
+				404
+			);
 		}
-
-		// If order is already in draft status, do nothing and return success.
-		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
-			return new \WP_REST_Response( array( 'success' => true ), 200 );
-		}
-
-		// If order is not pending, return an error.
-		if ( ! $order->has_status( OrderStatus::PENDING ) ) {
-			return new \WP_REST_Response( array( 'error' => 'Order is not pending' ), 409 );
-		}
-
-		$order->update_status( OrderStatus::CHECKOUT_DRAFT );
-		$order->save();
-
-		$request->set_param( 'context', 'edit' );
 
 		$order_data = [
 			'paypal_order_id' => $paypal_order_id,
 			'order_id'        => $order_id,
 			'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', ( new \WC_Gateway_Paypal() )->get_return_url( $order ) ) ),
 		];
+
+		// If order is already in draft status, do nothing and return success.
+		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
+			return $this->prepare_item_for_response( $order_data, $request );
+		}
+
+		// If order is not pending, return an error.
+		if ( ! $order->has_status( OrderStatus::PENDING ) ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_order_status',
+				__( 'Order is pending.', 'woocommerce' ),
+				409
+			);
+		}
+
+		$order->update_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+
+		$request->set_param( 'context', 'edit' );
 
 		return $this->prepare_item_for_response( $order_data, $request );
 	}
