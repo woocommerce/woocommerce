@@ -10,7 +10,6 @@ use Automattic\WooCommerce\Admin\Features\Features;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Admin\Loader;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 /**
