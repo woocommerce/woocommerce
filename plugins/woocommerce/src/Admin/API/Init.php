@@ -79,7 +79,7 @@ class Init {
 	}
 
 	/**
-	 * Load the wc-analytics namespace controllers.
+	 * Load the wc-admin namespace controllers.
 	 *
 	 * @return void
 	 */
