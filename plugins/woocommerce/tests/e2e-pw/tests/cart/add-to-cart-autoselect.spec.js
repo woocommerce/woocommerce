@@ -33,6 +33,7 @@ const productAttributes = [
 		options: [
 			"Red",
 			"Blue",
+			"Green",
 		],
 		variation: true,
 		visible: true,
@@ -40,6 +41,7 @@ const productAttributes = [
 	{
 		name: "Size",
 		options: [
+			"S",
 			"L",
 			"XL",
 		],
@@ -48,6 +50,23 @@ const productAttributes = [
 	},
 ]
 const productVariations = [
+	{
+		regular_price: productPrice,
+		attributes: [
+			{
+				name: "Type",
+				option: "T-shirt"
+			},
+			{
+				name: "Colour",
+				option: "Green"
+			},
+			{
+				name: "Size",
+				option: "S"
+			},
+		]
+	},
 	{
 		regular_price: productPrice,
 		attributes: [
@@ -400,6 +419,53 @@ test.describe(
 				} );
 			}
 		);
+		test(
+			'Add to Cart with Options: Combining Auto-select on user selection and Values in conflict settings should work',
+			{ tag: [] },
+			async ( { page, editor } ) => {
+				async function legacyCartSetUnattachedAttributesAction( value ) {
+					await test.step( `Set the unattached_attribute_action setting to "${ value }"`, async () => {
+						await setCartBlockAttributes( editor, 'legacy', { autoselect: true, disabledAttributesAction: value } );
+					} );
+				}
+				async function preselect() {
+					await page.goto( productPermalink );
+
+					// By setting the Colour to "Blue", the only possible Size remaining is "XL".
+					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
+					// Now, we deselect the Colour.
+					await selectAttribute( page, 'Colour', '', 'legacy' );
+					// Now, the options should look like this:
+					// Type: T-shirt
+					// Colour: ''
+					// Size: XL
+					// Because the Size is XL, the only Colours possible are Red and Blue.
+					// Now if we select Size: S, the Colour should auto-select to Green.
+					await selectAttribute( page, 'Size', 'S', 'legacy' );
+					// Now, the options should look like this:
+					// Type: T-shirt
+					// Colour: Green
+					// Size: S
+				}
+
+				for ( const value of [ 'hide', 'disable', 'gray' ] ) {
+					await legacyCartSetUnattachedAttributesAction( value );
+					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
+						await preselect();
+
+						await expect(
+							page.getByLabel( 'Type' )
+						).toHaveValue( 'T-shirt' );
+						await expect(
+							page.getByLabel( 'Colour' )
+						).toHaveValue( 'Green' );
+						await expect(
+							page.getByLabel( 'Size' )
+						).toHaveValue( 'S' );
+					} );
+				}
+			}
+		);
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
 			test(
@@ -569,6 +635,65 @@ test.describe(
 							: page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
 						).toHaveClass( /disabled/ ); // Replace with .toContainClass( 'disabled' ) (playwright 1.52 and above)
 					} );
+				}
+			);
+			test(
+				`${ optionStyle }: Add to Cart + Options: Combining Auto-select on user selection and Values in conflict settings should work`,
+				{ tag: [] },
+				async ( { page, editor } ) => {
+					async function preselect() {
+						await page.goto( productPermalink );
+
+						// By setting the Colour to "Blue", the only possible Size remaining is "XL".
+						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
+						// Now, we deselect the Colour.
+						await selectAttribute( page, 'Colour', '', 'new', optionStyle );
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Colour: ''
+						// Size: XL
+						// Because the Size is XL, the only Colours possible are Red and Blue.
+						// Now if we select Size: S, the Colour should auto-select to Green.
+						await selectAttribute( page, 'Size', 'S', 'new', optionStyle );
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Colour: Green
+						// Size: S
+					}
+
+					for ( const value of [ 'hide', 'disable', 'gray' ] ) {
+						await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
+							await setCartBlockAttributes( editor, 'new', { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
+						} );
+						await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
+							await preselect();
+
+							if ( optionStyle === 'Pills' ) {
+								await expect(
+									page.getByLabel( 'Type' )
+										.getByLabel( 'T-shirt' )
+								).toBeChecked();
+								await expect(
+									page.getByLabel( 'Colour' )
+										.getByLabel( 'Green' )
+								).toBeChecked();
+								await expect(
+									page.getByLabel( 'Size' )
+										.getByLabel( 'S' )
+								).toBeChecked();
+							} else if ( optionStyle === 'Dropdown' ) {
+								await expect(
+									page.getByLabel( 'Type' )
+								).toHaveValue( 'T-shirt' );
+								await expect(
+									page.getByLabel( 'Colour' )
+								).toHaveValue( 'Green' );
+								await expect(
+									page.getByLabel( 'Size' )
+								).toHaveValue( 'S' );
+							}
+						} );
+					}
 				}
 			);
 		}
