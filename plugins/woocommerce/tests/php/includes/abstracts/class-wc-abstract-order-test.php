@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Class WC_Abstract_Order file.
  *
@@ -310,8 +312,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public function test_apply_coupon_stores_applied_items_meta_data() {
 		$coupon_code = 'coupon_applied_items_test';
-		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
-		$order       = WC_Helper_Order::create_order();
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = WC_Helper_Order::create_order();
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 		$order->apply_coupon( $coupon_code );

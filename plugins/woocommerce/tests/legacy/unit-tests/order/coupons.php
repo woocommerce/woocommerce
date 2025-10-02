@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 /**
  * Order coupon tests.
  *
@@ -198,8 +200,8 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		 * Coupon will therefore discount 200. Compare the total without tax so we can compare the ex tax price and avoid rounding mishaps.
 		 */
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( 401, NumberUtil::round( $order->get_total_discount( false ), 2 ), $order->get_total_discount( false ) );
-		$this->assertEquals( 598.99, $order->get_total(), $order->get_total() );
+		$this->assertEquals( 401, NumberUtil::round( $order->get_total_discount( false ), 2 ), 'Total discount should be 401' );
+		$this->assertEquals( 598.99, $order->get_total(), 'Order total should be 598.99' );
 	}
 
 	/**
@@ -254,8 +256,8 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$order    = wc_get_order( $order_id );
 
 		$order->apply_coupon( 'test-coupon-2' );
-		$this->assertEquals( 401, $order->get_discount_total(), $order->get_discount_total() );
-		$this->assertFloatEquals( ( 1000 - 401 ) * 1.1, $order->get_total(), $order->get_total() );
+		$this->assertEquals( 401, $order->get_discount_total(), 'Discount total should be 401' );
+		$this->assertFloatEquals( ( 1000 - 401 ) * 1.1, $order->get_total(), 0.01, 'Order total should be 658.90' );
 	}
 
 	/**
@@ -2020,6 +2022,119 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$this->assertEquals( 20.00, $applied_items_meta_after[ $item->get_id() ]['discount'], 'Metadata discount should be 20 after reapplication' );
 
 		// Clean up.
+		$coupon->delete( true );
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test that discount tax is correctly calculated when prices include tax.
+	 */
+	public function test_coupon_discount_tax_with_prices_including_tax() {
+		// Enable tax calculations with prices including tax.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		// Create a 20% tax rate.
+		$tax_rate = array(
+			'tax_rate_country'  => '',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20',
+			'tax_rate_name'     => 'VAT',
+			'tax_rate_priority' => 1,
+			'tax_rate_compound' => 0,
+			'tax_rate_shipping' => 0,
+			'tax_rate_order'    => 1,
+			'tax_rate_class'    => '',
+		);
+		WC_Tax::_insert_tax_rate( $tax_rate );
+
+		// Create a $20 fixed cart discount coupon.
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'tax-incl-test' );
+		$coupon->set_amount( 20 );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->save();
+
+		// Create a product with price including tax: $120 (incl 20% tax = $100 + $20 tax).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 120 ); // Price includes tax.
+		$product->save();
+
+		// Create order and apply coupon.
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->apply_coupon( 'tax-incl-test' );
+		$order->calculate_totals();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		// Get the stored discount metadata.
+		$coupon_items = $order->get_items( 'coupon' );
+		$coupon_item = reset( $coupon_items );
+		$applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+
+		$this->assertIsArray( $applied_items, 'Should have coupon_applied_items metadata' );
+		$this->assertNotEmpty( $applied_items, 'Applied items should not be empty' );
+
+		$item_discount_data = reset( $applied_items );
+		$discount_amount = $item_discount_data['discount'];
+		$discount_tax = $item_discount_data['discount_tax'];
+
+		// Verify discount amounts are stored.
+		// Discount amount in metadata is gross (including tax).
+		$this->assertGreaterThan( 0, $discount_amount, 'Discount amount should be positive' );
+		$this->assertGreaterThan( 0, $discount_tax, 'Discount tax should be positive' );
+
+		// For a $20 discount with 20% tax: tax portion = $20 * (20/120) = $3.33.
+		$expected_discount_tax = round( 20 * ( 20 / 120 ), 2 );
+		$this->assertEqualsWithDelta( $expected_discount_tax, round( $discount_tax, 2 ), 0.01, 'Discount tax should be $3.33' );
+
+		// Verify tax ratio matches tax rate.
+		$actual_tax_ratio = $discount_tax / $discount_amount;
+		$expected_tax_ratio = 20 / 120;
+		$this->assertEqualsWithDelta( $expected_tax_ratio, $actual_tax_ratio, 0.01, 'Tax ratio should be 0.1667' );
+
+		// Verify order totals.
+		// Original: $120 = $100 excl + $20 tax.
+		// After $20 discount: $100 = $83.33 excl + $16.67 tax.
+		$order_total = (float) $order->get_total();
+		$order_discount_total = (float) $order->get_discount_total();
+		$order_discount_tax = (float) $order->get_discount_tax();
+		$order_tax = (float) $order->get_total_tax();
+
+		$this->assertEqualsWithDelta( 100.00, round( $order_total, 2 ), 0.01, 'Order total should be $100' );
+
+		$expected_discount_excl = round( 20 * ( 100 / 120 ), 2 );
+		$this->assertEqualsWithDelta( $expected_discount_excl, round( $order_discount_total, 2 ), 0.01, 'Discount excl tax should be $16.67' );
+
+		$this->assertEqualsWithDelta( $expected_discount_tax, round( $order_discount_tax, 2 ), 0.01, 'Order discount tax should be $3.33' );
+
+		$expected_remaining_tax = round( 20 - $expected_discount_tax, 2 );
+		$this->assertEqualsWithDelta( $expected_remaining_tax, round( $order_tax, 2 ), 0.01, 'Remaining tax should be $16.67' );
+
+		// Modify coupon and recalculate to verify preservation.
+		$original_total = $order->get_total();
+		$original_discount_total = $order->get_discount_total();
+		$original_discount_tax = $order->get_discount_tax();
+		$original_tax = $order->get_total_tax();
+
+		$coupon->set_amount( 5 );
+		$coupon->save();
+
+		$order->recalculate_coupons();
+		$order->calculate_totals();
+		$order->save();
+
+		$this->assertEquals( $original_total, $order->get_total(), 'Order total preserved' );
+		$this->assertEquals( $original_discount_total, $order->get_discount_total(), 'Discount excl tax preserved' );
+		$this->assertEquals( $original_discount_tax, $order->get_discount_tax(), 'Discount tax preserved' );
+		$this->assertEquals( $original_tax, $order->get_total_tax(), 'Order tax preserved' );
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $tax_rate['tax_rate_id'] ?? 1 );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
 		$coupon->delete( true );
 		$product->delete( true );
 		$order->delete( true );

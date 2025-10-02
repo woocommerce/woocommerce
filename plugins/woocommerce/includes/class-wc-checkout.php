@@ -726,8 +726,12 @@ class WC_Checkout {
 				$applied_line_items = array();
 				foreach ( $coupon_applied_items[ $code ] as $cart_item_key => $discount_data ) {
 					// Find the corresponding order line item for this cart item.
-					foreach ( $order->get_items() as $line_item_id => $line_item ) {
-						if ( $line_item->get_meta( '_cart_item_key' ) === $cart_item_key ) {
+					foreach ( $order->get_items( 'line_item' ) as $line_item_id => $line_item ) {
+						$key = $line_item->get_meta( '_cart_item_key', true );
+						if ( empty( $key ) && isset( $line_item->legacy_cart_item_key ) ) {
+							$key = $line_item->legacy_cart_item_key;
+						}
+						if ( $key === $cart_item_key ) {
 							// Store the line item ID with its discount amounts.
 							$applied_line_items[ $line_item_id ] = $discount_data;
 							break;

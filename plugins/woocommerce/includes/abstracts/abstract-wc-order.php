@@ -1303,47 +1303,49 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// This prevents items from being locked during the recalculation.
 		$this->applying_coupon = true;
 
-		$discounts = new WC_Discounts( $this );
-		$applied   = $discounts->apply_coupon( $coupon );
+		try {
+			$discounts = new WC_Discounts( $this );
+			$applied   = $discounts->apply_coupon( $coupon );
 
-		if ( is_wp_error( $applied ) ) {
-			return $applied;
-		}
-
-		$data_store = $coupon->get_data_store();
-
-		// Check specific for guest checkouts here as well since WC_Cart handles that separately in check_customer_coupons.
-		if ( $data_store && 0 === $this->get_customer_id() ) {
-			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
-			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
-				return new WP_Error(
-					'invalid_coupon',
-					$coupon->get_coupon_error( 106 ),
-					array(
-						'status' => 400,
-					)
-				);
+			if ( is_wp_error( $applied ) ) {
+				return $applied;
 			}
+
+			$data_store = $coupon->get_data_store();
+
+			// Check specific for guest checkouts here as well since WC_Cart handles that separately in check_customer_coupons.
+			if ( $data_store && 0 === $this->get_customer_id() ) {
+				$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
+				if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
+					return new WP_Error(
+						'invalid_coupon',
+						$coupon->get_coupon_error( 106 ),
+						array(
+							'status' => 400,
+						)
+					);
+				}
+			}
+
+			/**
+			 * Action to signal that a coupon has been applied to an order.
+			 *
+			 * @param  WC_Coupon $coupon The applied coupon object.
+			 * @param  WC_Order  $order  The current order object.
+			 *
+			 * @since 7.3
+			 */
+			do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
+
+			$this->set_coupon_discount_amounts( $discounts );
+			$this->save();
+
+			// Recalculate totals and taxes.
+			$this->recalculate_coupons();
+		} finally {
+			// Clear the flag after recalculation is complete.
+			$this->applying_coupon = false;
 		}
-
-		/**
-		 * Action to signal that a coupon has been applied to an order.
-		 *
-		 * @param  WC_Coupon $coupon The applied coupon object.
-		 * @param  WC_Order  $order  The current order object.
-		 *
-		 * @since 7.3
-		 */
-		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
-
-		$this->set_coupon_discount_amounts( $discounts );
-		$this->save();
-
-		// Recalculate totals and taxes.
-		$this->recalculate_coupons();
-
-		// Clear the flag after recalculation is complete.
-		$this->applying_coupon = false;
 
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();

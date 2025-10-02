@@ -830,10 +830,12 @@ final class WC_Cart_Totals {
 			foreach ( $coupon_discounts as $cart_item_key => $discount_amount ) {
 				// Store both the item key and the discount amount (including tax if applicable).
 				$discount_tax = 0;
-				if ( isset( $coupon_discount_tax_amounts[ $coupon_code ] ) && isset( $this->items[ $cart_item_key ] ) ) {
-					// Calculate proportional tax for this item's discount.
-					$item_discount_proportion = $discount_amount / max( 1, $coupon_discount_amounts[ $coupon_code ] );
-					$discount_tax = $coupon_discount_tax_amounts[ $coupon_code ] * $item_discount_proportion;
+				if ( isset( $this->items[ $cart_item_key ] ) ) {
+					$item = $this->items[ $cart_item_key ];
+					// Calculate this item's discount tax directly to match earlier calculation and avoid misallocation.
+					if ( $this->calculate_tax && $item->product->is_taxable() ) {
+						$discount_tax = array_sum( WC_Tax::calc_tax( $discount_amount, $item->tax_rates, $item->price_includes_tax ) );
+					}
 				}
 				$coupon_applied_items[ $coupon_code ][ $cart_item_key ] = array(
 					'discount'     => wc_remove_number_precision( $discount_amount ),
