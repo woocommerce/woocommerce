@@ -120,7 +120,10 @@ export default function ProductItemTemplateEdit(
 				resolveSelect( productsStore )
 					.getProducts( { type: 'grouped', per_page: 1 } )
 					.then( ( groupedProduct ) => {
-						if ( groupedProduct.length > 0 ) {
+						if (
+							groupedProduct.length > 0 &&
+							groupedProduct[ 0 ]?.grouped_products?.length > 0
+						) {
 							fetchChildProducts(
 								groupedProduct[ 0 ].grouped_products
 							);
