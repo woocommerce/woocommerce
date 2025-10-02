@@ -20,6 +20,7 @@ import { resolveSelect, useSelect } from '@wordpress/data';
 import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
 import { isProductResponseItem } from '@woocommerce/entities';
+import { Spinner } from '@wordpress/components';
 
 interface Attributes {
 	className?: string;
@@ -151,6 +152,10 @@ export default function ProductItemTemplateEdit(
 
 	const [ selectedProductItem, setSelectedProductItem ] =
 		useState< number >();
+
+	if ( ! products ) {
+		return <Spinner />;
+	}
 
 	return (
 		<div { ...blockProps }>
