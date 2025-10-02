@@ -15,6 +15,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Orders\Schema\PaypalOrderSchema;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
@@ -201,11 +202,11 @@ class Controller extends AbstractController {
 
 		$request->set_param( 'context', 'edit' );
 
-		$order_data = [
+		$order_data = array(
 			'paypal_order_id' => $paypal_order['id'] ?? null,
 			'order_id'        => $order_id,
 			'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
-		];
+		);
 
 		$response = $this->prepare_item_for_response( $order_data, $request );
 		$response->set_status( \WP_Http::CREATED );
@@ -252,11 +253,11 @@ class Controller extends AbstractController {
 			);
 		}
 
-		$order_data = [
+		$order_data = array(
 			'paypal_order_id' => $paypal_order_id,
 			'order_id'        => $order_id,
 			'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', ( new \WC_Gateway_Paypal() )->get_return_url( $order ) ) ),
-		];
+		);
 
 		// If order is already in draft status, do nothing and return success.
 		if ( $order->has_status( OrderStatus::CHECKOUT_DRAFT ) ) {
@@ -283,8 +284,8 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a single PayPal order data for response.
 	 *
-	 * @param array $order_data PayPal order data.
-	 * @param \WP_REST_Request  $request Request object.
+	 * @param array            $order_data PayPal order data.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
 	protected function get_item_response( $order_data, \WP_REST_Request $request ): array {

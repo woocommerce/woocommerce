@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,29 +31,29 @@ class PaypalShippingSchema extends AbstractSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'id'        => array(
+			'id'              => array(
 				'description' => __( 'Unique identifier for the PayPal order (on the PayPal side).', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
 			),
-			'purchase_units'   => array(
+			'purchase_units' => array(
 				'description' => __( 'Purchase units for this PayPal order.', 'woocommerce' ),
 				'type'        => 'array',
 				'readonly'    => true,
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'reference_id' => array(
-							'description' => __( 'Unit reference ID.', 'woocommerce' ),
-							'type'        => 'string',
+						'reference_id'     => array(
+							'description'  => __( 'Unit reference ID.', 'woocommerce' ),
+							'type'         => 'string',
 						),
-						'amount'       => array(
-							'description' => __( 'Breakdown of the unit amount.', 'woocommerce' ),
-							'type'        => 'array',
+						'amount'           => array(
+							'description'  => __( 'Breakdown of the unit amount.', 'woocommerce' ),
+							'type'         => 'array',
 						),
-						'shipping_options'     => array(
-							'description' => __( 'Shipping options for this unit.', 'woocommerce' ),
-							'type'        => 'array',
+						'shipping_options' => array(
+							'description'  => __( 'Shipping options for this unit.', 'woocommerce' ),
+							'type'         => 'array',
 						),
 					),
 				),
@@ -66,8 +66,8 @@ class PaypalShippingSchema extends AbstractSchema {
 	/**
 	 * Get the item response.
 	 *
-	 * @param array $shipping_data PayPal shipping data.
-	 * @param \WP_REST_Request  $request Request object.
+	 * @param array            $shipping_data PayPal shipping data.
+	 * @param \WP_REST_Request $request Request object.
 	 * @param array            $include_fields Fields to include in the response.
 	 * @return array The item response.
 	 */

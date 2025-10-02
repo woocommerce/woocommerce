@@ -11,9 +11,10 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping\Schema\PaypalShippingSchema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -193,8 +194,8 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a single standard object for response.
 	 *
-	 * @param array $shipping_data PayPal shipping data.
-	 * @param \WP_REST_Request  $request Request object.
+	 * @param array            $shipping_data PayPal shipping data.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
 	protected function get_item_response( $shipping_data, \WP_REST_Request $request ): array {

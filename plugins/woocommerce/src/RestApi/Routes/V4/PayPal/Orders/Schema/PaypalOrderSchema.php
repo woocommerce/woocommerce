@@ -7,7 +7,8 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Orders;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Orders\Schema;
+
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,12 +37,12 @@ class PaypalOrderSchema extends AbstractSchema {
 				'type'        => 'integer',
 				'readonly'    => true,
 			),
-			'paypal_order_id'      => array(
+			'paypal_order_id' => array(
 				'description' => __( 'Unique identifier for the order on the PayPal side.', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
 			),
-			'return_url'     => array(
+			'return_url'      => array(
 				'description' => __( 'Store return URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
