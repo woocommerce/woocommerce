@@ -17,7 +17,7 @@ patchedDependencies:
     path: bin/patches/@wordpress__data@10.0.2.patch
   '@wordpress/edit-site@5.15.0':
     hash: spx7qis6zudgbul6bwdexdeffi
-    path: patches/@wordpress__edit-site@5.15.0.patch
+    path: bin/patches/@wordpress__edit-site@5.15.0.patch
   '@wordpress/env@10.17.0':
     hash: ovltjfwrjswkqlvmxt7r5kywn4
     path: bin/patches/@wordpress__env@10.17.0.patch
