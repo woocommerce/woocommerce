@@ -53,7 +53,7 @@ const { itemsInCartTextTemplate } = getConfig(
 const scalePrice = (
 	price: number,
 	inputDecimals: number,
-	outputDecimals: number = 0
+	outputDecimals = 0
 ) => price * Math.pow( 10, outputDecimals - inputDecimals );
 
 // Inject style tags for badge styles based on background colors of the document.
