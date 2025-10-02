@@ -31,7 +31,7 @@ class PaypalShippingSchema extends AbstractSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'id'              => array(
+			'id'             => array(
 				'description' => __( 'Unique identifier for the PayPal order (on the PayPal side).', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
@@ -44,16 +44,16 @@ class PaypalShippingSchema extends AbstractSchema {
 					'type'       => 'object',
 					'properties' => array(
 						'reference_id'     => array(
-							'description'  => __( 'Unit reference ID.', 'woocommerce' ),
-							'type'         => 'string',
+							'description' => __( 'Unit reference ID.', 'woocommerce' ),
+							'type'        => 'string',
 						),
 						'amount'           => array(
-							'description'  => __( 'Breakdown of the unit amount.', 'woocommerce' ),
-							'type'         => 'array',
+							'description' => __( 'Breakdown of the unit amount.', 'woocommerce' ),
+							'type'        => 'array',
 						),
 						'shipping_options' => array(
-							'description'  => __( 'Shipping options for this unit.', 'woocommerce' ),
-							'type'         => 'array',
+							'description' => __( 'Shipping options for this unit.', 'woocommerce' ),
+							'type'        => 'array',
 						),
 					),
 				),
