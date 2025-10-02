@@ -332,21 +332,27 @@ class CheckoutSessions extends AbstractCartRoute {
 		$customer = WC()->customer;
 
 		if ( isset( $buyer['first_name'] ) ) {
-			$customer->set_billing_first_name( $buyer['first_name'] );
-			$customer->set_shipping_first_name( $buyer['first_name'] );
+			$first_name = wc_clean( wp_unslash( $buyer['first_name'] ) );
+			$customer->set_billing_first_name( $first_name );
+			$customer->set_shipping_first_name( $first_name );
 		}
 
 		if ( isset( $buyer['last_name'] ) ) {
-			$customer->set_billing_last_name( $buyer['last_name'] );
-			$customer->set_shipping_last_name( $buyer['last_name'] );
+			$last_name = wc_clean( wp_unslash( $buyer['last_name'] ) );
+			$customer->set_billing_last_name( $last_name );
+			$customer->set_shipping_last_name( $last_name );
 		}
 
 		if ( isset( $buyer['email'] ) ) {
-			$customer->set_billing_email( $buyer['email'] );
+			$email = sanitize_email( wp_unslash( $buyer['email'] ) );
+			if ( is_email( $email ) ) {
+				$customer->set_billing_email( $email );
+			}
 		}
 
 		if ( isset( $buyer['phone_number'] ) ) {
-			$customer->set_billing_phone( $buyer['phone_number'] );
+			$phone = wc_clean( wp_unslash( $buyer['phone_number'] ) );
+			$customer->set_billing_phone( $phone );
 		}
 
 		$customer->save();
@@ -361,30 +367,39 @@ class CheckoutSessions extends AbstractCartRoute {
 		$customer = WC()->customer;
 
 		// Parse name into first and last.
-		$name_parts = isset( $address['name'] ) ? explode( ' ', $address['name'], 2 ) : [ '', '' ];
+		$name       = isset( $address['name'] ) ? wc_clean( wp_unslash( $address['name'] ) ) : '';
+		$name_parts = $name ? explode( ' ', $name, 2 ) : array( '', '' );
 		$first_name = $name_parts[0];
 		$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+
+		// Sanitize all address fields.
+		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
+		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
+		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
+		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
+		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
+		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
 
 		// Set shipping address.
 		$customer->set_shipping_first_name( $first_name );
 		$customer->set_shipping_last_name( $last_name );
-		$customer->set_shipping_address_1( $address['line_one'] );
-		$customer->set_shipping_address_2( $address['line_two'] ?? '' );
-		$customer->set_shipping_city( $address['city'] );
-		$customer->set_shipping_state( $address['state'] ?? '' );
-		$customer->set_shipping_postcode( $address['postal_code'] );
-		$customer->set_shipping_country( $address['country'] );
+		$customer->set_shipping_address_1( $line_one );
+		$customer->set_shipping_address_2( $line_two );
+		$customer->set_shipping_city( $city );
+		$customer->set_shipping_state( $state );
+		$customer->set_shipping_postcode( $postal_code );
+		$customer->set_shipping_country( $country );
 
 		// Also set as billing address if not already set.
 		if ( ! $customer->get_billing_address_1() ) {
 			$customer->set_billing_first_name( $first_name );
 			$customer->set_billing_last_name( $last_name );
-			$customer->set_billing_address_1( $address['line_one'] );
-			$customer->set_billing_address_2( $address['line_two'] ?? '' );
-			$customer->set_billing_city( $address['city'] );
-			$customer->set_billing_state( $address['state'] ?? '' );
-			$customer->set_billing_postcode( $address['postal_code'] );
-			$customer->set_billing_country( $address['country'] );
+			$customer->set_billing_address_1( $line_one );
+			$customer->set_billing_address_2( $line_two );
+			$customer->set_billing_city( $city );
+			$customer->set_billing_state( $state );
+			$customer->set_billing_postcode( $postal_code );
+			$customer->set_billing_country( $country );
 		}
 
 		$customer->save();
