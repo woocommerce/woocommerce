@@ -245,6 +245,16 @@ async function switchProductType( productType: string ) {
 	} );
 }
 
+const expectBlocksToBeInTheDocument = ( blocks: string[] ) => {
+	blocks.forEach( ( blockName: string ) => {
+		expect(
+			screen.getByRole( 'document', {
+				name: blockName,
+			} )
+		).toBeInTheDocument();
+	} );
+};
+
 describe( 'Add to Cart + Options block', () => {
 	it( 'should render inner blocks', async () => {
 		await setup();
@@ -256,92 +266,51 @@ describe( 'Add to Cart + Options block', () => {
 
 		// Simple products.
 		await waitFor( () => {
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Stock Indicator',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Quantity (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Add to Cart Button',
-				} )
-			).toBeInTheDocument();
+			expectBlocksToBeInTheDocument( [
+				'Block: Product Stock Indicator',
+				'Block: Product Quantity (Beta)',
+				'Block: Add to Cart Button',
+			] );
 		} );
 
 		// External products.
 		await switchProductType( 'External/Affiliate product' );
 
 		await waitFor( () => {
+			expectBlocksToBeInTheDocument( [ 'Block: Add to Cart Button' ] );
+
 			expect(
 				screen.queryByRole( 'document', {
 					name: 'Block: Product Stock Indicator',
 				} )
 			).not.toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Add to Cart Button',
-				} )
-			).toBeInTheDocument();
 		} );
 
 		// Grouped products.
 		await switchProductType( 'Grouped product' );
 
 		await waitFor( () => {
-			expect(
-				screen.queryByRole( 'document', {
-					name: 'Block: Grouped Product Selector (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Grouped Product: Template (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Grouped Product: Item Selector (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Grouped Product: Item Label (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Price',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Stock Indicator',
-				} )
-			).toBeInTheDocument();
+			expectBlocksToBeInTheDocument( [
+				'Block: Grouped Product Selector (Beta)',
+				'Block: Grouped Product: Template (Beta)',
+				'Block: Grouped Product: Item Selector (Beta)',
+				'Block: Grouped Product: Item Label (Beta)',
+				'Block: Product Price',
+				'Block: Product Stock Indicator',
+			] );
 		} );
 
 		// Variable products.
 		await switchProductType( 'Variable product' );
 
 		await waitFor( () => {
-			expect(
-				screen.queryByRole( 'document', {
-					name: 'Block: Variation Selector (Beta)',
-				} )
-			).toBeInTheDocument();
+			expectBlocksToBeInTheDocument( [
+				'Block: Variation Selector (Beta)',
+				'Block: Variation Description (Beta)',
+				'Block: Product Stock Indicator',
+				'Block: Product Quantity (Beta)',
+				'Block: Add to Cart Button',
+			] );
 
 			expect(
 				screen.getByRole( 'list', {
@@ -363,30 +332,6 @@ describe( 'Add to Cart + Options block', () => {
 						name: 'Block: Variation Selector: Attribute Options (Beta)',
 					} )
 					.at( 0 )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Variation Description (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Stock Indicator',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Product Quantity (Beta)',
-				} )
-			).toBeInTheDocument();
-
-			expect(
-				screen.getByRole( 'document', {
-					name: 'Block: Add to Cart Button',
-				} )
 			).toBeInTheDocument();
 		} );
 	} );
