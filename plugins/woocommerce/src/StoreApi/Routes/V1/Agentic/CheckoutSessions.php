@@ -93,21 +93,21 @@ class CheckoutSessions extends AbstractCartRoute {
 				'description' => __( 'Line items to add to the cart.', 'woocommerce' ),
 				'type'        => 'array',
 				'required'    => true,
+				'minItems'    => 1,
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
 						'id'       => [
 							'description' => __( 'Product ID.', 'woocommerce' ),
 							'type'        => 'string',
-							'required'    => true,
 						],
 						'quantity' => [
 							'description' => __( 'Quantity.', 'woocommerce' ),
 							'type'        => 'integer',
-							'required'    => true,
 							'minimum'     => 1,
 						],
 					],
+					'required'   => [ 'id', 'quantity' ],
 				],
 			],
 			'buyer'                 => [
@@ -125,6 +125,7 @@ class CheckoutSessions extends AbstractCartRoute {
 					'email'        => [
 						'description' => __( 'Email address.', 'woocommerce' ),
 						'type'        => 'string',
+						'format'      => 'email',
 					],
 					'phone_number' => [
 						'description' => __( 'Phone number.', 'woocommerce' ),
@@ -143,7 +144,6 @@ class CheckoutSessions extends AbstractCartRoute {
 					'line_one'    => [
 						'description' => __( 'Address line 1.', 'woocommerce' ),
 						'type'        => 'string',
-						'required'    => true,
 					],
 					'line_two'    => [
 						'description' => __( 'Address line 2.', 'woocommerce' ),
@@ -152,7 +152,6 @@ class CheckoutSessions extends AbstractCartRoute {
 					'city'        => [
 						'description' => __( 'City.', 'woocommerce' ),
 						'type'        => 'string',
-						'required'    => true,
 					],
 					'state'       => [
 						'description' => __( 'State/province.', 'woocommerce' ),
@@ -161,14 +160,13 @@ class CheckoutSessions extends AbstractCartRoute {
 					'country'     => [
 						'description' => __( 'Country code (ISO 3166-1 alpha-2).', 'woocommerce' ),
 						'type'        => 'string',
-						'required'    => true,
 					],
 					'postal_code' => [
 						'description' => __( 'Postal/ZIP code.', 'woocommerce' ),
 						'type'        => 'string',
-						'required'    => true,
 					],
 				],
+				'required'    => [ 'line_one', 'city', 'country', 'postal_code' ],
 			],
 			'fulfillment_option_id' => [
 				'description' => __( 'Selected fulfillment option ID.', 'woocommerce' ),
