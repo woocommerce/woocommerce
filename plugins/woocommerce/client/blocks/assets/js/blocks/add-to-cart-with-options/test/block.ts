@@ -464,5 +464,3 @@ describe( 'Add to Cart + Options block', () => {
 		} );
 	} );
 } );
-
-// screen.debug( undefined, 300000 );
