@@ -1184,9 +1184,6 @@ class WC_Tests_Order_Coupons extends WC_Unit_Test_Case {
 		$order->calculate_totals();
 		$order->save();
 
-		$new_total = $order->get_total();
-		$new_discount = $order->get_discount_total();
-
 		// Expected behavior:
 		// - First product keeps its $30 discount (preserved)
 		// - Second product should get $20 discount (remainder: $50 - $30 = $20)
