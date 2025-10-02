@@ -217,8 +217,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Clear existing cart.
-		WC()->cart->empty_cart();
+		// TODO: Ensure that we have session isolation since we don't require nonces or cart-token.
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
