@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 
 /**
  * Handles the schema for Agentic Checkout API checkout sessions.
@@ -16,6 +17,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
  * Agentic Commerce Protocol specification.
  */
 class CheckoutSessionSchema extends AbstractSchema {
+    use DraftOrderTrait;
 	/**
 	 * The schema item name.
 	 *
@@ -318,7 +320,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$cart = WC()->cart;
 
 		// Get draft order if exists.
-		$session_id  = WC()->session->get( 'agentic_draft_order_id' );
+		$session_id  = $this->get_draft_order_id();
 		$draft_order = $session_id ? wc_get_order( $session_id ) : null;
 
 		return [
