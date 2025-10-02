@@ -56,7 +56,7 @@
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "1.7.0",
-		"wordpress/abilities-api": "dev-trunk",
+		"wordpress/abilities-api": "dev-trunk#41ec679e4182333f127ef82e5d5a9cde1b5f40f9",
 		"wordpress/mcp-adapter": "dev-trunk#7a2d22cff92328bc94f5b1648a66ae4273e949c5"
 	},
 	"require-dev": {
