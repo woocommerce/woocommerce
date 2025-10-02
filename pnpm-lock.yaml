@@ -16,8 +16,8 @@ patchedDependencies:
     hash: xjmezqav3jkhcz5453svqnw2p4
     path: bin/patches/@wordpress__data@10.0.2.patch
   '@wordpress/edit-site@5.15.0':
-    hash: u2xn4lpm453vgqpkdgbivlveaa
-    path: bin/patches/@wordpress__edit-site@5.15.0.patch
+    hash: spx7qis6zudgbul6bwdexdeffi
+    path: patches/@wordpress__edit-site@5.15.0.patch
   '@wordpress/env@10.17.0':
     hash: ovltjfwrjswkqlvmxt7r5kywn4
     path: bin/patches/@wordpress__env@10.17.0.patch
@@ -3175,7 +3175,7 @@ importers:
         version: 4.0.1
       '@wordpress/edit-site':
         specifier: 5.15.0
-        version: 5.15.0(patch_hash=u2xn4lpm453vgqpkdgbivlveaa)(@babel/helper-module-imports@7.25.9)(@babel/types@7.26.0)(@emotion/is-prop-valid@1.2.1)(@preact/signals-core@1.8.0)(@types/react@18.3.16)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+        version: 5.15.0(patch_hash=spx7qis6zudgbul6bwdexdeffi)(@babel/helper-module-imports@7.25.9)(@babel/types@7.26.0)(@emotion/is-prop-valid@1.2.1)(@preact/signals-core@1.8.0)(@types/react@18.3.16)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/editor':
         specifier: wp-6.6
         version: 14.0.8(@emotion/is-prop-valid@1.2.1)(@types/react-dom@18.3.0)(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3663,12 +3663,12 @@ importers:
       '@preact/signals':
         specifier: ^1.3.0
         version: 1.3.1(preact@10.25.1)
+      '@woocommerce/email-editor':
+        specifier: workspace:*
+        version: link:../../../../packages/js/email-editor
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../../../../packages/js/sanitize
-      '@woocommerce/email-editor':
-          specifier: workspace:*
-          version: link:../../../../packages/js/email-editor
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../../../../packages/js/tracks
@@ -35862,7 +35862,7 @@ snapshots:
       - supports-color
       - utf-8-validate
 
-  '@wordpress/edit-site@5.15.0(patch_hash=u2xn4lpm453vgqpkdgbivlveaa)(@babel/helper-module-imports@7.25.9)(@babel/types@7.26.0)(@emotion/is-prop-valid@1.2.1)(@preact/signals-core@1.8.0)(@types/react@18.3.16)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
+  '@wordpress/edit-site@5.15.0(patch_hash=spx7qis6zudgbul6bwdexdeffi)(@babel/helper-module-imports@7.25.9)(@babel/types@7.26.0)(@emotion/is-prop-valid@1.2.1)(@preact/signals-core@1.8.0)(@types/react@18.3.16)(babel-plugin-macros@3.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)':
     dependencies:
       '@babel/runtime': 7.25.7
       '@wordpress/a11y': 3.58.0

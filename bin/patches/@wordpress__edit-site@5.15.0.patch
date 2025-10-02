@@ -1,5 +1,5 @@
 diff --git a/build-module/lock-unlock.js b/build-module/lock-unlock.js
-index 2265f933ceec19f65ca6776c24c3f88b368d713f..e9e10980bfd1b584ab0a037c3b72edae29a2a26e 100644
+index 2265f933ceec19f65ca6776c24c3f88b368d713f..4b66d79153ceed52ca15b586e5cb38dbb637bf13 100644
 --- a/build-module/lock-unlock.js
 +++ b/build-module/lock-unlock.js
 @@ -1,9 +1,34 @@
@@ -42,8 +42,9 @@ index 2265f933ceec19f65ca6776c24c3f88b368d713f..e9e10980bfd1b584ab0a037c3b72edae
 +
 +export const { lock, unlock } = optInToUnstableAPIs();
  //# sourceMappingURL=lock-unlock.js.map
+\ No newline at end of file
 diff --git a/build-module/store/actions.js b/build-module/store/actions.js
-index a2f9fcd42f..c6bbf6a8c7 100644
+index a2f9fcd42f69fe7f6aa0bac9bd5bde6c6798893a..282249ec83315d7665732e7f211d9dd4589f5e9f 100644
 --- a/build-module/store/actions.js
 +++ b/build-module/store/actions.js
 @@ -240,7 +240,24 @@ export const setPage = page => async ({
@@ -72,3 +73,53 @@ index a2f9fcd42f..c6bbf6a8c7 100644
  
    if (!template) {
      return;
+diff --git a/src/components/layout/hooks.js b/src/components/layout/hooks.js
+index a9bf1b982903a99f3c84fa04660c1a7e3b6ea31a..5f3f4dc554da537e3765c0c4b3917bfe8d2145de 100644
+--- a/src/components/layout/hooks.js
++++ b/src/components/layout/hooks.js
+@@ -5,15 +5,10 @@ import { useEffect, useState } from '@wordpress/element';
+ import { useSelect } from '@wordpress/data';
+ import { store as coreStore } from '@wordpress/core-data';
+ 
+-/**
+- * Internal dependencies
+- */
+-import useEditedEntityRecord from '../use-edited-entity-record';
+ 
+ const MAX_LOADING_TIME = 10000; // 10 seconds
+ 
+ export function useIsSiteEditorLoading() {
+-	const { isLoaded: hasLoadedPost } = useEditedEntityRecord();
+ 	const [ loaded, setLoaded ] = useState( false );
+ 	const inLoadingPause = useSelect(
+ 		( select ) => {
+@@ -46,16 +41,17 @@ export function useIsSiteEditorLoading() {
+ 	useEffect( () => {
+ 		if ( inLoadingPause ) {
+ 			/*
+-			 * We're using an arbitrary 1s timeout here to catch brief moments
+-			 * without any resolving selectors that would result in displaying
+-			 * brief flickers of loading state and loaded state.
++			 * We're using an arbitrary 100ms timeout here to catch brief
++			 * moments without any resolving selectors that would result in
++			 * displaying brief flickers of loading state and loaded state.
+ 			 *
+ 			 * It's worth experimenting with different values, since this also
+-			 * adds 1s of artificial delay after loading has finished.
++			 * adds 100ms of artificial delay after loading has finished.
+ 			 */
++			const ARTIFICIAL_DELAY = 100;
+ 			const timeout = setTimeout( () => {
+ 				setLoaded( true );
+-			}, 1000 );
++			}, ARTIFICIAL_DELAY );
+ 
+ 			return () => {
+ 				clearTimeout( timeout );
+@@ -63,5 +59,5 @@ export function useIsSiteEditorLoading() {
+ 		}
+ 	}, [ inLoadingPause ] );
+ 
+-	return ! loaded || ! hasLoadedPost;
++	return ! loaded;
+ }
