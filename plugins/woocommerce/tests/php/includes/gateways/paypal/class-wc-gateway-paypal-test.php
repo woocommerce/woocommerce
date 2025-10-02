@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Paypal.
  */
 
+declare(strict_types=1);
 /**
  * Class WC_Gateway_Paypal_Test.
  */
@@ -169,4 +170,57 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order->get_meta( '_paypal_status' ), 'Completed' );
 	}
 
+	/**
+	 * Test that correct settings are displayed when Orders v2 is enabled.
+	 */
+	public function test_correct_settings_is_displayed_when_orders_v2_is_enabled() {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes' ) );
+
+		// Mock Orders v2 to be enabled.
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		$form_fields = $mock_gateway->get_form_fields();
+
+		// Verify that the number of fields are correct.
+		$this->assertEquals( count( $form_fields ), 12 );
+
+		// When Orders v2 is enabled, paypal_buttons field should be present.
+		$this->assertArrayHasKey( 'paypal_buttons', $form_fields );
+
+		// Verify legacy fields are removed (these would have 'is_legacy' => true).
+		// We need to check the original form fields to see what should be removed.
+		$all_form_fields = include WC_ABSPATH . 'includes/gateways/paypal/includes/settings-paypal.php';
+
+		foreach ( $all_form_fields as $key => $field ) {
+			if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
+				$this->assertArrayNotHasKey( $key, $form_fields, "Legacy field '{$key}' should be removed when Orders v2 is enabled" );
+			}
+		}
+	}
+
+	/**
+	 * Test that correct settings are displayed when Orders v2 is disabled.
+	 */
+	public function test_correct_settings_is_displayed_when_orders_v2_is_disabled() {
+		$all_form_fields = include WC_ABSPATH . 'includes/gateways/paypal/includes/settings-paypal.php';
+
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'yes' ) );
+
+		$gateway     = new WC_Gateway_Paypal();
+		$form_fields = $gateway->get_form_fields();
+
+		$this->assertEquals( count( $form_fields ), 22 );
+		$this->assertArrayNotHasKey( 'paypal_buttons', $form_fields );
+
+		foreach ( $all_form_fields as $key => $field ) {
+			if ( isset( $field['is_legacy'] ) && $field['is_legacy'] ) {
+				$this->assertArrayHasKey( $key, $form_fields, "Legacy field '{$key}' should be present when Orders v2 is disabled" );
+			}
+		}
+	}
 }

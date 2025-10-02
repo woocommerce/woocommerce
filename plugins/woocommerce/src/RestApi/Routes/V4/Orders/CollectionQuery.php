@@ -19,6 +19,7 @@ use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 /**
  * CollectionQuery class.
@@ -222,6 +223,16 @@ class CollectionQuery extends AbstractCollectionQuery {
 					return $valid;
 				},
 			),
+			'fulfillment_status'      => array(
+				'description'       => __( 'Limit result set to orders with specific fulfillment statuses.', 'woocommerce' ),
+				'type'              => 'array',
+				'items'             => array(
+					'type' => 'string',
+					'enum' => array_keys( FulfillmentUtils::get_order_fulfillment_statuses() ),
+				),
+				'sanitize_callback' => 'wp_parse_list',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
 		);
 	}
 
@@ -357,6 +368,20 @@ class CollectionQuery extends AbstractCollectionQuery {
 				'value'    => $total_value,
 				'operator' => $total_operator,
 			);
+		}
+
+		// Order fulfillment status filtering.
+		if ( isset( $request['fulfillment_status'] ) ) {
+			$request['fulfillment_status'] = is_array( $request['fulfillment_status'] ) ? $request['fulfillment_status'] : array( $request['fulfillment_status'] );
+			$fulfillment_status            = array();
+
+			foreach ( $request['fulfillment_status'] as $status ) {
+				if ( FulfillmentUtils::is_valid_order_fulfillment_status( $status ) ) {
+					$fulfillment_status[] = $status;
+				}
+			}
+
+			$args['fulfillment_status'] = $fulfillment_status;
 		}
 
 		return $args;
