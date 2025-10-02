@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order summary description text overflow in checkout
