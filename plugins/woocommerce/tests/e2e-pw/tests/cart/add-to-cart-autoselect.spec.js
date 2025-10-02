@@ -158,7 +158,7 @@ async function setCartBlockAttributes(
 		autoselect: false,
 		autoselectOnPageLoad: false,
 		disabledAttributesAction: undefined,
-	}
+	},
 ) {
 	const page = editor.page;
 	let isOnlyCurrentEntityDirty = true;
@@ -201,6 +201,28 @@ async function setCartBlockAttributes(
 	await autoselectOnPageLoadInput.setChecked( autoselectOnPageLoad );
 	await disabledAttributesActionInput.selectOption( { value: disabledAttributesAction } );
 	await saveBlockEditor( editor, isOnlyCurrentEntityDirty );
+}
+
+async function selectAttribute(
+	page,
+	attributeName,
+	attributeValue,
+	blockCartVersion,
+	optionStyle=undefined,
+) {
+	if ( blockCartVersion === 'legacy' ) {
+		await page.getByLabel( attributeName ).selectOption( attributeValue );
+	} else if ( blockCartVersion === 'new' ) {
+		if ( optionStyle === 'Pills' ) {
+			if ( attributeValue === '' ) {
+				await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
+			} else {
+				await page.getByLabel( attributeName ).getByText( attributeValue ).click();
+			}
+		} else if ( optionStyle === 'Dropdown' ) {
+			await page.getByLabel( attributeName ).selectOption( attributeValue );
+		}
+	}
 }
 
 test.describe(
@@ -298,7 +320,7 @@ test.describe(
 				await test.step( 'Expect attributes to NOT auto-select when user selects something', async () => {
 					await page.goto( productPermalink );
 
-					await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
+					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
 
 					// Expect nothing to have been auto-selected
 					await expect(
@@ -319,7 +341,7 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// By setting the Colour to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-					await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
+					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
 
 					await expect(
 						page.getByLabel( 'Type' )
@@ -346,7 +368,7 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-					await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
+					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
 				}
 
 				await legacyCartSetUnattachedAttributesAction( 'hide' );
@@ -391,26 +413,8 @@ test.describe(
 						await page.goto( productPermalink );
 
 						if ( optionStyle === 'Pills' ) {
-							await expect(
-								page.getByLabel( 'Type' )
-									.getByLabel( 'T-Shirt' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
-									.getByLabel( 'Red' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
-									.getByLabel( 'Blue' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'L', { exact: true } )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'XL' )
-							).not.toBeChecked();
+							for ( const loc of await page.getByLabel( /Type|Colour|Size/ ).getByLabel( '' ).all() )
+								await expect( loc ).not.toBeChecked();
 						} else {
 							await expect(
 								page.getByLabel( 'Type' )
@@ -434,24 +438,10 @@ test.describe(
 						if ( optionStyle === 'Pills' ) {
 							await expect(
 								page.getByLabel( 'Type' )
-									.getByLabel( 'T-Shirt' )
+									.getByLabel( 'T-shirt' )
 							).toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
-									.getByLabel( 'Red' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
-									.getByLabel( 'Blue' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'L', { exact: true } )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'XL' )
-							).not.toBeChecked();
+							for ( const loc of await page.getByLabel( /Colour|Size/ ).getByLabel( '' ).all() )
+								await expect( loc ).not.toBeChecked();
 						} else {
 							await expect(
 								page.getByLabel( 'Type' )
@@ -477,29 +467,15 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// Expect nothing to be auto-selected
-						if ( optionStyle === 'Pills' ) {
-							await page.getByLabel( 'Colour' ).getByText( 'Blue' ).click();
-						} else if ( optionStyle === 'Dropdown' ) {
-							await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
-						}
+						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 
 						if ( optionStyle === 'Pills' ) {
+							for ( const loc of await page.getByLabel( /Type|Size/ ).getByLabel( '' ).all() )
+								await expect( loc ).not.toBeChecked();
 							await expect(
-								page.getByLabel( 'Type' )
-									.getByLabel( 'T-Shirt' )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
+								await page.getByLabel( 'Colour' )
 									.getByLabel( 'Blue' )
 							).toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'L', { exact: true } )
-							).not.toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'XL' )
-							).not.toBeChecked();
 						} else {
 							await expect(
 								page.getByLabel( 'Type' )
@@ -520,11 +496,7 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// By setting the Colour to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-						if ( optionStyle === 'Pills' ) {
-							await page.getByLabel( 'Colour' ).getByText( 'Blue' ).click();
-						} else if ( optionStyle === 'Dropdown' ) {
-							await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
-						}
+						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 
 						if ( optionStyle === 'Pills' ) {
 							await expect(
@@ -566,11 +538,7 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-						if ( optionStyle === 'Pills' ) {
-							await page.getByLabel( 'Colour' ).getByText( 'Blue' ).click();
-						} else if ( optionStyle === 'Dropdown' ) {
-							await page.getByLabel( 'Colour' ).selectOption( 'Blue' );
-						}
+						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 					}
 
 					await newCartSetDisabledAttributesAction( 'hide' );
