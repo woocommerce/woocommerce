@@ -86,3 +86,45 @@ Schemas should extend `V4/AbstractSchema.php` and implement the following:
 See the WordPress documentation for more information on supported schema properties.
 
 <https://developer.wordpress.org/rest-api/extending-the-rest-api/schema/>
+
+## Registering V4 Routes
+
+To register a new V4 route, you must add it to the REST API Server:
+
+1. **Import the controller** in `/includes/rest-api/Server.php`:
+   ```php
+   use Automattic\WooCommerce\RestApi\Routes\V4\YourRoute\Controller as YourRouteController;
+   ```
+
+2. **Add to the `get_v4_controllers()` method** in `/includes/rest-api/Server.php`:
+   ```php
+   protected function get_v4_controllers() {
+       return array(
+           // ... existing controllers
+           'your-route' => YourRouteController::class,
+       );
+   }
+   ```
+
+The controller will be automatically instantiated via the dependency injection container and its `register_routes()` method will be called during `rest_api_init`.
+
+### Example
+
+To register the PaymentGateways controller:
+
+```php
+// In /includes/rest-api/Server.php
+
+// 1. Add import at the top of the file
+use Automattic\WooCommerce\RestApi\Routes\V4\PaymentGateways\Controller as PaymentGatewaysController;
+
+// 2. Add to get_v4_controllers()
+protected function get_v4_controllers() {
+    return array(
+        // ... other controllers
+        'payment-gateways' => PaymentGatewaysController::class,
+    );
+}
+```
+
+This will register the route at `/wp-json/wc/v4/payment-gateways`.

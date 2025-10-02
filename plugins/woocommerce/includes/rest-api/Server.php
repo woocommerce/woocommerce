@@ -16,6 +16,7 @@ use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotes
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PaymentGateways\Controller as PaymentGatewaysController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -222,6 +223,7 @@ class Server {
 			'shipping-zones'          => ShippingZonesController::class,
 			'orders'                  => OrdersController::class,
 			'offline-payment-methods' => OfflinePaymentMethodsController::class,
+			'payment-gateways'        => PaymentGatewaysController::class,
 			'settings-general'        => 'WC_REST_General_Settings_V4_Controller',
 			'settings-email'          => 'WC_REST_Email_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
