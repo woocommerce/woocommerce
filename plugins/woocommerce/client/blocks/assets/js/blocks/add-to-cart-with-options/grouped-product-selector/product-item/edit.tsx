@@ -91,7 +91,7 @@ export default function ProductItemTemplateEdit(
 	const [ products, setProducts ] = useState< ProductResponseItem[] | null >(
 		null
 	);
-	const productsLength = products?.length;
+	const productsLength = products?.length || 0;
 
 	useEffect( () => {
 		const fetchChildProducts = async ( groupedProductIds: number[] ) => {
@@ -110,12 +110,7 @@ export default function ProductItemTemplateEdit(
 				} );
 		};
 
-		if (
-			! isLoading &&
-			product &&
-			product.type === 'grouped' &&
-			productsLength === 0
-		) {
+		if ( ! isLoading && product && productsLength === 0 ) {
 			if ( isProductResponseItem( product ) ) {
 				fetchChildProducts( product.grouped_products );
 			} else {
