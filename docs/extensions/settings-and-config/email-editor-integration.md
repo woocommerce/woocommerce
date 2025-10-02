@@ -104,7 +104,7 @@ add_filter( 'woocommerce_email_groups', 'your_plugin_add_email_group' );
 
 Create `templates/emails/block/your-custom-email.php`:
 
-**Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. This ensures your emails continue to work even without block template support.
+**Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. These properties are intended to be used in the `get_content_html` and `get_content_plain` methods to load the corresponding template files. This ensures your emails continue to work even without block template support.
 
 ```php
 <?php
