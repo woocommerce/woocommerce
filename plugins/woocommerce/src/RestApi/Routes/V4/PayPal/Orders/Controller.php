@@ -24,7 +24,6 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
 
-
 /**
  * REST API PayPal Standard orders controller class.
  *
@@ -136,7 +135,7 @@ class Controller extends AbstractController {
 		}
 
 		$payment_source = isset( $data['payment_source'] ) ? sanitize_text_field( $data['payment_source'] ) : '';
-		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
+		if ( empty( $payment_source ) || ! in_array( $payment_source, \WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
 			return $this->get_route_error_response(
 				$this->get_error_prefix() . 'invalid_payment_source',
 				__( 'Missing/Invalid payment source.', 'woocommerce' ),

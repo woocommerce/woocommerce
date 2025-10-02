@@ -2,7 +2,7 @@
 /**
  * PaypalOrderSchema class.
  *
- * @package WooCommerce\RestApi
+ * @package Automattic\WooCommerce\RestApi
  */
 
 declare( strict_types=1 );
@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Orders;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
-use WC_Shipping_Zone;
 
 /**
  * PaypalOrderSchema class.
@@ -23,7 +22,7 @@ class PaypalOrderSchema extends AbstractSchema {
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'buttons';
+	const IDENTIFIER = 'paypal-order';
 
 	/**
 	 * Return all properties for the item schema.
@@ -60,7 +59,7 @@ class PaypalOrderSchema extends AbstractSchema {
 	 * @param array            $include_fields Fields to include in the response.
 	 * @return array The item response.
 	 */
-	public function get_item_response( array $order_data, \WP_REST_Request $request, array $include_fields = array() ): array {
+	public function get_item_response( $order_data, \WP_REST_Request $request, array $include_fields = array() ): array {
 		return array(
 			'paypal_order_id' => $order_data['id'] ?? null,
 			'order_id'        => $order_data['order_id'] ?? null,
