@@ -12,6 +12,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -24,10 +25,6 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Buttons' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-buttons.php';
 }
 
 /**
@@ -211,7 +208,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 				// Hook for updating the shipping information on order approval (Orders v2).
 				add_action( 'woocommerce_before_thankyou', array( $this, 'update_addresses_in_order' ), 10 );
 
-				$buttons = new WC_Gateway_Paypal_Buttons( $this );
+				$buttons = new Buttons( $this );
 				if ( $buttons->is_enabled() ) {
 					add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
 					add_filter( 'wp_script_attributes', array( $this, 'add_paypal_sdk_attributes' ) );
@@ -771,7 +768,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		$version           = Constants::get_constant( 'WC_VERSION' );
 		$is_page_supported = is_checkout() || is_cart() || is_product();
-		$buttons           = new WC_Gateway_Paypal_Buttons( $this );
+		$buttons           = new Buttons( $this );
 		$options           = $buttons->get_common_options();
 
 		if ( empty( $options['client-id'] ) || ! $is_page_supported ) {
@@ -812,7 +809,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 */
 	public function add_paypal_sdk_attributes( $attrs ) {
 		if ( 'paypal-standard-sdk-js' === $attrs['id'] ) {
-			$buttons   = new WC_Gateway_Paypal_Buttons( $this );
+			$buttons   = new Buttons( $this );
 			$page_type = $buttons->get_page_type();
 
 			$attrs['data-page-type']              = $page_type;
