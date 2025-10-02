@@ -112,6 +112,49 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that permission_callback is required for ability registration.
+	 *
+	 * @group abilities-api
+	 */
+	public function test_permission_callback_is_required() {
+		$ability_id                   = 'woocommerce-test/missing-permission';
+		$this->registered_abilities[] = $ability_id;
+
+		// Expect incorrect usage notices when permission_callback is missing.
+		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::register' );
+		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::get_registered' );
+
+		// Hook ability registration without permission_callback.
+		add_action(
+			'abilities_api_init',
+			function () use ( $ability_id ) {
+				wp_register_ability(
+					$ability_id,
+					array(
+						'label'            => 'Test Missing Permission',
+						'description'      => 'Ability without permission_callback',
+						'input_schema'     => array( 'type' => 'object' ),
+						'output_schema'    => array( 'type' => 'object' ),
+						'execute_callback' => function ( $input ) {
+							return array( 'success' => true );
+						},
+						// Note: permission_callback intentionally omitted.
+					)
+				);
+			}
+		);
+
+		// Attempt to retrieve the ability - should fail or return null.
+		$ability = wp_get_ability( $ability_id );
+
+		// In trunk, abilities without permission_callback should not be registered.
+		$this->assertNull(
+			$ability,
+			'Ability without permission_callback should not be registered.'
+		);
+	}
+
+	/**
 	 * Test that we can retrieve a registered ability.
 	 *
 	 * @group abilities-api
