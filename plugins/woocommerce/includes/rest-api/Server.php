@@ -52,12 +52,6 @@ class Server {
 					$legacy_proxy->get_instance_of( $controller_class );
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
-			/**
-			 * Fires immediately after WooCommerce core routes have been registered for the given namespace.
-			 *
-			 * @since 10.3.0
-			 */
-			do_action( 'woocommerce_' . $namespace . '_rest_namespace_routes_registered' );
 		}
 	}
 
