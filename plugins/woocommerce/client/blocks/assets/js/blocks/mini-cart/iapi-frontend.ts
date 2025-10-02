@@ -14,7 +14,6 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import Dinero from 'dinero.js';
 
 /**
  * Internal dependencies
@@ -50,6 +49,12 @@ const {
 const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
+
+const scalePrice = (
+	price: number,
+	inputDecimals: number,
+	outputDecimals: number = 0
+) => price * Math.pow( 10, outputDecimals - inputDecimals );
 
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
@@ -330,22 +335,20 @@ const { state: cartItemState } = store(
 			get cartItemDiscount(): string {
 				const { prices } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+				const regularAmountSingle = scalePrice(
+					parseInt( prices.raw_prices.regular_price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
 
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+				const purchaseAmountSingle = scalePrice(
+					parseInt( prices.raw_prices.price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
 
-				const saleAmountSingle =
-					regularAmountSingle.subtract( purchaseAmountSingle );
-
-				const discountPrice = saleAmountSingle
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const discountPrice =
+					regularAmountSingle - purchaseAmountSingle;
 
 				const price = formatPriceWithCurrency(
 					discountPrice,
@@ -382,23 +385,20 @@ const { state: cartItemState } = store(
 			get lineItemDiscount(): string {
 				const { quantity, prices } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+				const regularAmountSingle = scalePrice(
+					parseInt( prices.raw_prices.regular_price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
 
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
+				const purchaseAmountSingle = scalePrice(
+					parseInt( prices.raw_prices.price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
 
-				const saleAmountLineItem = regularAmountSingle
-					.subtract( purchaseAmountSingle )
-					.multiply( quantity );
-
-				const totalLineItemDiscount = saleAmountLineItem
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const totalLineItemDiscount =
+					( regularAmountSingle - purchaseAmountSingle ) * quantity;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -434,8 +434,8 @@ const { state: cartItemState } = store(
 
 			get cartItemHasDiscount(): boolean {
 				return (
-					cartItemState.cartItem.prices.regular_price !==
-					cartItemState.cartItem.prices.price
+					cartItemState.cartItem.prices.raw_prices.regular_price >
+					cartItemState.cartItem.prices.raw_prices.price
 				);
 			},
 
@@ -519,8 +519,15 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
+				const { prices } = cartItemState.cartItem;
+				const priceWithoutDiscount = scalePrice(
+					parseInt( prices.raw_prices.regular_price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
+					priceWithoutDiscount,
 					cartItemState.currency
 				);
 			},
@@ -578,8 +585,15 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
+				const { prices } = cartItemState.cartItem;
+				const itemPrice = scalePrice(
+					parseInt( prices.raw_prices.price, 10 ),
+					prices.raw_prices.precision,
+					cartItemState.currency.minorUnit
+				);
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.price, 10 ),
+					itemPrice,
 					cartItemState.currency
 				);
 			},
