@@ -61,6 +61,9 @@ class CheckoutSessions extends ControllerTestCase {
 
 		wc_empty_cart();
 		$this->reset_customer_state();
+
+		// Clear session data that might persist from other tests.
+		WC()->session->set( 'chosen_shipping_methods', null );
 	}
 
 	/**

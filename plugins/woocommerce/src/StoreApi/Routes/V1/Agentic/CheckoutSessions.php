@@ -217,7 +217,8 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// TODO: Ensure that we have session isolation since we don't require nonces or cart-token.
+		// Ensure that we have session isolation since we don't require nonces or cart-token.
+		// @todo Implement session isolation for agentic checkout sessions.
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
