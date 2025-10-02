@@ -3,6 +3,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -25,6 +28,24 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @var string
 	 */
 	const SCHEMA_TYPE = 'agentic-checkout-session';
+
+	/**
+	 * Order controller for managing draft orders.
+	 *
+	 * @var OrderController
+	 */
+	protected $order_controller;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param SchemaController $schema_controller Schema Controller instance.
+	 * @param AbstractSchema   $schema Schema class instance.
+	 */
+	public function __construct( $schema_controller, $schema ) {
+		parent::__construct( $schema_controller, $schema );
+		$this->order_controller = new OrderController();
+	}
 
 	/**
 	 * Get the path of this REST route.
@@ -270,11 +291,20 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Calculate totals after shipping method is set.
 		WC()->cart->calculate_totals();
 
-		// Create/update draft order.
-		$draft_order = $this->create_or_update_draft_order();
+		// Create or update draft order using OrderController.
+		$draft_order_id = WC()->session->get( 'agentic_draft_order_id' );
+		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
 
-		// Store draft order ID in session.
-		WC()->session->set( 'agentic_draft_order_id', $draft_order->get_id() );
+		if ( ! $draft_order || ! $draft_order->has_status( 'checkout-draft' ) ) {
+			// Create new draft order from cart.
+			$draft_order = $this->order_controller->create_order_from_cart();
+			$draft_order->save();
+			WC()->session->set( 'agentic_draft_order_id', $draft_order->get_id() );
+		} else {
+			// Update existing draft order from cart.
+			$this->order_controller->update_order_from_cart( $draft_order );
+			$draft_order->save();
+		}
 
 		// Build response.
 		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
@@ -383,78 +413,5 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Recalculate shipping.
 		WC()->cart->calculate_shipping();
-	}
-
-	/**
-	 * Create or update draft order.
-	 *
-	 * @return \WC_Order Draft order.
-	 */
-	protected function create_or_update_draft_order() {
-		// Check if we already have a draft order in session.
-		$session_id = WC()->session->get( 'agentic_draft_order_id' );
-		$order      = $session_id ? wc_get_order( $session_id ) : null;
-
-		// Create new draft order if none exists.
-		if ( ! $order ) {
-			$order = wc_create_order(
-				[
-					'status'      => 'checkout-draft',
-					'customer_id' => WC()->customer->get_id(),
-				]
-			);
-		}
-
-		// Update order from cart.
-		$this->update_order_from_cart( $order, WC()->cart );
-
-		// Save and return.
-		$order->save();
-
-		return $order;
-	}
-
-	/**
-	 * Update order from cart data.
-	 *
-	 * @param \WC_Order $order Order object.
-	 * @param \WC_Cart  $cart  Cart object.
-	 */
-	protected function update_order_from_cart( $order, $cart ) {
-		// Remove existing items.
-		foreach ( $order->get_items() as $item_id => $item ) {
-			$order->remove_item( $item_id );
-		}
-
-		// Add cart items to order.
-		foreach ( $cart->get_cart() as $cart_item ) {
-			$product = $cart_item['data'];
-			$item    = new \WC_Order_Item_Product();
-			$item->set_props(
-				[
-					'quantity' => $cart_item['quantity'],
-					'subtotal' => $cart_item['line_subtotal'],
-					'total'    => $cart_item['line_total'],
-				]
-			);
-			$item->set_product( $product );
-			$order->add_item( $item );
-		}
-
-		// Set addresses.
-		$customer = WC()->customer;
-		$order->set_address( $customer->get_billing(), 'billing' );
-		$order->set_address( $customer->get_shipping(), 'shipping' );
-
-		// Set shipping.
-		if ( ! empty( $cart->get_shipping_total() ) ) {
-			$shipping_item = new \WC_Order_Item_Shipping();
-			$shipping_item->set_method_title( __( 'Shipping', 'woocommerce' ) );
-			$shipping_item->set_total( $cart->get_shipping_total() );
-			$order->add_item( $shipping_item );
-		}
-
-		// Calculate totals.
-		$order->calculate_totals();
 	}
 }
