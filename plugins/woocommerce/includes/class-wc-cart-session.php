@@ -289,7 +289,7 @@ final class WC_Cart_Session {
 			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
-			if ( $merge_saved_cart ) {
+			if ( $merge_saved_cart || $update_cart_session ) {
 				$this->persistent_cart_update();
 			}
 		}

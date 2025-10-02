@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't load templates with the woocommerce slug if the queried template was customized by the user

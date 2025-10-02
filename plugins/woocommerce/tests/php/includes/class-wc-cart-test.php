@@ -803,4 +803,219 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			}
 		);
 	}
+
+	/**
+	 * @testdox Test that modified products are removed from persistent cart to prevent repeated removal messages
+	 */
+	public function test_modified_product_removed_from_persistent_cart() {
+		// Create a logged-in user to enable persistent cart functionality.
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		// Initialize session for the user.
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		// Clear any existing cart and notices.
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		// Create a simple product.
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		// Add the product to the cart.
+		$cart_item_key = WC()->cart->add_to_cart( $product_id, 1 );
+		$this->assertNotFalse( $cart_item_key, 'Product should be added to cart successfully' );
+
+		// Get the cart session handler.
+		$cart_session = new WC_Cart_Session( WC()->cart );
+
+		// Save the cart to the persistent cart (this happens on shutdown normally).
+		$cart_session->persistent_cart_update();
+
+		// Verify the product is in the persistent cart.
+		$saved_cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		$this->assertIsArray( $saved_cart_meta );
+		$this->assertArrayHasKey( 'cart', $saved_cart_meta );
+		$this->assertArrayHasKey( $cart_item_key, $saved_cart_meta['cart'] );
+
+		// Get the cart data with original data hash.
+		$cart_data = WC()->session->get( 'cart' );
+
+		// Simulate product modification by manually altering the data_hash in the saved cart
+		// This simulates what happens when a product type changes (e.g., simple to variable)
+		// We'll set an incorrect data hash to trigger the mismatch.
+		$saved_cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		if ( isset( $saved_cart_meta['cart'][ $cart_item_key ] ) ) {
+			$saved_cart_meta['cart'][ $cart_item_key ]['data_hash'] = 'modified_hash_' . time();
+			update_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), $saved_cart_meta );
+		}
+
+		// Clear session cart but keep persistent cart.
+		WC()->session->set( 'cart', null );
+		WC()->cart->empty_cart( false );
+
+		// Clear notices before reloading cart.
+		wc_clear_notices();
+
+		// Reload cart from session - this should trigger the modified product removal.
+		$cart_session->get_cart_from_session();
+
+		// Check that a notice was added about the product being removed.
+		$all_notices = wc_get_notices();
+		$this->assertNotEmpty( $all_notices, 'Expected notices to be added when product is modified' );
+
+		$found_removal_notice = false;
+		foreach ( $all_notices as $type => $type_notices ) {
+			foreach ( $type_notices as $notice ) {
+				// Handle both string and array notice formats.
+				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
+				if ( strpos( $notice_text, 'has been removed from your cart because it has since been modified' ) !== false ) {
+					$found_removal_notice = true;
+					break 2;
+				}
+			}
+		}
+		$this->assertTrue( $found_removal_notice, 'Should find the product modification removal notice' );
+
+		// Verify the cart is empty.
+		$this->assertCount( 0, WC()->cart->get_cart_contents(), 'Cart should be empty after modified product removal' );
+
+		// Verify the persistent cart is also updated (no longer contains the product).
+		$saved_cart_meta_after = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		if ( is_array( $saved_cart_meta_after ) && isset( $saved_cart_meta_after['cart'] ) ) {
+			$this->assertArrayNotHasKey( $cart_item_key, $saved_cart_meta_after['cart'], 'Persistent cart should not contain the removed product' );
+			$this->assertEmpty( $saved_cart_meta_after['cart'], 'Persistent cart should be empty after product removal' );
+		}
+
+		// Clear notices again.
+		WC()->session->set( 'wc_notices', null );
+
+		// Reload cart from session again - this should NOT trigger another removal notice.
+		$cart_session->get_cart_from_session();
+
+		// Verify no new notices are added (the bug would cause repeated notices).
+		$notices_after_reload = wc_get_notices();
+		foreach ( $notices_after_reload as $type => $type_notices ) {
+			foreach ( $type_notices as $notice ) {
+				// Handle both string and array notice formats.
+				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
+				$this->assertStringNotContainsString(
+					'has been removed from your cart because it has since been modified',
+					$notice_text,
+					'Should not see removal notice on subsequent page loads'
+				);
+			}
+		}
+
+		// Clean up.
+		$product->delete( true );
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Test that unpurchasable products are removed from persistent cart
+	 */
+	public function test_unpurchasable_product_removed_from_persistent_cart() {
+		// Create a logged-in user to enable persistent cart functionality.
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		// Initialize session for the user.
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		// Clear any existing cart and notices.
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		// Create a simple product.
+		$product    = WC_Helper_Product::create_simple_product();
+		$product_id = $product->get_id();
+
+		// Add the product to the cart.
+		$cart_item_key = WC()->cart->add_to_cart( $product_id, 1 );
+		$this->assertNotFalse( $cart_item_key, 'Product should be added to cart successfully' );
+
+		// Get the cart session handler.
+		$cart_session = new WC_Cart_Session( WC()->cart );
+
+		// Save the cart to the persistent cart.
+		$cart_session->persistent_cart_update();
+
+		// Verify the product is in the persistent cart.
+		$saved_cart_meta = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		$this->assertIsArray( $saved_cart_meta );
+		$this->assertArrayHasKey( 'cart', $saved_cart_meta );
+		$this->assertArrayHasKey( $cart_item_key, $saved_cart_meta['cart'] );
+
+		// Make the product unpurchasable by removing its price (is_purchasable() returns false when price is empty).
+		$product->set_price( '' );
+		$product->set_regular_price( '' );
+		$product->save();
+
+		// Clear session cart but keep persistent cart.
+		WC()->session->set( 'cart', null );
+		WC()->cart->empty_cart( false );
+
+		// Clear notices before reloading cart.
+		WC()->session->set( 'wc_notices', null );
+
+		// Reload cart from session - this should trigger the unpurchasable product removal.
+		$cart_session->get_cart_from_session();
+
+		// Check that an error notice was added about the product being removed.
+		$notices = wc_get_notices();
+		$this->assertNotEmpty( $notices, 'Expected notices to be added when product becomes unpurchasable' );
+
+		$found_removal_notice = false;
+		foreach ( $notices as $type => $type_notices ) {
+			foreach ( $type_notices as $notice ) {
+				// Handle both string and array notice formats.
+				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
+				if ( strpos( $notice_text, 'has been removed from your cart because it can no longer be purchased' ) !== false ) {
+					$found_removal_notice = true;
+					break 2;
+				}
+			}
+		}
+		$this->assertTrue( $found_removal_notice, 'Should find the unpurchasable product removal notice' );
+
+		// Verify the cart is empty.
+		$this->assertCount( 0, WC()->cart->get_cart_contents(), 'Cart should be empty after unpurchasable product removal' );
+
+		// Verify the persistent cart is also updated.
+		$saved_cart_meta_after = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+		if ( is_array( $saved_cart_meta_after ) && isset( $saved_cart_meta_after['cart'] ) ) {
+			$this->assertArrayNotHasKey( $cart_item_key, $saved_cart_meta_after['cart'], 'Persistent cart should not contain the removed product' );
+			$this->assertEmpty( $saved_cart_meta_after['cart'], 'Persistent cart should be empty after product removal' );
+		}
+
+		// Clear notices again.
+		WC()->session->set( 'wc_notices', null );
+
+		// Reload cart from session again - this should NOT trigger another removal notice.
+		$cart_session->get_cart_from_session();
+
+		// Verify no new notices are added.
+		$notices_after_reload = wc_get_notices();
+		foreach ( $notices_after_reload as $type => $type_notices ) {
+			foreach ( $type_notices as $notice ) {
+				// Handle both string and array notice formats.
+				$notice_text = is_array( $notice ) && isset( $notice['notice'] ) ? $notice['notice'] : (string) $notice;
+				$this->assertStringNotContainsString(
+					'has been removed from your cart because it can no longer be purchased',
+					$notice_text,
+					'Should not see removal notice on subsequent page loads'
+				);
+			}
+		}
+
+		// Clean up.
+		$product->delete( true );
+		wp_delete_user( $user_id );
+	}
 }

@@ -257,14 +257,13 @@ class BlockTemplatesController {
 		foreach ( $template_files as $template_file ) {
 			// It would be custom if the template was modified in the editor, so if it's not custom we can load it from
 			// the filesystem.
-			if (
-				'custom' === $template_file->source &&
-				(
+			if ( 'custom' === $template_file->source ) {
+				if (
 					BlockTemplateUtils::PLUGIN_SLUG === $template_file->theme ||
 					BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG === $template_file->theme
-				)
-			) {
-				array_unshift( $new_templates, $template_file );
+				) {
+					array_unshift( $new_templates, $template_file );
+				}
 				continue;
 			}
 
