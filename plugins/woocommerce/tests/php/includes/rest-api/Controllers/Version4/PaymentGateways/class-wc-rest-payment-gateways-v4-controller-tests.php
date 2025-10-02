@@ -353,4 +353,44 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 
 		$this->assertEquals( 10, $gateway['order'] );
 	}
+
+	/**
+	 * Test that COD gateway multiselect options are populated when simulating settings access.
+	 */
+	public function test_get_cod_gateway_with_shipping_method_options(): void {
+		global $wp;
+
+		// Mock the global $wp variable to simulate accessing payment_gateways endpoint.
+		// Note: COD gateway checks for '/payment_gateways' (underscore) in the route.
+		if ( ! isset( $wp->query_vars ) ) {
+			$wp->query_vars = array();
+		}
+		$wp->query_vars['rest_route'] = '/wc/v4/payment_gateways';
+
+		// Set REST_REQUEST constant if not already defined.
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		// Re-initialize the COD gateway to trigger options loading.
+		$gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $gateways['cod'] ) ) {
+			$gateways['cod']->init_form_fields();
+		}
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/payment-gateways/cod' );
+		$response = $this->server->dispatch( $request );
+		$gateway  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'cod', $gateway['id'] );
+		$this->assertArrayHasKey( 'settings', $gateway );
+		$this->assertArrayHasKey( 'enable_for_methods', $gateway['settings'] );
+
+		// Verify the multiselect field has options populated.
+		$enable_for_methods = $gateway['settings']['enable_for_methods'];
+		$this->assertEquals( 'multiselect', $enable_for_methods['type'] );
+		$this->assertArrayHasKey( 'options', $enable_for_methods );
+		$this->assertNotEmpty( $enable_for_methods['options'], 'Options should be populated when is_accessing_settings() returns true' );
+	}
 }

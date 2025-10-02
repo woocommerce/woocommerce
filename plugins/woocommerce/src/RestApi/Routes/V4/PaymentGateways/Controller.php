@@ -37,7 +37,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var string
 	 */
-	protected string $post_type = 'payment_gateway';
+	protected string $post_type = 'payment_gateways';
 
 	/**
 	 * Schema class for this route.

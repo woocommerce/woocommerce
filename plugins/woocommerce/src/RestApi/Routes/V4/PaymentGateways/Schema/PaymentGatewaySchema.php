@@ -113,6 +113,12 @@ class PaymentGatewaySchema extends AbstractSchema {
 	/**
 	 * Return settings associated with this payment gateway.
 	 *
+	 * Note: Some gateways may conditionally populate the 'options' array for select/multiselect fields
+	 * based on context (e.g., only when accessing settings pages) for performance reasons.
+	 * For example, the COD gateway's `enable_for_methods` field loads shipping method options only
+	 * when `is_accessing_settings()` returns true. This means the options array may be empty when
+	 * accessed via the REST API, even though the field type is multiselect.
+	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 *
 	 * @return array
