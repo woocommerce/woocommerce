@@ -17,7 +17,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * Agentic Commerce Protocol specification.
  */
 class CheckoutSessionSchema extends AbstractSchema {
-    use DraftOrderTrait;
+	use DraftOrderTrait;
+
 	/**
 	 * The schema item name.
 	 *
