@@ -5,8 +5,6 @@ import '@testing-library/jest-dom';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
-import { readFileSync } from 'fs';
-import { join } from 'path';
 
 /**
  * Internal dependencies
@@ -30,22 +28,81 @@ import '../variation-selector/attribute-name';
 import '../variation-selector/attribute-options';
 import '../variation-description';
 
-const mockTemplatePartsHTML: Record< string, string > = {
-	simple: '',
-	external: '',
-	grouped: '',
-	variable: '',
-};
+const mockSimpleTemplatePartHTML = `<!-- wp:woocommerce/product-stock-indicator {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group"><!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"quantitySelectorStyle":"stepper"} /-->
+<!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
+<!-- /wp:group -->`;
+const mockExternalTemplatePartHTML = `<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group"><!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
+<!-- /wp:group -->`;
+const mockGroupedTemplatePartHTML = `<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-selector -->
+<div
+	class="wp-block-woocommerce-add-to-cart-with-options-grouped-product-selector"
+	role="list"
+>
+	<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item -->
+	<div
+		class="wp-block-woocommerce-add-to-cart-with-options-grouped-product-item"
+		role="listitem"
+	>
+		<!-- wp:group {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}},"layout":{"type":"grid","columnCount":3,"minimumColumnWidth":null}} -->
+		<div
+			class="wp-block-group"
+			style="margin-top: 1rem; margin-bottom: 1rem"
+		>
+			<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item-selector /-->
 
-Object.keys( mockTemplatePartsHTML ).forEach( ( key ) => {
-	mockTemplatePartsHTML[ key ] = readFileSync(
-		join(
-			__dirname,
-			`../../../../../../../templates/parts/${ key }-product-add-to-cart-with-options.html`
-		),
-		'utf-8'
-	);
-} );
+			<!-- wp:woocommerce/add-to-cart-with-options-grouped-product-item-label {"style":{"layout":{"selfStretch":"fill"},"spacing":{"margin":{"top":"0","bottom":"0"}},"typography":{"fontWeight":400}}} /-->
+
+			<!-- wp:group {"style":{"spacing":{"blockGap":"0"}},"layout":{"type":"flex","orientation":"vertical","justifyContent":"right"}} -->
+			<div class="wp-block-group">
+				<!-- wp:woocommerce/product-price {"textAlign":"right","isDescendentOfSingleProductTemplate":true,"isDescendentOfSingleProductBlock":true,"style":{"typography":{"fontWeight":400,"fontStyle":"normal"}}} /-->
+				<!-- wp:woocommerce/product-stock-indicator {"fontSize":"small"} /--></div>
+			<!-- /wp:group -->
+		</div>
+		<!-- /wp:group -->
+	</div>
+	<!-- /wp:woocommerce/add-to-cart-with-options-grouped-product-item -->
+</div>
+<!-- /wp:woocommerce/add-to-cart-with-options-grouped-product-selector -->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+<div class="wp-block-group"><!-- wp:woocommerce/product-button {"textAlign":"left"} /--></div>
+<!-- /wp:group -->`;
+const mockVariableTemplatePartHTML = `<!-- wp:woocommerce/add-to-cart-with-options-variation-selector -->
+<div
+	class="wp-block-woocommerce-add-to-cart-with-options-variation-selector"
+	role="list"
+>
+	<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
+	<div
+		class="wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute"
+		role="listitem"
+	>
+		<!-- wp:group {"style":{"spacing":{"blockGap":"0.5rem","margin":{"top":"1rem","bottom":"1rem"}}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+		<div
+			class="wp-block-group"
+			style="margin-top: 1rem; margin-bottom: 1rem"
+		>
+			<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-name /-->
+
+			<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-options /-->
+		</div>
+		<!-- /wp:group -->
+	</div>
+	<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
+</div>
+<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector -->
+<!-- wp:woocommerce/add-to-cart-with-options-variation-description {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
+<!-- wp:woocommerce/product-stock-indicator {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap"}} -->
+<div class="wp-block-group">
+	<!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"quantitySelectorStyle":"stepper"} /-->
+
+	<!-- wp:woocommerce/product-button {"textAlign":"left"} /-->
+</div>
+<!-- /wp:group -->
+`;
 
 jest.mock( '@woocommerce/settings', () => {
 	return {
@@ -78,9 +135,82 @@ jest.mock( '@woocommerce/settings', () => {
 const mockProduct = {
 	id: 82,
 	name: 'Beanie with Logo',
+	slug: 'beanie-with-logo',
+	parent: 0,
 	type: 'simple',
+	variation: '',
+	permalink: 'https://202508.local/product/beanie-with-logo/',
+	sku: 'Woo-beanie-logo',
+	short_description: '<p>This is a simple product.</p>',
+	description:
+		'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>',
+	on_sale: true,
+	prices: {
+		price: '1800',
+		regular_price: '2000',
+		sale_price: '1800',
+		price_range: null,
+		currency_code: 'EUR',
+		currency_symbol: '\u20ac',
+		currency_minor_unit: 2,
+		currency_decimal_separator: ',',
+		currency_thousand_separator: '.',
+		currency_prefix: '',
+		currency_suffix: ' \u20ac',
+	},
+	price_html:
+		'<del aria-hidden="true"><span class="woocommerce-Price-amount amount">20,00&nbsp;<span class="woocommerce-Price-currencySymbol">&euro;</span></span></del> <span class="screen-reader-text">Original price was: 20,00&nbsp;&euro;.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount">18,00&nbsp;<span class="woocommerce-Price-currencySymbol">&euro;</span></span></ins><span class="screen-reader-text">Current price is: 18,00&nbsp;&euro;.</span>',
+	average_rating: '0',
+	review_count: 0,
+	images: [
+		{
+			id: 105,
+			src: 'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1.jpg',
+			thumbnail:
+				'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-300x300.jpg',
+			srcset: 'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1.jpg 800w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-300x300.jpg 300w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-100x100.jpg 100w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-600x600.jpg 600w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-150x150.jpg 150w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-768x768.jpg 768w',
+			sizes: '(max-width: 800px) 100vw, 800px',
+			name: 'beanie-with-logo-1.jpg',
+			alt: '',
+		},
+	],
+	categories: [
+		{
+			id: 19,
+			name: 'Accessories',
+			slug: 'accessories',
+			link: 'https://202508.local/product-category/clothing/accessories/',
+		},
+	],
+	tags: [],
+	brands: [],
+	attributes: [
+		{
+			id: 1,
+			name: 'Color',
+			taxonomy: 'pa_color',
+			has_variations: false,
+			terms: [ { id: 24, name: 'Red', slug: 'red' } ],
+		},
+	],
+	variations: [],
+	grouped_products: [],
+	has_options: false,
+	is_purchasable: true,
 	is_in_stock: true,
+	is_on_backorder: false,
+	low_stock_remaining: null,
 	stock_availability: { text: '', class: 'in-stock' },
+	sold_individually: false,
+	add_to_cart: {
+		text: 'Add to cart',
+		description: 'Add to cart: &ldquo;Beanie with Logo&rdquo;',
+		url: '/wp-json/wc/store/v1/products?_locale=user&#038;add-to-cart=82',
+		single_text: 'Add to cart',
+		minimum: 1,
+		maximum: 9999,
+		multiple_of: 1,
+	},
 };
 
 // Setup MSW.
@@ -115,7 +245,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//simple-product-add-to-cart-with-options',
 				content: {
-					raw: mockTemplatePartsHTML.simple,
+					raw: mockSimpleTemplatePartHTML,
 				},
 			} );
 		}
@@ -126,7 +256,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//external-product-add-to-cart-with-options',
 				content: {
-					raw: mockTemplatePartsHTML.external,
+					raw: mockExternalTemplatePartHTML,
 				},
 			} );
 		}
@@ -137,7 +267,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//grouped-product-add-to-cart-with-options',
 				content: {
-					raw: mockTemplatePartsHTML.grouped,
+					raw: mockGroupedTemplatePartHTML,
 				},
 			} );
 		}
@@ -149,7 +279,7 @@ const handlers = [
 			return HttpResponse.json( {
 				id: 'woocommerce/woocommerce//variable-product-add-to-cart-with-options',
 				content: {
-					raw: mockTemplatePartsHTML.variable,
+					raw: mockVariableTemplatePartHTML,
 				},
 			} );
 		}
@@ -172,7 +302,7 @@ async function setup() {
 	return await initializeEditor( addToCartWithOptionsBlock );
 }
 
-const switchProductType = async ( productType: string ) => {
+async function switchProductType( productType: string ) {
 	await selectBlock( 'Block: Add to Cart + Options (Beta)' );
 
 	await act( async () => {
@@ -186,17 +316,7 @@ const switchProductType = async ( productType: string ) => {
 			screen.getByRole( 'menuitem', { name: productType } )
 		);
 	} );
-};
-
-const expectBlocksToBeInTheDocument = ( blocks: string[] ) => {
-	blocks.forEach( ( blockName: string ) => {
-		expect(
-			screen.getByRole( 'document', {
-				name: blockName,
-			} )
-		).toBeInTheDocument();
-	} );
-};
+}
 
 describe( 'Add to Cart + Options block', () => {
 	it( 'should render inner blocks', async () => {
@@ -209,51 +329,92 @@ describe( 'Add to Cart + Options block', () => {
 
 		// Simple products.
 		await waitFor( () => {
-			expectBlocksToBeInTheDocument( [
-				'Block: Product Stock Indicator',
-				'Block: Product Quantity (Beta)',
-				'Block: Add to Cart Button',
-			] );
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Stock Indicator',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Quantity (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Add to Cart Button',
+				} )
+			).toBeInTheDocument();
 		} );
 
 		// External products.
 		await switchProductType( 'External/Affiliate product' );
 
 		await waitFor( () => {
-			expectBlocksToBeInTheDocument( [ 'Block: Add to Cart Button' ] );
-
 			expect(
 				screen.queryByRole( 'document', {
 					name: 'Block: Product Stock Indicator',
 				} )
 			).not.toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Add to Cart Button',
+				} )
+			).toBeInTheDocument();
 		} );
 
 		// Grouped products.
 		await switchProductType( 'Grouped product' );
 
 		await waitFor( () => {
-			expectBlocksToBeInTheDocument( [
-				'Block: Grouped Product Selector (Beta)',
-				'Block: Grouped Product: Template (Beta)',
-				'Block: Grouped Product: Item Selector (Beta)',
-				'Block: Grouped Product: Item Label (Beta)',
-				'Block: Product Price',
-				'Block: Product Stock Indicator',
-			] );
+			expect(
+				screen.queryByRole( 'document', {
+					name: 'Block: Grouped Product Selector (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Grouped Product: Template (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Grouped Product: Item Selector (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Grouped Product: Item Label (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Price',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Stock Indicator',
+				} )
+			).toBeInTheDocument();
 		} );
 
 		// Variable products.
 		await switchProductType( 'Variable product' );
 
 		await waitFor( () => {
-			expectBlocksToBeInTheDocument( [
-				'Block: Variation Selector (Beta)',
-				'Block: Variation Description (Beta)',
-				'Block: Product Stock Indicator',
-				'Block: Product Quantity (Beta)',
-				'Block: Add to Cart Button',
-			] );
+			expect(
+				screen.queryByRole( 'document', {
+					name: 'Block: Variation Selector (Beta)',
+				} )
+			).toBeInTheDocument();
 
 			expect(
 				screen.getByRole( 'list', {
@@ -275,6 +436,30 @@ describe( 'Add to Cart + Options block', () => {
 						name: 'Block: Variation Selector: Attribute Options (Beta)',
 					} )
 					.at( 0 )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Variation Description (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Stock Indicator',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Product Quantity (Beta)',
+				} )
+			).toBeInTheDocument();
+
+			expect(
+				screen.getByRole( 'document', {
+					name: 'Block: Add to Cart Button',
+				} )
 			).toBeInTheDocument();
 		} );
 	} );
