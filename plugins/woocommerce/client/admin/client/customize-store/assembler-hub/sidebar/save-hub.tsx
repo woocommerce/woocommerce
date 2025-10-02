@@ -9,7 +9,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { useQuery } from '@woocommerce/navigation';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useSelect, resolveSelect } from '@wordpress/data';
 import {
 	__experimentalHStack as HStack,
 	Button,
@@ -110,6 +110,27 @@ export const SaveHub = () => {
 					editEntityRecord( kind, name, key, {
 						status: 'publish',
 					} );
+				}
+
+				// In Gutenberg 21.8, there's a Template Activation mechanism.
+				// It doesn't allow us to use saveEditedEntityRecord to save templates.
+				// So we're using a "workaround" from Gutenberg to do so.
+				if ( kind === 'postType' && name === 'wp_template' ) {
+					const activeTemplates = {
+						// @ts-expect-error No types for this exist yet.
+						...( ( await resolveSelect( coreStore ).getEntityRecord(
+							'root',
+							'site'
+							// @ts-expect-error No types for this exist yet.
+						).active_templates ) ?? {} ),
+					};
+
+					// @ts-expect-error No types for this exist yet.
+					await editEntityRecord( 'root', 'site', undefined, {
+						active_templates: { ...activeTemplates, home: key },
+					} );
+					// @ts-expect-error No types for this exist yet.
+					await saveEditedEntityRecord( 'root', 'site' );
 				}
 
 				await saveEditedEntityRecord( kind, name, key, undefined );
