@@ -30,27 +30,27 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 }
 
 /**
- * REST API PayPal Standard controller class.
+ * REST API PayPal Standard shipping controller class.
  *
  * @package Automattic\WooCommerce\RestApi
  * @extends AbstractController
  */
-class StandardController extends AbstractController {
+class Controller extends AbstractController {
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'paypal-standard';
+	protected $rest_base = 'paypal';
 
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param StandardSchema $standard_schema Standard schema class.
+	 * @param PaypalShippingSchema $shipping_schema PayPal shipping schema class.
 	 * @internal
 	 */
-	final public function init( StandardSchema $standard_schema ) {
-		$this->item_schema = $standard_schema;
+	final public function init( PaypalShippingSchema $shipping_schema ) {
+		$this->item_schema = $shipping_schema;
 	}
 
 	/**
@@ -69,12 +69,15 @@ class StandardController extends AbstractController {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/update-shipping',
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'process_shipping_callback' ),
-				'permission_callback' => '__return_true',
-			)
+				'schema' => array( $this, 'get_public_item_schema' ),
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => '__return_true',
+				),
+			),
 		);
 	}
 
@@ -85,7 +88,7 @@ class StandardController extends AbstractController {
 	 * @param \WP_REST_Request $request The request object.
 	 * @return \WP_REST_Response The response object.
 	 */
-	public function process_shipping_callback( \WP_REST_Request $request ) {
+	public function update_item( \WP_REST_Request $request ) {
 		$paypal_order_id  = $request->get_param( 'id' );
 		$shipping_address = $request->get_param( 'shipping_address' );
 		$shipping_option  = $request->get_param( 'shipping_option' );
@@ -168,10 +171,10 @@ class StandardController extends AbstractController {
 		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		$paypal_request = new \WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
+		$paypal_request = new \WC_Gateway_Paypal_Request( \WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
-		$response = array(
+		$shipping_data = array(
 			'id'             => $paypal_order_id,
 			'purchase_units' => array(
 				array(
@@ -182,18 +185,20 @@ class StandardController extends AbstractController {
 			),
 		);
 
-		return new \WP_REST_Response( $response, 200 );
+		$request->set_param( 'context', 'edit' );
+
+		return $this->prepare_item_for_response( $shipping_data, $request );
 	}
 
 	/**
 	 * Prepare a single standard object for response.
 	 *
-	 * @param WC_Shipping_Zone $zone Shipping zone object.
-	 * @param WP_REST_Request  $request Request object.
+	 * @param array $shipping_data PayPal shipping data.
+	 * @param \WP_REST_Request  $request Request object.
 	 * @return array
 	 */
-	protected function get_item_response( $zone, WP_REST_Request $request ): array {
-		return $this->item_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
+	protected function get_item_response( $shipping_data, \WP_REST_Request $request ): array {
+		return $this->item_schema->get_item_response( $shipping_data, $request, $this->get_fields_for_response( $request ) );
 	}
 
 	/**
