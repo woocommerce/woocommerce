@@ -65,11 +65,7 @@ class Init {
 		}
 
 		$rest_api_util = wc_get_container()->get( RestApiUtil::class );
-		if ( is_callable( array( $rest_api_util, 'lazy_load_namespace' ) ) ) {
-			$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
-		} else {
-			$this->rest_api_init_wc_analytics();
-		}
+		$rest_api_util->lazy_load_namespace( 'wc-analytics', array( $this, 'rest_api_init_wc_analytics' ) );
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
 			$controller        = 'Automattic\WooCommerce\Admin\API\LaunchYourStore';
@@ -125,13 +121,6 @@ class Init {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
 		}
-
-		/**
-		 * Fires immediately after the WooCommerce core `wc-admin` routes have been registered.
-		 *
-		 * @since 10.3.0
-		 */
-		do_action( 'woocommerce_wc-admin_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
 	}
 
 	/**
@@ -215,7 +204,7 @@ class Init {
 		 *
 		 * @since 10.3.0
 		 */
-		do_action( 'woocommerce_wc-analytics_rest_namespace_routes_registered' ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores
+		do_action( 'woocommerce_wc_analytics_rest_namespace_routes_registered' );
 	}
 
 	/**

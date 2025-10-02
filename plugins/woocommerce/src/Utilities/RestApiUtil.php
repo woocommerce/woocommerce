@@ -62,9 +62,9 @@ class RestApiUtil {
 	}
 
 	/**
-	 * This is the internal function that implements the logic of wc_rest_lazy_load_namespace(). Its interface
+	 * This is the internal function that implements the logic of self::lazy_load_namespace(). Its interface
 	 * and behavior is not guaranteed.  It solely exists so that $callback_filter_id does not need to be part of the
-	 * public interface to `wc_rest_lazy_load_namespace()`. Do not call it directly.
+	 * public interface to `self::lazy_load_namespace()`. Do not call it directly.
 	 *
 	 * @param string   $route_namespace    The namespace to check.
 	 * @param callable $callback           The callback to execute if the namespace should be loaded.
