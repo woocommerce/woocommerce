@@ -229,7 +229,7 @@ async function setup() {
 	return await initializeEditor( addToCartWithOptionsBlock );
 }
 
-const switchProductType = async ( productType: string ) => {
+async function switchProductType( productType: string ) {
 	await selectBlock( 'Block: Add to Cart + Options (Beta)' );
 
 	await act( async () => {
@@ -243,7 +243,7 @@ const switchProductType = async ( productType: string ) => {
 			screen.getByRole( 'menuitem', { name: productType } )
 		);
 	} );
-};
+}
 
 describe( 'Add to Cart + Options block', () => {
 	it( 'should render inner blocks', async () => {
