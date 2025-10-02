@@ -11,7 +11,7 @@ import {
 	useViewportMatch,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import { useState, useContext } from '@wordpress/element';
+import { useState, useContext, useEffect } from '@wordpress/element';
 import { __unstableMotion as motion } from '@wordpress/components';
 import {
 	// @ts-expect-error No types for this exist yet.
@@ -28,8 +28,8 @@ import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
 // @ts-expect-error No types for this exist yet.
 import { NavigableRegion } from '@wordpress/interface';
 import { EntityProvider } from '@wordpress/core-data';
-// @ts-expect-error No types for this exist yet.
-import useEditedEntityRecord from '@wordpress/edit-site/build-module/components/use-edited-entity-record';
+import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -50,6 +50,28 @@ import './gutenberg-styles/layout.scss';
 const { useGlobalStyle } = unlock( blockEditorPrivateApis );
 
 const ANIMATION_DURATION = 0.5;
+
+// useEditedEntityRecord hook that we used to use to get the home template does not
+// return the template anymore. So we are using this function to get the home template.
+// It's not ideal but there's no better way to do this in universal way.
+const getHomeTemplate = async () => {
+	let fetchedTemplate;
+	try {
+		// This is NOT calling a REST endpoint but rather ends up with a response from
+		// an Ajax function which has a different shape from a WP_REST_Response.
+		fetchedTemplate = await apiFetch( {
+			url: addQueryArgs( '/', {
+				'_wp-find-template': true,
+			} ),
+			// @ts-expect-error we won't type it as it most likely will be removed.
+		} ).then( ( { data } ) => data );
+	} catch ( e ) {
+		// For non-FSE themes, it is possible that this request returns an error.
+		return null;
+	}
+
+	return fetchedTemplate;
+};
 
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
@@ -85,9 +107,23 @@ export const Layout = () => {
 		useState( false );
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
+	const [ templateId, setTemplateId ] = useState< string | undefined >(
+		undefined
+	);
+	const [ templateType, setTemplateType ] = useState< string | undefined >(
+		undefined
+	);
 
-	const { record: template } = useEditedEntityRecord();
-	const { id: templateId, type: templateType } = template;
+	useEffect( () => {
+		getHomeTemplate().then( ( template ) => {
+			if ( template ) {
+				// @ts-expect-error we won't type it as it most likely will be removed.
+				setTemplateId( template?.id );
+				// @ts-expect-error we won't type it as it most likely will be removed.
+				setTemplateType( template?.type );
+			}
+		} );
+	}, [] );
 
 	const editor = <Editor isLoading={ isEditorLoading } />;
 
