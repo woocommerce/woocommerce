@@ -180,7 +180,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								'input'   => $input,
 							);
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -236,7 +236,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								'processed_value' => 'Processed: ' . ( $input['input_value'] ?? 'empty' ),
 							);
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -299,7 +299,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -315,7 +315,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -392,7 +392,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								'input_echo' => $input,
 							);
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -452,7 +452,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
@@ -468,7 +468,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
-						'permission_callback' => function ( $input ) {
+						'permission_callback' => function () {
 							return true;
 						},
 					)
