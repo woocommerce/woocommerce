@@ -59,11 +59,29 @@ class CheckoutSessions extends ControllerTestCase {
 			),
 		);
 
+		// DEBUG: State before cleanup
+		error_log( '=== DEBUG: setUp before cleanup ===' );
+		error_log( 'Cart item count: ' . ( WC()->cart ? WC()->cart->get_cart_contents_count() : 'cart not initialized' ) );
+		error_log( 'Session exists: ' . ( WC()->session ? 'yes' : 'no' ) );
+		if ( WC()->session ) {
+			error_log( 'Chosen shipping methods: ' . print_r( WC()->session->get( 'chosen_shipping_methods' ), true ) );
+			error_log( 'Draft order: ' . WC()->session->get( 'store_api_draft_order' ) );
+		}
+
 		wc_empty_cart();
 		$this->reset_customer_state();
 
-		// Clear session data that might persist from other tests.
-		WC()->session->set( 'chosen_shipping_methods', null );
+		// Clear session data but keep session alive
+		if ( WC()->session ) {
+			WC()->session->set( 'chosen_shipping_methods', array() );
+			WC()->session->set( 'store_api_draft_order', 0 );
+		}
+
+		// DEBUG: State after cleanup
+		error_log( '=== DEBUG: setUp after cleanup ===' );
+		error_log( 'Cart item count: ' . WC()->cart->get_cart_contents_count() );
+		error_log( 'Chosen shipping methods: ' . print_r( WC()->session->get( 'chosen_shipping_methods' ), true ) );
+		error_log( 'Customer shipping address_1: ' . WC()->customer->get_shipping_address_1() );
 	}
 
 	/**
@@ -97,12 +115,21 @@ class CheckoutSessions extends ControllerTestCase {
 		wc()->customer->set_shipping_postcode( '94102' );
 		wc()->customer->set_billing_city( 'San Francisco' );
 		wc()->customer->set_shipping_city( 'San Francisco' );
+		wc()->customer->save();
 	}
 
 	/**
 	 * Test creating a checkout session with items only.
 	 */
 	public function test_create_checkout_session_with_items() {
+		// DEBUG: Check state before test
+		error_log( '=== DEBUG: test_create_checkout_session_with_items START ===' );
+		error_log( 'Cart needs_shipping: ' . ( WC()->cart->needs_shipping() ? 'true' : 'false' ) );
+		error_log( 'Shipping address_1: ' . WC()->customer->get_shipping_address_1() );
+		error_log( 'Chosen shipping methods: ' . print_r( WC()->session->get( 'chosen_shipping_methods' ), true ) );
+		error_log( 'Cart item count: ' . WC()->cart->get_cart_contents_count() );
+		error_log( 'Session draft order: ' . WC()->session->get( 'store_api_draft_order' ) );
+
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -120,6 +147,14 @@ class CheckoutSessions extends ControllerTestCase {
 
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
+
+		// DEBUG: Check state after request
+		error_log( '=== DEBUG: After request ===' );
+		error_log( 'Response status: ' . $data['status'] );
+		error_log( 'Cart needs_shipping: ' . ( WC()->cart->needs_shipping() ? 'true' : 'false' ) );
+		error_log( 'Shipping address_1: ' . WC()->customer->get_shipping_address_1() );
+		error_log( 'Chosen shipping methods: ' . print_r( WC()->session->get( 'chosen_shipping_methods' ), true ) );
+		error_log( '=== DEBUG: test_create_checkout_session_with_items END ===' );
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'id', $data );
