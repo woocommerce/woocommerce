@@ -69,6 +69,15 @@ class CheckoutSessions extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+
+		// Clear session data.
+		WC()->session->set( 'agentic_draft_order_id', null );
+		WC()->session->set( 'chosen_shipping_methods', null );
+
+		// Clear customer addresses.
+		WC()->customer->set_shipping_address_1( '' );
+		WC()->customer->set_billing_address_1( '' );
+		WC()->customer->save();
 	}
 
 	/**
