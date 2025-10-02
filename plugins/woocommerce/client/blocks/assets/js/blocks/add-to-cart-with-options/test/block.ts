@@ -135,82 +135,9 @@ jest.mock( '@woocommerce/settings', () => {
 const mockProduct = {
 	id: 82,
 	name: 'Beanie with Logo',
-	slug: 'beanie-with-logo',
-	parent: 0,
 	type: 'simple',
-	variation: '',
-	permalink: 'https://202508.local/product/beanie-with-logo/',
-	sku: 'Woo-beanie-logo',
-	short_description: '<p>This is a simple product.</p>',
-	description:
-		'<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>',
-	on_sale: true,
-	prices: {
-		price: '1800',
-		regular_price: '2000',
-		sale_price: '1800',
-		price_range: null,
-		currency_code: 'EUR',
-		currency_symbol: '\u20ac',
-		currency_minor_unit: 2,
-		currency_decimal_separator: ',',
-		currency_thousand_separator: '.',
-		currency_prefix: '',
-		currency_suffix: ' \u20ac',
-	},
-	price_html:
-		'<del aria-hidden="true"><span class="woocommerce-Price-amount amount">20,00&nbsp;<span class="woocommerce-Price-currencySymbol">&euro;</span></span></del> <span class="screen-reader-text">Original price was: 20,00&nbsp;&euro;.</span><ins aria-hidden="true"><span class="woocommerce-Price-amount amount">18,00&nbsp;<span class="woocommerce-Price-currencySymbol">&euro;</span></span></ins><span class="screen-reader-text">Current price is: 18,00&nbsp;&euro;.</span>',
-	average_rating: '0',
-	review_count: 0,
-	images: [
-		{
-			id: 105,
-			src: 'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1.jpg',
-			thumbnail:
-				'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-300x300.jpg',
-			srcset: 'https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1.jpg 800w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-300x300.jpg 300w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-100x100.jpg 100w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-600x600.jpg 600w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-150x150.jpg 150w, https://202508.local/wp-content/uploads/2025/09/beanie-with-logo-1-768x768.jpg 768w',
-			sizes: '(max-width: 800px) 100vw, 800px',
-			name: 'beanie-with-logo-1.jpg',
-			alt: '',
-		},
-	],
-	categories: [
-		{
-			id: 19,
-			name: 'Accessories',
-			slug: 'accessories',
-			link: 'https://202508.local/product-category/clothing/accessories/',
-		},
-	],
-	tags: [],
-	brands: [],
-	attributes: [
-		{
-			id: 1,
-			name: 'Color',
-			taxonomy: 'pa_color',
-			has_variations: false,
-			terms: [ { id: 24, name: 'Red', slug: 'red' } ],
-		},
-	],
-	variations: [],
-	grouped_products: [],
-	has_options: false,
-	is_purchasable: true,
 	is_in_stock: true,
-	is_on_backorder: false,
-	low_stock_remaining: null,
 	stock_availability: { text: '', class: 'in-stock' },
-	sold_individually: false,
-	add_to_cart: {
-		text: 'Add to cart',
-		description: 'Add to cart: &ldquo;Beanie with Logo&rdquo;',
-		url: '/wp-json/wc/store/v1/products?_locale=user&#038;add-to-cart=82',
-		single_text: 'Add to cart',
-		minimum: 1,
-		maximum: 9999,
-		multiple_of: 1,
-	},
 };
 
 // Setup MSW.
