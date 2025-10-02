@@ -23,7 +23,8 @@
 				".",
 				"https://downloads.wordpress.org/plugin/akismet.zip",
 				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
+				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip",
+				"https://github.com/WordPress/gutenberg/releases/download/v21.8.0-rc.1/gutenberg.zip"
 			],
 			"themes": [],
 			"config": {
