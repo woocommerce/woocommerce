@@ -84,6 +84,8 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Resets customer state and remove any existing data from previous tests.
 	 */
 	private function reset_customer_state() {
+		wc()->customer->set_shipping_address_1( '' );
+		wc()->customer->set_billing_address_1( '' );
 		wc()->customer->set_billing_country( 'US' );
 		wc()->customer->set_shipping_country( 'US' );
 		wc()->customer->set_billing_state( 'CA' );
