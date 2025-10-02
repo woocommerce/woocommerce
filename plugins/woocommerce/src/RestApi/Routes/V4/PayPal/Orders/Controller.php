@@ -200,8 +200,8 @@ class Controller extends AbstractController {
 	public function cancel_order( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		$order_id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
-		$paypal_order_id = isset( $data['paypal_order_id'] ) ? wc_clean( $data['paypal_order_id'] ) : '';
+		$paypal_order_id = isset( $request['id'] ) ? wc_clean( $request['id'] ) : '';
+		$order_id        = isset( $data['order_id'] ) ? absint( $data['order_id'] ) : 0;
 		if ( ! $order_id || '' === $paypal_order_id ) {
 			return new \WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
 		}
@@ -248,7 +248,7 @@ class Controller extends AbstractController {
 	 * @param \WP_REST_Request  $request Request object.
 	 * @return array
 	 */
-	protected function get_item_response( array $order_data, \WP_REST_Request $request ): array {
+	protected function get_item_response( $order_data, \WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $order_data, $request, $this->get_fields_for_response( $request ) );
 	}
 }

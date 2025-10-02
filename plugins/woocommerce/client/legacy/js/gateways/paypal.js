@@ -162,12 +162,12 @@ jQuery(function ($) {
 				try {
 					await window.wp.apiFetch( {
 						method: 'PATCH',
-						path: '/wc/v4/paypal/orders/' + orderId,
+						path: '/wc/v4/paypal/orders/' + data.orderID,
 						headers: {
 							Nonce: paypal_standard.cancel_order_nonce,
 						},
 						data: {
-							paypal_order_id: data.orderID,
+							order_id: orderId,
 						},
 					} );
 
