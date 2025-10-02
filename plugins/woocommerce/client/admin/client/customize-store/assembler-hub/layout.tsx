@@ -167,8 +167,8 @@ export const Layout = () => {
 				<EntityProvider kind="root" type="site">
 					<EntityProvider
 						kind="postType"
-						type={ templateType }
-						id={ templateId }
+						type={ templateType || '' }
+						id={ templateId || 0 }
 					>
 						<div
 							className={ clsx( 'woocommerce-edit-site-layout' ) }
