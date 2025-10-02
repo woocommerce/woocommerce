@@ -606,10 +606,16 @@ class PaymentsProviders {
 			}
 
 			// If WooPayments or Stripe is active, we don't suggest other BNPLs.
+			// Note: Affirm is available in the UK even with WooPayments or Stripe active
+			// because Stripe does not support it there, yet.
 			if ( ExtensionSuggestions::TYPE_BNPL === $extension['_type'] &&
 				(
 					in_array( ExtensionSuggestions::STRIPE, $active_extensions, true ) ||
 					in_array( ExtensionSuggestions::WOOPAYMENTS, $active_extensions, true )
+				) &&
+				! (
+					ExtensionSuggestions::AFFIRM === $extension['id'] &&
+					'GB' === $location
 				)
 			) {
 				continue;
