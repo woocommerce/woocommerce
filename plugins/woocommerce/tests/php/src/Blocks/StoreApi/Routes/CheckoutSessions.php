@@ -25,6 +25,17 @@ class CheckoutSessions extends ControllerTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
+		// Reset customer and cart FIRST before anything else.
+		wc_empty_cart();
+		$this->reset_customer_state();
+
+		// Clear all session data early to ensure clean state.
+		if ( WC()->session ) {
+			WC()->session->set( 'chosen_shipping_methods', array() );
+			WC()->session->set( 'store_api_draft_order', 0 );
+			WC()->session->set( 'agentic_draft_order_id', null );
+		}
+
 		// Enable the agentic_checkout feature.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
@@ -58,15 +69,6 @@ class CheckoutSessions extends ControllerTestCase {
 				)
 			),
 		);
-
-		wc_empty_cart();
-		$this->reset_customer_state();
-
-		// Clear session data that might persist from other tests.
-		if ( WC()->session ) {
-			WC()->session->set( 'chosen_shipping_methods', array() );
-			WC()->session->set( 'store_api_draft_order', 0 );
-		}
 	}
 
 	/**
@@ -80,27 +82,42 @@ class CheckoutSessions extends ControllerTestCase {
 		WC()->session->set( 'agentic_draft_order_id', null );
 		WC()->session->set( 'chosen_shipping_methods', null );
 
-		// Clear customer addresses.
-		WC()->customer->set_shipping_address_1( '' );
-		WC()->customer->set_billing_address_1( '' );
-		WC()->customer->save();
+		// Reset customer state to clean state.
+		$this->reset_customer_state();
 	}
 
 	/**
 	 * Resets customer state and remove any existing data from previous tests.
 	 */
 	private function reset_customer_state() {
-		wc()->customer->set_shipping_address_1( '' );
-		wc()->customer->set_billing_address_1( '' );
-		wc()->customer->set_billing_country( 'US' );
-		wc()->customer->set_shipping_country( 'US' );
-		wc()->customer->set_billing_state( 'CA' );
-		wc()->customer->set_shipping_state( 'CA' );
-		wc()->customer->set_billing_postcode( '94102' );
-		wc()->customer->set_shipping_postcode( '94102' );
-		wc()->customer->set_billing_city( 'San Francisco' );
-		wc()->customer->set_shipping_city( 'San Francisco' );
-		wc()->customer->save();
+		// Clear all customer data fields.
+		$customer = WC()->customer;
+
+		// Clear billing fields.
+		$customer->set_billing_first_name( '' );
+		$customer->set_billing_last_name( '' );
+		$customer->set_billing_company( '' );
+		$customer->set_billing_address_1( '' );
+		$customer->set_billing_address_2( '' );
+		$customer->set_billing_city( '' );
+		$customer->set_billing_state( '' );
+		$customer->set_billing_postcode( '' );
+		$customer->set_billing_country( '' );
+		$customer->set_billing_email( '' );
+		$customer->set_billing_phone( '' );
+
+		// Clear shipping fields.
+		$customer->set_shipping_first_name( '' );
+		$customer->set_shipping_last_name( '' );
+		$customer->set_shipping_company( '' );
+		$customer->set_shipping_address_1( '' );
+		$customer->set_shipping_address_2( '' );
+		$customer->set_shipping_city( '' );
+		$customer->set_shipping_state( '' );
+		$customer->set_shipping_postcode( '' );
+		$customer->set_shipping_country( '' );
+
+		$customer->save();
 	}
 
 	/**
