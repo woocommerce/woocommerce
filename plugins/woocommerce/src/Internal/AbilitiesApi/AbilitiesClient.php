@@ -26,6 +26,13 @@ class AbilitiesClient {
 	private static bool $enabled = false;
 
 	/**
+	 * Whether debug mode is enabled.
+	 *
+	 * @var bool
+	 */
+	private static bool $debug = false;
+
+	/**
 	 * Enable the WordPress Abilities API client for admin pages.
 	 *
 	 * This is the main method external plugins should use to enable
@@ -40,57 +47,32 @@ class AbilitiesClient {
 			return true;
 		}
 
-		// Check if abilities API is available.
-		if ( ! function_exists( 'wp_abilities_register_client_assets' ) ) {
-			return false;
-		}
+		self::$debug = $with_debug;
 
-		// Hook into admin_enqueue_scripts to register and enqueue when needed.
-		add_action(
-			'admin_enqueue_scripts',
-			function () use ( $with_debug ) {
-				self::enqueue_for_admin( $with_debug );
-			}
-		);
+		// Hook into admin_enqueue_scripts to enqueue when needed.
+		add_action( 'admin_enqueue_scripts', array( __CLASS__, 'enqueue_for_admin' ) );
 
 		self::$enabled = true;
 		return true;
 	}
 
 	/**
-	 * Check if the abilities API client is available.
-	 *
-	 * @return bool True if client is available, false otherwise.
+	 * Internal method to handle script enqueueing.
 	 */
-	public static function is_available(): bool {
-		return function_exists( 'wp_abilities_register_client_assets' );
-	}
-
-	/**
-	 * Internal method to handle script registration and enqueueing.
-	 *
-	 * @param bool $with_debug Whether to add debug logging.
-	 */
-	private static function enqueue_for_admin( bool $with_debug ): void {
+	public static function enqueue_for_admin(): void {
 		// Only enqueue on admin pages.
 		if ( ! is_admin() ) {
 			return;
 		}
 
-		// Register the client assets.
-		wp_abilities_register_client_assets();
+		// Enqueue the script if it's registered.
+		if ( wp_script_is( 'wp-abilities', 'registered' ) ) {
+			wp_enqueue_script( 'wp-abilities' );
 
-		// Check if registration was successful.
-		if ( ! wp_script_is( 'wp-abilities', 'registered' ) ) {
-			return;
-		}
-
-		// Enqueue the script.
-		wp_enqueue_script( 'wp-abilities' );
-
-		// Add debug script if requested.
-		if ( $with_debug ) {
-			self::add_debug_logging();
+			// Add debug script if requested.
+			if ( self::$debug ) {
+				self::add_debug_logging();
+			}
 		}
 	}
 
@@ -98,20 +80,16 @@ class AbilitiesClient {
 	 * Add debug console logging.
 	 */
 	private static function add_debug_logging(): void {
-		if ( ! wp_script_is( 'wp-abilities', 'enqueued' ) ) {
-			return;
-		}
-
 		$debug_script = "
 		if ( typeof wp !== 'undefined' && wp.abilities ) {
-			console.log('WC Abilities Client (Namespaced): API loaded successfully', wp.abilities);
-			wp.abilities.listAbilities().then(function(abilities) {
-				console.log('WC Abilities Client (Namespaced): Available abilities:', abilities);
+			console.log('WC Abilities Client: API loaded successfully', wp.abilities);
+			wp.abilities.getAbilities().then(function(abilities) {
+				console.log('WC Abilities Client: Available abilities:', abilities);
 			}).catch(function(error) {
-				console.error('WC Abilities Client (Namespaced): Failed to load abilities:', error);
+				console.error('WC Abilities Client: Failed to load abilities:', error);
 			});
 		} else {
-			console.warn('WC Abilities Client (Namespaced): API not available');
+			console.warn('WC Abilities Client: API not available');
 		}
 		";
 
