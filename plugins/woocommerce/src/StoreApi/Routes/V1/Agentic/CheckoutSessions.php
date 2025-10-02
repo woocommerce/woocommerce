@@ -221,7 +221,46 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
-		foreach ( $items as $item ) {
+
+		// Validate items is an array.
+		if ( ! is_array( $items ) ) {
+			return new \WP_REST_Response(
+				[
+					'type'    => 'invalid_request',
+					'code'    => 'invalid_items',
+					'message' => __( 'Items must be an array.', 'woocommerce' ),
+					'param'   => '$.items',
+				],
+				400
+			);
+		}
+
+		foreach ( $items as $index => $item ) {
+			// Validate item structure.
+			if ( ! isset( $item['id'] ) || ! is_numeric( $item['id'] ) ) {
+				return new \WP_REST_Response(
+					[
+						'type'    => 'invalid_request',
+						'code'    => 'invalid_product_id',
+						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
+						'param'   => '$.items[' . $index . '].id',
+					],
+					400
+				);
+			}
+
+			if ( ! isset( $item['quantity'] ) || ! is_numeric( $item['quantity'] ) || $item['quantity'] <= 0 ) {
+				return new \WP_REST_Response(
+					[
+						'type'    => 'invalid_request',
+						'code'    => 'invalid_quantity',
+						'message' => __( 'Quantity must be a positive number.', 'woocommerce' ),
+						'param'   => '$.items[' . $index . '].quantity',
+					],
+					400
+				);
+			}
+
 			$product_id = (int) $item['id'];
 			$quantity   = (int) $item['quantity'];
 
@@ -237,7 +276,24 @@ class CheckoutSessions extends AbstractCartRoute {
 							__( 'Product with ID %s not found.', 'woocommerce' ),
 							$product_id
 						),
-						'param'   => '$.items[' . array_search( $item, $items, true ) . '].id',
+						'param'   => '$.items[' . $index . '].id',
+					],
+					400
+				);
+			}
+
+			// Check if product is purchasable.
+			if ( ! $product->is_purchasable() ) {
+				return new \WP_REST_Response(
+					[
+						'type'    => 'invalid_request',
+						'code'    => 'product_not_purchasable',
+						'message' => sprintf(
+							/* translators: %s: product name */
+							__( 'Product "%s" is not available for purchase.', 'woocommerce' ),
+							$product->get_name()
+						),
+						'param'   => '$.items[' . $index . '].id',
 					],
 					400
 				);
@@ -254,14 +310,30 @@ class CheckoutSessions extends AbstractCartRoute {
 							__( 'Product "%s" is out of stock.', 'woocommerce' ),
 							$product->get_name()
 						),
-						'param'   => '$.items[' . array_search( $item, $items, true ) . ']',
+						'param'   => '$.items[' . $index . ']',
 					],
 					400
 				);
 			}
 
 			// Add to cart.
-			WC()->cart->add_to_cart( $product_id, $quantity );
+			$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity );
+			if ( false === $cart_item_key ) {
+				return new \WP_REST_Response(
+					[
+						'type'    => 'invalid_request',
+						'code'    => 'add_to_cart_failed',
+						'message' => sprintf(
+							/* translators: 1: product ID, 2: quantity */
+							__( 'Failed to add product (ID: %1$s, quantity: %2$d) to cart.', 'woocommerce' ),
+							$product_id,
+							$quantity
+						),
+						'param'   => '$.items[' . $index . ']',
+					],
+					400
+				);
+			}
 		}
 
 		// Set buyer information.
