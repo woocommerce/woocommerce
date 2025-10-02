@@ -876,35 +876,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order->set_date_created( $order_time++ );
 			$order->set_status( OrderStatus::COMPLETED );
 
-			error_log( "=== ORDER $order_number BEFORE COUPONS ===" );
-			error_log( "Order subtotal: " . $order->get_subtotal() );
-			error_log( "Order total: " . $order->get_total() );
-			error_log( "Order shipping: " . $order->get_shipping_total() );
-
-			$order_coupons_applied = 0;
-			foreach ( $coupons as $amount => $coupon ) {
-				if ( $amount >= $order_number ) {
-					error_log( "Applying coupon {$coupon->get_code()} with amount $amount" );
-					$order->apply_coupon( $coupon );
-					++$applied_coupons;
-					$applied_amount += $amount;
-					$order_coupons_applied += $amount;
-				}
-			}
-
-			$order->calculate_totals();
-			$orders_total += $order->get_total();
-
-			error_log( "=== ORDER $order_number AFTER COUPONS ===" );
-			error_log( "Coupons applied to this order: $order_coupons_applied" );
-			error_log( "Order subtotal: " . $order->get_subtotal() );
-			error_log( "Order discount total: " . $order->get_discount_total() );
-			error_log( "Order total: " . $order->get_total() );
-
-			// Log each coupon item
-			foreach ( $order->get_items( 'coupon' ) as $coupon_item ) {
-				error_log( "Coupon item: " . $coupon_item->get_code() . " discount=" . $coupon_item->get_discount() );
-			}
 
 			$order->save();
 
@@ -913,7 +884,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
-		error_log( "=== ANALYTICS SYNC COMPLETE ===" );
 
 		// Check what was written to the analytics tables
 		global $wpdb;
@@ -921,15 +891,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			"SELECT order_id, coupon_id, discount_amount FROM {$wpdb->prefix}wc_order_coupon_lookup ORDER BY order_id, coupon_id",
 			ARRAY_A
 		);
-		error_log( "Analytics coupon lookup table:" );
-		foreach ( $analytics_coupons as $row ) {
-			error_log( "  Order {$row['order_id']}: Coupon {$row['coupon_id']} = {$row['discount_amount']}" );
 		}
 
 		$analytics_total_coupons = $wpdb->get_var(
 			"SELECT SUM(discount_amount) FROM {$wpdb->prefix}wc_order_coupon_lookup"
 		);
-		error_log( "Total coupons in analytics: $analytics_total_coupons" );
 
 		$data_store = new OrdersStatsDataStore();
 
@@ -956,17 +922,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$net_revenue     = $orders_total - $shipping;
 		$gross_sales     = $product_price * $num_items_sold;
 
-		error_log( "=== TEST EXPECTATIONS ===" );
-		error_log( "Product price: $product_price" );
-		error_log( "Qty per product: $qty_per_product" );
-		error_log( "Orders count: $orders_count" );
-		error_log( "Num items sold: $num_items_sold" );
-		error_log( "Calculated applied_amount (total coupons): $applied_amount" );
-		error_log( "Orders total (sum of get_total()): $orders_total" );
-		error_log( "Shipping: $shipping" );
-		error_log( "Net revenue (orders_total - shipping): $net_revenue" );
-		error_log( "Gross sales (product_price * num_items_sold): $gross_sales" );
-		error_log( "Expected formula: gross_sales = net_revenue + coupons = $net_revenue + $applied_amount = " . ($net_revenue + $applied_amount) );
 		$subtotals       = array(
 			'orders_count'        => $orders_count,
 			'num_items_sold'      => $num_items_sold,
@@ -1004,13 +959,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		$actual_stats = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true );
 
-		error_log( "=== ACTUAL ANALYTICS RESULTS ===" );
-		error_log( "Actual gross_sales: " . $actual_stats['totals']['gross_sales'] );
-		error_log( "Actual total_sales: " . $actual_stats['totals']['total_sales'] );
-		error_log( "Actual coupons: " . $actual_stats['totals']['coupons'] );
-		error_log( "Actual net_revenue: " . $actual_stats['totals']['net_revenue'] );
-		error_log( "Actual shipping: " . $actual_stats['totals']['shipping'] );
-		error_log( "Last query: {$wpdb->last_query}" );
 
 		$this->assertEquals( $expected_stats, $actual_stats, 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
 	}

@@ -1415,12 +1415,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// Get unlocked items for discount calculation
+		// Get unlocked items for discount calculation.
 		$unlocked_items = array_filter( $this->get_items(), function( $item ) use ( $locked_items ) {
 			return ! in_array( (int) $item->get_id(), $locked_items, true );
 		});
 
-		// Create WC_Discounts instance with only unlocked items from the start
+		// Create WC_Discounts instance with only unlocked items from the start.
 		$discounts = new WC_Discounts( $this );
 		$discounts->set_items( $this->format_items_for_discounts( $unlocked_items ) );
 
@@ -1477,7 +1477,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		// Apply discounts using the preserved WC_Discounts state
+		// Apply discounts using the preserved WC_Discounts state.
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->set_item_discount_amounts( $discounts );
 
@@ -1660,37 +1660,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Set coupon discount amounts directly from an array of discount amounts.
-	 *
-	 * @param array $coupon_discounts Array of coupon code => discount amount.
-	 */
-	protected function set_coupon_discount_amounts_direct( $coupon_discounts ) {
-		$coupons = $this->get_items( 'coupon' );
-		$coupon_code_to_item = wc_list_pluck( $coupons, null, 'get_code' );
-
-		foreach ( $coupon_discounts as $coupon_code => $amount ) {
-			if ( isset( $coupon_code_to_item[ $coupon_code ] ) ) {
-				$coupon_item = $coupon_code_to_item[ $coupon_code ];
-
-				// Get preserved discount if exists
-				$preserved_discount = 0;
-				$preserved_items = $coupon_item->get_meta( 'coupon_applied_items', true );
-				if ( is_array( $preserved_items ) ) {
-					foreach ( $preserved_items as $preserved_data ) {
-						$preserved_discount += $preserved_data['discount'];
-					}
-				}
-
-				// Total discount is preserved + new
-				$total_discount = $preserved_discount + $amount;
-
-				$coupon_item->set_discount( $total_discount );
-				$coupon_item->save();
-			}
-		}
-	}
-
-	/**
 	 * After applying coupons via the WC_Discounts class, update or create coupon items.
 	 *
 	 * @since 3.2.0
@@ -1767,7 +1736,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 
 				// Set coupon discount to preserved + newly calculated amounts.
-				// Note: $amount is already in normal currency units, not precision format
 				$total_discount = $preserved_discount + $amount;
 				$total_discount_tax = $preserved_discount_tax + $discount_tax;
 				$coupon_item->set_discount( $total_discount );

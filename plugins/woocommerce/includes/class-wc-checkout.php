@@ -720,7 +720,7 @@ class WC_Checkout {
 			$coupon_info = $coupon->get_short_info();
 			$item->add_meta_data( 'coupon_info', $coupon_info );
 
-			// Store which cart items this coupon was applied to AND their discount amounts.
+			// Store per-item discount amounts for this coupon.
 			if ( isset( $coupon_applied_items[ $code ] ) ) {
 				// Convert cart item keys to order line item IDs with discount amounts.
 				$applied_line_items = array();

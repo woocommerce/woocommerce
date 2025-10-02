@@ -823,7 +823,7 @@ final class WC_Cart_Totals {
 		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
 		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
 
-		// Store which cart items each coupon was applied to AND their discount amounts for order metadata.
+		// Store per-item discount amounts for each coupon to preserve during order recalculation.
 		$coupon_applied_items = array();
 		foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
 			$coupon_applied_items[ $coupon_code ] = array();
