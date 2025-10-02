@@ -55,6 +55,18 @@ class WC_Analytics_Tracking_Proxy extends \WC_REST_Controller {
 	 * @return \WP_REST_Response|\WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function track_events( $request ) {
+		// Check consent before processing any events
+		if ( ! Consent_Manager::has_analytics_consent() ) {
+			return new \WP_REST_Response(
+				array(
+					'success' => true,
+					'message' => 'Events skipped due to lack of analytics consent',
+					'results' => array(),
+				),
+				200
+			);
+		}
+
 		$events = $request->get_json_params();
 
 		if ( ! is_array( $events ) || ( isset( $events['event_name'] ) ) ) {

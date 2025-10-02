@@ -81,6 +81,11 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
 	 */
 	public static function record_event( $event_name, $event_properties = array() ) {
+		// Check consent before recording any event
+		if ( ! Consent_Manager::has_analytics_consent() ) {
+			return true; // Skip recording.
+		}
+
 		$prefixed_event_name = self::PREFIX . $event_name;
 		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
 

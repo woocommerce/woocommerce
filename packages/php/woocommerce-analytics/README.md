@@ -65,50 +65,58 @@ add_filter( 'woocommerce_analytics_clickhouse_enabled', '__return_true' );
 add_filter( 'woocommerce_analytics_experimental_proxy_tracking_enabled', '__return_true' );
 ```
 
+## Privacy & Consent Management
+
+### WP Consent API Integration
+
+The package integrates with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) to ensure GDPR and privacy regulation compliance. Tracking only occurs when users have granted consent for statistics collection.
+
+When WP Consent API is not available, the package defaults to allowing all tracking to maintain backward compatibility.
+
 ## Tracked Events
 
 ### Session Events
 
-| Event Name            | Trigger                        | ClickHouse | Recording Method   | Description                                                   |
-|---------------------- |--------------------------------|------------|--------------------|---------------------------------------------------------------|
-| `session_started`     | Page load                      | ✓          | JS                 | When user session begins                                      |
-| `session_engagement`  | Page load (returning session)  | ✓          | JS                 | When user visits site in existing session (engagement marker) |
+| Event Name           | Trigger                       | ClickHouse | Recording Method | Description                                                   |
+| -------------------- | ----------------------------- | ---------- | ---------------- | ------------------------------------------------------------- |
+| `session_started`    | Page load                     | ✓          | JS               | When user session begins                                      |
+| `session_engagement` | Page load (returning session) | ✓          | JS               | When user visits site in existing session (engagement marker) |
 
 ### Navigation Events
 
-| Event Name   | Trigger       | ClickHouse | Recording Method   | Description                        |
-|-------------|---------------|------------|--------------------|------------------------------------|
-| `page_view` | Page load     | ✓          | JS                 | General page view tracking         |
-| `search`    | Search action | ✓          | PHP → JS Queue     | When site search is performed     |
+| Event Name  | Trigger       | ClickHouse | Recording Method | Description                   |
+| ----------- | ------------- | ---------- | ---------------- | ----------------------------- |
+| `page_view` | Page load     | ✓          | JS               | General page view tracking    |
+| `search`    | Search action | ✓          | PHP → JS Queue   | When site search is performed |
 
 ### Store Events
 
-| Event Name                 | Trigger                | ClickHouse | Recording Method   | Description                                         |
-|--------------------------- |----------------------- |------------|--------------------|-----------------------------------------------------|
-| `product_view`             | Single product page    | ✓          | PHP → JS Queue     | When product page is viewed                         |
-| `cart_view`                | Cart page              | ✓          | PHP → JS Queue     | When cart page is viewed                            |
-| `add_to_cart`              | Add to cart action     | ✓          | PHP (Immediate)    | When products are added to cart                     |
-| `remove_from_cart`         | Remove from cart       | ✓          | PHP (Immediate)    | When products are removed from cart                 |
-| `checkout_view`            | Checkout page          | ✓          | PHP → JS Queue     | When checkout page is viewed                        |
-| `product_checkout`         | Checkout page          | ✓          | PHP → JS Queue     | When checkout page is viewed and cart is not empty  |
-| `product_purchase`         | Order placed           | ✓          | PHP (Immediate)    | When purchase is completed                          |
-| `order_confirmation_view`   | Thank you page         | ✓          | PHP → JS Queue     | When order confirmation page is viewed               |
-| `post_account_creation`    | Account creation       | -          | PHP → JS Queue     | When new account is created during checkout         |
+| Event Name                | Trigger             | ClickHouse | Recording Method | Description                                        |
+| ------------------------- | ------------------- | ---------- | ---------------- | -------------------------------------------------- |
+| `product_view`            | Single product page | ✓          | PHP → JS Queue   | When product page is viewed                        |
+| `cart_view`               | Cart page           | ✓          | PHP → JS Queue   | When cart page is viewed                           |
+| `add_to_cart`             | Add to cart action  | ✓          | PHP (Immediate)  | When products are added to cart                    |
+| `remove_from_cart`        | Remove from cart    | ✓          | PHP (Immediate)  | When products are removed from cart                |
+| `checkout_view`           | Checkout page       | ✓          | PHP → JS Queue   | When checkout page is viewed                       |
+| `product_checkout`        | Checkout page       | ✓          | PHP → JS Queue   | When checkout page is viewed and cart is not empty |
+| `product_purchase`        | Order placed        | ✓          | PHP (Immediate)  | When purchase is completed                         |
+| `order_confirmation_view` | Thank you page      | ✓          | PHP → JS Queue   | When order confirmation page is viewed             |
+| `post_account_creation`   | Account creation    | -          | PHP → JS Queue   | When new account is created during checkout        |
 
 ### Account Events
 
-| Event Name                     | Trigger               | ClickHouse | Recording Method   | Description                                    |
-|--------------------------------|-----------------------|------------|--------------------|------------------------------------------------|
-| `my_account_tab_click`         | Tab click             | -          | JS                 | When account navigation log out tab is clicked |
-| `my_account_page_view`         | Tab view              | -          | PHP → JS Queue     | When account tabs/pages are viewed             |
-| `my_account_order_number_click`| Order number click    | -          | PHP → JS Queue     | When order number link is clicked              |
-| `my_account_order_action_click`| Order action click    | -          | PHP → JS Queue     | When order action buttons are clicked          |
-| `my_account_address_click`     | Address link click    | -          | PHP → JS Queue     | When address edit links are clicked            |
-| `my_account_address_save`      | Address update        | -          | PHP (Immediate)    | When user saves address information            |
-| `my_account_payment_add`       | Payment method page   | -          | PHP → JS Queue     | When add payment method page is viewed         |
-| `my_account_payment_save`      | Payment method add    | -          | PHP (Immediate)    | When payment method is added                   |
-| `my_account_payment_delete`    | Payment method delete | -          | PHP (Immediate)    | When payment method is deleted                 |
-| `my_account_details_save`      | Profile update         | -          | PHP (Immediate)    | When account details are saved                 |
+| Event Name                      | Trigger               | ClickHouse | Recording Method | Description                                    |
+| ------------------------------- | --------------------- | ---------- | ---------------- | ---------------------------------------------- |
+| `my_account_tab_click`          | Tab click             | -          | JS               | When account navigation log out tab is clicked |
+| `my_account_page_view`          | Tab view              | -          | PHP → JS Queue   | When account tabs/pages are viewed             |
+| `my_account_order_number_click` | Order number click    | -          | PHP → JS Queue   | When order number link is clicked              |
+| `my_account_order_action_click` | Order action click    | -          | PHP → JS Queue   | When order action buttons are clicked          |
+| `my_account_address_click`      | Address link click    | -          | PHP → JS Queue   | When address edit links are clicked            |
+| `my_account_address_save`       | Address update        | -          | PHP (Immediate)  | When user saves address information            |
+| `my_account_payment_add`        | Payment method page   | -          | PHP → JS Queue   | When add payment method page is viewed         |
+| `my_account_payment_save`       | Payment method add    | -          | PHP (Immediate)  | When payment method is added                   |
+| `my_account_payment_delete`     | Payment method delete | -          | PHP (Immediate)  | When payment method is deleted                 |
+| `my_account_details_save`       | Profile update        | -          | PHP (Immediate)  | When account details are saved                 |
 
 ### Recording Methods Explained
 
@@ -233,7 +241,7 @@ Enable debug mode for detailed logging:
 
 ```javascript
 // In browser console or add to page
-localStorage.setItem('debug', 'wc-analytics:*');
+localStorage.setItem( 'debug', 'wc-analytics:*' );
 ```
 
 ## Security

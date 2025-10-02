@@ -22,7 +22,7 @@
 		"test-coverage": "pnpm run test --coverage",
 		"typecheck": "tsc --noEmit",
 		"validate": "pnpm exec validate-es build/",
-		"watch": "pnpm build && pnpm build-client --watch"
+		"watch": "pnpm build --watch"
 	},
 	"dependencies": {
 		"@wordpress/api-fetch": "7.31.0",

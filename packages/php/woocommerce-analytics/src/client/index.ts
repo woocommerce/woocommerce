@@ -3,20 +3,23 @@
 /**
  * Internal dependencies
  */
-import { Analytics } from './analytics';
-import SessionManager from './session-manager';
+import { consentManager } from './consent';
 
 jQuery( () => {
 	if ( ! window.wcAnalytics ) {
 		return;
 	}
 
-	const sessionManager = new SessionManager();
-	const analytics = new Analytics( sessionManager, {
-		eventQueue: window.wcAnalytics.eventQueue,
-		commonProps: window.wcAnalytics.commonProps,
-		features: window.wcAnalytics.features,
-		pages: window.wcAnalytics.pages,
+	// Check for consent before initializing analytics
+	if ( consentManager.hasAnalyticsConsent() ) {
+		import( './init' );
+		return;
+	}
+
+	// Set up consent change listener to initialize when consent is granted
+	consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
+		if ( hasConsent ) {
+			import( './init' );
+		}
 	} );
-	analytics.init();
 } );

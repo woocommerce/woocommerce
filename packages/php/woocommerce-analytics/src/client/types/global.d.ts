@@ -14,6 +14,7 @@ declare global {
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
 		};
+		wp_has_consent?: ( type: string ) => boolean;
 	}
 }
 

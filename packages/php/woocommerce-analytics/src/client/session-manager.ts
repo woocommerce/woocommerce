@@ -192,4 +192,19 @@ export default class SessionManager {
 
 		this.isEngaged = true;
 	}
+
+	/**
+	 * Clear session data (for consent withdrawal)
+	 */
+	clearSession() {
+		// Clear cookie
+		document.cookie = `${ COOKIE_NAME }=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; secure; samesite=strict`;
+
+		// Reset session variables
+		this.sessionId = null;
+		this.landingPage = null;
+		this.isEngaged = false;
+		this.isNewSession = false;
+		this.isInitialized = false;
+	}
 }

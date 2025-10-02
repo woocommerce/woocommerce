@@ -6,6 +6,7 @@ import debugFactory from 'debug';
  * Internal dependencies
  */
 import { ApiClient } from './api-client';
+import { consentManager } from './consent';
 import { EVENT_NAME_REGEX, EVENT_PREFIX, CLICK_HOUSE_EVENTS } from './constants';
 import SessionManager from './session-manager';
 import type { AnalyticsConfig } from './types/shared';
@@ -56,6 +57,9 @@ export class Analytics {
 		 * only if the ClickHouse (ch) feature is enabled as these events are relevant exclusively when ClickHouse is active.
 		 */
 		if ( this.features.sessionTracking ) {
+			// Set up consent change listener
+			consentManager.addConsentChangeListener( this.handleConsentChange );
+
 			this.sessionManager.init();
 			const { sessionId, landingPage, isNewSession } = this.sessionManager;
 
@@ -110,6 +114,12 @@ export class Analytics {
 	 * @param properties - The properties of the event.
 	 */
 	recordEvent = ( event: string, properties: Record< string, unknown > = {} ): void => {
+		// Check consent before recording any event
+		if ( ! consentManager.hasAnalyticsConsent() ) {
+			debug( 'Skipping event recording due to lack of statistics consent: %s', event );
+			return;
+		}
+
 		// Validate event name
 		if ( typeof event !== 'string' || ! EVENT_NAME_REGEX.test( event ) ) {
 			debug( 'Skipping event recording because event name is not valid' );
@@ -224,5 +234,20 @@ export class Analytics {
 
 		this.sessionManager.setEngaged();
 		this.recordEvent( 'session_engagement' );
+	};
+
+	/**
+	 * Handle consent changes
+	 *
+	 * @param hasConsent - Whether the user has granted consent
+	 */
+	handleConsentChange = ( hasConsent: boolean ): void => {
+		if ( ! hasConsent ) {
+			// Consent withdrawn - clear session data if session tracking is enabled
+			this.sessionManager.clearSession();
+		} else if ( ! this.sessionManager.sessionId ) {
+			// Consent granted - reinitialize session if needed
+			this.sessionManager.init();
+		}
 	};
 }
