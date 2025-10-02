@@ -135,7 +135,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'description'      => 'Ability without permission_callback',
 						'input_schema'     => array( 'type' => 'object' ),
 						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'execute_callback' => function () {
 							return array( 'success' => true );
 						},
 						// Note: permission_callback intentionally omitted.
