@@ -400,9 +400,14 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return 'canceled';
 		}
 
-		// Check if completed.
-		if ( $order && in_array( $order->get_status(), [ 'pending', 'processing', 'completed' ], true ) ) {
+		// Check if completed (only processing and completed are final statuses).
+		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
 			return 'completed';
+		}
+
+		// Check if pending (payment not yet cleared).
+		if ( $order && 'pending' === $order->get_status() ) {
+			return 'ready_for_payment';
 		}
 
 		// Check if ready for payment.
