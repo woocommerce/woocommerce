@@ -9,11 +9,12 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\RestApi\Routes\V3\PayPal;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
@@ -25,26 +26,36 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 
 
 /**
- * REST API PayPal buttons controller class.
+ * REST API PayPal Standard orders controller class.
  *
  * @package Automattic\WooCommerce\RestApi
- * @extends \WC_REST_Controller
+ * @extends AbstractController
  */
-class ButtonsController extends \WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v3';
-
+class Controller extends AbstractController {
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'paypal-buttons';
+	protected $rest_base = 'paypal';
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @param PaypalOrderSchema $order_schema PayPal order schema class.
+	 * @internal
+	 */
+	final public function init( PaypalOrderSchema $order_schema ) {
+		$this->item_schema = $order_schema;
+	}
+
+	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 */
+	protected function get_schema(): array {
+		return $this->item_schema->get_item_schema();
+	}
 
 	/**
 	 * Register the routes for the PayPal buttons functionality handler.
@@ -54,22 +65,28 @@ class ButtonsController extends \WC_REST_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/create-order',
+			'/' . $this->rest_base,
 			array(
-				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'create_order' ),
-				'permission_callback' => array( $this, 'validate_create_order_request' ),
-			)
+				'schema' => array( $this, 'get_public_item_schema' ),
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'create_order' ),
+					'permission_callback' => array( $this, 'validate_create_order_request' ),
+				),
+			),
 		);
 
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/cancel-payment',
+			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => \WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'cancel_payment' ),
-				'permission_callback' => array( $this, 'validate_cancel_payment_request' ),
-			)
+				'schema' => array( $this, 'get_public_item_schema' ),
+				array(
+					'methods'             => \WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'cancel_order' ),
+					'permission_callback' => array( $this, 'validate_cancel_order_request' ),
+				),
+			),
 		);
 	}
 
@@ -88,15 +105,15 @@ class ButtonsController extends \WC_REST_Controller {
 	}
 
 	/**
-	 * Validate the cancel payment request.
+	 * Validate the cancel order request.
 	 *
 	 * @param \WP_REST_Request $request The request object.
-	 * @return bool True if the cancel payment request is valid, false otherwise.
+	 * @return bool True if the cancel order request is valid, false otherwise.
 	 */
-	public function validate_cancel_payment_request( \WP_REST_Request $request ) {
+	public function validate_cancel_order_request( \WP_REST_Request $request ) {
 		if ( $request->get_header( 'Nonce' ) ) {
 			$nonce = $request->get_header( 'Nonce' );
-			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_cancel_payment' );
+			return wp_verify_nonce( $nonce, 'wc_gateway_paypal_standard_cancel_order' );
 		}
 		return false;
 	}
@@ -159,26 +176,31 @@ class ButtonsController extends \WC_REST_Controller {
 		$order->update_status( OrderStatus::PENDING );
 		$order->save();
 
-		return new \WP_REST_Response(
-			array(
-				'paypal_order_id' => $paypal_order['id'] ?? null,
-				'order_id'        => $order_id,
-				'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
-			),
-			200
-		);
+		$request->set_param( 'context', 'edit' );
+
+		$order_data = [
+			'paypal_order_id' => $paypal_order['id'] ?? null,
+			'order_id'        => $order_id,
+			'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $gateway->get_return_url( $order ) ) ),
+		];
+
+		$response = $this->prepare_item_for_response( $order_data, $request );
+		$response->set_status( \WP_Http::CREATED );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $order_data['paypal_order_id'] ) ) );
+
+		return $response;
 	}
 
 	/**
-	 * Cancel a PayPal payment. This is used to move the woocommerce order back to a draft status.
+	 * Cancel a PayPal order. This is used to move the woocommerce order back to a draft status.
 	 *
 	 * @param \WP_REST_Request $request The request object.
 	 * @return \WP_REST_Response The response object.
 	 */
-	public function cancel_payment( \WP_REST_Request $request ) {
+	public function cancel_order( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 
-		$order_id        = isset( $data['order_id'] ) ? absint( $data['order_id'] ) : 0;
+		$order_id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$paypal_order_id = isset( $data['paypal_order_id'] ) ? wc_clean( $data['paypal_order_id'] ) : '';
 		if ( ! $order_id || '' === $paypal_order_id ) {
 			return new \WP_REST_Response( array( 'error' => 'Invalid request' ), 400 );
@@ -208,6 +230,25 @@ class ButtonsController extends \WC_REST_Controller {
 		$order->update_status( OrderStatus::CHECKOUT_DRAFT );
 		$order->save();
 
-		return new \WP_REST_Response( array( 'success' => true ), 200 );
+		$request->set_param( 'context', 'edit' );
+
+		$order_data = [
+			'paypal_order_id' => $paypal_order_id,
+			'order_id'        => $order_id,
+			'return_url'      => esc_url_raw( add_query_arg( 'utm_nooverride', '1', ( new \WC_Gateway_Paypal() )->get_return_url( $order ) ) ),
+		];
+
+		return $this->prepare_item_for_response( $order_data, $request );
+	}
+
+	/**
+	 * Prepare a single PayPal order data for response.
+	 *
+	 * @param array $order_data PayPal order data.
+	 * @param \WP_REST_Request  $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( array $order_data, \WP_REST_Request $request ): array {
+		return $this->item_schema->get_item_response( $order_data, $request, $this->get_fields_for_response( $request ) );
 	}
 }

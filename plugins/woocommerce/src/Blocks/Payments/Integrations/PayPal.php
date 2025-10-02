@@ -84,7 +84,7 @@ final class PayPal extends AbstractPaymentMethodType {
 			'buttonsOptions'         => $options,
 			'wc_store_api_nonce'     => wp_create_nonce( 'wc_store_api' ),
 			'create_order_nonce'     => wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ),
-			'cancel_payment_nonce'   => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ),
+			'cancel_order_nonce'     => wp_create_nonce( 'wc_gateway_paypal_standard_cancel_order' ),
 		];
 	}
 

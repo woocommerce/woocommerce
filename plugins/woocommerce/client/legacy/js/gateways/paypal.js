@@ -118,7 +118,7 @@ jQuery(function ($) {
 					// Create a PayPal order.
 					const paypalResponseData = await window.wp.apiFetch( {
 						method: 'POST',
-						path: '/wc/v3/paypal-buttons/create-order',
+						path: '/wc/v4/paypal/orders',
 						headers: {
 							Nonce: paypal_standard.create_order_nonce,
 						},
@@ -161,13 +161,12 @@ jQuery(function ($) {
 
 				try {
 					await window.wp.apiFetch( {
-						method: 'POST',
-						path: '/wc/v3/paypal-buttons/cancel-payment',
+						method: 'PATCH',
+						path: '/wc/v4/paypal/orders/' + orderId,
 						headers: {
-							Nonce: paypal_standard.cancel_payment_nonce,
+							Nonce: paypal_standard.cancel_order_nonce,
 						},
 						data: {
-							order_id: orderId,
 							paypal_order_id: data.orderID,
 						},
 					} );

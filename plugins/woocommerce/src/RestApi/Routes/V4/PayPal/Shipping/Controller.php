@@ -11,7 +11,9 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\RestApi\Routes\V3\PayPal;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal;
+
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,23 +33,33 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
  * REST API PayPal Standard controller class.
  *
  * @package Automattic\WooCommerce\RestApi
- * @extends \WC_REST_Controller
+ * @extends AbstractController
  */
-class StandardController extends \WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v3';
-
+class StandardController extends AbstractController {
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
 	protected $rest_base = 'paypal-standard';
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @param StandardSchema $standard_schema Standard schema class.
+	 * @internal
+	 */
+	final public function init( StandardSchema $standard_schema ) {
+		$this->item_schema = $standard_schema;
+	}
+
+	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 */
+	protected function get_schema(): array {
+		return $this->item_schema->get_item_schema();
+	}
 
 	/**
 	 * Register the routes for PayPal Standard REST API requests.
@@ -171,6 +183,17 @@ class StandardController extends \WC_REST_Controller {
 		);
 
 		return new \WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * Prepare a single standard object for response.
+	 *
+	 * @param WC_Shipping_Zone $zone Shipping zone object.
+	 * @param WP_REST_Request  $request Request object.
+	 * @return array
+	 */
+	protected function get_item_response( $zone, WP_REST_Request $request ): array {
+		return $this->item_schema->get_item_response( $zone, $request, $this->get_fields_for_response( $request ) );
 	}
 
 	/**
