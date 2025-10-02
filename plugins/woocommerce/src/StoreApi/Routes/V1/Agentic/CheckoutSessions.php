@@ -289,22 +289,18 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Calculate totals after shipping method is set.
 		WC()->cart->calculate_totals();
 
-		// Create or update draft order using OrderController.
-		$draft_order_id = WC()->session->get( 'agentic_draft_order_id' );
-		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
+		// Ensure draft order exists using core trait methods.
+		// The core cart_updated() method will sync it with the cart after this response.
+		$draft_order = $this->get_draft_order();
 
-		if ( ! $draft_order || ! $draft_order->has_status( 'checkout-draft' ) ) {
-			// Create new draft order from cart.
+		if ( ! $draft_order ) {
+			// Create new draft order from cart using core OrderController.
 			$draft_order = $this->order_controller->create_order_from_cart();
 			$draft_order->save();
-			WC()->session->set( 'agentic_draft_order_id', $draft_order->get_id() );
-		} else {
-			// Update existing draft order from cart.
-			$this->order_controller->update_order_from_cart( $draft_order );
-			$draft_order->save();
+			$this->set_draft_order_id( $draft_order->get_id() );
 		}
 
-		// Build response.
+		// Build response from canonical cart schema.
 		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
 
 		// Echo Agentic Commerce Protocol headers if provided.
