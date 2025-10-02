@@ -9,13 +9,7 @@ import { useContext, useEffect, useMemo } from '@wordpress/element';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
-import { unlock } from '@wordpress/edit-site/build-module/lock-unlock';
-// @ts-expect-error No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import useSiteEditorSettings from '@wordpress/edit-site/build-module/components/block-editor/use-site-editor-settings';
-// @ts-expect-error No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
-import { store as editSiteStore } from '@wordpress/edit-site/build-module/store';
 
 /**
  * Internal dependencies

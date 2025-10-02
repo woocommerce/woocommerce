@@ -107,7 +107,7 @@ export const Layout = () => {
 		useState( false );
 	const [ backgroundColor ] = useGlobalStyle( 'color.background' );
 	const [ gradientValue ] = useGlobalStyle( 'color.gradient' );
-	const [ templateId, setTemplateId ] = useState< string | undefined >(
+	const [ templateId, setTemplateId ] = useState< number | undefined >(
 		undefined
 	);
 	const [ templateType, setTemplateType ] = useState< string | undefined >(
@@ -117,10 +117,17 @@ export const Layout = () => {
 	useEffect( () => {
 		getHomeTemplate().then( ( template ) => {
 			if ( template ) {
+				if (
+					// @ts-expect-error we won't type it as it most likely will be removed.
+					typeof template.id === 'string' ||
+					// @ts-expect-error we won't type it as it most likely will be removed.
+					typeof template.id === 'number'
+				) {
+					// @ts-expect-error we won't type it as it most likely will be removed.
+					setTemplateId( Number( template.id ) );
+				}
 				// @ts-expect-error we won't type it as it most likely will be removed.
-				setTemplateId( template?.id );
-				// @ts-expect-error we won't type it as it most likely will be removed.
-				setTemplateType( template?.type );
+				setTemplateType( template.type );
 			}
 		} );
 	}, [] );
@@ -129,7 +136,9 @@ export const Layout = () => {
 
 	if (
 		typeof currentState === 'object' &&
-		currentState.transitionalScreen === 'transitional'
+		currentState.transitionalScreen === 'transitional' &&
+		templateType &&
+		templateId
 	) {
 		return (
 			// @ts-expect-error Types are not correct when kind is root and type is site.
