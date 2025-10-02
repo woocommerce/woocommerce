@@ -823,6 +823,26 @@ final class WC_Cart_Totals {
 		$this->cart->set_coupon_discount_totals( wc_remove_number_precision_deep( $coupon_discount_amounts ) );
 		$this->cart->set_coupon_discount_tax_totals( wc_remove_number_precision_deep( $coupon_discount_tax_amounts ) );
 
+		// Store which cart items each coupon was applied to AND their discount amounts for order metadata.
+		$coupon_applied_items = array();
+		foreach ( $discounts->get_discounts( true ) as $coupon_code => $coupon_discounts ) {
+			$coupon_applied_items[ $coupon_code ] = array();
+			foreach ( $coupon_discounts as $cart_item_key => $discount_amount ) {
+				// Store both the item key and the discount amount (including tax if applicable).
+				$discount_tax = 0;
+				if ( isset( $coupon_discount_tax_amounts[ $coupon_code ] ) && isset( $this->items[ $cart_item_key ] ) ) {
+					// Calculate proportional tax for this item's discount.
+					$item_discount_proportion = $discount_amount / max( 1, $coupon_discount_amounts[ $coupon_code ] );
+					$discount_tax = $coupon_discount_tax_amounts[ $coupon_code ] * $item_discount_proportion;
+				}
+				$coupon_applied_items[ $coupon_code ][ $cart_item_key ] = array(
+					'discount'     => wc_remove_number_precision( $discount_amount ),
+					'discount_tax' => wc_remove_number_precision( $discount_tax ),
+				);
+			}
+		}
+		$this->cart->set_coupon_applied_items( $coupon_applied_items );
+
 		// Add totals to cart object. Note: Discount total for cart is excl tax.
 		$this->cart->set_discount_total( $this->get_total( 'discounts_total' ) );
 		$this->cart->set_discount_tax( $this->get_total( 'discounts_tax_total' ) );

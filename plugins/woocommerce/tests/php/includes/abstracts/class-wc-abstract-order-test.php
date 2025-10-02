@@ -306,6 +306,31 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test apply_coupon() stores coupon_applied_items meta data.
+	 */
+	public function test_apply_coupon_stores_applied_items_meta_data() {
+		$coupon_code = 'coupon_applied_items_test';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order       = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items );
+
+		$coupon_applied_items = ( current( $coupon_items ) )->get_meta( 'coupon_applied_items' );
+		$this->assertIsArray( $coupon_applied_items, 'WC_Order_Item_Coupon missing `coupon_applied_items` meta.' );
+		$this->assertNotEmpty( $coupon_applied_items, 'coupon_applied_items should not be empty.' );
+
+		foreach ( $coupon_applied_items as $item_id => $discount_data ) {
+			$this->assertIsArray( $discount_data, 'Each item should have discount data array' );
+			$this->assertArrayHasKey( 'discount', $discount_data, 'Should store discount amount' );
+			$this->assertArrayHasKey( 'discount_tax', $discount_data, 'Should store discount tax' );
+		}
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *

@@ -705,6 +705,8 @@ class WC_Checkout {
 	 * @param WC_Cart  $cart  Cart instance.
 	 */
 	public function create_order_coupon_lines( &$order, $cart ) {
+		$coupon_applied_items = $cart->get_coupon_applied_items();
+
 		foreach ( $cart->get_coupons() as $code => $coupon ) {
 			$item = new WC_Order_Item_Coupon();
 			$item->set_props(
@@ -717,6 +719,25 @@ class WC_Checkout {
 
 			$coupon_info = $coupon->get_short_info();
 			$item->add_meta_data( 'coupon_info', $coupon_info );
+
+			// Store which cart items this coupon was applied to AND their discount amounts.
+			if ( isset( $coupon_applied_items[ $code ] ) ) {
+				// Convert cart item keys to order line item IDs with discount amounts.
+				$applied_line_items = array();
+				foreach ( $coupon_applied_items[ $code ] as $cart_item_key => $discount_data ) {
+					// Find the corresponding order line item for this cart item.
+					foreach ( $order->get_items() as $line_item_id => $line_item ) {
+						if ( $line_item->get_meta( '_cart_item_key' ) === $cart_item_key ) {
+							// Store the line item ID with its discount amounts.
+							$applied_line_items[ $line_item_id ] = $discount_data;
+							break;
+						}
+					}
+				}
+				if ( ! empty( $applied_line_items ) ) {
+					$item->add_meta_data( 'coupon_applied_items', $applied_line_items, true );
+				}
+			}
 
 			/**
 			 * Action hook to adjust item before save.

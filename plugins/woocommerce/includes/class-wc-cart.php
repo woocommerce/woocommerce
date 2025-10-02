@@ -102,6 +102,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	protected $totals = array();
 
 	/**
+	 * Contains an array of cart items affected by each coupon.
+	 *
+	 * @since x.x.x
+	 * @var array
+	 */
+	protected $coupon_applied_items = array();
+
+	/**
 	 * Reference to the cart session handling class.
 	 *
 	 * @var WC_Cart_Session
@@ -439,6 +447,26 @@ class WC_Cart extends WC_Legacy_Cart {
 	}
 
 	/**
+	 * Sets the array of cart items affected by each coupon.
+	 *
+	 * @since x.x.x
+	 * @param array $value Value to set (coupon_code => array of cart item keys).
+	 */
+	public function set_coupon_applied_items( $value = array() ) {
+		$this->coupon_applied_items = (array) $value;
+	}
+
+	/**
+	 * Gets the array of cart items affected by each coupon.
+	 *
+	 * @since x.x.x
+	 * @return array coupon_code => array of cart item keys.
+	 */
+	public function get_coupon_applied_items() {
+		return isset( $this->coupon_applied_items ) ? $this->coupon_applied_items : array();
+	}
+
+	/**
 	 * Set all calculated totals.
 	 *
 	 * @since 3.2.0
@@ -670,6 +698,7 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->shipping_methods           = array();
 		$this->coupon_discount_totals     = array();
 		$this->coupon_discount_tax_totals = array();
+		$this->coupon_applied_items       = array();
 		$this->applied_coupons            = array();
 		$this->totals                     = $this->default_totals;
 
@@ -2009,6 +2038,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function remove_coupons( $deprecated = null ) {
 		$this->set_coupon_discount_totals( array() );
 		$this->set_coupon_discount_tax_totals( array() );
+		$this->set_coupon_applied_items( array() );
 		$this->set_applied_coupons( array() );
 		$this->session->set_session();
 	}

@@ -110,6 +110,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $object_type = 'order';
 
 	/**
+	 * Flag to indicate if we're currently in the apply_coupon flow.
+	 * Used to prevent items from being locked during initial coupon application.
+	 *
+	 * @var bool
+	 */
+	protected $applying_coupon = false;
+
+	/**
 	 * Get the order if ID is passed, otherwise the order is new and empty.
 	 * This class should NOT be instantiated, but the wc_get_order function or new WC_Order_Factory
 	 * should be used. It is possible, but the aforementioned are preferred and are the only
@@ -1291,6 +1299,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		// Set a flag to indicate we're in the initial apply_coupon flow.
+		// This prevents items from being locked during the recalculation.
+		$this->applying_coupon = true;
+
 		$discounts = new WC_Discounts( $this );
 		$applied   = $discounts->apply_coupon( $coupon );
 
@@ -1329,6 +1341,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Recalculate totals and taxes.
 		$this->recalculate_coupons();
+
+		// Clear the flag after recalculation is complete.
+		$this->applying_coupon = false;
 
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
@@ -1389,25 +1404,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 3.2.0
 	 */
 	public function recalculate_coupons() {
-		// Reset line item totals.
+		// Identify which line items are "locked" (have preserved discount data).
+		$locked_items = $this->get_locked_line_items();
+
+		// Reset only unlocked line items to subtotal.
 		foreach ( $this->get_items() as $item ) {
-			$item->set_total( $item->get_subtotal() );
-			$item->set_total_tax( $item->get_subtotal_tax() );
+			if ( ! in_array( (int) $item->get_id(), $locked_items, true ) ) {
+				$item->set_total( $item->get_subtotal() );
+				$item->set_total_tax( $item->get_subtotal_tax() );
+			}
 		}
 
+		// Get unlocked items for discount calculation
+		$unlocked_items = array_filter( $this->get_items(), function( $item ) use ( $locked_items ) {
+			return ! in_array( (int) $item->get_id(), $locked_items, true );
+		});
+
+		// Create WC_Discounts instance with only unlocked items from the start
 		$discounts = new WC_Discounts( $this );
+		$discounts->set_items( $this->format_items_for_discounts( $unlocked_items ) );
 
 		foreach ( $this->get_items( 'coupon' ) as $coupon_item ) {
 			$coupon_code = $coupon_item->get_code();
 			$coupon_id   = wc_get_coupon_id_by_code( $coupon_code );
 
-			// If we have a coupon ID (loaded via wc_get_coupon_id_by_code) we can simply load the new coupon object using the ID.
-			if ( $coupon_id ) {
-				$coupon_object = new WC_Coupon( $coupon_id );
-
-			} else {
-
-				// If we do not have a coupon ID (was it virtual? has it been deleted?) we must create a temporary coupon using what data we have stored during checkout.
+			// For missing coupons, use the stored coupon data to preserve discount integrity.
+			if ( ! $coupon_id ) {
+				// Use the existing temporary coupon logic that preserves stored amounts.
 				$coupon_object = $this->get_temporary_coupon( $coupon_item );
 				$coupon_object->set_code( $coupon_code );
 				$coupon_object->set_virtual( true );
@@ -1423,6 +1446,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 					$coupon_object->set_discount_type( 'fixed_cart' );
 				}
+
+				// For fixed_cart coupons with locked items, calculate remaining discount.
+				if ( 'fixed_cart' === $coupon_object->get_discount_type() && ! empty( $locked_items ) ) {
+					$used_amount = $this->get_coupon_used_amount( $coupon_item, $locked_items );
+					$remaining = max( 0, $coupon_object->get_amount() - $used_amount );
+					$coupon_object->set_amount( $remaining );
+				}
+			} else {
+				// Load fresh coupon data for recalculation.
+				$coupon_object = new WC_Coupon( $coupon_id );
+
+				// For fixed_cart coupons, calculate remaining discount for unlocked items.
+				if ( 'fixed_cart' === $coupon_object->get_discount_type() && ! empty( $locked_items ) ) {
+					$used_amount = $this->get_coupon_used_amount( $coupon_item, $locked_items );
+					$remaining = max( 0, $coupon_object->get_amount() - $used_amount );
+					$coupon_object->set_amount( $remaining );
+				}
 			}
 
 			/**
@@ -1437,6 +1477,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
+		// Apply discounts using the preserved WC_Discounts state
 		$this->set_coupon_discount_amounts( $discounts );
 		$this->set_item_discount_amounts( $discounts );
 
@@ -1474,6 +1515,123 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get line items that are "locked" for coupon recalculation.
+	 * A line item is locked if:
+	 * 1. The order has a non-draft/non-pending status AND
+	 * 2. The line item has explicit coupon applied metadata
+	 *
+	 * @since x.x.x
+	 * @param string $coupon_code Optional. If provided, only return locked items for this specific coupon.
+	 * @return array Array of line item IDs that should preserve their discount amounts.
+	 */
+	private function get_locked_line_items( $coupon_code = '' ) {
+		// If we're in the initial apply_coupon flow, don't lock any items.
+		// This ensures the coupon can be properly applied to all items.
+		if ( ! empty( $this->applying_coupon ) ) {
+			return array();
+		}
+
+		// Determine which order statuses allow coupon recalculation.
+		$recalculate_statuses = array( 'pending', 'draft', 'auto-draft' );
+		$recalculate_statuses = apply_filters( 'woocommerce_order_recalculate_coupon_statuses', $recalculate_statuses, $this );
+		$should_recalculate   = $this->has_status( $recalculate_statuses );
+
+
+		// If order allows recalculation, no items are locked.
+		if ( $should_recalculate ) {
+			return array();
+		}
+
+		$locked_items = array();
+
+		// For each coupon, get the line items it was explicitly applied to.
+		$coupon_items = $this->get_items( 'coupon' );
+		foreach ( $coupon_items as $coupon_item ) {
+			// If a specific coupon code is provided, only check that coupon.
+			if ( ! empty( $coupon_code ) && ! wc_is_same_coupon( $coupon_item->get_code(), $coupon_code ) ) {
+				continue;
+			}
+
+			$applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+
+			// Only lock items if we have explicit metadata about which items were covered.
+			// Backwards compatibility: if no metadata exists, assume all items can be recalculated.
+			if ( is_array( $applied_items ) && ! empty( $applied_items ) ) {
+				$locked_items = array_merge( $locked_items, array_keys( $applied_items ) );
+			}
+		}
+
+		/**
+		 * Filter the list of locked line item IDs before returning.
+		 *
+		 * @since x.x.x
+		 * @param array    $locked_items Array of line item IDs that are locked for recalculation.
+		 * @param WC_Order $order        The order object.
+		 * @param string   $coupon_code  The coupon code being checked (empty string if checking all coupons).
+		 */
+		$locked_items = apply_filters( 'woocommerce_order_locked_line_items', $locked_items, $this, $coupon_code );
+		return array_unique( array_map( 'intval', $locked_items ) );
+	}
+
+	/**
+	 * Format order items for WC_Discounts class (converts to stdClass with required properties).
+	 *
+	 * @param array $order_items Array of WC_Order_Item_Product objects.
+	 * @return array Array of stdClass objects formatted for WC_Discounts.
+	 */
+	private function format_items_for_discounts( array $order_items ) {
+		$formatted_items = array();
+
+		foreach ( $order_items as $order_item ) {
+			$item           = new stdClass();
+			$item->key      = $order_item->get_id();
+			$item->object   = $order_item;
+			$item->product  = $order_item->get_product();
+			$item->quantity = $order_item->get_quantity();
+			$item->price    = wc_add_number_precision_deep( $order_item->get_subtotal() );
+
+			if ( $this->get_prices_include_tax() ) {
+				$item->price += wc_add_number_precision_deep( $order_item->get_subtotal_tax() );
+			}
+
+			$formatted_items[ $order_item->get_id() ] = $item;
+		}
+
+		return $formatted_items;
+	}
+
+	/**
+	 * Calculate how much of a fixed_cart coupon's discount has already been used
+	 * by locked line items.
+	 *
+	 * @since x.x.x
+	 * @param WC_Order_Item_Coupon $coupon_item The coupon item.
+	 * @param array                $locked_items Array of locked line item IDs.
+	 * @return float Amount of discount already used by locked items.
+	 */
+	private function get_coupon_used_amount( $coupon_item, $locked_items ) {
+		$used_amount = 0;
+		$applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+
+		// If no applied_items data, assume no discount is used by locked items.
+		// Backwards compatibility: orders without this metadata can recalculate freely.
+		if ( ! is_array( $applied_items ) || empty( $applied_items ) ) {
+			return 0;
+		}
+
+		// Calculate discount amount from locked line items only.
+		foreach ( $applied_items as $item_id => $discount_data ) {
+			$item_id = (int) $item_id;
+			if ( in_array( $item_id, $locked_items, true ) && is_array( $discount_data ) && isset( $discount_data['discount'] ) ) {
+				$used_amount += (float) $discount_data['discount'];
+			}
+		}
+
+		return $used_amount;
+	}
+
+
+	/**
 	 * After applying coupons via the WC_Discounts class, update line items.
 	 *
 	 * @since 3.2.0
@@ -1497,6 +1655,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				}
 
 				$item->set_total( max( 0, $item->get_total() - $amount ) );
+			}
+		}
+	}
+
+	/**
+	 * Set coupon discount amounts directly from an array of discount amounts.
+	 *
+	 * @param array $coupon_discounts Array of coupon code => discount amount.
+	 */
+	protected function set_coupon_discount_amounts_direct( $coupon_discounts ) {
+		$coupons = $this->get_items( 'coupon' );
+		$coupon_code_to_item = wc_list_pluck( $coupons, null, 'get_code' );
+
+		foreach ( $coupon_discounts as $coupon_code => $amount ) {
+			if ( isset( $coupon_code_to_item[ $coupon_code ] ) ) {
+				$coupon_item = $coupon_code_to_item[ $coupon_code ];
+
+				// Get preserved discount if exists
+				$preserved_discount = 0;
+				$preserved_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+				if ( is_array( $preserved_items ) ) {
+					foreach ( $preserved_items as $preserved_data ) {
+						$preserved_discount += $preserved_data['discount'];
+					}
+				}
+
+				// Total discount is preserved + new
+				$total_discount = $preserved_discount + $amount;
+
+				$coupon_item->set_discount( $total_discount );
+				$coupon_item->save();
 			}
 		}
 	}
@@ -1538,6 +1727,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					$coupon_item = $this->get_item( $item_id, false );
 				}
 
+				// Get locked items for the current coupon only.
+				$locked_items = $this->get_locked_line_items( $coupon_code );
+
 				$discount_tax = 0;
 
 				// Work out how much tax has been removed as a result of the discount from this coupon.
@@ -1560,8 +1752,83 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 				}
 
-				$coupon_item->set_discount( $amount );
-				$coupon_item->set_discount_tax( $discount_tax );
+				// Calculate total preserved discount for locked items.
+				$existing_applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+				$preserved_discount = 0;
+				$preserved_discount_tax = 0;
+
+				if ( is_array( $existing_applied_items ) && ! empty( $locked_items ) ) {
+					foreach ( $existing_applied_items as $item_id => $discount_data ) {
+						if ( in_array( (int) $item_id, $locked_items, true ) && is_array( $discount_data ) ) {
+							$preserved_discount += isset( $discount_data['discount'] ) ? (float) $discount_data['discount'] : 0;
+							$preserved_discount_tax += isset( $discount_data['discount_tax'] ) ? (float) $discount_data['discount_tax'] : 0;
+						}
+					}
+				}
+
+				// Set coupon discount to preserved + newly calculated amounts.
+				// Note: $amount is already in normal currency units, not precision format
+				$total_discount = $preserved_discount + $amount;
+				$total_discount_tax = $preserved_discount_tax + $discount_tax;
+				$coupon_item->set_discount( $total_discount );
+				$coupon_item->set_discount_tax( $total_discount_tax );
+
+				// Update the metadata for which items this coupon applied to.
+				// This will be used by restore_locked_item_discounts() later.
+				if ( isset( $all_discounts[ $coupon_code ] ) && ! empty( $all_discounts[ $coupon_code ] ) ) {
+					// Get existing metadata to preserve locked item data.
+					$existing_applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+					$new_applied_items = array();
+
+					// Preserve locked item discount data.
+					if ( is_array( $existing_applied_items ) ) {
+						foreach ( $existing_applied_items as $item_id => $discount_data ) {
+							if ( in_array( (int) $item_id, $locked_items, true ) ) {
+								$new_applied_items[ $item_id ] = $discount_data;
+							}
+						}
+					}
+
+					// Add new/unlocked items with their calculated discounts.
+					foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
+						if ( ! in_array( (int) $item_id, $locked_items, true ) ) {
+							$item = $this->get_item( $item_id, false );
+							$item_discount_tax = 0;
+
+							if ( $item && ProductTaxStatus::TAXABLE === $item->get_tax_status() && wc_tax_enabled() ) {
+								$item_taxes = WC_Tax::calc_tax( $item_discount_amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), $this->get_prices_include_tax() );
+								$item_discount_tax = array_sum( $item_taxes );
+								if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+									$item_discount_tax = wc_round_tax_total( $item_discount_tax );
+								}
+							}
+
+							$new_applied_items[ $item_id ] = array(
+								'discount' => $item_discount_amount,
+								'discount_tax' => $item_discount_tax,
+							);
+						}
+					}
+
+					if ( ! empty( $new_applied_items ) ) {
+						$coupon_item->add_meta_data( 'coupon_applied_items', $new_applied_items, true );
+					}
+				} elseif ( ! empty( $locked_items ) ) {
+					// Coupon has zero remaining amount but we need to preserve locked item metadata.
+					$existing_applied_items = $coupon_item->get_meta( 'coupon_applied_items', true );
+					if ( is_array( $existing_applied_items ) && ! empty( $existing_applied_items ) ) {
+						// Keep the existing metadata intact for locked items.
+						$preserved_items = array();
+						foreach ( $existing_applied_items as $item_id => $discount_data ) {
+							if ( in_array( (int) $item_id, $locked_items, true ) ) {
+								$preserved_items[ $item_id ] = $discount_data;
+							}
+						}
+						if ( ! empty( $preserved_items ) ) {
+							$coupon_item->add_meta_data( 'coupon_applied_items', $preserved_items, true );
+						}
+					}
+				}
 
 				$this->add_item( $coupon_item );
 			}
