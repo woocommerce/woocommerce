@@ -59,9 +59,8 @@ function attributesAutoselect( $variation_selectors ) {
 			optionStyle = $current_variation_selector.data( 'optionStyle' ) || 'pills';
 		// Dropdown options or Pill inputs,
 		// that HAVE a value (Choose an Option has an empty value of ""),
-		// are NOT disabled (disabled by attribute is when you cannot click it, disabled by class is when it is simply grayed-out/crossed-out, but you can still click it),
 		// and are compatible with the possible variations
-		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""], :disabled, .disabled)' ).filter( ( i, e ) => {
+		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""])' ).filter( ( i, e ) => {
 			const $el = $( e );
 			var name = '';
 			switch ( optionStyle ) {
@@ -89,6 +88,8 @@ function attributesAutoselect( $variation_selectors ) {
 				in_autoselect_scope = true;
 				switch ( optionStyle ) {
 					case 'pills':
+						// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
+						$valid_choices.removeClass( 'disabled' ).prop( 'disabled', false );
 						$valid_choices.click();
 						break;
 					case 'dropdown':
