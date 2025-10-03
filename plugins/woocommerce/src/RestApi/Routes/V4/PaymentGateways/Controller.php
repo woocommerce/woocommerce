@@ -218,6 +218,12 @@ class Controller extends AbstractController {
 						break;
 					}
 					$settings[ $key ] = $value;
+					// Update gateway property for special fields.
+					if ( 'title' === $key ) {
+						$gateway->title = $value;
+					} elseif ( 'description' === $key ) {
+						$gateway->description = $value;
+					}
 				}
 			}
 
@@ -400,18 +406,16 @@ class Controller extends AbstractController {
 	 * Validate checkbox based settings.
 	 *
 	 * @since 3.0.0
-	 * @param string $value Value.
-	 * @param array  $setting Setting.
-	 * @return string|WP_Error
+	 * @param mixed $value Value.
+	 * @param array $setting Setting.
+	 * @return bool|WP_Error
 	 */
 	public function validate_setting_checkbox_field( $value, $setting ) {
-		if ( in_array( $value, array( 'yes', 'no' ), true ) ) {
-			return $value;
-		} elseif ( empty( $value ) ) {
-			return isset( $setting['default'] ) ? $setting['default'] : 'no';
-		} else {
+		if ( ! is_bool( $value ) ) {
 			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
+
+		return $value;
 	}
 
 

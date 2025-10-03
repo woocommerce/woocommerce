@@ -519,13 +519,27 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 		return array(
 			'boolean true'  => array(
 				'input'        => true,
-				'expected'     => true,
 				'expect_error' => false,
 			),
 			'boolean false' => array(
 				'input'        => false,
-				'expected'     => false,
 				'expect_error' => false,
+			),
+			'string 1'      => array(
+				'input'        => '1',
+				'expect_error' => true,
+			),
+			'string 0'      => array(
+				'input'        => '0',
+				'expect_error' => true,
+			),
+			'integer 1'     => array(
+				'input'        => 1,
+				'expect_error' => true,
+			),
+			'integer 0'     => array(
+				'input'        => 0,
+				'expect_error' => true,
 			),
 		);
 	}
@@ -535,14 +549,15 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 *
 	 * @dataProvider data_provider_checkbox_field_validation
 	 * @param mixed $input        Input value to test.
-	 * @param bool  $expected     Expected output value.
 	 * @param bool  $expect_error Whether an error is expected.
 	 */
-	public function test_validate_checkbox_field( $input, bool $expected, bool $expect_error ): void {
-		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
+	public function test_validate_checkbox_field( $input, bool $expect_error ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cod' );
 		$request->set_body_params(
 			array(
-				'enabled' => $input,
+				'settings' => array(
+					'enable_for_virtual' => $input,
+				),
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -551,9 +566,9 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 			$this->assertEquals( 400, $response->get_status() );
 			$this->assertEquals( 'rest_setting_value_invalid', $response->get_data()['code'] );
 		} else {
-			$gateway = $response->get_data();
 			$this->assertEquals( 200, $response->get_status() );
-			$this->assertEquals( $expected, $gateway['enabled'] );
+			$gateway = $response->get_data();
+			$this->assertEquals( $input, $gateway['settings']['enable_for_virtual']['value'] );
 		}
 	}
 
