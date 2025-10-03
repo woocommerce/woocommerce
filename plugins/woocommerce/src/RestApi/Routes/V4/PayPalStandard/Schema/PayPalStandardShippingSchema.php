@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard\Shipping;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
