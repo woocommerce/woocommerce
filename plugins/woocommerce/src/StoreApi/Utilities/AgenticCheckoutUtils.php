@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * AgenticCheckoutUtils class.
@@ -303,5 +304,29 @@ class AgenticCheckoutUtils {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Check if the Agentic Checkout feature is enabled.
+	 *
+	 * V1 implementation: Returns true if feature is enabled (no auth check).
+	 * Future: Implement Bearer token authentication.
+	 *
+	 * @param \WP_REST_Request $request Request object (reserved for future auth check).
+	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
+	 */
+	public static function is_authorized( \WP_REST_Request $request ) {
+		// Check if feature is enabled.
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_agentic_checkout_disabled',
+				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		// V1: Allow all requests (implement proper auth in future).
+		return true;
 	}
 }
