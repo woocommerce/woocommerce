@@ -53,7 +53,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	public function __construct( $schema_controller, $schema ) {
 		parent::__construct( $schema_controller, $schema );
 		$this->order_controller = new OrderController();
-		$this->cart_controller = new CartController();
+		$this->cart_controller  = new CartController();
 	}
 
 	/**
@@ -255,7 +255,7 @@ class CheckoutSessions extends AbstractCartRoute {
 				);
 			} catch ( \Exception $e ) {
 				// Map exception messages to protocol-compliant error responses.
-				$error_code = 'invalid_product';
+				$error_code    = 'invalid_product';
 				$error_message = $e->getMessage();
 
 				// Detect specific error types from exception message.
