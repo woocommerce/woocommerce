@@ -329,17 +329,6 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Calculate totals after shipping method is set.
 		WC()->cart->calculate_totals();
 
-		// Ensure draft order exists using core trait methods.
-		// The core cart_updated() method will sync it with the cart after this response.
-		$draft_order = $this->get_draft_order();
-
-		if ( ! $draft_order ) {
-			// Create new draft order from cart using core OrderController.
-			$draft_order = $this->order_controller->create_order_from_cart();
-			$draft_order->save();
-			$this->set_draft_order_id( $draft_order->get_id() );
-		}
-
 		// Build response from canonical cart schema.
 		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
 
@@ -462,5 +451,28 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Recalculate shipping.
 		WC()->cart->calculate_shipping();
+	}
+
+	/**
+	 * When the cart is updated, create or update draft order.
+	 * Overrides parent to ensure draft order is created if it doesn't exist.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function cart_updated( \WP_REST_Request $request ) {
+		// Only create/update draft order if cart has items.
+		// This prevents errors when validation fails and cart is empty.
+		if ( WC()->cart && ! WC()->cart->is_empty() ) {
+			$draft_order = $this->get_draft_order();
+
+			if ( ! $draft_order ) {
+				// Create new draft order from cart using core OrderController.
+				$draft_order = $this->order_controller->create_order_from_cart();
+				$draft_order->save();
+				$this->set_draft_order_id( $draft_order->get_id() );
+			}
+
+			parent::cart_updated( $request );
+		}
 	}
 }
