@@ -99,7 +99,6 @@ class Controller extends AbstractController {
 	 * @return bool|WP_Error
 	 */
 	public function get_item_permissions_check( $request ) {
-        return true;
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new WP_Error(
 				'rest_forbidden',
@@ -135,14 +134,14 @@ class Controller extends AbstractController {
 	 */
 	public function get_item( $request ) {
 		$settings_instance = $this->get_settings_products_instance();
-		$sections = $settings_instance->get_sections();
+		$sections          = $settings_instance->get_sections();
 
 		$settings = array();
 
 		// Get settings for each section through WC's filter system
 		foreach ( array_keys( $sections ) as $section ) {
 			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings = array_merge( $settings, $section_settings );
+			$settings         = array_merge( $settings, $section_settings );
 		}
 
 		$response = $this->schema->get_item_response( $settings, $request );
@@ -177,13 +176,13 @@ class Controller extends AbstractController {
 
 		// Get all product settings definitions.
 		$settings_instance = $this->get_settings_products_instance();
-		$sections = $settings_instance->get_sections();
-		$settings = array();
+		$sections          = $settings_instance->get_sections();
+		$settings          = array();
 
 		// Get settings for each section through WC's filter system
 		foreach ( array_keys( $sections ) as $section ) {
 			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings = array_merge( $settings, $section_settings );
+			$settings         = array_merge( $settings, $section_settings );
 		}
 		$settings_by_id     = array_column( $settings, null, 'id' );
 		$valid_setting_ids  = array_keys( $settings_by_id );
@@ -237,13 +236,13 @@ class Controller extends AbstractController {
 
 		// Get all settings after update
 		$settings_instance = $this->get_settings_products_instance();
-		$sections = $settings_instance->get_sections();
-		$settings = array();
+		$sections          = $settings_instance->get_sections();
+		$settings          = array();
 
 		// Get settings for each section through WC's filter system
 		foreach ( array_keys( $sections ) as $section ) {
 			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings = array_merge( $settings, $section_settings );
+			$settings         = array_merge( $settings, $section_settings );
 		}
 
 		// Return updated settings
@@ -350,7 +349,7 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a single item for response.
 	 *
-	 * @param mixed            $item    Object to prepare.
+	 * @param mixed           $item    Object to prepare.
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Response data.
 	 */
