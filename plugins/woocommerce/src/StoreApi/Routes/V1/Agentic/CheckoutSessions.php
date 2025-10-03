@@ -63,7 +63,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return string
 	 */
 	public function get_path() {
-		return '/checkout_sessions';
+		return $this->get_path_regex();
 	}
 
 	/**
