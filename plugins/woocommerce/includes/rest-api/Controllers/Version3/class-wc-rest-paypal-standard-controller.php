@@ -5,16 +5,11 @@
  *
  * Handles requests to the /paypal-standard endpoint.
  *
- * @package Automattic\WooCommerce\RestApi
+ * @package WooCommerce\RestApi
  * @since   10.3.0
  */
 
 declare(strict_types=1);
-
-namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping;
-
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping\Schema\PaypalShippingSchema;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -31,36 +26,26 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 }
 
 /**
- * REST API PayPal Standard shipping controller class.
+ * REST API PayPal Standard controller class.
  *
- * @package Automattic\WooCommerce\RestApi
- * @extends AbstractController
+ * @package WooCommerce\RestApi
+ * @extends WC_REST_Controller
  */
-class Controller extends AbstractController {
+class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
+
+	/**
+	 * Endpoint namespace.
+	 *
+	 * @var string
+	 */
+	protected $namespace = 'wc/v3';
+
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'paypal';
-
-	/**
-	 * Initialize the controller.
-	 *
-	 * @param PaypalShippingSchema $shipping_schema PayPal shipping schema class.
-	 * @internal
-	 */
-	final public function init( PaypalShippingSchema $shipping_schema ) {
-		$this->item_schema = $shipping_schema;
-	}
-
-	/**
-	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
-	 * after running various hooks on the response.
-	 */
-	protected function get_schema(): array {
-		return $this->item_schema->get_item_schema();
-	}
+	protected $rest_base = 'paypal-standard';
 
 	/**
 	 * Register the routes for PayPal Standard REST API requests.
@@ -70,15 +55,12 @@ class Controller extends AbstractController {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/shipping',
+			'/' . $this->rest_base . '/update-shipping',
 			array(
-				'schema' => array( $this, 'get_public_item_schema' ),
-				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => '__return_true',
-				),
-			),
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'process_shipping_callback' ),
+				'permission_callback' => '__return_true',
+			)
 		);
 	}
 
@@ -86,57 +68,44 @@ class Controller extends AbstractController {
 	 * Callback for when the customer updates their shipping details in PayPal.
 	 * https://developer.paypal.com/docs/checkout/standard/customize/shipping-module/#server-side-shipping-callbacks
 	 *
-	 * @param \WP_REST_Request $request The request object.
-	 * @return \WP_REST_Response The response object.
+	 * @param WP_REST_Request $request The request object.
+	 * @return WP_REST_Response The response object.
 	 */
-	public function update_item( \WP_REST_Request $request ) {
+	public function process_shipping_callback( WP_REST_Request $request ) {
 		$paypal_order_id  = $request->get_param( 'id' );
 		$shipping_address = $request->get_param( 'shipping_address' );
 		$shipping_option  = $request->get_param( 'shipping_option' );
 		$purchase_units   = $request->get_param( 'purchase_units' );
 
-		// Ensure we have arrays before indexing.
-		$shipping_address = is_array( $shipping_address ) ? $shipping_address : array();
-		$purchase_units   = is_array( $purchase_units ) ? $purchase_units : array();
-		if ( ! empty( $shipping_option ) && ! is_array( $shipping_option ) ) {
-			$shipping_option = array();
-		}
-
 		// Note: shipping_option may or may not be present.
-		if (
-			empty( $paypal_order_id )
-			|| empty( $shipping_address )
-			|| empty( $purchase_units )
-			|| ! isset( $purchase_units[0] )
-			|| ! is_array( $purchase_units[0] )
-		) {
+		if ( empty( $paypal_order_id ) || empty( $shipping_address ) || empty( $purchase_units ) ) {
 			$response = $this->get_update_shipping_error_response();
-			return new \WP_REST_Response( $response, 422 );
+			return new WP_REST_Response( $response, 422 );
 		}
 
 		// Get the WC order.
-		$order = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
+		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
 			$custom_id = isset( $purchase_units[0]['custom_id'] ) ? $purchase_units[0]['custom_id'] : '{}';
-			\WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
+			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
 			$response = $this->get_update_shipping_error_response();
-			return new \WP_REST_Response( $response, 422 );
+			return new WP_REST_Response( $response, 422 );
 		}
 
 		// Compare PayPal order IDs.
 		$paypal_order_id_from_order_meta = $order->get_meta( '_paypal_order_id', true );
 		if ( $paypal_order_id !== $paypal_order_id_from_order_meta ) {
-			\WC_Gateway_Paypal::log(
+			WC_Gateway_Paypal::log(
 				'PayPal order ID mismatch. Order ID: ' . $order->get_id() .
 				'. PayPal order ID (request): ' . $paypal_order_id .
 				'. PayPal order ID (order meta): ' . $paypal_order_id_from_order_meta
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new \WP_REST_Response( $response, 422 );
+			return new WP_REST_Response( $response, 422 );
 		}
 
 		if ( ! WC()->session ) {
-			WC()->session = new \WC_Session_Handler();
+			WC()->session = new WC_Session_Handler();
 		}
 		WC()->session->init();
 
@@ -150,18 +119,12 @@ class Controller extends AbstractController {
 		// Get the new shipping options, which depend on the new shipping address.
 		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
 		if ( empty( $updated_shipping_options ) ) {
-			\WC_Gateway_Paypal::log(
+			WC_Gateway_Paypal::log(
 				'No shipping options found for address. Order ID: ' . $order->get_id() .
-				'. Address (redacted): ' . wp_json_encode(
-					array(
-						'country_code' => $shipping_address['country_code'] ?? '',
-						'postal_code'  => $shipping_address['postal_code'] ?? '',
-						'region'       => $shipping_address['admin_area_1'] ?? '',
-					)
-				)
+				'. Address: ' . wp_json_encode( $shipping_address )
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new \WP_REST_Response( $response, 422 );
+			return new WP_REST_Response( $response, 422 );
 		}
 
 		// Set the chosen shipping method in the session.
@@ -172,10 +135,10 @@ class Controller extends AbstractController {
 		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		$paypal_request = new \WC_Gateway_Paypal_Request( \WC_Gateway_Paypal::get_instance() );
+		$paypal_request = new WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
-		$shipping_data = array(
+		$response = array(
 			'id'             => $paypal_order_id,
 			'purchase_units' => array(
 				array(
@@ -186,26 +149,13 @@ class Controller extends AbstractController {
 			),
 		);
 
-		$request->set_param( 'context', 'edit' );
-
-		return $this->prepare_item_for_response( $shipping_data, $request );
-	}
-
-	/**
-	 * Prepare a single standard object for response.
-	 *
-	 * @param array            $shipping_data PayPal shipping data.
-	 * @param \WP_REST_Request $request Request object.
-	 * @return array
-	 */
-	protected function get_item_response( $shipping_data, \WP_REST_Request $request ): array {
-		return $this->item_schema->get_item_response( $shipping_data, $request, $this->get_fields_for_response( $request ) );
+		return new WP_REST_Response( $response, 200 );
 	}
 
 	/**
 	 * Rebuild the session cart.
 	 *
-	 * @param \WC_Order $order The order object.
+	 * @param WC_Order $order The order object.
 	 * @return void
 	 */
 	private function rebuild_cart_from_order( $order ) {
@@ -241,7 +191,7 @@ class Controller extends AbstractController {
 	/**
 	 * Recompute the fees for the order.
 	 *
-	 * @param \WC_Order $order The order object.
+	 * @param WC_Order $order The order object.
 	 * @return void
 	 */
 	private function recompute_fees( $order ) {
@@ -257,8 +207,8 @@ class Controller extends AbstractController {
 	/**
 	 * Update the WooCommerce order with the new shipping address.
 	 *
-	 * @param \WC_Order $order The order object.
-	 * @param array     $shipping_address The shipping address.
+	 * @param WC_Order $order The order object.
+	 * @param array    $shipping_address The shipping address.
 	 * @return void
 	 */
 	private function update_order_shipping_address( $order, $shipping_address ) {
@@ -280,7 +230,7 @@ class Controller extends AbstractController {
 		$order->save();
 
 		// Get customer from order and update their shipping location.
-		$customer = new \WC_Customer();
+		$customer = new WC_Customer();
 		$customer->set_location( $country, $state, $postcode, $city );
 		$customer->set_shipping_location( $country, $state, $postcode, $city );
 		$customer->set_calculated_shipping( true );
@@ -290,8 +240,8 @@ class Controller extends AbstractController {
 	/**
 	 * Get the shipping options for the order.
 	 *
-	 * @param \WC_Order $order The order object.
-	 * @param array     $selected_shipping_option The selected shipping option.
+	 * @param WC_Order $order The order object.
+	 * @param array    $selected_shipping_option The selected shipping option.
 	 * @return array The shipping options.
 	 */
 	private function get_updated_shipping_options( $order, $selected_shipping_option ) {
