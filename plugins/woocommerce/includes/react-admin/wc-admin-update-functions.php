@@ -289,7 +289,7 @@ function wc_update_670_delete_deprecated_remote_inbox_notifications_option() {
  */
 function wc_update_1040_add_idx_date_paid_status_parent() {
 	global $wpdb;
-	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}wc_order_stats WHERE key_name = 'woo_idx_comment_type'" );
+	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}wc_order_stats WHERE key_name = 'idx_date_paid_status_parent'" );
 
 	if ( is_null( $index_exists ) ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
