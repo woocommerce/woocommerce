@@ -173,13 +173,7 @@ class CheckoutSessions extends AbstractCartRoute {
 			AgenticCheckoutUtils::clear_fulfillment_address( WC()->customer );
 		}
 
-		// Set selected shipping method if provided.
-		$fulfillment_option_id = $request->get_param( 'fulfillment_option_id' );
-		if ( $fulfillment_option_id ) {
-			WC()->session->set( 'chosen_shipping_methods', array( $fulfillment_option_id ) );
-		}
-
-		// Calculate totals after shipping method is set.
+		// Calculate totals.
 		WC()->cart->calculate_totals();
 
 		// Build response from canonical cart schema.

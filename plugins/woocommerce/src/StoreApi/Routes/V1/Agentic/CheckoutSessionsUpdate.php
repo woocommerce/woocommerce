@@ -105,7 +105,14 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return array Parameters array.
 	 */
 	protected function get_update_params() {
-		return AgenticCheckoutUtils::get_shared_params();
+		$params = AgenticCheckoutUtils::get_shared_params();
+
+		$params['fulfillment_option_id'] = [
+			'description' => __( 'Selected fulfillment option ID.', 'woocommerce' ),
+			'type'        => 'string',
+		];
+
+		return $params;
 	}
 
 	/**
