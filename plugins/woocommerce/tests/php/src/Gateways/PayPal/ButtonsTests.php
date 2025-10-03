@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 use Automattic\WooCommerce\Gateways\PayPal\Buttons;
 
 /**
- * Class ButtonsTest.
+ * Class ButtonsTests.
  */
 class ButtonsTests extends \WC_Unit_Test_Case {
 	/**
