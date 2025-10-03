@@ -403,7 +403,7 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 */
 	public function data_provider_text_field_validation(): array {
 		return array(
-			'plain text'                     => array(
+			'plain text'                        => array(
 				'input'    => 'Check Payment',
 				'expected' => 'Check Payment',
 			),
@@ -411,19 +411,19 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 				'input'    => '  Check Payment  ',
 				'expected' => 'Check Payment',
 			),
-			'text with script tags'          => array(
+			'text with script tags'             => array(
 				'input'    => '<script>alert("xss")</script>Check Payment',
 				'expected' => 'alert("xss")Check Payment', // Script tags removed but content remains.
 			),
-			'text with allowed HTML'         => array(
+			'text with allowed HTML'            => array(
 				'input'    => '<strong>Check</strong> Payment',
 				'expected' => '<strong>Check</strong> Payment',
 			),
-			'text with dangerous HTML'       => array(
+			'text with dangerous HTML'          => array(
 				'input'    => '<img src=x onerror="alert(1)">Check Payment',
 				'expected' => '<img src="x">Check Payment', // onerror attribute removed.
 			),
-			'empty string'                   => array(
+			'empty string'                      => array(
 				'input'    => '',
 				'expected' => '',
 			),
@@ -434,6 +434,8 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 * Test text field validation with various inputs.
 	 *
 	 * @dataProvider data_provider_text_field_validation
+	 * @param mixed  $input    Input value to test.
+	 * @param string $expected Expected output value.
 	 */
 	public function test_validate_text_field( $input, string $expected ): void {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
@@ -489,6 +491,8 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 * Test textarea field validation with various inputs.
 	 *
 	 * @dataProvider data_provider_textarea_field_validation
+	 * @param mixed  $input    Input value to test.
+	 * @param string $expected Expected output value.
 	 */
 	public function test_validate_textarea_field( $input, string $expected ): void {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
@@ -514,14 +518,14 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	public function data_provider_checkbox_field_validation(): array {
 		return array(
 			'boolean true'  => array(
-				'input'         => true,
-				'expected'      => true,
-				'expect_error'  => false,
+				'input'        => true,
+				'expected'     => true,
+				'expect_error' => false,
 			),
 			'boolean false' => array(
-				'input'         => false,
-				'expected'      => false,
-				'expect_error'  => false,
+				'input'        => false,
+				'expected'     => false,
+				'expect_error' => false,
 			),
 		);
 	}
@@ -530,6 +534,9 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 * Test checkbox field validation with various inputs.
 	 *
 	 * @dataProvider data_provider_checkbox_field_validation
+	 * @param mixed $input        Input value to test.
+	 * @param bool  $expected     Expected output value.
+	 * @param bool  $expect_error Whether an error is expected.
 	 */
 	public function test_validate_checkbox_field( $input, bool $expected, bool $expect_error ): void {
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
@@ -557,17 +564,17 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 */
 	public function data_provider_multiselect_field_validation(): array {
 		return array(
-			'empty array'          => array(
+			'empty array'       => array(
 				'input'        => array(),
 				'expected'     => array(),
 				'expect_error' => false,
 			),
-			'non-array string'     => array(
+			'non-array string'  => array(
 				'input'        => 'not_an_array',
 				'expected'     => null,
 				'expect_error' => true,
 			),
-			'non-array integer'    => array(
+			'non-array integer' => array(
 				'input'        => 123,
 				'expected'     => null,
 				'expect_error' => true,
@@ -579,6 +586,9 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 	 * Test multiselect field validation with various inputs.
 	 *
 	 * @dataProvider data_provider_multiselect_field_validation
+	 * @param mixed $input        Input value to test.
+	 * @param mixed $expected     Expected output value.
+	 * @param bool  $expect_error Whether an error is expected.
 	 */
 	public function test_validate_multiselect_field( $input, $expected, bool $expect_error ): void {
 		global $wp;
