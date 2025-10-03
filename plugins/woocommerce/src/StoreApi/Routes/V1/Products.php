@@ -481,23 +481,24 @@ class Products extends AbstractRoute {
 		$max_variations = apply_filters( 'woocommerce_batch_prime_max_variations', 5000 );
 
 		$variations_to_prime = array();
-		$products_to_prime = array();
-		$total_count = 0;
+		$products_to_prime   = array();
 
+		$total_count = 0;
 		foreach ( $products as $product ) {
 			if ( ! $product->is_type( ProductType::VARIABLE ) ) {
 				continue;
 			}
 
 			$variation_ids = $product->get_visible_children();
-			$count = count( $variation_ids );
 
+			$count = count( $variation_ids );
 			if ( $total_count + $count > $max_variations ) {
 				break;
 			}
 
 			$variations_to_prime = array_merge( $variations_to_prime, $variation_ids );
 			$products_to_prime[] = $product;
+
 			$total_count += $count;
 		}
 
