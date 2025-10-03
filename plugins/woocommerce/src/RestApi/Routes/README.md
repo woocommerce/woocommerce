@@ -99,6 +99,7 @@ To register a new V4 route, you must add it to the REST API Server:
 
 
 2. **Add to the `get_v4_controllers()` method** in `/includes/rest-api/Server.php`:
+
    ```php
    protected function get_v4_controllers() {
        return array(
