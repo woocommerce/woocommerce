@@ -38,9 +38,8 @@ if (empty($output)) {
 }
 
 // Parse the diff output to find added and deleted functions
-$addedFunctions = [];
+$addedFunctionFileMap = [];
 $deletedFunctions = [];
-$functionFileMap = [];
 
 $currentFile = '';
 foreach ($output as $line) {
@@ -54,8 +53,7 @@ foreach ($output as $line) {
     // Look for added functions (lines starting with +)
     if (preg_match('/^\+.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches)) {
         $functionName = $matches[1];
-        $addedFunctions[] = $functionName;
-        $functionFileMap[$functionName] = $currentFile;
+        $addedFunctionFileMap[$functionName] = $currentFile;
     }
     
     // Look for deleted functions (lines starting with -)
@@ -65,24 +63,19 @@ foreach ($output as $line) {
     }
 }
 
-// Remove duplicates while preserving order
-$addedFunctions = array_unique($addedFunctions);
-$deletedFunctions = array_unique($deletedFunctions);
-
-// Calculate net added functions (added minus deleted)
-$netAddedFunctions = array_diff($addedFunctions, $deletedFunctions);
-
-// Filter function file map to only include net added functions
+// Calculate net added functions (added minus deleted) and clean file paths
 $netFunctionFileMap = [];
-foreach ($netAddedFunctions as $function) {
-    if (isset($functionFileMap[$function])) {
-        // Remove "plugins/woocommerce/" prefix from file path
-        $filePath = $functionFileMap[$function];
-        if (strpos($filePath, 'plugins/woocommerce/') === 0) {
-            $filePath = substr($filePath, 19); // Remove "plugins/woocommerce/" (19 characters)
-        }
-        $netFunctionFileMap[$function] = $filePath;
+foreach ($addedFunctionFileMap as $function => $filePath) {
+    // Skip functions that were also deleted (net zero change)
+    if (in_array($function, $deletedFunctions)) {
+        continue;
     }
+    
+    // Remove "plugins/woocommerce/" prefix from file path
+    if (strpos($filePath, 'plugins/woocommerce/') === 0) {
+        $filePath = substr($filePath, 19); // Remove "plugins/woocommerce/" (19 characters)
+    }
+    $netFunctionFileMap[$function] = $filePath;
 }
 
 // Check if there are any net added functions
