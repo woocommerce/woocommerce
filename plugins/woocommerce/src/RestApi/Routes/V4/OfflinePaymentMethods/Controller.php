@@ -2,7 +2,7 @@
 /**
  * REST API Offline Payment Methods Controller
  *
- * Handles requests to the /payments/offline-methods endpoint.
+ * Handles requests to the /settings/payments/offline-methods endpoint.
  *
  * @package WooCommerce\RestApi
  */
