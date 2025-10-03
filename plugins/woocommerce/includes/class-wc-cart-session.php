@@ -715,9 +715,9 @@ final class WC_Cart_Session {
 	 * @return bool True if expired items should be removed, false otherwise.
 	 */
 	public function clean_up_removed_cart_contents() {
+		// Limit to page requests initiated by the user.
 		$is_page = is_singular() || is_archive() || is_search();
-
-		if ( is_404() || ! $is_page || is_admin() ) {
+		if ( is_404() || ! $is_page ) {
 			return;
 		}
 
@@ -727,5 +727,6 @@ final class WC_Cart_Session {
 		}
 
 		WC()->session->set( 'removed_cart_contents', null );
+		$this->cart->set_removed_cart_contents( array() );
 	}
 }
