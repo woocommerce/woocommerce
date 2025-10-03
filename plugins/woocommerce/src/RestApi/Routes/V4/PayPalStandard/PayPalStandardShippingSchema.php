@@ -66,8 +66,8 @@ class PayPalStandardShippingSchema extends AbstractSchema {
 	/**
 	 * Get the item response.
 	 *
-	 * @param array $shipping_data The shipping data array;
-	 * @param \WP_REST_Request  $request Request object.
+	 * @param array            $shipping_data The shipping data array.
+	 * @param \WP_REST_Request $request Request object.
 	 * @param array            $include_fields Fields to include in the response.
 	 * @return array The item response.
 	 */

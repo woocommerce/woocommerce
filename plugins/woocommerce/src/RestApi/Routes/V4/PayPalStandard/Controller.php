@@ -169,14 +169,19 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * @inheritDoc
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
 	 */
 	protected function get_schema(): array {
 		return $this->item_schema->get_item_schema();
 	}
 
 	/**
-	 * @inheritDoc
+	 * Prepare a single order object for response.
+	 *
+	 * @param array $item The PayPal Standard shipping data.
+	 * @param \WP_REST_Request  $request Request object.
+	 * @return array
 	 */
 	protected function get_item_response( $item, \WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $item, $request, $this->get_fields_for_response( $request ) );
