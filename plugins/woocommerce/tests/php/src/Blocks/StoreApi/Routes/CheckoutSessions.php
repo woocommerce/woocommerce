@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
@@ -18,6 +17,13 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
+
+	/**
+	 * Products created for tests.
+	 *
+	 * @var array
+	 */
+	protected $products = array();
 
 	/**
 	 * Setup test product data. Called before every test.
@@ -121,27 +127,140 @@ class CheckoutSessions extends ControllerTestCase {
 	}
 
 	/**
+	 * Helper: Create base checkout session request data.
+	 *
+	 * @param array $overrides Optional array to override default values.
+	 * @return array Request data.
+	 */
+	private function create_checkout_request( $overrides = array() ) {
+		$defaults = array(
+			'items' => array(
+				array(
+					'id'       => (string) $this->products[0]->get_id(),
+					'quantity' => 1,
+				),
+			),
+		);
+		return array_merge_recursive( $defaults, $overrides );
+	}
+
+	/**
+	 * Helper: Get test fulfillment address.
+	 *
+	 * @param array $overrides Optional array to override default values.
+	 * @return array Address data.
+	 */
+	private function get_test_address( $overrides = array() ) {
+		$defaults = array(
+			'name'        => 'John Doe',
+			'line_one'    => '555 Golden Gate Avenue',
+			'line_two'    => '',
+			'city'        => 'San Francisco',
+			'state'       => 'CA',
+			'country'     => 'US',
+			'postal_code' => '94102',
+		);
+		return array_merge( $defaults, $overrides );
+	}
+
+	/**
+	 * Helper: Get test buyer information.
+	 *
+	 * @param array $overrides Optional array to override default values.
+	 * @return array Buyer data.
+	 */
+	private function get_test_buyer( $overrides = array() ) {
+		$defaults = array(
+			'first_name'   => 'Jane',
+			'last_name'    => 'Smith',
+			'email'        => 'jane@example.com',
+			'phone_number' => '+1234567890',
+		);
+		return array_merge( $defaults, $overrides );
+	}
+
+	/**
+	 * Helper: Create and dispatch a checkout session request.
+	 *
+	 * @param array $body_params Request body parameters.
+	 * @return \WP_REST_Response Response object.
+	 */
+	private function create_session( $body_params ) {
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_body_params( $body_params );
+		return rest_get_server()->dispatch( $request );
+	}
+
+	/**
+	 * Assert that totals array has the correct structure.
+	 *
+	 * @param array $totals The totals array to validate.
+	 */
+	private function assertValidTotalsStructure( $totals ) {
+		$this->assertIsArray( $totals );
+		$this->assertNotEmpty( $totals );
+
+		// Verify required total types exist.
+		$total_types = array_column( $totals, 'type' );
+		$this->assertContains( 'items_base_amount', $total_types );
+		$this->assertContains( 'subtotal', $total_types );
+		$this->assertContains( 'total', $total_types );
+
+		// Verify each total has required fields.
+		foreach ( $totals as $total ) {
+			$this->assertArrayHasKey( 'type', $total );
+			$this->assertArrayHasKey( 'display_text', $total );
+			$this->assertArrayHasKey( 'amount', $total );
+			$this->assertIsInt( $total['amount'] );
+		}
+	}
+
+	/**
+	 * Assert that session ID is a valid Cart-Token (JWT format).
+	 *
+	 * @param string $session_id The session ID to validate.
+	 */
+	private function assertValidSessionId( $session_id ) {
+		$this->assertNotEmpty( $session_id );
+		$this->assertIsString( $session_id );
+
+		// JWT tokens have 3 parts separated by dots.
+		$parts = explode( '.', $session_id );
+		$this->assertCount( 3, $parts, 'Session ID should be a JWT token with 3 parts' );
+
+		// Validate that it's a valid Cart-Token.
+		$is_valid = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::validate_cart_token( $session_id );
+		$this->assertTrue( $is_valid, 'Session ID should be a valid Cart-Token' );
+
+		// Extract and verify payload.
+		$payload = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token_payload( $session_id );
+		$this->assertIsArray( $payload );
+		$this->assertArrayHasKey( 'user_id', $payload );
+		$this->assertArrayHasKey( 'exp', $payload );
+		$this->assertArrayHasKey( 'iss', $payload );
+		$this->assertEquals( 'store-api', $payload['iss'] );
+
+		// Verify customer ID matches.
+		$this->assertEquals( (string) WC()->session->get_customer_id(), $payload['user_id'] );
+	}
+
+	/**
 	 * Test creating a checkout session with items only.
 	 */
 	public function test_create_checkout_session_with_items() {
 		$this->markTestSkipped( 'Skipping test - status calculation needs review' );
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 2,
-						),
+		$response = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[0]->get_id(),
+						'quantity' => 2,
 					),
-				)
+				),
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'id', $data );
@@ -165,38 +284,25 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->assertIsInt( $data['line_items'][0]['base_amount'] );
 		$this->assertIsInt( $data['line_items'][0]['total'] );
 		$this->assertEquals( 2000, $data['line_items'][0]['base_amount'] ); // $10 * 2 = $20 = 2000 cents
+
+		// Verify session ID is valid.
+		$this->assertValidSessionId( $data['id'] );
 	}
 
 	/**
 	 * Test creating a checkout session with address.
 	 */
 	public function test_create_checkout_session_with_address() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
+		$test_address = $this->get_test_address( array( 'line_two' => 'Apt 401' ) );
+		$response     = $this->create_session(
+			$this->create_checkout_request(
 				array(
-					'items'               => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-					'fulfillment_address' => array(
-						'name'        => 'John Doe',
-						'line_one'    => '555 Golden Gate Avenue',
-						'line_two'    => 'Apt 401',
-						'city'        => 'San Francisco',
-						'state'       => 'CA',
-						'country'     => 'US',
-						'postal_code' => '94102',
-					),
+					'fulfillment_address' => $test_address,
 				)
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -220,29 +326,15 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test creating a checkout session with buyer info.
 	 */
 	public function test_create_checkout_session_with_buyer() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
+		$response = $this->create_session(
+			$this->create_checkout_request(
 				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-					'buyer' => array(
-						'first_name'   => 'Jane',
-						'last_name'    => 'Smith',
-						'email'        => 'jane@example.com',
-						'phone_number' => '+1234567890',
-					),
+					'buyer' => $this->get_test_buyer(),
 				)
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 
@@ -259,22 +351,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test status calculation for not_ready_for_payment.
 	 */
 	public function test_status_not_ready_for_payment() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		// Without address and shipping method, should be not_ready_for_payment.
@@ -285,9 +362,6 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test status calculation for ready_for_payment.
 	 */
 	public function test_status_ready_for_payment() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-
 		// Get shipping methods first.
 		wc()->customer->set_shipping_address_1( '555 Golden Gate Avenue' );
 		wc()->customer->set_shipping_city( 'San Francisco' );
@@ -296,34 +370,21 @@ class CheckoutSessions extends ControllerTestCase {
 		wc()->customer->set_shipping_country( 'US' );
 		wc()->cart->add_to_cart( $this->products[0]->get_id(), 1 );
 		wc()->cart->calculate_shipping();
+
 		$packages           = wc()->shipping()->get_packages();
 		$shipping_method_id = ! empty( $packages[0]['rates'] ) ? array_key_first( $packages[0]['rates'] ) : null;
 		wc_empty_cart();
 
-		$request->set_body(
-			wp_json_encode(
+		$response = $this->create_session(
+			$this->create_checkout_request(
 				array(
-					'items'                 => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-					'fulfillment_address'   => array(
-						'name'        => 'John Doe',
-						'line_one'    => '555 Golden Gate Avenue',
-						'city'        => 'San Francisco',
-						'state'       => 'CA',
-						'country'     => 'US',
-						'postal_code' => '94102',
-					),
+					'fulfillment_address'   => $this->get_test_address(),
 					'fulfillment_option_id' => $shipping_method_id,
 				)
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		// With address and shipping method, should be ready_for_payment.
 		$this->assertEquals( 'ready_for_payment', $data['status'] );
@@ -333,23 +394,18 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test invalid product ID returns error.
 	 */
 	public function test_invalid_product_returns_error() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => '999999',
-							'quantity' => 1,
-						),
+		$response = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => '999999',
+						'quantity' => 1,
 					),
-				)
+				),
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
@@ -364,22 +420,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$this->products[0]->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
 		$this->products[0]->save();
 
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 400, $response->get_status() );
@@ -391,23 +432,18 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test virtual product doesn't require shipping address.
 	 */
 	public function test_virtual_product_ready_for_payment_without_address() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[2]->get_id(), // Virtual product.
-							'quantity' => 1,
-						),
+		$response = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[2]->get_id(), // Virtual product.
+						'quantity' => 1,
 					),
-				)
+				),
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		// Virtual product should be ready_for_payment without address.
@@ -418,62 +454,18 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test totals array format.
 	 */
 	public function test_totals_array_format() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
-		$this->assertIsArray( $data['totals'] );
-		$this->assertNotEmpty( $data['totals'] );
-
-		// Verify required total types exist.
-		$total_types = array_column( $data['totals'], 'type' );
-		$this->assertContains( 'items_base_amount', $total_types );
-		$this->assertContains( 'subtotal', $total_types );
-		$this->assertContains( 'total', $total_types );
-
-		// Verify each total has required fields.
-		foreach ( $data['totals'] as $total ) {
-			$this->assertArrayHasKey( 'type', $total );
-			$this->assertArrayHasKey( 'display_text', $total );
-			$this->assertArrayHasKey( 'amount', $total );
-			$this->assertIsInt( $total['amount'] );
-		}
+		// Use the assertion helper method.
+		$this->assertValidTotalsStructure( $data['totals'] );
 	}
 
 	/**
 	 * Test payment provider is included.
 	 */
 	public function test_payment_provider_included() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		// Should have payment_provider even if null.
@@ -484,22 +476,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test links array includes terms and privacy.
 	 */
 	public function test_links_array() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		$this->assertIsArray( $data['links'] );
@@ -520,22 +497,7 @@ class CheckoutSessions extends ControllerTestCase {
 		// Disable feature.
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 
 		$this->assertEquals( 403, $response->get_status() );
 	}
@@ -544,22 +506,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test currency format is lowercase.
 	 */
 	public function test_currency_format_is_lowercase() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		// Currency should be lowercase (e.g., "usd" not "USD").
@@ -571,32 +518,18 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test address line_two returns empty string when not set.
 	 */
 	public function test_address_line_two_empty_string() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
+		$address_without_line_two = $this->get_test_address();
+		unset( $address_without_line_two['line_two'] ); // Remove line_two to test empty case.
+
+		$response = $this->create_session(
+			$this->create_checkout_request(
 				array(
-					'items'               => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-					'fulfillment_address' => array(
-						'name'        => 'John Doe',
-						'line_one'    => '555 Golden Gate Avenue',
-						// line_two not provided.
-						'city'        => 'San Francisco',
-						'state'       => 'CA',
-						'country'     => 'US',
-						'postal_code' => '94102',
-					),
+					'fulfillment_address' => $address_without_line_two,
 				)
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		// line_two should be empty string, not null.
 		$this->assertArrayHasKey( 'fulfillment_address', $data );
@@ -610,32 +543,15 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test address line_two preserves value when provided.
 	 */
 	public function test_address_line_two_with_value() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
+		$response = $this->create_session(
+			$this->create_checkout_request(
 				array(
-					'items'               => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-					'fulfillment_address' => array(
-						'name'        => 'John Doe',
-						'line_one'    => '555 Golden Gate Avenue',
-						'line_two'    => 'Apt 401',
-						'city'        => 'San Francisco',
-						'state'       => 'CA',
-						'country'     => 'US',
-						'postal_code' => '94102',
-					),
+					'fulfillment_address' => $this->get_test_address( array( 'line_two' => 'Apt 401' ) ),
 				)
 			)
 		);
 
-		$response = rest_get_server()->dispatch( $request );
-		$data     = $response->get_data();
+		$data = $response->get_data();
 
 		// line_two should preserve the provided value.
 		$this->assertEquals( 'Apt 401', $data['fulfillment_address']['line_two'] );
@@ -645,50 +561,13 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test session_id is a valid Cart-Token (JWT format).
 	 */
 	public function test_session_id_is_cart_token() {
-		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
-		$request->set_header( 'Content-Type', 'application/json' );
-		$request->set_body(
-			wp_json_encode(
-				array(
-					'items' => array(
-						array(
-							'id'       => (string) $this->products[0]->get_id(),
-							'quantity' => 1,
-						),
-					),
-				)
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'id', $data );
 
-		// Session ID should not be empty.
-		$this->assertNotEmpty( $data['id'] );
-
-		// Should be a string (JWT token format).
-		$this->assertIsString( $data['id'] );
-
-		// JWT tokens have 3 parts separated by dots.
-		$parts = explode( '.', $data['id'] );
-		$this->assertCount( 3, $parts, 'Session ID should be a JWT token with 3 parts' );
-
-		// Validate that it's a valid Cart-Token.
-		$is_valid = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::validate_cart_token( $data['id'] );
-		$this->assertTrue( $is_valid, 'Session ID should be a valid Cart-Token' );
-
-		// Extract and verify payload.
-		$payload = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token_payload( $data['id'] );
-		$this->assertIsArray( $payload );
-		$this->assertArrayHasKey( 'user_id', $payload );
-		$this->assertArrayHasKey( 'exp', $payload );
-		$this->assertArrayHasKey( 'iss', $payload );
-		$this->assertEquals( 'store-api', $payload['iss'] );
-
-		// Verify customer ID matches.
-		$this->assertEquals( (string) WC()->session->get_customer_id(), $payload['user_id'] );
+		// Use the assertion helper method.
+		$this->assertValidSessionId( $data['id'] );
 	}
 }
