@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * CheckoutSessions Controller Tests.
@@ -43,7 +42,6 @@ class CheckoutSessions extends ControllerTestCase {
 		}
 
 		// Enable the agentic_checkout feature.
-		$features_controller = wc_get_container()->get( FeaturesController::class );
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
 		$fixtures = new FixtureData();
