@@ -292,6 +292,6 @@ function wc_update_1040_add_idx_date_paid_status_parent() {
 	$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->prefix}wc_order_stats WHERE key_name = 'woo_idx_comment_type'" );
 
 	if ( is_null( $index_exists ) ) {
-		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
+		$wpdb->query( "ALTER TABLE {$wpdb->prefix}wc_order_stats ADD INDEX idx_date_paid_status_parent (date_paid, status, parent_id)" );
 	}
 }
