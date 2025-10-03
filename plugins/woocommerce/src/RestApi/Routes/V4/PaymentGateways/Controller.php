@@ -326,8 +326,6 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * TODO: Validation rules could possibly be implemented on an abstract level and overriden if needed.
-	 *
 	 * Validate text based settings.
 	 *
 	 * @param mixed $value  Field value.
