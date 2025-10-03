@@ -424,7 +424,7 @@ class WC_Gateway_Paypal_Request {
 						'locale'                       => str_replace( '_', '-', get_locale() ),
 						'order_update_callback_config' => array(
 							'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
-							'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
+							'callback_url'    => esc_url_raw( rest_url( 'wc/v4/paypal-standard/update-shipping' ) ),
 						),
 						'app_switch_preference'        => array(
 							'launch_paypal_app' => true,

@@ -11,6 +11,11 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPal\Shipping;
+
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard\Shipping\PayPalStandardShippingSchema;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
@@ -29,23 +34,32 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
  * REST API PayPal Standard controller class.
  *
  * @package WooCommerce\RestApi
- * @extends WC_REST_Controller
+ * @extends AbstractController
  */
-class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
-
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v3';
-
+class Controller extends AbstractController {
 	/**
 	 * Route base.
 	 *
 	 * @var string
 	 */
 	protected $rest_base = 'paypal-standard';
+
+	/**
+	 * Schema instance.
+	 *
+	 * @var PayPalStandardShippingSchema
+	 */
+	protected $item_schema;
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @param PayPalStandardShippingSchema $shipping_schema PayPal Standard shipping schema class.
+	 * @internal
+	 */
+	final public function init( PayPalStandardShippingSchema $shipping_schema ) {
+		$this->item_schema = $shipping_schema;
+	}
 
 	/**
 	 * Register the routes for PayPal Standard REST API requests.
@@ -57,10 +71,13 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/update-shipping',
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'process_shipping_callback' ),
-				'permission_callback' => '__return_true',
-			)
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'process_shipping_callback' ),
+					'permission_callback' => '__return_true',
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			),
 		);
 	}
 
@@ -68,10 +85,10 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 	 * Callback for when the customer updates their shipping details in PayPal.
 	 * https://developer.paypal.com/docs/checkout/standard/customize/shipping-module/#server-side-shipping-callbacks
 	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response The response object.
+	 * @param \WP_REST_Request $request The request object.
+	 * @return \WP_REST_Response The response object.
 	 */
-	public function process_shipping_callback( WP_REST_Request $request ) {
+	public function process_shipping_callback( \WP_REST_Request $request ) {
 		$paypal_order_id  = $request->get_param( 'id' );
 		$shipping_address = $request->get_param( 'shipping_address' );
 		$shipping_option  = $request->get_param( 'shipping_option' );
@@ -80,32 +97,32 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Note: shipping_option may or may not be present.
 		if ( empty( $paypal_order_id ) || empty( $shipping_address ) || empty( $purchase_units ) ) {
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Get the WC order.
-		$order = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
+		$order = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $purchase_units[0]['custom_id'] ?? '{}' );
 		if ( ! $order ) {
 			$custom_id = isset( $purchase_units[0]['custom_id'] ) ? $purchase_units[0]['custom_id'] : '{}';
-			WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
+			\WC_Gateway_Paypal::log( 'Unable to determine WooCommerce order from PayPal custom ID: ' . $custom_id );
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Compare PayPal order IDs.
 		$paypal_order_id_from_order_meta = $order->get_meta( '_paypal_order_id', true );
 		if ( $paypal_order_id !== $paypal_order_id_from_order_meta ) {
-			WC_Gateway_Paypal::log(
+			\WC_Gateway_Paypal::log(
 				'PayPal order ID mismatch. Order ID: ' . $order->get_id() .
 				'. PayPal order ID (request): ' . $paypal_order_id .
 				'. PayPal order ID (order meta): ' . $paypal_order_id_from_order_meta
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		if ( ! WC()->session ) {
-			WC()->session = new WC_Session_Handler();
+			WC()->session = new \WC_Session_Handler();
 		}
 		WC()->session->init();
 
@@ -119,12 +136,12 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Get the new shipping options, which depend on the new shipping address.
 		$updated_shipping_options = $this->get_updated_shipping_options( $order, $shipping_option );
 		if ( empty( $updated_shipping_options ) ) {
-			WC_Gateway_Paypal::log(
+			\WC_Gateway_Paypal::log(
 				'No shipping options found for address. Order ID: ' . $order->get_id() .
 				'. Address: ' . wp_json_encode( $shipping_address )
 			);
 			$response = $this->get_update_shipping_error_response();
-			return new WP_REST_Response( $response, 422 );
+			return new \WP_REST_Response( $response, 422 );
 		}
 
 		// Set the chosen shipping method in the session.
@@ -135,7 +152,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		$paypal_request = new WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
+		$paypal_request = new \WC_Gateway_Paypal_Request( \WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
 		$response = array(
@@ -149,7 +166,21 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 			),
 		);
 
-		return new WP_REST_Response( $response, 200 );
+		return new \WP_REST_Response( $response, 200 );
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function get_schema(): array {
+		return $this->item_schema->get_item_schema();
+	}
+
+	/**
+	 * @inheritDoc
+	 */
+	protected function get_item_response( $item, \WP_REST_Request $request ): array {
+		return $this->item_schema->get_item_response( $item, $request, $this->get_fields_for_response( $request ) );
 	}
 
 	/**
