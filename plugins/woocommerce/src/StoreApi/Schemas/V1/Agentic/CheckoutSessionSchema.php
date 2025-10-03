@@ -326,7 +326,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
 
 		// Generate session ID from Cart-Token.
-		$session_id = CartTokenUtils::get_cart_token( (string) WC()->session->get_customer_id() );
+		$session_id = WC()->session->get( 'agentic_session_id' );
+		if ( null === $session_id ) {
+			$session_id = CartTokenUtils::get_cart_token( (string) WC()->session->get_customer_id() );
+			WC()->session->set( 'agentic_session_id', $session_id );
+		}
 
 		return [
 			'id'                    => $session_id,
