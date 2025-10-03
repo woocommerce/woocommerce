@@ -85,21 +85,19 @@ foreach ($netAddedFunctions as $function) {
 // Print the diff output
 echo implode("\n", $output) . "\n";
 
-echo "\n" . str_repeat("=", 60) . "\n";
-echo "FUNCTION ANALYSIS RESULTS:\n";
-echo str_repeat("=", 60) . "\n\n";
+// Check if there are any net added functions
+if (empty($netFunctionFileMap)) {
+    exit(0);
+}
 
-echo "1. Added Functions:\n";
-var_dump($addedFunctions);
+// Print error message and formatted table
+echo "\nNo new functions are allowed in WooCommerce. All the new code should go into classes in the src directory\n\n";
 
-echo "\n2. Deleted Functions:\n";
-var_dump($deletedFunctions);
+// Format as table
+printf("%-30s | %s\n", "Function Name", "File Path");
+echo str_repeat("-", 80) . "\n";
+foreach ($netFunctionFileMap as $function => $file) {
+    printf("%-30s | %s\n", $function, $file);
+}
 
-echo "\n3. Function File Map (Added Functions -> Files):\n";
-var_dump($functionFileMap);
-
-echo "\n4. Net Added Functions (Added - Deleted):\n";
-var_dump($netAddedFunctions);
-
-echo "\n5. Net Function File Map (Net Added Functions -> Files):\n";
-var_dump($netFunctionFileMap);
+exit(1);
