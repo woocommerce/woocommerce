@@ -12,10 +12,11 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
-use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard\Controller as PayPalStandardController;
+use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -202,7 +203,6 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
-			'paypal-standard'          => 'WC_REST_Paypal_Standard_Controller',
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
@@ -222,6 +222,7 @@ class Server {
 			'shipping-zones'          => ShippingZonesController::class,
 			'orders'                  => OrdersController::class,
 			'offline-payment-methods' => OfflinePaymentMethodsController::class,
+			'paypal-standard'         => PayPalStandardController::class,
 			'settings-general'        => 'WC_REST_General_Settings_V4_Controller',
 			'settings-email'          => 'WC_REST_Email_Settings_V4_Controller',
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
