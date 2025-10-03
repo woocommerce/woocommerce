@@ -14,7 +14,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\RestApi\Routes\V4\PayPalStandard\Schema\PayPalStandardShippingSchema;
 
 defined( 'ABSPATH' ) || exit;
 
