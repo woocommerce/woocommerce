@@ -369,7 +369,6 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 		}
 		$wp->query_vars['rest_route'] = '/wc/v4/payment_gateways';
 
-		// Set REST_REQUEST constant if not already defined.
 		if ( ! defined( 'REST_REQUEST' ) ) {
 			define( 'REST_REQUEST', true );
 		}
