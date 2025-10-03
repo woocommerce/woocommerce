@@ -60,7 +60,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 	 * @param CustomOrdersTableController $hpos_controller The instance of CustomOrdersTableController to use.
 	 * @param LegacyProxy                 $legacy_proxy The instance of LegacyProxy to use.
 	 * @param DataSynchronizer            $data_synchronizer The instance of DataSynchronizer to use.
-	 * 
+	 *
 	 * @internal
 	 */
 	final public function init( CustomOrdersTableController $hpos_controller, LegacyProxy $legacy_proxy, DataSynchronizer $data_synchronizer ) {
