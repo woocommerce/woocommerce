@@ -93,10 +93,6 @@ class AgenticCheckoutUtils {
 				],
 				'required'    => [ 'line_one', 'city', 'country', 'postal_code' ],
 			],
-			'fulfillment_option_id' => [
-				'description' => __( 'Selected fulfillment option ID.', 'woocommerce' ),
-				'type'        => 'string',
-			],
 		];
 	}
 
