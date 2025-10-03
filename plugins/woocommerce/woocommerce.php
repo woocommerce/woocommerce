@@ -65,12 +65,3 @@ $GLOBALS['woocommerce'] = WC();
 if ( class_exists( \Automattic\Jetpack\Connection\Rest_Authentication::class ) ) {
 	\Automattic\Jetpack\Connection\Rest_Authentication::init();
 }
-
-add_filter( 'woocommerce_paypal_use_orders_v2', '__return_true' );
-
-$woocommerce_paypal_settings = get_option( 'woocommerce_paypal_settings' );
-if ( ! is_array( $woocommerce_paypal_settings ) ) {
-	$woocommerce_paypal_settings = array();
-}
-$woocommerce_paypal_settings['_should_load'] = 'yes';
-update_option( 'woocommerce_paypal_settings', $woocommerce_paypal_settings );
