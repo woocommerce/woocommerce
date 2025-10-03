@@ -31,13 +31,13 @@ class ProductSettingsSchema extends AbstractSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		return array(
-			'id' => array(
+			'id'          => array(
 				'description' => __( 'Unique identifier for the settings group.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'title' => array(
+			'title'       => array(
 				'description' => __( 'Settings title.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
@@ -49,7 +49,7 @@ class ProductSettingsSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'values' => array(
+			'values'      => array(
 				'description'          => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
 				'type'                 => 'object',
 				'context'              => array( 'view', 'edit' ),
@@ -58,7 +58,7 @@ class ProductSettingsSchema extends AbstractSchema {
 					'type'        => array( 'string', 'number', 'array', 'boolean' ),
 				),
 			),
-			'groups' => array(
+			'groups'      => array(
 				'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
 				'type'                 => 'object',
 				'context'              => array( 'view', 'edit' ),
@@ -66,7 +66,7 @@ class ProductSettingsSchema extends AbstractSchema {
 					'type'        => 'object',
 					'description' => __( 'Settings group.', 'woocommerce' ),
 					'properties'  => array(
-						'title' => array(
+						'title'       => array(
 							'description' => __( 'Group title.', 'woocommerce' ),
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
@@ -76,13 +76,13 @@ class ProductSettingsSchema extends AbstractSchema {
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
-						'order' => array(
+						'order'       => array(
 							'description' => __( 'Display order for the group.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 						),
-						'fields' => array(
+						'fields'      => array(
 							'description' => __( 'Settings fields.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => array( 'view', 'edit' ),
@@ -136,7 +136,7 @@ class ProductSettingsSchema extends AbstractSchema {
 	/**
 	 * Get product settings data by transforming WC_Settings_Products data into REST API format.
 	 *
-	 * @param mixed            $item             Settings products instance.
+	 * @param mixed           $item             Settings products instance.
 	 * @param WP_REST_Request $request          Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
@@ -145,9 +145,9 @@ class ProductSettingsSchema extends AbstractSchema {
 		$raw_settings = $item;
 
 		// Transform raw settings into grouped format based on title/sectionend markers
-		$groups = array();
-		$values = array();
-		$current_group = null;
+		$groups           = array();
+		$values           = array();
+		$current_group    = null;
 		$current_group_id = null;
 
 		foreach ( $raw_settings as $setting ) {
@@ -156,7 +156,7 @@ class ProductSettingsSchema extends AbstractSchema {
 			// Handle section titles - start of a new group
 			if ( 'title' === $setting_type ) {
 				$current_group_id = $setting['id'] ?? '';
-				$current_group = array(
+				$current_group    = array(
 					'title'       => $setting['title'] ?? '',
 					'description' => $setting['desc'] ?? '',
 					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : 999,
@@ -168,9 +168,9 @@ class ProductSettingsSchema extends AbstractSchema {
 			// Handle section ends - save the current group
 			if ( 'sectionend' === $setting_type ) {
 				if ( $current_group && $current_group_id ) {
-					$groups[$current_group_id] = $current_group;
+					$groups[ $current_group_id ] = $current_group;
 				}
-				$current_group = null;
+				$current_group    = null;
 				$current_group_id = null;
 				continue;
 			}
@@ -192,11 +192,14 @@ class ProductSettingsSchema extends AbstractSchema {
 		}
 
 		// Sort groups by their order if available
-		uasort( $groups, function( $a, $b ) {
-			$a_order = $a['order'] ?? 999;
-			$b_order = $b['order'] ?? 999;
-			return $a_order - $b_order;
-		});
+		uasort(
+			$groups,
+			function ( $a, $b ) {
+				$a_order = $a['order'] ?? 999;
+				$b_order = $b['order'] ?? 999;
+				return $a_order - $b_order;
+			}
+		);
 
 		return array(
 			'id'          => 'products',
@@ -277,7 +280,7 @@ class ProductSettingsSchema extends AbstractSchema {
 	private function normalize_field_type( string $wc_type ): string {
 		$type_map = array(
 			'single_select_product' => 'select',
-			'multi_select_product' => 'multiselect',
+			'multi_select_product'  => 'multiselect',
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;
