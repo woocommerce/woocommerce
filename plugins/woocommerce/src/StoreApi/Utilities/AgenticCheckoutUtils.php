@@ -248,9 +248,6 @@ class AgenticCheckoutUtils {
 		}
 
 		$customer->save();
-
-		// Recalculate shipping.
-		WC()->cart->calculate_shipping();
 	}
 
 	/**
@@ -270,9 +267,6 @@ class AgenticCheckoutUtils {
 		$customer->set_shipping_country( '' );
 
 		$customer->save();
-
-		// Recalculate shipping.
-		WC()->cart->calculate_shipping();
 	}
 
 	/**
