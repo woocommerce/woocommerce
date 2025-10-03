@@ -230,40 +230,14 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
 
-		// Validate items is an array.
-		if ( ! is_array( $items ) ) {
-			return new \WP_REST_Response(
-				[
-					'type'    => 'invalid_request',
-					'code'    => 'invalid_items',
-					'message' => __( 'Items must be an array.', 'woocommerce' ),
-					'param'   => '$.items',
-				],
-				400
-			);
-		}
-
 		foreach ( $items as $index => $item ) {
-			// Validate item structure.
-			if ( ! isset( $item['id'] ) || ! is_numeric( $item['id'] ) ) {
+			if ( ! is_numeric( $item['id'] ) ) {
 				return new \WP_REST_Response(
 					[
 						'type'    => 'invalid_request',
 						'code'    => 'invalid_product_id',
 						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
 						'param'   => '$.items[' . $index . '].id',
-					],
-					400
-				);
-			}
-
-			if ( ! isset( $item['quantity'] ) || ! is_numeric( $item['quantity'] ) || $item['quantity'] <= 0 ) {
-				return new \WP_REST_Response(
-					[
-						'type'    => 'invalid_request',
-						'code'    => 'invalid_quantity',
-						'message' => __( 'Quantity must be a positive number.', 'woocommerce' ),
-						'param'   => '$.items[' . $index . '].quantity',
 					],
 					400
 				);
