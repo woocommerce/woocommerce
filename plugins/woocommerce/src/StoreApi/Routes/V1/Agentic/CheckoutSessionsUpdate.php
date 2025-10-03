@@ -202,7 +202,16 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		// Update selected shipping method if provided.
 		$fulfillment_option_id = $request->get_param( 'fulfillment_option_id' );
 		if ( null !== $fulfillment_option_id ) {
-			WC()->session->set( 'chosen_shipping_methods', array( $fulfillment_option_id ) );
+			$option_id = wc_clean( (string) $fulfillment_option_id );
+			$packages  = WC()->shipping()->get_packages();
+			foreach ( $packages as $package ) {
+				foreach ( (array) ( $package['rates'] ?? array() ) as $rate ) {
+					if ( $rate->get_id() === $option_id ) {
+						WC()->session->set( 'chosen_shipping_methods', array( $option_id ) );
+						break 2;
+					}
+				}
+			}
 		}
 
 		// Calculate totals after all updates.
