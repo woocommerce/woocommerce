@@ -418,8 +418,6 @@ class Controller extends AbstractController {
 	/**
 	 * Validate textarea based settings.
 	 *
-	 * TODO: Consider making this more restrictive (e.g., wp_kses with limited tags or sanitize_textarea_field) to prevent potential XSS if payment gateway settings don't need HTML.
-	 *
 	 * @param mixed $value  Field value.
 	 * @param array $setting Setting data.
 	 * @return string
