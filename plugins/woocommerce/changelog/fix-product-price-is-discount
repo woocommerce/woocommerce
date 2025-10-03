@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes how we check for discounted values in order summary
