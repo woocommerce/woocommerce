@@ -32,7 +32,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var string
 	 */
-	protected $rest_base = 'payments/offline-methods';
+	protected $rest_base = 'settings/payments/offline-methods';
 
 	/**
 	 * Payments instance.

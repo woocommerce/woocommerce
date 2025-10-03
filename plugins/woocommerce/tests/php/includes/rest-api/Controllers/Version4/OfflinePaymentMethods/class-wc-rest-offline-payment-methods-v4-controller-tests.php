@@ -194,15 +194,15 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v4/payments/offline-methods', $routes );
-		$this->assertCount( 1, $routes['/wc/v4/payments/offline-methods'] );
+		$this->assertArrayHasKey( '/wc/v4/settings/payments/offline-methods', $routes );
+		$this->assertCount( 1, $routes['/wc/v4/settings/payments/offline-methods'] );
 	}
 
 	/**
 	 * Test getting offline payment methods without location parameter.
 	 */
 	public function test_get_offline_payment_methods_without_location() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -222,7 +222,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test getting offline payment methods with location parameter.
 	 */
 	public function test_get_offline_payment_methods_with_location() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -240,7 +240,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test getting offline payment methods with invalid location parameter.
 	 */
 	public function test_get_offline_payment_methods_with_invalid_location() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( 'location', 'INVALID' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -255,7 +255,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 */
 	public function test_get_offline_payment_methods_without_permission() {
 		wp_set_current_user( 0 );
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
@@ -272,7 +272,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		);
 		wp_set_current_user( $user );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 403, $response->get_status() );
@@ -282,7 +282,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test the collection schema.
 	 */
 	public function test_get_collection_schema() {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -309,7 +309,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test the collection parameters.
 	 */
 	public function test_get_collection_params() {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -328,7 +328,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test response structure matches schema.
 	 */
 	public function test_response_structure_matches_schema() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -360,7 +360,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test that response uses proper preparation methods.
 	 */
 	public function test_response_uses_proper_preparation() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -377,7 +377,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test that results are sorted by _order field.
 	 */
 	public function test_results_are_sorted_by_order() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -397,7 +397,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test _fields parameter filtering.
 	 */
 	public function test_fields_parameter_filtering() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( '_fields', 'id,title' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -426,7 +426,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test that schema filtering prevents data leakage.
 	 */
 	public function test_schema_filtering_prevents_data_leakage() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
