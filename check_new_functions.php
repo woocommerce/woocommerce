@@ -71,6 +71,17 @@ foreach ($output as $line) {
 $addedFunctions = array_unique($addedFunctions);
 $deletedFunctions = array_unique($deletedFunctions);
 
+// Calculate net added functions (added minus deleted)
+$netAddedFunctions = array_diff($addedFunctions, $deletedFunctions);
+
+// Filter function file map to only include net added functions
+$netFunctionFileMap = [];
+foreach ($netAddedFunctions as $function) {
+    if (isset($functionFileMap[$function])) {
+        $netFunctionFileMap[$function] = $functionFileMap[$function];
+    }
+}
+
 // Print the diff output
 echo implode("\n", $output) . "\n";
 
@@ -86,3 +97,9 @@ var_dump($deletedFunctions);
 
 echo "\n3. Function File Map (Added Functions -> Files):\n";
 var_dump($functionFileMap);
+
+echo "\n4. Net Added Functions (Added - Deleted):\n";
+var_dump($netAddedFunctions);
+
+echo "\n5. Net Function File Map (Net Added Functions -> Files):\n";
+var_dump($netFunctionFileMap);
