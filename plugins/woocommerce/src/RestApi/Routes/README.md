@@ -92,9 +92,11 @@ See the WordPress documentation for more information on supported schema propert
 To register a new V4 route, you must add it to the REST API Server:
 
 1. **Import the controller** in `/includes/rest-api/Server.php`:
+
    ```php
    use Automattic\WooCommerce\RestApi\Routes\V4\YourRoute\Controller as YourRouteController;
    ```
+
 
 2. **Add to the `get_v4_controllers()` method** in `/includes/rest-api/Server.php`:
    ```php
