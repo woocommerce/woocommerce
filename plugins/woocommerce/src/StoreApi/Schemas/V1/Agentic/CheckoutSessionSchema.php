@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 
 /**
@@ -321,11 +322,14 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$cart = WC()->cart;
 
 		// Get draft order if exists.
-		$session_id  = $this->get_draft_order_id();
-		$draft_order = $session_id ? wc_get_order( $session_id ) : null;
+		$draft_order_id = $this->get_draft_order_id();
+		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
+
+		// Generate session ID from Cart-Token.
+		$session_id = CartTokenUtils::get_cart_token( (string) WC()->session->get_customer_id() );
 
 		return [
-			'id'                    => $session_id ? (string) $session_id : '',
+			'id'                    => $session_id,
 			'buyer'                 => $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
 			'status'                => $this->calculate_status( $cart, $draft_order ),
