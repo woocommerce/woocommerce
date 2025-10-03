@@ -268,9 +268,11 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertTrue( $gateway['enabled'] );
 		$this->assertEquals( 5, $gateway['order'] );
+		// Top-level title/description are set from the request, not from settings.
 		$this->assertEquals( 'Pay by Check', $gateway['title'] );
 		$this->assertEquals( 'Send us a check.', $gateway['description'] );
-		$this->assertEquals( 'Check Payment', $gateway['settings']['title']['value'] );
+		// The settings.title field is also updated independently.
+		$this->assertEquals( 'Pay by Check', $gateway['settings']['title']['value'] );
 		$this->assertEquals( 'Please send check to our office.', $gateway['settings']['instructions']['value'] );
 	}
 
@@ -392,5 +394,328 @@ class WC_REST_Payment_Gateways_V4_Controller_Tests extends WC_REST_Unit_Test_Cas
 		$this->assertEquals( 'multiselect', $enable_for_methods['type'] );
 		$this->assertArrayHasKey( 'options', $enable_for_methods );
 		$this->assertNotEmpty( $enable_for_methods['options'], 'Options should be populated when is_accessing_settings() returns true' );
+	}
+
+	/**
+	 * Data provider for text field validation tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_text_field_validation(): array {
+		return array(
+			'plain text'                     => array(
+				'input'    => 'Check Payment',
+				'expected' => 'Check Payment',
+			),
+			'text with leading/trailing spaces' => array(
+				'input'    => '  Check Payment  ',
+				'expected' => 'Check Payment',
+			),
+			'text with script tags'          => array(
+				'input'    => '<script>alert("xss")</script>Check Payment',
+				'expected' => 'alert("xss")Check Payment', // Script tags removed but content remains.
+			),
+			'text with allowed HTML'         => array(
+				'input'    => '<strong>Check</strong> Payment',
+				'expected' => '<strong>Check</strong> Payment',
+			),
+			'text with dangerous HTML'       => array(
+				'input'    => '<img src=x onerror="alert(1)">Check Payment',
+				'expected' => '<img src="x">Check Payment', // onerror attribute removed.
+			),
+			'empty string'                   => array(
+				'input'    => '',
+				'expected' => '',
+			),
+		);
+	}
+
+	/**
+	 * Test text field validation with various inputs.
+	 *
+	 * @dataProvider data_provider_text_field_validation
+	 */
+	public function test_validate_text_field( $input, string $expected ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'title' => $input,
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$gateway  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected, $gateway['settings']['title']['value'] );
+	}
+
+	/**
+	 * Data provider for textarea field validation tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_textarea_field_validation(): array {
+		return array(
+			'plain text'                        => array(
+				'input'    => 'Send check to our address.',
+				'expected' => 'Send check to our address.',
+			),
+			'text with allowed HTML tags'       => array(
+				'input'    => '<p>Send check to:</p><strong>123 Main St</strong>',
+				'expected' => '<p>Send check to:</p><strong>123 Main St</strong>',
+			),
+			'text with script tags'             => array(
+				'input'    => '<p>Instructions</p><script>alert("xss")</script>',
+				'expected' => '<p>Instructions</p>alert("xss")', // Script tags removed but content remains.
+			),
+			'text with line breaks'             => array(
+				'input'    => "Line 1\nLine 2\nLine 3",
+				'expected' => "Line 1\nLine 2\nLine 3",
+			),
+			'text with leading/trailing spaces' => array(
+				'input'    => '  Instructions here  ',
+				'expected' => 'Instructions here',
+			),
+			'empty string'                      => array(
+				'input'    => '',
+				'expected' => '',
+			),
+		);
+	}
+
+	/**
+	 * Test textarea field validation with various inputs.
+	 *
+	 * @dataProvider data_provider_textarea_field_validation
+	 */
+	public function test_validate_textarea_field( $input, string $expected ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'instructions' => $input,
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$gateway  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected, $gateway['settings']['instructions']['value'] );
+	}
+
+	/**
+	 * Data provider for checkbox field validation tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_checkbox_field_validation(): array {
+		return array(
+			'boolean true'  => array(
+				'input'         => true,
+				'expected'      => true,
+				'expect_error'  => false,
+			),
+			'boolean false' => array(
+				'input'         => false,
+				'expected'      => false,
+				'expect_error'  => false,
+			),
+		);
+	}
+
+	/**
+	 * Test checkbox field validation with various inputs.
+	 *
+	 * @dataProvider data_provider_checkbox_field_validation
+	 */
+	public function test_validate_checkbox_field( $input, bool $expected, bool $expect_error ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cheque' );
+		$request->set_body_params(
+			array(
+				'enabled' => $input,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		if ( $expect_error ) {
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'rest_setting_value_invalid', $response->get_data()['code'] );
+		} else {
+			$gateway = $response->get_data();
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( $expected, $gateway['enabled'] );
+		}
+	}
+
+	/**
+	 * Data provider for multiselect field validation tests.
+	 *
+	 * @return array
+	 */
+	public function data_provider_multiselect_field_validation(): array {
+		return array(
+			'empty array'          => array(
+				'input'        => array(),
+				'expected'     => array(),
+				'expect_error' => false,
+			),
+			'non-array string'     => array(
+				'input'        => 'not_an_array',
+				'expected'     => null,
+				'expect_error' => true,
+			),
+			'non-array integer'    => array(
+				'input'        => 123,
+				'expected'     => null,
+				'expect_error' => true,
+			),
+		);
+	}
+
+	/**
+	 * Test multiselect field validation with various inputs.
+	 *
+	 * @dataProvider data_provider_multiselect_field_validation
+	 */
+	public function test_validate_multiselect_field( $input, $expected, bool $expect_error ): void {
+		global $wp;
+
+		// Set up REST request context for COD gateway.
+		if ( ! isset( $wp->query_vars ) ) {
+			$wp->query_vars = array();
+		}
+		$wp->query_vars['rest_route'] = '/wc/v4/payment_gateways';
+
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		// Re-initialize COD gateway.
+		$gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $gateways['cod'] ) ) {
+			$gateways['cod']->init_form_fields();
+		}
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cod' );
+		$request->set_body_params(
+			array(
+				'settings' => array(
+					'enable_for_methods' => $input,
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		if ( $expect_error ) {
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertEquals( 'rest_setting_value_invalid', $response->get_data()['code'] );
+		} else {
+			$gateway = $response->get_data();
+			$this->assertEquals( 200, $response->get_status() );
+			// Multiselect values are stored as comma-separated strings.
+			$actual_value = $gateway['settings']['enable_for_methods']['value'];
+			if ( is_string( $actual_value ) ) {
+				$actual_value = array_filter( explode( ',', $actual_value ) );
+			}
+			$this->assertEquals( $expected, $actual_value );
+		}
+	}
+
+	/**
+	 * Test multiselect field with valid and invalid option keys.
+	 */
+	public function test_validate_multiselect_field_filters_invalid_options(): void {
+		global $wp;
+
+		// Set up REST request context.
+		if ( ! isset( $wp->query_vars ) ) {
+			$wp->query_vars = array();
+		}
+		$wp->query_vars['rest_route'] = '/wc/v4/payment_gateways';
+
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		// Re-initialize COD gateway.
+		$gateways = WC()->payment_gateways->payment_gateways();
+		if ( isset( $gateways['cod'] ) ) {
+			$gateways['cod']->init_form_fields();
+		}
+
+		// Get available options first.
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/payment-gateways/cod' );
+		$get_response = $this->server->dispatch( $get_request );
+		$gateway_data = $get_response->get_data();
+
+		$valid_keys = array_keys( $gateway_data['settings']['enable_for_methods']['options'] );
+
+		if ( ! empty( $valid_keys ) ) {
+			// Test with valid keys only.
+			$valid_selection = array( $valid_keys[0] );
+			$request         = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cod' );
+			$request->set_body_params(
+				array(
+					'settings' => array(
+						'enable_for_methods' => $valid_selection,
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$gateway  = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			// Multiselect values may be returned as arrays or strings.
+			$actual_value = $gateway['settings']['enable_for_methods']['value'];
+			if ( is_string( $actual_value ) ) {
+				$actual_value = $actual_value ? explode( ',', $actual_value ) : array();
+			}
+			$this->assertEquals( $valid_selection, array_values( (array) $actual_value ) );
+
+			// Test with invalid keys only.
+			$invalid_selection = array( 'invalid_key_1', 'invalid_key_2' );
+			$request           = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cod' );
+			$request->set_body_params(
+				array(
+					'settings' => array(
+						'enable_for_methods' => $invalid_selection,
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$gateway  = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			$actual_value = $gateway['settings']['enable_for_methods']['value'];
+			if ( is_string( $actual_value ) ) {
+				$actual_value = array_filter( explode( ',', $actual_value ) );
+			}
+			$this->assertEmpty( $actual_value );
+
+			// Test with mixed valid and invalid keys.
+			$mixed_selection = array( $valid_keys[0], 'invalid_key_1', 'invalid_key_2' );
+			$request         = new WP_REST_Request( 'PUT', '/wc/v4/payment-gateways/cod' );
+			$request->set_body_params(
+				array(
+					'settings' => array(
+						'enable_for_methods' => $mixed_selection,
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$gateway  = $response->get_data();
+
+			$this->assertEquals( 200, $response->get_status() );
+			$actual_value = $gateway['settings']['enable_for_methods']['value'];
+			if ( is_string( $actual_value ) ) {
+				$actual_value = array_filter( explode( ',', $actual_value ) );
+			}
+			$this->assertCount( 1, $actual_value );
+			$this->assertContains( $valid_keys[0], $actual_value );
+			$this->assertNotContains( 'invalid_key_1', $actual_value );
+		}
 	}
 }

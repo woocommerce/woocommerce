@@ -320,6 +320,8 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * TODO: Validation rules could possibly be implemented on an abstract level and overriden if needed.
+	 *
 	 * Validate text based settings.
 	 *
 	 * @param mixed $value  Field value.
@@ -397,36 +399,33 @@ class Controller extends AbstractController {
 	/**
 	 * Validate checkbox based settings.
 	 *
-	 * @param string $value  Field value.
-	 * @param array  $setting Setting data.
-	 * @return string
+	 * @since 3.0.0
+	 * @param string $value Value.
+	 * @param array  $setting Setting.
+	 * @return string|WP_Error
 	 */
-	public function validate_setting_checkbox_field( string $value, array $setting ): string {
-		return '1' === $value || 'yes' === $value ? 'yes' : 'no';
+	public function validate_setting_checkbox_field( $value, $setting ) {
+		if ( in_array( $value, array( 'yes', 'no' ), true ) ) {
+			return $value;
+		} elseif ( empty( $value ) ) {
+			return isset( $setting['default'] ) ? $setting['default'] : 'no';
+		} else {
+			return new WP_Error( 'rest_setting_value_invalid', __( 'An invalid setting value was passed.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
 	}
+
 
 	/**
 	 * Validate textarea based settings.
+	 *
+	 * TODO: Consider making this more restrictive (e.g., wp_kses with limited tags or sanitize_textarea_field) to prevent potential XSS if payment gateway settings don't need HTML.
 	 *
 	 * @param mixed $value  Field value.
 	 * @param array $setting Setting data.
 	 * @return string
 	 */
-	public function validate_setting_textarea_field( $value, array $setting ): string {
+	public function validate_setting_textarea_field( $value, array $setting ) {
 		$value = is_null( $value ) ? '' : $value;
-		return wp_kses(
-			trim( stripslashes( $value ) ),
-			array_merge(
-				array(
-					'iframe' => array(
-						'src'   => true,
-						'style' => true,
-						'id'    => true,
-						'class' => true,
-					),
-				),
-				wp_kses_allowed_html( 'post' )
-			)
-		);
+		return wp_kses_post( trim( stripslashes( $value ) ) );
 	}
 }
