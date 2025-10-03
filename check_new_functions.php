@@ -44,15 +44,6 @@ if (empty($relevantFiles)) {
     exit(0);
 }
 
-echo "Files changed in includes/ or src/ directories:\n";
-foreach ($relevantFiles as $file) {
-    echo "  - $file\n";
-}
-
-echo "\n" . str_repeat("=", 60) . "\n";
-echo "GIT DIFF OUTPUT:\n";
-echo str_repeat("=", 60) . "\n\n";
-
 // Get the full diff for the relevant files
 $fileList = implode(' ', array_map('escapeshellarg', $relevantFiles));
 $diffCommand = "git diff $compareBranch..$prBranch -- $fileList";
@@ -67,7 +58,3 @@ if ($diffReturnCode !== 0) {
 
 // Print the diff output
 echo implode("\n", $diffOutput) . "\n";
-
-echo "\n" . str_repeat("=", 60) . "\n";
-echo "DIFF COMPLETE\n";
-echo str_repeat("=", 60) . "\n";
