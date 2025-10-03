@@ -16,19 +16,19 @@ if ($argc < 3) {
     exit(1);
 }
 
-$prBranch = $argv[1];
-$compareBranch = $argv[2];
+$pr_branch = $argv[1];
+$compare_branch = $argv[2];
 
 // Execute git diff command to get changes between branches for includes/ and src/ directories only
-$diffCommand = "git diff $compareBranch..$prBranch -- includes/ src/";
+$diff_command = "git diff $compare_branch..$pr_branch -- includes/ src/";
 $output = [];
-$returnCode = 0;
+$return_code = 0;
 
-exec($diffCommand, $output, $returnCode);
+exec($diff_command, $output, $return_code);
 
-if ($returnCode !== 0) {
+if ($return_code !== 0) {
     echo "Error: Failed to execute git diff command\n";
-    echo "Command: $diffCommand\n";
+    echo "Command: $diff_command\n";
     exit(1);
 }
 
@@ -38,48 +38,48 @@ if (empty($output)) {
 }
 
 // Parse the diff output to find added and deleted functions
-$addedFunctionFileMap = [];
-$deletedFunctions = [];
+$added_function_file_map = [];
+$deleted_functions = [];
 
-$currentFile = '';
+$current_file = '';
 foreach ($output as $line) {
     // Track current file being processed
     if (preg_match('/^diff --git a\/(.+?) b\/(.+?)$/', $line, $matches)) {
-        $currentFile = $matches[2]; // Use the 'b' (new) file path
+        $current_file = $matches[2]; // Use the 'b' (new) file path
     } elseif (preg_match('/^\+\+\+ b\/(.+?)$/', $line, $matches)) {
-        $currentFile = $matches[1]; // Alternative way to get file path
+        $current_file = $matches[1]; // Alternative way to get file path
     }
     
     // Look for added functions (lines starting with +)
     if (preg_match('/^\+.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches)) {
-        $functionName = $matches[1];
-        $addedFunctionFileMap[$functionName] = $currentFile;
+        $function_name = $matches[1];
+        $added_function_file_map[$function_name] = $current_file;
     }
     
     // Look for deleted functions (lines starting with -)
     if (preg_match('/^\-.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches)) {
-        $functionName = $matches[1];
-        $deletedFunctions[] = $functionName;
+        $function_name = $matches[1];
+        $deleted_functions[] = $function_name;
     }
 }
 
 // Calculate net added functions (added minus deleted) and clean file paths
-$netFunctionFileMap = [];
-foreach ($addedFunctionFileMap as $function => $filePath) {
+$net_function_file_map = [];
+foreach ($added_function_file_map as $function => $file_path) {
     // Skip functions that were also deleted (net zero change)
-    if (in_array($function, $deletedFunctions)) {
+    if (in_array($function, $deleted_functions)) {
         continue;
     }
     
     // Remove "plugins/woocommerce/" prefix from file path
-    if (strpos($filePath, 'plugins/woocommerce/') === 0) {
-        $filePath = substr($filePath, 19); // Remove "plugins/woocommerce/" (19 characters)
+    if (strpos($file_path, 'plugins/woocommerce/') === 0) {
+        $file_path = substr($file_path, 19); // Remove "plugins/woocommerce/" (19 characters)
     }
-    $netFunctionFileMap[$function] = $filePath;
+    $net_function_file_map[$function] = $file_path;
 }
 
 // Check if there are any net added functions
-if (empty($netFunctionFileMap)) {
+if (empty($net_function_file_map)) {
     exit(0);
 }
 
@@ -87,14 +87,14 @@ if (empty($netFunctionFileMap)) {
 echo "No new functions are allowed in WooCommerce. All the new code should go into classes in the src directory\n\n";
 
 // Find the longest function name to determine column width
-$maxFunctionLength = max(array_map('strlen', array_keys($netFunctionFileMap)));
-$columnWidth = max(15, $maxFunctionLength + 2); // Minimum width of 15, plus 2 for padding
+$max_function_length = max(array_map('strlen', array_keys($net_function_file_map)));
+$column_width = max(15, $max_function_length + 2); // Minimum width of 15, plus 2 for padding
 
 // Format as table
-printf("%-{$columnWidth}s | %s\n", "Function Name", "File Path");
-echo str_repeat("-", $columnWidth + 3) . str_repeat("-", 50) . "\n";
-foreach ($netFunctionFileMap as $function => $file) {
-    printf("%-{$columnWidth}s | %s\n", $function, $file);
+printf("%-{$column_width}s | %s\n", "Function Name", "File Path");
+echo str_repeat("-", $column_width + 3) . str_repeat("-", 50) . "\n";
+foreach ($net_function_file_map as $function => $file) {
+    printf("%-{$column_width}s | %s\n", $function, $file);
 }
 
 exit(1);
