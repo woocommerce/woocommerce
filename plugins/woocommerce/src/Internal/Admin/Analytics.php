@@ -107,8 +107,14 @@ class Analytics {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
-		$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
+		$screen_id = ( function_exists( 'get_current_screen' ) && get_current_screen() ) ? get_current_screen()->id : '';
+
+		// Only preload endpoints on wc-admin pages.
+		if ( 'woocommerce_page_wc-admin' === $screen_id ) {
+			$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
+			$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
+		}
+
 		return $endpoints;
 	}
 
