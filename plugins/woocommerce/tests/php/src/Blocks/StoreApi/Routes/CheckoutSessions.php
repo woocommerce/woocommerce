@@ -640,4 +640,55 @@ class CheckoutSessions extends ControllerTestCase {
 		// line_two should preserve the provided value.
 		$this->assertEquals( 'Apt 401', $data['fulfillment_address']['line_two'] );
 	}
+
+	/**
+	 * Test session_id is a valid Cart-Token (JWT format).
+	 */
+	public function test_session_id_is_cart_token() {
+		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'items' => array(
+						array(
+							'id'       => (string) $this->products[0]->get_id(),
+							'quantity' => 1,
+						),
+					),
+				)
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'id', $data );
+
+		// Session ID should not be empty.
+		$this->assertNotEmpty( $data['id'] );
+
+		// Should be a string (JWT token format).
+		$this->assertIsString( $data['id'] );
+
+		// JWT tokens have 3 parts separated by dots.
+		$parts = explode( '.', $data['id'] );
+		$this->assertCount( 3, $parts, 'Session ID should be a JWT token with 3 parts' );
+
+		// Validate that it's a valid Cart-Token.
+		$is_valid = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::validate_cart_token( $data['id'] );
+		$this->assertTrue( $is_valid, 'Session ID should be a valid Cart-Token' );
+
+		// Extract and verify payload.
+		$payload = \Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils::get_cart_token_payload( $data['id'] );
+		$this->assertIsArray( $payload );
+		$this->assertArrayHasKey( 'user_id', $payload );
+		$this->assertArrayHasKey( 'exp', $payload );
+		$this->assertArrayHasKey( 'iss', $payload );
+		$this->assertEquals( 'store-api', $payload['iss'] );
+
+		// Verify customer ID matches.
+		$this->assertEquals( (string) WC()->session->get_customer_id(), $payload['user_id'] );
+	}
 }
