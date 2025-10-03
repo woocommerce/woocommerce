@@ -39,5 +39,50 @@ if (empty($output)) {
     exit(0);
 }
 
+// Parse the diff output to find added and deleted functions
+$addedFunctions = [];
+$deletedFunctions = [];
+$functionFileMap = [];
+
+$currentFile = '';
+foreach ($output as $line) {
+    // Track current file being processed
+    if (preg_match('/^diff --git a\/(.+?) b\/(.+?)$/', $line, $matches)) {
+        $currentFile = $matches[2]; // Use the 'b' (new) file path
+    } elseif (preg_match('/^\+\+\+ b\/(.+?)$/', $line, $matches)) {
+        $currentFile = $matches[1]; // Alternative way to get file path
+    }
+    
+    // Look for added functions (lines starting with +)
+    if (preg_match('/^\+.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches)) {
+        $functionName = $matches[1];
+        $addedFunctions[] = $functionName;
+        $functionFileMap[$functionName] = $currentFile;
+    }
+    
+    // Look for deleted functions (lines starting with -)
+    if (preg_match('/^\-.*?function\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(/', $line, $matches)) {
+        $functionName = $matches[1];
+        $deletedFunctions[] = $functionName;
+    }
+}
+
+// Remove duplicates while preserving order
+$addedFunctions = array_unique($addedFunctions);
+$deletedFunctions = array_unique($deletedFunctions);
+
 // Print the diff output
 echo implode("\n", $output) . "\n";
+
+echo "\n" . str_repeat("=", 60) . "\n";
+echo "FUNCTION ANALYSIS RESULTS:\n";
+echo str_repeat("=", 60) . "\n\n";
+
+echo "1. Added Functions:\n";
+var_dump($addedFunctions);
+
+echo "\n2. Deleted Functions:\n";
+var_dump($deletedFunctions);
+
+echo "\n3. Function File Map (Added Functions -> Files):\n";
+var_dump($functionFileMap);
