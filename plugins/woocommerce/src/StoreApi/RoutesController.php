@@ -76,7 +76,8 @@ class RoutesController {
 			],
 			'agentic' => [
 				// Agentic Commerce Protocol endpoints.
-				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER => Routes\V1\Agentic\CheckoutSessions::class,
+				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER       => Routes\V1\Agentic\CheckoutSessions::class,
+				Routes\V1\Agentic\CheckoutSessionsUpdate::IDENTIFIER => Routes\V1\Agentic\CheckoutSessionsUpdate::class,
 			],
 		];
 	}
