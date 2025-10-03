@@ -277,7 +277,11 @@ const ProductPrice = ( {
 		console.error( 'Price formats need to include the `<price/>` tag.' );
 	}
 
-	const isDiscounted = regularPrice && price && price < regularPrice;
+	const isDiscounted =
+		regularPrice !== undefined &&
+		price !== undefined &&
+		price < regularPrice;
+
 	let priceComponent = (
 		<span
 			className={ clsx(
@@ -286,6 +290,16 @@ const ProductPrice = ( {
 			) }
 		/>
 	);
+
+	console.log( {
+		isDiscounted,
+		minPrice,
+		maxPrice,
+		price,
+		regularPrice,
+		currency,
+		priceClassName,
+	} );
 
 	if ( isDiscounted ) {
 		priceComponent = (
