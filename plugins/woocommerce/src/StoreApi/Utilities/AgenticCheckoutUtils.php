@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+
 /**
  * AgenticCheckoutUtils class.
  *
@@ -143,16 +145,31 @@ class AgenticCheckoutUtils {
 	 * @return \WP_REST_Response Error response.
 	 */
 	public static function create_error_response_from_exception( \Exception $exception, $item_index ) {
-		$error_code    = 'invalid_product';
-		$error_message = $exception->getMessage();
 
-		// Detect specific error types from exception message.
-		if ( str_contains( $error_message, 'stock' ) ) {
-			$error_code = 'out_of_stock';
-		} elseif ( str_contains( $error_message, 'purchasable' ) || str_contains( $error_message, 'available' ) ) {
-			$error_code = 'product_not_purchasable';
-		} elseif ( str_contains( $error_message, 'not found' ) || str_contains( $error_message, 'does not exist' ) ) {
-			$error_code = 'invalid_product';
+		$error_message = $exception->getMessage();
+		$error_code    = 'invalid_product'; // Default fallback.
+
+		// Check if it's a RouteException with a specific error code.
+		if ( $exception instanceof RouteException ) {
+			$wc_error_code = $exception->getErrorCode();
+
+			// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
+			switch ( $wc_error_code ) {
+				case 'woocommerce_rest_product_out_of_stock':
+				case 'woocommerce_rest_product_partially_out_of_stock':
+					$error_code = 'out_of_stock';
+					break;
+				case 'woocommerce_rest_product_not_purchasable':
+					$error_code = 'product_not_purchasable';
+					break;
+				case 'woocommerce_rest_cart_invalid_product':
+				case 'woocommerce_rest_invalid_product_id':
+					$error_code = 'invalid_product';
+					break;
+				default:
+					// Keep default 'invalid_product' for unknown error codes.
+					break;
+			}
 		}
 
 		return new \WP_REST_Response(
