@@ -8,7 +8,6 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
  * CheckoutSessions class.
@@ -112,25 +111,13 @@ class CheckoutSessions extends AbstractCartRoute {
 	/**
 	 * Check if the request is authorized.
 	 *
-	 * V1 implementation: Return true for now (skip auth check).
-	 * Future: Implement Bearer token authentication.
+	 * Delegates to the AgenticCheckoutUtils helper.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
 	public function is_authorized( \WP_REST_Request $request ) {
-		// Check if feature is enabled.
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_disabled',
-				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		// V1: Allow all requests (implement proper auth in future).
-		return true;
+		return AgenticCheckoutUtils::is_authorized( $request );
 	}
 
 	/**
