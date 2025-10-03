@@ -225,11 +225,21 @@ class AgenticCheckoutUtils {
 	 * @param \WC_Customer $customer Customer instance.
 	 */
 	public static function set_fulfillment_address( $address, $customer ) {
-		// Parse name into first and last.
-		$name       = isset( $address['name'] ) ? wc_clean( wp_unslash( $address['name'] ) ) : '';
-		$name_parts = $name ? explode( ' ', $name, 2 ) : array( '', '' );
-		$first_name = $name_parts[0];
-		$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+		// Only parse and set name if provided and non-empty.
+		if ( ! empty( $address['name'] ) ) {
+			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name_parts = explode( ' ', $name, 2 );
+			$first_name = $name_parts[0];
+			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+
+			// Set shipping names.
+			$customer->set_shipping_first_name( $first_name );
+			$customer->set_shipping_last_name( $last_name );
+		} else {
+			// Preserve existing shipping names.
+			$first_name = $customer->get_shipping_first_name();
+			$last_name  = $customer->get_shipping_last_name();
+		}
 
 		// Sanitize all address fields.
 		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
@@ -239,9 +249,7 @@ class AgenticCheckoutUtils {
 		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
 		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
 
-		// Set shipping address.
-		$customer->set_shipping_first_name( $first_name );
-		$customer->set_shipping_last_name( $last_name );
+		// Set shipping address fields.
 		$customer->set_shipping_address_1( $line_one );
 		$customer->set_shipping_address_2( $line_two );
 		$customer->set_shipping_city( $city );
@@ -251,8 +259,11 @@ class AgenticCheckoutUtils {
 
 		// Also set as billing address if not already set.
 		if ( ! $customer->get_billing_address_1() ) {
-			$customer->set_billing_first_name( $first_name );
-			$customer->set_billing_last_name( $last_name );
+			// For billing, only set names if provided or use existing billing names.
+			if ( ! empty( $address['name'] ) ) {
+				$customer->set_billing_first_name( $first_name );
+				$customer->set_billing_last_name( $last_name );
+			}
 			$customer->set_billing_address_1( $line_one );
 			$customer->set_billing_address_2( $line_two );
 			$customer->set_billing_city( $city );
