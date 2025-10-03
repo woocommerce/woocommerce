@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
@@ -37,6 +38,13 @@ class CheckoutSessions extends AbstractCartRoute {
 	protected $order_controller;
 
 	/**
+	 * Cart controller for managing cart operations.
+	 *
+	 * @var CartController
+	 */
+	protected $cart_controller;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param SchemaController $schema_controller Schema Controller instance.
@@ -45,6 +53,7 @@ class CheckoutSessions extends AbstractCartRoute {
 	public function __construct( $schema_controller, $schema ) {
 		parent::__construct( $schema_controller, $schema );
 		$this->order_controller = new OrderController();
+		$this->cart_controller = new CartController();
 	}
 
 	/**
@@ -263,71 +272,32 @@ class CheckoutSessions extends AbstractCartRoute {
 			$product_id = (int) $item['id'];
 			$quantity   = (int) $item['quantity'];
 
-			// Get product.
-			$product = wc_get_product( $product_id );
-			if ( ! $product ) {
-				return new \WP_REST_Response(
+			try {
+				$this->cart_controller->add_to_cart(
 					[
-						'type'    => 'invalid_request',
-						'code'    => 'invalid_product',
-						'message' => sprintf(
-							/* translators: %s: product ID */
-							__( 'Product with ID %s not found.', 'woocommerce' ),
-							$product_id
-						),
-						'param'   => '$.items[' . $index . '].id',
-					],
-					400
+						'id'       => $product_id,
+						'quantity' => $quantity,
+					]
 				);
-			}
+			} catch ( \Exception $e ) {
+				// Map exception messages to protocol-compliant error responses.
+				$error_code = 'invalid_product';
+				$error_message = $e->getMessage();
 
-			// Check if product is purchasable.
-			if ( ! $product->is_purchasable() ) {
+				// Detect specific error types from exception message.
+				if ( strpos( $error_message, 'stock' ) !== false ) {
+					$error_code = 'out_of_stock';
+				} elseif ( strpos( $error_message, 'purchasable' ) !== false || strpos( $error_message, 'available' ) !== false ) {
+					$error_code = 'product_not_purchasable';
+				} elseif ( strpos( $error_message, 'not found' ) !== false || strpos( $error_message, 'does not exist' ) !== false ) {
+					$error_code = 'invalid_product';
+				}
+
 				return new \WP_REST_Response(
 					[
 						'type'    => 'invalid_request',
-						'code'    => 'product_not_purchasable',
-						'message' => sprintf(
-							/* translators: %s: product name */
-							__( 'Product "%s" is not available for purchase.', 'woocommerce' ),
-							$product->get_name()
-						),
-						'param'   => '$.items[' . $index . '].id',
-					],
-					400
-				);
-			}
-
-			// Check stock.
-			if ( ! $product->is_in_stock() || ! $product->has_enough_stock( $quantity ) ) {
-				return new \WP_REST_Response(
-					[
-						'type'    => 'invalid_request',
-						'code'    => 'out_of_stock',
-						'message' => sprintf(
-							/* translators: %s: product name */
-							__( 'Product "%s" is out of stock.', 'woocommerce' ),
-							$product->get_name()
-						),
-						'param'   => '$.items[' . $index . ']',
-					],
-					400
-				);
-			}
-
-			// Add to cart.
-			$cart_item_key = WC()->cart->add_to_cart( $product_id, $quantity );
-			if ( false === $cart_item_key ) {
-				return new \WP_REST_Response(
-					[
-						'type'    => 'invalid_request',
-						'code'    => 'add_to_cart_failed',
-						'message' => sprintf(
-							/* translators: 1: product ID, 2: quantity */
-							__( 'Failed to add product (ID: %1$s, quantity: %2$d) to cart.', 'woocommerce' ),
-							$product_id,
-							$quantity
-						),
+						'code'    => $error_code,
+						'message' => $error_message,
 						'param'   => '$.items[' . $index . ']',
 					],
 					400
