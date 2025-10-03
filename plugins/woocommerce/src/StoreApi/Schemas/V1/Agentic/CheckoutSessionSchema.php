@@ -534,9 +534,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 					'carrier'                => $rate->get_method_id(),
 					'earliest_delivery_time' => null,
 					'latest_delivery_time'   => null,
-					'subtotal'               => (string) $this->amount_to_cents( $rate->get_cost() ),
-					'tax'                    => (string) $this->amount_to_cents( $rate->get_shipping_tax() ),
-					'total'                  => (string) $this->amount_to_cents( $rate->get_cost() + $rate->get_shipping_tax() ),
+					'subtotal'               => $this->amount_to_cents( $rate->get_cost() ),
+					'tax'                    => $this->amount_to_cents( $rate->get_shipping_tax() ),
+					'total'                  => $this->amount_to_cents( $rate->get_cost() + $rate->get_shipping_tax() ),
 				];
 			}
 		}
