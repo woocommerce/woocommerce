@@ -18,7 +18,7 @@ class AgenticCheckoutUtils {
 	 */
 	public static function get_shared_params() {
 		return [
-			'items'                 => [
+			'items'               => [
 				'description' => __( 'Line items to add to the cart.', 'woocommerce' ),
 				'type'        => 'array',
 				'items'       => [
@@ -37,7 +37,7 @@ class AgenticCheckoutUtils {
 					'required'   => [ 'id', 'quantity' ],
 				],
 			],
-			'buyer'                 => [
+			'buyer'               => [
 				'description' => __( 'Buyer information.', 'woocommerce' ),
 				'type'        => 'object',
 				'properties'  => [
@@ -60,7 +60,7 @@ class AgenticCheckoutUtils {
 					],
 				],
 			],
-			'fulfillment_address'   => [
+			'fulfillment_address' => [
 				'description' => __( 'Fulfillment/shipping address.', 'woocommerce' ),
 				'type'        => 'object',
 				'properties'  => [
