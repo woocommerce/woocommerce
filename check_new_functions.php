@@ -21,40 +21,23 @@ $compareBranch = $argv[2];
 
 echo "Checking for new functions between branch '$prBranch' and '$compareBranch'...\n\n";
 
-// Execute git diff command to get changes between branches
-$gitCommand = "git diff $compareBranch..$prBranch --name-only";
+// Execute git diff command to get changes between branches for includes/ and src/ directories only
+$diffCommand = "git diff $compareBranch..$prBranch -- includes/ src/";
 $output = [];
 $returnCode = 0;
 
-exec($gitCommand, $output, $returnCode);
+exec($diffCommand, $output, $returnCode);
 
 if ($returnCode !== 0) {
     echo "Error: Failed to execute git diff command\n";
-    echo "Command: $gitCommand\n";
-    exit(1);
-}
-
-// Filter files to only include those in includes/ or src/ directories
-$relevantFiles = array_filter($output, function($file) {
-    return strpos($file, 'includes/') === 0 || strpos($file, 'src/') === 0;
-});
-
-if (empty($relevantFiles)) {
-    echo "No changes found in includes/ or src/ directories.\n";
-    exit(0);
-}
-
-// Get the full diff for the relevant files
-$fileList = implode(' ', array_map('escapeshellarg', $relevantFiles));
-$diffCommand = "git diff $compareBranch..$prBranch -- $fileList";
-
-exec($diffCommand, $diffOutput, $diffReturnCode);
-
-if ($diffReturnCode !== 0) {
-    echo "Error: Failed to execute git diff command for file contents\n";
     echo "Command: $diffCommand\n";
     exit(1);
 }
 
+if (empty($output)) {
+    echo "No changes found in includes/ or src/ directories.\n";
+    exit(0);
+}
+
 // Print the diff output
-echo implode("\n", $diffOutput) . "\n";
+echo implode("\n", $output) . "\n";
