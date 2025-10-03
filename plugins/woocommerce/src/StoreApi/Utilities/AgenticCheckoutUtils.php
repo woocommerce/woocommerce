@@ -7,301 +7,294 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
  *
  * Utility class for shared Agentic Checkout API functionality.
  */
-class AgenticCheckoutUtils
-{
-    /**
-     * Get the shared parameters schema for checkout session requests.
-     *
-     * @return array Parameters array.
-     */
-    public static function get_shared_params()
-    {
-        return [
-            'items' => [
-                'description' => __('Line items to add to the cart.', 'woocommerce'),
-                'type' => 'array',
-                'items' => [
-                    'type' => 'object',
-                    'properties' => [
-                        'id' => [
-                            'description' => __('Product ID.', 'woocommerce'),
-                            'type' => 'string',
-                        ],
-                        'quantity' => [
-                            'description' => __('Quantity.', 'woocommerce'),
-                            'type' => 'integer',
-                            'minimum' => 1,
-                        ],
-                    ],
-                    'required' => ['id', 'quantity'],
-                ],
-            ],
-            'buyer' => [
-                'description' => __('Buyer information.', 'woocommerce'),
-                'type' => 'object',
-                'properties' => [
-                    'first_name' => [
-                        'description' => __('First name.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'last_name' => [
-                        'description' => __('Last name.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'email' => [
-                        'description' => __('Email address.', 'woocommerce'),
-                        'type' => 'string',
-                        'format' => 'email',
-                    ],
-                    'phone_number' => [
-                        'description' => __('Phone number.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                ],
-            ],
-            'fulfillment_address' => [
-                'description' => __('Fulfillment/shipping address.', 'woocommerce'),
-                'type' => 'object',
-                'properties' => [
-                    'name' => [
-                        'description' => __('Full name.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'line_one' => [
-                        'description' => __('Address line 1.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'line_two' => [
-                        'description' => __('Address line 2.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'city' => [
-                        'description' => __('City.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'state' => [
-                        'description' => __('State/province.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'country' => [
-                        'description' => __('Country code (ISO 3166-1 alpha-2).', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                    'postal_code' => [
-                        'description' => __('Postal/ZIP code.', 'woocommerce'),
-                        'type' => 'string',
-                    ],
-                ],
-                'required' => ['line_one', 'city', 'country', 'postal_code'],
-            ],
-            'fulfillment_option_id' => [
-                'description' => __('Selected fulfillment option ID.', 'woocommerce'),
-                'type' => 'string',
-            ],
-        ];
-    }
+class AgenticCheckoutUtils {
 
-    /**
-     * Add items to cart from request.
-     *
-     * @param array $items Items array from request.
-     * @param CartController $cart_controller Cart controller instance.
-     * @return \WP_REST_Response|null Returns error response on failure, null on success.
-     */
-    public static function add_items_to_cart($items, $cart_controller)
-    {
-        foreach ($items as $index => $item) {
-            if (!is_numeric($item['id'])) {
-                return new \WP_REST_Response(
-                    [
-                        'type' => 'invalid_request',
-                        'code' => 'invalid_product_id',
-                        'message' => __('Product ID must be numeric.', 'woocommerce'),
-                        'param' => '$.items[' . $index . '].id',
-                    ],
-                    400
-                );
-            }
+	/**
+	 * Get the shared parameters schema for checkout session requests.
+	 *
+	 * @return array Parameters array.
+	 */
+	public static function get_shared_params() {
+		return [
+			'items'                 => [
+				'description' => __( 'Line items to add to the cart.', 'woocommerce' ),
+				'type'        => 'array',
+				'items'       => [
+					'type'       => 'object',
+					'properties' => [
+						'id'       => [
+							'description' => __( 'Product ID.', 'woocommerce' ),
+							'type'        => 'string',
+						],
+						'quantity' => [
+							'description' => __( 'Quantity.', 'woocommerce' ),
+							'type'        => 'integer',
+							'minimum'     => 1,
+						],
+					],
+					'required'   => [ 'id', 'quantity' ],
+				],
+			],
+			'buyer'                 => [
+				'description' => __( 'Buyer information.', 'woocommerce' ),
+				'type'        => 'object',
+				'properties'  => [
+					'first_name'   => [
+						'description' => __( 'First name.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'last_name'    => [
+						'description' => __( 'Last name.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'email'        => [
+						'description' => __( 'Email address.', 'woocommerce' ),
+						'type'        => 'string',
+						'format'      => 'email',
+					],
+					'phone_number' => [
+						'description' => __( 'Phone number.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+				],
+			],
+			'fulfillment_address'   => [
+				'description' => __( 'Fulfillment/shipping address.', 'woocommerce' ),
+				'type'        => 'object',
+				'properties'  => [
+					'name'        => [
+						'description' => __( 'Full name.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'line_one'    => [
+						'description' => __( 'Address line 1.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'line_two'    => [
+						'description' => __( 'Address line 2.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'city'        => [
+						'description' => __( 'City.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'state'       => [
+						'description' => __( 'State/province.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'country'     => [
+						'description' => __( 'Country code (ISO 3166-1 alpha-2).', 'woocommerce' ),
+						'type'        => 'string',
+					],
+					'postal_code' => [
+						'description' => __( 'Postal/ZIP code.', 'woocommerce' ),
+						'type'        => 'string',
+					],
+				],
+				'required'    => [ 'line_one', 'city', 'country', 'postal_code' ],
+			],
+			'fulfillment_option_id' => [
+				'description' => __( 'Selected fulfillment option ID.', 'woocommerce' ),
+				'type'        => 'string',
+			],
+		];
+	}
 
-            $product_id = (int)$item['id'];
-            $quantity = (int)$item['quantity'];
+	/**
+	 * Add items to cart from request.
+	 *
+	 * @param array          $items Items array from request.
+	 * @param CartController $cart_controller Cart controller instance.
+	 * @return \WP_REST_Response|null Returns error response on failure, null on success.
+	 */
+	public static function add_items_to_cart( $items, $cart_controller ) {
+		foreach ( $items as $index => $item ) {
+			if ( ! is_numeric( $item['id'] ) ) {
+				return new \WP_REST_Response(
+					[
+						'type'    => 'invalid_request',
+						'code'    => 'invalid_product_id',
+						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
+						'param'   => '$.items[' . $index . '].id',
+					],
+					400
+				);
+			}
 
-            try {
-                $cart_controller->add_to_cart(
-                    [
-                        'id' => $product_id,
-                        'quantity' => $quantity,
-                    ]
-                );
-            } catch (\Exception $e) {
-                return self::create_error_response_from_exception($e, $index);
-            }
-        }
+			$product_id = (int) $item['id'];
+			$quantity   = (int) $item['quantity'];
 
-        return null;
-    }
+			try {
+				$cart_controller->add_to_cart(
+					[
+						'id'       => $product_id,
+						'quantity' => $quantity,
+					]
+				);
+			} catch ( \Exception $e ) {
+				return self::create_error_response_from_exception( $e, $index );
+			}
+		}
 
-    /**
-     * Create error response from exception.
-     *
-     * @param \Exception $exception The exception.
-     * @param int $item_index The item index in the request.
-     * @return \WP_REST_Response Error response.
-     */
-    public static function create_error_response_from_exception(\Exception $exception, $item_index)
-    {
-        $error_code = 'invalid_product';
-        $error_message = $exception->getMessage();
+		return null;
+	}
 
-        // Detect specific error types from exception message.
-        if (str_contains($error_message, 'stock')) {
-            $error_code = 'out_of_stock';
-        } elseif (str_contains($error_message, 'purchasable') || str_contains($error_message, 'available')) {
-            $error_code = 'product_not_purchasable';
-        } elseif (str_contains($error_message, 'not found') || str_contains($error_message, 'does not exist')) {
-            $error_code = 'invalid_product';
-        }
+	/**
+	 * Create error response from exception.
+	 *
+	 * @param \Exception $exception The exception.
+	 * @param int        $item_index The item index in the request.
+	 * @return \WP_REST_Response Error response.
+	 */
+	public static function create_error_response_from_exception( \Exception $exception, $item_index ) {
+		$error_code    = 'invalid_product';
+		$error_message = $exception->getMessage();
 
-        return new \WP_REST_Response(
-            [
-                'type' => 'invalid_request',
-                'code' => $error_code,
-                'message' => $error_message,
-                'param' => '$.items[' . $item_index . ']',
-            ],
-            400
-        );
-    }
+		// Detect specific error types from exception message.
+		if ( str_contains( $error_message, 'stock' ) ) {
+			$error_code = 'out_of_stock';
+		} elseif ( str_contains( $error_message, 'purchasable' ) || str_contains( $error_message, 'available' ) ) {
+			$error_code = 'product_not_purchasable';
+		} elseif ( str_contains( $error_message, 'not found' ) || str_contains( $error_message, 'does not exist' ) ) {
+			$error_code = 'invalid_product';
+		}
 
-    /**
-     * Set buyer data on customer.
-     *
-     * @param array $buyer Buyer data.
-     * @param \WC_Customer $customer Customer instance.
-     */
-    public static function set_buyer_data($buyer, $customer)
-    {
-        if (isset($buyer['first_name'])) {
-            $first_name = wc_clean(wp_unslash($buyer['first_name']));
-            $customer->set_billing_first_name($first_name);
-            $customer->set_shipping_first_name($first_name);
-        }
+		return new \WP_REST_Response(
+			[
+				'type'    => 'invalid_request',
+				'code'    => $error_code,
+				'message' => $error_message,
+				'param'   => '$.items[' . $item_index . ']',
+			],
+			400
+		);
+	}
 
-        if (isset($buyer['last_name'])) {
-            $last_name = wc_clean(wp_unslash($buyer['last_name']));
-            $customer->set_billing_last_name($last_name);
-            $customer->set_shipping_last_name($last_name);
-        }
+	/**
+	 * Set buyer data on customer.
+	 *
+	 * @param array        $buyer Buyer data.
+	 * @param \WC_Customer $customer Customer instance.
+	 */
+	public static function set_buyer_data( $buyer, $customer ) {
+		if ( isset( $buyer['first_name'] ) ) {
+			$first_name = wc_clean( wp_unslash( $buyer['first_name'] ) );
+			$customer->set_billing_first_name( $first_name );
+			$customer->set_shipping_first_name( $first_name );
+		}
 
-        if (isset($buyer['email'])) {
-            $email = sanitize_email(wp_unslash($buyer['email']));
-            if (is_email($email)) {
-                $customer->set_billing_email($email);
-            }
-        }
+		if ( isset( $buyer['last_name'] ) ) {
+			$last_name = wc_clean( wp_unslash( $buyer['last_name'] ) );
+			$customer->set_billing_last_name( $last_name );
+			$customer->set_shipping_last_name( $last_name );
+		}
 
-        if (isset($buyer['phone_number'])) {
-            $phone = wc_clean(wp_unslash($buyer['phone_number']));
-            $customer->set_billing_phone($phone);
-        }
+		if ( isset( $buyer['email'] ) ) {
+			$email = sanitize_email( wp_unslash( $buyer['email'] ) );
+			if ( is_email( $email ) ) {
+				$customer->set_billing_email( $email );
+			}
+		}
 
-        $customer->save();
-    }
+		if ( isset( $buyer['phone_number'] ) ) {
+			$phone = wc_clean( wp_unslash( $buyer['phone_number'] ) );
+			$customer->set_billing_phone( $phone );
+		}
 
-    /**
-     * Set fulfillment address on customer.
-     *
-     * @param array $address Address data.
-     * @param \WC_Customer $customer Customer instance.
-     */
-    public static function set_fulfillment_address($address, $customer)
-    {
-        // Parse name into first and last.
-        $name = isset($address['name']) ? wc_clean(wp_unslash($address['name'])) : '';
-        $name_parts = $name ? explode(' ', $name, 2) : array('', '');
-        $first_name = $name_parts[0];
-        $last_name = isset($name_parts[1]) ? $name_parts[1] : '';
+		$customer->save();
+	}
 
-        // Sanitize all address fields.
-        $line_one = wc_clean(wp_unslash($address['line_one'] ?? ''));
-        $line_two = wc_clean(wp_unslash($address['line_two'] ?? ''));
-        $city = wc_clean(wp_unslash($address['city'] ?? ''));
-        $state = wc_clean(wp_unslash($address['state'] ?? ''));
-        $postal_code = wc_clean(wp_unslash($address['postal_code'] ?? ''));
-        $country = wc_clean(wp_unslash($address['country'] ?? ''));
+	/**
+	 * Set fulfillment address on customer.
+	 *
+	 * @param array        $address Address data.
+	 * @param \WC_Customer $customer Customer instance.
+	 */
+	public static function set_fulfillment_address( $address, $customer ) {
+		// Parse name into first and last.
+		$name       = isset( $address['name'] ) ? wc_clean( wp_unslash( $address['name'] ) ) : '';
+		$name_parts = $name ? explode( ' ', $name, 2 ) : array( '', '' );
+		$first_name = $name_parts[0];
+		$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
 
-        // Set shipping address.
-        $customer->set_shipping_first_name($first_name);
-        $customer->set_shipping_last_name($last_name);
-        $customer->set_shipping_address_1($line_one);
-        $customer->set_shipping_address_2($line_two);
-        $customer->set_shipping_city($city);
-        $customer->set_shipping_state($state);
-        $customer->set_shipping_postcode($postal_code);
-        $customer->set_shipping_country($country);
+		// Sanitize all address fields.
+		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
+		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
+		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
+		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
+		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
+		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
 
-        // Also set as billing address if not already set.
-        if (!$customer->get_billing_address_1()) {
-            $customer->set_billing_first_name($first_name);
-            $customer->set_billing_last_name($last_name);
-            $customer->set_billing_address_1($line_one);
-            $customer->set_billing_address_2($line_two);
-            $customer->set_billing_city($city);
-            $customer->set_billing_state($state);
-            $customer->set_billing_postcode($postal_code);
-            $customer->set_billing_country($country);
-        }
+		// Set shipping address.
+		$customer->set_shipping_first_name( $first_name );
+		$customer->set_shipping_last_name( $last_name );
+		$customer->set_shipping_address_1( $line_one );
+		$customer->set_shipping_address_2( $line_two );
+		$customer->set_shipping_city( $city );
+		$customer->set_shipping_state( $state );
+		$customer->set_shipping_postcode( $postal_code );
+		$customer->set_shipping_country( $country );
 
-        $customer->save();
+		// Also set as billing address if not already set.
+		if ( ! $customer->get_billing_address_1() ) {
+			$customer->set_billing_first_name( $first_name );
+			$customer->set_billing_last_name( $last_name );
+			$customer->set_billing_address_1( $line_one );
+			$customer->set_billing_address_2( $line_two );
+			$customer->set_billing_city( $city );
+			$customer->set_billing_state( $state );
+			$customer->set_billing_postcode( $postal_code );
+			$customer->set_billing_country( $country );
+		}
 
-        // Recalculate shipping.
-        WC()->cart->calculate_shipping();
-    }
+		$customer->save();
 
-    /**
-     * Clear fulfillment address from customer.
-     *
-     * @param \WC_Customer $customer Customer instance.
-     */
-    public static function clear_fulfillment_address($customer)
-    {
-        // Clear shipping address.
-        $customer->set_shipping_first_name('');
-        $customer->set_shipping_last_name('');
-        $customer->set_shipping_address_1('');
-        $customer->set_shipping_address_2('');
-        $customer->set_shipping_city('');
-        $customer->set_shipping_state('');
-        $customer->set_shipping_postcode('');
-        $customer->set_shipping_country('');
+		// Recalculate shipping.
+		WC()->cart->calculate_shipping();
+	}
 
-        $customer->save();
+	/**
+	 * Clear fulfillment address from customer.
+	 *
+	 * @param \WC_Customer $customer Customer instance.
+	 */
+	public static function clear_fulfillment_address( $customer ) {
+		// Clear shipping address.
+		$customer->set_shipping_first_name( '' );
+		$customer->set_shipping_last_name( '' );
+		$customer->set_shipping_address_1( '' );
+		$customer->set_shipping_address_2( '' );
+		$customer->set_shipping_city( '' );
+		$customer->set_shipping_state( '' );
+		$customer->set_shipping_postcode( '' );
+		$customer->set_shipping_country( '' );
 
-        // Recalculate shipping.
-        WC()->cart->calculate_shipping();
-    }
+		$customer->save();
 
-    /**
-     * Add Agentic Commerce Protocol headers to response.
-     *
-     * @param \WP_REST_Response $response Response object.
-     * @param \WP_REST_Request $request Request object.
-     * @return \WP_REST_Response Response with headers.
-     */
-    public static function add_protocol_headers(\WP_REST_Response $response, \WP_REST_Request $request)
-    {
-        // Echo Idempotency-Key header if provided.
-        $idempotency_key = $request->get_header('Idempotency-Key');
-        if ($idempotency_key) {
-            $response->header('Idempotency-Key', $idempotency_key);
-        }
+		// Recalculate shipping.
+		WC()->cart->calculate_shipping();
+	}
 
-        // Echo Request-Id header if provided.
-        $request_id = $request->get_header('Request-Id');
-        if ($request_id) {
-            $response->header('Request-Id', $request_id);
-        }
+	/**
+	 * Add Agentic Commerce Protocol headers to response.
+	 *
+	 * @param \WP_REST_Response $response Response object.
+	 * @param \WP_REST_Request  $request Request object.
+	 * @return \WP_REST_Response Response with headers.
+	 */
+	public static function add_protocol_headers( \WP_REST_Response $response, \WP_REST_Request $request ) {
+		// Echo Idempotency-Key header if provided.
+		$idempotency_key = $request->get_header( 'Idempotency-Key' );
+		if ( $idempotency_key ) {
+			$response->header( 'Idempotency-Key', $idempotency_key );
+		}
 
-        return $response;
-    }
+		// Echo Request-Id header if provided.
+		$request_id = $request->get_header( 'Request-Id' );
+		if ( $request_id ) {
+			$response->header( 'Request-Id', $request_id );
+		}
+
+		return $response;
+	}
 }

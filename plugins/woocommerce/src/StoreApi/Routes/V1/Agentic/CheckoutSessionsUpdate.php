@@ -128,7 +128,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 			);
 		}
 
-		if ( ! $this->has_cart_token ( $request ) ) {
+		if ( ! $this->has_cart_token( $request ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_invalid_checkout_session',
 				__( 'Invalid or expired checkout session ID.', 'woocommerce' ),
@@ -140,12 +140,12 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		return true;
 	}
 
-    /**
-     * Use the checkout_session_id as Cart-Token, and set the respective values to HTTP header and request.
-     *
-     * @param \WP_REST_Request $request
-     * @return bool|null
-     */
+	/**
+	 * Use the checkout_session_id as Cart-Token, and set the respective values to HTTP header and request.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return bool|null
+	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
 		$session_id = $request->get_param( 'checkout_session_id' );
 		if ( is_null( $this->has_cart_token ) ) {
@@ -153,9 +153,9 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		}
 
 		// This allows the session will be loaded later without any further intervention.
-		if ( $this->has_cart_token === true ) {
+		if ( true === $this->has_cart_token ) {
 			$request->set_header( 'Cart-Token', $session_id );
-            $_SERVER['HTTP_CART_TOKEN'] = $session_id;
+			$_SERVER['HTTP_CART_TOKEN'] = $session_id;
 		}
 
 		return $this->has_cart_token;
