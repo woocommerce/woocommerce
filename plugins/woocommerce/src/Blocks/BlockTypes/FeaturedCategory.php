@@ -95,7 +95,10 @@ class FeaturedCategory extends FeaturedItem {
 
 			$output .= $legacy_title;
 
-			if ( array_key_exists( 'showDesc', $attributes ) && $attributes['showDesc'] ) {
+			if (
+				! isset( $attributes['showDesc'] ) ||
+				( isset( $attributes['showDesc'] ) && false !== $attributes['showDesc'] )
+			) {
 				$desc_str = sprintf(
 					'<div class="wc-block-featured-category__description">%s</div>',
 					wc_format_content( wp_kses_post( $category->description ) )
