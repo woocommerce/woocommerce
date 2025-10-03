@@ -327,6 +327,11 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 			$this->debug_cache_data['query_args'] = $params;
 		}
 
+		// Normalize the $params to reduce cache misses.
+		$params = array_filter( $params, function ( $param ) {
+			return ! empty( $param );
+		} );
+		ksort( $params );
 		return implode(
 			'_',
 			array(
