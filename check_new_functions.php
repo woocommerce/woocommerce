@@ -19,8 +19,6 @@ if ($argc < 3) {
 $prBranch = $argv[1];
 $compareBranch = $argv[2];
 
-echo "Checking for new functions between branch '$prBranch' and '$compareBranch'...\n\n";
-
 // Execute git diff command to get changes between branches for includes/ and src/ directories only
 $diffCommand = "git diff $compareBranch..$prBranch -- includes/ src/";
 $output = [];
@@ -78,7 +76,12 @@ $netAddedFunctions = array_diff($addedFunctions, $deletedFunctions);
 $netFunctionFileMap = [];
 foreach ($netAddedFunctions as $function) {
     if (isset($functionFileMap[$function])) {
-        $netFunctionFileMap[$function] = $functionFileMap[$function];
+        // Remove "plugins/woocommerce/" prefix from file path
+        $filePath = $functionFileMap[$function];
+        if (strpos($filePath, 'plugins/woocommerce/') === 0) {
+            $filePath = substr($filePath, 19); // Remove "plugins/woocommerce/" (19 characters)
+        }
+        $netFunctionFileMap[$function] = $filePath;
     }
 }
 
