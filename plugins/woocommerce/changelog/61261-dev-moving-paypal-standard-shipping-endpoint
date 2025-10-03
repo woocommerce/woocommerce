@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Moves the new PayPal Standard `paypal-standard/update-shipping` endpoint to the src folder, under the v4 group, to be autoloaded using namespaces
