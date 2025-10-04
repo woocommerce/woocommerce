@@ -323,10 +323,9 @@ class AgenticCheckoutUtils {
 	 * V1 implementation: Returns true if feature is enabled (no auth check).
 	 * Future: Implement Bearer token authentication.
 	 *
-	 * @param \WP_REST_Request $request Request object (reserved for future auth check).
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
-	public static function is_authorized( \WP_REST_Request $request ) {
+	public static function is_authorized() {
 		// Check if feature is enabled.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
