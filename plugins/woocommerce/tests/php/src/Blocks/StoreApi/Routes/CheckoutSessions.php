@@ -36,9 +36,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Clear all session data early to ensure clean state.
 		if ( WC()->session ) {
-			WC()->session->set( 'chosen_shipping_methods', array() );
-			WC()->session->set( 'store_api_draft_order', 0 );
-			WC()->session->set( 'agentic_draft_order_id', null );
+			WC()->session->destroy_session();
 		}
 
 		// Enable the agentic_checkout feature.
@@ -246,7 +244,6 @@ class CheckoutSessions extends ControllerTestCase {
 	 * Test creating a checkout session with items only.
 	 */
 	public function test_create_checkout_session_with_items() {
-		$this->markTestSkipped( 'Skipping test - status calculation needs review' );
 		$response = $this->create_session(
 			array(
 				'items' => array(
