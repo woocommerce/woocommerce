@@ -222,7 +222,7 @@ async function setCartBlockAttributes(
 	await saveBlockEditor( editor, isOnlyCurrentEntityDirty );
 }
 
-async function selectAttribute(
+async function selectBlockAttribute(
 	page,
 	attributeName,
 	attributeValue,
@@ -240,6 +240,38 @@ async function selectAttribute(
 			}
 		} else if ( optionStyle === 'Dropdown' ) {
 			await page.getByLabel( attributeName ).selectOption( attributeValue );
+		}
+	}
+}
+
+async function expectSelectedAttributes( page, blockCartVersion, expectedValues={}, optionStyle=undefined ) {
+	for ( let { name: attributeName, options: attributeValues } of productAttributes ) {
+		if ( blockCartVersion === 'legacy' || ( blockCartVersion === 'new' && optionStyle === 'Dropdown' ) ) {
+			if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+				await expect(
+					page.getByLabel( attributeName, { exact: true } )
+				).toHaveValue( expectedValues[ attributeName ] );
+			} else {
+				await expect(
+					page.getByLabel( attributeName, { exact: true } )
+				).toHaveValue( '' );
+			}
+		} else if ( blockCartVersion === 'new' && optionStyle === 'Pills' ) {
+			if ( attributeName in expectedValues && expectedValues[ attributeName ] !== '' ) {
+				attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
+				await expect (
+					page.getByLabel( attributeName, { exact: true } ).getByLabel( expectedValues[ attributeName ], { exact: true } )
+				).toBeChecked;
+			}
+			if ( attributeValues.length ) {
+				for (
+					const loc of await page
+						.getByLabel( attributeName, { exact: true } )
+						.getByLabel( new RegExp( attributeValues.map( item => `^${ item }$` ).join( '|' ) ), { exact: true } ).all()
+				) {
+					await expect( loc ).not.toBeChecked();
+				}
+			}
 		}
 	}
 }
@@ -299,15 +331,7 @@ test.describe(
 				await test.step( 'Expect NOTHING to be auto-selected (on page load)', async () => {
 					await page.goto( productPermalink );
 
-					await expect(
-						page.getByLabel( 'Type' )
-					).toHaveValue( '' );
-					await expect(
-						page.getByLabel( 'Colour' )
-					).toHaveValue( '' );
-					await expect(
-						page.getByLabel( 'Size' )
-					).toHaveValue( '' );
+					await expectSelectedAttributes( page, 'legacy', { Type: '', Colour: '', Size: '' } );
 				} );
 
 				await test.step( 'Set the autoselect_on_page_load setting to true', async () => {
@@ -317,15 +341,7 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-					await expect(
-						page.getByLabel( 'Type' )
-					).toHaveValue( 'T-shirt' );
-					await expect(
-						page.getByLabel( 'Colour' )
-					).toHaveValue( '' );
-					await expect(
-						page.getByLabel( 'Size' )
-					).toHaveValue( '' );
+					await expectSelectedAttributes( page, 'legacy', { Type: 'T-shirt', Colour: '', Size: '' } );
 				} );
 			}
 		);
@@ -339,18 +355,10 @@ test.describe(
 				await test.step( 'Expect attributes to NOT auto-select when user selects something', async () => {
 					await page.goto( productPermalink );
 
-					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
+					await selectBlockAttribute( page, 'Colour', 'Blue', 'legacy' );
 
 					// Expect nothing to have been auto-selected
-					await expect(
-						page.getByLabel( 'Type' )
-					).toHaveValue( '' );
-					await expect(
-						page.getByLabel( 'Colour' )
-					).toHaveValue( 'Blue' );
-					await expect(
-						page.getByLabel( 'Size' )
-					).toHaveValue( '' );
+					await expectSelectedAttributes( page, 'legacy', { Type: '', Colour: 'Blue', Size: '' } );
 				} );
 
 				await test.step( 'Set the autoselect setting to true', async () => {
@@ -360,17 +368,9 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// By setting the Colour to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
+					await selectBlockAttribute( page, 'Colour', 'Blue', 'legacy' );
 
-					await expect(
-						page.getByLabel( 'Type' )
-					).toHaveValue( 'T-shirt' );
-					await expect(
-						page.getByLabel( 'Colour' )
-					).toHaveValue( 'Blue' );
-					await expect(
-						page.getByLabel( 'Size' )
-					).toHaveValue( 'XL' );
+					await expectSelectedAttributes( page, 'legacy', { Type: 'T-shirt', Colour: 'Blue', Size: 'XL' } );
 				} );
 			}
 		);
@@ -387,7 +387,7 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
+					await selectBlockAttribute( page, 'Colour', 'Blue', 'legacy' );
 				}
 
 				await legacyCartSetUnattachedAttributesAction( 'hide' );
@@ -432,16 +432,16 @@ test.describe(
 					await page.goto( productPermalink );
 
 					// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-					await selectAttribute( page, 'Colour', 'Blue', 'legacy' );
+					await selectBlockAttribute( page, 'Colour', 'Blue', 'legacy' );
 					// Now, we deselect the Colour.
-					await selectAttribute( page, 'Colour', '', 'legacy' );
+					await selectBlockAttribute( page, 'Colour', '', 'legacy' );
 					// Now, the options should look like this:
 					// Type: T-shirt
 					// Colour: ''
 					// Size: XL
 					// Because the Size is XL, the only Colours possible are Red and Blue.
 					// Now if we select Size: S, the Colour should auto-select to Green.
-					await selectAttribute( page, 'Size', 'S', 'legacy' );
+					await selectBlockAttribute( page, 'Size', 'S', 'legacy' );
 					// Now, the options should look like this:
 					// Type: T-shirt
 					// Colour: Green
@@ -453,15 +453,7 @@ test.describe(
 					await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
 						await preselect();
 
-						await expect(
-							page.getByLabel( 'Type' )
-						).toHaveValue( 'T-shirt' );
-						await expect(
-							page.getByLabel( 'Colour' )
-						).toHaveValue( 'Green' );
-						await expect(
-							page.getByLabel( 'Size' )
-						).toHaveValue( 'S' );
+						await expectSelectedAttributes( page, 'legacy', { Type: 'T-shirt', Colour: 'Green', Size: 'S' } );
 					} );
 				}
 			}
@@ -478,20 +470,7 @@ test.describe(
 					await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
 						await page.goto( productPermalink );
 
-						if ( optionStyle === 'Pills' ) {
-							for ( const loc of await page.getByLabel( /Type|Colour|Size/ ).getByLabel( '' ).all() )
-								await expect( loc ).not.toBeChecked();
-						} else {
-							await expect(
-								page.getByLabel( 'Type' )
-							).toHaveValue( '' );
-							await expect(
-								page.getByLabel( 'Colour' )
-							).toHaveValue( '' );
-							await expect(
-								page.getByLabel( 'Size' )
-							).toHaveValue( '' );
-						}
+						await expectSelectedAttributes( page, 'new', { Type: '', Colour: '', Size: '' }, optionStyle );
 					} );
 
 					await test.step( `${ optionStyle }: Set the autoselect_on_page_load setting to true`, async () => {
@@ -501,24 +480,7 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// Expect Size to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
-						if ( optionStyle === 'Pills' ) {
-							await expect(
-								page.getByLabel( 'Type' )
-									.getByLabel( 'T-shirt' )
-							).toBeChecked();
-							for ( const loc of await page.getByLabel( /Colour|Size/ ).getByLabel( '' ).all() )
-								await expect( loc ).not.toBeChecked();
-						} else {
-							await expect(
-								page.getByLabel( 'Type' )
-							).toHaveValue( 'T-shirt' )
-							await expect(
-								page.getByLabel( 'Colour' )
-							).toHaveValue( '' );
-							await expect(
-								page.getByLabel( 'Size' )
-							).toHaveValue( '' );
-						}
+						await expectSelectedAttributes( page, 'new', { Type: 'T-shirt', Colour: '', Size: '' }, optionStyle );
 					} );
 				}
 			);
@@ -533,26 +495,9 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// Expect nothing to be auto-selected
-						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 
-						if ( optionStyle === 'Pills' ) {
-							for ( const loc of await page.getByLabel( /Type|Size/ ).getByLabel( '' ).all() )
-								await expect( loc ).not.toBeChecked();
-							await expect(
-								await page.getByLabel( 'Colour' )
-									.getByLabel( 'Blue' )
-							).toBeChecked();
-						} else {
-							await expect(
-								page.getByLabel( 'Type' )
-							).toHaveValue( '' );
-							await expect(
-								page.getByLabel( 'Colour' )
-							).toHaveValue( 'Blue' );
-							await expect(
-								page.getByLabel( 'Size' )
-							).toHaveValue( '' );
-						}
+						await expectSelectedAttributes( page, 'new', { Type: '', Colour: 'Blue', Size: '' }, optionStyle );
 					} );
 
 					await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
@@ -562,32 +507,9 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// By setting the Colour to "Blue", we expect the Type to be auto-selected to "T-shirt", and the Size to "XL".
-						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 
-						if ( optionStyle === 'Pills' ) {
-							await expect(
-								page.getByLabel( 'Type' )
-									.getByLabel( 'T-Shirt' )
-							).toBeChecked();
-							await expect(
-								page.getByLabel( 'Colour' )
-									.getByLabel( 'Blue' )
-							).toBeChecked();
-							await expect(
-								page.getByLabel( 'Size' )
-									.getByLabel( 'XL' )
-							).toBeChecked();
-						} else {
-							await expect(
-								page.getByLabel( 'Type' )
-							).toHaveValue( 'T-shirt' );
-							await expect(
-								page.getByLabel( 'Colour' )
-							).toHaveValue( 'Blue' );
-							await expect(
-								page.getByLabel( 'Size' )
-							).toHaveValue( 'XL' );
-						}
+						await expectSelectedAttributes( page, 'new', { Type: 'T-shirt', Colour: 'Blue', Size: 'XL' }, optionStyle );
 					} );
 				}
 			);
@@ -604,7 +526,7 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 					}
 
 					await newCartSetDisabledAttributesAction( 'hide' );
@@ -645,16 +567,16 @@ test.describe(
 						await page.goto( productPermalink );
 
 						// By setting the Colour to "Blue", the only possible Size remaining is "XL".
-						await selectAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Colour', 'Blue', 'new', optionStyle );
 						// Now, we deselect the Colour.
-						await selectAttribute( page, 'Colour', '', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Colour', '', 'new', optionStyle );
 						// Now, the options should look like this:
 						// Type: T-shirt
 						// Colour: ''
 						// Size: XL
 						// Because the Size is XL, the only Colours possible are Red and Blue.
 						// Now if we select Size: S, the Colour should auto-select to Green.
-						await selectAttribute( page, 'Size', 'S', 'new', optionStyle );
+						await selectBlockAttribute( page, 'Size', 'S', 'new', optionStyle );
 						// Now, the options should look like this:
 						// Type: T-shirt
 						// Colour: Green
@@ -668,30 +590,7 @@ test.describe(
 						await test.step( `unattachedAttributesAction === ${ value }: Expect options to be properly auto-selected`, async () => {
 							await preselect();
 
-							if ( optionStyle === 'Pills' ) {
-								await expect(
-									page.getByLabel( 'Type' )
-										.getByLabel( 'T-shirt' )
-								).toBeChecked();
-								await expect(
-									page.getByLabel( 'Colour' )
-										.getByLabel( 'Green' )
-								).toBeChecked();
-								await expect(
-									page.getByLabel( 'Size' )
-										.getByLabel( 'S' )
-								).toBeChecked();
-							} else if ( optionStyle === 'Dropdown' ) {
-								await expect(
-									page.getByLabel( 'Type' )
-								).toHaveValue( 'T-shirt' );
-								await expect(
-									page.getByLabel( 'Colour' )
-								).toHaveValue( 'Green' );
-								await expect(
-									page.getByLabel( 'Size' )
-								).toHaveValue( 'S' );
-							}
+							await expectSelectedAttributes( page, 'new', { Type: 'T-shirt', Colour: 'Green', Size: 'S' }, optionStyle );
 						} );
 					}
 				}
