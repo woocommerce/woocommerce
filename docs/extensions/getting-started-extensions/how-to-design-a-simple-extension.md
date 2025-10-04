@@ -25,21 +25,21 @@ Your extension's main plugin file should have a header comment that includes a n
 
 - The `Plugin URI` field should contain the URL of the extension's product page in the WooCommerce Marketplace or the extension's official landing page on your website.
 
-- For extensions listed in the WooCommerce Marketplace, to help facilitate the update process, add a `Woo` field and an appropriate value. WooCommerce Marketplace vendors can find this snippet by logging in to the Vendors Dashboard and navigating to `Extensions > All Extensions`. Then, select the product and click Edit product page. This snippet will be in the upper-right-hand corner of the screen.
+- The `Woo` field is used for extensions listed in the WooCommerce Marketplace. This code is automatically added upon deployment for products sold on WooCommerce.com to facilitate updates. Please don't add it manually, and refrain from adding it to products offered outside of the WooCommerce Marketplace. Including this header in other versions will prevent updates from working.
 
 Below is an example of what the header content might look like for an extension listed in the WooCommerce Marketplace.
 
 ```php
 /**
- * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: https://woocommerce.com/products/woocommerce-extension/
+ * Plugin Name: My Great Extension for WooCommerce
+ * Plugin URI: https://woocommerce.com/products/my-extension-name/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name
  * Author URI: http://yourdomain.com/
  * Developer: Your Name
  * Developer URI: http://yourdomain.com/
- * Text Domain: my-extension
+ * Text Domain: my-extension-name
  * Domain Path: /languages
  *
  * Woo: 12345:342928dfsfhsf8429842374wdf4234sfd
@@ -265,15 +265,15 @@ Below is an example of what a main plugin file might look like for a very simple
 
 ```php
 /**
- * Plugin Name: My Great WooCommerce Extension
- * Plugin URI: https://woocommerce.com/products/woocommerce-extension/
+ * Plugin Name: My Great Extension for WooCommerce
+ * Plugin URI: https://woocommerce.com/products/my-extension-name/
  * Description: Your extension's description text.
  * Version: 1.0.0
  * Author: Your Name
  * Author URI: http://yourdomain.com/
  * Developer: Your Name
  * Developer URI: http://yourdomain.com/
- * Text Domain: my-extension
+ * Text Domain: my-extension-name
  * Domain Path: /languages
  *
  * Woo: 12345:342928dfsfhsf8429842374wdf4234sfd
