@@ -138,6 +138,9 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		// Clear existing cart to start fresh for POST requests.
+		WC()->cart->empty_cart();
+
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
 		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller );
