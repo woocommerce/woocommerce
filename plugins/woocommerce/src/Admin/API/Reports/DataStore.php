@@ -328,9 +328,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		}
 
 		// Normalize the $params to reduce cache misses.
-		$params = array_filter( $params, function ( $param ) {
-			return ! empty( $param );
-		} );
+		$params = array_filter(
+			$params,
+			function ( $param ) {
+				return ! empty( $param );
+			}
+		);
 		ksort( $params );
 		return implode(
 			'_',

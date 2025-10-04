@@ -304,8 +304,8 @@ class WC_Install {
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
 		'10.4.0' => array(
-			'wc_update_1040_add_idx_date_paid_status_parent'
-		)
+			'wc_update_1040_add_idx_date_paid_status_parent',
+		),
 	);
 
 	/**
