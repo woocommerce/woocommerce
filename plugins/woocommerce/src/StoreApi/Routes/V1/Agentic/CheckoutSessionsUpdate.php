@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -29,7 +30,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 *
 	 * @var string
 	 */
-	const SCHEMA_TYPE = 'agentic-checkout-session';
+	const SCHEMA_TYPE = CheckoutSessionSchema::IDENTIFIER;
 
 	/**
 	 * Order controller for managing draft orders.
