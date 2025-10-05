@@ -368,6 +368,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		if ( ! $gateway_id ) {
 			return new \WP_Error(
 				'woocommerce_rest_checkout_invalid_payment_provider',
+				/* translators: %s is a payment gateway, such as WooCommerce Payments or Stripe */
 				sprintf( __( 'Payment provider "%s" is not supported.', 'woocommerce' ), $provider ),
 				array( 'status' => 400 )
 			);
@@ -379,6 +380,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		if ( ! isset( $available_gateways[ $gateway_id ] ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_checkout_gateway_unavailable',
+				/* translators: %s is a payment gateway, such as WooCommerce Payments or Stripe */
 				sprintf( __( 'Payment gateway "%s" is not available.', 'woocommerce' ), $gateway_id ),
 				array( 'status' => 400 )
 			);
@@ -397,6 +399,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		 * if the gateway doesn't natively support it.
 		 *
 		 * @since 10.3.0
+		 *
+		 * @internal This hook is experimental and subject to change.
 		 *
 		 * @param array|null          $result       The payment result, or null to continue default processing.
 		 * @param \WC_Order           $order        The order being processed.
@@ -422,49 +426,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		// If still no result, fall back to legacy processing.
-		if ( is_null( $result ) ) {
-			$result = $this->process_payment_legacy( $order, $gateway, $payment_data );
-		}
-
 		return $result;
-	}
-
-	/**
-	 * Legacy payment processing using $_POST manipulation.
-	 *
-	 * @param \WC_Order           $order        Order to process.
-	 * @param \WC_Payment_Gateway $gateway      Payment gateway.
-	 * @param array               $payment_data Payment data.
-	 * @return array Payment result.
-	 */
-	protected function process_payment_legacy( $order, $gateway, $payment_data ) {
-		// Store original POST data.
-		$original_post = $_POST;
-
-		try {
-			// Set up $_POST for the gateway.
-			$_POST                   = array();
-			$_POST['payment_method'] = $gateway->id;
-
-			// Add gateway-specific token fields.
-			if ( 'stripe' === $gateway->id ) {
-				if ( strpos( $payment_data['token'], 'pm_' ) === 0 ) {
-					$_POST['stripe_source'] = $payment_data['token'];
-				} else {
-					$_POST['stripe_token'] = $payment_data['token'];
-				}
-			} elseif ( 'woocommerce_payments' === $gateway->id ) {
-				$_POST['wcpay-payment-method'] = $payment_data['token'];
-			}
-
-			// Process payment.
-			return $gateway->process_payment( $order->get_id() );
-
-		} finally {
-			// Restore original POST data.
-			$_POST = $original_post;
-		}
 	}
 
 	/**
