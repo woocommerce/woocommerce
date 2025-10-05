@@ -19,3 +19,7 @@ if [[ -z $changedFiles ]]; then
 fi
 
 composer exec phpcs-changed -- -s --git --git-base $baseBranch $changedFiles
+
+# Also verify that no new PHP functions are added.
+
+pnpm run lint:php:no-new-functions HEAD $baseBranch
