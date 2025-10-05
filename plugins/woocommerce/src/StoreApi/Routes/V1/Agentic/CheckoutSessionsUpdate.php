@@ -6,7 +6,6 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 
@@ -124,7 +123,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 */
 	public function is_authorized( \WP_REST_Request $request ) {
 		// Check if feature is enabled using helper.
-		$auth_check = AgenticCheckoutUtils::is_authorized( $request );
+		$auth_check = AgenticCheckoutUtils::is_authorized();
 		if ( is_wp_error( $auth_check ) ) {
 			return $auth_check;
 		}
@@ -148,17 +147,9 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return bool|null
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
-		$session_id = $request->get_param( 'checkout_session_id' );
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = CartTokenUtils::validate_cart_token( $session_id );
+			$this->has_cart_token = AgenticCheckoutUtils::validate_and_set_cart_token( $request );
 		}
-
-		// This allows the session will be loaded later without any further intervention.
-		if ( true === $this->has_cart_token ) {
-			$request->set_header( 'Cart-Token', $session_id );
-			$_SERVER['HTTP_CART_TOKEN'] = $session_id;
-		}
-
 		return $this->has_cart_token;
 	}
 

@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * AgenticCheckoutUtils class.
@@ -338,5 +339,33 @@ class AgenticCheckoutUtils {
 
 		// V1: Allow all requests (implement proper auth in future).
 		return true;
+	}
+
+	/**
+	 * Validate and set the checkout_session_id as Cart-Token.
+	 *
+	 * This allows the session to be loaded later without any further intervention.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @param string           $param_name The parameter name for the session ID (default: 'checkout_session_id').
+	 * @return bool True if cart token is valid, false otherwise.
+	 */
+	public static function validate_and_set_cart_token( \WP_REST_Request $request, $param_name = 'checkout_session_id' ) {
+		$session_id = $request->get_param( $param_name );
+
+		if ( ! $session_id ) {
+			return false;
+		}
+
+		// Validate the cart token.
+		$is_valid = CartTokenUtils::validate_cart_token( $session_id );
+
+		// If valid, set the token in request headers and server globals.
+		if ( $is_valid ) {
+			$request->set_header( 'Cart-Token', $session_id );
+			$_SERVER['HTTP_CART_TOKEN'] = $session_id;
+		}
+
+		return $is_valid;
 	}
 }

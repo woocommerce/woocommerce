@@ -6,7 +6,6 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
-use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 
@@ -82,7 +81,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 */
 	public function get_args() {
 		return [
-			'args' => [
+			'args'   => [
 				'checkout_session_id' => [
 					'description' => __( 'The checkout session ID (Cart-Token JWT).', 'woocommerce' ),
 					'type'        => 'string',
@@ -106,7 +105,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 */
 	protected function get_complete_params() {
 		return [
-			'buyer' => [
+			'buyer'        => [
 				'description' => __( 'Buyer information.', 'woocommerce' ),
 				'type'        => 'object',
 				'properties'  => [
@@ -134,12 +133,12 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 				'type'        => 'object',
 				'required'    => true,
 				'properties'  => [
-					'token' => [
+					'token'           => [
 						'description' => __( 'Payment token, method ID, or source ID.', 'woocommerce' ),
 						'type'        => 'string',
 						'required'    => true,
 					],
-					'provider' => [
+					'provider'        => [
 						'description' => __( 'Payment provider identifier (e.g., stripe).', 'woocommerce' ),
 						'type'        => 'string',
 						'required'    => true,
@@ -217,17 +216,9 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 * @return bool|null
 	 */
 	protected function has_cart_token( \WP_REST_Request $request ) {
-		$session_id = $request->get_param( 'checkout_session_id' );
 		if ( is_null( $this->has_cart_token ) ) {
-			$this->has_cart_token = CartTokenUtils::validate_cart_token( $session_id );
+			$this->has_cart_token = AgenticCheckoutUtils::validate_and_set_cart_token( $request );
 		}
-
-		// This allows the session will be loaded later without any further intervention.
-		if ( true === $this->has_cart_token ) {
-			$request->set_header( 'Cart-Token', $session_id );
-			$_SERVER['HTTP_CART_TOKEN'] = $session_id;
-		}
-
 		return $this->has_cart_token;
 	}
 
@@ -253,16 +244,19 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		// Get the draft order.
 		$draft_order = $this->get_draft_order();
 		if ( ! $draft_order ) {
-			// Create draft order if it doesn't exist.
-			$draft_order = $this->order_controller->create_order_from_cart();
-			$draft_order->save();
-			$this->set_draft_order_id( $draft_order->get_id() );
+			return new \WP_Error(
+				'woocommerce_rest_checkout_empty_draft_order',
+				__( 'Cannot complete checkout with an empty draft order.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
 		}
 
 		/**
 		 * Fires before processing an agentic checkout payment.
 		 *
-		 * @since 9.5.0
+		 * @since 10.3.0
+		 *
+		 * @internal This hook is experimental and subject to change.
 		 *
 		 * @param \WC_Order        $order        The order being processed.
 		 * @param array            $payment_data Payment data including token and provider.
@@ -301,11 +295,21 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		// Process the payment.
 		$payment_result = $this->process_payment( $draft_order, $payment_data );
 
+		if ( ! is_wp_error( $payment_result ) && 'success' !== $payment_result['result'] ) {
+			$payment_result = new \WP_Error(
+				'woocommerce_rest_checkout_payment_failed',
+				$payment_result['message'] ?? __( 'Payment processing failed.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( is_wp_error( $payment_result ) ) {
 			/**
 			 * Fires when an agentic payment fails.
 			 *
-			 * @since 9.5.0
+			 * @since 10.3.0
+			 *
+			 * @internal This hook is experimental and subject to change.
 			 *
 			 * @param \WC_Order $order        The order that failed payment.
 			 * @param \WP_Error $error        The error object.
@@ -316,22 +320,12 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			return $payment_result;
 		}
 
-		if ( 'success' !== $payment_result['result'] ) {
-			$error = new \WP_Error(
-				'woocommerce_rest_checkout_payment_failed',
-				$payment_result['message'] ?? __( 'Payment processing failed.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-
-			do_action( 'woocommerce_agentic_payment_failed', $draft_order, $error, $payment_data );
-
-			return $error;
-		}
-
 		/**
 		 * Fires after successful agentic payment processing.
 		 *
-		 * @since 9.5.0
+		 * @since 10.3.0
+		 *
+		 * @internal This hook is experimental and subject to change.
 		 *
 		 * @param \WC_Order $order        The order that was successfully paid.
 		 * @param array     $result       The successful payment result.
@@ -402,7 +396,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		 * Allows gateways or third-party code to handle token payment processing
 		 * if the gateway doesn't natively support it.
 		 *
-		 * @since 9.5.0
+		 * @since 10.3.0
 		 *
 		 * @param array|null          $result       The payment result, or null to continue default processing.
 		 * @param \WC_Order           $order        The order being processed.
@@ -483,7 +477,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		/**
 		 * Filters the mapping of payment providers to gateway IDs.
 		 *
-		 * @since 9.5.0
+		 * @since 10.3.0
 		 *
 		 * @param array $mapping Provider to gateway ID mapping.
 		 */
