@@ -261,7 +261,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
          * Stores the checkout session ID to the order meta.
          */
         $this->order->update_meta_data( OrderMetaKey::CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
-
+        $this->order->save_meta_data();
         /**
          * Verify checkout session is ready for payment.
          */
