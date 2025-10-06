@@ -148,10 +148,10 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Update method using zone's business logic.
-		$method = $zone->update_shipping_method( $instance_id, $request->get_params() );
-		if ( is_wp_error( $method ) ) {
-			return $method;
+		// Update method settings, enabled status, and order.
+		$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
 		$response = rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
@@ -194,11 +194,11 @@ class Controller extends AbstractController {
 			}
 		}
 
-		// Update method using zone's business logic if any updates provided.
+		// Update method settings, enabled status, and order if any updates provided.
 		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
-			$method = $zone->update_shipping_method( $instance_id, $request->get_params() );
-			if ( is_wp_error( $method ) ) {
-				return $method;
+			$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+			if ( is_wp_error( $result ) ) {
+				return $result;
 			}
 		}
 
