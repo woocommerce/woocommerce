@@ -1325,104 +1325,57 @@ class PaymentsExtensionSuggestions {
 
 		// LATAM & Caribbeans.
 		'AG' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'AI' => array(
+			self::TILOPAY,
+			self::VISA,
+			self::HELIOPAY,
+		),
+		'AR' => array(
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
-			self::TILOPAY,
-			self::HELIOPAY,
-		),
-		'AR' => array(
-			self::VISA         => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.ar/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.ar/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'AW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'BS' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BB' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BZ' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'BM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1435,130 +1388,57 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'BQ' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'BR' => array(
-			self::STRIPE       => array(
+			self::STRIPE => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.br/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.br/ajuda/termos-e-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'VG' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'KY' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'CL' => array(
-			self::VISA         => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.cl/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.cl/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_WALLET,
-			self::HELIOPAY,
-		),
-		'CO' => array(
-			self::VISA         => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.co/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.co/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_WALLET,
-			self::HELIOPAY,
-		),
-		'CR' => array(
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
+			self::HELIOPAY,
+		),
+		'CO' => array(
+			self::VISA => array(
+				'_append' => array(
+					'tags' => array( self::TAG_PREFERRED ),
+				),
+			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
+			self::HELIOPAY,
+		),
+		'CR' => array(
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1570,33 +1450,21 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'CW' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'DM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'DO' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1611,13 +1479,9 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'SV' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1640,13 +1504,9 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'GD' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1661,23 +1521,15 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'GT' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'GY' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'HT' => array(
@@ -1688,24 +1540,16 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'HN' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'JM' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1720,34 +1564,15 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'MX' => array(
-			self::STRIPE       => array(
+			self::STRIPE => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
 			self::VISA,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.mx/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.mx/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
-			self::KLARNA       => array(
+			self::KLARNA => array(
 				'_merge_on_type' => array(
 					'links' => array(
 						array(
@@ -1771,24 +1596,16 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'NI' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'PA' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1801,31 +1618,12 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'PE' => array(
-			self::VISA         => array(
+			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.pe/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.pe/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1846,24 +1644,16 @@ class PaymentsExtensionSuggestions {
 			self::HELIOPAY,
 		),
 		'KN' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'LC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
@@ -1875,21 +1665,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'VC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'SX' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'GS' => array(
@@ -1900,72 +1682,37 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'SR' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'TT' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'TC' => array(
-			self::VISA => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
 			self::TILOPAY,
+			self::PAYPAL_FULL_STACK,
+			self::VISA,
 			self::PAYPAL_WALLET,
 			self::HELIOPAY,
 		),
 		'UY' => array(
-			self::VISA         => array(
-				'_append' => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_FULL_STACK,
-			self::MERCADO_PAGO => array(
-				'_merge_on_type' => array(
-					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_PRICING,
-							'url'   => 'https://www.mercadopago.com.uy/costs-section',
-						),
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
-						array(
-							'_type' => self::LINK_TYPE_TERMS,
-							'url'   => 'https://www.mercadopago.com.uy/ayuda/terminos-y-politicas_194',
-						),
-					),
-				),
-				'_remove'        => array(
-					'tags' => array( self::TAG_PREFERRED ),
-				),
-			),
-			self::PAYPAL_WALLET,
-			self::HELIOPAY,
-		),
-		'VI' => array(
 			self::VISA => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
+			self::PAYPAL_FULL_STACK,
+			self::PAYPAL_WALLET,
+			self::HELIOPAY,
+		),
+		'VI' => array(
 			self::TILOPAY,
+			self::VISA,
 			self::HELIOPAY,
 		),
 		'VE' => array(
@@ -3591,7 +3338,6 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://woocommerce.com/my-account/contact-support/?select=mercado-pago-checkout',
 					),
 				),
-				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::MOLLIE            => array(
 				'_type'       => self::TYPE_PSP,
@@ -4023,6 +3769,7 @@ class PaymentsExtensionSuggestions {
 						'url'   => 'https://cst.support.tilopay.com/servicedesk/customer/portals',
 					),
 				),
+				'tags'        => array( self::TAG_PREFERRED ),
 			),
 			self::VIVA_WALLET       => array(
 				'_type'       => self::TYPE_PSP,

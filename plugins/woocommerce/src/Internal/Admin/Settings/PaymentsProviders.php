@@ -221,6 +221,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway objects list.
 	 */
 	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
 			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
@@ -285,6 +288,9 @@ class PaymentsProviders {
 	 * @return array The processed payment gateways list.
 	 */
 	public function remove_shell_payment_gateways( array $payment_gateways, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways, $country_code );
 		return array_filter(
 			$payment_gateways,
@@ -421,6 +427,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway details.
 	 */
 	public function get_payment_gateway_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		return $this->enhance_payment_gateway_details(
 			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
 			$payment_gateway,
@@ -439,6 +448,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
@@ -526,6 +538,9 @@ class PaymentsProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
+		// Normalize the location to uppercase.
+		$location = strtoupper( $location );
+
 		$preferred_psp         = null;
 		$preferred_apm         = null;
 		$preferred_offline_psp = null;
@@ -606,10 +621,16 @@ class PaymentsProviders {
 			}
 
 			// If WooPayments or Stripe is active, we don't suggest other BNPLs.
+			// Note: Affirm is available in the UK even with WooPayments or Stripe active
+			// because Stripe does not support it there, yet.
 			if ( ExtensionSuggestions::TYPE_BNPL === $extension['_type'] &&
 				(
 					in_array( ExtensionSuggestions::STRIPE, $active_extensions, true ) ||
 					in_array( ExtensionSuggestions::WOOPAYMENTS, $active_extensions, true )
+				) &&
+				! (
+					ExtensionSuggestions::AFFIRM === $extension['id'] &&
+					'GB' === $location
 				)
 			) {
 				continue;
@@ -691,6 +712,9 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
 		if ( ! is_null( $suggestion ) ) {
 			// Enhance the suggestion details.
