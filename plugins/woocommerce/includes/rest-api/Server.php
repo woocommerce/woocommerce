@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\RestApi\Routes\V4\PayPalButtons\Controller as PayPalButtonsController;
 use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
@@ -204,7 +205,6 @@ class Server {
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
 			'paypal-standard'          => 'WC_REST_Paypal_Standard_Controller',
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
-			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
 	}
 
@@ -221,6 +221,7 @@ class Server {
 			'order-notes'             => OrderNotesController::class,
 			'shipping-zones'          => ShippingZonesController::class,
 			'orders'                  => OrdersController::class,
+			'paypal-buttons'          => PayPalButtonsController::class,
 			'offline-payment-methods' => OfflinePaymentMethodsController::class,
 			'settings-general'        => 'WC_REST_General_Settings_V4_Controller',
 			'settings-email'          => 'WC_REST_Email_Settings_V4_Controller',

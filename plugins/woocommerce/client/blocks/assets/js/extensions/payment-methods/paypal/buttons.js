@@ -167,7 +167,7 @@ const PayPalButtonsContainer = ( {
 			// Create a PayPal order.
 			const paypalResponseData = await apiFetch( {
 				method: 'POST',
-				path: '/wc/v3/paypal-buttons/create-order',
+				path: '/wc/v4/paypal-buttons/create-order',
 				headers: {
 					Nonce: payPalData.create_order_nonce,
 				},
@@ -217,7 +217,7 @@ const PayPalButtonsContainer = ( {
 		try {
 			await apiFetch( {
 				method: 'POST',
-				path: '/wc/v3/paypal-buttons/cancel-payment',
+				path: '/wc/v4/paypal-buttons/cancel-payment',
 				headers: {
 					Nonce: payPalData.cancel_payment_nonce,
 				},
