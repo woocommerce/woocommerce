@@ -129,7 +129,7 @@ class Controller extends AbstractController {
 
 		// Transform data to match the new format.
 		$response_data = array(
-			'id'              => 'offline_payment_methods',
+			'id'              => 'payments/offline-methods',
 			'title'           => __( 'Offline Payment Methods', 'woocommerce' ),
 			'description'     => __( 'Manage offline payment methods available for your store.', 'woocommerce' ),
 			'values'          => array(),
