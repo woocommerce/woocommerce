@@ -133,16 +133,7 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		$settings_instance = $this->get_settings_products_instance();
-		$sections          = $settings_instance->get_sections();
-
-		$settings = array();
-
-		// Get settings for each section through WC's filter system
-		foreach ( array_keys( $sections ) as $section ) {
-			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings         = array_merge( $settings, $section_settings );
-		}
+		$settings = $this->get_all_settings();
 
 		$response = $this->schema->get_item_response( $settings, $request );
 		return rest_ensure_response( $response );
@@ -175,15 +166,7 @@ class Controller extends AbstractController {
 		}
 
 		// Get all product settings definitions.
-		$settings_instance = $this->get_settings_products_instance();
-		$sections          = $settings_instance->get_sections();
-		$settings          = array();
-
-		// Get settings for each section through WC's filter system
-		foreach ( array_keys( $sections ) as $section ) {
-			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings         = array_merge( $settings, $section_settings );
-		}
+		$settings           = $this->get_all_settings();
 		$settings_by_id     = array_column( $settings, null, 'id' );
 		$valid_setting_ids  = array_keys( $settings_by_id );
 		$validated_settings = array();
@@ -359,5 +342,23 @@ class Controller extends AbstractController {
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		return $this->schema->get_item_response( $item, $request );
+	}
+
+	/**
+	 * Get all product settings definitions.
+	 *
+	 * @return array Array of setting definitions.
+	 */
+	private function get_all_settings(): array {
+		$settings_instance = $this->get_settings_products_instance();
+		$sections          = $settings_instance->get_sections();
+		$settings          = array();
+
+		foreach ( array_keys( $sections ) as $section ) {
+			$section_settings = $settings_instance->get_settings_for_section( $section );
+			$settings         = array_merge( $settings, $section_settings );
+		}
+
+		return $settings;
 	}
 }
