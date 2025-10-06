@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums;
  */
 class OrderMetaKey {
 	/**
-	 * Checkout session ID for this order.
+	 * Agentic checkout session ID for this order.
 	 */
-	const CHECKOUT_SESSION_ID = 'agentic_session_id';
+	const CHECKOUT_SESSION_ID = 'checkout_session_id';
 }
