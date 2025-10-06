@@ -77,6 +77,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_it_can_update_push_token() {
 		$data_store = new PushTokensDataStore();
+
 		$push_token = $this->create_test_push_token();
 		$push_token->set_token( 'updated_token' );
 		$push_token->set_device_uuid( 'updated-device-uuid' );
@@ -91,6 +92,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_it_can_delete_push_token() {
 		$data_store = new PushTokensDataStore();
+
 		$push_token = $this->create_test_push_token();
 		$data_store->delete( $push_token );
 
