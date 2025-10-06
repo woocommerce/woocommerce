@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Replaced <ThemeCards /> component in the “Customize Your Store” task with a new Marketplace banner, and removed the related REST API endpoint in the /onboarding/ namespace.
