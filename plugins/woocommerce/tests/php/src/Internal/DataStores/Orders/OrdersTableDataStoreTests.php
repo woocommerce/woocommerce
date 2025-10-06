@@ -13,11 +13,14 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStoreMeta;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use Automattic\WooCommerce\Internal\DependencyManagement\ContainerException;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use DateTime;
 use DateTimeZone;
+use Exception;
+use WC_Data_Exception;
 use WC_Helper_Order;
 use WC_Helper_Payment_Token;
 use WC_Helper_Product;
@@ -3786,6 +3789,26 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->add_meta_data( $meta_key, $meta_value, false );
 		$order->save_meta_data();
 		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+	}
+
+	/**
+	 * @testdox Sync-on-read should update metadata as well.
+	 */
+	public function test_sync_on_read_updates_metadata() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->save();
+
+		// Update the meta data on the post.
+		update_post_meta( $order->get_id(), 'foo', 'baz' );
+
+		$fresh_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
+		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
 	}
 
 	/**
