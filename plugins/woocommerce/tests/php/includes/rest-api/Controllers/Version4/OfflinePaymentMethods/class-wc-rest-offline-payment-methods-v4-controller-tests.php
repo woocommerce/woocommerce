@@ -496,7 +496,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		$schema_properties = array_keys( $this->endpoint->get_collection_schema()['properties'] );
+		$schema_properties = array_keys( $this->endpoint->get_item_schema()['properties'] );
 
 		// Allow framework-added fields like _links.
 		$allowed_framework_fields = array( '_links' );
