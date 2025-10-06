@@ -211,10 +211,14 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#post-search-input' ).fill( 'Imported' );
 			await page.locator( '#search-submit' ).click();
 
-			// Compare imported products to what's expected
+			// Wait for search results to load completely
+			await page.waitForLoadState( 'networkidle' );
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
-				productNames.length
+				productNames.length,
+				{ timeout: 30000 }
 			);
+
+			// Compare imported products to what's expected
 			const productTitles = await page
 				.locator( 'a.row-title' )
 				.allTextContents();
@@ -257,10 +261,14 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#post-search-input' ).fill( 'Imported' );
 			await page.locator( '#search-submit' ).click();
 
-			// Compare imported products to what's expected
+			// Wait for search results to load completely
+			await page.waitForLoadState( 'networkidle' );
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
-				productNamesOverride.length
+				productNamesOverride.length,
+				{ timeout: 30000 }
 			);
+
+			// Compare imported products to what's expected
 			const productTitles = await page
 				.locator( 'a.row-title' )
 				.allInnerTexts();
@@ -271,7 +279,8 @@ test.describe( 'Import Products from a CSV file', () => {
 
 			// Compare product prices to what's expected
 			await expect( page.locator( '.amount' ) ).toHaveCount(
-				productPricesOverride.length
+				productPricesOverride.length,
+				{ timeout: 30000 }
 			);
 			const productPrices = await page
 				.locator( '.amount' )
