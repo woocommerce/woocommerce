@@ -244,7 +244,7 @@ class Controller extends AbstractController {
 		// Custom validation rules for specific product settings.
 		switch ( $setting_id ) {
 			case 'woocommerce_weight_unit':
-				$valid_units = array( 'kg', 'g', 'lbs', 'oz' );
+				$valid_units = apply_filters( 'woocommerce_weight_units', array( 'kg', 'g', 'lbs', 'oz' ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
@@ -255,7 +255,7 @@ class Controller extends AbstractController {
 				break;
 
 			case 'woocommerce_dimension_unit':
-				$valid_units = array( 'm', 'cm', 'mm', 'in', 'yd' );
+				$valid_units = apply_filters( 'woocommerce_dimension_units', array( 'm', 'cm', 'mm', 'in', 'yd' ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
 						'rest_invalid_param',
