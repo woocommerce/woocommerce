@@ -11,7 +11,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\Products\Schema;
 
+defined( 'ABSPATH' ) || exit;
+
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
+use WP_REST_Request;
 
 /**
  * Product Settings Schema Class.
@@ -141,10 +144,10 @@ class ProductSettingsSchema extends AbstractSchema {
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
-	public function get_item_response( $item, \WP_REST_Request $request, array $include_fields = array() ): array {
+	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$raw_settings = $item;
 
-		// Transform raw settings into grouped format based on title/sectionend markers
+		// Transform raw settings into grouped format based on title/sectionend markers.
 		$groups           = array();
 		$values           = array();
 		$current_group    = null;
@@ -153,7 +156,7 @@ class ProductSettingsSchema extends AbstractSchema {
 		foreach ( $raw_settings as $setting ) {
 			$setting_type = $setting['type'] ?? '';
 
-			// Handle section titles - start of a new group
+			// Handle section titles - start of a new group.
 			if ( 'title' === $setting_type ) {
 				$current_group_id = $setting['id'] ?? '';
 				$current_group    = array(
@@ -165,7 +168,7 @@ class ProductSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
-			// Handle section ends - save the current group
+			// Handle section ends - save the current group.
 			if ( 'sectionend' === $setting_type ) {
 				if ( $current_group && $current_group_id ) {
 					$groups[ $current_group_id ] = $current_group;
@@ -175,12 +178,12 @@ class ProductSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
-			// Skip title and sectionend types
+			// Skip title and sectionend types.
 			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
 				continue;
 			}
 
-			// Convert setting to field format
+			// Convert setting to field format.
 			if ( isset( $setting['id'] ) && $current_group ) {
 				$field = $this->transform_setting_to_field( $setting );
 				if ( $field ) {
@@ -191,7 +194,7 @@ class ProductSettingsSchema extends AbstractSchema {
 			}
 		}
 
-		// Sort groups by their order if available
+		// Sort groups by their order if available.
 		uasort(
 			$groups,
 			function ( $a, $b ) {
