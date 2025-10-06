@@ -217,18 +217,18 @@ class Controller extends AbstractController {
 			do_action( 'woocommerce_settings_updated', $updated_settings, $this->rest_base );
 		}
 
-		// Get all settings after update
+		// Get all settings after update.
 		$settings_instance = $this->get_settings_products_instance();
 		$sections          = $settings_instance->get_sections();
 		$settings          = array();
 
-		// Get settings for each section through WC's filter system
+		// Get settings for each section through WC's filter system.
 		foreach ( array_keys( $sections ) as $section ) {
 			$section_settings = $settings_instance->get_settings_for_section( $section );
 			$settings         = array_merge( $settings, $section_settings );
 		}
 
-		// Return updated settings
+		// Return updated settings.
 		$response = $this->schema->get_item_response( $settings, $request );
 		return rest_ensure_response( $response );
 	}
@@ -244,6 +244,13 @@ class Controller extends AbstractController {
 		// Custom validation rules for specific product settings.
 		switch ( $setting_id ) {
 			case 'woocommerce_weight_unit':
+				/**
+				 * Filter the available weight units.
+				 *
+				 * @since 10.4.0
+				 *
+				 * @param array $weight_units Array of weight unit strings.
+				 */
 				$valid_units = apply_filters( 'woocommerce_weight_units', array( 'kg', 'g', 'lbs', 'oz' ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
@@ -255,6 +262,13 @@ class Controller extends AbstractController {
 				break;
 
 			case 'woocommerce_dimension_unit':
+				/**
+				 * Filter the available dimension units.
+				 *
+				 * @since 10.4.0
+				 *
+				 * @param array $dimension_units Array of dimension unit strings.
+				 */
 				$valid_units = apply_filters( 'woocommerce_dimension_units', array( 'm', 'cm', 'mm', 'in', 'yd' ) );
 				if ( ! in_array( $value, $valid_units, true ) ) {
 					return new WP_Error(
