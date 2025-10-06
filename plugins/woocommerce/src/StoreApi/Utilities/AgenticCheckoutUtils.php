@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessio
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use WC_Session;
 
 /**
  * AgenticCheckoutUtils class.
@@ -385,23 +386,21 @@ class AgenticCheckoutUtils {
 	 * Calculate the status of the checkout session.
 	 *
 	 * @param \WC_Cart       $cart Cart object.
-	 * @param \WC_Order|null $order Draft order if exists.
+	 *
 	 * @return string Status value.
 	 */
-	public static function calculate_status( $cart, $order ) {
-		// Check if canceled.
-		if ( $order && $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_CANCELED ) === 'yes' ) {
+	public static function calculate_status($cart ): string {
+		$wc_session = WC()->session;
+		if ( null === $wc_session ) {
 			return CheckoutSessionStatus::CANCELED;
 		}
 
-		// Check if completed (only processing and completed are final statuses).
-		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
-			return CheckoutSessionStatus::COMPLETED;
+		if ( $wc_session->get( SessionKey::IS_CANCELED ) ) {
+			return CheckoutSessionStatus::CANCELED;
 		}
 
-		// Check if pending (payment not yet cleared).
-		if ( $order && 'pending' === $order->get_status() ) {
-			return CheckoutSessionStatus::READY_FOR_PAYMENT;
+		if ( $wc_session->get( SessionKey::COMPLETED_ORDER_ID ) ) {
+			return CheckoutSessionStatus::COMPLETED;
 		}
 
 		// Check if ready for payment.
@@ -409,7 +408,7 @@ class AgenticCheckoutUtils {
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
 
 		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
+		$chosen_methods = $wc_session->get( SessionKey::CHOSEN_SHIPPING_METHODS );
 		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
 
 		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {

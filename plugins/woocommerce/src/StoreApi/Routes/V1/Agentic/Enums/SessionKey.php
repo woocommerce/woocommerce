@@ -15,4 +15,14 @@ class SessionKey {
 	 * Chosen shipping methods.
 	 */
 	const CHOSEN_SHIPPING_METHODS = 'chosen_shipping_methods';
+
+	/**
+	 * Completed order ID.
+	 */
+	const COMPLETED_ORDER_ID = 'completed_order_id';
+
+	/**
+	 * Whether if the session has been canceled.
+	 */
+	const IS_CANCELED = 'is_canceled';
 }

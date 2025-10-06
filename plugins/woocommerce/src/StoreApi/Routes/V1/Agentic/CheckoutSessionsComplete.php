@@ -3,6 +3,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -23,7 +28,6 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
  */
 class CheckoutSessionsComplete extends AbstractCartRoute {
 	use CheckoutTrait;
-	use DraftOrderTrait;
 
 	/**
 	 * The route identifier.
@@ -209,7 +213,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		/**
+        /**
 		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
 		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
 		 */
@@ -241,40 +245,42 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			AgenticCheckoutUtils::set_billing_address( $payment_data['billing_address'], WC()->customer );
 		}
 
-		/**
-		 * Get draft order (must exist from create/update).
-		 */
-		$this->order = $this->get_draft_order();
-		if ( ! $this->order ) {
-			return new \WP_REST_Response(
-				[
-					'type'    => 'invalid_request',
-					'code'    => 'session_not_found',
-					'message' => __( 'Checkout session not found or expired.', 'woocommerce' ),
-				],
-				404
-			);
-		}
+        /**
+         * Similar to Checkout::create_or_update_draft_order.
+         *
+         * @todo: Can move this to CheckoutTrait to share between Checkout and this controller)
+         */
+        $this->order = $this->get_draft_order();
+        if ( ! $this->order ) {
+            $this->order = $this->order_controller->create_order_from_cart();
+        } else {
+            $this->order_controller->update_order_from_cart( $this->order, true );
+        }
 
-		/**
-		 * Verify checkout session is ready for payment.
-		 */
-		$session_status = AgenticCheckoutUtils::calculate_status( WC()->cart, $this->order );
-		if ( 'ready_for_payment' !== $session_status ) {
-			return new \WP_REST_Response(
-				[
-					'type'    => 'invalid_request',
-					'code'    => 'session_not_ready',
-					'message' => sprintf(
-						/* translators: %s: current session status */
-						__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
-						$session_status
-					),
-					'status'  => $session_status,
-				],
-				400
-			);
-		}
+        /**
+         * Stores the checkout session ID to the order meta.
+         */
+        $this->order->update_meta_data( OrderMetaKey::CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
+
+        /**
+         * Verify checkout session is ready for payment.
+         */
+        $session_status = AgenticCheckoutUtils::calculate_status( WC()->cart );
+        if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
+            return new \WP_REST_Response(
+                [
+                    'type'    => ErrorType::INVALID_REQUEST,
+                    'code'    => ErrorCode::INVALID,
+                    'message' => sprintf(
+                    /* translators: %s: current session status */
+                        __( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
+                        $session_status
+                    ),
+                    'status'  => $session_status,
+                ],
+                400
+            );
+        }
 
 		/**
 		 * Validate updated order before payment is attempted.
@@ -305,7 +311,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		/**
+        // Set the order status to 'pending' as an initial step.
+        $this->order->update_status( 'pending' );
+
+        /**
 		 * Process payment (reuse CheckoutTrait).
 		 */
 		$payment_result = new PaymentResult();
@@ -346,7 +355,9 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		// 13. Build response from canonical cart schema with order.
+		/**
+         * Build response from canonical cart schema with order.
+         */
 		$response_data = $this->schema->get_item_response( WC()->cart );
 
 		// Add order data.
@@ -356,7 +367,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			'permalink_url'       => $this->order->get_checkout_order_received_url(),
 		];
 
-		$response_data['status'] = 'completed';
+		$response_data['status'] = CheckoutSessionStatus::COMPLETED;
+        WC()->session->set( SessionKey::COMPLETED_ORDER_ID, $response_data['order']['id'] );
 
 		$response = rest_ensure_response( $response_data );
 

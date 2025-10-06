@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums;
  */
 class OrderMetaKey {
 	/**
-	 * Meta key for canceled checkout sessions.
+	 * Checkout session ID for this order.
 	 */
-	const AGENTIC_CHECKOUT_CANCELED = '_agentic_checkout_canceled';
+	const CHECKOUT_SESSION_ID = 'agentic_session_id';
 }

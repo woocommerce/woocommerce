@@ -351,7 +351,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'id'                    => $session_id,
 			'buyer'                 => $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
-			'status'                => AgenticCheckoutUtils::calculate_status( $cart, $draft_order ),
+			'status'                => AgenticCheckoutUtils::calculate_status( $cart ),
 			'currency'              => strtolower( get_woocommerce_currency() ),
 			'line_items'            => $this->format_line_items( $cart->get_cart() ),
 			'fulfillment_address'   => $this->format_fulfillment_address(),
