@@ -668,10 +668,8 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		 * @param array                $instance_settings Instance settings.
 		 * @param WC_Shipping_Method   $this              Shipping method instance.
 		 */
-		$result = update_option(
-			$this->get_instance_option_key(),
-			apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this )
-		);
+		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this );
+		$result            = update_option( $this->get_instance_option_key(), $filtered_settings );
 
 		if ( $result ) {
 			$this->instance_settings = $instance_settings;
