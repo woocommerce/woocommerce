@@ -71,12 +71,13 @@ class Controller extends AbstractController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'get_items' ),
-					'permission_callback' => array( $this, 'create_item_permissions_check' ),
+					'callback'            => array( $this, 'create_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 			)
@@ -96,7 +97,7 @@ class Controller extends AbstractController {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
-					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
 				),
 			)
 		);
@@ -109,14 +110,6 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		if ( ! wc_shipping_enabled() ) {
-			return $this->get_route_error_response(
-				$this->get_error_prefix() . 'disabled',
-				__( 'Shipping is disabled.', 'woocommerce' ),
-				WP_Http::SERVICE_UNAVAILABLE
-			);
-		}
-
 		$zone_id = (int) $request['id'];
 
 		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
@@ -139,14 +132,6 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		if ( ! wc_shipping_enabled() ) {
-			return $this->get_route_error_response(
-				$this->get_error_prefix() . 'disabled',
-				__( 'Shipping is disabled.', 'woocommerce' ),
-				WP_Http::SERVICE_UNAVAILABLE
-			);
-		}
-
 		// Get all zones including "Rest of the World".
 		$zones             = WC_Shipping_Zones::get_zones();
 		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
@@ -185,32 +170,27 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Check whether a given request has permission to read shipping zones.
+	 * Check if a given request has permission to manage shipping zones.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
+	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
 	 */
-	public function get_items_permissions_check( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access to create Shipping Zones.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|boolean
-	 */
-	public function create_item_permissions_check( $request ) {
+	public function check_permissions( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error( 'rest_no_route', __( 'Shipping is disabled.', 'woocommerce' ), array( 'status' => 404 ) );
+			return new WP_Error(
+				'rest_shipping_disabled',
+				__( 'Shipping is disabled.', 'woocommerce' ),
+				array( 'status' => WP_Http::SERVICE_UNAVAILABLE )
+			);
 		}
 
-		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', __( 'Sorry, you are not allowed to create resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		$method = $request->get_method();
+
+		// GET requests require 'read' permission, all others require 'edit'.
+		$permission_type = ( WP_REST_Server::READABLE === $method ) ? 'read' : 'edit';
+
+		if ( ! wc_rest_check_manager_permissions( 'settings', $permission_type ) ) {
+			return $this->get_authentication_error_by_method( $method );
 		}
 
 		return true;
