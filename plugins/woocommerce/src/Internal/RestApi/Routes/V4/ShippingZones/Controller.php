@@ -197,13 +197,64 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Create a new zone
+	 * Create a new shipping zone.
 	 *
-	 * @param WP_REST_Request $request Full details about the request
-	 * @return WP_Error|WP_REST_Response
-	* */
-	public function create_item($request)
-	{
-		return rest_ensure_response('test'  );
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function create_item( $request ) {
+		$zone = new WC_Shipping_Zone( null );
+
+		// Set zone name (required).
+		if ( ! is_null( $request->get_param( 'name' ) ) ) {
+			$zone->set_zone_name( $request->get_param( 'name' ) );
+		}
+
+		// Set zone order (optional).
+		if ( ! is_null( $request->get_param( 'order' ) ) ) {
+			$zone->set_zone_order( $request->get_param( 'order' ) );
+		}
+
+		// Set locations (required, can be empty array).
+		$raw_locations = $request->get_param( 'locations' );
+		$locations     = array();
+
+		foreach ( (array) $raw_locations as $raw_location ) {
+			if ( empty( $raw_location['code'] ) ) {
+				continue;
+			}
+
+			$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
+
+			if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+				continue;
+			}
+
+			$locations[] = array(
+				'code' => sanitize_text_field( $raw_location['code'] ),
+				'type' => sanitize_text_field( $type ),
+			);
+		}
+
+		$zone->set_locations( $locations );
+
+		// Save the zone.
+		$zone->save();
+
+		// Verify zone was created successfully.
+		if ( 0 === $zone->get_id() ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'cannot_create',
+				__( 'Resource cannot be created. Check to make sure "name" is present.', 'woocommerce' ),
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+		}
+
+		// Prepare response.
+		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+		$response->set_status( 201 );
+		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
+
+		return $response;
 	}
 }
