@@ -83,7 +83,7 @@ class Controller extends AbstractController {
 						)
 					),
 				),
-				'schema' => array( $this, 'get_collection_schema' ),
+				'schema' => array( $this, 'get_public_item_schema' ),
 			)
 		);
 	}
@@ -127,13 +127,56 @@ class Controller extends AbstractController {
 			return $offline_methods;
 		}
 
-		$data = array();
-		foreach ( $offline_methods as $method ) {
-			$prepared_item = $this->prepare_item_for_response( $method, $request );
-			$data[]        = $this->prepare_response_for_collection( $prepared_item );
+		// Transform data to match the new format.
+		$response_data = array(
+			'id'              => 'offline_payment_methods',
+			'title'           => __( 'Offline Payment Methods', 'woocommerce' ),
+			'description'     => __( 'Manage offline payment methods available for your store.', 'woocommerce' ),
+			'values'          => array(),
+			'payment_methods' => array(),
+		);
+
+		// Validate input is an array.
+		if ( ! is_array( $offline_methods ) ) {
+			return new WP_Error(
+				'woocommerce_rest_invalid_data',
+				__( 'Invalid payment methods data received.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
 		}
 
-		return rest_ensure_response( $data );
+		// Process each offline payment method.
+		foreach ( $offline_methods as $method ) {
+			// Skip if method is not an array.
+			if ( ! is_array( $method ) ) {
+				continue;
+			}
+
+			$method_id = $method['id'] ?? '';
+			if ( empty( $method_id ) ) {
+				continue;
+			}
+
+			// Add method to values (current settings/state).
+			$enabled_state = $method['state']['enabled'] ?? false;
+			if ( is_array( $enabled_state ) ) {
+				$enabled_state = $enabled_state['value'] ?? false;
+			}
+			$response_data['values'][ $method_id ] = (bool) $enabled_state;
+
+			// Add complete payment method data to payment_methods.
+			$response_data['payment_methods'][ $method_id ] = array(
+				'id'          => $method_id,
+				'_order'      => $method['_order'] ?? 0,
+				'title'       => sanitize_text_field( $method['title'] ?? '' ),
+				'description' => wp_kses_post( $method['description'] ?? '' ),
+				'icon'        => esc_url_raw( $method['icon'] ?? '' ),
+				'state'       => $method['state'] ?? array(),
+				'management'  => $method['management'] ?? array(),
+			);
+		}
+
+		return rest_ensure_response( $response_data );
 	}
 
 	/**
@@ -167,24 +210,9 @@ class Controller extends AbstractController {
 		return $offline_payment_providers;
 	}
 
-	/**
-	 * Get the schema for offline payment methods collection, conforming to JSON Schema.
-	 *
-	 * @return array
-	 */
-	public function get_collection_schema() {
-		$schema = array(
-			'$schema' => 'http://json-schema.org/draft-04/schema#',
-			'title'   => 'offline_payment_methods',
-			'type'    => 'array',
-			'items'   => $this->item_schema->get_item_schema(),
-		);
-
-		return $this->add_additional_fields_schema( $schema );
-	}
 
 	/**
-	 * Get the item schema for individual payment methods.
+	 * Get the schema for the current resource.
 	 *
 	 * @return array
 	 */
@@ -203,23 +231,4 @@ class Controller extends AbstractController {
 		return $this->item_schema->get_item_response( $item, $request );
 	}
 
-	/**
-	 * Prepare links for the request.
-	 *
-	 * @param mixed            $item Payment method data.
-	 * @param WP_REST_Request  $request Request object.
-	 * @param WP_REST_Response $response Response object.
-	 * @return array Links for the given payment method.
-	 */
-	protected function prepare_links( $item, WP_REST_Request $request, WP_REST_Response $response ): array {
-		$links = array();
-
-		if ( isset( $item['management']['_links']['settings']['href'] ) ) {
-			$links['settings'] = array(
-				'href' => $item['management']['_links']['settings']['href'],
-			);
-		}
-
-		return $links;
-	}
 }
