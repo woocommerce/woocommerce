@@ -3,6 +3,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -202,7 +203,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 			foreach ( $packages as $package ) {
 				foreach ( (array) ( $package['rates'] ?? array() ) as $rate ) {
 					if ( $rate->get_id() === $option_id ) {
-						WC()->session->set( 'chosen_shipping_methods', array( $option_id ) );
+						WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, array( $option_id ) );
 						break 2;
 					}
 				}

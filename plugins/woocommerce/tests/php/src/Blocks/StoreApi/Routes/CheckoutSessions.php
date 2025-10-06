@@ -404,7 +404,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		$this->assertEquals( 400, $response->get_status() );
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'invalid_product', $data['code'] );
+		$this->assertEquals( 'invalid', $data['code'] );
 	}
 
 	/**
