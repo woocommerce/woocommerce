@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Set default_plugin_compatibility for new Destroy Empty Sessions feature.
