@@ -17,9 +17,9 @@ use WP_Error;
 /**
  * BacsGatewaySettingsSchema class.
  *
- * Extends PaymentGatewaySettingsSchema to handle BACS-specific settings.
+ * Extends AbstractPaymentGatewaySettingsSchema to handle BACS-specific settings.
  */
-class BacsGatewaySettingsSchema extends PaymentGatewaySettingsSchema {
+class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 	/**
 	 * Get values for BACS-specific special fields.
 	 *

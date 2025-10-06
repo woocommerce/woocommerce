@@ -9,11 +9,11 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentMethods;
+namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\AbstractPaymentGatewaySettingsSchema;
 use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\BacsGatewaySettingsSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\ChequeGatewaySettingsSchema;
 use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\CodGatewaySettingsSchema;
 use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
 use WC_Payment_Gateway;
@@ -47,17 +47,17 @@ class Controller extends AbstractController {
 	/**
 	 * Schema class for this route.
 	 *
-	 * @var PaymentGatewaySettingsSchema
+	 * @var AbstractPaymentGatewaySettingsSchema
 	 */
-	protected PaymentGatewaySettingsSchema $item_schema;
+	protected AbstractPaymentGatewaySettingsSchema $item_schema;
 
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param PaymentGatewaySettingsSchema $item_schema Payment gateway schema class.
+	 * @param AbstractPaymentGatewaySettingsSchema $item_schema Payment gateway schema class.
 	 * @internal
 	 */
-	final public function init( PaymentGatewaySettingsSchema $item_schema ): void {
+	final public function init( AbstractPaymentGatewaySettingsSchema $item_schema ): void {
 		$this->item_schema = $item_schema;
 	}
 
@@ -77,12 +77,13 @@ class Controller extends AbstractController {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			'/' . $this->rest_base,
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema(),
 				),
 				array(
 					'methods'             => WP_REST_Server::EDITABLE,
@@ -91,13 +92,6 @@ class Controller extends AbstractController {
 					'args'                => $this->get_endpoint_args_for_item_schema(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'string',
-						'pattern'     => '^[\w-]+$',
-					),
-				),
 			)
 		);
 	}
@@ -109,7 +103,18 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
 	 */
 	public function get_item( $request ) {
-		$id               = $request['id'];
+		$params = $request->get_json_params();
+
+		// Validate required id field.
+		if ( ! isset( $params['id'] ) ) {
+			return new WP_Error(
+				'rest_missing_callback_param',
+				__( 'Missing parameter(s): id', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$id               = $params['id'];
 		$payment_gateways = WC()->payment_gateways->payment_gateways();
 
 		if ( ! isset( $payment_gateways[ $id ] ) ) {
@@ -127,12 +132,12 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Check if a given request has access to read a payment gateway.
+	 * Check if a given request has access to read payment gateways.
 	 *
 	 * @param  WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|boolean
 	 */
-	public function get_item_permissions_check( $request ) {
+	public function get_items_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( $this->post_type, 'read' ) ) {
 			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
@@ -168,19 +173,17 @@ class Controller extends AbstractController {
 	 * Get the appropriate schema for a payment gateway.
 	 *
 	 * @param string $gateway_id Gateway ID.
-	 * @return PaymentGatewaySettingsSchema
+	 * @return AbstractPaymentGatewaySettingsSchema
 	 */
-	private function get_schema_for_gateway( string $gateway_id ): PaymentGatewaySettingsSchema {
+	private function get_schema_for_gateway( string $gateway_id ): AbstractPaymentGatewaySettingsSchema {
 		switch ( $gateway_id ) {
 			case 'bacs':
 				return new BacsGatewaySettingsSchema();
-			case 'cheque':
-				return new ChequeGatewaySettingsSchema();
 			case 'cod':
 				return new CodGatewaySettingsSchema();
 			default:
-				// Use base schema for unknown gateways.
-				return $this->item_schema;
+				// Use generic schema for unknown gateways.
+				return new PaymentGatewaySettingsSchema();
 		}
 	}
 
@@ -191,7 +194,18 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$id      = $request['id'];
+		$params = $request->get_json_params();
+
+		// Validate required id field.
+		if ( ! isset( $params['id'] ) ) {
+			return new WP_Error(
+				'rest_missing_callback_param',
+				__( 'Missing parameter(s): id', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$id      = $params['id'];
 		$gateway = $this->get_payment_gateway( $id );
 
 		if ( ! $gateway ) {
@@ -205,10 +219,40 @@ class Controller extends AbstractController {
 		// Get gateway-specific schema.
 		$schema = $this->get_schema_for_gateway( $id );
 
-		$params = $request->get_json_params();
+		// Get field values from the values object.
+		if ( ! isset( $params['values'] ) ) {
+			return new WP_Error(
+				'rest_missing_callback_param',
+				__( 'Missing parameter(s): values', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
 
-		// Support both new format { "values": {...} } and legacy flat format.
-		$values_to_update = $params['values'] ?? $params;
+		$values_to_update = $params['values'];
+
+		// Handle top-level gateway fields from within values.
+		if ( isset( $values_to_update['enabled'] ) ) {
+			$gateway->enabled = wc_bool_to_string( $values_to_update['enabled'] );
+			unset( $values_to_update['enabled'] );
+		}
+
+		if ( isset( $values_to_update['title'] ) ) {
+			$gateway->title = sanitize_text_field( $values_to_update['title'] );
+			unset( $values_to_update['title'] );
+		}
+
+		if ( isset( $values_to_update['description'] ) ) {
+			$gateway->description = wp_kses_post( $values_to_update['description'] );
+			unset( $values_to_update['description'] );
+		}
+
+		if ( isset( $values_to_update['order'] ) ) {
+			$order                    = absint( $values_to_update['order'] );
+			$gateway_order            = (array) get_option( 'woocommerce_gateway_order', array() );
+			$gateway_order[ $id ]     = $order;
+			update_option( 'woocommerce_gateway_order', $gateway_order );
+			unset( $values_to_update['order'] );
+		}
 
 		// Separate standard fields from special fields.
 		$standard_values = array();
@@ -258,7 +302,21 @@ class Controller extends AbstractController {
 		$schema->update_special_fields( $gateway, $validated_special );
 
 		// Return updated gateway data.
-		return $this->get_item( $request );
+		$data = $schema->get_item_response( $gateway, $request );
+		return rest_ensure_response( $data );
 	}
 
+	/**
+	 * Get the item response for a payment gateway.
+	 *
+	 * @param WC_Payment_Gateway $item    Payment gateway object.
+	 * @param WP_REST_Request    $request Request object.
+	 * @return array The item response.
+	 */
+	protected function get_item_response( $item, WP_REST_Request $request ): array {
+		// Get gateway-specific schema.
+		$schema = $this->get_schema_for_gateway( $item->id );
+
+		return $schema->get_item_response( $item, $request );
+	}
 }
