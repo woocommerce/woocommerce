@@ -257,8 +257,24 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
-		 * @todo: Only continue process if calculate_status is `ready_for_payment`. Required refactors.
+		 * Verify checkout session is ready for payment.
 		 */
+		$session_status = AgenticCheckoutUtils::calculate_status( WC()->cart, $this->order );
+		if ( 'ready_for_payment' !== $session_status ) {
+			return new \WP_REST_Response(
+				[
+					'type'    => 'invalid_request',
+					'code'    => 'session_not_ready',
+					'message' => sprintf(
+						/* translators: %s: current session status */
+						__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
+						$session_status
+					),
+					'status'  => $session_status,
+				],
+				400
+			);
+		}
 
 		/**
 		 * Validate updated order before payment is attempted.
@@ -290,8 +306,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
-         * Process payment (reuse CheckoutTrait).
-         */
+		 * Process payment (reuse CheckoutTrait).
+		 */
 		$payment_result = new PaymentResult();
 
 		try {
@@ -317,8 +333,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
-         * If payment failed, return error.
-         */
+		 * If payment failed, return error.
+		 */
 		if ( 'failure' === $payment_result->status || 'error' === $payment_result->status ) {
 			return new \WP_REST_Response(
 				[
@@ -356,8 +372,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 * @return array
 	 */
 	private function get_request_payment_data( \WP_REST_Request $request ) {
-		$payment_data   = [];
-		$agentic_data   = $request->get_param( 'payment_data' );
+		$payment_data = [];
+		$agentic_data = $request->get_param( 'payment_data' );
 
 		if ( ! $agentic_data ) {
 			return $payment_data;
@@ -372,7 +388,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			$payment_data['wc-agentic_commerce-provider'] = wc_clean( $agentic_data['provider'] );
 		}
 
-        return $payment_data;
+		return $payment_data;
 	}
 
 	/**
@@ -380,6 +396,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return string
+	 * @throws RouteException If no payment gateway is available.
 	 */
 	private function get_request_payment_method_id( \WP_REST_Request $request ) {
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
@@ -407,6 +424,5 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			esc_html__( 'No agentic-supported payment gateway available.', 'woocommerce' ),
 			400
 		);
-
 	}
 }

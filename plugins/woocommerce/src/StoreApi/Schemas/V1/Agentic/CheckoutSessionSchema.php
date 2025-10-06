@@ -9,6 +9,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 
@@ -336,7 +337,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'id'                    => $session_id,
 			'buyer'                 => $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
-			'status'                => $this->calculate_status( $cart, $draft_order ),
+			'status'                => AgenticCheckoutUtils::calculate_status( $cart, $draft_order ),
 			'currency'              => strtolower( get_woocommerce_currency() ),
 			'line_items'            => $this->format_line_items( $cart->get_cart() ),
 			'fulfillment_address'   => $this->format_fulfillment_address(),
@@ -407,49 +408,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'provider'                  => 'stripe',
 			'supported_payment_methods' => [ 'card' ],
 		];
-	}
-
-	/**
-	 * Calculate the status of the checkout session.
-	 *
-	 * @param \WC_Cart       $cart Cart object.
-	 * @param \WC_Order|null $order Draft order if exists.
-	 * @return string Status value.
-	 */
-	protected function calculate_status( $cart, $order ) {
-		// Check if canceled.
-		if ( $order && $order->get_meta( '_agentic_checkout_canceled' ) === 'yes' ) {
-			return 'canceled';
-		}
-
-		// Check if completed (only processing and completed are final statuses).
-		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
-			return 'completed';
-		}
-
-		// Check if pending (payment not yet cleared).
-		if ( $order && 'pending' === $order->get_status() ) {
-			return 'ready_for_payment';
-		}
-
-		// Check if ready for payment.
-		$needs_shipping = $cart->needs_shipping();
-		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
-
-		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = WC()->session ? WC()->session->get( 'chosen_shipping_methods' ) : null;
-		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
-
-		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
-			return 'not_ready_for_payment';
-		}
-
-		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) ) {
-			return 'not_ready_for_payment';
-		}
-
-		return 'ready_for_payment';
 	}
 
 	/**

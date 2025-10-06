@@ -377,4 +377,47 @@ class AgenticCheckoutUtils {
 		// V1: Allow all requests (implement proper auth in future).
 		return true;
 	}
+
+	/**
+	 * Calculate the status of the checkout session.
+	 *
+	 * @param \WC_Cart       $cart Cart object.
+	 * @param \WC_Order|null $order Draft order if exists.
+	 * @return string Status value.
+	 */
+	public static function calculate_status( $cart, $order ) {
+		// Check if canceled.
+		if ( $order && $order->get_meta( '_agentic_checkout_canceled' ) === 'yes' ) {
+			return 'canceled';
+		}
+
+		// Check if completed (only processing and completed are final statuses).
+		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
+			return 'completed';
+		}
+
+		// Check if pending (payment not yet cleared).
+		if ( $order && 'pending' === $order->get_status() ) {
+			return 'ready_for_payment';
+		}
+
+		// Check if ready for payment.
+		$needs_shipping = $cart->needs_shipping();
+		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
+
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( 'chosen_shipping_methods' ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
+
+		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
+			return 'not_ready_for_payment';
+		}
+
+		// Check for cart validation errors.
+		if ( ! empty( wc_get_notices( 'error' ) ) ) {
+			return 'not_ready_for_payment';
+		}
+
+		return 'ready_for_payment';
+	}
 }
