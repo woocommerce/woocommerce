@@ -25,6 +25,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * Handles the schema for Agentic Checkout API checkout sessions.
  * This schema formats WooCommerce cart/order data according to the
  * Agentic Commerce Protocol specification.
+ *
+ * @internal The specification for agentic requests is subject to abrupt changes; backwards compatibility cannot be guaranteed.
  */
 class CheckoutSessionSchema extends AbstractSchema {
 	use DraftOrderTrait;
