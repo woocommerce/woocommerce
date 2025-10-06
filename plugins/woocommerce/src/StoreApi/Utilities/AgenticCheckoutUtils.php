@@ -3,6 +3,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -387,18 +390,18 @@ class AgenticCheckoutUtils {
 	 */
 	public static function calculate_status( $cart, $order ) {
 		// Check if canceled.
-		if ( $order && $order->get_meta( '_agentic_checkout_canceled' ) === 'yes' ) {
-			return 'canceled';
+		if ( $order && $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_CANCELED ) === 'yes' ) {
+			return CheckoutSessionStatus::CANCELED;
 		}
 
 		// Check if completed (only processing and completed are final statuses).
 		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
-			return 'completed';
+			return CheckoutSessionStatus::COMPLETED;
 		}
 
 		// Check if pending (payment not yet cleared).
 		if ( $order && 'pending' === $order->get_status() ) {
-			return 'ready_for_payment';
+			return CheckoutSessionStatus::READY_FOR_PAYMENT;
 		}
 
 		// Check if ready for payment.
@@ -406,18 +409,18 @@ class AgenticCheckoutUtils {
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
 
 		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = WC()->session ? WC()->session->get( 'chosen_shipping_methods' ) : null;
+		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
 		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
 
 		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
-			return 'not_ready_for_payment';
+			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
 		// Check for cart validation errors.
 		if ( ! empty( wc_get_notices( 'error' ) ) ) {
-			return 'not_ready_for_payment';
+			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
-		return 'ready_for_payment';
+		return CheckoutSessionStatus::READY_FOR_PAYMENT;
 	}
 }
