@@ -8,6 +8,15 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\FulfillmentType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
@@ -93,7 +102,12 @@ class CheckoutSessionSchema extends AbstractSchema {
 				'description' => __( 'Status of the checkout session.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => [ 'view', 'edit' ],
-				'enum'        => [ 'not_ready_for_payment', 'ready_for_payment', 'completed', 'canceled' ],
+				'enum'        => [
+					CheckoutSessionStatus::NOT_READY_FOR_PAYMENT,
+					CheckoutSessionStatus::READY_FOR_PAYMENT,
+					CheckoutSessionStatus::COMPLETED,
+					CheckoutSessionStatus::CANCELED,
+				],
 				'readonly'    => true,
 			],
 			'currency'              => [
@@ -195,7 +209,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 						'type'                   => [
 							'description' => __( 'Fulfillment type.', 'woocommerce' ),
 							'type'        => 'string',
-							'enum'        => [ 'shipping', 'digital' ],
+							'enum'        => [ FulfillmentType::SHIPPING, FulfillmentType::DIGITAL ],
 						],
 						'id'                     => [
 							'description' => __( 'Fulfillment option ID.', 'woocommerce' ),
@@ -223,15 +237,15 @@ class CheckoutSessionSchema extends AbstractSchema {
 						],
 						'subtotal'               => [
 							'description' => __( 'Subtotal in cents.', 'woocommerce' ),
-							'type'        => 'string',
+							'type'        => 'integer',
 						],
 						'tax'                    => [
 							'description' => __( 'Tax in cents.', 'woocommerce' ),
-							'type'        => 'string',
+							'type'        => 'integer',
 						],
 						'total'                  => [
 							'description' => __( 'Total in cents.', 'woocommerce' ),
-							'type'        => 'string',
+							'type'        => 'integer',
 						],
 					],
 				],
@@ -273,7 +287,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 						'type'         => [
 							'description' => __( 'Message type.', 'woocommerce' ),
 							'type'        => 'string',
-							'enum'        => [ 'info', 'warning', 'error' ],
+							'enum'        => [ MessageType::INFO, MessageType::WARNING, MessageType::ERROR ],
 						],
 						'param'        => [
 							'description' => __( 'JSON path to the related field.', 'woocommerce' ),
@@ -282,7 +296,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 						'content_type' => [
 							'description' => __( 'Content type.', 'woocommerce' ),
 							'type'        => 'string',
-							'enum'        => [ 'plain', 'markdown' ],
+							'enum'        => [ MessageContentType::PLAIN, MessageContentType::MARKDOWN ],
 						],
 						'content'      => [
 							'description' => __( 'Message content.', 'woocommerce' ),
@@ -327,10 +341,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
 
 		// Generate session ID from Cart-Token.
-		$session_id = WC()->session->get( 'agentic_session_id' );
+		$session_id = WC()->session->get( SessionKey::AGENTIC_SESSION_ID );
 		if ( null === $session_id ) {
 			$session_id = CartTokenUtils::get_cart_token( (string) WC()->session->get_customer_id() );
-			WC()->session->set( 'agentic_session_id', $session_id );
+			WC()->session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
 		}
 
 		return [
@@ -384,6 +398,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Payment provider data or null.
 	 */
 	protected function format_payment_provider() {
+		// Default to first available payment gateway.
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		if ( empty( $available_gateways ) ) {
@@ -402,12 +417,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 				];
 			}
 		}
-
-		// Fallback for now, but it should be `null` in the future.
-		return [
-			'provider'                  => 'stripe',
-			'supported_payment_methods' => [ 'card' ],
-		];
 	}
 
 	/**
@@ -496,7 +505,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 
 			foreach ( $package['rates'] as $rate ) {
 				$options[] = [
-					'type'                   => 'shipping',
+					'type'                   => FulfillmentType::SHIPPING,
 					'id'                     => $rate->get_id(),
 					'title'                  => $rate->get_label(),
 					'subtitle'               => null,
@@ -519,7 +528,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return string|null Selected option ID or null.
 	 */
 	protected function get_selected_fulfillment_option_id() {
-		$chosen_methods = WC()->session->get( 'chosen_shipping_methods' );
+		$chosen_methods = WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS );
 
 		return ! empty( $chosen_methods[0] ) ? $chosen_methods[0] : null;
 	}
@@ -540,7 +549,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			$items_base += $product->get_price() * $cart_item['quantity'];
 		}
 		$totals[] = [
-			'type'         => 'items_base_amount',
+			'type'         => TotalType::ITEMS_BASE_AMOUNT,
 			'display_text' => __( 'Items Base Amount', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $items_base ),
 		];
@@ -548,35 +557,35 @@ class CheckoutSessionSchema extends AbstractSchema {
 		// Items discount.
 		$discount = $cart->get_cart_discount_total();
 		$totals[] = [
-			'type'         => 'items_discount',
+			'type'         => TotalType::ITEMS_DISCOUNT,
 			'display_text' => __( 'Items Discount', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $discount ),
 		];
 
 		// Subtotal.
 		$totals[] = [
-			'type'         => 'subtotal',
+			'type'         => TotalType::SUBTOTAL,
 			'display_text' => __( 'Subtotal', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_subtotal() - $discount ),
 		];
 
 		// Fulfillment (shipping).
 		$totals[] = [
-			'type'         => 'fulfillment',
+			'type'         => TotalType::FULFILLMENT,
 			'display_text' => __( 'Shipping', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_shipping_total() ),
 		];
 
 		// Tax.
 		$totals[] = [
-			'type'         => 'tax',
+			'type'         => TotalType::TAX,
 			'display_text' => __( 'Tax', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_total_tax() ),
 		];
 
 		// Total.
 		$totals[] = [
-			'type'         => 'total',
+			'type'         => TotalType::TOTAL,
 			'display_text' => __( 'Total', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_total( 'edit' ) ),
 		];
@@ -596,9 +605,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 		// Add info message if shipping is needed.
 		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
 			$messages[] = [
-				'type'         => 'info',
+				'type'         => MessageType::INFO,
 				'param'        => '$.fulfillment_address',
-				'content_type' => 'plain',
+				'content_type' => MessageContentType::PLAIN,
 				'content'      => __( 'Shipping address required.', 'woocommerce' ),
 			];
 		}
@@ -620,7 +629,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			$permalink = get_permalink( $terms_page_id );
 			if ( $permalink ) {
 				$links[] = [
-					'type' => 'terms_of_use',
+					'type' => LinkType::TERMS_OF_USE,
 					'url'  => $permalink,
 				];
 			}
@@ -632,7 +641,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			$permalink = get_permalink( $privacy_page_id );
 			if ( $permalink ) {
 				$links[] = [
-					'type' => 'privacy_policy',
+					'type' => LinkType::PRIVACY_POLICY,
 					'url'  => $permalink,
 				];
 			}

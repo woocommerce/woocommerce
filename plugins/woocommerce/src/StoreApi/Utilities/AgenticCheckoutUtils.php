@@ -3,6 +3,8 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 
 /**
@@ -111,7 +113,7 @@ class AgenticCheckoutUtils {
 			if ( ! is_numeric( $item['id'] ) ) {
 				return new \WP_REST_Response(
 					[
-						'type'    => 'invalid_request',
+						'type'    => ErrorType::INVALID_REQUEST,
 						'code'    => 'invalid_product_id',
 						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
 						'param'   => '$.items[' . $index . '].id',
@@ -148,7 +150,7 @@ class AgenticCheckoutUtils {
 	public static function create_error_response_from_exception( \Exception $exception, $item_index ) {
 
 		$error_message = $exception->getMessage();
-		$error_code    = 'invalid_product'; // Default fallback.
+		$error_code    = ErrorCode::INVALID; // Default fallback.
 
 		// Check if it's a RouteException with a specific error code.
 		if ( $exception instanceof RouteException ) {
@@ -158,24 +160,22 @@ class AgenticCheckoutUtils {
 			switch ( $wc_error_code ) {
 				case 'woocommerce_rest_product_out_of_stock':
 				case 'woocommerce_rest_product_partially_out_of_stock':
-					$error_code = 'out_of_stock';
+					$error_code = ErrorCode::OUT_OF_STOCK;
 					break;
 				case 'woocommerce_rest_product_not_purchasable':
-					$error_code = 'product_not_purchasable';
-					break;
 				case 'woocommerce_rest_cart_invalid_product':
 				case 'woocommerce_rest_invalid_product_id':
-					$error_code = 'invalid_product';
+					$error_code = ErrorCode::INVALID;
 					break;
 				default:
-					// Keep default 'invalid_product' for unknown error codes.
+					// Keep default 'invalid' for unknown error codes.
 					break;
 			}
 		}
 
 		return new \WP_REST_Response(
 			[
-				'type'    => 'invalid_request',
+				'type'    => ErrorType::INVALID_REQUEST,
 				'code'    => $error_code,
 				'message' => $error_message,
 				'param'   => '$.items[' . $item_index . ']',
