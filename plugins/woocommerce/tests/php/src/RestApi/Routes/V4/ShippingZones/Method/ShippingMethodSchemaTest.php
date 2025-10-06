@@ -151,8 +151,9 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$this->assertNotNull( $method );
 
-		// Update method settings using our extended model method.
-		$zone->update_shipping_method(
+		// Update method settings using the new API method.
+		$result = $method->update_from_api_request(
+			$zone,
 			$instance_id,
 			array(
 				'enabled'  => true,
@@ -162,6 +163,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
+		$this->assertTrue( $result );
 
 		// Re-fetch the method to get updated data.
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
@@ -196,7 +198,8 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$flat_rate_id = $zone->add_shipping_method( 'flat_rate' );
 		$flat_rate    = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
 
-		$zone->update_shipping_method(
+		$result = $flat_rate->update_from_api_request(
+			$zone,
 			$flat_rate_id,
 			array(
 				'settings' => array(
@@ -206,6 +209,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
+		$this->assertTrue( $result );
 
 		// Re-fetch to get updated settings.
 		$flat_rate = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
@@ -274,7 +278,9 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 		$zone        = $this->create_shipping_zone();
 		$instance_id = $zone->add_shipping_method( 'free_shipping' );
 
-		$zone->update_shipping_method(
+		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$result = $method->update_from_api_request(
+			$zone,
 			$instance_id,
 			array(
 				'settings' => array(
@@ -284,6 +290,7 @@ class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
 				),
 			)
 		);
+		$this->assertTrue( $result );
 
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 
