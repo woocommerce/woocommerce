@@ -34,7 +34,7 @@
 		"@babel/cli": "7.25.7",
 		"@babel/core": "7.25.7",
 		"@wordpress/babel-preset-default": "next",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"wireit": "0.14.12"
 	},
 	"dependencies": {

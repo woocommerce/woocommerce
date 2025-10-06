@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure address fields without valid values from provider 'select' are emptied on shortcode checkout.

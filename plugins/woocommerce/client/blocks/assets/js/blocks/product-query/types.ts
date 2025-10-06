@@ -97,6 +97,7 @@ export interface QueryBlockQuery {
 export interface ProductQueryContext {
 	query?: ProductQueryBlockQuery;
 	queryId?: number;
+	postId?: number;
 }
 
 export enum QueryVariation {

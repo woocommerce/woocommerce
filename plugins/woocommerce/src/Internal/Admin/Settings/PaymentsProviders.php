@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayCle
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Eway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
@@ -16,6 +17,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheck
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\NexiCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payfast;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paymob;
@@ -27,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Visa;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
@@ -83,40 +86,43 @@ class PaymentsProviders {
 	 * @var \class-string[]
 	 */
 	private array $payment_gateways_providers_class_map = array(
-		WC_Gateway_BACS::ID         => WCCore::class,
-		WC_Gateway_Cheque::ID       => WCCore::class,
-		WC_Gateway_COD::ID          => WCCore::class,
-		WC_Gateway_Paypal::ID       => WCCore::class,
-		'woocommerce_payments'      => WooPayments::class,
-		'ppcp-gateway'              => PayPal::class,
-		'stripe'                    => Stripe::class,
-		'stripe_*'                  => Stripe::class,
-		'mollie'                    => Mollie::class,
-		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
-		'amazon_payments_advanced*' => AmazonPay::class,
-		'woo-mercado-pago-*'        => MercadoPago::class,
-		'affirm'                    => Affirm::class,
-		'klarna_payments'           => Klarna::class,
-		'afterpay'                  => AfterpayClearpay::class,
-		'clearpay'                  => AfterpayClearpay::class,
-		'antom_*'                   => Antom::class,
-		'razorpay'                  => Razorpay::class,
-		'paystack'                  => Paystack::class,
-		'paystack-*'                => Paystack::class,
-		'payfast'                   => Payfast::class,
-		'payoneer-*'                => Payoneer::class,
-		'payubiz'                   => PayUIndia::class,
-		'paymob'                    => Paymob::class,
-		'paymob-*'                  => Paymob::class,
-		'airwallex_*'               => Airwallex::class,
-		'vivawallet*'               => Vivacom::class,
-		'tilopay'                   => Tilopay::class,
-		'helio'                     => HelioPay::class,
-		'paytrail'                  => Paytrail::class,
-		'monei'                     => Monei::class,
-		'monei_*'                   => Monei::class,
-		'gocardless'                => GoCardless::class,
-		'kco'                       => KlarnaCheckout::class,
+		WC_Gateway_BACS::ID           => WCCore::class,
+		WC_Gateway_Cheque::ID         => WCCore::class,
+		WC_Gateway_COD::ID            => WCCore::class,
+		WC_Gateway_Paypal::ID         => WCCore::class,
+		'woocommerce_payments'        => WooPayments::class,
+		'ppcp-gateway'                => PayPal::class,
+		'stripe'                      => Stripe::class,
+		'stripe_*'                    => Stripe::class,
+		'mollie'                      => Mollie::class,
+		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
+		'amazon_payments_advanced*'   => AmazonPay::class,
+		'woo-mercado-pago-*'          => MercadoPago::class,
+		'affirm'                      => Affirm::class,
+		'klarna_payments'             => Klarna::class,
+		'afterpay'                    => AfterpayClearpay::class,
+		'clearpay'                    => AfterpayClearpay::class,
+		'antom_*'                     => Antom::class,
+		'razorpay'                    => Razorpay::class,
+		'paystack'                    => Paystack::class,
+		'paystack-*'                  => Paystack::class,
+		'payfast'                     => Payfast::class,
+		'payoneer-*'                  => Payoneer::class,
+		'payubiz'                     => PayUIndia::class,
+		'paymob'                      => Paymob::class,
+		'paymob-*'                    => Paymob::class,
+		'airwallex_*'                 => Airwallex::class,
+		'vivawallet*'                 => Vivacom::class,
+		'tilopay'                     => Tilopay::class,
+		'helio'                       => HelioPay::class,
+		'paytrail'                    => Paytrail::class,
+		'monei'                       => Monei::class,
+		'monei_*'                     => Monei::class,
+		'gocardless'                  => GoCardless::class,
+		'kco'                         => KlarnaCheckout::class,
+		'visa_acceptance_solutions_*' => Visa::class,
+		'eway'                        => Eway::class,
+		'dibs_easy'                   => NexiCheckout::class,
 	);
 
 	/**
@@ -153,6 +159,9 @@ class PaymentsProviders {
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
 		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::VISA              => Visa::class,
+		ExtensionSuggestions::EWAY              => Eway::class,
+		ExtensionSuggestions::NEXI_CHECKOUT     => NexiCheckout::class,
 	);
 
 	/**
@@ -212,6 +221,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway objects list.
 	 */
 	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
 			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
@@ -276,6 +288,9 @@ class PaymentsProviders {
 	 * @return array The processed payment gateways list.
 	 */
 	public function remove_shell_payment_gateways( array $payment_gateways, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways, $country_code );
 		return array_filter(
 			$payment_gateways,
@@ -412,6 +427,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway details.
 	 */
 	public function get_payment_gateway_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		return $this->enhance_payment_gateway_details(
 			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
 			$payment_gateway,
@@ -430,6 +448,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
@@ -517,6 +538,9 @@ class PaymentsProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
+		// Normalize the location to uppercase.
+		$location = strtoupper( $location );
+
 		$preferred_psp         = null;
 		$preferred_apm         = null;
 		$preferred_offline_psp = null;
@@ -597,10 +621,16 @@ class PaymentsProviders {
 			}
 
 			// If WooPayments or Stripe is active, we don't suggest other BNPLs.
+			// Note: Affirm is available in the UK even with WooPayments or Stripe active
+			// because Stripe does not support it there, yet.
 			if ( ExtensionSuggestions::TYPE_BNPL === $extension['_type'] &&
 				(
 					in_array( ExtensionSuggestions::STRIPE, $active_extensions, true ) ||
 					in_array( ExtensionSuggestions::WOOPAYMENTS, $active_extensions, true )
+				) &&
+				! (
+					ExtensionSuggestions::AFFIRM === $extension['id'] &&
+					'GB' === $location
 				)
 			) {
 				continue;
@@ -682,6 +712,9 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
 		if ( ! is_null( $suggestion ) ) {
 			// Enhance the suggestion details.
@@ -1177,16 +1210,14 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
-					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
-					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
-					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
-					ExtensionSuggestions::DEPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON, // We don't have suggestion details yet.
-					ExtensionSuggestions::EWAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::FORTISPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::NEXI, // We don't have suggestion details yet.
-					ExtensionSuggestions::PAYPAL_ZETTLE, // We don't have suggestion details yet.
-					ExtensionSuggestions::RAPYD, // We don't have suggestion details yet.
+					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
+					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
+					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
+					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
+					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
+					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
+					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
 				),
 				true

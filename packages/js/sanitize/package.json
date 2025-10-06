@@ -1,0 +1,153 @@
+{
+	"name": "@woocommerce/sanitize",
+	"version": "0.1.0",
+	"description": "WooCommerce HTML sanitization utilities.",
+	"main": "build/index.js",
+	"module": "build/index.js",
+	"types": "build-types/index.d.ts",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/woocommerce/woocommerce.git",
+		"directory": "packages/js/sanitize"
+	},
+	"keywords": [
+		"woocommerce",
+		"sanitize",
+		"dompurify",
+		"html",
+		"security"
+	],
+	"author": "Automattic",
+	"license": "GPL-2.0-or-later",
+	"bugs": {
+		"url": "https://github.com/woocommerce/woocommerce/issues"
+	},
+	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/sanitize#readme",
+	"dependencies": {
+		"dompurify": "^3.2.6"
+	},
+	"devDependencies": {
+		"@babel/core": "7.25.7",
+		"@types/dompurify": "^2.0.4",
+		"@types/jest": "29.5.x",
+		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/internal-js-tests": "workspace:*",
+		"@wordpress/scripts": "^27.0.0",
+		"eslint": "^8.55.0",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
+		"rimraf": "5.0.5",
+		"ts-jest": "29.1.x",
+		"typescript": "5.7.x",
+		"wireit": "0.14.12"
+	},
+	"peerDependencies": {
+		"@types/react": "18.3.x",
+		"@types/react-dom": "18.3.x",
+		"react": "18.3.x",
+		"react-dom": "18.3.x"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"scripts": {
+		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
+		"build:project": "pnpm --if-present '/^build:project:.*$/'",
+		"build:project:cjs": "wireit",
+		"build:project:esm": "wireit",
+		"dev": "wp-scripts start",
+		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
+		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
+		"lint:fix:lang:js": "eslint src --fix",
+		"lint:lang:js": "eslint src",
+		"start": "wp-scripts start",
+		"test:js": "jest --config ./jest.config.json --passWithNoTests",
+		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
+		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
+		"watch:build:project:cjs": "wireit",
+		"watch:build:project:esm": "wireit"
+	},
+	"lint-staged": {
+		"*.(t|j)s?(x)": [
+			"pnpm lint:fix",
+			"pnpm test:js"
+		]
+	},
+	"config": {
+		"ci": {
+			"lint": {
+				"command": "lint",
+				"changes": "src/**/*.{js,jsx,ts,tsx}"
+			},
+			"tests": [
+				{
+					"name": "JavaScript",
+					"command": "test:js",
+					"changes": [
+						"jest.config.json",
+						"tsconfig.json",
+						"src/**/*.{js,jsx,ts,tsx}"
+					],
+					"events": [
+						"pull_request",
+						"push"
+					]
+				}
+			]
+		}
+	},
+	"wireit": {
+		"build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig-cjs.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:cjs": {
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"service": true
+		},
+		"build:project:esm": {
+			"command": "tsc --project tsconfig.json",
+			"clean": "if-file-deleted",
+			"files": [
+				"tsconfig.json",
+				"src/**/*.{js,jsx,ts,tsx}",
+				"typings/**/*.ts"
+			],
+			"output": [
+				"build-module",
+				"build-types"
+			],
+			"dependencies": [
+				"dependencyOutputs"
+			]
+		},
+		"watch:build:project:esm": {
+			"command": "tsc --project tsconfig.json --watch",
+			"service": true
+		},
+		"dependencyOutputs": {
+			"allowUsuallyExcludedPaths": true,
+			"files": [
+				"package.json",
+				"node_modules/@woocommerce/eslint-plugin/configs",
+				"node_modules/@woocommerce/eslint-plugin/rules",
+				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/internal-js-tests/build",
+				"node_modules/@woocommerce/internal-js-tests/build-module",
+				"node_modules/@woocommerce/internal-js-tests/jest-preset.js"
+			]
+		}
+	}
+}

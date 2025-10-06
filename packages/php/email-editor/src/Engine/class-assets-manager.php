@@ -214,7 +214,6 @@ class Assets_Manager {
 				'send'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 				'back'     => admin_url( 'admin.php?page=wc-settings&tab=email' ),
 			),
-			'block_preview_url'     => esc_url( wp_nonce_url( admin_url( '?preview_woocommerce_mail_editor_content=true' ), 'preview-mail' ) ),
 		);
 
 		wp_localize_script(

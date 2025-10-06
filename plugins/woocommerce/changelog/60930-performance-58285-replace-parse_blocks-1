@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Replace "parse_blocks" with "Block_Scanner" in the CheckoutExpressPaymentBlock.

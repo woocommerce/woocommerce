@@ -143,9 +143,6 @@ class SingleProductTemplate extends AbstractTemplate {
 			$query_result
 		);
 
-		// Let's make sure we only run the filter once.
-		remove_filter( 'get_block_templates', array( $this, 'update_single_product_content' ), 11 );
-
 		return $query_result;
 	}
 

@@ -6,6 +6,12 @@ sidebar_position: 1
 
 # Building and Publishing a Release
 
+:::note
+
+If you encounter any issues during the release process, refer to the [Release Troubleshooting & Recovery guide](/docs/contribution/releases/troubleshooting) for step-by-step solutions to common problems and recovery procedures.
+
+:::
+
 ## Prerequisites
 
 - You must have a WordPress.org account with committer access to the WooCommerce plugin to approve the commit.

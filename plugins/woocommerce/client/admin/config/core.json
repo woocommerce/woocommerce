@@ -5,7 +5,7 @@
 		"product-block-editor": true,
 		"product-data-views": false,
 		"experimental-blocks": false,
-		"experimental-iapi-mini-cart": false,
+		"experimental-iapi-mini-cart": true,
 		"experimental-iapi-runtime": false,
 		"coming-soon-newsletter-template": false,
 		"coupons": true,
@@ -41,6 +41,6 @@
 		"launch-your-store": true,
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
-		"experimental-wc-rest-api": false
+		"rest-api-v4": false
 	}
 }

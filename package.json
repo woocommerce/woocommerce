@@ -46,7 +46,7 @@
 		"css-loader": "6.11.x",
 		"glob": "^10.3.10",
 		"husky": "^9.0.11",
-		"jest": "27.5.x",
+		"jest": "29.5.x",
 		"lint-staged": "^12.5.0",
 		"mkdirp": "^1.0.4",
 		"moment": "^2.29.4",

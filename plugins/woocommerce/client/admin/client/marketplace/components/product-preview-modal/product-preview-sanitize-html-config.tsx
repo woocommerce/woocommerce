@@ -12,20 +12,8 @@ import {
 } from '~/lib/sanitize-html/sanitize-html-extended.js';
 
 const sanitizeHtmlConfig = {
-	allowedTags: [
-		...EXTENDED_ALLOWED_TAGS,
-		'path',
-		'svg',
-		'footer',
-		'header',
-	],
-	allowedAttributes: [
-		...EXTENDED_ALLOWED_ATTR,
-		'd',
-		'fill',
-		'viewBox',
-		'xmlns',
-	],
+	tags: [ ...EXTENDED_ALLOWED_TAGS, 'path', 'svg', 'footer', 'header' ],
+	attr: [ ...EXTENDED_ALLOWED_ATTR, 'd', 'fill', 'viewBox', 'xmlns' ],
 };
 
 export default sanitizeHtmlConfig;

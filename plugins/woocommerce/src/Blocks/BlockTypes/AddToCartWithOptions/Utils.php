@@ -23,10 +23,10 @@ class Utils {
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options-quantity-selector::actions.decreaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 		// Replacement string to add button AFTER the matched <input> element.
 		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="woocommerce/add-to-cart-with-options-quantity-selector::actions.increaseQuantity" data-wp-bind--disabled="woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
 		$new_html    = preg_replace( $pattern, $plus_button, $quantity_html );
 		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
 		return $new_html;
@@ -55,43 +55,54 @@ class Utils {
 	}
 
 	/**
-	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding an input event listener.
+	 * Make the quantity input interactive by wrapping it with the necessary data attribute and adding a blur event listener.
 	 *
 	 * @param string   $quantity_html The quantity HTML.
-	 * @param string   $wrapper_attributes Optional wrapper attributes.
+	 * @param array    $wrapper_attributes Optional wrapper attributes.
+	 * @param array    $input_attributes Optional input attributes.
 	 * @param int|null $child_product_id Optional child product ID.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = '', $child_product_id = null ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $child_product_id = null ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
-			$processor->set_attribute( 'data-wp-on--input', 'actions.handleQuantityInput' );
-			$processor->set_attribute( 'data-wp-on--change', 'actions.handleQuantityChange' );
+			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
+
+			foreach ( $input_attributes as $attribute => $value ) {
+				$processor->set_attribute( $attribute, $value );
+			}
 		}
 
 		$quantity_html = $processor->get_updated_html();
 
-		$context = array();
-		if ( $child_product_id ) {
-			$context['childProductId'] = $child_product_id;
-		}
-		$context_attribute = ! empty( $context ) ? " data-wp-context='" . wp_json_encode( $context ) . "'" : '';
+		$wrapper_attributes = array_merge(
+			array(
+				'data-wp-interactive' => 'woocommerce/add-to-cart-with-options-quantity-selector',
+			),
+			$wrapper_attributes
+		);
 
-		if ( ! empty( $wrapper_attributes ) ) {
-			return sprintf(
-				'<div %1$s data-wp-interactive="woocommerce/add-to-cart-with-options"%2$s>%3$s</div>',
-				$wrapper_attributes,
-				$context_attribute,
-				$quantity_html
-			);
-		}
+		global $product;
 
-		return '<div data-wp-interactive="woocommerce/add-to-cart-with-options"' . $context_attribute . '>' . $quantity_html . '</div>';
+		$context_attribute = wp_interactivity_data_wp_context(
+			array(
+				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
+					$child_product_id :
+					$product->get_id(),
+			)
+		);
+
+		return sprintf(
+			'<div %1$s %2$s>%3$s</div>',
+			get_block_wrapper_attributes( $wrapper_attributes ),
+			$context_attribute,
+			$quantity_html
+		);
 	}
 
 	/**
@@ -123,9 +134,9 @@ class Utils {
 	 * @return bool True if the product is not purchasable or not in stock.
 	 */
 	public static function is_not_purchasable_product( $product ) {
-		if ( $product->is_type( 'simple' ) ) {
+		if ( $product->is_type( ProductType::SIMPLE ) ) {
 			return ! $product->is_in_stock() || ! $product->is_purchasable();
-		} elseif ( $product->is_type( 'variable' ) ) {
+		} elseif ( $product->is_type( ProductType::VARIABLE ) ) {
 			return ! $product->is_in_stock() || ! $product->has_purchasable_variations();
 		}
 
@@ -172,9 +183,10 @@ class Utils {
 	 * @return array The quantity constraints.
 	 */
 	public static function get_product_quantity_constraints( $product ) {
-		$min  = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
-		$max  = is_numeric( $product->get_max_purchase_quantity() ) ? $product->get_max_purchase_quantity() : -1;
-		$step = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
+		$min          = is_numeric( $product->get_min_purchase_quantity() ) ? $product->get_min_purchase_quantity() : 1;
+		$max_quantity = $product->get_max_purchase_quantity();
+		$max          = is_numeric( $max_quantity ) && -1 !== $max_quantity ? $max_quantity : null;
+		$step         = is_numeric( $product->get_purchase_quantity_step() ) ? $product->get_purchase_quantity_step() : 1;
 
 		return array(
 			'min'  => $min,

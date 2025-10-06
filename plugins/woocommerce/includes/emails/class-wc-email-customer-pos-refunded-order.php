@@ -49,6 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$this->customer_email = true;
 			$this->id             = 'customer_pos_refunded_order';
 			$this->title          = __( 'POS refunded order', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-pos-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-pos-refunded-order.php';
 			$this->placeholders   = array(

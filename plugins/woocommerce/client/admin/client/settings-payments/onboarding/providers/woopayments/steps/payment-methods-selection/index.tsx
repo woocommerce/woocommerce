@@ -37,6 +37,9 @@ export default function PaymentMethodsSelection() {
 	> | null >( null );
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
+	const [ loadingPaymentMethods, setLoadingPaymentMethods ] = useState< {
+		[ key: string ]: boolean;
+	} >( {} );
 
 	const contextPaymentMethodsState = currentStep?.context?.pms_state;
 	const contextPaymentMethods = currentStep?.context?.recommended_pms;
@@ -114,9 +117,25 @@ export default function PaymentMethodsSelection() {
 	}, [ recommendedPaymentMethods, isExpanded, initialVisibilityMap ] );
 
 	const savePaymentMethodsState = (
-		state: Record< string, boolean >
+		state: Record< string, boolean >,
+		changedMethodId?: string
 	): Promise< void > => {
 		const saveUrl = currentStep?.actions?.save?.href;
+
+		// Store the previous state for potential rollback
+		const previousState = { ...paymentMethodsState };
+
+		// Set loading state for the specific method if provided
+		if ( changedMethodId ) {
+			setLoadingPaymentMethods( ( prev ) => ( {
+				...prev,
+				[ changedMethodId ]: true,
+			} ) );
+		}
+
+		// Optimistically update the local state first
+		setPaymentMethodsState( state );
+
 		if ( saveUrl ) {
 			// Send the updated state to the backend.
 			return apiFetch( {
@@ -126,14 +145,30 @@ export default function PaymentMethodsSelection() {
 					payment_methods: state,
 					source: sessionEntryPoint,
 				},
-			} ).then( () => {
-				// Update the local state.
-				setPaymentMethodsState( state );
-			} );
+			} )
+				.then( () => {} )
+				.catch( () => {
+					// If the request fails, revert to the previous state
+					setPaymentMethodsState( previousState );
+				} )
+				.finally( () => {
+					// Clear loading state immediately if no API call is made
+					if ( changedMethodId ) {
+						setLoadingPaymentMethods( ( prev ) => ( {
+							...prev,
+							[ changedMethodId ]: false,
+						} ) );
+					}
+				} );
 		}
 
-		// If there is no save URL, just update the local state.
-		setPaymentMethodsState( state );
+		// Clear loading state immediately if no API call is made
+		if ( changedMethodId ) {
+			setLoadingPaymentMethods( ( prev ) => ( {
+				...prev,
+				[ changedMethodId ]: false,
+			} ) );
+		}
 
 		// Return a resolved promise since no API call was made.
 		return Promise.resolve();
@@ -211,7 +246,10 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											savePaymentMethodsState( state );
+											savePaymentMethodsState(
+												state,
+												method.id
+											);
 										} }
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
@@ -222,6 +260,11 @@ export default function PaymentMethodsSelection() {
 												: null
 										}
 										isExpanded={ isExpanded }
+										isLoading={
+											loadingPaymentMethods[
+												method.id
+											] ?? false
+										}
 										key={ method.id }
 									/>
 								)

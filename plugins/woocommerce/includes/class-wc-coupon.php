@@ -146,6 +146,24 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Returns all data for this object.
+	 *
+	 * @since  2.6.0
+	 * @return array
+	 */
+	public function get_data() {
+		$data = parent::get_data();
+		if ( '' === $data['minimum_amount'] ) {
+			$data['minimum_amount'] = '0';
+		}
+		if ( '' === $data['maximum_amount'] ) {
+			$data['maximum_amount'] = '0';
+		}
+		return $data;
+	}
+
+
+	/**
 	 * If the object has an ID, read using the data store.
 	 *
 	 * @since 3.4.1
@@ -400,20 +418,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_minimum_amount( $context = 'view' ) {
-		return $this->get_prop( 'minimum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'minimum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'minimum_amount', $context ) );
 	}
 	/**
 	 * Get maximum spend amount.
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_maximum_amount( $context = 'view' ) {
-		return $this->get_prop( 'maximum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'maximum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
 	}
 
 	/**
@@ -543,10 +567,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param string $discount_type Discount type.
 	 */
 	public function set_discount_type( $discount_type ) {
+		$this->set_discount_type_core( $discount_type, true );
+	}
+
+	/**
+	 * Set discount type, optionally disabling the type verification.
+	 *
+	 * @since 10.3.0
+	 * @param string $discount_type Discount type.
+	 * @param bool   $verify_discount_type Whether to verify if the discount type is valid.
+	 */
+	private function set_discount_type_core( $discount_type, bool $verify_discount_type ) {
 		if ( 'percent_product' === $discount_type ) {
 			$discount_type = 'percent'; // Backwards compatibility.
 		}
-		if ( ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
+		if ( $verify_discount_type && ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'discount_type', $discount_type );
@@ -1267,7 +1302,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		$this->set_id( $info[0] ?? 0 );
 		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type( $info[2] ?? 'fixed_cart' );
+		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
 		$this->set_amount( $info[3] ?? 0 );
 		$this->set_free_shipping( $info[4] ?? false );
 	}

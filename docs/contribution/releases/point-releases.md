@@ -14,6 +14,15 @@ Point releases are patch releases that address specific issues without adding su
 - **Security patches** for urgent vulnerabilities
 - **Compatibility fixes** for WordPress, theme, or plugin conflicts
 
+## Timing a Point Release
+
+When considering the exact time to create a point release, use your best judgement based on the urgency and severity of outsanding issues:
+
+- If the issue is not very urgent, consider waiting 3–4 days to see if additional related issues are reported before proceeding. This helps consolidate fixes and reduces the number of patch releases.
+- For high-severity or critical issues, prioritize releasing as soon as possible to minimize impact on users.
+- For security issues, coordinate with the team that implemented the security fix to help determine urgency if it is not clear.
+- Consider whether other known issues are already being worked on that could be included in the same release.
+
 ## The Point Release Requests (PRR) flow
 
 The **Point Release Request (PRR) flow** is a structured process for requesting and managing critical fixes that need to be included in WooCommerce point releases. This process ensures that urgent bug fixes can be safely incorporated into current stable release and automatically forward-port them to trunk and any frozen branches, preserving code quality, enforcing thorough reviews, and preventing regressions.

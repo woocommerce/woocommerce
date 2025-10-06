@@ -318,6 +318,12 @@ $fontSizes: (
 	}
 }
 
+@mixin cart-checkout-below-medium-container {
+	@container (max-width: 519px) {
+		@content;
+	}
+}
+
 @mixin cart-checkout-small-container {
 	@container (min-width: 400px) and (max-width: 519px) {
 		@content;

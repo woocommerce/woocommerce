@@ -19,6 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -843,7 +844,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_recorded_coupon_usage_counts();
+		return $order && $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -1031,7 +1032,8 @@ WHERE
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
+	 *
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
@@ -1048,6 +1050,36 @@ WHERE
 				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
+				$order->get_id(),
+			)
+		) ?? 0;
+		// phpcs:enable
+
+		return abs( $total );
+	}
+
+	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @since 10.2.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded( $order ) {
+		global $wpdb;
+
+		$order_table = self::get_orders_table_name();
+
+		$total = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
 				$order->get_id()
 			)
 		) ?? 0;
@@ -3061,6 +3093,11 @@ FROM $order_meta_table
 					'compare' => 'NOT EXISTS',
 				);
 			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
 		try {

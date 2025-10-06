@@ -3,8 +3,11 @@
  */
 import clsx from 'clsx';
 import { createHigherOrderComponent } from '@wordpress/compose';
-import { addFilter } from '@wordpress/hooks';
-import { getBlockSupport, hasBlockSupport } from '@wordpress/blocks';
+import {
+	getBlockSupport,
+	hasBlockSupport,
+	getBlockTypes,
+} from '@wordpress/blocks';
 import { Block } from '@wordpress/blocks/index';
 import { __ } from '@wordpress/i18n';
 import { justifyLeft, justifyCenter, justifyRight } from '@wordpress/icons';
@@ -22,6 +25,11 @@ import {
 	// @ts-expect-error No types for this exist yet.
 	JustifyContentControl,
 } from '@wordpress/block-editor';
+
+/**
+ * Internal dependencies
+ */
+import { addFilterForEmail, updateBlockSettings } from '../config-tools';
 
 const layoutBlockSupportKey = '__experimentalEmailFlexLayout';
 
@@ -161,24 +169,21 @@ function LayoutControls( { setAttributes, attributes, name: blockName } ) {
 
 /**
  * Filters registered block settings, extending attributes to include `layout`.
- *
- * @param {Object} settings Original block settings.
- *
- * @return {Object} Filtered block settings.
  */
-export function addAttribute( settings: Block ) {
-	if ( hasLayoutBlockSupport( settings.name ) ) {
-		return {
-			...settings,
-			attributes: {
-				...settings.attributes,
-				layout: {
-					type: 'object',
+export function addAttribute() {
+	getBlockTypes().forEach( ( blockType: Block ) => {
+		if ( hasLayoutBlockSupport( blockType.name ) ) {
+			updateBlockSettings( blockType.name, ( current ) => ( {
+				...current,
+				attributes: {
+					...current.attributes,
+					layout: {
+						type: 'object',
+					},
 				},
-			},
-		};
-	}
-	return settings;
+			} ) );
+		}
+	} );
 }
 
 /**
@@ -241,17 +246,13 @@ export const withLayoutStyles = createHigherOrderComponent(
 );
 
 export function initializeLayout() {
-	addFilter(
-		'blocks.registerBlockType',
-		'woocommerce-email-editor/layout/addAttribute',
-		addAttribute
-	);
-	addFilter(
+	addAttribute();
+	addFilterForEmail(
 		'editor.BlockListBlock',
 		'woocommerce-email-editor/with-layout-styles',
 		withLayoutStyles
 	);
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/with-inspector-controls',
 		withLayoutControls

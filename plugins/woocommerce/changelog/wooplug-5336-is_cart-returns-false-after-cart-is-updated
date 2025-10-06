@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Set the WOOCOMMERCE_CART constant on update cart AJAX routes

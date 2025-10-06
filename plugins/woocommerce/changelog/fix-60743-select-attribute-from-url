@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update the Add to Cart + Options block so attributes are automatically selected when they match the URL parameters

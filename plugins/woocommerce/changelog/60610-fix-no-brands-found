@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add missing `no_terms` label to Brands taxonomy for proper empty state messaging.

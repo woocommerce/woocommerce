@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Sender } from 'xstate';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { Button } from '@wordpress/components';
@@ -11,8 +12,8 @@ import { Link } from '@woocommerce/components';
 /**
  * Internal dependencies
  */
-import { Intro } from '.';
 import { IntroSiteIframe } from './intro-site-iframe';
+import type { customizeStoreStateMachineEvents } from '~/customize-store';
 import { ADMIN_URL, getAdminSetting } from '~/utils/admin-settings';
 import { navigateOrParent } from '../utils';
 import { trackEvent } from '../tracking';
@@ -28,9 +29,10 @@ export const BaseIntroBanner = ( {
 	secondaryButton,
 	previewBanner,
 	children,
+	isSecondaryBanner,
 }: {
 	bannerTitle: string;
-	bannerText: string;
+	bannerText: string | React.ReactNode;
 	bannerClass: string;
 	showAIDisclaimer: boolean;
 	buttonIsLink?: boolean;
@@ -39,7 +41,10 @@ export const BaseIntroBanner = ( {
 	secondaryButton?: React.ReactNode;
 	previewBanner?: React.ReactNode;
 	children?: React.ReactNode;
+	isSecondaryBanner?: boolean;
 } ) => {
+	const TextTag = typeof bannerText === 'string' ? 'p' : 'div';
+	const TitleTag = isSecondaryBanner ? 'h2' : 'h1';
 	return (
 		<div
 			className={ clsx(
@@ -49,8 +54,8 @@ export const BaseIntroBanner = ( {
 		>
 			<div className={ `woocommerce-customize-store-banner-content` }>
 				<div className="banner-actions">
-					<h1>{ bannerTitle }</h1>
-					<p>{ bannerText }</p>
+					<TitleTag>{ bannerTitle }</TitleTag>
+					<TextTag>{ bannerText }</TextTag>
 					{ bannerButtonText && (
 						<Button
 							onClick={ () =>
@@ -110,7 +115,7 @@ export const NetworkOfflineBanner = () => {
 export const JetpackOfflineBanner = ( {
 	sendEvent,
 }: {
-	sendEvent: React.ComponentProps< typeof Intro >[ 'sendEvent' ];
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
 } ) => {
 	return (
 		<BaseIntroBanner
@@ -141,21 +146,19 @@ export const NoAIBanner = ( {
 	redirectToCYSFlow: () => void;
 } ) => {
 	return (
-		<>
-			<BaseIntroBanner
-				bannerTitle={ __( 'Design your own', 'woocommerce' ) }
-				bannerText={ __(
-					'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
-					'woocommerce'
-				) }
-				bannerClass="no-ai-banner"
-				bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
-				bannerButtonOnClick={ () => {
-					redirectToCYSFlow();
-				} }
-				showAIDisclaimer={ false }
-			/>
-		</>
+		<BaseIntroBanner
+			bannerTitle={ __( 'Design your own', 'woocommerce' ) }
+			bannerText={ __(
+				'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+				'woocommerce'
+			) }
+			bannerClass="no-ai-banner"
+			bannerButtonText={ __( 'Start designing', 'woocommerce' ) }
+			bannerButtonOnClick={ () => {
+				redirectToCYSFlow();
+			} }
+			showAIDisclaimer={ false }
+		/>
 	);
 };
 
@@ -241,5 +244,53 @@ export const NonDefaultBlockThemeBanner = () => {
 			showAIDisclaimer={ false }
 			previewBanner={ <IntroSiteIframe siteUrl={ siteUrl } /> }
 		></BaseIntroBanner>
+	);
+};
+
+export const PickYourThemeBanner = ( {
+	sendEvent,
+}: {
+	sendEvent: Sender< customizeStoreStateMachineEvents >;
+} ) => {
+	return (
+		<BaseIntroBanner
+			isSecondaryBanner
+			bannerTitle={ __( 'Pick your perfect theme', 'woocommerce' ) }
+			bannerText={
+				<div className="pick-your-theme-banner__content">
+					<p>
+						{ __(
+							'Bring your vision to life — no coding required. Explore hundreds of free and paid ecommerce-optimized themes.',
+							'woocommerce'
+						) }
+					</p>
+					<ul>
+						<li>
+							{ __( 'Themes for every industry', 'woocommerce' ) }
+						</li>
+						<li>
+							{ __(
+								'Ready to use out of the box',
+								'woocommerce'
+							) }
+						</li>
+						<li>
+							{ __(
+								'30-day money-back guarantee',
+								'woocommerce'
+							) }
+						</li>
+					</ul>
+				</div>
+			}
+			bannerButtonText={ __( 'Browse the Marketplace', 'woocommerce' ) }
+			bannerButtonOnClick={ () => {
+				sendEvent( {
+					type: 'SELECTED_BROWSE_ALL_THEMES',
+				} );
+			} }
+			showAIDisclaimer={ false }
+			bannerClass="pick-your-theme-banner"
+		/>
 	);
 };

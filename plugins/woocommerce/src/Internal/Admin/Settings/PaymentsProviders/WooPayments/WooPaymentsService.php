@@ -72,6 +72,15 @@ class WooPaymentsService {
 
 	const NOX_PROFILE_OPTION_KEY    = 'woocommerce_woopayments_nox_profile';
 	const NOX_ONBOARDING_LOCKED_KEY = 'woocommerce_woopayments_nox_onboarding_locked';
+	/**
+	 * The TTL for the onboarding lock.
+	 * This is to prevent the onboarding from being locked indefinitely in case of uncaught errors.
+	 * If the lock timestamp is older than this, we consider the lock expired and allow onboarding actions again.
+	 * 2 minutes (120 seconds) should be more than enough for any onboarding action/request to complete.
+	 * If at some point we have more complex onboarding actions that may take longer, we can revisit this value,
+	 * but we should keep it as low as possible to prevent long lockouts.
+	 */
+	const NOX_ONBOARDING_LOCKED_TTL_SECONDS = 120;
 
 	const SESSION_ENTRY_DEFAULT = 'settings_payments';
 	const SESSION_ENTRY_LYS     = 'lys';
@@ -910,8 +919,8 @@ class WooPaymentsService {
 	 *
 	 * @return array The result of the test account initialization.
 	 * @throws ApiException If the given onboarding step ID or step data is invalid.
-	 *                                           If the onboarding action can not be performed due to the current state
-	 *                                           of the site or there was an error initializing the test account.
+	 *                      If the onboarding action can not be performed due to the current state
+	 *                      of the site or there was an error initializing the test account.
 	 */
 	public function onboarding_test_account_init( string $location, ?string $source = self::SESSION_ENTRY_DEFAULT ): array {
 		$this->check_if_onboarding_step_action_is_acceptable( self::ONBOARDING_STEP_TEST_ACCOUNT, $location );
@@ -945,10 +954,10 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to initialize the test account.
@@ -1084,10 +1093,10 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to get the KYC session.
@@ -1197,10 +1206,10 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$source = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
-
-		$source = $this->validate_onboarding_source( $source );
 
 		try {
 			// Call the WooPayments API to finalize the KYC session.
@@ -1356,21 +1365,22 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
+		$event_props = array();
+		$source      = $this->validate_onboarding_source( $source );
+
 		// Lock the onboarding to prevent concurrent actions.
 		$this->set_onboarding_lock();
 
-		$source = $this->validate_onboarding_source( $source );
+		try {
+			// Before resetting the onboarding, record its details for tracking purposes.
+			$event_props = array(
+				'has_account'  => $this->has_account(),
+				'account_mode' => $this->has_account() ? ( $this->has_live_account() ? 'live' : 'test' ) : 'none',
+				'test_account' => $this->has_test_account(),
+				'source'       => $source,
+			);
 
-		// Before resetting the onboarding, record its details for tracking purposes.
-		$event_props = array(
-			'has_account'  => $this->has_account(),
-			'account_mode' => $this->has_account() ? ( $this->has_live_account() ? 'live' : 'test' ) : 'none',
-			'test_account' => $this->has_test_account(),
-			'source'       => $source,
-		);
-
-		if ( $this->has_account() ) {
-			try {
+			if ( $this->has_account() ) {
 				// Call the WooPayments API to reset onboarding.
 				$response = $this->proxy->call_static(
 					Utils::class,
@@ -1381,22 +1391,22 @@ class WooPaymentsService {
 						'source' => $source,
 					)
 				);
-			} catch ( Exception $e ) {
-				// Catch any exceptions to allow for proper error handling and onboarding unlock.
-				$response = new WP_Error(
-					'woocommerce_woopayments_onboarding_client_api_exception',
-					esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
-					array(
-						'code'    => $e->getCode(),
-						'message' => $e->getMessage(),
-						'trace'   => $e->getTrace(),
-					)
+			} else {
+				// If there is no account to reset, we can just use a success response.
+				$response = array(
+					'success' => true,
 				);
 			}
-		} else {
-			// If there is no account to reset, we can just use a success response.
-			$response = array(
-				'success' => true,
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while resetting onboarding.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
 			);
 		}
 
@@ -1457,21 +1467,27 @@ class WooPaymentsService {
 		// Ensure the payment gateways logic is initialized in case actions need to be taken on payment gateway changes.
 		WC()->payment_gateways();
 
-		$has_test_account    = $this->has_test_account();
-		$has_sandbox_account = $this->has_sandbox_account();
-
-		// Lock the onboarding to prevent concurrent actions.
-		$this->set_onboarding_lock();
-
-		$source = $this->validate_onboarding_source( $source );
-
 		$response = array(
 			'success' => true,
 		);
 
-		// First, check if we have a test account to disable.
-		if ( $has_test_account ) {
-			try {
+		$event_props = array();
+		$source      = $this->validate_onboarding_source( $source );
+
+		// Lock the onboarding to prevent concurrent actions.
+		$this->set_onboarding_lock();
+
+		try {
+			$has_test_account    = $this->has_test_account();
+			$has_sandbox_account = $this->has_sandbox_account();
+
+			$event_props = array(
+				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
+				'source'       => $source,
+			);
+
+			// First, check if we have a test account to disable.
+			if ( $has_test_account ) {
 				// Call the WooPayments API to disable the test account and prepare for the switch to live.
 				$response = $this->proxy->call_static(
 					Utils::class,
@@ -1482,20 +1498,7 @@ class WooPaymentsService {
 						'source' => $source,
 					)
 				);
-			} catch ( Exception $e ) {
-				// Catch any exceptions to allow for proper error handling and onboarding unlock.
-				$response = new WP_Error(
-					'woocommerce_woopayments_onboarding_client_api_exception',
-					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-					array(
-						'code'    => $e->getCode(),
-						'message' => $e->getMessage(),
-						'trace'   => $e->getTrace(),
-					)
-				);
-			}
-		} elseif ( $has_sandbox_account ) {
-			try {
+			} elseif ( $has_sandbox_account ) {
 				// Call the WooPayments API to reset onboarding.
 				$response = $this->proxy->call_static(
 					Utils::class,
@@ -1506,18 +1509,18 @@ class WooPaymentsService {
 						'source' => $source,
 					)
 				);
-			} catch ( Exception $e ) {
-				// Catch any exceptions to allow for proper error handling and onboarding unlock.
-				$response = new WP_Error(
-					'woocommerce_woopayments_onboarding_client_api_exception',
-					esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
-					array(
-						'code'    => $e->getCode(),
-						'message' => $e->getMessage(),
-						'trace'   => $e->getTrace(),
-					)
-				);
 			}
+		} catch ( Exception $e ) {
+			// Catch any exceptions to allow for proper error handling and onboarding unlock.
+			$response = new WP_Error(
+				'woocommerce_woopayments_onboarding_client_api_exception',
+				esc_html__( 'An unexpected error happened while disabling the test account.', 'woocommerce' ),
+				array(
+					'code'    => $e->getCode(),
+					'message' => $e->getMessage(),
+					'trace'   => $e->getTrace(),
+				)
+			);
 		}
 
 		// Unlock the onboarding after the API call finished or errored.
@@ -1575,10 +1578,7 @@ class WooPaymentsService {
 		$this->record_event(
 			self::EVENT_PREFIX . 'onboarding_test_account_disabled',
 			$location,
-			array(
-				'account_type' => $has_test_account ? 'test_drive' : ( $has_sandbox_account ? 'sandbox' : 'unknown' ),
-				'source'       => $source,
-			)
+			$event_props
 		);
 
 		return $response;
@@ -1712,7 +1712,25 @@ class WooPaymentsService {
 	 * @return bool Whether the onboarding is locked.
 	 */
 	private function is_onboarding_locked(): bool {
-		return 'yes' === $this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
+		$lock_timestamp = (int) $this->proxy->call_function(
+			'absint',
+			$this->proxy->call_function( 'get_option', self::NOX_ONBOARDING_LOCKED_KEY, 0 )
+		);
+
+		if ( 0 === $lock_timestamp ) {
+			return false;
+		}
+
+		$now = $this->proxy->call_function( 'time' );
+
+		// If the lock timestamp is older than the TTL, consider it unlocked and self-heal.
+		if ( $lock_timestamp < ( $now - self::NOX_ONBOARDING_LOCKED_TTL_SECONDS ) ) {
+			$this->clear_onboarding_lock();
+
+			return false;
+		}
+
+		return true;
 	}
 
 	/**
@@ -1726,7 +1744,8 @@ class WooPaymentsService {
 	 * @return void
 	 */
 	private function set_onboarding_lock(): void {
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'yes' );
+		$now = $this->proxy->call_function( 'time' );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, $now, false );
 	}
 
 	/**
@@ -1736,7 +1755,7 @@ class WooPaymentsService {
 	 */
 	private function clear_onboarding_lock(): void {
 		// We update rather than delete the option for performance reasons.
-		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 'no' );
+		$this->proxy->call_function( 'update_option', self::NOX_ONBOARDING_LOCKED_KEY, 0, false );
 	}
 
 	/**
@@ -2361,9 +2380,14 @@ class WooPaymentsService {
 		}
 
 		// Combine Apple Pay and Google Pay into a single `apple_google` entry.
-		$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+		// First check if apple_google is explicitly stored, otherwise fallback to combining individual states.
+		if ( isset( $step_pms_data['apple_google'] ) ) {
+			$apple_google_enabled = wc_string_to_bool( $step_pms_data['apple_google'] );
+		} else {
+			// Fallback to OR logic for backward compatibility.
+			$apple_google_enabled = $apple_pay_enabled || $google_pay_enabled;
+		}
 
-		// Optionally also respect stored state or forced requirements if needed here.
 		$payment_methods_state['apple_google'] = $apple_google_enabled;
 
 		return $payment_methods_state;

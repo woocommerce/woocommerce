@@ -126,7 +126,13 @@
 		text-decoration: none;
 		font-size: medium;
 		cursor: pointer;
+	}
 
+	// Reset the margin top in the Add to Cart + Options block.
+	// @see https://github.com/woocommerce/woocommerce/pull/60413
+	// Extra class for specificity.
+	.wp-block-add-to-cart-with-options .wp-block-button__link.wp-block-button__link {
+		margin-top: 0;
 	}
 
 	// Style the 'Showing A-B of X results' text.

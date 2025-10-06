@@ -34,6 +34,10 @@ type PaymentMethodListItemProps = {
 	 * If undefined, the component calculates its own initial visibility.
 	 */
 	initialVisibilityStatus?: boolean | null;
+	/**
+	 * Indicates whether this payment method is currently being saved.
+	 */
+	isLoading?: boolean;
 };
 
 /**
@@ -46,6 +50,7 @@ export const PaymentMethodListItem = ( {
 	setPaymentMethodsState,
 	isExpanded,
 	initialVisibilityStatus,
+	isLoading = false,
 	...props
 }: PaymentMethodListItemProps ) => {
 	// Internal ref for fallback mechanism when prop is not provided
@@ -168,9 +173,11 @@ export const PaymentMethodListItem = ( {
 									[ method.id ]: isChecked,
 								} );
 							} }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore disabled prop exists
-							disabled={ method.required ?? false }
+							disabled={
+								// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+								// @ts-ignore disabled prop exists
+								( method.required ?? false ) || isLoading
+							}
 							label=""
 						/>
 					</div>

@@ -8,6 +8,7 @@
  * @version 2.6.0
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 
 defined( 'ABSPATH' ) || exit;
@@ -426,6 +427,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc/v1',
 		'wc/v2',
 		'wc/v3',
+		'wc/v4',
 		'wc-telemetry',
 		'wc-admin',
 		'wc-analytics',

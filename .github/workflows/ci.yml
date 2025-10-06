@@ -406,7 +406,7 @@ jobs:
       - name: 'Publish report to dashboard'
         if: ${{ !! steps.merge-artifacts.outputs.artifact-id }}
         env:
-          GH_TOKEN: ${{ secrets.REPORTS_TOKEN }}
+          GH_TOKEN: ${{ secrets.TEST_REPORTS_DISPATCH_WORKFLOW_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPORT_NAME: ${{ matrix.report }}
           HEAD_COMMIT_MESSAGE: ${{ github.event.head_commit.message }}

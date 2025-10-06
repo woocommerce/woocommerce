@@ -122,7 +122,7 @@ export class Editor extends CoreEditor {
 
 		// Wait for the search to finish.
 		await expect(
-			this.page.getByRole( 'button', { name: 'Reset' } )
+			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
 	}
@@ -181,7 +181,11 @@ export class Editor extends CoreEditor {
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {
-		await this.page.getByLabel( 'Add Template' ).click();
+		// We need to take into account two versions of WordPress where label has changed.
+		await this.page
+			.getByLabel( 'Add Template' )
+			.or( this.page.getByText( 'Add New Template' ) )
+			.click();
 
 		const dialog = this.page.getByRole( 'dialog' );
 		await dialog.getByRole( 'button', { name: templateName } ).click();

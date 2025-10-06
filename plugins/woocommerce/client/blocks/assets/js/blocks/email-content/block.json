@@ -1,0 +1,18 @@
+{
+	"name": "woocommerce/email-content",
+	"title": "Email Content",
+	"description": "A placeholder block for email content.",
+	"category": "woocommerce",
+	"textdomain": "woocommerce",
+	"supports": {
+		"inserter": false,
+		"email": true
+	},
+	"attributes": {
+		"emailType": {
+			"type": "string"
+		}
+	},
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

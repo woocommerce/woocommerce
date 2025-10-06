@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Optimize query to get name of deleted product for Analytics product reports.

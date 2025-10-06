@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove 'allows modifying the template parts' e2e test from Add to Cart + Options

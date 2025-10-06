@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Remove shipping data from session when cart emptied or checkout completed.
