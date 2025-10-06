@@ -63,13 +63,11 @@ class ShippingZoneSchema extends AbstractSchema {
 						'code' => array(
 							'description' => __( 'Shipping zone location code.', 'woocommerce' ),
 							'type'        => 'string',
-							'required'    => true,
 						),
 						'type' => array(
 							'description' => __( 'Shipping zone location type.', 'woocommerce' ),
 							'type'        => 'string',
 							'default'     => 'country',
-							'enum'        => array( 'postcode', 'state', 'country', 'continent' ),
 						),
 						'name' => array(
 							'description' => __( 'Shipping zone location name (readonly, auto-generated from code).', 'woocommerce' ),
