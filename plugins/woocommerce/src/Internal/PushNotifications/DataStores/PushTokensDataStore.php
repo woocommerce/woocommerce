@@ -66,7 +66,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 		$meta = $this->read_meta( $push_token );
 
-		$push_token->set_user_id( $post->post_author );
+		$push_token->set_user_id( (int) $post->post_author );
 		$push_token->set_token( $meta['token'] ?? null );
 		$push_token->set_platform( $meta['platform'] ?? null );
 		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
@@ -249,7 +249,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		$push_token->set_id( $push_token_data[0]->ID );
-		$push_token->set_user_id( $push_token_data[0]->post_author );
+		$push_token->set_user_id( (int) $push_token_data[0]->post_author );
 
 		$meta = $this->read_meta( $push_token );
 
