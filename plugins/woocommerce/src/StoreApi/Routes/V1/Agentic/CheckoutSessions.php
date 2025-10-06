@@ -32,13 +32,6 @@ class CheckoutSessions extends AbstractCartRoute {
 	const SCHEMA_TYPE = CheckoutSessionSchema::IDENTIFIER;
 
 	/**
-	 * Order controller for managing draft orders.
-	 *
-	 * @var OrderController
-	 */
-	protected $order_controller;
-
-	/**
 	 * Cart controller for managing cart operations.
 	 *
 	 * @var CartController
@@ -172,27 +165,5 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Add protocol headers.
 		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );
-	}
-
-	/**
-	 * Handle cart updated event.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 */
-	protected function cart_updated( \WP_REST_Request $request ) {
-		// Only create/update draft order if cart has items.
-		// This prevents errors when validation fails and cart is empty.
-		if ( WC()->cart && ! WC()->cart->is_empty() ) {
-			$draft_order = $this->get_draft_order();
-
-			if ( ! $draft_order ) {
-				// Create new draft order from cart using core OrderController.
-				$draft_order = $this->order_controller->create_order_from_cart();
-				$draft_order->save();
-				$this->set_draft_order_id( $draft_order->get_id() );
-			}
-
-			parent::cart_updated( $request );
-		}
 	}
 }
