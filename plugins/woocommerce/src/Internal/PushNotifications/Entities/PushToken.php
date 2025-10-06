@@ -17,10 +17,10 @@ class PushToken {
 	const PLATFORM_APPLE   = 'apple';
 	const PLATFORM_ANDROID = 'android';
 
-	const PLATFORMS = [
+	const PLATFORMS = array(
 		self::PLATFORM_APPLE,
 		self::PLATFORM_ANDROID,
-	];
+	);
 
 	/**
 	 * The id of the token post.

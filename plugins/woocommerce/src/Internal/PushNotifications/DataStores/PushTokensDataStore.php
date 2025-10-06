@@ -3,6 +3,8 @@
  * PushTokensDataStore class file.
  */
 
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 
 defined( 'ABSPATH' ) || exit;
@@ -29,16 +31,16 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		$id = wp_insert_post(
-			[
-				'post_author'     => $push_token->get_user_id(),
-				'post_type'       => PushToken::POST_TYPE,
-				'post_status'     => 'publish',
-				'meta_input'      => array(
+			array(
+				'post_author' => $push_token->get_user_id(),
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'publish',
+				'meta_input'  => array(
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
 					'device_uuid' => $push_token->get_device_uuid(),
 				),
-			]
+			)
 		);
 
 		$push_token->set_id( $id );
@@ -82,17 +84,17 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		wp_update_post(
-			[
-				'ID'              => $push_token->get_id(),
-				'post_author'     => $push_token->get_user_id(),
-				'post_type'       => PushToken::POST_TYPE,
-				'post_status'     => 'publish',
-				'meta_input'      => array(
+			array(
+				'ID'          => $push_token->get_id(),
+				'post_author' => $push_token->get_user_id(),
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'publish',
+				'meta_input'  => array(
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
 					'device_uuid' => $push_token->get_device_uuid(),
 				),
-			]
+			)
 		);
 	}
 
@@ -214,18 +216,18 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			);
 		}
 
-		$args = [
-			'post_type'           => PushToken::POST_TYPE,
-			'author'              => $push_token->get_user_id(),
-			'meta_query'          => array(
-				'relation'        => 'AND',
+		$args = array(
+			'post_type'  => PushToken::POST_TYPE,
+			'author'     => $push_token->get_user_id(),
+			'meta_query' => array(
+				'relation' => 'AND',
 				array(
-					'key'         => 'platform',
-					'compare'     => '=',
-					'value'       => $push_token->get_platform(),
+					'key'     => 'platform',
+					'compare' => '=',
+					'value'   => $push_token->get_platform(),
 				),
 				array(
-					'relation'    => 'OR',
+					'relation' => 'OR',
 					array(
 						'key'     => 'token',
 						'compare' => '=',
@@ -238,7 +240,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					),
 				),
 			),
-		];
+		);
 
 		$push_token_data = get_posts( $args );
 

@@ -272,11 +272,11 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $meta );
 
 		$this->assertEquals(
-			[
-				'platform' => $push_token->get_platform(),
-				'token' => $push_token->get_token(),
+			array(
+				'platform'    => $push_token->get_platform(),
+				'token'       => $push_token->get_token(),
 				'device_uuid' => $push_token->get_device_uuid(),
-			],
+			),
 			$meta
 		);
 	}
@@ -526,9 +526,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( PushToken::POST_TYPE, $post->post_type );
 		$this->assertEquals( $push_token->get_user_id(), $post->post_author );
 
-		$platform     = get_post_meta( $push_token->get_id(), 'platform', true );
-		$token        = get_post_meta( $push_token->get_id(), 'token', true );
-		$device_uuid  = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$platform    = get_post_meta( $push_token->get_id(), 'platform', true );
+		$token       = get_post_meta( $push_token->get_id(), 'token', true );
+		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
 
 		$this->assertEquals( $push_token->get_platform(), $platform );
 		$this->assertEquals( $push_token->get_token(), $token );
