@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Introduce WC_Shipping_Zone_Data_Store::read_multiple() to improve performance when requesting all Shipping_Zones at once.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add to Cart + Options: don't disable optimistic updates when adding grouped product children to cart if only one fails
