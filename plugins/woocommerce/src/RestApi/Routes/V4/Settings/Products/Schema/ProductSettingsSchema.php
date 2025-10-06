@@ -188,8 +188,8 @@ class ProductSettingsSchema extends AbstractSchema {
 				$field = $this->transform_setting_to_field( $setting );
 				if ( $field ) {
 					$current_group['fields'][] = $field;
-					// Add field value to the flat values array
-					$raw_value = get_option( $field['id'], $setting['default'] ?? '' );
+					// Add field value to the flat values array.
+					$raw_value              = get_option( $field['id'], $setting['default'] ?? '' );
 					$values[ $field['id'] ] = $this->validate_field_value( $raw_value, $field['type'] );
 				}
 			}
