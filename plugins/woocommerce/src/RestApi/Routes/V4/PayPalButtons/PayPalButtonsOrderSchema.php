@@ -31,17 +31,17 @@ class PayPalButtonsOrderSchema extends AbstractSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'paypal_order_id'        => array(
+			'paypal_order_id' => array(
 				'description' => __( 'Unique identifier for the PayPal order (on the PayPal side).', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
 			),
-			'order_id'      => array(
+			'order_id'        => array(
 				'description' => __( 'Unique identifier for the order (WooCommerce side).', 'woocommerce' ),
 				'type'        => 'integer',
 				'readonly'    => true,
 			),
-			'return_url'     => array(
+			'return_url'      => array(
 				'description' => __( 'The order return URL.', 'woocommerce' ),
 				'type'        => 'string',
 				'readonly'    => true,
