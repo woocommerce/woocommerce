@@ -189,7 +189,8 @@ class ProductSettingsSchema extends AbstractSchema {
 				if ( $field ) {
 					$current_group['fields'][] = $field;
 					// Add field value to the flat values array
-					$values[ $field['id'] ] = get_option( $field['id'], $setting['default'] ?? '' );
+					$raw_value = get_option( $field['id'], $setting['default'] ?? '' );
+					$values[ $field['id'] ] = $this->validate_field_value( $raw_value, $field['type'] );
 				}
 			}
 		}
@@ -288,5 +289,27 @@ class ProductSettingsSchema extends AbstractSchema {
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;
+	}
+
+	/**
+	 * Validate and sanitize field value based on its type.
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $type  Field type.
+	 * @return mixed Validated value.
+	 */
+	private function validate_field_value( $value, string $type ) {
+		switch ( $type ) {
+			case 'number':
+				return is_numeric( $value ) ? (float) $value : 0;
+			case 'checkbox':
+				return (bool) $value;
+			case 'multiselect':
+				return is_array( $value ) ? $value : array();
+			case 'text':
+			case 'select':
+			default:
+				return is_string( $value ) ? $value : (string) $value;
+		}
 	}
 }
