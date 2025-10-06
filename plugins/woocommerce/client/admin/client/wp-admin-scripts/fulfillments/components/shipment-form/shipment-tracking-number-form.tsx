@@ -88,7 +88,7 @@ export default function ShipmentTrackingNumberForm() {
 					),
 					method: 'GET',
 				} );
-			if ( ! tracking_number_details.tracking_number ) {
+			if ( ! tracking_number_response.tracking_number ) {
 				const errorMessage = __(
 					'No information found for this tracking number. Check the number or enter the details manually.',
 					'woocommerce'
