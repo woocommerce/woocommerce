@@ -310,7 +310,11 @@ class Controller extends AbstractController {
 				return sanitize_text_field( $value );
 
 			case 'number':
-				return is_numeric( $value ) ? floatval( $value ) : 0;
+				if ( ! is_numeric( $value ) ) {
+					return 0;
+				}
+
+				return filter_var( $value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? floatval( $value );
 
 			case 'checkbox':
 				return wc_bool_to_string( $value );
