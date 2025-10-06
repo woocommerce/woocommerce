@@ -212,7 +212,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#search-submit' ).click();
 
 			// Wait for search results to load completely
-			await page.waitForLoadState( 'networkidle' );
+			await page.waitForSelector( 'a.row-title', { timeout: 30000 } );
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
 				productNames.length,
 				{ timeout: 30000 }
@@ -262,7 +262,7 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#search-submit' ).click();
 
 			// Wait for search results to load completely
-			await page.waitForLoadState( 'networkidle' );
+			await page.waitForSelector( 'a.row-title', { timeout: 30000 } );
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
 				productNamesOverride.length,
 				{ timeout: 30000 }
