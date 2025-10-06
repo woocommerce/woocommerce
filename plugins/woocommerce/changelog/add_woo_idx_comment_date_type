@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Add composite index on wp_comments to optimize admin comments query
