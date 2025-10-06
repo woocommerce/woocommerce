@@ -235,18 +235,17 @@ class CheckoutSessionSchema extends AbstractSchema {
 							'type'        => [ 'string', 'null' ],
 						],
 						'subtotal'               => [
-                         'subtotal'               => [
-                             'description' => __( 'Subtotal in cents.', 'woocommerce' ),
-                             'type'        => 'integer',
-                         ],
-                         'tax'                    => [
-                             'description' => __( 'Tax in cents.', 'woocommerce' ),
-                             'type'        => 'integer',
-                         ],
-                         'total'                  => [
-                             'description' => __( 'Total in cents.', 'woocommerce' ),
-                             'type'        => 'integer',
-                         ],
+							'description' => __( 'Subtotal in cents.', 'woocommerce' ),
+							'type'        => 'integer',
+						],
+						'tax'                    => [
+							'description' => __( 'Tax in cents.', 'woocommerce' ),
+							'type'        => 'integer',
+						],
+						'total'                  => [
+							'description' => __( 'Total in cents.', 'woocommerce' ),
+							'type'        => 'integer',
+						],
 					],
 				],
 			],
