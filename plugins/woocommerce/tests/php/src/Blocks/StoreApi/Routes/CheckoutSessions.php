@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\StoreApi\RoutesController;
 
 /**
  * CheckoutSessions Controller Tests.
@@ -71,6 +72,8 @@ class CheckoutSessions extends ControllerTestCase {
 				)
 			),
 		);
+
+		wc_get_container()->get( RoutesController::class )->register_all_routes();
 	}
 
 	/**
