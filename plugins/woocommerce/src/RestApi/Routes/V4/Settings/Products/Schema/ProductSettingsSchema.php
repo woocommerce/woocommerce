@@ -306,7 +306,13 @@ class ProductSettingsSchema extends AbstractSchema {
 			case 'number':
 				return is_numeric( $value ) ? (float) $value : 0;
 			case 'checkbox':
-				return (bool) $value;
+				if ( function_exists( 'wc_string_to_bool' ) ) {
+					return wc_string_to_bool( $value );
+				}
+				if ( is_bool( $value ) ) {
+					return $value;
+				}
+				return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			case 'multiselect':
 				return is_array( $value ) ? $value : array();
 			case 'text':
