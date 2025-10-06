@@ -257,6 +257,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 *
 	 * @param string $page_type The page type.
 	 * @param string $filter_name The filter name.
+	 * @param bool   $is_checkout Whether it's a checkout page.
 	 * @param string $post_type The post type.
 	 * @param bool   $expected_contains Whether the expected contains.
 	 */
