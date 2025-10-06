@@ -640,7 +640,7 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		 */
 		$post_data = array();
 		foreach ( $settings as $key => $value ) {
-			$field_key              = $this->get_field_key( $key );
+			$field_key               = $this->get_field_key( $key );
 			$post_data[ $field_key ] = $value;
 		}
 
@@ -661,6 +661,13 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Save to database.
+		/**
+		 * Filter the instance settings values before saving.
+		 *
+		 * @since 9.4.0
+		 * @param array                $instance_settings Instance settings.
+		 * @param WC_Shipping_Method   $this              Shipping method instance.
+		 */
 		$result = update_option(
 			$this->get_instance_option_key(),
 			apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $instance_settings, $this )
