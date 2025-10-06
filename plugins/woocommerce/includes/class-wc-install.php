@@ -303,15 +303,9 @@ class WC_Install {
 		'10.2.0' => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
-<<<<<<< HEAD
-=======
 		'10.3.0' => array(
 			'wc_update_1030_add_comments_date_type_index',
 		),
-		'10.4.0' => array(
-			'wc_update_1040_add_idx_date_paid_status_parent',
-		),
->>>>>>> f2b5224352 (Performance: Add composite index on wp_comments to optimize admin comments query (#61160))
 	);
 
 	/**
