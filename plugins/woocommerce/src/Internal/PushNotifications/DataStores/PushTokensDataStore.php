@@ -1,6 +1,6 @@
 <?php
 /**
- * OrdersTableDataStore class file.
+ * PushTokensDataStore class file.
  */
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
@@ -23,7 +23,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function create( &$push_token ) {
 		if ( ! $push_token->can_be_created() ) {
-			throw new InvalidArgumentException( 'Push token data is incorrect and and can\'t be created.' );
+			throw new InvalidArgumentException(
+				'Can\'t create push token because the push token object data is incorrect.'
+			);
 		}
 
 		$id = wp_insert_post(
@@ -43,15 +45,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	}
 
 	/**
-	 * Gets post representing push tokens using filter arguments.
+	 * Gets post representing a push token.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be created.
+	 * @throws InvalidArgumentException If the token can't be read.
 	 * @return null|PushToken
 	 */
 	public function read( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Push token object is incomplete and and can\'t be read.' );
+			throw new InvalidArgumentException( 'Can\'t read push token because the push token object is incomplete.' );
 		}
 
 		$post = get_post( $push_token->get_id() );
@@ -72,11 +74,11 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * Updates a post representing the push token.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @throws InvalidArgumentException If the token can't be created.
+	 * @throws InvalidArgumentException If the token can't be updated.
 	 */
 	public function update( &$push_token ) {
 		if ( ! $push_token->can_be_updated() ) {
-			throw new InvalidArgumentException( 'Push token object is incomplete and and can\'t be updated.' );
+			throw new InvalidArgumentException( 'Can\'t update push token because the push token object is incomplete.' );
 		}
 
 		wp_update_post(
@@ -100,11 +102,11 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $args Not used, enforced by interface.
 	 * @return void
-	 * @throws InvalidArgumentException If the token can't be created.
+	 * @throws InvalidArgumentException If the token can't be deleted.
 	 */
 	public function delete( &$push_token, $args = array() ) {
 		if ( ! $push_token->can_be_deleted() ) {
-			throw new InvalidArgumentException( 'Push token object is incomplete and and can\'t be deleted.' );
+			throw new InvalidArgumentException( 'Can\'t delete push token because the push token object is incomplete.' );
 		}
 
 		wp_delete_post( $push_token->get_id() );
@@ -114,9 +116,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * Returns an array of post meta objects as key => value pairs.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
 	 * @return array
 	 */
 	public function read_meta( &$push_token ) {
+		if ( ! $push_token->can_be_read() ) {
+			throw new InvalidArgumentException( 'Can\'t read meta for push token object with incomplete data.' );
+		}
+
 		return array_map(
 			fn ( $meta ) => $meta[0] ?? $meta,
 			get_post_meta( $push_token->get_id() )
@@ -124,15 +131,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	}
 
 	/**
-	 * Add new piece of meta.
+	 * Add new piece of meta to the given push token.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing the meta key and value.
-	 * @throws InvalidArgumentException If the meta key or push token ID is not provided.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
 	 */
 	public function add_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t add meta for push token without ID.' );
+			throw new InvalidArgumentException( 'Can\'t add meta for push token object with incomplete data.' );
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
@@ -148,15 +155,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	}
 
 	/**
-	 * Update meta.
+	 * Updates meta for the given push token.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing the meta key and value.
-	 * @throws InvalidArgumentException If the meta key or push token ID is not provided.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
 	 */
 	public function update_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t update meta for push token without ID.' );
+			throw new InvalidArgumentException( 'Can\'t update meta for push token object with incomplete data.' );
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
@@ -171,15 +178,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	}
 
 	/**
-	 * Deletes meta based on meta ID.
+	 * Deletes meta for the given push token.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing at least the meta key.
-	 * @throws InvalidArgumentException If the meta key or push token ID is not provided.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
 	 */
 	public function delete_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t delete meta for push token without ID.' );
+			throw new InvalidArgumentException( 'Can\'t delete meta for push token object with incomplete data.' );
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
@@ -191,19 +198,19 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 	/**
 	 * Find tokens for this user and platform that match either the token
-	 * or device UUID. We check the token to avoid creating a duplicate. We
-	 * check the device UUID because only one token should be issued per
-	 * device, so if we already have one then we can update it to avoid
-	 * creating a duplicate.
+	 * or device UUID. We check the token value to avoid creating a duplicate.
+	 * We check the device UUID value because only one token should be issued
+	 * per device, therefore if we already have one then we can update it to
+	 * avoid creating a duplicate.
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @return null|Push_token
+	 * @return null|PushToken
 	 * @throws InvalidArgumentException If push token is missing data.
 	 */
 	public function get_by_token_or_device_id( &$push_token ): ?PushToken {
 		if ( ! $push_token->get_user_id() || ! $push_token->get_platform() ) {
 			throw new InvalidArgumentException(
-				'Can\'t get_by_token_or_device_id without user ID and platform.',
+				'Can\'t retrieve token using token or device UUID for push token object without user ID and platform.',
 			);
 		}
 

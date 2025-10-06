@@ -23,7 +23,7 @@ class PushToken {
 	];
 
 	/**
-	 * The id of the token row.
+	 * The id of the token post.
 	 *
 	 * @var int|null
 	 */
@@ -60,7 +60,7 @@ class PushToken {
 	/**
 	 * Sets the ID.
 	 *
-	 * @param int $id The id of the token row.
+	 * @param int $id The id of the token post.
 	 */
 	public function set_id( $id ) {
 		$this->id = $id;

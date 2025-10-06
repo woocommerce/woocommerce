@@ -64,9 +64,9 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns true when all required fields are set.
+	 * Tests can_be_created returns true when all fields are set except ID.
 	 */
-	public function test_it_can_be_created_when_all_fields_are_set() {
+	public function test_it_can_be_created_when_all_fields_are_set_except_id() {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
@@ -91,12 +91,53 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when required fields are missing.
+	 * Tests can_be_created returns false when user ID is already set.
 	 */
-	public function test_it_cannot_be_created_when_fields_are_missing() {
+	public function test_it_cannot_be_created_when_user_id_is_set() {
 		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_created() );
+	}
+
+	/**
+	 * Tests can_be_created returns false when platform is already set.
+	 */
+	public function test_it_cannot_be_created_when_platform_is_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_created() );
+	}
+
+	/**
+	 * Tests can_be_created returns false when token is already set.
+	 */
+	public function test_it_cannot_be_created_when_token_is_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_created() );
+	}
+
+	/**
+	 * Tests can_be_created returns false when device UUID is already set.
+	 */
+	public function test_it_cannot_be_created_when_device_uuid_is_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -129,12 +170,53 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when required fields are missing.
+	 * Tests can_be_updated returns false when user ID is is not set.
 	 */
-	public function test_it_cannot_be_updated_when_fields_are_missing() {
+	public function test_it_cannot_be_updated_when_user_id_is_not_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * Tests can_be_updated returns false when platform is is not set.
+	 */
+	public function test_it_cannot_be_updated_when_platform_is_not_set() {
 		$push_token = new PushToken();
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * Tests can_be_updated returns false when device UUID is is not set.
+	 */
+	public function test_it_cannot_be_updated_when_device_uuid_is_not_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+
+		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * Tests can_be_updated returns false when token is is not set.
+	 */
+	public function test_it_cannot_be_updated_when_token_is_not_set() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_device_uuid( 'test-device-uuid' );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
