@@ -1373,8 +1373,10 @@ WHERE
 			global $wpdb;
 
 			// Exclude orders that do not exist in the posts table.
-			$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
-			$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			if ( $load_posts_for ) {
+				$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
+				$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
 
 			$post_orders = $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) );
 		}
