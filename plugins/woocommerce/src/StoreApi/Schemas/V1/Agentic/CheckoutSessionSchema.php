@@ -383,18 +383,29 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Payment provider data or null.
 	 */
 	protected function format_payment_provider() {
-		// Default to first available payment gateway.
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		if ( empty( $available_gateways ) ) {
 			return null;
 		}
 
-		$first_gateway = reset( $available_gateways );
+		// Look for gateway with agentic_commerce capability.
+		foreach ( $available_gateways as $gateway ) {
+			if ( $gateway->supports( 'agentic_commerce' )
+				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
+				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
+			) {
+				return [
+					'provider'                  => $gateway->get_agentic_commerce_provider(),
+					'supported_payment_methods' => $gateway->get_agentic_commerce_payment_methods(),
+				];
+			}
+		}
 
+		// Fallback for now, but it should be `null` in the future.
 		return [
-			'provider'                  => $first_gateway->id,
-			'supported_payment_methods' => [ 'card' ], // Default, can be expanded.
+			'provider'                  => 'stripe',
+			'supported_payment_methods' => [ 'card' ],
 		];
 	}
 
