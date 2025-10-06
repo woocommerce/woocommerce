@@ -273,10 +273,39 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 			'fields'      => array(),
 		);
 
+		// Add standard top-level fields first.
+		$group['fields'][] = array(
+			'id'    => 'enabled',
+			'label' => __( 'Enable/Disable', 'woocommerce' ),
+			'type'  => 'checkbox',
+			'desc'  => __( 'Enable this payment gateway', 'woocommerce' ),
+		);
+
+		$group['fields'][] = array(
+			'id'    => 'title',
+			'label' => __( 'Title', 'woocommerce' ),
+			'type'  => 'text',
+			'desc'  => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
+		);
+
+		$group['fields'][] = array(
+			'id'    => 'description',
+			'label' => __( 'Description', 'woocommerce' ),
+			'type'  => 'text',
+			'desc'  => __( 'This controls the description which the user sees during checkout.', 'woocommerce' ),
+		);
+
+		$group['fields'][] = array(
+			'id'    => 'order',
+			'label' => __( 'Order', 'woocommerce' ),
+			'type'  => 'number',
+			'desc'  => __( 'Determines the display order of payment gateways during checkout.', 'woocommerce' ),
+		);
+
 		foreach ( $gateway->form_fields as $id => $field ) {
 			$field_type = $field['type'] ?? '';
 
-			// Skip non-data fields and top-level fields (handled separately).
+			// Skip non-data fields and top-level fields (already added above).
 			if ( in_array( $field_type, array( 'title', 'sectionend' ), true ) ||
 				in_array( $id, array( 'enabled', 'description', 'title' ), true ) ) {
 				continue;
