@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
-use Automattic\WooCommerce\Gateways\PayPal\Buttons;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -19,7 +19,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	/**
 	 * The buttons instance.
 	 *
-	 * @var Buttons
+	 * @var PayPalButtons
 	 */
 	private $buttons;
 
@@ -59,7 +59,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->buttons = new Buttons( $this->mock_gateway );
+		$this->buttons = new PayPalButtons( $this->mock_gateway );
 	}
 
 	/**
@@ -86,7 +86,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_options_returns_correct_structure() {
 		// Mock get_client_id and get_page_type to return test values.
-		$buttons = $this->getMockBuilder( Buttons::class )
+		$buttons = $this->getMockBuilder( PayPalButtons::class )
 			->setConstructorArgs( array( $this->mock_gateway ) )
 			->onlyMethods( array( 'get_client_id', 'get_page_type' ) )
 			->getMock();
@@ -113,7 +113,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_common_options_returns_correct_defaults() {
 		// Mock get_client_id to return a test client ID.
-		$buttons = $this->getMockBuilder( Buttons::class )
+		$buttons = $this->getMockBuilder( PayPalButtons::class )
 			->setConstructorArgs( array( $this->mock_gateway ) )
 			->onlyMethods( array( 'get_client_id' ) )
 			->getMock();
@@ -177,7 +177,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	public function test_get_client_id_returns_null_when_orders_v2_disabled() {
 		$this->mock_gateway->method( 'should_use_orders_v2' )->willReturn( false );
 
-		$buttons = new Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
 		$this->assertNull( $buttons->get_client_id() );
 	}
@@ -217,7 +217,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( 'test_client_id' );
 
-		$buttons = new Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
 		$reflection       = new \ReflectionClass( $buttons );
 		$request_property = $reflection->getProperty( 'request' );
@@ -237,7 +237,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( '' );
 
-		$buttons = new Buttons( $this->mock_gateway );
+		$buttons = new PayPalButtons( $this->mock_gateway );
 
 		// Use reflection to set the request property.
 		$reflection       = new \ReflectionClass( $buttons );
@@ -385,7 +385,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( $orders_v2_enabled );
 		$mock_gateway->method( 'get_option' )->with( 'paypal_buttons', 'yes' )->willReturn( $buttons_option );
 
-		$buttons = new Buttons( $mock_gateway );
+		$buttons = new PayPalButtons( $mock_gateway );
 
 		$this->assertEquals( $expected_result, $buttons->is_enabled(), $description );
 	}

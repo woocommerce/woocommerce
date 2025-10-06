@@ -3,7 +3,7 @@ namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use WC_Gateway_Paypal;
 use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Gateways\PayPal\Buttons;
+use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
 
 /**
  * PayPal Standard payment method integration
@@ -71,7 +71,7 @@ final class PayPal extends AbstractPaymentMethodType {
 	public function get_payment_method_data() {
 		$gateway = WC_Gateway_Paypal::get_instance();
 
-		$buttons = new Buttons( $gateway );
+		$buttons = new PayPalButtons( $gateway );
 		$options = $buttons->get_options();
 
 		return [
