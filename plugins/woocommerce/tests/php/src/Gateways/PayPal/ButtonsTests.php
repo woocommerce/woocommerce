@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Buttons;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Class ButtonsTests.
@@ -259,11 +260,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * @param string $post_type The post type.
 	 * @param bool   $expected_contains Whether the expected contains.
 	 */
-	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $post_type = 'page', $expected_contains = false ) {
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
-		}
-
+	public function test_get_current_page_for_app_switch( $page_type, $filter_name = null, $is_checkout = false, $post_type = 'page', $expected_contains = false ) {
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
@@ -283,6 +280,12 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		if ( $filter_name ) {
 			add_filter( $filter_name, '__return_true' );
 		}
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn () => $is_checkout,
+			)
+		);
 
 		$url = $this->buttons->get_current_page_for_app_switch();
 
@@ -306,19 +309,22 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		return array(
 			'checkout_page' => array(
 				'page_type'         => 'checkout',
-				'filter_name'       => 'woocommerce_is_checkout',
+				'filter_name'       => null,
+				'is_checkout'       => true,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'cart_page'     => array(
 				'page_type'         => 'cart',
 				'filter_name'       => 'woocommerce_is_cart',
+				'is_checkout'       => false,
 				'post_type'         => 'page',
 				'expected_contains' => true,
 			),
 			'other_page'    => array(
 				'page_type'         => 'other',
 				'filter_name'       => null,
+				'is_checkout'       => false,
 				'post_type'         => 'page',
 				'expected_contains' => false,
 			),
@@ -329,10 +335,6 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * Test get_current_page_for_app_switch returns empty string for other pages.
 	 */
 	public function test_get_current_page_for_app_switch_returns_empty_for_other_pages() {
-		if ( defined( 'WOOCOMMERCE_CHECKOUT' ) ) {
-			$this->markTestSkipped( 'Skipping test because WOOCOMMERCE_CHECKOUT is defined. `is_checkout` will always be `true`.' );
-		}
-
 		// Create a test post.
 		$post_id = $this->factory->post->create(
 			array(
@@ -347,8 +349,13 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		$post = get_post( $post_id );
 
 		// Mock all page types to return false.
-		add_filter( 'woocommerce_is_checkout', '__return_false' );
 		add_filter( 'woocommerce_is_cart', '__return_false' );
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'is_checkout' => fn () => false,
+			)
+		);
 
 		$url = $this->buttons->get_current_page_for_app_switch();
 

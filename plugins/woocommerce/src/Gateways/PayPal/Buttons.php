@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -153,7 +155,7 @@ class Buttons {
 	 */
 	public function get_current_page_for_app_switch() {
 		// If checkout, cart or product page, return the current page URL.
-		if ( is_checkout() || is_cart() || is_product() ) {
+		if ( wc_get_container()->get( LegacyProxy::class )->call_function( 'is_checkout' ) || is_cart() || is_product() ) {
 			return get_permalink( get_the_ID() );
 		}
 
