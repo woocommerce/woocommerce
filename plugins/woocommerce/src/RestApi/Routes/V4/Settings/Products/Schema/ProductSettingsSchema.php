@@ -236,7 +236,7 @@ class ProductSettingsSchema extends AbstractSchema {
 			$field['options'] = $setting['options'];
 		} else {
 			// Generate options for special field types.
-			$field['options'] = $this->get_field_options( $setting_type, $setting_id );
+			$field['options'] = $this->get_field_options( $setting_id );
 		}
 
 		return $field;
@@ -245,11 +245,10 @@ class ProductSettingsSchema extends AbstractSchema {
 	/**
 	 * Get options for specific field types.
 	 *
-	 * @param string $field_type Field type.
 	 * @param string $field_id Field ID.
 	 * @return array Field options.
 	 */
-	private function get_field_options( string $field_type, string $field_id ): array {
+	private function get_field_options( string $field_id ): array {
 		switch ( $field_id ) {
 			case 'woocommerce_weight_unit':
 				return array(
@@ -269,7 +268,11 @@ class ProductSettingsSchema extends AbstractSchema {
 				);
 
 			case 'woocommerce_product_type':
-				$product_types = function_exists( 'wc_get_product_types' ) ? wc_get_product_types() : array();
+				if ( ! function_exists( 'wc_get_product_types' ) ) {
+					return array();
+				}
+
+				$product_types = wc_get_product_types();
 				return is_array( $product_types ) ? $product_types : array();
 		}
 
