@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\PushToken\Entities;
+namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use WC_Unit_Test_Case;
