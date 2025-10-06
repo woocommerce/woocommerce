@@ -74,7 +74,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 			<p
 				{ ...blockProps }
 				dangerouslySetInnerHTML={ {
-					__html: fullDescription?.rendered || rawDescription,
+					__html: fullDescription?.rendered,
 				} }
 			/>
 		);

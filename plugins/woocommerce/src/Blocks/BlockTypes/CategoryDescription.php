@@ -54,7 +54,7 @@ class CategoryDescription extends AbstractBlock {
 		);
 
 		return sprintf(
-			'<p %1$s>%2$s</p>',
+			'<div %1$s>%2$s</div>',
 			$wrapper_attributes,
 			wp_kses_post( wc_format_content( $description ) )
 		);

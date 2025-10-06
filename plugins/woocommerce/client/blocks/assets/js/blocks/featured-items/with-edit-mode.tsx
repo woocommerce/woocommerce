@@ -78,24 +78,13 @@ export const withEditMode =
 			mediaSrc: string;
 		} >();
 
-		const wasBlockJustInserted = useSelect(
-			( select ) => {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-expect-error method exists but not typed
-				return select( blockEditorStore ).wasBlockJustInserted(
-					clientId
-				);
-			},
-			[ clientId ]
-		);
-
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
 			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
 
 		// Only show edit mode for newly inserted blocks without existing selection
 		const [ editMode, setEditMode ] = useState< boolean >(
-			wasBlockJustInserted && ! hasFeaturedItemId
+			! hasFeaturedItemId
 		);
 
 		const onDone = () => {

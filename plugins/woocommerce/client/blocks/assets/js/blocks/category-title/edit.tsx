@@ -71,7 +71,7 @@ export default function Edit( { attributes, setAttributes, context }: Props ) {
 		'taxonomy',
 		termTaxonomy || 'product_cat',
 		'name',
-		String( termId )
+		termId ? String( termId ) : undefined
 	);
 
 	const link = useSelect(

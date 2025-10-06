@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/category-title",
-	"title": "Category Title",
+	"title": "Product Category Title",
 	"description": "Displays the current category title and lets permitted users edit it.",
 	"category": "woocommerce",
 	"apiVersion": 3,
@@ -29,11 +29,13 @@
 	"supports": {
 		"align": false,
 		"color": {
+			"background": true,
 			"text": true
 		},
 		"html": false,
 		"spacing": {
-			"margin": true
+			"margin": true,
+			"padding": true
 		},
 		"typography": true
 	},

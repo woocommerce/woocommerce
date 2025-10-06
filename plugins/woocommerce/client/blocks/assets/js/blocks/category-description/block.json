@@ -1,6 +1,6 @@
 {
 	"name": "woocommerce/category-description",
-	"title": "Category Description",
+	"title": "Product Category Description",
 	"description": "Displays the current category description.",
 	"category": "woocommerce",
 	"apiVersion": 3,
@@ -13,11 +13,13 @@
 	"supports": {
 		"align": false,
 		"color": {
+			"background": true,
 			"text": true
 		},
 		"html": false,
 		"spacing": {
-			"margin": true
+			"margin": true,
+			"padding": true
 		},
 		"typography": true
 	},
