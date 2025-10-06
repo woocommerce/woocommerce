@@ -319,7 +319,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'schema', $data );
 
-		$schema = $data['schema'];
+		$schema    = $data['schema'];
 		$this->assertEquals( 'object', $schema['type'] );
 		$this->assertArrayHasKey( 'properties', $schema );
 
@@ -337,7 +337,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		// Verify payment_methods schema.
 		$this->assertEquals( 'object', $properties['payment_methods']['type'] );
-		$payment_method_properties = $properties['payment_methods']['additionalProperties']['properties'];
+		$payment_method_properties  = $properties['payment_methods']['additionalProperties']['properties'];
 		$expected_method_properties = array( 'id', '_order', 'title', 'description', 'icon', 'state', 'management' );
 
 		foreach ( $expected_method_properties as $property ) {
@@ -446,10 +446,10 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		// Test that payment methods have _order field and are sorted.
 		$previous_order = -1;
-		foreach ( $data['payment_methods'] as $method_id => $method ) {
+		foreach ( $data['payment_methods'] as $method ) {
 			$this->assertArrayHasKey( '_order', $method );
 			$this->assertIsInt( $method['_order'] );
-			$this->assertGreaterThan( $previous_order, $method['_order'], "Payment methods should be sorted by _order field" );
+			$this->assertGreaterThan( $previous_order, $method['_order'], 'Payment methods should be sorted by _order field' );
 			$previous_order = $method['_order'];
 		}
 	}

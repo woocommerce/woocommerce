@@ -51,19 +51,19 @@ class OfflinePaymentMethodSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'values'          => array(
-				'description' => __( 'Current enabled state for all payment methods.', 'woocommerce' ),
-				'type'        => 'object',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-				'readonly'    => true,
+				'description'          => __( 'Current enabled state for all payment methods.', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => self::VIEW_EDIT_CONTEXT,
+				'readonly'             => true,
 				'additionalProperties' => array(
 					'type' => 'boolean',
 				),
 			),
 			'payment_methods' => array(
-				'description' => __( 'Available offline payment methods.', 'woocommerce' ),
-				'type'        => 'object',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-				'readonly'    => true,
+				'description'          => __( 'Available offline payment methods.', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => self::VIEW_EDIT_CONTEXT,
+				'readonly'             => true,
 				'additionalProperties' => array(
 					'type'       => 'object',
 					'properties' => array(

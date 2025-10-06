@@ -199,6 +199,10 @@ class Controller extends AbstractController {
 			return new \WP_Error( 'woocommerce_rest_payment_providers_error', $e->getMessage(), array( 'status' => 500 ) );
 		}
 
+		if ( is_wp_error( $providers ) ) {
+			return $providers;
+		}
+
 		// Retrieve the offline PMs from the main providers list.
 		$offline_payment_providers = array_values(
 			array_filter(
@@ -230,5 +234,4 @@ class Controller extends AbstractController {
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $item, $request );
 	}
-
 }
