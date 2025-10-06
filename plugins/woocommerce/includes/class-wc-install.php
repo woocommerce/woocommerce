@@ -305,6 +305,9 @@ class WC_Install {
 		),
 		'10.3.0' => array(
 			'wc_update_1030_add_comments_date_type_index',
+    ),
+		'10.4.0' => array(
+			'wc_update_1040_add_idx_date_paid_status_parent',
 		),
 	);
 
@@ -1962,7 +1965,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
-	KEY status (status)
+	KEY status (status),
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,

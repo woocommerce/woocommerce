@@ -346,6 +346,7 @@ const entries = {
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
 		priceFormat: './packages/prices/index.js',
 		wcTypes: './assets/js/types/index.ts',
+		wcEntities: './assets/js/entities/index.ts',
 	},
 	main: {
 		// Shared blocks code

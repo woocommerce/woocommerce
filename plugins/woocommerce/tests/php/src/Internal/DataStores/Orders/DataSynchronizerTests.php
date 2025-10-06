@@ -506,6 +506,53 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox When an order sync is performed, changes to meta data should propagate from the CPT to the HPOS datastore
+	 * preserving number of values in metadata as well as handling values deleted at the source.
+	 *
+	 * @return void
+	 */
+	public function test_sync_propagates_meta_data_to_hpos(): void {
+		$legacy_handler = wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\LegacyDataHandler::class );
+
+		// Sync disabled, no sync-on-read and legacy authoritative.
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_false' );
+		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+
+		// Create (and sync) an order with some metadata.
+		$legacy_order = OrderHelper::create_order();
+		$legacy_order->add_meta_data( 'foo', 'bar' );
+		$legacy_order->add_meta_data( 'quux', 'yes' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		// Load the order from HPOS and confirm metadata matches.
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'foo' ), 'bar' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), 'yes' );
+
+		// Add 'baz' to 'foo' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->add_meta_data( 'foo', 'baz' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEqualsCanonicalizing( array_column( $hpos_order->get_meta( 'foo', false ), 'value' ), array( 'bar', 'baz' ) );
+
+		// Remove 'quux' meta.
+		$legacy_order = wc_get_order( $legacy_order->get_id() );
+		$legacy_order->delete_meta_data( 'quux' );
+		$legacy_order->save();
+		$this->sut->process_batch( array( $legacy_order->get_id() ) );
+
+		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
+		$this->assertEquals( $hpos_order->get_meta( 'quux' ), '' );
+
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
 	 * @testDox Orders for migration are picked by ID sorted.
 	 */
 	public function test_migration_sort() {
