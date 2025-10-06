@@ -475,7 +475,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 * @param bool $tax_has_rates Product tax has defined rates or not.
 	 * @param bool $user_vat_exempt User is VAT exempt or not.
 	 */
-	public function test_read_prices_data_when_taxes_dont_influence_price( bool $tax_enabled, bool $taxable_product, bool $tax_has_rates, bool $user_vat_exempt ) {
+	public function test_read_prices_cache_when_taxes_dont_influence_price( bool $tax_enabled, bool $taxable_product, bool $tax_has_rates, bool $user_vat_exempt ) {
 		add_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
 		add_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		add_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
@@ -486,33 +486,71 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$transient_name = 'wc_var_prices_' . $product->get_id();
 		delete_transient( $transient_name );
 
-		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
-		$extended_data_store = new class() extends WC_Product_Variable_Data_Store_CPT {
-			public function get_price_hash( &$product, $for_display = false ) {
-				return parent::get_price_hash( $product, $for_display );
-			}
-		};
-		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
 
 		$expected_hashes = array_unique( array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) ) );
 		sort( $expected_hashes );
 
 		delete_transient( $transient_name );
 		$data_store->read_price_data( $product, false );
-		$actual_hashes = array_unique( array_keys( (array) json_decode( get_transient( $transient_name ) ) ) );
+		$actual_hashes = array_unique( array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) ) );
 		sort( $actual_hashes );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
 
 		$data_store = new WC_Product_Variable_Data_Store_CPT();
 		delete_transient( $transient_name );
 		$data_store->read_price_data( $product, false );
-		$actual_hashes = array_unique( array_keys( (array) json_decode( get_transient( $transient_name ) ) ) );
+		$actual_hashes = array_unique( array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) ) );
 		sort( $actual_hashes );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
 
 		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
+	}
+
+	/**
+	 * @testdox read_prices does separate caching for prices for display and not for display when they are different.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $for_display Test getting prices for display or not for display.
+	 */
+	public function test_read_prices_cache_when_taxes_influence_price( bool $for_display ) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		delete_transient( $transient_name );
+		$data_store->read_price_data( $product, $for_display );
+		$expected_hashes = array( $extended_data_store->get_price_hash( $product, $for_display ) );
+		$actual_hashes   = array_unique( array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) ) );
+		$this->assertEquals( $expected_hashes, $actual_hashes );
+	}
+
+	/**
+	 * Get an instance of WC_Product_Variable_Data_Store_CPT whose get_price_hash method is public.
+	 *
+	 * @return WC_Product_Variable_Data_Store_CPT
+	 */
+	private function get_data_store_with_public_get_price_hash(): object {
+		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
+		return new class() extends WC_Product_Variable_Data_Store_CPT {
+			public function get_price_hash( &$product, $for_display = false ) {
+				return parent::get_price_hash( $product, $for_display );
+			}
+		};
+		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 	}
 
 	/**
