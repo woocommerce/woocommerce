@@ -42,22 +42,6 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 	 */
 	const IDENTIFIER = 'payment-gateway';
 
-	/**
-	 * Map of gateway IDs to their special fields that require custom handling.
-	 *
-	 * @var array
-	 */
-	private const GATEWAY_SPECIAL_FIELDS = array(
-		'bacs' => array(
-			'account_details' => array(
-				'option_name' => 'woocommerce_bacs_accounts',
-				'type'        => 'array',
-				'label'       => 'Account details',
-				'description' => 'Bank account details for direct bank transfer.',
-				'default'     => array(),
-			),
-		),
-	);
 
 	/**
 	 * Return all properties for the item schema.
@@ -236,23 +220,13 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 	/**
 	 * Get values for gateway-specific special fields.
 	 *
+	 * Override this method in gateway-specific schema classes to provide special field values.
+	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @return array
 	 */
-	private function get_special_field_values( WC_Payment_Gateway $gateway ): array {
-		$values = array();
-
-		if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] ) ) {
-			return $values;
-		}
-
-		foreach ( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] as $field_id => $field_config ) {
-			$option_name         = $field_config['option_name'];
-			$default             = $field_config['default'] ?? array();
-			$values[ $field_id ] = get_option( $option_name, $default );
-		}
-
-		return $values;
+	protected function get_special_field_values( WC_Payment_Gateway $gateway ): array {
+		return array();
 	}
 
 	/**
@@ -274,21 +248,13 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 
 	/**
 	 * Get custom groups for specific gateways.
-	 * Extensible - add more gateway-specific groupings as needed.
+	 *
+	 * Override this method in gateway-specific schema classes to provide custom groupings.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @return array
 	 */
-	private function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
-		// Currently no custom groupings, but structure is ready for future additions.
-		// Example for future:
-		// switch ( $gateway->id ) {
-		// case 'bacs':
-		// return $this->get_bacs_groups( $gateway );
-		// case 'custom_gateway':
-		// return $this->get_custom_gateway_groups( $gateway );
-		// }
-
+	protected function get_custom_groups_for_gateway( WC_Payment_Gateway $gateway ): array {
 		return array();
 	}
 
@@ -334,26 +300,13 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 	/**
 	 * Get field schemas for gateway-specific special fields.
 	 *
+	 * Override this method in gateway-specific schema classes to provide special field schemas.
+	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @return array
 	 */
-	private function get_special_field_schemas( WC_Payment_Gateway $gateway ): array {
-		$fields = array();
-
-		if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] ) ) {
-			return $fields;
-		}
-
-		foreach ( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] as $field_id => $field_config ) {
-			$fields[] = array(
-				'id'    => $field_id,
-				'label' => $field_config['label'] ?? ucwords( str_replace( '_', ' ', $field_id ) ),
-				'type'  => $field_config['type'],
-				'desc'  => $field_config['description'] ?? '',
-			);
-		}
-
-		return $fields;
+	protected function get_special_field_schemas( WC_Payment_Gateway $gateway ): array {
+		return array();
 	}
 
 	/**
@@ -473,12 +426,13 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 	/**
 	 * Check if a field is a special field.
 	 *
-	 * @param string $gateway_id Gateway ID.
-	 * @param string $field_id   Field ID.
+	 * Override this method in gateway-specific schema classes to identify special fields.
+	 *
+	 * @param string $field_id Field ID.
 	 * @return bool
 	 */
-	public function is_special_field( string $gateway_id, string $field_id ): bool {
-		return isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway_id ][ $field_id ] );
+	public function is_special_field( string $field_id ): bool {
+		return false;
 	}
 
 	/**
@@ -613,110 +567,26 @@ class PaymentGatewaySettingsSchema extends AbstractSchema {
 	/**
 	 * Validate and sanitize special fields.
 	 *
+	 * Override this method in gateway-specific schema classes to provide custom validation.
+	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @param array              $values  Special field values.
 	 * @return array|WP_Error Validated values or error.
 	 */
 	public function validate_and_sanitize_special_fields( WC_Payment_Gateway $gateway, array $values ) {
-		if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] ) ) {
-			return array();
-		}
-
-		$validated = array();
-
-		foreach ( $values as $field_id => $value ) {
-			if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ][ $field_id ] ) ) {
-				continue;
-			}
-
-			$field_config = self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ][ $field_id ];
-
-			// Gateway-specific validation.
-			switch ( $gateway->id ) {
-				case 'bacs':
-					if ( 'account_details' === $field_id ) {
-						$validated[ $field_id ] = $this->validate_bacs_accounts( $value );
-						if ( is_wp_error( $validated[ $field_id ] ) ) {
-							return $validated[ $field_id ];
-						}
-					}
-					break;
-			}
-		}
-
-		return $validated;
-	}
-
-	/**
-	 * Validate BACS account details array.
-	 *
-	 * @param mixed $value Account details value.
-	 * @return array|WP_Error Validated accounts or error.
-	 */
-	private function validate_bacs_accounts( $value ) {
-		if ( ! is_array( $value ) ) {
-			return new WP_Error(
-				'rest_invalid_param',
-				__( 'Account details must be an array.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$validated_accounts = array();
-		$valid_fields       = array( 'account_name', 'account_number', 'sort_code', 'bank_name', 'iban', 'bic' );
-
-		foreach ( $value as $index => $account ) {
-			if ( ! is_array( $account ) ) {
-				return new WP_Error(
-					'rest_invalid_param',
-					sprintf(
-						/* translators: %d: account index */
-						__( 'Account at index %d must be an object.', 'woocommerce' ),
-						$index
-					),
-					array( 'status' => 400 )
-				);
-			}
-
-			$validated_account = array();
-
-			// Sanitize each field.
-			foreach ( $valid_fields as $field ) {
-				$validated_account[ $field ] = isset( $account[ $field ] )
-					? sanitize_text_field( $account[ $field ] )
-					: '';
-			}
-
-			// Only add if at least one field is filled.
-			if ( array_filter( $validated_account ) ) {
-				$validated_accounts[] = $validated_account;
-			}
-		}
-
-		return $validated_accounts;
+		return array();
 	}
 
 	/**
 	 * Update special fields in database.
+	 *
+	 * Override this method in gateway-specific schema classes to provide custom update logic.
 	 *
 	 * @param WC_Payment_Gateway $gateway Gateway instance.
 	 * @param array              $values  Validated special field values.
 	 * @return void
 	 */
 	public function update_special_fields( WC_Payment_Gateway $gateway, array $values ): void {
-		if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ] ) ) {
-			return;
-		}
-
-		foreach ( $values as $field_id => $value ) {
-			if ( ! isset( self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ][ $field_id ] ) ) {
-				continue;
-			}
-
-			$field_config = self::GATEWAY_SPECIAL_FIELDS[ $gateway->id ][ $field_id ];
-			$option_name  = $field_config['option_name'];
-
-			update_option( $option_name, $value );
-		}
+		// Base implementation does nothing.
 	}
 }

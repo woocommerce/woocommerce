@@ -12,6 +12,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentMethods;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\BacsGatewaySettingsSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\ChequeGatewaySettingsSchema;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\CodGatewaySettingsSchema;
 use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
 use WC_Payment_Gateway;
 use WP_REST_Server;
@@ -115,7 +118,10 @@ class Controller extends AbstractController {
 
 		$gateway = $payment_gateways[ $id ];
 
-		$data = $this->prepare_item_for_response( $gateway, $request );
+		// Get gateway-specific schema.
+		$schema = $this->get_schema_for_gateway( $id );
+
+		$data = $schema->get_item_response( $gateway, $request );
 
 		return rest_ensure_response( $data );
 	}
@@ -159,6 +165,26 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Get the appropriate schema for a payment gateway.
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 * @return PaymentGatewaySettingsSchema
+	 */
+	private function get_schema_for_gateway( string $gateway_id ): PaymentGatewaySettingsSchema {
+		switch ( $gateway_id ) {
+			case 'bacs':
+				return new BacsGatewaySettingsSchema();
+			case 'cheque':
+				return new ChequeGatewaySettingsSchema();
+			case 'cod':
+				return new CodGatewaySettingsSchema();
+			default:
+				// Use base schema for unknown gateways.
+				return $this->item_schema;
+		}
+	}
+
+	/**
 	 * Update a payment gateway's settings.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -176,6 +202,9 @@ class Controller extends AbstractController {
 			);
 		}
 
+		// Get gateway-specific schema.
+		$schema = $this->get_schema_for_gateway( $id );
+
 		$params = $request->get_json_params();
 
 		// Support both new format { "values": {...} } and legacy flat format.
@@ -189,7 +218,7 @@ class Controller extends AbstractController {
 
 		foreach ( $values_to_update as $key => $value ) {
 			// Check if this is a special field.
-			if ( $this->is_special_field( $gateway->id, $key ) ) {
+			if ( $schema->is_special_field( $key ) ) {
 				$special_values[ $key ] = $value;
 			} elseif ( isset( $gateway->form_fields[ $key ] ) ) {
 				$standard_values[ $key ] = $value;
@@ -198,7 +227,7 @@ class Controller extends AbstractController {
 		}
 
 		// Validate and sanitize standard settings.
-		$validated_settings = $this->item_schema->validate_and_sanitize_settings(
+		$validated_settings = $schema->validate_and_sanitize_settings(
 			$gateway,
 			$standard_values
 		);
@@ -208,7 +237,7 @@ class Controller extends AbstractController {
 		}
 
 		// Validate and sanitize special fields.
-		$validated_special = $this->item_schema->validate_and_sanitize_special_fields(
+		$validated_special = $schema->validate_and_sanitize_special_fields(
 			$gateway,
 			$special_values
 		);
@@ -226,20 +255,10 @@ class Controller extends AbstractController {
 		update_option( $gateway->get_option_key(), $gateway->settings );
 
 		// Update special fields.
-		$this->item_schema->update_special_fields( $gateway, $validated_special );
+		$schema->update_special_fields( $gateway, $validated_special );
 
 		// Return updated gateway data.
 		return $this->get_item( $request );
 	}
 
-	/**
-	 * Check if a field is a special field for the gateway.
-	 *
-	 * @param string $gateway_id Gateway ID.
-	 * @param string $field_id   Field ID.
-	 * @return bool
-	 */
-	private function is_special_field( string $gateway_id, string $field_id ): bool {
-		return $this->item_schema->is_special_field( $gateway_id, $field_id );
-	}
 }
