@@ -265,7 +265,8 @@ class ProductSettingsSchema extends AbstractSchema {
 				);
 
 			case 'woocommerce_product_type':
-				return wc_get_product_types();
+				$product_types = function_exists( 'wc_get_product_types' ) ? wc_get_product_types() : array();
+				return is_array( $product_types ) ? $product_types : array();
 		}
 
 		return array();
