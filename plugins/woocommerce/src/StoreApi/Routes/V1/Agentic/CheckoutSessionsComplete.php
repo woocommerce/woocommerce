@@ -242,10 +242,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
-		 * Setup payment_data
-		 */
-
-		/**
 		 * Get draft order (must exist from create/update).
 		 */
 		$this->order = $this->get_draft_order();
@@ -260,8 +256,9 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		// 5. Set payment method from payment_data.
-		$this->set_payment_method_from_request( $request );
+		/**
+		 * @todo: Only continue process if calculate_status is `ready_for_payment`. Required refactors.
+		 */
 
 		/**
 		 * Validate updated order before payment is attempted.
@@ -292,18 +289,13 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		// 9. Fire pre-completion hook.
-		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
-
-		// 10. Process payment (reuse CheckoutTrait).
+		/**
+         * Process payment (reuse CheckoutTrait).
+         */
 		$payment_result = new PaymentResult();
 
 		try {
-			if ( $this->order->needs_payment() ) {
-				$this->process_payment( $request, $payment_result );
-			} else {
-				$this->process_without_payment( $request, $payment_result );
-			}
+			$this->process_payment( $request, $payment_result );
 		} catch ( RouteException $e ) {
 			return new \WP_REST_Response(
 				[
@@ -324,7 +316,9 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-		// 11. If payment failed, return error.
+		/**
+         * If payment failed, return error.
+         */
 		if ( 'failure' === $payment_result->status || 'error' === $payment_result->status ) {
 			return new \WP_REST_Response(
 				[
@@ -354,81 +348,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	}
 
 	/**
-	 * Set payment method from agentic payment_data.
-	 *
-	 * Maps the payment provider to WooCommerce payment method ID.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @throws RouteException If payment method is invalid.
-	 */
-	private function set_payment_method_from_request( \WP_REST_Request $request ) {
-		$payment_data = $request->get_param( 'payment_data' );
-		$provider     = $payment_data['provider'] ?? '';
-
-		// Map provider to WooCommerce payment method ID.
-		// This mapping can be extended via filter.
-		$payment_method_id = apply_filters(
-			'woocommerce_agentic_payment_provider_to_method_id',
-			$this->map_provider_to_payment_method( $provider ),
-			$provider
-		);
-
-		if ( empty( $payment_method_id ) ) {
-			throw new RouteException(
-				'woocommerce_rest_invalid_payment_provider',
-				sprintf(
-					/* translators: %s: payment provider */
-					__( 'Invalid payment provider: %s', 'woocommerce' ),
-					$provider
-				),
-				400
-			);
-		}
-
-		// Get the payment gateway.
-		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
-		$payment_method     = $available_gateways[ $payment_method_id ] ?? null;
-
-		if ( ! $payment_method ) {
-			throw new RouteException(
-				'woocommerce_rest_payment_method_not_available',
-				sprintf(
-					/* translators: %s: payment method ID */
-					__( 'Payment method %s is not available.', 'woocommerce' ),
-					$payment_method_id
-				),
-				400
-			);
-		}
-
-		// Set payment method on order.
-		WC()->session->set( 'chosen_payment_method', $payment_method_id );
-		$this->order->set_payment_method( $payment_method );
-		$this->order->save();
-	}
-
-	/**
-	 * Map payment provider to WooCommerce payment method ID.
-	 *
-	 * @param string $provider Payment provider identifier.
-	 * @return string Payment method ID.
-	 */
-	private function map_provider_to_payment_method( $provider ) {
-		$mapping = [
-			'stripe' => 'stripe', // Default mapping, can be overridden.
-		];
-
-		/**
-		 * Filter the payment provider to method ID mapping.
-		 *
-		 * @param array $mapping Provider to method ID mapping.
-		 */
-		$mapping = apply_filters( 'woocommerce_agentic_payment_provider_mapping', $mapping );
-
-		return $mapping[ $provider ] ?? '';
-	}
-
-	/**
 	 * Gets and formats payment request data for CheckoutTrait.
 	 *
 	 * Transforms agentic payment_data format to Store API format.
@@ -446,35 +365,48 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 
 		// Transform agentic format to Store API payment_data format.
 		if ( isset( $agentic_data['token'] ) ) {
-			$payment_data['token'] = wc_clean( $agentic_data['token'] );
+			$payment_data['wc-agentic_commerce-token'] = wc_clean( $agentic_data['token'] );
 		}
 
 		if ( isset( $agentic_data['provider'] ) ) {
-			$payment_data['provider'] = wc_clean( $agentic_data['provider'] );
+			$payment_data['wc-agentic_commerce-provider'] = wc_clean( $agentic_data['provider'] );
 		}
 
-		/**
-		 * Filter the transformed payment data.
-		 *
-		 * @param array $payment_data Transformed payment data.
-		 * @param array $agentic_data Original agentic payment data.
-		 * @param \WP_REST_Request $request Request object.
-		 */
-		return apply_filters( 'woocommerce_agentic_payment_data', $payment_data, $agentic_data, $request );
+        return $payment_data;
 	}
 
 	/**
-	 * Gets the chosen payment method ID from the request.
-	 *
-	 * Required by CheckoutTrait.
+	 * Gets the chosen payment method (gateway) ID for CheckoutTrait.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @return string
 	 */
 	private function get_request_payment_method_id( \WP_REST_Request $request ) {
-		$payment_data = $request->get_param( 'payment_data' );
-		$provider     = $payment_data['provider'] ?? '';
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
-		return $this->map_provider_to_payment_method( $provider );
+		if ( empty( $available_gateways ) ) {
+			throw new RouteException(
+				'woocommerce_checkout_session_no_payment_gateway_available',
+				esc_html__( 'No payment gateway available.', 'woocommerce' ),
+				400
+			);
+		}
+
+		// Look for gateway with agentic_commerce capability.
+		foreach ( $available_gateways as $gateway ) {
+			if ( $gateway->supports( 'agentic_commerce' )
+				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
+				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
+			) {
+				return $gateway->id;
+			}
+		}
+
+		throw new RouteException(
+			'woocommerce_checkout_session_no_agentic_payment_gateway_available',
+			esc_html__( 'No agentic-supported payment gateway available.', 'woocommerce' ),
+			400
+		);
+
 	}
 }
