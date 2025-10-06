@@ -319,12 +319,12 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertArrayHasKey( 'schema', $data );
 
-		$schema    = $data['schema'];
+		$schema     = $data['schema'];
 		$this->assertEquals( 'object', $schema['type'] );
 		$this->assertArrayHasKey( 'properties', $schema );
 
 		// Verify the schema has all expected top-level properties.
-		$properties = $schema['properties'];
+		$properties          = $schema['properties'];
 		$expected_properties = array( 'id', 'title', 'description', 'values', 'payment_methods' );
 
 		foreach ( $expected_properties as $property ) {
