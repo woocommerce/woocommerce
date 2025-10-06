@@ -314,6 +314,10 @@ class Controller extends AbstractController {
 				return filter_var( $value, FILTER_VALIDATE_INT, FILTER_NULL_ON_FAILURE ) ?? floatval( $value );
 
 			case 'checkbox':
+				// Ensure we have a scalar value for checkbox settings
+				if ( is_array( $value ) ) {
+					$value = ! empty( $value ); // Convert array to boolean based on emptiness
+				}
 				return wc_bool_to_string( $value );
 
 			case 'select':
