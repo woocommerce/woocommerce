@@ -476,9 +476,9 @@ class Products extends AbstractRoute {
 		 * Filters the maximum number of variations to prime at once.
 		 *
 		 * @since 10.4.0
-		 * @param int $max_variations Default 5000.
+		 * @param int $max_variations Default 1000.
 		 */
-		$max_variations = apply_filters( 'woocommerce_batch_prime_max_variations', 5000 );
+		$max_variations = apply_filters( 'woocommerce_batch_prime_max_variations', 1000 );
 
 		$variations_to_prime = array();
 		$products_to_prime   = array();
