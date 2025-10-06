@@ -1,0 +1,245 @@
+<?php
+/**
+ * REST API Payment Gateways Controller
+ *
+ * Handles requests to the /settings/payment-gateways endpoint.
+ *
+ * @package WooCommerce\RestApi
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentMethods;
+
+use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
+use WC_Payment_Gateway;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * REST API Payment Gateways Controller Class.
+ *
+ * @extends AbstractController
+ */
+class Controller extends AbstractController {
+	/**
+	 * Route base.
+	 *
+	 * @var string
+	 */
+	protected $rest_base = 'settings/payment-gateways';
+
+	/**
+	 * Post type.
+	 *
+	 * @var string
+	 */
+	protected string $post_type = 'payment_gateways';
+
+	/**
+	 * Schema class for this route.
+	 *
+	 * @var PaymentGatewaySettingsSchema
+	 */
+	protected PaymentGatewaySettingsSchema $item_schema;
+
+	/**
+	 * Initialize the controller.
+	 *
+	 * @param PaymentGatewaySettingsSchema $item_schema Payment gateway schema class.
+	 * @internal
+	 */
+	final public function init( PaymentGatewaySettingsSchema $item_schema ): void {
+		$this->item_schema = $item_schema;
+	}
+
+	/**
+	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
+	 * after running various hooks on the response.
+	 *
+	 * @return array
+	 */
+	protected function get_schema(): array {
+		return $this->item_schema->get_item_schema();
+	}
+
+	/**
+	 * Register the routes for payment gateways.
+	 */
+	public function register_routes() {
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema(),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'string',
+						'pattern'     => '^[\w-]+$',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Get a single payment gateway.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error Response object on success, or WP_Error object on failure.
+	 */
+	public function get_item( $request ) {
+		$id               = $request['id'];
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+
+		if ( ! isset( $payment_gateways[ $id ] ) ) {
+			return new WP_Error( 'woocommerce_rest_payment_gateway_invalid_id', __( 'Invalid payment gateway ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
+		$gateway = $payment_gateways[ $id ];
+
+		$data = $this->prepare_item_for_response( $gateway, $request );
+
+		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Check if a given request has access to read a payment gateway.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function get_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( $this->post_type, 'read' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
+	}
+
+	/**
+	 * Check if a given request has access to update payment gateways.
+	 *
+	 * @param  WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|boolean
+	 */
+	public function update_item_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'payment_gateways', 'edit' ) ) {
+			return $this->get_authentication_error_by_method( $request->get_method() );
+		}
+		return true;
+	}
+
+	/**
+	 * Get a gateway based on the current request object.
+	 *
+	 * @param string $id Gateway ID.
+	 *
+	 * @return WC_Payment_Gateway|null
+	 */
+	private function get_payment_gateway( $id ): ?WC_Payment_Gateway {
+		$payment_gateways = WC()->payment_gateways->payment_gateways();
+		return $payment_gateways[ $id ] ?? null;
+	}
+
+	/**
+	 * Update a payment gateway's settings.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_item( $request ) {
+		$id      = $request['id'];
+		$gateway = $this->get_payment_gateway( $id );
+
+		if ( ! $gateway ) {
+			return new WP_Error(
+				'woocommerce_rest_payment_gateway_invalid_id',
+				__( 'Invalid payment gateway ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$params = $request->get_json_params();
+
+		// Support both new format { "values": {...} } and legacy flat format.
+		$values_to_update = $params['values'] ?? $params;
+
+		// Separate standard fields from special fields.
+		$standard_values = array();
+		$special_values  = array();
+
+		$gateway->init_form_fields();
+
+		foreach ( $values_to_update as $key => $value ) {
+			// Check if this is a special field.
+			if ( $this->is_special_field( $gateway->id, $key ) ) {
+				$special_values[ $key ] = $value;
+			} elseif ( isset( $gateway->form_fields[ $key ] ) ) {
+				$standard_values[ $key ] = $value;
+			}
+			// Silently skip unknown fields.
+		}
+
+		// Validate and sanitize standard settings.
+		$validated_settings = $this->item_schema->validate_and_sanitize_settings(
+			$gateway,
+			$standard_values
+		);
+
+		if ( is_wp_error( $validated_settings ) ) {
+			return $validated_settings;
+		}
+
+		// Validate and sanitize special fields.
+		$validated_special = $this->item_schema->validate_and_sanitize_special_fields(
+			$gateway,
+			$special_values
+		);
+
+		if ( is_wp_error( $validated_special ) ) {
+			return $validated_special;
+		}
+
+		// Update standard settings.
+		foreach ( $validated_settings as $key => $value ) {
+			$gateway->settings[ $key ] = $value;
+		}
+
+		// Save standard settings to database.
+		update_option( $gateway->get_option_key(), $gateway->settings );
+
+		// Update special fields.
+		$this->item_schema->update_special_fields( $gateway, $validated_special );
+
+		// Return updated gateway data.
+		return $this->get_item( $request );
+	}
+
+	/**
+	 * Check if a field is a special field for the gateway.
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 * @param string $field_id   Field ID.
+	 * @return bool
+	 */
+	private function is_special_field( string $gateway_id, string $field_id ): bool {
+		return $this->item_schema->is_special_field( $gateway_id, $field_id );
+	}
+}
