@@ -179,8 +179,8 @@ class Controller extends AbstractController {
 	/**
 	 * Prepare a single order object for response.
 	 *
-	 * @param array $item The PayPal Standard shipping data.
-	 * @param \WP_REST_Request  $request Request object.
+	 * @param array            $item The PayPal Standard shipping data.
+	 * @param \WP_REST_Request $request Request object.
 	 * @return array
 	 */
 	protected function get_item_response( $item, \WP_REST_Request $request ): array {
