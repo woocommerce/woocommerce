@@ -309,8 +309,16 @@ class Controller extends AbstractController {
 				if ( is_array( $value ) ) {
 					return array_map( 'sanitize_text_field', $value );
 				}
-				return is_string( $value ) ? array( sanitize_text_field( $value ) ) : array();
 
+				if ( is_string( $value ) ) {
+					return array( sanitize_text_field( $value ) );
+				}
+
+				if ( is_scalar( $value ) ) {
+					return array( sanitize_text_field( (string) $value ) );
+				}
+
+				return array();
 			default:
 				return sanitize_text_field( $value );
 		}
