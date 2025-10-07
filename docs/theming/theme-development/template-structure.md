@@ -46,7 +46,7 @@ The code above outputs the block highlighted in red in the image below, which is
 
 ![image](https://woocommerce.com/wp-content/uploads/2020/05/templating-using-hooks.webp)
 
-A code below can be used as a starting point to build out desired functionality. It can then be added to a code snippets plugin to modify the output at that particular location in the template, without having to edit the template itself. The same goes for other hooks, wherever in the templates they may appear.
+The code below can be used as a starting point to build out desired functionality. It can then be added to a code snippets plugin to modify the output at that particular location in the template, without having to edit the template itself. The same goes for other hooks, wherever in the templates they may appear.
 
 ```php
 add_action( 'woocommerce_email_order_details', 'my_custom_woo_function');
