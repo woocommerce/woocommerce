@@ -1164,4 +1164,40 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// Verify COGS was synced.
 		$this->assertEquals( $expected_cogs, (float) get_post_meta( $order->get_id(), '_cogs_total_value', true ) );
 	}
+
+	/**
+	 * @testDox Items without saved COGS metadata can calculate COGS from products.
+	 */
+	public function test_items_without_saved_cogs_calculate_from_product() {
+		$this->enable_cogs_feature();
+
+		$product_cost  = 15.00;
+		$product_qty   = 2;
+		$expected_cogs = $product_cost * $product_qty;
+
+		// Create an order with COGS and save it.
+		$order = new WC_Order();
+		$this->add_product_with_cogs_to_order( $order, $product_cost, $product_qty );
+		$order->calculate_totals();
+		$order->save();
+
+		// Get the item and manually delete its _cogs_value metadata to simulate an item without saved COGS.
+		$items = $order->get_items();
+		$item  = reset( $items );
+		delete_metadata( 'order_item', $item->get_id(), '_cogs_value' );
+
+		// Reload the order.
+		$reloaded_order = wc_get_order( $order->get_id() );
+
+		// The item should not have a saved COGS value.
+		$reloaded_items = $reloaded_order->get_items();
+		$reloaded_item  = reset( $reloaded_items );
+
+		// When we call calculate_totals, it should calculate COGS from the product.
+		$reloaded_order->calculate_totals();
+
+		// Verify the COGS was calculated correctly.
+		$this->assertEquals( $expected_cogs, $reloaded_item->get_cogs_value(), 'Item without saved COGS should calculate from product' );
+		$this->assertEquals( $expected_cogs, $reloaded_order->get_cogs_total_value(), 'Order total should reflect calculated item COGS' );
+	}
 }
