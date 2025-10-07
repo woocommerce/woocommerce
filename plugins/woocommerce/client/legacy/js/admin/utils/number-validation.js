@@ -12,10 +12,22 @@
  * @returns {boolean} Whether the value is a valid formatted number or formula
  */
 function isValidFormattedNumber( value, config ) {
-	// Check if value is a string and config is provided
-	if ( ! value || typeof value !== 'string' || ! config || typeof config !== 'object' ) {
-		return false;
-	}
+    // Ensure we are dealing with a string; non-strings are invalid.
+    if ( typeof value !== 'string' ) {
+        return false;
+    }
+
+    // Treat empty input as valid so optional fields (e.g. Flat rate main cost)
+    // can be saved as blank to rely on class-only costs.
+    // This preserves 10.0.x behavior where blank values were allowed.
+    if ( value.trim() === '' ) {
+        return true;
+    }
+
+    // For non-empty values, require a config object.
+    if ( ! config || typeof config !== 'object' ) {
+        return false;
+    }
 
 	var decimalSeparator = config.decimalSeparator || '.';
 	var thousandSeparator = config.thousandSeparator || ',';
