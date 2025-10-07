@@ -536,6 +536,51 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$expected_hashes = array( $extended_data_store->get_price_hash( $product, $for_display ) );
 		$actual_hashes   = array_unique( array_keys( array_filter( (array) json_decode( strval( get_transient( $transient_name ) ), true ) ) ) );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
+
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+	}
+
+	/**
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hook_modifies_prices
+	 * @return void
+	 */
+	public function test_read_prices_cache_when_taxes_dont_influence_price_plus_hook(bool $hook_modifies_prices) {
+		add_filter( 'wc_tax_enabled', '__return_true' );
+		add_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
+		WC()->customer->set_is_vat_exempt( false );
+
+		add_filter('woocommerce_variation_prices_array', function($prices_array, $variation, $for_display ) use ($hook_modifies_prices) {
+			if($hook_modifies_prices) {
+				$prices_array['foobar'] = $for_display;
+			}
+			return $prices_array;
+		}, 10, 3);
+
+		$data_store     = new WC_Product_Variable_Data_Store_CPT();
+		$product        = WC_Helper_Product::create_variation_product();
+		$transient_name = 'wc_var_prices_' . $product->get_id();
+		delete_transient( $transient_name );
+
+		$extended_data_store = $this->get_data_store_with_public_get_price_hash();
+
+		$data_store->read_price_data( $product, true );
+		$actual_hashes   = array_unique( $this->get_keys_for_json_encoded_transient( $transient_name ) );
+		$expected_hashes =
+			$hook_modifies_prices ?
+			array( $extended_data_store->get_price_hash( $product, true ) ) :
+			array( $extended_data_store->get_price_hash( $product, true ), $extended_data_store->get_price_hash( $product, false ) );
+		$this->assertEquals($expected_hashes, $actual_hashes);
+
+		remove_all_filters('woocommerce_variation_prices_array');
+		remove_filter( 'wc_tax_enabled', '__return_true' );
+		remove_filter( 'woocommerce_product_is_taxable', '__return_false' );
+		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
 	}
 
 	/**
