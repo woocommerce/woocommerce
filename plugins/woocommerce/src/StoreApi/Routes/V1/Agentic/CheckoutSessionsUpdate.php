@@ -4,6 +4,10 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -164,6 +168,23 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+		if ( ! in_array( $current_status, [ CheckoutSessionStatus::READY_FOR_PAYMENT, CheckoutSessionStatus::NOT_READY_FOR_PAYMENT ] ) ) {
+			return new \WP_REST_Response(
+				[
+					'type'         => ErrorType::INVALID_REQUEST,
+					'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => sprintf(
+						/* translators: %s: current session status */
+						__( 'Unable to update. Current status: %s', 'woocommerce' ),
+						$current_status
+					),
+				],
+				400
+			);
+		}
+
 		// Update items if provided.
 		$items = $request->get_param( 'items' );
 		if ( null !== $items ) {
