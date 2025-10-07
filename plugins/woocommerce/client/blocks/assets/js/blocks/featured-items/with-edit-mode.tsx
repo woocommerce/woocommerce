@@ -4,8 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-import { store as blockEditorStore } from '@wordpress/block-editor';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -62,7 +60,6 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
-			clientId,
 			debouncedSpeak,
 			name,
 			setAttributes,
