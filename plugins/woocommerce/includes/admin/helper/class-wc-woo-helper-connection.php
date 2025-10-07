@@ -33,8 +33,8 @@ class WC_Woo_Helper_Connection {
 		$auth_user_id   = $auth_user_data['user_id'] ?? '';
 
 		$auth          = WC_Helper_Options::get( 'auth' );
-		$url           = rtrim( $auth['url'], '/' ) ?? '';
-		$home_url      = rtrim( home_url(), '/' ) ?? '';
+		$url           = rtrim( $auth['url'] ?? '', '/' );
+		$home_url      = rtrim( home_url() ?? '', '/' );
 		$wccom_user_id = $auth['wccom_user_id'] ?? '';
 
 		if ( $home_url !== $url ) {
