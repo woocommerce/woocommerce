@@ -12,10 +12,12 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
-use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
-use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method\Controller as ShippingZoneMethodController;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
