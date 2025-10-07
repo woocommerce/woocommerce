@@ -689,13 +689,14 @@ class WC_Frontend_Scripts {
 							},
 							$providers
 						),
+						JSON_HEX_TAG | JSON_UNESCAPED_SLASHES
 					),
 				);
 				break;
 			case 'wc-address-i18n':
 				$params = array(
-					'locale'             => wp_json_encode( WC()->countries->get_country_locale() ),
-					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors() ),
+					'locale'             => wp_json_encode( WC()->countries->get_country_locale(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
 					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);
@@ -742,7 +743,7 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-country-select':
 				$params = array(
-					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),

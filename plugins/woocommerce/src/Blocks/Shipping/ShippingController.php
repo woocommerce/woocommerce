@@ -372,7 +372,7 @@ class ShippingController {
 			self::LOCAL_PICKUP_ADMIN_JS_HANDLE,
 			sprintf(
 				'var hydratedScreenSettings = %s;',
-				wp_json_encode( $settings )
+				wp_json_encode( $settings, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 			),
 			'before'
 		);
