@@ -17,7 +17,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
-use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Payments\PaymentResult;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
@@ -353,6 +352,11 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
+		 * Store the completed order ID into the session. This will prevent new orders in this session.
+		 */
+		WC()->session->set( SessionKey::COMPLETED_ORDER_ID, $this->order->get_id() );
+
+		/**
          * Build response from canonical cart schema with order.
          */
 		$response_data = $this->schema->get_item_response( WC()->cart );
@@ -363,9 +367,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			'checkout_session_id' => $request->get_param( 'checkout_session_id' ),
 			'permalink_url'       => $this->order->get_checkout_order_received_url(),
 		];
-
-		$response_data['status'] = CheckoutSessionStatus::COMPLETED;
-        WC()->session->set( SessionKey::COMPLETED_ORDER_ID, $response_data['order']['id'] );
 
 		$response = rest_ensure_response( $response_data );
 

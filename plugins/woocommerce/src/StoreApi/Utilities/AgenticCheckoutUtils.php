@@ -115,8 +115,8 @@ class AgenticCheckoutUtils {
 			if ( ! is_numeric( $item['id'] ) ) {
 				return new \WP_REST_Response(
 					[
+						'code'    => ErrorCode::INVALID,
 						'type'    => ErrorType::INVALID_REQUEST,
-						'code'    => 'invalid_product_id',
 						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
 						'param'   => '$.items[' . $index . '].id',
 					],
@@ -387,7 +387,7 @@ class AgenticCheckoutUtils {
 	 *
 	 * @return string Status value.
 	 */
-	public static function calculate_status($cart ): string {
+	public static function calculate_status( $cart ): string {
 		$wc_session = WC()->session;
 		if ( null === $wc_session ) {
 			return CheckoutSessionStatus::CANCELED;
