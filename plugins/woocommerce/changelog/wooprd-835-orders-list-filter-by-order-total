@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Allow wc_order_query to query by order total and various operators.

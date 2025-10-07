@@ -52,7 +52,7 @@
 		"pelago/emogrifier": "7.3.0",
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "1.7.0",
+		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.1.1",
 		"wordpress/mcp-adapter": "dev-trunk#7a2d22cff92328bc94f5b1648a66ae4273e949c5"
 	},
