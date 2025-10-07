@@ -78,7 +78,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'woocommerce_new_coupon_data',
 				array(
 					'post_type'     => 'shop_coupon',
-					'post_status'   => 'publish',
+					'post_status'   => $coupon->get_status( 'edit' ) ? $coupon->get_status( 'edit' ) : 'publish',
 					'post_author'   => get_current_user_id(),
 					'post_title'    => $coupon->get_code( 'edit' ),
 					'post_content'  => '',
