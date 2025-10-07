@@ -158,7 +158,10 @@ class Controller extends AbstractController {
 			}
 
 			// Add method to values (current settings/state).
-			$enabled_state = $method['state']['enabled'] ?? false;
+			$enabled_state = false;
+			if ( isset( $method['state'] ) && is_array( $method['state'] ) ) {
+				$enabled_state = $method['state']['enabled'] ?? false;
+			}
 			if ( is_array( $enabled_state ) ) {
 				$enabled_state = $enabled_state['value'] ?? false;
 			}
@@ -189,12 +192,7 @@ class Controller extends AbstractController {
 						)
 					)
 				),
-				'management'  => wp_parse_args(
-					is_array( $method['management'] ?? null ) ? $method['management'] : array(),
-					array(
-						'_links' => array(),
-					)
-				),
+				'management'  => $this->sanitize_management_field( $method['management'] ?? array() ),
 			);
 		}
 
@@ -205,7 +203,7 @@ class Controller extends AbstractController {
 	 * Get offline payment methods data.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
-	 * @return array The offline payment methods data.
+	 * @return array|WP_Error The offline payment methods data or error.
 	 * @throws \Exception If there's an error retrieving the data.
 	 */
 	private function get_offline_payment_methods_data( $request ) {
@@ -255,5 +253,38 @@ class Controller extends AbstractController {
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		return $this->item_schema->get_item_response( $item, $request );
+	}
+
+	/**
+	 * Sanitize the management field data.
+	 *
+	 * @param mixed $management The management data to sanitize.
+	 * @return array Sanitized management array.
+	 */
+	private function sanitize_management_field( $management ) {
+		if ( ! is_array( $management ) ) {
+			return array( '_links' => array() );
+		}
+
+		$sanitized = array(
+			'_links' => array(),
+		);
+
+		if ( isset( $management['_links'] ) && is_array( $management['_links'] ) ) {
+			foreach ( $management['_links'] as $key => $link ) {
+				$sanitized_key = sanitize_key( $key );
+				if ( is_array( $link ) && isset( $link['href'] ) ) {
+					// Handle link objects with href property
+					$sanitized['_links'][ $sanitized_key ] = array(
+						'href' => esc_url_raw( $link['href'] ),
+					);
+				} elseif ( is_string( $link ) ) {
+					// Handle direct URL strings
+					$sanitized['_links'][ $sanitized_key ] = esc_url_raw( $link );
+				}
+			}
+		}
+
+		return $sanitized;
 	}
 }
