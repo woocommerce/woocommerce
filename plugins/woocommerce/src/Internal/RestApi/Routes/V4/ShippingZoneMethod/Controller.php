@@ -7,11 +7,11 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Method;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use WC_Shipping_Zones;
 use WP_Http;
 use WP_REST_Request;
