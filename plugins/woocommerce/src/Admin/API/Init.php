@@ -197,13 +197,6 @@ class Init {
 			$this->$controller = new $controller();
 			$this->$controller->register_routes();
 		}
-
-		/**
-		 * Fires immediately after the WooCommerce core `wc-analytics` routes have been registered.
-		 *
-		 * @since 10.3.0
-		 */
-		do_action( 'woocommerce_wc_analytics_rest_namespace_routes_registered' );
 	}
 
 	/**

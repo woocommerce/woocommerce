@@ -159,12 +159,5 @@ class RoutesController {
 				$route_instance->get_args()
 			);
 		}
-
-		/**
-		 * Fires immediately after WooCommerce core routes have been registered for the given namespace.
-		 *
-		 * @since 10.3.0
-		 */
-		do_action( 'woocommerce_' . $namespace . '_rest_namespace_routes_registered' );
 	}
 }
