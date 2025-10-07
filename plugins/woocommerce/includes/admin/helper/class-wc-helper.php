@@ -2678,7 +2678,7 @@ class WC_Helper {
 	 * @param string $access_token_secret The secret access token.
 	 * @param int    $site_id The site id returned by the API.
 	 * @param string $home_url Home url of the site.
-	 * @param string $wccom_user_id WC user id, owner of the site.
+	 * @param string $wccom_user_id WooCommerce.com user ID, owner of the site.
 	 *
 	 * @return void
 	 */
