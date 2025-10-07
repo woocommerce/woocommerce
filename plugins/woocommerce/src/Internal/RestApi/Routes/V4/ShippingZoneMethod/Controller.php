@@ -154,7 +154,8 @@ class Controller extends AbstractController {
 			return $result;
 		}
 
-		$response = rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
+		$request['zone_id'] = $zone->get_id();
+		$response           = $this->prepare_item_for_response( $method, $request );
 		$response->set_status( 201 );
 		return $response;
 	}
@@ -168,30 +169,14 @@ class Controller extends AbstractController {
 	public function update_item( $request ) {
 		$instance_id = (int) $request['id'];
 
-		// Get the method by instance ID.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		if ( ! $method ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		// Get the zone - either from request or by looking up the method's zone.
-		if ( isset( $request['zone_id'] ) ) {
-			$zone = $this->validate_zone( $request['zone_id'] );
-			if ( is_wp_error( $zone ) ) {
-				return $zone;
-			}
-
-			// Ensure the method belongs to the specified zone.
-			$zone_methods = $zone->get_shipping_methods();
-			if ( ! isset( $zone_methods[ $instance_id ] ) ) {
-				return $this->get_route_error_by_code( self::ZONE_MISMATCH );
-			}
-		} else {
-			// No zone_id provided, get the zone by method instance.
-			$zone = $this->validate_zone_by_method_instance( $instance_id );
-			if ( is_wp_error( $zone ) ) {
-				return $zone;
-			}
+		$zone = $this->validate_zone_by_method_instance( $instance_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
 		}
 
 		// Update method settings, enabled status, and order if any updates provided.
@@ -200,9 +185,11 @@ class Controller extends AbstractController {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
+			$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		}
 
-		return rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
+		$request['zone_id'] = $zone->get_id();
+		return $this->prepare_item_for_response( $method, $request );
 	}
 
 	/**

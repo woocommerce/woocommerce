@@ -402,9 +402,9 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item with zone mismatch.
+	 * Test update item ignores zone_id since it's readonly.
 	 */
-	public function test_update_item_zone_mismatch() {
+	public function test_update_item_ignores_readonly_zone_id() {
 		wp_set_current_user( self::$admin_user_id );
 
 		// Create zone and method.
@@ -416,14 +416,19 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
-		$request->set_param( 'zone_id', $other_zone->get_id() );
+		$request->set_param( 'zone_id', $other_zone->get_id() ); // This should be ignored since zone_id is readonly.
 		$request->set_param( 'enabled', false );
 
 		$response = $this->controller->update_item( $request );
 
-		$this->assertInstanceOf( WP_Error::class, $response );
-		$this->assertStringContainsString( 'zone_mismatch', $response->get_error_code() );
-		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_error_data()['status'] );
+		// Should succeed and zone_id should be ignored.
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$data = $response->get_data();
+
+		// Method should still belong to original zone, not other_zone.
+		$this->assertEquals( $zone->get_id(), $data['zone_id'] );
+		$this->assertNotEquals( $other_zone->get_id(), $data['zone_id'] );
+		$this->assertFalse( $data['enabled'] ); // Enabled update should have worked.
 
 		wp_set_current_user( 0 );
 	}
