@@ -153,7 +153,7 @@ class Controller extends AbstractController {
 			}
 
 			$method_id = $method['id'] ?? '';
-			if ( empty( $method_id ) ) {
+			if ( empty( $method_id ) || ! is_string( $method_id ) ) {
 				continue;
 			}
 
@@ -167,12 +167,26 @@ class Controller extends AbstractController {
 			// Add complete payment method data to payment_methods.
 			$response_data['payment_methods'][ $method_id ] = array(
 				'id'          => $method_id,
-				'_order'      => $method['_order'] ?? 0,
+				'_order'      => isset( $method['_order'] ) ? absint( $method['_order'] ) : 0,
 				'title'       => sanitize_text_field( $method['title'] ?? '' ),
 				'description' => wp_kses_post( $method['description'] ?? '' ),
 				'icon'        => esc_url_raw( $method['icon'] ?? '' ),
-				'state'       => $method['state'] ?? array(),
-				'management'  => $method['management'] ?? array(),
+				'state'       => wp_parse_args( 
+					is_array( $method['state'] ?? null ) ? $method['state'] : array(), 
+					array(
+						'enabled'           => false,
+						'account_connected' => false,
+						'needs_setup'       => false,
+						'test_mode'         => false,
+						'dev_mode'          => false,
+					)
+				),
+				'management'  => wp_parse_args(
+					is_array( $method['management'] ?? null ) ? $method['management'] : array(),
+					array(
+						'_links' => array(),
+					)
+				),
 			);
 		}
 

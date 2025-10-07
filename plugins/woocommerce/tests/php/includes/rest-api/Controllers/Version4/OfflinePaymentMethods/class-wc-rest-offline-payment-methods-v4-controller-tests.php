@@ -216,7 +216,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'values', $data );
 		$this->assertArrayHasKey( 'payment_methods', $data );
 
-		$this->assertEquals( 'offline_payment_methods', $data['id'] );
+		$this->assertEquals( 'payments/offline-methods', $data['id'] );
 		$this->assertIsArray( $data['values'] );
 		$this->assertIsArray( $data['payment_methods'] );
 
