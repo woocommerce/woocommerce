@@ -9,11 +9,12 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Schema\OfflinePaymentMethodSchema;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;

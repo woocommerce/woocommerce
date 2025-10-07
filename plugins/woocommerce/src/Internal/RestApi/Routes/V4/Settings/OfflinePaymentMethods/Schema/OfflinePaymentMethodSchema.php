@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Schema;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
