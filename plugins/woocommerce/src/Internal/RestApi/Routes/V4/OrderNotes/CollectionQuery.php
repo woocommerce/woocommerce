@@ -8,11 +8,11 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractCollectionQuery;
 use WP_REST_Request;
 use WC_Order;
 

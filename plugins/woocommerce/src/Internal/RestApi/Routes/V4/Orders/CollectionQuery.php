@@ -8,14 +8,14 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
 use WP_REST_Request;
 use WP_Http;
 use WP_Error;
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractCollectionQuery;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractCollectionQuery;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order_Query;

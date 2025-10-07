@@ -9,13 +9,13 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use WP_Http;
 use WP_Error;
 use WC_Order;

@@ -7,11 +7,11 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WC_Order_Item;
 use WP_REST_Request;
 

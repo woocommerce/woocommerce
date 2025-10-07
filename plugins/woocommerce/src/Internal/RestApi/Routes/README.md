@@ -51,8 +51,8 @@ The main controller class should be named `Controller.php` with the correct name
 
 For example:
 
-- `V4/Orders/Controller.php` with namespace `Automattic\WooCommerce\RestApi\Routes\V4\Orders`
-- `V4/OrderNotes/Controller.php` with namespace `Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes`
+- `V4/Orders/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders`
+- `V4/OrderNotes/Controller.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes`
 
 #### Schemas
 
@@ -60,8 +60,8 @@ The schema class should be named `{SingularResourceType}Schema.php` with the cor
 
 For example:
 
-- `V4/Orders/OrderSchema.php` with namespace `Automattic\WooCommerce\RestApi\Routes\V4\Orders`
-- `V4/OrderNotes/OrderNoteSchema.php` with namespace `Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes`
+- `V4/Orders/OrderSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders`
+- `V4/OrderNotes/OrderNoteSchema.php` with namespace `Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes`
 
 ### Controller Structure
 

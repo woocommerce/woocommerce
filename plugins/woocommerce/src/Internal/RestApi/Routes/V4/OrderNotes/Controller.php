@@ -9,12 +9,12 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema;
 use WP_Http;
 use WP_Error;
 use WP_Comment;

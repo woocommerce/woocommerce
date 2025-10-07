@@ -9,11 +9,11 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\Products;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products;
 
 use WP_Error;
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\Products\Schema\ProductSettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Schema\ProductSettingsSchema;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
