@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add support for storing COGS values for orders when HPOS is disabled
