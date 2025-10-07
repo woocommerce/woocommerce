@@ -11,7 +11,11 @@ import { Icon, trendingUp } from '@wordpress/icons';
 /**
  * Internal dependencies
  */
-import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
+import {
+	INNER_BLOCKS_PRODUCT_TEMPLATE,
+	DEFAULT_QUERY,
+	DEFAULT_ATTRIBUTES,
+} from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
 const collection = {
@@ -28,12 +32,14 @@ const collection = {
 };
 
 const attributes = {
+	...DEFAULT_ATTRIBUTES,
 	displayLayout: {
 		type: 'flex',
 		columns: 4,
 		shrinkColumns: true,
 	},
 	query: {
+		...DEFAULT_QUERY,
 		perPage: 8,
 		pages: 1,
 	},
@@ -43,7 +49,7 @@ const attributes = {
 const heading: InnerBlockTemplate = [
 	'core/heading',
 	{
-		textAlign: 'center',
+		textAlign: 'left',
 		level: 2,
 		content: __( 'You may also like', 'woocommerce' ),
 		style: { spacing: { margin: { bottom: '1rem' } } },

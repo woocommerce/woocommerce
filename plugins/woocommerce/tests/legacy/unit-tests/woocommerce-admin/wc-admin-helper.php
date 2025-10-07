@@ -33,7 +33,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 	 *
 	 * @var int
 	 */
-	private static $product_id;
+	private $product_id;
 
 	/**
 	 * Set up before class.
@@ -56,12 +56,6 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		global $wp_rewrite;
 		$wp_rewrite->set_permalink_structure( '/%postname%/' );
 
-		// Create a product.
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_status( 'publish' );
-		$product->save();
-		self::$product_id = $product->get_id();
-
 		// Flush rewrite rules.
 		$wp_rewrite->init();
 		$wp_rewrite->flush_rules( true );
@@ -76,12 +70,36 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 		$wp_rewrite->set_permalink_structure( self::$original_permalink_structure );
 		update_option( 'woocommerce_permalinks', self::$original_wc_permalinks );
 
-		// Clean up product.
-		WC_Helper_Product::delete_product( self::$product_id );
-
 		// Flush rewrite rules one final time.
 		$wp_rewrite->flush_rules();
 		parent::tearDownAfterClass();
+	}
+
+	/**
+	 * Initialize environment for tests by creating a simple product.
+	 *
+	 * @return void
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Create a product.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_status( 'publish' );
+		$product->save();
+		$this->product_id = $product->get_id();
+	}
+
+	/**
+	 * Clean up environment for tests by deleting the simple product.
+	 *
+	 * @return void
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Clean up product.
+		WC_Helper_Product::delete_product( $this->product_id );
 	}
 
 	/**
@@ -264,7 +282,7 @@ class WC_Admin_Tests_Admin_Helper extends WC_Unit_Test_Case {
 			array( 'shop', get_permalink( wc_get_page_id( 'shop' ) ), true ),
 			array( 'checkout', get_permalink( wc_get_page_id( 'checkout' ) ), true ),
 			array( 'product archive', get_post_type_archive_link( 'product' ), true ),
-			array( 'product', get_permalink( self::$product_id ), true ),
+			array( 'product', get_permalink( $this->product_id ), true ),
 			// Should return true if a shop page contains a query param.
 			array( 'shop with query', get_permalink( wc_get_page_id( 'shop' ) ) . '?query=test', true ),
 			// Should non-store pages return false.

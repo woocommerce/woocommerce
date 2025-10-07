@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Orders\OrderAttributionController
  * @package WooCommerce\Templates
- * @version 9.5.0
+ * @version 10.3.0
  */
 
 declare( strict_types=1 );
@@ -136,5 +136,7 @@ defined( 'ABSPATH' ) || exit;
 		</span>
 	<?php endif; ?>
 	<!-- A placeholder for the OA install banner React component. -->
-	<div id="order-attribution-install-banner-slotfill"></div>
+	<?php if ( class_exists( 'WC_Marketplace_Suggestions' ) && \WC_Marketplace_Suggestions::allow_suggestions() ) : ?>
+		<div id="order-attribution-install-banner-slotfill"></div>
+	<?php endif; ?>
 </div>

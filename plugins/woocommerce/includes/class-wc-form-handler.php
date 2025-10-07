@@ -637,6 +637,8 @@ class WC_Form_Handler {
 			return;
 		}
 
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
+
 		wc_nocache_headers();
 
 		$nonce_value = wc_get_var( $_REQUEST['woocommerce-cart-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.

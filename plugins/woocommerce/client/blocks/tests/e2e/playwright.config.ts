@@ -45,12 +45,26 @@ const config: PlaywrightTestConfig = {
 		storageState: STORAGE_STATE_PATH,
 		actionTimeout: 10_000,
 		navigationTimeout: 10_000,
+		contextOptions: {
+			reducedMotion: 'reduce',
+		},
 	},
 	projects: [
 		{
 			name: 'chromium',
 			use: { ...devices[ 'Desktop Chrome' ] },
 			fullyParallel: true,
+		},
+		{
+			name: 'legacy-mini-cart',
+			testMatch: [
+				'**/tests/mini-cart/**/*.spec.ts',
+				'**/tests/add-to-cart-with-options/**/*.spec.ts',
+				'**/tests/product-button/**/*.spec.ts',
+				'**/tests/product-collection/**/*.spec.ts',
+			],
+			fullyParallel: true,
+			use: { ...devices[ 'Desktop Chrome' ] },
 		},
 	],
 };

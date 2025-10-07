@@ -1,6 +1,7 @@
 ---
 post_title: Backporting in WooCommerce
 sidebar_label: Backporting
+sidebar_position: 3
 ---
 
 # Backporting in WooCommerce

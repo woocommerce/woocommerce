@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Do not preload leaderboards and performance indicators data outside of Analytics screens.

@@ -6,7 +6,7 @@ import { decodeEntities } from '@wordpress/html-entities';
 import { Panel } from '@woocommerce/blocks-components';
 import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData } from '@woocommerce/base-context/hooks';
-import { sanitizeHTML } from '@woocommerce/utils';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
 
 /**

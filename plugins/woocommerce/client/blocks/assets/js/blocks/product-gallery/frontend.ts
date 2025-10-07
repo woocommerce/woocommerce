@@ -6,13 +6,20 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
+	getConfig,
 } from '@wordpress/interactivity';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
 import type { ProductGalleryContext } from './types';
 import { checkOverflow } from './utils';
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const getContext = ( ns?: string ) =>
 	getContextFn< ProductGalleryContext >( ns );
@@ -156,6 +163,12 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 		behavior: 'smooth',
 	} );
 };
+
+const { state: productDataState } = store< ProductDataStore >(
+	'woocommerce/product-data',
+	{},
+	{ lock: universalLock }
+);
 
 const productGallery = {
 	state: {
@@ -416,6 +429,33 @@ const productGallery = {
 		},
 	},
 	callbacks: {
+		listenToProductDataChanges: () => {
+			const productId = productDataState?.productId;
+			if ( ! productId ) {
+				return;
+			}
+
+			const { products } = getConfig(
+				'woocommerce'
+			) as WooCommerceConfig;
+
+			const productData =
+				products?.[ productId ]?.variations?.[
+					productDataState?.variationId || 0
+				] || products?.[ productId ];
+
+			const imageId = productData?.image_id;
+			if ( ! imageId ) {
+				return;
+			}
+
+			const { imageData } = getContext();
+			const imageIndex = imageData.indexOf( imageId );
+
+			if ( imageIndex >= 0 ) {
+				actions.selectImage( imageIndex );
+			}
+		},
 		watchForChangesOnAddToCartForm: () => {
 			const context = getContext();
 			const variableProductCartForm = document.querySelector(

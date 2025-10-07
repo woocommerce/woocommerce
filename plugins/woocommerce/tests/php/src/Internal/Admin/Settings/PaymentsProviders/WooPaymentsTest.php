@@ -142,7 +142,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings',
+							'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS,
 						),
 					),
 				),

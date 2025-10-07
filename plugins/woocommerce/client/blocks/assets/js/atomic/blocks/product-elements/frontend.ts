@@ -1,24 +1,23 @@
 /**
  * External dependencies
  */
-import { getElement, store, getContext } from '@wordpress/interactivity';
+import {
+	getElement,
+	store,
+	getContext,
+	getConfig,
+} from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import type {
 	ProductData,
-	Store as WooCommerce,
+	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import { sanitize } from 'dompurify'; // eslint-disable-line import/named
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: wooState } = store< WooCommerce >(
-	'woocommerce',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productDataState } = store< ProductDataStore >(
 	'woocommerce/product-data',
@@ -67,10 +66,18 @@ const productElementStore = store(
 					return undefined;
 				}
 
+				const { products } = getConfig(
+					'woocommerce'
+				) as WooCommerceConfig;
+
+				if ( ! products ) {
+					return undefined;
+				}
+
 				return (
-					wooState?.products?.[ productDataState.productId ]
-						?.variations?.[ productDataState?.variationId || 0 ] ||
-					wooState?.products?.[ productDataState.productId ]
+					products?.[ productDataState.productId ]?.variations?.[
+						productDataState?.variationId || 0
+					] || products?.[ productDataState.productId ]
 				);
 			},
 		},
@@ -90,9 +97,9 @@ const productElementStore = store(
 					];
 
 				if ( typeof productElementHtml === 'string' ) {
-					element.ref.innerHTML = sanitize( productElementHtml, {
-						ALLOWED_TAGS,
-						ALLOWED_ATTR,
+					element.ref.innerHTML = sanitizeHTML( productElementHtml, {
+						tags: ALLOWED_TAGS,
+						attr: ALLOWED_ATTR,
 					} );
 				}
 			},

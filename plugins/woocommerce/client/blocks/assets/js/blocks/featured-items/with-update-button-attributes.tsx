@@ -11,14 +11,9 @@ import type { ComponentType } from 'react';
  * Internal dependencies
  */
 import { EditorBlock } from './types';
-
-interface WithUpdateButtonRequiredAttributes {
-	editMode: boolean;
-}
-
 interface WithUpdateButtonAttributes< T > {
-	attributes: WithUpdateButtonRequiredAttributes &
-		EditorBlock< T >[ 'attributes' ];
+	attributes: EditorBlock< T >[ 'attributes' ];
+	editMode?: boolean;
 }
 
 interface WithUpdateButtonCategoryProps< T >
@@ -41,10 +36,8 @@ export const withUpdateButtonAttributes =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: WithUpdateButtonProps< T > ) => {
 		const [ doUrlUpdate, setDoUrlUpdate ] = useState( false );
-		const { attributes, category, clientId, product } = props;
+		const { category, clientId, editMode, product } = props;
 		const item = category || product;
-
-		const { editMode } = attributes;
 		const permalink =
 			( item as WP_REST_API_Category )?.link ||
 			( item as ProductResponseItem )?.permalink;

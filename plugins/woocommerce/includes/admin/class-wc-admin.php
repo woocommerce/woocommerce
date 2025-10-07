@@ -37,7 +37,6 @@ class WC_Admin {
 		add_action( 'current_screen', array( $this, 'conditional_includes' ) );
 		add_action( 'admin_init', array( $this, 'buffer' ), 1 );
 		add_action( 'admin_init', array( $this, 'preview_emails' ) );
-		add_action( 'admin_init', array( $this, 'preview_email_editor_dummy_content' ) );
 		add_action( 'admin_init', array( $this, 'prevent_admin_access' ) );
 		add_action( 'admin_init', array( $this, 'admin_redirects' ) );
 		add_action( 'admin_footer', 'wc_print_js', 25 );
@@ -143,14 +142,12 @@ class WC_Admin {
 
 	/**
 	 * Handle redirects:
-	 * 1. To setup/welcome page after install and updates.
-	 * 2. To offline payment gateway(s) new settings page.
+	 * 1. Nonced plugin install redirects.
 	 *
 	 * The user must have access rights, and we must ignore the network/bulk plugin updaters.
 	 */
 	public function admin_redirects() {
-		// Don't run this fn from Action Scheduler requests, as it would clear _wc_activation_redirect transient.
-		// That means OBW would never be shown.
+		// Don't run this fn from Action Scheduler requests.
 		if ( wc_is_running_from_async_action_scheduler() ) {
 			return;
 		}
@@ -170,38 +167,6 @@ class WC_Admin {
 			wp_safe_redirect( $url );
 			exit;
 		}
-
-		// Check if we have a section parameter for offline payment gateways and redirect to the new path.
-		if ( ! empty( $_GET['section'] ) ) {
-			$section = wc_clean( wp_unslash( $_GET['section'] ) );
-
-			// Handle offline payment gateway(s) redirections.
-			if ( 'offline' === $section || WC_Gateway_BACS::ID === $section || WC_Gateway_COD::ID === $section || WC_Gateway_Cheque::ID === $section ) {
-				// Get current URL and remove source parameter.
-				$current_url = remove_query_arg( 'section' );
-
-				if ( 'offline' === $section ) {
-					$redirect_url = add_query_arg(
-						array(
-							'path' => '/offline',
-						),
-						$current_url,
-					);
-				} else {
-					$redirect_url = add_query_arg(
-						array(
-							'path' => '/offline/' . strtolower( $section ),
-						),
-						$current_url,
-					);
-				}
-
-				// Perform the redirect.
-				wp_safe_redirect( $redirect_url );
-				exit;
-			}
-		}
-
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -299,44 +264,6 @@ class WC_Admin {
 			// phpcs:enable
 			exit;
 		}
-	}
-
-	/**
-	 * Preview email editor placeholder dummy content.
-	 */
-	public function preview_email_editor_dummy_content() {
-		$message = '';
-		if ( ! isset( $_GET['preview_woocommerce_mail_editor_content'] ) ) {
-			return;
-		}
-
-		if ( ! isset( $_REQUEST['_wpnonce'] ) || ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ), 'preview-mail' ) ) {
-			die( 'Security check' );
-		}
-
-		/**
-		 * Email preview instance for rendering dummy content.
-		 *
-		 * @var EmailPreview $email_preview - email preview instance
-		 */
-		$email_preview = wc_get_container()->get( EmailPreview::class );
-
-		$type_param = EmailPreview::DEFAULT_EMAIL_TYPE;
-		if ( isset( $_GET['type'] ) ) {
-			$type_param = sanitize_text_field( wp_unslash( $_GET['type'] ) );
-		}
-
-		try {
-			$message = $email_preview->generate_placeholder_content( $type_param );
-		} catch ( \Exception $e ) {
-			// Catch other potential errors during content generation.
-			wp_die( esc_html__( 'There was an error rendering the email preview.', 'woocommerce' ), 404 );
-		}
-
-		// Print the placeholder content.
-		// phpcs:ignore WordPress.Security.EscapeOutput
-		echo $message;
-		exit;
 	}
 
 	/**

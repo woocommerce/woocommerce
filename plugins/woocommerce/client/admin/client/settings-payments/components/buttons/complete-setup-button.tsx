@@ -9,7 +9,6 @@ import {
 	PaymentsProviderIncentive,
 	woopaymentsOnboardingStore,
 } from '@woocommerce/data';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -21,6 +20,7 @@ import {
 	recordPaymentsProviderEvent,
 } from '~/settings-payments/utils';
 import { wooPaymentsOnboardingSessionEntrySettings } from '~/settings-payments/constants';
+import { WooPaymentsUpdateRequiredModal } from '~/settings-payments/components/modals';
 
 interface CompleteSetupButtonProps {
 	/**
@@ -85,6 +85,7 @@ export const CompleteSetupButton = ( {
 	incentive = null,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
+	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
 
 	// Get the store's `select` function to trigger selector resolution later (in useEffect).
 	// We don't need to select data directly here, just the function itself.
@@ -130,8 +131,8 @@ export const CompleteSetupButton = ( {
 			setOnboardingModalOpen( true );
 		} else if ( ! accountConnected || ! onboardingStarted ) {
 			if ( gatewayHasRecommendedPaymentMethods ) {
-				const history = getHistory();
-				history.push( getNewPath( {}, '/payment-methods' ) );
+				setShowUpdateModal( true );
+				setIsUpdating( false );
 			} else {
 				// Redirect to the gateway's onboarding URL if it needs setup.
 				window.location.href = onboardingHref;
@@ -155,14 +156,20 @@ export const CompleteSetupButton = ( {
 	};
 
 	return (
-		<Button
-			key={ gatewayProvider.id }
-			variant={ 'primary' }
-			isBusy={ isUpdating }
-			disabled={ isUpdating || !! installingPlugin }
-			onClick={ completeSetup }
-		>
-			{ buttonText }
-		</Button>
+		<>
+			<Button
+				key={ gatewayProvider.id }
+				variant="primary"
+				isBusy={ isUpdating }
+				disabled={ isUpdating || !! installingPlugin }
+				onClick={ completeSetup }
+			>
+				{ buttonText }
+			</Button>
+			<WooPaymentsUpdateRequiredModal
+				isOpen={ showUpdateModal }
+				onClose={ () => setShowUpdateModal( false ) }
+			/>
+		</>
 	);
 };

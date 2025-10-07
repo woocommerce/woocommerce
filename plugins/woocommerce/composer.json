@@ -2,7 +2,7 @@
 	"name": "woocommerce/woocommerce",
 	"description": "An eCommerce toolkit that helps you sell anything. Beautifully.",
 	"homepage": "https://woocommerce.com/",
-	"version": "10.2.0",
+	"version": "10.4.0",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
 	"prefer-stable": true,
@@ -32,11 +32,15 @@
 			"options": {
 				"symlink": false
 			}
+		},
+		{
+			"type": "vcs",
+			"url": "https://github.com/WordPress/mcp-adapter.git"
 		}
 	],
 	"require": {
 		"php": ">=7.4",
-		"automattic/block-delimiter": "0.2.1",
+		"automattic/block-delimiter": "0.3.4",
 		"automattic/jetpack-a8c-mc-stats": "^3.0.0",
 		"automattic/jetpack-autoloader": "5.0.0",
 		"automattic/jetpack-config": "3.0.0",
@@ -45,10 +49,11 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"pelago/emogrifier": "^6.0",
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*"
+		"woocommerce/email-editor": "*",
+		"wordpress/abilities-api": "^0.1.1",
+		"wordpress/mcp-adapter": "dev-trunk#7a2d22cff92328bc94f5b1648a66ae4273e949c5"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

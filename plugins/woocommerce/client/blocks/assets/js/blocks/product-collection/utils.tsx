@@ -3,8 +3,9 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select, useSelect } from '@wordpress/data';
+import { select, useSelect, useDispatch } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
+import { store as editorStore } from '@wordpress/editor';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import {
 	useEffect,
@@ -13,7 +14,7 @@ import {
 	useMemo,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import type { ProductResponseItem } from '@woocommerce/types';
+import { isString, type ProductResponseItem } from '@woocommerce/types';
 import { getProduct } from '@woocommerce/editor-components/utils';
 import {
 	createBlock,
@@ -67,23 +68,23 @@ export function setQueryAttribute(
 
 const isInProductArchive = () => {
 	const ARCHIVE_PRODUCT_TEMPLATES = [
-		'woocommerce/woocommerce//archive-product',
-		'woocommerce/woocommerce//taxonomy-product_attribute',
-		'woocommerce/woocommerce//product-search-results',
+		'archive-product',
+		'taxonomy-product_attribute',
+		'product-search-results',
 		// Custom taxonomy templates have structure:
-		// <<THEME>>//taxonomy-product_cat-<<CATEGORY>>
+		// taxonomy-product_cat-<<CATEGORY>>
 		// hence we're checking if template ID includes the middle part.
 		//
 		// That includes:
-		// - woocommerce/woocommerce//taxonomy-product_cat
-		// - woocommerce/woocommerce//taxonomy-product_tag
-		'//taxonomy-product_cat',
-		'//taxonomy-product_tag',
+		// - taxonomy-product_cat
+		// - taxonomy-product_tag
+		'taxonomy-product_cat',
+		'taxonomy-product_tag',
+		'taxonomy-product_brand',
 	];
 
-	const currentTemplateId = select(
-		'core/edit-site'
-	)?.getEditedPostId() as string;
+	// @ts-expect-error getEditedPostSlug is not typed
+	const currentTemplateId = select( editorStore ).getEditedPostSlug();
 
 	/**
 	 * Set inherit value when Product Collection block is first added to the page.
@@ -92,7 +93,9 @@ const isInProductArchive = () => {
 	 */
 	if ( currentTemplateId ) {
 		return ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			currentTemplateId.includes( template )
+			isString( currentTemplateId )
+				? currentTemplateId.includes( template )
+				: false
 		);
 	}
 
@@ -326,7 +329,11 @@ export const useSetPreviewState = ( {
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
 } ) => {
+	const { __unstableMarkNextChangeAsNotPersistent } =
+		useDispatch( blockEditorStore );
+
 	const setState = ( newPreviewState: PreviewState ) => {
+		__unstableMarkNextChangeAsNotPersistent();
 		setAttributes( {
 			__privatePreviewState: {
 				...attributes.__privatePreviewState,
@@ -343,8 +350,9 @@ export const useSetPreviewState = ( {
 		location,
 		isUsingReferencePreviewMode
 	);
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: usesReferencePreviewMessage.length > 0,
@@ -390,11 +398,12 @@ export const useSetPreviewState = ( {
 		location.type === LocationType.Archive
 			? location.sourceData?.termId
 			: null;
-	useLayoutEffect( () => {
+	useEffect( () => {
 		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
+			__unstableMarkNextChangeAsNotPersistent();
 			setAttributes( {
 				__privatePreviewState: {
 					isPreview: isGenericArchiveTemplate

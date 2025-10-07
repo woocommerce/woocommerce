@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AfterpayCle
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Airwallex;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\AmazonPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Antom;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Eway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\GoCardless;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\HelioPay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Klarna;
@@ -16,6 +17,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\KlarnaCheck
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\MercadoPago;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Mollie;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Monei;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\NexiCheckout;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Payfast;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Paymob;
@@ -27,6 +29,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PayUIndia;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Razorpay;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Stripe;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Tilopay;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Visa;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\Vivacom;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
@@ -83,40 +86,43 @@ class PaymentsProviders {
 	 * @var \class-string[]
 	 */
 	private array $payment_gateways_providers_class_map = array(
-		WC_Gateway_BACS::ID         => WCCore::class,
-		WC_Gateway_Cheque::ID       => WCCore::class,
-		WC_Gateway_COD::ID          => WCCore::class,
-		WC_Gateway_Paypal::ID       => WCCore::class,
-		'woocommerce_payments'      => WooPayments::class,
-		'ppcp-gateway'              => PayPal::class,
-		'stripe'                    => Stripe::class,
-		'stripe_*'                  => Stripe::class,
-		'mollie'                    => Mollie::class,
-		'mollie_wc_gateway_*'       => Mollie::class, // Target all the Mollie gateways.
-		'amazon_payments_advanced*' => AmazonPay::class,
-		'woo-mercado-pago-*'        => MercadoPago::class,
-		'affirm'                    => Affirm::class,
-		'klarna_payments'           => Klarna::class,
-		'afterpay'                  => AfterpayClearpay::class,
-		'clearpay'                  => AfterpayClearpay::class,
-		'antom_*'                   => Antom::class,
-		'razorpay'                  => Razorpay::class,
-		'paystack'                  => Paystack::class,
-		'paystack-*'                => Paystack::class,
-		'payfast'                   => Payfast::class,
-		'payoneer-*'                => Payoneer::class,
-		'payubiz'                   => PayUIndia::class,
-		'paymob'                    => Paymob::class,
-		'paymob-*'                  => Paymob::class,
-		'airwallex_*'               => Airwallex::class,
-		'vivawallet*'               => Vivacom::class,
-		'tilopay'                   => Tilopay::class,
-		'helio'                     => HelioPay::class,
-		'paytrail'                  => Paytrail::class,
-		'monei'                     => Monei::class,
-		'monei_*'                   => Monei::class,
-		'gocardless'                => GoCardless::class,
-		'kco'                       => KlarnaCheckout::class,
+		WC_Gateway_BACS::ID           => WCCore::class,
+		WC_Gateway_Cheque::ID         => WCCore::class,
+		WC_Gateway_COD::ID            => WCCore::class,
+		WC_Gateway_Paypal::ID         => WCCore::class,
+		'woocommerce_payments'        => WooPayments::class,
+		'ppcp-gateway'                => PayPal::class,
+		'stripe'                      => Stripe::class,
+		'stripe_*'                    => Stripe::class,
+		'mollie'                      => Mollie::class,
+		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
+		'amazon_payments_advanced*'   => AmazonPay::class,
+		'woo-mercado-pago-*'          => MercadoPago::class,
+		'affirm'                      => Affirm::class,
+		'klarna_payments'             => Klarna::class,
+		'afterpay'                    => AfterpayClearpay::class,
+		'clearpay'                    => AfterpayClearpay::class,
+		'antom_*'                     => Antom::class,
+		'razorpay'                    => Razorpay::class,
+		'paystack'                    => Paystack::class,
+		'paystack-*'                  => Paystack::class,
+		'payfast'                     => Payfast::class,
+		'payoneer-*'                  => Payoneer::class,
+		'payubiz'                     => PayUIndia::class,
+		'paymob'                      => Paymob::class,
+		'paymob-*'                    => Paymob::class,
+		'airwallex_*'                 => Airwallex::class,
+		'vivawallet*'                 => Vivacom::class,
+		'tilopay'                     => Tilopay::class,
+		'helio'                       => HelioPay::class,
+		'paytrail'                    => Paytrail::class,
+		'monei'                       => Monei::class,
+		'monei_*'                     => Monei::class,
+		'gocardless'                  => GoCardless::class,
+		'kco'                         => KlarnaCheckout::class,
+		'visa_acceptance_solutions_*' => Visa::class,
+		'eway'                        => Eway::class,
+		'dibs_easy'                   => NexiCheckout::class,
 	);
 
 	/**
@@ -153,6 +159,9 @@ class PaymentsProviders {
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
 		ExtensionSuggestions::KLARNA_CHECKOUT   => KlarnaCheckout::class,
+		ExtensionSuggestions::VISA              => Visa::class,
+		ExtensionSuggestions::EWAY              => Eway::class,
+		ExtensionSuggestions::NEXI_CHECKOUT     => NexiCheckout::class,
 	);
 
 	/**
@@ -165,18 +174,18 @@ class PaymentsProviders {
 	/**
 	 * The memoized payment gateways to avoid computing the list multiple times during a request.
 	 *
-	 * @var array|null
+	 * @var array
 	 */
-	private ?array $payment_gateways_memo = null;
+	private array $payment_gateways_memo = array();
 
 	/**
 	 * The memoized payment gateways for display to avoid computing the list multiple times during a request.
 	 *
 	 * This is especially important since it avoids triggering the legacy action multiple times during a request.
 	 *
-	 * @var array|null
+	 * @var array
 	 */
-	private ?array $payment_gateways_for_display_memo = null;
+	private array $payment_gateways_for_display_memo = array();
 
 	/**
 	 * The payment extension suggestions service.
@@ -202,18 +211,23 @@ class PaymentsProviders {
 	 * We apply the same actions and logic that the non-React Payments settings page uses to get the gateways.
 	 * This way we maintain backwards compatibility.
 	 *
-	 * @param bool $for_display Whether the payment gateway list is intended for display purposes.
-	 *                          This triggers the legacy `woocommerce_admin_field_payment_gateways` action and
-	 *                          the exclusion of "shell" gateways.
-	 *                          Default is true.
+	 * @param bool   $for_display  Whether the payment gateway list is intended for display purposes.
+	 *                             This triggers the legacy `woocommerce_admin_field_payment_gateways` action and
+	 *                             the exclusion of "shell" gateways.
+	 *                             Default is true.
+	 * @param string $country_code Optional. The country code for which the payment gateways are being generated.
+	 *                             This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The payment gateway objects list.
 	 */
-	public function get_payment_gateways( bool $for_display = true ): array {
+	public function get_payment_gateways( bool $for_display = true, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		// If we are asked for a display gateways list, we need to fire legacy actions and filter out "shells".
 		if ( $for_display ) {
-			if ( ! is_null( $this->payment_gateways_for_display_memo ) ) {
-				return $this->payment_gateways_for_display_memo;
+			if ( isset( $this->payment_gateways_for_display_memo[ $country_code ] ) ) {
+				return $this->payment_gateways_for_display_memo[ $country_code ];
 			}
 
 			// We don't want to output anything from the action. So we buffer it and discard it.
@@ -235,17 +249,17 @@ class PaymentsProviders {
 			$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 			// Remove "shell" gateways from the list.
-			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways );
+			$payment_gateways = $this->remove_shell_payment_gateways( $payment_gateways, $country_code );
 
 			// Store the entire payment gateways list for display for later use.
-			$this->payment_gateways_for_display_memo = $payment_gateways;
+			$this->payment_gateways_for_display_memo[ $country_code ] = $payment_gateways;
 
 			return $payment_gateways;
 		}
 
 		// We were asked for the raw payment gateways list.
-		if ( ! is_null( $this->payment_gateways_memo ) ) {
-			return $this->payment_gateways_memo;
+		if ( isset( $this->payment_gateways_memo[ $country_code ] ) ) {
+			return $this->payment_gateways_memo[ $country_code ];
 		}
 
 		// Get all payment gateways, ordered by the user.
@@ -255,7 +269,7 @@ class PaymentsProviders {
 		$payment_gateways = $this->handle_non_standard_registration_for_payment_gateways( $payment_gateways );
 
 		// Store the entire payment gateways list for later use.
-		$this->payment_gateways_memo = $payment_gateways;
+		$this->payment_gateways_memo[ $country_code ] = $payment_gateways;
 
 		return $payment_gateways;
 	}
@@ -267,20 +281,25 @@ class PaymentsProviders {
 	 * The removal is done in a way that ensures we do not remove all gateways from an extension,
 	 * thus preventing user access to the settings page(s) for that extension.
 	 *
-	 * @param array $payment_gateways The payment gateways list to process.
+	 * @param array  $payment_gateways The payment gateways list to process.
+	 * @param string $country_code     Optional. The country code for which the payment gateways are being generated.
+	 *                                 This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The processed payment gateways list.
 	 */
-	public function remove_shell_payment_gateways( array $payment_gateways ): array {
-		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways );
+	public function remove_shell_payment_gateways( array $payment_gateways, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
+		$grouped_payment_gateways = $this->group_gateways_by_extension( $payment_gateways, $country_code );
 		return array_filter(
 			$payment_gateways,
-			function ( $gateway ) use ( $grouped_payment_gateways ) {
+			function ( $gateway ) use ( $grouped_payment_gateways, $country_code ) {
 				// If the gateway is a shell, we only remove it if there are other, non-shell gateways from that extension.
 				// This is to avoid removing all the gateways registered by an extension and
 				// preventing user access to the settings page(s) for that extension.
 				if ( $this->is_shell_payment_gateway( $gateway ) ) {
-					$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+					$gateway_details = $this->get_payment_gateway_details( $gateway, 0, $country_code );
 					// In case we don't have the needed extension details,
 					// we allow the gateway to be displayed (aka better safe than sorry).
 					if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
@@ -408,6 +427,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway details.
 	 */
 	public function get_payment_gateway_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		return $this->enhance_payment_gateway_details(
 			$this->get_payment_gateway_base_details( $payment_gateway, $payment_gateway_order, $country_code ),
 			$payment_gateway,
@@ -426,6 +448,9 @@ class PaymentsProviders {
 	 * @return array The payment gateway base details.
 	 */
 	public function get_payment_gateway_base_details( WC_Payment_Gateway $payment_gateway, int $payment_gateway_order, string $country_code = '' ): array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$provider = $this->get_payment_gateway_provider_instance( $payment_gateway->id );
 
 		return $provider->get_details( $payment_gateway, $payment_gateway_order, $country_code );
@@ -513,6 +538,9 @@ class PaymentsProviders {
 	 * @throws Exception If there are malformed or invalid suggestions.
 	 */
 	public function get_extension_suggestions( string $location, string $context = '' ): array {
+		// Normalize the location to uppercase.
+		$location = strtoupper( $location );
+
 		$preferred_psp         = null;
 		$preferred_apm         = null;
 		$preferred_offline_psp = null;
@@ -593,10 +621,16 @@ class PaymentsProviders {
 			}
 
 			// If WooPayments or Stripe is active, we don't suggest other BNPLs.
+			// Note: Affirm is available in the UK even with WooPayments or Stripe active
+			// because Stripe does not support it there, yet.
 			if ( ExtensionSuggestions::TYPE_BNPL === $extension['_type'] &&
 				(
 					in_array( ExtensionSuggestions::STRIPE, $active_extensions, true ) ||
 					in_array( ExtensionSuggestions::WOOPAYMENTS, $active_extensions, true )
+				) &&
+				! (
+					ExtensionSuggestions::AFFIRM === $extension['id'] &&
+					'GB' === $location
 				)
 			) {
 				continue;
@@ -678,6 +712,9 @@ class PaymentsProviders {
 	 * @return ?array The payment extension suggestion details, or null if not found.
 	 */
 	public function get_extension_suggestion_by_plugin_slug( string $slug, string $country_code = '' ): ?array {
+		// Normalize the country code to uppercase.
+		$country_code = strtoupper( $country_code );
+
 		$suggestion = $this->extension_suggestions->get_by_plugin_slug( $slug, $country_code, Payments::SUGGESTIONS_CONTEXT );
 		if ( ! is_null( $suggestion ) ) {
 			// Enhance the suggestion details.
@@ -1080,8 +1117,8 @@ class PaymentsProviders {
 	 * @return void
 	 */
 	public function reset_memo(): void {
-		$this->payment_gateways_memo             = null;
-		$this->payment_gateways_for_display_memo = null;
+		$this->payment_gateways_memo             = array();
+		$this->payment_gateways_for_display_memo = array();
 	}
 
 	/**
@@ -1173,16 +1210,14 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
-					ExtensionSuggestions::COINBASE, // We don't have suggestion details yet.
-					ExtensionSuggestions::AUTHORIZE_NET, // We don't have suggestion details yet.
-					ExtensionSuggestions::BOLT, // We don't have suggestion details yet.
-					ExtensionSuggestions::DEPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON, // We don't have suggestion details yet.
-					ExtensionSuggestions::EWAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::FORTISPAY, // We don't have suggestion details yet.
-					ExtensionSuggestions::NEXI, // We don't have suggestion details yet.
-					ExtensionSuggestions::PAYPAL_ZETTLE, // We don't have suggestion details yet.
-					ExtensionSuggestions::RAPYD, // We don't have suggestion details yet.
+					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
+					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
+					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
+					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
+					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
+					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
+					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
+					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_BRAINTREE, // We don't have suggestion details yet.
 				),
 				true
@@ -1429,14 +1464,16 @@ class PaymentsProviders {
 	/**
 	 * Group payment gateways by their plugin extension filename.
 	 *
-	 * @param WC_Payment_Gateway[] $gateways The list of payment gateway instances to group.
+	 * @param WC_Payment_Gateway[] $gateways     The list of payment gateway instances to group.
+	 * @param string               $country_code Optional. The country code for which the gateways are being generated.
+	 *                                           This should be an ISO 3166-1 alpha-2 country code.
 	 *
 	 * @return array The grouped payment gateway instances, keyed by the plugin file.
 	 *               Each group contains an array of payment gateway instances that belong to the same plugin.
 	 *               If a payment gateway does not have a corresponding plugin file,
 	 *               it will be grouped under the 'unknown_extension' key.
 	 */
-	private function group_gateways_by_extension( array $gateways ): array {
+	private function group_gateways_by_extension( array $gateways, string $country_code = '' ): array {
 		$grouped = array(
 			// This is the group for gateways that we don't know how to group by extension.
 			// It can be used for gateways that are not registered by a WP plugin.
@@ -1445,7 +1482,7 @@ class PaymentsProviders {
 
 		foreach ( $gateways as $gateway ) {
 			// Get the payment gateway details, but use a dummy gateway order since it is inconsequential here.
-			$gateway_details = $this->get_payment_gateway_details( $gateway, 0 );
+			$gateway_details = $this->get_payment_gateway_details( $gateway, 0, $country_code );
 			// If we don't have the necessary plugin details, put it in the unknown group.
 			if ( empty( $gateway_details ) || ! isset( $gateway_details['plugin'] ) || empty( $gateway_details['plugin']['file'] ) ) {
 				$grouped['unknown_extension'][] = $gateway;

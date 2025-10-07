@@ -53,7 +53,6 @@ export interface FeaturedItemRequiredAttributes {
 	overlayGradient: string;
 	showDesc: boolean;
 	showPrice: boolean;
-	editMode: boolean;
 	backgroundColor: string | undefined;
 	style: { color: { background: string } };
 	backgroundColorVisibilityStatus: {
@@ -91,6 +90,7 @@ interface FeaturedItemRequiredProps< T > {
 	isLoading: boolean;
 	setAttributes: ( attrs: Partial< FeaturedItemRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
 
 interface FeaturedCategoryProps< T > extends FeaturedItemRequiredProps< T > {
@@ -117,6 +117,7 @@ export const withFeaturedItem =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: FeaturedItemProps< T > ) => {
 		const [ isEditingImage ] = props.useEditingImage;
+		const [ , setEditMode ] = props.useEditMode;
 
 		const {
 			attributes,
@@ -214,7 +215,7 @@ export const withFeaturedItem =
 					<button
 						type="button"
 						className="components-button is-secondary"
-						onClick={ () => setAttributes( { editMode: true } ) }
+						onClick={ () => setEditMode( true ) }
 					>
 						{ noSelectionButtonLabel }
 					</button>

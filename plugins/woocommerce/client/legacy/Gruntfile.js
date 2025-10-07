@@ -116,9 +116,9 @@ module.exports = function ( grunt ) {
 			},
 		},
 
-		// Concatenate select2.css onto the admin.css files.
 		concat: {
-			admin: {
+			// Concatenate select2.css onto the admin.css files.
+			css: {
 				files: {
 					'<%= dirs.css %>/admin.css': [
 						'<%= dirs.css %>/select2.css',
@@ -127,6 +127,15 @@ module.exports = function ( grunt ) {
 					'<%= dirs.css %>/admin-rtl.css': [
 						'<%= dirs.css %>/select2.css',
 						'<%= dirs.css %>/admin-rtl.css',
+					],
+				},
+			},
+			// Concatenate number validation utility function with shipping zone methods
+			js: {
+				files: {
+					'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js': [
+						'<%= dirs.js %>/admin/utils/number-validation.js',
+						'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js',
 					],
 				},
 			},
@@ -141,7 +150,7 @@ module.exports = function ( grunt ) {
 					'rtlcss',
 					'postcss',
 					'cssmin',
-					'concat',
+					'concat:css',
 					'move:css',
 					'copy:css',
 				],
@@ -152,7 +161,7 @@ module.exports = function ( grunt ) {
 					'<%= dirs.js %>/**/*.js',
 					'!<%= dirs.js %>/**/*.min.js',
 				],
-				tasks: [ 'eslint', 'copy:js', 'newer:uglify' ],
+				tasks: [ 'eslint', 'copy:js', 'concat:js', 'newer:uglify' ],
 			},
 		},
 
@@ -225,7 +234,7 @@ module.exports = function ( grunt ) {
 						expand: true,
 						src: '*.scss',
 						dest: '<%= dirs.cssDest %>/',
-					}
+					},
 				],
 			},
 			js: {
@@ -233,7 +242,7 @@ module.exports = function ( grunt ) {
 					{
 						cwd: '<%= dirs.js %>/',
 						expand: true,
-						src: '**',
+						src: [ '**', '!admin/utils/**' ],
 						dest: '<%= dirs.jsDest %>/',
 					},
 					{
@@ -241,7 +250,7 @@ module.exports = function ( grunt ) {
 						flatten: true,
 						src: ['node_modules/sourcebuster/dist/sourcebuster*','node_modules/sourcebuster/LICENSE'],
 						dest: '<%= dirs.jsDest %>/sourcebuster/',
-					}
+					},
 				],
 			},
 		},
@@ -265,14 +274,14 @@ module.exports = function ( grunt ) {
 	// Register tasks.
 	grunt.registerTask( 'default', [ 'js', 'css' ] );
 
-	grunt.registerTask( 'js', [ 'copy:js', 'uglify:js_assets' ] );
+	grunt.registerTask( 'js', [ 'copy:js', 'concat:js', 'uglify:js_assets' ] );
 
 	grunt.registerTask( 'css', [
 		'sass',
 		'rtlcss',
 		'postcss',
 		'cssmin',
-		'concat',
+		'concat:css',
 		'move:css',
 		'copy:css',
 	] );

@@ -10,6 +10,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface;
+use WC_Log_Levels;
 
 /**
  * WooCommerce logger adapter for the email editor.
@@ -34,6 +35,25 @@ class Logger implements Email_Editor_Logger_Interface {
 	}
 
 	/**
+	 * Checks if the log level should be handled.
+	 *
+	 * @param string $level The log level.
+	 * @return bool Whether the log level should be handled.
+	 */
+	private function should_handle( string $level ): bool {
+		/**
+		 * Controls the logging threshold for the email editor.
+		 *
+		 * @param string $threshold The log level threshold.
+		 *
+		 * @since 10.2.0
+		 */
+		$logging_threshold = apply_filters( 'woocommerce_email_editor_logging_threshold', WC_Log_Levels::WARNING );
+
+		return WC_Log_Levels::get_level_severity( $logging_threshold ) <= WC_Log_Levels::get_level_severity( $level );
+	}
+
+	/**
 	 * Adds emergency level log message.
 	 *
 	 * @param string $message The log message.
@@ -41,7 +61,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function emergency( string $message, array $context = array() ): void {
-		$this->wc_logger->emergency( $message, $context );
+		$this->log( WC_Log_Levels::EMERGENCY, $message, $context );
 	}
 
 	/**
@@ -52,7 +72,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function alert( string $message, array $context = array() ): void {
-		$this->wc_logger->alert( $message, $context );
+		$this->log( WC_Log_Levels::ALERT, $message, $context );
 	}
 
 	/**
@@ -63,7 +83,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function critical( string $message, array $context = array() ): void {
-		$this->wc_logger->critical( $message, $context );
+		$this->log( WC_Log_Levels::CRITICAL, $message, $context );
 	}
 
 	/**
@@ -74,7 +94,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function error( string $message, array $context = array() ): void {
-		$this->wc_logger->error( $message, $context );
+		$this->log( WC_Log_Levels::ERROR, $message, $context );
 	}
 
 	/**
@@ -85,7 +105,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function warning( string $message, array $context = array() ): void {
-		$this->wc_logger->warning( $message, $context );
+		$this->log( WC_Log_Levels::WARNING, $message, $context );
 	}
 
 	/**
@@ -96,7 +116,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function notice( string $message, array $context = array() ): void {
-		$this->wc_logger->notice( $message, $context );
+		$this->log( WC_Log_Levels::NOTICE, $message, $context );
 	}
 
 	/**
@@ -107,7 +127,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function info( string $message, array $context = array() ): void {
-		$this->wc_logger->info( $message, $context );
+		$this->log( WC_Log_Levels::INFO, $message, $context );
 	}
 
 	/**
@@ -118,7 +138,7 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function debug( string $message, array $context = array() ): void {
-		$this->wc_logger->debug( $message, $context );
+		$this->log( WC_Log_Levels::DEBUG, $message, $context );
 	}
 
 	/**
@@ -130,6 +150,8 @@ class Logger implements Email_Editor_Logger_Interface {
 	 * @return void
 	 */
 	public function log( string $level, string $message, array $context = array() ): void {
-		$this->wc_logger->log( $level, $message, $context );
+		if ( $this->should_handle( $level ) ) {
+			$this->wc_logger->log( $level, $message, $context );
+		}
 	}
 }

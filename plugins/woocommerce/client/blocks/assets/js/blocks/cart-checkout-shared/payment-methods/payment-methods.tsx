@@ -6,6 +6,7 @@ import { Label } from '@woocommerce/blocks-components';
 import { useSelect } from '@wordpress/data';
 import { paymentStore } from '@woocommerce/block-data';
 import { CheckoutPaymentSkeleton } from '@woocommerce/base-components/skeleton/patterns/checkout-payment';
+import { DelayedContentWithSkeleton } from '@woocommerce/base-components/delayed-content-with-skeleton';
 
 /**
  * Internal dependencies
@@ -45,27 +46,37 @@ const PaymentMethods = ( {
 		};
 	} );
 
-	if ( ! paymentMethodsInitialized ) {
-		return <CheckoutPaymentSkeleton />;
-	}
-
-	const hasPaymentMethods =
-		paymentMethodsInitialized &&
+	const hasAvailablePaymentMethods =
 		Object.keys( availablePaymentMethods ).length > 0;
-	const hasExpressPaymentMethods =
-		expressPaymentMethodsInitialized &&
+	const hasAvailableExpressPaymentMethods =
 		Object.keys( availableExpressPaymentMethods ).length > 0;
 
-	if ( ! hasPaymentMethods && ! hasExpressPaymentMethods ) {
-		return noPaymentMethods;
-	}
+	if ( paymentMethodsInitialized && expressPaymentMethodsInitialized ) {
+		// No payment methods available at all
+		if (
+			! hasAvailablePaymentMethods &&
+			! hasAvailableExpressPaymentMethods
+		) {
+			return noPaymentMethods;
+		}
 
-	if ( hasExpressPaymentMethods && ! hasPaymentMethods ) {
-		return onlyExpressPayments;
+		// Only express payment methods available
+		if (
+			hasAvailableExpressPaymentMethods &&
+			! hasAvailablePaymentMethods
+		) {
+			return onlyExpressPayments;
+		}
 	}
 
 	return (
-		<>
+		<DelayedContentWithSkeleton
+			isLoading={
+				! paymentMethodsInitialized ||
+				! expressPaymentMethodsInitialized
+			}
+			skeleton={ <CheckoutPaymentSkeleton /> }
+		>
 			<SavedPaymentMethodOptions />
 			{ Object.keys( savedPaymentMethods ).length > 0 && (
 				<Label
@@ -83,7 +94,7 @@ const PaymentMethods = ( {
 				/>
 			) }
 			<PaymentMethodOptions />
-		</>
+		</DelayedContentWithSkeleton>
 	);
 };
 

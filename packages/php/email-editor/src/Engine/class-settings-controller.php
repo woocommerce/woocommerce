@@ -25,6 +25,13 @@ class Settings_Controller {
 	private Theme_Controller $theme_controller;
 
 	/**
+	 * Allowed iframe style handles.
+	 *
+	 * @var string[]
+	 */
+	private array $allowed_iframe_style_handles = array();
+
+	/**
 	 * Assets for iframe editor (component styles, scripts, etc.)
 	 *
 	 * @var array
@@ -55,10 +62,11 @@ class Settings_Controller {
 
 		$settings = array_merge( $core_default_settings, self::DEFAULT_SETTINGS );
 		// Assets for iframe editor (component styles, scripts, etc.).
-		$settings['__unstableResolvedAssets'] = $this->iframe_assets;
-		$editor_content_styles                = file_get_contents( __DIR__ . '/content-editor.css' );
-		$shares_content_styles                = file_get_contents( __DIR__ . '/content-shared.css' );
-		$settings['styles']                   = array(
+		$settings['__unstableResolvedAssets']  = $this->iframe_assets;
+		$settings['allowedIframeStyleHandles'] = $this->allowed_iframe_style_handles;
+		$editor_content_styles                 = file_get_contents( __DIR__ . '/content-editor.css' );
+		$shares_content_styles                 = file_get_contents( __DIR__ . '/content-shared.css' );
+		$settings['styles']                    = array(
 			array( 'css' => $editor_content_styles ),
 			array( 'css' => $shares_content_styles ),
 		);
@@ -181,6 +189,42 @@ class Settings_Controller {
 	}
 
 	/**
+	 * Get the allowed iframe style handles.
+	 *
+	 * @return array
+	 */
+	private function get_allowed_iframe_style_handles() {
+		// Core style handles.
+		$allowed_iframe_style_handles = array(
+			'wp-components-css',
+			'wp-reset-editor-styles-css',
+			'wp-block-library-css',
+			'wp-block-editor-content-css',
+			'wp-edit-blocks-css',
+		);
+
+		foreach ( \WP_Block_Type_Registry::get_instance()->get_all_registered() as $block ) {
+			if ( ! isset( $block->supports['email'] ) || ! $block->supports['email'] ) {
+				continue;
+			}
+
+			if ( strpos( $block->name, 'core/' ) !== false ) {
+				continue;
+			}
+
+			foreach ( $block->style_handles as $handle ) {
+				$allowed_iframe_style_handles[] = $handle . '-css';
+			}
+
+			foreach ( $block->editor_style_handles as $handle ) {
+				$allowed_iframe_style_handles[] = $handle . '-css';
+			}
+		}
+
+		return apply_filters( 'woocommerce_email_editor_allowed_iframe_style_handles', $allowed_iframe_style_handles );
+	}
+
+	/**
 	 * Method to initialize iframe assets.
 	 *
 	 * @return void
@@ -190,20 +234,19 @@ class Settings_Controller {
 			return;
 		}
 
-		$this->iframe_assets = _wp_get_iframed_editor_assets();
+		$this->iframe_assets                = _wp_get_iframed_editor_assets();
+		$this->allowed_iframe_style_handles = $this->get_allowed_iframe_style_handles();
 
-		// Remove layout styles and block library for classic themes. They are added only when a classic theme is active
-		// and they add unwanted margins and paddings in the editor content.
 		$cleaned_styles = array();
 		foreach ( explode( "\n", (string) $this->iframe_assets['styles'] ) as $asset ) {
-			if ( strpos( $asset, 'wp-editor-classic-layout-styles-css' ) !== false ) {
-				continue;
+			foreach ( $this->allowed_iframe_style_handles as $handle ) {
+				if ( strpos( $asset, $handle ) !== false ) {
+					$cleaned_styles[] = $asset;
+					break;
+				}
 			}
-			if ( strpos( $asset, 'wp-block-library-theme-css' ) !== false ) {
-				continue;
-			}
-			$cleaned_styles[] = $asset;
 		}
+
 		$this->iframe_assets['styles'] = implode( "\n", $cleaned_styles );
 	}
 }

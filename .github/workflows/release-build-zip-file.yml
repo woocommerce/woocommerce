@@ -62,6 +62,18 @@ jobs:
               echo "::error::Verification can not be skipped when building for a release."
               exit 1
           fi
+
+        # Checkout trunk.
+      - uses: actions/checkout@v4
+        with:
+          ref: trunk
+          path: checkout-trunk
+          sparse-checkout: |
+            /.github/workflows/scripts/release-check-db-updates.js
+          sparse-checkout-cone-mode: false
+        if: ${{ ! inputs.skip_verify }}
+
+        # Checkout branch.
       - uses: actions/checkout@v4
         with:
           ref: ${{ inputs.branch || github.ref }}
@@ -73,6 +85,7 @@ jobs:
         if: ${{ ! inputs.skip_verify }}
 
       - name: 'Pre-build verification'
+        id: pre-build-verification
         if: ${{ ! inputs.skip_verify }}
         env:
           BRANCH: ${{ inputs.branch || github.ref }}
@@ -136,6 +149,16 @@ jobs:
                 echo "::error::Pre-build verification: there are PRs with milestone '$milestone' still open."
                 exit 1
             fi
+
+            echo "release_version=$branch_plugin_version" >> $GITHUB_OUTPUT
+
+      - name: 'Pre-build verification: db updates'
+        if: ${{ ! inputs.skip_verify && ! contains( steps.pre-build-verification.outputs.release_version, '-dev' ) && ! contains( steps.pre-build-verification.outputs.release_version, '-beta.1' ) }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const { run } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
+            await run( `${{ inputs.branch }}`, { github, context } );
 
   build:
     name: Build release zip file

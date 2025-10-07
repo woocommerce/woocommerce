@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
@@ -130,7 +131,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings',
+							'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS,
 						),
 					),
 				),
@@ -652,15 +653,45 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	 * Test get_settings_url.
 	 */
 	public function test_get_settings_url() {
+		$test_site_wp_admin_url = get_site_url( null, 'wp-admin/', 'admin' );
+
+		// Test valid, full URLs.
 		$fake_gateway = new FakePaymentGateway( 'gateway1' );
-		$this->assertEquals( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings', $this->sut->get_settings_url( $fake_gateway ) );
+		$this->assertEquals( 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'https://example.com/settings-url' ) );
-		$this->assertEquals( 'https://example.com/settings-url', $this->sut->get_settings_url( $fake_gateway ) );
+		$this->assertEquals( 'https://example.com/settings-url?from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 
-		// Test with wrong type.
+		// Test invalid URLs.
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'not_good_url/settings-url' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => '//not_good_url/settings-url?param=value' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		// Test valid relative WP admin URLs.
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => '/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => '/admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		// Test invalid relative URLs.
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'not_good_url/admin.php?page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => 'page=wc-settings&tab=checkout&section=bogus_settings' ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
+
+		// Test with wrong type uses the default settings URL.
 		$fake_gateway = new FakePaymentGateway( 'gateway2', array( 'settings_url' => false ) );
-		$this->assertEquals( '', $this->sut->get_settings_url( $fake_gateway ) );
+		$this->assertEquals( $test_site_wp_admin_url . 'admin.php?page=wc-settings&tab=checkout&section=gateway2&from=' . Payments::FROM_PAYMENTS_SETTINGS, $this->sut->get_settings_url( $fake_gateway ) );
 	}
 
 	/**

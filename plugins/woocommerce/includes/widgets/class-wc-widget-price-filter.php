@@ -34,9 +34,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		);
 		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version                  = Constants::get_constant( 'WC_VERSION' );
-		wp_register_script( 'accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
+		wp_register_script( 'wc-accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), $version, true );
-		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'accounting' ), $version, true );
+		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'wc-accounting' ), $version, true );
 		wp_localize_script(
 			'wc-price-slider',
 			'woocommerce_price_slider_params',

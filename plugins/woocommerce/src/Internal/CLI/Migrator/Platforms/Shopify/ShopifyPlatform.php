@@ -41,6 +41,10 @@ class ShopifyPlatform {
 			'description' => 'Import products and data from Shopify stores',
 			'fetcher'     => ShopifyFetcher::class,
 			'mapper'      => ShopifyMapper::class,
+			'credentials' => array(
+				'shop_url'     => 'Enter shop URL (e.g., mystore.myshopify.com):',
+				'access_token' => 'Enter access token:',
+			),
 		);
 
 		return $platforms;

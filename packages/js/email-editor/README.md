@@ -7,7 +7,7 @@ You can try the email editor in [the WordPress Playground](https://playground.wo
 This JavaScript package is designed to work in conjunction with its PHP counterpart, which can be found in the same repository at `packages/php/email-editor`. Both packages are required for full functionality.
 
 ## Initializing the editor
-  
+
 > **Note:** The `initializeEditor` function is currently experimental and its API is subject to change in future releases. Please be aware that breaking changes may occur.
 
 To use the email editor in your project, you'll need to initialize it using the `initializeEditor` function. The editor requires certain data to be set on the global `window.WooCommerceEmailEditor` object before initialization:
@@ -24,18 +24,18 @@ window.WooCommerceEmailEditor = {
     urls: {
         listings: '', // optional: The URL for the listings page
         send: '', // optional: The URL for the send button
-        back: '' // optional: The URL for the back button (top left corner)
-    }
+        back: '', // optional: The URL for the back button (top left corner)
+    },
 };
 
 // Then initialize the editor with the HTML element ID
 import { initializeEditor } from '@woocommerce/email-editor';
-initializeEditor('email-editor-container');
+initializeEditor( 'email-editor-container' );
 ```
 
 The `initializeEditor` function accepts a single parameter:
 
-- `htmlId` (required): The ID of the HTML element where the editor will be mounted
+-   `htmlId` (required): The ID of the HTML element where the editor will be mounted
 
 Make sure to set up the required data on `window.WooCommerceEmailEditor` before calling `initializeEditor`.
 
@@ -91,7 +91,7 @@ If your WordPress installation does not use the Gutenberg plugin or does not inc
 ### WEB CLIENTS
 
 | Client                  | Platform | Versions to Support                            | Rendering Engine | Percentage (Litmus) | Litmus Check | Note                                                                            |
-|-------------------------|----------|------------------------------------------------|------------------|---------------------|--------------|---------------------------------------------------------------------------------|
+| ----------------------- | -------- | ---------------------------------------------- | ---------------- | ------------------- | ------------ | ------------------------------------------------------------------------------- |
 | Gmail.com               | Browser  | Latest: Chrome, Firefox, Edge, Safari + mobile | WebKit/Gecko     | -/-                 | Yes          | Combined with apps it is around 30%. Mobile Web is not covered by Litmus tests. |
 | Yahoo! Mail             | Browser  | Latest: Chrome, Firefox, Edge, Safari          | WebKit/Gecko     | 3.37/2.89           | Yes          |                                                                                 |
 | Outlook.com + Office365 | Browser  | Latest: Chrome, Firefox, Edge, Safari          | WebKit/Gecko     | -/0.67              | Yes          |                                                                                 |
@@ -102,7 +102,7 @@ If your WordPress installation does not use the Gutenberg plugin or does not inc
 ### APPLICATION CLIENTS
 
 | Client         | Platform              | Versions to Support  | Rendering Engine | Percentage (Litmus) | Litmus Check          | Note                                                                                                                                                                                                     |
-|----------------|-----------------------|----------------------|------------------|---------------------|-----------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| -------------- | --------------------- | -------------------- | ---------------- | ------------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Gmail App      | iOS                   | Latest               | Proprietary      | -/-                 | Yes                   |                                                                                                                                                                                                          |
 | Gmail App      | Android               | Android 7.0 - Latest | Proprietary      | -/-                 | Partially (up to 8.1) | Android 6 market share is 1.7%. Android 7 starts 4.4%                                                                                                                                                    |
 | Apple Mail     | iOS                   | Latest               | WebKit           | -/-                 | Yes                   | No exact data about usage but combined iOS and desktop has almost 60% on Litmus                                                                                                                          |
@@ -126,21 +126,22 @@ We may add, update and delete any of them.
 ### Actions
 
 | Name                              | Argument           | Description         |
-|-----------------------------------|--------------------|---------------------|
+| --------------------------------- | ------------------ | ------------------- |
 | `woocommerce_email_editor_events` | `EventData.detail` | Email editor events |
 
 ### Filters
 
-| Name                                                               | Argument                         | Return                                     | Description                                                                                                                    |
-|--------------------------------------------------------------------|----------------------------------|--------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| `woocommerce_email_editor_events_tracking_enabled`                 | `boolean` (false-default)        | `boolean`                                  | Used to enable the email editor events tracking and collection                                                                 |
-| `woocommerce_email_editor_wrap_editor_component`                   | `JSX.Element` Editor             | `JSX.Element` Editor                       | The main editor component. Custom component can wrap the editor and provide additional functionality                           |
-| `woocommerce_email_editor_send_button_label`                       | `string` 'Send'                  | `string` 'Send' (default)                  | Email editor send button label. The `Send` text can be updated using this filter                                               |
-| `woocommerce_email_editor_send_action_callback`                    | `function` sendAction            | `function` sendAction                      | Action to perform when the Send button is clicked                                                                              |
-| `woocommerce_email_editor_content_validation_rules`                | `array` rules                    | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send btton` click and revalidated on `save draft`            |
-| `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                    | `string` link                              | Edit or remove the sending configuration link message                                                                          |
-| `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                                   |
-| `woocommerce_email_editor_preferred_template_title`                | `string` '', `Post` post         | `string` custom (preferred) template title | Custom title for Email preset template selector                                                                                |
-| `woocommerce_email_editor_sidebar_email_type_info_icon`            | none                             | `JSX.Element` icon component               | Return an icon from @wordpress/icons e.g. () => <Icon icon={ postContent } />                                                  |
-| `woocommerce_email_editor_sidebar_email_type_info_content`         | none                             | `JSX.Element` info content                 | Return a React component containing information about the current template or content                                          |
-| `woocommerce_email_editor_trash_modal_should_permanently_delete`   | `boolean` (false-default)        | `boolean`                                  | Controls the action of the trash modal. Returning `true` will ensure the modal permanently deletes the email (skipping trash). |
+| Name                                                               | Argument                                              | Return                                     | Description                                                                                                                    |
+| ------------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| `woocommerce_email_editor_events_tracking_enabled`                 | `boolean` (false-default)                             | `boolean`                                  | Used to enable the email editor events tracking and collection                                                                 |
+| `woocommerce_email_editor_wrap_editor_component`                   | `JSX.Element` Editor                                  | `JSX.Element` Editor                       | The main editor component. Custom component can wrap the editor and provide additional functionality                           |
+| `woocommerce_email_editor_send_button_label`                       | `string` 'Send'                                       | `string` 'Send' (default)                  | Email editor send button label. The `Send` text can be updated using this filter                                               |
+| `woocommerce_email_editor_send_action_callback`                    | `function` sendAction                                 | `function` sendAction                      | Action to perform when the Send button is clicked                                                                              |
+| `woocommerce_email_editor_content_validation_rules`                | `array` rules                                         | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send button` click and revalidated on `save draft`           |
+| `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                                         | `string` link                              | Edit or remove the sending configuration link message                                                                          |
+| `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton                      | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                                   |
+| `woocommerce_email_editor_preferred_template_title`                | `string` '', `Post` post                              | `string` custom (preferred) template title | Custom title for Email preset template selector                                                                                |
+| `woocommerce_email_editor_sidebar_email_type_info_icon`            | none                                                  | `JSX.Element` icon component               | Return an icon from @wordpress/icons e.g. () => <Icon icon={ postContent } />                                                  |
+| `woocommerce_email_editor_sidebar_email_type_info_content`         | none                                                  | `JSX.Element` info content                 | Return a React component containing information about the current template or content                                          |
+| `woocommerce_email_editor_trash_modal_should_permanently_delete`   | `boolean` (false-default)                             | `boolean`                                  | Controls the action of the trash modal. Returning `true` will ensure the modal permanently deletes the email (skipping trash). |
+| `woocommerce_email_editor_iframe_stylesheet_should_remove`         | `boolean` (false-default), `CSSStyleSheet` stylesheet | `boolean`                                  | Controls whether the iframe stylesheet should be removed. Returning `true` will remove the iframe stylesheet.                  |

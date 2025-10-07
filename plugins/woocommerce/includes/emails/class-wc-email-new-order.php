@@ -31,6 +31,7 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 		public function __construct() {
 			$this->id             = 'new_order';
 			$this->title          = __( 'New order', 'woocommerce' );
+			$this->email_group    = 'orders';
 			$this->template_html  = 'emails/admin-new-order.php';
 			$this->template_plain = 'emails/plain/admin-new-order.php';
 			$this->placeholders   = array(

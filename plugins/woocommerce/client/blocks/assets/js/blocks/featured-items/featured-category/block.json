@@ -42,10 +42,6 @@
 			"type": "number",
 			"default": 50
 		},
-		"editMode": {
-			"type": "boolean",
-			"default": true
-		},
 		"focalPoint": {
 			"type": "object",
 			"default": {

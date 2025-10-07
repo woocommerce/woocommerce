@@ -123,7 +123,10 @@ export interface WooPaymentsProviderOnboardingStep {
 				status: 'completed' | 'not_started' | 'started';
 			}
 		>;
+		// True when a test (test-drive) account is connected.
 		has_test_account?: boolean;
+		// True when a sandbox (test-mode, non-test-drive) account is connected.
+		has_sandbox_account?: boolean;
 	};
 	errors?: {
 		message: string;

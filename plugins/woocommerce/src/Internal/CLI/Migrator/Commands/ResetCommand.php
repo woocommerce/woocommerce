@@ -57,15 +57,16 @@ class ResetCommand {
 	 */
 	public function __invoke( array $args, array $assoc_args ) {
 		// Resolve and validate the platform.
-		$platform = $this->platform_registry->resolve_platform( $assoc_args );
+		$platform              = $this->platform_registry->resolve_platform( $assoc_args );
+		$platform_display_name = $this->platform_registry->get_platform_display_name( $platform );
 
 		if ( ! $this->credential_manager->has_credentials( $platform ) ) {
-			WP_CLI::warning( "No credentials found for '{$platform}' to reset." );
+			WP_CLI::warning( "No credentials found for '{$platform_display_name}' to reset." );
 			return;
 		}
 
 		$this->credential_manager->delete_credentials( $platform );
 
-		WP_CLI::success( "Credentials for the '{$platform}' platform have been cleared." );
+		WP_CLI::success( "Credentials for the '{$platform_display_name}' platform have been cleared." );
 	}
 }
