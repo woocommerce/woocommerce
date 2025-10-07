@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-use Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 
 /**
  * Shipping Zones V4 Controller tests class.
@@ -513,7 +513,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		// Test the location formatting directly since we can't easily inject
 		// malformed data without triggering core WooCommerce handling.
-		$schema = new \Automattic\WooCommerce\RestApi\Routes\V4\ShippingZones\ShippingZoneSchema();
+		$schema = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneSchema();
 
 		// Use reflection to test the protected method.
 		$reflection = new \ReflectionClass( $schema );
