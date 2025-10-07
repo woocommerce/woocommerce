@@ -274,12 +274,12 @@ class Controller extends AbstractController {
 			foreach ( $management['_links'] as $key => $link ) {
 				$sanitized_key = sanitize_key( $key );
 				if ( is_array( $link ) && isset( $link['href'] ) ) {
-					// Handle link objects with href property
+					// Handle link objects with href property.
 					$sanitized['_links'][ $sanitized_key ] = array(
 						'href' => esc_url_raw( $link['href'] ),
 					);
 				} elseif ( is_string( $link ) ) {
-					// Handle direct URL strings
+					// Handle direct URL strings.
 					$sanitized['_links'][ $sanitized_key ] = esc_url_raw( $link );
 				}
 			}
