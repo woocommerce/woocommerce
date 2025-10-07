@@ -384,6 +384,44 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
+	 * Test create item rollback on validation failure.
+	 */
+	public function test_create_item_rollback_on_validation_failure() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone();
+
+		// Add filter to simulate validation failure in update_from_api_request.
+		$filter_callback = function () {
+			return new WP_Error(
+				'invalid_settings',
+				'Simulated validation error',
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		};
+		add_filter( 'woocommerce_shipping_' . 'flat_rate' . '_instance_settings_values', $filter_callback, 10, 0 );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
+		$request->set_param( 'zone_id', $zone->get_id() );
+		$request->set_param( 'method_id', 'flat_rate' );
+		$request->set_param( 'enabled', true );
+		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
+
+		$response = $this->controller->create_item( $request );
+
+		// Should return an error.
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 'invalid_settings', $response->get_error_code() );
+
+		// Verify the method instance was deleted (rollback).
+		$methods = $zone->get_shipping_methods( false );
+		$this->assertEmpty( $methods, 'Method instance should be deleted on validation failure' );
+
+		remove_filter( 'woocommerce_shipping_' . 'flat_rate' . '_instance_settings_values', $filter_callback, 10 );
+		wp_set_current_user( 0 );
+	}
+
+	/**
 	 * Test update item with invalid ID.
 	 */
 	public function test_update_item_invalid_id() {
