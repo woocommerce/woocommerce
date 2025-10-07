@@ -13,7 +13,7 @@ use WP_REST_Request;
  *
  * @package Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZoneMethod
  */
-class ShippingMethodSchemaTest extends WC_Unit_Test_Case {
+class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 
 	/**
 	 * @var ShippingMethodSchema
