@@ -77,9 +77,12 @@ class Controller extends AbstractController {
 						$this->get_collection_params(),
 						array(
 							'location' => array(
-								'description' => __( 'Country code to retrieve offline payment methods for.', 'woocommerce' ),
-								'type'        => 'string',
-								'required'    => false,
+								'description'       => __( 'Country code to retrieve offline payment methods for.', 'woocommerce' ),
+								'type'              => 'string',
+								'required'          => false,
+								'sanitize_callback' => static function ( $value ) {
+									return sanitize_text_field( $value );
+								},
 							),
 						)
 					),
@@ -130,11 +133,13 @@ class Controller extends AbstractController {
 
 		// Transform data to match the new format.
 		$response_data = array(
-			'id'              => 'payments/offline-methods',
-			'title'           => __( 'Offline Payment Methods', 'woocommerce' ),
-			'description'     => __( 'Manage offline payment methods available for your store.', 'woocommerce' ),
-			'values'          => array(),
-			'payment_methods' => array(),
+			'id'          => 'payments/offline-methods',
+			'title'       => __( 'Offline Payment Methods', 'woocommerce' ),
+			'description' => __( 'Manage offline payment methods available for your store.', 'woocommerce' ),
+			'values'      => array(),
+			'groups'      => array(
+				'payment_methods' => array(),
+			),
 		);
 
 		// Validate input is an array.
@@ -173,8 +178,8 @@ class Controller extends AbstractController {
 			}
 			$response_data['values'][ $method_id ] = $enabled_state;
 
-			// Add complete payment method data to payment_methods.
-			$response_data['payment_methods'][ $method_id ] = array(
+			// Add complete payment method data to groups.payment_methods.
+			$response_data['groups']['payment_methods'][ $method_id ] = array(
 				'id'          => $method_id,
 				'_order'      => isset( $method['_order'] ) ? absint( $method['_order'] ) : 0,
 				'title'       => sanitize_text_field( $method['title'] ?? '' ),
@@ -208,7 +213,8 @@ class Controller extends AbstractController {
 	 * @throws \Exception If there's an error retrieving the data.
 	 */
 	private function get_offline_payment_methods_data( $request ) {
-		$location = $request->get_param( 'location' );
+		$location = sanitize_text_field( $request->get_param( 'location' ) );
+
 		if ( empty( $location ) ) {
 			// Fall back to the payments country if no location is provided.
 			$location = $this->payments->get_country();

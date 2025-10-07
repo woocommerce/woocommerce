@@ -214,14 +214,16 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'title', $data );
 		$this->assertArrayHasKey( 'description', $data );
 		$this->assertArrayHasKey( 'values', $data );
-		$this->assertArrayHasKey( 'payment_methods', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 
 		$this->assertEquals( 'payments/offline-methods', $data['id'] );
 		$this->assertIsArray( $data['values'] );
-		$this->assertIsArray( $data['payment_methods'] );
+		$this->assertIsArray( $data['groups'] );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertIsArray( $data['groups']['payment_methods'] );
 
 		// Verify payment methods structure.
-		foreach ( $data['payment_methods'] as $method_id => $method ) {
+		foreach ( $data['groups']['payment_methods'] as $method_id => $method ) {
 			$this->assertArrayHasKey( 'id', $method );
 			$this->assertArrayHasKey( '_order', $method );
 			$this->assertArrayHasKey( 'title', $method );
@@ -235,7 +237,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		// Verify values structure (boolean enabled states).
 		foreach ( $data['values'] as $method_id => $enabled ) {
 			$this->assertIsBool( $enabled );
-			$this->assertArrayHasKey( $method_id, $data['payment_methods'] );
+			$this->assertArrayHasKey( $method_id, $data['groups']['payment_methods'] );
 		}
 	}
 
@@ -256,9 +258,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'title', $data );
 		$this->assertArrayHasKey( 'description', $data );
 		$this->assertArrayHasKey( 'values', $data );
-		$this->assertArrayHasKey( 'payment_methods', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 		$this->assertIsArray( $data['values'] );
-		$this->assertIsArray( $data['payment_methods'] );
+		$this->assertIsArray( $data['groups'] );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertIsArray( $data['groups']['payment_methods'] );
 	}
 
 	/**
@@ -277,7 +281,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'title', $data );
 		$this->assertArrayHasKey( 'description', $data );
 		$this->assertArrayHasKey( 'values', $data );
-		$this->assertArrayHasKey( 'payment_methods', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 	}
 
 	/**
@@ -325,7 +329,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		// Verify the schema has all expected top-level properties.
 		$properties          = $schema['properties'];
-		$expected_properties = array( 'id', 'title', 'description', 'values', 'payment_methods' );
+		$expected_properties = array( 'id', 'title', 'description', 'values', 'groups' );
 
 		foreach ( $expected_properties as $property ) {
 			$this->assertArrayHasKey( $property, $properties, "Missing property: {$property}" );
@@ -335,9 +339,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 'object', $properties['values']['type'] );
 		$this->assertEquals( 'boolean', $properties['values']['additionalProperties']['type'] );
 
-		// Verify payment_methods schema.
-		$this->assertEquals( 'object', $properties['payment_methods']['type'] );
-		$payment_method_properties  = $properties['payment_methods']['additionalProperties']['properties'];
+		// Verify groups schema.
+		$this->assertEquals( 'object', $properties['groups']['type'] );
+		$groups_properties = $properties['groups']['properties'];
+		$this->assertArrayHasKey( 'payment_methods', $groups_properties );
+		$payment_method_properties  = $groups_properties['payment_methods']['additionalProperties']['properties'];
 		$expected_method_properties = array( 'id', '_order', 'title', 'description', 'icon', 'state', 'management' );
 
 		foreach ( $expected_method_properties as $property ) {
@@ -380,14 +386,14 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'title', $data );
 		$this->assertArrayHasKey( 'description', $data );
 		$this->assertArrayHasKey( 'values', $data );
-		$this->assertArrayHasKey( 'payment_methods', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 
 		// Test data types.
 		$this->assertIsString( $data['id'] );
 		$this->assertIsString( $data['title'] );
 		$this->assertIsString( $data['description'] );
 		$this->assertIsArray( $data['values'] );
-		$this->assertIsArray( $data['payment_methods'] );
+		$this->assertIsArray( $data['groups'] );
 
 		// Test values structure (boolean values).
 		foreach ( $data['values'] as $method_id => $enabled ) {
@@ -396,7 +402,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		}
 
 		// Test payment methods structure.
-		foreach ( $data['payment_methods'] as $method_id => $method ) {
+		foreach ( $data['groups']['payment_methods'] as $method_id => $method ) {
 			$this->assertIsString( $method_id );
 			$this->assertIsArray( $method );
 			$this->assertArrayHasKey( 'id', $method );
@@ -442,11 +448,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
-		$this->assertArrayHasKey( 'payment_methods', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 
 		// Test that payment methods have _order field and are sorted.
 		$previous_order = -1;
-		foreach ( $data['payment_methods'] as $method ) {
+		foreach ( $data['groups']['payment_methods'] as $method ) {
 			$this->assertArrayHasKey( '_order', $method );
 			$this->assertIsInt( $method['_order'] );
 			$this->assertGreaterThan( $previous_order, $method['_order'], 'Payment methods should be sorted by _order field' );
@@ -473,7 +479,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		// Should NOT contain other fields like description, values, etc.
 		$this->assertArrayNotHasKey( 'description', $data );
 		$this->assertArrayNotHasKey( 'values', $data );
-		$this->assertArrayNotHasKey( 'payment_methods', $data );
+		$this->assertArrayNotHasKey( 'groups', $data );
 
 		// Test that we have the requested fields and optionally framework fields.
 		$allowed_fields = array( 'id', 'title', '_links' );
