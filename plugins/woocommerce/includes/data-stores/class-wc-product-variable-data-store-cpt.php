@@ -422,11 +422,27 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 
 			/**
-			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
-			 * This value may differ from the transient cache. It is filtered once before storing locally.
+			 * Filters the variation prices array for a variable product.
+			 *
+			 * This filter gives plugins one last chance to modify the variation prices array which has been
+			 * generated and will be stored locally to the class. This value may differ from the transient cache.
+			 * It is filtered once before storing locally.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param array      $prices_array {
+			 *     Associative array of variation prices indexed by variation ID.
+			 *
+			 *     @type array $price         Array of active prices (variation_id => price).
+			 *     @type array $regular_price Array of regular prices (variation_id => price).
+			 *     @type array $sale_price    Array of sale prices (variation_id => price).
+			 * }
+			 * @param WC_Product $product      The variable product object.
+			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
 			if ( $opposite_price_hash ) {
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks
 				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
 			}
 		}
