@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -248,7 +249,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
         /**
          * Similar to Checkout::create_or_update_draft_order.
          *
-         * @todo: Can move this to CheckoutTrait to share between Checkout and this controller)
+         * @todo: Can move this to CheckoutTrait to share between Checkout.php and this controller.
          */
         $this->order = $this->get_draft_order();
         if ( ! $this->order ) {
@@ -262,6 +263,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
          */
         $this->order->update_meta_data( OrderMetaKey::CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
         $this->order->save_meta_data();
+
         /**
          * Verify checkout session is ready for payment.
          */
@@ -269,14 +271,14 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
         if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
             return new \WP_REST_Response(
                 [
-                    'type'    => ErrorType::INVALID_REQUEST,
-                    'code'    => ErrorCode::INVALID,
-                    'message' => sprintf(
-                    /* translators: %s: current session status */
+                    'type'         => ErrorType::INVALID_REQUEST,
+                    'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+                    'content'      => sprintf(
+                    	/* translators: %s: current session status */
                         __( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
                         $session_status
                     ),
-                    'status'  => $session_status,
                 ],
                 400
             );
@@ -290,9 +292,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		} catch ( \Exception $e ) {
 			return new \WP_REST_Response(
 				[
-					'type'    => 'invalid_request',
-					'code'    => 'validation_failed',
-					'message' => $e->getMessage(),
+					'type'         => ErrorType::INVALID_REQUEST,
+					'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => $e->getMessage(),
 				],
 				400
 			);
@@ -303,9 +306,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		} catch ( \Exception $e ) {
 			return new \WP_REST_Response(
 				[
-					'type'    => 'invalid_request',
-					'code'    => 'stock_reservation_failed',
-					'message' => $e->getMessage(),
+					'type'         => ErrorType::INVALID_REQUEST,
+					'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => $e->getMessage(),
 				],
 				400
 			);
@@ -321,21 +325,13 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 
 		try {
 			$this->process_payment( $request, $payment_result );
-		} catch ( RouteException $e ) {
-			return new \WP_REST_Response(
-				[
-					'type'    => 'processing_error',
-					'code'    => $e->getErrorCode(),
-					'message' => $e->getMessage(),
-				],
-				$e->getCode()
-			);
 		} catch ( \Exception $e ) {
 			return new \WP_REST_Response(
 				[
-					'type'    => 'processing_error',
-					'code'    => 'payment_failed',
-					'message' => $e->getMessage(),
+					'type'         => ErrorType::PROCESSING_ERROR,
+					'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => $e->getMessage(),
 				],
 				400
 			);
@@ -347,9 +343,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		if ( 'failure' === $payment_result->status || 'error' === $payment_result->status ) {
 			return new \WP_REST_Response(
 				[
-					'type'    => 'processing_error',
-					'code'    => 'payment_declined',
-					'message' => $payment_result->message ?? __( 'Payment was declined.', 'woocommerce' ),
+					'type'         => ErrorType::PROCESSING_ERROR,
+					'code'         => ErrorCode::PAYMENT_DECLINED,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => $payment_result->message ?? __( 'Payment was declined.', 'woocommerce' ),
 				],
 				400
 			);
