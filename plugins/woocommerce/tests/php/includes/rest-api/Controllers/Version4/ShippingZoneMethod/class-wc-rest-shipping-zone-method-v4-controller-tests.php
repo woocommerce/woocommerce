@@ -1,10 +1,10 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZones\Method;
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method\Controller;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method\ShippingMethodSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingMethodSchema;
 use WC_REST_Unit_Test_Case;
 use WC_Shipping_Zone;
 use WP_Error;
@@ -14,7 +14,7 @@ use WP_REST_Request;
 /**
  * Class ControllerTest
  *
- * @package Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZones\Method
+ * @package Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZoneMethod
  */
 class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
