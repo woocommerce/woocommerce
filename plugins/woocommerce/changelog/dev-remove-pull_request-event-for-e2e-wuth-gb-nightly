@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-dev: remove the pull_request trigger event for e2e tests with GB Nightly

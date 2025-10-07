@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Dont return product name in add-to-cart endpoint if product is draft or private

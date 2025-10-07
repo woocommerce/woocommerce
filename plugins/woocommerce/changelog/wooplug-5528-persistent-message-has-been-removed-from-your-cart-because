@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure items that are forcibly removed from cart re-save the persistent cart

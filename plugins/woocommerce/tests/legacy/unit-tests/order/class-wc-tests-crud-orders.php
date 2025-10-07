@@ -201,6 +201,15 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: get_total_empty
+	 */
+	public function test_get_total_empty() {
+		$object = new WC_Order();
+		$object->set_total( '' );
+		$this->assertEquals( 0, $object->get_total() );
+	}
+
+	/**
 	 * Test: get_total_tax
 	 */
 	public function test_get_total_tax() {
