@@ -360,14 +360,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
          * Build response from canonical cart schema with order.
          */
 		$response_data = $this->schema->get_item_response( WC()->cart );
-
-		// Add order data.
-		$response_data['order'] = [
-			'id'                  => (string) $this->order->get_id(),
-			'checkout_session_id' => $request->get_param( 'checkout_session_id' ),
-			'permalink_url'       => $this->order->get_checkout_order_received_url(),
-		];
-
 		$response = rest_ensure_response( $response_data );
 
 		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );

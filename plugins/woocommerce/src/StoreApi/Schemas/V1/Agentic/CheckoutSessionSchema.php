@@ -352,7 +352,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			? $this->format_line_items_from_order( $completed_order )
 			: $this->format_line_items_from_cart( $cart_items );
 
-		return [
+		$response = [
 			'id'                    => $session_id,
 			'buyer'                 => $completed_order instanceof WC_Order
 				? $this->format_buyer_from_order( $completed_order )
@@ -378,6 +378,17 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'messages'              => $this->get_messages( $cart ),
 			'links'                 => $this->get_links(),
 		];
+
+		// Add order data if a completed order exists.
+		if ( $completed_order instanceof WC_Order ) {
+			$response['order'] = [
+				'id'                  => (string) $completed_order->get_id(),
+				'checkout_session_id' => $session_id,
+				'permalink_url'       => $completed_order->get_checkout_order_received_url(),
+			];
+		}
+
+		return $response;
 	}
 
 	/**
