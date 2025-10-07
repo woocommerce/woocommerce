@@ -4,6 +4,8 @@
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
+import { useSelect } from '@wordpress/data';
+import { store as blockEditorStore } from '@wordpress/block-editor';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -36,7 +38,6 @@ interface EditModeConfiguration extends GenericBlockUIConfig {
 
 type EditModeRequiredAttributes = {
 	categoryId?: number;
-	editMode: boolean;
 	mediaId: number;
 	mediaSrc: string;
 	productId?: number;
@@ -44,6 +45,7 @@ type EditModeRequiredAttributes = {
 
 interface EditModeRequiredProps< T > {
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
+	clientId: string;
 	debouncedSpeak: ( label: string ) => void;
 	setAttributes: ( attrs: Partial< EditModeRequiredAttributes > ) => void;
 	triggerUrlUpdate: () => void;
@@ -60,6 +62,7 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
+			clientId,
 			debouncedSpeak,
 			name,
 			setAttributes,
@@ -73,12 +76,32 @@ export const withEditMode =
 			categoryId?: number;
 			mediaId: number;
 			mediaSrc: string;
-			editMode: boolean;
 		} >();
+
+		const wasBlockJustInserted = useSelect(
+			( select ) => {
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+				// @ts-expect-error method exists but not typed
+				return select( blockEditorStore ).wasBlockJustInserted(
+					clientId
+				);
+			},
+			[ clientId ]
+		);
+
+		const hasFeaturedItemId =
+			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
+			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
+
+		// Only show edit mode for newly inserted blocks without existing selection
+		const [ editMode, setEditMode ] = useState< boolean >(
+			wasBlockJustInserted && ! hasFeaturedItemId
+		);
 
 		const onDone = () => {
 			if ( selectedOptions ) {
 				setAttributes( selectedOptions );
+				setEditMode( false );
 				debouncedSpeak( editLabel );
 			}
 		};
@@ -101,12 +124,12 @@ export const withEditMode =
 					isDeleted;
 
 				if ( currEditModeValue ) {
-					setAttributes( { editMode: currEditModeValue } );
+					setEditMode( currEditModeValue );
 				}
 			}
-		}, [ status, isDeleted, name, setAttributes, isLoading ] );
+		}, [ status, isDeleted, name, isLoading ] );
 
-		if ( attributes.editMode ) {
+		if ( editMode ) {
 			return (
 				<Placeholder
 					icon={ <Icon icon={ icon } /> }
@@ -144,7 +167,6 @@ export const withEditMode =
 										categoryId: id,
 										mediaId: 0,
 										mediaSrc: '',
-										editMode: false,
 									} );
 									triggerUrlUpdate();
 								} }
@@ -167,7 +189,6 @@ export const withEditMode =
 										productId: id,
 										mediaId: 0,
 										mediaSrc: '',
-										editMode: false,
 									} );
 									triggerUrlUpdate();
 								} }
@@ -186,6 +207,7 @@ export const withEditMode =
 				{ ...props }
 				isLoading={ isLoading }
 				error={ isLoading ? null : error }
+				useEditMode={ [ editMode, setEditMode ] }
 			/>
 		);
 	};
