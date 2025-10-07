@@ -482,24 +482,21 @@ class Products extends AbstractRoute {
 
 		$variations_to_prime = array();
 		$products_to_prime   = array();
+		$total_count         = 0;
 
-		$total_count = 0;
 		foreach ( $products as $product ) {
 			if ( ! $product->is_type( ProductType::VARIABLE ) ) {
 				continue;
 			}
 
-			$variation_ids = $product->get_visible_children();
-
-			$count = count( $variation_ids );
-			if ( $total_count + $count > $max_variations ) {
+			if ( $total_count >= $max_variations ) {
 				break;
 			}
 
+			$variation_ids       = array_slice( $product->get_visible_children(), 0, $max_variations - $total_count );
 			$variations_to_prime = array_merge( $variations_to_prime, $variation_ids );
 			$products_to_prime[] = $product;
-
-			$total_count += $count;
+			$total_count        += count( $variation_ids );
 		}
 
 		if ( empty( $variations_to_prime ) ) {
