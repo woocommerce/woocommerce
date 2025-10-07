@@ -176,14 +176,17 @@ class Controller extends AbstractController {
 				'title'       => sanitize_text_field( $method['title'] ?? '' ),
 				'description' => wp_kses_post( $method['description'] ?? '' ),
 				'icon'        => esc_url_raw( $method['icon'] ?? '' ),
-				'state'       => wp_parse_args(
-					is_array( $method['state'] ?? null ) ? $method['state'] : array(),
-					array(
-						'enabled'           => false,
-						'account_connected' => false,
-						'needs_setup'       => false,
-						'test_mode'         => false,
-						'dev_mode'          => false,
+				'state'       => array_map(
+					'rest_sanitize_boolean',
+					wp_parse_args(
+						is_array( $method['state'] ?? null ) ? $method['state'] : array(),
+						array(
+							'enabled'           => false,
+							'account_connected' => false,
+							'needs_setup'       => false,
+							'test_mode'         => false,
+							'dev_mode'          => false,
+						)
 					)
 				),
 				'management'  => wp_parse_args(
