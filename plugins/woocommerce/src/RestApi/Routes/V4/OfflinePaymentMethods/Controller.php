@@ -162,7 +162,12 @@ class Controller extends AbstractController {
 			if ( is_array( $enabled_state ) ) {
 				$enabled_state = $enabled_state['value'] ?? false;
 			}
-			$response_data['values'][ $method_id ] = (bool) $enabled_state;
+			if ( is_string( $enabled_state ) ) {
+				$enabled_state = wc_string_to_bool( $enabled_state );
+			} elseif ( ! is_bool( $enabled_state ) ) {
+				$enabled_state = (bool) $enabled_state;
+			}
+			$response_data['values'][ $method_id ] = $enabled_state;
 
 			// Add complete payment method data to payment_methods.
 			$response_data['payment_methods'][ $method_id ] = array(
@@ -171,8 +176,8 @@ class Controller extends AbstractController {
 				'title'       => sanitize_text_field( $method['title'] ?? '' ),
 				'description' => wp_kses_post( $method['description'] ?? '' ),
 				'icon'        => esc_url_raw( $method['icon'] ?? '' ),
-				'state'       => wp_parse_args( 
-					is_array( $method['state'] ?? null ) ? $method['state'] : array(), 
+				'state'       => wp_parse_args(
+					is_array( $method['state'] ?? null ) ? $method['state'] : array(),
 					array(
 						'enabled'           => false,
 						'account_connected' => false,
