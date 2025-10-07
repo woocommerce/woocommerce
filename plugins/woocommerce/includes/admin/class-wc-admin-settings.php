@@ -108,6 +108,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		public static function save() {
 			global $current_tab;
 
+			if ( ! current_user_can( 'manage_woocommerce' ) ) {
+				wp_die( esc_html__( 'You do not have permission to save settings.', 'woocommerce' ), 403 );
+			}
+
 			check_admin_referer( 'woocommerce-settings' );
 
 			// Trigger actions.
