@@ -38,12 +38,19 @@ const v1 = {
 		const { editMode, showDesc, showPrice, ...otherAttributes } =
 			attributes;
 
+		// This padding was applied via the styles in inner sections of the block.
+		// Now that they are inner blocks, we are porting this padding to their attributes.
+		const V1_PADDING_BOTTOM = '16px';
+
 		if ( showDesc !== false ) {
 			innerBlocks.unshift(
 				createBlock( 'woocommerce/product-summary', {
 					showDescriptionIfEmpty: true,
 					summaryLength: 80,
 					style: {
+						padding: {
+							bottom: V1_PADDING_BOTTOM,
+						},
 						typography: {
 							textAlign: 'center',
 						},
@@ -57,6 +64,11 @@ const v1 = {
 		if ( showPrice !== false ) {
 			innerBlocks.unshift(
 				createBlock( 'woocommerce/product-price', {
+					style: {
+						padding: {
+							bottom: V1_PADDING_BOTTOM,
+						},
+					},
 					textAlign: 'center',
 				} )
 			);
@@ -66,6 +78,11 @@ const v1 = {
 			createBlock( 'core/post-title', {
 				level: 2,
 				isLink: false,
+				style: {
+					padding: {
+						bottom: OLD_PADDING_BOTTOM,
+					},
+				},
 				textAlign: 'center',
 				__woocommerceNamespace:
 					'woocommerce/product-collection/product-title',
