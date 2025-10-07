@@ -996,7 +996,7 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
-		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'], home_url() );
+		self::update_auth_option( $access_token['access_token'], $access_token['access_token_secret'], $access_token['site_id'], home_url(), $access_token['user_id'] );
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
@@ -1812,11 +1812,13 @@ class WC_Helper {
 
 		$connection_data = json_decode( wp_remote_retrieve_body( $request ), true );
 
-		$url = $connection_data['url'] ?? '';
+		$url           = $connection_data['url'] ?? '';
+		$wccom_user_id = $connection_data['wccom_user_id'] ?? '';
 
 		if ( ! empty( $url ) ) {
-			$auth        = WC_Helper_Options::get( 'auth' );
-			$auth['url'] = $url;
+			$auth                  = WC_Helper_Options::get( 'auth' );
+			$auth['url']           = $url;
+			$auth['wccom_user_id'] = $wccom_user_id;
 			WC_Helper_Options::update( 'auth', $auth );
 			set_transient( self::CACHE_KEY_CONNECTION_DATA, $connection_data, 1 * HOUR_IN_SECONDS );
 		}
@@ -2527,8 +2529,9 @@ class WC_Helper {
 		WC_Helper_Options::update(
 			'auth_user_data',
 			array(
-				'name'  => $user_data['name'],
-				'email' => $user_data['email'],
+				'name'    => $user_data['name'],
+				'email'   => $user_data['email'],
+				'user_id' => $user_data['user_id'],
 			)
 		);
 
@@ -2665,7 +2668,7 @@ class WC_Helper {
 			return new WP_Error( 'connect-with-password-invalid-response', $message );
 		}
 
-		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'], home_url() );
+		self::update_auth_option( $access_data['access_token'], $access_data['access_token_secret'], $access_data['site_id'], home_url(), $access_data['user_id'] );
 	}
 
 	/**
@@ -2675,10 +2678,11 @@ class WC_Helper {
 	 * @param string $access_token_secret The secret access token.
 	 * @param int    $site_id The site id returned by the API.
 	 * @param string $home_url Home url of the site.
+	 * @param string $wccom_user_id WC user id, owner of the site.
 	 *
 	 * @return void
 	 */
-	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id, string $home_url ): void {
+	public static function update_auth_option( string $access_token, string $access_token_secret, int $site_id, string $home_url, string $wccom_user_id ): void {
 		WC_Helper_Options::update(
 			'auth',
 			array(
@@ -2688,6 +2692,7 @@ class WC_Helper {
 				'url'                 => $home_url,
 				'user_id'             => get_current_user_id(),
 				'updated'             => time(),
+				'wccom_user_id'       => $wccom_user_id,
 			)
 		);
 

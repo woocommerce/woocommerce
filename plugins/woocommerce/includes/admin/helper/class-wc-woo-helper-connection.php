@@ -29,19 +29,26 @@ class WC_Woo_Helper_Connection {
 			return '';
 		}
 
-		$auth     = WC_Helper_Options::get( 'auth' );
-		$url      = rtrim( $auth['url'], '/' );
-		$home_url = rtrim( home_url(), '/' );
-		if ( empty( $url ) || $home_url === $url ) {
-			return '';
+		$auth_user_data = WC_Helper_Options::get( 'auth_user_data', array() );
+		$auth_user_id   = $auth_user_data['user_id'] ?? '';
+
+		$auth          = WC_Helper_Options::get( 'auth' );
+		$url           = rtrim( $auth['url'], '/' ) ?? '';
+		$home_url      = rtrim( home_url(), '/' ) ?? '';
+		$wccom_user_id = $auth['wccom_user_id'] ?? '';
+
+		if ( $home_url !== $url ) {
+			return sprintf(
+			/* translators: 1: WooCommerce.com connection URL, 2: home URL */
+				__( 'Your site is currently connected to WooCommerce.com using <b>%1$s</b>, but your actual site URL is <b>%2$s</b>. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
+				$url,
+				$home_url
+			);
+		} elseif ( $auth_user_id !== $wccom_user_id ) {
+			return __( 'Your site is currently connected to WooCommerce.com using a different user than the original owner. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' );
 		}
 
-		return sprintf(
-		/* translators: 1: WooCommerce.com connection URL, 2: home URL */
-			__( 'Your site is currently connected to WooCommerce.com using <b>%1$s</b>, but your actual site URL is <b>%2$s</b>. To fix this, please reconnect your site to <b>WooCommerce.com</b> to ensure everything works correctly.', 'woocommerce' ),
-			$url,
-			$home_url
-		);
+		return '';
 	}
 
 	/**

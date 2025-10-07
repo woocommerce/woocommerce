@@ -557,6 +557,7 @@ class Plugins extends \WC_REST_Data_Controller {
 				'site_id'             => $access_token['site_id'],
 				'user_id'             => get_current_user_id(),
 				'updated'             => time(),
+				'wccom_user_id'       => $access_token['user_id'],
 			)
 		);
 

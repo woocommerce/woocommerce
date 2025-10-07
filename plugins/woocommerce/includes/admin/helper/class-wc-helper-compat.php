@@ -128,6 +128,7 @@ class WC_Helper_Compat {
 				'site_id'             => $access_token['site_id'],
 				'user_id'             => null, // Set this later
 				'updated'             => time(),
+				'wccom_user_id'       => $access_token['user_id'],
 			)
 		);
 
