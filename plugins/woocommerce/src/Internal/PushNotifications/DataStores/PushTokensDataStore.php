@@ -216,46 +216,53 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			);
 		}
 
-		$args = array(
-			'post_type'  => PushToken::POST_TYPE,
-			'author'     => $push_token->get_user_id(),
-			'meta_query' => array(
-				'relation' => 'AND',
-				array(
-					'key'     => 'platform',
-					'compare' => '=',
-					'value'   => $push_token->get_platform(),
-				),
-				array(
-					'relation' => 'OR',
-					array(
-						'key'     => 'token',
-						'compare' => '=',
-						'value'   => $push_token->get_token(),
-					),
-					array(
-						'key'     => 'device_uuid',
-						'compare' => '=',
-						'value'   => $push_token->get_device_uuid(),
-					),
-				),
-			),
-		);
+		global $wpdb;
 
-		$push_token_data = get_posts( $args );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$push_token_data = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT
+					posts.ID,
+					posts.post_author,
+					platform_meta.meta_value as platform,
+					token_meta.meta_value as token,
+					device_uuid_meta.meta_value as device_uuid
+				FROM {$wpdb->posts} AS posts
+				INNER JOIN {$wpdb->postmeta} AS platform_meta
+					ON posts.ID = platform_meta.post_id
+					AND platform_meta.meta_key = 'platform'
+				INNER JOIN {$wpdb->postmeta} AS token_meta
+					ON posts.ID = token_meta.post_id
+					AND token_meta.meta_key = 'token'
+				INNER JOIN {$wpdb->postmeta} AS device_uuid_meta
+					ON posts.ID = device_uuid_meta.post_id
+					AND device_uuid_meta.meta_key = 'device_uuid'
+				WHERE posts.post_type = %s
+				AND posts.post_author = %d
+				AND platform_meta.meta_value = %s
+				AND (
+					token_meta.meta_value = %s
+					OR device_uuid_meta.meta_value = %s
+				)
+				LIMIT 1",
+				PushToken::POST_TYPE,
+				$push_token->get_user_id(),
+				$push_token->get_platform(),
+				$push_token->get_token(),
+				$push_token->get_device_uuid()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $push_token_data ) {
 			return null;
 		}
 
-		$push_token->set_id( $push_token_data[0]->ID );
-		$push_token->set_user_id( (int) $push_token_data[0]->post_author );
-
-		$meta = $this->read_meta( $push_token );
-
-		$push_token->set_token( $meta['token'] ?? null );
-		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
-		$push_token->set_platform( $meta['platform'] ?? null );
+		$push_token->set_id( (int) $push_token_data->ID );
+		$push_token->set_user_id( (int) $push_token_data->post_author );
+		$push_token->set_token( $push_token_data->token );
+		$push_token->set_device_uuid( $push_token_data->device_uuid );
+		$push_token->set_platform( $push_token_data->platform );
 
 		return $push_token;
 	}
