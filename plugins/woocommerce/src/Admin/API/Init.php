@@ -207,7 +207,6 @@ class Init {
 				$this->$controller->register_routes();
 			}
 		}
-
 	}
 
 	/**

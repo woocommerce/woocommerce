@@ -77,7 +77,7 @@ class RestApiUtil {
 	 * @internal Do not call this function directly. Backward compatibility is not guaranteed.
 	 */
 	public function attach_lazy_loaded_namespace( string $route_namespace, callable $callback, string $rest_route = '', string $callback_filter_id = '' ) {
-		if ( '' === $rest_route ) {
+		if ( '' === $rest_route && isset( $GLOBALS['wp'] ) && is_object( $GLOBALS['wp'] ) ) {
 			$rest_route = $GLOBALS['wp']->query_vars['rest_route'] ?? '';
 		}
 
