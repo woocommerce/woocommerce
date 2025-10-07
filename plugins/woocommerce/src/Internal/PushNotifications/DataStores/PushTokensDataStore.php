@@ -10,7 +10,9 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Exception;
 use InvalidArgumentException;
+use WP_Http;
 use WC_Object_Data_Store_Interface;
 
 /**
@@ -51,7 +53,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 *
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @throws InvalidArgumentException If the token can't be read.
-	 * @return null|PushToken
+	 * @throws Exception If the token can't be found.
 	 */
 	public function read( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
@@ -63,7 +65,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post ) {
-			return null;
+			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
 		$meta = $this->read_meta( $push_token );
