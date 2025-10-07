@@ -60,22 +60,6 @@ class Controller extends AbstractController {
 	 * Register the routes for payment gateways.
 	 */
 	public function register_routes() {
-		// Collection endpoint for updates.
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base,
-			array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'update_item' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema(),
-				),
-				'schema' => array( $this, 'get_public_item_schema' ),
-			)
-		);
-
-		// Single item endpoint for reads.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\w-]+)',
@@ -84,6 +68,12 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'args'                => $this->get_endpoint_args_for_item_schema(),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 				'args'   => array(
@@ -184,18 +174,7 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_item( $request ) {
-		$params = $request->get_json_params();
-
-		// Validate required id field.
-		if ( ! isset( $params['id'] ) ) {
-			return new WP_Error(
-				'rest_missing_callback_param',
-				__( 'Missing parameter(s): id', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$id      = $params['id'];
+		$id      = $request['id'];
 		$gateway = $this->get_payment_gateway( $id );
 
 		if ( ! $gateway ) {
@@ -208,6 +187,8 @@ class Controller extends AbstractController {
 
 		// Get gateway-specific schema.
 		$schema = $this->get_schema_for_gateway( $id );
+
+		$params = $request->get_json_params();
 
 		// Get field values from the values object.
 		if ( ! isset( $params['values'] ) ) {
