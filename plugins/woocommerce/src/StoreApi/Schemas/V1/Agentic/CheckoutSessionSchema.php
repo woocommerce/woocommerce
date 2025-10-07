@@ -26,6 +26,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
  * Handles the schema for Agentic Checkout API checkout sessions.
  * This schema formats WooCommerce cart/order data according to the
  * Agentic Commerce Protocol specification.
+ *
+ * @internal The specification for agentic requests is subject to abrupt changes; backwards compatibility cannot be guaranteed.
  */
 class CheckoutSessionSchema extends AbstractSchema {
 	use DraftOrderTrait;
@@ -337,8 +339,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$cart = WC()->cart;
 
 		// Get draft order if exists.
-		$draft_order_id = $this->get_draft_order_id();
-		$draft_order    = $draft_order_id ? wc_get_order( $draft_order_id ) : null;
+		$draft_order = $this->get_draft_order();
 
 		// Generate session ID from Cart-Token.
 		$session_id = WC()->session->get( SessionKey::AGENTIC_SESSION_ID );
