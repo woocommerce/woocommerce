@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Notification when sites are out-of-sync (mismatched wccom user id)
