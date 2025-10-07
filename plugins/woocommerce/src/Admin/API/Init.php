@@ -188,7 +188,7 @@ class Init {
 		$controllers = array_merge( $analytics_controllers, $controllers );
 
 		/**
-		 * Filter for the WooCommerce Admin REST controllers.
+		 * Filter for the WooCommerce Admin Analytics REST controllers.
 		 *
 		 * @param array $controllers List of rest API controllers.
 		 *
