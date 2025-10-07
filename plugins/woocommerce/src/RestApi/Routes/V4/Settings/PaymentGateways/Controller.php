@@ -45,30 +45,15 @@ class Controller extends AbstractController {
 	protected string $post_type = 'payment_gateways';
 
 	/**
-	 * Schema class for this route.
-	 *
-	 * @var AbstractPaymentGatewaySettingsSchema
-	 */
-	protected AbstractPaymentGatewaySettingsSchema $item_schema;
-
-	/**
-	 * Initialize the controller.
-	 *
-	 * @param AbstractPaymentGatewaySettingsSchema $item_schema Payment gateway schema class.
-	 * @internal
-	 */
-	final public function init( AbstractPaymentGatewaySettingsSchema $item_schema ): void {
-		$this->item_schema = $item_schema;
-	}
-
-	/**
 	 * Get the schema for the current resource. This use consumed by the AbstractController to generate the item schema
 	 * after running various hooks on the response.
 	 *
 	 * @return array
 	 */
 	protected function get_schema(): array {
-		return $this->item_schema->get_item_schema();
+		// Use generic schema for schema generation.
+		$schema = new PaymentGatewaySettingsSchema();
+		return $schema->get_item_schema();
 	}
 
 	/**
