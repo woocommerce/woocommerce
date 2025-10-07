@@ -280,7 +280,9 @@ class Controller extends AbstractController {
 					);
 				} elseif ( is_string( $link ) ) {
 					// Handle direct URL strings.
-					$sanitized['_links'][ $sanitized_key ] = esc_url_raw( $link );
+					$sanitized['_links'][ $sanitized_key ] = array(
+						'href' => esc_url_raw( $link ),
+					);
 				}
 			}
 		}
