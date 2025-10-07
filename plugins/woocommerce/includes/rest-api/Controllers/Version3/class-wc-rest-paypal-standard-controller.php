@@ -309,7 +309,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		if ( $order_shipping_item ) {
 			$method_id   = $order_shipping_item->get_method_id();
 			$instance_id = $order_shipping_item->get_instance_id();
-			$rate_id     = $instance_id ? "{$method_id}:{$instance_id}" : $method_id;
+			$rate_id     = ( '' === $instance_id || null === $instance_id ) ? $method_id : "{$method_id}:{$instance_id}";
 
 			return $rate_id;
 		}
