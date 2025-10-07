@@ -105,17 +105,22 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
-		/**
-		 * Filter for the WooCommerce Admin REST controllers.
-		 *
-		 * @param array $controllers List of rest API controllers.
-		 *
-		 * @since 3.5.0
-		 */
-		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
-
-		if ( ! is_array( $controllers ) ) {
-			return;
+		if ( ! did_action( 'woocommerce_admin_rest_controllers' ) ) {
+			/**
+			 * Filter for the WooCommerce Admin REST controllers.
+			 *
+			 * Admin and Analytics controllers were originally loaded in one place.  However, with attempts to dynamically
+			 * load namespaces based on context, these were split up.  However, to maintain backward compatibility, we
+			 * must run this hook if either namespace is loaded because extensions could be targeting either namespace.
+			 *
+			 * @param array $controllers List of rest API controllers.
+			 *
+			 * @since 3.5.0
+			 */
+			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+			if ( ! is_array( $controllers ) ) {
+				return;
+			}
 		}
 
 		$controllers = array_values( array_unique( $controllers ) );
@@ -187,17 +192,20 @@ class Init {
 
 		$controllers = array_merge( $analytics_controllers, $controllers );
 
-		/**
-		 * Filter for the WooCommerce Admin Analytics REST controllers.
-		 *
-		 * @param array $controllers List of rest API controllers.
-		 *
-		 * @since 10.4.0
-		 */
-		$controllers = apply_filters( 'woocommerce_admin_analytics_rest_controllers', $controllers );
-
-		if ( ! is_array( $controllers ) ) {
-			return;
+		if ( ! did_action( 'woocommerce_admin_rest_controllers' ) ) {
+			/**
+			 * Filter for the WooCommerce Admin REST controllers.
+			 *
+			 * @param array $controllers List of rest API controllers.
+			 *
+			 * @since 3.5.0
+			 *
+			 * @see   self::rest_api_init_wc_admin() for extended documentation.
+			 */
+			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+			if ( ! is_array( $controllers ) ) {
+				return;
+			}
 		}
 
 		$controllers = array_values( array_unique( $controllers ) );
