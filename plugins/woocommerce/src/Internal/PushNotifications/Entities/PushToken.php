@@ -16,10 +16,12 @@ class PushToken {
 	const POST_TYPE        = 'push_token';
 	const PLATFORM_APPLE   = 'apple';
 	const PLATFORM_ANDROID = 'android';
+	const PLATFORM_BROWSER = 'browser';
 
 	const PLATFORMS = array(
 		self::PLATFORM_APPLE,
 		self::PLATFORM_ANDROID,
+		self::PLATFORM_BROWSER,
 	);
 
 	/**
