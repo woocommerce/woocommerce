@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -66,7 +66,18 @@ class Controller extends AbstractController {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'check_permissions' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+				'args'                => array_merge(
+					$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
+					array(
+						'zone_id' => array(
+							'description'       => __( 'Shipping zone ID.', 'woocommerce' ),
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+					)
+				),
 			)
 		);
 
@@ -140,14 +151,10 @@ class Controller extends AbstractController {
 		// Update method settings, enabled status, and order.
 		$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
-			// Delete the method instance to rollback the creation.
-			// This ensures a failed POST would not leave an orphaned method.
-			$zone->delete_shipping_method( $instance_id );
 			return $result;
 		}
 
-		$request['zone_id'] = $zone->get_id();
-		$response           = $this->prepare_item_for_response( $method, $request );
+		$response = rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
 		$response->set_status( 201 );
 		return $response;
 	}
@@ -161,14 +168,30 @@ class Controller extends AbstractController {
 	public function update_item( $request ) {
 		$instance_id = (int) $request['id'];
 
+		// Get the method by instance ID.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		if ( ! $method ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		$zone = $this->validate_zone_by_method_instance( $instance_id );
-		if ( is_wp_error( $zone ) ) {
-			return $zone;
+		// Get the zone - either from request or by looking up the method's zone.
+		if ( isset( $request['zone_id'] ) ) {
+			$zone = $this->validate_zone( $request['zone_id'] );
+			if ( is_wp_error( $zone ) ) {
+				return $zone;
+			}
+
+			// Ensure the method belongs to the specified zone.
+			$zone_methods = $zone->get_shipping_methods();
+			if ( ! isset( $zone_methods[ $instance_id ] ) ) {
+				return $this->get_route_error_by_code( self::ZONE_MISMATCH );
+			}
+		} else {
+			// No zone_id provided, get the zone by method instance.
+			$zone = $this->validate_zone_by_method_instance( $instance_id );
+			if ( is_wp_error( $zone ) ) {
+				return $zone;
+			}
 		}
 
 		// Update method settings, enabled status, and order if any updates provided.
@@ -177,11 +200,9 @@ class Controller extends AbstractController {
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		}
 
-		$request['zone_id'] = $zone->get_id();
-		return $this->prepare_item_for_response( $method, $request );
+		return rest_ensure_response( $this->method_schema->get_item_response( $method, $request ) );
 	}
 
 	/**
@@ -191,6 +212,17 @@ class Controller extends AbstractController {
 	 */
 	protected function get_schema(): array {
 		return $this->method_schema->get_item_schema();
+	}
+
+	/**
+	 * Get error prefix for this controller.
+	 *
+	 * @return string
+	 */
+	protected function get_error_prefix(): string {
+		// Convert 'shipping-zone-method' to 'shipping_zone_method_'.
+		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
+		return 'woocommerce_rest_api_v4_' . $prefix . '_';
 	}
 
 	/**

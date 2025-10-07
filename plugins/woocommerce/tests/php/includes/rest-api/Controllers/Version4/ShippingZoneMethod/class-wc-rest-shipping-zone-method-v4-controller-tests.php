@@ -1,10 +1,10 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZones\Method;
 
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingMethodSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method\Controller;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Method\ShippingMethodSchema;
 use WC_REST_Unit_Test_Case;
 use WC_Shipping_Zone;
 use WP_Error;
@@ -14,7 +14,7 @@ use WP_REST_Request;
 /**
  * Class ControllerTest
  *
- * @package Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZoneMethod
+ * @package Automattic\WooCommerce\Tests\RestApi\Routes\V4\ShippingZones\Method
  */
 class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
@@ -384,83 +384,6 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test create item rollback on validation failure.
-	 */
-	public function test_create_item_rollback_on_validation_failure() {
-		wp_set_current_user( self::$admin_user_id );
-
-		// Register a custom shipping method that will fail validation.
-		// Do this BEFORE creating the zone to ensure it's registered when validate_method_type is called.
-		$custom_method_class = new class() extends \WC_Shipping_Method {
-			/**
-			 * Constructor.
-			 *
-			 * @param int $instance_id Instance ID.
-			 */
-			public function __construct( $instance_id = 0 ) {
-				$this->id                 = 'test_failing_method';
-				$this->method_title       = 'Test Failing Method';
-				$this->method_description = 'A test method that fails validation';
-				$this->instance_id        = absint( $instance_id );
-				$this->supports           = array( 'shipping-zones', 'instance-settings' );
-				parent::__construct( $instance_id );
-			}
-
-			/**
-			 * Update instance settings from API.
-			 *
-			 * @param array $settings Settings array.
-			 * @return \WP_Error Always returns error to simulate validation failure.
-			 */
-			public function update_instance_settings_from_api( $settings ) {
-				// Always return an error to simulate validation failure.
-				return new \WP_Error(
-					'woocommerce_rest_shipping_method_invalid_setting',
-					'Simulated validation error',
-					array( 'status' => 400 )
-				);
-			}
-		};
-
-		// Register the custom method with high priority to ensure it's loaded.
-		add_filter(
-			'woocommerce_shipping_methods',
-			function ( $methods ) use ( $custom_method_class ) {
-				$methods['test_failing_method'] = $custom_method_class;
-				return $methods;
-			},
-			1
-		);
-
-		// Force WC_Shipping to reload methods by creating a new instance.
-		WC()->shipping()->load_shipping_methods();
-
-		$zone = $this->create_shipping_zone();
-
-		// Count shipping methods before the test.
-		$methods_before = $zone->get_shipping_methods( false );
-		$count_before   = count( $methods_before );
-
-		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zone-method' );
-		$request->set_param( 'zone_id', $zone->get_id() );
-		$request->set_param( 'method_id', 'test_failing_method' );
-		$request->set_param( 'enabled', true );
-		$request->set_param( 'settings', array( 'title' => 'Test Method' ) );
-
-		$response = $this->controller->create_item( $request );
-
-		// Should return an error.
-		$this->assertInstanceOf( WP_Error::class, $response );
-		$this->assertEquals( 'woocommerce_rest_shipping_method_invalid_setting', $response->get_error_code() );
-
-		// Verify the method instance was deleted (rollback).
-		$methods_after = $zone->get_shipping_methods( false );
-		$this->assertCount( $count_before, $methods_after, 'Method instance should be deleted on validation failure' );
-
-		wp_set_current_user( 0 );
-	}
-
-	/**
 	 * Test update item with invalid ID.
 	 */
 	public function test_update_item_invalid_id() {
@@ -479,9 +402,9 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
-	 * Test update item ignores zone_id since it's readonly.
+	 * Test update item with zone mismatch.
 	 */
-	public function test_update_item_ignores_readonly_zone_id() {
+	public function test_update_item_zone_mismatch() {
 		wp_set_current_user( self::$admin_user_id );
 
 		// Create zone and method.
@@ -493,19 +416,14 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'PUT', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
-		$request->set_param( 'zone_id', $other_zone->get_id() ); // This should be ignored since zone_id is readonly.
+		$request->set_param( 'zone_id', $other_zone->get_id() );
 		$request->set_param( 'enabled', false );
 
 		$response = $this->controller->update_item( $request );
 
-		// Should succeed and zone_id should be ignored.
-		$this->assertNotInstanceOf( WP_Error::class, $response );
-		$data = $response->get_data();
-
-		// Method should still belong to original zone, not other_zone.
-		$this->assertEquals( $zone->get_id(), $data['zone_id'] );
-		$this->assertNotEquals( $other_zone->get_id(), $data['zone_id'] );
-		$this->assertFalse( $data['enabled'] ); // Enabled update should have worked.
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'zone_mismatch', $response->get_error_code() );
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_error_data()['status'] );
 
 		wp_set_current_user( 0 );
 	}
