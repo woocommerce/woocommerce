@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Exception;
 use InvalidArgumentException;
 
 /**
@@ -109,6 +110,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t create push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->create( $push_token );
 	}
@@ -123,6 +125,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t read push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->read( $push_token );
 	}
@@ -138,6 +141,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
+		$this->expectExceptionCode( 404 );
 
 		$data_store->read( $push_token );
 	}
@@ -154,6 +158,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->update( $push_token );
 	}
@@ -167,6 +172,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t delete push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->delete( $push_token );
 	}
@@ -306,6 +312,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t read meta for push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->read_meta( $push_token );
 	}
@@ -385,6 +392,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t add meta for push token because the meta key was not provided.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->add_meta(
 			$push_token,
@@ -403,6 +411,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t add meta for push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->add_meta(
 			$push_token,
@@ -424,6 +433,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t update meta for push token because the meta key was not provided.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->update_meta(
 			$push_token,
@@ -442,6 +452,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t update meta for push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->update_meta(
 			$push_token,
@@ -463,6 +474,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t delete meta for push token because the meta key was not provided.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -480,6 +492,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t delete meta for push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -501,6 +514,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because user ID was not provided.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
 	}
@@ -518,6 +532,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because platform was not provided.' );
+		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
 	}

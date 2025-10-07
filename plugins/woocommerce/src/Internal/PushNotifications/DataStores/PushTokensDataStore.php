@@ -28,7 +28,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function create( &$push_token ) {
 		if ( ! $push_token->can_be_created() ) {
 			throw new InvalidArgumentException(
-				'Can\'t create push token because the push token data provided is invalid.'
+				'Can\'t create push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -58,13 +60,16 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function read( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t read push token because the push token data provided is invalid.'
+				'Can\'t read push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
 		$post = get_post( $push_token->get_id() );
 
 		if ( ! $post ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
@@ -85,7 +90,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function update( &$push_token ) {
 		if ( ! $push_token->can_be_updated() ) {
 			throw new InvalidArgumentException(
-				'Can\'t update push token because the push token data provided is invalid.'
+				'Can\'t update push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -115,7 +122,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function delete( &$push_token, $args = array() ) {
 		if ( ! $push_token->can_be_deleted() ) {
 			throw new InvalidArgumentException(
-				'Can\'t delete push token because the push token data provided is invalid.'
+				'Can\'t delete push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -132,7 +141,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function read_meta( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t read meta for push token because the push token data provided is invalid.'
+				'Can\'t read meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -152,13 +163,17 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function add_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t add meta for push token because the push token data provided is invalid.'
+				'Can\'t add meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
 			throw new InvalidArgumentException(
-				'Can\'t add meta for push token because the meta key was not provided.'
+				'Can\'t add meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -180,13 +195,17 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function update_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t update meta for push token because the push token data provided is invalid.'
+				'Can\'t update meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
 			throw new InvalidArgumentException(
-				'Can\'t update meta for push token because the meta key was not provided.'
+				'Can\'t update meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -207,13 +226,17 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function delete_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
 			throw new InvalidArgumentException(
-				'Can\'t delete meta for push token because the push token data provided is invalid.'
+				'Can\'t delete meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
 			throw new InvalidArgumentException(
-				'Can\'t delete meta for push token because the meta key was not provided.'
+				'Can\'t delete meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
@@ -235,9 +258,12 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		if ( ! $push_token->get_user_id() || ! $push_token->get_platform() ) {
 			throw new InvalidArgumentException(
 				sprintf(
+					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					'Can\'t retrieve push token using token or device UUID because %s was not provided.',
-					$push_token->get_platform() ? 'user ID' : 'platform'
-				)
+					$push_token->get_platform() ? 'user ID' : 'platform',
+				),
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
 			);
 		}
 
