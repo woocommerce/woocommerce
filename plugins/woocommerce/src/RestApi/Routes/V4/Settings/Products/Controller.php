@@ -218,15 +218,7 @@ class Controller extends AbstractController {
 		}
 
 		// Get all settings after update.
-		$settings_instance = $this->get_settings_products_instance();
-		$sections          = $settings_instance->get_sections();
-		$settings          = array();
-
-		// Get settings for each section through WC's filter system.
-		foreach ( array_keys( $sections ) as $section ) {
-			$section_settings = $settings_instance->get_settings_for_section( $section );
-			$settings         = array_merge( $settings, $section_settings );
-		}
+		$settings = $this->get_all_settings();
 
 		// Return updated settings.
 		$response = $this->schema->get_item_response( $settings, $request );
