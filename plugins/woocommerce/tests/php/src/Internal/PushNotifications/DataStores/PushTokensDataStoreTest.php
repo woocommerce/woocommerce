@@ -108,7 +108,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t create push token because the push token object data is incorrect.' );
+		$this->expectExceptionMessage( 'Can\'t create push token because the push token data provided is invalid.' );
 
 		$data_store->create( $push_token );
 	}
@@ -122,7 +122,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t read push token because the push token object is incomplete.' );
+		$this->expectExceptionMessage( 'Can\'t read push token because the push token data provided is invalid.' );
 
 		$data_store->read( $push_token );
 	}
@@ -138,7 +138,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t update push token because the push token object is incomplete.' );
+		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
 
 		$data_store->update( $push_token );
 	}
@@ -151,7 +151,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t delete push token because the push token object is incomplete.' );
+		$this->expectExceptionMessage( 'Can\'t delete push token because the push token data provided is invalid.' );
 
 		$data_store->delete( $push_token );
 	}
@@ -290,7 +290,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t read meta for push token object with incomplete data.' );
+		$this->expectExceptionMessage( 'Can\'t read meta for push token because the push token data provided is invalid.' );
 
 		$data_store->read_meta( $push_token );
 	}
@@ -369,7 +369,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = $this->create_test_push_token();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t add meta for push token without meta key.' );
+		$this->expectExceptionMessage( 'Can\'t add meta for push token because the meta key was not provided.' );
 
 		$data_store->add_meta(
 			$push_token,
@@ -387,7 +387,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t add meta for push token object with incomplete data.' );
+		$this->expectExceptionMessage( 'Can\'t add meta for push token because the push token data provided is invalid.' );
 
 		$data_store->add_meta(
 			$push_token,
@@ -408,7 +408,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = $this->create_test_push_token();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t update meta for push token without meta key.' );
+		$this->expectExceptionMessage( 'Can\'t update meta for push token because the meta key was not provided.' );
 
 		$data_store->update_meta(
 			$push_token,
@@ -426,7 +426,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t update meta for push token object with incomplete data.' );
+		$this->expectExceptionMessage( 'Can\'t update meta for push token because the push token data provided is invalid.' );
 
 		$data_store->update_meta(
 			$push_token,
@@ -447,7 +447,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = $this->create_test_push_token();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t delete meta for push token without meta key.' );
+		$this->expectExceptionMessage( 'Can\'t delete meta for push token because the meta key was not provided.' );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -464,7 +464,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t delete meta for push token object with incomplete data.' );
+		$this->expectExceptionMessage( 'Can\'t delete meta for push token because the push token data provided is invalid.' );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -485,7 +485,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve token using token or device UUID for push token object without user ID and platform.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because user ID was not provided.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );
 	}
@@ -502,7 +502,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Can\'t retrieve token using token or device UUID for push token object without user ID and platform.' );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because platform was not provided.' );
 
 		$data_store->get_by_token_or_device_id( $push_token );
 	}

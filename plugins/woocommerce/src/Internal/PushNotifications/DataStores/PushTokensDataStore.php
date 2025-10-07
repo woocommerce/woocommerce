@@ -26,7 +26,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function create( &$push_token ) {
 		if ( ! $push_token->can_be_created() ) {
 			throw new InvalidArgumentException(
-				'Can\'t create push token because the push token object data is incorrect.'
+				'Can\'t create push token because the push token data provided is invalid.'
 			);
 		}
 
@@ -55,7 +55,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function read( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t read push token because the push token object is incomplete.' );
+			throw new InvalidArgumentException(
+				'Can\'t read push token because the push token data provided is invalid.'
+			);
 		}
 
 		$post = get_post( $push_token->get_id() );
@@ -80,7 +82,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function update( &$push_token ) {
 		if ( ! $push_token->can_be_updated() ) {
-			throw new InvalidArgumentException( 'Can\'t update push token because the push token object is incomplete.' );
+			throw new InvalidArgumentException(
+				'Can\'t update push token because the push token data provided is invalid.'
+			);
 		}
 
 		wp_update_post(
@@ -108,7 +112,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function delete( &$push_token, $args = array() ) {
 		if ( ! $push_token->can_be_deleted() ) {
-			throw new InvalidArgumentException( 'Can\'t delete push token because the push token object is incomplete.' );
+			throw new InvalidArgumentException(
+				'Can\'t delete push token because the push token data provided is invalid.'
+			);
 		}
 
 		wp_delete_post( $push_token->get_id() );
@@ -123,7 +129,9 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function read_meta( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t read meta for push token object with incomplete data.' );
+			throw new InvalidArgumentException(
+				'Can\'t read meta for push token because the push token data provided is invalid.'
+			);
 		}
 
 		return array_map(
@@ -141,11 +149,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function add_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t add meta for push token object with incomplete data.' );
+			throw new InvalidArgumentException(
+				'Can\'t add meta for push token because the push token data provided is invalid.'
+			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
-			throw new InvalidArgumentException( 'Can\'t add meta for push token without meta key.' );
+			throw new InvalidArgumentException(
+				'Can\'t add meta for push token because the meta key was not provided.'
+			);
 		}
 
 		return add_post_meta(
@@ -165,11 +177,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function update_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t update meta for push token object with incomplete data.' );
+			throw new InvalidArgumentException(
+				'Can\'t update meta for push token because the push token data provided is invalid.'
+			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
-			throw new InvalidArgumentException( 'Can\'t update meta for push token without meta key.' );
+			throw new InvalidArgumentException(
+				'Can\'t update meta for push token because the meta key was not provided.'
+			);
 		}
 
 		return update_post_meta(
@@ -188,11 +204,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 */
 	public function delete_meta( &$push_token, $meta ) {
 		if ( ! $push_token->can_be_read() ) {
-			throw new InvalidArgumentException( 'Can\'t delete meta for push token object with incomplete data.' );
+			throw new InvalidArgumentException(
+				'Can\'t delete meta for push token because the push token data provided is invalid.'
+			);
 		}
 
 		if ( empty( $meta['meta_key'] ) ) {
-			throw new InvalidArgumentException( 'Can\'t delete meta for push token without meta key.' );
+			throw new InvalidArgumentException(
+				'Can\'t delete meta for push token because the meta key was not provided.'
+			);
 		}
 
 		return delete_post_meta( $push_token->get_id(), $meta['meta_key'] );
@@ -212,7 +232,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	public function get_by_token_or_device_id( &$push_token ): ?PushToken {
 		if ( ! $push_token->get_user_id() || ! $push_token->get_platform() ) {
 			throw new InvalidArgumentException(
-				'Can\'t retrieve token using token or device UUID for push token object without user ID and platform.',
+				sprintf(
+					'Can\'t retrieve push token using token or device UUID because %s was not provided.',
+					$push_token->get_platform() ? 'user ID' : 'platform'
+				)
 			);
 		}
 
