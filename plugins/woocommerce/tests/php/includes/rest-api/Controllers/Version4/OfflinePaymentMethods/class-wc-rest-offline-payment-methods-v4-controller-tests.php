@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-use Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
@@ -80,7 +80,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->payments->method( 'get_country' )->willReturn( 'US' );
 		$this->payments->method( 'get_payment_providers' )->willReturn( $this->get_mock_payment_providers() );
 
-		$schema = new Automattic\WooCommerce\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema();
+		$schema = new Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema();
 
 		$this->endpoint = new OfflinePaymentMethodsController();
 		$this->endpoint->init( $this->payments, $schema );

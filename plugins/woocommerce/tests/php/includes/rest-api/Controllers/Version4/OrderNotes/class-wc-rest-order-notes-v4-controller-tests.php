@@ -5,10 +5,10 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 
 /**
- * class Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller tests.
+ * class Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller tests.
  * Order Notes Controller tests for V4 REST API.
  */
 class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
@@ -70,10 +70,10 @@ class WC_REST_Order_Notes_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Create schema instance with dependency injection.
-		$order_note_schema = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
+		$order_note_schema = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema\OrderNoteSchema();
 
 		// Create utils instance.
-		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\CollectionQuery();
+		$collection_query = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\CollectionQuery();
 
 		$this->endpoint = new OrderNotesController();
 		$this->endpoint->init( $order_note_schema, $collection_query );
