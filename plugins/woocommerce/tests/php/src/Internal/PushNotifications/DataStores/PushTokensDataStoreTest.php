@@ -149,6 +149,21 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the read method throws exception when push token is not found.
+	 */
+	public function test_it_throws_exception_when_reading_push_token_that_does_not_exist() {
+		$data_store = new PushTokensDataStore();
+
+		$push_token = new PushToken();
+		$push_token->set_id( 999999 );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+
+		$data_store->read( $push_token );
+	}
+
+	/**
 	 * Tests the update method throws exception when push token data is incomplete.
 	 */
 	public function test_it_throws_exception_when_updating_push_token_with_incomplete_data() {
