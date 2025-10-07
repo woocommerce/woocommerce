@@ -8,7 +8,8 @@
 	"version": "1.7.0",
 	"autoload": {
 		"classmap": [
-			"src/"
+			"src/",
+			"vendor-prefixed/"
 		]
 	},
 	"autoload-dev": {
@@ -34,6 +35,12 @@
 		}
 	},
 	"scripts": {
+		"post-install-cmd": [
+			"composer dump-autoload -o"
+		],
+		"post-update-cmd": [
+			"composer dump-autoload -o"
+		],
 		"env:destroy": "wp-env destroy",
 		"env:stop": "wp-env stop",
 		"env:start": "wp-env start",

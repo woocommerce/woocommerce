@@ -113,4 +113,13 @@ final class SessionHandler extends WC_Session {
 			$this->_dirty = false;
 		}
 	}
+
+	/**
+	 * Return the current session data.
+	 *
+	 * @return array
+	 */
+	public function get_session_data() {
+		return $this->_data ?? [];
+	}
 }

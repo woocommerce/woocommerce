@@ -87,6 +87,9 @@ class Email_Css_Inliner implements Css_Inliner {
 		if ( class_exists( 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner' ) ) {
 			return 'Automattic\WooCommerce\Vendor\Pelago\Emogrifier\CssInliner';
 		}
+		if ( class_exists( 'Automattic\WooCommerce\EmailEditorVendor\Pelago\Emogrifier\CssInliner' ) ) {
+			return 'Automattic\WooCommerce\EmailEditorVendor\Pelago\Emogrifier\CssInliner';
+		}
 		throw new \Exception( 'CssInliner class not found' );
 	}
 }
