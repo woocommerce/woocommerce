@@ -8,6 +8,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
@@ -427,12 +428,12 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		// Check if completed (only processing and completed are final statuses).
-		if ( $order && in_array( $order->get_status(), [ 'processing', 'completed' ], true ) ) {
+		if ( $order && in_array( $order->get_status(), [ OrderStatus::PROCESSING, OrderStatus::COMPLETED ], true ) ) {
 			return CheckoutSessionStatus::COMPLETED;
 		}
 
 		// Check if pending (payment not yet cleared).
-		if ( $order && 'pending' === $order->get_status() ) {
+		if ( $order && OrderStatus::PENDING === $order->get_status() ) {
 			return CheckoutSessionStatus::READY_FOR_PAYMENT;
 		}
 
