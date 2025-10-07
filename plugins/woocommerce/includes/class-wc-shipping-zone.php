@@ -483,8 +483,6 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Shipping method not found.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		global $wpdb;
-
 		// Update settings if provided.
 		if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
 			$result = $method->update_settings( $data['settings'] );
