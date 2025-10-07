@@ -105,20 +105,25 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
-		if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
-			/**
-			 * Filter for the WooCommerce Admin REST controllers.
-			 *
-			 * @param array $controllers List of rest API controllers.
-			 *
-			 * @since 3.5.0
-			 */
-			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+		/**
+		 * Filter for the WooCommerce Admin REST controllers.
+		 *
+		 * @param array $controllers List of rest API controllers.
+		 *
+		 * @since 3.5.0
+		 */
+		$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+
+		if ( ! is_array( $controllers ) ) {
+			return;
 		}
 
+		$controllers = array_values( array_unique( $controllers ) );
 		foreach ( $controllers as $controller ) {
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
+			if ( is_string( $controller ) ) {
+				$this->$controller = new $controller();
+				$this->$controller->register_routes();
+			}
 		}
 	}
 
@@ -182,21 +187,27 @@ class Init {
 
 		$controllers = array_merge( $analytics_controllers, $controllers );
 
-		if ( ! did_filter( 'woocommerce_admin_rest_controllers' ) ) {
-			/**
-			 * Filter for the WooCommerce Admin REST controllers.
-			 *
-			 * @param array $controllers List of rest API controllers.
-			 *
-			 * @since 3.5.0
-			 */
-			$controllers = apply_filters( 'woocommerce_admin_rest_controllers', $controllers );
+		/**
+		 * Filter for the WooCommerce Admin REST controllers.
+		 *
+		 * @param array $controllers List of rest API controllers.
+		 *
+		 * @since 10.4.0
+		 */
+		$controllers = apply_filters( 'woocommerce_admin_analytics_rest_controllers', $controllers );
+
+		if ( ! is_array( $controllers ) ) {
+			return;
 		}
 
+		$controllers = array_values( array_unique( $controllers ) );
 		foreach ( $controllers as $controller ) {
-			$this->$controller = new $controller();
-			$this->$controller->register_routes();
+			if ( is_string( $controller ) ) {
+				$this->$controller = new $controller();
+				$this->$controller->register_routes();
+			}
 		}
+
 	}
 
 	/**

@@ -108,8 +108,13 @@ class RestApiUtil {
 				return $filter_result;
 			};
 			$callback_filter_id = _wp_filter_build_unique_id( 'rest_pre_dispatch', $callback_filter, 0 );
-			// This runs on priority 0 so that the namespace is loaded before `rest_handle_options_request()` is run (priority 10).
+			/**
+			 * The `rest_handle_options_request()` function only works correctly if all REST API routes are registered. To ensure
+			 * our routes are available in time, we must load the namespace before `rest_handle_options_request()` runs
+			 * (which happens at priority 10).
+			 */
 			add_filter( 'rest_pre_dispatch', $callback_filter, 0, 3 );
+
 		}
 	}
 }
