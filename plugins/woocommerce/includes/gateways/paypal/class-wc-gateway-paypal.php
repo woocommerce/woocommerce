@@ -174,7 +174,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
+			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
 			$this->description  = trim( $this->description );
 		}
 
