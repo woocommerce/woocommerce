@@ -1649,8 +1649,8 @@ WHERE
 	 *
 	 * Also provides an option to sync the metadata as well, since we are already computing the diff.
 	 *
-	 * @param \WC_Abstract_Order $order1 Order object read from posts.
-	 * @param \WC_Abstract_Order $order2 Order object read from COT.
+	 * @param \WC_Abstract_Order $order1 Order object read from COT.
+	 * @param \WC_Abstract_Order $order2 Order object read from posts.
 	 * @param bool               $sync   Whether to also sync the meta data.
 	 *
 	 * @return array Difference between post and COT meta data.
