@@ -305,7 +305,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store->add_meta(
 			$push_token,
 			array(
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 				'meta_key'   => 'platform',
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_value.
 				'meta_value' => PushToken::PLATFORM_APPLE,
 			)
 		);
@@ -327,7 +329,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store->update_meta(
 			$push_token,
 			array(
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 				'meta_key'   => 'platform',
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_value.
 				'meta_value' => PushToken::PLATFORM_ANDROID,
 			)
 		);
@@ -348,6 +352,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$data_store->delete_meta(
 			$push_token,
+			// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 			array( 'meta_key' => 'platform' )
 		);
 
@@ -368,6 +373,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$data_store->add_meta(
 			$push_token,
+			// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 			array( 'meta_value' => 'test_value' )
 		);
 	}
@@ -386,7 +392,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store->add_meta(
 			$push_token,
 			array(
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 				'meta_key'   => 'test_key',
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_value.
 				'meta_value' => 'test_value',
 			)
 		);
@@ -404,6 +412,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$data_store->update_meta(
 			$push_token,
+			// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 			array( 'meta_value' => 'test_value' )
 		);
 	}
@@ -422,7 +431,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store->update_meta(
 			$push_token,
 			array(
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 				'meta_key'   => 'test_key',
+				// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_value.
 				'meta_value' => 'test_value',
 			)
 		);
@@ -457,6 +468,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$data_store->delete_meta(
 			$push_token,
+			// phpcs:WordPress.DB.SlowDBQuery.slow_db_query_meta_key.
 			array( 'meta_key' => 'test_key' )
 		);
 	}
