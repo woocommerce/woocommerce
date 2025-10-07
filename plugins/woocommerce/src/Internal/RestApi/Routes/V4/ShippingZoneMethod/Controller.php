@@ -151,6 +151,9 @@ class Controller extends AbstractController {
 		// Update method settings, enabled status, and order.
 		$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
+			// Delete the method instance to rollback the creation.
+			// This ensures a failed POST would not leave an orphaned method
+			$zone->delete_shipping_method( $instance_id );
 			return $result;
 		}
 
