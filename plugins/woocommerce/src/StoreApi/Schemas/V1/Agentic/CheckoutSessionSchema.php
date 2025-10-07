@@ -375,8 +375,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$first_name = $customer->get_billing_first_name() ? $customer->get_billing_first_name() : $customer->get_shipping_first_name();
-		$last_name  = $customer->get_billing_last_name() ? $customer->get_billing_last_name() : $customer->get_shipping_last_name();
+		$first_name = $customer->get_billing_first_name();
+		$last_name  = $customer->get_billing_last_name();
 		$email      = $customer->get_billing_email();
 		$phone      = $customer->get_billing_phone();
 
