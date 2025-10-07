@@ -266,12 +266,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since  3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
-		static $has_variation_prices_array_filters = null;
-
-		if ( is_null( $has_variation_prices_array_filters ) ) {
-			global $wp_filter;
-			$has_variation_prices_array_filters = ! empty( $wp_filter['woocommerce_variation_prices_array'] );
-		}
+		global $wp_filter;
+		$has_variation_prices_array_filters = ! empty( $wp_filter['woocommerce_variation_prices_array'] );
 
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
