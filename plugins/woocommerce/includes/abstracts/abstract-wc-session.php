@@ -139,4 +139,22 @@ abstract class WC_Session {
 	public function get_customer_id() {
 		return $this->_customer_id ?? '';
 	}
+
+	/**
+	 * Return true if the current user has an active session, i.e. a cookie to retrieve values.
+	 *
+	 * @return bool
+	 */
+	public function has_session() {
+		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
+	}
+
+	/**
+	 * Get session data.
+	 *
+	 * @return array
+	 */
+	public function get_session_data() {
+		return $this->has_session() ? (array) $this->get_session( $this->get_customer_id(), array() ) : array();
+	}
 }

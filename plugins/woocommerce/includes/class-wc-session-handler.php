@@ -373,15 +373,6 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Return true if the current user has an active session, i.e. a cookie to retrieve values.
-	 *
-	 * @return bool
-	 */
-	public function has_session() {
-		return isset( $_COOKIE[ $this->_cookie ] ) || $this->_has_cookie || is_user_logged_in();
-	}
-
-	/**
 	 * Checks if the session is expiring.
 	 *
 	 * @return bool Whether session is expiring.
@@ -525,14 +516,6 @@ class WC_Session_Handler extends WC_Session {
 		return array( $customer_id, $session_expiration, $session_expiring, $cookie_hash );
 	}
 
-	/**
-	 * Get session data.
-	 *
-	 * @return array
-	 */
-	public function get_session_data() {
-		return $this->has_session() ? (array) $this->get_session( $this->get_customer_id(), array() ) : array();
-	}
 
 	/**
 	 * Gets a cache prefix. This is used in session names so the entire cache can be invalidated with 1 function call.
