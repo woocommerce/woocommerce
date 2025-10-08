@@ -86,7 +86,6 @@ class AgenticWebhookPayloadBuilder {
 			'on-hold'        => ACPOrderStatus::MANUAL_REVIEW,
 			'completed'      => ACPOrderStatus::FULFILLED,
 			'cancelled'      => ACPOrderStatus::CANCELED,
-			'canceled'       => ACPOrderStatus::CANCELED, // Support both spellings.
 			'refunded'       => ACPOrderStatus::FULFILLED, // Refunded orders are still fulfilled.
 			'failed'         => ACPOrderStatus::CANCELED,
 			'checkout-draft' => ACPOrderStatus::CREATED,
