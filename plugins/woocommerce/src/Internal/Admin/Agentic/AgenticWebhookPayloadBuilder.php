@@ -65,14 +65,14 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string Order permalink URL.
 	 */
 	private function get_order_permalink( $order ) {
-		// Try to get the order received page URL (customer-facing)
+		// Try to get the order received page URL (customer-facing).
 		$order_received_url = $order->get_checkout_order_received_url();
 
 		if ( ! empty( $order_received_url ) ) {
 			return $order_received_url;
 		}
 
-		// Fallback to admin edit URL if customer URL not available
+		// Fallback to admin edit URL if customer URL not available.
 		return admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' );
 	}
 
@@ -163,7 +163,7 @@ class AgenticWebhookPayloadBuilder {
 	 */
 	private function build_single_refund_data( $refund ) {
 		$refund_type = $this->determine_refund_type( $refund );
-		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative
+		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative.
 
 		return array(
 			'type'   => $refund_type,
@@ -178,20 +178,20 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string Refund type ('store_credit' or 'original_payment').
 	 */
 	private function determine_refund_type( $refund ) {
-		// Check if refund has a specific type meta
+		// Check if refund has a specific type meta.
 		$refund_type = $refund->get_meta( '_refund_type' );
 
 		if ( 'store_credit' === $refund_type ) {
 			return 'store_credit';
 		}
 
-		// Check refund reason for store credit indicators
+		// Check refund reason for store credit indicators.
 		$reason = strtolower( $refund->get_reason() );
-		if ( strpos( $reason, 'store credit' ) !== false || strpos( $reason, 'credit' ) !== false ) {
+		if ( false !== strpos( $reason, 'store credit' ) || false !== strpos( $reason, 'credit' ) ) {
 			return 'store_credit';
 		}
 
-		// Default to original payment method
+		// Default to original payment method.
 		return 'original_payment';
 	}
 

@@ -30,6 +30,10 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 * Test building payloads for different event types.
 	 *
 	 * @dataProvider event_type_provider
+	 *
+	 * @param string $event               Event type.
+	 * @param string $status              WooCommerce order status.
+	 * @param string $expected_acp_status Expected ACP status.
 	 */
 	public function test_build_payload_for_event_type( $event, $status, $expected_acp_status ) {
 		$order   = $this->create_agentic_order( 'test_session_123', $status );
@@ -55,6 +59,9 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 * Test status mapping from WooCommerce to ACP.
 	 *
 	 * @dataProvider status_mapping_provider
+	 *
+	 * @param string $wc_status           WooCommerce order status.
+	 * @param string $expected_acp_status Expected ACP status.
 	 */
 	public function test_status_mapping( $wc_status, $expected_acp_status ) {
 		$order   = $this->create_agentic_order( 'test_session', $wc_status );
@@ -82,6 +89,9 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 * Test building payload with refunds.
 	 *
 	 * @dataProvider refund_type_provider
+	 *
+	 * @param string $reason        Refund reason.
+	 * @param string $expected_type Expected refund type.
 	 */
 	public function test_build_payload_with_refunds( $reason, $expected_type ) {
 		$order = $this->create_agentic_order();
@@ -126,6 +136,10 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 * Test status mapping filter.
 	 *
 	 * @dataProvider status_filter_provider
+	 *
+	 * @param callable $filter_callback  Filter callback function.
+	 * @param string   $wc_status        WooCommerce order status.
+	 * @param string   $expected_status  Expected ACP status.
 	 */
 	public function test_status_mapping_filter( $filter_callback, $wc_status, $expected_status ) {
 		add_filter( 'woocommerce_agentic_webhook_order_status_map', $filter_callback, 10, 2 );
@@ -143,7 +157,7 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function status_filter_provider() {
 		return array(
-			'override to confirmed' => array(
+			'override to confirmed'   => array(
 				function ( $map ) {
 					$map['pending'] = 'confirmed';
 					return $map;
@@ -151,7 +165,7 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 				'pending',
 				'confirmed',
 			),
-			'map to shipped'        => array(
+			'map to shipped'          => array(
 				function ( $map ) {
 					$map['processing'] = 'shipped';
 					return $map;

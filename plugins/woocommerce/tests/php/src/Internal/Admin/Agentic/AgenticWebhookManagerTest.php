@@ -38,6 +38,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	public function test_custom_topics_registered() {
 		new AgenticWebhookManager();
 
+		/**
+		 * Filters the list of webhook topic hooks.
+		 *
+		 * @see AgenticWebhookManager::register_webhook_topic_names()
+		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
 
 		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_created', $topics );
@@ -51,6 +56,9 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test action firing based on session ID presence.
 	 *
 	 * @dataProvider action_firing_provider
+	 *
+	 * @param bool $has_session_id Whether order has session ID.
+	 * @param bool $should_fire    Whether action should fire.
 	 */
 	public function test_action_firing_based_on_session_id( $has_session_id, $should_fire ) {
 		new AgenticWebhookManager();
@@ -96,6 +104,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$order = $this->create_agentic_order( 'test_session', 'processing' );
 
 		$action_count = 0;
+		/**
+		 * Fires when an Agentic order is updated.
+		 *
+		 * @see AgenticWebhookManager::handle_order_status_changed()
+		 */
 		add_action(
 			'woocommerce_agentic_order_updated',
 			function () use ( &$action_count ) {
@@ -113,6 +126,9 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test refund events trigger update action.
 	 *
 	 * @dataProvider refund_test_provider
+	 *
+	 * @param array $refund_amounts Refund amounts to create.
+	 * @param int   $expected_count Expected action count.
 	 */
 	public function test_refund_triggers_update( $refund_amounts, $expected_count ) {
 		new AgenticWebhookManager();
@@ -145,7 +161,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 */
 	public function refund_test_provider() {
 		return array(
-			'single refund'   => array( array( 10.00 ), 1 ),
+			'single refund'    => array( array( 10.00 ), 1 ),
 			'multiple refunds' => array( array( 10.00, 5.00, 15.00 ), 3 ),
 		);
 	}
@@ -170,6 +186,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			);
 		}
 
+		/**
+		 * Filters the webhook payload.
+		 *
+		 * @see AgenticWebhookManager::customize_webhook_payload()
+		 */
 		$payload = apply_filters(
 			'woocommerce_webhook_payload',
 			array(),
@@ -198,6 +219,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$webhook = $this->create_agentic_webhook();
 		$order   = $this->create_agentic_order( 'test_session_456' );
 
+		/**
+		 * Filters the webhook payload.
+		 *
+		 * @see AgenticWebhookManager::customize_webhook_payload()
+		 */
 		$payload = apply_filters(
 			'woocommerce_webhook_payload',
 			array( 'original' => 'data' ),
@@ -226,6 +252,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			),
 		);
 
+		/**
+		 * Filters the webhook HTTP args.
+		 *
+		 * @see AgenticWebhookManager::customize_webhook_http_args()
+		 */
 		$modified_args = apply_filters(
 			'woocommerce_webhook_http_args',
 			$original_args,

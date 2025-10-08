@@ -200,13 +200,13 @@ class AgenticWebhookManager {
 	/**
 	 * Customize webhook payload for Agentic topics.
 	 *
-	 * @param array  $payload     Original payload.
-	 * @param string $resource    Resource type.
-	 * @param int    $resource_id Resource ID.
-	 * @param int    $webhook_id  Webhook ID.
+	 * @param array  $payload        Original payload.
+	 * @param string $resource_type  Resource type.
+	 * @param int    $resource_id    Resource ID.
+	 * @param int    $webhook_id     Webhook ID.
 	 * @return array Modified payload.
 	 */
-	public function customize_webhook_payload( $payload, $resource, $resource_id, $webhook_id ) {
+	public function customize_webhook_payload( $payload, $resource_type, $resource_id, $webhook_id ) {
 		$webhook = wc_get_webhook( $webhook_id );
 		if ( ! $webhook ) {
 			return $payload;
@@ -226,7 +226,7 @@ class AgenticWebhookManager {
 		}
 
 		// Determine event type based on topic.
-		$event = ( $topic === self::TOPIC_ORDER_CREATED ) ? 'order_create' : 'order_update';
+		$event = ( self::TOPIC_ORDER_CREATED === $topic ) ? 'order_create' : 'order_update';
 
 		// Build ACP-compliant payload.
 		return $this->payload_builder->build_payload( $event, $order );
@@ -307,10 +307,11 @@ class AgenticWebhookManager {
 	 * @return bool True if in delivery context.
 	 */
 	private function is_delivering_webhook() {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Needed to detect delivery context.
 		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
 		foreach ( $backtrace as $call ) {
-			if ( isset( $call['class'] ) && $call['class'] === 'WC_Webhook'
-				&& isset( $call['function'] ) && $call['function'] === 'deliver' ) {
+			if ( isset( $call['class'] ) && 'WC_Webhook' === $call['class']
+				&& isset( $call['function'] ) && 'deliver' === $call['function'] ) {
 				return true;
 			}
 		}

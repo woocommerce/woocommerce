@@ -16,7 +16,11 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 		$controller = new AgenticController();
 		$controller->register();
 
-		// Verify webhook topics are registered (indicates manager was initialized).
+		/**
+		 * Verify webhook topics are registered (indicates manager was initialized).
+		 *
+		 * @see AgenticWebhookManager::register_webhook_topic_names()
+		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
 		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_created', $topics );
 		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_updated', $topics );
