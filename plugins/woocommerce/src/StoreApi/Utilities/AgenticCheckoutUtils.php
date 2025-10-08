@@ -7,7 +7,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
-use WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 
 /**
  * AgenticCheckoutUtils class.
@@ -109,7 +109,7 @@ class AgenticCheckoutUtils {
 	 * @param array          $items Items array from request.
 	 * @param CartController $cart_controller Cart controller instance.
 	 * @param ErrorMessages  $error_messages Error messages instance.
-	 * @return Error|MessageError|null Returns error response on failure, null on success.
+	 * @return Error|null Returns error response on failure, null on success.
 	 */
 	public static function add_items_to_cart( $items, $cart_controller, $error_messages ) {
 		foreach ( $items as $item_index => $item ) {
