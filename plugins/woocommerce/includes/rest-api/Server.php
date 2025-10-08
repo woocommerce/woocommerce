@@ -12,11 +12,11 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaySettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
+use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 
 /**
@@ -227,7 +227,7 @@ class Server {
 			'settings-general'          => 'WC_REST_General_Settings_V4_Controller',
 			'settings-email'            => 'WC_REST_Email_Settings_V4_Controller',
 			'settings-products'         => ProductsController::class,
-			'settings-payment-gateways' => PaymentGatewaySettingsController::class,
+			'settings-payment-gateways' => PaymentGatewaysController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);
