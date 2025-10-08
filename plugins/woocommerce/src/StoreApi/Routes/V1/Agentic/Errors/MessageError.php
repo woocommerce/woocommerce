@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
-use WP_REST_Response;
 
 /**
  * MessageError class.

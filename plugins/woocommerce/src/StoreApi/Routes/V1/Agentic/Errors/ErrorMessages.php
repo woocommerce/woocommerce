@@ -1,9 +1,5 @@
 <?php
-/**
- * ErrorMessages class for managing error messages in the Store API.
- *
- * @package WooCommerce\StoreApi\Routes\V1\Agentic\Errors
- */
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors;
 
@@ -13,7 +9,6 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors;
  * Manages error messages for the agentic checkout process.
  */
 class ErrorMessages {
-
 	/**
 	 * Array of error messages.
 	 *
