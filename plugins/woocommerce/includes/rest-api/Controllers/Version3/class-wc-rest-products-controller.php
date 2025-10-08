@@ -51,7 +51,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * See prepare_objects_query()
 	 *
 	 * @var string
-	 * @since 10.1
+	 * @since 10.4
 	 */
 	private $search_mpn_arg_value = '';
 
