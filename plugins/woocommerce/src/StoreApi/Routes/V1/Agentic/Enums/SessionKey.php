@@ -7,22 +7,22 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums;
  */
 class SessionKey {
 	/**
-	 * Agentic session ID stored in WC session.
-	 */
-	const AGENTIC_SESSION_ID = 'agentic_session_id';
-
-	/**
-	 * Chosen shipping methods.
+	 * Chosen shipping methods. This is not specific to Agentic Checkout.
 	 */
 	const CHOSEN_SHIPPING_METHODS = 'chosen_shipping_methods';
 
 	/**
+	 * Agentic session ID stored in WC session.
+	 */
+	const AGENTIC_CHECKOUT_SESSION_ID = 'agentic_checkout_session_id';
+
+	/**
 	 * Completed order ID.
 	 */
-	const COMPLETED_ORDER_ID = 'completed_order_id';
+	const AGENTIC_CHECKOUT_COMPLETED_ORDER_ID = 'agentic_checkout_completed_order_id';
 
 	/**
 	 * Whether if the session has been canceled.
 	 */
-	const IS_CANCELED = 'is_canceled';
+	const AGENTIC_CHECKOUT_IS_CANCELED = 'agentic_checkout_is_canceled';
 }

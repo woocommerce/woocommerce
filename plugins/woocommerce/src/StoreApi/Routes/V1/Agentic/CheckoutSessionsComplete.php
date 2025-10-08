@@ -260,7 +260,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
         /**
          * Stores the checkout session ID to the order meta.
          */
-        $this->order->update_meta_data( OrderMetaKey::CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
+        $this->order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
         $this->order->save_meta_data();
 
         /**
@@ -354,7 +354,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		/**
 		 * Store the completed order ID into the session. This will prevent new orders in this session.
 		 */
-		WC()->session->set( SessionKey::COMPLETED_ORDER_ID, $this->order->get_id() );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, $this->order->get_id() );
 
 		/**
          * Build response from canonical cart schema with order.

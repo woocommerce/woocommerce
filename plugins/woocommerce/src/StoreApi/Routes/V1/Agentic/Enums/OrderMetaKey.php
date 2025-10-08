@@ -9,10 +9,10 @@ class OrderMetaKey {
 	/**
 	 * Agentic checkout session ID for this order.
 	 */
-	const CHECKOUT_SESSION_ID = 'checkout_session_id';
+	const AGENTIC_CHECKOUT_SESSION_ID = '_agentic_checkout_session_id';
 
 	/**
-	 * Meta key for canceled checkout sessions.
+	 * Meta key for canceled checkout order.
 	 */
 	const AGENTIC_CHECKOUT_CANCELED = '_agentic_checkout_canceled';
 }

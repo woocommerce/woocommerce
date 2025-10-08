@@ -339,13 +339,13 @@ class CheckoutSessionSchema extends AbstractSchema {
 	public function get_item_response( $cart ) {
 		// Generate session ID from Cart-Token.
 		$wc_session = WC()->session;
-		$session_id = $wc_session->get( SessionKey::AGENTIC_SESSION_ID );
+		$session_id = $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID );
 		if ( null === $session_id ) {
 			$session_id = CartTokenUtils::get_cart_token( (string) $wc_session->get_customer_id() );
-			$wc_session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
+			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
 		}
 
-		$completed_order = wc_get_order( $wc_session->get( SessionKey::COMPLETED_ORDER_ID ) );
+		$completed_order = wc_get_order( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
 
 		// Get line items from cart, or from completed order if cart is empty.
 		$cart_items = $cart->get_cart();
