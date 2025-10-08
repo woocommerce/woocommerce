@@ -575,20 +575,27 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	public function update_from_api_request( $params ) {
-		// Prevent updating "Rest of the World" zone name or locations.
+		// Prevent updating "Rest of the World" zone name, order, or locations.
 		if ( 0 === $this->get_id() ) {
 			if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
 				return new WP_Error(
 					'woocommerce_rest_cannot_edit_zone',
 					__( 'Cannot change name of "Rest of the World" zone.', 'woocommerce' ),
-					array( 'status' => 400 )
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
+			if ( isset( $params['order'] ) && ! is_null( $params['order'] ) ) {
+				return new WP_Error(
+					'woocommerce_rest_cannot_edit_zone',
+					__( 'Cannot change order of "Rest of the World" zone.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 			if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
 				return new WP_Error(
 					'woocommerce_rest_cannot_edit_zone',
 					__( 'Cannot change locations of "Rest of the World" zone.', 'woocommerce' ),
-					array( 'status' => 400 )
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 		}
@@ -600,7 +607,7 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 				return new WP_Error(
 					'woocommerce_rest_invalid_zone_name',
 					__( 'Zone name cannot be empty.', 'woocommerce' ),
-					array( 'status' => 400 )
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 			$this->set_zone_name( $name );
