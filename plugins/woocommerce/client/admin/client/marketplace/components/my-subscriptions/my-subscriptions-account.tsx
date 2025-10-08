@@ -45,7 +45,6 @@ export default function MySubscriptionsAccount(): JSX.Element | null {
 						strong: <strong>user email</strong>,
 					}
 				) }
-				Your
 			</p>
 			<div className="woocommerce-marketplace__my-subscriptions__account-actions">
 				<Button
