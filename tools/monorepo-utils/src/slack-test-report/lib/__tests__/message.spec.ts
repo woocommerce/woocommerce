@@ -482,8 +482,7 @@ describe( 'createMessage', () => {
 	it( 'should limit jobs list to 5 with custom header', async () => {
 		const withManyJobsAndHeaderOptions = {
 			...defaultOptions,
-			jobsList:
-				'Failed:###Job 1,Job 2,Job 3,Job 4,Job 5,Job 6,Job 7',
+			jobsList: 'Failed:###Job 1,Job 2,Job 3,Job 4,Job 5,Job 6,Job 7',
 		};
 
 		const result = await createMessage( withManyJobsAndHeaderOptions );

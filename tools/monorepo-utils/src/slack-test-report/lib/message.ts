@@ -202,13 +202,13 @@ export async function createMessage( options: Options ) {
 				.map( ( job ) => `• ${ job.trim() }` )
 				.join( '\n' );
 
-			let text = jobsText;
+			let jobsBlockText = jobsText;
 			if ( jobs.length > maxJobs ) {
 				const remaining = jobs.length - maxJobs;
-				text += `\n• _${ remaining } more_`;
+				jobsBlockText += `\n• _${ remaining } more_`;
 			}
 			if ( header ) {
-				text = `*${ header }*\n${ text }`;
+				jobsBlockText = `*${ header }*\n${ jobsBlockText }`;
 			}
 
 			mainMsgBlocks.push( {
@@ -216,7 +216,7 @@ export async function createMessage( options: Options ) {
 				elements: [
 					{
 						type: 'mrkdwn',
-						text,
+						text: jobsBlockText,
 					},
 				],
 			} );
