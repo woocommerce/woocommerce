@@ -17,7 +17,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller a
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
