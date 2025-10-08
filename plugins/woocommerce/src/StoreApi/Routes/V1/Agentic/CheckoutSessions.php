@@ -172,7 +172,7 @@ class CheckoutSessions extends AbstractCartRoute {
 		}
 
 		// Build response from canonical cart schema.
-		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance(), $message_errors );
+		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance() );
 
 		// Add the messages outside of the schema (it accepts a single object).
 		$response['messages'] = $message_errors->get_formatted_messages();
