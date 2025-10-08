@@ -4,12 +4,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications;
 
-if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-}
+defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 
 /**
  * WC Push Notifications
@@ -27,6 +26,8 @@ class PushNotifications {
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
+
+		wc_get_container()->get( PushTokenRestController::class )->register();
 	}
 
 	/**
