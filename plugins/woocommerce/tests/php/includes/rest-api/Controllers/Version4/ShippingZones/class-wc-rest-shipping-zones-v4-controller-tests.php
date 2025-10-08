@@ -1424,21 +1424,21 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		// Verify zone has locations initially.
 		$this->assertCount( 1, $zone->get_zone_locations() );
 
-		$request         = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
 		$request->set_body_params(
 			array(
 				'locations' => array(),
 			)
 		);
 
-		$response        = $this->server->dispatch( $request );
-		$data            = $response->get_data();
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $data['locations'] );
 
 		// Verify locations were actually cleared.
-		$zone_reloaded   = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
 		$this->assertCount( 0, $zone_reloaded->get_zone_locations() );
 	}
 }
