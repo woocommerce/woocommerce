@@ -25,7 +25,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order $order Order object.
 	 * @return array Webhook payload.
 	 */
-	public function build_payload( $event, $order ) {
+	public function build_payload( string $event, WC_Order $order ): array {
 		return array(
 			'type' => $event,
 			'data' => $this->build_order_data( $order ),
@@ -38,7 +38,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order $order Order object.
 	 * @return array Order data.
 	 */
-	private function build_order_data( $order ) {
+	private function build_order_data( WC_Order $order ): array {
 		return array(
 			'type'                => 'order',
 			'checkout_session_id' => $this->get_checkout_session_id( $order ),
@@ -54,7 +54,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order $order Order object.
 	 * @return string Checkout session ID.
 	 */
-	private function get_checkout_session_id( $order ) {
+	private function get_checkout_session_id( WC_Order $order ): string {
 		$session_id = $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID );
 		return ! empty( $session_id ) ? $session_id : 'checkout_session_' . $order->get_id();
 	}
@@ -65,7 +65,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order $order Order object.
 	 * @return string Order permalink URL.
 	 */
-	private function get_order_permalink( $order ) {
+	private function get_order_permalink( WC_Order $order ): string {
 		// Get the order received page URL (customer-facing).
 		return $order->get_checkout_order_received_url();
 	}
@@ -78,7 +78,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param string $wc_status WooCommerce order status.
 	 * @return string ACP status.
 	 */
-	private function map_order_status( $wc_status ) {
+	private function map_order_status( string $wc_status ): string {
 		// Remove 'wc-' prefix if present.
 		$wc_status = str_replace( 'wc-', '', $wc_status );
 
@@ -134,7 +134,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order $order Order object.
 	 * @return array Array of refunds.
 	 */
-	private function build_refunds_data( $order ) {
+	private function build_refunds_data( WC_Order $order ): array {
 		$refunds_data = array();
 		$refunds      = $order->get_refunds();
 
@@ -155,7 +155,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order_Refund $refund Refund object.
 	 * @return array Refund data.
 	 */
-	private function build_single_refund_data( $refund ) {
+	private function build_single_refund_data( WC_Order_Refund $refund ): array {
 		$refund_type = $this->determine_refund_type( $refund );
 		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative.
 
@@ -171,7 +171,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param WC_Order_Refund $refund Refund object.
 	 * @return string Refund type ('store_credit' or 'original_payment').
 	 */
-	private function determine_refund_type( $refund ) {
+	private function determine_refund_type( WC_Order_Refund $refund ): string {
 		// Default to original payment method.
 		$refund_type = 'original_payment';
 
@@ -197,7 +197,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @param float $amount Amount to format.
 	 * @return string Formatted amount.
 	 */
-	private function format_amount( $amount ) {
+	private function format_amount( float $amount ): string {
 		return number_format( $amount, 2, '.', '' );
 	}
 }
