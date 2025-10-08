@@ -44,7 +44,7 @@ class ErrorMessages {
 	 */
 	public function get_formatted_messages() {
 		return array_map(
-			function( $message_error ) {
+			function ( $message_error ) {
 				return $message_error->to_array();
 			},
 			$this->error_messages

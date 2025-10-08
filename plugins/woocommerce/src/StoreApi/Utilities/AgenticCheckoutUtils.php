@@ -117,7 +117,8 @@ class AgenticCheckoutUtils {
 				return Error::invalid_request(
 					'invalid_product_id',
 					__( 'Product ID must be numeric.', 'woocommerce' ),
-					 '$.items[' . $item_index . '].id' );
+					'$.items[' . $item_index . '].id'
+				);
 			}
 
 			$product_id = (int) $item['id'];
