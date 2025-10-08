@@ -1690,7 +1690,7 @@ WHERE
 			// This prevents overwriting valid COGS data with recalculated zero values during sync-on-read.
 			if ( 'cogs_total_value' === $key && $order->has_cogs() && $this->cogs_is_enabled() ) {
 				$hpos_cogs = $order->get_cogs_total_value( 'edit' );
-				if ( $hpos_cogs > 0 && 0.0 === (float) $value ) {
+				if ( 0.0 !== $hpos_cogs && 0.0 === (float) $value ) {
 					continue;
 				}
 			}
