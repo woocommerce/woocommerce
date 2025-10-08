@@ -194,17 +194,6 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get error prefix for this controller.
-	 *
-	 * @return string
-	 */
-	protected function get_error_prefix(): string {
-		// Convert 'shipping-zone-method' to 'shipping_zone_method_'.
-		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
-		return 'woocommerce_rest_api_v4_' . $prefix . '_';
-	}
-
-	/**
 	 * Get the item response for a shipping method.
 	 *
 	 * @param mixed           $zone    Shipping method data.
