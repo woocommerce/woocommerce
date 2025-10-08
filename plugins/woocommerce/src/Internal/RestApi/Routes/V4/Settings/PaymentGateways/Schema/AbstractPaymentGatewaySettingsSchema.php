@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGate
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WC_Payment_Gateway;
 use WP_Error;
 use WP_REST_Request;
