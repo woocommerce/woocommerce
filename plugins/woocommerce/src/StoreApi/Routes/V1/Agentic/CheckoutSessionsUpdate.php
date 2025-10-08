@@ -169,7 +169,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
-		if ( ! in_array( $current_status, [ CheckoutSessionStatus::READY_FOR_PAYMENT, CheckoutSessionStatus::NOT_READY_FOR_PAYMENT ] ) ) {
+		if ( ! in_array( $current_status, [ CheckoutSessionStatus::READY_FOR_PAYMENT, CheckoutSessionStatus::NOT_READY_FOR_PAYMENT ], true ) ) {
 			return new \WP_REST_Response(
 				[
 					'type'         => ErrorType::INVALID_REQUEST,

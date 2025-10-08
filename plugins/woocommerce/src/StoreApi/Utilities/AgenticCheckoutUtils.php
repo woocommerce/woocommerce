@@ -383,7 +383,7 @@ class AgenticCheckoutUtils {
 	/**
 	 * Calculate the status of the checkout session.
 	 *
-	 * @param \WC_Cart       $cart Cart object.
+	 * @param \WC_Cart $cart Cart object.
 	 *
 	 * @return string Status value.
 	 */

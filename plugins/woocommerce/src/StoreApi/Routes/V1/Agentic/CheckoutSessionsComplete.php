@@ -266,23 +266,22 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			AgenticCheckoutUtils::set_billing_address( $payment_data['billing_address'], WC()->customer );
 		}
 
-        /**
-         * Similar to Checkout::create_or_update_draft_order.
-         *
-         * @todo: Can move this to CheckoutTrait to share between Checkout.php and this controller.
-         */
-        $this->order = $this->get_draft_order();
-        if ( ! $this->order ) {
-            $this->order = $this->order_controller->create_order_from_cart();
-        } else {
-            $this->order_controller->update_order_from_cart( $this->order, true );
-        }
+		/**
+		 * Similar to Checkout::create_or_update_draft_order.
+		 * Can move this to CheckoutTrait to share between Checkout.php and this controller.
+		 */
+		$this->order = $this->get_draft_order();
+		if ( ! $this->order ) {
+			$this->order = $this->order_controller->create_order_from_cart();
+		} else {
+			$this->order_controller->update_order_from_cart( $this->order, true );
+		}
 
-        /**
-         * Stores the checkout session ID to the order meta.
-         */
-        $this->order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
-        $this->order->save_meta_data();
+		/**
+		 * Stores the checkout session ID to the order meta.
+		 */
+		$this->order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
+		$this->order->save_meta_data();
 
 		/**
 		 * Validate updated order before payment is attempted.
@@ -315,10 +314,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 			);
 		}
 
-        // Set the order status to 'pending' as an initial step.
-        $this->order->update_status( 'pending' );
+		// Set the order status to 'pending' as an initial step.
+		$this->order->update_status( 'pending' );
 
-        /**
+		/**
 		 * Process payment (reuse CheckoutTrait).
 		 */
 		$payment_result = new PaymentResult();
@@ -358,10 +357,10 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, $this->order->get_id() );
 
 		/**
-         * Build response from canonical cart schema with order.
-         */
+		 * Build response from canonical cart schema with order.
+		 */
 		$response_data = $this->schema->get_item_response( WC()->cart );
-		$response = rest_ensure_response( $response_data );
+		$response      = rest_ensure_response( $response_data );
 
 		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );
 	}

@@ -27,7 +27,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	/**
 	 * Mock payment gateway instance.
 	 *
-	 * @var Mock_Agentic_Payment_Gateway
+	 * @var MockAgenticPaymentGateway
 	 */
 	protected $mock_gateway;
 
@@ -102,7 +102,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * Register a mock agentic payment gateway for testing.
 	 */
 	private function register_agentic_payment_gateway() {
-		$this->mock_gateway = new Mock_Agentic_Payment_Gateway();
+		$this->mock_gateway = new MockAgenticPaymentGateway();
 		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
 
 		// Force payment gateways to reload.
@@ -765,7 +765,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	}
 }
 
-// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
+// phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound, Squiz.Classes.ClassFileName.NoMatch, Suin.Classes.PSR4.IncorrectClassName
 
 /**
  * Mock Agentic Payment Gateway for testing.
@@ -773,7 +773,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
  * This gateway supports the agentic_commerce feature and is used
  * in CheckoutSessionsComplete tests.
  */
-class Mock_Agentic_Payment_Gateway extends \WC_Payment_Gateway {
+class MockAgenticPaymentGateway extends \WC_Payment_Gateway {
 	/**
 	 * Constructor for the gateway.
 	 */

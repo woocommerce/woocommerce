@@ -404,8 +404,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$first_name = $customer->get_billing_first_name() ?: $customer->get_shipping_first_name();
-		$last_name  = $customer->get_billing_last_name() ?: $customer->get_shipping_last_name();
+		$first_name = $customer->get_billing_first_name() ? $customer->get_billing_first_name() : $customer->get_shipping_first_name();
+		$last_name  = $customer->get_billing_last_name() ? $customer->get_billing_last_name() : $customer->get_shipping_last_name();
 		$email      = $customer->get_billing_email();
 
 		if ( ! $first_name && ! $last_name && ! $email ) {
@@ -413,10 +413,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		return [
-			'first_name'   => $first_name ?: '',
-			'last_name'    => $last_name ?: '',
-			'email'        => $email ?: '',
-			'phone_number' => $customer->get_billing_phone() ?: '',
+			'first_name'   => $first_name ? $first_name : '',
+			'last_name'    => $last_name ? $last_name : '',
+			'email'        => $email ? $email : '',
+			'phone_number' => $customer->get_billing_phone() ? $customer->get_billing_phone() : '',
 		];
 	}
 
@@ -427,8 +427,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Buyer data or null.
 	 */
 	protected function format_buyer_from_order( $order ) {
-		$first_name = $order->get_billing_first_name() ?: $order->get_shipping_first_name();
-		$last_name  = $order->get_billing_last_name() ?: $order->get_shipping_last_name();
+		$first_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : $order->get_shipping_first_name();
+		$last_name  = $order->get_billing_last_name() ? $order->get_billing_last_name() : $order->get_shipping_last_name();
 		$email      = $order->get_billing_email();
 
 		if ( ! $first_name && ! $last_name && ! $email ) {
@@ -436,10 +436,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		return [
-			'first_name'   => $first_name ?: '',
-			'last_name'    => $last_name ?: '',
-			'email'        => $email ?: '',
-			'phone_number' => $order->get_billing_phone() ?: '',
+			'first_name'   => $first_name ? $first_name : '',
+			'last_name'    => $last_name ? $last_name : '',
+			'email'        => $email ? $email : '',
+			'phone_number' => $order->get_billing_phone() ? $order->get_billing_phone() : '',
 		];
 	}
 
@@ -620,9 +620,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$name = trim( $first_name . ' ' . $last_name );
 
 		return [
-			'name'        => $name ?: 'Customer',
+			'name'        => $name ? $name : 'Customer',
 			'line_one'    => $address_1,
-			'line_two'    => $address_2 ?: '',
+			'line_two'    => $address_2 ? $address_2 : '',
 			'city'        => $city,
 			'state'       => $state,
 			'country'     => $country,
