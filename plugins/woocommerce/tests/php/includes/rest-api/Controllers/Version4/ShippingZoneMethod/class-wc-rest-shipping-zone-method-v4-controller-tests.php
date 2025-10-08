@@ -392,6 +392,11 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		// Register a custom shipping method that will fail validation.
 		// Do this BEFORE creating the zone to ensure it's registered when validate_method_type is called.
 		$custom_method_class = new class() extends \WC_Shipping_Method {
+			/**
+			 * Constructor.
+			 *
+			 * @param int $instance_id Instance ID.
+			 */
 			public function __construct( $instance_id = 0 ) {
 				$this->id                 = 'test_failing_method';
 				$this->method_title       = 'Test Failing Method';
@@ -401,6 +406,12 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 				parent::__construct( $instance_id );
 			}
 
+			/**
+			 * Update instance settings from API.
+			 *
+			 * @param array $settings Settings array.
+			 * @return \WP_Error Always returns error to simulate validation failure.
+			 */
 			public function update_instance_settings_from_api( $settings ) {
 				// Always return an error to simulate validation failure.
 				return new \WP_Error(
