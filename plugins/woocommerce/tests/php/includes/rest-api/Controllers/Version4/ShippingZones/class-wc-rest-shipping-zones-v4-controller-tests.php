@@ -1409,7 +1409,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 	 * Test update zone clears locations with empty array.
 	 */
 	public function test_update_item_clear_locations() {
-		$zone            = $this->create_shipping_zone(
+		$zone          = $this->create_shipping_zone(
 			'Test Zone',
 			0,
 			array(
@@ -1419,7 +1419,7 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 				),
 			)
 		);
-		$this->zones[]   = $zone;
+		$this->zones[] = $zone;
 
 		// Verify zone has locations initially.
 		$this->assertCount( 1, $zone->get_zone_locations() );
