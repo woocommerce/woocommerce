@@ -98,9 +98,6 @@ class AgenticWebhookPayloadBuilder {
 			'refunded'       => 'fulfilled', // Refunded orders are still fulfilled
 			'failed'         => 'canceled',
 			'checkout-draft' => 'created',
-			// Custom statuses that might exist
-			'shipped'        => 'shipped',
-			'delivered'      => 'fulfilled',
 		);
 
 		// Check if status exists in map
