@@ -104,7 +104,7 @@ class Controller extends AbstractController {
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-				)
+				),
 			)
 		);
 	}
@@ -271,6 +271,6 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
 	 */
 	public function update_item( $request ) {
-		return rest_ensure_response('test');
+		return rest_ensure_response( 'test' );
 	}
 }
