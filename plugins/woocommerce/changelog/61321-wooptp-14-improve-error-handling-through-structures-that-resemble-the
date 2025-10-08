@@ -1,4 +1,4 @@
 Significance: minor
 Type: enhancement
 
-Conform to the Agentic Commerce Protocol spec when handling errors for checkout sessions.
+Confirm to the ACP spec when handling errors for checkout sessions.
