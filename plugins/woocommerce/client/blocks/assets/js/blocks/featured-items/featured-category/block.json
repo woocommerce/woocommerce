@@ -29,6 +29,12 @@
 			"__experimentalSkipSerialization": true
 		}
 	},
+	"allowedBlocks": [
+		"woocommerce/category-title",
+		"woocommerce/category-description",
+		"core/heading",
+		"core/buttons"
+	],
 	"attributes": {
 		"alt": {
 			"type": "string",
@@ -90,13 +96,14 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
-		},
-		"showDesc": {
-			"type": "boolean",
-			"default": true
 		}
 	},
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
-	"$schema": "https://schemas.wp.org/trunk/block.json"
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"usesContext": [ "termId", "termTaxonomy" ],
+	"providesContext": {
+		"termId": "categoryId",
+		"termTaxonomy": "termTaxonomy"
+	}
 }
