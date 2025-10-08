@@ -719,4 +719,135 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$result = $method->invoke( $this->controller, 'SomeUnknownFont' );
 		$this->assertEquals( "Arial, 'Helvetica Neue', Helvetica, sans-serif", $result );
 	}
+
+	/**
+	 * Test referenced value that is correctly read and used.
+	 */
+	public function test_referenced_value_correctly_resolved(): void {
+		// Mock theme data with a referenced value within styles subtree.
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(
+				'color' => array(
+					'palette' => array(
+						'theme' => array(
+							array(
+								'slug'  => 'primary',
+								'color' => '#007cba',
+								'name'  => 'Primary Color',
+							),
+						),
+					),
+				),
+			),
+			'styles'   => array(
+				'color'      => array(
+					'text'       => '#007cba',
+					'background' => array(
+						'ref' => 'styles.color.text',
+					),
+				),
+				'typography' => array(
+					'fontSize' => '16px',
+				),
+				'elements'   => array(
+					'button' => array(
+						'color' => array(
+							'background' => array(
+								'ref' => 'styles.color.text',
+							),
+						),
+					),
+				),
+			),
+		);
+
+		// Create a mock theme.
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Verify the referenced color value is correctly resolved.
+		$this->assertArrayHasKey( 'color', $synced_data['styles'] );
+		$this->assertArrayHasKey( 'background', $synced_data['styles']['color'] );
+		$this->assertEquals( '#007cba', $synced_data['styles']['color']['background'] );
+
+		// Verify button element also references the same color.
+		$this->assertArrayHasKey( 'elements', $synced_data['styles'] );
+		$this->assertArrayHasKey( 'button', $synced_data['styles']['elements'] );
+		$this->assertArrayHasKey( 'color', $synced_data['styles']['elements']['button'] );
+		$this->assertEquals( '#007cba', $synced_data['styles']['elements']['button']['color']['background'] );
+	}
+
+	/**
+	 * Test reference pointing to non-existing path should result in null.
+	 */
+	public function test_referenced_value_with_invalid_path_returns_null(): void {
+		// Mock theme data with invalid reference paths within styles subtree.
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(
+				'color' => array(
+					'palette' => array(
+						'theme' => array(
+							array(
+								'slug'  => 'primary',
+								'color' => '#007cba',
+								'name'  => 'Primary Color',
+							),
+						),
+					),
+				),
+			),
+			'styles'   => array(
+				'color'      => array(
+					'text'       => '#333333',
+					'background' => array(
+						'ref' => 'styles.color.nonexistent', // Invalid path - doesn't exist.
+					),
+					'link'       => array(
+						'ref' => 'styles.elements.button.color.background', // Invalid path - button doesn't exist.
+					),
+				),
+				'typography' => array(
+					'fontSize' => '16px',
+				),
+				'elements'   => array(
+					'heading' => array(
+						'color' => array(
+							'text' => array(
+								'ref' => 'styles.typography.nonexistent', // Invalid path - doesn't exist.
+							),
+						),
+					),
+				),
+			),
+		);
+
+		// Create a mock theme.
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Verify that invalid references are not included in synced data.
+		$this->assertArrayHasKey( 'color', $synced_data['styles'] );
+		$this->assertArrayNotHasKey( 'background', $synced_data['styles']['color'] );
+		$this->assertArrayNotHasKey( 'link', $synced_data['styles']['color'] );
+
+		// Verify that invalid references in elements are also not included.
+		$this->assertArrayHasKey( 'elements', $synced_data['styles'] );
+		$this->assertArrayHasKey( 'heading', $synced_data['styles']['elements'] );
+		$this->assertArrayHasKey( 'color', $synced_data['styles']['elements']['heading'] );
+		$this->assertArrayNotHasKey( 'text', $synced_data['styles']['elements']['heading']['color'] );
+	}
 }

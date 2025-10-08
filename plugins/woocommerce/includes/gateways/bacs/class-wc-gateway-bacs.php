@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -489,9 +490,37 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	/**
 	 * Get the settings URL for the gateway.
 	 *
-	 * @return string
+	 * @return string The settings page URL for the gateway.
 	 */
 	public function get_settings_url() {
-		return admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline/bacs' );
+		$should_use_react_settings_page = $this->is_reactified_settings_page();
+
+		// We must not include both the path and the section query parameter, as this can cause weird behavior.
+		return SettingsUtils::wc_payments_settings_url(
+			$should_use_react_settings_page ? '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id : null,
+			$should_use_react_settings_page ? array() : array( 'section' => $this->id )
+		);
+	}
+
+	/**
+	 * Check if the BACS settings page is reactified.
+	 *
+	 * @return bool Whether the BACS settings page is reactified or not.
+	 */
+	private function is_reactified_settings_page(): bool {
+		// Search for a WC_Settings_Payment_Gateways instance in the settings pages.
+		$payments_settings_page = null;
+		foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( $settings_page instanceof WC_Settings_Payment_Gateways ) {
+				$payments_settings_page = $settings_page;
+				break;
+			}
+		}
+		// If no instance found, default to reactified.
+		if ( empty( $payments_settings_page ) ) {
+			return true;
+		}
+
+		return $payments_settings_page->should_render_react_section( WC_Settings_Payment_Gateways::BACS_SECTION_NAME );
 	}
 }

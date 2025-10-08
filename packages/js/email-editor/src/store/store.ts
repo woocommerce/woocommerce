@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { createReduxStore, register } from '@wordpress/data';
+import { createReduxStore, register, select } from '@wordpress/data';
+
 import {
 	ReduxStoreConfig,
 	StoreDescriptor as GenericStoreDescriptor,
@@ -31,6 +32,12 @@ const getConfig = () =>
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 
 export const createStore = () => {
+	// Check if store is already registered
+	const storeState = select( storeName );
+	if ( storeState !== undefined ) {
+		return select( storeName );
+	}
+
 	const store = createReduxStore( storeName, getConfig() );
 	register( store );
 	return store;

@@ -6,6 +6,7 @@ import {
 	expect,
 	wpCLI,
 	TemplateCompiler,
+	BLOCK_THEME_SLUG,
 } from '@woocommerce/e2e-utils';
 
 const blockData = {
@@ -107,7 +108,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		);
 
 		await admin.visitSiteEditor( {
-			postId: 'woocommerce/woocommerce//archive-product',
+			postId: `${ BLOCK_THEME_SLUG }//archive-product`,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );

@@ -2,25 +2,20 @@
  * Internal dependencies
  */
 import { State } from './types';
-import { getEditorSettings, getEditorTheme, getUrls } from './settings';
 
 export function getInitialState(): State {
-	if ( ! window.WooCommerceEmailEditor ) {
-		throw new Error(
-			'WooCommerceEmailEditor global object is not available. This is required for the email editor to work.'
-		);
-	}
-
 	return {
-		editorSettings: getEditorSettings(),
-		theme: getEditorTheme(),
+		editorSettings: undefined,
+		theme: undefined,
 		styles: {
-			globalStylesPostId:
-				window.WooCommerceEmailEditor.user_theme_post_id,
+			globalStylesPostId: null,
 		},
-		urls: getUrls(),
+		urls: {
+			back: '',
+			listings: '',
+		},
 		preview: {
-			toEmail: window.WooCommerceEmailEditor.current_wp_user_email,
+			toEmail: '',
 			isModalOpened: false,
 			isSendingPreviewEmail: false,
 			sendingPreviewStatus: null,

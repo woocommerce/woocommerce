@@ -20,7 +20,7 @@ class AddressProviderController {
 	 *
 	 * @var string ID of preferred address provider.
 	 */
-	private $preferred_provider_option;
+	private $preferred_provider_option = '';
 
 	/**
 	 * Constructor.

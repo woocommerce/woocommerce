@@ -51,7 +51,7 @@ class Cart extends AbstractBlock {
 	 * Register block pattern for Empty Cart Message to make it translatable.
 	 */
 	public function register_patterns() {
-		$shop_permalink = wc_get_page_id( 'shop' ) ? get_permalink( wc_get_page_id( 'shop' ) ) : '';
+		$shop_permalink = wc_get_page_permalink( 'shop' );
 
 		register_block_pattern(
 			'woocommerce/cart-heading',

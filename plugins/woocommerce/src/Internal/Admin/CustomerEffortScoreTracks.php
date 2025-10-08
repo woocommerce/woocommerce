@@ -242,6 +242,8 @@ class CustomerEffortScoreTracks {
 			array()
 		);
 
+		$queue = is_array( $queue ) ? $queue : array();
+
 		$has_duplicate = array_filter(
 			$queue,
 			function ( $queue_item ) use ( $item ) {

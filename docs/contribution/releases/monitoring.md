@@ -1,6 +1,7 @@
 ---
 post_title: WooCommerce Release Monitoring
 sidebar_label: Release Monitoring
+sidebar_position: 7
 ---
 
 # WooCommerce Release Monitoring

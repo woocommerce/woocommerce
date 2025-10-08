@@ -17,6 +17,12 @@ import {
 	connectProduct,
 	removeNotice,
 } from '../../../../utils/functions';
+import {
+	getConnectionErrorMessage,
+	getConnectionErrorAction,
+	trackConnectErrorActionClicked,
+	type ConnectError,
+} from '../../error-utils';
 import { Subscription } from '../../types';
 import { NoticeStatus } from '../../../../contexts/types';
 import sanitizeHTML from '~/lib/sanitize-html';
@@ -82,24 +88,39 @@ export default function ConnectButton( props: ConnectProps ) {
 
 				refreshSubscriptionsList();
 			} )
-			.catch( () => {
-				addNotice(
-					props.subscription.product_key,
-					sprintf(
-						// translators: %s is the product name.
-						__( '%s couldn’t be connected.', 'woocommerce' ),
-						props.subscription.product_name
-					),
-					NoticeStatus.Error,
-					{
-						actions: [
+			.catch( ( error: unknown ) => {
+				const connectError = error as ConnectError;
+				const baseNoticeMessage = sprintf(
+					// translators: %s is the product name.
+					__( '%s couldn’t be connected.', 'woocommerce' ),
+					props.subscription.product_name
+				);
+				const noticeMessage = getConnectionErrorMessage(
+					connectError,
+					baseNoticeMessage
+				);
+				const action = getConnectionErrorAction( connectError );
+
+				const actions = action
+					? [ action ]
+					: [
 							{
 								label: __( 'Try again', 'woocommerce' ),
-								onClick: connect,
-								url: '',
+								onClick: () => {
+									trackConnectErrorActionClicked(
+										'try_again',
+										connectError.data?.code || ''
+									);
+									connect();
+								},
 							},
-						],
-					}
+					  ];
+
+				addNotice(
+					props.subscription.product_key,
+					noticeMessage,
+					NoticeStatus.Error,
+					{ actions }
 				);
 				setIsConnecting( false );
 				if ( props.onClose ) {

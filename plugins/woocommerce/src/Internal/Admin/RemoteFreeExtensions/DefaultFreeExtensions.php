@@ -190,7 +190,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 1, 60 ), // 50% segment with klaviyo
+						'value'       => array( 1, 84 ), // 70% segment with klaviyo
 						'default'     => false,
 						'operation'   => 'range',
 					),
@@ -220,7 +220,7 @@ class DefaultFreeExtensions {
 					array(
 						'type'        => 'option',
 						'option_name' => 'woocommerce_remote_variant_assignment',
-						'value'       => array( 61, 120 ), // 50% segment with mailpoet
+						'value'       => array( 85, 120 ), // 30% segment with mailpoet
 						'default'     => false,
 						'operation'   => 'range',
 					),

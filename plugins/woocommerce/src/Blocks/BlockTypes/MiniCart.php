@@ -494,6 +494,13 @@ class MiniCart extends AbstractBlock {
 	 */
 	protected function render_experimental_iapi_mini_cart( $attributes, $content, $block ) {
 		wp_enqueue_script_module( $this->get_full_block_name() );
+
+		// Enqueue all integration scripts registered for this block.
+		$integration_script_handles = $this->integration_registry->get_all_registered_script_handles();
+		foreach ( $integration_script_handles as $handle ) {
+			wp_enqueue_script( $handle );
+		}
+
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
@@ -539,7 +546,9 @@ class MiniCart extends AbstractBlock {
 			wp_interactivity_state(
 				$this->get_full_block_name(),
 				array(
+					'isOpen'             => false,
 					'totalItemsInCart'   => $cart_item_count,
+					'shouldShowTaxLabel' => $cart->get_cart_contents_tax() > 0,
 					'badgeIsVisible'     => $badge_is_visible,
 					'formattedSubtotal'  => $formatted_subtotal,
 					'drawerOverlayClass' => 'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out wc-block-components-drawer__screen-overlay--is-hidden',
@@ -553,18 +562,17 @@ class MiniCart extends AbstractBlock {
 			);
 
 			$context = array(
-				'isOpen'                       => false,
-				'productCountVisibility'       => $product_count_visibility,
-				'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+				'productCountVisibility' => $product_count_visibility,
 			);
 
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
-					'addToCartBehaviour'      => $attributes['addToCartBehaviour'],
-					'onCartClickBehaviour'    => $on_cart_click_behaviour,
-					'checkoutUrl'             => wc_get_checkout_url(),
-					'buttonAriaLabelTemplate' => $button_aria_label_template,
+					'displayCartPriceIncludingTax' => $display_cart_price_including_tax,
+					'addToCartBehaviour'           => $attributes['addToCartBehaviour'],
+					'onCartClickBehaviour'         => $on_cart_click_behaviour,
+					'checkoutUrl'                  => wc_get_checkout_url(),
+					'buttonAriaLabelTemplate'      => $button_aria_label_template,
 				)
 			);
 
@@ -575,12 +583,17 @@ class MiniCart extends AbstractBlock {
 				? 'role="link"'
 				: '';
 
+			// Render the minicart overlay in the body, outside of the block itself.
+			if ( ! has_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) ) ) {
+				add_action( 'wp_footer', array( $this, 'render_experimental_iapi_mini_cart_overlay' ) );
+			}
 			ob_start();
 			?>
 		
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
-				data-wp-init="callbacks.setupOpenDrawerListener"
+				data-wp-init="callbacks.setupEventListeners"
+				data-wp-init--refresh-cart-items="woocommerce::actions.refreshCartItems"
 				data-wp-watch="callbacks.disableScrollingOnBody"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
@@ -606,36 +619,62 @@ class MiniCart extends AbstractBlock {
 					<?php if ( $cart_always_shows_price ) : ?>
 						<span data-wp-text="state.formattedSubtotal" class="wc-block-mini-cart__amount" style="<?php echo 'color:' . esc_attr( $price_color ); ?>">
 						</span>
-						<?php
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo $this->get_include_tax_label_markup( $attributes );
-						?>
+						<?php if ( ! empty( $this->tax_label ) ) : ?>
+							<small
+								data-wp-bind--hidden="!state.shouldShowTaxLabel"
+								class="wc-block-mini-cart__tax-label"
+								style="color:<?php echo esc_attr( $price_color ); ?>"
+							>
+								<?php echo esc_html( $this->tax_label ); ?>
+							</small>
+						<?php endif; ?>
 					<?php endif; ?>
 				</button>
-				<div data-wp-on--click="callbacks.overlayCloseDrawer" data-wp-bind--class="state.drawerOverlayClass">
-					<div 
-						data-wp-bind--role="state.drawerRole"
-						data-wp-bind--aria-modal="context.isOpen"
-						data-wp-bind--aria-hidden="!context.isOpen"
-						data-wp-bind--tabindex="state.drawerTabIndex"
-						class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
-					>
-						<div class="wc-block-components-drawer__content">
-							<div class="wc-block-mini-cart__template-part">
-								<?php
-									// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-									echo $template_part_contents;
-								?>
-							</div>
-						</div>
-					</div>
-				</div>
 			</div>
 			<?php
 			return ob_get_clean();
 		}
 
 		return '';
+	}
+
+	/**
+	 * Echoes the Interactivity API Mini Cart overlay markup.
+	 *
+	 * @return void
+	 */
+	public function render_experimental_iapi_mini_cart_overlay() {
+		$template_part_contents = $this->get_template_part_contents( false );
+		$template_part_contents = do_blocks( $this->process_template_contents( $template_part_contents ) );
+		ob_start();
+		?>
+		<div
+			data-wp-interactive="woocommerce/mini-cart"
+			data-wp-router-region='{ "id": "woocommerce/mini-cart-overlay", "attachTo": "body" }'
+			data-wp-key="wc-mini-cart-overlay"
+			data-wp-on--click="callbacks.overlayCloseDrawer"
+			data-wp-bind--class="state.drawerOverlayClass"
+		>
+			<div
+				data-wp-bind--role="state.drawerRole"
+				data-wp-bind--aria-modal="state.isOpen"
+				data-wp-bind--aria-hidden="!state.isOpen"
+				data-wp-bind--tabindex="state.drawerTabIndex"
+				class="wc-block-mini-cart__drawer wc-block-components-drawer is-mobile"
+			>
+				<div class="wc-block-components-drawer__content">
+					<div class="wc-block-mini-cart__template-part">
+						<?php
+							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+							echo $template_part_contents;
+						?>
+					</div>
+				</div>
+			</div>
+		</div>				
+		<?php
+		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo wp_interactivity_process_directives( ob_get_clean() );
 	}
 
 	/**

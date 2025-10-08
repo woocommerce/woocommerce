@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Default allowed HTML tags for extended sanitization.
@@ -77,21 +77,19 @@ export const EXTENDED_ALLOWED_ATTR = [
  *
  * @param {string}   html                     The HTML to sanitize.
  * @param {Object}   config                   Optional configuration to extend/override defaults.
- * @param {string[]} config.allowedTags       Array of allowed HTML tags.
- * @param {Object}   config.allowedAttributes Object of allowed attributes by tag.
- * @return {Object} Object with sanitized HTML in _html property.
+ * @param {string[]} config.tags              Array of allowed HTML tags.
+ * @param {string[]} config.attr              Array of allowed HTML attributes.
+ * @return {Object} Object with sanitized HTML in __html property.
  */
 export default function sanitizeHtmlExtended( html, config = {} ) {
 	if ( ! html ) {
 		return '';
 	}
 
-	const finalConfig = {
-		ALLOWED_TAGS: config.allowedTags || EXTENDED_ALLOWED_TAGS,
-		ALLOWED_ATTR: config.allowedAttributes || EXTENDED_ALLOWED_ATTR,
-	};
-
 	return {
-		__html: sanitize( html, finalConfig ),
+		__html: sanitizeHTML( html, {
+			tags: config.tags || EXTENDED_ALLOWED_TAGS,
+			attr: config.attr || EXTENDED_ALLOWED_ATTR,
+		} ),
 	};
 }

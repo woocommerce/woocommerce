@@ -11,6 +11,7 @@ $border-width: 1px;
 		margin: 0;
 		overflow: hidden;
 		text-align: center;
+		> div,
 		> li {
 			margin: 0;
 			width: 100%;
@@ -127,6 +128,7 @@ $border-width: 1px;
 
 .wc-block-components-express-payment--cart {
 	.wc-block-components-express-payment__event-buttons {
+		> div,
 		> li {
 			padding-bottom: $gap-small;
 			text-align: center;

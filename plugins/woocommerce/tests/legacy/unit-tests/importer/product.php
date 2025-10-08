@@ -49,6 +49,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'prevent_timeouts' => false,
 			)
 		);
+
+		// Clear list of approved download directories before running tests.
+		wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register::class )->delete_all();
 	}
 
 	/**

@@ -20,6 +20,7 @@ import {
  * Internal dependencies
  */
 import './style.scss';
+import './editor.scss';
 import QuantityBadge from '../mini-cart/quantity-badge';
 
 export interface Attributes {
@@ -67,7 +68,11 @@ const Edit = ( { attributes, setAttributes }: Props ): JSX.Element => {
 					</ToggleGroupControl>
 				</PanelBody>
 			</InspectorControls>
-			<a className="wc-block-cart-link" href={ '#cart-pseudo-link' }>
+			<a
+				className="wc-block-cart-link"
+				href={ '#cart-pseudo-link' }
+				onClick={ ( event ) => event.preventDefault() }
+			>
 				<QuantityBadge
 					icon={ cartIcon }
 					productCountVisibility={ 'never' }

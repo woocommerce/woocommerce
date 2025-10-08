@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
@@ -139,20 +140,10 @@ function wc_delete_product_transients( $post_id = 0 ) {
 
 	if ( $post_id > 0 ) {
 		// Transient names that include an ID - since they are dynamic they cannot be cleaned in bulk without the ID.
-		$post_transient_names = array(
-			'wc_product_children_',
-			'wc_var_prices_',
-			'wc_related_',
-			'wc_child_has_weight_',
-			'wc_child_has_dimensions_',
-		);
-
-		foreach ( $post_transient_names as $transient ) {
-			delete_transient( $transient . $post_id );
-		}
+		wc_get_container()->get( ProductUtil::class )->delete_product_specific_transients( $post_id );
 	}
 
-	// Increments the transient version to invalidate cache.
+	// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
 	WC_Cache_Helper::get_transient_version( 'product', true );
 
 	do_action( 'woocommerce_delete_product_transients', $post_id );
@@ -533,9 +524,13 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
 function wc_scheduled_sales() {
 	$data_store = WC_Data_Store::load( 'product' );
 
+	$product_util           = wc_get_container()->get( ProductUtil::class );
+	$must_refresh_transient = false;
+
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
@@ -553,16 +548,18 @@ function wc_scheduled_sales() {
 
 				$product->save();
 			}
+
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_starting_sales', $product_ids );
 
-		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
 	}
 
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 		foreach ( $product_ids as $product_id ) {
 			$product = wc_get_product( $product_id );
@@ -575,11 +572,17 @@ function wc_scheduled_sales() {
 				$product->set_date_on_sale_from( '' );
 				$product->save();
 			}
+
+			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
 		}
 		do_action( 'wc_after_products_ending_sales', $product_ids );
 
-		WC_Cache_Helper::get_transient_version( 'product', true );
 		delete_transient( 'wc_products_onsale' );
+	}
+
+	if ( $must_refresh_transient ) {
+		// Kept for compatibility, WooCommerce core doesn't use product transient versions anymore.
+		WC_Cache_Helper::get_transient_version( 'product', true );
 	}
 }
 add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );

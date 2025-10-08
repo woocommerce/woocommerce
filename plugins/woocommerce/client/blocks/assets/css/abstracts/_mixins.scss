@@ -318,6 +318,12 @@ $fontSizes: (
 	}
 }
 
+@mixin cart-checkout-below-medium-container {
+	@container (max-width: 519px) {
+		@content;
+	}
+}
+
 @mixin cart-checkout-small-container {
 	@container (min-width: 400px) and (max-width: 519px) {
 		@content;
@@ -359,6 +365,22 @@ $fontSizes: (
 	&--static {
 		&::after {
 			display: none;
+		}
+	}
+}
+
+@mixin skeleton-animation-fade() {
+	transition: background-color 0.2s ease;
+
+	&::after {
+		transition: background-color 0.2s ease;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: background-color 0.2s ease;
+
+		&::after {
+			transition: background-color 0.2s ease;
 		}
 	}
 }

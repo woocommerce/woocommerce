@@ -1,9 +1,9 @@
 /**
  * External dependencies
  */
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
-const templatePath = 'woocommerce/woocommerce//page-cart';
+const templatePath = `${ BLOCK_THEME_SLUG }//page-cart`;
 const templateType = 'wp_template';
 
 test.describe( 'Test the cart template', () => {

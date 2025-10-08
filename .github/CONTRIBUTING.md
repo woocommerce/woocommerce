@@ -29,7 +29,7 @@ Please take a moment to review the [project readme](https://github.com/woocommer
 - [Naming conventions](https://github.com/woocommerce/woocommerce/wiki/Naming-conventions)
 - [String localisation guidelines](https://github.com/woocommerce/woocommerce/wiki/String-localisation-guidelines)
 - [Running unit tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/README.md)
-- [Running e2e tests](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md)
+- [Running e2e tests](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/tests/e2e-pw#guide-for-writing-e2e-tests)
 
 ## Coding Guidelines and Development 🛠
 

@@ -55,7 +55,7 @@ describe( 'SettingsButton', () => {
 				/>
 			</Router>
 		);
-		fireEvent.click( getByRole( 'link', { name: 'Manage' } ) );
+		fireEvent.click( getByRole( 'button', { name: 'Manage' } ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'settings_payments_provider_manage_click',
 			expect.objectContaining( {

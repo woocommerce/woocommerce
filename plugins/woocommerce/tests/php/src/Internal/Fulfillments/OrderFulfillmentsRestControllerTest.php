@@ -103,8 +103,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check the response.
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillments', $response->get_data() );
-		$fulfillments = $response->get_data()['fulfillments'];
+
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 		$this->assertEquals( 10, count( $fulfillments ) );
@@ -177,7 +177,9 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check the response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillments', $response->get_data() );
+
+		$this->assertArrayHasKey( 'entity_id', $response->get_data()[0] );
+		$this->assertEquals( self::$created_order_ids[0], $response->get_data()[0]['entity_id'] );
 
 		// Clean up the test environment.
 		wp_set_current_user( $current_user->ID );
@@ -294,11 +296,10 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check the response. It should be ok.
 		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillment', $response->get_data() );
-		$fulfillment = $response->get_data()['fulfillment'];
+		$fulfillment = $response->get_data();
 		$this->assertIsArray( $fulfillment );
-		$this->assertArrayHasKey( 'fulfillment_id', $fulfillment );
-		$this->assertNotNull( $fulfillment['fulfillment_id'] );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+		$this->assertNotNull( $fulfillment['id'] );
 		$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
 		$this->assertEquals( $order->get_id(), $fulfillment['entity_id'] );
 		$this->assertEquals( 'unfulfilled', $fulfillment['status'] );
@@ -498,11 +499,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Get the fulfillment for the order.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id );
@@ -511,9 +512,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check if $fulfillments[0] is the same as $response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillment', $response->get_data() );
-		$fulfillment = $response->get_data()['fulfillment'];
-		$this->assertEquals( $fulfillments[0]['fulfillment_id'], $fulfillment['fulfillment_id'] );
+		$fulfillment = $response->get_data();
+		$this->assertEquals( $fulfillments[0]['id'], $fulfillment['id'] );
 		$this->assertEquals( $fulfillments[0]['entity_type'], $fulfillment['entity_type'] );
 		$this->assertEquals( $fulfillments[0]['entity_id'], $fulfillment['entity_id'] );
 		$this->assertEquals( $fulfillments[0]['status'], $fulfillment['status'] );
@@ -531,11 +531,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Set the current user to an admin.
 		wp_set_current_user( 1 );
@@ -547,9 +547,8 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		// Check if $fulfillments[0] is the same as $response.
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillment', $response->get_data() );
-		$fulfillment = $response->get_data()['fulfillment'];
-		$this->assertEquals( $fulfillments[0]['fulfillment_id'], $fulfillment['fulfillment_id'] );
+		$fulfillment = $response->get_data();
+		$this->assertEquals( $fulfillments[0]['id'], $fulfillment['id'] );
 	}
 
 	/**
@@ -561,11 +560,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Get the fulfillment for the order with an invalid order ID.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/999999/fulfillments/' . $fulfillment_id );
@@ -592,7 +591,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -625,11 +624,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -660,11 +659,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( self::$created_user_id );
@@ -728,11 +727,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Update the fulfillment for the order.
 		wp_set_current_user( 1 );
@@ -782,13 +781,12 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( WP_Http::OK, $response->get_status() );
 
 		$this->assertIsArray( $response->get_data() );
-		$this->assertArrayHasKey( 'fulfillment', $response->get_data() );
 
-		$fulfillment = $response->get_data()['fulfillment'];
+		$fulfillment = $response->get_data();
 		$this->assertIsArray( $fulfillment );
 
-		$this->assertArrayHasKey( 'fulfillment_id', $fulfillment );
-		$this->assertNotNull( $fulfillment['fulfillment_id'] );
+		$this->assertArrayHasKey( 'id', $fulfillment );
+		$this->assertNotNull( $fulfillment['id'] );
 
 		$this->assertEquals( WC_Order::class, $fulfillment['entity_type'] );
 		$this->assertEquals( $order_id, $fulfillment['entity_id'] );
@@ -841,11 +839,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Update the fulfillment for the order with an invalid order ID.
 		wp_set_current_user( 1 );
@@ -910,7 +908,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -980,11 +978,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Update the fulfillment for the order with an invalid fulfillment ID.
 		wp_set_current_user( 1 );
@@ -1040,11 +1038,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1143,11 +1141,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1176,11 +1174,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1201,11 +1199,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1234,7 +1232,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -1268,11 +1266,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1303,11 +1301,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		// Get the fulfillment meta data for the order.
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1341,7 +1339,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 					unset( $meta['id'] );
 					return $meta;
 				},
-				$response->get_data()['meta_data']
+				$response->get_data()
 			)
 		);
 	}
@@ -1355,11 +1353,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1394,7 +1392,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 					unset( $meta['id'] );
 					return $meta;
 				},
-				$response->get_data()['meta_data']
+				$response->get_data()
 			)
 		);
 	}
@@ -1408,11 +1406,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1441,7 +1439,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -1475,11 +1473,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1510,11 +1508,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[1]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[1]['id'];
 
 		// Update the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1558,11 +1556,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[2]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[2]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1625,7 +1623,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 					unset( $meta['id'] );
 					return $meta;
 				},
-				$response->get_data()['meta_data']
+				$response->get_data()
 			)
 		);
 
@@ -1642,11 +1640,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1694,7 +1692,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -1747,11 +1745,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 
@@ -1799,11 +1797,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[4]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[4]['id'];
 
 		// Delete the fulfillment meta data for the order.
 		$request = new WP_REST_Request( 'DELETE', '/wc/v3/orders/' . $order_id . '/fulfillments/' . $fulfillment_id . '/metadata' );
@@ -1838,11 +1836,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1859,7 +1857,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Check the response. It should be ok.
-		$this->assertEquals( WP_Http::NO_CONTENT, $response->get_status() );
+		$this->assertEquals( WP_Http::OK, $response->get_status() );
 		// Clean up the test environment.
 		wp_set_current_user( 0 );
 	}
@@ -1873,11 +1871,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( 1 );
 
@@ -1916,7 +1914,7 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
@@ -1960,11 +1958,11 @@ class OrderFulfillmentsRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id . '/fulfillments' );
 		$response = $this->server->dispatch( $request );
 
-		$fulfillments = $response->get_data()['fulfillments'];
+		$fulfillments = $response->get_data();
 		$this->assertIsArray( $fulfillments );
 		$this->assertCount( 10, $fulfillments );
 
-		$fulfillment_id = $fulfillments[0]['fulfillment_id'];
+		$fulfillment_id = $fulfillments[0]['id'];
 
 		wp_set_current_user( self::$created_user_id );
 

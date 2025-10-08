@@ -1,6 +1,7 @@
 .wp-block-woocommerce-cart {
 	// Don't remove this, it marks the container for container queries used in inner blocks.
 	container-type: inline-size;
+	width: 100%;
 }
 
 .wc-block-cart {
@@ -184,6 +185,7 @@
 		min-height: 15em;
 		display: block;
 		@include skeleton-animation();
+		@include skeleton-animation-fade();
 	}
 
 	.wp-block-woocommerce-cart-totals-block {
@@ -198,14 +200,15 @@
 	.wp-block-woocommerce-cart-express-payment-block,
 	.wp-block-woocommerce-proceed-to-checkout-block,
 	.wp-block-woocommerce-cart-accepted-payment-methods-block {
-		min-height: 3em;
+		min-height: 48px;
 		display: block;
 		@include skeleton-animation();
+		@include skeleton-animation-fade();
 		margin: 0 0 1em 0;
 	}
 
 	div.wp-block-woocommerce-cart-order-summary-block {
-		height: 20em;
+		height: 200px;
 	}
 	div.wp-block-woocommerce-cart-order-summary-totals-block {
 		border-top: none;

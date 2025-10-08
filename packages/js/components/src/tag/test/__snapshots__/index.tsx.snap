@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Tag <Tag label="foo" /> should render a tag with the label foo 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
     <p
@@ -126,7 +126,7 @@ Object {
 `;
 
 exports[`Tag <Tag label="foo" popoverContents={ <p>This is a popover</p> } /> should render a tag with a popover 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
     <p
@@ -253,7 +253,7 @@ Object {
 `;
 
 exports[`Tag <Tag label="foo" remove={ noop } /> should render a tag with a close button 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
     <p
@@ -418,7 +418,7 @@ Object {
 `;
 
 exports[`Tag <Tag label="foo" screenReaderLabel="FooBar" /> should render a tag with a screen reader label 1`] = `
-Object {
+{
   "asFragment": [Function],
   "baseElement": <body>
     <p

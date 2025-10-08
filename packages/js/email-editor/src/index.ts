@@ -7,7 +7,8 @@ import { initialize } from './editor';
  * The unique identifier used to register the email editor data store.
  * This store manages the email editor's state and settings.
  */
-export { storeName } from './store';
+export { storeName, createStore } from './store';
+export { useIsEmailEditor } from './hooks';
 
 /**
  * This method is used to initialize the email editor.
@@ -23,7 +24,7 @@ export { storeName } from './store';
  *    "urls": {
  *      "listings": "", // optional The URL for the listings page.
  *      "send": "", // optional The URL for the send button.
- *      "back": "" // optionsl The URL for the back button (top left corner).
+ *      "back": "" // optional The URL for the back button (top left corner).
  *    }
  *	}
  *
@@ -43,4 +44,36 @@ export function initializeEditor( htmlId: string ) {
 	}
 }
 
+/**
+ * Experimental component meant as a replacement for initializeEditor.
+ * Still working on the API, so it's not recommended to use it in production.
+ *
+ * @param postId   - The ID of the post to edit.
+ * @param postType - The type of the post to edit.
+ * @param config   - The configuration for the editor.
+ *
+ * @example
+ * ```jsx
+ * import { ExperimentalEmailEditor } from '@woocommerce/email-editor';
+ *
+ * <ExperimentalEmailEditor
+ *   postId="123"
+ *   postType="email"
+ *   config={{
+ *     editorSettings: {...},
+ *     theme: {...},
+ *     urls: {...},
+ *     userEmail: "user@example.com",
+ *     globalStylesPostId: 456
+ *   }}
+ * />
+ */
 export { ExperimentalEmailEditor } from './editor';
+
+export type {
+	EmailEditorSettings,
+	EmailTheme,
+	EmailEditorUrls,
+} from './store/types';
+
+export { SendPreviewEmail } from './components/preview';

@@ -1655,8 +1655,10 @@ function wc_back_link( $label, $url ) {
  * @param string $url   URL of the page to return to.
  */
 function wc_back_header( $title, $label, $url ) {
+	$arrow = is_rtl() ? 'dashicons-arrow-right-alt2' : 'dashicons-arrow-left-alt2';
+
 	echo '<h2 class="wc-admin-header">';
-	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons dashicons-arrow-left-alt2"></span></a></small>';
+	echo '<small><a href="' . esc_url( $url ) . '" aria-label="' . esc_attr( $label ) . '"><span class="dashicons ' . esc_attr( $arrow ) . '" aria-hidden="true"></span></a></small>';
 	echo esc_html( $title );
 	echo '</h2>';
 }

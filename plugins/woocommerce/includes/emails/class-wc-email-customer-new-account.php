@@ -65,6 +65,7 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 			$this->id             = 'customer_new_account';
 			$this->customer_email = true;
 			$this->title          = __( 'New account', 'woocommerce' );
+			$this->email_group    = 'accounts';
 			$this->description    = __( 'Send an email to customers notifying them that they have created an account', 'woocommerce' );
 			$this->template_html  = 'emails/customer-new-account.php';
 			$this->template_plain = 'emails/plain/customer-new-account.php';

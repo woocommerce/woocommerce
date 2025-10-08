@@ -18,7 +18,8 @@
 			"allowOrientation": true,
 			"allowEditing": true,
 			"allowJustification": false
-		}
+		},
+		"email": true
 	},
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId" ],

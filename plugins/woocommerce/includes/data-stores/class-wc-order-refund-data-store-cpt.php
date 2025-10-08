@@ -77,12 +77,18 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	protected function read_order_data( &$refund, $post_object ) {
 		parent::read_order_data( $refund, $post_object );
 		$id = $refund->get_id();
+
+		$post_meta = get_post_meta( $id );
+
+		$refunded_by = $post_meta['_refunded_by'][0] ?? null;
+		$reason      = $post_meta['_refund_reason'][0] ?? '';
+
 		$refund->set_props(
 			array(
-				'amount'           => get_post_meta( $id, '_refund_amount', true ),
-				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? get_post_meta( $id, '_refunded_by', true ) : absint( $post_object->post_author ),
-				'refunded_payment' => wc_string_to_bool( get_post_meta( $id, '_refunded_payment', true ) ),
-				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? get_post_meta( $id, '_refund_reason', true ) : $post_object->post_excerpt,
+				'amount'           => $post_meta['_refund_amount'][0] ?? 0,
+				'refunded_by'      => metadata_exists( 'post', $id, '_refunded_by' ) ? $refunded_by : absint( $post_object->post_author ),
+				'refunded_payment' => wc_string_to_bool( $post_meta['_refunded_payment'][0] ?? false ),
+				'reason'           => metadata_exists( 'post', $id, '_refund_reason' ) ? $reason : $post_object->post_excerpt,
 			)
 		);
 	}

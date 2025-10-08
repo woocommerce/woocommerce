@@ -276,6 +276,7 @@ class WC_Brands {
 						'add_new_item'      => __( 'Add New Brand', 'woocommerce' ),
 						'new_item_name'     => __( 'New Brand Name', 'woocommerce' ),
 						'not_found'         => __( 'No Brands Found', 'woocommerce' ),
+						'no_terms'          => __( 'No brands', 'woocommerce' ),
 						'back_to_items'     => __( '&larr; Go to Brands', 'woocommerce' ),
 					),
 
@@ -431,10 +432,14 @@ class WC_Brands {
 
 		if ( ! empty( $brands ) && is_array( $brands ) ) {
 			// Can only return one brand, so pick the first.
+			$brand_thumbnail = wc_get_brand_thumbnail_url( $brands[0]->term_id, 'full' );
 			$markup['brand'] = array(
 				'@type' => 'Brand',
 				'name'  => $brands[0]->name,
 			);
+			if ( $brand_thumbnail ) {
+				$markup['brand']['logo'] = $brand_thumbnail;
+			}
 		}
 
 		return $markup;

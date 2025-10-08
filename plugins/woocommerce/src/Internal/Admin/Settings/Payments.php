@@ -173,7 +173,7 @@ class Payments {
 				'management'  => array(
 					'_links' => array(
 						'settings' => array(
-							'href' => admin_url( 'admin.php?page=wc-settings&tab=checkout&path=/offline' ),
+							'href' => Utils::wc_payments_settings_url( '/' . ( class_exists( '\WC_Settings_Payment_Gateways' ) ? \WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME : 'offline' ) ),
 						),
 					),
 				),

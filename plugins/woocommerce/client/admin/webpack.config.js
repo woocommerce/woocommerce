@@ -57,6 +57,7 @@ const wcAdminPackages = [
 	'onboarding',
 	'block-templates',
 	'product-editor',
+	'sanitize',
 	'settings-editor',
 	'remote-logging',
 	'email-editor',

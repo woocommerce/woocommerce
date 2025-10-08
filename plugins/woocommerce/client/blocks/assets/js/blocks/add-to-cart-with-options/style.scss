@@ -45,15 +45,10 @@
 			color: currentColor;
 			margin: 0;
 			font-size: 0.8em;
-			height: 1.5em;
 			box-sizing: content-box;
-			/**
-			* This is a base style for the input text element in WooCommerce that prevents inputs from appearing too small.
-			*
-			* @link https://github.com/woocommerce/woocommerce/blob/95ca53675f2817753d484583c96ca9ab9f725172/plugins/woocommerce/client/legacy/css/woocommerce-blocktheme.scss#L203-L206
-			*/
-			padding: 0.9rem 0;
+			padding: 0.7rem 0;
 			margin-right: unset;
+			max-width: 3.631em; /* This value is based on the WC core styles. */
 
 			&:focus {
 				border-radius: unset;

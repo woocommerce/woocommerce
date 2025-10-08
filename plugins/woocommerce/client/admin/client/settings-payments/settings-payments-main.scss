@@ -1,3 +1,9 @@
+/* *
+ * Internal dependencies
+ */
+/* This is imported here to avoid build errors when importing the same file in multiple places. */
+@import "./components/modals/modals.scss";
+
 /* These keyframes and spinner style are copied from the Stripe Spinner component https://docs.stripe.com/stripe-apps/components/spinner?app-sdk-version=8  */
 @keyframes SpinnerAnimationShow {
 	0% {

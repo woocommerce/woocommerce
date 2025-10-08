@@ -49,7 +49,6 @@ test.describe( 'Template part customization', () => {
 	} );
 
 	const templateName = 'Mini-Cart';
-	const templatePath = 'mini-cart';
 
 	const userText = `Hello World in the ${ templateName } template`;
 
@@ -60,11 +59,12 @@ test.describe( 'Template part customization', () => {
 			page,
 			testUtils,
 		} ) => {
-			// Edit the theme template.
 			await admin.visitSiteEditor( {
-				postId: `${ CLASSIC_CHILD_THEME_WITH_BLOCK_TEMPLATE_PARTS_SLUG }//${ templatePath }`,
 				postType: 'wp_template_part',
-				canvas: 'edit',
+			} );
+
+			await editor.openTemplate( {
+				templateName,
 			} );
 
 			await editor.insertBlock( {

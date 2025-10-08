@@ -27,7 +27,59 @@ class ProductImageGallery extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return [ 'query', 'queryId', 'postId' ];
+		return array( 'query', 'queryId', 'postId' );
+	}
+
+	/**
+	 * Enqueue assets specific to this block.
+	 *
+	 * @param array    $attributes Block attributes.
+	 * @param string   $content Block content.
+	 * @param WP_Block $block Block instance.
+	 */
+	protected function enqueue_assets( $attributes, $content, $block ) {
+		parent::enqueue_assets( $attributes, $content, $block );
+
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_legacy_assets' ], 20 );
+	}
+
+	/**
+	 * Enqueue legacy assets when this block is used as we don't enqueue them for block themes anymore.
+	 *
+	 * Note: This enqueue logic is intentionally duplicated in ClassicTemplate.php
+	 * to keep legacy blocks independent and allow for separate deprecation paths.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/pull/60223
+	 */
+	public function enqueue_legacy_assets() {
+		// Legacy script dependencies for backward compatibility.
+		$need_single_product_script = false;
+
+		if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
+			$need_single_product_script = true;
+			wp_enqueue_script( 'wc-zoom' );
+		}
+
+		if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
+			$need_single_product_script = true;
+			wp_enqueue_script( 'wc-flexslider' );
+		}
+
+		if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+			$need_single_product_script = true;
+			wp_enqueue_script( 'wc-photoswipe-ui-default' );
+			wp_enqueue_style( 'photoswipe-default-skin' );
+			add_action(
+				'wp_footer',
+				function () {
+					wc_get_template( 'single-product/photoswipe.php' );
+				}
+			);
+		}
+
+		if ( $need_single_product_script ) {
+			wp_enqueue_script( 'wc-single-product' );
+		}
 	}
 
 	/**
@@ -55,10 +107,9 @@ class ProductImageGallery extends AbstractBlock {
 			return '';
 		}
 
-		if ( class_exists( 'WC_Frontend_Scripts' ) ) {
-			$frontend_scripts = new \WC_Frontend_Scripts();
-			$frontend_scripts::load_scripts();
-		}
+		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
 
 		ob_start();
 		woocommerce_show_product_sale_flash();
