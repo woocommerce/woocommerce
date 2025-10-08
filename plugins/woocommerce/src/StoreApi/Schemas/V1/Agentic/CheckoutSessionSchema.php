@@ -8,6 +8,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
@@ -467,6 +468,13 @@ class CheckoutSessionSchema extends AbstractSchema {
 				];
 			}
 		}
+
+		$first_gateway = reset( $available_gateways );
+
+		return [
+			'provider'                  => $first_gateway->id,
+			'supported_payment_methods' => [ PaymentMethod::CARD ], // Default, can be expanded.
+		];
 	}
 
 	/**

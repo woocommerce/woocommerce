@@ -4,13 +4,13 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Controller as OrdersController;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderCouponSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderItemSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderCouponSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderFeeSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderTaxSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderShippingSchema;
 
 /**
  * Orders Controller tests for V4 REST API.
@@ -93,8 +93,8 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
 
 		// Create utils instances.
-		$collection_query = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\CollectionQuery();
-		$update_utils     = new \Automattic\WooCommerce\RestApi\Routes\V4\Orders\UpdateUtils();
+		$collection_query = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery();
+		$update_utils     = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\UpdateUtils();
 
 		$this->endpoint = new OrdersController();
 		$this->endpoint->init( $this->order_schema, $collection_query, $update_utils );
