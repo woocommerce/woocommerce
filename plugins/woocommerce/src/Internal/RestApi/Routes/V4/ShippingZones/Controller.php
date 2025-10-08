@@ -177,10 +177,10 @@ class Controller extends AbstractController {
 	 */
 	public function check_permissions( $request ) {
 		if ( ! wc_shipping_enabled() ) {
-			return new WP_Error(
-				'rest_shipping_disabled',
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'disabled',
 				__( 'Shipping is disabled.', 'woocommerce' ),
-				array( 'status' => WP_Http::SERVICE_UNAVAILABLE )
+				WP_Http::SERVICE_UNAVAILABLE
 			);
 		}
 
