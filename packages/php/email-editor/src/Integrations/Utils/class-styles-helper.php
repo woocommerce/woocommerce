@@ -31,7 +31,7 @@ class Styles_Helper {
 	 * @param string|int $value String with value and unit or integer value.
 	 * @return float
 	 */
-	public static function parse_value( string|int $value ): float {
+	public static function parse_value( $value ): float {
 		if ( is_int( $value ) ) {
 			return (float) $value;
 		}
