@@ -21,6 +21,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 */
 	private $jetpack_connection_manager_mock;
 
+	/**
+	 * Tear down the test case.
+	 */
 	public function tearDown(): void {
 		parent::tearDown();
 
@@ -72,11 +75,10 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->method( 'is_connected' )
 			->willReturn( false );
 
-
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		$routes = array_keys(rest_get_server()->get_routes() );
+		$routes = array_keys( rest_get_server()->get_routes() );
 
 		$this->assertNotContains( '/wc-push-notifications/push-tokens', $routes );
 		$this->assertNotContains( '/wc-push-notifications/push-tokens/(?P<id>[\d]+)', $routes );
@@ -96,7 +98,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 		$push_notifications->register();
 
-		$routes = array_keys(rest_get_server()->get_routes() );
+		$routes = array_keys( rest_get_server()->get_routes() );
 
 		$this->assertContains( '/wc-push-notifications/push-tokens', $routes );
 		$this->assertContains( '/wc-push-notifications/push-tokens/(?P<id>[\d]+)', $routes );
