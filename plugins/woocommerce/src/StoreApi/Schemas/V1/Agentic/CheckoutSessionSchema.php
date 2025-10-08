@@ -531,18 +531,20 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$items = [];
 
 		foreach ( $order->get_items() as $item_id => $item ) {
-			$product     = $item->get_product();
 			$quantity    = $item->get_quantity();
-			$base_amount = $this->amount_to_cents( $product->get_price() * $quantity );
+			$base_amount = $this->amount_to_cents( $item->get_subtotal() );
 			$discount    = $this->amount_to_cents( $item->get_subtotal() - $item->get_total() );
 			$subtotal    = $base_amount - $discount;
 			$tax         = $this->amount_to_cents( $item->get_total_tax() );
 			$total       = $subtotal + $tax;
 
+			// Use product_id from the order item, with variation_id as fallback.
+			$item_product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+
 			$items[] = [
 				'id'          => (string) $item_id,
 				'item'        => [
-					'id'       => (string) $product->get_id(),
+					'id'       => (string) $item_product_id,
 					'quantity' => $quantity,
 				],
 				'base_amount' => $base_amount,
