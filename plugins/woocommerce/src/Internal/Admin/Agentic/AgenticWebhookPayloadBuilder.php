@@ -60,22 +60,11 @@ class AgenticWebhookPayloadBuilder {
 	private function build_order_data( WC_Order $order ): array {
 		return array(
 			'type'                => 'order',
-			'checkout_session_id' => $this->get_checkout_session_id( $order ),
+			'checkout_session_id' => $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID ),
 			'permalink_url'       => $this->get_order_permalink( $order ),
 			'status'              => $this->map_order_status( $order->get_status() ),
 			'refunds'             => $this->build_refunds_data( $order ),
 		);
-	}
-
-	/**
-	 * Get the checkout session ID from the order.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @return string Checkout session ID.
-	 */
-	private function get_checkout_session_id( WC_Order $order ): string {
-		$session_id = $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID );
-		return ! empty( $session_id ) ? $session_id : 'checkout_session_' . $order->get_id();
 	}
 
 	/**

@@ -124,17 +124,6 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test fallback checkout session ID generation.
-	 */
-	public function test_fallback_checkout_session_id() {
-		$order   = \WC_Helper_Order::create_order();
-		$payload = $this->payload_builder->build_payload( 'order_create', $order );
-
-		$expected_session_id = 'checkout_session_' . $order->get_id();
-		$this->assertEquals( $expected_session_id, $payload['data']['checkout_session_id'] );
-	}
-
-	/**
 	 * Test status mapping filter.
 	 *
 	 * @dataProvider status_filter_provider
