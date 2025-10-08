@@ -214,7 +214,27 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-        /**
+		/**
+		 * Verify checkout session is ready for payment.
+		 */
+		$session_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
+			return new \WP_REST_Response(
+				[
+					'type'         => ErrorType::INVALID_REQUEST,
+					'code'         => ErrorCode::INVALID,
+					'content_type' => MessageContentType::PLAIN,
+					'content'      => sprintf(
+					/* translators: %s: current session status */
+						__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
+						$session_status
+					),
+				],
+				400
+			);
+		}
+
+		/**
 		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
 		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
 		 */
@@ -263,26 +283,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
          */
         $this->order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, $request->get_param( 'checkout_session_id' ) );
         $this->order->save_meta_data();
-
-        /**
-         * Verify checkout session is ready for payment.
-         */
-        $session_status = AgenticCheckoutUtils::calculate_status( WC()->cart );
-        if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
-            return new \WP_REST_Response(
-                [
-                    'type'         => ErrorType::INVALID_REQUEST,
-                    'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-                    'content'      => sprintf(
-                    	/* translators: %s: current session status */
-                        __( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
-                        $session_status
-                    ),
-                ],
-                400
-            );
-        }
 
 		/**
 		 * Validate updated order before payment is attempted.
