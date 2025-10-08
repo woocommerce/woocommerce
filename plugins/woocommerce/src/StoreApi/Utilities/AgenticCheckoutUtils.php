@@ -131,7 +131,7 @@ class AgenticCheckoutUtils {
 					]
 				);
 			} catch ( RouteException $exception ) {
-				$message = $exception->getMessage();
+				$message = wp_specialchars_decode( $exception->getMessage(), ENT_QUOTES );
 				$param   = '$.items[' . $item_index . ']';
 
 				// Check if it's a RouteException with a specific error code.
@@ -140,7 +140,7 @@ class AgenticCheckoutUtils {
 					switch ( $exception->getErrorCode() ) {
 						case 'woocommerce_rest_product_out_of_stock':
 						case 'woocommerce_rest_product_partially_out_of_stock':
-							$message_error = MessageError::out_of_stock( $exception->getMessage(), $param );
+							$message_error = MessageError::out_of_stock( $message, $param );
 							$error_messages->add( $message_error );
 							return;
 					}
