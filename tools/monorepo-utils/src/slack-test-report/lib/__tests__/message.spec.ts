@@ -458,6 +458,67 @@ describe( 'createMessage', () => {
 			],
 		} );
 	} );
+
+	it( 'should limit jobs list to 5 and show remaining count', async () => {
+		const withManyJobsOptions = {
+			...defaultOptions,
+			jobsList: 'Job 1,Job 2,Job 3,Job 4,Job 5,Job 6,Job 7,Job 8',
+		};
+
+		const result = await createMessage( withManyJobsOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2\n• Job 3\n• Job 4\n• Job 5\n• _3 more_',
+				},
+			],
+		} );
+	} );
+
+	it( 'should limit jobs list to 5 with custom header', async () => {
+		const withManyJobsAndHeaderOptions = {
+			...defaultOptions,
+			jobsList:
+				'Failed:###Job 1,Job 2,Job 3,Job 4,Job 5,Job 6,Job 7',
+		};
+
+		const result = await createMessage( withManyJobsAndHeaderOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '*Failed:*\n• Job 1\n• Job 2\n• Job 3\n• Job 4\n• Job 5\n• _2 more_',
+				},
+			],
+		} );
+	} );
+
+	it( 'should not show "more" when exactly 5 jobs', async () => {
+		const withExactly5JobsOptions = {
+			...defaultOptions,
+			jobsList: 'Job 1,Job 2,Job 3,Job 4,Job 5',
+		};
+
+		const result = await createMessage( withExactly5JobsOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2\n• Job 3\n• Job 4\n• Job 5',
+				},
+			],
+		} );
+	} );
 } );
 
 describe( 'getBlocksChunksBySize', () => {

@@ -195,12 +195,22 @@ export async function createMessage( options: Options ) {
 			.split( ',' )
 			.filter( ( job ) => job.trim() !== '' );
 		if ( jobs.length > 0 ) {
-			const jobsText = jobs
+			const maxJobs = 5;
+			const displayJobs =
+				jobs.length > maxJobs ? jobs.slice( 0, maxJobs ) : jobs;
+			const jobsText = displayJobs
 				.map( ( job ) => `• ${ job.trim() }` )
 				.join( '\n' );
-			const text = header
-				? `*${ header }*\n${ jobsText }`
-				: jobsText;
+
+			let text = jobsText;
+			if ( jobs.length > maxJobs ) {
+				const remaining = jobs.length - maxJobs;
+				text += `\n• _${ remaining } more_`;
+			}
+			if ( header ) {
+				text = `*${ header }*\n${ text }`;
+			}
+
 			mainMsgBlocks.push( {
 				type: 'context',
 				elements: [
