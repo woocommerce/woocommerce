@@ -294,8 +294,8 @@ class WC_Install {
 			'wc_update_1000_multisite_visibility_setting',
 			'wc_update_1000_remove_patterns_toolkit_transient',
 		),
-		'10.2.0' => array(
-			'wc_update_1020_add_mpn_to_product_lookup_table',
+		'10.4.0' => array(
+			'wc_update_1040_add_mpn_to_product_lookup_table',
 		),
 	);
 
