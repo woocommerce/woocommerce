@@ -7,7 +7,7 @@
 
 declare( strict_types=1 );
 
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
@@ -80,7 +80,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->payments->method( 'get_country' )->willReturn( 'US' );
 		$this->payments->method( 'get_payment_providers' )->willReturn( $this->get_mock_payment_providers() );
 
-		$schema = new Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema();
+		$schema = new Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Schema\OfflinePaymentMethodSchema();
 
 		$this->endpoint = new OfflinePaymentMethodsController();
 		$this->endpoint->init( $this->payments, $schema );
@@ -194,27 +194,50 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 */
 	public function test_register_routes() {
 		$routes = $this->server->get_routes();
-		$this->assertArrayHasKey( '/wc/v4/payments/offline-methods', $routes );
-		$this->assertCount( 1, $routes['/wc/v4/payments/offline-methods'] );
+		$this->assertArrayHasKey( '/wc/v4/settings/payments/offline-methods', $routes );
+		$this->assertCount( 1, $routes['/wc/v4/settings/payments/offline-methods'] );
 	}
 
 	/**
 	 * Test getting offline payment methods without location parameter.
 	 */
 	public function test_get_offline_payment_methods_without_location() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		// Verify each item has the expected offline payment method type.
-		foreach ( $data as $item ) {
-			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $item['_type'] );
-			$this->assertArrayHasKey( 'id', $item );
-			$this->assertArrayHasKey( 'title', $item );
-			$this->assertArrayHasKey( 'description', $item );
+		// Verify the new grouped response structure.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+
+		$this->assertEquals( 'payments/offline-methods', $data['id'] );
+		$this->assertIsArray( $data['values'] );
+		$this->assertIsArray( $data['groups'] );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertIsArray( $data['groups']['payment_methods'] );
+
+		// Verify payment methods structure.
+		foreach ( $data['groups']['payment_methods'] as $method_id => $method ) {
+			$this->assertArrayHasKey( 'id', $method );
+			$this->assertArrayHasKey( '_order', $method );
+			$this->assertArrayHasKey( 'title', $method );
+			$this->assertArrayHasKey( 'description', $method );
+			$this->assertArrayHasKey( 'icon', $method );
+			$this->assertArrayHasKey( 'state', $method );
+			$this->assertArrayHasKey( 'management', $method );
+			$this->assertEquals( $method_id, $method['id'] );
+		}
+
+		// Verify values structure (boolean enabled states).
+		foreach ( $data['values'] as $method_id => $enabled ) {
+			$this->assertIsBool( $enabled );
+			$this->assertArrayHasKey( $method_id, $data['groups']['payment_methods'] );
 		}
 	}
 
@@ -222,7 +245,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test getting offline payment methods with location parameter.
 	 */
 	public function test_get_offline_payment_methods_with_location() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -230,17 +253,23 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		// Verify each item has the expected offline payment method type.
-		foreach ( $data as $item ) {
-			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $item['_type'] );
-		}
+		// Verify the grouped response structure.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertIsArray( $data['values'] );
+		$this->assertIsArray( $data['groups'] );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertIsArray( $data['groups']['payment_methods'] );
 	}
 
 	/**
 	 * Test getting offline payment methods with invalid location parameter.
 	 */
 	public function test_get_offline_payment_methods_with_invalid_location() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( 'location', 'INVALID' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -248,6 +277,11 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		// Should still return 200 as the Payments service handles invalid locations gracefully.
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 	}
 
 	/**
@@ -255,7 +289,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 */
 	public function test_get_offline_payment_methods_without_permission() {
 		wp_set_current_user( 0 );
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 401, $response->get_status() );
@@ -272,7 +306,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		);
 		wp_set_current_user( $user );
 
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 403, $response->get_status() );
@@ -282,7 +316,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test the collection schema.
 	 */
 	public function test_get_collection_schema() {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -290,18 +324,30 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertArrayHasKey( 'schema', $data );
 
 		$schema = $data['schema'];
-		$this->assertEquals( 'array', $schema['type'] );
-		$this->assertArrayHasKey( 'items', $schema );
+		$this->assertEquals( 'object', $schema['type'] );
+		$this->assertArrayHasKey( 'properties', $schema );
 
-		// Verify the item schema has all expected properties.
-		$item_schema = $schema['items'];
-		$this->assertArrayHasKey( 'properties', $item_schema );
-
-		$properties          = $item_schema['properties'];
-		$expected_properties = array( 'id', '_order', '_type', 'title', 'description', 'supports', 'plugin', 'image', 'icon', 'links', 'state', 'management', 'onboarding' );
+		// Verify the schema has all expected top-level properties.
+		$properties          = $schema['properties'];
+		$expected_properties = array( 'id', 'title', 'description', 'values', 'groups' );
 
 		foreach ( $expected_properties as $property ) {
 			$this->assertArrayHasKey( $property, $properties, "Missing property: {$property}" );
+		}
+
+		// Verify values schema.
+		$this->assertEquals( 'object', $properties['values']['type'] );
+		$this->assertEquals( 'boolean', $properties['values']['additionalProperties']['type'] );
+
+		// Verify groups schema.
+		$this->assertEquals( 'object', $properties['groups']['type'] );
+		$groups_properties = $properties['groups']['properties'];
+		$this->assertArrayHasKey( 'payment_methods', $groups_properties );
+		$payment_method_properties  = $groups_properties['payment_methods']['additionalProperties']['properties'];
+		$expected_method_properties = array( 'id', '_order', 'title', 'description', 'icon', 'state', 'management' );
+
+		foreach ( $expected_method_properties as $property ) {
+			$this->assertArrayHasKey( $property, $payment_method_properties, "Missing payment method property: {$property}" );
 		}
 	}
 
@@ -309,7 +355,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test the collection parameters.
 	 */
 	public function test_get_collection_params() {
-		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
@@ -328,31 +374,50 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test response structure matches schema.
 	 */
 	public function test_response_structure_matches_schema() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		if ( ! empty( $data ) ) {
-			$first_item = $data[0];
+		// Test top-level structure.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
 
-			// Test required fields are present.
-			$this->assertArrayHasKey( 'id', $first_item );
-			$this->assertArrayHasKey( '_type', $first_item );
-			$this->assertArrayHasKey( 'title', $first_item );
+		// Test data types.
+		$this->assertIsString( $data['id'] );
+		$this->assertIsString( $data['title'] );
+		$this->assertIsString( $data['description'] );
+		$this->assertIsArray( $data['values'] );
+		$this->assertIsArray( $data['groups'] );
 
-			// Test _type is correct for offline payment methods.
-			$this->assertEquals( PaymentsProviders::TYPE_OFFLINE_PM, $first_item['_type'] );
+		// Test values structure (boolean values).
+		foreach ( $data['values'] as $method_id => $enabled ) {
+			$this->assertIsString( $method_id );
+			$this->assertIsBool( $enabled );
+		}
 
-			// Test data types.
-			$this->assertIsString( $first_item['id'] );
-			$this->assertIsString( $first_item['title'] );
+		// Test payment methods structure.
+		foreach ( $data['groups']['payment_methods'] as $method_id => $method ) {
+			$this->assertIsString( $method_id );
+			$this->assertIsArray( $method );
+			$this->assertArrayHasKey( 'id', $method );
+			$this->assertArrayHasKey( '_order', $method );
+			$this->assertArrayHasKey( 'title', $method );
+			$this->assertArrayHasKey( 'description', $method );
+			$this->assertArrayHasKey( 'icon', $method );
+			$this->assertArrayHasKey( 'state', $method );
+			$this->assertArrayHasKey( 'management', $method );
 
-			if ( isset( $first_item['_order'] ) ) {
-				$this->assertIsInt( $first_item['_order'] );
-			}
+			$this->assertIsString( $method['id'] );
+			$this->assertIsInt( $method['_order'] );
+			$this->assertIsString( $method['title'] );
+			$this->assertIsArray( $method['state'] );
+			$this->assertIsArray( $method['management'] );
 		}
 	}
 
@@ -360,7 +425,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test that response uses proper preparation methods.
 	 */
 	public function test_response_uses_proper_preparation() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -374,22 +439,24 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	}
 
 	/**
-	 * Test that results are sorted by _order field.
+	 * Test that payment methods are present and have _order field.
 	 */
-	public function test_results_are_sorted_by_order() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+	public function test_payment_methods_have_order_field() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'groups', $data );
 
-		// Test that results are sorted by _order field.
-		if ( count( $data ) > 1 ) {
-			$orders        = array_column( $data, '_order' );
-			$sorted_orders = $orders;
-			sort( $sorted_orders );
-			$this->assertEquals( $sorted_orders, $orders, 'Results should be sorted by _order field' );
+		// Test that payment methods have _order field and are sorted.
+		$previous_order = -1;
+		foreach ( $data['groups']['payment_methods'] as $method ) {
+			$this->assertArrayHasKey( '_order', $method );
+			$this->assertIsInt( $method['_order'] );
+			$this->assertGreaterThan( $previous_order, $method['_order'], 'Payment methods should be sorted by _order field' );
+			$previous_order = $method['_order'];
 		}
 	}
 
@@ -397,7 +464,7 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 	 * Test _fields parameter filtering.
 	 */
 	public function test_fields_parameter_filtering() {
-		$request = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$request->set_param( '_fields', 'id,title' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -405,46 +472,45 @@ class WC_REST_Offline_Payment_Methods_V4_Controller_Tests extends WC_REST_Unit_T
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		if ( ! empty( $data ) ) {
-			$first_item = $data[0];
+		// Should only contain the requested fields.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
 
-			// Should only contain the requested fields.
-			$this->assertArrayHasKey( 'id', $first_item );
-			$this->assertArrayHasKey( 'title', $first_item );
+		// Should NOT contain other fields like description, values, etc.
+		$this->assertArrayNotHasKey( 'description', $data );
+		$this->assertArrayNotHasKey( 'values', $data );
+		$this->assertArrayNotHasKey( 'groups', $data );
 
-			// Should NOT contain other fields like description, _type, etc.
-			$this->assertArrayNotHasKey( 'description', $first_item );
-			$this->assertArrayNotHasKey( '_type', $first_item );
-			$this->assertArrayNotHasKey( 'supports', $first_item );
-
-			// Test that we only have exactly the requested fields.
-			$this->assertCount( 2, $first_item );
+		// Test that we have the requested fields and optionally framework fields.
+		$allowed_fields = array( 'id', 'title', '_links' );
+		foreach ( array_keys( $data ) as $field ) {
+			$this->assertContains( $field, $allowed_fields, "Unexpected field: {$field}" );
 		}
+		// Ensure requested fields are present.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
 	}
 
 	/**
 	 * Test that schema filtering prevents data leakage.
 	 */
 	public function test_schema_filtering_prevents_data_leakage() {
-		$request  = new WP_REST_Request( 'GET', '/wc/v4/payments/offline-methods' );
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/payments/offline-methods' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertIsArray( $data );
 
-		if ( ! empty( $data ) ) {
-			$first_item        = $data[0];
-			$schema_properties = array_keys( $this->endpoint->get_collection_schema()['items']['properties'] );
+		$schema_properties = array_keys( $this->endpoint->get_item_schema()['properties'] );
 
-			// Allow framework-added fields like _links.
-			$allowed_framework_fields = array( '_links' );
-			$allowed_fields           = array_merge( $schema_properties, $allowed_framework_fields );
+		// Allow framework-added fields like _links.
+		$allowed_framework_fields = array( '_links' );
+		$allowed_fields           = array_merge( $schema_properties, $allowed_framework_fields );
 
-			// Test that response only contains fields from schema or allowed framework fields.
-			foreach ( array_keys( $first_item ) as $field ) {
-				$this->assertContains( $field, $allowed_fields, "Field '{$field}' not declared in schema or allowed framework fields" );
-			}
+		// Test that response only contains fields from schema or allowed framework fields.
+		foreach ( array_keys( $data ) as $field ) {
+			$this->assertContains( $field, $allowed_fields, "Field '{$field}' not declared in schema or allowed framework fields" );
 		}
 	}
 }
