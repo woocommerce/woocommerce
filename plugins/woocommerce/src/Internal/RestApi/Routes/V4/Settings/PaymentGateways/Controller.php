@@ -9,13 +9,13 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways;
 
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractController;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\AbstractPaymentGatewaySettingsSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\BacsGatewaySettingsSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\CodGatewaySettingsSchema;
-use Automattic\WooCommerce\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\AbstractPaymentGatewaySettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\BacsGatewaySettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\CodGatewaySettingsSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Schema\PaymentGatewaySettingsSchema;
 use WC_Payment_Gateway;
 use WP_REST_Server;
 use WP_REST_Request;
