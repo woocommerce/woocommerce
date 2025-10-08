@@ -79,9 +79,6 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string ACP status.
 	 */
 	private function map_order_status( string $wc_status ): string {
-		// Remove 'wc-' prefix if present.
-		$wc_status = str_replace( 'wc-', '', $wc_status );
-
 		$status_map = array(
 			// WooCommerce status => ACP status.
 			'pending'        => ACPOrderStatus::CREATED,
