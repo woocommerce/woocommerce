@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;
 use WC_Webhook;
 
@@ -184,7 +185,7 @@ class AgenticWebhookManager {
 	 */
 	private function should_trigger_webhook( $order ) {
 		// Only trigger for orders with an Agentic checkout session ID.
-		$checkout_session_id = $order->get_meta( '_agentic_checkout_session_id' );
+		$checkout_session_id = $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID );
 		if ( empty( $checkout_session_id ) ) {
 			return false;
 		}

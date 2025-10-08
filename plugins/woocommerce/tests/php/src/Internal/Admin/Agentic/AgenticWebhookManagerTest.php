@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 
 /**
  * Tests for AgenticWebhookManager class.
@@ -67,7 +68,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		// Create order.
 		$order = \WC_Helper_Order::create_order();
 		if ( $has_session_id ) {
-			$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
+			$order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, 'test_session_123' );
 		}
 		$order->save();
 

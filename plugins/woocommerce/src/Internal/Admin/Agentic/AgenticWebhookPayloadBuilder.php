@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus as ACPOrderStatus;
 use WC_Order;
 use WC_Order_Refund;
@@ -54,7 +55,7 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string Checkout session ID.
 	 */
 	private function get_checkout_session_id( $order ) {
-		$session_id = $order->get_meta( '_agentic_checkout_session_id' );
+		$session_id = $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID );
 		return ! empty( $session_id ) ? $session_id : 'checkout_session_' . $order->get_id();
 	}
 
@@ -65,15 +66,8 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string Order permalink URL.
 	 */
 	private function get_order_permalink( $order ) {
-		// Try to get the order received page URL (customer-facing).
-		$order_received_url = $order->get_checkout_order_received_url();
-
-		if ( ! empty( $order_received_url ) ) {
-			return $order_received_url;
-		}
-
-		// Fallback to admin edit URL if customer URL not available.
-		return admin_url( 'post.php?post=' . $order->get_id() . '&action=edit' );
+		// Get the order received page URL (customer-facing).
+		return $order->get_checkout_order_received_url();
 	}
 
 	/**

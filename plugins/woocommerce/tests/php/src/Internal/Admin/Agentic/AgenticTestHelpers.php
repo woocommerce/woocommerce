@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;
 use WC_Webhook;
 
@@ -19,7 +20,7 @@ trait AgenticTestHelpers {
 	 */
 	protected function create_agentic_order( $session_id = 'test_session_123', $status = 'pending' ) {
 		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', $session_id );
+		$order->update_meta_data( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
 		$order->set_status( $status );
 		$order->save();
 		return $order;

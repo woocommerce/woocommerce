@@ -66,14 +66,6 @@ class OrderController {
 	 * @param boolean   $update_totals Whether to update totals or not.
 	 */
 	public function update_order_from_cart( \WC_Order $order, $update_totals = true ) {
-		// Store the Agentic session ID if it exists.
-		if ( WC()->session ) {
-			$agentic_session_id = WC()->session->get( \Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey::AGENTIC_SESSION_ID );
-			if ( ! empty( $agentic_session_id ) ) {
-				$order->update_meta_data( '_agentic_checkout_session_id', $agentic_session_id );
-			}
-		}
-
 		/**
 		 * This filter ensures that local pickup locations are still used for order taxes by forcing the address used to
 		 * calculate tax for an order to match the current address of the customer.
