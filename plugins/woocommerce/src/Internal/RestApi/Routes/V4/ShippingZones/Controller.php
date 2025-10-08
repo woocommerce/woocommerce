@@ -245,7 +245,7 @@ class Controller extends AbstractController {
 		if ( 0 === $zone->get_id() ) {
 			return $this->get_route_error_response(
 				$this->get_error_prefix() . 'cannot_create',
-				__( 'Resource cannot be created. Check to make sure "name" is present.', 'woocommerce' ),
+				__( 'Resource cannot be created. Check for validation errors or server logs for details.', 'woocommerce' ),
 				WP_Http::INTERNAL_SERVER_ERROR
 			);
 		}

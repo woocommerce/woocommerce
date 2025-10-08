@@ -781,9 +781,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertCount( 2, $data['locations'] );
 
 		// Verify locations were saved.
-		$zone = WC_Shipping_Zones::get_zone( $data['id'] );
-		$this->zones[] = $zone;
-
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
 		$saved_locations = $zone->get_zone_locations();
 		$this->assertCount( 2, $saved_locations );
 	}
@@ -887,9 +886,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 201, $response->get_status() );
 
 		// Invalid location type should be skipped, only valid one should be saved.
-		$zone = WC_Shipping_Zones::get_zone( $data['id'] );
-		$this->zones[] = $zone;
-
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
 		$saved_locations = $zone->get_zone_locations();
 		$this->assertCount( 1, $saved_locations );
 		$this->assertEquals( 'CA', $saved_locations[0]->code );
@@ -919,9 +917,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 201, $response->get_status() );
 
 		// Location type should default to 'country'.
-		$zone = WC_Shipping_Zones::get_zone( $data['id'] );
-		$this->zones[] = $zone;
-
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
 		$saved_locations = $zone->get_zone_locations();
 		$this->assertCount( 1, $saved_locations );
 		$this->assertEquals( 'GB', $saved_locations[0]->code );
@@ -1069,9 +1066,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		$this->assertEquals( 201, $response->get_status() );
 
-		$zone = WC_Shipping_Zones::get_zone( $data['id'] );
-		$this->zones[] = $zone;
-
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
 		$saved_locations = $zone->get_zone_locations();
 		$this->assertCount( 4, $saved_locations );
 
@@ -1115,9 +1111,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 201, $response->get_status() );
 
 		// Empty location code should be skipped.
-		$zone = WC_Shipping_Zones::get_zone( $data['id'] );
-		$this->zones[] = $zone;
-
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
 		$saved_locations = $zone->get_zone_locations();
 		$this->assertCount( 1, $saved_locations );
 		$this->assertEquals( 'US', $saved_locations[0]->code );
