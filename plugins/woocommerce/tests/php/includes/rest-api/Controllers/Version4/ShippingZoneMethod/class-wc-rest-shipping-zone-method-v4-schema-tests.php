@@ -95,7 +95,6 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		// Test zone_id properties.
 		$this->assertEquals( 'integer', $properties['zone_id']['type'] );
 		$this->assertTrue( $properties['zone_id']['required'] );
-		$this->assertTrue( $properties['zone_id']['readonly'] );
 		$this->assertContains( 'view', $properties['zone_id']['context'] );
 		$this->assertContains( 'edit', $properties['zone_id']['context'] );
 
@@ -104,6 +103,11 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$this->assertTrue( $properties['enabled']['required'] );
 		$this->assertContains( 'view', $properties['enabled']['context'] );
 		$this->assertContains( 'edit', $properties['enabled']['context'] );
+
+		// Test order properties.
+		$this->assertEquals( 'integer', $properties['order']['type'] );
+		$this->assertContains( 'view', $properties['order']['context'] );
+		$this->assertContains( 'edit', $properties['order']['context'] );
 
 		// Test method_id properties.
 		$this->assertEquals( 'string', $properties['method_id']['type'] );
