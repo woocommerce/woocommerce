@@ -113,11 +113,12 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 2, $payload['data']['refunds'] );
 
 		// Both refunds should default to original_payment.
+		// Amounts should be in cents (integer).
 		$this->assertEquals( 'original_payment', $payload['data']['refunds'][0]['type'] );
-		$this->assertEquals( '10.00', $payload['data']['refunds'][0]['amount'] );
+		$this->assertEquals( 1000, $payload['data']['refunds'][0]['amount'] );
 
 		$this->assertEquals( 'original_payment', $payload['data']['refunds'][1]['type'] );
-		$this->assertEquals( '5.00', $payload['data']['refunds'][1]['amount'] );
+		$this->assertEquals( 500, $payload['data']['refunds'][1]['amount'] );
 	}
 
 	/**

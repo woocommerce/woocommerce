@@ -210,9 +210,10 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$this->assertCount( 3, $payload['data']['refunds'] );
 
 		$refund_amounts_in_payload = array_column( $payload['data']['refunds'], 'amount' );
-		$this->assertContains( '10.00', $refund_amounts_in_payload );
-		$this->assertContains( '5.00', $refund_amounts_in_payload );
-		$this->assertContains( '15.00', $refund_amounts_in_payload );
+		// Amounts should be in cents (integer).
+		$this->assertContains( 1000, $refund_amounts_in_payload );
+		$this->assertContains( 500, $refund_amounts_in_payload );
+		$this->assertContains( 1500, $refund_amounts_in_payload );
 
 		$webhook->delete( true );
 	}

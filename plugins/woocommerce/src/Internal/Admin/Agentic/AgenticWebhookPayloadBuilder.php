@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus as ACPOrderStatus;
 use WC_Order;
@@ -147,9 +148,13 @@ class AgenticWebhookPayloadBuilder {
 		$refund_type = $this->determine_refund_type( $refund );
 		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative.
 
+		// Convert amount to cents using MoneyFormatter, same as checkout session endpoints.
+		$formatter = new MoneyFormatter();
+		$amount_in_cents = (int) $formatter->format( $amount, array( 'decimals' => 2 ) );
+
 		return array(
 			'type'   => $refund_type,
-			'amount' => $this->format_amount( $amount ),
+			'amount' => $amount_in_cents,
 		);
 	}
 
@@ -174,18 +179,5 @@ class AgenticWebhookPayloadBuilder {
 		 * @param WC_Order_Refund $refund      The refund object.
 		 */
 		return apply_filters( 'woocommerce_agentic_webhook_refund_type', $refund_type, $refund );
-	}
-
-	/**
-	 * Format amount for the payload.
-	 *
-	 * The spec shows amounts as strings in the example, but the schema defines them as integers.
-	 * We'll use string format to match the examples and preserve decimal precision.
-	 *
-	 * @param float $amount Amount to format.
-	 * @return string Formatted amount.
-	 */
-	private function format_amount( float $amount ): string {
-		return number_format( $amount, 2, '.', '' );
 	}
 }
