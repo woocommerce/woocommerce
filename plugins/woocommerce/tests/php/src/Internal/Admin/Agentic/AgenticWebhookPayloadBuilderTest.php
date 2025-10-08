@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookPayloadBuilder;
-use WC_Order;
-use WC_Order_Refund;
 
 /**
- * Unit tests for AgenticWebhookPayloadBuilder class.
+ * Tests for AgenticWebhookPayloadBuilder class.
  */
 class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
+	use AgenticTestHelpers;
+
 	/**
 	 * Payload builder instance.
 	 *
@@ -27,54 +27,28 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test building a payload for order creation.
+	 * Test building payloads for different event types.
+	 *
+	 * @dataProvider event_type_provider
 	 */
-	public function test_build_payload_order_create() {
-		// Create a test order.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->set_status( 'processing' );
-		$order->save();
+	public function test_build_payload_for_event_type( $event, $status, $expected_acp_status ) {
+		$order   = $this->create_agentic_order( 'test_session_123', $status );
+		$payload = $this->payload_builder->build_payload( $event, $order );
 
-		// Build payload.
-		$payload = $this->payload_builder->build_payload( 'order_create', $order );
-
-		// Assert structure.
-		$this->assertEquals( 'order_create', $payload['type'] );
-		$this->assertArrayHasKey( 'data', $payload );
-
-		// Assert data structure.
-		$data = $payload['data'];
-		$this->assertEquals( 'order', $data['type'] );
-		$this->assertEquals( 'test_session_123', $data['checkout_session_id'] );
-		$this->assertStringContainsString( 'order-received', $data['permalink_url'] );
-		$this->assertEquals( 'confirmed', $data['status'] );
-		$this->assertIsArray( $data['refunds'] );
-		$this->assertEmpty( $data['refunds'] );
+		$this->assert_agentic_payload_structure( $payload, $event );
+		$this->assertEquals( 'test_session_123', $payload['data']['checkout_session_id'] );
+		$this->assertEquals( $expected_acp_status, $payload['data']['status'] );
+		$this->assertEmpty( $payload['data']['refunds'] );
 	}
 
 	/**
-	 * Test building a payload for order update.
+	 * Provider for event type tests.
 	 */
-	public function test_build_payload_order_update() {
-		// Create a test order.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_456' );
-		$order->set_status( 'completed' );
-		$order->save();
-
-		// Build payload.
-		$payload = $this->payload_builder->build_payload( 'order_update', $order );
-
-		// Assert structure.
-		$this->assertEquals( 'order_update', $payload['type'] );
-		$this->assertArrayHasKey( 'data', $payload );
-
-		// Assert data structure.
-		$data = $payload['data'];
-		$this->assertEquals( 'order', $data['type'] );
-		$this->assertEquals( 'test_session_456', $data['checkout_session_id'] );
-		$this->assertEquals( 'fulfilled', $data['status'] );
+	public function event_type_provider() {
+		return array(
+			'order create' => array( 'order_create', 'processing', 'confirmed' ),
+			'order update' => array( 'order_update', 'completed', 'fulfilled' ),
+		);
 	}
 
 	/**
@@ -83,11 +57,9 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 * @dataProvider status_mapping_provider
 	 */
 	public function test_status_mapping( $wc_status, $expected_acp_status ) {
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( $wc_status );
-		$order->save();
-
+		$order   = $this->create_agentic_order( 'test_session', $wc_status );
 		$payload = $this->payload_builder->build_payload( 'order_update', $order );
+
 		$this->assertEquals( $expected_acp_status, $payload['data']['status'] );
 	}
 
@@ -107,183 +79,94 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test building a payload with refunds.
+	 * Test building payload with refunds.
+	 *
+	 * @dataProvider refund_type_provider
 	 */
-	public function test_build_payload_with_refunds() {
-		// Create a test order.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_789' );
-		$order->save();
+	public function test_build_payload_with_refunds( $reason, $expected_type ) {
+		$order = $this->create_agentic_order();
 
-		// Create a refund.
-		$refund = wc_create_refund(
+		wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 10.00,
-				'reason'   => 'Product defect',
+				'reason'   => $reason,
 			)
 		);
 
-		// Build payload.
 		$payload = $this->payload_builder->build_payload( 'order_update', $order );
 
-		// Assert refunds.
-		$this->assertNotEmpty( $payload['data']['refunds'] );
 		$this->assertCount( 1, $payload['data']['refunds'] );
-
-		$refund_data = $payload['data']['refunds'][0];
-		$this->assertEquals( 'original_payment', $refund_data['type'] );
-		$this->assertEquals( '10.00', $refund_data['amount'] );
+		$this->assertEquals( $expected_type, $payload['data']['refunds'][0]['type'] );
+		$this->assertEquals( '10.00', $payload['data']['refunds'][0]['amount'] );
 	}
 
 	/**
-	 * Test building a payload with store credit refund.
+	 * Provider for refund type tests.
 	 */
-	public function test_build_payload_with_store_credit_refund() {
-		// Create a test order.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_999' );
-		$order->save();
-
-		// Create a refund with store credit reason.
-		$refund = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 5.00,
-				'reason'   => 'Store credit issued',
-			)
+	public function refund_type_provider() {
+		return array(
+			'original payment' => array( 'Product defect', 'original_payment' ),
+			'store credit'     => array( 'Store credit issued', 'store_credit' ),
 		);
-
-		// Build payload.
-		$payload = $this->payload_builder->build_payload( 'order_update', $order );
-
-		// Assert refunds.
-		$this->assertNotEmpty( $payload['data']['refunds'] );
-		$refund_data = $payload['data']['refunds'][0];
-		$this->assertEquals( 'store_credit', $refund_data['type'] );
-		$this->assertEquals( '5.00', $refund_data['amount'] );
 	}
 
 	/**
 	 * Test fallback checkout session ID generation.
 	 */
 	public function test_fallback_checkout_session_id() {
-		// Create order without agentic session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->save();
-
-		// Build payload.
+		$order   = \WC_Helper_Order::create_order();
 		$payload = $this->payload_builder->build_payload( 'order_create', $order );
 
-		// Assert fallback session ID.
 		$expected_session_id = 'checkout_session_' . $order->get_id();
 		$this->assertEquals( $expected_session_id, $payload['data']['checkout_session_id'] );
 	}
 
 	/**
-	 * Test permalink URL generation.
+	 * Test status mapping filter.
+	 *
+	 * @dataProvider status_filter_provider
 	 */
-	public function test_permalink_url() {
-		$order = \WC_Helper_Order::create_order();
-		$order->save();
+	public function test_status_mapping_filter( $filter_callback, $wc_status, $expected_status ) {
+		add_filter( 'woocommerce_agentic_webhook_order_status_map', $filter_callback, 10, 2 );
 
-		$payload = $this->payload_builder->build_payload( 'order_create', $order );
-
-		// Assert URL is valid.
-		$this->assertNotEmpty( $payload['data']['permalink_url'] );
-		$this->assertStringContainsString( 'http', $payload['data']['permalink_url'] );
-	}
-
-	/**
-	 * Test status mapping filter allows extensions to override mappings.
-	 */
-	public function test_status_mapping_filter() {
-		// Add filter to override existing status mapping.
-		add_filter(
-			'woocommerce_agentic_webhook_order_status_map',
-			function ( $status_map, $wc_status ) {
-				// Override pending to map to confirmed instead of created.
-				$status_map['pending'] = 'confirmed';
-				return $status_map;
-			},
-			10,
-			2
-		);
-
-		// Create order with pending status.
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-
-		// Build payload.
+		$order   = $this->create_agentic_order( 'test_session', $wc_status );
 		$payload = $this->payload_builder->build_payload( 'order_update', $order );
 
-		// Assert status was mapped to confirmed (overridden by filter).
-		$this->assertEquals( 'confirmed', $payload['data']['status'] );
+		$this->assertEquals( $expected_status, $payload['data']['status'] );
 
-		// Clean up.
 		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
 	}
 
 	/**
-	 * Test status mapping filter with invalid ACP status falls back to 'created'.
+	 * Provider for status filter tests.
 	 */
-	public function test_status_mapping_filter_with_invalid_status() {
-		// Add filter that returns invalid status.
-		add_filter(
-			'woocommerce_agentic_webhook_order_status_map',
-			function ( $status_map, $wc_status ) {
-				// Map pending to an invalid ACP status.
-				$status_map['pending'] = 'invalid_acp_status';
-				return $status_map;
-			},
-			10,
-			2
+	public function status_filter_provider() {
+		return array(
+			'override to confirmed' => array(
+				function ( $map ) {
+					$map['pending'] = 'confirmed';
+					return $map;
+				},
+				'pending',
+				'confirmed',
+			),
+			'map to shipped'        => array(
+				function ( $map ) {
+					$map['processing'] = 'shipped';
+					return $map;
+				},
+				'processing',
+				'shipped',
+			),
+			'invalid status fallback' => array(
+				function ( $map ) {
+					$map['pending'] = 'invalid_status';
+					return $map;
+				},
+				'pending',
+				'created', // Should fallback to 'created'.
+			),
 		);
-
-		// Create order with pending status.
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-
-		// Build payload.
-		$payload = $this->payload_builder->build_payload( 'order_update', $order );
-
-		// Assert it falls back to 'created' when invalid status is returned.
-		$this->assertEquals( 'created', $payload['data']['status'] );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
-	}
-
-	/**
-	 * Test status mapping filter can map to 'shipped' status.
-	 */
-	public function test_status_mapping_filter_shipped_status() {
-		// Add filter to map processing to shipped.
-		add_filter(
-			'woocommerce_agentic_webhook_order_status_map',
-			function ( $status_map, $wc_status ) {
-				// Map processing to shipped instead of confirmed.
-				$status_map['processing'] = 'shipped';
-				return $status_map;
-			},
-			10,
-			2
-		);
-
-		// Create order with processing status.
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'processing' );
-		$order->save();
-
-		// Build payload.
-		$payload = $this->payload_builder->build_payload( 'order_update', $order );
-
-		// Assert status was mapped to shipped (overridden by filter).
-		$this->assertEquals( 'shipped', $payload['data']['status'] );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
 	}
 }

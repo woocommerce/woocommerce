@@ -4,18 +4,19 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
-use WC_Order;
 
 /**
- * Unit tests for AgenticWebhookManager class.
+ * Tests for AgenticWebhookManager class.
  */
 class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
+	use AgenticTestHelpers;
+
 	/**
 	 * Webhook manager instance.
 	 *
 	 * @var AgenticWebhookManager
 	 */
-	protected $webhook_manager;
+	private $webhook_manager;
 
 	/**
 	 * Set up before each test.
@@ -23,69 +24,77 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		AgenticWebhookManager::reset_processed_events();
-		$this->webhook_manager = new AgenticWebhookManager();
+
+		// Remove any existing hooks to prevent duplicates.
+		remove_all_filters( 'woocommerce_webhook_topics' );
+		remove_all_actions( 'woocommerce_new_order' );
+		remove_all_actions( 'woocommerce_order_status_changed' );
+		remove_all_actions( 'woocommerce_order_refunded' );
 	}
 
 	/**
-	 * Test that custom actions are not fired for orders without session ID.
+	 * Test that custom webhook topics are registered.
 	 */
-	public function test_no_action_fired_for_orders_without_session_id() {
-		// Create order without session ID.
+	public function test_custom_topics_registered() {
+		new AgenticWebhookManager();
+
+		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
+
+		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_created', $topics );
+		$this->assertEquals( 'Agentic Order Created', $topics['action.woocommerce_agentic_order_created'] );
+
+		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_updated', $topics );
+		$this->assertEquals( 'Agentic Order Updated', $topics['action.woocommerce_agentic_order_updated'] );
+	}
+
+	/**
+	 * Test action firing based on session ID presence.
+	 *
+	 * @dataProvider action_firing_provider
+	 */
+	public function test_action_firing_based_on_session_id( $has_session_id, $should_fire ) {
+		new AgenticWebhookManager();
+
+		// Create order.
 		$order = \WC_Helper_Order::create_order();
+		if ( $has_session_id ) {
+			$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
+		}
 		$order->save();
 
-		// Track if action was fired.
-		$action_fired = false;
+		// Set up action listener.
+		$action_count = 0;
 		add_action(
 			'woocommerce_agentic_order_created',
-			function () use ( &$action_fired ) {
-				$action_fired = true;
+			function () use ( &$action_count ) {
+				$action_count++;
 			}
 		);
 
-		// Trigger order created hook.
+		// Manually trigger the new order action to test the hook.
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 
-		// Assert action was NOT fired.
-		$this->assertFalse( $action_fired );
+		$this->assertEquals( $should_fire ? 1 : 0, $action_count );
 	}
 
 	/**
-	 * Test that custom actions are fired for orders with session ID.
+	 * Provider for action firing tests.
 	 */
-	public function test_action_fired_for_orders_with_session_id() {
-		// Create order with session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->save();
-
-		// Track if action was fired.
-		$action_fired = false;
-		add_action(
-			'woocommerce_agentic_order_created',
-			function () use ( &$action_fired ) {
-				$action_fired = true;
-			}
+	public function action_firing_provider() {
+		return array(
+			'with session ID'    => array( true, true ),
+			'without session ID' => array( false, false ),
 		);
-
-		// Trigger order created hook.
-		do_action( 'woocommerce_new_order', $order->get_id(), $order );
-
-		// Assert action was fired.
-		$this->assertTrue( $action_fired );
 	}
 
 	/**
-	 * Test that custom action is fired on order status change.
+	 * Test that order status changes trigger update action.
 	 */
-	public function test_action_fired_on_order_status_change() {
-		// Create order with session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->set_status( 'processing' );
-		$order->save();
+	public function test_order_status_change_triggers_update() {
+		new AgenticWebhookManager();
 
-		// Track action calls.
+		$order = $this->create_agentic_order( 'test_session', 'processing' );
+
 		$action_count = 0;
 		add_action(
 			'woocommerce_agentic_order_updated',
@@ -94,55 +103,22 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		// Change order status.
 		$order->set_status( 'completed' );
 		$order->save();
 
-		// Assert action was fired once.
 		$this->assertEquals( 1, $action_count );
 	}
 
 	/**
-	 * Test that custom action is fired on refund.
+	 * Test refund events trigger update action.
+	 *
+	 * @dataProvider refund_test_provider
 	 */
-	public function test_action_fired_on_refund() {
-		// Create order with session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->save();
+	public function test_refund_triggers_update( $refund_amounts, $expected_count ) {
+		new AgenticWebhookManager();
 
-		// Track action calls.
-		$action_fired = false;
-		add_action(
-			'woocommerce_agentic_order_updated',
-			function () use ( &$action_fired ) {
-				$action_fired = true;
-			}
-		);
+		$order = $this->create_agentic_order();
 
-		// Create a refund.
-		$refund = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 10.00,
-				'reason'   => 'Test refund',
-			)
-		);
-
-		// Assert action was fired.
-		$this->assertTrue( $action_fired );
-	}
-
-	/**
-	 * Test that custom action is fired on multiple partial refunds.
-	 */
-	public function test_action_fired_on_multiple_partial_refunds() {
-		// Create order with session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->save();
-
-		// Track action calls.
 		$action_count = 0;
 		add_action(
 			'woocommerce_agentic_order_updated',
@@ -151,104 +127,121 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		// Create multiple refunds.
-		$refund1 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 10.00,
-				'reason'   => 'First refund',
-			)
-		);
+		foreach ( $refund_amounts as $amount ) {
+			wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => $amount,
+					'reason'   => 'Test refund',
+				)
+			);
+		}
 
-		$refund2 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 5.00,
-				'reason'   => 'Second refund',
-			)
-		);
-
-		$refund3 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 15.00,
-				'reason'   => 'Third refund',
-			)
-		);
-
-		// Assert action was fired for each refund.
-		$this->assertEquals( 3, $action_count );
+		$this->assertEquals( $expected_count, $action_count );
 	}
 
 	/**
-	 * Test webhook payload contains all refunds after multiple partial refunds.
+	 * Provider for refund tests.
+	 */
+	public function refund_test_provider() {
+		return array(
+			'single refund'   => array( array( 10.00 ), 1 ),
+			'multiple refunds' => array( array( 10.00, 5.00, 15.00 ), 3 ),
+		);
+	}
+
+	/**
+	 * Test webhook payload contains all refunds.
 	 */
 	public function test_webhook_payload_contains_all_refunds() {
-		// Create a webhook with Agentic topic.
-		$webhook = new \WC_Webhook();
-		$webhook->set_topic( 'action.woocommerce_agentic_order_updated' );
-		$webhook->set_delivery_url( 'https://test.com' );
-		$webhook->set_secret( 'test_secret' );
-		$webhook->save();
+		new AgenticWebhookManager();
 
-		// Create order with session ID.
-		$order = \WC_Helper_Order::create_order();
-		$order->update_meta_data( '_agentic_checkout_session_id', 'test_session_123' );
-		$order->save();
+		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
+		$order   = $this->create_agentic_order();
 
 		// Create multiple refunds.
-		$refund1 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 10.00,
-				'reason'   => 'First refund',
-			)
-		);
+		$refund_amounts = array( 10.00, 5.00, 15.00 );
+		foreach ( $refund_amounts as $amount ) {
+			wc_create_refund(
+				array(
+					'order_id' => $order->get_id(),
+					'amount'   => $amount,
+				)
+			);
+		}
 
-		$refund2 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 5.00,
-				'reason'   => 'Second refund',
-			)
-		);
-
-		$refund3 = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 15.00,
-				'reason'   => 'Third refund',
-			)
-		);
-
-		// Get the webhook payload via the filter.
-		$original_payload = array( 'original' => 'data' );
-		$modified_payload = apply_filters(
+		$payload = apply_filters(
 			'woocommerce_webhook_payload',
-			$original_payload,
+			array(),
 			'order',
 			$order->get_id(),
 			$webhook->get_id()
 		);
 
-		// Verify the payload contains all 3 refunds.
-		$this->assertEquals( 'order_update', $modified_payload['type'] );
-		$this->assertArrayHasKey( 'refunds', $modified_payload['data'] );
-		$this->assertCount( 3, $modified_payload['data']['refunds'] );
+		$this->assertEquals( 'order_update', $payload['type'] );
+		$this->assertCount( 3, $payload['data']['refunds'] );
 
-		// Verify refund amounts are correct.
-		$refund_amounts = array_column( $modified_payload['data']['refunds'], 'amount' );
-		$this->assertContains( '10.00', $refund_amounts );
-		$this->assertContains( '5.00', $refund_amounts );
-		$this->assertContains( '15.00', $refund_amounts );
+		$refund_amounts_in_payload = array_column( $payload['data']['refunds'], 'amount' );
+		$this->assertContains( '10.00', $refund_amounts_in_payload );
+		$this->assertContains( '5.00', $refund_amounts_in_payload );
+		$this->assertContains( '15.00', $refund_amounts_in_payload );
 
-		// Verify all refunds have a type.
-		foreach ( $modified_payload['data']['refunds'] as $refund_data ) {
-			$this->assertArrayHasKey( 'type', $refund_data );
-			$this->assertContains( $refund_data['type'], array( 'store_credit', 'original_payment' ) );
-		}
+		$webhook->delete( true );
+	}
 
-		// Clean up.
+	/**
+	 * Test webhook payload customization for ACP format.
+	 */
+	public function test_webhook_payload_customization() {
+		new AgenticWebhookManager();
+
+		$webhook = $this->create_agentic_webhook();
+		$order   = $this->create_agentic_order( 'test_session_456' );
+
+		$payload = apply_filters(
+			'woocommerce_webhook_payload',
+			array( 'original' => 'data' ),
+			'order',
+			$order->get_id(),
+			$webhook->get_id()
+		);
+
+		$this->assert_agentic_payload_structure( $payload, 'order_create' );
+		$this->assertEquals( 'test_session_456', $payload['data']['checkout_session_id'] );
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test webhook HTTP args customization for ACP compliance.
+	 */
+	public function test_webhook_http_args_customization() {
+		new AgenticWebhookManager();
+
+		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
+
+		$original_args = array(
+			'headers' => array(
+				'X-WC-Webhook-Signature' => 'test_signature',
+			),
+		);
+
+		$modified_args = apply_filters(
+			'woocommerce_webhook_http_args',
+			$original_args,
+			null,
+			$webhook->get_id()
+		);
+
+		// Verify signature header was renamed.
+		$this->assertArrayNotHasKey( 'X-WC-Webhook-Signature', $modified_args['headers'] );
+		$this->assertArrayHasKey( 'Merchant-Signature', $modified_args['headers'] );
+		$this->assertEquals( 'test_signature', $modified_args['headers']['Merchant-Signature'] );
+
+		// Verify ACP headers were added.
+		$this->assertArrayHasKey( 'Request-Id', $modified_args['headers'] );
+		$this->assertArrayHasKey( 'Timestamp', $modified_args['headers'] );
+
 		$webhook->delete( true );
 	}
 }
