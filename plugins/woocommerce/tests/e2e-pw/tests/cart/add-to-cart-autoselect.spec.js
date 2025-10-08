@@ -264,12 +264,12 @@ async function expectSelectedAttributes( page, blockCartVersion, expectedValues=
 				).toBeChecked;
 			}
 			if ( attributeValues.length ) {
-				for (
-					const loc of await page
-						.getByLabel( attributeName, { exact: true } )
-						.getByLabel( new RegExp( attributeValues.map( item => `^${ item }$` ).join( '|' ) ), { exact: true } ).all()
-				) {
-					await expect( loc ).not.toBeChecked();
+				for ( const attributeValue of attributeValues ) {
+					await expect(
+						page
+							.getByLabel( attributeName, { exact: true } )
+							.getByLabel( attributeValue, { exact: true } )
+					).not.toBeChecked();
 				}
 			}
 		} else {
