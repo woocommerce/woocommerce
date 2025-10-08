@@ -332,7 +332,7 @@ class Image extends Abstract_Block_Renderer {
 	 * Parse block content to get image URL, image HTML and caption HTML.
 	 *
 	 * @param string $block_content Block content.
-	 * @return array{imageUrl: string, image: string, caption: string, class: string}|null
+	 * @return array{imageUrl: string, image: string, caption: string, class: string, anchor_tag_href: string}|null
 	 */
 	private function parse_block_content( string $block_content ): ?array {
 		// If block's image is not set, we don't need to parse the content.
