@@ -14,7 +14,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\RestApi\Routes\V4\AbstractSchema;
 
 /**
- * ShippingZoneSchema class.
+ * PayPalButtonsOrderSchema class.
  */
 class PayPalButtonsOrderSchema extends AbstractSchema {
 	/**
