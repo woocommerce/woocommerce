@@ -66,18 +66,7 @@ class Controller extends AbstractController {
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'create_item' ),
 				'permission_callback' => array( $this, 'check_permissions' ),
-				'args'                => array_merge(
-					$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-					array(
-						'zone_id' => array(
-							'description'       => __( 'Shipping zone ID.', 'woocommerce' ),
-							'type'              => 'integer',
-							'required'          => true,
-							'sanitize_callback' => 'absint',
-							'validate_callback' => 'rest_validate_request_arg',
-						),
-					)
-				),
+				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 			)
 		);
 
@@ -202,17 +191,6 @@ class Controller extends AbstractController {
 	 */
 	protected function get_schema(): array {
 		return $this->method_schema->get_item_schema();
-	}
-
-	/**
-	 * Get error prefix for this controller.
-	 *
-	 * @return string
-	 */
-	protected function get_error_prefix(): string {
-		// Convert 'shipping-zone-method' to 'shipping_zone_method_'.
-		$prefix = str_replace( array( '-', '/' ), '_', $this->rest_base );
-		return 'woocommerce_rest_api_v4_' . $prefix . '_';
 	}
 
 	/**
