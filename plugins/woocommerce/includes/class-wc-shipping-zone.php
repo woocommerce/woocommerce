@@ -566,4 +566,79 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 
 		return false;
 	}
+
+	/**
+	 * Update zone details from REST API request.
+	 *
+	 * @since 9.5.0
+	 * @param array $params Request parameters.
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	public function update_from_api_request( $params ) {
+		// Prevent updating "Rest of the World" zone name or locations.
+		if ( 0 === $this->get_id() ) {
+			if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
+				return new WP_Error(
+					'woocommerce_rest_cannot_edit_zone',
+					__( 'Cannot change name of "Rest of the World" zone.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+			if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
+				return new WP_Error(
+					'woocommerce_rest_cannot_edit_zone',
+					__( 'Cannot change locations of "Rest of the World" zone.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		// Set zone name if provided.
+		if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
+			$name = trim( $params['name'] );
+			if ( '' === $name ) {
+				return new WP_Error(
+					'woocommerce_rest_invalid_zone_name',
+					__( 'Zone name cannot be empty.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+			$this->set_zone_name( $name );
+		}
+
+		// Set zone order if provided.
+		if ( isset( $params['order'] ) && ! is_null( $params['order'] ) ) {
+			$this->set_zone_order( $params['order'] );
+		}
+
+		// Set locations if provided.
+		if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
+			$raw_locations = $params['locations'];
+			$locations     = array();
+
+			foreach ( (array) $raw_locations as $raw_location ) {
+				if ( empty( $raw_location['code'] ) ) {
+					continue;
+				}
+
+				$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
+
+				if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+					continue;
+				}
+
+				$locations[] = array(
+					'code' => sanitize_text_field( $raw_location['code'] ),
+					'type' => sanitize_text_field( $type ),
+				);
+			}
+
+			$this->set_locations( $locations );
+		}
+
+		// Save the zone.
+		$this->save();
+
+		return true;
+	}
 }
