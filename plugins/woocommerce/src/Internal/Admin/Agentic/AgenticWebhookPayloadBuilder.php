@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus as ACPOrderStatus;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -84,29 +85,53 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string ACP status.
 	 */
 	private function map_order_status( $wc_status ) {
-		// Remove 'wc-' prefix if present
+		// Remove 'wc-' prefix if present.
 		$wc_status = str_replace( 'wc-', '', $wc_status );
 
 		$status_map = array(
-			// WooCommerce status => ACP status
-			'pending'        => 'created',
-			'processing'     => 'confirmed',
-			'on-hold'        => 'manual_review',
-			'completed'      => 'fulfilled',
-			'cancelled'      => 'canceled',
-			'canceled'       => 'canceled', // Support both spellings
-			'refunded'       => 'fulfilled', // Refunded orders are still fulfilled
-			'failed'         => 'canceled',
-			'checkout-draft' => 'created',
+			// WooCommerce status => ACP status.
+			'pending'        => ACPOrderStatus::CREATED,
+			'processing'     => ACPOrderStatus::CONFIRMED,
+			'on-hold'        => ACPOrderStatus::MANUAL_REVIEW,
+			'completed'      => ACPOrderStatus::FULFILLED,
+			'cancelled'      => ACPOrderStatus::CANCELED,
+			'canceled'       => ACPOrderStatus::CANCELED, // Support both spellings.
+			'refunded'       => ACPOrderStatus::FULFILLED, // Refunded orders are still fulfilled.
+			'failed'         => ACPOrderStatus::CANCELED,
+			'checkout-draft' => ACPOrderStatus::CREATED,
 		);
 
-		// Check if status exists in map
-		if ( isset( $status_map[ $wc_status ] ) ) {
-			return $status_map[ $wc_status ];
+		/**
+		 * Filter the WooCommerce to ACP order status mapping.
+		 *
+		 * Allows extensions to map custom WooCommerce order statuses to ACP order statuses.
+		 * The mapped status must be one of: created, manual_review, confirmed, canceled, shipped, fulfilled.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param array  $status_map Associative array of WooCommerce status => ACP status.
+		 * @param string $wc_status  The WooCommerce order status being mapped.
+		 */
+		$status_map = apply_filters( 'woocommerce_agentic_webhook_order_status_map', $status_map, $wc_status );
+
+		// Get mapped status or default to 'created'.
+		$mapped_status = isset( $status_map[ $wc_status ] ) ? $status_map[ $wc_status ] : ACPOrderStatus::CREATED;
+
+		// Validate the mapped status is a valid ACP status.
+		if ( ! ACPOrderStatus::is_valid( $mapped_status ) ) {
+			// Log a warning for invalid status but continue with fallback.
+			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			error_log(
+				sprintf(
+					'Invalid ACP order status "%s" returned by woocommerce_agentic_webhook_order_status_map filter for WooCommerce status "%s". Using "created" as fallback.',
+					$mapped_status,
+					$wc_status
+				)
+			);
+			return ACPOrderStatus::CREATED;
 		}
 
-		// Default to 'created' for unknown statuses
-		return 'created';
+		return $mapped_status;
 	}
 
 	/**

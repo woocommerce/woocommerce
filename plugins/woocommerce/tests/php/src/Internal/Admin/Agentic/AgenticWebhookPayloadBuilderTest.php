@@ -193,4 +193,97 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 		$this->assertNotEmpty( $payload['data']['permalink_url'] );
 		$this->assertStringContainsString( 'http', $payload['data']['permalink_url'] );
 	}
+
+	/**
+	 * Test status mapping filter allows extensions to override mappings.
+	 */
+	public function test_status_mapping_filter() {
+		// Add filter to override existing status mapping.
+		add_filter(
+			'woocommerce_agentic_webhook_order_status_map',
+			function ( $status_map, $wc_status ) {
+				// Override pending to map to confirmed instead of created.
+				$status_map['pending'] = 'confirmed';
+				return $status_map;
+			},
+			10,
+			2
+		);
+
+		// Create order with pending status.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		// Build payload.
+		$payload = $this->payload_builder->build_payload( 'order_update', $order );
+
+		// Assert status was mapped to confirmed (overridden by filter).
+		$this->assertEquals( 'confirmed', $payload['data']['status'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
+	}
+
+	/**
+	 * Test status mapping filter with invalid ACP status falls back to 'created'.
+	 */
+	public function test_status_mapping_filter_with_invalid_status() {
+		// Add filter that returns invalid status.
+		add_filter(
+			'woocommerce_agentic_webhook_order_status_map',
+			function ( $status_map, $wc_status ) {
+				// Map pending to an invalid ACP status.
+				$status_map['pending'] = 'invalid_acp_status';
+				return $status_map;
+			},
+			10,
+			2
+		);
+
+		// Create order with pending status.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		// Build payload.
+		$payload = $this->payload_builder->build_payload( 'order_update', $order );
+
+		// Assert it falls back to 'created' when invalid status is returned.
+		$this->assertEquals( 'created', $payload['data']['status'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
+	}
+
+	/**
+	 * Test status mapping filter can map to 'shipped' status.
+	 */
+	public function test_status_mapping_filter_shipped_status() {
+		// Add filter to map processing to shipped.
+		add_filter(
+			'woocommerce_agentic_webhook_order_status_map',
+			function ( $status_map, $wc_status ) {
+				// Map processing to shipped instead of confirmed.
+				$status_map['processing'] = 'shipped';
+				return $status_map;
+			},
+			10,
+			2
+		);
+
+		// Create order with processing status.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		// Build payload.
+		$payload = $this->payload_builder->build_payload( 'order_update', $order );
+
+		// Assert status was mapped to shipped (overridden by filter).
+		$this->assertEquals( 'shipped', $payload['data']['status'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
+	}
 }
