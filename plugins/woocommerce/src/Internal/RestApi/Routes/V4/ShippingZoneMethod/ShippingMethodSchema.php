@@ -44,7 +44,6 @@ class ShippingMethodSchema extends AbstractSchema {
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'required'    => true,
-				'readonly'    => true, // Cannot change zone after creation.
 			),
 			'enabled'     => array(
 				'description' => __( 'Whether the shipping method is enabled.', 'woocommerce' ),
