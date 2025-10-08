@@ -283,7 +283,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get MPN.
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
@@ -897,7 +897,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set MPN.
 	 *
-	 * @since 10.2.0
+	 * @since 10.4.0
 	 * @param string $mpn Product MPN.
 	 */
 	public function set_mpn( $mpn ) {
