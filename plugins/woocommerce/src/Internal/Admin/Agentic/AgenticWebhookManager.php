@@ -34,6 +34,13 @@ class AgenticWebhookManager {
 	private $payload_builder;
 
 	/**
+	 * Track processed events to prevent duplicate firing.
+	 *
+	 * @var array
+	 */
+	private static $processed_events = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -50,7 +57,6 @@ class AgenticWebhookManager {
 
 		// Hook into order lifecycle events to fire our custom actions.
 		add_action( 'woocommerce_new_order', array( $this, 'handle_order_created' ), 10, 2 );
-		add_action( 'woocommerce_update_order', array( $this, 'handle_order_updated' ), 10, 2 );
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_order_status_changed' ), 10, 4 );
 		add_action( 'woocommerce_order_refunded', array( $this, 'handle_order_refunded' ), 10, 2 );
 
@@ -110,35 +116,6 @@ class AgenticWebhookManager {
 	}
 
 	/**
-	 * Handle order updates.
-	 *
-	 * @param int      $order_id Order ID.
-	 * @param WC_Order $order    Order object.
-	 */
-	public function handle_order_updated( $order_id, $order ) {
-		if ( ! $this->should_trigger_webhook( $order ) ) {
-			return;
-		}
-
-		// Check if this is actually a new order (created within last 10 seconds).
-		$created_date = $order->get_date_created();
-		if ( $created_date && ( time() - $created_date->getTimestamp() ) <= 10 ) {
-			// This is handled by handle_order_created.
-			return;
-		}
-
-		/**
-		 * Fires when an Agentic order is updated.
-		 *
-		 * @since 10.3.0
-		 *
-		 * @param int      $order_id Order ID.
-		 * @param WC_Order $order    Order object.
-		 */
-		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
-	}
-
-	/**
 	 * Handle order status changes.
 	 *
 	 * @param int      $order_id   Order ID.
@@ -150,6 +127,13 @@ class AgenticWebhookManager {
 		if ( ! $this->should_trigger_webhook( $order ) ) {
 			return;
 		}
+
+		// Prevent duplicate firing for the same status change.
+		$event_key = 'status_' . $order_id . '_' . $old_status . '_' . $new_status;
+		if ( isset( self::$processed_events[ $event_key ] ) ) {
+			return;
+		}
+		self::$processed_events[ $event_key ] = true;
 
 		/**
 		 * Fires when an Agentic order status changes.
@@ -173,6 +157,13 @@ class AgenticWebhookManager {
 		if ( ! $order || ! $this->should_trigger_webhook( $order ) ) {
 			return;
 		}
+
+		// Prevent duplicate firing for the same refund.
+		$event_key = 'refund_' . $order_id . '_' . $refund_id;
+		if ( isset( self::$processed_events[ $event_key ] ) ) {
+			return;
+		}
+		self::$processed_events[ $event_key ] = true;
 
 		/**
 		 * Fires when an Agentic order is refunded.
@@ -324,5 +315,13 @@ class AgenticWebhookManager {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Reset processed events tracking.
+	 * Useful for testing or when starting a new request context.
+	 */
+	public static function reset_processed_events() {
+		self::$processed_events = array();
 	}
 }
