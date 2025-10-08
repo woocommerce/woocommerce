@@ -99,6 +99,12 @@ class Controller extends AbstractController {
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
 				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				)
 			)
 		);
 	}
@@ -256,5 +262,15 @@ class Controller extends AbstractController {
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
 
 		return $response;
+	}
+
+	/**
+	 * Update a shipping zone.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function update_item( $request ) {
+		return rest_ensure_response('test');
 	}
 }
