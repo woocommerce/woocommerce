@@ -293,9 +293,7 @@
 					"name": "Core e2e tests - Legacy MiniCart",
 					"testType": "e2e",
 					"command": "test:e2e:legacy-mini-cart",
-					"shardingArguments": [
-						"--shard=1/1"
-					],
+					"shardingArguments": [],
 					"changes": [
 						"client/admin/config/*.json",
 						"composer.json",
@@ -328,10 +326,8 @@
 					"testType": "e2e",
 					"command": "test:e2e:gb-stable",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e-pw/**"
@@ -359,10 +355,8 @@
 					"testType": "e2e",
 					"command": "test:e2e:gb-nightly",
 					"shardingArguments": [
-						"--shard=1/4",
-						"--shard=2/4",
-						"--shard=3/4",
-						"--shard=4/4"
+						"--shard=1/2",
+						"--shard=2/2"
 					],
 					"changes": [
 						"tests/e2e-pw/**"

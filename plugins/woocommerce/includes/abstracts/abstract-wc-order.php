@@ -813,7 +813,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			wc_deprecated_argument( 'total_type', '3.0', 'Use dedicated total setter methods instead.' );
 			return $this->legacy_set_total( $value, $deprecated );
 		}
-		$this->set_prop( 'total', wc_format_decimal( $value, wc_get_price_decimals() ) );
+
+		$this->set_prop( 'total', wc_format_decimal( (float) $value, wc_get_price_decimals() ) );
 	}
 
 	/**
