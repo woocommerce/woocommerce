@@ -1204,4 +1204,40 @@ class CheckoutSessions extends ControllerTestCase {
 			$this->assertIsNumeric( $option['total'] );
 		}
 	}
+
+	/**
+	 * Test updating a completed session returns error.
+	 *
+	 * This tests the new status validation added in the complete-agentic-commerce branch.
+	 */
+	public function test_update_completed_session_returns_error() {
+		// Create a session and mark it as completed by setting the completed order ID in session.
+		$create_response = $this->create_session( $this->create_checkout_request() );
+		$create_data     = $create_response->get_data();
+		$session_id      = $create_data['id'];
+
+		// Simulate a completed session by setting the completed order ID.
+		// This makes the status calculation return 'completed'.
+		WC()->session->set( 'agentic_checkout_completed_order_id', 123 );
+
+		// Try to update the completed session.
+		$update_response = $this->update_session(
+			$session_id,
+			array(
+				'buyer' => array(
+					'first_name' => 'Test',
+				),
+			)
+		);
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $update_response->get_status() );
+
+		// Verify error response format.
+		$data = $update_response->get_data();
+		$this->assertArrayHasKey( 'type', $data );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertArrayHasKey( 'content', $data );
+		$this->assertStringContainsString( 'Unable to update', $data['content'] );
+	}
 }
