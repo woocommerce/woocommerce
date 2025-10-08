@@ -41,6 +41,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filters the list of webhook topic hooks.
 		 *
+		 * @since 10.3.0
 		 * @see AgenticWebhookManager::register_webhook_topic_names()
 		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
@@ -79,7 +80,11 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			}
 		);
 
-		// Manually trigger the new order action to test the hook.
+		/**
+		 * Manually trigger the new order action to test the hook.
+		 *
+		 * @since 10.3.0
+		 */
 		do_action( 'woocommerce_new_order', $order->get_id(), $order );
 
 		$this->assertEquals( $should_fire ? 1 : 0, $action_count );
@@ -189,6 +194,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filters the webhook payload.
 		 *
+		 * @since 10.3.0
 		 * @see AgenticWebhookManager::customize_webhook_payload()
 		 */
 		$payload = apply_filters(
@@ -222,6 +228,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filters the webhook payload.
 		 *
+		 * @since 10.3.0
 		 * @see AgenticWebhookManager::customize_webhook_payload()
 		 */
 		$payload = apply_filters(
@@ -255,6 +262,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Filters the webhook HTTP args.
 		 *
+		 * @since 10.3.0
 		 * @see AgenticWebhookManager::customize_webhook_http_args()
 		 */
 		$modified_args = apply_filters(

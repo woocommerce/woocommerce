@@ -19,6 +19,7 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 		/**
 		 * Verify webhook topics are registered (indicates manager was initialized).
 		 *
+		 * @since 10.3.0
 		 * @see AgenticWebhookManager::register_webhook_topic_names()
 		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
