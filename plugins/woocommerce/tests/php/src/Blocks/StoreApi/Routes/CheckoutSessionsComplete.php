@@ -302,7 +302,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$complete_data = $complete_response->get_data();
 
 		// Verify successful completion.
-		$this->assertEquals( $complete_response->get_status(), 200 );
+		$this->assertEquals( 200, $complete_response->get_status() );
 
 		$this->assertEquals( 'completed', $complete_data['status'] );
 		$this->assertArrayHasKey( 'id', $complete_data );
@@ -485,6 +485,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			$this->create_checkout_request(
 				array(
 					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
 				)
 			)
 		);
@@ -519,15 +520,13 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			)
 		);
 
-		$this->assertContains( $complete_response->get_status(), [ 200, 400 ] );
+		$this->assertEquals( 200, $complete_response->get_status() );
 
 		// If payment succeeded, verify order was created with billing address.
-		if ( 200 === $complete_response->get_status() ) {
-			$complete_data = $complete_response->get_data();
-			if ( isset( $complete_data['order']['id'] ) ) {
-				$order = wc_get_order( $complete_data['order']['id'] );
-				$this->assertEquals( 'Los Angeles', $order->get_billing_city() );
-			}
+		$complete_data = $complete_response->get_data();
+		if ( isset( $complete_data['order']['id'] ) ) {
+			$order = wc_get_order( $complete_data['order']['id'] );
+			$this->assertEquals( 'Los Angeles', $order->get_billing_city() );
 		}
 	}
 
@@ -587,6 +586,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			$this->create_checkout_request(
 				array(
 					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
 				)
 			)
 		);
@@ -610,17 +610,15 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			)
 		);
 
-		$this->assertContains( $complete_response->get_status(), [ 200, 400 ] );
+		$this->assertEquals( 200, $complete_response->get_status() );
 
 		// If payment succeeded, verify stock was reserved.
-		if ( 200 === $complete_response->get_status() ) {
-			$complete_data = $complete_response->get_data();
-			if ( isset( $complete_data['order']['id'] ) ) {
-				$order = wc_get_order( $complete_data['order']['id'] );
-				$this->assertInstanceOf( \WC_Order::class, $order );
-				// Stock should be reserved/reduced.
-				$this->assertGreaterThan( 0, $order->get_item_count() );
-			}
+		$complete_data = $complete_response->get_data();
+		if ( isset( $complete_data['order']['id'] ) ) {
+			$order = wc_get_order( $complete_data['order']['id'] );
+			$this->assertInstanceOf( \WC_Order::class, $order );
+			// Stock should be reserved/reduced.
+			$this->assertGreaterThan( 0, $order->get_item_count() );
 		}
 	}
 
@@ -720,6 +718,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			$this->create_checkout_request(
 				array(
 					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
 				)
 			)
 		);
@@ -743,25 +742,23 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 			)
 		);
 
-		$this->assertContains( $complete_response->get_status(), [ 200, 400 ] );
+		$this->assertEquals( 200, $complete_response->get_status() );
 
 		// If payment succeeded, verify totals are present and calculated.
-		if ( 200 === $complete_response->get_status() ) {
-			$complete_data = $complete_response->get_data();
-			$this->assertArrayHasKey( 'totals', $complete_data );
-			$this->assertNotEmpty( $complete_data['totals'] );
+		$complete_data = $complete_response->get_data();
+		$this->assertArrayHasKey( 'totals', $complete_data );
+		$this->assertNotEmpty( $complete_data['totals'] );
 
-			// Verify total amount is greater than 0.
-			$total_obj = array_filter(
-				$complete_data['totals'],
-				function ( $total ) {
-					return 'total' === $total['type'];
-				}
-			);
-			$this->assertNotEmpty( $total_obj );
-			$total = reset( $total_obj );
-			$this->assertGreaterThan( 0, $total['amount'] );
-		}
+		// Verify total amount is greater than 0.
+		$total_obj = array_filter(
+			$complete_data['totals'],
+			function ( $total ) {
+				return 'total' === $total['type'];
+			}
+		);
+		$this->assertNotEmpty( $total_obj );
+		$total = reset( $total_obj );
+		$this->assertGreaterThan( 0, $total['amount'] );
 	}
 }
 
