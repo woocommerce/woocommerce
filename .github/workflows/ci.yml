@@ -348,7 +348,7 @@ jobs:
     name: 'Report results on Slack'
     runs-on: ubuntu-latest
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
-    if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' }}
     env:
       NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
