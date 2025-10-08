@@ -483,23 +483,14 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 			return new \WP_Error( 'woocommerce_rest_shipping_zone_method_invalid', __( 'Shipping method not found.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
-		// Update settings if provided.
-		if ( isset( $data['settings'] ) && is_array( $data['settings'] ) ) {
-			$result = $method->update_settings( $data['settings'] );
-			if ( is_wp_error( $result ) ) {
-				return $result;
-			}
+		// Update method using the standardized, validated API.
+		$result = $method->update_from_api_request( $this, $instance_id, $data );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
-		// Update method order if provided.
-		if ( isset( $data['order'] ) ) {
-			$this->set_method_order( $instance_id, absint( $data['order'] ) );
-		}
-
-		// Update enabled status if provided.
-		if ( isset( $data['enabled'] ) ) {
-			$this->set_method_enabled( $instance_id, $data['enabled'] );
-		}
+		// Re-fetch method to get fresh state after updates.
+		$method = $this->get_shipping_method( $instance_id );
 
 		// Clear shipping transients.
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
