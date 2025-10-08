@@ -86,39 +86,38 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test building payload with refunds.
-	 *
-	 * @dataProvider refund_type_provider
-	 *
-	 * @param string $reason        Refund reason.
-	 * @param string $expected_type Expected refund type.
+	 * Test refunds are included in payload and default to original_payment.
 	 */
-	public function test_build_payload_with_refunds( $reason, $expected_type ) {
+	public function test_build_payload_with_refunds() {
 		$order = $this->create_agentic_order();
 
+		// Create multiple refunds - all should default to original_payment.
 		wc_create_refund(
 			array(
 				'order_id' => $order->get_id(),
 				'amount'   => 10.00,
-				'reason'   => $reason,
+				'reason'   => 'Product defect',
+			)
+		);
+
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5.00,
+				'reason'   => 'Store credit issued', // Even this defaults to original_payment now.
 			)
 		);
 
 		$payload = $this->payload_builder->build_payload( 'order_update', $order );
 
-		$this->assertCount( 1, $payload['data']['refunds'] );
-		$this->assertEquals( $expected_type, $payload['data']['refunds'][0]['type'] );
-		$this->assertEquals( '10.00', $payload['data']['refunds'][0]['amount'] );
-	}
+		$this->assertCount( 2, $payload['data']['refunds'] );
 
-	/**
-	 * Provider for refund type tests.
-	 */
-	public function refund_type_provider() {
-		return array(
-			'original payment' => array( 'Product defect', 'original_payment' ),
-			'store credit'     => array( 'Store credit issued', 'store_credit' ),
-		);
+		// Both refunds should default to original_payment.
+		$this->assertEquals( 'original_payment', $payload['data']['refunds'][0]['type'] );
+		$this->assertEquals( '10.00', $payload['data']['refunds'][0]['amount'] );
+
+		$this->assertEquals( 'original_payment', $payload['data']['refunds'][1]['type'] );
+		$this->assertEquals( '5.00', $payload['data']['refunds'][1]['amount'] );
 	}
 
 	/**
@@ -182,5 +181,43 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 				'created', // Should fallback to 'created'.
 			),
 		);
+	}
+
+	/**
+	 * Test refund type filter allows customization.
+	 */
+	public function test_refund_type_filter() {
+		$order = $this->create_agentic_order();
+
+		// Create a refund.
+		wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 15.00,
+				'reason'   => 'Store credit issued',
+			)
+		);
+
+		// Hook into the filter to change refund type based on reason.
+		add_filter(
+			'woocommerce_agentic_webhook_refund_type',
+			function( $type, $refund_obj ) {
+				if ( stripos( $refund_obj->get_reason(), 'store credit' ) !== false ) {
+					return 'store_credit';
+				}
+				return $type;
+			},
+			10,
+			2
+		);
+
+		$payload = $this->payload_builder->build_payload( 'order_update', $order );
+
+		// Check that refund type was changed to store_credit via filter.
+		$this->assertNotEmpty( $payload['data']['refunds'] );
+		$this->assertEquals( 'store_credit', $payload['data']['refunds'][0]['type'] );
+
+		// Clean up filter.
+		remove_all_filters( 'woocommerce_agentic_webhook_refund_type' );
 	}
 }

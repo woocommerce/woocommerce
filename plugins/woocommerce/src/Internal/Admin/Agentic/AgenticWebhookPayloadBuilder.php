@@ -178,21 +178,20 @@ class AgenticWebhookPayloadBuilder {
 	 * @return string Refund type ('store_credit' or 'original_payment').
 	 */
 	private function determine_refund_type( $refund ) {
-		// Check if refund has a specific type meta.
-		$refund_type = $refund->get_meta( '_refund_type' );
-
-		if ( 'store_credit' === $refund_type ) {
-			return 'store_credit';
-		}
-
-		// Check refund reason for store credit indicators.
-		$reason = strtolower( $refund->get_reason() );
-		if ( false !== strpos( $reason, 'store credit' ) || false !== strpos( $reason, 'credit' ) ) {
-			return 'store_credit';
-		}
-
 		// Default to original payment method.
-		return 'original_payment';
+		$refund_type = 'original_payment';
+
+		/**
+		 * Filter the refund type for Agentic webhooks.
+		 *
+		 * This allows extensions to specify when a refund is store credit.
+		 * By default, all refunds are assumed to be original payment method.
+		 *
+		 * @since 10.4.0
+		 * @param string          $refund_type The refund type ('store_credit' or 'original_payment').
+		 * @param WC_Order_Refund $refund      The refund object.
+		 */
+		return apply_filters( 'woocommerce_agentic_webhook_refund_type', $refund_type, $refund );
 	}
 
 	/**
