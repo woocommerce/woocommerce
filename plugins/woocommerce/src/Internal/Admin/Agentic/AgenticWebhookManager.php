@@ -45,8 +45,6 @@ class AgenticWebhookManager {
 	 * Initialize hooks for webhook integration.
 	 */
 	private function init_hooks() {
-		// Register our custom topics with WooCommerce's webhook system.
-		add_filter( 'woocommerce_webhook_topic_hooks', array( $this, 'register_webhook_topics' ), 10, 2 );
 		add_filter( 'woocommerce_valid_webhook_events', array( $this, 'register_webhook_events' ) );
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
@@ -62,19 +60,6 @@ class AgenticWebhookManager {
 		// Customize webhook HTTP arguments for our topics.
 		add_filter( 'woocommerce_webhook_http_args', array( $this, 'customize_webhook_http_args' ), 10, 3 );
 		add_filter( 'woocommerce_webhook_delivery_url', array( $this, 'customize_webhook_delivery_url' ), 10, 2 );
-	}
-
-	/**
-	 * Register custom webhook topics.
-	 *
-	 * @param array      $topic_hooks Existing topic hooks.
-	 * @param WC_Webhook $webhook     Webhook instance.
-	 * @return array Modified topic hooks.
-	 */
-	public function register_webhook_topics( $topic_hooks, $webhook ) {
-		// Our custom topics use the action.* format, so they'll be handled directly
-		// by WooCommerce as custom actions. We don't need to map them to hooks here.
-		return $topic_hooks;
 	}
 
 	/**
@@ -116,6 +101,8 @@ class AgenticWebhookManager {
 		/**
 		 * Fires when an Agentic order is created.
 		 *
+		 * @since 10.3.0
+		 *
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
@@ -143,6 +130,8 @@ class AgenticWebhookManager {
 		/**
 		 * Fires when an Agentic order is updated.
 		 *
+		 * @since 10.3.0
+		 *
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
@@ -162,7 +151,14 @@ class AgenticWebhookManager {
 			return;
 		}
 
-		// Fire update webhook for status changes.
+		/**
+		 * Fires when an Agentic order status changes.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param int      $order_id Order ID.
+		 * @param WC_Order $order    Order object.
+		 */
 		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
 	}
 
@@ -178,7 +174,14 @@ class AgenticWebhookManager {
 			return;
 		}
 
-		// Fire update webhook for refunds.
+		/**
+		 * Fires when an Agentic order is refunded.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param int      $order_id Order ID.
+		 * @param WC_Order $order    Order object.
+		 */
 		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
 	}
 
