@@ -3075,7 +3075,7 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
  *
  * @return void
  */
-function wc_update_1020_add_mpn_to_product_lookup_table() {
+function wc_update_1040_add_mpn_to_product_lookup_table() {
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . 'wc_product_meta_lookup';
