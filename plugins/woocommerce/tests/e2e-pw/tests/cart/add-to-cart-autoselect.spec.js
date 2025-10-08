@@ -135,9 +135,9 @@ async function switchCartBlockVersion ( editor, targetBlockVersion ) {
 
 	await editor.selectBlocks( cartBlock );
 	if ( isLegacyCart && targetBlockVersion === 'new' ) {
-		await editor.page.getByRole('button', { name: 'Upgrade to the Add to Cart + Options block', exact: true }).click();
+		await editor.page.getByRole( 'button', { name: 'Upgrade to the Add to Cart + Options block', exact: true } ).click();
 	} else if ( ! isLegacyCart && targetBlockVersion === 'legacy' ) {
-		await editor.page.getByRole('button', { name: 'Switch back' }).click();
+		await editor.page.getByRole( 'button', { name: 'Switch back' } ).click();
 	}
 }
 
@@ -186,6 +186,8 @@ async function setCartBlockAttributes(
 			disabledAttributesAction = 'hide';
 		} else if ( targetBlockVersion === 'new' ) {
 			disabledAttributesAction = 'gray';
+		} else {
+			throw new Error( `Bad value for targetBlockVersion (${ targetBlockVersion })` );
 		}
 	}
 	await goToProductTemplateEditor( editor );
@@ -229,18 +231,16 @@ async function selectBlockAttribute(
 	blockCartVersion,
 	optionStyle=undefined,
 ) {
-	if ( blockCartVersion === 'legacy' ) {
+	if ( blockCartVersion === 'legacy' || ( blockCartVersion === 'new' && optionStyle === 'Dropdown' ) ) {
 		await page.getByLabel( attributeName ).selectOption( attributeValue );
-	} else if ( blockCartVersion === 'new' ) {
-		if ( optionStyle === 'Pills' ) {
-			if ( attributeValue === '' ) {
-				await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
-			} else {
-				await page.getByLabel( attributeName ).getByText( attributeValue ).click();
-			}
-		} else if ( optionStyle === 'Dropdown' ) {
-			await page.getByLabel( attributeName ).selectOption( attributeValue );
+	} else if ( blockCartVersion === 'new' && optionStyle === 'Pills' ) {
+		if ( attributeValue === '' ) {
+			await page.getByLabel( attributeName ).locator( 'label:has(:checked)' ).click();
+		} else {
+			await page.getByLabel( attributeName ).getByText( attributeValue ).click();
 		}
+	} else {
+		throw new Error( `Bad values for blockCartVersion (${ blockCartVersion }) and/or optionStyle (${ optionStyle })` );
 	}
 }
 
@@ -272,6 +272,8 @@ async function expectSelectedAttributes( page, blockCartVersion, expectedValues=
 					await expect( loc ).not.toBeChecked();
 				}
 			}
+		} else {
+			throw new Error( `Bad values for blockCartVersion (${ blockCartVersion }) and/or optionStyle (${ optionStyle })` );
 		}
 	}
 }
