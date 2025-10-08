@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
-use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookSettings;
 
 /**
  * Integration tests for Agentic Webhook functionality using native WooCommerce webhooks.
@@ -190,75 +189,5 @@ class AgenticWebhookIntegrationTest extends \WC_Unit_Test_Case {
 
 		// Note: Testing actual delivery context would require mocking WC_Webhook::deliver()
 		// which is complex for this integration test.
-	}
-
-	/**
-	 * Test creating webhooks programmatically.
-	 */
-	public function test_create_webhooks_programmatically() {
-		$base_url = 'https://ai-agent.example.com';
-		$secret   = 'test_secret_key_very_secure_123';
-
-		// Create webhooks.
-		$results = AgenticWebhookSettings::create_webhooks( $base_url, $secret );
-
-		// Assert webhooks were created.
-		$this->assertArrayHasKey( 'created', $results );
-		$this->assertArrayHasKey( 'updated', $results );
-		$this->assertIsInt( $results['created'] );
-		$this->assertIsInt( $results['updated'] );
-
-		// Verify the created webhooks.
-		$webhook_created = wc_get_webhook( $results['created'] );
-		$this->assertNotNull( $webhook_created );
-		$this->assertEquals( 'action.woocommerce_agentic_order_created', $webhook_created->get_topic() );
-		$this->assertEquals( $base_url, $webhook_created->get_delivery_url() );
-		$this->assertEquals( $secret, $webhook_created->get_secret() );
-
-		$webhook_updated = wc_get_webhook( $results['updated'] );
-		$this->assertNotNull( $webhook_updated );
-		$this->assertEquals( 'action.woocommerce_agentic_order_updated', $webhook_updated->get_topic() );
-
-		// Clean up.
-		$webhook_created->delete( true );
-		$webhook_updated->delete( true );
-	}
-
-	/**
-	 * Test getting Agentic webhooks.
-	 */
-	public function test_get_agentic_webhooks() {
-		// Create test webhooks.
-		$results = AgenticWebhookSettings::create_webhooks( 'https://test.com', 'secret123456789' );
-
-		// Get Agentic webhooks.
-		$webhooks = AgenticWebhookSettings::get_agentic_webhooks();
-
-		// Assert we found our webhooks.
-		$this->assertGreaterThanOrEqual( 2, count( $webhooks ) );
-
-		$topics = array_map(
-			function ( $webhook ) {
-				return $webhook->get_topic();
-			},
-			$webhooks
-		);
-
-		$this->assertContains( 'action.woocommerce_agentic_order_created', $topics );
-		$this->assertContains( 'action.woocommerce_agentic_order_updated', $topics );
-
-		// Clean up.
-		if ( isset( $results['created'] ) ) {
-			$webhook = wc_get_webhook( $results['created'] );
-			if ( $webhook ) {
-				$webhook->delete( true );
-			}
-		}
-		if ( isset( $results['updated'] ) ) {
-			$webhook = wc_get_webhook( $results['updated'] );
-			if ( $webhook ) {
-				$webhook->delete( true );
-			}
-		}
 	}
 }
