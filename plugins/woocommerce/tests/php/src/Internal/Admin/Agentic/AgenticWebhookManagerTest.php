@@ -252,11 +252,13 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		new AgenticWebhookManager();
 
 		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
+		$webhook->set_secret( 'test_secret' );
+		$webhook->save();
 
+		$payload = json_encode( array( 'test' => 'data' ) );
 		$original_args = array(
-			'headers' => array(
-				'X-WC-Webhook-Signature' => 'test_signature',
-			),
+			'headers' => array(),
+			'body'    => $payload,
 		);
 
 		/**
@@ -272,14 +274,95 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			$webhook->get_id()
 		);
 
-		// Verify signature header was renamed.
-		$this->assertArrayNotHasKey( 'X-WC-Webhook-Signature', $modified_args['headers'] );
+		// Verify Merchant-Signature was added with correct computed value.
 		$this->assertArrayHasKey( 'Merchant-Signature', $modified_args['headers'] );
-		$this->assertEquals( 'test_signature', $modified_args['headers']['Merchant-Signature'] );
 
-		// Verify ACP headers were added.
-		$this->assertArrayHasKey( 'Request-Id', $modified_args['headers'] );
-		$this->assertArrayHasKey( 'Timestamp', $modified_args['headers'] );
+		// Compute expected signature same way WooCommerce does.
+		$expected_signature = base64_encode( hash_hmac( 'sha256', $payload, 'test_secret', true ) );
+		$this->assertEquals( $expected_signature, $modified_args['headers']['Merchant-Signature'] );
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test that signature is computed correctly for different payloads.
+	 */
+	public function test_merchant_signature_computation() {
+		new AgenticWebhookManager();
+
+		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_created' );
+		$webhook->set_secret( 'my_webhook_secret_123' );
+		$webhook->save();
+
+		// Test with various payload types.
+		$test_cases = array(
+			array(
+				'payload' => json_encode( array( 'order_id' => 123 ) ),
+				'description' => 'Simple JSON payload',
+			),
+			array(
+				'payload' => json_encode( array( 'unicode' => '€£¥' ) ),
+				'description' => 'Unicode characters',
+			),
+			array(
+				'payload' => '{"nested":{"data":{"value":true}}}',
+				'description' => 'Nested JSON',
+			),
+		);
+
+		foreach ( $test_cases as $test ) {
+			$args = array(
+				'headers' => array(),
+				'body'    => $test['payload'],
+			);
+
+			$modified_args = apply_filters(
+				'woocommerce_webhook_http_args',
+				$args,
+				null,
+				$webhook->get_id()
+			);
+
+			// Verify signature matches expected HMAC-SHA256.
+			$expected = base64_encode( hash_hmac( 'sha256', $test['payload'], 'my_webhook_secret_123', true ) );
+			$this->assertEquals(
+				$expected,
+				$modified_args['headers']['Merchant-Signature'],
+				'Failed for: ' . $test['description']
+			);
+		}
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test that non-Agentic webhooks are not affected.
+	 */
+	public function test_non_agentic_webhooks_unaffected() {
+		new AgenticWebhookManager();
+
+		// Create a regular WooCommerce webhook.
+		$webhook = new \WC_Webhook();
+		$webhook->set_topic( 'order.created' ); // Regular WC topic.
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->save();
+
+		$args = array(
+			'headers' => array(),
+			'body'    => '{"test":"data"}',
+		);
+
+		$modified_args = apply_filters(
+			'woocommerce_webhook_http_args',
+			$args,
+			null,
+			$webhook->get_id()
+		);
+
+		// Should not have Merchant-Signature for non-Agentic webhooks.
+		$this->assertArrayNotHasKey( 'Merchant-Signature', $modified_args['headers'] );
+		// Should not have empty X-WC-Webhook-Signature.
+		$this->assertArrayNotHasKey( 'X-WC-Webhook-Signature', $modified_args['headers'] );
 
 		$webhook->delete( true );
 	}

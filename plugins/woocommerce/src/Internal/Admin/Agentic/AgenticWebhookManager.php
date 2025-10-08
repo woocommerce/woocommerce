@@ -253,15 +253,27 @@ class AgenticWebhookManager {
 			return $http_args;
 		}
 
-		// Replace X-WC-Webhook-Signature with Merchant-Signature for ACP compliance.
-		if ( isset( $http_args['headers']['X-WC-Webhook-Signature'] ) ) {
-			$http_args['headers']['Merchant-Signature'] = $http_args['headers']['X-WC-Webhook-Signature'];
-			unset( $http_args['headers']['X-WC-Webhook-Signature'] );
-		}
+		// Compute HMAC signature per ACP webhook spec.
+		// The signature must be computed over the raw request body.
+		if ( isset( $http_args['body'] ) && ! empty( $webhook->get_secret() ) ) {
+			// Use the same hash algorithm as WooCommerce (SHA256 by default).
+			// This allows sites to customize the algorithm if needed via filter.
+			$hash_algo = apply_filters( 'woocommerce_webhook_hash_algorithm', 'sha256', $http_args['body'], $webhook_id );
 
-		// Add ACP-specific headers.
-		$http_args['headers']['Request-Id'] = wp_generate_uuid4();
-		$http_args['headers']['Timestamp']  = gmdate( 'c' );
+			// Compute HMAC signature over the raw body.
+			// Note: wp_specialchars_decode is needed because WooCommerce stores secrets with HTML entities escaped.
+			$signature = base64_encode(
+				hash_hmac(
+					$hash_algo,
+					$http_args['body'],
+					wp_specialchars_decode( $webhook->get_secret(), ENT_QUOTES ),
+					true
+				)
+			);
+
+			// Add Merchant-Signature header per ACP webhook specification.
+			$http_args['headers']['Merchant-Signature'] = $signature;
+		}
 
 		return $http_args;
 	}
