@@ -309,6 +309,155 @@ describe( 'createMessage', () => {
 			],
 		} );
 	} );
+
+	it( 'should include jobs list when provided', async () => {
+		const withJobsOptions = {
+			...defaultOptions,
+			jobsList: 'Job 1,Job 2,Job 3',
+		};
+
+		const result = await createMessage( withJobsOptions );
+
+		// Jobs context should be before actions block
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		const actionsBlock = result.mainMsgBlocks[ 3 ];
+
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2\n• Job 3',
+				},
+			],
+		} );
+		expect( actionsBlock.type ).toBe( 'actions' );
+	} );
+
+	it( 'should not include jobs list when empty', async () => {
+		const withoutJobsOptions = {
+			...defaultOptions,
+			jobsList: '',
+		};
+
+		const result = await createMessage( withoutJobsOptions );
+
+		// Should have 3 blocks (section, context, actions)
+		expect( result.mainMsgBlocks ).toHaveLength( 3 );
+		expect( result.mainMsgBlocks[ 2 ].type ).toBe( 'actions' );
+	} );
+
+	it( 'should not include jobs list when only whitespace', async () => {
+		const withWhitespaceJobsOptions = {
+			...defaultOptions,
+			jobsList: '   ',
+		};
+
+		const result = await createMessage( withWhitespaceJobsOptions );
+
+		expect( result.mainMsgBlocks ).toHaveLength( 3 );
+		expect( result.mainMsgBlocks[ 2 ].type ).toBe( 'actions' );
+	} );
+
+	it( 'should filter out empty job names from list', async () => {
+		const withEmptyJobsOptions = {
+			...defaultOptions,
+			jobsList: 'Job 1,,Job 2,  ,Job 3',
+		};
+
+		const result = await createMessage( withEmptyJobsOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2\n• Job 3',
+				},
+			],
+		} );
+	} );
+
+	it( 'should trim job names', async () => {
+		const withSpacedJobsOptions = {
+			...defaultOptions,
+			jobsList: '  Job 1  ,  Job 2  ,  Job 3  ',
+		};
+
+		const result = await createMessage( withSpacedJobsOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2\n• Job 3',
+				},
+			],
+		} );
+	} );
+
+	it( 'should parse custom header with ### separator', async () => {
+		const withCustomHeaderOptions = {
+			...defaultOptions,
+			jobsList: 'Failed:###Job 1,Job 2,Job 3',
+		};
+
+		const result = await createMessage( withCustomHeaderOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '*Failed:*\n• Job 1\n• Job 2\n• Job 3',
+				},
+			],
+		} );
+	} );
+
+	it( 'should handle custom header with spaces', async () => {
+		const withCustomHeaderOptions = {
+			...defaultOptions,
+			jobsList: '  Failed Jobs:  ###  Job 1  ,  Job 2  ',
+		};
+
+		const result = await createMessage( withCustomHeaderOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '*Failed Jobs:*\n• Job 1\n• Job 2',
+				},
+			],
+		} );
+	} );
+
+	it( 'should show only bullets when no custom header provided', async () => {
+		const withoutCustomHeaderOptions = {
+			...defaultOptions,
+			jobsList: 'Job 1,Job 2',
+		};
+
+		const result = await createMessage( withoutCustomHeaderOptions );
+
+		const jobsBlock = result.mainMsgBlocks[ 2 ];
+		expect( jobsBlock ).toMatchObject( {
+			type: 'context',
+			elements: [
+				{
+					type: 'mrkdwn',
+					text: '• Job 1\n• Job 2',
+				},
+			],
+		} );
+	} );
 } );
 
 describe( 'getBlocksChunksBySize', () => {
