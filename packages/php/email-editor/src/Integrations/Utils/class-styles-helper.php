@@ -28,10 +28,14 @@ class Styles_Helper {
 	/**
 	 * Parse number value from a string.
 	 *
-	 * @param string $value String value with value and unit.
+	 * @param string|int $value String with value and unit or integer value.
 	 * @return float
 	 */
-	public static function parse_value( string $value ): float {
+	public static function parse_value( string|int $value ): float {
+		if ( is_int( $value ) ) {
+			return (float) $value;
+		}
+
 		if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
 			return (float) $m[1];
 		}
