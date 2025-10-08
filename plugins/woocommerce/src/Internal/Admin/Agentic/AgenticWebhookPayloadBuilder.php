@@ -131,18 +131,10 @@ class AgenticWebhookPayloadBuilder {
 	 * @return array Array of refunds.
 	 */
 	private function build_refunds_data( WC_Order $order ): array {
-		$refunds_data = array();
-		$refunds      = $order->get_refunds();
-
-		if ( empty( $refunds ) ) {
-			return $refunds_data;
-		}
-
-		foreach ( $refunds as $refund ) {
-			$refunds_data[] = $this->build_single_refund_data( $refund );
-		}
-
-		return $refunds_data;
+		return array_map(
+			array( $this, 'build_single_refund_data' ),
+			$order->get_refunds()
+		);
 	}
 
 	/**
