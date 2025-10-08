@@ -14,6 +14,7 @@ use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
@@ -221,6 +222,7 @@ class Server {
 			'products'                => 'WC_REST_Products_V4_Controller',
 			'order-notes'             => OrderNotesController::class,
 			'shipping-zones'          => ShippingZonesController::class,
+			'shipping-zone-method'    => ShippingZoneMethodController::class,
 			'orders'                  => OrdersController::class,
 			'offline-payment-methods' => OfflinePaymentMethodsController::class,
 			'settings-general'        => 'WC_REST_General_Settings_V4_Controller',
