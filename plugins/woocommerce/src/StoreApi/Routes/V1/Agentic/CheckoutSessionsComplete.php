@@ -2,6 +2,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
+use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
@@ -413,7 +414,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 
 		// Look for gateway with agentic_commerce capability.
 		foreach ( $available_gateways as $gateway ) {
-			if ( $gateway->supports( 'agentic_commerce' )
+			if ( $gateway->supports( PaymentGatewayFeature::AGENTIC_COMMERCE )
 				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
 				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
 			) {

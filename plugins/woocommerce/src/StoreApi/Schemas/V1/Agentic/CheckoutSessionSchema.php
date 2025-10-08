@@ -449,7 +449,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Payment provider data or null.
 	 */
 	protected function format_payment_provider() {
-		// Default to first available payment gateway.
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		if ( empty( $available_gateways ) ) {
