@@ -173,7 +173,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		$items = $request->get_param( 'items' );
 		if ( null !== $items ) {
 			// Clear existing cart items and replace with new ones.
-			WC()->cart->empty_cart();
+			$this->cart_controller->empty_cart();
 
 			$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $message_errors );
 			if ( $error instanceof Error ) {
@@ -209,10 +209,15 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		}
 
 		// Calculate totals after all updates.
-		WC()->cart->calculate_totals();
+		try {
+			$this->cart_controller->calculate_totals();
+		} catch ( \Exception $e ) {
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( 'totals_calculation_error', $message )->to_rest_response();
+		}
 
 		// Build response from canonical cart schema.
-		$response = $this->schema->get_item_response( WC()->cart, $message_errors );
+		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance(), $message_errors );
 
 		// Add the messages outside of the schema (it accepts a single object).
 		$response['messages'] = $message_errors->get_formatted_messages();

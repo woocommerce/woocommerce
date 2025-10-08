@@ -134,11 +134,11 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Clear existing cart to start fresh for POST requests.
-		WC()->cart->empty_cart();
-
 		// We'll gather all non-critical errors and provide them at the end.
 		$message_errors = new ErrorMessages();
+
+		// Clear existing cart to start fresh for POST requests.
+		$this->cart_controller->empty_cart();
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
@@ -165,14 +165,14 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Calculate totals.
 		try {
-			WC()->cart->calculate_totals();
+			$this->cart_controller->calculate_totals();
 		} catch ( \Exception $e ) {
 			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
 			return Error::processing_error( 'totals_calculation_error', $message )->to_rest_response();
 		}
 
 		// Build response from canonical cart schema.
-		$response = $this->schema->get_item_response( WC()->cart, $message_errors );
+		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance(), $message_errors );
 
 		// Add the messages outside of the schema (it accepts a single object).
 		$response['messages'] = $message_errors->get_formatted_messages();
