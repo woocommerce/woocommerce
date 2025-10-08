@@ -38,11 +38,16 @@ class ErrorMessages {
 	}
 
 	/**
-	 * Get all error messages.
+	 * Get all error messages, formatted as per the ACP spec.
 	 *
-	 * @return MessageError[] Array of error messages.
+	 * @return array that is ready for the response.
 	 */
-	public function get_all() {
-		return $this->error_messages;
+	public function get_formatted_messages() {
+		return array_map(
+			function( $message_error ) {
+				return $message_error->to_array();
+			},
+			$this->error_messages
+		);
 	}
 }

@@ -215,12 +215,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		$response = $this->schema->get_item_response( WC()->cart, $message_errors );
 
 		// Add the messages outside of the schema (it accepts a single object).
-		$response['messages'] = array_map(
-			function( $message_error ) {
-				return $message_error->to_array();
-			},
-			$message_errors->get_all()
-		);
+		$response['messages'] = $message_errors->get_formatted_messages();
 
 		// Add protocol headers.
 		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );

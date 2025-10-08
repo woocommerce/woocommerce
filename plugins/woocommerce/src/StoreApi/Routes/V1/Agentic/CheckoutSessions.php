@@ -137,12 +137,13 @@ class CheckoutSessions extends AbstractCartRoute {
 		// Clear existing cart to start fresh for POST requests.
 		WC()->cart->empty_cart();
 
-		// We'll gather all error messages in a single array to provide at the end.
+		// We'll gather all non-critical errors and provide them at the end.
 		$message_errors = new ErrorMessages();
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
 		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $message_errors );
+		// Halt for critical errors.
 		if ( $error instanceof Error ) {
 			return $error->to_rest_response();
 		}
@@ -163,18 +164,18 @@ class CheckoutSessions extends AbstractCartRoute {
 		}
 
 		// Calculate totals.
-		WC()->cart->calculate_totals();
+		try {
+			WC()->cart->calculate_totals();
+		} catch ( \Exception $e ) {
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( 'totals_calculation_error', $message )->to_rest_response();
+		}
 
 		// Build response from canonical cart schema.
 		$response = $this->schema->get_item_response( WC()->cart, $message_errors );
 
 		// Add the messages outside of the schema (it accepts a single object).
-		$response['messages'] = array_map(
-			function( $message_error ) {
-				return $message_error->to_array();
-			},
-			$message_errors->get_all()
-		);
+		$response['messages'] = $message_errors->get_formatted_messages();
 
 		// Add protocol headers.
 		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );
