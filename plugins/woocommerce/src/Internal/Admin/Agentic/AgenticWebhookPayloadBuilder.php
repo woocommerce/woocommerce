@@ -206,24 +206,4 @@ class AgenticWebhookPayloadBuilder {
 	private function format_amount( $amount ) {
 		return number_format( $amount, 2, '.', '' );
 	}
-
-	/**
-	 * Add additional order metadata that might be useful.
-	 * This is for extensibility - the spec allows additional properties.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @return array Additional metadata.
-	 */
-	private function get_additional_metadata( $order ) {
-		return array(
-			'order_id'       => $order->get_id(),
-			'order_key'      => $order->get_order_key(),
-			'currency'       => $order->get_currency(),
-			'total'          => $this->format_amount( $order->get_total() ),
-			'customer_email' => $order->get_billing_email(),
-			'created_via'    => $order->get_created_via(),
-			'date_created'   => $order->get_date_created() ? $order->get_date_created()->format( 'c' ) : null,
-			'date_modified'  => $order->get_date_modified() ? $order->get_date_modified()->format( 'c' ) : null,
-		);
-	}
 }
