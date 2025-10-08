@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus as ACPOrderStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\RefundType;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -166,7 +167,7 @@ class AgenticWebhookPayloadBuilder {
 	 */
 	private function determine_refund_type( WC_Order_Refund $refund ): string {
 		// Default to original payment method.
-		$refund_type = 'original_payment';
+		$refund_type = RefundType::ORIGINAL_PAYMENT;
 
 		/**
 		 * Filter the refund type for Agentic webhooks.
