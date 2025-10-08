@@ -13,7 +13,7 @@ use WC_Webhook;
  * Integrates Agentic Commerce Protocol webhooks with WooCommerce's native webhook system.
  * Defines custom action topics and handles filtering/transformation for ACP compliance.
  *
- * @since 9.6.0
+ * @since 10.3.0
  */
 class AgenticWebhookManager {
 	/**

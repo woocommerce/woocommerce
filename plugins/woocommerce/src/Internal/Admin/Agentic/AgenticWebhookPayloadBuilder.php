@@ -13,7 +13,7 @@ use WC_Order_Refund;
  * Builds webhook payloads for the Agentic Commerce Protocol following
  * the specification for order lifecycle events.
  *
- * @since 9.6.0
+ * @since 10.3.0
  */
 class AgenticWebhookPayloadBuilder {
 	/**

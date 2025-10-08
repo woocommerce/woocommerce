@@ -9,7 +9,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Agentic;
  * Main controller for Agentic Commerce Protocol features.
  * Manages initialization of webhooks and future settings for the Agentic feature.
  *
- * @since 9.6.0
+ * @since 10.3.0
  */
 class AgenticController {
 	/**
