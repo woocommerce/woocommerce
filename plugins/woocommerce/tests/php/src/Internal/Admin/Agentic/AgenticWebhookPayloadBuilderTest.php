@@ -23,7 +23,9 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->payload_builder = new AgenticWebhookPayloadBuilder();
+		// Use the WooCommerce logger for tests.
+		$logger = wc_get_logger();
+		$this->payload_builder = new AgenticWebhookPayloadBuilder( $logger );
 	}
 
 	/**

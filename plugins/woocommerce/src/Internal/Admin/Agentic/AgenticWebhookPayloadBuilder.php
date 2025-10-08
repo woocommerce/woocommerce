@@ -8,6 +8,7 @@ use Automattic\WooCommerce\StoreApi\Formatters\MoneyFormatter;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus as ACPOrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\RefundType;
+use WC_Logger_Interface;
 use WC_Order;
 use WC_Order_Refund;
 
@@ -20,6 +21,22 @@ use WC_Order_Refund;
  * @since 10.3.0
  */
 class AgenticWebhookPayloadBuilder {
+	/**
+	 * Logger instance.
+	 *
+	 * @var WC_Logger_Interface
+	 */
+	private $logger;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param WC_Logger_Interface $logger Logger instance.
+	 */
+	public function __construct( WC_Logger_Interface $logger ) {
+		$this->logger = $logger;
+	}
+
 	/**
 	 * Build the webhook payload for an order event.
 	 *
@@ -112,13 +129,13 @@ class AgenticWebhookPayloadBuilder {
 		// Validate the mapped status is a valid ACP status.
 		if ( ! ACPOrderStatus::is_valid( $mapped_status ) ) {
 			// Log a warning for invalid status but continue with fallback.
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
-			error_log(
+			$this->logger->error(
 				sprintf(
 					'Invalid ACP order status "%s" returned by woocommerce_agentic_webhook_order_status_map filter for WooCommerce status "%s". Using "created" as fallback.',
 					$mapped_status,
 					$wc_status
-				)
+				),
+				array( 'source' => 'agentic-webhooks' )
 			);
 			return ACPOrderStatus::CREATED;
 		}
