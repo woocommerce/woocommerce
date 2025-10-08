@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -19,6 +20,14 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * @var JetpackConnectionManager|MockObject
 	 */
 	private $jetpack_connection_manager_mock;
+
+	public function tearDown(): void {
+		parent::tearDown();
+
+		// Reset the REST server to clear registered routes.
+		global $wp_rest_server;
+		$wp_rest_server = null;
+	}
 
 	/**
 	 * Tests the functionality is enabled if Jetpack is connected.
@@ -50,6 +59,47 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications = new PushNotifications();
 
 		$this->assertFalse( $push_notifications->should_be_enabled() );
+	}
+
+	/**
+	 * Tests the endpoints haven't been registered if Jetpack is not connected.
+	 */
+	public function test_it_does_not_register_endpoints_if_disabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		$routes = array_keys(rest_get_server()->get_routes() );
+
+		$this->assertNotContains( '/wc-push-notifications/push-tokens', $routes );
+		$this->assertNotContains( '/wc-push-notifications/push-tokens/(?P<id>[\d]+)', $routes );
+	}
+
+	/**
+	 * Tests the endpoints have been registered if Jetpack is connected.
+	 */
+	public function test_it_registers_endpoints_if_enabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->register();
+
+		$routes = array_keys(rest_get_server()->get_routes() );
+
+		$this->assertContains( '/wc-push-notifications/push-tokens', $routes );
+		$this->assertContains( '/wc-push-notifications/push-tokens/(?P<id>[\d]+)', $routes );
 	}
 
 	/**
