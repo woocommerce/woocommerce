@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix is_cart() and is_checkout() conditional tags returning false during Store API cart operations. Store API routes now define WOOCOMMERCE_CART and WOOCOMMERCE_CHECKOUT constants to match traditional AJAX handler behavior, ensuring custom validation code in hooks like woocommerce_check_cart_items executes correctly during cart updates (e.g., quantity changes via Cart Block +/- buttons).
