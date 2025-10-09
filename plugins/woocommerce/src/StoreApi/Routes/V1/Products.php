@@ -77,7 +77,7 @@ class Products extends AbstractRoute {
 			$query_results    = $product_query->get_objects( $request );
 			$response_objects = [];
 
-			$this->batch_prime_variable_prices( $query_results['objects'] );
+			$this->batch_prime_variable_products_and_variations( $query_results['objects'] );
 
 			foreach ( $query_results['objects'] as $object ) {
 				$data               = rest_ensure_response( $this->schema->get_item_response( $object ) );
@@ -467,11 +467,11 @@ class Products extends AbstractRoute {
 	}
 
 	/**
-	 * Batch prime price data for variable products to improve performance.
+	 * Batch prime variable products and their variations.
 	 *
 	 * @param \WC_Product[] $products Array of product objects.
 	 */
-	protected function batch_prime_variable_prices( array $products ) {
+	protected function batch_prime_variable_products_and_variations(array $products ) {
 		$to_prime = array();
 
 		foreach ( $products as $product ) {
