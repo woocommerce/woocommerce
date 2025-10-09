@@ -260,12 +260,12 @@ class GeneralSettingsSchema extends AbstractSchema {
 				}
 
 				$currencies = get_woocommerce_currencies();
-				$options   = array();
+				$options    = array();
 
 				foreach ( $currencies as $code => $name ) {
-					$label                = wp_specialchars_decode( (string) $name );
-					$symbol              = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
-					$options[ $code ]    = $label . ' (' . $symbol . ') — ' . $code;
+					$label            = wp_specialchars_decode( (string) $name );
+					$symbol           = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
+					$options[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
 				}
 
 				return $options;
@@ -278,8 +278,8 @@ class GeneralSettingsSchema extends AbstractSchema {
 				}
 
 				$countries = WC()->countries->get_countries();
-				$states   = WC()->countries->get_states();
-				$options  = array();
+				$states    = WC()->countries->get_states();
+				$options   = array();
 
 				foreach ( $countries as $country_code => $country_name ) {
 					$country_states = $states[ $country_code ] ?? array();
