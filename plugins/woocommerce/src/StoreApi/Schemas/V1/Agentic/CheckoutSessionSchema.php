@@ -442,20 +442,12 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return CheckoutSessionStatus::READY_FOR_PAYMENT;
 		}
 
-		// Check if ready for payment.
-		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
-		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
-
-		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
-		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
-
-		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
-			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
-		}
-
-		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) || $checkout_session->get_messages()->has_errors() ) {
+		// Check for validation errors.
+		if (
+			$checkout_session->get_messages()->has_errors()
+			// Once we switch to using the CartController everywhere, there should be no notices and need for this.
+			|| ! empty( wc_get_notices( 'error' ) )
+		) {
 			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
@@ -646,15 +638,32 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array Messages array.
 	 */
 	protected function validate( $checkout_session ) {
-		$errors = $checkout_session->get_messages();
+		$messages = $checkout_session->get_messages();
 		$cart   = $checkout_session->get_cart();
 
+		// Check if ready for payment.
+		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
+		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
+
 		// Add info message if shipping is needed.
-		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
-			$errors->add(
+		if ( $needs_shipping && ! $has_address ) {
+			$messages->add(
 				MessageError::missing(
 					__( 'Shipping address required.', 'woocommerce' ),
 					'$.fulfillment_address'
+				)
+			);
+		}
+
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
+
+		if ( $needs_shipping && ! $has_shipping ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'No shipping method selected.', 'woocommerce' ),
+					'$.fulfillment_option_id'
 				)
 			);
 		}
