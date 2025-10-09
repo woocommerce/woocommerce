@@ -73,7 +73,13 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_item' ),
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema(),
+					'args'                => array(
+						'values' => array(
+							'description' => __( 'Payment gateway field values to update.', 'woocommerce' ),
+							'type'        => 'object',
+							'required'    => true,
+						),
+					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
 				'args'   => array(
@@ -188,18 +194,17 @@ class Controller extends AbstractController {
 		// Get gateway-specific schema.
 		$schema = $this->get_schema_for_gateway( $id );
 
-		$params = $request->get_json_params();
+		// Get field values from the values parameter.
+		$params           = $request->get_params();
+		$values_to_update = $params['values'] ?? null;
 
-		// Get field values from the values object.
-		if ( ! isset( $params['values'] ) ) {
+		if ( empty( $values_to_update ) || ! is_array( $values_to_update ) ) {
 			return new WP_Error(
 				'rest_missing_callback_param',
 				__( 'Missing parameter(s): values', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
 		}
-
-		$values_to_update = $params['values'];
 
 		// Handle top-level gateway fields from within values.
 		if ( isset( $values_to_update['enabled'] ) ) {
@@ -218,9 +223,9 @@ class Controller extends AbstractController {
 		}
 
 		if ( isset( $values_to_update['order'] ) ) {
-			$order                    = absint( $values_to_update['order'] );
-			$gateway_order            = (array) get_option( 'woocommerce_gateway_order', array() );
-			$gateway_order[ $id ]     = $order;
+			$order                = absint( $values_to_update['order'] );
+			$gateway_order        = (array) get_option( 'woocommerce_gateway_order', array() );
+			$gateway_order[ $id ] = $order;
 			update_option( 'woocommerce_gateway_order', $gateway_order );
 			unset( $values_to_update['order'] );
 		}
