@@ -665,9 +665,9 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		// Verify error response contains stock-related message.
 		$complete_data = $complete_response->get_data();
 		$this->assertArrayHasKey( 'type', $complete_data );
-        $this->assertEquals( 'invalid_request', $complete_data['type'] );
+		$this->assertEquals( 'invalid_request', $complete_data['type'] );
 		$this->assertArrayHasKey( 'code', $complete_data );
-        $this->assertEquals( 'invalid', $complete_data['code'] );
+		$this->assertEquals( 'invalid', $complete_data['code'] );
 		$this->assertArrayHasKey( 'message', $complete_data );
 		$this->assertStringContainsString( 'out of stock', strtolower( $complete_data['message'] ) );
 	}

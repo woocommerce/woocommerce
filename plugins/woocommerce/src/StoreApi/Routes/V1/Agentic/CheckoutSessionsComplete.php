@@ -217,6 +217,14 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		 * Verify checkout session is ready for payment.
 		 */
 		$session_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+
+		// If payment is already in progress, return error.
+		if ( CheckoutSessionStatus::IN_PROGRESS === $session_status ) {
+			$message = __( 'Payment is already in progress for this checkout session.', 'woocommerce' );
+			return Error::processing_error( ErrorCode::INVALID, $message )->to_rest_response();
+		}
+
+		// Only allow payment if session is ready.
 		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
 			$message = sprintf(
 				/* translators: %s: current session status */
@@ -306,16 +314,30 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		$payment_result = new PaymentResult();
 
 		try {
+			/**
+			 * Set IN_PROGRESS status to prevent concurrent payment attempts.
+			 * Save this status right away so that any concurrent request will not be able to access the payment process.
+			 */
+			WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS, true );
+			WC()->session->save_data();
+
 			$this->process_payment( $request, $payment_result );
 		} catch ( \Exception $e ) {
 			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
 			return Error::processing_error( ErrorCode::INVALID, $message )->to_rest_response();
+		} finally {
+			/**
+			 * Clear IN_PROGRESS status after payment attempt.
+			 * Do not save session here as it will be done after the shutdown.
+			 */
+			WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS, false );
 		}
 
 		/**
 		 * If payment failed, return error.
 		 */
 		if ( 'failure' === $payment_result->status || 'error' === $payment_result->status ) {
+			// Clear IN_PROGRESS status to allow retry.
 			$message = $payment_result->message ?? __( 'Payment was declined.', 'woocommerce' );
 			$message = wp_specialchars_decode( $message, ENT_QUOTES );
 			return Error::processing_error( ErrorCode::PAYMENT_DECLINED, $message )->to_rest_response();
@@ -327,7 +349,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, $this->order->get_id() );
 
 		/**
-		 * Build response from canonical cart schema with order.
+		 * Build response from canonical cart schema.
 		 */
 		$response_data = $this->schema->get_item_response( WC()->cart );
 		$response      = rest_ensure_response( $response_data );

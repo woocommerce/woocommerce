@@ -25,4 +25,9 @@ class SessionKey {
 	 * Whether if the session has been canceled.
 	 */
 	const AGENTIC_CHECKOUT_IS_CANCELED = 'agentic_checkout_is_canceled';
+
+	/**
+	 * Whether payment is in progress.
+	 */
+	const AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS = 'agentic_checkout_payment_in_progress';
 }

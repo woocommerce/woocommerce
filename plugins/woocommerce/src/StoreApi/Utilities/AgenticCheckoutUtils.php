@@ -377,6 +377,10 @@ class AgenticCheckoutUtils {
 			return CheckoutSessionStatus::COMPLETED;
 		}
 
+		if ( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS ) ) {
+			return CheckoutSessionStatus::IN_PROGRESS;
+		}
+
 		// Check if ready for payment.
 		$needs_shipping = $cart->needs_shipping();
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
