@@ -266,9 +266,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since  3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
-		global $wp_filter;
-		$has_variation_prices_array_filters = ! empty( $wp_filter['woocommerce_variation_prices_array'] );
-
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 *
@@ -376,7 +373,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
 						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
 
-						if ( $has_variation_prices_array_filters ) {
+						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
 							/**
 							 * Filter the variation prices array before storing in transient cache.
 							 *
