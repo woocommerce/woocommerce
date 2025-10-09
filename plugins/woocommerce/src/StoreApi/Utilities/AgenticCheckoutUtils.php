@@ -369,10 +369,6 @@ class AgenticCheckoutUtils {
 			return CheckoutSessionStatus::CANCELED;
 		}
 
-		if ( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_IS_CANCELED ) ) {
-			return CheckoutSessionStatus::CANCELED;
-		}
-
 		if ( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) ) {
 			return CheckoutSessionStatus::COMPLETED;
 		}

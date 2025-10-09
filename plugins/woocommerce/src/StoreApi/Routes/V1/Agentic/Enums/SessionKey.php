@@ -22,11 +22,6 @@ class SessionKey {
 	const AGENTIC_CHECKOUT_COMPLETED_ORDER_ID = 'agentic_checkout_completed_order_id';
 
 	/**
-	 * Whether if the session has been canceled.
-	 */
-	const AGENTIC_CHECKOUT_IS_CANCELED = 'agentic_checkout_is_canceled';
-
-	/**
 	 * Whether payment is in progress.
 	 */
 	const AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS = 'agentic_checkout_payment_in_progress';
