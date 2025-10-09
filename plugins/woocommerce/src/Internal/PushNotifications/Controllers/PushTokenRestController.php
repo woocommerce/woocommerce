@@ -89,6 +89,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		$push_token->set_token( $request->get_param( 'token' ) );
 		$push_token->set_platform( $request->get_param( 'platform' ) );
 		$push_token->set_device_uuid( $request->get_param( 'device_uuid' ) );
+		$push_token->set_origin( $request->get_param( 'origin' ) );
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
 
@@ -247,13 +248,18 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	private function get_args(): array {
 		return array(
-			'token'       => array(
-				'description'       => __( 'Push Token', 'woocommerce' ),
-				'type'              => 'string',
-				'required'          => true,
-				'readonly'          => true,
-				'context'           => array( 'create' ),
-				'validate_callback' => array( $this, 'validate_token' ),
+			'origin'      => array(
+				'description' => __( 'Origin', 'woocommerce' ),
+				'type'        => 'string',
+				'readonly'    => true,
+				'required'    => true,
+				'context'     => array( 'create' ),
+			),
+			'device_uuid' => array(
+				'description' => __( 'Device UUID', 'woocommerce' ),
+				'type'        => 'string',
+				'required'    => true,
+				'context'     => array( 'create' ),
 			),
 			'platform'    => array(
 				'description' => __( 'Platform', 'woocommerce' ),
@@ -267,12 +273,12 @@ class PushTokenRestController extends RestApiControllerBase {
 					PushToken::PLATFORM_BROWSER,
 				),
 			),
-			'device_uuid' => array(
-				'description' => __( 'Device UUID', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'readonly'    => true,
-				'context'     => array( 'create' ),
+			'token'       => array(
+				'description'       => __( 'Push Token', 'woocommerce' ),
+				'type'              => 'string',
+				'required'          => true,
+				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_token' ),
 			),
 		);
 	}
