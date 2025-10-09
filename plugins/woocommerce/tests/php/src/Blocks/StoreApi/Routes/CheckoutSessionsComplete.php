@@ -102,7 +102,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * @return array Modified gateways.
 	 */
 	public function add_mock_gateway( $gateways ) {
-		$gateways[ MockAgenticPaymentGateway::GATEWAY_ID ] =  $this->mock_gateway;
+		$gateways[ MockAgenticPaymentGateway::GATEWAY_ID ] = $this->mock_gateway;
 		return $gateways;
 	}
 

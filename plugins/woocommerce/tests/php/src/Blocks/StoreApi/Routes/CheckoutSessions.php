@@ -18,7 +18,6 @@ use Automattic\WooCommerce\StoreApi\RoutesController;
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
-
 	/**
 	 * Products created for tests.
 	 *
@@ -85,8 +84,7 @@ class CheckoutSessions extends ControllerTestCase {
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
 		// Clear session data.
-		WC()->session->set( 'agentic_draft_order_id', null );
-		WC()->session->set( 'chosen_shipping_methods', null );
+		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
