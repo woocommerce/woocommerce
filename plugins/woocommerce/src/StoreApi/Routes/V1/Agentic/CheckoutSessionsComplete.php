@@ -227,22 +227,6 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		/**
-		 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
-		 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
-		 */
-		$this->cart_controller->calculate_totals();
-
-		/**
-		 * Validate that the cart is not empty.
-		 */
-		$this->cart_controller->validate_cart_not_empty();
-
-		/**
-		 * Validate items and fix violations before the order is processed.
-		 */
-		$this->cart_controller->validate_cart();
-
-		/**
 		 * Set buyer data if exists.
 		 */
 		$buyer = $request->get_param( 'buyer' );
@@ -256,6 +240,27 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		$payment_data = $request->get_param( 'payment_data' );
 		if ( isset( $payment_data['billing_address'] ) ) {
 			AgenticCheckoutUtils::set_billing_address( $payment_data['billing_address'], WC()->customer );
+		}
+
+		try {
+			/**
+			 * Before triggering validation, ensure totals are current and in turn, things such as shipping costs are present.
+			 * This is so plugins that validate other cart data (e.g. conditional shipping and payments) can access this data.
+			 */
+			$this->cart_controller->calculate_totals();
+
+			/**
+			 * Validate that the cart is not empty.
+			 */
+			$this->cart_controller->validate_cart_not_empty();
+
+			/**
+			 * Validate items and fix violations before the order is processed.
+			 */
+			$this->cart_controller->validate_cart();
+		} catch ( \Exception $e ) {
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
 		/**
