@@ -29,12 +29,20 @@ class AgenticWebhookPayloadBuilder {
 	private $logger;
 
 	/**
+	 * Money formatter instance.
+	 *
+	 * @var MoneyFormatter
+	 */
+	private $money_formatter;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param WC_Logger_Interface $logger Logger instance.
 	 */
 	public function __construct( WC_Logger_Interface $logger ) {
-		$this->logger = $logger;
+		$this->logger          = $logger;
+		$this->money_formatter = new MoneyFormatter();
 	}
 
 	/**
@@ -157,13 +165,12 @@ class AgenticWebhookPayloadBuilder {
 		$refund_type = $this->determine_refund_type( $refund );
 		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative.
 
-		// Convert amount to cents using MoneyFormatter, same as checkout session endpoints.
-		$formatter       = new MoneyFormatter();
-		$amount_in_cents = (int) $formatter->format( $amount, array( 'decimals' => 2 ) );
+		// Convert amount to minor units using MoneyFormatter (respects store currency decimals).
+		$amount_in_minor_units = (int) $this->money_formatter->format( $amount );
 
 		return array(
 			'type'   => $refund_type,
-			'amount' => $amount_in_cents,
+			'amount' => $amount_in_minor_units,
 		);
 	}
 
