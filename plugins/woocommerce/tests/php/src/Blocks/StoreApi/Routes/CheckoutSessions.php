@@ -421,9 +421,10 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 400, $response->get_status() );
-		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'out_of_stock', $data['code'] );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'messages', $data );
+		$this->assertEquals( 'error', $data['messages'][0]['type'] );
+		$this->assertEquals( 'out_of_stock', $data['messages'][0]['code'] );
 	}
 
 	/**
