@@ -102,7 +102,7 @@ class Controller extends AbstractController {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'Sorry, you are not allowed to access product settings.', 'woocommerce' ),
+				__( 'Sorry, you are not allowed to access general settings.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -119,7 +119,7 @@ class Controller extends AbstractController {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
 			return new WP_Error(
 				'rest_forbidden',
-				__( 'Sorry, you are not allowed to edit product settings.', 'woocommerce' ),
+				__( 'Sorry, you are not allowed to edit general settings.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
