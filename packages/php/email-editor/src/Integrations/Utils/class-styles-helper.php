@@ -28,7 +28,7 @@ class Styles_Helper {
 	/**
 	 * Parse number value from a string.
 	 *
-	 * @param string|int $value String with value and unit or integer value.
+	 * @param string|float|int $value String with value and unit or integer value.
 	 * @return float
 	 */
 	public static function parse_value( $value ): float {
