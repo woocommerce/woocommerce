@@ -53,7 +53,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 						),
 					),
 				),
-				'schema' => array( $this, 'generate_products_catalog_schema' ),
+				'schema' => array( $this, 'catalog_generation_schema' ),
 			)
 		);
 
