@@ -67,7 +67,6 @@ class AgenticWebhookManager {
 
 		// Customize webhook HTTP arguments for our topics.
 		add_filter( 'woocommerce_webhook_http_args', array( $this, 'customize_webhook_http_args' ), 10, 3 );
-		add_filter( 'woocommerce_webhook_delivery_url', array( $this, 'customize_webhook_delivery_url' ), 10, 2 );
 	}
 
 	/**
@@ -266,58 +265,6 @@ class AgenticWebhookManager {
 		}
 
 		return $http_args;
-	}
-
-	/**
-	 * Customize webhook delivery URL for Agentic topics.
-	 *
-	 * @param string $url        Delivery URL.
-	 * @param int    $webhook_id Webhook ID.
-	 * @return string Modified URL.
-	 */
-	public function customize_webhook_delivery_url( $url, $webhook_id ) {
-		// Only modify URL during actual delivery, not during retrieval.
-		// Check if we're in a delivery context by looking at the call stack.
-		if ( ! $this->is_delivering_webhook() ) {
-			return $url;
-		}
-
-		$webhook = wc_get_webhook( $webhook_id );
-		if ( ! $webhook ) {
-			return $url;
-		}
-
-		$topic = $webhook->get_topic();
-
-		// Check if this is one of our Agentic topics.
-		if ( ! in_array( $topic, array( self::TOPIC_ORDER_CREATED, self::TOPIC_ORDER_UPDATED ), true ) ) {
-			return $url;
-		}
-
-		// Append the ACP endpoint path if not already present.
-		$acp_path = '/agentic_checkout/webhooks/order_events';
-		if ( strpos( $url, $acp_path ) === false ) {
-			$url = trailingslashit( $url ) . ltrim( $acp_path, '/' );
-		}
-
-		return $url;
-	}
-
-	/**
-	 * Check if we're currently delivering a webhook.
-	 *
-	 * @return bool True if in delivery context.
-	 */
-	private function is_delivering_webhook() {
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- Needed to detect delivery context.
-		$backtrace = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 10 );
-		foreach ( $backtrace as $call ) {
-			if ( isset( $call['class'] ) && 'WC_Webhook' === $call['class']
-				&& isset( $call['function'] ) && 'deliver' === $call['function'] ) {
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/**
