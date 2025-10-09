@@ -9,6 +9,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -166,8 +167,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// Prepare an array for all error messages.
-		$message_errors = new ErrorMessages();
+		$checkout_session = new AgenticCheckoutSession( $this->cart_controller->get_cart_instance() );
 
 		// Update items if provided.
 		$items = $request->get_param( 'items' );
@@ -175,7 +175,11 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 			// Clear existing cart items and replace with new ones.
 			$this->cart_controller->empty_cart();
 
-			$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $message_errors );
+			$error = AgenticCheckoutUtils::add_items_to_cart(
+				$items,
+				$this->cart_controller,
+				$checkout_session->get_errors()
+			);
 			if ( $error instanceof Error ) {
 				return $error->to_rest_response();
 			}
@@ -217,10 +221,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		}
 
 		// Build response from canonical cart schema.
-		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance() );
-
-		// Add the messages outside of the schema (it accepts a single object).
-		$response['messages'] = $message_errors->get_formatted_messages();
+		$response = $this->schema->get_item_response( $checkout_session );
 
 		// Add protocol headers.
 		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );
