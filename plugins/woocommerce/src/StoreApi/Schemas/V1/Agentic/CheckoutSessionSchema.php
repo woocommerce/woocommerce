@@ -635,11 +635,10 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * Validates a session.
 	 *
 	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
-	 * @return array Messages array.
+	 * @return void
 	 */
-	protected function validate( $checkout_session ) {
+	protected function validate( $checkout_session ): void {
 		$messages = $checkout_session->get_messages();
-		$cart   = $checkout_session->get_cart();
 
 		// Check if ready for payment.
 		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
