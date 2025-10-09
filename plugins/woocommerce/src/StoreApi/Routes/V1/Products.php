@@ -472,43 +472,18 @@ class Products extends AbstractRoute {
 	 * @param \WC_Product[] $products Array of product objects.
 	 */
 	protected function batch_prime_variable_prices( array $products ) {
-		/**
-		 * Filters the maximum number of variations to prime at once.
-		 *
-		 * @since 10.4.0
-		 * @param int $max_variations Default 1000.
-		 */
-		$max_variations = apply_filters( 'woocommerce_batch_prime_max_variations', 1000 );
-
-		$variations_to_prime = array();
-		$products_to_prime   = array();
-		$total_count         = 0;
+		$to_prime = array();
 
 		foreach ( $products as $product ) {
-			if ( ! $product->is_type( ProductType::VARIABLE ) ) {
-				continue;
+			if ( $product->is_type( ProductType::VARIABLE ) ) {
+				$to_prime = array_merge( $to_prime, $product->get_visible_children());
 			}
 
-			if ( $total_count >= $max_variations ) {
-				break;
-			}
-
-			$variation_ids       = array_slice( $product->get_visible_children(), 0, $max_variations - $total_count );
-			$variations_to_prime = array_merge( $variations_to_prime, $variation_ids );
-			$products_to_prime[] = $product;
-			$total_count        += count( $variation_ids );
+			$to_prime[] = $product;
 		}
 
-		if ( empty( $variations_to_prime ) ) {
-			return;
-		}
-
-		if ( is_callable( '_prime_post_caches' ) ) {
-			_prime_post_caches( array_unique( $variations_to_prime ) );
-		}
-
-		foreach ( $products_to_prime as $product ) {
-			$product->get_variation_price();
+		if ( is_callable( '_prime_post_caches' ) && ! empty( $to_prime ) ) {
+			_prime_post_caches( $to_prime );
 		}
 	}
 }
