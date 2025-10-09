@@ -24,7 +24,7 @@ class ConditionalTagsTest extends ControllerTestCase {
 	 */
 	protected $products = array();
 
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		wc_empty_cart();
@@ -55,7 +55,7 @@ class ConditionalTagsTest extends ControllerTestCase {
 		wc_get_container()->get( RoutesController::class )->register_all_routes();
 	}
 
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		parent::tearDown();
 		wc_empty_cart();
 		$this->reset_customer_state();
