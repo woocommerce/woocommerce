@@ -70,7 +70,12 @@ const ProductItem = ( {
 						role="button"
 						tabIndex={ 0 }
 						onClick={ onSelect }
-						onKeyDown={ onSelect }
+						onKeyDown={ ( e ) => {
+							if ( e.key === 'Enter' || e.key === ' ' ) {
+								e.preventDefault();
+								onSelect();
+							}
+						} }
 					/>
 				</div>
 			) }
@@ -123,6 +128,7 @@ export default function ProductItemTemplateEdit(
 	useEffect( () => {
 		const fetchChildProducts = async ( groupedProductIds: number[] ) => {
 			if ( ! groupedProductIds || groupedProductIds.length === 0 ) {
+				setIsLoadingProducts( false );
 				return;
 			}
 
@@ -197,7 +203,7 @@ export default function ProductItemTemplateEdit(
 					} }
 					blocks={ blocks }
 					isSelected={
-						( selectedProductItem || products[ 0 ]?.id ) ===
+						( selectedProductItem ?? products[ 0 ]?.id ) ===
 						productItem.id
 					}
 					onSelect={ () => setSelectedProductItem( productItem.id ) }
@@ -210,7 +216,7 @@ export default function ProductItemTemplateEdit(
 					blocks={ blocks }
 					isLoading={ false }
 					isSelected={
-						( selectedProductItem ||
+						( selectedProductItem ??
 							previewProductResponseItems[ 0 ]?.id ) ===
 						productItem.id
 					}
