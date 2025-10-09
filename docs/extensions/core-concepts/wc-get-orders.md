@@ -1,3 +1,6 @@
+---
+sidebar_label: Order Querying
+---
 # `wc_get_orders()` and order queries
 
 `wc_get_orders()` and `WC_Order_Query` provide a standard way of retrieving orders from the database, similar to WordPress' [`get_posts()` and `WP_Query`](https://codex.wordpress.org/Class_Reference/WP_Query) but specifically for orders.
