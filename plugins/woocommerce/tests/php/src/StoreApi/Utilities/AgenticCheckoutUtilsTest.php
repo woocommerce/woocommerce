@@ -17,7 +17,7 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Reset customer and cart FIRST before anything else.
+		// Reset cart FIRST before anything else.
 		wc_empty_cart();
 
 		// Clear all session data early to ensure clean state.
