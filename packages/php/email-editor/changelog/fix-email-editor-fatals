@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixed type errors caused by passing int to Styles_Helper::parse_value.

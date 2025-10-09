@@ -3,9 +3,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 
 /**
  * AgenticCheckoutUtils class.
@@ -106,19 +108,16 @@ class AgenticCheckoutUtils {
 	 *
 	 * @param array          $items Items array from request.
 	 * @param CartController $cart_controller Cart controller instance.
-	 * @return \WP_REST_Response|null Returns error response on failure, null on success.
+	 * @param ErrorMessages  $error_messages Error messages instance.
+	 * @return Error|null Returns error response on failure, null on success.
 	 */
-	public static function add_items_to_cart( $items, $cart_controller ) {
-		foreach ( $items as $index => $item ) {
+	public static function add_items_to_cart( $items, $cart_controller, $error_messages ) {
+		foreach ( $items as $item_index => $item ) {
 			if ( ! is_numeric( $item['id'] ) ) {
-				return new \WP_REST_Response(
-					[
-						'type'    => ErrorType::INVALID_REQUEST,
-						'code'    => 'invalid_product_id',
-						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
-						'param'   => '$.items[' . $index . '].id',
-					],
-					400
+				return Error::invalid_request(
+					'invalid_product_id',
+					__( 'Product ID must be numeric.', 'woocommerce' ),
+					'$.items[' . $item_index . '].id'
 				);
 			}
 
@@ -132,56 +131,32 @@ class AgenticCheckoutUtils {
 						'quantity' => $quantity,
 					]
 				);
-			} catch ( \Exception $e ) {
-				return self::create_error_response_from_exception( $e, $index );
+			} catch ( RouteException $exception ) {
+				$message       = wp_specialchars_decode( $exception->getMessage(), ENT_QUOTES );
+				$param         = '$.items[' . $item_index . ']';
+				$message_error = null;
+
+				// Check if it's a RouteException with a specific error code.
+				if ( $exception instanceof RouteException ) {
+					// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
+					switch ( $exception->getErrorCode() ) {
+						case 'woocommerce_rest_product_out_of_stock':
+						case 'woocommerce_rest_product_partially_out_of_stock':
+							$message_error = MessageError::out_of_stock( $message, $param );
+							break;
+					}
+				}
+
+				if ( null !== $message_error ) {
+					$error_messages->add( $message_error );
+				} else {
+					// The error code is generally applicable only to MessageErrors, but we can use it here as well.
+					return Error::invalid_request( ErrorCode::INVALID, $message, $param );
+				}
 			}
 		}
 
 		return null;
-	}
-
-	/**
-	 * Create error response from exception.
-	 *
-	 * @param \Exception $exception The exception.
-	 * @param int        $item_index The item index in the request.
-	 * @return \WP_REST_Response Error response.
-	 */
-	public static function create_error_response_from_exception( \Exception $exception, $item_index ) {
-
-		$error_message = $exception->getMessage();
-		$error_code    = ErrorCode::INVALID; // Default fallback.
-
-		// Check if it's a RouteException with a specific error code.
-		if ( $exception instanceof RouteException ) {
-			$wc_error_code = $exception->getErrorCode();
-
-			// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
-			switch ( $wc_error_code ) {
-				case 'woocommerce_rest_product_out_of_stock':
-				case 'woocommerce_rest_product_partially_out_of_stock':
-					$error_code = ErrorCode::OUT_OF_STOCK;
-					break;
-				case 'woocommerce_rest_product_not_purchasable':
-				case 'woocommerce_rest_cart_invalid_product':
-				case 'woocommerce_rest_invalid_product_id':
-					$error_code = ErrorCode::INVALID;
-					break;
-				default:
-					// Keep default 'invalid' for unknown error codes.
-					break;
-			}
-		}
-
-		return new \WP_REST_Response(
-			[
-				'type'    => ErrorType::INVALID_REQUEST,
-				'code'    => $error_code,
-				'message' => $error_message,
-				'param'   => '$.items[' . $item_index . ']',
-			],
-			400
-		);
 	}
 
 	/**
