@@ -18,7 +18,9 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\FulfillmentTyp
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 
@@ -331,12 +333,12 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce cart to the Agentic Checkout session format.
 	 *
-	 * @param mixed $cart_data Cart data from WooCommerce (unused, uses WC()->cart directly).
+	 * @param AgenticCheckoutSession $checkout_session Cart data from WooCommerce (unused, uses WC()->cart directly).
 	 * @return array Formatted checkout session data.
 	 */
-	public function get_item_response( $cart_data ) {
+	public function get_item_response( $checkout_session ) {
 		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable.
-		$cart = WC()->cart;
+		$cart = $checkout_session->get_cart();
 
 		// Get draft order if exists.
 		$draft_order = $this->get_draft_order();
@@ -348,18 +350,22 @@ class CheckoutSessionSchema extends AbstractSchema {
 			WC()->session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
 		}
 
+		// Messages are generated first, as they might add errors to the session.
+		// This behavior should be changed, it is temporary in order to fix calculations first.
+		$messages = $this->get_messages( $checkout_session );
+
 		return [
 			'id'                    => $session_id,
 			'buyer'                 => $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
-			'status'                => $this->calculate_status( $cart, $draft_order ),
+			'status'                => $this->calculate_status( $checkout_session, $draft_order ),
 			'currency'              => strtolower( get_woocommerce_currency() ),
 			'line_items'            => $this->format_line_items( $cart->get_cart() ),
 			'fulfillment_address'   => $this->format_fulfillment_address(),
 			'fulfillment_options'   => $this->format_fulfillment_options(),
 			'fulfillment_option_id' => $this->get_selected_fulfillment_option_id(),
 			'totals'                => $this->format_totals( $cart ),
-			'messages'              => $this->get_messages( $cart ),
+			'messages'              => $messages,
 			'links'                 => $this->get_links(),
 		];
 	}
@@ -417,11 +423,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Calculate the status of the checkout session.
 	 *
-	 * @param \WC_Cart       $cart Cart object.
-	 * @param \WC_Order|null $order Draft order if exists.
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
+	 * @param \WC_Order|null         $order Draft order if exists.
 	 * @return string Status value.
 	 */
-	protected function calculate_status( $cart, $order ) {
+	protected function calculate_status( AgenticCheckoutSession $checkout_session, $order ) {
 		// Check if canceled.
 		if ( $order && $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_CANCELED ) === 'yes' ) {
 			return CheckoutSessionStatus::CANCELED;
@@ -438,7 +444,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		// Check if ready for payment.
-		$needs_shipping = $cart->needs_shipping();
+		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
 		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
 
 		// Check if valid shipping method is selected (not just empty strings).
@@ -450,7 +456,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) ) {
+		if ( ! empty( wc_get_notices( 'error' ) ) || $checkout_session->get_errors()->has_errors() ) {
 			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
@@ -637,23 +643,24 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Get messages for the session.
 	 *
-	 * @param \WC_Cart $cart Cart object.
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return array Messages array.
 	 */
-	protected function get_messages( $cart ) {
-		$messages = [];
+	protected function get_messages( $checkout_session ) {
+		$errors = $checkout_session->get_errors();
 
-		// Add info message if shipping is needed.
+		// Add info message if shipping is needed. This should not reside here.
+		$cart = $checkout_session->get_cart();
 		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
-			$messages[] = [
-				'type'         => MessageType::INFO,
-				'param'        => '$.fulfillment_address',
-				'content_type' => MessageContentType::PLAIN,
-				'content'      => __( 'Shipping address required.', 'woocommerce' ),
-			];
+			$errors->add(
+				MessageError::missing(
+					__( 'Shipping address required.', 'woocommerce' ),
+					'$.fulfillment_address'
+				)
+			);
 		}
 
-		return $messages;
+		return $errors->get_formatted_messages();
 	}
 
 	/**
