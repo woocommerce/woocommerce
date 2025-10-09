@@ -173,7 +173,7 @@ class Controller extends AbstractController {
 			$values_to_update = $params;
 		}
 
-		// Filter out the woocommerce_share_key_display field as it's not allowed to be updated via API
+		// Filter out the woocommerce_share_key_display field as it's not allowed to be updated via API.
 		if ( isset( $values_to_update['woocommerce_share_key_display'] ) ) {
 			unset( $values_to_update['woocommerce_share_key_display'] );
 		}
@@ -382,8 +382,8 @@ class Controller extends AbstractController {
 	 */
 	private function get_all_settings(): array {
 		$settings_instance = $this->get_settings_general_instance();
-		$sections         = $settings_instance->get_sections();
-		$settings         = array();
+		$sections          = $settings_instance->get_sections();
+		$settings          = array();
 
 		foreach ( array_keys( $sections ) as $section ) {
 			$section_settings = $settings_instance->get_settings_for_section( $section );
