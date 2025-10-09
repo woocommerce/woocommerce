@@ -8,8 +8,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -219,19 +218,12 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		 */
 		$session_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
 		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::INVALID_REQUEST,
-					'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => sprintf(
-					/* translators: %s: current session status */
-						__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
-						$session_status
-					),
-				],
-				400
+			$message = sprintf(
+				/* translators: %s: current session status */
+				__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
+				$session_status
 			);
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
 		/**
@@ -289,29 +281,15 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		try {
 			$this->order_controller->validate_order_before_payment( $this->order );
 		} catch ( \Exception $e ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::INVALID_REQUEST,
-					'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => $e->getMessage(),
-				],
-				400
-			);
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
 		try {
 			wc_reserve_stock_for_order( $this->order );
 		} catch ( \Exception $e ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::INVALID_REQUEST,
-					'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => $e->getMessage(),
-				],
-				400
-			);
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
 		// Set the order status to 'pending' as an initial step.
@@ -325,30 +303,17 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		try {
 			$this->process_payment( $request, $payment_result );
 		} catch ( \Exception $e ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::PROCESSING_ERROR,
-					'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => $e->getMessage(),
-				],
-				400
-			);
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( ErrorCode::INVALID, $message )->to_rest_response();
 		}
 
 		/**
 		 * If payment failed, return error.
 		 */
 		if ( 'failure' === $payment_result->status || 'error' === $payment_result->status ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::PROCESSING_ERROR,
-					'code'         => ErrorCode::PAYMENT_DECLINED,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => $payment_result->message ?? __( 'Payment was declined.', 'woocommerce' ),
-				],
-				400
-			);
+			$message = $payment_result->message ?? __( 'Payment was declined.', 'woocommerce' );
+			$message = wp_specialchars_decode( $message, ENT_QUOTES );
+			return Error::processing_error( ErrorCode::PAYMENT_DECLINED, $message )->to_rest_response();
 		}
 
 		/**

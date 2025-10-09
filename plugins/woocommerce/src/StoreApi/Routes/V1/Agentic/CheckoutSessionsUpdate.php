@@ -171,19 +171,13 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
 		if ( ! in_array( $current_status, [ CheckoutSessionStatus::READY_FOR_PAYMENT, CheckoutSessionStatus::NOT_READY_FOR_PAYMENT ], true ) ) {
-			return new \WP_REST_Response(
-				[
-					'type'         => ErrorType::INVALID_REQUEST,
-					'code'         => ErrorCode::INVALID,
-					'content_type' => MessageContentType::PLAIN,
-					'content'      => sprintf(
-						/* translators: %s: current session status */
-						__( 'Unable to update. Current status: %s', 'woocommerce' ),
-						$current_status
-					),
-				],
-				400
-			);
+			return Error::invalid_request(
+				ErrorCode::INVALID,
+				sprintf(
+				/* translators: %s: current session status */
+					__( 'Unable to update. Current status: %s', 'woocommerce' ),
+					$current_status ),
+			)->to_rest_response();
 		}
 
 		// Prepare an array for all error messages.
