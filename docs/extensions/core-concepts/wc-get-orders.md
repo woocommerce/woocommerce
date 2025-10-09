@@ -317,7 +317,7 @@ $orders = wc_get_orders( $args );
 ```php
 // Get orders completed 16 May 2017 21:46:17 UTC to 17 May 2017 12:46:17 UTC.
 $args = array(
-    'date_completed' => '1494971177...1494938777',
+    'date_completed' => '1494938777...1494971177',
 );
 $orders = wc_get_orders( $args );
 ```
@@ -449,7 +449,7 @@ Developers can extend the query capabilities by filtering the generated query to
 
 WooCommerce currently supports two order storage mechanisms: HPOS (the default) and legacy (which uses WordPress posts and metadata), each with their own hook to filter the generated query:
 
-- (HPOS) `woocomerce_order_query_args` to translate a parameter into an existing one, or `woocommerce_orders_table_query_clauses` to write your own SQL.
+- (HPOS) `woocommerce_order_query_args` to translate a parameter into an existing one, or `woocommerce_orders_table_query_clauses` to write your own SQL.
 - (Legacy) `woocommerce_order_data_store_cpt_get_orders_query` to translate a parameter into a `WP_Query` parameter.
 
 ```php
@@ -467,7 +467,7 @@ function handle_custom_query_var_hpos( $query_args ) {
 
 		$query_args['meta_query'][] = array(
 			'key'   => 'customvar',
-			'value' => esc_attr( $query_vars['customvar'] ),
+			'value' => esc_attr( $query_args['customvar'] ),
 		);
 
         unset( $query_args['customvar'] );
@@ -491,11 +491,15 @@ function handle_custom_query_var_legacy( $query, $query_vars ) {
 
 if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
     // HPOS.
-    add_filter( 'woocommerce_order_query_args', 'handle_custom_query_var_hpos' );
+    add_filter(
+        'woocommerce_order_query_args',
+        'handle_custom_query_var_hpos'
+    );
 } else {
     // Legacy support.
     add_filter(
-        'woocommerce_order_data_store_cpt_get_orders_query', 'handle_custom_query_var_legacy',
+        'woocommerce_order_data_store_cpt_get_orders_query',
+        'handle_custom_query_var_legacy',
         10,
         2
     );
