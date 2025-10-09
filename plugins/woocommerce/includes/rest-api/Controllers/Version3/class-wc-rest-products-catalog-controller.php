@@ -124,6 +124,10 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 */
 	public function get_catalog_generation_status( $request ) {
 		$job_id = $request->get_param( 'job_id' );
+		if ( empty( $job_id ) || ! is_string( $job_id ) ) {
+			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+		$job_id = sanitize_text_field( $job_id );
 		// Mock response to make it look like the generation is complete.
 		$response_data = array(
 			'job_id'       => $job_id,
