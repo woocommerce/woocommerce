@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Added a webhook event to handle pending captures for PayPal Standard payment using PayPal orders v2 API.

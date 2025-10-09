@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow fetching core blocks' styles in the editor's iframe for blocks that support emails
