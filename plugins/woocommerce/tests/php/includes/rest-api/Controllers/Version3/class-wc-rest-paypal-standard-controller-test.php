@@ -66,10 +66,12 @@ class WC_REST_Paypal_Standard_Controller_Test  extends WC_REST_Unit_Test_Case {
 	 */
 	public function provide_test_process_shipping_callback(): array {
 		$order = WC_Helper_Order::create_order();
+		$order->save();
 		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
 		$order->save_meta_data();
 
 		$order_mismatch = WC_Helper_Order::create_order();
+		$order_mismatch->save();
 		$order_mismatch->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
 		$order_mismatch->save_meta_data();
 
