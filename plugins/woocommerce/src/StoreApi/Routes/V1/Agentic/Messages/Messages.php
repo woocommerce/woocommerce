@@ -17,12 +17,12 @@ class Messages {
 	private $messages = array();
 
 	/**
-	 * Add an error message.
+	 * Add a message.
 	 *
 	 * @param Message $message The message to add.
 	 * @return void
 	 */
-	public function add( Message $message ) {
+	public function add( Message $message ): void {
 		$this->messages[] = $message;
 	}
 
@@ -31,7 +31,7 @@ class Messages {
 	 *
 	 * @return bool True if there are error messages, false otherwise.
 	 */
-	public function has_errors() {
+	public function has_errors(): bool {
 		foreach ( $this->messages as $message ) {
 			if ( $message->is_error() ) {
 				return true;
@@ -45,7 +45,7 @@ class Messages {
 	 *
 	 * @return array that is ready for the response.
 	 */
-	public function get_formatted_messages() {
+	public function get_formatted_messages(): array {
 		return array_map(
 			function ( Message $message ) {
 				return $message->to_array();

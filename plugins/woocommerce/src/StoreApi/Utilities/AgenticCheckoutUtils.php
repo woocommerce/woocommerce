@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error as AgenticError;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
@@ -113,8 +113,8 @@ class AgenticCheckoutUtils {
 	 */
 	public static function add_items_to_cart( $items, $cart_controller, $messages ) {
 		foreach ( $items as $item_index => $item ) {
-			if ( ! is_numeric( $item['id'] ) ) {
-				return Error::invalid_request(
+			if ( ! ctype_digit( $item['id'] ) ) {
+				return AgenticError::invalid_request(
 					'invalid_product_id',
 					__( 'Product ID must be numeric.', 'woocommerce' ),
 					'$.items[' . $item_index . '].id'
@@ -136,22 +136,19 @@ class AgenticCheckoutUtils {
 				$param         = '$.items[' . $item_index . ']';
 				$message_error = null;
 
-				// Check if it's a RouteException with a specific error code.
-				if ( $exception instanceof RouteException ) {
-					// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
-					switch ( $exception->getErrorCode() ) {
-						case 'woocommerce_rest_product_out_of_stock':
-						case 'woocommerce_rest_product_partially_out_of_stock':
-							$message_error = MessageError::out_of_stock( $message, $param );
-							break;
-					}
+				// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
+				switch ( $exception->getErrorCode() ) {
+					case 'woocommerce_rest_product_out_of_stock':
+					case 'woocommerce_rest_product_partially_out_of_stock':
+						$message_error = MessageError::out_of_stock( $message, $param );
+						break;
 				}
 
 				if ( null !== $message_error ) {
 					$messages->add( $message_error );
 				} else {
 					// The error code is generally applicable only to MessageErrors, but we can use it here as well.
-					return Error::invalid_request( ErrorCode::INVALID, $message, $param );
+					return AgenticError::invalid_request( ErrorCode::INVALID, $message, $param );
 				}
 			}
 		}

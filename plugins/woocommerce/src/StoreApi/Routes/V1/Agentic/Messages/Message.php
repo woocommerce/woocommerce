@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
 
 /**
- * Interface for error and info messages.
+ * Base class for error and info messages.
  */
 abstract class Message {
 	/**
@@ -16,7 +16,7 @@ abstract class Message {
 	 *
 	 * @var string
 	 */
-	protected $content_type = 'plain';
+	protected $content_type = MessageContentType::PLAIN;
 
 	/**
 	 * Error content/message.

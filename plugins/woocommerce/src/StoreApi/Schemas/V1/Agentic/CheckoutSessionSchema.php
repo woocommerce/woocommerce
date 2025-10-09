@@ -333,7 +333,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce cart to the Agentic Checkout session format.
 	 *
-	 * @param AgenticCheckoutSession $checkout_session Cart data from WooCommerce (unused, uses WC()->cart directly).
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return array Formatted checkout session data.
 	 */
 	public function get_item_response( $checkout_session ) {
@@ -350,7 +350,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			WC()->session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
 		}
 
-		// Validate the checkout sesssion. Messages will be added to the collection, if any.
+		// Validate the checkout session. Messages will be added to the collection, if any.
 		$this->validate( $checkout_session );
 
 		return [
@@ -637,7 +637,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return void
 	 */
-	protected function validate( $checkout_session ): void {
+	protected function validate( AgenticCheckoutSession $checkout_session ): void {
 		$messages = $checkout_session->get_messages();
 
 		// Check if ready for payment.

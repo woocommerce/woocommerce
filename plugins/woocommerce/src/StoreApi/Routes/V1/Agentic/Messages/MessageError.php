@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageType;
 
 /**
@@ -35,7 +34,7 @@ class MessageError extends Message {
 	 * @param string      $content Error content/message.
 	 * @param string|null $param   RFC 9535 JSONPath (optional).
 	 */
-	public function __construct( $code, $content, $param = null ) {
+	public function __construct( string $code, string $content, ?string $param = null ) {
 		$this->code    = $code;
 		$this->content = $content;
 		$this->param   = $param;
