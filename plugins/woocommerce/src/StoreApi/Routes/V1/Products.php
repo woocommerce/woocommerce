@@ -471,7 +471,7 @@ class Products extends AbstractRoute {
 	 *
 	 * @param \WC_Product[] $products Array of product objects.
 	 */
-	protected function batch_prime_variable_products_and_variations(array $products ) {
+	protected function batch_prime_variable_products_and_variations( array $products ) {
 		$to_prime = array();
 
 		foreach ( $products as $product ) {
