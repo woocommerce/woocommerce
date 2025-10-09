@@ -150,13 +150,13 @@ jobs:
 
       - name: Open PR with changes
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           branch_name="bump-wc-version-to-${{ steps.compute-new-version.outputs.nextVersion }}/${{ github.run_id }}"
 
           # Configure Git.
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
 
           # Push changes.
           git checkout -b ${branch_name}
