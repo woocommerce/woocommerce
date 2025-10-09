@@ -87,7 +87,7 @@ class Controller extends AbstractController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
-				'schema' => array( $this, 'get_schema' ),
+				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
 	}
@@ -424,7 +424,16 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	public function get_schema(): array {
-		return $this->schema->get_item_schema_properties();
+		return $this->schema->get_item_schema();
+	}
+
+	/**
+	 * Get the item schema for the controller.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema(): array {
+		return $this->get_schema();
 	}
 
 	/**
@@ -445,7 +454,6 @@ class Controller extends AbstractController {
 	 * @return array Endpoint arguments.
 	 */
 	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ): array {
-		$schema = $this->get_schema();
-		return rest_get_endpoint_args_for_schema( $schema, $method );
+		return rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
 	}
 }
