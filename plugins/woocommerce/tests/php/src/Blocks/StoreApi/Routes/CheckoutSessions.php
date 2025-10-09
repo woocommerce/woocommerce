@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -1092,7 +1093,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Clear cart and session to simulate new session.
 		wc_empty_cart();
-		WC()->session->set( 'agentic_session_id', null );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 		WC()->session->set( 'agentic_draft_order_id', null );
 
 		// Create second session.
