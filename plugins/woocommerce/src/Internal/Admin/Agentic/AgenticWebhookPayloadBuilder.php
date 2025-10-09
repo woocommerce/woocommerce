@@ -113,7 +113,7 @@ class AgenticWebhookPayloadBuilder {
 		 * Allows extensions to map custom WooCommerce order statuses to ACP order statuses.
 		 * The mapped status must be one of: created, manual_review, confirmed, canceled, shipped, fulfilled.
 		 *
-		 * @see Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\OrderStatus
+		 * @see Automattic\WooCommerce\Internal\Agentic\Enums\Specs\OrderStatus
 		 *
 		 * @since 10.3.0
 		 *
