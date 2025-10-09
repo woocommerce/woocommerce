@@ -3,12 +3,14 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 
 /**
  * CheckoutSessions class.
@@ -132,14 +134,18 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		// We'll gather all non-critical errors and provide them at the end.
+		$message_errors = new ErrorMessages();
+
 		// Clear existing cart to start fresh for POST requests.
-		WC()->cart->empty_cart();
+		$this->cart_controller->empty_cart();
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
-		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller );
-		if ( $error ) {
-			return $error;
+		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $message_errors );
+		// Halt for critical errors.
+		if ( $error instanceof Error ) {
+			return $error->to_rest_response();
 		}
 
 		// Set buyer information.
@@ -158,12 +164,20 @@ class CheckoutSessions extends AbstractCartRoute {
 		}
 
 		// Calculate totals.
-		WC()->cart->calculate_totals();
+		try {
+			$this->cart_controller->calculate_totals();
+		} catch ( \Exception $e ) {
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( 'totals_calculation_error', $message )->to_rest_response();
+		}
 
 		// Build response from canonical cart schema.
-		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
+		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance() );
+
+		// Add the messages outside of the schema (it accepts a single object).
+		$response['messages'] = $message_errors->get_formatted_messages();
 
 		// Add protocol headers.
-		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );
+		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );
 	}
 }
