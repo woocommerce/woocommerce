@@ -207,7 +207,6 @@ class Controller extends AbstractController {
 		return true;
 	}
 
-
 	/**
 	 * Create a new shipping zone.
 	 *
