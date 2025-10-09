@@ -476,7 +476,7 @@ class Products extends AbstractRoute {
 
 		foreach ( $products as $product ) {
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$to_prime = array_merge( $to_prime, $product->get_visible_children());
+				$to_prime = array_merge( $to_prime, $product->get_visible_children() );
 			}
 
 			$to_prime[] = $product;
