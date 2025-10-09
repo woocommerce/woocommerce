@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -13,7 +15,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  *
  * @since 10.3.0
  */
-class AgenticController {
+class AgenticController implements RegisterHooksInterface {
 	/**
 	 * Webhook manager instance.
 	 *
@@ -27,12 +29,17 @@ class AgenticController {
 	 * This follows the WooCommerce pattern for controllers.
 	 */
 	public function register() {
+		// Don't register hooks during installation.
+		if ( Constants::is_true( 'WC_INSTALLING' ) ) {
+			return;
+		}
+
 		// Only initialize if the agentic checkout feature is enabled.
 		if ( ! FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
 			return;
 		}
 
-		// Initialize webhook functionality.
-		$this->webhook_manager = new AgenticWebhookManager();
+		// Resolve webhook manager from container.
+		$this->webhook_manager = wc_get_container()->get( AgenticWebhookManager::class );
 	}
 }

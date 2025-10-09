@@ -16,7 +16,13 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 		// Enable the agentic checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		$controller = new AgenticController();
+		// Ensure WC_INSTALLING is not set during the test.
+		if ( defined( 'WC_INSTALLING' ) ) {
+			\Automattic\Jetpack\Constants::set_constant( 'WC_INSTALLING', false );
+		}
+
+		// Resolve controller from container to ensure proper DI.
+		$controller = wc_get_container()->get( AgenticController::class );
 		$controller->register();
 
 		/**
