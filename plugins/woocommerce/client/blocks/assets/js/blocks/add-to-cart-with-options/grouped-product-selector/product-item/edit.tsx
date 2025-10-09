@@ -61,20 +61,19 @@ const ProductItem = ( {
 
 	return (
 		<ProductDataContextProvider product={ product } isLoading={ isLoading }>
-			{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
-
-			<div
-				role="listitem"
-				style={ { display: isSelected ? 'none' : undefined } }
-			>
-				<div
-					{ ...blockPreviewProps }
-					role="button"
-					tabIndex={ 0 }
-					onClick={ onSelect }
-					onKeyDown={ onSelect }
-				/>
-			</div>
+			{ isSelected ? (
+				<div { ...innerBlocksProps } />
+			) : (
+				<div role="listitem">
+					<div
+						{ ...blockPreviewProps }
+						role="button"
+						tabIndex={ 0 }
+						onClick={ onSelect }
+						onKeyDown={ onSelect }
+					/>
+				</div>
+			) }
 		</ProductDataContextProvider>
 	);
 };
