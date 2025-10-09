@@ -1238,7 +1238,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$data = $update_response->get_data();
 		$this->assertArrayHasKey( 'type', $data );
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertArrayHasKey( 'content', $data );
-		$this->assertStringContainsString( 'Unable to update', $data['content'] );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertStringContainsString( 'cannot be updated', $data['message'] );
 	}
 }

@@ -353,7 +353,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$this->assertEquals( 400, $complete_response->get_status() );
 		$complete_data = $complete_response->get_data();
 		$this->assertArrayHasKey( 'code', $complete_data );
-		$this->assertStringContainsString( 'not ready for payment', strtolower( $complete_data['content'] ) );
+		$this->assertStringContainsString( 'not ready for payment', strtolower( $complete_data['message'] ) );
 	}
 
 	/**
@@ -625,23 +625,51 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	/**
 	 * Test completing checkout with insufficient stock fails.
 	 */
-	public function test_complete_checkout_session_insufficient_stock() {
+	public function test_complete_checkout_session_out_of_stock() {
+		// Create session with address and buyer.
+		$create_response = $this->create_session(
+			$this->create_checkout_request(
+				array(
+					'fulfillment_address' => $this->get_test_address(),
+					'buyer'               => $this->get_test_buyer(),
+				)
+			)
+		);
+
+		$create_data        = $create_response->get_data();
+		$session_id         = $create_data['id'];
+		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
+		$this->update_session(
+			$session_id,
+			array(
+				'fulfillment_option_id' => $shipping_method_id,
+			)
+		);
+
 		// Set product to have insufficient stock.
 		$this->products[0]->set_manage_stock( true );
 		$this->products[0]->set_stock_quantity( 0 );
 		$this->products[0]->save();
 
-		// Create session - this should fail or warn about stock.
-		$create_response = $this->create_session(
-			$this->create_checkout_request(
-				array(
-					'fulfillment_address' => $this->get_test_address(),
-				)
+		// Try to complete checkout - this should fail during validation.
+		$complete_response = $this->complete_session(
+			$session_id,
+			array(
+				'payment_data' => $this->get_payment_data(),
 			)
 		);
 
-		// Session creation should fail due to insufficient stock.
-		$this->assertEquals( 400, $create_response->get_status() );
+		// Complete should fail due to stock validation.
+		$this->assertEquals( 400, $complete_response->get_status() );
+
+		// Verify error response contains stock-related message.
+		$complete_data = $complete_response->get_data();
+		$this->assertArrayHasKey( 'type', $complete_data );
+        $this->assertEquals( 'invalid_request', $complete_data['type'] );
+		$this->assertArrayHasKey( 'code', $complete_data );
+        $this->assertEquals( 'invalid', $complete_data['code'] );
+		$this->assertArrayHasKey( 'message', $complete_data );
+		$this->assertStringContainsString( 'out of stock', strtolower( $complete_data['message'] ) );
 	}
 
 	/**
@@ -704,9 +732,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$this->assertEquals( 400, $complete_response->get_status() );
 		$this->assertArrayHasKey( 'type', $data );
 		$this->assertArrayHasKey( 'code', $data );
-		$this->assertArrayHasKey( 'content_type', $data );
-		$this->assertArrayHasKey( 'content', $data );
-		$this->assertEquals( 'plain', $data['content_type'] );
+		$this->assertArrayHasKey( 'message', $data );
 	}
 
 	/**
