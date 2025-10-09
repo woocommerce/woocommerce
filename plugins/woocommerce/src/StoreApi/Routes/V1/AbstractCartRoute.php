@@ -168,6 +168,8 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
+		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
+
 		if ( $this->has_cart_token( $request ) ) {
 			// Overrides the core session class.
 			add_filter(

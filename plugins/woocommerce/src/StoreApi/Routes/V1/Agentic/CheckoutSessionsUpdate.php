@@ -73,6 +73,18 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	}
 
 	/**
+	 * Load the cart session before handling responses.
+	 * Overrides parent to also define WOOCOMMERCE_CHECKOUT constant.
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 */
+	protected function load_cart_session( \WP_REST_Request $request ) {
+		parent::load_cart_session( $request );
+
+		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+	}
+
+	/**
 	 * Get method arguments for this REST route.
 	 *
 	 * @return array An array of endpoints.
