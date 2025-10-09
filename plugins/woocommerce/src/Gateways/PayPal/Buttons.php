@@ -1,25 +1,28 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Buttons file.
+ * Class Buttons file.
  *
- * @package WooCommerce\Gateways
+ * @package Automattic\WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
+
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
 
 /**
  * Handles PayPal Buttons.
  */
-class WC_Gateway_Paypal_Buttons {
-
+class Buttons {
 	/**
 	 * The option for the client-id.
 	 *
@@ -27,11 +30,10 @@ class WC_Gateway_Paypal_Buttons {
 	 */
 	private const CLIENT_ID_OPTION = 'woocommerce_paypal_client_id';
 
-
 	/**
 	 * The gateway instance.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
@@ -45,18 +47,18 @@ class WC_Gateway_Paypal_Buttons {
 	/**
 	 * The request instance.
 	 *
-	 * @var WC_Gateway_Paypal_Request
+	 * @var \WC_Gateway_Paypal_Request
 	 */
 	private $request;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param WC_Gateway_Paypal $gateway The gateway instance.
+	 * @param \WC_Gateway_Paypal $gateway The gateway instance.
 	 */
-	public function __construct( WC_Gateway_Paypal $gateway ) {
+	public function __construct( \WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
-		$this->request = new WC_Gateway_Paypal_Request( $this->gateway );
+		$this->request = new \WC_Gateway_Paypal_Request( $this->gateway );
 
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		$this->enabled = $this->gateway->should_use_orders_v2() && 'yes' === $this->gateway->get_option( 'paypal_buttons', 'yes' );
@@ -153,7 +155,7 @@ class WC_Gateway_Paypal_Buttons {
 	 */
 	public function get_current_page_for_app_switch() {
 		// If checkout, cart or product page, return the current page URL.
-		if ( is_checkout() || is_cart() || is_product() ) {
+		if ( wc_get_container()->get( LegacyProxy::class )->call_function( 'is_checkout' ) || is_cart() || is_product() ) {
 			return get_permalink( get_the_ID() );
 		}
 

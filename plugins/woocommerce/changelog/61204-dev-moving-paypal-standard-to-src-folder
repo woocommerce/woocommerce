@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Moves most of the new PayPal Standard classes to the src folder, to be autoloaded using namespaces
