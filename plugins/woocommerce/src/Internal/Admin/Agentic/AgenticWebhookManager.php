@@ -67,7 +67,7 @@ class AgenticWebhookManager {
 	 * @param array $topics Existing topics.
 	 * @return array Modified topics.
 	 */
-	public function register_webhook_topic_names( $topics ) {
+	public function register_webhook_topic_names( $topics ): array {
 		$topics[ self::TOPIC_ORDER_CREATED ] = __( 'Agentic Order Created', 'woocommerce' );
 		$topics[ self::TOPIC_ORDER_UPDATED ] = __( 'Agentic Order Updated', 'woocommerce' );
 		return $topics;

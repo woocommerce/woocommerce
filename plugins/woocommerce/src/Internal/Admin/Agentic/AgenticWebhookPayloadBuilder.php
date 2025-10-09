@@ -128,7 +128,7 @@ class AgenticWebhookPayloadBuilder {
 		// Validate the mapped status is a valid ACP status.
 		if ( ! ACPOrderStatus::is_valid( $mapped_status ) ) {
 			// Log a warning for invalid status but continue with fallback.
-			$this->logger->error(
+			$this->logger->warning(
 				sprintf(
 					'Invalid ACP order status "%s" returned by woocommerce_agentic_webhook_order_status_map filter for WooCommerce status "%s". Using "created" as fallback.',
 					$mapped_status,
