@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Automattic\WooCommerce\StoreApi\Utilities;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
 use WC_Cart;

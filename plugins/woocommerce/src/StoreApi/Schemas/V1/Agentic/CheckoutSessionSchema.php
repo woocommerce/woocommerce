@@ -20,7 +20,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 

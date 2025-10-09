@@ -10,7 +10,7 @@ use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 
 /**
  * CheckoutSessions class.

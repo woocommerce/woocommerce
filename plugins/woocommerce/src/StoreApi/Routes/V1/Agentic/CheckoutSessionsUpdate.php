@@ -9,7 +9,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
-use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
