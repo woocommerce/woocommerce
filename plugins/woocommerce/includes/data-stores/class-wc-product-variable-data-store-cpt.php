@@ -374,6 +374,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
 
 						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
+							$original_prices_array = $prices_array;
+
 							/**
 							 * Filter the variation prices array before storing in transient cache.
 							 *
@@ -394,7 +396,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 								// so we need to check.
 								$prices_array_hash = md5( wp_json_encode( $prices_array ) );
 								// phpcs:ignore WooCommerce.Commenting.CommentHooks
-								$opposite_prices_array      = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, ! $for_display );
+								$opposite_prices_array      = apply_filters( 'woocommerce_variation_prices_array', $original_prices_array, $variation, ! $for_display );
 								$opposite_prices_array_hash = md5( wp_json_encode( $opposite_prices_array ) );
 								if ( $opposite_prices_array_hash !== $prices_array_hash ) {
 									$opposite_price_hash = null;
