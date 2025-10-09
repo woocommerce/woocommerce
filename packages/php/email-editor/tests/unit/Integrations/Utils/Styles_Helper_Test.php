@@ -44,9 +44,28 @@ class Styles_Helper_Test extends \Email_Editor_Unit_Test {
 	 * Test it handles invalid values.
 	 */
 	public function testItHandlesInvalidValues(): void {
+		$this->assertSame( 0.0, Styles_Helper::parse_value( null ) );
+		$this->assertSame( 0.0, Styles_Helper::parse_value( false ) );
+		$this->assertSame( 0.0, Styles_Helper::parse_value( array() ) );
 		$this->assertSame( 0.0, Styles_Helper::parse_value( 'invalid' ) );
 		$this->assertSame( 0.0, Styles_Helper::parse_value( '' ) );
 		$this->assertSame( 0.0, Styles_Helper::parse_value( 'px' ) );
+	}
+
+	/**
+	 * Test it parses numeric values.
+	 */
+	public function testItParsesNumericValues(): void {
+		$this->assertSame( 12.5, Styles_Helper::parse_value( 12.5 ) );
+		$this->assertSame( 100.0, Styles_Helper::parse_value( 100 ) );
+	}
+
+	/**
+	 * Test it parses negative numeric values.
+	 */
+	public function testItParsesNegativeNumericValues(): void {
+		$this->assertSame( -12.5, Styles_Helper::parse_value( -12.5 ) );
+		$this->assertSame( -100.0, Styles_Helper::parse_value( -100 ) );
 	}
 
 	/**
