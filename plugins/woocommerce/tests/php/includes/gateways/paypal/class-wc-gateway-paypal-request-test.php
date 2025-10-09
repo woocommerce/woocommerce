@@ -203,9 +203,84 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for the `get_paypal_order_details` method.
 	 *
+	 * @param string      $paypal_order_id            The PayPal order ID.
+	 * @param string|null $expected_exception         The expected exception class, or null if no exception is expected.
+	 * @param string|null $expected_exception_message The expected exception message, or null if no exception is expected.
 	 * @return void
+	 *
+	 * @dataProvider provide_test_get_paypal_order_details
 	 */
-	public function test_get_paypal_order_details() {}
+	public function test_get_paypal_order_details( string $paypal_order_id, ?string $expected_exception, ?string $expected_exception_message ) {
+		$response_mock_ref = function() use ( $paypal_order_id ) {
+			if ( $paypal_order_id === 'ERROR_ID' ) {
+				return new WP_Error( 'error', 'Some error occurred.' );
+			}
+
+			if ( $paypal_order_id === 'FAILED_ID' ) {
+				return array(
+					'response' => array(
+						'code' => 500,
+					),
+					'body'     => wp_json_encode(
+						array(
+							'name'    => 'SOME_ERROR',
+							'details' => array(
+								array( 'issue' => 'SOME_ISSUE' ),
+							),
+						)
+					),
+				);
+			}
+
+			return array(
+				'response' => array(
+					'code' => 200,
+				),
+				'body'    => wp_json_encode( array() ),
+			);
+		};
+
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$response_data = $request->get_paypal_order_details( $paypal_order_id );
+
+		// Clean up the filter.
+		remove_filter( 'pre_http_request', $response_mock_ref );
+
+		if ( $expected_exception ) {
+			$this->assertInstanceOf( $expected_exception, $response_data );
+			$this->assertStringContainsString( $expected_exception_message, $response_data->getMessage() );
+		} else {
+			$this->assertIsArray( $response_data );
+		}
+	}
+
+	/**
+	 * Data provider for the `test_get_paypal_order_details` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_get_paypal_order_details(): array {
+		return array(
+			'order details error response' => array(
+				'PayPal order ID' => 'ERROR_ID',
+				'expected exception' => Exception::class,
+				'expected exception message' => 'Could not retrieve PayPal order details.',
+			),
+			'order details failed response' => array(
+				'PayPal order ID' => 'FAILED_ID',
+				'expected exception' => Exception::class,
+				'expected exception message' => 'Could not retrieve PayPal order details.',
+			),
+			'order details success response' => array(
+				'PayPal order ID' => 'SUCCESS_ID',
+				'expected exception' => null,
+				'expected exception message' => null,
+			),
+		);
+	}
 
 	/**
 	 * Tests for the `get_paypal_order_purchase_unit_amount` method.
