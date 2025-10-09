@@ -171,4 +171,103 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * Tests for the `cancel_payment` method.
+	 *
+	 * @param string $nonce Nonce for request validation.
+	 * @param int    $order_id Order ID.
+	 * @param int    $expected_status Expected HTTP status code.
+	 * @param array  $expected_response Expected response data.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_cancel_payment
+	 */
+	public function test_cancel_payment( string $nonce, int $order_id, int $expected_status, array $expected_response ) {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/cancel_payment' );
+		$request->set_body_params(
+			array(
+				'nonce'    => $nonce,
+				'order_id' => $order_id,
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( $expected_status, $response->get_status() );
+		$this->assertEquals( $expected_response, $response->get_data() );
+	}
+
+	/**
+	 * Data provider for `test_cancel_payment`.
+	 *
+	 * @return array
+	 */
+	public function provide_test_cancel_payment(): array {
+		$order = WC_Helper_Order::create_order();
+		$order->save();
+		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
+		$order->save_meta_data();
+
+		$order_invalid_paypal_id = WC_Helper_Order::create_order();
+		$order_invalid_paypal_id->save();
+		$order_invalid_paypal_id->update_meta_data( '_paypal_order_id', '' );
+		$order_invalid_paypal_id->save_meta_data();
+
+		$order_draft = WC_Helper_Order::create_order();
+		$order_draft->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order_draft->save();
+		$order_draft->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
+		$order_draft->save_meta_data();
+
+		$order_invalid_status = WC_Helper_Order::create_order();
+		$order_invalid_status->set_status( OrderStatus::COMPLETED );
+		$order_invalid_status->save();
+		$order_invalid_status->update_meta_data( '_paypal_order_id', '74L758601X447022W' );
+		$order_invalid_status->save_meta_data();
+
+		return array(
+			'invalid nonce' => array(
+				'nonce' => '',
+				'order ID' => $order->get_id(),
+				'expected status' => 403,
+				'expected response' => '',
+			),
+			'invalid order ID' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => 0,
+				'expected status' => 400,
+				'expected response' => '',
+			),
+			'order not found' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => 99999,
+				'expected status' => 404,
+				'expected response' => '',
+			),
+			'invalid PayPal order ID' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => $order_invalid_paypal_id->get_id(),
+				'expected status' => 404,
+				'expected response' => '',
+			),
+			'order already in draft status' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => $order_draft->get_id(),
+				'expected status' => 200,
+				'expected response' => array( 'success' => true ),
+			),
+			'invalid order status' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => $order_invalid_status->get_id(),
+				'expected status' => 409,
+				'expected response' => '',
+			),
+			'successful cancellation' => array(
+				'nonce' => wp_create_nonce( '' ),
+				'order ID' => $order->get_id(),
+				'expected status' => 200,
+				'expected response' => array( 'success' => true ),
+			),
+		);
+	}
 }
