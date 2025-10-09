@@ -183,9 +183,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'job_id' => array(
 					'description' => __( 'Products catalog generation job ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'required'    => true,
 				),
 			),
+			'required'   => array( 'job_id' ),
 		);
 	}
 
@@ -203,20 +203,18 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'job_id'       => array(
 					'description' => __( 'Products catalog generation job ID.', 'woocommerce' ),
 					'type'        => 'string',
-					'required'    => true,
 				),
 				'status'       => array(
 					'description' => __( 'Products catalog generation status. Possible values: pending, processing, complete, failed.', 'woocommerce' ),
 					'type'        => 'string',
 					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
-					'required'    => true,
 				),
 				'download_url' => array(
 					'description' => __( 'Products catalog download URL when the generation is complete.', 'woocommerce' ),
 					'type'        => 'string',
-					'required'    => false,
 				),
 			),
+			'required'   => array( 'job_id', 'status' ),
 		);
 	}
 
@@ -234,14 +232,13 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'products'   => array(
 					'description' => __( 'Products catalog products.', 'woocommerce' ),
 					'type'        => 'array',
-					'required'    => true,
 				),
 				'variations' => array(
 					'description' => __( 'Products catalog variations.', 'woocommerce' ),
 					'type'        => 'array',
-					'required'    => true,
 				),
 			),
+			'required'   => array( 'products', 'variations' ),
 		);
 	}
 }
