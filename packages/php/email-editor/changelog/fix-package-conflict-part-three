@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Add CssInliner library and ensure packages are prefixed to prevent package conflicts.
