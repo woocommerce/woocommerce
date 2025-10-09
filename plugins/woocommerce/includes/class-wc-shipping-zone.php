@@ -628,15 +628,20 @@ class WC_Shipping_Zone extends WC_Legacy_Shipping_Zone {
 					continue;
 				}
 
-				$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
+				$type = ! empty( $raw_location['type'] ) ? $raw_location['type'] : 'country';
 
-				if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+				// Normalize 'country:state' to 'state' for v4 API backward compatibility.
+				if ( 'country:state' === $type ) {
+					$type = 'state';
+				}
+
+				if ( ! $this->is_valid_location_type( $type ) ) {
 					continue;
 				}
 
 				$locations[] = array(
-					'code' => sanitize_text_field( $raw_location['code'] ),
-					'type' => sanitize_text_field( $type ),
+					'code' => $raw_location['code'],
+					'type' => $type,
 				);
 			}
 
