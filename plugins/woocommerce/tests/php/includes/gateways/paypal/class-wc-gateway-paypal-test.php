@@ -223,4 +223,32 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			}
 		}
 	}
+
+	/**
+	 * Tests for the `update_addresses_in_order` method.
+	 *
+	 * @return void
+	 */
+	public function test_update_addresses_in_order() {}
+
+	/**
+	 * Tests for the `enqueue_scripts` method.
+	 *
+	 * @return void
+	 */
+	public function test_enqueue_scripts() {}
+
+	/**
+	 * Tests for the `add_paypal_sdk_attributes` method.
+	 *
+	 * @return void
+	 */
+	public function test_add_paypal_sdk_attributes() {}
+
+	/**
+	 * Tests for the `render_buttons_container` method.
+	 *
+	 * @return void
+	 */
+	public function test_render_buttons_container() {}
 }

@@ -199,4 +199,25 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	public function return_blog_token( $value ) {
 		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
+
+	/**
+	 * Tests for the `get_paypal_order_details` method.
+	 *
+	 * @return void
+	 */
+	public function test_get_paypal_order_details() {}
+
+	/**
+	 * Tests for the `get_paypal_order_purchase_unit_amount` method.
+	 *
+	 * @return void
+	 */
+	public function test_get_paypal_order_purchase_unit_amount() {}
+
+	/**
+	 * Tests for the `fetch_paypal_client_id` method.
+	 *
+	 * @return void
+	 */
+	public function test_fetch_paypal_client_id() {}
 }
