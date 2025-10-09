@@ -4,7 +4,7 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
@@ -178,7 +178,7 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 			$error = AgenticCheckoutUtils::add_items_to_cart(
 				$items,
 				$this->cart_controller,
-				$checkout_session->get_errors()
+				$checkout_session->get_messages()
 			);
 			if ( $error instanceof Error ) {
 				return $error->to_rest_response();

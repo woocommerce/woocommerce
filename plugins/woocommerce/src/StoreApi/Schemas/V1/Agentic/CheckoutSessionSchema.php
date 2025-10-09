@@ -18,7 +18,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\FulfillmentTyp
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
@@ -456,7 +456,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) || $checkout_session->get_errors()->has_errors() ) {
+		if ( ! empty( wc_get_notices( 'error' ) ) || $checkout_session->get_messages()->has_errors() ) {
 			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
@@ -647,7 +647,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array Messages array.
 	 */
 	protected function get_messages( $checkout_session ) {
-		$errors = $checkout_session->get_errors();
+		$errors = $checkout_session->get_messages();
 
 		// Add info message if shipping is needed. This should not reside here.
 		$cart = $checkout_session->get_cart();

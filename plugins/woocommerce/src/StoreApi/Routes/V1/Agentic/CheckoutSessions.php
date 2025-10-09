@@ -3,14 +3,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutSession;
 
 /**
@@ -142,7 +141,7 @@ class CheckoutSessions extends AbstractCartRoute {
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
-		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $checkout_session->get_errors() );
+		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $checkout_session->get_messages() );
 		// Halt for critical errors.
 		if ( $error instanceof Error ) {
 			return $error->to_rest_response();

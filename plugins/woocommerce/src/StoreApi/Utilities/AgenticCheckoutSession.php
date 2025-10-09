@@ -2,7 +2,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
 use WC_Cart;
 
 /**
@@ -22,9 +22,9 @@ final class AgenticCheckoutSession {
 	/**
 	 * Error messages handler for the checkout session.
 	 *
-	 * @var ErrorMessages
+	 * @var Messages
 	 */
-	private $errors;
+	private $messages;
 
 	/**
 	 * Constructor.
@@ -32,8 +32,8 @@ final class AgenticCheckoutSession {
 	 * @param WC_Cart $cart The WooCommerce cart instance.
 	 */
 	public function __construct( WC_Cart $cart ) {
-		$this->cart   = $cart;
-		$this->errors = new ErrorMessages();
+		$this->cart     = $cart;
+		$this->messages = new Messages();
 	}
 
 	/**
@@ -46,11 +46,11 @@ final class AgenticCheckoutSession {
 	}
 
 	/**
-	 * Gets the error messages handler.
+	 * Gets the messages collection.
 	 *
-	 * @return ErrorMessages The error messages handler instance.
+	 * @return Messages The messages handler instance.
 	 */
-	public function get_errors(): ErrorMessages {
-		return $this->errors;
+	public function get_messages(): Messages {
+		return $this->messages;
 	}
 }

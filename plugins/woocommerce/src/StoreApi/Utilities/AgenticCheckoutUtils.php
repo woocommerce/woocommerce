@@ -4,10 +4,10 @@ namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
 
 /**
  * AgenticCheckoutUtils class.
@@ -108,10 +108,10 @@ class AgenticCheckoutUtils {
 	 *
 	 * @param array          $items Items array from request.
 	 * @param CartController $cart_controller Cart controller instance.
-	 * @param ErrorMessages  $error_messages Error messages instance.
+	 * @param Messages       $messages Error messages instance.
 	 * @return Error|null Returns error response on failure, null on success.
 	 */
-	public static function add_items_to_cart( $items, $cart_controller, $error_messages ) {
+	public static function add_items_to_cart( $items, $cart_controller, $messages ) {
 		foreach ( $items as $item_index => $item ) {
 			if ( ! is_numeric( $item['id'] ) ) {
 				return Error::invalid_request(
@@ -148,7 +148,7 @@ class AgenticCheckoutUtils {
 				}
 
 				if ( null !== $message_error ) {
-					$error_messages->add( $message_error );
+					$messages->add( $message_error );
 				} else {
 					// The error code is generally applicable only to MessageErrors, but we can use it here as well.
 					return Error::invalid_request( ErrorCode::INVALID, $message, $param );
