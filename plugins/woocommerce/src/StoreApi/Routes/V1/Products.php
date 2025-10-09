@@ -479,7 +479,7 @@ class Products extends AbstractRoute {
 				$to_prime = array_merge( $to_prime, $product->get_visible_children() );
 			}
 
-			$to_prime[] = $product;
+			$to_prime[] = $product->get_id();
 		}
 
 		if ( is_callable( '_prime_post_caches' ) && ! empty( $to_prime ) ) {
