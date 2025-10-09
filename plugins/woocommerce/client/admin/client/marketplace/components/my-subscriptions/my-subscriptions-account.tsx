@@ -10,6 +10,7 @@ import { Icon, link } from '@wordpress/icons';
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
+import { MARKETPLACE_MY_ACCOUNT_PATH } from '../constants';
 
 export default function MySubscriptionsAccount(): JSX.Element | null {
 	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
@@ -36,20 +37,20 @@ export default function MySubscriptionsAccount(): JSX.Element | null {
 					sprintf(
 						// translators: %s is user email
 						__(
-							'Your store is currently connected to <strong>%s</strong> account on Woocommerce.com. If you think this is a mistake, you can disconnect your account and connect it to your current Woocommerce.com account. Doing this will not affect WooCommerce or any related extensions running on your site.',
+							'Your store is currently connected to <strong>%s</strong> account on WooCommerce.com. If you think this is a mistake, you can disconnect your account and connect it to your current Woocommerce.com account. Doing this will not affect WooCommerce or any related extensions running on your site.',
 							'woocommerce'
 						),
 						userEmail
 					),
 					{
-						strong: <strong>user email</strong>,
+						strong: <strong />,
 					}
 				) }
 			</p>
 			<div className="woocommerce-marketplace__my-subscriptions__account-actions">
 				<Button
 					variant="secondary"
-					href="https://woocommerce.com/my-account/"
+					href={ MARKETPLACE_MY_ACCOUNT_PATH }
 					target="_blank"
 				>
 					{ __( 'View account', 'woocommerce' ) }
