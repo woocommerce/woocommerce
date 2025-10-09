@@ -54,7 +54,6 @@ class AgenticWebhookManager {
 	 * Initialize hooks for webhook integration.
 	 */
 	private function init_hooks() {
-		add_filter( 'woocommerce_valid_webhook_events', array( $this, 'register_webhook_events' ) );
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
 		// Hook into order lifecycle events to fire our custom actions.
@@ -67,19 +66,6 @@ class AgenticWebhookManager {
 
 		// Customize webhook HTTP arguments for our topics.
 		add_filter( 'woocommerce_webhook_http_args', array( $this, 'customize_webhook_http_args' ), 10, 3 );
-	}
-
-	/**
-	 * Register valid webhook events for the 'order' resource.
-	 *
-	 * @param array $events Valid events.
-	 * @return array Modified events.
-	 */
-	public function register_webhook_events( $events ) {
-		// Add our custom events to the valid events list.
-		$events[] = 'agentic_created';
-		$events[] = 'agentic_updated';
-		return $events;
 	}
 
 	/**
