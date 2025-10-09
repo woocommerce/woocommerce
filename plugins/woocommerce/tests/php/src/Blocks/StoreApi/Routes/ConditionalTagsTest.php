@@ -294,7 +294,7 @@ class ConditionalTagsTest extends ControllerTestCase {
 		$this->assertContains( $response->get_status(), array( 200, 401 ), 'Checkout request status' );
 		
 		if ( 200 === $response->get_status() ) {
-			$this->assertTrue( $is_cart_result, 'is_cart() should return true during Store API checkout request' );
+			$this->assertFalse( $is_cart_result, 'is_cart() should return false during Store API checkout request (matches core AJAX)' );
 			$this->assertTrue( $is_checkout_result, 'is_checkout() should return true during Store API checkout request' );
 		} else {
 			$this->addToAssertionCount( 1 );

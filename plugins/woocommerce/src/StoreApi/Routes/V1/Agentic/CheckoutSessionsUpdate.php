@@ -74,14 +74,24 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 
 	/**
 	 * Load the cart session before handling responses.
-	 * Overrides parent to also define WOOCOMMERCE_CHECKOUT constant.
+	 * Overrides parent to define WOOCOMMERCE_CHECKOUT instead of WOOCOMMERCE_CART.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	protected function load_cart_session( \WP_REST_Request $request ) {
-		parent::load_cart_session( $request );
-
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
+
+		if ( $this->has_cart_token( $request ) ) {
+			add_filter(
+				'woocommerce_session_handler',
+				function () {
+					return SessionHandler::class;
+				}
+			);
+		}
+
+		$this->cart_controller->load_cart();
+		$this->cart_controller->normalize_cart();
 	}
 
 	/**
