@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53c42f18fe293e387384c28fe2212d3c",
+    "content-hash": "402d1789868587468ea7504dcb358d9a",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1178,11 +1178,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "1.7.0",
+            "version": "1.8.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "cb8f68b660212b31f99ce847b8b423e3f4163210"
+                "reference": "5fdaf423e6a6e2a295bd95e30ac438e770df5b30"
             },
             "require": {
                 "php": ">=7.4"
