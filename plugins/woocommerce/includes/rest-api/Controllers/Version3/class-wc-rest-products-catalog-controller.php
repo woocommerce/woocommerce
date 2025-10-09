@@ -12,8 +12,6 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Enums\ProductType;
-
 /**
  * REST API Products Catalog controller class.
  *
@@ -206,6 +204,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'status'       => array(
 					'description' => __( 'Products catalog generation status. Possible values: pending, processing, complete, failed.', 'woocommerce' ),
 					'type'        => 'string',
+					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
 					'required'    => true,
 				),
 				'download_url' => array(
