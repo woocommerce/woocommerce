@@ -24,7 +24,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		AgenticWebhookManager::reset_processed_events();
 
 		// Remove any existing hooks to prevent duplicates.
 		remove_all_filters( 'woocommerce_webhook_topics' );

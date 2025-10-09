@@ -35,13 +35,6 @@ class AgenticWebhookManager {
 	private $payload_builder;
 
 	/**
-	 * Track processed events to prevent duplicate firing.
-	 *
-	 * @var array
-	 */
-	private static $processed_events = array();
-
-	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -115,13 +108,6 @@ class AgenticWebhookManager {
 			return;
 		}
 
-		// Prevent duplicate firing for the same status change.
-		$event_key = 'status_' . $order_id . '_' . $old_status . '_' . $new_status;
-		if ( isset( self::$processed_events[ $event_key ] ) ) {
-			return;
-		}
-		self::$processed_events[ $event_key ] = true;
-
 		/**
 		 * Fires when an Agentic order status changes.
 		 *
@@ -144,13 +130,6 @@ class AgenticWebhookManager {
 		if ( ! $order || ! $this->should_trigger_webhook( $order ) ) {
 			return;
 		}
-
-		// Prevent duplicate firing for the same refund.
-		$event_key = 'refund_' . $order_id . '_' . $refund_id;
-		if ( isset( self::$processed_events[ $event_key ] ) ) {
-			return;
-		}
-		self::$processed_events[ $event_key ] = true;
 
 		/**
 		 * Fires when an Agentic order is refunded.
@@ -251,13 +230,5 @@ class AgenticWebhookManager {
 		}
 
 		return $http_args;
-	}
-
-	/**
-	 * Reset processed events tracking.
-	 * Useful for testing or when starting a new request context.
-	 */
-	public static function reset_processed_events() {
-		self::$processed_events = array();
 	}
 }
