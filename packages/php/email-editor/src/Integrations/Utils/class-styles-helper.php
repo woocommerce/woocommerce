@@ -32,13 +32,19 @@ class Styles_Helper {
 	 * @return float
 	 */
 	public static function parse_value( $value ): float {
-		if ( is_int( $value ) ) {
+		// Handle numeric values.
+		if ( is_numeric( $value ) ) {
 			return (float) $value;
 		}
 
-		if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
-			return (float) $m[1];
+		// Handle string values.
+		if ( is_string( $value ) ) {
+			if ( preg_match( '/^\s*(-?\d+(?:\.\d+)?)/', $value, $m ) ) {
+				return (float) $m[1];
+			}
 		}
+
+		// Default to 0.0.
 		return 0.0;
 	}
 
