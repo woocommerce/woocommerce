@@ -105,6 +105,8 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function generate_catalog( $request ) {
 		// Mock job ID.
@@ -119,6 +121,8 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function get_catalog_generation_status( $request ) {
 		$job_id = $request->get_param( 'job_id' );
@@ -132,10 +136,12 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Download export file.
+	 * Download catalog file.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function download_catalog( $request ) {
 		// Mock empty catalog.
@@ -151,6 +157,8 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|bool
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function generate_products_catalog_permissions_check( $request ) {
 		if ( ! ( wc_rest_check_post_permissions( 'product', 'read' ) && wc_rest_check_post_permissions( 'product_variation', 'read' ) ) ) {
