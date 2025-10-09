@@ -182,4 +182,39 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 
 		$this->assertEquals( 401, $response->get_status() );
 	}
+
+	/**
+	 * Test that woocommerce_share_key_display setting cannot be updated via REST API.
+	 */
+	public function test_update_share_key_display_not_allowed() {
+		// Set an initial value
+		$initial_value = 'initial_value';
+		update_option( 'woocommerce_share_key_display', $initial_value );
+
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_share_key_display' => 'new_value',
+						'woocommerce_default_country' => 'US:CA', // Another setting to verify normal updates still work
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Verify the response is successful
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify woocommerce_share_key_display was not changed
+		$this->assertEquals( $initial_value, get_option( 'woocommerce_share_key_display' ) );
+
+		// Verify other settings were updated successfully
+		$this->assertEquals( 'US:CA', get_option( 'woocommerce_default_country' ) );
+		$this->assertEquals( 'US:CA', $data['values']['woocommerce_default_country'] );
+	}
 }
