@@ -203,4 +203,69 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'has-border-color', $table_cell_class );
 		$this->assertStringNotContainsString( 'custom-class', $table_cell_class );
 	}
+
+	/**
+	 * Test it renders image with link
+	 */
+	public function testItRendersImageWithLink(): void {
+		$image_content_with_link   = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<a href="https://example.com/target-page">
+					<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+				</a>
+			</figure>
+		';
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content_with_link;
+
+		$rendered = $this->image_renderer->render( $image_content_with_link, $parsed_image, $this->rendering_context );
+
+		// Check that the anchor tag is present with correct attributes.
+		$this->assertStringContainsString( '<a href="https://example.com/target-page"', $rendered );
+		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );
+		$this->assertStringContainsString( 'target="_blank"', $rendered );
+		// Check that the image is present.
+		$this->assertStringContainsString( '<img ', $rendered );
+	}
+
+	/**
+	 * Test it renders image without link when no anchor tag is present
+	 */
+	public function testItRendersImageWithoutLinkWhenNoAnchorTag(): void {
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $this->image_content; // Original content without link.
+
+		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->rendering_context );
+
+		// Check that no anchor tag is present.
+		$this->assertStringNotContainsString( '<a href=', $rendered );
+		$this->assertStringNotContainsString( 'rel="noopener nofollow"', $rendered );
+		$this->assertStringNotContainsString( 'target="_blank"', $rendered );
+
+		// But image should still be present.
+		$this->assertStringContainsString( '<img ', $rendered );
+	}
+
+	/**
+	 * Test it properly escapes anchor tag href
+	 */
+	public function testItEscapesAnchorTagHref(): void {
+		$malicious_url                     = 'javascript:alert("xss")';
+		$image_content_with_malicious_link = '
+			<figure class="wp-block-image alignleft size-full is-style-default">
+				<a href="' . $malicious_url . '">
+					<img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="" srcset="https://test.com/wp-content/uploads/2023/05/image.jpg 1000w"/>
+				</a>
+			</figure>
+		';
+		$parsed_image                      = $this->parsed_image;
+		$parsed_image['innerHTML']         = $image_content_with_malicious_link;
+
+		$rendered = $this->image_renderer->render( $image_content_with_malicious_link, $parsed_image, $this->rendering_context );
+
+		// The malicious URL should be escaped/sanitized by esc_url().
+		// esc_url() should remove javascript: protocol.
+		$this->assertStringNotContainsString( 'javascript:', $rendered );
+		$this->assertStringNotContainsString( 'alert("xss")', $rendered );
+	}
 }
