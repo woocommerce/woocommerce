@@ -55,6 +55,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-123' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -79,6 +80,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'test_android_token_123' );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid-456' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -113,6 +115,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $browser_token );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'device_uuid', 'test-device-uuid-456' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -142,6 +145,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $token_value );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'device-1' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -156,6 +160,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $token_value );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'device-2' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -183,6 +188,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'c', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -197,6 +203,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'd', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', $device_uuid );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -215,6 +222,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'e', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -234,6 +242,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'invalid-token' );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -257,6 +266,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'invalid token with spaces' );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -279,6 +289,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 4097 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -302,6 +313,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'not-valid-json' );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -334,6 +346,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $browser_token );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -367,6 +380,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', $browser_token );
 		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -388,6 +402,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -409,6 +424,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'token', str_repeat( 'f', 64 ) );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -431,6 +447,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
 		$request->set_param( 'token', str_repeat( 'g', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -453,6 +470,53 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'anything' );
 		$request->set_param( 'platform', 'windows' );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
+	 * Test it cannot create a push token without required origin
+	 * parameter.
+	 */
+	public function test_it_cannot_create_push_token_with_a_missing_origin() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'h', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * Test it cannot create a push token with invalid origin value.
+	 */
+	public function test_it_cannot_create_push_token_with_invalid_origin() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', 'anything' );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', 'development' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -479,6 +543,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$push_token->set_token( str_repeat( 'i', 64 ) );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'device-to-delete' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
 		$data_store->create( $push_token );
@@ -520,6 +585,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$push_token->set_token( str_repeat( 'j', 64 ) );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'device-other-user' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
 		$data_store->create( $push_token );
@@ -571,6 +637,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
 		$request->set_param( 'device_uuid', 'test-device-uuid-123' );
+		$request->set_param( 'origin', 'com.automattic.woocommerce' );
 
 		$response = $this->server->dispatch( $request );
 
@@ -591,11 +658,13 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'token', $schema['properties'] );
 		$this->assertArrayHasKey( 'platform', $schema['properties'] );
 		$this->assertArrayHasKey( 'device_uuid', $schema['properties'] );
+		$this->assertArrayHasKey( 'origin', $schema['properties'] );
 		$this->assertArrayHasKey( 'enum', $schema['properties']['platform'] );
 
 		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['token'] );
 		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['platform'] );
 		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['device_uuid'] );
+		$this->assertArrayNotHasKey( 'validate_callback', $schema['properties']['origin'] );
 
 		$this->assertEquals( 'string', $schema['properties']['token']['type'] );
 		$this->assertEquals( 'string', $schema['properties']['platform']['type'] );

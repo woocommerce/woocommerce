@@ -43,6 +43,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
 					'device_uuid' => $push_token->get_device_uuid(),
+					'origin'      => $push_token->get_origin(),
 				),
 			)
 		);
@@ -79,6 +80,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		$push_token->set_token( $meta['token'] ?? null );
 		$push_token->set_platform( $meta['platform'] ?? null );
 		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
+		$push_token->set_origin( $meta['origin'] ?? null );
 	}
 
 	/**
@@ -106,6 +108,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
 					'device_uuid' => $push_token->get_device_uuid(),
+					'origin'      => $push_token->get_origin(),
 				),
 			)
 		);
@@ -255,13 +258,14 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * @throws InvalidArgumentException If push token is missing data.
 	 */
 	public function get_by_token_or_device_id( &$push_token ): ?PushToken {
-		if ( ! $push_token->get_user_id() || ! $push_token->get_platform() ) {
+		if (
+			! $push_token->get_user_id()
+			|| ! $push_token->get_platform()
+			|| ! $push_token->get_origin()
+		) {
 			throw new InvalidArgumentException(
-				sprintf(
-					// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-					'Can\'t retrieve push token using token or device UUID because %s was not provided.',
-					$push_token->get_platform() ? 'user ID' : 'platform',
-				),
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.',
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				WP_Http::BAD_REQUEST
 			);
@@ -277,7 +281,8 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					posts.post_author,
 					platform_meta.meta_value as platform,
 					token_meta.meta_value as token,
-					device_uuid_meta.meta_value as device_uuid
+					device_uuid_meta.meta_value as device_uuid,
+					origin_meta.meta_value as origin
 				FROM {$wpdb->posts} AS posts
 				INNER JOIN {$wpdb->postmeta} AS platform_meta
 					ON posts.ID = platform_meta.post_id
@@ -288,9 +293,13 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				INNER JOIN {$wpdb->postmeta} AS device_uuid_meta
 					ON posts.ID = device_uuid_meta.post_id
 					AND device_uuid_meta.meta_key = 'device_uuid'
+				INNER JOIN {$wpdb->postmeta} AS origin_meta
+					ON posts.ID = origin_meta.post_id
+					AND origin_meta.meta_key = 'origin'
 				WHERE posts.post_type = %s
 				AND posts.post_author = %d
 				AND platform_meta.meta_value = %s
+				AND origin_meta.meta_value = %s
 				AND (
 					token_meta.meta_value = %s
 					OR device_uuid_meta.meta_value = %s
@@ -299,11 +308,11 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				PushToken::POST_TYPE,
 				$push_token->get_user_id(),
 				$push_token->get_platform(),
+				$push_token->get_origin(),
 				$push_token->get_token(),
 				$push_token->get_device_uuid()
 			)
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $push_token_data ) {
 			return null;
@@ -314,6 +323,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		$push_token->set_token( $push_token_data->token );
 		$push_token->set_device_uuid( $push_token_data->device_uuid );
 		$push_token->set_platform( $push_token_data->platform );
+		$push_token->set_origin( $push_token_data->origin );
 
 		return $push_token;
 	}

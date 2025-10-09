@@ -72,6 +72,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertTrue( $push_token->can_be_created() );
 	}
@@ -86,6 +87,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -99,6 +101,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -112,6 +115,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -125,6 +129,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -152,6 +157,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertTrue( $push_token->can_be_updated() );
 	}
@@ -165,6 +171,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
@@ -178,6 +185,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
@@ -191,6 +199,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
@@ -217,6 +226,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_platform( PushToken::PLATFORM_APPLE );
 		$push_token->set_device_uuid( 'test-device-uuid' );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}

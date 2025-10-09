@@ -60,6 +60,13 @@ class PushToken {
 	private ?string $platform = null;
 
 	/**
+	 * The origin the token belongs to.
+	 *
+	 * @var string|null
+	 */
+	private ?string $origin = null;
+
+	/**
 	 * Sets the ID.
 	 *
 	 * @param int $id The id of the token post.
@@ -102,6 +109,15 @@ class PushToken {
 	 */
 	public function set_platform( string $platform ) {
 		$this->platform = $platform;
+	}
+
+	/**
+	 * Sets the origin.
+	 *
+	 * @param string $origin The origin of the token, e.g. the app it came from.
+	 */
+	public function set_origin( string $origin ) {
+		$this->origin = $origin;
 	}
 
 	/**
@@ -150,6 +166,15 @@ class PushToken {
 	}
 
 	/**
+	 * Gets the origin.
+	 *
+	 * @return string|null
+	 */
+	public function get_origin(): ?string {
+		return $this->origin;
+	}
+
+	/**
 	 * Determines whether this token can be created.
 	 *
 	 * @return bool
@@ -159,7 +184,8 @@ class PushToken {
 			&& $this->get_user_id()
 			&& $this->get_token()
 			&& $this->get_device_uuid()
-			&& $this->get_platform();
+			&& $this->get_platform()
+			&& $this->get_origin();
 	}
 
 	/**
@@ -172,7 +198,8 @@ class PushToken {
 			&& $this->get_user_id()
 			&& $this->get_token()
 			&& $this->get_device_uuid()
-			&& $this->get_platform();
+			&& $this->get_platform()
+			&& $this->get_origin();
 	}
 
 	/**
