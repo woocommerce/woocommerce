@@ -226,8 +226,13 @@ class Controller extends AbstractController {
 
 			$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
 
-			if ( ! in_array( $type, array( 'postcode', 'state', 'country', 'continent' ), true ) ) {
+			if ( ! in_array( $type, array( 'postcode', 'state', 'country:state', 'country', 'continent' ), true ) ) {
 				continue;
+			}
+
+			// Normalize 'country:state' to 'state' for backward compatibility with core.
+			if ( 'country:state' === $type ) {
+				$type = 'state';
 			}
 
 			$locations[] = array(
