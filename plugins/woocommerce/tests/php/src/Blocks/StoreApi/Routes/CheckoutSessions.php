@@ -1220,7 +1220,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Simulate a completed session by setting the completed order ID.
 		// This makes the status calculation return 'completed'.
-		WC()->session->set( 'agentic_checkout_completed_order_id', 123 );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, 123 );
 
 		// Try to update the completed session.
 		$update_response = $this->update_session(

@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\RoutesController;
@@ -72,7 +73,9 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		);
 
 		// Register mock agentic payment gateway.
-		$this->register_agentic_payment_gateway();
+		$this->mock_gateway = new MockAgenticPaymentGateway();
+		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'add_mock_gateway' ) );
 
 		wc_get_container()->get( RoutesController::class )->register_all_routes();
 	}
@@ -85,28 +88,11 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
 		// Clear session data.
-		WC()->session->set( 'agentic_draft_order_id', null );
-		WC()->session->set( 'chosen_shipping_methods', null );
-		WC()->session->set( 'agentic_checkout_completed_order_id', null );
-
-		// Unregister mock gateway.
-		if ( $this->mock_gateway ) {
-			remove_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
-		}
+		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
-	}
-
-	/**
-	 * Register a mock agentic payment gateway for testing.
-	 */
-	private function register_agentic_payment_gateway() {
-		$this->mock_gateway = new MockAgenticPaymentGateway();
-		add_filter( 'woocommerce_payment_gateways', array( $this, 'add_mock_gateway' ) );
-
-		// Force payment gateways to reload.
-		WC()->payment_gateways()->init();
 	}
 
 	/**
@@ -116,7 +102,8 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 * @return array Modified gateways.
 	 */
 	public function add_mock_gateway( $gateways ) {
-		return array( 'agentic_commerce' => $this->mock_gateway );
+		$gateways[ MockAgenticPaymentGateway::GATEWAY_ID ] =  $this->mock_gateway;
+		return $gateways;
 	}
 
 	/**
@@ -323,7 +310,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$this->assertEquals( 2, $complete_data['line_items'][0]['item']['quantity'] );
 
 		// Verify order ID is stored in session.
-		$stored_order_id = WC()->session->get( 'agentic_checkout_completed_order_id' );
+		$stored_order_id = WC()->session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID );
 		$this->assertNotNull( $stored_order_id );
 		$this->assertIsNumeric( $stored_order_id );
 		$this->assertEquals( $order_data['id'], (string) $stored_order_id );
@@ -797,12 +784,13 @@ class CheckoutSessionsComplete extends ControllerTestCase {
  * in CheckoutSessionsComplete tests.
  */
 class MockAgenticPaymentGateway extends \WC_Payment_Gateway {
+	public const GATEWAY_ID = 'mock_agentic_payment_gateway';
 	/**
 	 * Constructor for the gateway.
 	 */
 	public function __construct() {
 		$this->enabled            = 'yes';
-		$this->id                 = 'agentic_commerce';
+		$this->id                 = self::GATEWAY_ID;
 		$this->has_fields         = false;
 		$this->method_title       = 'Mock Agentic Gateway';
 		$this->method_description = 'Mock Gateway for agentic commerce testing';
