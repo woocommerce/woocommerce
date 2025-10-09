@@ -408,7 +408,7 @@ $orders = wc_get_orders(
 <!-- markdownlint-disable MD033 -->
 |Parameter|Description|
 |-|-|
-|**date_query**|One or more arrays with keys `field` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
+|**date_query**|One or more arrays with keys `column` (an order date: `date_completed`, `date_created`, `date_updated` or `date_paid`, optionally followed by `_gmt` for UTC dates), `value` and optionally `type` and `compare`.<br />This parameter is analogous to [WP_Query's `date_query`](https://developer.wordpress.org/reference/classes/wp_query/#date-parameters), supporting various comparison operators and levels of queries joined by AND/OR relations.|
 <!-- markdownlint-enable MD033 -->
 
 For more details and examples, refer to the [HPOS order querying](/docs/features/high-performance-order-storage/wc-order-query-improvements#date-queries-date_query) guide.
