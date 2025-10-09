@@ -350,9 +350,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 			WC()->session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
 		}
 
-		// Messages are generated first, as they might add errors to the session.
-		// This behavior should be changed, it is temporary in order to fix calculations first.
-		$messages = $this->get_messages( $checkout_session );
+		// Validate the checkout sesssion. Messages will be added to the collection, if any.
+		$this->validate( $checkout_session );
 
 		return [
 			'id'                    => $session_id,
@@ -365,7 +364,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'fulfillment_options'   => $this->format_fulfillment_options(),
 			'fulfillment_option_id' => $this->get_selected_fulfillment_option_id(),
 			'totals'                => $this->format_totals( $cart ),
-			'messages'              => $messages,
+			'messages'              => $checkout_session->get_messages()->get_formatted_messages(),
 			'links'                 => $this->get_links(),
 		];
 	}
@@ -641,16 +640,16 @@ class CheckoutSessionSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get messages for the session.
+	 * Validates a session.
 	 *
 	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return array Messages array.
 	 */
-	protected function get_messages( $checkout_session ) {
+	protected function validate( $checkout_session ) {
 		$errors = $checkout_session->get_messages();
+		$cart   = $checkout_session->get_cart();
 
-		// Add info message if shipping is needed. This should not reside here.
-		$cart = $checkout_session->get_cart();
+		// Add info message if shipping is needed.
 		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
 			$errors->add(
 				MessageError::missing(
@@ -659,8 +658,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 				)
 			);
 		}
-
-		return $errors->get_formatted_messages();
 	}
 
 	/**
