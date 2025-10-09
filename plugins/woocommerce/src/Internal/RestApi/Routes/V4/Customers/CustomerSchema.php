@@ -217,16 +217,23 @@ class CustomerSchema extends AbstractSchema {
 						'type'        => 'string',
 						'context'     => array( 'view', 'edit' ),
 					),
-					'phone'      => array(
-						'description' => __( 'Phone number.', 'woocommerce' ),
-						'type'        => 'string',
-						'context'     => array( 'view', 'edit' ),
-					),
 				),
 			),
 			'is_paying_customer' => array(
 				'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
 				'type'        => 'bool',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'orders_count'       => array(
+				'description' => __( 'Quantity of orders made by the customer.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'total_spent'        => array(
+				'description' => __( 'Total amount spent.', 'woocommerce' ),
+				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
@@ -305,7 +312,10 @@ class CustomerSchema extends AbstractSchema {
 			'billing'            => $data['billing'],
 			'shipping'           => $data['shipping'],
 			'is_paying_customer' => $data['is_paying_customer'],
+			'orders_count'       => $item->get_order_count(),
+			'total_spent'        => $item->get_total_spent(),
 			'avatar_url'         => $item->get_avatar_url(),
+			'meta_data'          => $data['meta_data'],
 		);
 
 		// Add meta data for administrators.
