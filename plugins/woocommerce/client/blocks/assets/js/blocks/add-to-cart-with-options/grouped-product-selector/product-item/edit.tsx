@@ -30,14 +30,14 @@ interface Attributes {
 type ProductItemWithContextProps = {
 	attributes: { productId: number };
 	isLoading?: boolean;
-	product?: ProductResponseItem;
+	product?: ProductResponseItem | null;
 	blocks: BlockInstance[];
 	isSelected: boolean;
 	onSelect(): void;
 };
 
 type ProductItemProps = {
-	product: ProductResponseItem;
+	product: ProductResponseItem | null;
 	blocks: BlockInstance[];
 	isLoading: boolean;
 	isSelected: boolean;
@@ -81,16 +81,12 @@ const ProductItem = ( {
 const ProductItemWithContext = withProduct(
 	( {
 		attributes,
-		isLoading,
-		product,
+		isLoading = true,
+		product = null,
 		blocks,
 		isSelected,
 		onSelect,
 	}: ProductItemWithContextProps ) => {
-		if ( ! product ) {
-			return null;
-		}
-
 		return (
 			<BlockContextProvider
 				value={ { postId: attributes.productId, postType: 'product' } }
@@ -98,7 +94,7 @@ const ProductItemWithContext = withProduct(
 				<ProductItem
 					product={ product }
 					blocks={ blocks }
-					isLoading={ isLoading || true }
+					isLoading={ isLoading }
 					isSelected={ isSelected }
 					onSelect={ onSelect }
 				/>
@@ -118,6 +114,7 @@ export default function ProductItemTemplateEdit(
 	} );
 
 	const { product, isLoading } = useProductDataContext();
+	const [ isLoadingProducts, setIsLoadingProducts ] = useState( true );
 	const [ products, setProducts ] = useState< ProductResponseItem[] | null >(
 		null
 	);
@@ -137,6 +134,7 @@ export default function ProductItemTemplateEdit(
 				} )
 				.then( ( fetchedProducts ) => {
 					setProducts( fetchedProducts );
+					setIsLoadingProducts( false );
 				} );
 		};
 
@@ -167,6 +165,7 @@ export default function ProductItemTemplateEdit(
 									if ( fetchedProducts.length > 0 ) {
 										setProducts( fetchedProducts );
 									}
+									setIsLoadingProducts( false );
 								} );
 						}
 					} );
@@ -185,7 +184,7 @@ export default function ProductItemTemplateEdit(
 	const [ selectedProductItem, setSelectedProductItem ] =
 		useState< number >();
 
-	if ( isLoading ) {
+	if ( isLoading || isLoadingProducts ) {
 		return <Spinner />;
 	}
 
