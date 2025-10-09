@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors;
 
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\MessageContentType;
 
 /**
  * MessageError class.
