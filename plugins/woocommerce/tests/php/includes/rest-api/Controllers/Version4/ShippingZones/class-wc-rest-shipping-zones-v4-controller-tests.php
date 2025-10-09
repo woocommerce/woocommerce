@@ -1117,4 +1117,54 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertCount( 1, $saved_locations );
 		$this->assertEquals( 'US', $saved_locations[0]->code );
 	}
+
+	/**
+	 * Test create zone with country:state location type (v4 specific feature).
+	 */
+	public function test_create_item_with_country_state_location_type() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Country:State Zone',
+				'locations' => array(
+					array(
+						'code' => 'US:CA',
+						'type' => 'country:state',
+					),
+					array(
+						'code' => 'US:NY',
+						'type' => 'country:state',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Verify the zone was created.
+		$zone          = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[] = $zone;
+
+		// Verify locations were saved and normalized to 'state' type.
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 2, $saved_locations );
+
+		foreach ( $saved_locations as $location ) {
+			// Type should be normalized to 'state' internally.
+			$this->assertEquals( 'state', $location->type );
+		}
+
+		// Verify codes are correct.
+		$codes = array_map(
+			function ( $location ) {
+				return $location->code;
+			},
+			$saved_locations
+		);
+		$this->assertContains( 'US:CA', $codes );
+		$this->assertContains( 'US:NY', $codes );
+	}
 }
