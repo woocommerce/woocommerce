@@ -216,7 +216,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 'Test Zone 1', $zone1_data['name'] );
 		$this->assertEquals( 1, $zone1_data['order'] );
 		$this->assertIsArray( $zone1_data['locations'] );
-		$this->assertContains( 'California', $zone1_data['locations'] );
+		$this->assertCount( 1, $zone1_data['locations'] );
+		$this->assertEquals( 'US:CA', $zone1_data['locations'][0]['code'] );
+		$this->assertEquals( 'state', $zone1_data['locations'][0]['type'] );
+		$this->assertEquals( 'California', $zone1_data['locations'][0]['name'] );
 		$this->assertIsArray( $zone1_data['methods'] );
 		$this->assertCount( 2, $zone1_data['methods'] );
 
@@ -226,7 +229,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 'Test Zone 2', $zone2_data['name'] );
 		$this->assertEquals( 2, $zone2_data['order'] );
 		$this->assertIsArray( $zone2_data['locations'] );
-		$this->assertContains( 'United States (US)', $zone2_data['locations'] );
+		$this->assertCount( 1, $zone2_data['locations'] );
+		$this->assertEquals( 'US', $zone2_data['locations'][0]['code'] );
+		$this->assertEquals( 'country', $zone2_data['locations'][0]['type'] );
+		$this->assertEquals( 'United States (US)', $zone2_data['locations'][0]['name'] );
 		$this->assertIsArray( $zone2_data['methods'] );
 		$this->assertCount( 1, $zone2_data['methods'] );
 
@@ -322,9 +328,12 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertCount( 3, $test_zone_data['locations'] );
 
 		$locations = $test_zone_data['locations'];
-		$this->assertContains( 'California', $locations );
-		$this->assertContains( 'New York', $locations );
-		$this->assertContains( 'Canada', $locations );
+
+		// Check locations are objects with proper structure.
+		$location_names = array_column( $locations, 'name' );
+		$this->assertContains( 'California', $location_names );
+		$this->assertContains( 'New York', $location_names );
+		$this->assertContains( 'Canada', $location_names );
 	}
 
 	/**
@@ -585,7 +594,11 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		// Test locations schema.
 		$this->assertEquals( 'array', $properties['locations']['type'] );
-		$this->assertEquals( 'string', $properties['locations']['items']['type'] );
+		$this->assertEquals( 'object', $properties['locations']['items']['type'] );
+		$this->assertArrayHasKey( 'properties', $properties['locations']['items'] );
+		$this->assertArrayHasKey( 'code', $properties['locations']['items']['properties'] );
+		$this->assertArrayHasKey( 'type', $properties['locations']['items']['properties'] );
+		$this->assertArrayHasKey( 'name', $properties['locations']['items']['properties'] );
 
 		// Test methods schema.
 		$this->assertEquals( 'array', $properties['methods']['type'] );
@@ -625,10 +638,10 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 
 		// In detailed view, locations should have name property.
 		foreach ( $data['locations'] as $location ) {
-			$this->assertIsObject( $location );
-			$this->assertObjectHasProperty( 'name', $location );
-			$this->assertObjectHasProperty( 'code', $location );
-			$this->assertObjectHasProperty( 'type', $location );
+			$this->assertIsArray( $location );
+			$this->assertArrayHasKey( 'name', $location );
+			$this->assertArrayHasKey( 'code', $location );
+			$this->assertArrayHasKey( 'type', $location );
 		}
 
 		// Check methods.
@@ -706,7 +719,452 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 0, $data['id'] );
 		$this->assertIsArray( $data['locations'] );
+		// "Rest of the World" zone returns empty locations array.
+		$this->assertCount( 0, $data['locations'] );
+	}
+
+	/**
+	 * Test create zone with minimal fields (name and empty locations).
+	 */
+	public function test_create_item_minimal() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Test Minimal Zone',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 'Test Minimal Zone', $data['name'] );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
+		$this->assertEquals( 0, $data['order'] ); // Default order.
+		$this->assertIsArray( $data['locations'] );
+		$this->assertCount( 0, $data['locations'] );
+		$this->assertIsArray( $data['methods'] );
+
+		// Track for cleanup.
+		$this->zones[] = WC_Shipping_Zones::get_zone( $data['id'] );
+	}
+
+	/**
+	 * Test create zone with name and locations.
+	 */
+	public function test_create_item_with_locations() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'US & Canada Zone',
+				'locations' => array(
+					array(
+						'code' => 'US',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'CA',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 'US & Canada Zone', $data['name'] );
+		$this->assertIsArray( $data['locations'] );
+		$this->assertCount( 2, $data['locations'] );
+
+		// Verify locations were saved.
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 2, $saved_locations );
+	}
+
+	/**
+	 * Test create zone with all fields (name, order, locations).
+	 */
+	public function test_create_item_with_all_fields() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Europe Zone',
+				'order'     => 5,
+				'locations' => array(
+					array(
+						'code' => 'EU',
+						'type' => 'continent',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+		$this->assertEquals( 'Europe Zone', $data['name'] );
+		$this->assertEquals( 5, $data['order'] );
 		$this->assertCount( 1, $data['locations'] );
-		$this->assertEquals( 'All regions not covered above', $data['locations'][0] );
+
+		// Verify the continent location.
+		$location = $data['locations'][0];
+		$this->assertEquals( 'EU', $location['code'] );
+		$this->assertEquals( 'continent', $location['type'] );
+
+		$this->zones[] = WC_Shipping_Zones::get_zone( $data['id'] );
+	}
+
+	/**
+	 * Test create zone with missing required name field.
+	 */
+	public function test_create_item_missing_name() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * Test create zone with missing required locations field.
+	 */
+	public function test_create_item_missing_locations() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name' => 'Test Zone',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'rest_missing_callback_param', $data['code'] );
+	}
+
+	/**
+	 * Test create zone with invalid location type (should be skipped).
+	 */
+	public function test_create_item_invalid_location_type() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Test Zone',
+				'locations' => array(
+					array(
+						'code' => 'US',
+						'type' => 'invalid_type',
+					),
+					array(
+						'code' => 'CA',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Invalid location type should be skipped, only valid one should be saved.
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 1, $saved_locations );
+		$this->assertEquals( 'CA', $saved_locations[0]->code );
+		$this->assertEquals( 'country', $saved_locations[0]->type );
+	}
+
+	/**
+	 * Test create zone with location type defaulting to country.
+	 */
+	public function test_create_item_location_type_defaults_to_country() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Test Zone',
+				'locations' => array(
+					array(
+						'code' => 'GB',
+						// No type specified.
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Location type should default to 'country'.
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 1, $saved_locations );
+		$this->assertEquals( 'GB', $saved_locations[0]->code );
+		$this->assertEquals( 'country', $saved_locations[0]->type );
+	}
+
+	/**
+	 * Test create zone response structure and status code.
+	 */
+	public function test_create_item_response_structure() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Response Test Zone',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Verify 201 Created status.
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Verify response structure.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'name', $data );
+		$this->assertArrayHasKey( 'order', $data );
+		$this->assertArrayHasKey( 'locations', $data );
+		$this->assertArrayHasKey( 'methods', $data );
+
+		// Verify types.
+		$this->assertIsInt( $data['id'] );
+		$this->assertIsString( $data['name'] );
+		$this->assertIsInt( $data['order'] );
+		$this->assertIsArray( $data['locations'] );
+		$this->assertIsArray( $data['methods'] );
+
+		$this->zones[] = WC_Shipping_Zones::get_zone( $data['id'] );
+	}
+
+	/**
+	 * Test create zone sets Location header correctly.
+	 */
+	public function test_create_item_location_header() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Header Test Zone',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Verify Location header is set.
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'Location', $headers );
+
+		$expected_location = rest_url( '/wc/v4/shipping-zones/' . $data['id'] );
+		$this->assertEquals( $expected_location, $headers['Location'] );
+
+		$this->zones[] = WC_Shipping_Zones::get_zone( $data['id'] );
+	}
+
+	/**
+	 * Test create zone without permission.
+	 */
+	public function test_create_item_without_permission() {
+		wp_set_current_user( 0 );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Unauthorized Zone',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test create zone when shipping is disabled.
+	 */
+	public function test_create_item_shipping_disabled() {
+		// Disable shipping temporarily.
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Disabled Shipping Zone',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 503, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_disabled', $data['code'] );
+
+		// Re-enable shipping.
+		remove_filter( 'wc_shipping_enabled', '__return_false' );
+	}
+
+	/**
+	 * Test create zone with various location types.
+	 */
+	public function test_create_item_with_various_location_types() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Multi-Location Zone',
+				'locations' => array(
+					array(
+						'code' => 'US',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'US:CA',
+						'type' => 'state',
+					),
+					array(
+						'code' => '90210',
+						'type' => 'postcode',
+					),
+					array(
+						'code' => 'NA',
+						'type' => 'continent',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 4, $saved_locations );
+
+		// Verify all location types were saved.
+		$types = array_map(
+			function ( $location ) {
+				return $location->type;
+			},
+			$saved_locations
+		);
+		$this->assertContains( 'country', $types );
+		$this->assertContains( 'state', $types );
+		$this->assertContains( 'postcode', $types );
+		$this->assertContains( 'continent', $types );
+	}
+
+	/**
+	 * Test create zone with empty location code (should be skipped).
+	 */
+	public function test_create_item_empty_location_code() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Test Zone',
+				'locations' => array(
+					array(
+						'code' => '',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'US',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Empty location code should be skipped.
+		$zone            = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[]   = $zone;
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 1, $saved_locations );
+		$this->assertEquals( 'US', $saved_locations[0]->code );
+	}
+
+	/**
+	 * Test create zone with country:state location type (v4 specific feature).
+	 */
+	public function test_create_item_with_country_state_location_type() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => 'Country:State Zone',
+				'locations' => array(
+					array(
+						'code' => 'US:CA',
+						'type' => 'country:state',
+					),
+					array(
+						'code' => 'US:NY',
+						'type' => 'country:state',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 201, $response->get_status() );
+
+		// Verify the zone was created.
+		$zone          = WC_Shipping_Zones::get_zone( $data['id'] );
+		$this->zones[] = $zone;
+
+		// Verify locations were saved and normalized to 'state' type.
+		$saved_locations = $zone->get_zone_locations();
+		$this->assertCount( 2, $saved_locations );
+
+		foreach ( $saved_locations as $location ) {
+			// Type should be normalized to 'state' internally.
+			$this->assertEquals( 'state', $location->type );
+		}
+
+		// Verify codes are correct.
+		$codes = array_map(
+			function ( $location ) {
+				return $location->code;
+			},
+			$saved_locations
+		);
+		$this->assertContains( 'US:CA', $codes );
+		$this->assertContains( 'US:NY', $codes );
 	}
 }
