@@ -123,9 +123,8 @@ class AgenticWebhookManager {
 	 * Handle order refunds.
 	 *
 	 * @param int $order_id  Order ID.
-	 * @param int $refund_id Refund ID.
 	 */
-	public function handle_order_refunded( $order_id, $refund_id ) {
+	public function handle_order_refunded( $order_id ) {
 		$order = wc_get_order( $order_id );
 		if ( ! $order || ! $this->should_trigger_webhook( $order ) ) {
 			return;
