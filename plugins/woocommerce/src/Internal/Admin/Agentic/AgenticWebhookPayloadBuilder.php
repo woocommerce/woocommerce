@@ -158,7 +158,7 @@ class AgenticWebhookPayloadBuilder {
 		$amount      = abs( (float) $refund->get_total() ); // Get absolute value as refunds are negative.
 
 		// Convert amount to cents using MoneyFormatter, same as checkout session endpoints.
-		$formatter = new MoneyFormatter();
+		$formatter       = new MoneyFormatter();
 		$amount_in_cents = (int) $formatter->format( $amount, array( 'decimals' => 2 ) );
 
 		return array(

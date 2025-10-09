@@ -13,6 +13,9 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 	 * Test that controller initializes webhook manager.
 	 */
 	public function test_register_initializes_webhook_manager() {
+		// Enable the agentic checkout feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
 		$controller = new AgenticController();
 		$controller->register();
 

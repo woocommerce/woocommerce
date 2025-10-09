@@ -24,7 +24,7 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		// Use the WooCommerce logger for tests.
-		$logger = wc_get_logger();
+		$logger                = wc_get_logger();
 		$this->payload_builder = new AgenticWebhookPayloadBuilder( $logger );
 	}
 
@@ -193,7 +193,7 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 		// Hook into the filter to change refund type based on reason.
 		add_filter(
 			'woocommerce_agentic_webhook_refund_type',
-			function( $type, $refund_obj ) {
+			function ( $type, $refund_obj ) {
 				if ( stripos( $refund_obj->get_reason(), 'store credit' ) !== false ) {
 					return 'store_credit';
 				}

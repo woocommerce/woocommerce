@@ -257,7 +257,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$webhook->set_secret( 'test_secret' );
 		$webhook->save();
 
-		$payload = json_encode( array( 'test' => 'data' ) );
+		$payload       = wp_json_encode( array( 'test' => 'data' ) );
 		$original_args = array(
 			'headers' => array(),
 			'body'    => $payload,
@@ -280,7 +280,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'Merchant-Signature', $modified_args['headers'] );
 
 		// Compute expected signature same way WooCommerce does.
-		$expected_signature = base64_encode( hash_hmac( 'sha256', $payload, 'test_secret', true ) );
+		$expected_signature = base64_encode( hash_hmac( 'sha256', $payload, 'test_secret', true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		$this->assertEquals( $expected_signature, $modified_args['headers']['Merchant-Signature'] );
 
 		$webhook->delete( true );
@@ -299,15 +299,15 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		// Test with various payload types.
 		$test_cases = array(
 			array(
-				'payload' => json_encode( array( 'order_id' => 123 ) ),
+				'payload'     => wp_json_encode( array( 'order_id' => 123 ) ),
 				'description' => 'Simple JSON payload',
 			),
 			array(
-				'payload' => json_encode( array( 'unicode' => '€£¥' ) ),
+				'payload'     => wp_json_encode( array( 'unicode' => '€£¥' ) ),
 				'description' => 'Unicode characters',
 			),
 			array(
-				'payload' => '{"nested":{"data":{"value":true}}}',
+				'payload'     => '{"nested":{"data":{"value":true}}}',
 				'description' => 'Nested JSON',
 			),
 		);
@@ -326,7 +326,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			);
 
 			// Verify signature matches expected HMAC-SHA256.
-			$expected = base64_encode( hash_hmac( 'sha256', $test['payload'], 'my_webhook_secret_123', true ) );
+			$expected = base64_encode( hash_hmac( 'sha256', $test['payload'], 'my_webhook_secret_123', true ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 			$this->assertEquals(
 				$expected,
 				$modified_args['headers']['Merchant-Signature'],
@@ -354,6 +354,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'body'    => '{"test":"data"}',
 		);
 
+		// phpcs:ignore
 		$modified_args = apply_filters(
 			'woocommerce_webhook_http_args',
 			$args,

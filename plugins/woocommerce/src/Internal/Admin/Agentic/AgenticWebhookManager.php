@@ -45,7 +45,7 @@ class AgenticWebhookManager {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$logger = wc_get_logger();
+		$logger                = wc_get_logger();
 		$this->payload_builder = new AgenticWebhookPayloadBuilder( $logger );
 		$this->init_hooks();
 	}
