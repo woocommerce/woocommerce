@@ -21,12 +21,13 @@ import type { ProductResponseItem } from '@woocommerce/types';
 import { productsStore } from '@woocommerce/data';
 import { isProductResponseItem } from '@woocommerce/entities';
 import { Spinner } from '@wordpress/components';
+import { previewProductResponseItems } from '@woocommerce/resource-previews';
 
 interface Attributes {
 	className?: string;
 }
 
-type ProductItemProps = {
+type ProductItemWithContextProps = {
 	attributes: { productId: number };
 	isLoading?: boolean;
 	product?: ProductResponseItem;
@@ -35,14 +36,21 @@ type ProductItemProps = {
 	onSelect(): void;
 };
 
-const ProductItem = withProduct( function ProductItem( {
-	attributes,
-	isLoading,
+type ProductItemProps = {
+	product: ProductResponseItem;
+	blocks: BlockInstance[];
+	isLoading: boolean;
+	isSelected: boolean;
+	onSelect(): void;
+};
+
+const ProductItem = ( {
 	product,
 	blocks,
+	isLoading,
 	isSelected,
 	onSelect,
-}: ProductItemProps ) {
+}: ProductItemProps ) => {
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 	} );
@@ -52,31 +60,53 @@ const ProductItem = withProduct( function ProductItem( {
 	);
 
 	return (
-		<BlockContextProvider
-			value={ { postId: attributes.productId, postType: 'product' } }
-		>
-			<ProductDataContextProvider
-				product={ product as ProductResponseItem }
-				isLoading={ isLoading as boolean }
-			>
-				{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
+		<ProductDataContextProvider product={ product } isLoading={ isLoading }>
+			{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
 
+			<div
+				role="listitem"
+				style={ { display: isSelected ? 'none' : undefined } }
+			>
 				<div
-					role="listitem"
-					style={ { display: isSelected ? 'none' : undefined } }
-				>
-					<div
-						{ ...blockPreviewProps }
-						role="button"
-						tabIndex={ 0 }
-						onClick={ onSelect }
-						onKeyDown={ onSelect }
-					/>
-				</div>
-			</ProductDataContextProvider>
-		</BlockContextProvider>
+					{ ...blockPreviewProps }
+					role="button"
+					tabIndex={ 0 }
+					onClick={ onSelect }
+					onKeyDown={ onSelect }
+				/>
+			</div>
+		</ProductDataContextProvider>
 	);
-} );
+};
+
+const ProductItemWithContext = withProduct(
+	( {
+		attributes,
+		isLoading,
+		product,
+		blocks,
+		isSelected,
+		onSelect,
+	}: ProductItemWithContextProps ) => {
+		if ( ! product ) {
+			return null;
+		}
+
+		return (
+			<BlockContextProvider
+				value={ { postId: attributes.productId, postType: 'product' } }
+			>
+				<ProductItem
+					product={ product }
+					blocks={ blocks }
+					isLoading={ isLoading || true }
+					isSelected={ isSelected }
+					onSelect={ onSelect }
+				/>
+			</BlockContextProvider>
+		);
+	}
+);
 
 export default function ProductItemTemplateEdit(
 	props: BlockEditProps< Attributes >
@@ -156,31 +186,44 @@ export default function ProductItemTemplateEdit(
 	const [ selectedProductItem, setSelectedProductItem ] =
 		useState< number >();
 
-	if ( ! products ) {
+	if ( isLoading ) {
 		return <Spinner />;
 	}
+
+	const productList = products
+		? products?.map( ( productItem ) => (
+				<ProductItemWithContext
+					key={ productItem.id }
+					attributes={ {
+						productId: productItem.id,
+					} }
+					blocks={ blocks }
+					isSelected={
+						( selectedProductItem || products[ 0 ]?.id ) ===
+						productItem.id
+					}
+					onSelect={ () => setSelectedProductItem( productItem.id ) }
+				/>
+		  ) )
+		: previewProductResponseItems?.map( ( productItem ) => (
+				<ProductItem
+					key={ productItem.id }
+					product={ productItem }
+					blocks={ blocks }
+					isLoading={ false }
+					isSelected={
+						( selectedProductItem ||
+							previewProductResponseItems[ 0 ]?.id ) ===
+						productItem.id
+					}
+					onSelect={ () => setSelectedProductItem( productItem.id ) }
+				/>
+		  ) );
 
 	return (
 		<div { ...blockProps }>
 			<InnerBlockLayoutContextProvider parentName="woocommerce/add-to-cart-with-options-grouped-product-item">
-				<div role="list">
-					{ products?.map( ( productItem ) => (
-						<ProductItem
-							key={ productItem.id }
-							attributes={ {
-								productId: productItem.id,
-							} }
-							blocks={ blocks }
-							isSelected={
-								( selectedProductItem || products[ 0 ]?.id ) ===
-								productItem.id
-							}
-							onSelect={ () =>
-								setSelectedProductItem( productItem.id )
-							}
-						/>
-					) ) }
-				</div>
+				<div role="list">{ productList }</div>
 			</InnerBlockLayoutContextProvider>
 		</div>
 	);

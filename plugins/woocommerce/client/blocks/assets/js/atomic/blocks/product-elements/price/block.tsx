@@ -97,8 +97,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
 	const showPricePreview =
-		isDescendentOfSingleProductTemplate &&
-		! isDescendentOfAddToCartGroupedProductSelectorBlock;
+		( isDescendentOfSingleProductTemplate &&
+			! isDescendentOfAddToCartGroupedProductSelectorBlock ) ||
+		! product;
 
 	const wrapperClassName = clsx(
 		'wc-block-components-product-price',
