@@ -287,12 +287,97 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @return void
 	 */
-	public function test_get_paypal_order_purchase_unit_amount() {}
+	public function test_get_paypal_order_purchase_unit_amount(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_cart_tax( 10 );
+		$order->set_shipping_tax( 0 );
+		$order->set_total( 60 );
+		$order->save();
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$expected = array(
+			'currency_code' => 'USD',
+			'value'         => '60.00',
+			'breakdown'     => array(
+				'item_total' => array(
+					'currency_code' => 'USD',
+					'value'         => '40.00',
+				),
+				'shipping'   => array(
+					'currency_code' => 'USD',
+					'value'         => '10.00',
+				),
+				'tax_total'  => array(
+					'currency_code' => 'USD',
+					'value'         => '10.00',
+				),
+			),
+		);
+		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
+		$this->assertEquals( $expected, $actual );
+	}
 
 	/**
 	 * Tests for the `fetch_paypal_client_id` method.
 	 *
 	 * @return void
+	 *
+	 * @dataProvider provide_test_fetch_paypal_client_id
 	 */
-	public function test_fetch_paypal_client_id() {}
+	public function test_fetch_paypal_client_id( $response, $client_id ): void {
+		$response_mock_ref = function() use ( $response ) {
+			return $response;
+		};
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$actual = $request->fetch_paypal_client_id();
+
+		// Clean up the filter.
+		remove_filter( 'pre_http_request', $response_mock_ref );
+
+		$this->assertEquals( $client_id, $actual );
+	}
+
+	/**
+	 * Data provider for the `test_fetch_paypal_client_id` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_fetch_paypal_client_id(): array {
+		$error_response   = new WP_Error( 'error', 'Some error occurred.' );
+		$invalid_response = array(
+			'response' => array(
+				'code' => 200,
+			),
+			'body'     => 'Invalid JSON',
+		);
+		$valid_response  = array(
+			'response' => array(
+				'code' => 200,
+			),
+			'body'     => wp_json_encode(
+				array(
+					'client_id' => 'SOME_CLIENT_ID',
+				)
+			),
+		);
+
+		return array(
+			'request error' => array(
+				'response'  => $error_response,
+				'client ID' => null,
+			),
+			'invalid response' => array(
+				'response'  => $invalid_response,
+				'client ID' => null,
+			),
+			'valid response' => array(
+				'response'  => $valid_response,
+				'client ID' => 'SOME_CLIENT_ID',
+			),
+		);
+	}
 }
