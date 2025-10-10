@@ -65,7 +65,7 @@ Note that `wc_get_orders()` is mostly a shortcut to `WC_Order_Query::get_orders(
 | `WC_Order_Query::set( string $key, mixed $value )`       | Set a query variable.                     |
 | `WC_Order_Query::get_orders()`            | Get all orders matching the current query variables.  |
 
-Query parameters/arguments are described below that can be used with these functions are described below.
+Query parameters/arguments that can be used with these functions are described below.
 
 ## Query parameters reference
 
@@ -203,7 +203,7 @@ $orders = wc_get_orders( array( 'currency' => 'USD' ) );
 ```
 
 ```php
-// Get orders payed by check.
+// Get orders paid by check.
 $orders = wc_get_orders( array( 'payment_method' => 'cheque' ) );
 ```
 
@@ -423,7 +423,7 @@ Check if it's enabled with `OrderUtil::custom_orders_table_usage_is_enabled()` b
 #### Examples
 
 ```php
-// Example. Orders paid in the last month that were created before noon (on any date).
+// Example: Orders paid in the last month that were created before noon (on any date).
 
 $orders = wc_get_orders(
     array(
@@ -454,7 +454,7 @@ WooCommerce currently supports two order storage mechanisms: HPOS (the default) 
 
 ```php
 /**
- * Example. Handle a custom 'customvar' query var to get orders with the 'customvar' meta.
+ * Example: Handle a custom 'customvar' query var to get orders with the 'customvar' meta.
  */
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
