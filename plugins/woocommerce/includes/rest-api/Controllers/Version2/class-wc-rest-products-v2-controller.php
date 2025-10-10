@@ -166,7 +166,6 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 *
 	 * @return array Array of WP_Error or WP_REST_Response objects for each processed item.
 	 * @since 10.4.0 Added term counting optimization for bulk operations.
-	 *
 	 */
 	public function batch_items( $request ) {
 		wp_defer_term_counting( true );
