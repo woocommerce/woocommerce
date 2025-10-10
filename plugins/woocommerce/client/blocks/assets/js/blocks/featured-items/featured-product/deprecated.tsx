@@ -80,7 +80,7 @@ const v1 = {
 				isLink: false,
 				style: {
 					padding: {
-						bottom: OLD_PADDING_BOTTOM,
+						bottom: V1_PADDING_BOTTOM,
 					},
 				},
 				textAlign: 'center',
