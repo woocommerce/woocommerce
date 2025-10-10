@@ -30,4 +30,9 @@ class CheckoutSessionStatus {
 	 * Session is in progress (payment initiated but not complete).
 	 */
 	const IN_PROGRESS = 'in_progress';
+
+	/**
+	 * Allowed statuses for update operations.
+	 */
+	const ALLOWED_STATUSES_FOR_UPDATE = [ self::NOT_READY_FOR_PAYMENT, self::READY_FOR_PAYMENT ];
 }
