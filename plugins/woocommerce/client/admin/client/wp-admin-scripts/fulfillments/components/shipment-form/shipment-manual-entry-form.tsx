@@ -86,6 +86,13 @@ export default function ShipmentManualEntryForm() {
 						value={ shipmentProvider }
 						options={ ShipmentProviders }
 						onChange={ ( value ) => {
+							if ( typeof value !== 'string' ) {
+								return;
+							}
+							if ( ! value ) {
+								setTrackingUrl( '' );
+								return;
+							}
 							setShipmentProvider( value as string );
 							setTrackingUrl(
 								(
@@ -94,7 +101,7 @@ export default function ShipmentManualEntryForm() {
 									]?.url ?? ''
 								).replace(
 									/__placeholder__/i,
-									trackingNumber ?? ''
+									encodeURIComponent( trackingNumber ?? '' )
 								)
 							);
 						} }
