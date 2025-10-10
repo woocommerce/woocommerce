@@ -70,7 +70,19 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 			summaryLength: 80,
 		},
 	],
-	[ 'woocommerce/product-price', { textAlign: 'center' } ],
+	[
+		'woocommerce/product-price',
+		{
+			style: {
+				spacing: {
+					padding: {
+						bottom: '16px',
+					},
+				},
+			},
+			textAlign: 'center',
+		},
+	],
 	[
 		'core/buttons',
 		{
