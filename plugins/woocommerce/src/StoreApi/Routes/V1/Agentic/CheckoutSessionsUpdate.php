@@ -6,6 +6,8 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -166,6 +168,18 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+		if ( ! in_array( $current_status, CheckoutSessionStatus::ALLOWED_STATUSES_FOR_UPDATE, true ) ) {
+			$allowed_statuses = implode( ', ', CheckoutSessionStatus::ALLOWED_STATUSES_FOR_UPDATE );
+			$message          = sprintf(
+				/* translators: 1: current session status, 2: allowed statuses */
+				__( 'Checkout session cannot be updated. Current status: %1$s. Allowed statuses: %2$s', 'woocommerce' ),
+				$current_status,
+				$allowed_statuses
+			);
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
+		}
+
 		// Prepare an array for all error messages.
 		$message_errors = new ErrorMessages();
 

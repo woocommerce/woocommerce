@@ -19,8 +19,10 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
+use WC_Order;
 
 /**
  * Handles the schema for Agentic Checkout API checkout sessions.
@@ -331,37 +333,63 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce cart to the Agentic Checkout session format.
 	 *
-	 * @param mixed $cart_data Cart data from WooCommerce (unused, uses WC()->cart directly).
+	 * @param \WC_Cart $cart Cart data from WooCommerce.
 	 * @return array Formatted checkout session data.
 	 */
-	public function get_item_response( $cart_data ) {
-		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable.
-		$cart = WC()->cart;
-
-		// Get draft order if exists.
-		$draft_order = $this->get_draft_order();
-
+	public function get_item_response( $cart ) {
 		// Generate session ID from Cart-Token.
-		$session_id = WC()->session->get( SessionKey::AGENTIC_SESSION_ID );
+		$wc_session = WC()->session;
+		$session_id = $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID );
 		if ( null === $session_id ) {
-			$session_id = CartTokenUtils::get_cart_token( (string) WC()->session->get_customer_id() );
-			WC()->session->set( SessionKey::AGENTIC_SESSION_ID, $session_id );
+			$session_id = CartTokenUtils::get_cart_token( (string) $wc_session->get_customer_id() );
+			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
 		}
 
-		return [
+		$completed_order = wc_get_order( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
+
+		// Get line items from cart, or from completed order if cart is empty.
+		$cart_items = $cart->get_cart();
+		$line_items = $completed_order instanceof WC_Order
+			? $this->format_line_items_from_order( $completed_order )
+			: $this->format_line_items_from_cart( $cart_items );
+
+		$response = [
 			'id'                    => $session_id,
-			'buyer'                 => $this->format_buyer(),
+			'buyer'                 => $completed_order instanceof WC_Order
+				? $this->format_buyer_from_order( $completed_order )
+				: $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
-			'status'                => $this->calculate_status( $cart, $draft_order ),
-			'currency'              => strtolower( get_woocommerce_currency() ),
-			'line_items'            => $this->format_line_items( $cart->get_cart() ),
-			'fulfillment_address'   => $this->format_fulfillment_address(),
-			'fulfillment_options'   => $this->format_fulfillment_options(),
-			'fulfillment_option_id' => $this->get_selected_fulfillment_option_id(),
-			'totals'                => $this->format_totals( $cart ),
+			'status'                => AgenticCheckoutUtils::calculate_status( $cart ),
+			'currency'              => $completed_order instanceof WC_Order
+				? strtolower( $completed_order->get_currency() )
+				: strtolower( get_woocommerce_currency() ),
+			'line_items'            => $line_items,
+			'fulfillment_address'   => $completed_order instanceof WC_Order
+				? $this->format_fulfillment_address_from_order( $completed_order )
+				: $this->format_fulfillment_address(),
+			'fulfillment_options'   => $completed_order instanceof WC_Order
+				? $this->format_fulfillment_options_from_order( $completed_order )
+				: $this->format_fulfillment_options(),
+			'fulfillment_option_id' => $completed_order instanceof WC_Order
+				? $this->get_selected_fulfillment_option_id_from_order( $completed_order )
+				: $this->get_selected_fulfillment_option_id(),
+			'totals'                => $completed_order instanceof WC_Order
+				? $this->format_totals_from_order( $completed_order )
+				: $this->format_totals( $cart ),
 			'messages'              => $this->get_messages( $cart ),
 			'links'                 => $this->get_links(),
 		];
+
+		// Add order data if a completed order exists.
+		if ( $completed_order instanceof WC_Order ) {
+			$response['order'] = [
+				'id'                  => (string) $completed_order->get_id(),
+				'checkout_session_id' => $session_id,
+				'permalink_url'       => $completed_order->get_checkout_order_received_url(),
+			];
+		}
+
+		return $response;
 	}
 
 	/**
@@ -376,10 +404,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$first_name = $customer->get_billing_first_name();
-		$last_name  = $customer->get_billing_last_name();
+		$first_name = $customer->get_billing_first_name() ? $customer->get_billing_first_name() : $customer->get_shipping_first_name();
+		$last_name  = $customer->get_billing_last_name() ? $customer->get_billing_last_name() : $customer->get_shipping_last_name();
 		$email      = $customer->get_billing_email();
-		$phone      = $customer->get_billing_phone();
 
 		if ( ! $first_name && ! $last_name && ! $email ) {
 			return null;
@@ -389,7 +416,30 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'first_name'   => $first_name ? $first_name : '',
 			'last_name'    => $last_name ? $last_name : '',
 			'email'        => $email ? $email : '',
-			'phone_number' => $phone ? $phone : '',
+			'phone_number' => $customer->get_billing_phone() ? $customer->get_billing_phone() : '',
+		];
+	}
+
+	/**
+	 * Format buyer information from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array|null Buyer data or null.
+	 */
+	protected function format_buyer_from_order( $order ) {
+		$first_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : $order->get_shipping_first_name();
+		$last_name  = $order->get_billing_last_name() ? $order->get_billing_last_name() : $order->get_shipping_last_name();
+		$email      = $order->get_billing_email();
+
+		if ( ! $first_name && ! $last_name && ! $email ) {
+			return null;
+		}
+
+		return [
+			'first_name'   => $first_name ? $first_name : '',
+			'last_name'    => $last_name ? $last_name : '',
+			'email'        => $email ? $email : '',
+			'phone_number' => $order->get_billing_phone() ? $order->get_billing_phone() : '',
 		];
 	}
 
@@ -399,62 +449,26 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Payment provider data or null.
 	 */
 	protected function format_payment_provider() {
-		// Default to first available payment gateway.
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		if ( empty( $available_gateways ) ) {
 			return null;
 		}
 
-		$first_gateway = reset( $available_gateways );
+		// Look for gateway with agentic_commerce capability.
+		$gateway = AgenticCheckoutUtils::get_agentic_commerce_gateway( $available_gateways );
+
+		if ( null !== $gateway ) {
+			return [
+				'provider'                  => $gateway->get_agentic_commerce_provider(),
+				'supported_payment_methods' => $gateway->get_agentic_commerce_payment_methods(),
+			];
+		}
 
 		return [
-			'provider'                  => $first_gateway->id,
+			'provider'                  => 'stripe',
 			'supported_payment_methods' => [ PaymentMethod::CARD ], // Default, can be expanded.
 		];
-	}
-
-	/**
-	 * Calculate the status of the checkout session.
-	 *
-	 * @param \WC_Cart       $cart Cart object.
-	 * @param \WC_Order|null $order Draft order if exists.
-	 * @return string Status value.
-	 */
-	protected function calculate_status( $cart, $order ) {
-		// Check if canceled.
-		if ( $order && $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_CANCELED ) === 'yes' ) {
-			return CheckoutSessionStatus::CANCELED;
-		}
-
-		// Check if completed (only processing and completed are final statuses).
-		if ( $order && in_array( $order->get_status(), [ OrderStatus::PROCESSING, OrderStatus::COMPLETED ], true ) ) {
-			return CheckoutSessionStatus::COMPLETED;
-		}
-
-		// Check if pending (payment not yet cleared).
-		if ( $order && OrderStatus::PENDING === $order->get_status() ) {
-			return CheckoutSessionStatus::READY_FOR_PAYMENT;
-		}
-
-		// Check if ready for payment.
-		$needs_shipping = $cart->needs_shipping();
-		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
-
-		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
-		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
-
-		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
-			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
-		}
-
-		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) ) {
-			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
-		}
-
-		return CheckoutSessionStatus::READY_FOR_PAYMENT;
 	}
 
 	/**
@@ -465,8 +479,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 */
 	protected function amount_to_cents( $amount ) {
 		return (int) $this->extend->get_formatter( 'money' )->format(
-			$amount,
-			[ 'decimals' => 2 ]
+			$amount
 		);
 	}
 
@@ -476,7 +489,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @param array $cart_items Cart items array.
 	 * @return array Formatted line items.
 	 */
-	protected function format_line_items( $cart_items ) {
+	protected function format_line_items_from_cart( $cart_items ) {
 		$items = [];
 
 		foreach ( $cart_items as $cart_item_key => $cart_item ) {
@@ -506,6 +519,43 @@ class CheckoutSessionSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Format line items from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array Formatted line items.
+	 */
+	protected function format_line_items_from_order( $order ) {
+		$items = [];
+
+		foreach ( $order->get_items() as $item_id => $item ) {
+			$quantity    = $item->get_quantity();
+			$base_amount = $this->amount_to_cents( $item->get_subtotal() );
+			$discount    = $this->amount_to_cents( $item->get_subtotal() - $item->get_total() );
+			$subtotal    = $base_amount - $discount;
+			$tax         = $this->amount_to_cents( $item->get_total_tax() );
+			$total       = $subtotal + $tax;
+
+			// Use product_id from the order item, with variation_id as fallback.
+			$item_product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+
+			$items[] = [
+				'id'          => (string) $item_id,
+				'item'        => [
+					'id'       => (string) $item_product_id,
+					'quantity' => $quantity,
+				],
+				'base_amount' => $base_amount,
+				'discount'    => $discount,
+				'subtotal'    => $subtotal,
+				'tax'         => $tax,
+				'total'       => $total,
+			];
+		}
+
+		return $items;
+	}
+
+	/**
 	 * Format fulfillment address.
 	 *
 	 * @return array|null Address data or null.
@@ -517,16 +567,65 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$name = trim( $customer->get_shipping_first_name() . ' ' . $customer->get_shipping_last_name() );
+		return $this->build_address_array(
+			$customer->get_shipping_first_name(),
+			$customer->get_shipping_last_name(),
+			$customer->get_shipping_address_1(),
+			$customer->get_shipping_address_2(),
+			$customer->get_shipping_city(),
+			$customer->get_shipping_state(),
+			$customer->get_shipping_country(),
+			$customer->get_shipping_postcode()
+		);
+	}
+
+	/**
+	 * Format fulfillment address from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array|null Address data or null.
+	 */
+	protected function format_fulfillment_address_from_order( $order ) {
+		if ( ! $order->get_shipping_address_1() ) {
+			return null;
+		}
+
+		return $this->build_address_array(
+			$order->get_shipping_first_name(),
+			$order->get_shipping_last_name(),
+			$order->get_shipping_address_1(),
+			$order->get_shipping_address_2(),
+			$order->get_shipping_city(),
+			$order->get_shipping_state(),
+			$order->get_shipping_country(),
+			$order->get_shipping_postcode()
+		);
+	}
+
+	/**
+	 * Build address array from components.
+	 *
+	 * @param string $first_name First name.
+	 * @param string $last_name Last name.
+	 * @param string $address_1 Address line 1.
+	 * @param string $address_2 Address line 2.
+	 * @param string $city City.
+	 * @param string $state State.
+	 * @param string $country Country.
+	 * @param string $postcode Postcode.
+	 * @return array Address array.
+	 */
+	protected function build_address_array( $first_name, $last_name, $address_1, $address_2, $city, $state, $country, $postcode ) {
+		$name = trim( $first_name . ' ' . $last_name );
 
 		return [
 			'name'        => $name ? $name : 'Customer',
-			'line_one'    => $customer->get_shipping_address_1(),
-			'line_two'    => $customer->get_shipping_address_2() ? $customer->get_shipping_address_2() : '',
-			'city'        => $customer->get_shipping_city(),
-			'state'       => $customer->get_shipping_state(),
-			'country'     => $customer->get_shipping_country(),
-			'postal_code' => $customer->get_shipping_postcode(),
+			'line_one'    => $address_1,
+			'line_two'    => $address_2 ? $address_2 : '',
+			'city'        => $city,
+			'state'       => $state,
+			'country'     => $country,
+			'postal_code' => $postcode,
 		];
 	}
 
@@ -564,6 +663,34 @@ class CheckoutSessionSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Format fulfillment options from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array Fulfillment options.
+	 */
+	protected function format_fulfillment_options_from_order( $order ) {
+		$options          = [];
+		$shipping_methods = $order->get_shipping_methods();
+
+		foreach ( $shipping_methods as $item ) {
+			$options[] = [
+				'type'                   => FulfillmentType::SHIPPING,
+				'id'                     => $item->get_method_id() . ':' . $item->get_instance_id(),
+				'title'                  => $item->get_name(),
+				'subtitle'               => null,
+				'carrier'                => $item->get_method_id(),
+				'earliest_delivery_time' => null,
+				'latest_delivery_time'   => null,
+				'subtotal'               => $this->amount_to_cents( $item->get_total() ),
+				'tax'                    => $this->amount_to_cents( $item->get_total_tax() ),
+				'total'                  => $this->amount_to_cents( $item->get_total() + $item->get_total_tax() ),
+			];
+		}
+
+		return $options;
+	}
+
+	/**
 	 * Get selected fulfillment option ID.
 	 *
 	 * @return string|null Selected option ID or null.
@@ -572,6 +699,22 @@ class CheckoutSessionSchema extends AbstractSchema {
 		$chosen_methods = WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS );
 
 		return ! empty( $chosen_methods[0] ) ? $chosen_methods[0] : null;
+	}
+
+	/**
+	 * Get selected fulfillment option ID from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return string|null Selected option ID or null.
+	 */
+	protected function get_selected_fulfillment_option_id_from_order( $order ) {
+		$shipping_methods = $order->get_shipping_methods();
+		if ( empty( $shipping_methods ) ) {
+			return null;
+		}
+
+		$shipping_method = reset( $shipping_methods );
+		return $shipping_method->get_method_id() . ':' . $shipping_method->get_instance_id();
 	}
 
 	/**
@@ -629,6 +772,66 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'type'         => TotalType::TOTAL,
 			'display_text' => __( 'Total', 'woocommerce' ),
 			'amount'       => $this->amount_to_cents( $cart->get_total( 'edit' ) ),
+		];
+
+		return $totals;
+	}
+
+	/**
+	 * Format totals array from order.
+	 *
+	 * @param \WC_Order $order Order object.
+	 * @return array Totals array.
+	 */
+	protected function format_totals_from_order( $order ) {
+		$totals = [];
+
+		// Items base amount.
+		$items_base = 0;
+		foreach ( $order->get_items() as $item ) {
+			$product     = $item->get_product();
+			$items_base += $product->get_price() * $item->get_quantity();
+		}
+		$totals[] = [
+			'type'         => TotalType::ITEMS_BASE_AMOUNT,
+			'display_text' => __( 'Items Base Amount', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $items_base ),
+		];
+
+		// Items discount.
+		$discount = $order->get_discount_total();
+		$totals[] = [
+			'type'         => TotalType::ITEMS_DISCOUNT,
+			'display_text' => __( 'Items Discount', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $discount ),
+		];
+
+		// Subtotal.
+		$totals[] = [
+			'type'         => TotalType::SUBTOTAL,
+			'display_text' => __( 'Subtotal', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $items_base - $discount ),
+		];
+
+		// Fulfillment (shipping).
+		$totals[] = [
+			'type'         => TotalType::FULFILLMENT,
+			'display_text' => __( 'Shipping', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $order->get_shipping_total() ),
+		];
+
+		// Tax.
+		$totals[] = [
+			'type'         => TotalType::TAX,
+			'display_text' => __( 'Tax', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $order->get_total_tax() ),
+		];
+
+		// Total.
+		$totals[] = [
+			'type'         => TotalType::TOTAL,
+			'display_text' => __( 'Total', 'woocommerce' ),
+			'amount'       => $this->amount_to_cents( $order->get_total() ),
 		];
 
 		return $totals;
