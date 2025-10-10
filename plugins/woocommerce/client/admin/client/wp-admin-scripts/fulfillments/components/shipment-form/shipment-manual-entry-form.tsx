@@ -92,7 +92,10 @@ export default function ShipmentManualEntryForm() {
 									window.wcFulfillmentSettings.providers[
 										value as string
 									]?.url ?? ''
-								).replace( /__placeholder__/i, trackingNumber )
+								).replace(
+									/__placeholder__/i,
+									trackingNumber ?? ''
+								)
 							);
 						} }
 						__nextHasNoMarginBottom
