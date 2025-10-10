@@ -1943,56 +1943,60 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		$product = WC_Helper_Product::create_simple_product();
-		$term       = wp_insert_term( 'BatchTestCategory', 'product_cat' );
-		$term_id    = $term['term_id'];
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
 		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
 		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
 
 		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 
-		$update_request = new WP_REST_Request('POST', '/wc/v3/products/batch');
-		$update_request->set_body_params([
-			'update' => [[
-				'id' => $product->get_id(),
-				'stock_status' => 'outofstock',
-			]]
-		]);
-		$this->server->dispatch($update_request);
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params( [
+			'update' => [
+				[
+					'id'           => $product->get_id(),
+					'stock_status' => 'outofstock',
+				]
+			]
+		] );
+		$this->server->dispatch( $update_request );
 
 		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
-		$this->assertEquals($count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.');
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
 	}
 
 	public function test_batch_update_status_affects_term_counts() {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		$product = WC_Helper_Product::create_simple_product();
-		$term       = wp_insert_term( 'BatchTestCategory', 'product_cat' );
-		$term_id    = $term['term_id'];
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
 		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
 		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
 
 		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 
-		$update_request = new WP_REST_Request('POST', '/wc/v3/products/batch');
-		$update_request->set_body_params([
-			'update' => [[
-				'id' => $product->get_id(),
-				'status' => 'draft',
-			]]
-		]);
-		$this->server->dispatch($update_request);
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params( [
+			'update' => [
+				[
+					'id'     => $product->get_id(),
+					'status' => 'draft',
+				]
+			]
+		] );
+		$this->server->dispatch( $update_request );
 
 		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
-		$this->assertEquals($count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.');
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
 	}
 
 	public function test_batch_delete_product_updates_term_counts() {
 		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
 
 		$product = WC_Helper_Product::create_simple_product();
-		$term       = wp_insert_term( 'BatchTestCategory', 'product_cat' );
-		$term_id    = $term['term_id'];
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
 		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
 		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
 
@@ -2000,11 +2004,11 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 
 		// Batch delete.
-		$delete_request = new WP_REST_Request('POST', '/wc/v3/products/batch');
+		$delete_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
 		$delete_request->set_body_params( [ 'delete' => [ $product->get_id() ] ] );
-		$this->server->dispatch($delete_request);
+		$this->server->dispatch( $delete_request );
 
 		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
-		$this->assertEquals($count_before - 1, $count_after, 'Batch delete should decrement term count immediately.');
+		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
 	}
 }
