@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent callback replacement attacks via __unserialize()
