@@ -87,6 +87,13 @@ export default function ShipmentManualEntryForm() {
 						options={ ShipmentProviders }
 						onChange={ ( value ) => {
 							setShipmentProvider( value as string );
+							setTrackingUrl(
+								(
+									window.wcFulfillmentSettings.providers[
+										value as string
+									]?.url ?? ''
+								).replace( /__placeholder__/i, trackingNumber )
+							);
 						} }
 						__nextHasNoMarginBottom
 					/>

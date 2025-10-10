@@ -16,11 +16,13 @@ global.window.wcFulfillmentSettings = {
 			label: 'UPS',
 			icon: '',
 			value: 'ups',
+			url: 'https://www.ups.com/track?loc=en_US&tracknum=%25placeholder%25',
 		},
 		dhl: {
 			label: 'DHL',
 			icon: '',
 			value: 'dhl',
+			url: 'https://www.dhl.com/en/express/tracking.html?AWB=%25placeholder%25',
 		},
 	},
 	currency_symbols: {
