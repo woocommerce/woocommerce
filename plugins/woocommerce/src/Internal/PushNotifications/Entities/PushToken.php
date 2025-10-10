@@ -123,10 +123,7 @@ class PushToken {
 	public function set_platform( string $platform ) {
 		if ( ! in_array( $platform, self::PLATFORMS, true ) ) {
 			throw new InvalidArgumentException(
-				sprintf(
-					'Platform \'%s\' for PushToken is invalid.',
-					$platform
-				)
+				esc_html( sprintf( 'Platform \'%s\' for PushToken is invalid.', $platform ) )
 			);
 		}
 
