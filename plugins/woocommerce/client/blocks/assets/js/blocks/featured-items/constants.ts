@@ -58,7 +58,6 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 			__woocommerceNamespace: PRODUCT_TITLE_VARIATION_NAME,
 		},
 	],
-	[ 'woocommerce/product-price', { textAlign: 'center' } ],
 	[
 		'woocommerce/product-summary',
 		{
@@ -71,6 +70,7 @@ export const FEATURED_PRODUCT_DEFAULT_TEMPLATE = (
 			summaryLength: 80,
 		},
 	],
+	[ 'woocommerce/product-price', { textAlign: 'center' } ],
 	[
 		'core/buttons',
 		{
