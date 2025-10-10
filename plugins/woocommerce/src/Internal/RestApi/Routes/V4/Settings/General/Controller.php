@@ -345,6 +345,13 @@ class Controller extends AbstractController {
 	 * @return mixed Sanitized value.
 	 */
 	private function sanitize_setting_value( $setting_type, $value ) {
+		// Normalize WooCommerce setting types to REST API schema types.
+		$type_map = array(
+			'single_select_country'  => 'select',
+			'multi_select_countries' => 'multiselect',
+		);
+		$setting_type = $type_map[ $setting_type ] ?? $setting_type;
+
 		switch ( $setting_type ) {
 			case 'text':
 				return sanitize_text_field( $value );
@@ -364,11 +371,9 @@ class Controller extends AbstractController {
 				return wc_bool_to_string( $value );
 
 			case 'select':
-			case 'single_select_country':
 				return sanitize_text_field( $value );
 
 			case 'multiselect':
-			case 'multi_select_countries':
 				if ( is_array( $value ) ) {
 					return array_map( 'sanitize_text_field', $value );
 				}
@@ -384,6 +389,7 @@ class Controller extends AbstractController {
 				return array();
 
 			default:
+				// If a type is not explicitly handled, treat it as text.
 				return sanitize_text_field( $value );
 		}
 	}
