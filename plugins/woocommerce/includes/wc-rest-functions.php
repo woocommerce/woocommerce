@@ -235,12 +235,12 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 		'batch'  => 'edit_others_posts',
 	);
 
-	if ( 'revision' === $post_type ) {
-		$permission = false;
-	} else {
+	$permission = false;
+
+	if ( 'revision' !== $post_type ) {
 		$cap              = $contexts[ $context ];
 		$post_type_object = get_post_type_object( $post_type );
-		$permission       = false;
+
 		if ( $post_type_object instanceof WP_Post_Type ) {
 			$permission = current_user_can( $post_type_object->cap->$cap );
 
