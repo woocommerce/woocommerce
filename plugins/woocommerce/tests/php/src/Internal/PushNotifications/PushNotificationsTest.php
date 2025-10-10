@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
-use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -13,7 +12,7 @@ use WC_Unit_Test_Case;
 /**
  * PushNotifications test.
  *
- * @covers PushNotifications
+ * @covers \Automattic\WooCommerce\Internal\PushNotifications\PushNotifications
  */
 class PushNotificationsTest extends WC_Unit_Test_Case {
 	/**
@@ -30,6 +29,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		// Reset the REST server to clear registered routes.
 		global $wp_rest_server;
 		$wp_rest_server = null;
+
+		// Clear LegacyProxy mocks to avoid affecting other tests.
+		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( array() );
 	}
 
 	/**

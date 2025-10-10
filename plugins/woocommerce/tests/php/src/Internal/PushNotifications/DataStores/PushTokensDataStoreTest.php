@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
@@ -44,7 +44,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token_12345' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'device-uuid-123' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -140,6 +140,31 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$push_token = new PushToken();
 		$push_token->set_id( 999999 );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+		$this->expectExceptionCode( 404 );
+
+		$data_store->read( $push_token );
+	}
+
+	/**
+	 * Tests the read method throws exception when the post exists but is not the correct post type.
+	 */
+	public function test_it_throws_exception_when_reading_push_token_with_wrong_post_type() {
+		$data_store = new PushTokensDataStore();
+
+		// Create a regular post instead of a push_token.
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Post',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+
+		$push_token = new PushToken();
+		$push_token->set_id( $post_id );
 
 		$this->expectException( Exception::class );
 		$this->expectExceptionMessage( 'Push token could not be found.' );
@@ -359,13 +384,13 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				'meta_key'   => 'platform',
 				// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
-				'meta_value' => PushToken::PLATFORM_APPLE,
+				'meta_value' => PushToken::PLATFORM_IOS,
 			)
 		);
 
 		$meta_value = get_post_meta( $push_token->get_id(), 'platform', true );
 
-		$this->assertEquals( PushToken::PLATFORM_APPLE, $meta_value );
+		$this->assertEquals( PushToken::PLATFORM_IOS, $meta_value );
 	}
 
 	/**
@@ -375,7 +400,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_APPLE );
+		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_IOS );
 
 		$data_store->update_meta(
 			$push_token,
@@ -399,7 +424,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 		$push_token = $this->create_test_push_token();
 
-		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_APPLE );
+		add_post_meta( $push_token->get_id(), 'platform', PushToken::PLATFORM_IOS );
 
 		$data_store->delete_meta(
 			$push_token,
@@ -537,7 +562,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store = new PushTokensDataStore();
 
 		$push_token = new PushToken();
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
@@ -576,12 +601,30 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test_device' );
 
 		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->get_by_token_or_device_id( $push_token );
+	}
+
+	/**
+	 * Tests the get_by_token_or_device_id method throws exception when both token and device_uuid are missing.
+	 */
+	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_token_and_device_uuid() {
+		$data_store = new PushTokensDataStore();
+
+		$push_token = new PushToken();
+		$push_token->set_user_id( 1 );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_origin( 'com.automattic.woocommerce' );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t retrieve push token: token or device UUID must be provided.' );
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
@@ -598,7 +641,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token_' . wp_rand() );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid-' . wp_rand() );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 

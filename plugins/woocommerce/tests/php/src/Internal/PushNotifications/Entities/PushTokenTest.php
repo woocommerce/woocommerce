@@ -58,9 +58,9 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	 */
 	public function test_it_can_get_and_set_platform() {
 		$push_token = new PushToken();
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 
-		$this->assertEquals( PushToken::PLATFORM_APPLE, $push_token->get_platform() );
+		$this->assertEquals( PushToken::PLATFORM_IOS, $push_token->get_platform() );
 	}
 
 	/**
@@ -70,7 +70,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -85,7 +85,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -95,11 +95,10 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests can_be_created returns false when user ID is already set.
 	 */
-	public function test_it_cannot_be_created_when_user_id_is_set() {
+	public function test_it_cannot_be_created_when_user_id_is_missing() {
 		$push_token = new PushToken();
-		$push_token->set_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -109,9 +108,8 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests can_be_created returns false when platform is already set.
 	 */
-	public function test_it_cannot_be_created_when_platform_is_set() {
+	public function test_it_cannot_be_created_when_platform_is_missing() {
 		$push_token = new PushToken();
-		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test-device-uuid' );
@@ -123,11 +121,10 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests can_be_created returns false when token is already set.
 	 */
-	public function test_it_cannot_be_created_when_token_is_set() {
+	public function test_it_cannot_be_created_when_token_is_missing() {
 		$push_token = new PushToken();
-		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -137,12 +134,11 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	/**
 	 * Tests can_be_created returns false when device UUID is already set.
 	 */
-	public function test_it_cannot_be_created_when_device_uuid_is_set() {
+	public function test_it_cannot_be_created_when_device_uuid_is_missing() {
 		$push_token = new PushToken();
-		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -155,7 +151,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -169,7 +165,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -183,7 +179,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 
@@ -212,7 +208,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
@@ -224,7 +220,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 		$push_token->set_id( 1 );
 		$push_token->set_user_id( 1 );
-		$push_token->set_platform( PushToken::PLATFORM_APPLE );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
 		$push_token->set_origin( 'com.automattic.woocommerce' );
 

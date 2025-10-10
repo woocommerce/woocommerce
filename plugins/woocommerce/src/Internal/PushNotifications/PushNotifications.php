@@ -31,9 +31,7 @@ class PushNotifications {
 
 	/**
 	 * Determines if local push notification functionality should be enabled. It
-	 * should be enabled if:
-	 * - Jetpack is connected
-	 * - WooCommerce.com account is connected
+	 * should be enabled if Jetpack is connected.
 	 *
 	 * @return bool
 	 */
