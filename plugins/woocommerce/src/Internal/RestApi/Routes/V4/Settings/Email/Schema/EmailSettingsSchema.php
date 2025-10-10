@@ -51,10 +51,9 @@ class EmailSettingsSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'values'      => array(
-				'description' => __( 'Flattened setting values.', 'woocommerce' ),
+				'description' => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
 				'type'        => 'object',
 				'context'     => self::VIEW_EDIT_CONTEXT,
-				'readonly'    => true,
 			),
 			'groups'      => array(
 				'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
@@ -89,33 +88,6 @@ class EmailSettingsSchema extends AbstractSchema {
 					),
 				),
 			),
-			'woocommerce_email_from_name'        => array(
-				'description' => __( 'Email sender name.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-			),
-			'woocommerce_email_from_address'     => array(
-				'description' => __( 'Email sender address.', 'woocommerce' ),
-				'type'        => 'string',
-				'format'      => 'email',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-			),
-			'woocommerce_email_reply_to_enabled' => array(
-				'description' => __( 'Enable reply-to email address.', 'woocommerce' ),
-				'type'        => 'boolean',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-			),
-			'woocommerce_email_reply_to_name'    => array(
-				'description' => __( 'Reply-to name.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-			),
-			'woocommerce_email_reply_to_address' => array(
-				'description' => __( 'Reply-to email address.', 'woocommerce' ),
-				'type'        => 'string',
-				'format'      => 'email',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-			),
 		);
 	}
 
@@ -141,7 +113,7 @@ class EmailSettingsSchema extends AbstractSchema {
 				'type'        => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'email', 'boolean' ),
+					'enum'        => array( 'text', 'email', 'boolean', 'number' ),
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
 				'description' => array(
@@ -156,48 +128,59 @@ class EmailSettingsSchema extends AbstractSchema {
 	/**
 	 * Get email settings data by transforming email settings into REST API format.
 	 *
-	 * @param mixed           $item             Raw settings (unused for email settings).
+	 * @param mixed           $item             Settings array from WC_Settings_Emails.
 	 * @param WP_REST_Request $request          Request object.
 	 * @param array           $include_fields   Fields to include.
 	 * @return array
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
-		$fields = array(
-			array(
-				'id'    => 'woocommerce_email_from_name',
-				'label' => __( '"FROM" Name', 'woocommerce' ),
-				'type'  => 'text',
-			),
-			array(
-				'id'    => 'woocommerce_email_from_address',
-				'label' => __( '"FROM" Address', 'woocommerce' ),
-				'type'  => 'email',
-			),
-			array(
-				'id'          => 'woocommerce_email_reply_to_enabled',
-				'label'       => __( 'Add "Reply-to" email', 'woocommerce' ),
-				'type'        => 'boolean',
-				'description' => __( 'Use a different email address for replies.', 'woocommerce' ),
-			),
-			array(
-				'id'    => 'woocommerce_email_reply_to_name',
-				'label' => __( '"Reply-to" Name', 'woocommerce' ),
-				'type'  => 'text',
-			),
-			array(
-				'id'    => 'woocommerce_email_reply_to_address',
-				'label' => __( '"Reply-to" Address', 'woocommerce' ),
-				'type'  => 'email',
-			),
+		$settings = is_array( $item ) ? $item : array();
+
+		// Filter out non-editable field types.
+		$editable_settings = array_filter(
+			$settings,
+			static function ( $setting ) {
+				$type = $setting['type'] ?? '';
+				return isset( $setting['id'] ) && ! in_array( $type, array( 'title', 'sectionend', 'email_notification', 'email_notification_block_emails', 'email_preview', 'email_image_url', 'email_font_family', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button' ), true );
+			}
 		);
 
-		$values = array(
-			'woocommerce_email_from_name'        => get_option( 'woocommerce_email_from_name', get_option( 'blogname' ) ),
-			'woocommerce_email_from_address'     => get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
-			'woocommerce_email_reply_to_enabled' => get_option( 'woocommerce_email_reply_to_enabled', 'no' ) === 'yes',
-			'woocommerce_email_reply_to_name'    => get_option( 'woocommerce_email_reply_to_name', '' ),
-			'woocommerce_email_reply_to_address' => get_option( 'woocommerce_email_reply_to_address', '' ),
-		);
+		// Build fields array from settings.
+		$fields = array();
+		$values = array();
+
+		foreach ( $editable_settings as $setting ) {
+			$setting_id   = $setting['id'];
+			$setting_type = $setting['type'] ?? 'text';
+
+			// Map WooCommerce field types to REST API types.
+			$api_type = $this->map_setting_type_to_api_type( $setting_type );
+
+			// Build field definition.
+			$field = array(
+				'id'    => $setting_id,
+				'label' => $setting['title'] ?? $setting_id,
+				'type'  => $api_type,
+			);
+
+			// Add description if available.
+			if ( ! empty( $setting['desc'] ) ) {
+				$field['description'] = $setting['desc'];
+			}
+
+			$fields[] = $field;
+
+			// Get current value.
+			$default_value = $setting['default'] ?? '';
+			$current_value = get_option( $setting_id, $default_value );
+
+			// Convert checkbox values to boolean for API.
+			if ( 'checkbox' === $setting_type ) {
+				$current_value = 'yes' === $current_value;
+			}
+
+			$values[ $setting_id ] = $current_value;
+		}
 
 		$response = array(
 			'id'          => 'email',
@@ -219,5 +202,22 @@ class EmailSettingsSchema extends AbstractSchema {
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Map WooCommerce setting type to REST API type.
+	 *
+	 * @param string $setting_type WooCommerce setting type.
+	 * @return string REST API type.
+	 */
+	private function map_setting_type_to_api_type( string $setting_type ): string {
+		$type_map = array(
+			'text'     => 'text',
+			'email'    => 'email',
+			'checkbox' => 'boolean',
+			'number'   => 'number',
+		);
+
+		return $type_map[ $setting_type ] ?? 'text';
 	}
 }
