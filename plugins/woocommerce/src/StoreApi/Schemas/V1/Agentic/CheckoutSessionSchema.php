@@ -348,8 +348,11 @@ class CheckoutSessionSchema extends AbstractSchema {
 			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
 		}
 
-		// Validate the checkout session. Messages will be added to the collection, if any.
-		AgenticCheckoutUtils::validate( $checkout_session );
+		// If validation already went through and we have errors, no need to repeat them.
+		if ( ! $checkout_session->get_messages()->has_errors() ) {
+			// Validate the checkout session. Messages will be added to the collection, if any.
+			AgenticCheckoutUtils::validate( $checkout_session );
+		}
 
 		$completed_order = wc_get_order( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
 
