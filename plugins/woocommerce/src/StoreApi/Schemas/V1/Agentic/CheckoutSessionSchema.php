@@ -16,7 +16,6 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\FulfillmentTyp
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
@@ -337,7 +336,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array Formatted checkout session data.
 	 */
 	public function get_item_response( $checkout_session ) {
-		// phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable.
 		$cart = $checkout_session->get_cart();
 
 		// Generate session ID from Cart-Token.
