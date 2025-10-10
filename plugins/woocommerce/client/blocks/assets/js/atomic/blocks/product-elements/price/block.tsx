@@ -75,7 +75,6 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
-	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
 		/**
@@ -95,6 +94,17 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	const isDescendentOfAddToCartGroupedProductSelectorBlock =
 		parentName ===
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
+
+	// If the block is not a descendant of the All Products block, we are
+	// already printing the styles from the PHP side (in the frontend) and the
+	// `edit.tsx` file (in the editor).
+	let styleProps = useStyleProps( props );
+	if ( ! isDescendentOfAllProductsBlock ) {
+		styleProps = {
+			className: '',
+			style: {},
+		};
+	}
 
 	const showPricePreview =
 		( isDescendentOfSingleProductTemplate &&
