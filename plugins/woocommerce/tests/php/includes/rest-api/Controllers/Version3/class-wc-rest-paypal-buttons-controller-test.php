@@ -160,7 +160,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'payment source'    => '',
 				'WPCOM response'    => null,
 				'expected status'   => 400,
-				'expected response' => array( 'error' => 'Missing/Invalid payment source: '  ),
+				'expected response' => array( 'error' => 'Missing/Invalid payment source: ' ),
 			),
 			'order not found'              => array(
 				'include nonce'     => true,
@@ -198,12 +198,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Failed to create PayPal order' ),
 			),
-			'successful order creation' => array(
-				'include nonce'  => true,
-				'order ID'       => $order->get_id(),
-				'order key'      => $order->get_order_key(),
-				'payment source' => 'paypal',
-				'WPCOM response' => array(
+			'successful order creation'    => array(
+				'include nonce'     => true,
+				'order ID'          => $order->get_id(),
+				'order key'         => $order->get_order_key(),
+				'payment source'    => 'paypal',
+				'WPCOM response'    => array(
 					'response' => array(
 						'code' => 200,
 					),
@@ -220,7 +220,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 						)
 					),
 				),
-				'expected status' => 200,
+				'expected status'   => 200,
 				'expected response' => array(
 					'paypal_order_id' => '123',
 					'order_id'        => $order->get_id(),
