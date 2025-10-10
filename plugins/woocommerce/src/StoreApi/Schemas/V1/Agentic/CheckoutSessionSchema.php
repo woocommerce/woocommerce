@@ -478,7 +478,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return int Amount in cents.
 	 */
 	protected function amount_to_cents( $amount ) {
-		return (int) round( (float) $amount * 100 );
+		return (int) $this->extend->get_formatter( 'money' )->format(
+			$amount
+		);
 	}
 
 	/**
