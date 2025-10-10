@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors;
+namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
 use WP_REST_Response;
@@ -133,8 +133,9 @@ class Error {
 	private function get_http_status_code() {
 		switch ( $this->type ) {
 			case ErrorType::INVALID_REQUEST:
-			case ErrorType::REQUEST_NOT_IDEMPOTENT:
 				return 400;
+			case ErrorType::REQUEST_NOT_IDEMPOTENT:
+				return 409;
 			case ErrorType::PROCESSING_ERROR:
 				return 500;
 			case ErrorType::SERVICE_UNAVAILABLE:

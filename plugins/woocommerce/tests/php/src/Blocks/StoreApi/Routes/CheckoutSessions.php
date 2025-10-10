@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 
 /**
@@ -1203,6 +1204,105 @@ class CheckoutSessions extends ControllerTestCase {
 			$this->assertIsNumeric( $option['tax'] );
 			$this->assertIsNumeric( $option['total'] );
 		}
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when out_of_stock MessageError is present.
+	 */
+	public function test_calculate_status_out_of_stock_returns_not_ready_for_payment() {
+		// Create a product and set it out of stock.
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Out of Stock Product',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				'regular_price' => 10,
+			)
+		);
+
+		// Add the out of stock product to cart.
+		$response = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $product->get_id(),
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$data = $response->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to out of stock error.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+
+		// Verify there are error messages with the right code.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::OUT_OF_STOCK ) );
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when shipping address is missing.
+	 */
+	public function test_calculate_status_missing_shipping_address_returns_not_ready_for_payment() {
+		// Create session with physical product that needs shipping but no address.
+		$data = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[0]->get_id(), // Physical product.
+						'quantity' => 1,
+					),
+				),
+			)
+		)->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to missing shipping address.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+		// Verify there are error messages about missing shipping address.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::MISSING ) );
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when shipping method is missing.
+	 * This test verifies that when we have a physical product that needs shipping,
+	 * but no shipping method is selected, the status should be NOT_READY_FOR_PAYMENT.
+	 */
+	public function test_calculate_status_missing_shipping_method_returns_not_ready_for_payment() {
+		// This should trigger both "missing shipping address" and "missing shipping method" errors.
+		$data = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[0]->get_id(), // Physical product.
+						'quantity' => 1,
+					),
+				),
+			)
+		)->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to missing shipping address and method.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+
+		// Verify there are error messages about missing shipping address and method.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::MISSING ) );
+	}
+
+	/**
+	 * Check if the response contains an error message with the given code.
+	 *
+	 * @param array  $response The response data.
+	 * @param string $code The error code to check for.
+	 * @return bool True if the response contains an error message with the given code, false otherwise.
+	 */
+	private function does_response_contain_error_message_with_code( array $response, string $code ): bool {
+		$this->assertNotEmpty( $response['messages'] );
+		foreach ( $response['messages'] as $message ) {
+			if ( 'error' === $message['type'] && $message['code'] === $code ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

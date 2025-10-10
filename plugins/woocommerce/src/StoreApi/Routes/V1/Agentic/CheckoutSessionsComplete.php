@@ -8,7 +8,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
@@ -213,10 +213,14 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$checkout_session = new AgenticCheckoutSession( $this->cart_controller->get_cart_instance() );
+
+		AgenticCheckoutUtils::validate( $checkout_session );
+
 		/**
 		 * Verify checkout session is ready for payment.
 		 */
-		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+		$current_status = AgenticCheckoutUtils::calculate_status( $checkout_session );
 		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $current_status ) {
 			$message = sprintf(
 				/* translators: %s: current session status */
@@ -343,7 +347,7 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		/**
 		 * Build response from canonical cart schema.
 		 */
-		$response_data = $this->schema->get_item_response( WC()->cart );
+		$response_data = $this->schema->get_item_response( $checkout_session );
 		$response      = rest_ensure_response( $response_data );
 
 		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );

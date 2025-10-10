@@ -8,9 +8,7 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic;
 
-use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
@@ -19,6 +17,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\TotalType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\LinkType;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\PaymentMethod;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
@@ -333,16 +332,24 @@ class CheckoutSessionSchema extends AbstractSchema {
 	/**
 	 * Convert a WooCommerce cart to the Agentic Checkout session format.
 	 *
-	 * @param \WC_Cart $cart Cart data from WooCommerce.
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return array Formatted checkout session data.
 	 */
-	public function get_item_response( $cart ) {
+	public function get_item_response( $checkout_session ) {
+		$cart = $checkout_session->get_cart();
+
 		// Generate session ID from Cart-Token.
 		$wc_session = WC()->session;
 		$session_id = $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID );
 		if ( null === $session_id ) {
 			$session_id = CartTokenUtils::get_cart_token( (string) $wc_session->get_customer_id() );
 			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
+		}
+
+		// If validation already went through and we have errors, no need to repeat them.
+		if ( ! $checkout_session->get_messages()->has_errors() ) {
+			// Validate the checkout session. Messages will be added to the collection, if any.
+			AgenticCheckoutUtils::validate( $checkout_session );
 		}
 
 		$completed_order = wc_get_order( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
@@ -359,7 +366,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 				? $this->format_buyer_from_order( $completed_order )
 				: $this->format_buyer(),
 			'payment_provider'      => $this->format_payment_provider(),
-			'status'                => AgenticCheckoutUtils::calculate_status( $cart ),
+			'status'                => AgenticCheckoutUtils::calculate_status( $checkout_session ),
 			'currency'              => $completed_order instanceof WC_Order
 				? strtolower( $completed_order->get_currency() )
 				: strtolower( get_woocommerce_currency() ),
@@ -376,7 +383,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'totals'                => $completed_order instanceof WC_Order
 				? $this->format_totals_from_order( $completed_order )
 				: $this->format_totals( $cart ),
-			'messages'              => $this->get_messages( $cart ),
+			'messages'              => $checkout_session->get_messages()->get_formatted_messages(),
 			'links'                 => $this->get_links(),
 		];
 
@@ -835,28 +842,6 @@ class CheckoutSessionSchema extends AbstractSchema {
 		];
 
 		return $totals;
-	}
-
-	/**
-	 * Get messages for the session.
-	 *
-	 * @param \WC_Cart $cart Cart object.
-	 * @return array Messages array.
-	 */
-	protected function get_messages( $cart ) {
-		$messages = [];
-
-		// Add info message if shipping is needed.
-		if ( $cart->needs_shipping() && ! WC()->customer->get_shipping_address_1() ) {
-			$messages[] = [
-				'type'         => MessageType::INFO,
-				'param'        => '$.fulfillment_address',
-				'content_type' => MessageContentType::PLAIN,
-				'content'      => __( 'Shipping address required.', 'woocommerce' ),
-			];
-		}
-
-		return $messages;
 	}
 
 	/**

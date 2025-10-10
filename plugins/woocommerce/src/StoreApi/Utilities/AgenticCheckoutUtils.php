@@ -6,10 +6,11 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error as AgenticError;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
 
 /**
  * AgenticCheckoutUtils class.
@@ -110,13 +111,13 @@ class AgenticCheckoutUtils {
 	 *
 	 * @param array          $items Items array from request.
 	 * @param CartController $cart_controller Cart controller instance.
-	 * @param ErrorMessages  $error_messages Error messages instance.
+	 * @param Messages       $messages Error messages instance.
 	 * @return Error|null Returns error response on failure, null on success.
 	 */
-	public static function add_items_to_cart( $items, $cart_controller, $error_messages ) {
+	public static function add_items_to_cart( $items, $cart_controller, $messages ) {
 		foreach ( $items as $item_index => $item ) {
-			if ( ! is_numeric( $item['id'] ) ) {
-				return Error::invalid_request(
+			if ( ! ctype_digit( $item['id'] ) ) {
+				return AgenticError::invalid_request(
 					'invalid_product_id',
 					__( 'Product ID must be numeric.', 'woocommerce' ),
 					'$.items[' . $item_index . '].id'
@@ -138,22 +139,19 @@ class AgenticCheckoutUtils {
 				$param         = '$.items[' . $item_index . ']';
 				$message_error = null;
 
-				// Check if it's a RouteException with a specific error code.
-				if ( $exception instanceof RouteException ) {
-					// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
-					switch ( $exception->getErrorCode() ) {
-						case 'woocommerce_rest_product_out_of_stock':
-						case 'woocommerce_rest_product_partially_out_of_stock':
-							$message_error = MessageError::out_of_stock( $message, $param );
-							break;
-					}
+				// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
+				switch ( $exception->getErrorCode() ) {
+					case 'woocommerce_rest_product_out_of_stock':
+					case 'woocommerce_rest_product_partially_out_of_stock':
+						$message_error = MessageError::out_of_stock( $message, $param );
+						break;
 				}
 
 				if ( null !== $message_error ) {
-					$error_messages->add( $message_error );
+					$messages->add( $message_error );
 				} else {
 					// The error code is generally applicable only to MessageErrors, but we can use it here as well.
-					return Error::invalid_request( ErrorCode::INVALID, $message, $param );
+					return AgenticError::invalid_request( ErrorCode::INVALID, $message, $param );
 				}
 			}
 		}
@@ -356,13 +354,50 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
+	 * Validates a session.
+	 *
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
+	 * @return void
+	 */
+	public static function validate( AgenticCheckoutSession $checkout_session ): void {
+		$messages = $checkout_session->get_messages();
+
+		// Check if ready for payment.
+		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
+		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
+
+		// Add info message if shipping is needed.
+		if ( $needs_shipping && ! $has_address ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'Shipping address required.', 'woocommerce' ),
+					'$.fulfillment_address'
+				)
+			);
+		}
+
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
+
+		if ( $needs_shipping && ! $has_shipping ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'No shipping method selected.', 'woocommerce' ),
+					'$.fulfillment_option_id'
+				)
+			);
+		}
+	}
+
+	/**
 	 * Calculate the status of the checkout session.
 	 *
-	 * @param \WC_Cart $cart Cart object.
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 *
 	 * @return string Status value.
 	 */
-	public static function calculate_status( $cart ): string {
+	public static function calculate_status( AgenticCheckoutSession $checkout_session ): string {
 		$wc_session = WC()->session;
 		if ( null === $wc_session ) {
 			return CheckoutSessionStatus::CANCELED;
@@ -376,20 +411,12 @@ class AgenticCheckoutUtils {
 			return CheckoutSessionStatus::IN_PROGRESS;
 		}
 
-		// Check if ready for payment.
-		$needs_shipping = $cart->needs_shipping();
-		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
-
-		// Check if valid shipping method is selected (not just empty strings).
-		$chosen_methods = $wc_session->get( SessionKey::CHOSEN_SHIPPING_METHODS );
-		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
-
-		if ( $needs_shipping && ( ! $has_address || ! $has_shipping ) ) {
-			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
-		}
-
-		// Check for cart validation errors.
-		if ( ! empty( wc_get_notices( 'error' ) ) ) {
+		// Check for validation errors.
+		if (
+			$checkout_session->get_messages()->has_errors()
+			// Once we switch to using the CartController everywhere, there should be no notices and need for this.
+			|| ! empty( wc_get_notices( 'error' ) )
+		) {
 			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
 		}
 
