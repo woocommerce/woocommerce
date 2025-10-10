@@ -48,13 +48,13 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		remove_filter(
 			'pre_option_jetpack_options',
-			function() {
+			function () {
 				return array( 'id' => 12345 );
 			}
 		);
 		remove_filter(
 			'pre_option_jetpack_private_options',
-			function() {
+			function () {
 				return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 			}
 		);
@@ -63,12 +63,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests for the `create_order` method.
 	 *
-	 * @param bool   $include_nonce Whether to include a nonce in the request.
-	 * @param int    $order_id Order ID.
-	 * @param string $order_key Order key.
-	 * @param string $payment_source Payment source (e.g., 'paypal').
+	 * @param bool       $include_nonce Whether to include a nonce in the request.
+	 * @param int        $order_id Order ID.
+	 * @param string     $order_key Order key.
+	 * @param string     $payment_source Payment source (e.g., 'paypal').
 	 * @param array|null $wpcom_response Mocked response from WPCOM API.
-	 * @param int    $expected_status Expected HTTP status code.
+	 * @param int        $expected_status Expected HTTP status code.
 	 * @param array|null $expected_response Expected response data.
 	 * @return void
 	 *
