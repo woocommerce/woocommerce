@@ -242,6 +242,11 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
 
+		if ( $expected_exception ) {
+			$this->expectException( $expected_exception );
+			$this->expectExceptionMessage( $expected_exception_message );
+		}
+
 		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
 
 		$response_data = $request->get_paypal_order_details( $paypal_order_id );
@@ -249,10 +254,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		// Clean up the filter.
 		remove_filter( 'pre_http_request', $response_mock_ref );
 
-		if ( $expected_exception ) {
-			$this->assertInstanceOf( $expected_exception, $response_data );
-			$this->assertStringContainsString( $expected_exception_message, $response_data->getMessage() );
-		} else {
+		if ( ! $expected_exception ) {
 			$this->assertIsArray( $response_data );
 		}
 	}
@@ -267,12 +269,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			'order details error response' => array(
 				'PayPal order ID' => 'ERROR_ID',
 				'expected exception' => Exception::class,
-				'expected exception message' => 'Could not retrieve PayPal order details.',
+				'expected exception message' => 'PayPal order details request failed: Some error occurred.',
 			),
 			'order details failed response' => array(
 				'PayPal order ID' => 'FAILED_ID',
 				'expected exception' => Exception::class,
-				'expected exception message' => 'Could not retrieve PayPal order details.',
+				'expected exception message' => 'PayPal order details request failed. HTTP 500',
 			),
 			'order details success response' => array(
 				'PayPal order ID' => 'SUCCESS_ID',
@@ -311,6 +313,10 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'tax_total'  => array(
 					'currency_code' => 'USD',
 					'value'         => '10.00',
+				),
+				'discount'   => array(
+					'currency_code' => 'USD',
+					'value'         => '0.00',
 				),
 			),
 		);
