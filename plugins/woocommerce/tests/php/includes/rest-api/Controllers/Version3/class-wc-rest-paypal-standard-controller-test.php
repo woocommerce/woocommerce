@@ -90,7 +90,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				),
 				'expected status'   => 422,
 			),
-			'unable to find order'    => array(
+			'unable to find order'      => array(
 				'PayPal order ID'   => '74L756601X447022W',
 				'purchase units'    => array(
 					'custom_id' => 'non_existent_order',
@@ -107,13 +107,20 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 			'PayPal order ID mismatch'  => array(
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'purchase units'    => array(
-					'custom_id' => wp_json_encode( array( 'order_id' => $order_mismatch->get_id(), 'order_key' => $order_mismatch->get_order_key() ) ),
+					'custom_id' => wp_json_encode(
+						array(
+							'order_id'  => $order_mismatch->get_id(),
+							'order_key' => $order_mismatch->get_order_key(),
+						),
+					),
 				),
 				'shipping option'   => array(),
 				'expected response' => array(
 					'name'    => 'UNPROCESSABLE_ENTITY',
 					'details' => array(
-						array( 'issue' => 'ADDRESS_ERROR' ),
+						array(
+							'issue' => 'ADDRESS_ERROR',
+						),
 					),
 				),
 				'expected status'   => 422,
@@ -127,7 +134,9 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				'expected response' => array(
 					'name'    => 'UNPROCESSABLE_ENTITY',
 					'details' => array(
-						array( 'issue' => 'ADDRESS_ERROR' ),
+						array(
+							'issue' => 'ADDRESS_ERROR',
+						),
 					),
 				),
 				'expected status'   => 422,
@@ -135,7 +144,12 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 			'successful update' => array(
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'purchase units'    => array(
-					'custom_id' => wp_json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->get_order_key() ) ),
+					'custom_id' => wp_json_encode(
+						array(
+							'order_id'  => $order->get_id(),
+							'order_key' => $order->get_order_key(),
+						),
+					),
 				),
 				'shipping option'   => array(
 					'id' => 'flat_rate:1',
