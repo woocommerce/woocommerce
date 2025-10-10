@@ -6,7 +6,7 @@ declare(strict_types=1);
  * class WC_REST_Paypal_Standard_Controller_Test.
  * PayPal Standard Controller tests for V3 REST API.
  */
-class WC_REST_Paypal_Standard_Controller_Test  extends WC_REST_Unit_Test_Case {
+class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
@@ -78,7 +78,7 @@ class WC_REST_Paypal_Standard_Controller_Test  extends WC_REST_Unit_Test_Case {
 		$order_mismatch->save_meta_data();
 
 		return array(
-			'missing PayPal order ID' => array(
+			'missing PayPal order ID'   => array(
 				'PayPal order ID'   => '',
 				'purchase units'    => array(),
 				'shipping option'   => array(),
@@ -90,7 +90,7 @@ class WC_REST_Paypal_Standard_Controller_Test  extends WC_REST_Unit_Test_Case {
 				),
 				'expected status'   => 422,
 			),
-			'unable to find order' => array(
+			'unable to find order'    => array(
 				'PayPal order ID'   => '74L756601X447022W',
 				'purchase units'    => array(
 					'custom_id' => 'non_existent_order',
@@ -104,7 +104,7 @@ class WC_REST_Paypal_Standard_Controller_Test  extends WC_REST_Unit_Test_Case {
 				),
 				'expected status'   => 422,
 			),
-			'PayPal order ID mismatch' => array(
+			'PayPal order ID mismatch'  => array(
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'purchase units'    => array(
 					'custom_id' => wp_json_encode( array( 'order_id' => $order_mismatch->get_id(), 'order_key' => $order_mismatch->get_order_key() ) ),
