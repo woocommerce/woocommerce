@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
@@ -18,7 +19,6 @@ use Automattic\WooCommerce\StoreApi\RoutesController;
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
-
 	/**
 	 * Products created for tests.
 	 *
@@ -85,8 +85,7 @@ class CheckoutSessions extends ControllerTestCase {
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
 		// Clear session data.
-		WC()->session->set( 'agentic_draft_order_id', null );
-		WC()->session->set( 'chosen_shipping_methods', null );
+		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
@@ -1093,7 +1092,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Clear cart and session to simulate new session.
 		wc_empty_cart();
-		WC()->session->set( 'agentic_session_id', null );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 		WC()->session->set( 'agentic_draft_order_id', null );
 
 		// Create second session.
@@ -1304,5 +1303,41 @@ class CheckoutSessions extends ControllerTestCase {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Test updating a completed session returns error.
+	 *
+	 * This tests the new status validation added in the complete-agentic-commerce branch.
+	 */
+	public function test_update_completed_session_returns_error() {
+		// Create a session and mark it as completed by setting the completed order ID in session.
+		$create_response = $this->create_session( $this->create_checkout_request() );
+		$create_data     = $create_response->get_data();
+		$session_id      = $create_data['id'];
+
+		// Simulate a completed session by setting the completed order ID.
+		// This makes the status calculation return 'completed'.
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, 123 );
+
+		// Try to update the completed session.
+		$update_response = $this->update_session(
+			$session_id,
+			array(
+				'buyer' => array(
+					'first_name' => 'Test',
+				),
+			)
+		);
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $update_response->get_status() );
+
+		// Verify error response format.
+		$data = $update_response->get_data();
+		$this->assertArrayHasKey( 'type', $data );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertStringContainsString( 'cannot be updated', $data['message'] );
 	}
 }
