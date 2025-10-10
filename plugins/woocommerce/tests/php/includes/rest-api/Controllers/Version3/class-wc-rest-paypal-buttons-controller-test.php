@@ -83,7 +83,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$expected_status = 200,
 		$expected_response = null
 	) {
-		$response_mock_ref = function() use ( $wpcom_response ) {
+		$response_mock_ref = function () use ( $wpcom_response ) {
 			return $wpcom_response;
 		};
 
@@ -129,13 +129,13 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$order_invalid_status->save();
 
 		return array(
-			'missing nonce' => array(
-				'include nonce' => false,
-				'order ID' => 123,
-				'order key' => 'some_key',
-				'payment source' => 'paypal',
-				'WPCOM response' => null,
-				'expected status' => 403,
+			'missing nonce'                => array(
+				'include nonce'     => false,
+				'order ID'          => 123,
+				'order key'         => 'some_key',
+				'payment source'    => 'paypal',
+				'WPCOM response'    => null,
+				'expected status'   => 403,
 				'expected response' => array(
 					'code'    => 'rest_forbidden',
 					'message' => 'Sorry, you are not allowed to do that.',
@@ -144,62 +144,62 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			'missing order ID' => array(
-				'include nonce' => true,
-				'order ID' => '',
-				'order key' => 'some_key',
-				'payment source' => 'paypal',
-				'WPCOM response' => null,
-				'expected status' => 400,
+			'missing order ID'             => array(
+				'include nonce'     => true,
+				'order ID'          => '',
+				'order key'         => 'some_key',
+				'payment source'    => 'paypal',
+				'WPCOM response'    => null,
+				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Invalid request' ),
 			),
-			'missing payment source' => array(
-				'include nonce'          => true,
-				'order ID'       => 123,
-				'order key'      => 'some_key',
-				'payment source' => '',
-				'WPCOM response' => null,
-				'expected status' => 400,
+			'missing payment source'       => array(
+				'include nonce'     => true,
+				'order ID'          => 123,
+				'order key'         => 'some_key',
+				'payment source'    => '',
+				'WPCOM response'    => null,
+				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Missing/Invalid payment source: '  ),
 			),
-			'order not found' => array(
-				'include nonce'    => true,
-				'order ID' => 123,
-				'order key' => 'some_key',
-				'payment source' => 'paypal',
-				'WPCOM response' => null,
-				'expected status' => 404,
+			'order not found'              => array(
+				'include nonce'     => true,
+				'order ID'          => 123,
+				'order key'         => 'some_key',
+				'payment source'    => 'paypal',
+				'WPCOM response'    => null,
+				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
-			'invalid order key' => array(
+			'invalid order key'            => array(
 				'include nonce'     => true,
-				'order ID'  => $order_invalid_status->get_id(),
-				'order key' => 'invalid_key',
-				'payment source' => 'paypal',
-				'WPCOM response' => null,
-				'expected status' => 404,
+				'order ID'          => $order_invalid_status->get_id(),
+				'order key'         => 'invalid_key',
+				'payment source'    => 'paypal',
+				'WPCOM response'    => null,
+				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
-			'invalid order status' => array(
+			'invalid order status'         => array(
 				'include nonce'     => true,
-				'order ID'  => $order_invalid_status->get_id(),
-				'order key' => $order_invalid_status->get_order_key(),
-				'payment source' => 'paypal',
-				'WPCOM response' => null,
-				'expected status' => 409,
+				'order ID'          => $order_invalid_status->get_id(),
+				'order key'         => $order_invalid_status->get_order_key(),
+				'payment source'    => 'paypal',
+				'WPCOM response'    => null,
+				'expected status'   => 409,
 				'expected response' => array( 'error' => 'Invalid order status' ),
 			),
 			'PayPal order creation failed' => array(
-				'include nonce'          => true,
-				'order ID'       => $order->get_id(),
-				'order key'      => $order->get_order_key(),
-				'payment source' => 'paypal',
-				'WPCOM response' => '',
-				'expected status' => 400,
+				'include nonce'     => true,
+				'order ID'          => $order->get_id(),
+				'order key'         => $order->get_order_key(),
+				'payment source'    => 'paypal',
+				'WPCOM response'    => '',
+				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Failed to create PayPal order' ),
 			),
 			'successful order creation' => array(
-				'include nonce'          => true,
+				'include nonce'  => true,
 				'order ID'       => $order->get_id(),
 				'order key'      => $order->get_order_key(),
 				'payment source' => 'paypal',
