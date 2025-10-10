@@ -456,22 +456,17 @@ class CheckoutSessionSchema extends AbstractSchema {
 		}
 
 		// Look for gateway with agentic_commerce capability.
-		foreach ( $available_gateways as $gateway ) {
-			if ( $gateway->supports( 'agentic_commerce' )
-				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
-				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
-			) {
-				return [
-					'provider'                  => $gateway->get_agentic_commerce_provider(),
-					'supported_payment_methods' => $gateway->get_agentic_commerce_payment_methods(),
-				];
-			}
+		$gateway = AgenticCheckoutUtils::get_agentic_commerce_gateway( $available_gateways );
+
+		if ( null !== $gateway ) {
+			return [
+				'provider'                  => $gateway->get_agentic_commerce_provider(),
+				'supported_payment_methods' => $gateway->get_agentic_commerce_payment_methods(),
+			];
 		}
 
-		$first_gateway = reset( $available_gateways );
-
 		return [
-			'provider'                  => $first_gateway->id,
+			'provider'                  => 'stripe',
 			'supported_payment_methods' => [ PaymentMethod::CARD ], // Default, can be expanded.
 		];
 	}

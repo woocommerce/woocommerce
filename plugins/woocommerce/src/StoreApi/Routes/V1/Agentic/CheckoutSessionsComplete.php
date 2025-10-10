@@ -396,19 +396,16 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		}
 
 		// Look for gateway with agentic_commerce capability.
-		foreach ( $available_gateways as $gateway ) {
-			if ( $gateway->supports( PaymentGatewayFeature::AGENTIC_COMMERCE )
-				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
-				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
-			) {
-				return $gateway->id;
-			}
+		$gateway = AgenticCheckoutUtils::get_agentic_commerce_gateway( $available_gateways );
+
+		if ( null === $gateway ) {
+			throw new RouteException(
+				'woocommerce_checkout_session_no_agentic_payment_gateway_available',
+				esc_html__( 'No agentic-supported payment gateway available.', 'woocommerce' ),
+				400
+			);
 		}
 
-		throw new RouteException(
-			'woocommerce_checkout_session_no_agentic_payment_gateway_available',
-			esc_html__( 'No agentic-supported payment gateway available.', 'woocommerce' ),
-			400
-		);
+		return $gateway->id;
 	}
 }

@@ -396,4 +396,29 @@ class AgenticCheckoutUtils {
 
 		return CheckoutSessionStatus::READY_FOR_PAYMENT;
 	}
+
+	/**
+	 * Get the agentic commerce payment gateway from available gateways.
+	 *
+	 * Finds the first gateway that supports agentic commerce and has the required methods.
+	 *
+	 * @param array $available_gateways Array of available payment gateways.
+	 * @return \WC_Payment_Gateway|null The agentic commerce gateway or null if not found.
+	 */
+	public static function get_agentic_commerce_gateway( $available_gateways ) {
+		if ( empty( $available_gateways ) ) {
+			return null;
+		}
+
+		foreach ( $available_gateways as $gateway ) {
+			if ( $gateway->supports( \Automattic\WooCommerce\Enums\PaymentGatewayFeature::AGENTIC_COMMERCE )
+				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
+				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
+			) {
+				return $gateway;
+			}
+		}
+
+		return null;
+	}
 }
