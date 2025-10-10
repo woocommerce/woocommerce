@@ -57,7 +57,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
 					'permission_callback' => fn ( WP_REST_Request $request ) => $this->authorize( $request ),
-					'args'                => $this->get_args(),
+					'args'                => $this->get_args( 'create' ),
 					'schema'              => $this->get_schema(),
 				),
 			)
@@ -71,6 +71,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
 					'permission_callback' => fn ( WP_REST_Request $request ) => $this->authorize( $request ),
+					'args'                => $this->get_args( 'delete' ),
 					'schema'              => $this->get_schema(),
 				),
 			)
@@ -81,9 +82,9 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * Creates a push token record.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function create( WP_REST_Request $request ): WP_REST_Response {
+	public function create( WP_REST_Request $request ) {
 		$push_token = new PushToken();
 		$push_token->set_user_id( get_current_user_id() );
 		$push_token->set_token( $request->get_param( 'token' ) );
@@ -116,12 +117,11 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * Deletes a push token record.
 	 *
 	 * @param WP_REST_Request $request The request object.
-	 * @return WP_REST_Response
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function delete( WP_REST_Request $request ): WP_REST_Response {
+	public function delete( WP_REST_Request $request ) {
 		$push_token = new PushToken();
 		$push_token->set_id( (int) $request->get_param( 'id' ) );
-		$push_token->set_user_id( get_current_user_id() );
 
 		$data_store = wc_get_container()->get( PushTokensDataStore::class );
 
@@ -135,36 +135,6 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Checks user is authorized to access this endpoint.
-	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @return bool|WP_Error
-	 */
-	private function authorize( WP_REST_Request $request ) {
-		if (
-			! get_current_user_id()
-			|| ! wc_get_container()->get( PushNotifications::class )->should_be_enabled()
-		) {
-			return false;
-		}
-
-		if ( $request->has_param( 'id' ) ) {
-			$push_token = new PushToken();
-			$push_token->set_id( (int) $request->get_param( 'id' ) );
-
-			try {
-				wc_get_container()->get( PushTokensDataStore::class )->read( $push_token );
-			} catch ( Exception $e ) {
-				return $this->convert_exception_to_wp_error( $e );
-			}
-
-			return $push_token->get_user_id() === get_current_user_id();
-		}
-
-		return true;
-	}
-
-	/**
 	 * Validates the token.
 	 *
 	 * @param string          $token The token string.
@@ -173,8 +143,8 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	public function validate_token( string $token, WP_REST_Request $request ) {
 		if (
-			$request->get_param( 'platform' ) === PushToken::PLATFORM_APPLE
-			&& ! preg_match( '/^[A-Za-z0-9]{64}$/', $token )
+			$request->get_param( 'platform' ) === PushToken::PLATFORM_IOS
+			&& ! preg_match( '/^[A-Fa-f0-9]{64}$/', $token )
 		) {
 			return new WP_Error( 'rest_invalid_param', 'Invalid push token format.' );
 		}
@@ -191,13 +161,15 @@ class PushTokenRestController extends RestApiControllerBase {
 
 		if ( $request->get_param( 'platform' ) === PushToken::PLATFORM_BROWSER ) {
 			$token_object = json_decode( $token, true );
+			$endpoint     = $token_object['endpoint'] ?? null;
 
 			if (
 				json_last_error()
-				|| ! isset( $token_object['endpoint'] )
+				|| ! $endpoint
 				|| ! isset( $token_object['keys']['auth'] )
-				|| ! isset( $token_object['keys']['p256'] )
-				|| ! preg_match( '/^http[s]?:\/\/[A-Za-z0-9=:\_\-\+\/\.]+$/', $token_object['endpoint'] )
+				|| ! isset( $token_object['keys']['p256dh'] )
+				|| ! wp_http_validate_url( $endpoint )
+				|| ( wp_parse_url( $endpoint, PHP_URL_SCHEME ) !== 'https' )
 			) {
 				return new WP_Error( 'rest_invalid_param', 'Invalid push token format.' );
 			}
@@ -225,6 +197,42 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Checks user is authorized to access this endpoint.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool|WP_Error
+	 */
+	private function authorize( WP_REST_Request $request ) {
+		if (
+			! get_current_user_id()
+			|| ! wc_get_container()->get( PushNotifications::class )->should_be_enabled()
+		) {
+			return false;
+		}
+
+		if ( $request->has_param( 'id' ) ) {
+			$push_token = new PushToken();
+			$push_token->set_id( (int) $request->get_param( 'id' ) );
+
+			try {
+				wc_get_container()->get( PushTokensDataStore::class )->read( $push_token );
+			} catch ( Exception $e ) {
+				return $this->convert_exception_to_wp_error( $e );
+			}
+
+			if ( $push_token->get_user_id() !== get_current_user_id() ) {
+				return new WP_Error(
+					'rest_invalid_push_token',
+					'Push token could not be found.',
+					array( 'status' => WP_Http::NOT_FOUND )
+				);
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Converts an exception to an instance of WP_Error.
 	 *
 	 * @param Exception $e The exception to convert.
@@ -244,16 +252,24 @@ class PushTokenRestController extends RestApiControllerBase {
 	/**
 	 * Get the accepted arguments for the POST request.
 	 *
+	 * @param string $context The context to return args for.
 	 * @return array
 	 */
-	private function get_args(): array {
-		return array(
+	private function get_args( ?string $context = null ): array {
+		$args = array(
+			'id'          => array(
+				'description' => __( 'Push Token ID', 'woocommerce' ),
+				'type'        => 'integer',
+				'required'    => true,
+				'context'     => array( 'delete' ),
+				'minimum'     => 1,
+			),
 			'origin'      => array(
 				'description' => __( 'Origin', 'woocommerce' ),
 				'type'        => 'string',
-				'readonly'    => true,
 				'required'    => true,
 				'context'     => array( 'create' ),
+				'enum'        => PushToken::ORIGINS,
 			),
 			'device_uuid' => array(
 				'description' => __( 'Device UUID', 'woocommerce' ),
@@ -265,13 +281,8 @@ class PushTokenRestController extends RestApiControllerBase {
 				'description' => __( 'Platform', 'woocommerce' ),
 				'type'        => 'string',
 				'required'    => true,
-				'readonly'    => true,
 				'context'     => array( 'create' ),
-				'enum'        => array(
-					PushToken::PLATFORM_ANDROID,
-					PushToken::PLATFORM_APPLE,
-					PushToken::PLATFORM_BROWSER,
-				),
+				'enum'        => PushToken::PLATFORMS,
 			),
 			'token'       => array(
 				'description'       => __( 'Push Token', 'woocommerce' ),
@@ -281,5 +292,14 @@ class PushTokenRestController extends RestApiControllerBase {
 				'validate_callback' => array( $this, 'validate_token' ),
 			),
 		);
+
+		if ( $context ) {
+			$args = array_filter(
+				$args,
+				fn ( $arg ) => in_array( $context, $arg['context'], true )
+			);
+		}
+
+		return $args;
 	}
 }
