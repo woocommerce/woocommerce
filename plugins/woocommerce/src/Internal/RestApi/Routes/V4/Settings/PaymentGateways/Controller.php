@@ -207,18 +207,23 @@ class Controller extends AbstractController {
 		}
 
 		// Handle top-level gateway fields from within values.
+		$gateway->init_form_fields();
+
 		if ( isset( $values_to_update['enabled'] ) ) {
-			$gateway->enabled = wc_bool_to_string( $values_to_update['enabled'] );
+			$gateway->enabled             = wc_bool_to_string( $values_to_update['enabled'] );
+			$gateway->settings['enabled'] = $gateway->enabled;
 			unset( $values_to_update['enabled'] );
 		}
 
 		if ( isset( $values_to_update['title'] ) ) {
-			$gateway->title = sanitize_text_field( $values_to_update['title'] );
+			$gateway->title             = sanitize_text_field( $values_to_update['title'] );
+			$gateway->settings['title'] = $gateway->title;
 			unset( $values_to_update['title'] );
 		}
 
 		if ( isset( $values_to_update['description'] ) ) {
-			$gateway->description = wp_kses_post( $values_to_update['description'] );
+			$gateway->description             = wp_kses_post( $values_to_update['description'] );
+			$gateway->settings['description'] = $gateway->description;
 			unset( $values_to_update['description'] );
 		}
 
@@ -233,8 +238,6 @@ class Controller extends AbstractController {
 		// Separate standard fields from special fields.
 		$standard_values = array();
 		$special_values  = array();
-
-		$gateway->init_form_fields();
 
 		foreach ( $values_to_update as $key => $value ) {
 			// Check if this is a special field.
