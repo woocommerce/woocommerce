@@ -693,7 +693,7 @@ class WC_Brands_Admin {
 	/**
 	 * Add formatting callback for brand_ids during CSV import.
 	 *
-	 * @param  array                $callbacks Formatting callbacks.
+	 * @param  array               $callbacks Formatting callbacks.
 	 * @param  WC_Product_Importer $importer  Importer instance.
 	 * @return array $callbacks
 	 */
@@ -718,11 +718,11 @@ class WC_Brands_Admin {
 	 * @param array      $data    Raw CSV data.
 	 */
 	public function process_import( $product, $data ) {
-		if ( empty( $data[ 'brand_ids' ] ) || ! is_array( $data[ 'brand_ids' ] ) ) {
+		if ( empty( $data['brand_ids'] ) || ! is_array( $data['brand_ids'] ) ) {
 			return;
 		}
 
-		$brand_ids = array_map( 'intval', $data[ 'brand_ids' ] );
+		$brand_ids = array_map( 'intval', $data['brand_ids'] );
 		wp_set_object_terms( $product->get_id(), $brand_ids, 'product_brand' );
 	}
 
