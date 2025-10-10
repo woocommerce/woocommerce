@@ -228,8 +228,79 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 * Tests for the `update_addresses_in_order` method.
 	 *
 	 * @return void
+	 *
+	 * @dataProvider provide_test_update_address_in_order
 	 */
-	public function test_update_addresses_in_order() {}
+	public function test_update_addresses_in_order( int $order_id, bool $should_use_orders_v2, bool $expect_to_save ) {
+		$filter_value = $should_use_orders_v2 ? '__return_true' : '__return_false';
+		add_filter( 'woocommerce_paypal_should_use_orders_v2', $filter_value );
+
+		$triggered = false;
+		$callback  = static function () use ( &$triggered ) {
+			$triggered = true;
+		};
+		add_action( 'woocommerce_before_order_object_save', $callback );
+
+		$gateway = new WC_Gateway_Paypal();
+		$gateway->update_address_in_order( $order_id );
+
+		// Clean up after test.
+		remove_filter( 'woocommerce_paypal_should_use_orders_v2', $filter_value );
+		remove_action( 'woocommerce_before_order_object_save', $callback );
+
+		$this->assertSame(
+			$expect_to_save,
+			$triggered,
+		);
+	}
+
+	public function provide_test_update_address_in_order(): array {
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'paypal' );
+		$order->update_meta_data( '_paypal_order_id', 'TEST_PAYPAL_ORDER_ID' );
+		$order->save();
+
+		$order_not_paypal = WC_Helper_Order::create_order();
+		$order_not_paypal->set_payment_method( 'bacs' );
+		$order_not_paypal->save();
+
+		$order_missing_paypal_id = WC_Helper_Order::create_order();
+		$order_missing_paypal_id->set_payment_method( WC_Gateway_Paypal::ID );
+		$order_missing_paypal_id->save();
+
+		return array(
+			'order not found' => array(
+				'order ID' => 0,
+				'should use orders v2' => true,
+				'expect to save' => false,
+			),
+			'invalid payment method' => array(
+				'order ID' => $order_not_paypal->get_id(),
+				'should use orders v2' => true,
+				'expect to save' => false,
+			),
+			'orders v2 not enabled' => array(
+				'order ID' => $order->get_id(),
+				'should use orders v2' => false,
+				'expect to save' => false,
+			),
+			'missing PayPal order ID' => array(
+				'order ID' => $order_missing_paypal_id->get_id(),
+				'should use orders v2' => true,
+				'expect to save' => false,
+			),
+			'exception thrown' => array(
+				'order ID' => $order->get_id(),
+				'should use orders v2' => true,
+				'expect to save' => false,
+			),
+			'successful update' => array(
+				'order ID' => $order->get_id(),
+				'should use orders v2' => true,
+				'expect to save' => true,
+			),
+		);
+	}
 
 	/**
 	 * Tests for the `enqueue_scripts` method.
