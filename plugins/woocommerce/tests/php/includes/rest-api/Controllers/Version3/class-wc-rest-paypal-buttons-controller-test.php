@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 /**
@@ -14,10 +16,20 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Mock Jetpack options to return a valid site ID.
-		add_filter( 'pre_option_jetpack_options', function() { return array( 'id' => 12345 ); } );
+		add_filter(
+			'pre_option_jetpack_options',
+			function () {
+				return array( 'id' => 12345 );
+			}
+		);
 
 		// Return a Jetpack blog token.
-		add_filter( 'pre_option_jetpack_private_options', function() { return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' ); } );
+		add_filter(
+			'pre_option_jetpack_private_options',
+			function () {
+				return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
+			}
+		);
 
 		$this->endpoint = new WC_REST_Paypal_Buttons_Controller();
 		$this->user     = $this->factory->user->create(
