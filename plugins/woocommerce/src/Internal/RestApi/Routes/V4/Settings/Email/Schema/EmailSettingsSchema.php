@@ -1,0 +1,223 @@
+<?php
+/**
+ * EmailSettingsSchema class.
+ *
+ * @package WooCommerce\RestApi
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Schema;
+
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use WP_REST_Request;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * EmailSettingsSchema class.
+ */
+class EmailSettingsSchema extends AbstractSchema {
+	/**
+	 * The schema item identifier.
+	 *
+	 * @var string
+	 */
+	const IDENTIFIER = 'email_settings';
+
+	/**
+	 * Return all properties for the item schema.
+	 *
+	 * @return array
+	 */
+	public function get_item_schema_properties(): array {
+		return array(
+			'id'          => array(
+				'description' => __( 'Unique identifier for the settings group.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'title'       => array(
+				'description' => __( 'Settings title.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'description' => array(
+				'description' => __( 'Settings description.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'values'      => array(
+				'description' => __( 'Flattened setting values.', 'woocommerce' ),
+				'type'        => 'object',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'groups'      => array(
+				'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
+				'type'                 => 'object',
+				'context'              => self::VIEW_EDIT_CONTEXT,
+				'additionalProperties' => array(
+					'type'        => 'object',
+					'description' => __( 'Settings group.', 'woocommerce' ),
+					'properties'  => array(
+						'title'       => array(
+							'description' => __( 'Group title.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+						),
+						'description' => array(
+							'description' => __( 'Group description.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+						),
+						'order'       => array(
+							'description' => __( 'Display order for the group.', 'woocommerce' ),
+							'type'        => 'integer',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+							'readonly'    => true,
+						),
+						'fields'      => array(
+							'description' => __( 'Settings fields.', 'woocommerce' ),
+							'type'        => 'array',
+							'context'     => self::VIEW_EDIT_CONTEXT,
+							'items'       => $this->get_field_schema(),
+						),
+					),
+				),
+			),
+			'woocommerce_email_from_name'        => array(
+				'description' => __( 'Email sender name.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+			),
+			'woocommerce_email_from_address'     => array(
+				'description' => __( 'Email sender address.', 'woocommerce' ),
+				'type'        => 'string',
+				'format'      => 'email',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+			),
+			'woocommerce_email_reply_to_enabled' => array(
+				'description' => __( 'Enable reply-to email address.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+			),
+			'woocommerce_email_reply_to_name'    => array(
+				'description' => __( 'Reply-to name.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+			),
+			'woocommerce_email_reply_to_address' => array(
+				'description' => __( 'Reply-to email address.', 'woocommerce' ),
+				'type'        => 'string',
+				'format'      => 'email',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+			),
+		);
+	}
+
+	/**
+	 * Get the schema for individual setting fields.
+	 *
+	 * @return array
+	 */
+	private function get_field_schema(): array {
+		return array(
+			'type'       => 'object',
+			'properties' => array(
+				'id'          => array(
+					'description' => __( 'Setting field ID.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_CONTEXT,
+				),
+				'label'       => array(
+					'description' => __( 'Setting field label.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_CONTEXT,
+				),
+				'type'        => array(
+					'description' => __( 'Setting field type.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array( 'text', 'email', 'boolean' ),
+					'context'     => self::VIEW_EDIT_CONTEXT,
+				),
+				'description' => array(
+					'description' => __( 'Setting field description.', 'woocommerce' ),
+					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_CONTEXT,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get email settings data by transforming email settings into REST API format.
+	 *
+	 * @param mixed           $item             Raw settings (unused for email settings).
+	 * @param WP_REST_Request $request          Request object.
+	 * @param array           $include_fields   Fields to include.
+	 * @return array
+	 */
+	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
+		$fields = array(
+			array(
+				'id'    => 'woocommerce_email_from_name',
+				'label' => __( '"FROM" Name', 'woocommerce' ),
+				'type'  => 'text',
+			),
+			array(
+				'id'    => 'woocommerce_email_from_address',
+				'label' => __( '"FROM" Address', 'woocommerce' ),
+				'type'  => 'email',
+			),
+			array(
+				'id'          => 'woocommerce_email_reply_to_enabled',
+				'label'       => __( 'Add "Reply-to" email', 'woocommerce' ),
+				'type'        => 'boolean',
+				'description' => __( 'Use a different email address for replies.', 'woocommerce' ),
+			),
+			array(
+				'id'    => 'woocommerce_email_reply_to_name',
+				'label' => __( '"Reply-to" Name', 'woocommerce' ),
+				'type'  => 'text',
+			),
+			array(
+				'id'    => 'woocommerce_email_reply_to_address',
+				'label' => __( '"Reply-to" Address', 'woocommerce' ),
+				'type'  => 'email',
+			),
+		);
+
+		$values = array(
+			'woocommerce_email_from_name'        => get_option( 'woocommerce_email_from_name', get_option( 'blogname' ) ),
+			'woocommerce_email_from_address'     => get_option( 'woocommerce_email_from_address', get_option( 'admin_email' ) ),
+			'woocommerce_email_reply_to_enabled' => get_option( 'woocommerce_email_reply_to_enabled', 'no' ) === 'yes',
+			'woocommerce_email_reply_to_name'    => get_option( 'woocommerce_email_reply_to_name', '' ),
+			'woocommerce_email_reply_to_address' => get_option( 'woocommerce_email_reply_to_address', '' ),
+		);
+
+		$response = array(
+			'id'          => 'email',
+			'title'       => __( 'Email design', 'woocommerce' ),
+			'description' => __( 'Customize the look and feel of all you notification emails.', 'woocommerce' ),
+			'values'      => $values,
+			'groups'      => array(
+				'sender_details' => array(
+					'title'       => __( 'Sender details', 'woocommerce' ),
+					'description' => __( 'This is how your sender name and email address would appear in outgoing emails.', 'woocommerce' ),
+					'order'       => 1,
+					'fields'      => $fields,
+				),
+			),
+		);
+
+		if ( ! empty( $include_fields ) ) {
+			$response = array_intersect_key( $response, array_flip( $include_fields ) );
+		}
+
+		return $response;
+	}
+}
