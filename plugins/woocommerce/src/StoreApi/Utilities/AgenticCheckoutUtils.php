@@ -3,9 +3,9 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\SessionKey;
 use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\CheckoutSessionStatus;
 use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\MessageError;

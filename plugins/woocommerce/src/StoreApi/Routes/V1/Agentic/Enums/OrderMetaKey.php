@@ -15,9 +15,4 @@ class OrderMetaKey {
 	 * Meta key for canceled checkout order.
 	 */
 	const AGENTIC_CHECKOUT_CANCELED = '_agentic_checkout_canceled';
-
-	/**
-	 * Meta key for Agentic checkout session ID.
-	 */
-	const AGENTIC_CHECKOUT_SESSION_ID = '_agentic_checkout_session_id';
 }
