@@ -354,6 +354,43 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
+	 * Validates a session.
+	 *
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
+	 * @return void
+	 */
+	public static function validate( AgenticCheckoutSession $checkout_session ): void {
+		$messages = $checkout_session->get_messages();
+
+		// Check if ready for payment.
+		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
+		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
+
+		// Add info message if shipping is needed.
+		if ( $needs_shipping && ! $has_address ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'Shipping address required.', 'woocommerce' ),
+					'$.fulfillment_address'
+				)
+			);
+		}
+
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
+
+		if ( $needs_shipping && ! $has_shipping ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'No shipping method selected.', 'woocommerce' ),
+					'$.fulfillment_option_id'
+				)
+			);
+		}
+	}
+
+	/**
 	 * Calculate the status of the checkout session.
 	 *
 	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
