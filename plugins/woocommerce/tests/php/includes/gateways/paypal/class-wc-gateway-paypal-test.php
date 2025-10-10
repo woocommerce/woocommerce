@@ -254,6 +254,12 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Data provider for `test_update_address_in_order`.
+	 *
+	 * @return array[]
+	 * @throws WC_Data_Exception
+	 */
 	public function provide_test_update_address_in_order(): array {
 		$order = WC_Helper_Order::create_order();
 		$order->set_payment_method( 'paypal' );
@@ -306,20 +312,94 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 * Tests for the `enqueue_scripts` method.
 	 *
 	 * @return void
+	 *
+	 * @dataProvider provide_test_enqueue_scripts
 	 */
-	public function test_enqueue_scripts() {}
+	public function test_enqueue_scripts( $gateway_enabled, $client_id, $script_expected ) {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => $gateway_enabled ? 'yes' : 'no' ) );
+
+		// Set cached client ID.
+		update_option( 'woocommerce_paypal_client_id_sandbox', $client_id );
+
+		/**
+		 * @var WC_Gateway_Paypal $mock_gateway Mocked gateway with Orders v2 enabled.
+		 */
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+
+		$mock_gateway->enqueue_scripts();
+
+		// Clean up.
+		update_option( 'woocommerce_paypal_settings', array() );
+		update_option( 'woocommerce_paypal_client_id_sandbox', '' );
+
+		$this->assertEquals( $script_expected, wp_script_is( 'paypal-standard-sdk', 'enqueued' ) );
+	}
+
+	/**
+	 * Data provider for `test_enqueue_scripts`.
+	 *
+	 * @return array[]
+	 */
+	public function provide_test_enqueue_scripts(): array {
+		return array(
+			'gateway disabled' => array(
+				'gateway enabled' => false,
+				'client ID' => 'test_client_id',
+				'script expected' => false,
+			),
+			'missing client ID' => array(
+				'gateway enabled' => true,
+				'client ID' => '',
+				'script expected' => false,
+			),
+			'script enqueued' => array(
+				'gateway enabled' => true,
+				'client ID' => 'test_client_id',
+				'script expected' => true,
+			),
+		);
+	}
 
 	/**
 	 * Tests for the `add_paypal_sdk_attributes` method.
 	 *
 	 * @return void
 	 */
-	public function test_add_paypal_sdk_attributes() {}
+	public function test_add_paypal_sdk_attributes() {
+		$gateway = new WC_Gateway_Paypal();
+
+		// Without the JS SDK
+		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => '' ) );
+		$this->assertSame( array( 'id' => '' ), $actual );
+
+		// With the JS SDK
+		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => 'paypal-standard-sdk-js' ) );
+		$this->assertSame(
+			array(
+				'id'                          => 'paypal-standard-sdk-js',
+				'data-page-type'              => 'cart',
+				'data-partner-attribution-id' => 'WooCommerce_Cart_Paypal',
+			),
+			$actual
+		);
+	}
 
 	/**
 	 * Tests for the `render_buttons_container` method.
 	 *
 	 * @return void
 	 */
-	public function test_render_buttons_container() {}
+	public function test_render_buttons_container() {
+		$gateway = new WC_Gateway_Paypal();
+
+		ob_start();
+		$gateway->render_buttons_container();
+		$output = ob_get_clean();
+
+		$this->assertSame( '<div id="wc-paypal-buttons-container"></div>', trim( $output ) );
+	}
 }
