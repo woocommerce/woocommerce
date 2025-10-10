@@ -260,11 +260,14 @@ class Controller extends AbstractController {
 		switch ( $setting_id ) {
 			case 'woocommerce_price_num_decimals':
 				if ( ! is_numeric( $value ) || $value < 0 || $value > 10 ) {
-					return new WP_Error(
-						'rest_invalid_param',
-						__( 'Number of decimals must be between 0 and 10.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
+					$int = filter_var( $value, FILTER_VALIDATE_INT );
+					if ( false === $int || $int < 0 || $int > 10 ) {
+						return new WP_Error(
+							'rest_invalid_param',
+							__( 'Number of decimals must be between 0 and 10.', 'woocommerce' ),
+							array( 'status' => 400 )
+						);
+					}
 				}
 				break;
 
