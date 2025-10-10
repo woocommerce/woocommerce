@@ -1381,7 +1381,7 @@ WHERE
 				$this->read_cogs_data( $order );
 			}
 
-			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
@@ -1526,8 +1526,15 @@ WHERE
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
-		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
+			// Exclude orders where the CPT version is a placeholder post.
+			$post_type = get_post_type( $order_id );
+			if ( ! $post_type || DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+				unset( $orders[ $order_id ] );
+				continue;
+			}
+
+			// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
 
