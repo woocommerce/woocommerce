@@ -216,20 +216,12 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 		/**
 		 * Verify checkout session is ready for payment.
 		 */
-		$session_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
-
-		// If payment is already in progress, return error.
-		if ( CheckoutSessionStatus::IN_PROGRESS === $session_status ) {
-			$message = __( 'Payment is already in progress for this checkout session.', 'woocommerce' );
-			return Error::processing_error( ErrorCode::INVALID, $message )->to_rest_response();
-		}
-
-		// Only allow payment if session is ready.
-		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $session_status ) {
+		$current_status = AgenticCheckoutUtils::calculate_status( $this->cart_controller->get_cart_instance() );
+		if ( CheckoutSessionStatus::READY_FOR_PAYMENT !== $current_status ) {
 			$message = sprintf(
 				/* translators: %s: current session status */
 				__( 'Checkout session is not ready for payment. Current status: %s', 'woocommerce' ),
-				$session_status
+				$current_status
 			);
 			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
 		}
