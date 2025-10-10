@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;
 use WC_Webhook;
@@ -16,7 +17,7 @@ use WC_Webhook;
  *
  * @since 10.3.0
  */
-class AgenticWebhookManager {
+class AgenticWebhookManager implements RegisterHooksInterface {
 	/**
 	 * Custom webhook topic for Agentic order creation.
 	 */
@@ -35,18 +36,22 @@ class AgenticWebhookManager {
 	private $payload_builder;
 
 	/**
-	 * Constructor.
+	 * Initializes dependencies and hooks.
+	 *
+	 * @internal
+	 *
+	 * @param AgenticWebhookPayloadBuilder $payload_builder Payload builder instance.
 	 */
-	public function __construct() {
-		$logger                = wc_get_logger();
-		$this->payload_builder = new AgenticWebhookPayloadBuilder( $logger );
-		$this->init_hooks();
+	final public function init( AgenticWebhookPayloadBuilder $payload_builder ) {
+		$this->payload_builder = $payload_builder;
 	}
 
 	/**
 	 * Initialize hooks for webhook integration.
+	 *
+	 *  @internal
 	 */
-	private function init_hooks() {
+	public function register() {
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
 		// Hook into order lifecycle events to fire our custom actions.

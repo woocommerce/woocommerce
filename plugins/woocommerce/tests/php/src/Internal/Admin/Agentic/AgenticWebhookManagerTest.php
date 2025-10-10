@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
+use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookPayloadBuilder;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 
 /**
@@ -25,19 +26,29 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->webhook_manager = wc_get_container()->get( AgenticWebhookManager::class );
+
+		// During tests, the controller never triggered hooks to be registered. Do it manually.
+		$this->webhook_manager->register();
+	}
+
+	/**
+	 * Tear down after each test.
+	 */
+	public function tearDown(): void {
 		// Remove any existing hooks to prevent duplicates.
 		remove_all_filters( 'woocommerce_webhook_topics' );
 		remove_all_actions( 'woocommerce_new_order' );
 		remove_all_actions( 'woocommerce_order_status_changed' );
 		remove_all_actions( 'woocommerce_order_refunded' );
+
+		parent::tearDown();
 	}
 
 	/**
 	 * Test that custom webhook topics are registered.
 	 */
 	public function test_custom_topics_registered() {
-		new AgenticWebhookManager();
-
 		/**
 		 * Filters the list of webhook topic hooks.
 		 *
@@ -62,8 +73,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * @param bool $should_fire    Whether action should fire.
 	 */
 	public function test_action_firing_based_on_session_id( $has_session_id, $should_fire ) {
-		new AgenticWebhookManager();
-
 		// Create order.
 		$order = \WC_Helper_Order::create_order();
 		if ( $has_session_id ) {
@@ -104,8 +113,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test that order status changes trigger update action.
 	 */
 	public function test_order_status_change_triggers_update() {
-		new AgenticWebhookManager();
-
 		$order = $this->create_agentic_order( 'test_session', 'processing' );
 
 		$action_count = 0;
@@ -136,8 +143,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * @param int   $expected_count Expected action count.
 	 */
 	public function test_refund_triggers_update( $refund_amounts, $expected_count ) {
-		new AgenticWebhookManager();
-
 		$order = $this->create_agentic_order();
 
 		$action_count = 0;
@@ -175,8 +180,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test webhook payload contains all refunds.
 	 */
 	public function test_webhook_payload_contains_all_refunds() {
-		new AgenticWebhookManager();
-
 		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
 		$order   = $this->create_agentic_order();
 
@@ -221,8 +224,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test webhook payload customization for ACP format.
 	 */
 	public function test_webhook_payload_customization() {
-		new AgenticWebhookManager();
-
 		$webhook = $this->create_agentic_webhook();
 		$order   = $this->create_agentic_order( 'test_session_456' );
 
@@ -250,8 +251,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test webhook HTTP args customization for ACP compliance.
 	 */
 	public function test_webhook_http_args_customization() {
-		new AgenticWebhookManager();
-
 		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
 		$webhook->set_secret( 'test_secret' );
 		$webhook->save();
@@ -289,8 +288,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test that signature is computed correctly for different payloads.
 	 */
 	public function test_merchant_signature_computation() {
-		new AgenticWebhookManager();
-
 		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_created' );
 		$webhook->set_secret( 'my_webhook_secret_123' );
 		$webhook->save();
@@ -341,8 +338,6 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test that non-Agentic webhooks are not affected.
 	 */
 	public function test_non_agentic_webhooks_unaffected() {
-		new AgenticWebhookManager();
-
 		// Create a regular WooCommerce webhook.
 		$webhook = new \WC_Webhook();
 		$webhook->set_topic( 'order.created' ); // Regular WC topic.

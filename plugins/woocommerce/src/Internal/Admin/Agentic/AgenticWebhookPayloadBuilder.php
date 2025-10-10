@@ -22,13 +22,6 @@ use WC_Order_Refund;
  */
 class AgenticWebhookPayloadBuilder {
 	/**
-	 * Logger instance.
-	 *
-	 * @var WC_Logger_Interface
-	 */
-	private $logger;
-
-	/**
 	 * Money formatter instance.
 	 *
 	 * @var MoneyFormatter
@@ -36,12 +29,11 @@ class AgenticWebhookPayloadBuilder {
 	private $money_formatter;
 
 	/**
-	 * Constructor.
+	 * Dependency initialization.
 	 *
-	 * @param WC_Logger_Interface $logger Logger instance.
+	 * @internal
 	 */
-	public function __construct( WC_Logger_Interface $logger ) {
-		$this->logger          = $logger;
+	final public function init() {
 		$this->money_formatter = new MoneyFormatter();
 	}
 
@@ -128,7 +120,7 @@ class AgenticWebhookPayloadBuilder {
 		// Validate the mapped status is a valid ACP status.
 		if ( ! ACPOrderStatus::is_valid( $mapped_status ) ) {
 			// Log a warning for invalid status but continue with fallback.
-			$this->logger->warning(
+			wc_get_logger()->warning(
 				sprintf(
 					'Invalid ACP order status "%s" returned by woocommerce_agentic_webhook_order_status_map filter for WooCommerce status "%s". Using "created" as fallback.',
 					$mapped_status,

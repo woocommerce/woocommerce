@@ -17,16 +17,11 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class AgenticController implements RegisterHooksInterface {
 	/**
-	 * Webhook manager instance.
-	 *
-	 * @var AgenticWebhookManager
-	 */
-	private $webhook_manager;
-
-	/**
 	 * Register hooks and initialize components.
 	 *
 	 * This follows the WooCommerce pattern for controllers.
+	 *
+	 * @internal
 	 */
 	public function register() {
 		// Don't register hooks during installation.
@@ -40,6 +35,6 @@ class AgenticController implements RegisterHooksInterface {
 		}
 
 		// Resolve webhook manager from container.
-		$this->webhook_manager = wc_get_container()->get( AgenticWebhookManager::class );
+		wc_get_container()->get( AgenticWebhookManager::class )->register();
 	}
 }
