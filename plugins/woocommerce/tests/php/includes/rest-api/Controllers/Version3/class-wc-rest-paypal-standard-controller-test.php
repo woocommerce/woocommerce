@@ -128,7 +128,12 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 			'no shipping options found' => array(
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'purchase units'    => array(
-					'custom_id' => wp_json_encode( array( 'order_id' => $order->get_id(), 'order_key' => $order->get_order_key() ) ),
+					'custom_id' => wp_json_encode(
+						array(
+							'order_id'  => $order->get_id(),
+							'order_key' => $order->get_order_key(),
+						),
+					),
 				),
 				'shipping option'   => array(),
 				'expected response' => array(
@@ -141,7 +146,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				),
 				'expected status'   => 422,
 			),
-			'successful update' => array(
+			'successful update'         => array(
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'purchase units'    => array(
 					'custom_id' => wp_json_encode(
