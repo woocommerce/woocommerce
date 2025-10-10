@@ -686,7 +686,7 @@ final class WC_Cart_Session {
 	private function remove_shipping_for_package_from_session() {
 		$wc_session = WC()->session;
 
-		if ( ! method_exists( $wc_session, 'get_session_data' ) ) {
+		if ( ! is_a( $wc_session, 'WC_Session_Handler' ) ) {
 			return;
 		}
 
