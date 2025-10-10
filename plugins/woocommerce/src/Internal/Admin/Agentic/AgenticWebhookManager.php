@@ -163,11 +163,11 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		if (
 			in_array(
 				$order->get_status(),
-				[
+				array(
 					OrderStatus::CHECKOUT_DRAFT,
 					OrderStatus::DRAFT,
 					OrderStatus::AUTO_DRAFT,
-				],
+				),
 				true
 			)
 		) {

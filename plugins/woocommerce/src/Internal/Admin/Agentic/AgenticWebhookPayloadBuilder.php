@@ -78,13 +78,13 @@ class AgenticWebhookPayloadBuilder {
 	private function map_order_status( string $wc_status ): string {
 		$status_map = array(
 			// WooCommerce status => ACP status.
-			OrderStatus::PENDING        => ACPOrderStatus::CREATED,
-			OrderStatus::PROCESSING     => ACPOrderStatus::CONFIRMED,
-			OrderStatus::ON_HOLD        => ACPOrderStatus::MANUAL_REVIEW,
-			OrderStatus::COMPLETED      => ACPOrderStatus::FULFILLED,
-			OrderStatus::CANCELLED      => ACPOrderStatus::CANCELED,
-			OrderStatus::REFUNDED       => ACPOrderStatus::FULFILLED, // Refunded orders are still fulfilled.
-			OrderStatus::FAILED         => ACPOrderStatus::CANCELED,
+			OrderStatus::PENDING    => ACPOrderStatus::CREATED,
+			OrderStatus::PROCESSING => ACPOrderStatus::CONFIRMED,
+			OrderStatus::ON_HOLD    => ACPOrderStatus::MANUAL_REVIEW,
+			OrderStatus::COMPLETED  => ACPOrderStatus::FULFILLED,
+			OrderStatus::CANCELLED  => ACPOrderStatus::CANCELED,
+			OrderStatus::REFUNDED   => ACPOrderStatus::FULFILLED, // Refunded orders are still fulfilled.
+			OrderStatus::FAILED     => ACPOrderStatus::CANCELED,
 		);
 
 		/**
