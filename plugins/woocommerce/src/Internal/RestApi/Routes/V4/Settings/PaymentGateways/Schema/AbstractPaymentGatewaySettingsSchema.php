@@ -305,9 +305,10 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 		foreach ( $gateway->form_fields as $id => $field ) {
 			$field_type = $field['type'] ?? '';
 
-			// Skip non-data fields and top-level fields (already added above).
+			// Skip non-data fields, top-level fields (already added above), and special fields.
 			if ( in_array( $field_type, array( 'title', 'sectionend' ), true ) ||
-				in_array( $id, array( 'enabled', 'description', 'title' ), true ) ) {
+				in_array( $id, array( 'enabled', 'description', 'title' ), true ) ||
+				$this->is_special_field( $id ) ) {
 				continue;
 			}
 
