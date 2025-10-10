@@ -354,12 +354,29 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 		);
 
 		// Add options for select/multiselect fields.
-		if ( ! empty( $field['options'] ) &&
-			in_array( $schema_field['type'], array( 'select', 'multiselect' ), true ) ) {
-			$schema_field['options'] = $field['options'];
+		if ( in_array( $schema_field['type'], array( 'select', 'multiselect' ), true ) ) {
+			if ( ! empty( $field['options'] ) ) {
+				$schema_field['options'] = $field['options'];
+			} else {
+				// Generate options dynamically for specific fields.
+				$schema_field['options'] = $this->get_field_options( $id );
+			}
 		}
 
 		return $schema_field;
+	}
+
+	/**
+	 * Get options for specific gateway fields.
+	 *
+	 * Override this method in gateway-specific schema classes to provide
+	 * dynamic options for select/multiselect fields.
+	 *
+	 * @param string $field_id Field ID.
+	 * @return array Field options.
+	 */
+	protected function get_field_options( string $field_id ): array {
+		return array();
 	}
 
 	/**

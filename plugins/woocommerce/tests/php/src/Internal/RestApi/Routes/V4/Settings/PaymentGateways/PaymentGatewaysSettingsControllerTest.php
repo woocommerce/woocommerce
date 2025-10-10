@@ -539,4 +539,50 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $data['values'] );
 		$this->assertArrayHasKey( 'instructions', $data['values'] );
 	}
+
+	/**
+	 * Test that COD gateway enable_for_methods field has options populated.
+	 */
+	public function test_cod_gateway_enable_for_methods_has_options() {
+		// Act.
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/cod' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'settings', $data['groups'] );
+		$this->assertArrayHasKey( 'fields', $data['groups']['settings'] );
+
+		// Find the enable_for_methods field.
+		$enable_for_methods_field = null;
+		foreach ( $data['groups']['settings']['fields'] as $field ) {
+			if ( 'enable_for_methods' === $field['id'] ) {
+				$enable_for_methods_field = $field;
+				break;
+			}
+		}
+
+		// Verify the field exists.
+		$this->assertNotNull( $enable_for_methods_field, 'enable_for_methods field should exist in COD gateway fields' );
+
+		// Verify field metadata.
+		$this->assertSame( 'enable_for_methods', $enable_for_methods_field['id'] );
+		$this->assertSame( 'multiselect', $enable_for_methods_field['type'] );
+		$this->assertArrayHasKey( 'options', $enable_for_methods_field );
+
+		// Verify options is an array.
+		$this->assertIsArray( $enable_for_methods_field['options'] );
+
+		// Verify options is not empty (there should be at least some shipping methods).
+		$this->assertNotEmpty( $enable_for_methods_field['options'], 'enable_for_methods should have shipping method options' );
+
+		// Verify the options structure is nested (by shipping method title).
+		// The structure should be: { "Method Title": { "method_id": "Label", ... }, ... }
+		foreach ( $enable_for_methods_field['options'] as $method_group ) {
+			$this->assertIsArray( $method_group, 'Each shipping method group should be an array' );
+		}
+	}
 }
