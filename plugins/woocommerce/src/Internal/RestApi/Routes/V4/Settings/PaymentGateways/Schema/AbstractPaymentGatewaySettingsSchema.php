@@ -346,12 +346,19 @@ abstract class AbstractPaymentGatewaySettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function transform_field_to_schema( string $id, array $field, WC_Payment_Gateway $gateway ): array {
+		$field_type = $field['type'] ?? 'text';
+
 		$schema_field = array(
 			'id'    => $id,
 			'label' => $field['title'] ?? $field['label'] ?? '',
-			'type'  => $this->normalize_field_type( $field['type'] ?? 'text' ),
+			'type'  => $this->normalize_field_type( $field_type ),
 			'desc'  => $field['description'] ?? '',
 		);
+
+		// For checkbox fields, use the 'label' field as description if no explicit description exists.
+		if ( 'checkbox' === $field_type && empty( $schema_field['desc'] ) && ! empty( $field['label'] ) ) {
+			$schema_field['desc'] = $field['label'];
+		}
 
 		// Add options for select/multiselect fields.
 		if ( in_array( $schema_field['type'], array( 'select', 'multiselect' ), true ) ) {
