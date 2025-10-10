@@ -174,6 +174,36 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests the read method throws exception when push token metadata is malformed/missing.
+	 */
+	public function test_it_throws_exception_when_reading_push_token_with_malformed_metadata() {
+		$data_store = new PushTokensDataStore();
+
+		// Create a push_token post but with missing metadata.
+		$post_id = wp_insert_post(
+			array(
+				'post_author' => 1,
+				'post_type'   => PushToken::POST_TYPE,
+				'post_status' => 'publish',
+				'meta_input'  => array(
+					'platform'    => PushToken::PLATFORM_IOS,
+					'token'       => 'test_token',
+					// Missing device_uuid and origin.
+				),
+			)
+		);
+
+		$push_token = new PushToken();
+		$push_token->set_id( $post_id );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t read push token because the push token record is malformed.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->read( $push_token );
+	}
+
+	/**
 	 * Tests the update method throws exception when push token data is incomplete.
 	 */
 	public function test_it_throws_exception_when_updating_push_token_with_incomplete_data() {
