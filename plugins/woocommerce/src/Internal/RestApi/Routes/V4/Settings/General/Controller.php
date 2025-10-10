@@ -179,11 +179,11 @@ class Controller extends AbstractController {
 		}
 
 		// Get all general settings definitions.
-		$settings           = $this->get_all_settings();
-		$settings_by_id     = array_column( $settings, null, 'id' );
+		$settings       = $this->get_all_settings();
+		$settings_by_id = array_column( $settings, null, 'id' );
 
 		// Exclude non-editable markers like 'title' and 'sectionend'.
-		$settings_by_id     = array_filter(
+		$settings_by_id = array_filter(
 			$settings_by_id,
 			static function ( $def ) {
 				$type = $def['type'] ?? '';
@@ -346,7 +346,7 @@ class Controller extends AbstractController {
 	 */
 	private function sanitize_setting_value( $setting_type, $value ) {
 		// Normalize WooCommerce setting types to REST API schema types.
-		$type_map = array(
+		$type_map     = array(
 			'single_select_country'  => 'select',
 			'multi_select_countries' => 'multiselect',
 		);
