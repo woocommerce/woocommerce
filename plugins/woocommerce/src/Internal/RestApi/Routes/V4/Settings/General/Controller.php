@@ -181,6 +181,16 @@ class Controller extends AbstractController {
 		// Get all general settings definitions.
 		$settings           = $this->get_all_settings();
 		$settings_by_id     = array_column( $settings, null, 'id' );
+
+		// Exclude non-editable markers like 'title' and 'sectionend'.
+		$settings_by_id     = array_filter(
+			$settings_by_id,
+			static function ( $def ) {
+				$type = $def['type'] ?? '';
+				return isset( $def['id'] ) && ! in_array( $type, array( 'title', 'sectionend' ), true );
+			}
+		);
+
 		$valid_setting_ids  = array_keys( $settings_by_id );
 		$validated_settings = array();
 
