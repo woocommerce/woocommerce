@@ -300,7 +300,6 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertEquals( '', $url );
 		}
-
 	}
 
 	/**
