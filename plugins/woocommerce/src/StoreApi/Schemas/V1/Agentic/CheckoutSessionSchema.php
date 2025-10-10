@@ -849,7 +849,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
 	 * @return void
 	 */
-	protected function validate( AgenticCheckoutSession $checkout_session ): void {
+	public function validate( AgenticCheckoutSession $checkout_session ): void {
 		$messages = $checkout_session->get_messages();
 
 		// Check if ready for payment.

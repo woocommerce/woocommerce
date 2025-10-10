@@ -329,8 +329,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$create_data     = $create_response->get_data();
 		$session_id      = $create_data['id'];
 
-		var_dump($create_data);
-
 		// Try to complete checkout.
 		$complete_response = $this->complete_session(
 			$session_id,

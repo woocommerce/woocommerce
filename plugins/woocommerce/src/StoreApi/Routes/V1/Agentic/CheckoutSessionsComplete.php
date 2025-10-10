@@ -215,6 +215,8 @@ class CheckoutSessionsComplete extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$checkout_session = new AgenticCheckoutSession( $this->cart_controller->get_cart_instance() );
 
+		$this->schema->validate( $checkout_session );
+
 		/**
 		 * Verify checkout session is ready for payment.
 		 */
