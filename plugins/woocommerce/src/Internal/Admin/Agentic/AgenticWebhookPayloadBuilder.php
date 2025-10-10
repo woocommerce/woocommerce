@@ -85,7 +85,6 @@ class AgenticWebhookPayloadBuilder {
 			OrderStatus::CANCELLED      => ACPOrderStatus::CANCELED,
 			OrderStatus::REFUNDED       => ACPOrderStatus::FULFILLED, // Refunded orders are still fulfilled.
 			OrderStatus::FAILED         => ACPOrderStatus::CANCELED,
-			OrderStatus::CHECKOUT_DRAFT => ACPOrderStatus::CREATED,
 		);
 
 		/**

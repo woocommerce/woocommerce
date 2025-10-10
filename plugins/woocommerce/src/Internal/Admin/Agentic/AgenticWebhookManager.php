@@ -160,7 +160,17 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		}
 
 		// Don't trigger for draft orders.
-		if ( in_array( $order->get_status(), array( OrderStatus::DRAFT, OrderStatus::AUTO_DRAFT ), true ) ) {
+		if (
+			in_array(
+				$order->get_status(),
+				[
+					OrderStatus::CHECKOUT_DRAFT,
+					OrderStatus::DRAFT,
+					OrderStatus::AUTO_DRAFT,
+				],
+				true
+			)
+		) {
 			return false;
 		}
 
