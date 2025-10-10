@@ -8,7 +8,13 @@ import {
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
 } from '@wordpress/components';
-import { Icon, commentAuthorAvatar, external, linkOff, chevronDown } from '@wordpress/icons';
+import {
+	Icon,
+	commentAuthorAvatar,
+	external,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -65,7 +71,7 @@ export default function HeaderAccount( {
 	};
 
 	const dropdownTrigger = () => {
-		const isInApp = 'wc-addons' === page;
+		const isInApp = page === 'wc-addons';
 		if ( ! isInApp ) {
 			return avatar();
 		}
@@ -75,13 +81,21 @@ export default function HeaderAccount( {
 				{ avatar() }
 				<span
 					className="woocommerce-marketplace__header-account-trigger__email"
-					title={ isConnected ? userEmail : __( 'Connect to WooCommerce.com', 'woocommerce' ) }
+					title={
+						isConnected
+							? userEmail
+							: __( 'Connect to WooCommerce.com', 'woocommerce' )
+					}
 				>
 					{ isConnected
 						? userEmail
 						: __( 'Connect to WooCommerce.com', 'woocommerce' ) }
 				</span>
-				<Icon icon={ chevronDown } size={ 24 } className="woocommerce-marketplace__header-account-trigger__expand-icon" />
+				<Icon
+					icon={ chevronDown }
+					size={ 24 }
+					className="woocommerce-marketplace__header-account-trigger__expand-icon"
+				/>
 			</span>
 		);
 	};

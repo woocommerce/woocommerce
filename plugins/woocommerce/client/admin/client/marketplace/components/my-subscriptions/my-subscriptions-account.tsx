@@ -28,7 +28,7 @@ export default function MySubscriptionsAccount(): JSX.Element | null {
 				<Icon icon={ link } size={ 24 } />
 				{ sprintf(
 					// translators: %s is user email
- 					__( 'Connected to %s', 'woocommerce' ),
+					__( 'Connected to %s', 'woocommerce' ),
 					userEmail
 				) }
 			</h2>
