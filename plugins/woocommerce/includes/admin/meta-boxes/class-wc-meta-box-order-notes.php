@@ -33,10 +33,15 @@ class WC_Meta_Box_Order_Notes {
 		} else {
 			$notes = array();
 		}
+		if ( count( $notes ) > 4 ) {
+			?>
+			<p class="add_note_jump_to"><a href="#woocommerce-order-notes-add-note"><?php esc_html_e( 'Add note', 'woocommerce' ); ?></a></p>
+			<?php
+		}
 
 		include __DIR__ . '/views/html-order-notes.php';
 		?>
-		<div class="add_note">
+		<div class="add_note" id="woocommerce-order-notes-add-note">
 			<p>
 				<label for="add_order_note"><?php esc_html_e( 'Add note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></label>
 				<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
