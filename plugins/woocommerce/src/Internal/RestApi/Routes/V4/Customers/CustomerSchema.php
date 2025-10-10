@@ -315,7 +315,6 @@ class CustomerSchema extends AbstractSchema {
 			'orders_count'       => $item->get_order_count(),
 			'total_spent'        => $item->get_total_spent(),
 			'avatar_url'         => $item->get_avatar_url(),
-			'meta_data'          => $data['meta_data'],
 		);
 
 		// Add meta data for administrators.
