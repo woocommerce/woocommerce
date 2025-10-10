@@ -61,21 +61,10 @@ class AgenticWebhookPayloadBuilder {
 		return array(
 			'type'                => 'order',
 			'checkout_session_id' => $order->get_meta( OrderMetaKey::AGENTIC_CHECKOUT_SESSION_ID ),
-			'permalink_url'       => $this->get_order_permalink( $order ),
+			'permalink_url'       => $order->get_checkout_order_received_url(),
 			'status'              => $this->map_order_status( $order->get_status() ),
 			'refunds'             => $this->build_refunds_data( $order ),
 		);
-	}
-
-	/**
-	 * Get the order permalink URL.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @return string Order permalink URL.
-	 */
-	private function get_order_permalink( WC_Order $order ): string {
-		// Get the order received page URL (customer-facing).
-		return $order->get_checkout_order_received_url();
 	}
 
 	/**
