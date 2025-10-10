@@ -284,17 +284,17 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$order_missing_paypal_id->save();
 
 		return array(
-			'order not found' => array(
+			'order not found'         => array(
 				'order ID' => 0,
 				'should use orders v2' => true,
 				'expect to save' => false,
 			),
-			'invalid payment method' => array(
+			'invalid payment method'  => array(
 				'order ID' => $order_not_paypal->get_id(),
 				'should use orders v2' => true,
 				'expect to save' => false,
 			),
-			'orders v2 not enabled' => array(
+			'orders v2 not enabled'   => array(
 				'order ID' => $order->get_id(),
 				'should use orders v2' => false,
 				'expect to save' => false,
@@ -304,12 +304,12 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 				'should use orders v2' => true,
 				'expect to save' => false,
 			),
-			'exception thrown' => array(
+			'exception thrown'        => array(
 				'order ID' => $order->get_id(),
 				'should use orders v2' => true,
 				'expect to save' => false,
 			),
-			'successful update' => array(
+			'successful update'       => array(
 				'order ID' => $order->get_id(),
 				'should use orders v2' => true,
 				'expect to save' => true,
