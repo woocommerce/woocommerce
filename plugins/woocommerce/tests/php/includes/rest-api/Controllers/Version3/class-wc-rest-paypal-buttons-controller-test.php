@@ -260,7 +260,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$request->set_body(
 			wp_json_encode(
 				array(
-					'order_id' => $order_id,
+					'order_id'        => $order_id,
 					'paypal_order_id' => $paypal_order_id,
 				)
 			)
@@ -300,7 +300,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$order_invalid_status->save_meta_data();
 
 		return array(
-			'invalid nonce' => array(
+			'invalid nonce'                 => array(
 				'include nonce' => false,
 				'order ID' => $order->get_id(),
 				'PayPal order ID' => '94N960803Z669244Y',
@@ -313,21 +313,21 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 					),
 				),
 			),
-			'invalid order ID' => array(
+			'invalid order ID'              => array(
 				'include nonce' => true,
 				'order ID' => 0,
 				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 400,
 				'expected response' => array( 'error' => 'Invalid request' ),
 			),
-			'order not found' => array(
+			'order not found'               => array(
 				'include nonce' => true,
 				'order ID' => 99999,
 				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
-			'invalid PayPal order ID' => array(
+			'invalid PayPal order ID'       => array(
 				'include nonce' => true,
 				'order ID' => $order_invalid_paypal_id->get_id(),
 				'PayPal order ID' => '94N960803Z669244Y',
@@ -341,14 +341,14 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'expected status' => 200,
 				'expected response' => array( 'success' => true ),
 			),
-			'invalid order status' => array(
+			'invalid order status'          => array(
 				'include nonce' => true,
 				'order ID' => $order_invalid_status->get_id(),
 				'PayPal order ID' => '74L758601X447022W',
 				'expected status' => 409,
 				'expected response' => array( 'error' => 'Order is not pending' ),
 			),
-			'successful cancellation' => array(
+			'successful cancellation'       => array(
 				'include nonce' => true,
 				'order ID' => $order->get_id(),
 				'PayPal order ID' => '94N960803Z669244Y',
