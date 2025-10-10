@@ -6,12 +6,18 @@ use Automattic\WooCommerce\Enums\OrderStatus;
  * class WC_REST_Paypal_Buttons_Controller_Test.
  * PayPal Buttons Controller tests for V3 REST API.
  */
-class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
+class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// Mock Jetpack options to return a valid site ID.
+		add_filter( 'pre_option_jetpack_options', function() { return array( 'id' => 12345 ); } );
+
+		// Return a Jetpack blog token.
+		add_filter( 'pre_option_jetpack_private_options', function() { return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' ); } );
 
 		$this->endpoint = new WC_REST_Paypal_Buttons_Controller();
 		$this->user     = $this->factory->user->create(
@@ -23,9 +29,19 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down the test environment.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_filter( 'pre_option_jetpack_options', function() { return array( 'id' => 12345 ); } );
+		remove_filter( 'pre_option_jetpack_private_options', function() { return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' ); } );
+	}
+
+	/**
 	 * Tests for the `create_order` method.
 	 *
-	 * @param string $nonce Nonce for request validation.
+	 * @param bool   $include_nonce Whether to include a nonce in the request.
 	 * @param int    $order_id Order ID.
 	 * @param string $order_key Order key.
 	 * @param string $payment_source Payment source (e.g., 'paypal').
@@ -37,7 +53,7 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 	 * @dataProvider provide_test_create_order
 	 */
 	public function test_create_order(
-		$nonce,
+		$include_nonce = false,
 		$order_id = null,
 		$order_key = null,
 		$payment_source = null,
@@ -51,13 +67,21 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', $response_mock_ref, 10, 3 );
 
-		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/create_order' );
-		$request->set_body_params(
-			array(
-				'nonce'      => $nonce,
-				'order_id'   => $order_id,
-				'order_key'  => $order_key,
-				'payment_source' => $payment_source,
+		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/create-order' );
+
+		if ( $include_nonce ) {
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_gateway_paypal_standard_create_order' ) );
+		}
+
+		$request->set_header( 'content-type', 'application/json' );
+
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'order_id'       => $order_id,
+					'order_key'      => $order_key,
+					'payment_source' => $payment_source,
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -84,70 +108,76 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 
 		return array(
 			'missing nonce' => array(
-				'nonce' => '',
+				'include nonce' => false,
 				'order ID' => 123,
 				'order key' => 'some_key',
 				'payment source' => 'paypal',
 				'WPCOM response' => null,
 				'expected status' => 403,
-				'expected response' => '',
+				'expected response' => array(
+					'code'    => 'rest_forbidden',
+					'message' => 'Sorry, you are not allowed to do that.',
+					'data'    => array(
+						'status' => 403,
+					),
+				),
 			),
 			'missing order ID' => array(
-				'nonce'    => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => '',
 				'order key' => 'some_key',
 				'payment source' => 'paypal',
 				'WPCOM response' => null,
 				'expected status' => 400,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Invalid request' ),
 			),
 			'missing payment source' => array(
-				'nonce'          => wp_create_nonce( '' ),
+				'include nonce'          => true,
 				'order ID'       => 123,
 				'order key'      => 'some_key',
 				'payment source' => '',
 				'WPCOM response' => null,
 				'expected status' => 400,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Missing/Invalid payment source: '  ),
 			),
 			'order not found' => array(
-				'nonce'    => wp_create_nonce( '' ),
+				'include nonce'    => true,
 				'order ID' => 123,
 				'order key' => 'some_key',
 				'payment source' => 'paypal',
 				'WPCOM response' => null,
 				'expected status' => 404,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid order key' => array(
-				'nonce'     => wp_create_nonce( '' ),
+				'include nonce'     => true,
 				'order ID'  => $order_invalid_status->get_id(),
 				'order key' => 'invalid_key',
 				'payment source' => 'paypal',
 				'WPCOM response' => null,
 				'expected status' => 404,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid order status' => array(
-				'nonce'     => wp_create_nonce( '' ),
+				'include nonce'     => true,
 				'order ID'  => $order_invalid_status->get_id(),
 				'order key' => $order_invalid_status->get_order_key(),
 				'payment source' => 'paypal',
 				'WPCOM response' => null,
 				'expected status' => 409,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Invalid order status' ),
 			),
 			'PayPal order creation failed' => array(
-				'nonce'          => wp_create_nonce( '' ),
+				'include nonce'          => true,
 				'order ID'       => $order->get_id(),
 				'order key'      => $order->get_order_key(),
 				'payment source' => 'paypal',
 				'WPCOM response' => '',
 				'expected status' => 400,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Failed to create PayPal order' ),
 			),
 			'successful order creation' => array(
-				'nonce'          => wp_create_nonce( '' ),
+				'include nonce'          => true,
 				'order ID'       => $order->get_id(),
 				'order key'      => $order->get_order_key(),
 				'payment source' => 'paypal',
@@ -168,6 +198,12 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 						)
 					),
 				),
+				'expected status' => 200,
+				'expected response' => array(
+					'paypal_order_id' => '123',
+					'order_id'        => $order->get_id(),
+					'return_url'      => 'http://localhost:8086?order-received=' . $order->get_id() . '&key=' . $order->get_order_key() . '&utm_nooverride=1',
+				),
 			),
 		);
 	}
@@ -175,20 +211,36 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 	/**
 	 * Tests for the `cancel_payment` method.
 	 *
-	 * @param string $nonce Nonce for request validation.
+	 * @param bool   $include_nonce Whether to include a nonce in the request.
 	 * @param int    $order_id Order ID.
+	 * @param string $paypal_order_id PayPal order ID.
 	 * @param int    $expected_status Expected HTTP status code.
 	 * @param array  $expected_response Expected response data.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_cancel_payment
 	 */
-	public function test_cancel_payment( string $nonce, int $order_id, int $expected_status, array $expected_response ) {
-		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/cancel_payment' );
-		$request->set_body_params(
-			array(
-				'nonce'    => $nonce,
-				'order_id' => $order_id,
+	public function test_cancel_payment(
+		bool $include_nonce,
+		int $order_id,
+		string $paypal_order_id,
+		int $expected_status,
+		array $expected_response
+	) {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/cancel-payment' );
+
+		if ( $include_nonce ) {
+			$request->set_header( 'Nonce', wp_create_nonce( 'wc_gateway_paypal_standard_cancel_payment' ) );
+		}
+
+		$request->set_header( 'content-type', 'application/json' );
+
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'order_id' => $order_id,
+					'paypal_order_id' => $paypal_order_id,
+				)
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -227,44 +279,57 @@ class WC_REST_Paypal_Buttons_Controller_Test  extends WC_REST_Unit_Test_Case {
 
 		return array(
 			'invalid nonce' => array(
-				'nonce' => '',
+				'include nonce' => false,
 				'order ID' => $order->get_id(),
+				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 403,
-				'expected response' => '',
+				'expected response' => array(
+					'code'    => 'rest_forbidden',
+					'message' => 'Sorry, you are not allowed to do that.',
+					'data'    => array(
+						'status' => 403,
+					),
+				),
 			),
 			'invalid order ID' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => 0,
+				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 400,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Invalid request' ),
 			),
 			'order not found' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => 99999,
+				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 404,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid PayPal order ID' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => $order_invalid_paypal_id->get_id(),
+				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 404,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Invalid PayPal order' ),
 			),
 			'order already in draft status' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => $order_draft->get_id(),
+				'PayPal order ID' => '84M859702Y558133X',
 				'expected status' => 200,
 				'expected response' => array( 'success' => true ),
 			),
 			'invalid order status' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => $order_invalid_status->get_id(),
+				'PayPal order ID' => '74L758601X447022W',
 				'expected status' => 409,
-				'expected response' => '',
+				'expected response' => array( 'error' => 'Order is not pending' ),
 			),
 			'successful cancellation' => array(
-				'nonce' => wp_create_nonce( '' ),
+				'include nonce' => true,
 				'order ID' => $order->get_id(),
+				'PayPal order ID' => '94N960803Z669244Y',
 				'expected status' => 200,
 				'expected response' => array( 'success' => true ),
 			),
