@@ -453,8 +453,10 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 *
 	 * @param WC_Product $product Product to check.
 	 * @return bool True if the prices will be different with or without taxes.
+	 *
+	 * @since 10.4.0
 	 */
-	private function taxes_influence_price( $product ): bool {
+	protected function taxes_influence_price( $product ): bool {
 		if ( ! $product->is_taxable() ) {
 			return false;
 		}
