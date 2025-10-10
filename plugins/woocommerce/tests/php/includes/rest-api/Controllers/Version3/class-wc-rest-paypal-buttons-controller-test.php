@@ -46,8 +46,18 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter( 'pre_option_jetpack_options', function() { return array( 'id' => 12345 ); } );
-		remove_filter( 'pre_option_jetpack_private_options', function() { return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' ); } );
+		remove_filter(
+			'pre_option_jetpack_options',
+			function() {
+				return array( 'id' => 12345 );
+			}
+		);
+		remove_filter(
+			'pre_option_jetpack_private_options',
+			function() {
+				return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
+			}
+		);
 	}
 
 	/**
