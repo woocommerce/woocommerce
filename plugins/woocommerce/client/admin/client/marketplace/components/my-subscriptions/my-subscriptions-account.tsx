@@ -37,7 +37,7 @@ export default function MySubscriptionsAccount(): JSX.Element | null {
 					sprintf(
 						// translators: %s is user email
 						__(
-							'Your store is currently connected to <strong>%s</strong> account on WooCommerce.com. If you think this is a mistake, you can disconnect your account and connect it to your current Woocommerce.com account. Doing this will not affect WooCommerce or any related extensions running on your site.',
+							'Your store is currently connected to <strong>%s</strong> account on WooCommerce.com. If you think this is a mistake, you can disconnect your account and connect it to your current WooCommerce.com account. Doing this will not affect WooCommerce or any related extensions running on your site.',
 							'woocommerce'
 						),
 						userEmail
