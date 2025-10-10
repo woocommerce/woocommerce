@@ -28,6 +28,15 @@ class AgenticWebhookPayloadBuilderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_agentic_webhook_order_status_map' );
+		remove_all_filters( 'woocommerce_agentic_webhook_refund_type' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test building payloads for different event types.
 	 *
 	 * @dataProvider event_type_provider
