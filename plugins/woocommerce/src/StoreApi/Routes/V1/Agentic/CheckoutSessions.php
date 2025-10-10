@@ -3,14 +3,14 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\AgenticCheckoutUtils;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\ErrorMessages;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 
 /**
  * CheckoutSessions class.
@@ -134,15 +134,14 @@ class CheckoutSessions extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		// We'll gather all non-critical errors and provide them at the end.
-		$message_errors = new ErrorMessages();
+		$checkout_session = new AgenticCheckoutSession( $this->cart_controller->get_cart_instance() );
 
 		// Clear existing cart to start fresh for POST requests.
 		$this->cart_controller->empty_cart();
 
 		// Add items to cart.
 		$items = $request->get_param( 'items' );
-		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $message_errors );
+		$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller, $checkout_session->get_messages() );
 		// Halt for critical errors.
 		if ( $error instanceof Error ) {
 			return $error->to_rest_response();
@@ -172,10 +171,7 @@ class CheckoutSessions extends AbstractCartRoute {
 		}
 
 		// Build response from canonical cart schema.
-		$response = $this->schema->get_item_response( $this->cart_controller->get_cart_instance() );
-
-		// Add the messages outside of the schema (it accepts a single object).
-		$response['messages'] = $message_errors->get_formatted_messages();
+		$response = $this->schema->get_item_response( $checkout_session );
 
 		// Add protocol headers.
 		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );
