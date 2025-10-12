@@ -57,7 +57,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		// Hook into order lifecycle events to fire our custom actions.
 		add_action( 'woocommerce_new_order', array( $this, 'handle_order_created' ), 999, 2 ); // Hook late to give a chance for other plugins to modify.
 		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_order_status_changed' ), 10, 4 );
-		add_action( 'woocommerce_order_refunded', array( $this, 'handle_order_refunded' ), 10, 2 );
+		add_action( 'woocommerce_order_refunded', array( $this, 'handle_order_refunded' ), 10, 1 );
 
 		// Customize webhook payload for our topics.
 		add_filter( 'woocommerce_webhook_payload', array( $this, 'customize_webhook_payload' ), 10, 4 );
