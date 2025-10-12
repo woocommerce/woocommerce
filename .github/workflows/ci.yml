@@ -318,6 +318,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    outputs:
+      non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -327,6 +329,7 @@ jobs:
               .github/workflows/scripts
 
       - name: 'Evaluation'
+        id: evaluation
         env:
           REPOSITORY: ${{ github.repository }}
           RUN_ID: ${{ github.run_id }}
@@ -346,6 +349,8 @@ jobs:
     runs-on: ubuntu-latest
     needs: ['project-jobs', 'project-lint-jobs', 'project-test-jobs', 'evaluate-project-jobs']
     if: ${{ !cancelled() && github.event_name != 'pull_request' && github.repository == 'woocommerce/woocommerce' }}
+    env:
+      NON_SUCCESSFUL_JOBS: ${{ needs.evaluate-project-jobs.outputs.non_successful_jobs }}
     steps:
       - uses: 'actions/checkout@v4'
         name: 'Checkout'
@@ -376,9 +381,15 @@ jobs:
               CHECKS_TYPE=""
           fi
 
+          # Parse non-successful jobs and create comma-separated list of job names
+          FAILED_JOBS=""
+          if [[ -n "${NON_SUCCESSFUL_JOBS}" ]]; then
+            FAILED_JOBS=$(echo "${NON_SUCCESSFUL_JOBS}" | jq -r '.[].name' | paste -sd "," -)
+          fi
+
           pnpm utils slack-test-report -c "${{ needs.project-jobs.result }}" -r "$CHECKS_TYPE build jobs matrix" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
           pnpm utils slack-test-report -c "${{ needs.project-lint-jobs.result }}" -r "$CHECKS_TYPE linting" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
-          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json"
+          pnpm utils slack-test-report -c "${{ needs.project-test-jobs.result }}" -r "$CHECKS_TYPE tests" -m "$COMMIT_MESSAGE" --config ".github/workflows/slack-report-config.json" --jobs-list "Failed:###$FAILED_JOBS"
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'

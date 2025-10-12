@@ -1167,4 +1167,328 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->assertContains( 'US:CA', $codes );
 		$this->assertContains( 'US:NY', $codes );
 	}
+
+	/**
+	 * Test create zone with empty name fails.
+	 */
+	public function test_create_item_empty_name() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => '',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_invalid_zone_name', $data['code'] );
+		$this->assertEquals( 'Zone name cannot be empty.', $data['message'] );
+	}
+
+	/**
+	 * Test create zone with whitespace-only name fails.
+	 */
+	public function test_create_item_whitespace_name() {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/shipping-zones' );
+		$request->set_body_params(
+			array(
+				'name'      => '   ',
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_invalid_zone_name', $data['code'] );
+	}
+
+	/**
+	 * Test update "Rest of the World" zone name fails.
+	 */
+	public function test_update_rest_of_world_zone_name() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
+		$request->set_body_params(
+			array(
+				'name' => 'New Name',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_cannot_edit_zone', $data['code'] );
+		$this->assertEquals( 'Cannot change name of "Rest of the World" zone.', $data['message'] );
+	}
+
+	/**
+	 * Test update "Rest of the World" zone locations fails.
+	 */
+	public function test_update_rest_of_world_zone_locations() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
+		$request->set_body_params(
+			array(
+				'locations' => array(
+					array(
+						'code' => 'US',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_cannot_edit_zone', $data['code'] );
+		$this->assertEquals( 'Cannot change locations of "Rest of the World" zone.', $data['message'] );
+	}
+
+	/**
+	 * Test update "Rest of the World" zone order fails.
+	 */
+	public function test_update_rest_of_world_zone_order() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/0' );
+		$request->set_body_params(
+			array(
+				'order' => 5,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_cannot_edit_zone', $data['code'] );
+		$this->assertEquals( 'Cannot change order of "Rest of the World" zone.', $data['message'] );
+	}
+
+	/**
+	 * Test update regular zone with empty name fails.
+	 */
+	public function test_update_item_empty_name() {
+		$zone          = $this->create_shipping_zone( 'Test Zone' );
+		$this->zones[] = $zone;
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'name' => '',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_invalid_zone_name', $data['code'] );
+		$this->assertEquals( 'Zone name cannot be empty.', $data['message'] );
+	}
+
+	/**
+	 * Test update regular zone name successfully.
+	 */
+	public function test_update_item_name() {
+		$zone          = $this->create_shipping_zone( 'Original Name' );
+		$this->zones[] = $zone;
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'name' => 'Updated Name',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $zone->get_id(), $data['id'] );
+		$this->assertEquals( 'Updated Name', $data['name'] );
+
+		// Verify it was actually saved.
+		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		$this->assertEquals( 'Updated Name', $zone_reloaded->get_zone_name() );
+	}
+
+	/**
+	 * Test update regular zone order successfully.
+	 */
+	public function test_update_item_order() {
+		$zone          = $this->create_shipping_zone( 'Test Zone', 0 );
+		$this->zones[] = $zone;
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'order' => 10,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 10, $data['order'] );
+
+		// Verify it was actually saved.
+		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		$this->assertEquals( 10, $zone_reloaded->get_zone_order() );
+	}
+
+	/**
+	 * Test update regular zone locations successfully.
+	 */
+	public function test_update_item_locations() {
+		$zone          = $this->create_shipping_zone( 'Test Zone' );
+		$this->zones[] = $zone;
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'locations' => array(
+					array(
+						'code' => 'US',
+						'type' => 'country',
+					),
+					array(
+						'code' => 'CA',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 2, $data['locations'] );
+
+		// Verify they were actually saved.
+		$zone_reloaded   = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		$saved_locations = $zone_reloaded->get_zone_locations();
+		$this->assertCount( 2, $saved_locations );
+	}
+
+	/**
+	 * Test update regular zone with all fields successfully.
+	 */
+	public function test_update_item_all_fields() {
+		$zone          = $this->create_shipping_zone( 'Original Name', 0 );
+		$this->zones[] = $zone;
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'name'      => 'Updated Name',
+				'order'     => 7,
+				'locations' => array(
+					array(
+						'code' => 'GB',
+						'type' => 'country',
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'Updated Name', $data['name'] );
+		$this->assertEquals( 7, $data['order'] );
+		$this->assertCount( 1, $data['locations'] );
+		$this->assertEquals( 'GB', $data['locations'][0]['code'] );
+	}
+
+	/**
+	 * Test update zone with invalid ID.
+	 */
+	public function test_update_item_invalid_id() {
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/99999' );
+		$request->set_body_params(
+			array(
+				'name' => 'Test',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertEquals( 'woocommerce_rest_api_v4_shipping_zones_invalid_zone_id', $data['code'] );
+		$this->assertEquals( 'Invalid shipping zone ID.', $data['message'] );
+	}
+
+	/**
+	 * Test update zone without permission.
+	 */
+	public function test_update_item_without_permission() {
+		$zone          = $this->create_shipping_zone( 'Test Zone' );
+		$this->zones[] = $zone;
+
+		wp_set_current_user( 0 );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'name' => 'Updated Name',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test update zone clears locations with empty array.
+	 */
+	public function test_update_item_clear_locations() {
+		$zone          = $this->create_shipping_zone(
+			'Test Zone',
+			0,
+			array(
+				array(
+					'code' => 'US',
+					'type' => 'country',
+				),
+			)
+		);
+		$this->zones[] = $zone;
+
+		// Verify zone has locations initially.
+		$this->assertCount( 1, $zone->get_zone_locations() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/shipping-zones/' . $zone->get_id() );
+		$request->set_body_params(
+			array(
+				'locations' => array(),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertCount( 0, $data['locations'] );
+
+		// Verify locations were actually cleared.
+		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		$this->assertCount( 0, $zone_reloaded->get_zone_locations() );
+	}
 }
