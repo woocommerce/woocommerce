@@ -110,6 +110,19 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			),
 			'taxes'        => $this->get_taxes_schema(),
 			'meta_data'    => $this->get_meta_data_schema(),
+			'currency'             => array(
+				'description' => __( 'Currency the order item was created with, in ISO format.', 'woocommerce' ),
+				'type'        => 'string',
+				'default'     => get_woocommerce_currency(),
+				'enum'        => array_keys( get_woocommerce_currencies() ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+			),
+			'currency_symbol'      => array(
+				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		if ( $this->cogs_is_enabled() ) {
@@ -154,20 +167,22 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		$dp              = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$quantity_amount = (float) $order_item->get_quantity();
 		$data            = array(
-			'id'           => $order_item->get_id(),
-			'name'         => $order_item->get_name(),
-			'image'        => $this->get_image( $order_item ),
-			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
-			'product_data' => $this->get_product_data( $order_item ),
-			'quantity'     => $order_item->get_quantity(),
-			'price'        => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
-			'tax_class'    => $order_item->get_tax_class(),
-			'subtotal'     => wc_format_decimal( $order_item->get_subtotal(), $dp ),
-			'subtotal_tax' => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
-			'total'        => wc_format_decimal( $order_item->get_total(), $dp ),
-			'total_tax'    => wc_format_decimal( $order_item->get_total_tax(), $dp ),
-			'taxes'        => $this->prepare_taxes( $order_item, $request ),
-			'meta_data'    => $this->prepare_meta_data( $order_item ),
+			'id'              => $order_item->get_id(),
+			'name'            => $order_item->get_name(),
+			'image'           => $this->get_image( $order_item ),
+			'product_id'      => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
+			'product_data'    => $this->get_product_data( $order_item ),
+			'quantity'        => $order_item->get_quantity(),
+			'price'           => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
+			'tax_class'       => $order_item->get_tax_class(),
+			'subtotal'        => wc_format_decimal( $order_item->get_subtotal(), $dp ),
+			'subtotal_tax'    => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
+			'total'           => wc_format_decimal( $order_item->get_total(), $dp ),
+			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
+			'taxes'           => $this->prepare_taxes( $order_item, $request ),
+			'meta_data'       => $this->filter_meta_data( $this->prepare_meta_data( $order_item ), $order_item, $request ),
+			'currency'        => $order_item->get_order()->get_currency(),
+			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $order_item->get_order()->get_currency() ), ENT_QUOTES ),
 		);
 
 		// Add COGS data.
