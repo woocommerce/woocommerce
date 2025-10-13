@@ -46,10 +46,11 @@ export const createFieldProps = (
 		errorMessage: field?.errorMessage || '',
 		required: field?.required,
 		placeholder: field?.placeholder,
-		className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
-			'/',
-			'-'
-		), // Replace all slashes with hyphens to avoid invalid HTML classes.,
+		className:
+			`wc-block-components-address-form__${ field?.key }`.replaceAll(
+				'/',
+				'-'
+			), // Replace all slashes with hyphens to avoid invalid HTML classes.,
 		...field?.attributes,
 	};
 };
