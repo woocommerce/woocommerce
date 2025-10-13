@@ -171,6 +171,10 @@ trait RestApiCache {
 	 * @return array|null Array with 'request_hash' (string) and 'entity_type' (string), or null to skip caching.
 	 */
 	protected function get_request_uid_info( WP_REST_Request $request ): ?array {
+		if ( ! $this->route_belongs_to_this_controller( $request ) ) {
+			return null;
+		}
+
 		$entity_type  = $request->get_method() === 'GET' ? $this->get_default_entity_type() : null;
 		$request_hash = md5( $request->get_route() . '-' . wp_json_encode( $request->get_query_params() ) );
 
@@ -195,6 +199,35 @@ trait RestApiCache {
 	}
 
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
+
+	/**
+	 * Check if the current request route belongs to this controller.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool True if route belongs to this controller, false otherwise.
+	 */
+	protected function route_belongs_to_this_controller( WP_REST_Request $request ): bool {
+		$matched_route = $this->get_matched_route( $request );
+		if ( ! $matched_route ) {
+			return false;
+		}
+
+		$routes = rest_get_server()->get_routes();
+		if ( ! isset( $routes[ $matched_route ] ) ) {
+			return false;
+		}
+
+		$handlers = $routes[ $matched_route ];
+
+		foreach ( $handlers as $handler ) {
+			$callback = $handler['callback'] ?? null;
+			if ( is_array( $callback ) && ( $callback[0] ?? null ) === $this ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 
 	/**
 	 * Get the names of the filters that can customize the response for a given request
