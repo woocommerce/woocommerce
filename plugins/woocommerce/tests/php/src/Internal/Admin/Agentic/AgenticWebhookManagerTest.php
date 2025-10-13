@@ -57,11 +57,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
 
-		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_created', $topics );
-		$this->assertEquals( 'Agentic Order Created', $topics['action.woocommerce_agentic_order_created'] );
-
-		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_updated', $topics );
-		$this->assertEquals( 'Agentic Order Updated', $topics['action.woocommerce_agentic_order_updated'] );
+		$this->assertArrayHasKey( AgenticWebhookManager::WEBHOOK_TOPIC, $topics );
+		$this->assertEquals( 'Agentic Commerce Protocol: Order created or updated', $topics[AgenticWebhookManager::WEBHOOK_TOPIC] );
 	}
 
 	/**
@@ -83,7 +80,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		// Set up action listener.
 		$action_count = 0;
 		add_action(
-			'woocommerce_agentic_order_created',
+			AgenticWebhookManager::WEBHOOK_ACTION,
 			function () use ( &$action_count ) {
 				$action_count++;
 			}
@@ -122,7 +119,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		 * @see AgenticWebhookManager::handle_order_status_changed()
 		 */
 		add_action(
-			'woocommerce_agentic_order_updated',
+			AgenticWebhookManager::WEBHOOK_ACTION,
 			function () use ( &$action_count ) {
 				$action_count++;
 			}
@@ -147,7 +144,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 
 		$action_count = 0;
 		add_action(
-			'woocommerce_agentic_order_updated',
+			AgenticWebhookManager::WEBHOOK_ACTION,
 			function () use ( &$action_count ) {
 				$action_count++;
 			}
@@ -180,8 +177,9 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test webhook payload contains all refunds.
 	 */
 	public function test_webhook_payload_contains_all_refunds() {
-		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
+		$webhook = $this->create_agentic_webhook();
 		$order   = $this->create_agentic_order();
+		$this->add_webhook_sent_meta( $order );
 
 		// Create multiple refunds.
 		$refund_amounts = array( 10.00, 5.00, 15.00 );
@@ -251,7 +249,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test webhook HTTP args customization for ACP compliance.
 	 */
 	public function test_webhook_http_args_customization() {
-		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_updated' );
+		$webhook = $this->create_agentic_webhook();
 		$webhook->set_secret( 'test_secret' );
 		$webhook->save();
 
@@ -288,7 +286,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test that signature is computed correctly for different payloads.
 	 */
 	public function test_merchant_signature_computation() {
-		$webhook = $this->create_agentic_webhook( 'action.woocommerce_agentic_order_created' );
+		$webhook = $this->create_agentic_webhook();
 		$webhook->set_secret( 'my_webhook_secret_123' );
 		$webhook->save();
 
