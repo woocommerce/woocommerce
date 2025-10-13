@@ -136,50 +136,75 @@ class EmailSettingsSchema extends AbstractSchema {
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$settings = is_array( $item ) ? $item : array();
 
-		// Filter out non-editable field types.
-		$editable_settings = array_filter(
-			$settings,
-			static function ( $setting ) {
-				$type = $setting['type'] ?? '';
-				return isset( $setting['id'] ) && ! in_array( $type, array( 'title', 'sectionend', 'email_notification', 'email_notification_block_emails', 'email_preview', 'email_image_url', 'email_font_family', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button' ), true );
-			}
-		);
+		// Transform settings into grouped format based on title/sectionend markers.
+		$groups           = array();
+		$values           = array();
+		$current_group    = null;
+		$current_group_id = null;
 
-		// Build fields array from settings.
-		$fields = array();
-		$values = array();
+		foreach ( $settings as $setting ) {
+			$setting_type = $setting['type'] ?? '';
 
-		foreach ( $editable_settings as $setting ) {
-			$setting_id   = $setting['id'];
-			$setting_type = $setting['type'] ?? 'text';
-
-			// Map WooCommerce field types to REST API types.
-			$api_type = $this->map_setting_type_to_api_type( $setting_type );
-
-			// Build field definition.
-			$field = array(
-				'id'    => $setting_id,
-				'label' => $setting['title'] ?? $setting_id,
-				'type'  => $api_type,
-			);
-
-			// Add description if available.
-			if ( ! empty( $setting['desc'] ) ) {
-				$field['description'] = $setting['desc'];
+			// Handle section titles - start of a new group.
+			if ( 'title' === $setting_type ) {
+				$current_group_id = $setting['id'] ?? '';
+				$current_group    = array(
+					'title'       => $setting['title'] ?? '',
+					'description' => $setting['desc'] ?? '',
+					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : 999,
+					'fields'      => array(),
+				);
+				continue;
 			}
 
-			$fields[] = $field;
-
-			// Get current value.
-			$default_value = $setting['default'] ?? '';
-			$current_value = get_option( $setting_id, $default_value );
-
-			// Convert checkbox values to boolean for API.
-			if ( 'checkbox' === $setting_type ) {
-				$current_value = 'yes' === $current_value;
+			// Handle section ends - save the current group.
+			if ( 'sectionend' === $setting_type ) {
+				if ( $current_group && $current_group_id ) {
+					$groups[ $current_group_id ] = $current_group;
+				}
+				$current_group    = null;
+				$current_group_id = null;
+				continue;
 			}
 
-			$values[ $setting_id ] = $current_value;
+			// Skip non-editable field types.
+			if ( in_array( $setting_type, array( 'email_notification', 'email_notification_block_emails', 'email_preview', 'email_image_url', 'email_font_family', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button' ), true ) ) {
+				continue;
+			}
+
+			// Process field if we have a current group and the setting has an ID.
+			if ( isset( $setting['id'] ) && $current_group ) {
+				$setting_id   = $setting['id'];
+				$setting_type = $setting['type'] ?? 'text';
+
+				// Map WooCommerce field types to REST API types.
+				$api_type = $this->map_setting_type_to_api_type( $setting_type );
+
+				// Build field definition.
+				$field = array(
+					'id'    => $setting_id,
+					'label' => $setting['title'] ?? $setting_id,
+					'type'  => $api_type,
+				);
+
+				// Add description if available.
+				if ( ! empty( $setting['desc'] ) ) {
+					$field['description'] = $setting['desc'];
+				}
+
+				$current_group['fields'][] = $field;
+
+				// Get current value.
+				$default_value = $setting['default'] ?? '';
+				$current_value = get_option( $setting_id, $default_value );
+
+				// Convert checkbox values to boolean for API.
+				if ( 'checkbox' === $setting_type ) {
+					$current_value = 'yes' === $current_value;
+				}
+
+				$values[ $setting_id ] = $current_value;
+			}
 		}
 
 		$response = array(
@@ -187,14 +212,7 @@ class EmailSettingsSchema extends AbstractSchema {
 			'title'       => __( 'Email design', 'woocommerce' ),
 			'description' => __( 'Customize the look and feel of all you notification emails.', 'woocommerce' ),
 			'values'      => $values,
-			'groups'      => array(
-				'sender_details' => array(
-					'title'       => __( 'Sender details', 'woocommerce' ),
-					'description' => __( 'This is how your sender name and email address would appear in outgoing emails.', 'woocommerce' ),
-					'order'       => 1,
-					'fields'      => $fields,
-				),
-			),
+			'groups'      => $groups,
 		);
 
 		if ( ! empty( $include_fields ) ) {

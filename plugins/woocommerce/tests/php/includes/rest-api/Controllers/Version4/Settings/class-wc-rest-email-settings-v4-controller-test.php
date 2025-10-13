@@ -119,9 +119,15 @@ class WC_REST_Email_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		// Extra assertions on groups structure.
 		$this->assertIsArray( $data['groups'] );
-		$this->assertArrayHasKey( 'sender_details', $data['groups'] );
-		$this->assertArrayHasKey( 'fields', $data['groups']['sender_details'] );
-		$this->assertNotEmpty( $data['groups']['sender_details']['fields'] );
+		// Groups are now dynamically generated from settings structure.
+		// With block email editor enabled, we expect 'email_options' group.
+		$this->assertArrayHasKey( 'email_options', $data['groups'] );
+		$this->assertArrayHasKey( 'fields', $data['groups']['email_options'] );
+		$this->assertNotEmpty( $data['groups']['email_options']['fields'] );
+		// Verify the group has expected structure.
+		$this->assertArrayHasKey( 'title', $data['groups']['email_options'] );
+		$this->assertArrayHasKey( 'description', $data['groups']['email_options'] );
+		$this->assertArrayHasKey( 'order', $data['groups']['email_options'] );
 
 		// Extra assertions on values keys.
 		$this->assertIsArray( $data['values'] );
