@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages;
 
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\MessageContentType;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\MessageContentType;
 
 /**
  * Base class for error and info messages.

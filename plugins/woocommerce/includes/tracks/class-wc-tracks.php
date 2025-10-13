@@ -81,7 +81,7 @@ class WC_Tracks {
 	 */
 	public static function get_role_details( $user ) {
 		return array(
-			'role'                   => ! empty( $user->roles ) ? reset( $user->roles ) : '',
+			'role'                   => ! empty( $user->roles ) ? array_values( $user->roles )[0] : '',
 			'can_install_plugins'    => $user->has_cap( 'install_plugins' ),
 			'can_activate_plugins'   => $user->has_cap( 'activate_plugins' ),
 			'can_manage_woocommerce' => $user->has_cap( 'manage_woocommerce' ),

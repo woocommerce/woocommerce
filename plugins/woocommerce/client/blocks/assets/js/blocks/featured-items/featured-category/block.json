@@ -10,10 +10,13 @@
 		},
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
-		"html": false,
 		"color": {
 			"background": true,
 			"text": true
+		},
+		"html": false,
+		"filter": {
+			"duotone": true
 		},
 		"spacing": {
 			"padding": true,
@@ -96,6 +99,11 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
 		}
 	},
 	"textdomain": "woocommerce",
