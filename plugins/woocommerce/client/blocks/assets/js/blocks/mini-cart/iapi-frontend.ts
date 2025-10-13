@@ -313,27 +313,25 @@ const { state: cartItemState } = store(
 					cartItem: { id },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem =
-					woocommerceState.cart.items.find(
-						( item ) => item.id === id
-					) || ( {} as CartItem );
+				const cartItem = ( woocommerceState.cart.items.find(
+					( item ) => item.id === id
+				) || {} ) as CartItem;
 
-				return {
-					variation: [],
-					item_data: [],
-					...cartItem,
-				};
+				cartItem.variation = cartItem.variation || [];
+				cartItem.item_data = cartItem.item_data || [];
+
+				return cartItem;
 			},
 
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
-					currency
+					currency!
 				);
 			},
 
 			get cartItemDiscount(): string {
-				const { prices } = cartItemState.cartItem;
+				const { prices, extensions } = cartItemState.cartItem;
 
 				const regularAmountSingle = scalePrice(
 					parseInt( prices.raw_prices.regular_price, 10 ),
@@ -367,7 +365,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions: extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -383,7 +381,7 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = cartItemState.cartItem;
+				const { quantity, prices, extensions } = cartItemState.cartItem;
 
 				const regularAmountSingle = scalePrice(
 					parseInt( prices.raw_prices.regular_price, 10 ),
@@ -417,7 +415,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions: extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,

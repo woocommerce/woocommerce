@@ -73,9 +73,10 @@ export const normalizeCurrencyResponse = (
 			typeof decimalSeparator === 'string'
 				? decimalSeparator
 				: defaultCurrency.decimalSeparator,
-		minorUnit: Number.isFinite( minorUnit )
-			? minorUnit
-			: defaultCurrency.minorUnit,
+		minorUnit:
+			minorUnit && Number.isFinite( minorUnit )
+				? minorUnit
+				: defaultCurrency.minorUnit,
 		prefix: typeof prefix === 'string' ? prefix : defaultCurrency.prefix,
 		suffix: typeof suffix === 'string' ? suffix : defaultCurrency.suffix,
 	};
