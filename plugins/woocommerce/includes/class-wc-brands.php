@@ -112,6 +112,7 @@ class WC_Brands {
 			if ( is_array( $product_terms ) ) {
 				wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_brand' );
 			}
+			return;
 		}
 
 		$product_brands = array();

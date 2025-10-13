@@ -168,11 +168,14 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @since 10.4.0 Added term counting optimization for bulk operations.
 	 */
 	public function batch_items( $request ) {
+		$already_deferred = wp_defer_term_counting();
 		wp_defer_term_counting( true );
-		$response = parent::batch_items( $request );
-		wp_defer_term_counting( false );
-
-		return $response;
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			// Be sure to trigger term counting already processed terms even if there was an exception unless something had already deferred it.
+			wp_defer_term_counting( $already_deferred );
+		}
 	}
 
 	/**
