@@ -8,7 +8,8 @@
 	},
 	"require-dev": {
 		"mobiledetect/mobiledetectlib": "^3.74",
-		"psr/container": "^1.1"
+		"psr/container": "^1.1",
+		"pelago/emogrifier": "7.3.0"
 	},
 	"config": {
 		"platform": {
@@ -29,10 +30,23 @@
 			"dep_directory": "/packages/",
 			"packages": [
 				"psr/container",
-				"mobiledetect/mobiledetectlib"
+				"mobiledetect/mobiledetectlib",
+				"pelago/emogrifier"
 			],
 			"excluded_packages": [
 			],
+			"override_autoload": {
+				"mobiledetect/mobiledetectlib": {
+					"psr-4": {
+						"Detection\\": "src/"
+					}
+				},
+				"thecodingmachine/safe": {
+					"psr-4": {
+						"Safe\\": ""
+					}
+				}
+			},
 			"classmap_directory": "/classes/",
 			"classmap_prefix": "WC_Vendor_",
 			"delete_vendor_directories": true

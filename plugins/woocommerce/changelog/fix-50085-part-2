@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add hook 'woocommerce_update_order_refund' for refund updates.
