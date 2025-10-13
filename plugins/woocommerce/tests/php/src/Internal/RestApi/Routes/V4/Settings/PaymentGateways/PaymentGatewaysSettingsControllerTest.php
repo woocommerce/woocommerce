@@ -221,7 +221,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_payment_gateway_missing_values() {
 		// Act.
-		$request = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
+		$request  = new WP_REST_Request( 'PUT', self::ENDPOINT . '/bacs' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -580,7 +580,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( $enable_for_methods_field['options'], 'enable_for_methods should have shipping method options' );
 
 		// Verify the options structure is nested (by shipping method title).
-		// The structure should be: { "Method Title": { "method_id": "Label", ... }, ... }
+		// The structure should be: { "Method Title": { "method_id": "Label", ... }, ... }.
 		foreach ( $enable_for_methods_field['options'] as $method_group ) {
 			$this->assertIsArray( $method_group, 'Each shipping method group should be an array' );
 		}
