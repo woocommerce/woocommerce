@@ -170,20 +170,6 @@ class Controller extends AbstractController {
 				),
 			)
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/batch',
-			array(
-				array(
-					'methods'             => WP_REST_Server::EDITABLE,
-					'callback'            => array( $this, 'batch_items' ),
-					'permission_callback' => array( $this, 'batch_items_permissions_check' ),
-					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-				),
-				'schema' => array( $this, 'get_public_batch_schema' ),
-			)
-		);
 	}
 
 	/**
@@ -521,21 +507,6 @@ class Controller extends AbstractController {
 				),
 				array( 'status' => rest_authorization_required_code() )
 			);
-		}
-
-		return true;
-	}
-
-	/**
-	 * Check if a given request has access batch create, update and delete items.
-	 *
-	 * @param  WP_REST_Request $request Full details about the request.
-	 *
-	 * @return bool|WP_Error
-	 */
-	public function batch_items_permissions_check( $request ) {
-		if ( ! wc_rest_check_user_permissions( 'batch' ) ) {
-			return $this->get_authentication_error_by_method( $request->get_method() );
 		}
 
 		return true;
