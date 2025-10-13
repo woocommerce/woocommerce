@@ -326,7 +326,7 @@ const { state: cartItemState } = store(
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
-					currency!
+					currency as Currency
 				);
 			},
 
@@ -365,7 +365,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -415,7 +415,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -431,10 +431,10 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemHasDiscount(): boolean {
-				const { raw_prices } = cartItemState.cartItem.prices;
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				return (
-					parseInt( raw_prices.regular_price, 10 ) >
-					parseInt( raw_prices.price, 10 )
+					parseInt( rawPrices.regular_price, 10 ) >
+					parseInt( rawPrices.price, 10 )
 				);
 			},
 
@@ -518,10 +518,10 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
-				const { raw_prices } = cartItemState.cartItem.prices;
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				const priceWithoutDiscount = scalePrice(
-					parseInt( raw_prices.regular_price, 10 ),
-					raw_prices.precision,
+					parseInt( rawPrices.regular_price, 10 ),
+					rawPrices.precision,
 					cartItemState.currency.minorUnit
 				);
 
@@ -584,10 +584,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
-				const { raw_prices } = cartItemState.cartItem.prices;
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				const itemPrice = scalePrice(
-					parseInt( raw_prices.price, 10 ),
-					raw_prices.precision,
+					parseInt( rawPrices.price, 10 ),
+					rawPrices.precision,
 					cartItemState.currency.minorUnit
 				);
 
