@@ -19,14 +19,18 @@ use WC_Webhook;
  */
 class AgenticWebhookManager implements RegisterHooksInterface {
 	/**
-	 * Custom webhook topic for Agentic order creation.
+	 * Action that will be triggered for webhooks.
+	 *
+	 * @var string
 	 */
-	const TOPIC_ORDER_CREATED = 'action.woocommerce_agentic_order_created';
+	const WEBHOOK_ACTION = 'woocommerce_agentic_order_changed';
 
 	/**
-	 * Custom webhook topic for Agentic order updates.
+	 * Topic that will be used for webhooks.
+	 *
+	 * @var string
 	 */
-	const TOPIC_ORDER_UPDATED = 'action.woocommerce_agentic_order_updated';
+	const WEBHOOK_TOPIC = 'action.' . self::WEBHOOK_ACTION;
 
 	/**
 	 * Payload builder instance.
@@ -52,6 +56,8 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	 *  @internal
 	 */
 	public function register() {
+		add_action( 'woocommerce_init', array( $this, 'create_webhook' ) );
+
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
 		// Hook into order lifecycle events to fire our custom actions.
@@ -67,14 +73,63 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	}
 
 	/**
+	 * Create the webhook for Agentic Commerce Protocol.
+	 *
+	 * @return void
+	 */
+	public function create_webhook(): void {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
+		$name_prefix = 'ACP';
+		$data_store  = \WC_Data_Store::load( 'webhook' );
+		$webhooks    = $data_store->search_webhooks(
+			array(
+				'search' => $name_prefix,
+				'status' => 'active',
+				'limit'  => 1,
+			)
+		);
+
+		if ( ! empty( $webhooks ) ) {
+			return;
+		}
+
+		/**
+		 * Filter the delivery URL for Agentic webhooks.
+		 *
+		 * @since 10.3.0
+		 *
+		 * @param string $delivery_url Delivery URL.
+		 */
+		$delivery_url = apply_filters( 'woocommerce_agentic_webhook_delivery_url', 'https://tbd.com' );
+
+		// Include the non-translated prefix (ACP) to allow searching for the webhook by name.
+		$name = sprintf(
+			// translators: %s: webhook name prefix (ACP).
+			__( '%s: Order Created or Updated', 'woocommerce' ),
+			$name_prefix
+		);
+
+		$webhook = new \WC_Webhook();
+		$webhook->set_name( $name );
+		$webhook->set_user_id( get_current_user_id() );
+		$webhook->set_topic( self::WEBHOOK_TOPIC );
+		$webhook->set_secret( wp_generate_password( 50, false ) ); // This will be ignored, but is required.
+		$webhook->set_delivery_url( $delivery_url );
+		$webhook->set_status( 'active' );
+		$webhook->save();
+	}
+
+	/**
 	 * Register webhook topic names for display in the UI.
 	 *
 	 * @param array $topics Existing topics.
 	 * @return array Modified topics.
 	 */
 	public function register_webhook_topic_names( $topics ): array {
-		$topics[ self::TOPIC_ORDER_CREATED ] = __( 'Agentic Order Created', 'woocommerce' );
-		$topics[ self::TOPIC_ORDER_UPDATED ] = __( 'Agentic Order Updated', 'woocommerce' );
+		$topics[ self::WEBHOOK_TOPIC ] = __( 'Agentic Commerce Protocol: Order created or updated', 'woocommerce' );
 		return $topics;
 	}
 
@@ -90,14 +145,14 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		}
 
 		/**
-		 * Fires when an Agentic order is created.
+		 * Fires when an Agentic order is updated or created.
 		 *
 		 * @since 10.3.0
 		 *
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_created', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order, 'order_create' );
 	}
 
 	/**
@@ -121,7 +176,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order, 'order_update' );
 	}
 
 	/**
@@ -143,7 +198,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order, 'order_update' );
 	}
 
 	/**
@@ -195,7 +250,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		$topic = $webhook->get_topic();
 
 		// Check if this is one of our Agentic topics.
-		if ( ! in_array( $topic, array( self::TOPIC_ORDER_CREATED, self::TOPIC_ORDER_UPDATED ), true ) ) {
+		if ( self::WEBHOOK_TOPIC !== $topic ) {
 			return $payload;
 		}
 
@@ -205,8 +260,16 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 			return $payload;
 		}
 
-		// Determine event type based on topic.
-		$event = ( self::TOPIC_ORDER_CREATED === $topic ) ? 'order_create' : 'order_update';
+		// The meta key is not used elsewhere, so it is not stored in a constant.
+		$meta_key       = '_acp_order_created_sent';
+		$is_first_event = 'sent' !== $order->get_meta( $meta_key );
+		if ( $is_first_event ) {
+			$event = 'order_create';
+			$order->update_meta_data( $meta_key, 'sent' );
+			$order->save();
+		} else {
+			$event = 'order_update';
+		}
 
 		// Build ACP-compliant payload.
 		return $this->payload_builder->build_payload( $event, $order );
@@ -229,7 +292,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		$topic = $webhook->get_topic();
 
 		// Check if this is one of our Agentic topics.
-		if ( ! in_array( $topic, array( self::TOPIC_ORDER_CREATED, self::TOPIC_ORDER_UPDATED ), true ) ) {
+		if ( self::WEBHOOK_TOPIC !== $topic ) {
 			return $http_args;
 		}
 
