@@ -27,7 +27,9 @@ use Automattic\Jetpack\Constants;
  */
 class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V2_Controller {
 	use CogsAwareRestControllerTrait;
-	use RestApiCache;
+	use RestApiCache {
+		extract_entity_ids as protected parent_extract_entity_ids;
+	}
 
 	/**
 	 * Endpoint namespace.
@@ -1357,7 +1359,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @return array Variation and parent product IDs.
 	 */
 	protected function extract_entity_ids( array $data ): array {
-		$ids = parent::extract_entity_ids( $data );
+		$ids = $this->parent_extract_entity_ids( $data );
 
 		$parent_id = 0;
 		if ( isset( $data[0]['parent_id'] ) ) {
