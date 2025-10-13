@@ -4,7 +4,7 @@ REST API endpoint for managing payment gateway settings in WooCommerce.
 
 ## Endpoint
 
-```
+```http
 GET  /wc/v4/settings/payment-gateways/{gateway_id}
 PUT  /wc/v4/settings/payment-gateways/{gateway_id}
 ```
@@ -130,6 +130,7 @@ Returns the updated gateway object with the same structure as the GET response.
 ### Standard Fields
 
 Standard fields are those defined in the gateway's `form_fields` property:
+
 - Automatically validated and sanitized based on field type
 - Stored in the gateway's settings option
 - Examples: `instructions`, `enable_for_virtual`, `enable_for_methods`
@@ -137,6 +138,7 @@ Standard fields are those defined in the gateway's `form_fields` property:
 ### Top-Level Fields
 
 These fields are handled at the gateway object level:
+
 - `enabled`: Gateway enabled status
 - `title`: Gateway title
 - `description`: Gateway description
@@ -145,6 +147,7 @@ These fields are handled at the gateway object level:
 ### Special Fields
 
 Special fields require custom handling and are gateway-specific:
+
 - Not defined in `form_fields`
 - Require custom validation, sanitization, and storage logic
 - Example: BACS `account_details` (stored in separate option)
@@ -372,7 +375,7 @@ curl -X PUT "https://example.com/wp-json/wc/v4/settings/payment-gateways/bacs" \
 
 ## Architecture
 
-```
+```text
 Controller.php
 ├── get_item()           - GET endpoint handler
 ├── update_item()        - PUT endpoint handler
@@ -398,12 +401,14 @@ Schema/
 ## Testing
 
 Tests are located in:
-```
+
+```text
 tests/php/src/Internal/RestApi/Routes/V4/Settings/PaymentGateways/
 └── PaymentGatewaysSettingsControllerTest.php
 ```
 
 Run tests with:
+
 ```bash
 pnpm --filter=@woocommerce/plugin-woocommerce test:unit:env -- --filter=PaymentGatewaysSettingsControllerTest
 ```
