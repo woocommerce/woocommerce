@@ -26,6 +26,13 @@ class EmailSettingsSchema extends AbstractSchema {
 	const IDENTIFIER = 'email_settings';
 
 	/**
+	 * List of non-editable field types.
+	 *
+	 * @var string[]
+	 */
+	const NON_EDITABLE_TYPES = array( 'title', 'sectionend', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button', 'email_notification', 'email_notification_block_emails', 'hidden' );
+
+	/**
 	 * Return all properties for the item schema.
 	 *
 	 * @return array
@@ -145,8 +152,8 @@ class EmailSettingsSchema extends AbstractSchema {
 		foreach ( $settings as $setting ) {
 			$setting_type = $setting['type'] ?? '';
 
-			// Handle section titles - start of a new group.
-			if ( 'title' === $setting_type ) {
+			// Handle section titles and email_color_palette - start of a new group.
+			if ( 'title' === $setting_type || 'email_color_palette' === $setting_type ) {
 				$current_group_id = $setting['id'] ?? '';
 				$current_group    = array(
 					'title'       => $setting['title'] ?? '',
@@ -168,7 +175,7 @@ class EmailSettingsSchema extends AbstractSchema {
 			}
 
 			// Skip non-editable field types.
-			if ( in_array( $setting_type, array( 'email_notification', 'email_notification_block_emails', 'email_preview', 'email_image_url', 'email_font_family', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button' ), true ) ) {
+			if ( in_array( $setting_type, self::NON_EDITABLE_TYPES, true ) ) {
 				continue;
 			}
 
@@ -192,6 +199,11 @@ class EmailSettingsSchema extends AbstractSchema {
 					$field['description'] = $setting['desc'];
 				}
 
+				// Add options if available.
+				if ( isset( $setting['options'] ) && is_array( $setting['options'] ) ) {
+					$field['options'] = $setting['options'];
+				}
+
 				$current_group['fields'][] = $field;
 
 				// Get current value.
@@ -206,6 +218,14 @@ class EmailSettingsSchema extends AbstractSchema {
 				$values[ $setting_id ] = $current_value;
 			}
 		}
+
+		// Filter groups without fields.
+		$groups = array_filter(
+			$groups,
+			function ( $group ) {
+				return ! empty( $group['fields'] );
+			}
+		);
 
 		$response = array(
 			'id'          => 'email',
@@ -234,6 +254,8 @@ class EmailSettingsSchema extends AbstractSchema {
 			'email'    => 'email',
 			'checkbox' => 'boolean',
 			'number'   => 'number',
+			'color'    => 'color',
+			'select'   => 'select',
 		);
 
 		return $type_map[ $setting_type ] ?? 'text';

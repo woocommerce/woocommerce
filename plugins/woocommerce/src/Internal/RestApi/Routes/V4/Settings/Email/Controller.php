@@ -195,12 +195,12 @@ class Controller extends AbstractController {
 		$settings       = $this->get_all_settings();
 		$settings_by_id = array_column( $settings, null, 'id' );
 
-		// Exclude non-editable markers like 'title' and 'sectionend'.
+		// Exclude non-editable markers like 'title' and 'sectionend, ...'.
 		$settings_by_id = array_filter(
 			$settings_by_id,
 			static function ( $def ) {
 				$type = $def['type'] ?? '';
-				return isset( $def['id'] ) && ! in_array( $type, array( 'title', 'sectionend', 'email_notification', 'email_notification_block_emails', 'email_preview', 'email_image_url', 'email_font_family', 'email_color_palette', 'previewing_new_templates', 'email_improvements_button' ), true );
+				return isset( $def['id'] ) && ! in_array( $type, EmailSettingsSchema::NON_EDITABLE_TYPES, true );
 			}
 		);
 
@@ -348,6 +348,8 @@ class Controller extends AbstractController {
 	private function sanitize_setting_value( $setting_type, $value ) {
 		switch ( $setting_type ) {
 			case 'text':
+			case 'select':
+			case 'color':
 				return sanitize_text_field( $value );
 
 			case 'email':
