@@ -101,7 +101,8 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'description'       => __( 'Limit result set to resources with a specific email.', 'woocommerce' ),
 				'type'              => 'string',
 				'format'            => 'email',
-				'validate_callback' => 'rest_validate_request_arg',
+				'sanitize_callback' => 'sanitize_email',
+				'validate_callback' => 'is_email',
 			),
 			'role'     => array(
 				'description'       => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
