@@ -30,7 +30,10 @@ export const createFieldProps = (
 ): FieldProps => {
 	// Prefix autocomplete with billing/shipping for address fields
 	let autoComplete = field?.autocomplete;
-	if ( autoComplete && ( fieldAddressType === 'billing' || fieldAddressType === 'shipping' ) ) {
+	if (
+		autoComplete &&
+		( fieldAddressType === 'billing' || fieldAddressType === 'shipping' )
+	) {
 		autoComplete = `${ fieldAddressType } ${ autoComplete }`;
 	}
 

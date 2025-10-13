@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add billing/shipping prefixes to autocomplete attributes on checkout address fields to improve browser autofill accuracy when billing and shipping addresses differ.
