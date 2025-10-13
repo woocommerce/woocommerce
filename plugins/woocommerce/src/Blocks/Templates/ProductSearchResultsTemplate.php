@@ -45,7 +45,7 @@ class ProductSearchResultsTemplate extends AbstractTemplate {
 	}
 
 	/**
-	 * Renders the default block template from Woo Blocks if no theme templates exist.
+	 * Run template-specific logic when the query matches this template.
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_post_type_archive( 'product' ) && is_search() ) {

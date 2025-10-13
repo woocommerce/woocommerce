@@ -19,8 +19,8 @@ import { useProduct } from '@woocommerce/entities';
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
-import type { Attributes } from '../types';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import type { Attributes } from '../types';
 
 const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }

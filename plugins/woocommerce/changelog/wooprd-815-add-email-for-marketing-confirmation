@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Use email $template_base when generating initial templates
