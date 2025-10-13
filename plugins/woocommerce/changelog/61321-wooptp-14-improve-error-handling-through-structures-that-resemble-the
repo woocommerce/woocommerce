@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Confirm to the ACP spec when handling errors for checkout sessions.

@@ -30,6 +30,7 @@ interface Options {
 	repository: string;
 	refType: string;
 	refName: string;
+	jobsList?: string;
 }
 
 /**
@@ -101,6 +102,7 @@ export async function createMessage( options: Options ) {
 		repository,
 		refType,
 		refName,
+		jobsList,
 	} = options;
 
 	let target = `for ${ sha }`;
@@ -180,11 +182,51 @@ export async function createMessage( options: Options ) {
 			type: 'context',
 			elements: contextElements,
 		},
-		{
-			type: 'actions',
-			elements: buttons,
-		},
 	];
+
+	// Add jobs list if provided
+	if ( jobsList && jobsList.trim() !== '' ) {
+		// Split by ### to get header and jobs list
+		const parts = jobsList.split( '###' );
+		const header = parts.length > 1 ? parts[ 0 ].trim() : '';
+		const jobsString = parts.length > 1 ? parts[ 1 ] : parts[ 0 ];
+
+		const jobs = jobsString
+			.split( ',' )
+			.filter( ( job ) => job.trim() !== '' );
+		if ( jobs.length > 0 ) {
+			const maxJobs = 5;
+			const displayJobs =
+				jobs.length > maxJobs ? jobs.slice( 0, maxJobs ) : jobs;
+			const jobsText = displayJobs
+				.map( ( job ) => `• ${ job.trim() }` )
+				.join( '\n' );
+
+			let jobsBlockText = jobsText;
+			if ( jobs.length > maxJobs ) {
+				const remaining = jobs.length - maxJobs;
+				jobsBlockText += `\n• _${ remaining } more_`;
+			}
+			if ( header ) {
+				jobsBlockText = `*${ header }*\n${ jobsBlockText }`;
+			}
+
+			mainMsgBlocks.push( {
+				type: 'context',
+				elements: [
+					{
+						type: 'mrkdwn',
+						text: jobsBlockText,
+					},
+				],
+			} );
+		}
+	}
+
+	mainMsgBlocks.push( {
+		type: 'actions',
+		elements: buttons,
+	} );
 
 	const detailsMsgBlocksChunks = [];
 	// detailsMsgBlocksChunks.push( ...getPlaywrightBlocks() );

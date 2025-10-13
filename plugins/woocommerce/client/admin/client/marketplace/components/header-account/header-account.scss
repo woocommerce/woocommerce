@@ -37,6 +37,47 @@
 		}
 	}
 
+	&__header-account-trigger {
+		display: contents;
+
+		&__email,
+		&__expand-icon {
+			display: none;
+		}
+
+		@media screen and (min-width: $breakpoint-medium) {
+			display: flex;
+			align-items: center;
+			gap: $grid-unit-10;
+			border: 1px solid $gutenberg-gray-300;
+			margin: -6px; // accomodate for being placed in a button
+			height: 40px;
+			padding-left: $grid-unit-10;
+			padding-right: $grid-unit-10;
+			max-width: 280px;
+
+			&__email {
+				display: block;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+				overflow: hidden;
+			}
+
+			&__expand-icon,
+			svg,
+			img {
+				display: block;
+				width: $grid-unit-30;
+				height: $grid-unit-30;
+				flex-shrink: 0;
+			}
+		}
+
+		button:focus & {
+			border-color: transparent;
+		}
+	}
+
 	&__header-account-modal-overlay {
 		// This is to ensure the modal is above the user menu popover.
 		z-index: 1000000;

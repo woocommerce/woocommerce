@@ -438,6 +438,8 @@ final class BlockTypesController {
 			'Breadcrumbs',
 			'CartLink',
 			'CatalogSorting',
+			'CategoryTitle',
+			'CategoryDescription',
 			'ClassicTemplate',
 			'ClassicShortcode',
 			'ComingSoon',
