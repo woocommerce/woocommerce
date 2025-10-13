@@ -33,7 +33,7 @@ class BlockTemplatesController {
 		add_action( 'current_screen', array( $this, 'hide_template_selector_in_cart_checkout_pages' ), 10 );
 		add_action( 'wp_enqueue_scripts', [ $this, 'dequeue_legacy_scripts' ], 20 );
 
-		// Fix a bug in WordPress 6.8 and lower that caused block hooks no to
+		// Fix a bug in WordPress 6.8 and lower that caused block hooks not to
 		// run in templates registered via the Template Registration API.
 		// @see https://github.com/WordPress/gutenberg/issues/71139.
 		if ( Utils::wp_version_compare( '6.8', '<=' ) ) {
