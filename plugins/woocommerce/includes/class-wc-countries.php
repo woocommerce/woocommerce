@@ -1714,12 +1714,9 @@ class WC_Countries {
 				$value['country']       = $country;
 			}
 
-			// Add billing/shipping prefix to autocomplete for specific fields.
-			if ( ! empty( $value['autocomplete'] ) ) {
-				$fields_to_prefix = array( 'organization', 'address-line1', 'address-line2', 'address-line3', 'postal-code', 'tel' );
-				if ( in_array( $value['autocomplete'], $fields_to_prefix, true ) ) {
-					$value['autocomplete'] = $autocomplete_prefix . ' ' . $value['autocomplete'];
-				}
+			// Add billing/shipping prefix to autocomplete for all fields except email.
+			if ( ! empty( $value['autocomplete'] ) && 'email' !== $value['autocomplete'] ) {
+				$value['autocomplete'] = $autocomplete_prefix . ' ' . $value['autocomplete'];
 			}
 
 			$address_fields[ $type . $key ] = $value;

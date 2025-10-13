@@ -31,18 +31,7 @@ export const createFieldProps = (
 	// Prefix autocomplete with billing/shipping for address fields
 	let autoComplete = field?.autocomplete;
 	if ( autoComplete && ( fieldAddressType === 'billing' || fieldAddressType === 'shipping' ) ) {
-		// Fields that should have the billing/shipping prefix
-		const fieldsToPrefix = [
-			'organization',
-			'address-line1',
-			'address-line2',
-			'address-line3',
-			'postal-code',
-			'tel',
-		];
-		if ( fieldsToPrefix.includes( autoComplete ) ) {
-			autoComplete = `${ fieldAddressType } ${ autoComplete }`;
-		}
+		autoComplete = `${ fieldAddressType } ${ autoComplete }`;
 	}
 
 	return {
