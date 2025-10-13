@@ -43,5 +43,19 @@ class AgenticController implements RegisterHooksInterface {
 
 		// Resolve webhook manager from container.
 		wc_get_container()->get( AgenticWebhookManager::class )->register();
+
+		// Register OpenAI integration.
+		add_filter( 'woocommerce_integrations', array( $this, 'add_openai_integration' ) );
+	}
+
+	/**
+	 * Add OpenAI integration to WooCommerce integrations.
+	 *
+	 * @param array $integrations Existing integrations.
+	 * @return array Modified integrations.
+	 */
+	public function add_openai_integration( $integrations ) {
+		$integrations[] = OpenAIIntegration::class;
+		return $integrations;
 	}
 }
