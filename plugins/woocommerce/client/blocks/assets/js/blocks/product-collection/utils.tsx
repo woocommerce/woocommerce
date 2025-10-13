@@ -390,9 +390,10 @@ export const useSetPreviewState = ( {
 	 * For all Product Collection blocks that inherit query from the template,
 	 * we want to show a preview message in the editor if the block is in
 	 * generic archive template i.e.
-	 * - Products by category
-	 * - Products by tag
-	 * - Products by attribute
+	 * - Products by Category
+	 * - Products by Tag
+	 * - Products by Attribute
+	 * - Products by Brand
 	 */
 	const termId =
 		location.type === LocationType.Archive
