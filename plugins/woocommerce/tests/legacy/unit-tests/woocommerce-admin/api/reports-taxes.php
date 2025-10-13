@@ -315,6 +315,41 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 		$order->set_total( 109.75 ); // Product + all taxes.
 		$order->save();
 
+		// @todo Remove this once order data is synced to wc_order_tax_lookup
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 1,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 1,
+				'order_tax'    => 5,
+				'total_tax'    => 6,
+			)
+		);
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 2,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 0.5,
+				'order_tax'    => 2.5,
+				'total_tax'    => 3,
+			)
+		);
+		$wpdb->insert(
+			$wpdb->prefix . 'wc_order_tax_lookup',
+			array(
+				'order_id'     => $order->get_id(),
+				'tax_rate_id'  => 3,
+				'date_created' => gmdate( 'Y-m-d H:i:s' ),
+				'shipping_tax' => 0.25,
+				'order_tax'    => 1,
+				'total_tax'    => 1.25,
+			)
+		);
+
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 		// Make the API request.
