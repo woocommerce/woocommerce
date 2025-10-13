@@ -4,8 +4,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\OfflinePaymentMethods;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\Controller;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OfflinePaymentMethods\OfflinePaymentMethodSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Schema\OfflinePaymentMethodSchema;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -21,7 +21,7 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var string
 	 */
-	const ENDPOINT = '/wc/v4/payments/offline-methods';
+	const ENDPOINT = '/wc/v4/settings/payments/offline-methods';
 
 	/**
 	 * @var Controller
@@ -98,17 +98,24 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 
 		$data = $response->get_data();
-		$this->assertCount( 3, $data );
+
+		// Verify top-level structure.
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+
+		$methods = $data['groups']['payment_methods'];
+		$this->assertCount( 3, $methods );
 
 		// Verify structure of first offline payment method.
-		$method = $data[0];
+		$method = reset( $methods );
 		$this->assertArrayHasKey( 'id', $method );
 		$this->assertArrayHasKey( 'title', $method );
 		$this->assertArrayHasKey( 'description', $method );
 		$this->assertArrayHasKey( '_order', $method );
-		$this->assertArrayHasKey( '_type', $method );
-		$this->assertArrayHasKey( 'supports', $method );
-		$this->assertArrayHasKey( 'plugin', $method );
 		$this->assertArrayHasKey( 'icon', $method );
 		$this->assertArrayHasKey( 'state', $method );
 		$this->assertArrayHasKey( 'management', $method );
@@ -117,12 +124,6 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'enabled', $method['state'] );
 		$this->assertArrayHasKey( 'needs_setup', $method['state'] );
 		$this->assertArrayHasKey( 'test_mode', $method['state'] );
-
-		// Verify plugin structure.
-		$this->assertArrayHasKey( '_type', $method['plugin'] );
-		$this->assertArrayHasKey( 'slug', $method['plugin'] );
-		$this->assertArrayHasKey( 'file', $method['plugin'] );
-		$this->assertArrayHasKey( 'status', $method['plugin'] );
 
 		// Verify management structure.
 		$this->assertArrayHasKey( '_links', $method['management'] );
@@ -156,7 +157,9 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertCount( 3, $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertCount( 3, $data['groups']['payment_methods'] );
 	}
 
 	/**
@@ -186,7 +189,9 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertCount( 3, $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertCount( 3, $data['groups']['payment_methods'] );
 	}
 
 	/**
@@ -232,7 +237,9 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		$this->assertCount( 0, $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
+		$this->assertCount( 0, $data['groups']['payment_methods'] );
 	}
 
 	/**
@@ -273,13 +280,11 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 
-		// Should only return the 3 offline payment methods, not the gateway or suggestion.
-		$this->assertCount( 3, $data );
+		$this->assertArrayHasKey( 'groups', $data );
+		$this->assertArrayHasKey( 'payment_methods', $data['groups'] );
 
-		// Verify all returned items are offline payment methods.
-		foreach ( $data as $method ) {
-			$this->assertSame( 'offline_pm', $method['_type'] );
-		}
+		// Should only return the 3 offline payment methods, not the gateway or suggestion.
+		$this->assertCount( 3, $data['groups']['payment_methods'] );
 	}
 
 	/**
@@ -297,12 +302,17 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'offline_payment_method', $schema['title'] );
 		$this->assertSame( 'object', $schema['type'] );
 
-		// Verify key properties exist.
+		// Verify key properties exist for the full response structure.
 		$properties = $schema['properties'];
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'title', $properties );
-		$this->assertArrayHasKey( '_type', $properties );
-		$this->assertArrayHasKey( 'state', $properties );
+		$this->assertArrayHasKey( 'description', $properties );
+		$this->assertArrayHasKey( 'values', $properties );
+		$this->assertArrayHasKey( 'groups', $properties );
+
+		// Verify nested payment_methods structure exists.
+		$this->assertArrayHasKey( 'properties', $properties['groups'] );
+		$this->assertArrayHasKey( 'payment_methods', $properties['groups']['properties'] );
 	}
 
 	/**
