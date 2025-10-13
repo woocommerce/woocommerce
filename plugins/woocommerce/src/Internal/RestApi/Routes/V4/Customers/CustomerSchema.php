@@ -221,7 +221,7 @@ class CustomerSchema extends AbstractSchema {
 			),
 			'is_paying_customer' => array(
 				'description' => __( 'Is the customer a paying customer?', 'woocommerce' ),
-				'type'        => 'bool',
+				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
@@ -287,16 +287,7 @@ class CustomerSchema extends AbstractSchema {
 			return array();
 		}
 
-		$data        = $item->get_data();
-		$format_date = array( 'date_created', 'date_modified' );
-
-		// Format date values.
-		foreach ( $format_date as $key ) {
-			// Date created is stored UTC, date modified is stored WP local time.
-			$datetime              = 'date_created' === $key && is_subclass_of( $data[ $key ], 'DateTime' ) ? get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $data[ $key ]->getTimestamp() ) ) : $data[ $key ];
-			$data[ $key ]          = wc_rest_prepare_date_response( $datetime, false );
-			$data[ $key . '_gmt' ] = wc_rest_prepare_date_response( $datetime );
-		}
+		$data = $item->get_data();
 
 		$formatted_data = array(
 			'id'                 => $item->get_id(),
