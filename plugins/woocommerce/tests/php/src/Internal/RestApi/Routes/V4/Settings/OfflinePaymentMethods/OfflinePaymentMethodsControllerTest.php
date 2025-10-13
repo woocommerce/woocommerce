@@ -1,7 +1,7 @@
 <?php
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\OfflinePaymentMethods;
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller;
