@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.3.0-beta.2 2025-10-06 =
+= 10.3.0-beta.2 2025-10-13 =
 
 **WooCommerce**
 
@@ -217,6 +217,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Support legacy event listeners in iAPI-powered minicart. [#60849](https://github.com/woocommerce/woocommerce/pull/60849)
 * Fix - Update the list of Indian states and union territories to align with current official standards. [#60266](https://github.com/woocommerce/woocommerce/pull/60266)
 * Fix - Update used woocommerce/email-editor pacakge. [#61001](https://github.com/woocommerce/woocommerce/pull/61001)
+* Fix - Persist the initially selected shipping option in the PayPal payment page. [#61299](https://github.com/woocommerce/woocommerce/pull/61299)
 * Add - Add action 'woocommerce_order_scheduler_after_import_order' fired after WooCommerce Analytics imports an order or refund and invalidates reports cache. [#60827](https://github.com/woocommerce/woocommerce/pull/60827)
 * Add - Add address autocomplete API without feature gate. [#60840](https://github.com/woocommerce/woocommerce/pull/60840)
 * Add - Add API endpoints for email settings screen [#61074](https://github.com/woocommerce/woocommerce/pull/61074)
@@ -281,6 +282,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Update the Add to Cart + Options block so attributes are automatically selected when they match the URL parameters [#60745](https://github.com/woocommerce/woocommerce/pull/60745)
 * Update - Update the WooPayments onboarding locking mechanism to include an expiration and auto-unlock. [#61084](https://github.com/woocommerce/woocommerce/pull/61084)
 * Update - Validate quantities are valid in the Add to Cart + Options on every input change [#60598](https://github.com/woocommerce/woocommerce/pull/60598)
+* Update - Added a webhook event to handle pending captures for PayPal Standard payment using PayPal orders v2 API. [#61302](https://github.com/woocommerce/woocommerce/pull/61302)
 * Dev - Added platform docs for Shopify to Woo [#60954](https://github.com/woocommerce/woocommerce/pull/60954)
 * Dev - Added user facing docs for WooCommerce Migrator CLI [#60988](https://github.com/woocommerce/woocommerce/pull/60988)
 * Dev - Add wc/v4/shipping-zones/<id> endpoint with unified location and method data to improve performance in shipping zone details views. [#61017](https://github.com/woocommerce/woocommerce/pull/61017)
@@ -325,6 +327,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Performance - Replace the usage of `parse_blocks` function with the `Block_Scanner` in `CartCheckoutUtils::has_block_variation`. [#60943](https://github.com/woocommerce/woocommerce/pull/60943)
 * Performance - Strip the `rel=self` link from the report response as it is built by the Reports/Controller to avoid the performance penalty from building target hints. [#60791](https://github.com/woocommerce/woocommerce/pull/60791)
 * Performance - Use `Block_Scanner` to find the local pickup text instead of `parse_blocks`. [#60938](https://github.com/woocommerce/woocommerce/pull/60938)
+* Performance - Add composite index on wp_comments to optimize admin comments query [#61288](https://github.com/woocommerce/woocommerce/pull/61288)
 * Enhancement - add brand thumbnail image to product schema [#60398](https://github.com/woocommerce/woocommerce/pull/60398)
 * Enhancement - Allow order data stors to sort orders by order total. [#61104](https://github.com/woocommerce/woocommerce/pull/61104)
 * Enhancement - Allow wc_order_query to query by order total and various operators. [#60995](https://github.com/woocommerce/woocommerce/pull/60995)
