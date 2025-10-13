@@ -291,10 +291,10 @@ class CustomerSchema extends AbstractSchema {
 
 		$formatted_data = array(
 			'id'                 => $item->get_id(),
-			'date_created'       => $data['date_created'],
-			'date_created_gmt'   => $data['date_created_gmt'],
-			'date_modified'      => $data['date_modified'],
-			'date_modified_gmt'  => $data['date_modified_gmt'],
+			'date_created'       => wc_rest_prepare_date_response( $item->get_date_created(), false ),
+			'date_created_gmt'   => wc_rest_prepare_date_response( $item->get_date_created() ),
+			'date_modified'      => wc_rest_prepare_date_response( $item->get_date_modified(), false ),
+			'date_modified_gmt'  => wc_rest_prepare_date_response( $item->get_date_modified() ),
 			'email'              => $data['email'],
 			'first_name'         => $data['first_name'],
 			'last_name'          => $data['last_name'],
