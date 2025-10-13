@@ -36,24 +36,45 @@ class ShippingZoneSchema extends AbstractSchema {
 			'id'        => array(
 				'description' => __( 'Unique identifier for the shipping zone.', 'woocommerce' ),
 				'type'        => 'integer',
+				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'name'      => array(
-				'description' => __( 'Shipping zone name.', 'woocommerce' ),
-				'type'        => 'string',
-				'readonly'    => true,
+				'description'       => __( 'Shipping zone name.', 'woocommerce' ),
+				'type'              => 'string',
+				'context'           => array( 'view', 'edit' ),
+				'required'          => true,
+				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'order'     => array(
 				'description' => __( 'Shipping zone order.', 'woocommerce' ),
 				'type'        => 'integer',
-				'readonly'    => true,
+				'context'     => array( 'view', 'edit' ),
+				'default'     => 0,
 			),
 			'locations' => array(
-				'description' => __( 'Array of location names for this zone.', 'woocommerce' ),
+				'description' => __( 'Array of locations for this zone. Can be empty array but must be explicitly provided.', 'woocommerce' ),
 				'type'        => 'array',
-				'readonly'    => true,
+				'context'     => array( 'view', 'edit' ),
+				'required'    => true,
 				'items'       => array(
-					'type' => 'string',
+					'type'       => 'object',
+					'properties' => array(
+						'code' => array(
+							'description' => __( 'Shipping zone location code.', 'woocommerce' ),
+							'type'        => 'string',
+						),
+						'type' => array(
+							'description' => __( 'Shipping zone location type.', 'woocommerce' ),
+							'type'        => 'string',
+							'default'     => 'country',
+						),
+						'name' => array(
+							'description' => __( 'Shipping zone location name (readonly, auto-generated from code).', 'woocommerce' ),
+							'type'        => 'string',
+							'readonly'    => true,
+						),
+					),
 				),
 			),
 			'methods'   => array(
@@ -110,35 +131,29 @@ class ShippingZoneSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get array of location names for display.
+	 * Get array of location objects for API response.
 	 *
 	 * @param WC_Shipping_Zone $zone Shipping zone object.
 	 * @param string           $view The view for which the API is requested ('summary' or 'detailed').
-	 * @return array
+	 * @return array Array of location objects with code, type, and name.
 	 */
 	protected function get_formatted_zone_locations( WC_Shipping_Zone $zone, string $view = 'summary' ): array {
 		if ( 0 === $zone->get_id() ) {
-			return array( __( 'All regions not covered above', 'woocommerce' ) );
+			return array();
 		}
 
-		$locations = $zone->get_zone_locations();
+		$locations           = $zone->get_zone_locations();
+		$formatted_locations = array();
 
-		if ( 'summary' === $view ) {
-			$location_names = array();
-			foreach ( $locations as $location ) {
-				$location_names[] = $this->get_location_name( $location );
-			}
-			return $location_names;
-		} else {
-			// For detailed view, add name property to each location object.
-			$detailed_locations = array();
-			foreach ( $locations as $location ) {
-				$location_copy        = clone $location;
-				$location_copy->name  = $this->get_location_name( $location );
-				$detailed_locations[] = $location_copy;
-			}
-			return $detailed_locations;
+		foreach ( $locations as $location ) {
+			$formatted_locations[] = array(
+				'code' => isset( $location->code ) ? $location->code : '',
+				'type' => isset( $location->type ) ? $location->type : 'country',
+				'name' => $this->get_location_name( $location ),
+			);
 		}
+
+		return $formatted_locations;
 	}
 
 	/**
@@ -209,6 +224,7 @@ class ShippingZoneSchema extends AbstractSchema {
 				return isset( $countries[ $location->code ] ) ? $countries[ $location->code ] : $location->code;
 
 			case 'state':
+			case 'country:state':
 				$parts = explode( ':', $location->code );
 				if ( count( $parts ) === 2 ) {
 					$states = WC()->countries->get_states( $parts[0] );
