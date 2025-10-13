@@ -18,9 +18,9 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		short_description: __( 'Warm hat for winter', 'woocommerce' ),
 		description:
 			'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
-		price: '7.99',
+		price: '799',
 		price_html:
-			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">£</span>7.99</span>',
+			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>7.99</span>',
 		images: [
 			{
 				id: 1,
@@ -46,16 +46,16 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		variations: [],
 		review_count: 1,
 		prices: {
-			currency_code: 'GBP',
-			currency_symbol: '£',
+			currency_code: 'USD',
+			currency_symbol: '$',
 			currency_minor_unit: 2,
 			currency_decimal_separator: '.',
 			currency_thousand_separator: ',',
-			currency_prefix: '£',
+			currency_prefix: '$',
 			currency_suffix: '',
-			price: '7.99',
-			regular_price: '9.99',
-			sale_price: '7.99',
+			price: '799',
+			regular_price: '999',
+			sale_price: '799',
 			price_range: null,
 		},
 		add_to_cart: {
@@ -78,8 +78,8 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		},
 		sold_individually: false,
 		grouped_products: [],
-		regular_price: '9.99',
-		sale_price: '7.99',
+		regular_price: '999',
+		sale_price: '799',
 		on_sale: true,
 	},
 	{
@@ -94,9 +94,9 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		short_description: __( 'Warm hat for winter', 'woocommerce' ),
 		description:
 			'Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. Aenean ultricies mi vitae est. Mauris placerat eleifend leo.',
-		price: '22.99',
+		price: '2299',
 		price_html:
-			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">£</span>22.99</span>',
+			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>22.99</span>',
 		images: [
 			{
 				id: 1,
@@ -122,16 +122,16 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		variations: [],
 		review_count: 1,
 		prices: {
-			currency_code: 'GBP',
-			currency_symbol: '£',
+			currency_code: 'USD',
+			currency_symbol: '$',
 			currency_minor_unit: 2,
 			currency_decimal_separator: '.',
 			currency_thousand_separator: ',',
-			currency_prefix: '£',
+			currency_prefix: '$',
 			currency_suffix: '',
-			price: '22.99',
-			regular_price: '24.99',
-			sale_price: '22.99',
+			price: '2299',
+			regular_price: '2499',
+			sale_price: '2299',
 			price_range: null,
 		},
 		add_to_cart: {
@@ -154,8 +154,8 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		},
 		sold_individually: false,
 		grouped_products: [],
-		regular_price: '24.99',
-		sale_price: '22.99',
+		regular_price: '2499',
+		sale_price: '2299',
 		on_sale: true,
 	},
 	{
@@ -169,9 +169,9 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		sku: 'woo-polo',
 		short_description: __( 'Polo', 'woocommerce' ),
 		description: 'Polo',
-		price: '22.99',
+		price: '2299',
 		price_html:
-			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">£</span>22.99</span>',
+			'<span class="woocommerce-Price-amount amount"><span class="woocommerce-Price-currencySymbol">$</span>22.99</span>',
 		images: [
 			{
 				id: 1,
@@ -197,16 +197,16 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		variations: [],
 		review_count: 1,
 		prices: {
-			currency_code: 'GBP',
-			currency_symbol: '£',
+			currency_code: 'USD',
+			currency_symbol: '$',
 			currency_minor_unit: 2,
 			currency_decimal_separator: '.',
 			currency_thousand_separator: ',',
-			currency_prefix: '£',
+			currency_prefix: '$',
 			currency_suffix: '',
-			price: '22.99',
-			regular_price: '24.99',
-			sale_price: '22.99',
+			price: '2299',
+			regular_price: '2499',
+			sale_price: '2299',
 			price_range: null,
 		},
 		add_to_cart: {
@@ -229,8 +229,8 @@ export const previewProductResponseItems: ProductResponseItem[] = [
 		},
 		sold_individually: false,
 		grouped_products: [],
-		regular_price: '24.99',
-		sale_price: '22.99',
+		regular_price: '2499',
+		sale_price: '2299',
 		on_sale: true,
 	},
 ];
