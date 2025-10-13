@@ -140,6 +140,19 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 	}
 
 	/**
+	 * Optionally add the ID to the orderby clause if the orderby is modified.
+	 *
+	 * @param WP_Query $wp_query The WP_Query object.
+	 * @return WP_Query
+	 */
+	public static function optionally_add_wp_query_orderby_id( $wp_query ) {
+		if ( 'modified' === $wp_query->get( 'orderby' ) ) {
+			$wp_query->set( 'orderby', 'modified ID' );
+		}
+		return;
+	}
+
+	/**
 	 * Get a collection of posts and add the post title filter option to WP_Query.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
@@ -149,10 +162,12 @@ class ProductVariations extends \WC_REST_Product_Variations_Controller {
 		add_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10, 2 );
 		add_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10, 2 );
 		add_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10, 2 );
+		add_action( 'pre_get_posts', array( __CLASS__, 'optionally_add_wp_query_orderby_id' ), 10, 2 );
 		$response = parent::get_items( $request );
 		remove_filter( 'posts_where', array( __CLASS__, 'add_wp_query_filter' ), 10 );
 		remove_filter( 'posts_join', array( __CLASS__, 'add_wp_query_join' ), 10 );
 		remove_filter( 'posts_groupby', array( 'Automattic\WooCommerce\Admin\API\Products', 'add_wp_query_group_by' ), 10 );
+		remove_action( 'pre_get_posts', array( __CLASS__, 'optionally_add_wp_query_orderby_id' ), 10 );
 		return $response;
 	}
 
