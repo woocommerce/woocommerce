@@ -35,7 +35,7 @@ class BlockTemplatesController {
 
 		// Fix a bug in WordPress 6.8 and lower that caused block hooks no to
 		// run in templates registered via the Template Registration API.
-		// @see https://github.com/WordPress/gutenberg/issues/71139
+		// @see https://github.com/WordPress/gutenberg/issues/71139.
 		if ( Utils::wp_version_compare( '6.8', '<=' ) ) {
 			add_filter( 'get_block_templates', array( $this, 'run_hooks_on_block_templates' ), 10, 3 );
 		}
