@@ -1705,11 +1705,23 @@ class WC_Countries {
 		// Prepend field keys.
 		$address_fields = array();
 
+		// Determine the address type prefix (billing or shipping) for autocomplete.
+		$autocomplete_prefix = rtrim( $type, '_' );
+
 		foreach ( $fields as $key => $value ) {
 			if ( 'state' === $key ) {
 				$value['country_field'] = $type . 'country';
 				$value['country']       = $country;
 			}
+
+			// Add billing/shipping prefix to autocomplete for specific fields.
+			if ( ! empty( $value['autocomplete'] ) ) {
+				$fields_to_prefix = array( 'organization', 'address-line1', 'address-line2', 'address-line3', 'postal-code', 'tel' );
+				if ( in_array( $value['autocomplete'], $fields_to_prefix, true ) ) {
+					$value['autocomplete'] = $autocomplete_prefix . ' ' . $value['autocomplete'];
+				}
+			}
+
 			$address_fields[ $type . $key ] = $value;
 		}
 
@@ -1722,7 +1734,7 @@ class WC_Countries {
 					'type'         => 'tel',
 					'class'        => array( 'form-row-wide' ),
 					'validate'     => array( 'phone' ),
-					'autocomplete' => 'tel',
+					'autocomplete' => 'billing tel',
 					'priority'     => 100,
 				);
 			}

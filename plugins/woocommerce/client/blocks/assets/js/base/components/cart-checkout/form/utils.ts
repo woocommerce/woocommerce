@@ -27,21 +27,40 @@ export const createFieldProps = (
 	field: KeyedParsedFormFields[ number ],
 	formId: string,
 	fieldAddressType: string
-): FieldProps => ( {
-	id: `${ formId }-${ field?.key }`.replaceAll( '/', '-' ), // Replace all slashes with hyphens to avoid invalid HTML ID.
-	errorId: `${ fieldAddressType }_${ field?.key }`,
-	label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
-	autoCapitalize: field?.autocapitalize,
-	autoComplete: field?.autocomplete,
-	errorMessage: field?.errorMessage || '',
-	required: field?.required,
-	placeholder: field?.placeholder,
-	className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
-		'/',
-		'-'
-	), // Replace all slashes with hyphens to avoid invalid HTML classes.,
-	...field?.attributes,
-} );
+): FieldProps => {
+	// Prefix autocomplete with billing/shipping for address fields
+	let autoComplete = field?.autocomplete;
+	if ( autoComplete && ( fieldAddressType === 'billing' || fieldAddressType === 'shipping' ) ) {
+		// Fields that should have the billing/shipping prefix
+		const fieldsToPrefix = [
+			'organization',
+			'address-line1',
+			'address-line2',
+			'address-line3',
+			'postal-code',
+			'tel',
+		];
+		if ( fieldsToPrefix.includes( autoComplete ) ) {
+			autoComplete = `${ fieldAddressType } ${ autoComplete }`;
+		}
+	}
+
+	return {
+		id: `${ formId }-${ field?.key }`.replaceAll( '/', '-' ), // Replace all slashes with hyphens to avoid invalid HTML ID.
+		errorId: `${ fieldAddressType }_${ field?.key }`,
+		label: ( field?.required ? field?.label : field?.optionalLabel ) || '',
+		autoCapitalize: field?.autocapitalize,
+		autoComplete,
+		errorMessage: field?.errorMessage || '',
+		required: field?.required,
+		placeholder: field?.placeholder,
+		className: `wc-block-components-address-form__${ field?.key }`.replaceAll(
+			'/',
+			'-'
+		), // Replace all slashes with hyphens to avoid invalid HTML classes.,
+		...field?.attributes,
+	};
+};
 
 export const createCheckboxFieldProps = ( fieldProps: FieldProps ) => {
 	const { autoCapitalize, autoComplete, placeholder, ...rest } = fieldProps;
