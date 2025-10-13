@@ -246,30 +246,30 @@ const productGallery = {
 		},
 		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
 			if (
-				event.code === 'Enter' ||
-				event.code === 'Space' ||
-				event.code === 'NumpadEnter'
+				event.key === 'Enter' ||
+				event.key === 'Space' ||
+				event.key === 'NumpadEnter'
 			) {
-				if ( event.code === 'Space' ) {
+				if ( event.key === 'Space' ) {
 					event.preventDefault();
 				}
 				actions.openDialog();
 			}
 
-			if ( event.code === 'ArrowRight' ) {
+			if ( event.key === 'ArrowRight' ) {
 				actions.selectNextImage();
 			}
 
-			if ( event.code === 'ArrowLeft' ) {
+			if ( event.key === 'ArrowLeft' ) {
 				actions.selectPreviousImage();
 			}
 		},
 		onDialogKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'Escape' ) {
+			if ( event.key === 'Escape' ) {
 				actions.closeDialog();
 			}
 
-			if ( event.code === 'Tab' ) {
+			if ( event.key === 'Tab' ) {
 				const focusableElementsSelectors =
 					'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
@@ -383,12 +383,12 @@ const productGallery = {
 			context.thumbnailsOverflow = overflowState;
 		},
 		onArrowsKeyDown: ( event: KeyboardEvent ) => {
-			if ( event.code === 'ArrowRight' ) {
+			if ( event.key === 'ArrowRight' ) {
 				event.preventDefault();
 				actions.selectNextImage();
 			}
 
-			if ( event.code === 'ArrowLeft' ) {
+			if ( event.key === 'ArrowLeft' ) {
 				event.preventDefault();
 				actions.selectPreviousImage();
 			}
