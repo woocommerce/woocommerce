@@ -450,7 +450,7 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Whether the current request is the agentic commerce.
+	 * Whether the current request is for agentic commerce.
 	 *
 	 * @return bool
 	 */
@@ -464,7 +464,7 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Get the checkout session ID. If not exists, generate a Cart-Token for it, save to the current session.
+	 * Get the checkout session ID. If it does not exist, generate a cart token for it and save to the current session.
 	 *
 	 * @return string Checkout Session ID stored in the current session.
 	 */
