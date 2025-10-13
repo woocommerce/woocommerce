@@ -171,16 +171,13 @@ trait RestApiCache {
 	 * @return array|null Array with 'request_hash' (string) and 'entity_type' (string), or null to skip caching.
 	 */
 	protected function get_request_uid_info( WP_REST_Request $request ): ?array {
-		if ( ! $this->route_belongs_to_this_controller( $request ) ) {
+		if ( ! $this->route_belongs_to_this_controller( $request ) || $request->get_method() !== 'GET' ) {
 			return null;
 		}
 
-		$entity_type  = $request->get_method() === 'GET' ? $this->get_default_entity_type() : null;
-		$request_hash = md5( $request->get_route() . '-' . wp_json_encode( $request->get_query_params() ) );
-
 		$uid_info = array(
-			'request_hash' => $request_hash,
-			'entity_type'  => $entity_type,
+			'request_hash' => md5( $request->get_route() . '-' . wp_json_encode( $request->get_query_params() ) ),
+			'entity_type'  => $this->get_default_entity_type(),
 		);
 
 		/**
