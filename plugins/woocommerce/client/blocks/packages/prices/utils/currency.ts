@@ -74,7 +74,8 @@ export const normalizeCurrencyResponse = (
 				? decimalSeparator
 				: defaultCurrency.decimalSeparator,
 		minorUnit:
-			Number.isInteger( minorUnit as number ) && ( minorUnit as number ) >= 0
+			Number.isInteger( minorUnit as number ) &&
+			( minorUnit as number ) >= 0
 				? ( minorUnit as number )
 				: defaultCurrency.minorUnit,
 		prefix: typeof prefix === 'string' ? prefix : defaultCurrency.prefix,
