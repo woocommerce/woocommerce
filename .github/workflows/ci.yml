@@ -550,6 +550,7 @@ jobs:
       ${{
         ! cancelled() && 
         github.event_name == 'pull_request' && 
+        github.event.pull_request.user.login != 'woocommercebot' && 
         github.event.pull_request.user.login != 'github-actions[bot]' && 
         needs.identify-jobs-to-run.outputs.needs-changelog-validation == 'true' && 
         ( github.event.pull_request.base.ref == 'trunk' || startsWith( github.event.pull_request.base.ref, 'release/' ) ) && 
