@@ -181,8 +181,7 @@ class Controller extends AbstractController {
 	public function get_item( $request ) {
 		$user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $request['id'] );
 		if ( is_wp_error( $user ) ) {
-			$user->add_data( array( 'status' => 404 ) );
-			return $user;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		$customer = $this->prepare_item_for_response( $user, $request );
@@ -274,7 +273,7 @@ class Controller extends AbstractController {
 		} catch ( \WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_cannot_create', $e->getMessage(), array( 'status' => 400 ) );
+			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 	}
 
@@ -287,8 +286,7 @@ class Controller extends AbstractController {
 	public function update_item( $request ) {
 		$user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $request['id'] );
 		if ( is_wp_error( $user ) ) {
-			$user->add_data( array( 'status' => 404 ) );
-			return $user;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		$customer = new WC_Customer( $user->ID );
@@ -317,7 +315,7 @@ class Controller extends AbstractController {
 		} catch ( \WC_REST_Exception $e ) {
 			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'woocommerce_rest_cannot_update', $e->getMessage(), array( 'status' => 400 ) );
+			return $this->get_route_error_by_code( self::CANNOT_UPDATE );
 		}
 	}
 
@@ -339,15 +337,14 @@ class Controller extends AbstractController {
 
 		$user_data = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $id );
 		if ( is_wp_error( $user_data ) ) {
-			$user_data->add_data( array( 'status' => 404 ) );
-			return $user_data;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		if ( ! empty( $reassign ) ) {
 			$reassign_user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $reassign );
 
 			if ( $reassign === $id || is_wp_error( $reassign_user ) ) {
-				return new WP_Error( 'woocommerce_rest_customer_invalid_reassign', __( 'Invalid resource id for reassignment.', 'woocommerce' ), array( 'status' => 400 ) );
+				return $this->get_route_error_by_code( self::INVALID_ID );
 			}
 		}
 
@@ -405,8 +402,7 @@ class Controller extends AbstractController {
 		$user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $request['id'] );
 
 		if ( is_wp_error( $user ) ) {
-			$user->add_data( array( 'status' => 404 ) );
-			return $user;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		if ( ! wc_rest_check_user_permissions( 'read', $user->ID ) ) {
@@ -438,8 +434,7 @@ class Controller extends AbstractController {
 		$user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $request['id'] );
 
 		if ( is_wp_error( $user ) ) {
-			$user->add_data( array( 'status' => 404 ) );
-			return $user;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		if ( ! wc_rest_check_user_permissions( 'edit', $user->ID ) ) {
@@ -483,8 +478,7 @@ class Controller extends AbstractController {
 		$user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $request['id'] );
 
 		if ( is_wp_error( $user ) ) {
-			$user->add_data( array( 'status' => 404 ) );
-			return $user;
+			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
 		if ( ! wc_rest_check_user_permissions( 'delete', $user->ID ) ) {
