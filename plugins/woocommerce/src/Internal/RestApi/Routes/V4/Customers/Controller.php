@@ -161,15 +161,10 @@ class Controller extends AbstractController {
 					'callback'            => array( $this, 'delete_item' ),
 					'permission_callback' => array( $this, 'delete_item_permissions_check' ),
 					'args'                => array(
-						'force'    => array(
+						'force' => array(
 							'default'     => false,
 							'type'        => 'boolean',
 							'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
-						),
-						'reassign' => array(
-							'default'     => 0,
-							'type'        => 'integer',
-							'description' => __( 'ID to reassign posts to.', 'woocommerce' ),
 						),
 					),
 				),
