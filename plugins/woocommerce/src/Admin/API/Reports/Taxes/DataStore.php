@@ -85,7 +85,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$this->report_columns = array(
 			'tax_rate_id'  => "{$table_name}.tax_rate_id",
 			'name'         => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-2), '-', 1) as name",
-			'tax_rate'     => "CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate",
+			'tax_rate'     => 'CAST(itemmeta_rate_percent.meta_value AS DECIMAL(7,4)) as tax_rate',
 			'country'      => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',1) as country",
 			'state'        => "SUBSTRING_INDEX(SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-3), '-', 1) as state",
 			'priority'     => "SUBSTRING_INDEX({$wpdb->prefix}woocommerce_order_items.order_item_name,'-',-1) as priority",
