@@ -431,9 +431,10 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemHasDiscount(): boolean {
+				const { raw_prices } = cartItemState.cartItem.prices;
 				return (
-					cartItemState.cartItem.prices.raw_prices.regular_price >
-					cartItemState.cartItem.prices.raw_prices.price
+					parseInt( raw_prices.regular_price, 10 ) >
+					parseInt( raw_prices.price, 10 )
 				);
 			},
 
@@ -517,10 +518,10 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
-				const { prices } = cartItemState.cartItem;
+				const { raw_prices } = cartItemState.cartItem.prices;
 				const priceWithoutDiscount = scalePrice(
-					parseInt( prices.raw_prices.regular_price, 10 ),
-					prices.raw_prices.precision,
+					parseInt( raw_prices.regular_price, 10 ),
+					raw_prices.precision,
 					cartItemState.currency.minorUnit
 				);
 
@@ -583,10 +584,10 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
-				const { prices } = cartItemState.cartItem;
+				const { raw_prices } = cartItemState.cartItem.prices;
 				const itemPrice = scalePrice(
-					parseInt( prices.raw_prices.price, 10 ),
-					prices.raw_prices.precision,
+					parseInt( raw_prices.price, 10 ),
+					raw_prices.precision,
 					cartItemState.currency.minorUnit
 				);
 
