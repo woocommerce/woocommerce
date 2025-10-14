@@ -10,14 +10,16 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Gateways\PayPal;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * WC_Gateway_Paypal_Constants Class.
+ * Constants Class.
  */
-class WC_Gateway_Paypal_Constants {
+class Constants {
 	/**
 	 * PayPal proxy request timeout.
 	 */

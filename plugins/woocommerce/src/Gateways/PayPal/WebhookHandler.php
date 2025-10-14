@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -75,7 +76,7 @@ class WebhookHandler {
 
 		// Skip if the payment is already processed.
 		$paypal_status = $order->get_meta( '_paypal_status', true );
-		if ( in_array( $paypal_status, array( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED, \WC_Gateway_Paypal_Constants::STATUS_APPROVED ), true ) ) {
+		if ( in_array( $paypal_status, array( PayPalConstants::STATUS_COMPLETED, PayPalConstants::STATUS_APPROVED ), true ) ) {
 			return;
 		}
 
@@ -96,7 +97,7 @@ class WebhookHandler {
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
 			$links         = $event['resource']['links'] ?? null;
-			$action        = \WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $paypal_intent ? \WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : \WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
+			$action        = PayPalConstants::INTENT_CAPTURE === $paypal_intent ? PayPalConstants::PAYMENT_ACTION_CAPTURE : PayPalConstants::PAYMENT_ACTION_AUTHORIZE;
 			$this->authorize_or_capture_payment( $order, $links, $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
@@ -126,7 +127,7 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -159,7 +160,7 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -187,7 +188,7 @@ class WebhookHandler {
 		}
 
 		// Skip if the payment is already processed.
-		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( PayPalConstants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 

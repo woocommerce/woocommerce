@@ -19,10 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-constants.php';
-}
-
 if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
 	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
 }

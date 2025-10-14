@@ -11,6 +11,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\WebhookHandler;
 
 /**
@@ -116,7 +117,7 @@ class WebhookHandlerTests extends \WC_Unit_Test_Case {
 	public function test_process_checkout_order_approved_skips_already_processed() {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', \WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -193,7 +194,7 @@ class WebhookHandlerTests extends \WC_Unit_Test_Case {
 	public function test_process_payment_capture_completed_skips_already_processed() {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', \WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(
@@ -267,7 +268,7 @@ class WebhookHandlerTests extends \WC_Unit_Test_Case {
 	public function test_process_payment_authorization_created_skips_already_processed() {
 		$test_order = \WC_Helper_Order::create_order();
 		$test_order->set_payment_method( 'paypal' );
-		$test_order->update_meta_data( '_paypal_status', \WC_Gateway_Paypal_Constants::STATUS_COMPLETED );
+		$test_order->update_meta_data( '_paypal_status', PayPalConstants::STATUS_COMPLETED );
 		$test_order->save();
 
 		$custom_id_data = array(

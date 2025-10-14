@@ -7,12 +7,10 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-constants.php';
 }
 
 /**
@@ -123,7 +121,7 @@ class WC_Gateway_Paypal_Helper {
 
 			if ( is_array( $value ) ) {
 				$redacted_data[ $key ] = self::redact_data( $value );
-			} elseif ( in_array( $key, WC_Gateway_Paypal_Constants::FIELDS_TO_REDACT, true ) ) {
+			} elseif ( in_array( $key, PayPalConstants::FIELDS_TO_REDACT, true ) ) {
 				$redacted_data[ $key ] = '[redacted]';
 			} else {
 				// Keep non-PII data as is.

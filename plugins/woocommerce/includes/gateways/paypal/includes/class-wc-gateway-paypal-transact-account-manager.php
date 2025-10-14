@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -353,7 +354,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 			array(
 				'headers' => array( 'Content-Type' => 'application/json' ),
 				'method'  => $method,
-				'timeout' => WC_Gateway_Paypal_Constants::WPCOM_PROXY_REQUEST_TIMEOUT,
+				'timeout' => PayPalConstants::WPCOM_PROXY_REQUEST_TIMEOUT,
 			),
 			'GET' === $method ? null : wp_json_encode( $request_body ),
 			'wpcom'
