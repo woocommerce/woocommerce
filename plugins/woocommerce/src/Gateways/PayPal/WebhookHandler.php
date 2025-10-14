@@ -1,11 +1,13 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Webhook_Handler file.
+ * Class WebhookHandler file.
  *
  * @package WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 
@@ -24,21 +26,20 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
 /**
  * Handles webhook events.
  */
-class WC_Gateway_Paypal_Webhook_Handler {
-
+class WebhookHandler {
 	/**
 	 * Process the webhook event.
 	 *
-	 * @param WP_REST_Request $request The request object.
+	 * @param \WP_REST_Request $request The request object.
 	 */
 	public function process_webhook( WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 		if ( ! is_array( $data ) || empty( $data['event_type'] ) || empty( $data['resource'] ) ) {
-			WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
+			\WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
 			return;
 		}
 
-		WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
+		\WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( \WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
 
 		switch ( $data['event_type'] ) {
 			case 'CHECKOUT.ORDER.APPROVED':
@@ -54,7 +55,7 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				$this->process_payment_authorization_created( $data );
 				break;
 			default:
-				WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
+				\WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( \WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
 				break;
 		}
 	}
@@ -66,22 +67,22 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_checkout_order_approved( $event ) {
 		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
-		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
 		}
 
 		// Skip if the payment is already processed.
 		$paypal_status = $order->get_meta( '_paypal_status', true );
-		if ( in_array( $paypal_status, array( WC_Gateway_Paypal_Constants::STATUS_COMPLETED, WC_Gateway_Paypal_Constants::STATUS_APPROVED ), true ) ) {
+		if ( in_array( $paypal_status, array( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED, \WC_Gateway_Paypal_Constants::STATUS_APPROVED ), true ) ) {
 			return;
 		}
 
 		$status          = $event['resource']['status'] ?? null;
 		$paypal_order_id = $event['resource']['id'] ?? null;
 		if ( 'APPROVED' === $status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
+			\WC_Gateway_Paypal::log( 'PayPal payment approved. Order ID: ' . $order->get_id() );
 			$order->update_meta_data( '_paypal_status', $status );
 			$order->add_order_note(
 				sprintf(
@@ -95,11 +96,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			// Authorize or capture the payment after approval.
 			$paypal_intent = $event['resource']['intent'] ?? null;
 			$links         = $event['resource']['links'] ?? null;
-			$action        = WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $paypal_intent ? WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
+			$action        = \WC_Gateway_Paypal_Constants::INTENT_CAPTURE === $paypal_intent ? \WC_Gateway_Paypal_Constants::PAYMENT_ACTION_CAPTURE : \WC_Gateway_Paypal_Constants::PAYMENT_ACTION_AUTHORIZE;
 			$this->authorize_or_capture_payment( $order, $links, $action );
 		} else {
 			// This is unexpected for a CHECKOUT.ORDER.APPROVED event.
-			WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
+			\WC_Gateway_Paypal::log( 'PayPal payment approval failed. Order ID: ' . $order->get_id() . ' Status: ' . $status );
 			$order->add_order_note(
 				sprintf(
 					/* translators: %1$s: PayPal order ID, %2$s: Status */
@@ -118,14 +119,14 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_payment_capture_completed( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
 		}
 
 		// Skip if the payment is already processed.
-		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -151,14 +152,14 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_payment_capture_pending( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
 		}
 
 		// Skip if the payment is already processed.
-		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -179,14 +180,14 @@ class WC_Gateway_Paypal_Webhook_Handler {
 	 */
 	private function process_payment_authorization_created( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
-			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
 		}
 
 		// Skip if the payment is already processed.
-		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+		if ( \WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
 			return;
 		}
 
@@ -216,11 +217,11 @@ class WC_Gateway_Paypal_Webhook_Handler {
 
 		$payment_gateways = WC()->payment_gateways()->payment_gateways();
 		if ( ! isset( $payment_gateways['paypal'] ) ) {
-			WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
+			\WC_Gateway_Paypal::log( 'PayPal gateway is not available.' );
 			return;
 		}
 		$gateway        = $payment_gateways['paypal'];
-		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
+		$paypal_request = new \WC_Gateway_Paypal_Request( $gateway );
 		$paypal_request->authorize_or_capture_payment( $order, $action_url, $action );
 	}
 
