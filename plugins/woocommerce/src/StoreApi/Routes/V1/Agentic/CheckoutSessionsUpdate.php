@@ -4,9 +4,13 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic;
 
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\Agentic\CheckoutSessionSchema;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
@@ -164,15 +168,34 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
+		$cart             = $this->cart_controller->get_cart_instance();
+		$checkout_session = new AgenticCheckoutSession( $cart );
+
+		$current_status = AgenticCheckoutUtils::calculate_status( $checkout_session );
+		if ( ! in_array( $current_status, CheckoutSessionStatus::ALLOWED_STATUSES_FOR_UPDATE, true ) ) {
+			$allowed_statuses = implode( ', ', CheckoutSessionStatus::ALLOWED_STATUSES_FOR_UPDATE );
+			$message          = sprintf(
+				/* translators: 1: current session status, 2: allowed statuses */
+				__( 'Checkout session cannot be updated. Current status: %1$s. Allowed statuses: %2$s', 'woocommerce' ),
+				$current_status,
+				$allowed_statuses
+			);
+			return Error::invalid_request( ErrorCode::INVALID, $message )->to_rest_response();
+		}
+
 		// Update items if provided.
 		$items = $request->get_param( 'items' );
 		if ( null !== $items ) {
 			// Clear existing cart items and replace with new ones.
-			WC()->cart->empty_cart();
+			$this->cart_controller->empty_cart();
 
-			$error = AgenticCheckoutUtils::add_items_to_cart( $items, $this->cart_controller );
-			if ( $error ) {
-				return $error;
+			$error = AgenticCheckoutUtils::add_items_to_cart(
+				$items,
+				$this->cart_controller,
+				$checkout_session->get_messages()
+			);
+			if ( $error instanceof Error ) {
+				return $error->to_rest_response();
 			}
 		}
 
@@ -204,12 +227,17 @@ class CheckoutSessionsUpdate extends AbstractCartRoute {
 		}
 
 		// Calculate totals after all updates.
-		WC()->cart->calculate_totals();
+		try {
+			$this->cart_controller->calculate_totals();
+		} catch ( \Exception $e ) {
+			$message = wp_specialchars_decode( $e->getMessage(), ENT_QUOTES );
+			return Error::processing_error( 'totals_calculation_error', $message )->to_rest_response();
+		}
 
 		// Build response from canonical cart schema.
-		$response = rest_ensure_response( $this->schema->get_item_response( WC()->cart ) );
+		$response = $this->schema->get_item_response( $checkout_session );
 
 		// Add protocol headers.
-		return AgenticCheckoutUtils::add_protocol_headers( $response, $request );
+		return AgenticCheckoutUtils::add_protocol_headers( rest_ensure_response( $response ), $request );
 	}
 }

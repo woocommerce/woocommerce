@@ -3,9 +3,15 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorType;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error as AgenticError;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\MessageError;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Messages\Messages;
 
 /**
  * AgenticCheckoutUtils class.
@@ -106,19 +112,16 @@ class AgenticCheckoutUtils {
 	 *
 	 * @param array          $items Items array from request.
 	 * @param CartController $cart_controller Cart controller instance.
-	 * @return \WP_REST_Response|null Returns error response on failure, null on success.
+	 * @param Messages       $messages Error messages instance.
+	 * @return Error|null Returns error response on failure, null on success.
 	 */
-	public static function add_items_to_cart( $items, $cart_controller ) {
-		foreach ( $items as $index => $item ) {
-			if ( ! is_numeric( $item['id'] ) ) {
-				return new \WP_REST_Response(
-					[
-						'type'    => ErrorType::INVALID_REQUEST,
-						'code'    => 'invalid_product_id',
-						'message' => __( 'Product ID must be numeric.', 'woocommerce' ),
-						'param'   => '$.items[' . $index . '].id',
-					],
-					400
+	public static function add_items_to_cart( $items, $cart_controller, $messages ) {
+		foreach ( $items as $item_index => $item ) {
+			if ( ! ctype_digit( $item['id'] ) ) {
+				return AgenticError::invalid_request(
+					'invalid_product_id',
+					__( 'Product ID must be numeric.', 'woocommerce' ),
+					'$.items[' . $item_index . '].id'
 				);
 			}
 
@@ -132,56 +135,29 @@ class AgenticCheckoutUtils {
 						'quantity' => $quantity,
 					]
 				);
-			} catch ( \Exception $e ) {
-				return self::create_error_response_from_exception( $e, $index );
+			} catch ( RouteException $exception ) {
+				$message       = wp_specialchars_decode( $exception->getMessage(), ENT_QUOTES );
+				$param         = '$.items[' . $item_index . ']';
+				$message_error = null;
+
+				// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
+				switch ( $exception->getErrorCode() ) {
+					case 'woocommerce_rest_product_out_of_stock':
+					case 'woocommerce_rest_product_partially_out_of_stock':
+						$message_error = MessageError::out_of_stock( $message, $param );
+						break;
+				}
+
+				if ( null !== $message_error ) {
+					$messages->add( $message_error );
+				} else {
+					// The error code is generally applicable only to MessageErrors, but we can use it here as well.
+					return AgenticError::invalid_request( ErrorCode::INVALID, $message, $param );
+				}
 			}
 		}
 
 		return null;
-	}
-
-	/**
-	 * Create error response from exception.
-	 *
-	 * @param \Exception $exception The exception.
-	 * @param int        $item_index The item index in the request.
-	 * @return \WP_REST_Response Error response.
-	 */
-	public static function create_error_response_from_exception( \Exception $exception, $item_index ) {
-
-		$error_message = $exception->getMessage();
-		$error_code    = ErrorCode::INVALID; // Default fallback.
-
-		// Check if it's a RouteException with a specific error code.
-		if ( $exception instanceof RouteException ) {
-			$wc_error_code = $exception->getErrorCode();
-
-			// Map WooCommerce error codes to Agentic Commerce Protocol error codes.
-			switch ( $wc_error_code ) {
-				case 'woocommerce_rest_product_out_of_stock':
-				case 'woocommerce_rest_product_partially_out_of_stock':
-					$error_code = ErrorCode::OUT_OF_STOCK;
-					break;
-				case 'woocommerce_rest_product_not_purchasable':
-				case 'woocommerce_rest_cart_invalid_product':
-				case 'woocommerce_rest_invalid_product_id':
-					$error_code = ErrorCode::INVALID;
-					break;
-				default:
-					// Keep default 'invalid' for unknown error codes.
-					break;
-			}
-		}
-
-		return new \WP_REST_Response(
-			[
-				'type'    => ErrorType::INVALID_REQUEST,
-				'code'    => $error_code,
-				'message' => $error_message,
-				'param'   => '$.items[' . $item_index . ']',
-			],
-			400
-		);
 	}
 
 	/**
@@ -295,6 +271,44 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
+	 * Set billing address on customer.
+	 *
+	 * @param array        $address Address data.
+	 * @param \WC_Customer $customer Customer instance.
+	 */
+	public static function set_billing_address( $address, $customer ) {
+		// Only parse and set name if provided and non-empty.
+		if ( ! empty( $address['name'] ) ) {
+			$name       = wc_clean( wp_unslash( $address['name'] ) );
+			$name_parts = explode( ' ', $name, 2 );
+			$first_name = $name_parts[0];
+			$last_name  = isset( $name_parts[1] ) ? $name_parts[1] : '';
+
+			// Set billing names.
+			$customer->set_billing_first_name( $first_name );
+			$customer->set_billing_last_name( $last_name );
+		}
+
+		// Sanitize all address fields.
+		$line_one    = wc_clean( wp_unslash( $address['line_one'] ?? '' ) );
+		$line_two    = wc_clean( wp_unslash( $address['line_two'] ?? '' ) );
+		$city        = wc_clean( wp_unslash( $address['city'] ?? '' ) );
+		$state       = wc_clean( wp_unslash( $address['state'] ?? '' ) );
+		$postal_code = wc_clean( wp_unslash( $address['postal_code'] ?? '' ) );
+		$country     = wc_clean( wp_unslash( $address['country'] ?? '' ) );
+
+		// Set billing address fields.
+		$customer->set_billing_address_1( $line_one );
+		$customer->set_billing_address_2( $line_two );
+		$customer->set_billing_city( $city );
+		$customer->set_billing_state( $state );
+		$customer->set_billing_postcode( $postal_code );
+		$customer->set_billing_country( $country );
+
+		$customer->save();
+	}
+
+	/**
 	 * Add Agentic Commerce Protocol headers to response.
 	 *
 	 * @param \WP_REST_Response $response Response object.
@@ -338,5 +352,100 @@ class AgenticCheckoutUtils {
 
 		// V1: Allow all requests (implement proper auth in future).
 		return true;
+	}
+
+	/**
+	 * Validates a session.
+	 *
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
+	 * @return void
+	 */
+	public static function validate( AgenticCheckoutSession $checkout_session ): void {
+		$messages = $checkout_session->get_messages();
+
+		// Check if ready for payment.
+		$needs_shipping = $checkout_session->get_cart()->needs_shipping();
+		$has_address    = WC()->customer && WC()->customer->get_shipping_address_1();
+
+		// Add info message if shipping is needed.
+		if ( $needs_shipping && ! $has_address ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'Shipping address required.', 'woocommerce' ),
+					'$.fulfillment_address'
+				)
+			);
+		}
+
+		// Check if valid shipping method is selected (not just empty strings).
+		$chosen_methods = WC()->session ? WC()->session->get( SessionKey::CHOSEN_SHIPPING_METHODS ) : null;
+		$has_shipping   = ! empty( $chosen_methods ) && ! empty( array_filter( $chosen_methods ) );
+
+		if ( $needs_shipping && ! $has_shipping ) {
+			$messages->add(
+				MessageError::missing(
+					__( 'No shipping method selected.', 'woocommerce' ),
+					'$.fulfillment_option_id'
+				)
+			);
+		}
+	}
+
+	/**
+	 * Calculate the status of the checkout session.
+	 *
+	 * @param AgenticCheckoutSession $checkout_session Checkout session object.
+	 *
+	 * @return string Status value.
+	 */
+	public static function calculate_status( AgenticCheckoutSession $checkout_session ): string {
+		$wc_session = WC()->session;
+		if ( null === $wc_session ) {
+			return CheckoutSessionStatus::CANCELED;
+		}
+
+		if ( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) ) {
+			return CheckoutSessionStatus::COMPLETED;
+		}
+
+		if ( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS ) ) {
+			return CheckoutSessionStatus::IN_PROGRESS;
+		}
+
+		// Check for validation errors.
+		if (
+			$checkout_session->get_messages()->has_errors()
+			// Once we switch to using the CartController everywhere, there should be no notices and need for this.
+			|| ! empty( wc_get_notices( 'error' ) )
+		) {
+			return CheckoutSessionStatus::NOT_READY_FOR_PAYMENT;
+		}
+
+		return CheckoutSessionStatus::READY_FOR_PAYMENT;
+	}
+
+	/**
+	 * Get the agentic commerce payment gateway from available gateways.
+	 *
+	 * Finds the first gateway that supports agentic commerce and has the required methods.
+	 *
+	 * @param array $available_gateways Array of available payment gateways.
+	 * @return \WC_Payment_Gateway|null The agentic commerce gateway or null if not found.
+	 */
+	public static function get_agentic_commerce_gateway( $available_gateways ) {
+		if ( empty( $available_gateways ) ) {
+			return null;
+		}
+
+		foreach ( $available_gateways as $gateway ) {
+			if ( $gateway->supports( \Automattic\WooCommerce\Enums\PaymentGatewayFeature::AGENTIC_COMMERCE )
+				&& method_exists( $gateway, 'get_agentic_commerce_provider' )
+				&& method_exists( $gateway, 'get_agentic_commerce_payment_methods' )
+			) {
+				return $gateway;
+			}
+		}
+
+		return null;
 	}
 }

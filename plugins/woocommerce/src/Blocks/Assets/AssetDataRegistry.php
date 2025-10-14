@@ -254,11 +254,8 @@ class AssetDataRegistry {
 			);
 		}
 
-		$core_data = $this->get_core_data();
-
-		if ( is_admin() && ! WC()->is_rest_api_request() ) {
-			$core_data['experimentalWcRestApiV4'] = Features::is_enabled( 'rest-api-v4' );
-		}
+		$core_data                            = $this->get_core_data();
+		$core_data['experimentalWcRestApiV4'] = Features::is_enabled( 'rest-api-v4' );
 		// note this WILL wipe any data already registered to these keys because they are protected.
 		$this->data = array_replace_recursive( $settings, $core_data );
 	}

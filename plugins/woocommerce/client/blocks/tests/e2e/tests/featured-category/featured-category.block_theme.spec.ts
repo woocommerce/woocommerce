@@ -58,7 +58,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await blockLocator.getByText( 'Done' ).click();
 		await editor.clickBlockToolbarButton( 'Edit category image' );
 		await editor.clickBlockToolbarButton( 'Rotate' );
-		await editor.page.getByRole( 'button', { name: 'Apply' } ).click();
+		await editor.page
+			.getByRole( 'button', { name: 'Apply', exact: true } )
+			.click();
 		await expect(
 			editor.canvas.locator( 'img[alt="Test Category"][src*="-edited"]' )
 		).toBeVisible();
