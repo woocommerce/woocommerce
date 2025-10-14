@@ -364,17 +364,17 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		return array(
 			'gateway disabled' => array(
 				'gateway enabled' => false,
-				'client ID' => 'test_client_id',
+				'client ID'       => 'test_client_id',
 				'script expected' => false,
 			),
 			'missing client ID' => array(
 				'gateway enabled' => true,
-				'client ID' => '',
+				'client ID'       => '',
 				'script expected' => false,
 			),
 			'script enqueued' => array(
 				'gateway enabled' => true,
-				'client ID' => 'test_client_id',
+				'client ID'       => 'test_client_id',
 				'script expected' => true,
 			),
 		);
@@ -388,11 +388,11 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	public function test_add_paypal_sdk_attributes() {
 		$gateway = new WC_Gateway_Paypal();
 
-		// Without the JS SDK
+		// Without the JS SDK.
 		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => '' ) );
 		$this->assertSame( array( 'id' => '' ), $actual );
 
-		// With the JS SDK
+		// With the JS SDK.
 		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => 'paypal-standard-sdk-js' ) );
 		$this->assertSame(
 			array(
