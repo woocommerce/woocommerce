@@ -33,6 +33,13 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	const WEBHOOK_TOPIC = 'action.' . self::WEBHOOK_ACTION;
 
 	/**
+	 * Meta key to store if the first event has been delivered.
+	 *
+	 * @var string
+	 */
+	const FIRST_EVENT_DELIVERED_META_KEY = '_acp_order_created_sent';
+
+	/**
 	 * Payload builder instance.
 	 *
 	 * @var AgenticWebhookPayloadBuilder
@@ -70,6 +77,9 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 
 		// Customize webhook HTTP arguments for our topics.
 		add_filter( 'woocommerce_webhook_http_args', array( $this, 'customize_webhook_http_args' ), 10, 3 );
+
+		// When the webhook is delivered (or not), mark the first event as delivered.
+		add_action( 'woocommerce_webhook_delivery', array( $this, 'mark_first_event_delivered' ), 10, 5 );
 	}
 
 	/**
@@ -264,16 +274,8 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 			return $payload;
 		}
 
-		// The meta key is not used elsewhere, so it is not stored in a constant.
-		$meta_key       = '_acp_order_created_sent';
-		$is_first_event = 'sent' !== $order->get_meta( $meta_key );
-		if ( $is_first_event ) {
-			$event = 'order_create';
-			$order->update_meta_data( $meta_key, 'sent' );
-			$order->save();
-		} else {
-			$event = 'order_update';
-		}
+		$is_first_event = 'sent' !== $order->get_meta( self::FIRST_EVENT_DELIVERED_META_KEY );
+		$event          = $is_first_event ? 'order_create' : 'order_update';
 
 		// Build ACP-compliant payload.
 		return $this->payload_builder->build_payload( $event, $order );
@@ -311,5 +313,42 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		}
 
 		return $http_args;
+	}
+
+	/**
+	 * Mark first event as delivered on successful webhook delivery.
+	 *
+	 * @param array  $http_args   HTTP request args.
+	 * @param mixed  $response    HTTP response.
+	 * @param float  $duration    Request duration.
+	 * @param int    $arg         First argument to the action (order_id).
+	 * @param int    $webhook_id  Webhook ID.
+	 */
+	public function mark_first_event_delivered( $http_args, $response, $duration, $arg, $webhook_id ) {
+		// Only proceed for successful responses.
+		if ( is_wp_error( $response ) ) {
+			return;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			return;
+		}
+
+		// Verify this is our webhook topic.
+		$webhook = wc_get_webhook( $webhook_id );
+		if ( ! $webhook || self::WEBHOOK_TOPIC !== $webhook->get_topic() ) {
+			return;
+		}
+
+		// $arg contains the order_id from do_action( self::WEBHOOK_ACTION, $order_id, $order ).
+		$order = wc_get_order( $arg );
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( 'sent' !== $order->get_meta( self::FIRST_EVENT_DELIVERED_META_KEY ) ) {
+			$order->update_meta_data( self::FIRST_EVENT_DELIVERED_META_KEY, 'sent' );
+			$order->save();
+		}
 	}
 }

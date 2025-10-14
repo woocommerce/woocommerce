@@ -548,6 +548,181 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that first event is marked as delivered on successful webhook delivery.
+	 */
+	public function test_mark_first_event_delivered_success() {
+		$webhook = $this->create_agentic_webhook();
+		$order   = $this->create_agentic_order( 'test_session_789' );
+
+		// Verify the order doesn't have the meta key set initially.
+		$this->assertEmpty( $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		// Simulate successful webhook delivery.
+		$http_args = array(
+			'headers' => array(),
+			'body'    => wp_json_encode( array( 'test' => 'payload' ) ),
+		);
+
+		// Mock successful HTTP response.
+		$response = array(
+			'response' => array( 'code' => 200 ),
+		);
+
+		/**
+		 * Fires when a webhook is delivered.
+		 *
+		 * @since 10.3.0
+		 * @see AgenticWebhookManager::mark_first_event_delivered()
+		 */
+		do_action(
+			'woocommerce_webhook_delivery',
+			$http_args,
+			$response,
+			0.5, // duration
+			$order->get_id(), // arg (order_id)
+			$webhook->get_id()
+		);
+
+		// Verify the meta key was set to 'sent'.
+		$order = wc_get_order( $order->get_id() ); // Refresh order from database.
+		$this->assertEquals( 'sent', $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test that first event is not marked as delivered on failed webhook delivery.
+	 */
+	public function test_mark_first_event_delivered_failure() {
+		$webhook = $this->create_agentic_webhook();
+		$order   = $this->create_agentic_order( 'test_session_456' );
+
+		// Verify the order doesn't have the meta key set initially.
+		$this->assertEmpty( $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		// Simulate failed webhook delivery (HTTP error).
+		$http_args = array(
+			'headers' => array(),
+			'body'    => wp_json_encode( array( 'test' => 'payload' ) ),
+		);
+
+		// Mock failed HTTP response.
+		$response = array(
+			'response' => array( 'code' => 500 ),
+		);
+
+		/**
+		 * Fires when a webhook is delivered.
+		 *
+		 * @since 10.3.0
+		 * @see AgenticWebhookManager::mark_first_event_delivered()
+		 */
+		do_action(
+			'woocommerce_webhook_delivery',
+			$http_args,
+			$response,
+			0.5, // duration
+			$order->get_id(), // arg (order_id)
+			$webhook->get_id()
+		);
+
+		// Verify the meta key was NOT set.
+		$order = wc_get_order( $order->get_id() ); // Refresh order from database.
+		$this->assertEmpty( $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test that first event marking is skipped for non-Agentic webhooks.
+	 */
+	public function test_mark_first_event_delivered_non_agentic_webhook() {
+		// Create a regular WooCommerce webhook (not Agentic).
+		$webhook = new \WC_Webhook();
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->save();
+
+		$order = $this->create_agentic_order( 'test_session_123' );
+
+		// Verify the order doesn't have the meta key set initially.
+		$this->assertEmpty( $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		// Simulate successful webhook delivery.
+		$http_args = array(
+			'headers' => array(),
+			'body'    => wp_json_encode( array( 'test' => 'payload' ) ),
+		);
+
+		$response = array(
+			'response' => array( 'code' => 200 ),
+		);
+
+		/**
+		 * Fires when a webhook is delivered.
+		 *
+		 * @since 10.3.0
+		 * @see AgenticWebhookManager::mark_first_event_delivered()
+		 */
+		do_action(
+			'woocommerce_webhook_delivery',
+			$http_args,
+			$response,
+			0.5, // duration
+			$order->get_id(), // arg (order_id)
+			$webhook->get_id()
+		);
+
+		// Verify the meta key was NOT set for non-Agentic webhook.
+		$order = wc_get_order( $order->get_id() ); // Refresh order from database.
+		$this->assertEmpty( $order->get_meta( AgenticWebhookManager::FIRST_EVENT_DELIVERED_META_KEY ) );
+
+		$webhook->delete( true );
+	}
+
+	/**
+	 * Test that first event marking is skipped when order doesn't exist.
+	 */
+	public function test_mark_first_event_delivered_nonexistent_order() {
+		$webhook = $this->create_agentic_webhook();
+		$order   = $this->create_agentic_order( 'test_session_999' );
+		$order_id = $order->get_id();
+
+		// Delete the order to simulate non-existent order.
+		$order->delete( true );
+
+		// Simulate successful webhook delivery.
+		$http_args = array(
+			'headers' => array(),
+			'body'    => wp_json_encode( array( 'test' => 'payload' ) ),
+		);
+
+		$response = array(
+			'response' => array( 'code' => 200 ),
+		);
+
+		/**
+		 * Fires when a webhook is delivered.
+		 *
+		 * @since 10.3.0
+		 * @see AgenticWebhookManager::mark_first_event_delivered()
+		 */
+		do_action(
+			'woocommerce_webhook_delivery',
+			$http_args,
+			$response,
+			0.5, // duration
+			$order_id, // arg (order_id) - order no longer exists
+			$webhook->get_id()
+		);
+
+		// This should not cause any errors and should complete successfully.
+		$this->assertTrue( true ); // If we get here, no exception was thrown.
+
+		$webhook->delete( true );
+	}
+
+	/**
 	 * Clean up existing Agentic webhooks for testing.
 	 */
 	private function cleanup_existing_agentic_webhooks() {
