@@ -332,12 +332,14 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Check if the Agentic Checkout feature is enabled and request is authorized.
+	 * Check if the Agentic Checkout feature is enabled.
 	 *
-	 * @param \WP_REST_Request $request Request object.
+	 * V1 implementation: Returns true if feature is enabled (no auth check).
+	 * Future: Implement Bearer token authentication.
+	 *
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
-	public static function is_authorized( $request ) {
+	public static function is_authorized() {
 		// Check if feature is enabled.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
@@ -348,47 +350,7 @@ class AgenticCheckoutUtils {
 			);
 		}
 
-		// Validate API version header.
-		$api_version = $request->get_header( 'API-Version' );
-		if ( $api_version !== '2025-09-29' ) {
-			return new \WP_Error(
-				'woocommerce_rest_invalid_api_version',
-				__( 'Invalid or missing API-Version header. Expected: 2025-09-29', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		// Extract bearer token from Authorization header.
-		$auth_header = $request->get_header( 'Authorization' );
-		if ( ! $auth_header || ! preg_match( '/^Bearer\s+(.+)$/i', $auth_header, $matches ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_invalid_authorization',
-				__( 'Invalid or missing Authorization header. Expected: Bearer <token>', 'woocommerce' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		$token = $matches[1];
-
-		// Get registry.
-		$registry = get_option( 'woocommerce_agentic_agent_registry', array() );
-
-		// Check OpenAI token (for now, only agent supported).
-		$openai_config  = $registry['openai'] ?? array();
-		$expected_token = $openai_config['bearer_token'] ?? '';
-
-		if ( empty( $expected_token ) || $token !== $expected_token ) {
-			return new \WP_Error(
-				'woocommerce_rest_invalid_token',
-				__( 'Invalid bearer token.', 'woocommerce' ),
-				array( 'status' => 401 )
-			);
-		}
-
-		// Store agent info in request for later use.
-		$request->set_param( '_agentic_agent', 'openai' );
-		$request->set_param( '_agentic_agent_config', $openai_config );
-
+		// V1: Allow all requests (implement proper auth in future).
 		return true;
 	}
 
