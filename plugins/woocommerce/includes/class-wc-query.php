@@ -612,7 +612,7 @@ class WC_Query {
 		}
 
 		// Convert to correct format.
-		$orderby = strtolower( is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby );
+		$orderby = is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby;
 		$order   = strtoupper( is_array( $order ) ? (string) current( $order ) : (string) $order );
 		$args    = array(
 			'orderby'  => $orderby,
@@ -620,6 +620,7 @@ class WC_Query {
 			'meta_key' => '', // @codingStandardsIgnoreLine
 		);
 
+		$orderby = strtolower( $orderby );
 		switch ( $orderby ) {
 			case 'id':
 				$args['orderby'] = 'ID';
@@ -638,8 +639,9 @@ class WC_Query {
 			case 'rand':
 				$args['orderby'] = 'rand'; // @codingStandardsIgnoreLine
 				break;
+			case 'modified':
 			case 'date':
-				$args['orderby'] = 'date ID';
+				$args['orderby'] = $orderby . ' ID';
 				$args['order']   = ( 'ASC' === $order ) ? 'ASC' : 'DESC';
 				break;
 			case 'price':
