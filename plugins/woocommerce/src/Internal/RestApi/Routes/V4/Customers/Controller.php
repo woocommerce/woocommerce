@@ -184,7 +184,7 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		$customer = $this->prepare_item_for_response( $user, $request );
+		$customer = $this->prepare_item_for_response( new WC_Customer( $user->ID ), $request );
 		$response = rest_ensure_response( $customer );
 
 		return $response;
