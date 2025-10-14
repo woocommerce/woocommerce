@@ -229,6 +229,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @param int  $order_id Order ID to test with.
 	 * @param bool $should_use_orders_v2 Whether Orders v2 is enabled.
+	 * @param bool $mock_jetpack_params Whether to mock valid Jetpack params.
 	 * @param bool $expect_to_save Whether we expect the order to be saved.
 	 * @return void
 	 *
@@ -243,7 +244,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$return_valid_site_id = function () {
 			return array( 'id' => 12345 );
 		};
-		$return_blog_token = function () {
+		$return_blog_token    = function () {
 			return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 		};
 
@@ -313,37 +314,37 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			'order not found'         => array(
 				'order ID'             => 0,
 				'should use orders v2' => true,
-				'mock Jetpack params' => true,
+				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'invalid payment method'  => array(
 				'order ID'             => $order_not_paypal->get_id(),
 				'should use orders v2' => true,
-				'mock Jetpack params' => true,
+				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'orders v2 not enabled'   => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => false,
-				'mock Jetpack params' => true,
+				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'missing PayPal order ID' => array(
 				'order ID'             => $order_missing_paypal_id->get_id(),
 				'should use orders v2' => true,
-				'mock Jetpack params' => true,
+				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'exception thrown'        => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
-				'mock Jetpack params' => false,
+				'mock Jetpack params'  => false,
 				'expect to save'       => false,
 			),
 			'successful update'       => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
-				'mock Jetpack params' => true,
+				'mock Jetpack params'  => true,
 				'expect to save'       => true,
 			),
 		);
