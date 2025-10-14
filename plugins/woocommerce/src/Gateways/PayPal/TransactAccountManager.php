@@ -1,11 +1,13 @@
 <?php
 /**
- * Class WC_Gateway_Paypal_Transact_Account_Manager file.
+ * Class TransactAccountManager file.
  *
  * @package WooCommerce\Gateways
  */
 
 declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -17,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Handles Transact account management.
  */
-final class WC_Gateway_Paypal_Transact_Account_Manager {
+final class TransactAccountManager {
 	/**
 	 * The API version for the proxy endpoint.
 	 *
@@ -52,16 +54,16 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 	/**
 	 * Paypal gateway object.
 	 *
-	 * @var WC_Gateway_Paypal
+	 * @var \WC_Gateway_Paypal
 	 */
 	private $gateway;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param WC_Gateway_Paypal $gateway Paypal gateway object.
+	 * @param \WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
-	public function __construct( WC_Gateway_Paypal $gateway ) {
+	public function __construct( \WC_Gateway_Paypal $gateway ) {
 		$this->gateway = $gateway;
 	}
 
@@ -80,14 +82,14 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		// Register with Jetpack if not already connected.
 		$jetpack_connection_manager = $this->gateway->get_jetpack_connection_manager();
 		if ( ! $jetpack_connection_manager ) {
-			WC_Gateway_Paypal::log( 'Jetpack connection manager not found.', 'error' );
+			\WC_Gateway_Paypal::log( 'Jetpack connection manager not found.', 'error' );
 			return;
 		}
 
 		if ( ! $jetpack_connection_manager->is_connected() ) {
 			$result = $jetpack_connection_manager->try_registration();
 			if ( is_wp_error( $result ) ) {
-				WC_Gateway_Paypal::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
+				\WC_Gateway_Paypal::log( 'Jetpack registration failed: ' . $result->get_error_message(), 'error' );
 				return;
 			}
 		}
@@ -97,7 +99,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		if ( empty( $merchant_account_data ) ) {
 			$merchant_account = $this->create_merchant_account();
 			if ( empty( $merchant_account ) ) {
-				WC_Gateway_Paypal::log( 'Transact merchant onboarding failed.', 'error' );
+				\WC_Gateway_Paypal::log( 'Transact merchant onboarding failed.', 'error' );
 				return;
 			}
 
@@ -112,7 +114,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 		if ( empty( $provider_account_data ) ) {
 			$provider_account = $this->create_provider_account();
 			if ( ! $provider_account ) {
-				WC_Gateway_Paypal::log( 'Transact provider onboarding failed.', 'error' );
+				\WC_Gateway_Paypal::log( 'Transact provider onboarding failed.', 'error' );
 				return;
 			}
 
@@ -263,7 +265,7 @@ final class WC_Gateway_Paypal_Transact_Account_Manager {
 
 		$response_data = json_decode( wp_remote_retrieve_body( $response ), true );
 		if ( empty( $response_data['public_id'] ) ) {
-			WC_Gateway_Paypal::log( 'Transact merchant account creation failed. Response body: ' . wc_print_r( $response_data, true ) );
+			\WC_Gateway_Paypal::log( 'Transact merchant account creation failed. Response body: ' . wc_print_r( $response_data, true ) );
 			return null;
 		}
 
