@@ -231,7 +231,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
 			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-			$image_id      = $product ? $product->get_image_id() : 0;
+			$image_id = $product ? $product->get_image_id() : 0;
 
 			$data['image'] = array(
 				'id'  => $image_id,
