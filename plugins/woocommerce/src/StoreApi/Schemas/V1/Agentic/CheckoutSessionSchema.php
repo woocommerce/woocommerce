@@ -338,21 +338,15 @@ class CheckoutSessionSchema extends AbstractSchema {
 	public function get_item_response( $checkout_session ) {
 		$cart = $checkout_session->get_cart();
 
-		// Generate session ID from Cart-Token.
-		$wc_session = WC()->session;
-		$session_id = $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID );
-		if ( null === $session_id ) {
-			$session_id = CartTokenUtils::get_cart_token( (string) $wc_session->get_customer_id() );
-			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
-		}
-
 		// If validation already went through and we have errors, no need to repeat them.
 		if ( ! $checkout_session->get_messages()->has_errors() ) {
 			// Validate the checkout session. Messages will be added to the collection, if any.
 			AgenticCheckoutUtils::validate( $checkout_session );
 		}
 
-		$completed_order = wc_get_order( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
+		$completed_order = WC()->session
+			? wc_get_order( WC()->session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) )
+			: null;
 
 		// Get line items from cart, or from completed order if cart is empty.
 		$cart_items = $cart->get_cart();
@@ -361,7 +355,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			: $this->format_line_items_from_cart( $cart_items );
 
 		$response = [
-			'id'                    => $session_id,
+			'id'                    => $checkout_session->get_id(),
 			'buyer'                 => $completed_order instanceof WC_Order
 				? $this->format_buyer_from_order( $completed_order )
 				: $this->format_buyer(),
@@ -391,7 +385,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		if ( $completed_order instanceof WC_Order ) {
 			$response['order'] = [
 				'id'                  => (string) $completed_order->get_id(),
-				'checkout_session_id' => $session_id,
+				'checkout_session_id' => $checkout_session->get_id(),
 				'permalink_url'       => $completed_order->get_checkout_order_received_url(),
 			];
 		}
