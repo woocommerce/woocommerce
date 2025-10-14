@@ -27,7 +27,7 @@ class AgenticController implements RegisterHooksInterface {
 			return;
 		}
 
-		add_action( 'init', array( $this, 'on_init' ) );
+		add_action( 'woocommerce_init', array( $this, 'on_init' ) );
 	}
 
 	/**
