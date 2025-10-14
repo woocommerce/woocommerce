@@ -850,6 +850,74 @@ const { state: cartItemState } = store(
 					}
 				}
 			},
+			itemItemData() {
+				const { ref } = getElement();
+
+				if ( ! ref ) {
+					return;
+				}
+
+				const populateSingleItemData = ( ref: Element, item: any ) => {
+					const nameEl = ref.querySelector(
+						'div span.wc-block-components-product-details__name'
+					);
+					const valueEl = ref.querySelector(
+						'div span.wc-block-components-product-details__value'
+					);
+
+					const name = item?.key || item.name || '';
+					const value = item?.display || item.value;
+
+					if ( nameEl && item.name ) {
+						nameEl.innerHTML = trimWords( name );
+					}
+					if ( valueEl && item.value ) {
+						valueEl.innerHTML = trimWords( value );
+					}
+				};
+
+				const populateMultipleItemData = (
+					ref: Element,
+					itemData: any[]
+				) => {
+					const listItems = ref.querySelectorAll( 'li' );
+
+					itemData.forEach( ( item, index ) => {
+						const listItem = listItems[ index ];
+						const nameEl = listItem?.querySelector(
+							'.wc-block-components-product-details__name'
+						);
+						const valueEl = listItem?.querySelector(
+							'.wc-block-components-product-details__value'
+						);
+
+						const name = item?.key || item.name || '';
+						const value = item?.display || item.value;
+
+						if ( nameEl && ( item.name || item.key ) ) {
+							nameEl.innerHTML = trimWords( name );
+						}
+						if ( valueEl && item.value ) {
+							valueEl.innerHTML = trimWords( value );
+						}
+					} );
+				};
+
+				const itemData = cartItemState.cartItem?.item_data || [];
+
+				if ( itemData.length === 0 ) {
+					return;
+				}
+
+				// A workaround for the lack of dangerous set HTML directive
+				// in interactivity API.
+				if ( itemData.length === 1 ) {
+					populateSingleItemData( ref, itemData[ 0 ] );
+				} else {
+					populateMultipleItemData( ref, itemData );
+				}
+			},
+
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
