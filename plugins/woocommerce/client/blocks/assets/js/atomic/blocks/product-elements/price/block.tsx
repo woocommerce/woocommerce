@@ -98,12 +98,13 @@ export const Block = ( props: Props ): JSX.Element | null => {
 	// If the block is not a descendant of the All Products block, we are
 	// already printing the styles from the PHP side (in the frontend) and the
 	// `edit.tsx` file (in the editor).
-	let styleProps = useStyleProps( props );
-	if ( ! isDescendentOfAllProductsBlock ) {
-		styleProps = {
-			className: '',
-			style: {},
-		};
+	const computedStyles = useStyleProps( props );
+	let styleProps = {
+		className: '',
+		style: {},
+	};
+	if ( isDescendentOfAllProductsBlock ) {
+		styleProps = computedStyles;
 	}
 
 	const showPricePreview =
