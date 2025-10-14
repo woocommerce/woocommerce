@@ -462,24 +462,4 @@ class AgenticCheckoutUtils {
 
 		return null !== $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 	}
-
-	/**
-	 * Get the checkout session ID. If it does not exist, generate a cart token for it and save to the current session.
-	 *
-	 * @return string Checkout Session ID stored in the current session.
-	 */
-	public static function get_or_set_checkout_session_id(): string {
-		$wc_session = WC()->session;
-		if ( null === $wc_session ) {
-			return '';
-		}
-
-		$session_id = $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID );
-		if ( null === $session_id ) {
-			$session_id = CartTokenUtils::get_cart_token( (string) $wc_session->get_customer_id() );
-			$wc_session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, $session_id );
-		}
-
-		return $session_id;
-	}
 }
