@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controll
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -228,7 +229,7 @@ class Server {
 			'orders'                    => OrdersController::class,
 			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
 			'settings-general'          => GeneralSettingsController::class,
-			'settings-email'            => 'WC_REST_Email_Settings_V4_Controller',
+			'settings-email'            => EmailSettingsController::class,
 			'settings-products'         => ProductsController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
