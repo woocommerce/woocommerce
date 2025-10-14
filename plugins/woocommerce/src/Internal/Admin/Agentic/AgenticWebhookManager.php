@@ -82,18 +82,22 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 			return;
 		}
 
-		$name_prefix = 'ACP';
-		$data_store  = \WC_Data_Store::load( 'webhook' );
-		$webhooks    = $data_store->search_webhooks(
+		$name_prefix  = 'ACP'; // Not translated on purpose, to make search more specific.
+		$data_store   = \WC_Data_Store::load( 'webhook' );
+		$webhooks_ids = $data_store->search_webhooks(
 			array(
 				'search' => $name_prefix,
 				'status' => 'active',
-				'limit'  => 1,
+				'limit'  => -11,
 			)
 		);
 
-		if ( ! empty( $webhooks ) ) {
-			return;
+		foreach ( $webhooks_ids as $webhook_id ) {
+			$webhook = wc_get_webhook( $webhook_id );
+			if ( self::WEBHOOK_TOPIC === $webhook->get_topic() ) {
+				// There is a correct webhook already.
+				return;
+			}
 		}
 
 		/**
