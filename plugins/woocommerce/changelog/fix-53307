@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent accidental syncing of order with placeholder post when HPOS compat mode is enabled.

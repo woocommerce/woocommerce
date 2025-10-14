@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix error when a custom coupon discount type is unregistered and an order using such a coupon is updated

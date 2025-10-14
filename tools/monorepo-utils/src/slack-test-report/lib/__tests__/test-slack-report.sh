@@ -20,4 +20,4 @@ pnpm utils slack-test-report --config ".github/workflows/slack-report-config.jso
 
 export GITHUB_REF_NAME="trunk"
 export GITHUB_EVENT_NAME="schedule"
-pnpm utils slack-test-report --config ".github/workflows/slack-report-config.json" -c "failure" -r "daily-checks Tests" -m "Test commit message"
+pnpm utils slack-test-report --config ".github/workflows/slack-report-config.json" -c "failure" -r "daily-checks Tests" -m "Test commit message" --jobs-list "Failed:###job1,job2,job3,job4,job5,job6,job7,job8,job9,job10,job11,job12,job13,job14,job15,job16,job17,job18,job19,job20"
