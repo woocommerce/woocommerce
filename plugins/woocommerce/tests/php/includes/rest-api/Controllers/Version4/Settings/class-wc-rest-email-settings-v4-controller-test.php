@@ -47,10 +47,9 @@ class WC_REST_Email_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		add_filter( 'woocommerce_admin_features', $this->feature_filter );
 
-		// Enable block email editor feature to test reply-to fields.
-		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
-
 		parent::setUp();
+		// Enable block email editor feature to test reply-to fields.
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
 		// Snapshot current option values to restore on tearDown.
 		$option_ids = array(
@@ -89,9 +88,8 @@ class WC_REST_Email_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 			}
 		}
 
-		// Clean up block email editor feature.
-		delete_option( 'woocommerce_feature_block_email_editor_enabled' );
-
+		// Disable block email editor feature.
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 		parent::tearDown();
 	}
 

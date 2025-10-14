@@ -5,7 +5,6 @@
  * @package WooCommerce\Tests\Settings
  */
 
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
 require_once __DIR__ . '/class-wc-settings-unit-test-case.php';
@@ -102,8 +101,6 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	public function test_get_default_settings_with_block_email_editor_enabled() {
 		// Enable block email editor feature before any WooCommerce initialization.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
-		// Reset the container to pick up the new option value.
-		$this->reset_container_resolutions();
 
 		$sut                   = new WC_Settings_Emails();
 		$settings              = $sut->get_settings_for_section( '' );
@@ -120,7 +117,7 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 		$this->assertEquals( 'email', $setting_ids_and_types['woocommerce_email_reply_to_address'] );
 
 		// Clean up.
-		delete_option( 'woocommerce_feature_block_email_editor_enabled' );
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 	}
 
 	/**
