@@ -344,7 +344,9 @@ class CheckoutSessionSchema extends AbstractSchema {
 			AgenticCheckoutUtils::validate( $checkout_session );
 		}
 
-		$completed_order = wc_get_order( WC()->session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) );
+		$completed_order = WC()->session
+			? wc_get_order( WC()->session->get( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID ) )
+			: null;
 
 		// Get line items from cart, or from completed order if cart is empty.
 		$cart_items = $cart->get_cart();
