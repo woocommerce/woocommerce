@@ -460,6 +460,6 @@ class AgenticCheckoutUtils {
 			return false;
 		}
 
-		return null !== $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
+		return ! empty( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID ) );
 	}
 }
