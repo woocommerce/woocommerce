@@ -578,8 +578,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'woocommerce_webhook_delivery',
 			$http_args,
 			$response,
-			0.5, // duration
-			$order->get_id(), // arg (order_id)
+			0.5, // duration.
+			$order->get_id(), // arg (order_id).
 			$webhook->get_id()
 		);
 
@@ -621,8 +621,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'woocommerce_webhook_delivery',
 			$http_args,
 			$response,
-			0.5, // duration
-			$order->get_id(), // arg (order_id)
+			0.5, // duration.
+			$order->get_id(), // arg (order_id).
 			$webhook->get_id()
 		);
 
@@ -668,8 +668,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'woocommerce_webhook_delivery',
 			$http_args,
 			$response,
-			0.5, // duration
-			$order->get_id(), // arg (order_id)
+			0.5, // duration.
+			$order->get_id(), // arg (order_id).
 			$webhook->get_id()
 		);
 
@@ -684,8 +684,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 	 * Test that first event marking is skipped when order doesn't exist.
 	 */
 	public function test_mark_first_event_delivered_nonexistent_order() {
-		$webhook = $this->create_agentic_webhook();
-		$order   = $this->create_agentic_order( 'test_session_999' );
+		$webhook  = $this->create_agentic_webhook();
+		$order    = $this->create_agentic_order( 'test_session_999' );
 		$order_id = $order->get_id();
 
 		// Delete the order to simulate non-existent order.
@@ -711,8 +711,8 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 			'woocommerce_webhook_delivery',
 			$http_args,
 			$response,
-			0.5, // duration
-			$order_id, // arg (order_id) - order no longer exists
+			0.5, // duration.
+			$order_id, // arg (order_id) - order no longer exists.
 			$webhook->get_id()
 		);
 

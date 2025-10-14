@@ -318,11 +318,11 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	/**
 	 * Mark first event as delivered on successful webhook delivery.
 	 *
-	 * @param array  $http_args   HTTP request args.
-	 * @param mixed  $response    HTTP response.
-	 * @param float  $duration    Request duration.
-	 * @param int    $arg         First argument to the action (order_id).
-	 * @param int    $webhook_id  Webhook ID.
+	 * @param array $http_args   HTTP request args.
+	 * @param mixed $response    HTTP response.
+	 * @param float $duration    Request duration.
+	 * @param int   $arg         First argument to the action (order_id).
+	 * @param int   $webhook_id  Webhook ID.
 	 */
 	public function mark_first_event_delivered( $http_args, $response, $duration, $arg, $webhook_id ) {
 		// Only proceed for successful responses.
