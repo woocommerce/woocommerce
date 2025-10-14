@@ -450,11 +450,11 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Whether the current request is for agentic commerce.
+	 * Whether the current request is within Agentic Commerce session.
 	 *
 	 * @return bool
 	 */
-	public static function is_agentic_commerce_request(): bool {
+	public static function is_agentic_commerce_session(): bool {
 		$wc_session = WC()->session;
 		if ( null === $wc_session ) {
 			return false;
