@@ -85,10 +85,12 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
-	name?: string;
-	value?: string;
+	name: string;
+	value: string;
 	className?: string;
 	hidden?: boolean;
+	key?: string;
+	display?: string;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -857,11 +859,14 @@ const { state: cartItemState } = store(
 					return;
 				}
 
-				const populateSingleItemData = ( ref: Element, item: any ) => {
-					const nameEl = ref.querySelector(
+				const populateSingleItemData = (
+					element: Element,
+					item: CartItemDataAttr
+				) => {
+					const nameEl = element.querySelector(
 						'div span.wc-block-components-product-details__name'
 					);
-					const valueEl = ref.querySelector(
+					const valueEl = element.querySelector(
 						'div span.wc-block-components-product-details__value'
 					);
 
@@ -877,10 +882,10 @@ const { state: cartItemState } = store(
 				};
 
 				const populateMultipleItemData = (
-					ref: Element,
-					itemData: any[]
+					element: Element,
+					itemData: CartItemDataAttr[]
 				) => {
-					const listItems = ref.querySelectorAll( 'li' );
+					const listItems = element.querySelectorAll( 'li' );
 
 					itemData.forEach( ( item, index ) => {
 						const listItem = listItems[ index ];
@@ -934,9 +939,11 @@ const { state: cartItemState } = store(
 						const { ref } = getElement();
 
 						// Remove previously applied classes.
-						ref!.classList.remove(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.remove(
+								...previouslyAppliedClasses.current
+							);
+						}
 
 						const newClassesString = applyCheckoutFilter( {
 							filterName: 'cartItemClass',
@@ -953,9 +960,11 @@ const { state: cartItemState } = store(
 						previouslyAppliedClasses.current = newClassesString
 							.split( ' ' )
 							.filter( Boolean );
-						ref!.classList.add(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.add(
+								...previouslyAppliedClasses.current
+							);
+						}
 					}
 				} );
 			},
