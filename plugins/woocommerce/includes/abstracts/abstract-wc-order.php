@@ -2633,4 +2633,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this
 		);
 	}
+
+	/**
+	 * Check if the order costs are provisional (can transition to completed status).
+	 *
+	 * @return bool True if the order costs are provisional.
+	 */
+	public function costs_are_provisional(): bool {
+		if ( ! $this->cogs_is_enabled( __METHOD__ ) || ! $this->has_cogs() ) {
+			return false;
+		}
+
+		$statuses_with_provisional_cosas = array(
+			'pending',
+			'processing',
+			'on-hold',
+		);
+
+		$costs_are_provisional = in_array( $this->get_status(), $statuses_with_provisional_cosas, true );
+
+		/**
+		 * Filter to customize whether order costs are provisional.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $costs_are_provisional Whether the order costs are provisional.
+		 * @param WC_Abstract_Order $order The order object.
+		 */
+		return apply_filters( 'woocommerce_order_costs_are_provisional', $costs_are_provisional, $this );
+	}
 }

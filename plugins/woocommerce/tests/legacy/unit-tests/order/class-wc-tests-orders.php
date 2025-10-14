@@ -212,4 +212,45 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$order->calculate_totals();
 		$this->assertEquals( 250 - 65, $order->get_cogs_total_value() );
 	}
+
+	/**
+	 * @testdox Cost of Goods Sold recalculation is performed when the order transitions to the "completed" status.
+	 */
+	public function test_cogs_recalculation_on_transition_to_completed_status() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 50 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->set_status( 'pending' );
+		$order->add_product( $product, 1 );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$initial_cogs = $order->get_cogs_total_value();
+
+		// Change product cost.
+		$product->set_cogs_value( 75.00 );
+		$product->save();
+
+		// Transition to a not completed status: order cost doesn't change.
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$cogs_after_processing = $order->get_cogs_total_value();
+		$this->assertEquals( $initial_cogs, $cogs_after_processing );
+
+		// Transition to completed: order cost changes.
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$cogs_after_completion = $order->get_cogs_total_value();
+		$this->assertEquals( 75.00, $cogs_after_completion );
+	}
 }

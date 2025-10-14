@@ -308,6 +308,12 @@ if ( wc_tax_enabled() ) {
 		<?php do_action( 'woocommerce_admin_order_totals_after_total', $order->get_id() ); ?>
 	</table>
 
+	<?php if ( $cogs_is_enabled && $order->costs_are_provisional() ) : ?>
+		<div style="margin-top: 8px; text-align: right;">
+			<span class="description"><?php echo wc_help_tip( __( 'Definitive cost values will be calculated when the order is completed', 'woocommerce' ) ); ?> <?php esc_html_e( 'Cost values are provisional.', 'woocommerce' ); ?></span>
+		</div>
+	<?php endif; ?>
+
 	<div class="clear"></div>
 </div>
 <div class="wc-order-data-row wc-order-bulk-actions wc-order-data-row-toggle">

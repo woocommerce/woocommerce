@@ -447,6 +447,11 @@ class WC_Order extends WC_Abstract_Order {
 				 */
 				do_action( 'woocommerce_order_status_' . $status_transition['to'], $this->get_id(), $this, $status_transition );
 
+				if ( 'completed' === $status_transition['to'] && $this->cogs_is_enabled() && $this->has_cogs() ) {
+					$this->calculate_cogs_total_value();
+					$this->save();
+				}
+
 				if ( ! empty( $status_transition['from'] ) ) {
 					/* translators: 1: old order status 2: new order status */
 					$transition_note = sprintf( __( 'Order status changed from %1$s to %2$s.', 'woocommerce' ), wc_get_order_status_name( $status_transition['from'] ), wc_get_order_status_name( $status_transition['to'] ) );

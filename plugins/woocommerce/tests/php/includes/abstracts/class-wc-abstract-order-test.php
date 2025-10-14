@@ -734,4 +734,31 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		};
 		// phpcs:enable Squiz.Commenting
 	}
+
+	/**
+	 * @testdox Test that costs_are_provisional can be customized via filter.
+	 */
+	public function test_costs_are_provisional_filter() {
+		$this->enable_cogs_feature();
+
+		$order = new WC_Order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$this->assertFalse( $order->costs_are_provisional() );
+
+		add_filter(
+			'woocommerce_order_costs_are_provisional',
+			// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+			function ( $costs_are_provisional, $order ) {
+				return true; // Force all orders to have provisional costs.
+			},
+			10,
+			2
+		);
+
+		$this->assertTrue( $order->costs_are_provisional() );
+
+		remove_all_filters( 'woocommerce_order_costs_are_provisional' );
+	}
 }
