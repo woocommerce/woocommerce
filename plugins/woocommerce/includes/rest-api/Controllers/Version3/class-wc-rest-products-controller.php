@@ -101,7 +101,9 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		$this->product_util = wc_get_container()->get( ProductUtil::class );
 
 		add_action( 'woocommerce_new_product', array( $this, 'handle_product_change' ), 10, 1 );
+		add_action( 'woocommerce_new_product_variation', array( $this, 'handle_product_change' ), 10, 1 );
 		add_action( 'woocommerce_update_product', array( $this, 'handle_product_change' ), 10, 1 );
+		add_action( 'woocommerce_update_product_variation', array( $this, 'handle_product_change' ), 10, 1 );
 		add_action( 'woocommerce_delete_product', array( $this, 'handle_product_change' ), 10, 1 );
 		add_action( 'woocommerce_trash_product', array( $this, 'handle_product_change' ), 10, 1 );
 		add_action( 'woocommerce_untrash_product', array( $this, 'handle_product_change' ), 10, 1 );
@@ -2204,12 +2206,30 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	public function handle_product_change( int $product_id ): void {
 		$this->invalidate_entity_cache( 'product', $product_id );
 
-		// Also invalidate variation caches if this is a variable product.
 		$product = wc_get_product( $product_id );
-		if ( $product && $product->is_type( 'variable' ) ) {
+		if ( ! $product ) {
+			return;
+		}
+
+		// If the product is variable we need to invalidate the cache entries for the variations too.
+		// On the other hand, if it's a variation, we need to invalidate the parent's cache entries
+		// and this involves registering the parent as modified (saving a variation won't alter
+		// the last modification date of the parent).
+
+		if ( $product->is_type( 'variable' ) ) {
 			$variation_ids = $product->get_children();
 			foreach ( $variation_ids as $variation_id ) {
 				$this->invalidate_entity_cache( 'product', $variation_id );
+			}
+		} elseif ( $product->is_type( 'variation' ) ) {
+			$parent_id = $product->get_parent_id();
+			if ( $parent_id ) {
+				$this->invalidate_entity_cache( 'product', $parent_id );
+
+				$parent = wc_get_product( $parent_id );
+				if ( $parent ) {
+					$parent->save();
+				}
 			}
 		}
 	}

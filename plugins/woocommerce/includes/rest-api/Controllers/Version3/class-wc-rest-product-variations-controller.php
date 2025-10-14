@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -51,7 +52,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	public function __construct() {
 		parent::__construct();
 		$this->register_response_cache_hooks();
+
+		$this->product_util = wc_get_container()->get( ProductUtil::class );
 	}
+
+	/**
+	 * Product utility instance for version retrieval.
+	 *
+	 * @var ProductUtil
+	 */
+	private $product_util;
 
 	/**
 	 * Register the routes for products.
@@ -1373,5 +1383,16 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		return array_unique( array_filter( $ids ) );
+	}
+
+	/**
+	 * Get the current version of a product.
+	 *
+	 * @param string $entity_type Entity type.
+	 * @param int    $entity_id   Entity ID.
+	 * @return string|null Entity version (timestamp), or null if not available.
+	 */
+	protected function get_entity_version_core( string $entity_type, int $entity_id ): ?string {
+		return 'product' === $entity_type ? (string) $this->product_util->get_last_modified_date( $entity_id ) : null;
 	}
 }
