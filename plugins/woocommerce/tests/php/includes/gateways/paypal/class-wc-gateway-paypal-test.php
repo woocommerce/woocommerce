@@ -285,34 +285,34 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		return array(
 			'order not found'         => array(
-				'order ID' => 0,
+				'order ID'             => 0,
 				'should use orders v2' => true,
-				'expect to save' => false,
+				'expect to save'       => false,
 			),
 			'invalid payment method'  => array(
-				'order ID' => $order_not_paypal->get_id(),
+				'order ID'             => $order_not_paypal->get_id(),
 				'should use orders v2' => true,
-				'expect to save' => false,
+				'expect to save'       => false,
 			),
 			'orders v2 not enabled'   => array(
-				'order ID' => $order->get_id(),
+				'order ID'             => $order->get_id(),
 				'should use orders v2' => false,
-				'expect to save' => false,
+				'expect to save'       => false,
 			),
 			'missing PayPal order ID' => array(
-				'order ID' => $order_missing_paypal_id->get_id(),
+				'order ID'             => $order_missing_paypal_id->get_id(),
 				'should use orders v2' => true,
-				'expect to save' => false,
+				'expect to save'       => false,
 			),
 			'exception thrown'        => array(
-				'order ID' => $order->get_id(),
+				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
-				'expect to save' => false,
+				'expect to save'       => false,
 			),
 			'successful update'       => array(
-				'order ID' => $order->get_id(),
+				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
-				'expect to save' => true,
+				'expect to save'       => true,
 			),
 		);
 	}
@@ -320,6 +320,9 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for the `enqueue_scripts` method.
 	 *
+	 * @param bool   $gateway_enabled Whether the gateway is enabled.
+	 * @param string $client_id       The client ID to set in options.
+	 * @param bool   $script_expected Whether we expect the script to be enqueued.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_enqueue_scripts
