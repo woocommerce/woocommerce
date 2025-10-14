@@ -320,19 +320,21 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				),
 			),
 		);
-		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
+		$actual   = $request->get_paypal_order_purchase_unit_amount( $order );
 		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
 	 * Tests for the `fetch_paypal_client_id` method.
 	 *
+	 * @param array       $response The mocked HTTP response.
+	 * @param string|null $client_id The expected client ID, or null if none is
 	 * @return void
 	 *
 	 * @dataProvider provide_test_fetch_paypal_client_id
 	 */
 	public function test_fetch_paypal_client_id( $response, $client_id ): void {
-		$response_mock_ref = function() use ( $response ) {
+		$response_mock_ref = function () use ( $response ) {
 			return $response;
 		};
 		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
@@ -360,7 +362,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			),
 			'body'     => 'Invalid JSON',
 		);
-		$valid_response  = array(
+		$valid_response   = array(
 			'response' => array(
 				'code' => 200,
 			),
@@ -372,7 +374,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		);
 
 		return array(
-			'request error' => array(
+			'request error'    => array(
 				'response'  => $error_response,
 				'client ID' => null,
 			),
@@ -380,7 +382,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'response'  => $invalid_response,
 				'client ID' => null,
 			),
-			'valid response' => array(
+			'valid response'   => array(
 				'response'  => $valid_response,
 				'client ID' => 'SOME_CLIENT_ID',
 			),
