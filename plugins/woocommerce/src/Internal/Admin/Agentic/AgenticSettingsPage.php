@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Agentic;
  * AgenticSettingsPage class
  *
  * Adds Agentic Commerce settings to WooCommerce > Settings > Integration.
- * Currently displays settings for OpenAI agent only (using registry structure).
+ * Uses a provider-based system to allow multiple AI agent integrations.
  *
  * @since 10.4.0
  */
@@ -22,7 +22,7 @@ class AgenticSettingsPage {
 	 * Constructor.
 	 */
 	public function __construct() {
-		// No hooks needed - used by OpenAIIntegration class.
+		// No hooks needed - used by AgenticCommerceIntegration class.
 	}
 
 	/**
@@ -31,11 +31,92 @@ class AgenticSettingsPage {
 	 * @return array Agent registry.
 	 */
 	private function get_registry() {
-		return get_option( self::REGISTRY_OPTION, array( 'openai' => array() ) );
+		return get_option( self::REGISTRY_OPTION, array() );
 	}
 
 	/**
-	 * Get settings for OpenAI integration.
+	 * Get registered providers.
+	 *
+	 * Each provider should return an array with:
+	 * - id: string (unique identifier, e.g., 'openai')
+	 * - name: string (display name, e.g., 'OpenAI')
+	 * - description: string (optional description)
+	 * - fields: array (settings fields configuration)
+	 *
+	 * @return array Array of registered providers.
+	 */
+	private function get_providers() {
+		$registry = $this->get_registry();
+
+		// Register built-in OpenAI provider.
+		$providers = array(
+			array(
+				'id'          => 'openai',
+				'name'        => __( 'ChatGPT', 'woocommerce' ),
+				'description' => sprintf(
+					/* translators: %s: URL to ChatGPT merchants application page */
+					__( 'To get started, <a href="%s" target="_blank">apply to ChatGPT</a>. Once approved, ChatGPT will provide the credentials below.', 'woocommerce' ),
+					'https://chatgpt.com/merchants'
+				),
+				'fields'      => $this->get_openai_fields( $registry['openai'] ?? array() ),
+			),
+		);
+
+		/**
+		 * Filter to register additional AI agent providers.
+		 *
+		 * Allows extensions to add their own AI agent provider settings.
+		 * Each provider should return an array with id, name, description, and fields.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param array $providers Array of provider configurations.
+		 * @param array $registry  Current registry data.
+		 */
+		return apply_filters( 'woocommerce_agentic_commerce_providers', $providers, $registry );
+	}
+
+	/**
+	 * Get OpenAI provider fields.
+	 *
+	 * @param array $config Current OpenAI configuration.
+	 * @return array Fields configuration.
+	 */
+	private function get_openai_fields( $config ) {
+		return array(
+			array(
+				'title'    => __( 'Authorization Token', 'woocommerce' ),
+				'desc'     => __( 'The bearer token that ChatGPT uses to authenticate API requests. Provided by OpenAI.', 'woocommerce' ),
+				'id'       => 'woocommerce_agentic_openai_bearer_token',
+				'type'     => 'password',
+				'css'      => 'min-width:400px;',
+				'default'  => $config['bearer_token'] ?? '',
+				'desc_tip' => true,
+			),
+			array(
+				'title'       => __( 'Webhook URL', 'woocommerce' ),
+				'desc'        => __( 'The URL where order events will be sent. Provided by OpenAI.', 'woocommerce' ),
+				'id'          => 'woocommerce_agentic_openai_webhook_url',
+				'type'        => 'text',
+				'css'         => 'min-width:400px;',
+				'placeholder' => 'https://openai.example.com/agentic_checkout/webhooks/order_events',
+				'default'     => $config['webhook_url'] ?? '',
+				'desc_tip'    => true,
+			),
+			array(
+				'title'    => __( 'Webhook Secret', 'woocommerce' ),
+				'desc'     => __( 'Secret key used to sign outgoing webhook requests. Provided by OpenAI.', 'woocommerce' ),
+				'id'       => 'woocommerce_agentic_openai_webhook_secret',
+				'type'     => 'password',
+				'css'      => 'min-width:400px;',
+				'default'  => $config['webhook_secret'] ?? '',
+				'desc_tip' => true,
+			),
+		);
+	}
+
+	/**
+	 * Get settings for Agentic Commerce integration.
 	 *
 	 * @param array  $settings Current settings.
 	 * @param string $current_section Current section ID.
@@ -46,76 +127,46 @@ class AgenticSettingsPage {
 			return $settings;
 		}
 
-		// Get current registry.
-		$registry      = $this->get_registry();
-		$openai_config = $registry['openai'] ?? array();
+		$agentic_settings = array();
+		$providers        = $this->get_providers();
 
-		$agentic_settings = array(
-			array(
-				'title' => __( 'OpenAI Integration', 'woocommerce' ),
+		// Build settings for each provider.
+		foreach ( $providers as $provider ) {
+			// Provider section header.
+			$agentic_settings[] = array(
+				'title' => $provider['name'],
 				'type'  => 'title',
-				'desc'  => __( 'Configure settings to allow ChatGPT to purchase from your store.', 'woocommerce' ),
-				'id'    => 'agentic_commerce_openai_settings',
-			),
+				'desc'  => $provider['description'] ?? '',
+				'id'    => 'agentic_commerce_' . $provider['id'] . '_settings',
+			);
 
-			array(
-				'title'    => __( 'Authorization Token', 'woocommerce' ),
-				'desc'     => __( 'The bearer token that ChatGPT uses to authenticate API requests. Provided by OpenAI.', 'woocommerce' ),
-				'id'       => 'woocommerce_agentic_openai_bearer_token',
-				'type'     => 'password',
-				'css'      => 'min-width:400px;',
-				'default'  => $openai_config['bearer_token'] ?? '',
-				'desc_tip' => true,
-			),
+			// Add provider fields.
+			foreach ( $provider['fields'] as $field ) {
+				$agentic_settings[] = $field;
+			}
 
-			array(
-				'title'       => __( 'Webhook URL', 'woocommerce' ),
-				'desc'        => __( 'The URL where order events will be sent. Provided by OpenAI.', 'woocommerce' ),
-				'id'          => 'woocommerce_agentic_openai_webhook_url',
-				'type'        => 'text',
-				'css'         => 'min-width:400px;',
-				'placeholder' => 'https://openai.example.com/agentic_checkout/webhooks/order_events',
-				'default'     => $openai_config['webhook_url'] ?? '',
-				'desc_tip'    => true,
-			),
-
-			array(
-				'title'    => __( 'Webhook Secret', 'woocommerce' ),
-				'desc'     => __( 'Secret key used to sign outgoing webhook requests. Provided by OpenAI.', 'woocommerce' ),
-				'id'       => 'woocommerce_agentic_openai_webhook_secret',
-				'type'     => 'password',
-				'css'      => 'min-width:400px;',
-				'default'  => $openai_config['webhook_secret'] ?? '',
-				'desc_tip' => true,
-			),
-
-			array(
+			// Provider section end.
+			$agentic_settings[] = array(
 				'type' => 'sectionend',
-				'id'   => 'agentic_commerce_openai_settings',
-			),
-		);
+				'id'   => 'agentic_commerce_' . $provider['id'] . '_settings',
+			);
+		}
 
-		/**
-		 * Filter agentic commerce settings.
-		 *
-		 * Allows extensions to add their own agent settings.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param array $agentic_settings Settings array.
-		 * @param array $registry         Full registry data.
-		 */
-		return apply_filters( 'woocommerce_agentic_commerce_settings', $agentic_settings, $registry );
+		return $agentic_settings;
 	}
 
 	/**
 	 * Save settings to registry structure.
 	 */
 	public function save_settings() {
+		// Verify nonce for security.
+		check_admin_referer( 'woocommerce-settings' );
+
 		// Get current registry.
 		$registry = $this->get_registry();
 
 		// Update OpenAI settings.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['openai'] = array(
 			'bearer_token'     => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
 				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
@@ -134,7 +185,8 @@ class AgenticSettingsPage {
 		/**
 		 * Filter registry before saving.
 		 *
-		 * Allows extensions to save their own agent settings.
+		 * Allows extensions to save their own agent provider settings.
+		 * Extensions should inspect $_POST for their settings and add them to the registry.
 		 *
 		 * @since 10.4.0
 		 *
@@ -145,35 +197,5 @@ class AgenticSettingsPage {
 
 		// Save registry (don't autoload to prevent performance issues).
 		update_option( self::REGISTRY_OPTION, $registry, false );
-	}
-
-	/**
-	 * Get payment provider field description.
-	 *
-	 * @return string Description HTML.
-	 */
-	private function get_payment_provider_description() {
-		$gateways       = WC()->payment_gateways()->get_available_payment_gateways();
-		$has_compatible = false;
-
-		foreach ( $gateways as $gateway ) {
-			if ( $gateway->supports( \Automattic\WooCommerce\Enums\PaymentGatewayFeature::AGENTIC_COMMERCE ) ) {
-				$has_compatible = true;
-				break;
-			}
-		}
-
-		if ( ! $has_compatible ) {
-			return sprintf(
-				'<span class="description" style="color: #d63638;">%s <a href="%s" target="_blank">%s</a> | <a href="%s" target="_blank">%s</a></span>',
-				esc_html__( 'No compatible payment providers found. Please install:', 'woocommerce' ),
-				'https://woocommerce.com/products/woocommerce-gateway-stripe/',
-				esc_html__( 'Stripe for WooCommerce', 'woocommerce' ),
-				'https://woocommerce.com/products/woocommerce-payments/',
-				esc_html__( 'WooPayments', 'woocommerce' )
-			);
-		}
-
-		return __( 'The payment gateway used to process agentic commerce transactions.', 'woocommerce' );
 	}
 }

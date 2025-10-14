@@ -27,7 +27,10 @@ class AgenticController implements RegisterHooksInterface {
 			return;
 		}
 
-		add_action( 'woocommerce_init', array( $this, 'on_init' ) );
+		// We want to run on init for translations but before woocommerce_init so that
+		// we can hook the new integration settings page. We should be able to simplify
+		// this by just hooking here when we no longer need to check if the feature is enabled.
+		add_action( 'before_woocommerce_init', array( $this, 'on_init' ) );
 	}
 
 	/**
@@ -44,18 +47,18 @@ class AgenticController implements RegisterHooksInterface {
 		// Resolve webhook manager from container.
 		wc_get_container()->get( AgenticWebhookManager::class )->register();
 
-		// Register OpenAI integration.
-		add_filter( 'woocommerce_integrations', array( $this, 'add_openai_integration' ) );
+		// Register Agentic Commerce integration.
+		add_filter( 'woocommerce_integrations', array( $this, 'add_agentic_commerce_integration' ) );
 	}
 
 	/**
-	 * Add OpenAI integration to WooCommerce integrations.
+	 * Add Agentic Commerce integration to WooCommerce integrations.
 	 *
 	 * @param array $integrations Existing integrations.
 	 * @return array Modified integrations.
 	 */
-	public function add_openai_integration( $integrations ) {
-		$integrations[] = OpenAIIntegration::class;
+	public function add_agentic_commerce_integration( $integrations ) {
+		$integrations[] = AgenticCommerceIntegration::class;
 		return $integrations;
 	}
 }

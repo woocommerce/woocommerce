@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Admin\Agentic;
 
 /**
- * OpenAI Integration class
+ * Agentic Commerce Integration class
  *
- * Registers OpenAI as a WooCommerce integration for Agentic Commerce.
+ * Registers the Agentic Commerce Protocol as a WooCommerce integration.
+ * Manages settings for various AI agent providers (OpenAI, Anthropic, etc.)
  *
  * @since 10.4.0
  */
-class OpenAIIntegration extends \WC_Integration {
+class AgenticCommerceIntegration extends \WC_Integration {
 
 	/**
 	 * Settings page instance.
@@ -23,12 +24,15 @@ class OpenAIIntegration extends \WC_Integration {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id                 = 'openai';
-		$this->method_title       = __( 'OpenAI', 'woocommerce' );
-		$this->method_description = __( 'Configure settings to allow ChatGPT to purchase from your store.', 'woocommerce' );
+		$this->id                 = 'agentic_commerce';
+		$this->method_title       = __( 'Agentic Commerce', 'woocommerce' );
+		$this->method_description = __( 'Configure settings to allow AI agents to purchase from your store.', 'woocommerce' );
 
 		// Initialize settings page helper.
 		$this->settings_page = new AgenticSettingsPage();
+
+		// Bind to the save action for the settings.
+		add_action( 'woocommerce_update_options_integration_' . $this->id, array( $this, 'process_admin_options' ) );
 	}
 
 	/**
@@ -37,7 +41,6 @@ class OpenAIIntegration extends \WC_Integration {
 	public function admin_options() {
 		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
 		echo wp_kses_post( wpautop( $this->get_method_description() ) );
-		echo '<div><input type="hidden" name="section" value="' . esc_attr( $this->id ) . '" /></div>';
 
 		// Get settings from AgenticSettingsPage.
 		$settings = $this->settings_page->get_settings( array(), 'agentic_commerce' );
