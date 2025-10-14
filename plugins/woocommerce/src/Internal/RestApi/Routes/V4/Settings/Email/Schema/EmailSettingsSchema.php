@@ -107,25 +107,30 @@ class EmailSettingsSchema extends AbstractSchema {
 		return array(
 			'type'       => 'object',
 			'properties' => array(
-				'id'          => array(
+				'id'      => array(
 					'description' => __( 'Setting field ID.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
-				'label'       => array(
+				'label'   => array(
 					'description' => __( 'Setting field label.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
-				'type'        => array(
+				'type'    => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'email', 'boolean', 'number' ),
+					'enum'        => array( 'text', 'email', 'checkbox', 'number', 'color', 'select' ),
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
-				'description' => array(
+				'desc'    => array(
 					'description' => __( 'Setting field description.', 'woocommerce' ),
 					'type'        => 'string',
+					'context'     => self::VIEW_EDIT_CONTEXT,
+				),
+				'options' => array(
+					'description' => __( 'Available options for selectable fields.', 'woocommerce' ),
+					'type'        => 'object',
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
 			),
@@ -196,7 +201,7 @@ class EmailSettingsSchema extends AbstractSchema {
 
 				// Add description if available.
 				if ( ! empty( $setting['desc'] ) ) {
-					$field['description'] = $setting['desc'];
+					$field['desc'] = $setting['desc'];
 				}
 
 				// Add options if available.
@@ -252,7 +257,7 @@ class EmailSettingsSchema extends AbstractSchema {
 		$type_map = array(
 			'text'     => 'text',
 			'email'    => 'email',
-			'checkbox' => 'boolean',
+			'checkbox' => 'checkbox',
 			'number'   => 'number',
 			'color'    => 'color',
 			'select'   => 'select',
