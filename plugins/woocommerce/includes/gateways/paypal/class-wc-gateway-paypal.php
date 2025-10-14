@@ -13,21 +13,17 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
-	require_once __DIR__ . '/includes/class-wc-gateway-paypal-helper.php';
-}
-
 /**
  * WC_Gateway_Paypal Class.
  */
 class WC_Gateway_Paypal extends WC_Payment_Gateway {
-
 	/**
 	 * Unique ID for this gateway.
 	 *
@@ -319,7 +315,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			PayPalHelper::is_orders_v2_migration_eligible() && PayPalHelper::is_orders_v2_feature_flag_enabled()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -912,7 +908,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			PayPalHelper::is_orders_v2_migration_eligible() && PayPalHelper::is_orders_v2_feature_flag_enabled()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,

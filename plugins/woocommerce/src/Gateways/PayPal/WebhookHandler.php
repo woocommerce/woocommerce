@@ -10,14 +10,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Helper' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
@@ -40,7 +37,7 @@ class WebhookHandler {
 			return;
 		}
 
-		\WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( \WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
+		\WC_Gateway_Paypal::log( 'Webhook received: ' . wc_print_r( PayPalHelper::redact_data( $data ), true ) );
 
 		switch ( $data['event_type'] ) {
 			case 'CHECKOUT.ORDER.APPROVED':
@@ -56,7 +53,7 @@ class WebhookHandler {
 				$this->process_payment_authorization_created( $data );
 				break;
 			default:
-				\WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( \WC_Gateway_Paypal_Helper::redact_data( $data ), true ) );
+				\WC_Gateway_Paypal::log( 'Unhandled PayPal webhook event: ' . wc_print_r( PayPalHelper::redact_data( $data ), true ) );
 				break;
 		}
 	}
@@ -68,7 +65,7 @@ class WebhookHandler {
 	 */
 	private function process_checkout_order_approved( $event ) {
 		$custom_id = $event['resource']['purchase_units'][0]['custom_id'] ?? '';
-		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -120,7 +117,7 @@ class WebhookHandler {
 	 */
 	private function process_payment_capture_completed( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -153,7 +150,7 @@ class WebhookHandler {
 	 */
 	private function process_payment_capture_pending( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;
@@ -181,7 +178,7 @@ class WebhookHandler {
 	 */
 	private function process_payment_authorization_created( $event ) {
 		$custom_id = $event['resource']['custom_id'] ?? '';
-		$order     = \WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$order     = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 		if ( ! $order ) {
 			\WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
 			return;

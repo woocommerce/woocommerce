@@ -7,6 +7,8 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -53,7 +55,7 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		// Skip if the gateway is not available or the merchant has not been onboarded.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! $this->gateway->should_use_orders_v2() ) {
+		if ( ! PayPalHelper::is_paypal_gateway_available() || ! $this->gateway->should_use_orders_v2() ) {
 			return;
 		}
 
