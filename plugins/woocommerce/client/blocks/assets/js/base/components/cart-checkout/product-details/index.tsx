@@ -69,11 +69,16 @@ const ProductDetails = ( {
 			{ details.map( ( detail ) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
+				// Strip HTML tags from name for CSS class generation
+				const nameForClass = sanitizeHTML( name, {
+					tags: [],
+					attr: [],
+				} );
 				const className =
 					detail?.className ||
-					( name
+					( nameForClass
 						? `wc-block-components-product-details__${ kebabCase(
-								name
+								nameForClass
 						  ) }`
 						: '' );
 
