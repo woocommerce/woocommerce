@@ -102,7 +102,9 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'type'              => 'string',
 				'format'            => 'email',
 				'sanitize_callback' => 'sanitize_email',
-				'validate_callback' => 'is_email',
+				'validate_callback' => function ( $value ) {
+					return is_email( $value );
+				},
 			),
 			'role'     => array(
 				'description'       => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),

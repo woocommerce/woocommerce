@@ -99,11 +99,6 @@ class CustomerSchema extends AbstractSchema {
 					'sanitize_callback' => 'sanitize_user',
 				),
 			),
-			'password'           => array(
-				'description' => __( 'Customer password.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'edit' ),
-			),
 			'billing'            => array(
 				'description' => __( 'List of billing address data.', 'woocommerce' ),
 				'type'        => 'object',
@@ -307,18 +302,6 @@ class CustomerSchema extends AbstractSchema {
 			'total_spent'        => $item->get_total_spent(),
 			'avatar_url'         => $item->get_avatar_url(),
 		);
-
-		// Add meta data for administrators.
-		if ( wc_current_user_has_role( 'administrator' ) ) {
-			$formatted_data['meta_data'] = array_values(
-				array_filter(
-					$data['meta_data'],
-					function ( $meta ) {
-						return ! is_protected_meta( $meta->key, 'user' );
-					}
-				)
-			);
-		}
 
 		// Filter fields if specified.
 		if ( ! empty( $include_fields ) ) {
