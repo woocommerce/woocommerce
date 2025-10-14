@@ -1,6 +1,6 @@
 <?php
 declare(strict_types=1);
-namespace Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs;
+namespace Automattic\WooCommerce\Internal\Agentic\Enums\Specs;
 
 /**
  * Checkout session status values as defined in the Agentic Commerce Protocol.
@@ -34,5 +34,5 @@ class CheckoutSessionStatus {
 	/**
 	 * Allowed statuses for update operations.
 	 */
-	const ALLOWED_STATUSES_FOR_UPDATE = [ self::NOT_READY_FOR_PAYMENT, self::READY_FOR_PAYMENT ];
+	const ALLOWED_STATUSES_FOR_UPDATE = array( self::NOT_READY_FOR_PAYMENT, self::READY_FOR_PAYMENT );
 }

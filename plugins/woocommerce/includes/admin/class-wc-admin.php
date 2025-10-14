@@ -315,7 +315,7 @@ class WC_Admin {
 	/**
 	 * Update the footer version text.
 	 *
-	 * @since $VID:$
+	 * @since 10.2.0
 	 *
 	 * @param string $version The current version string.
 	 * @return string
