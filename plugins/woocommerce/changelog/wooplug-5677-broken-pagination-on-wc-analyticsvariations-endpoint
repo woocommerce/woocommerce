@@ -1,4 +1,4 @@
 Significance: minor
 Type: fix
 
-Fix issue in variations endpoint where pagination with the modified orderby was causing duplicates.
+Fix issue in where pagination with the modified orderby was causing duplicates in Variation and Product endpoints.
