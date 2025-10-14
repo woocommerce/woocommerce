@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
@@ -196,7 +197,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		if ( isset( $request['id'] ) ) {
 			$variation = wc_get_product( absint( $request['id'] ) );
 		} else {
-			$variation = new WC_Product_Variation();
+			/**
+			 * This filter is documented in includes/class-wc-product-factory.php
+			 *
+			 * @since 10.3.0
+			 */
+			$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_Variation', ProductType::VARIATION, 'product_variation', 0 );
+			$variation = new $classname();
 		}
 
 		$variation->set_parent_id( absint( $request['product_id'] ) );
