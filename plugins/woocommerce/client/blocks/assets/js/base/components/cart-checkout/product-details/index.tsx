@@ -2,13 +2,42 @@
  * External dependencies
  */
 import { paramCase as kebabCase } from 'change-case';
-import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import type { ProductResponseItemData } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import './style.scss';
+
+const CONTENT_TAGS = [
+	'a',
+	'b',
+	'em',
+	'i',
+	'strong',
+	'p',
+	'br',
+	'abbr',
+	'ul',
+	'li',
+	'img',
+	'span',
+	'ol',
+	'div',
+];
+
+const CONTENT_ATTR = [
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'src',
+	'style',
+	'class',
+	'title',
+];
 
 interface ProductDetailsProps {
 	details: ProductResponseItemData[];
@@ -47,6 +76,7 @@ const ProductDetails = ( {
 								name
 						  ) }`
 						: '' );
+
 				return (
 					<ChildTag
 						key={ name + ( detail.display || detail.value ) }
@@ -54,14 +84,29 @@ const ProductDetails = ( {
 					>
 						{ name && (
 							<>
-								<span className="wc-block-components-product-details__name">
-									{ decodeEntities( name ) }:
-								</span>{ ' ' }
+								<span
+									className="wc-block-components-product-details__name"
+									dangerouslySetInnerHTML={ {
+										__html: sanitizeHTML( name, {
+											tags: CONTENT_TAGS,
+											attr: CONTENT_ATTR,
+										} ),
+									} }
+								/>{ ' ' }
 							</>
 						) }
-						<span className="wc-block-components-product-details__value">
-							{ decodeEntities( detail.display || detail.value ) }
-						</span>
+						<span
+							className="wc-block-components-product-details__value"
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML(
+									detail.display || detail.value,
+									{
+										tags: CONTENT_TAGS,
+										attr: CONTENT_ATTR,
+									}
+								),
+							} }
+						/>
 					</ChildTag>
 				);
 			} ) }
