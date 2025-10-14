@@ -211,12 +211,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_get_paypal_order_details
 	 */
 	public function test_get_paypal_order_details( string $paypal_order_id, ?string $expected_exception, ?string $expected_exception_message ) {
-		$response_mock_ref = function() use ( $paypal_order_id ) {
-			if ( $paypal_order_id === 'ERROR_ID' ) {
+		$response_mock_ref = function () use ( $paypal_order_id ) {
+			if ( 'ERROR_ID' === $paypal_order_id ) {
 				return new WP_Error( 'error', 'Some error occurred.' );
 			}
 
-			if ( $paypal_order_id === 'FAILED_ID' ) {
+			if ( 'FAILED_ID' === $paypal_order_id ) {
 				return array(
 					'response' => array(
 						'code' => 500,
@@ -236,7 +236,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'response' => array(
 					'code' => 200,
 				),
-				'body'    => wp_json_encode( array() ),
+				'body'     => wp_json_encode( array() ),
 			);
 		};
 
@@ -266,19 +266,19 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provide_test_get_paypal_order_details(): array {
 		return array(
-			'order details error response' => array(
-				'PayPal order ID' => 'ERROR_ID',
-				'expected exception' => Exception::class,
+			'order details error response'   => array(
+				'PayPal order ID'            => 'ERROR_ID',
+				'expected exception'         => Exception::class,
 				'expected exception message' => 'PayPal order details request failed: Some error occurred.',
 			),
-			'order details failed response' => array(
-				'PayPal order ID' => 'FAILED_ID',
-				'expected exception' => Exception::class,
+			'order details failed response'  => array(
+				'PayPal order ID'            => 'FAILED_ID',
+				'expected exception'         => Exception::class,
 				'expected exception message' => 'PayPal order details request failed. HTTP 500',
 			),
 			'order details success response' => array(
-				'PayPal order ID' => 'SUCCESS_ID',
-				'expected exception' => null,
+				'PayPal order ID'            => 'SUCCESS_ID',
+				'expected exception'         => null,
 				'expected exception message' => null,
 			),
 		);

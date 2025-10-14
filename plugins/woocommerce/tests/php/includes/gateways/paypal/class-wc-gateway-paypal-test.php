@@ -362,7 +362,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 */
 	public function provide_test_enqueue_scripts(): array {
 		return array(
-			'gateway disabled' => array(
+			'gateway disabled'  => array(
 				'gateway enabled' => false,
 				'client ID'       => 'test_client_id',
 				'script expected' => false,
@@ -372,7 +372,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 				'client ID'       => '',
 				'script expected' => false,
 			),
-			'script enqueued' => array(
+			'script enqueued'   => array(
 				'gateway enabled' => true,
 				'client ID'       => 'test_client_id',
 				'script expected' => true,
