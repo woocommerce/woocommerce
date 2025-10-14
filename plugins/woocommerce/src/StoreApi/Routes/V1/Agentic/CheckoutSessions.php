@@ -136,9 +136,6 @@ class CheckoutSessions extends AbstractCartRoute {
 	protected function get_route_post_response( \WP_REST_Request $request ) {
 		$checkout_session = new AgenticCheckoutSession( $this->cart_controller->get_cart_instance() );
 
-		// Set the session_id early so that it can be checked if the current request is agentic commerce.
-		AgenticCheckoutUtils::get_or_set_checkout_session_id();
-
 		// Clear existing cart to start fresh for POST requests.
 		$this->cart_controller->empty_cart();
 

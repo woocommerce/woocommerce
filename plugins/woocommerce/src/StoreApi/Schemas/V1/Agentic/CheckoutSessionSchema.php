@@ -353,7 +353,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			: $this->format_line_items_from_cart( $cart_items );
 
 		$response = [
-			'id'                    => AgenticCheckoutUtils::get_or_set_checkout_session_id(),
+			'id'                    => $checkout_session->get_id(),
 			'buyer'                 => $completed_order instanceof WC_Order
 				? $this->format_buyer_from_order( $completed_order )
 				: $this->format_buyer(),
@@ -383,7 +383,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 		if ( $completed_order instanceof WC_Order ) {
 			$response['order'] = [
 				'id'                  => (string) $completed_order->get_id(),
-				'checkout_session_id' => AgenticCheckoutUtils::get_or_set_checkout_session_id(),
+				'checkout_session_id' => $checkout_session->get_id(),
 				'permalink_url'       => $completed_order->get_checkout_order_received_url(),
 			];
 		}
