@@ -234,7 +234,7 @@ class WC_Admin_Tests_API_Reports_Taxes extends WC_REST_Unit_Test_Case {
 	 * Ensures that the report returns the correct number of unique tax rates
 	 * when an order has multiple different taxes applied.
 	 *
-	 * @since 3.5.0
+	 * @since 10.4.0
 	 */
 	public function test_get_reports_with_multiple_tax_line_items() {
 		global $wpdb;
