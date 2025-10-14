@@ -219,10 +219,6 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	public function test_cogs_recalculation_on_transition_to_completed_status() {
 		$this->enable_cogs_feature();
 
-		$order = new WC_Order();
-		$order->set_status( 'pending' );
-		$order->save();
-
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_cogs_value( 50 );
 		$product->save();

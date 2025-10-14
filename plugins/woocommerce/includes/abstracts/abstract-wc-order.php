@@ -2644,13 +2644,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
-		$statuses_with_provisional_cosas = array(
-			'pending',
-			'processing',
-			'on-hold',
+		$statuses_with_provisional_cost = array(
+			OrderStatus::PENDING,
+			OrderStatus::PROCESSING,
+			OrderStatus::ON_HOLD,
 		);
 
-		$costs_are_provisional = in_array( $this->get_status(), $statuses_with_provisional_cosas, true );
+		$costs_are_provisional = in_array( $this->get_status(), $statuses_with_provisional_cost, true );
 
 		/**
 		 * Filter to customize whether order costs are provisional.
