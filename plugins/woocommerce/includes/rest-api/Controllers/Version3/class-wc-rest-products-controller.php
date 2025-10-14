@@ -728,17 +728,19 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Type is the most important part here because we need to be using the correct class and methods.
 		if ( isset( $request['type'] ) ) {
-			$classname = WC_Product_Factory::get_classname_from_product_type( $request['type'] );
-
-			if ( ! class_exists( $classname ) ) {
-				$classname = 'WC_Product_Simple';
-			}
+			$classname = WC_Product_Factory::get_product_classname( $id, $request['type'] );
 
 			$product = new $classname( $id );
 		} elseif ( isset( $request['id'] ) ) {
 			$product = wc_get_product( $id );
 		} else {
-			$product = new WC_Product_Simple();
+			/**
+			 * This filter is documented in includes/class-wc-product-factory.php
+			 *
+			 * @since 10.3.0
+			 */
+			$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_Simple', ProductType::SIMPLE, 'product', 0 );
+			$product   = new $classname();
 		}
 
 		if ( ProductType::VARIATION === $product->get_type() ) {
