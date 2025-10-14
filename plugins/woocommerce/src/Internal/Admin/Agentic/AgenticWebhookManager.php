@@ -88,7 +88,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 			array(
 				'search' => $name_prefix,
 				'status' => 'active',
-				'limit'  => -11,
+				'limit'  => -1,
 			)
 		);
 
