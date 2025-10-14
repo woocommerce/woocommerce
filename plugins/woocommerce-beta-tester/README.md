@@ -27,4 +27,4 @@ Run `./bin/build-zip.sh` to make a zip file.
 
 ## License
 
-Like WooCommerce itself, the WooCommerce Beta Tester plugin is open-source software licensed under the GPL v2. See [license](../../license.txt).
+Like WooCommerce itself, the WooCommerce Beta Tester plugin is open-source software licensed under the GPL v3. See [license](../../license.txt).
