@@ -395,7 +395,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'active', $webhook->get_status() );
 		$this->assertEquals( $user_id, $webhook->get_user_id() );
 		$this->assertNotEmpty( $webhook->get_secret() );
-		$this->assertEquals( 'https://tbd.com', $webhook->get_delivery_url() );
+		$this->assertEquals( 'https://acp.invalid', $webhook->get_delivery_url() );
 
 		// Verify webhook name contains ACP prefix.
 		$this->assertStringContainsString( 'ACP', $webhook->get_name() );
@@ -499,7 +499,7 @@ class AgenticWebhookManagerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( AgenticWebhookManager::WEBHOOK_TOPIC, $webhook->get_topic() );
 		$this->assertEquals( 'active', $webhook->get_status() );
 		$this->assertEquals( $user_id, $webhook->get_user_id() );
-		$this->assertEquals( 'https://tbd.com', $webhook->get_delivery_url() );
+		$this->assertEquals( 'https://acp.invalid', $webhook->get_delivery_url() );
 		$this->assertNotEmpty( $webhook->get_secret() );
 		$this->assertEquals( 50, strlen( $webhook->get_secret() ) ); // Secret should be 50 characters.
 

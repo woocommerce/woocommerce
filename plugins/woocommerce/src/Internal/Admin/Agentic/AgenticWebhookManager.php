@@ -107,7 +107,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 *
 		 * @param string $delivery_url Delivery URL.
 		 */
-		$delivery_url = apply_filters( 'woocommerce_agentic_webhook_delivery_url', 'https://tbd.com' );
+		$delivery_url = apply_filters( 'woocommerce_agentic_webhook_delivery_url', 'https://acp.invalid' );
 
 		// Include the non-translated prefix (ACP) to allow searching for the webhook by name.
 		$name = sprintf(
