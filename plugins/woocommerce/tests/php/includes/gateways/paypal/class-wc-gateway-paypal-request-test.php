@@ -13,7 +13,6 @@ require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-pa
  * Class WC_Gateway_Paypal_Test.
  */
 class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
-
 	/**
 	 * Set up the test environment.
 	 */

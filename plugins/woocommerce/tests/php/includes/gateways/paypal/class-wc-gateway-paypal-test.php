@@ -7,8 +7,6 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Proxies\LegacyProxy;
-
 /**
  * Class WC_Gateway_Paypal_Test.
  */
@@ -236,7 +234,34 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provide_test_update_addresses_in_order
 	 */
-	public function test_update_addresses_in_order( int $order_id, bool $should_use_orders_v2, bool $expect_to_save ) {
+	public function test_update_addresses_in_order(
+		int $order_id,
+		bool $should_use_orders_v2,
+		bool $mock_jetpack_params,
+		bool $expect_to_save
+	) {
+		$return_valid_site_id = function () {
+			return array( 'id' => 12345 );
+		};
+		$return_blog_token = function () {
+			return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
+		};
+
+		if ( $mock_jetpack_params ) {
+			add_filter( 'pre_option_jetpack_options', $return_valid_site_id );
+			add_filter( 'pre_option_jetpack_private_options', $return_blog_token );
+		}
+
+		$response_mock_ref = function () {
+			return array(
+				'response' => array(
+					'code' => 200,
+				),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
 		$triggered = false;
 		$callback  = static function () use ( &$triggered ) {
 			$triggered = true;
@@ -249,18 +274,19 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
 			->onlyMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
-		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( $should_use_orders_v2 );
+		$mock_gateway->method( 'should_use_orders_v2' )
+			->willReturn( $should_use_orders_v2 );
 		$mock_gateway->testmode = false;
 
 		$mock_gateway->update_addresses_in_order( $order_id );
 
 		// Clean up after test.
+		remove_filter( 'pre_option_jetpack_options', $return_valid_site_id );
+		remove_filter( 'pre_option_jetpack_private_options', $return_blog_token );
 		remove_action( 'woocommerce_before_order_object_save', $callback );
+		remove_filter( 'pre_http_request', $response_mock_ref );
 
-		$this->assertSame(
-			$expect_to_save,
-			$triggered,
-		);
+		$this->assertSame( $expect_to_save, $triggered );
 	}
 
 	/**
@@ -287,31 +313,37 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 			'order not found'         => array(
 				'order ID'             => 0,
 				'should use orders v2' => true,
+				'mock Jetpack params' => true,
 				'expect to save'       => false,
 			),
 			'invalid payment method'  => array(
 				'order ID'             => $order_not_paypal->get_id(),
 				'should use orders v2' => true,
+				'mock Jetpack params' => true,
 				'expect to save'       => false,
 			),
 			'orders v2 not enabled'   => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => false,
+				'mock Jetpack params' => true,
 				'expect to save'       => false,
 			),
 			'missing PayPal order ID' => array(
 				'order ID'             => $order_missing_paypal_id->get_id(),
 				'should use orders v2' => true,
+				'mock Jetpack params' => true,
 				'expect to save'       => false,
 			),
 			'exception thrown'        => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
+				'mock Jetpack params' => false,
 				'expect to save'       => false,
 			),
 			'successful update'       => array(
 				'order ID'             => $order->get_id(),
 				'should use orders v2' => true,
+				'mock Jetpack params' => true,
 				'expect to save'       => true,
 			),
 		);
