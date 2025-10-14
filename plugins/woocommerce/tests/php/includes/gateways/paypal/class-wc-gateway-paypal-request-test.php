@@ -328,7 +328,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * Tests for the `fetch_paypal_client_id` method.
 	 *
 	 * @param array       $response The mocked HTTP response.
-	 * @param string|null $client_id The expected client ID, or null if none is
+	 * @param string|null $client_id The expected client ID, or null if none is.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_fetch_paypal_client_id
