@@ -159,10 +159,9 @@ async function saveBlockEditor( editor, isOnlyCurrentEntityDirty ) {
 
 async function setCartBlockAttributes(
 	editor,
-	{ optionStyle, autoselect, autoselectOnPageLoad, disabledAttributesAction } = {
+	{ optionStyle, autoselect, disabledAttributesAction } = {
 		optionStyle: undefined,
 		autoselect: false,
-		autoselectOnPageLoad: false,
 		disabledAttributesAction: undefined,
 	},
 ) {
@@ -183,19 +182,16 @@ async function setCartBlockAttributes(
 	}
 	await optionStyleInput.click();
 
-	const autoselectInput = await page.getByRole( 'checkbox', { name: 'Auto-select other attributes' } )
-	const autoselectOnPageLoadInput = await page.getByRole( 'checkbox', { name: 'Auto-select on page load' } );
+	const autoselectInput = await page.getByRole( 'checkbox', { name: 'Auto-select when only one attribute is compatible' } )
 	const disabledAttributesActionInput = await page.getByLabel( 'Values in conflict');
 
 	if (
 		autoselectInput.isChecked !== autoselect ||
-		autoselectOnPageLoadInput.isChecked !== autoselectOnPageLoad ||
 		disabledAttributesActionInput.getAttribute( 'value' ) !== disabledAttributesAction
 	) {
 		isOnlyCurrentEntityDirty = false;
 	}
 	await autoselectInput.setChecked( autoselect );
-	await autoselectOnPageLoadInput.setChecked( autoselectOnPageLoad );
 	await disabledAttributesActionInput.selectOption( { value: disabledAttributesAction } );
 	await saveBlockEditor( editor, isOnlyCurrentEntityDirty );
 }
@@ -300,11 +296,11 @@ test.describe(
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
 			test(
-				`${ optionStyle }: Add to Cart + Options: Auto-select on page load should work`,
+				`${ optionStyle }: Add to Cart + Options: Auto-select should work (on page load)`,
 				{ tag: [] },
 				async ( { page, editor } ) => {
-					await test.step( `${ optionStyle }: Set the autoselect_on_page_load setting to false`, async () => {
-						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselectOnPageLoad: false } );
+					await test.step( `${ optionStyle }: Set the autoselect setting to false`, async () => {
+						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselect: false } );
 					} );
 					await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
 						await page.goto( productPermalink );
@@ -312,8 +308,8 @@ test.describe(
 						await expectSelectedAttributes( page, { Type: '', Colour: '', Size: '' }, optionStyle );
 					} );
 
-					await test.step( `${ optionStyle }: Set the autoselect_on_page_load setting to true`, async () => {
-						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselectOnPageLoad: true } );
+					await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselect: true } );
 					} );
 					await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
 						await page.goto( productPermalink );

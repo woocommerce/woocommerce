@@ -370,14 +370,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const context = getContext< Context >(),
 					$form = $( 'form.wc-block-add-to-cart-with-options' ),
 					$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
-					autoselectOnPageLoad =
-						$variation_selectors.first().data( 'autoselectOnPageLoad' ) ||
+					autoselect =
+						$variation_selectors.first().data( 'autoselect' ) ||
 						false;
 
 				if ( context.selectedValue ) {
 					actions.setAttribute( context.name, context.selectedValue );
 				}
-				if ( autoselectOnPageLoad ) {
+				if ( autoselect ) {
 					const $target_variation_selector = $variation_selectors.has( `[name="${ context.name }"]` );
 					attributesAutoselect( $target_variation_selector );
 				}

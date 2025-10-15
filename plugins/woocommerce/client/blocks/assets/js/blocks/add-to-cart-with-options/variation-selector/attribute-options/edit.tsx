@@ -66,7 +66,6 @@ export default function AttributeOptionsEdit(
 		className,
 		optionStyle,
 		autoselect,
-		autoselectOnPageLoad,
 		disabledAttributesAction,
 	} = attributes;
 
@@ -129,17 +128,10 @@ export default function AttributeOptionsEdit(
 				</PanelBody>
 				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
 					<ToggleControl
-						label={ __( 'Auto-select other attributes on user selection', 'woocommerce' ) }
-						help={ __( 'This controls whether other attributes will be auto-selected when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
+						label={ __( 'Auto-select when only one attribute is compatible', 'woocommerce' ) }
+						help={ __( 'This controls whether attributes will be auto-selected once upon loading the page and when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
 						checked={ autoselect }
 						onChange={ () => setAttributes( { autoselect: ! autoselect } ) }
-						__nextHasNoMarginBottom
-					/>
-					<ToggleControl
-						label={ __( 'Auto-select on page load', 'woocommerce' ) }
-						help={ __( 'This controls whether or not attributes with only one possible option will be auto-selected upon loading the page.', 'woocommerce' ) }
-						checked={ autoselectOnPageLoad }
-						onChange={ () => setAttributes( { autoselectOnPageLoad: ! autoselectOnPageLoad } ) }
 						__nextHasNoMarginBottom
 					/>
 					<SelectControl

@@ -16,10 +16,6 @@
 			"type": "boolean",
 			"default": false
 		},
-		"autoselectOnPageLoad": {
-			"type": "boolean",
-			"default": false
-		},
 		"disabledAttributesAction": {
 			"type": "string",
 			"default": "disable"
