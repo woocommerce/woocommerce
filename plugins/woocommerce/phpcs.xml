@@ -17,14 +17,8 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
 
-	<!-- Exclude JavaScript/TypeScript files which are covered by ESLint. -->
-	<exclude-pattern>*.js</exclude-pattern>
-	<exclude-pattern>*.jsx</exclude-pattern>
-	<exclude-pattern>*.ts</exclude-pattern>
-	<exclude-pattern>*.tsx</exclude-pattern>
-	<exclude-pattern>*.json</exclude-pattern>
-	<exclude-pattern>*.scss</exclude-pattern>
-	<exclude-pattern>*.css</exclude-pattern>
+	<!-- Only check PHP files. -->
+	<arg name="extensions" value="php" />
 
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps" />
