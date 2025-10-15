@@ -160,7 +160,7 @@ describe( 'ProductDetails', () => {
 	} );
 
 	test( 'should apply correct CSS classes', () => {
-		const details = [ { name: 'Test Name', value: 'Test Value' } ];
+		const details = [ { name: 'Test <b>Name</b>', value: 'Test Value' } ];
 
 		const { container } = render( <ProductDetails details={ details } /> );
 

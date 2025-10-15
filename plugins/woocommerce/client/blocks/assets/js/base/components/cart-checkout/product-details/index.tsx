@@ -3,6 +3,7 @@
  */
 import { paramCase as kebabCase } from 'change-case';
 import { sanitizeHTML } from '@woocommerce/sanitize';
+
 import type { ProductResponseItemData } from '@woocommerce/types';
 
 /**
@@ -16,7 +17,6 @@ const CONTENT_TAGS = [
 	'em',
 	'i',
 	'strong',
-	'p',
 	'br',
 	'abbr',
 	'ul',
@@ -24,7 +24,6 @@ const CONTENT_TAGS = [
 	'img',
 	'span',
 	'ol',
-	'div',
 ];
 
 const CONTENT_ATTR = [
@@ -42,6 +41,7 @@ const CONTENT_ATTR = [
 interface ProductDetailsProps {
 	details: ProductResponseItemData[];
 }
+
 // Component to display cart item data and variations.
 const ProductDetails = ( {
 	details = [],
@@ -70,10 +70,10 @@ const ProductDetails = ( {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
 				// Strip HTML tags from name for CSS class generation
-				const nameForClass = sanitizeHTML( name, {
-					tags: [],
-					attr: [],
-				} );
+				const tempDiv = document.createElement( 'div' );
+				tempDiv.innerHTML = name;
+				const nameForClass =
+					tempDiv.textContent || tempDiv.innerText || '';
 				const className =
 					detail?.className ||
 					( nameForClass
