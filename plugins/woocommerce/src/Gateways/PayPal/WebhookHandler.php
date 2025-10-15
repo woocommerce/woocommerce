@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-request.php';
+	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
 }
 
 /**
