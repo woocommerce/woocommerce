@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add wc/v4/shipping-zone-method endpoint for creating a shipping zone with Core Data compatibility and modern v4 architecture patterns.

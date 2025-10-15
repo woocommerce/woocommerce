@@ -326,7 +326,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -919,7 +919,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,

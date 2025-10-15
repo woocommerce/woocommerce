@@ -4,8 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import type { ComponentType } from 'react';
 import { useEffect, useState } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-import { store as blockEditorStore } from '@wordpress/block-editor';
 import { info } from '@wordpress/icons';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductControl from '@woocommerce/editor-components/product-control';
@@ -62,7 +60,6 @@ export const withEditMode =
 	( props: EditModeProps< T > ) => {
 		const {
 			attributes,
-			clientId,
 			debouncedSpeak,
 			name,
 			setAttributes,
@@ -78,24 +75,13 @@ export const withEditMode =
 			mediaSrc: string;
 		} >();
 
-		const wasBlockJustInserted = useSelect(
-			( select ) => {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-expect-error method exists but not typed
-				return select( blockEditorStore ).wasBlockJustInserted(
-					clientId
-				);
-			},
-			[ clientId ]
-		);
-
 		const hasFeaturedItemId =
 			( name === BLOCK_NAMES.featuredProduct && attributes.productId ) ||
 			( name === BLOCK_NAMES.featuredCategory && attributes.categoryId );
 
 		// Only show edit mode for newly inserted blocks without existing selection
 		const [ editMode, setEditMode ] = useState< boolean >(
-			wasBlockJustInserted && ! hasFeaturedItemId
+			! hasFeaturedItemId
 		);
 
 		const onDone = () => {

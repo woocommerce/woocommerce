@@ -9,15 +9,16 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\RoutesController;
 
 /**
  * CheckoutSessions Controller Tests.
  */
 class CheckoutSessions extends ControllerTestCase {
-
 	/**
 	 * Products created for tests.
 	 *
@@ -84,8 +85,7 @@ class CheckoutSessions extends ControllerTestCase {
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
 
 		// Clear session data.
-		WC()->session->set( 'agentic_draft_order_id', null );
-		WC()->session->set( 'chosen_shipping_methods', null );
+		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
 
 		// Reset customer state to clean state.
 		$this->reset_customer_state();
@@ -421,9 +421,10 @@ class CheckoutSessions extends ControllerTestCase {
 		$response = $this->create_session( $this->create_checkout_request() );
 		$data     = $response->get_data();
 
-		$this->assertEquals( 400, $response->get_status() );
-		$this->assertArrayHasKey( 'code', $data );
-		$this->assertEquals( 'out_of_stock', $data['code'] );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'messages', $data );
+		$this->assertEquals( 'error', $data['messages'][0]['type'] );
+		$this->assertEquals( 'out_of_stock', $data['messages'][0]['code'] );
 	}
 
 	/**
@@ -1091,7 +1092,7 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Clear cart and session to simulate new session.
 		wc_empty_cart();
-		WC()->session->set( 'agentic_session_id', null );
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_SESSION_ID, null );
 		WC()->session->set( 'agentic_draft_order_id', null );
 
 		// Create second session.
@@ -1203,5 +1204,140 @@ class CheckoutSessions extends ControllerTestCase {
 			$this->assertIsNumeric( $option['tax'] );
 			$this->assertIsNumeric( $option['total'] );
 		}
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when out_of_stock MessageError is present.
+	 */
+	public function test_calculate_status_out_of_stock_returns_not_ready_for_payment() {
+		// Create a product and set it out of stock.
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Out of Stock Product',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				'regular_price' => 10,
+			)
+		);
+
+		// Add the out of stock product to cart.
+		$response = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $product->get_id(),
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+
+		$data = $response->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to out of stock error.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+
+		// Verify there are error messages with the right code.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::OUT_OF_STOCK ) );
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when shipping address is missing.
+	 */
+	public function test_calculate_status_missing_shipping_address_returns_not_ready_for_payment() {
+		// Create session with physical product that needs shipping but no address.
+		$data = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[0]->get_id(), // Physical product.
+						'quantity' => 1,
+					),
+				),
+			)
+		)->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to missing shipping address.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+		// Verify there are error messages about missing shipping address.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::MISSING ) );
+	}
+
+	/**
+	 * Test calculate_status returns NOT_READY_FOR_PAYMENT when shipping method is missing.
+	 * This test verifies that when we have a physical product that needs shipping,
+	 * but no shipping method is selected, the status should be NOT_READY_FOR_PAYMENT.
+	 */
+	public function test_calculate_status_missing_shipping_method_returns_not_ready_for_payment() {
+		// This should trigger both "missing shipping address" and "missing shipping method" errors.
+		$data = $this->create_session(
+			array(
+				'items' => array(
+					array(
+						'id'       => (string) $this->products[0]->get_id(), // Physical product.
+						'quantity' => 1,
+					),
+				),
+			)
+		)->get_data();
+
+		// Should return NOT_READY_FOR_PAYMENT due to missing shipping address and method.
+		$this->assertEquals( 'not_ready_for_payment', $data['status'] );
+
+		// Verify there are error messages about missing shipping address and method.
+		$this->assertTrue( $this->does_response_contain_error_message_with_code( $data, ErrorCode::MISSING ) );
+	}
+
+	/**
+	 * Check if the response contains an error message with the given code.
+	 *
+	 * @param array  $response The response data.
+	 * @param string $code The error code to check for.
+	 * @return bool True if the response contains an error message with the given code, false otherwise.
+	 */
+	private function does_response_contain_error_message_with_code( array $response, string $code ): bool {
+		$this->assertNotEmpty( $response['messages'] );
+		foreach ( $response['messages'] as $message ) {
+			if ( 'error' === $message['type'] && $message['code'] === $code ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Test updating a completed session returns error.
+	 *
+	 * This tests the new status validation added in the complete-agentic-commerce branch.
+	 */
+	public function test_update_completed_session_returns_error() {
+		// Create a session and mark it as completed by setting the completed order ID in session.
+		$create_response = $this->create_session( $this->create_checkout_request() );
+		$create_data     = $create_response->get_data();
+		$session_id      = $create_data['id'];
+
+		// Simulate a completed session by setting the completed order ID.
+		// This makes the status calculation return 'completed'.
+		WC()->session->set( SessionKey::AGENTIC_CHECKOUT_COMPLETED_ORDER_ID, 123 );
+
+		// Try to update the completed session.
+		$update_response = $this->update_session(
+			$session_id,
+			array(
+				'buyer' => array(
+					'first_name' => 'Test',
+				),
+			)
+		);
+
+		// Should return 400 error.
+		$this->assertEquals( 400, $update_response->get_status() );
+
+		// Verify error response format.
+		$data = $update_response->get_data();
+		$this->assertArrayHasKey( 'type', $data );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertArrayHasKey( 'message', $data );
+		$this->assertStringContainsString( 'cannot be updated', $data['message'] );
 	}
 }

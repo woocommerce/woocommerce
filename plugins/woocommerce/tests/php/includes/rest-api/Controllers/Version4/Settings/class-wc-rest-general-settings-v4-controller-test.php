@@ -67,6 +67,10 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		if ( isset( $this->prev_default_country ) ) {
 			update_option( 'woocommerce_default_country', $this->prev_default_country );
 		}
+		delete_option( 'general_options' );
+		delete_option( 'woocommerce_currency' );
+		delete_option( 'woocommerce_price_num_decimals' );
+		delete_option( 'woocommerce_share_key_display' );
 		parent::tearDown();
 	}
 
@@ -181,5 +185,102 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 		$response->get_data();
 
 		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test that woocommerce_share_key_display setting cannot be updated via REST API.
+	 */
+	public function test_update_share_key_display_not_allowed() {
+		// Set an initial value.
+		$initial_value = 'initial_value';
+		update_option( 'woocommerce_share_key_display', $initial_value );
+
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_share_key_display' => 'new_value',
+						'woocommerce_default_country'   => 'US:CA', // Another setting to verify normal updates still work.
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		// Verify the response is successful.
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify woocommerce_share_key_display was not changed.
+		$this->assertEquals( $initial_value, get_option( 'woocommerce_share_key_display' ) );
+
+		// Verify other settings were updated successfully.
+		$this->assertEquals( 'US:CA', get_option( 'woocommerce_default_country' ) );
+		$this->assertEquals( 'US:CA', $data['values']['woocommerce_default_country'] );
+	}
+
+	/**
+	 * Test update_item method does not update \'title\' and \'sectionend\' settings and other non-updatable fields.
+	 */
+	public function test_update_item_ignores_non_updatable_settings() {
+		// Set an initial value for an option that corresponds to a 'title' type setting.
+		// In WC_Settings_General, 'general_options' is often used as the ID for the main title section.
+		$initial_title_value = 'initial_title_value';
+		update_option( 'general_options', $initial_title_value );
+
+		// Set initial values for other updatable options.
+		update_option( 'woocommerce_currency', 'USD' );
+		update_option( 'woocommerce_price_num_decimals', 2 );
+		update_option( 'woocommerce_share_key_display', 'no' ); // Initial value, should not be updated.
+
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/general' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_currency'           => 'EUR', // Should be updated.
+						'woocommerce_price_num_decimals' => 3, // Should be updated.
+						'general_options'                => 'updated_title_value', // Should NOT be updated.
+						'woocommerce_share_key_display'  => 'yes', // Should NOT be updated (ignored by API).
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Assert that actual updatable settings were updated.
+		$this->assertEquals( 'EUR', get_option( 'woocommerce_currency' ) );
+		$this->assertEquals( 3, get_option( 'woocommerce_price_num_decimals' ) );
+
+		// Assert that 'title' and 'sectionend' typed settings (like 'general_options') are NOT updated.
+		$this->assertEquals( $initial_title_value, get_option( 'general_options' ) );
+
+		// Assert that woocommerce_share_key_display was ignored and remains its initial value.
+		$this->assertEquals( 'no', get_option( 'woocommerce_share_key_display' ) );
+
+		// Verify the response only contains updatable settings, and the ignored/non-updatable are not among them.
+		$response_setting_ids = array();
+		foreach ( $data['groups'] as $group ) {
+			if ( isset( $group['fields'] ) && is_array( $group['fields'] ) ) {
+				foreach ( $group['fields'] as $field ) {
+					if ( isset( $field['id'] ) ) {
+						$response_setting_ids[] = $field['id'];
+					}
+				}
+			}
+		}
+
+		$this->assertContains( 'woocommerce_currency', $response_setting_ids );
+		$this->assertContains( 'woocommerce_price_num_decimals', $response_setting_ids );
+		$this->assertNotContains( 'general_options', $response_setting_ids ); // Should not be in response as updatable.
+		$this->assertNotContains( 'woocommerce_share_key_display', $response_setting_ids ); // Should not be in response as updatable.
 	}
 }
