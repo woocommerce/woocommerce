@@ -3,9 +3,10 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\CheckoutSessionStatus;
+use Automattic\WooCommerce\Internal\Agentic\Enums\Specs\ErrorCode;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\SessionKey;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\CheckoutSessionStatus;
-use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\Specs\ErrorCode;
+use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Errors\Error;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Error as AgenticError;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\AgenticCheckoutSession;
@@ -446,5 +447,19 @@ class AgenticCheckoutUtils {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Whether the current request is within Agentic Commerce session.
+	 *
+	 * @return bool
+	 */
+	public static function is_agentic_commerce_session(): bool {
+		$wc_session = WC()->session;
+		if ( null === $wc_session ) {
+			return false;
+		}
+
+		return ! empty( $wc_session->get( SessionKey::AGENTIC_CHECKOUT_SESSION_ID ) );
 	}
 }

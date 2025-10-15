@@ -1,0 +1,5 @@
+Significance: patch
+Type: enhancement
+Comment: Moving the email settings API to proper namespace
+
+

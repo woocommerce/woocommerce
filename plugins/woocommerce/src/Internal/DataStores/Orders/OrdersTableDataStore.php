@@ -102,6 +102,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -1381,7 +1382,7 @@ WHERE
 				$this->read_cogs_data( $order );
 			}
 
-			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
@@ -1526,8 +1527,15 @@ WHERE
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
-		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
+			// Exclude orders where the CPT version is a placeholder post.
+			$post_type = get_post_type( $order_id );
+			if ( ! $post_type || DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+				unset( $orders[ $order_id ] );
+				continue;
+			}
+
+			// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
 
@@ -1686,6 +1694,14 @@ WHERE
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
+			// Skip migrating cogs_total_value if the HPOS order has a valid value and the CPT order has 0.
+			// This prevents overwriting valid COGS data with recalculated zero values during sync-on-read.
+			if ( 'cogs_total_value' === $key && $order->has_cogs() && $this->cogs_is_enabled() ) {
+				$hpos_cogs = $order->get_cogs_total_value( 'edit' );
+				if ( 0.0 !== $hpos_cogs && 0.0 === (float) $value ) {
+					continue;
+				}
+			}
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
