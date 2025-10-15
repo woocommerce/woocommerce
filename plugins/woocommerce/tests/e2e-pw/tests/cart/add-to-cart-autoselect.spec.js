@@ -122,11 +122,24 @@ const productVariations = [
 
 async function goToProductTemplateEditor ( editor ) {
 	await editor.page.goto( productPermalink );
-	await editor.page.getByRole('menuitem', { name: 'Edit Site' }).click();
+	await editor.page.getByRole( 'menuitem', { name: 'Edit Site' } ).click();
 	await editor.page.waitForLoadState();
 	await editor.setPreferences( 'core/edit-site', {
 		welcomeGuide: false,
 	} );
+	await editor.openDocumentSettingsSidebar();
+}
+
+async function switchCartBlockVersion ( editor, targetBlockVersion ) {
+		const cartBlock = await editor.canvas.getByRole( 'document', { name: /Block: Add to Cart (with|\+) Options/ } );
+		const isLegacyCart = await cartBlock.getAttribute( 'aria-label' ) === 'Block: Add to Cart with Options';
+
+		await editor.selectBlocks( cartBlock );
+		if ( isLegacyCart && targetBlockVersion === 'new' ) {
+				await editor.page.getByRole( 'button', { name: 'Upgrade to the Add to Cart + Options block', exact: true } ).click();
+		} else if ( ! isLegacyCart && targetBlockVersion === 'legacy' ) {
+				await editor.page.getByRole( 'button', { name: 'Switch back' } ).click();
+		}
 }
 
 async function saveBlockEditor( editor, isOnlyCurrentEntityDirty ) {
@@ -162,16 +175,12 @@ async function setCartBlockAttributes(
 	{ optionStyle, autoselect, disabledAttributesAction } = {
 		optionStyle: undefined,
 		autoselect: false,
-		disabledAttributesAction: undefined,
+		disabledAttributesAction: 'disable',
 	},
 ) {
 	const page = editor.page;
 	let isOnlyCurrentEntityDirty = true;
-	if ( disabledAttributesAction === undefined ) {
-		disabledAttributesAction = 'disabled';
-	}
-	await goToProductTemplateEditor( editor );
-	await editor.openDocumentSettingsSidebar();
+	await editor.selectBlocks( await editor.canvas.getByRole( 'document', { name: /Block: Add to Cart \+ Options/ } ) );
 
 	await page.getByRole( 'button', { name: 'Switch product type' } ).click();
 	await page.getByRole( 'menuitem', { name: 'Variable product' } ).click();
@@ -254,6 +263,7 @@ test.describe(
 	{ tag: [] },
 	() => {
 		let productId;
+		let commonSetupExecuted = false;
 
 		test.beforeAll( async ( { restApi } ) => {
 			await restApi
@@ -272,7 +282,7 @@ test.describe(
 			}
 		} );
 
-		test.beforeEach( async ( { page, context } ) => {
+		test.beforeEach( async ( { page, editor, context } ) => {
 			// Login
 			await page.goto( 'wp-login.php' );
 			await page.getByRole( 'textbox', { name: 'Username or Email Address' } ).fill( admin.username );
@@ -280,6 +290,26 @@ test.describe(
 			await page.getByRole( 'checkbox', { name: 'Remember Me' } ).check();
 			await page.getByRole( 'button', { name: 'Log In' } ).click();
 			await page.waitForURL( '**/wp-admin/' );
+
+			// Tests expect to start in editor of product template
+			await goToProductTemplateEditor( editor );
+
+			if ( commonSetupExecuted ) {
+				// Setup already done at suite level, skip template changes
+			} else {
+				await switchCartBlockVersion( editor, 'new' )
+				await saveBlockEditor( editor, true );
+			}
+		} );
+
+		test.afterEach( async ( { editor } ) => {
+			if (commonSetupExecuted) {
+				// leave the template intact until end of suite
+			} else {
+				await goToProductTemplateEditor( editor );
+				await switchCartBlockVersion( editor, 'legacy' )
+				await saveBlockEditor( editor, true );
+			}
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
@@ -293,6 +323,18 @@ test.describe(
 				await use( new Editor( { page } ) );
 			},
 		} );
+
+		test(
+			'common setup',
+			{ tag: [] },
+			async ( { page, editor } ) => {
+				// do any common setup here
+
+				// This is only required to save execution time by skipping
+				// common parts of setup/cleanup for each test.
+				commonSetupExecuted = true;
+			}
+		);
 
 		for ( const optionStyle of [ 'Pills', 'Dropdown' ] ) {
 			test(
@@ -309,6 +351,7 @@ test.describe(
 					} );
 
 					await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+						await goToProductTemplateEditor( editor );
 						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselect: true } );
 					} );
 					await test.step( `${ optionStyle }: Expect only the Type to be auto-selected (on page load)`, async () => {
@@ -336,6 +379,7 @@ test.describe(
 					} );
 
 					await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+						await goToProductTemplateEditor( editor );
 						await setCartBlockAttributes( editor, { optionStyle: optionStyle, autoselect: true } );
 					} );
 					await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
@@ -373,6 +417,7 @@ test.describe(
 						).not.toBeVisible();
 					} );
 
+					await goToProductTemplateEditor( editor );
 					await setDisabledAttributesAction( 'disable' );
 					await test.step( `${ optionStyle }: Expect unattached options to be disabled (by prop)`, async () => {
 						await preselect();
@@ -408,6 +453,8 @@ test.describe(
 					}
 
 					for ( const value of [ 'hide', 'disable' ] ) {
+						await goToProductTemplateEditor( editor );
+
 						await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
 							await setCartBlockAttributes( editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
 						} );
@@ -420,5 +467,14 @@ test.describe(
 				}
 			);
 		}
+
+		test(
+			'common cleanup',
+			{ tag: [] },
+			async ( { page, editor } ) => {
+				// do any common cleanup here
+				commonSetupExecuted = false;
+			}
+		);
 	}
 );
