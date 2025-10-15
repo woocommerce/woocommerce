@@ -326,9 +326,8 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public function delete_item( $request ) {
-		$id       = (int) $request['id'];
-		$reassign = isset( $request['reassign'] ) ? absint( $request['reassign'] ) : null;
-		$force    = isset( $request['force'] ) ? (bool) $request['force'] : false;
+		$id    = (int) $request['id'];
+		$force = isset( $request['force'] ) ? (bool) $request['force'] : false;
 
 		// We don't support trashing for this type, error out.
 		if ( ! $force ) {
@@ -340,14 +339,6 @@ class Controller extends AbstractController {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		if ( ! empty( $reassign ) ) {
-			$reassign_user = \Automattic\WooCommerce\Internal\Utilities\Users::get_user_in_current_site( $reassign );
-
-			if ( $reassign === $id || is_wp_error( $reassign_user ) ) {
-				return $this->get_route_error_by_code( self::INVALID_ID );
-			}
-		}
-
 		$request->set_param( 'context', 'edit' );
 		$response = $this->prepare_item_for_response( new WC_Customer( $id ), $request );
 
@@ -356,11 +347,7 @@ class Controller extends AbstractController {
 
 		$customer = new WC_Customer( $id );
 
-		if ( ! is_null( $reassign ) ) {
-			$result = $customer->delete_and_reassign( $reassign );
-		} else {
-			$result = $customer->delete();
-		}
+		$result = $customer->delete();
 
 		if ( ! $result ) {
 			return $this->get_route_error_by_code( self::CANNOT_DELETE );
