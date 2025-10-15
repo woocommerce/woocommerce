@@ -52,10 +52,8 @@ if ( process.env.CI ) {
 	reporter.push( [ 'buildkite-test-collector/playwright/reporter' ] );
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
 	reporter.push( [
-		[
-			'junit',
-			{ outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml` },
-		],
+		'junit',
+		{ outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml` },
 	] );
 } else {
 	reporter.push( [
