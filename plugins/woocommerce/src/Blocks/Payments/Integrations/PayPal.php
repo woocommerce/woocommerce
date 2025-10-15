@@ -94,10 +94,11 @@ final class PayPal extends AbstractPaymentMethodType {
 	 * @return string
 	 */
 	public function get_description() {
-		$gateway = WC_Gateway_Paypal::get_instance();
-		$testmode = $gateway->testmode;
+		$gateway     = WC_Gateway_Paypal::get_instance();
+		$testmode    = $gateway->testmode;
 		$description = $this->get_setting( 'description' ) ?? '';
 		if ( $testmode ) {
+			/* translators: %s: Link to PayPal sandbox testing guide page */
 			$description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
 		}
 		return trim( $description );
