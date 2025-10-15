@@ -19,15 +19,13 @@
 	padding: 0.25em 0.75em;
 	user-select: none;
 
-	&:where(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)),
-	&:where(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input.disabled)) {
+	&:where(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled)) {
 		color: color-mix(in srgb, var(--pill-color) 40%, transparent);
 		cursor: not-allowed;
 		text-decoration: line-through;
 	}
 
-	&:where(:hover:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled))),
-	&:where(:hover:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input.disabled))) {
+	&:where(:hover:not(:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:disabled))) {
 		background-color: color-mix(
 			in srgb,
 			var(--pill-color) 10%,
@@ -41,19 +39,6 @@
 			var(--pill-background-color) 85%,
 			transparent
 		);
-	}
-	/* Do not force a cursor for the inputs that are disabled at the browser level (:disabled) */
-	&:where(:hover:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input.disabled)) {
-		cursor: pointer;
-	}
-
-	/* When the pill button is hidden, we also need to hide the label (&) */
-	&:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input[hidden]) {
-		visibility: hidden;
-	}
-	/* Do not force a cursor for the inputs that are disabled at the browser level (:disabled) */
-	&:where(:hover:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input.disabled)) {
-		cursor: pointer;
 	}
 
 	/* When the pill button is hidden, we also need to hide the label (&) */
@@ -84,8 +69,4 @@
 :where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown) {
 	height: 3em;
 	padding: 0.25em 1em;
-
-	> option.disabled {
-		color: GrayText;
-	}
 }

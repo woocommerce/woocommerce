@@ -312,39 +312,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			handlePillClick() {
-				const disabled = state.isOptionDisabled;
 				const context = getContext< Context >();
 				const { selectedAttributes } =
 					getContext< Context >(
 						'woocommerce/add-to-cart-with-options'
 					);
-				const $form = $( 'form.wc-block-add-to-cart-with-options' ),
-					$variation_selectors = $form.find( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' ),
-					disabledAttributesAction =
-						$variation_selectors.first().data( 'disabledAttributesAction' ) ||
-						'disabled';
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
-					if ( disabled && disabledAttributesAction === 'gray' ) {
-						// Before selecting this option, prepare the way by deselecting any other option that would become invalid
-						const fakeSelectedAttributes: CartVariationItem[] = [ { attribute: context.name, value: context.option.value } ];
-						for ( const attr of selectedAttributes ) {
-							const attrName = attr.attribute;
-							if ( attrName === context.name || attrName === '' ) {
-								continue;
-							}
-							const valid = isAttributeValueValid( {
-								attributeName: attrName,
-								attributeValue: context.option.value,
-								selectedAttributes: fakeSelectedAttributes,
-							} );
-							if ( ! valid ) {
-								// deselect this attribute by clicking on it
-								$( `form.wc-block-add-to-cart-with-options input[name="${ attrName }"][value="${ attr.value }"` ).click();
-							}
-						}
-					}
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );

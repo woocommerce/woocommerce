@@ -155,10 +155,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				// Disable (prop) -- Browser disallows selecting
 				$wp_interactivity_directive = 'data-wp-bind--disabled';
 				break;
-			case 'gray':
-				// Disable (class) -- Browser allows selecting
-				$wp_interactivity_directive =  'data-wp-class--disabled';
-				break;
 			default:
 				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );
 				break;
@@ -257,10 +253,6 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			case 'disable':
 				// Disable (prop) -- Browser disallows selecting
 				$wp_interactivity_directive = 'data-wp-bind--disabled';
-				break;
-			case 'gray':
-				// Disable (class) -- Browser allows selecting
-				$wp_interactivity_directive = 'data-wp-class--disabled';
 				break;
 			default:
 				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );

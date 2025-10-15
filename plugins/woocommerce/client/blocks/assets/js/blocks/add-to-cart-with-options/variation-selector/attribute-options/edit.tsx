@@ -141,7 +141,6 @@ export default function AttributeOptionsEdit(
 						options={ [
 							{ label: __( 'Hidden',                                                                              'woocommerce' ), value: 'hide' },
 							{ label: __( 'Grayed-out/crossed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
-							{ label: __( 'Grayed-out/crossed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
 						] }
 						onChange={ ( value ) => setAttributes( { disabledAttributesAction: value } ) }
 						__nextHasNoMarginBottom

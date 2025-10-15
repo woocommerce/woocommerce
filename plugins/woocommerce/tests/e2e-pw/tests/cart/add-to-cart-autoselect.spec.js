@@ -168,7 +168,7 @@ async function setCartBlockAttributes(
 	const page = editor.page;
 	let isOnlyCurrentEntityDirty = true;
 	if ( disabledAttributesAction === undefined ) {
-		disabledAttributesAction = 'gray';
+		disabledAttributesAction = 'disabled';
 	}
 	await goToProductTemplateEditor( editor );
 	await editor.openDocumentSettingsSidebar();
@@ -381,17 +381,6 @@ test.describe(
 							page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
 						).toBeDisabled();
 					} );
-
-					await setDisabledAttributesAction( 'gray' );
-					await test.step( `${ optionStyle }: Expect unattached options to be disabled (by class)`, async () => {
-						await preselect();
-
-						await expect(
-							optionStyle === 'Pills'
-							? page.getByLabel( 'Size' ).getByLabel( 'L', { exact: true } )
-							: page.getByLabel( 'Size' ).getByText( 'L', { exact: true } )
-						).toHaveClass( /disabled/ ); // Replace with .toContainClass( 'disabled' ) (playwright 1.52 and above)
-					} );
 				}
 			);
 			test(
@@ -418,7 +407,7 @@ test.describe(
 						// Size: S
 					}
 
-					for ( const value of [ 'hide', 'disable', 'gray' ] ) {
+					for ( const value of [ 'hide', 'disable' ] ) {
 						await test.step( `${ optionStyle }: Set the disabled_attribute_action setting to "${ value }"`, async () => {
 							await setCartBlockAttributes( editor, { autoselect: true, optionStyle: optionStyle, disabledAttributesAction: value } );
 						} );
