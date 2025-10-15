@@ -32,6 +32,18 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+/**
+ * Manually dispatches a 'change' event on the quantity input element.
+ *
+ * When users click the plus/minus stepper buttons, no 'change' event is fired
+ * since there is no direct interaction with the input. However, some extensions
+ * rely on the change event to detect quantity changes. This function ensures
+ * those extensions continue working by programmatically dispatching the event.
+ *
+ * @see https://github.com/woocommerce/woocommerce/issues/53031
+ *
+ * @param inputElement - The quantity input element to dispatch the event on.
+ */
 export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 	const event = new Event( 'change', { bubbles: true } );
 	inputElement.dispatchEvent( event );

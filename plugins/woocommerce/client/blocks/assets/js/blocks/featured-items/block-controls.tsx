@@ -27,6 +27,7 @@ interface WithBlockControlsRequiredProps< T > {
 		EditorBlock< T >[ 'attributes' ];
 	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
 	useEditingImage: [ boolean, Dispatch< SetStateAction< boolean > > ];
+	useEditMode: [ boolean, Dispatch< SetStateAction< boolean > > ];
 }
 
 interface WithBlockControlsCategoryProps< T >
@@ -47,7 +48,6 @@ type WithBlockControlsProps< T extends EditorBlock< T > > =
 
 type BlockControlRequiredAttributes = {
 	contentAlign: BlockAlignment;
-	editMode: boolean;
 	mediaId: number;
 	mediaSrc: string;
 };
@@ -63,6 +63,7 @@ interface BlockControlsProps {
 	mediaSrc: string;
 	setAttributes: ( attrs: Partial< BlockControlRequiredAttributes > ) => void;
 	setIsEditingImage: ( value: boolean ) => void;
+	setEditMode: ( editMode: boolean ) => void;
 }
 
 interface BlockControlsConfiguration extends GenericBlockUIConfig {
@@ -81,6 +82,7 @@ export const BlockControls = ( {
 	mediaSrc,
 	setAttributes,
 	setIsEditingImage,
+	setEditMode,
 }: BlockControlsProps ) => {
 	return (
 		<BlockControlsWrapper>
@@ -125,8 +127,7 @@ export const BlockControls = ( {
 					{
 						icon: 'edit',
 						title: editLabel,
-						onClick: () =>
-							setAttributes( { editMode: ! editMode } ),
+						onClick: () => setEditMode( ! editMode ),
 						isActive: editMode,
 					},
 				] }
@@ -140,8 +141,9 @@ export const withBlockControls =
 	< T extends EditorBlock< T > >( Component: ComponentType< T > ) =>
 	( props: WithBlockControlsProps< T > ) => {
 		const [ isEditingImage, setIsEditingImage ] = props.useEditingImage;
+		const [ editMode, setEditMode ] = props.useEditMode;
 		const { attributes, category, name, product, setAttributes } = props;
-		const { contentAlign, editMode, mediaId, mediaSrc } = attributes;
+		const { contentAlign, mediaId, mediaSrc } = attributes;
 		const item = category || product;
 
 		const { backgroundImageId, backgroundImageSrc } = useBackgroundImage( {
@@ -164,6 +166,7 @@ export const withBlockControls =
 					mediaSrc={ mediaSrc }
 					setAttributes={ setAttributes }
 					setIsEditingImage={ setIsEditingImage }
+					setEditMode={ setEditMode }
 				/>
 				<Component { ...props } />
 			</>

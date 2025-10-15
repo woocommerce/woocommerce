@@ -12,8 +12,9 @@ This guide shows how extensions can add custom email notifications that integrat
 
 1. **Extend `WC_Email`** – Create a custom email class for your notification by extending the core WooCommerce email class.
 2. **Register with `woocommerce_email_classes`** – Add your new email class to WooCommerce so it appears in the admin email settings.
-3. **Create a block template** – Design a block-based template to ensure your email works seamlessly with the WooCommerce Email Editor.
-4. **Set up triggers** – Define when and under what conditions your custom email should be sent (for example, after a specific user action or event).
+3. **Register the email with the block editor** – Register your email ID with the `woocommerce_transactional_emails_for_block_editor` filter to enable block editor support.
+4. **Create a block template** – Design a block-based template to ensure your email works seamlessly with the WooCommerce Email Editor.
+5. **Set up triggers** – Define when and under what conditions your custom email should be sent (for example, after a specific user action or event).
 
 ## 1. Create email class
 
@@ -28,8 +29,9 @@ class YourPlugin_Custom_Email extends WC_Email {
         $this->customer_email = true;
         $this->email_group    = 'your-plugin';
 
-        $this->template_html  = 'templates/emails/your-custom-email.php';
-        $this->template_plain = 'templates/emails/plain/your-custom-email.php';
+        $this->template_html  = 'emails/your-custom-email.php';
+        $this->template_plain = 'emails/plain/your-custom-email.php';
+        $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();
     }
@@ -92,7 +94,7 @@ function your_plugin_add_email_class( $email_classes ) {
 }
 add_filter( 'woocommerce_email_classes', 'your_plugin_add_email_class' );
 
-// Add the custom email group.
+// Add the custom email group. This is only necessary if email_group is not set on the WC_Email class.
 function your_plugin_add_email_group( $email_groups ) {
     $email_groups['your-plugin'] = __( 'Your Plugin', 'your-plugin' );
     return $email_groups;
@@ -100,11 +102,37 @@ function your_plugin_add_email_group( $email_groups ) {
 add_filter( 'woocommerce_email_groups', 'your_plugin_add_email_group' );
 ```
 
-## 3. Create block template
+## 3. Register the email with the block editor
+
+Third-party extensions need to explicitly opt their emails into block editor support. This is done by registering your email ID with the `woocommerce_transactional_emails_for_block_editor` filter:
+
+```php
+/**
+ * Register custom transactional emails for the block editor.
+ *
+ * @param array $emails Array of email IDs.
+ * @return array Modified array of email IDs.
+ */
+function your_plugin_register_transactional_emails_for_block_editor( $emails ) {
+    $emails[] = 'your_plugin_custom_email';
+    return $emails;
+}
+add_filter( 'woocommerce_transactional_emails_for_block_editor', 'your_plugin_register_transactional_emails_for_block_editor' );
+```
+
+**Important:** Without this step, your email may still appear in the email list, but it will not use the email editor, as explicit opt-in is required from third-party developers.
+
+**Note:** For third-party extensions, WooCommerce will not create an email post unless you opt-in using the `woocommerce_transactional_emails_for_block_editor` filter.
+
+**Development tip:** WooCommerce caches email post-generation with a transient. When testing or developing, delete the transient `wc_email_editor_initial_templates_generated` to force post-generation.
+
+## 4. Create block template
 
 Create `templates/emails/block/your-custom-email.php`:
 
 **Note:** Block templates are the modern approach for email editor integration. However, WooCommerce maintains backward compatibility with traditional email templates. If you don't provide a block template, WooCommerce will fall back to your traditional `template_html` and `template_plain` files defined in your email class. These properties are intended to be used in the `get_content_html` and `get_content_plain` methods to load the corresponding template files. This ensures your emails continue to work even without block template support.
+
+**Template base property:** Make sure to set the `$template_base` property in your email class constructor to point to your plugin's template directory. This allows WooCommerce to properly locate and load your block template files. The block template filename is expected to match the plain template, but using the `block` directory instead of `plain`.
 
 ```php
 <?php
@@ -129,7 +157,25 @@ defined( 'ABSPATH' ) || exit;
 
 The `BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER` is a special placeholder that gets replaced with the main email content when the email is rendered. This placeholder is essential for integrating with WooCommerce's email system and allows the email editor to inject the core email content (like order details, customer information, etc.) into your custom template.
 
-When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context, ensuring your custom template works seamlessly with WooCommerce's email system.
+By default, WooCommerce uses the [general block email template](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/templates/emails/block/general-block-email.php) to generate the content that replaces this placeholder. When WooCommerce processes your email template, it replaces this placeholder with the appropriate email content based on the email type and context.
+
+If your email needs to use different content, you have two options:
+
+1. **Set a custom template**: Set the `$template_block_content` property in your email class constructor to point to a custom template for the block content:
+
+    ```php
+    $this->template_block_content = 'emails/block/custom-content.php';
+    ```
+
+2. **Implement custom logic**: Implement the `get_block_editor_email_template_content` method in your email class to provide custom logic for generating the content:
+
+    ```php
+    public function get_block_editor_email_template_content() {
+        return '<!-- wp:paragraph -->
+    <p>Your custom block template content here</p>
+    <!-- /wp:paragraph -->';
+    }
+    ```
 
 **Register the template:**
 
@@ -163,7 +209,7 @@ function your_plugin_register_email_templates( $templates_registry ) {
 add_filter( 'woocommerce_email_editor_register_templates', 'your_plugin_register_email_templates' );
 ```
 
-## 4. Set Up Triggers
+## 5. Set Up Triggers
 
 **Set up when your email should be sent** by hooking into WordPress actions. You can trigger emails on WooCommerce events or your own custom actions:
 
@@ -284,7 +330,7 @@ function your_plugin_get_custom_field_value( $context, $args = array() ) {
 add_filter( 'woocommerce_email_editor_register_personalization_tags', 'your_plugin_register_personalization_tags' );
 ```
 
-**Usage in templates:** Use `<!--[your-plugin/custom-field]-->` in your block template, and they will be replaced with the values returned by your callback functions.
+**Usage in templates:** Use `<!--[your-plugin/custom-field]-->` in your block template, and it will be replaced with the value returned by your callback function.
 
 To learn more about personalization tags, please see the [personalization tags documentation](https://github.com/woocommerce/woocommerce/blob/trunk/packages/php/email-editor/docs/personalization-tags.md) in the `woocommerce/email-editor` package.
 
@@ -302,8 +348,9 @@ class YourPlugin_Loyalty_Welcome_Email extends WC_Email {
         $this->customer_email = true;
         $this->email_group    = 'loyalty';
 
-        $this->template_html  = 'templates/emails/loyalty-welcome.php';
-        $this->template_plain = 'templates/emails/plain/loyalty-welcome.php';
+        $this->template_html  = 'emails/loyalty-welcome.php';
+        $this->template_plain = 'emails/plain/loyalty-welcome.php';
+        $this->template_base  = plugin_dir_path( __FILE__ ) . 'templates/';
 
         parent::__construct();
     }
@@ -379,6 +426,12 @@ add_filter( 'woocommerce_email_groups', function( $email_groups ) {
     return $email_groups;
 } );
 
+// Register the email with the block editor.
+add_filter( 'woocommerce_transactional_emails_for_block_editor', function( $emails ) {
+    $emails[] = 'loyalty_welcome_email';
+    return $emails;
+} );
+
 // Register block template for the email editor
 add_filter( 'woocommerce_email_editor_register_templates', function( $registry ) {
     $template = new \Automattic\WooCommerce\EmailEditor\Engine\Templates\Template(
@@ -406,8 +459,9 @@ add_action( 'your_plugin_customer_joined_loyalty', function( $customer_id, $poin
 **How it works:**
 
 1. **Email registration** makes your email appear in **WooCommerce > Settings > Emails**
-2. **Template registration** allows you to register additional email templates for use and editing in the block editor
-3. **Trigger setup** automatically sends the email when a customer joins your loyalty program
+2. **Block editor registration** enables your email to work with the WooCommerce Email Editor
+3. **Template registration** allows you to register additional email templates for use and editing in the block editor
+4. **Trigger setup** automatically sends the email when a customer joins your loyalty program
 
 ## Best practices
 
@@ -419,13 +473,15 @@ add_action( 'your_plugin_customer_joined_loyalty', function( $customer_id, $poin
 
 ## Troubleshooting
 
--   **Email not in admin?**  
+-   **Email not in admin?**
     Double-check that your email class is registered with the `woocommerce_email_classes` filter and that the class name is correct.
--   **Template not loading?**  
-    Make sure the template file path is correct and that you’ve registered it with the email editor.
--   **Tags not working?**  
+-   **Email not using the block template or email editor?**
+    Ensure you have registered your email ID with the `woocommerce_transactional_emails_for_block_editor` filter.
+-   **Template not loading?**
+    Make sure the template file path is correct and that you have registered it with the email editor.
+-   **Tags not working?**
     Confirm that your personalization tag callbacks are registered and returning the expected values.
--   **Email not sending?**  
+-   **Email not sending?**
     Check that the email is enabled in WooCommerce settings and that your trigger action is firing as expected.
 
 ---
