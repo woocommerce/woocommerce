@@ -612,15 +612,17 @@ class WC_Query {
 		}
 
 		// Convert to correct format.
-		$orderby = is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby;
+		$orderby = strtolower( is_array( $orderby ) ? (string) current( $orderby ) : (string) $orderby );
+		// ID can already be added and requires to be capitalized.
+		$orderby = str_replace( ' id', ' ID', $orderby );
 		$order   = strtoupper( is_array( $order ) ? (string) current( $order ) : (string) $order );
-		$args    = array(
+
+		$args = array(
 			'orderby'  => $orderby,
 			'order'    => ( 'DESC' === $order ) ? 'DESC' : 'ASC',
 			'meta_key' => '', // @codingStandardsIgnoreLine
 		);
 
-		$orderby = strtolower( $orderby );
 		switch ( $orderby ) {
 			case 'id':
 				$args['orderby'] = 'ID';
