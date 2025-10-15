@@ -30,7 +30,7 @@ class WebhookHandler {
 	 *
 	 * @param \WP_REST_Request $request The request object.
 	 */
-	public function process_webhook( WP_REST_Request $request ) {
+	public function process_webhook( \WP_REST_Request $request ) {
 		$data = $request->get_json_params();
 		if ( ! is_array( $data ) || empty( $data['event_type'] ) || empty( $data['resource'] ) ) {
 			\WC_Gateway_Paypal::log( 'Invalid PayPal webhook payload: ' . wc_print_r( $data, true ) );
@@ -205,7 +205,7 @@ class WebhookHandler {
 	/**
 	 * Capture the payment.
 	 *
-	 * @param WC_Order $order The order object.
+	 * @param \WC_Order $order The order object.
 	 * @param array    $links The links from the webhook event.
 	 * @param string   $action The action to perform (capture or authorize).
 	 * @return void
