@@ -302,7 +302,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			data-wp-bind--hidden="state.cartItemDataAttr.hidden"
 			data-wp-bind--class="state.cartItemDataAttr.className"
 		>
-			<span class="wc-block-components-product-details__name"<?php echo $skip_text ? '' : ' data-wp-text="state.cartItemDataAttr.name"'; ?>></span>
+			<span class="wc-block-components-product-details__name"<?php echo $skip_text ? '' : ' data-wp-text="state.cartItemDataAttr.name"'; ?>></span><?php echo ': '; ?>
 			<span class="wc-block-components-product-details__value"<?php echo $skip_text ? '' : ' data-wp-text="state.cartItemDataAttr.value"'; ?>></span>
 		</<?php echo tag_escape( $tag_name ); ?>>
 		<?php

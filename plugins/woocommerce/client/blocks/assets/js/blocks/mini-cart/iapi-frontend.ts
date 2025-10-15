@@ -703,7 +703,7 @@ const { state: cartItemState } = store(
 
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = dataItemAttrKey + ':';
+				nameTxt.innerHTML = dataItemAttrKey;
 				const valueTxt = document.createElement( 'textarea' );
 				valueTxt.innerHTML = dataItemAttr.value;
 
