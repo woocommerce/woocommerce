@@ -1,1 +1,4 @@
 plugins/woocommerce-docs/tests/src/Blocks/fixtures/*
+plugins/woocommerce/lib/classes/*
+plugins/woocommerce/lib/packages/*
+packages/php/email-editor/vendor-prefixed/*
