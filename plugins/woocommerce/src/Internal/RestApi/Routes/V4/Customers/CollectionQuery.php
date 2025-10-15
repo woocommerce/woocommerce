@@ -110,7 +110,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'description'       => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
 				'type'              => 'string',
 				'default'           => 'customer',
-				'enum'              => array( 'customer' ),
+				'enum'              => array( 'customer', 'all' ),
 				'validate_callback' => 'rest_validate_request_arg',
 			),
 		);
