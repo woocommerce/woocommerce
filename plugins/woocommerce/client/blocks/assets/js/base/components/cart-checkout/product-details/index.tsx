@@ -33,7 +33,6 @@ const CONTENT_ATTR = [
 	'name',
 	'download',
 	'src',
-	'style',
 	'class',
 	'title',
 ];
