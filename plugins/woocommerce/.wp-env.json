@@ -3,7 +3,7 @@
 	"phpVersion": "8.1",
 	"plugins": [
 		".",
-		"https://github.com/WordPress/gutenberg/actions/runs/18528411186/artifacts/4276382381.zip"
+		"https://github.com/ellatrix/test-zips/raw/refs/heads/main/gutenberg.zip"
 	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
