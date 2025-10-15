@@ -60,7 +60,7 @@ class UpdateUtils {
 	 */
 	public function update_order_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
 		// Get data that can be edited from schema.
-		$ignore_keys = array( 'created_via', 'status', 'customer_id', 'set_paid' );
+		$ignore_keys = array( 'created_via', 'status', 'customer_id' );
 		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
 
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
@@ -120,13 +120,6 @@ class UpdateUtils {
 		if ( ! empty( $request['status'] ) ) {
 			$order->set_status( $request['status'], '', true );
 			$order->save();
-		}
-
-		// Actions for after the order is saved.
-		if ( true === $request['set_paid'] ) {
-			if ( $creating || $order->needs_payment() ) {
-				$order->payment_complete( $request['transaction_id'] );
-			}
 		}
 	}
 
