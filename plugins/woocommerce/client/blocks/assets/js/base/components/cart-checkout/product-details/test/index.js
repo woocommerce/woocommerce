@@ -152,13 +152,11 @@ describe( 'ProductDetails', () => {
 			{ key: 'Size', value: 'Large', display: 'L' },
 		];
 
-		render( <ProductDetails details={ details } /> );
+		const { container } = render( <ProductDetails details={ details } /> );
 
-		// Should render key as name
-		expect( screen.getByText( 'Color' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Red' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'Size' ) ).toBeInTheDocument();
-		expect( screen.getByText( 'L' ) ).toBeInTheDocument(); // display takes precedence
+		const listItems = container.querySelectorAll( 'li' );
+		expect( listItems[ 0 ].textContent ).toBe( 'Color: Red' );
+		expect( listItems[ 1 ].textContent ).toBe( 'Size: L' );
 	} );
 
 	test( 'should apply correct CSS classes', () => {

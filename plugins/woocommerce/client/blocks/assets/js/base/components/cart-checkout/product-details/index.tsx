@@ -97,7 +97,8 @@ const ProductDetails = ( {
 											attr: CONTENT_ATTR,
 										} ),
 									} }
-								/>{ ' ' }
+								/>
+								{ ': ' }
 							</>
 						) }
 						<span
