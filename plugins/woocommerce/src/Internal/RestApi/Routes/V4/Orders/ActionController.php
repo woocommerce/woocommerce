@@ -138,6 +138,12 @@ class ActionController {
 
 		wc_downloadable_product_permissions( $order->get_id(), true );
 
+		$order->add_order_note(
+			esc_html__( 'Downloadable product permissions regenerated.', 'woocommerce' ),
+			false,
+			true
+		);
+
 		return true;
 	}
 
