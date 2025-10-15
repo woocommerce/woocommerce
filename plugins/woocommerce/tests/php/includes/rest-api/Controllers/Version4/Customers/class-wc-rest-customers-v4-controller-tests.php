@@ -189,8 +189,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$schema_properties = $this->customer_schema->get_item_schema_properties();
 
 		$this->validate_response_against_schema( $response_data, $schema_properties );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -221,9 +219,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$first_customer    = $response_data[0];
 		$schema_properties = $this->customer_schema->get_item_schema_properties();
 		$this->validate_response_against_schema( $first_customer, $schema_properties );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
 	}
 
 	/**
@@ -240,8 +235,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$schema_properties = $this->customer_schema->get_item_schema_properties();
 		$this->validate_response_against_schema( $response_data, $schema_properties );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -316,7 +309,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '555-5678', $response_data['shipping']['phone'] );
 
 		$customer = new WC_Customer( $response_data['id'] );
-		$customer->delete( true );
 	}
 
 	/**
@@ -385,8 +377,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '10001', $response_data['shipping']['postcode'] );
 		$this->assertEquals( 'US', $response_data['shipping']['country'] );
 		$this->assertEquals( '555-5678', $response_data['shipping']['phone'] );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -442,8 +432,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'email', $response_data );
 		$this->assertArrayHasKey( 'first_name', $response_data );
 		$this->assertArrayNotHasKey( 'billing', $response_data );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -526,9 +514,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			}
 		}
 		$this->assertFalse( $found_any_customer, 'Should not find any customers for non-existent search term' );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
 	}
 
 	/**
@@ -570,9 +555,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		}
 		$this->assertTrue( $found_customer1, 'Should find customer with matching email' );
 		$this->assertFalse( $found_customer2, 'Should not find customer with non-matching email' );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
 	}
 
 	/**
@@ -608,9 +590,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 
 		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
 	}
 
 	/**
@@ -684,10 +663,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertTrue( $found_customer1, 'Should find non-excluded customer1' );
 		$this->assertFalse( $found_customer2, 'Should not find excluded customer2' );
 		$this->assertTrue( $found_customer3, 'Should find non-excluded customer3' );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
-		$customer3->delete( true );
 	}
 
 	/**
@@ -726,11 +701,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should have customers on second page.
 		$this->assertGreaterThanOrEqual( 0, count( $response_data ) );
-
-		// Clean up.
-		foreach ( $customers as $customer ) {
-			$customer->delete( true );
-		}
 	}
 
 	/**
@@ -763,8 +733,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 500, $response->get_status() );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -786,8 +754,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 500, $response->get_status() );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -811,9 +777,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
-
-		$customer1->delete( true );
-		$customer2->delete( true );
 	}
 
 	/**
@@ -827,8 +790,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 501, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_api_v4_customers_trash_not_supported', $response->get_data()['code'] );
-
-		$customer->delete( true );
 	}
 
 	/**
@@ -991,6 +952,5 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Clean up.
 		$customer = new WC_Customer( $response_data['id'] );
-		$customer->delete( true );
 	}
 }
