@@ -5,13 +5,7 @@ import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import { BlockEditProps } from '@wordpress/blocks';
-import {
-        PanelBody,
-        Disabled,
-        Tooltip,
-        SelectControl,
-        ToggleControl,
-} from '@wordpress/components';
+import { Disabled, Tooltip } from '@wordpress/components';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
 
@@ -23,7 +17,7 @@ import { UpgradeNotice } from './components/upgrade-notice';
 import type { Attributes } from './';
 
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
-	const { attributes, setAttributes } = props;
+	const { setAttributes } = props;
 
 	const quantitySelectorStyleClass =
 		props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input
@@ -41,12 +35,6 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const buttonLinkClass = ! isBlockTheme
 		? 'wp-block-button__link wc-block-components-button'
 		: '';
-
-	const {
-		autoselect,
-		autoselectOnPageLoad,
-		unattachedAttributesAction,
-	} = attributes;
 
 	return (
 		<>
@@ -156,36 +144,6 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					</div>
 				</Tooltip>
 			</div>
-			<InspectorControls key="inspector">
-				<PanelBody title={ __( 'Auto-select', 'woocommerce' ) }>
-					<ToggleControl
-						label={ __( 'Auto-select other attributes on user selection', 'woocommerce' ) }
-						help={ __( 'This controls whether other attributes will be auto-selected when an attribute is changed by the user. Only attributes with a single compatible value will be auto-selected.', 'woocommerce' ) }
-						checked={ autoselect }
-						onChange={ () => setAttributes( { autoselect: !autoselect } ) }
-						__nextHasNoMarginBottom
-					/>
-					<ToggleControl
-						label={ __( 'Auto-select on page load', 'woocommerce' ) }
-						help={ __( 'This controls whether or not attributes with only one possible option will be auto-selected upon loading the page.', 'woocommerce' ) }
-						checked={ autoselectOnPageLoad }
-						onChange={ () => setAttributes( { autoselectOnPageLoad: !autoselectOnPageLoad } ) }
-						__nextHasNoMarginBottom
-					/>
-					<SelectControl
-						label={ __( 'Values in conflict with current selection', 'woocommerce' ) }
-						help={ __( 'This controls what to do with attribute values that conflict with the current selection.', 'woocommerce' ) }
-						value={ unattachedAttributesAction }
-						options={ [
-							{ label: __( 'Hidden',                                                                  'woocommerce' ), value: 'hide' },
-							{ label: __( 'Grayed-out and disabled',                                                 'woocommerce' ), value: 'disable' },
-							{ label: __( 'Grayed-out but selectable (will clear all other attributes if selected)', 'woocommerce' ), value: 'gray' },
-						] }
-						onChange={ ( value ) => setAttributes( { unattachedAttributesAction: value } ) }
-						__nextHasNoMarginBottom
-					/>
-				</PanelBody>
-			</InspectorControls>
 		</>
 	);
 };

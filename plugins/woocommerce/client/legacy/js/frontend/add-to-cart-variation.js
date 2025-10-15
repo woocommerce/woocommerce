@@ -5,9 +5,6 @@
 	 */
 	var VariationForm = function( $form ) {
 		var self = this;
-		const autoselect_on_page_load =
-			$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselectOnPageLoad' ) ||
-			false;
 
 		self.$form                = $form;
 		self.$attributeFields     = $form.find( '.variations select' );
@@ -20,8 +17,6 @@
 		self.useAjax              = false === self.variationData;
 		self.xhr                  = false;
 		self.loading              = true;
-		// When true, do not handle clicks on attributes, this is to avoid infinite recursion
-		self.in_autoselect_scope  = false;
 
 		// Initial state.
 		self.$singleVariationWrap.show();
@@ -59,24 +54,6 @@
 		// Init after gallery.
 		setTimeout( function() {
 			$form.trigger( 'check_variations' );
-
-			if ( autoselect_on_page_load ) {
-				// Autoselect for all selects if there is only 1 option for each select
-				let doCheckVariations = false;
-				self.$attributeFields.each( function() {
-					const $el = $( this );
-					const $options = $el.find( 'option:not([value=""], [disabled], [class*="disabled"])' );
-					if ( $options.length === 1 ) {
-						// There is only one attribute to choose from
-						$el.val( $options.val() );
-						// The change is done, trigger change and click events to allow plugins to listen
-						$el.trigger( "change" ).trigger( "click" );
-					} else {
-						// More than one attribute to choose from, let the user choose
-					}
-				} );
-			}
-
 			$form.trigger( 'wc_variation_form', self );
 			self.loading = false;
 		}, 100 );
@@ -236,8 +213,7 @@
 						if ( variation ) {
 							form.$form.trigger( 'found_variation', [ variation ] );
 						} else {
-							// Checking variation after resetting to ensure the options are not wrongly disabled
-							form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
+							form.$form.trigger( 'reset_data' );
 							attributes.chosenCount = 0;
 
 							if ( ! form.loading ) {
@@ -258,8 +234,7 @@
 				if ( variation ) {
 					form.$form.trigger( 'found_variation', [ variation ] );
 				} else {
-					// Checking variation after resetting to ensure the options are not wrongly disabled
-					form.$form.trigger( 'reset_data' ).trigger( 'check_variations' );
+					form.$form.trigger( 'reset_data' );
 					attributes.chosenCount = 0;
 
 					if ( ! form.loading ) {
@@ -374,7 +349,6 @@
 	 */
 	VariationForm.prototype.onChange = function( event ) {
 		var form = event.data.variationForm;
-		const eventTarget = event.target;
 
 		form.$form.find( 'input[name="variation_id"], input.variation_id' ).val( '' ).trigger( 'change' );
 		form.$form.trigger( 'clear_reset_announcement' );
@@ -384,16 +358,7 @@
 			form.$form.trigger( 'check_variations' );
 		} else {
 			form.$form.trigger( 'woocommerce_variation_select_change' );
-		}
-		form.$form.trigger( 'check_variations' );
-
-		if ( form.in_autoselect_scope ) {
-			// Avoid infinite recursion
-		} else {
-			if ( form.$form.wc_variations_autoselect( form, $( eventTarget ) ) ) {
-				// Check variations again after auto-selecting
-				form.$form.trigger( 'check_variations' );
-			}
+			form.$form.trigger( 'check_variations' );
 		}
 
 		// Custom event for when variation selection has been changed
@@ -415,12 +380,9 @@
 	 * Updates attributes in the DOM to show valid values.
 	 */
 	VariationForm.prototype.onUpdateAttributes = function( event ) {
-		var form                       = event.data.variationForm,
-			attributes                 = form.getChosenAttributes(),
-			currentAttributes          = attributes.data;
-		const unattached_attributes_action =
-			form.$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'unattachedAttributesAction' ) ||
-			'hide';
+		var form              = event.data.variationForm,
+			attributes        = form.getChosenAttributes(),
+			currentAttributes = attributes.data;
 
 		if ( form.useAjax ) {
 			return;
@@ -431,6 +393,7 @@
 			var current_attr_select     = $( el ),
 				current_attr_name       = current_attr_select.data( 'attribute_name' ) || current_attr_select.attr( 'name' ),
 				show_option_none        = $( el ).data( 'show_option_none' ),
+				option_gt_filter        = ':gt(0)',
 				attached_options_count  = 0,
 				new_attr_select         = $( '<select/>' ),
 				selected_attr_val       = current_attr_select.val() || '',
@@ -442,46 +405,10 @@
 
 				refSelect.find( 'option' ).removeAttr( 'attached' ).prop( 'disabled', false ).prop( 'selected', false );
 
-				// Variations that are not "possible" are likely unpublished, such as not "enabled"
-				var all_possible_variations = form.variationData;
-				var all_possible_attributes = {};
-
-				// Get all possible values for all possible attributes
-				for ( var num in all_possible_variations ) {
-					var variation = all_possible_variations[ num ];
-
-					if ( typeof( variation ) !== 'undefined' ) {
-						var variationAttributes = variation.attributes;
-
-						for ( var attr_name in variationAttributes ) {
-							if ( ! ( attr_name in all_possible_attributes ) ) {
-								all_possible_attributes[ attr_name ] = new Set();
-							}
-							// special cases for "Any ATTRIBUTE NAME" are handled later
-							all_possible_attributes[ attr_name ].add( variationAttributes[ attr_name ] );
-						}
-					}
-				}
-				// Filter initial options to match those of possible variations
-				const attribute = all_possible_attributes[ 'attribute_' + refSelect.attr( 'id' ) ];
-				if ( attribute.has( '' ) ) {
-					// "Any ATTRIBUTE NAME" is specified in the variation data
-					// Keep all attributes
-				} else {
-					// A specific attribute is specified in the variation data
-					refSelect.find( 'option' ).each( function () {
-						const $el = $( this );
-						if ( $el.val() !== '' && ! attribute.has( $el.val() ) ) {
-							// This attribute is not in any possible variation
-							$el.remove();
-						}
-					} );
-				}
-
 				// Legacy data attribute.
 				current_attr_select.data(
 					'attribute_options',
-					refSelect.find( 'option:not([value=""])' ).get()
+					refSelect.find( 'option' + option_gt_filter ).get()
 				);
 				current_attr_select.data( 'attribute_html', refSelect.html() );
 			}
@@ -494,13 +421,12 @@
 
 			checkAttributes[ current_attr_name ] = '';
 
-			var matching_variations = form.findMatchingVariations( form.variationData, checkAttributes );
+			var variations = form.findMatchingVariations( form.variationData, checkAttributes );
 
-			for ( var num in matching_variations ) {
-				const variation = matching_variations[ num ];
-
-				if ( typeof( variation ) !== 'undefined' ) {
-					var variationAttributes = variation.attributes;
+			// Loop through variations.
+			for ( var num in variations ) {
+				if ( typeof( variations[ num ] ) !== 'undefined' ) {
+					var variationAttributes = variations[ num ].attributes;
 
 					for ( var attr_name in variationAttributes ) {
 						if ( variationAttributes.hasOwnProperty( attr_name ) ) {
@@ -508,7 +434,7 @@
 								variation_active = '';
 
 							if ( attr_name === current_attr_name ) {
-								if ( variation.variation_is_active ) {
+								if ( variations[ num ].variation_is_active ) {
 									variation_active = 'enabled';
 								}
 
@@ -532,7 +458,7 @@
 									}
 								} else {
 									// Attach all apart from placeholder.
-									new_attr_select.find( 'option:not([value=""])' ).addClass( 'attached ' + variation_active );
+									new_attr_select.find( 'option:gt(0)' ).addClass( 'attached ' + variation_active );
 								}
 							}
 						}
@@ -566,26 +492,15 @@
 			// - Placeholders are not set to be permanently visible.
 			if ( attached_options_count > 0 && selected_attr_val && selected_attr_val_valid && ( 'no' === show_option_none ) ) {
 				new_attr_select.find( 'option:first' ).remove();
+				option_gt_filter = '';
 			}
 
-			const $unattached_options = new_attr_select.find( 'option:not([value=""], .attached, .enabled)' );
-			switch ( unattached_attributes_action ) {
-				case 'hide':
-					// Hide unattached
-					$unattached_options.remove();
-					break;
-				case 'disable':
-					// Disable unattached (prop) -- Browser disallows selecting
-					$unattached_options.prop( 'disabled', true );
-					break;
-				case 'gray':
-					// Disable unattached (class) -- Browser allows selecting
-					$unattached_options.addClass( 'disabled' );
-					break;
-			}
+			// Detach unattached.
+			new_attr_select.find( 'option' + option_gt_filter + ':not(.attached)' ).remove();
 
 			// Finally, copy to DOM and set value.
 			current_attr_select.html( new_attr_select.html() );
+			current_attr_select.find( 'option' + option_gt_filter + ':not(.enabled)' ).prop( 'disabled', true );
 
 			// Choose selected value.
 			if ( selected_attr_val ) {
@@ -872,42 +787,6 @@
 		$gallery_img.wc_reset_variation_attr( 'src' );
 		$product_link.wc_reset_variation_attr( 'href' );
 	};
-
-	/**
-	 * Autoselect variation attributes.
-	 *
-	 * If we return true here, the caller should check/confirm variations again
-	 */
-	$.fn.wc_variations_autoselect = function( form, $eventTargetSelect ) {
-		const autoselect =
-				form.$form.parent( 'div.wc-block-add-to-cart-form' ).data( 'autoselect' ) ||
-				false;
-		if ( ! autoselect ) {
-			return false;
-		} else {
-			if ( $eventTargetSelect.val() === '' ) {
-				return false;
-			} else {
-				const $otherSelectElements = form.$attributeFields.not( $eventTargetSelect );
-				$otherSelectElements.each( function () {
-					const $selectElement = $( this );
-					// Options that HAVE a value and are NOT disabled
-					const $validOptions = $selectElement.children( 'option:not([value=""], [disabled], [class*="disabled"])' );
-					if ( $validOptions.length === 1 ) {
-						// Only 1 option (+ the "Choose an option" choice)
-						if ( $selectElement.val() !== $validOptions.val() ) {
-							form.in_autoselect_scope = true;
-							$selectElement.val( $validOptions.val() );
-							$selectElement.trigger( 'change' ).trigger( 'click' );
-							form.in_autoselect_scope = false;
-						}
-					}
-				} );
-
-				return true; // Caller: please check variations
-			}
-		}
-	}
 
 	$(function() {
 		if ( typeof wc_add_to_cart_variation_params !== 'undefined' ) {
