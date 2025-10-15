@@ -31,9 +31,7 @@ final class UpdateUtils {
 	 * @return void
 	 * @throws WC_REST_Exception If there's an error updating the customer.
 	 */
-	public function update_customer_from_request( WC_Customer $customer, WP_REST_Request $request, bool $creating = false ): void {
-		// Suppress unused parameter warning.
-		$creating = $creating;
+	public function update_customer_from_request( WC_Customer $customer, WP_REST_Request $request, bool $creating = false ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		// Customer email.
 		if ( isset( $request['email'] ) ) {
 			$customer->set_email( sanitize_email( $request['email'] ) );
