@@ -243,32 +243,6 @@ class CustomerSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'meta_data'          => array(
-				'description' => __( 'Meta data.', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => self::VIEW_EDIT_CONTEXT,
-				'items'       => array(
-					'type'       => 'object',
-					'properties' => array(
-						'id'    => array(
-							'description' => __( 'Meta ID.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => self::VIEW_EDIT_CONTEXT,
-							'readonly'    => true,
-						),
-						'key'   => array(
-							'description' => __( 'Meta key.', 'woocommerce' ),
-							'type'        => 'string',
-							'context'     => self::VIEW_EDIT_CONTEXT,
-						),
-						'value' => array(
-							'description' => __( 'Meta value.', 'woocommerce' ),
-							'type'        => 'mixed',
-							'context'     => self::VIEW_EDIT_CONTEXT,
-						),
-					),
-				),
-			),
 		);
 
 		return $schema;
