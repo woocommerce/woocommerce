@@ -3663,12 +3663,12 @@ importers:
       '@preact/signals':
         specifier: ^1.3.0
         version: 1.3.1(preact@10.25.1)
+      '@woocommerce/email-editor':
+        specifier: workspace:*
+        version: link:../../../../packages/js/email-editor
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../../../../packages/js/sanitize
-      '@woocommerce/email-editor':
-          specifier: workspace:*
-          version: link:../../../../packages/js/email-editor
       '@woocommerce/tracks':
         specifier: workspace:*
         version: link:../../../../packages/js/tracks
