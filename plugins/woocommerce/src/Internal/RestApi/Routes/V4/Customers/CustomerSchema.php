@@ -212,6 +212,11 @@ class CustomerSchema extends AbstractSchema {
 						'type'        => 'string',
 						'context'     => self::VIEW_EDIT_CONTEXT,
 					),
+					'phone'      => array(
+						'description' => __( 'Phone number.', 'woocommerce' ),
+						'type'        => 'string',
+						'context'     => self::VIEW_EDIT_CONTEXT,
+					),
 				),
 			),
 			'is_paying_customer' => array(

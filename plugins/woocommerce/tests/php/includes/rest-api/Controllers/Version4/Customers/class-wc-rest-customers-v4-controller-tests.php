@@ -273,6 +273,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'state'      => 'IL',
 				'postcode'   => '62701',
 				'country'    => 'US',
+				'phone'      => '555-5678',
 			),
 		);
 
@@ -312,6 +313,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'IL', $response_data['shipping']['state'] );
 		$this->assertEquals( '62701', $response_data['shipping']['postcode'] );
 		$this->assertEquals( 'US', $response_data['shipping']['country'] );
+		$this->assertEquals( '555-5678', $response_data['shipping']['phone'] );
 
 		$customer = new WC_Customer( $response_data['id'] );
 		$customer->delete( true );
@@ -345,6 +347,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'state'      => 'NY',
 				'postcode'   => '10001',
 				'country'    => 'US',
+				'phone'      => '555-5678',
 			),
 		);
 
@@ -381,6 +384,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'NY', $response_data['shipping']['state'] );
 		$this->assertEquals( '10001', $response_data['shipping']['postcode'] );
 		$this->assertEquals( 'US', $response_data['shipping']['country'] );
+		$this->assertEquals( '555-5678', $response_data['shipping']['phone'] );
 
 		$customer->delete( true );
 	}
