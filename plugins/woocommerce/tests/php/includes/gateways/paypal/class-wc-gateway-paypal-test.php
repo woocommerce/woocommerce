@@ -288,6 +288,18 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'pre_http_request', $response_mock_ref );
 
 		$this->assertSame( $expect_to_save, $triggered );
+
+		// If we expected the order to be saved, verify that addresses were set.
+		if ( $expect_to_save ) {
+			$order = wc_get_order( $order_id );
+
+			$this->assertEquals( 'US', $order->get_billing_country() );
+			$this->assertEquals( '12345', $order->get_billing_postcode() );
+			$this->assertEquals( 'NY', $order->get_billing_state() );
+			$this->assertEquals( 'WooCity', $order->get_billing_city() );
+			$this->assertEquals( 'WooAddress', $order->get_billing_address_1() );
+			$this->assertEquals( '', $order->get_billing_address_2() );
+		}
 	}
 
 	/**
