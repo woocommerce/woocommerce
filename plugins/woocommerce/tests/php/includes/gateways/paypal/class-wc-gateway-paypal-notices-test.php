@@ -9,20 +9,23 @@ declare(strict_types=1);
 
 require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php';
 
+/**
+ * Class WC_Gateway_Paypal_Notices_Test
+ */
 class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for `add_paypal_migration_notice` method.
 	 *
-	 * @param array $current_user_can Capabilities for current user.
-	 * @param bool  $gateway_available Whether the gateway is available.
-	 * @param bool  $notice_dismissed Whether the notice has been dismissed.
+	 * @param array  $current_user_can Capabilities for current user.
+	 * @param bool   $gateway_available Whether the gateway is available.
+	 * @param bool   $notice_dismissed Whether the notice has been dismissed.
 	 * @param string $expected Expected output.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_add_paypal_migration_notice
 	 */
 	public function test_add_paypal_migration_notice( array $current_user_can, bool $gateway_available, bool $notice_dismissed, string $expected ): void {
-		$filter_callback = fn( $caps ) => $current_user_can;
+		$filter_callback = fn() => $current_user_can;
 		add_filter( 'user_has_cap', $filter_callback );
 
 		if ( $gateway_available ) {
@@ -81,16 +84,16 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 	public function provide_test_add_paypal_migration_notice(): array {
 		return array(
 			'user cannot manage site' => array(
-				'current user can'  => [],
+				'current user can'  => array(),
 				'gateway available' => true,
 				'notice dismissed'  => false,
 				'expected'          => '',
 			),
 			'gateway not available'   => array(
-				'current user can'  => [
+				'current user can'  => array(
 					'manage_woocommerce' => true,
 					'manage_options'     => true,
-				],
+				),
 				'gateway available' => false,
 				'notice dismissed'  => false,
 				'expected'          => '',
