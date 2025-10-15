@@ -62,16 +62,6 @@ final class UpdateUtils {
 			$this->update_customer_address( $customer, $request['shipping'], 'shipping' );
 		}
 
-		// Meta data.
-		if ( isset( $request['meta_data'] ) && is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				if ( is_protected_meta( $meta['key'], 'user' ) ) { // bypass internal keys.
-					continue;
-				}
-				$customer->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
-
 		// Save the customer.
 		$customer->save();
 
