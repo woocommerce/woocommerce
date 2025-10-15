@@ -2114,4 +2114,79 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertContains( $visible_product->get_id(), $product_ids );
 		$this->assertContains( $hidden_product->get_id(), $product_ids );
 	}
+
+	/**
+	 * Test that REST Controllers allow overriding product classes.
+	 *
+	 * Verifies that the `woocommerce_product_class` filter hook, used to override
+	 * product classes in `WC_Product_Factory::get_product_classname()`, is also
+	 * used by REST Controllers when interacting with products.
+	 */
+	public function test_custom_product_classes() {
+		/* Add filters for custom product classes */
+
+		$simple_class    = new class() extends WC_Product_Simple {};
+		$variation_class = new class() extends WC_Product_Variation {};
+
+		$woocommerce_product_class_filter_callback = function ( $classname, $product_type ) use ( $simple_class, $variation_class ) {
+			if ( 'simple' === $product_type ) {
+				return $simple_class::class;
+			} elseif ( 'variation' === $product_type ) {
+				return $variation_class::class;
+			}
+			return $classname;
+		};
+		add_filter( 'woocommerce_product_class', $woocommerce_product_class_filter_callback, 10, 2 );
+
+		$woocommerce_rest_prepare_object_filter_callback = function ( $response, $object ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+			$response->data['classname'] = get_class( $object );
+			return $response;
+		};
+		add_filter( 'woocommerce_rest_prepare_product_object', $woocommerce_rest_prepare_object_filter_callback, 10, 2 );
+		add_filter( 'woocommerce_rest_prepare_product_variation_object', $woocommerce_rest_prepare_object_filter_callback, 10, 2 );
+
+		/* Define and run tests */
+
+		$simple_product    = WC_Helper_Product::create_simple_product();
+		$variable_product  = WC_Helper_Product::create_variation_product();
+		$variation_product = $variable_product->get_available_variations()[0];
+		$variation_product = wc_get_product( $variation_product['variation_id'] );
+
+		$test_cases = array(
+			array(
+				'product'        => $simple_product,
+				'expected_class' => $simple_class::class,
+				'api_endpoint'   => "/wc/v3/products/{$simple_product->get_id()}",
+			),
+			array(
+				'product'        => $variation_product,
+				'expected_class' => $variation_class::class,
+				'api_endpoint'   => "/wc/v3/products/{$variable_product->get_id()}/variations/{$variation_product->get_id()}",
+			),
+			array(
+				'product'        => $variable_product,
+				'expected_class' => 'WC_Product_Variable',
+				'api_endpoint'   => "/wc/v3/products/{$variable_product->get_id()}",
+			),
+		);
+
+		foreach ( $test_cases as $case ) {
+			$request  = new WP_REST_Request( 'GET', $case['api_endpoint'] );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( $case['expected_class'], $response->data['classname'] );
+
+			$request = new WP_REST_Request( 'PUT', $case['api_endpoint'] );
+			$request->set_body_params( array( 'name' => "{$case['product']->get_name()} - Test Update" ) );
+			$response = $this->server->dispatch( $request );
+
+			$this->assertEquals( $case['expected_class'], $response->data['classname'] );
+		}
+
+		/* Remove filters */
+
+		remove_filter( 'woocommerce_product_class', $woocommerce_product_class_filter_callback, 10 );
+		remove_filter( 'woocommerce_rest_prepare_product_object', $woocommerce_rest_prepare_object_filter_callback, 10 );
+		remove_filter( 'woocommerce_rest_prepare_product_variation_object', $woocommerce_rest_prepare_object_filter_callback, 10 );
+	}
 }
