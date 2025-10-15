@@ -3,7 +3,7 @@
 	"phpVersion": "8.1",
 	"plugins": [
 		".",
-		"https://github.com/WordPress/gutenberg/releases/download/v21.8.1/gutenberg.zip"
+		"https://github.com/user-attachments/files/22927320/gutenberg-plugin.zip"
 	],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
