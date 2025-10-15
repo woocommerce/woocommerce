@@ -592,7 +592,7 @@ class WC_Post_Data {
 	 * @since 10.4.0
 	 */
 	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
-		if ( $taxonomy !== 'product_visibility' ) {
+		if ( 'product_visibility' !== $taxonomy ) {
 			return;
 		}
 
