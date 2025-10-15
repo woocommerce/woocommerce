@@ -455,10 +455,13 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$simple_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 			}
 
+			if ( property_exists( $variant_node, 'taxable' ) ) {
+				$simple_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
+			}
+
 			$simple_data['original_variant_id'] = ! empty( $variant_node->id ) ? basename( $variant_node->id ) : null;
 
 		} else {
-			// Defaults for variable or product with no variants.
 			$simple_data['sku']                 = null;
 			$simple_data['regular_price']       = null;
 			$simple_data['sale_price']          = null;
@@ -466,6 +469,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 			$simple_data['manage_stock']        = false;
 			$simple_data['stock_status']        = 'instock';
 			$simple_data['weight']              = null;
+			$simple_data['tax_status']          = 'taxable';
 			$simple_data['original_variant_id'] = null;
 		}
 
@@ -544,6 +548,10 @@ class ShopifyMapper implements PlatformMapperInterface {
 					property_exists( $variant_node->inventoryItem, 'unitCost' ) && is_object( $variant_node->inventoryItem->unitCost ) // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 				) {
 					$variation_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+				}
+
+				if ( property_exists( $variant_node, 'taxable' ) ) {
+					$variation_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
 				}
 
 				if ( $this->should_process( 'attributes' ) ) {
