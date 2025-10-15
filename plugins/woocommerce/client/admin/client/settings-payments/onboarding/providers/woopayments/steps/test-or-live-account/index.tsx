@@ -33,6 +33,11 @@ const TestOrLiveAccountStep = () => {
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
 
+	const testAccountStepActions = getStepByKey(
+		TESTING_ACCOUNT_STEP_ID
+	)?.actions;
+	const canCreateTestAccount = testAccountStepActions?.finish?.href;
+
 	return (
 		<>
 			<WooPaymentsStepHeader onClose={ closeModal } />
@@ -105,31 +110,61 @@ const TestOrLiveAccountStep = () => {
 										}
 									);
 
-									const testAccountStep = getStepByKey(
-										TESTING_ACCOUNT_STEP_ID
-									);
+									if ( canCreateTestAccount ) {
+										// Mark the test account as finished.
+										const actionUrl =
+											testAccountStepActions?.finish
+												?.href;
 
-									const actionUrl =
-										testAccountStep?.actions?.finish?.href;
-
-									if ( actionUrl ) {
-										apiFetch( {
-											url: actionUrl,
-											method: 'POST',
-										} )
-											.then( () => {
-												setIsContinueButtonLoading(
-													false
-												);
-
-												refreshStoreData();
+										if ( actionUrl ) {
+											apiFetch( {
+												url: actionUrl,
+												method: 'POST',
 											} )
-											.catch( () => {
-												// Handle any errors that occur during the process.
-												setIsContinueButtonLoading(
-													false
+												.then( () => {
+													setIsContinueButtonLoading(
+														false
+													);
+
+													refreshStoreData();
+												} )
+												.catch( () => {
+													// Handle any errors that occur during the process.
+													setIsContinueButtonLoading(
+														false
+													);
+												} );
+										} else {
+											// If no test step is present, start the live account creation process directly.
+											const liveAccountStep =
+												getStepByKey(
+													LIVE_ACCOUNT_STEP_ID
 												);
-											} );
+
+											const liveAccountActionURL =
+												liveAccountStep?.actions?.start
+													?.href;
+
+											if ( liveAccountActionURL ) {
+												apiFetch( {
+													url: liveAccountActionURL,
+													method: 'POST',
+												} )
+													.then( () => {
+														setIsContinueButtonLoading(
+															false
+														);
+
+														refreshStoreData();
+													} )
+													.catch( () => {
+														// Handle any errors that occur during the process.
+														setIsContinueButtonLoading(
+															false
+														);
+													} );
+											}
+										}
 									}
 								} }
 								isBusy={ isContinueButtonLoading }
