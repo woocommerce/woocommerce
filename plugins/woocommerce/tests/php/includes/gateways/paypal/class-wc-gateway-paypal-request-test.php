@@ -286,41 +286,149 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for the `get_paypal_order_purchase_unit_amount` method.
 	 *
+	 * @param int   $cart_tax       The cart tax amount.
+	 * @param int   $shipping_tax   The shipping tax amount.
+	 * @param int   $discount_total The discount total amount.
+	 * @param int   $total          The order total amount.
+	 * @param array $expected       The expected purchase unit amount array.
 	 * @return void
+	 *
+	 * @dataProvider provide_test_get_paypal_order_purchase_unit_amount
 	 */
-	public function test_get_paypal_order_purchase_unit_amount(): void {
+	public function test_get_paypal_order_purchase_unit_amount( int $cart_tax, int $shipping_tax, int $discount_total, int $total, array $expected ): void {
 		$order = WC_Helper_Order::create_order();
-		$order->set_cart_tax( 10 );
-		$order->set_shipping_tax( 0 );
-		$order->set_total( 60 );
+		$order->set_cart_tax( $cart_tax );
+		$order->set_shipping_tax( $shipping_tax );
+		$order->set_discount_total( $discount_total );
+		$order->set_total( $total );
 		$order->save();
 
 		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
 
-		$expected = array(
-			'currency_code' => 'USD',
-			'value'         => '60.00',
-			'breakdown'     => array(
-				'item_total' => array(
+		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Data provider for `test_get_paypal_order_purchase_unit_amount` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_get_paypal_order_purchase_unit_amount(): array {
+		return array(
+			'test 1' => array(
+				'cart tax'       => 10,
+				'shipping tax'   => 0,
+				'discount total' => 0,
+				'total'          => 60,
+				'expected' => array(
 					'currency_code' => 'USD',
-					'value'         => '40.00',
+					'value'         => '60.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
 				),
-				'shipping'   => array(
+			),
+			'test 2' => array(
+				'cart tax'       => 0,
+				'shipping tax'   => 5,
+				'discount total' => 0,
+				'total'          => 55,
+				'expected' => array(
 					'currency_code' => 'USD',
-					'value'         => '10.00',
+					'value'         => '55.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '5.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
 				),
-				'tax_total'  => array(
+			),
+			'test 3' => array(
+				'cart tax'       => 0,
+				'shipping tax'   => 0,
+				'discount total' => 0,
+				'total'          => 50,
+				'expected' => array(
 					'currency_code' => 'USD',
-					'value'         => '10.00',
+					'value'         => '50.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
 				),
-				'discount'   => array(
+			),
+			'test 4' => array(
+				'cart tax'       => 10,
+				'shipping tax'   => 0,
+				'discount total' => 5,
+				'total'          => 55,
+				'expected' => array(
 					'currency_code' => 'USD',
-					'value'         => '0.00',
+					'value'         => '55.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '5.00',
+						),
+					),
 				),
 			),
 		);
-		$actual   = $request->get_paypal_order_purchase_unit_amount( $order );
-		$this->assertEquals( $expected, $actual );
 	}
 
 	/**
