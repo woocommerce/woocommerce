@@ -1,6 +1,6 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Helper class.
+ * Unit tests for Helper class.
  *
  * @package WooCommerce\Tests\Paypal.
  */
