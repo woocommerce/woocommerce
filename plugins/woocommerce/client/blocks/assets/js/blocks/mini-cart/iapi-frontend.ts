@@ -85,13 +85,12 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
-	name: string;
 	value: string;
 	className?: string;
 	hidden?: boolean;
-	key?: string;
 	display?: string;
-};
+	attribute?: string;
+} & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -676,15 +675,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | null {
+			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
 				const { itemData, dataProperty } = getContext< {
-					itemData: {
-						key: string;
-						attribute: string;
-						name: string;
-						value: string;
-						hidden: string;
-					};
+					itemData: CartItemDataAttr;
 					dataProperty: DataProperty;
 				} >();
 
@@ -699,7 +692,8 @@ const { state: cartItemState } = store(
 				const dataItemAttrKey =
 					dataItemAttr.key ||
 					dataItemAttr.attribute ||
-					dataItemAttr.name;
+					dataItemAttr.name ||
+					'';
 
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
