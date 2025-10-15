@@ -321,7 +321,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'shipping tax'   => 0,
 				'discount total' => 0,
 				'total'          => 60,
-				'expected' => array(
+				'expected'       => array(
 					'currency_code' => 'USD',
 					'value'         => '60.00',
 					'breakdown'     => array(
@@ -349,7 +349,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'shipping tax'   => 5,
 				'discount total' => 0,
 				'total'          => 55,
-				'expected' => array(
+				'expected'       => array(
 					'currency_code' => 'USD',
 					'value'         => '55.00',
 					'breakdown'     => array(
@@ -377,7 +377,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'shipping tax'   => 0,
 				'discount total' => 0,
 				'total'          => 50,
-				'expected' => array(
+				'expected'       => array(
 					'currency_code' => 'USD',
 					'value'         => '50.00',
 					'breakdown'     => array(
@@ -405,7 +405,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 				'shipping tax'   => 0,
 				'discount total' => 5,
 				'total'          => 55,
-				'expected' => array(
+				'expected'       => array(
 					'currency_code' => 'USD',
 					'value'         => '55.00',
 					'breakdown'     => array(
