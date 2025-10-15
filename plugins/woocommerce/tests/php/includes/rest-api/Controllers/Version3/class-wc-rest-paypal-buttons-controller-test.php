@@ -16,20 +16,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		parent::setUp();
 
 		// Mock Jetpack options to return a valid site ID.
-		add_filter(
-			'pre_option_jetpack_options',
-			function () {
-				return array( 'id' => 12345 );
-			}
-		);
+		add_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 
 		// Return a Jetpack blog token.
-		add_filter(
-			'pre_option_jetpack_private_options',
-			function () {
-				return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
-			}
-		);
+		add_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
 
 		$this->endpoint = new WC_REST_Paypal_Buttons_Controller();
 		$this->user     = $this->factory->user->create(
@@ -46,18 +36,30 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 
-		remove_filter(
-			'pre_option_jetpack_options',
-			function () {
-				return array( 'id' => 12345 );
-			}
-		);
-		remove_filter(
-			'pre_option_jetpack_private_options',
-			function () {
-				return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
-			}
-		);
+		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
+		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+	}
+
+	/**
+	 * Helper method to return valid site ID for Jetpack options.
+	 *
+	 * @param mixed $value The option value.
+	 *
+	 * @return int
+	 */
+	public function return_valid_site_id( $value ) {
+		return array( 'id' => 12345 );
+	}
+
+	/**
+	 * Helper method to return valid blog token for Jetpack options.
+	 *
+	 * @param mixed $value The option value.
+	 *
+	 * @return array
+	 */
+	public function return_blog_token( $value ) {
+		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
 	}
 
 	/**
