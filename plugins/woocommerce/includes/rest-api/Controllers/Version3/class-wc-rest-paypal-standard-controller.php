@@ -32,7 +32,6 @@ if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
  * @extends WC_REST_Controller
  */
 class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
-
 	/**
 	 * Endpoint namespace.
 	 *

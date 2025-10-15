@@ -290,15 +290,16 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 
 		$url = $this->buttons->get_current_page_for_app_switch();
 
+		// Clean up.
+		wp_delete_post( $post_id, true );
+		wc_get_container()->get( LegacyProxy::class )->reset();
+
 		if ( $expected_contains ) {
 			$this->assertNotEmpty( $url );
 			$this->assertStringContainsString( (string) $post_id, $url );
 		} else {
 			$this->assertEquals( '', $url );
 		}
-
-		// Clean up.
-		wp_delete_post( $post_id, true );
 	}
 
 	/**
