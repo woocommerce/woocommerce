@@ -53,12 +53,12 @@ final class UpdateUtils {
 		}
 
 		// Customer billing address.
-		if ( isset( $request['billing'] ) ) {
+		if ( isset( $request['billing'] ) && is_array( $request['billing'] ) ) {
 			$this->update_customer_address( $customer, $request['billing'], 'billing' );
 		}
 
 		// Customer shipping address.
-		if ( isset( $request['shipping'] ) ) {
+		if ( isset( $request['shipping'] ) && is_array( $request['shipping'] ) ) {
 			$this->update_customer_address( $customer, $request['shipping'], 'shipping' );
 		}
 
@@ -86,6 +86,8 @@ final class UpdateUtils {
 	 * @return void
 	 */
 	private function update_customer_address( WC_Customer $customer, array $address, string $type ): void {
+		$address = wc_clean( $address );
+
 		$address_fields = array(
 			'first_name',
 			'last_name',
@@ -102,7 +104,8 @@ final class UpdateUtils {
 
 		foreach ( $address_fields as $field ) {
 			if ( isset( $address[ $field ] ) && is_callable( array( $customer, "set_{$type}_{$field}" ) ) ) {
-				$customer->{"set_{$type}_{$field}"}( $address[ $field ] );
+				$value = ( 'email' === $field ) ? sanitize_email( $address[ $field ] ) : $address[ $field ];
+				$customer->{"set_{$type}_{$field}"}( $value );
 			}
 		}
 	}
