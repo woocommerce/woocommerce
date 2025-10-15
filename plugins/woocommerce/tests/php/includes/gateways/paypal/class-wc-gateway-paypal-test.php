@@ -393,7 +393,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		$mock_gateway->enqueue_scripts();
 
 		// Clean up.
-		delete_option( 'woocommerce_paypal_settings', array() );
+		delete_option( 'woocommerce_paypal_settings' );
 		delete_option( 'woocommerce_paypal_client_id_live' );
 		remove_filter( 'woocommerce_is_cart', '__return_true' );
 
