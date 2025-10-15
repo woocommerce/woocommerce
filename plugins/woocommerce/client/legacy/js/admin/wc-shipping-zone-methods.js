@@ -510,7 +510,8 @@
 						// Cost values are saved to the DB with thousands separators stripped and decimal separators converted to a dot.
 						// If value is not a formula, then we need to check for incorrect decimal separator in the value returned
 						// from the DB, and replace it with the correct one before passing it to the localiseMonetaryValue function.
-						const formulaRegex = /[\[\]()\*\+\"a-z]/;
+						// Formula detection regex matches: brackets [], parentheses (), operators */+-, quotes ", and letters a-z and A-Z.
+						const formulaRegex = /[\[\]()\*\+\-\/\"a-zA-Z]/;
 						if ( ! formulaRegex.test( value ) && '.' !== config.decimalSeparator && value.includes( '.' ) ) {
 							value = value.replace( '.', config.decimalSeparator );
 						}
