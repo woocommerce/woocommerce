@@ -337,7 +337,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		foreach ( $order->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
-				'refund' => $refund->get_reason() ? $refund->get_reason() : '',
+				'refund' => $refund->get_reason() ?: '',
 				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $dp ),
 			);
 		}

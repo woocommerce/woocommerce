@@ -29,7 +29,7 @@ if ( ! empty( $product->get_sku() ) ) {
 		<span>
 			<?php printf( '(%s)', esc_html( $identifier ) ); ?>
 		</span>
-		<a target="_blank" href="<?php echo esc_url( admin_url( sprintf( 'post.php?post=%d&action=edit', $product->get_parent_id() ? $product->get_parent_id() : $product->get_id() ) ) ); ?>"><span class="dashicons dashicons-external"></span></a>
+		<a target="_blank" href="<?php echo esc_url( admin_url( sprintf( 'post.php?post=%d&action=edit', $product->get_parent_id() ?: $product->get_id() ) ) ); ?>"><span class="dashicons dashicons-external"></span></a>
 	</p>
 
 	<span class="product-details__price">

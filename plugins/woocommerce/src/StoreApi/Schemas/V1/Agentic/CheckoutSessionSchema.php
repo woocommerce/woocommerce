@@ -405,8 +405,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 			return null;
 		}
 
-		$first_name = $customer->get_billing_first_name() ? $customer->get_billing_first_name() : $customer->get_shipping_first_name();
-		$last_name  = $customer->get_billing_last_name() ? $customer->get_billing_last_name() : $customer->get_shipping_last_name();
+		$first_name = $customer->get_billing_first_name() ?: $customer->get_shipping_first_name();
+		$last_name  = $customer->get_billing_last_name() ?: $customer->get_shipping_last_name();
 		$email      = $customer->get_billing_email();
 
 		if ( ! $first_name && ! $last_name && ! $email ) {
@@ -417,7 +417,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'first_name'   => $first_name ? $first_name : '',
 			'last_name'    => $last_name ? $last_name : '',
 			'email'        => $email ? $email : '',
-			'phone_number' => $customer->get_billing_phone() ? $customer->get_billing_phone() : '',
+			'phone_number' => $customer->get_billing_phone() ?: '',
 		];
 	}
 
@@ -428,8 +428,8 @@ class CheckoutSessionSchema extends AbstractSchema {
 	 * @return array|null Buyer data or null.
 	 */
 	protected function format_buyer_from_order( $order ) {
-		$first_name = $order->get_billing_first_name() ? $order->get_billing_first_name() : $order->get_shipping_first_name();
-		$last_name  = $order->get_billing_last_name() ? $order->get_billing_last_name() : $order->get_shipping_last_name();
+		$first_name = $order->get_billing_first_name() ?: $order->get_shipping_first_name();
+		$last_name  = $order->get_billing_last_name() ?: $order->get_shipping_last_name();
 		$email      = $order->get_billing_email();
 
 		if ( ! $first_name && ! $last_name && ! $email ) {
@@ -440,7 +440,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			'first_name'   => $first_name ? $first_name : '',
 			'last_name'    => $last_name ? $last_name : '',
 			'email'        => $email ? $email : '',
-			'phone_number' => $order->get_billing_phone() ? $order->get_billing_phone() : '',
+			'phone_number' => $order->get_billing_phone() ?: '',
 		];
 	}
 
@@ -537,7 +537,7 @@ class CheckoutSessionSchema extends AbstractSchema {
 			$total       = $subtotal + $tax;
 
 			// Use product_id from the order item, with variation_id as fallback.
-			$item_product_id = $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id();
+			$item_product_id = $item->get_variation_id() ?: $item->get_product_id();
 
 			$items[] = [
 				'id'          => (string) $item_id,

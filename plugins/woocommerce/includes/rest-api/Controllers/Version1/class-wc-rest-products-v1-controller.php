@@ -481,7 +481,7 @@ class WC_REST_Products_V1_Controller extends WC_REST_Posts_Controller {
 			'sku'                   => $product->get_sku(),
 			'price'                 => $product->get_price(),
 			'regular_price'         => $product->get_regular_price(),
-			'sale_price'            => $product->get_sale_price() ? $product->get_sale_price() : '',
+			'sale_price'            => $product->get_sale_price() ?: '',
 			'date_on_sale_from'     => $product->get_date_on_sale_from() ? date( 'Y-m-d', $product->get_date_on_sale_from()->getTimestamp() ) : '',
 			'date_on_sale_to'       => $product->get_date_on_sale_to() ? date( 'Y-m-d', $product->get_date_on_sale_to()->getTimestamp() ) : '',
 			'price_html'            => $product->get_price_html(),

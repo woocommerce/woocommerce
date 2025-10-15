@@ -2826,7 +2826,7 @@ FROM $order_meta_table
 	 */
 	protected function persist_save( &$order, bool $force_all_fields = false, $backfill = true ) {
 		$order->set_version( Constants::get_constant( 'WC_VERSION' ) );
-		$order->set_currency( $order->get_currency() ? $order->get_currency() : get_woocommerce_currency() );
+		$order->set_currency( $order->get_currency() ?: get_woocommerce_currency() );
 
 		if ( ! $order->get_date_created( 'edit' ) ) {
 			$order->set_date_created( time() );

@@ -260,7 +260,7 @@ class Orders extends \WC_REST_Orders_Controller {
 		foreach ( $object->get_refunds() as $refund ) {
 			$data['refunds'][] = array(
 				'id'     => $refund->get_id(),
-				'reason' => $refund->get_reason() ? $refund->get_reason() : '',
+				'reason' => $refund->get_reason() ?: '',
 				'total'  => '-' . wc_format_decimal( $refund->get_amount(), $this->request['dp'] ),
 			);
 		}

@@ -157,7 +157,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'id'           => $order_item->get_id(),
 			'name'         => $order_item->get_name(),
 			'image'        => $this->get_image( $order_item ),
-			'product_id'   => $order_item->get_variation_id() ? $order_item->get_variation_id() : $order_item->get_product_id(),
+			'product_id'   => $order_item->get_variation_id() ?: $order_item->get_product_id(),
 			'product_data' => $this->get_product_data( $order_item ),
 			'quantity'     => $order_item->get_quantity(),
 			'price'        => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
@@ -292,7 +292,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			return '';
 		}
 
-		$image_id = $product->get_image_id() ? $product->get_image_id() : 0;
+		$image_id = $product->get_image_id() ?: 0;
 		return $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '';
 	}
 }

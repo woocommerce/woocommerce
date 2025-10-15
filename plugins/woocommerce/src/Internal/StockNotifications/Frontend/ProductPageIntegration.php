@@ -211,7 +211,7 @@ class ProductPageIntegration {
 		wc_get_template(
 			'single-product/back-in-stock-form.php',
 			array(
-				'product_id'       => $product->get_parent_id() ? $product->get_parent_id() : $product->get_id(),
+				'product_id'       => $product->get_parent_id() ?: $product->get_id(),
 				'show_checkbox'    => ! is_user_logged_in() && Config::creates_account_on_signup() && ! Config::requires_account(),
 				'show_email_field' => ! is_user_logged_in() && ! Config::requires_account(),
 				'button_class'     => $button_class,

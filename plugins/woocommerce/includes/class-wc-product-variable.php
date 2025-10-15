@@ -397,7 +397,7 @@ class WC_Product_Variable extends WC_Product {
 		}
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
-
+		$max_purchase_quantity = $variation->get_max_purchase_quantity();
 		return apply_filters(
 			'woocommerce_available_variation',
 			array(
@@ -415,7 +415,7 @@ class WC_Product_Variable extends WC_Product {
 				'is_purchasable'        => $variation->is_purchasable(),
 				'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
 				'is_virtual'            => $variation->is_virtual(),
-				'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
+				'max_qty'               => 0 < $max_purchase_quantity ? $max_purchase_quantity : '',
 				'min_qty'               => $variation->get_min_purchase_quantity(),
 				'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
 				'sku'                   => $variation->get_sku(),

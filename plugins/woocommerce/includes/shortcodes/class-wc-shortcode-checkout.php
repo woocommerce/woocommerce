@@ -188,9 +188,9 @@ class WC_Shortcode_Checkout {
 
 				WC()->customer->set_props(
 					array(
-						'billing_country'  => $order->get_billing_country() ? $order->get_billing_country() : null,
-						'billing_state'    => $order->get_billing_state() ? $order->get_billing_state() : null,
-						'billing_postcode' => $order->get_billing_postcode() ? $order->get_billing_postcode() : null,
+						'billing_country'  => $order->get_billing_country() ?: null,
+						'billing_state'    => $order->get_billing_state() ?: null,
+						'billing_postcode' => $order->get_billing_postcode() ?: null,
 					)
 				);
 				WC()->customer->save();

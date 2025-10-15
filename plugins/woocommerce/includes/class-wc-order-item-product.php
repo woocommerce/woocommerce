@@ -372,7 +372,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 
 		return $order ? add_query_arg(
 			array(
-				'download_file' => $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id(),
+				'download_file' => $this->get_variation_id() ?: $this->get_product_id(),
 				'order'         => $order->get_order_key(),
 				'email'         => rawurlencode( $order->get_billing_email() ),
 				'key'           => $download_id,
@@ -390,7 +390,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$files      = array();
 		$product    = $this->get_product();
 		$order      = $this->get_order();
-		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+		$product_id = $this->get_variation_id() ?: $this->get_product_id();
 
 		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
 			$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );

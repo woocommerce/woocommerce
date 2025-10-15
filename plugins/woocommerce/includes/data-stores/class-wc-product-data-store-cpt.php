@@ -206,9 +206,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				'woocommerce_new_product_data',
 				array(
 					'post_type'      => 'product',
-					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
+					'post_status'    => $product->get_status() ?: ProductStatus::PUBLISH,
 					'post_author'    => get_current_user_id(),
-					'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
+					'post_title'     => $product->get_name() ?: __( 'Product', 'woocommerce' ),
 					'post_content'   => $product->get_description(),
 					'post_excerpt'   => $product->get_short_description(),
 					'post_parent'    => $product->get_parent_id(),

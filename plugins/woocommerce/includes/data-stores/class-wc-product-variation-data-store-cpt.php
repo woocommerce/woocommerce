@@ -137,7 +137,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				'woocommerce_new_product_variation_data',
 				array(
 					'post_type'      => 'product_variation',
-					'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
+					'post_status'    => $product->get_status() ?: ProductStatus::PUBLISH,
 					'post_author'    => get_current_user_id(),
 					'post_title'     => $product->get_name( 'edit' ),
 					'post_excerpt'   => $product->get_attribute_summary( 'edit' ),

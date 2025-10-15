@@ -96,7 +96,7 @@ class FeaturedProduct extends FeaturedItem {
 			) {
 				$desc_str = sprintf(
 					'<div class="wc-block-featured-product__description">%s</div>',
-					wc_format_content( wp_kses_post( $product->get_short_description() ? $product->get_short_description() : wc_trim_string( $product->get_description(), 400 ) ) )
+					wc_format_content( wp_kses_post( $product->get_short_description() ?: wc_trim_string( $product->get_description(), 400 ) ) )
 				);
 				$output  .= $desc_str;
 			}

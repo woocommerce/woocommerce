@@ -209,7 +209,7 @@ class WC_Structured_Data {
 			'@id'         => $permalink . '#product', // Append '#product' to differentiate between this @id and the @id generated for the Breadcrumblist.
 			'name'        => wp_kses_post( $product->get_name() ),
 			'url'         => $permalink,
-			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
+			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ?: $product->get_description() ) ),
 		);
 
 		if ( $image ) {
