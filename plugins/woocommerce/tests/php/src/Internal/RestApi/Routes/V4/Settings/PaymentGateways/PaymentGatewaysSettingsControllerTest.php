@@ -438,6 +438,17 @@ class PaymentGatewaysSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 1, $saved_details );
 		$this->assertSame( 'Test Company', $saved_details[0]['account_name'] );
 		$this->assertSame( '12345678', $saved_details[0]['account_number'] );
+
+		// Verify the account details were persisted to the database option.
+		$saved_option = get_option( 'woocommerce_bacs_accounts' );
+		$this->assertIsArray( $saved_option );
+		$this->assertCount( 1, $saved_option );
+		$this->assertSame( $account_details[0]['account_name'], $saved_option[0]['account_name'] );
+		$this->assertSame( $account_details[0]['account_number'], $saved_option[0]['account_number'] );
+		$this->assertSame( $account_details[0]['bank_name'], $saved_option[0]['bank_name'] );
+		$this->assertSame( $account_details[0]['sort_code'], $saved_option[0]['sort_code'] );
+		$this->assertSame( $account_details[0]['iban'], $saved_option[0]['iban'] );
+		$this->assertSame( $account_details[0]['bic'], $saved_option[0]['bic'] );
 	}
 
 	/**
