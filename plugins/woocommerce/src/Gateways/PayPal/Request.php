@@ -308,7 +308,7 @@ class Request {
 			$order->save();
 		} catch ( Exception $e ) {
 			WC_Gateway_Paypal::log( $e->getMessage() );
-			$note_message = __( 'PayPal capture authorized payment failed', 'woocommerce' );
+			$note_message = __( 'PayPal capture authorized payment failed.', 'woocommerce' );
 			if ( $paypal_debug_id ) {
 				$note_message .= sprintf(
 					/* translators: %s: PayPal debug ID */
