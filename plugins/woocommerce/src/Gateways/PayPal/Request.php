@@ -60,7 +60,7 @@ class Request {
 	 * @param \WC_Gateway_Paypal $gateway Paypal gateway object.
 	 */
 	public function __construct( \WC_Gateway_Paypal $gateway ) {
-		$this->gateway    = $gateway;
+		$this->gateway = $gateway;
 	}
 
 	/**
@@ -70,8 +70,8 @@ class Request {
 	 * the approval URL where customers will be redirected to complete payment.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param string   $payment_source The payment source.
-	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
+	 * @param string    $payment_source The payment source.
+	 * @param array     $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array|null
 	 * @throws Exception If the PayPal order creation fails.
 	 */
@@ -182,8 +182,8 @@ class Request {
 	 * This method authorizes or captures a PayPal payment and updates the order status.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param string   $action_url The URL to authorize or capture the payment.
-	 * @param string   $action The action to perform. Either 'authorize' or 'capture'.
+	 * @param string    $action_url The URL to authorize or capture the payment.
+	 * @param string    $action The action to perform. Either 'authorize' or 'capture'.
 	 * @return void
 	 * @throws Exception If the PayPal payment authorization or capture fails.
 	 */
@@ -335,9 +335,9 @@ class Request {
 			$rel = 'approve';
 		}
 
-        if ( ! isset( $response_data['links'] ) || ! is_array( $response_data['links'] ) ) {
-            return null;
-        }
+		if ( ! isset( $response_data['links'] ) || ! is_array( $response_data['links'] ) ) {
+			return null;
+		}
 
 		foreach ( $response_data['links'] as $link ) {
 			if ( $rel === $link['rel'] && 'GET' === $link['method'] && filter_var( $link['href'], FILTER_VALIDATE_URL ) ) {
@@ -352,8 +352,8 @@ class Request {
 	 * Build the request parameters for the PayPal create-order request.
 	 *
 	 * @param \WC_Order $order Order object.
-	 * @param string   $payment_source The payment source.
-	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
+	 * @param string    $payment_source The payment source.
+	 * @param array     $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
 	 */
 	private function get_paypal_create_order_request_params( \WC_Order $order, string $payment_source, array $js_sdk_params ) {
@@ -490,7 +490,7 @@ class Request {
 	/**
 	 * Get the order items for the PayPal create-order request.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param \WC_Order $order Order object.
 	 * @return array
 	 */
 	private function get_paypal_order_items( \WC_Order $order ) {
@@ -685,19 +685,19 @@ class Request {
 	/**
 	 * Limit length of an arg.
 	 *
-	 * @param  string  $string Argument to limit.
+	 * @param  string  $arg Argument to limit.
 	 * @param  integer $limit Limit size in characters.
 	 * @return string
 	 */
-	protected function limit_length( string $string, int $limit = 127 ) {
+	protected function limit_length( string $arg, int $limit = 127 ) {
 		$str_limit = $limit - 3;
 		if ( function_exists( 'mb_strimwidth' ) ) {
-			if ( mb_strlen( $string ) > $limit ) {
-				$string = mb_strimwidth( $string, 0, $str_limit ) . '...';
+			if ( mb_strlen( $arg ) > $limit ) {
+				$arg = mb_strimwidth( $arg, 0, $str_limit ) . '...';
 			}
-		} elseif ( strlen( $string ) > $limit ) {
-				$string = substr( $string, 0, $str_limit ) . '...';
+		} elseif ( strlen( $arg ) > $limit ) {
+				$arg = substr( $arg, 0, $str_limit ) . '...';
 		}
-		return $string;
+		return $arg;
 	}
 }

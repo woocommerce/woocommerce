@@ -592,11 +592,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function process_payment( $order_id ) {
 		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
-		$order          = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( $this->should_use_orders_v2() ) {
 			$paypal_request = new PayPalRequest( $this );
-			$paypal_order = $paypal_request->create_paypal_order( $order );
+			$paypal_order   = $paypal_request->create_paypal_order( $order );
 			if ( ! $paypal_order || empty( $paypal_order['id'] ) || empty( $paypal_order['redirect_url'] ) ) {
 				throw new Exception(
 					esc_html__( 'We are unable to process your PayPal payment at this time. Please try again or use a different payment method.', 'woocommerce' )
