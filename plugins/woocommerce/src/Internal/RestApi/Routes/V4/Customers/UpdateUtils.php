@@ -122,7 +122,7 @@ final class UpdateUtils {
 		$additional_fields = $this->get_additional_fields();
 
 		foreach ( $additional_fields as $field_name => $field_options ) {
-			if ( ! $field_options['update_callback'] ) {
+			if ( ! $field_options['update_callback'] || ! is_callable( $field_options['update_callback'] ) ) {
 				continue;
 			}
 
