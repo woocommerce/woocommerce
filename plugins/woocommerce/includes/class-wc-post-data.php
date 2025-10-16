@@ -617,6 +617,7 @@ class WC_Post_Data {
 		if ( ! empty( $visibility_tt_ids['outofstock'] ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['outofstock'];
 		}
+
 		if ( ! empty( array_intersect( $modified_tt_ids, $tt_ids_modifying_term_counts ) ) ) {
 			_wc_recount_terms_by_product( $object_id );
 		}
