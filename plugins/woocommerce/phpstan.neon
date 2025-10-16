@@ -1,0 +1,32 @@
+parameters:
+	# Analysis level (0-9, 9 being strictest)
+	level: 0
+
+	# PHP version to analyze for
+	phpVersion: 80400
+
+	# Paths to analyze
+	paths:
+		- woocommerce.php
+		- src/
+		- includes/
+
+	# Exclude paths from analysis
+	excludePaths:
+		- includes/legacy/
+		- includes/libraries/
+		- includes/class-wc-geo-ip.php
+		- vendor/
+
+	# Bootstrap files
+	bootstrapFiles:
+		- vendor/autoload.php
+
+	# Treat PHPDoc types as certain
+	treatPhpDocTypesAsCertain: false
+
+	# Ignore specific errors
+	ignoreErrors:
+		# Allow missing type hints for array values - this is common in WP/WC code
+		- identifier: missingType.iterableValue
+

@@ -1,0 +1,3943 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 3
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^@param WC_Order \$order does not accept actual type of parameter\: \$this\(WC_Abstract_Order\)\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 4
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Access to an undefined property WC_Abstract_Order\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 13
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Access to an undefined property WC_Abstract_Order\:\:\$object_read\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_city\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_country\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_email\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_postcode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_billing_state\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_customer_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_data_store\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 17
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_meta\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_meta_data\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 18
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_shipping_city\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_shipping_country\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_shipping_postcode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_shipping_state\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:legacy_set_total\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Abstract_Order\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 14
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^WC_Abstract_Order\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Abstract_Order does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 7
+			path: includes/abstracts/abstract-wc-payment-gateway.php
+
+		-
+			message: '#^Expected 3 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/abstracts/abstract-wc-payment-gateway.php
+
+		-
+			message: '#^Access to an undefined property WC_Payment_Token\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^WC_Payment_Token\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Payment_Token does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/abstracts/abstract-wc-payment-token.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 6
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Access to an undefined property WC_Product\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 5
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:get_changes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 16
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:get_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 54
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Call to an undefined method WC_Product\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 50
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^WC_Product\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Product does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^WC_Product\:\:delete\(\) calls parent\:\:delete\(\) but WC_Product does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/abstracts/abstract-wc-product.php
+
+		-
+			message: '#^Method WC_Settings_API\:\:generate_settings_html\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/abstracts/abstract-wc-settings-api.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/abstracts/abstract-wc-shipping-method.php
+
+		-
+			message: '#^Access to an undefined property \$this\(WC_Background_Process\)\:\:\$identifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Process\:\:\$cron_hook_identifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Process\:\:\$identifier\.$#'
+			identifier: property.notFound
+			count: 5
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:complete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:dispatch\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:lock_process\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:memory_exceeded\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:task\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:time_exceeded\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:unlock_process\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Process\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/abstracts/class-wc-background-process.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/admin/class-wc-admin-attributes.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: includes/admin/class-wc-admin-marketplace-promotions.php
+
+		-
+			message: '#^Found usage of constant DOING_CRON\. Use wp_doing_cron\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: includes/admin/class-wc-admin-marketplace-promotions.php
+
+		-
+			message: '#^Action callback returns int but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/admin/class-wc-admin-post-types.php
+
+		-
+			message: '#^Action callback returns WP_Error\|false but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/admin/helper/class-wc-helper-updater.php
+
+		-
+			message: '#^Action callback returns object but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: includes/admin/helper/class-wc-helper-updater.php
+
+		-
+			message: '#^@param int \$product_id does not accept actual type of parameter\: string\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: includes/admin/helper/class-wc-helper.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''Variant SKU'' \(''Variant SKU'', ''Variant SKU''\)\.$#'
+			identifier: array.duplicateKey
+			count: 1
+			path: includes/admin/importers/mappings/shopify.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/admin/marketplace-suggestions/class-wc-marketplace-suggestions.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 5
+			path: includes/admin/meta-boxes/class-wc-meta-box-order-data.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: includes/admin/meta-boxes/views/html-product-data-inventory.php
+
+		-
+			message: '#^Calling self\:\:get_product_data_tabs\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 1
+			path: includes/admin/meta-boxes/views/html-product-data-panel.php
+
+		-
+			message: '#^Calling self\:\:get_product_type_options\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 1
+			path: includes/admin/meta-boxes/views/html-product-data-panel.php
+
+		-
+			message: '#^Calling self\:\:output_tabs\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 1
+			path: includes/admin/meta-boxes/views/html-product-data-panel.php
+
+		-
+			message: '#^Calling self\:\:output_variations\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 1
+			path: includes/admin/meta-boxes/views/html-product-data-panel.php
+
+		-
+			message: '#^Action callback returns WP_User_Query but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/admin/reports/class-wc-report-customer-list.php
+
+		-
+			message: '#^Expected 0 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/admin/settings/class-wc-settings-payment-gateways.php
+
+		-
+			message: '#^Calling self\:\:output_plugins_info\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 2
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Calling self\:\:output_tables_info\(\) outside of class scope\.$#'
+			identifier: outOfClass.self
+			count: 1
+			path: includes/admin/views/html-admin-page-status-report.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Emailer\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Emailer\:\:\$cron_hook_identifier\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Emailer\:\:\$cron_interval_identifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Emailer\:\:\$data\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Emailer\:\:\$prefix\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method \$this\(WC_Background_Emailer\)\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:complete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:delete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:dispatch\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:lock_process\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:memory_exceeded\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:time_exceeded\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:unlock_process\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Emailer\:\:update\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:__construct\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-background-emailer.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Updater\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Updater\:\:\$cron_hook_identifier\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Updater\:\:\$cron_interval_identifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Access to an undefined property WC_Background_Updater\:\:\$prefix\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Updater\:\:clear_scheduled_event\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Updater\:\:is_process_running\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined method WC_Background_Updater\:\:memory_exceeded\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:__construct\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:complete\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:dispatch\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-background-updater.php
+
+		-
+			message: '#^@param string \$brand_output does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-brands.php
+
+		-
+			message: '#^Action callback returns WC_Product but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-brands.php
+
+		-
+			message: '#^Method WC_Brands\:\:duplicate_store_temporary_brands\(\) should return WC_Product but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/class-wc-brands.php
+
+		-
+			message: '#^Action callback returns array\<string, string\> but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-cache-helper.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-cart-fees.php
+
+		-
+			message: '#^@param bool \$session does not accept actual type of parameter\: \$this\(WC_Cart_Session\)\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-cart-session.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Access to an undefined property WC_Cart\:\:\$coupon_discount_tax_totals\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Access to an undefined property WC_Cart\:\:\$coupon_discount_totals\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Access to an undefined property WC_Cart\:\:\$shipping_tax_total\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Access to an undefined property WC_Cart\:\:\$shipping_total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: includes/class-wc-cart.php
+
+		-
+			message: '#^Method WC_Checkout\:\:__get\(\) should return array\|string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/class-wc-checkout.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-checkout.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-wc-cli.php
+
+		-
+			message: '#^Call to static method add_hook\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 10
+			path: includes/class-wc-cli.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: includes/class-wc-comments.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-comments.php
+
+		-
+			message: '#^Access to an undefined property WC_Coupon\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 27
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 21
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Call to an undefined method WC_Coupon\:\:set_props\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^WC_Coupon\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Coupon does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^WC_Coupon\:\:get_data\(\) calls parent\:\:get_data\(\) but WC_Coupon does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/class-wc-coupon.php
+
+		-
+			message: '#^Access to an undefined property WC_Customer\:\:\$changes\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Access to an undefined property WC_Customer\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 5
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Access to an undefined property WC_Customer\:\:\$object_read\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:get_hook_prefix\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 11
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^Call to an undefined method WC_Customer\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 9
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^WC_Customer\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Customer does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/class-wc-customer.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-discounts.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-download-handler.php
+
+		-
+			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/class-wc-download-handler.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/class-wc-download-handler.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-emails.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 2
+			path: includes/class-wc-emails.php
+
+		-
+			message: '#^Expected 2 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 3
+			path: includes/class-wc-emails.php
+
+		-
+			message: '#^Expected 4 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 6
+			path: includes/class-wc-emails.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-frontend-scripts.php
+
+		-
+			message: '#^@param string \$geolocation does not accept actual type of parameter\: false\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-geolocation.php
+
+		-
+			message: '#^Class WC_Post_Types referenced with incorrect case\: WC_Post_types\.$#'
+			identifier: class.nameCase
+			count: 2
+			path: includes/class-wc-install.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/class-wc-install.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-logger.php
+
+		-
+			message: '#^Class WC_Abstract_Legacy_Order not found\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/class-wc-order-factory.php
+
+		-
+			message: '#^Call to an undefined method \$this\(WC_Order_Item\)\:\:set_taxes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order-item.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order-item.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Item\:\:set_taxes\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-order-item.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Refund\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/class-wc-order-refund.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Refund\:\:populate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order-refund.php
+
+		-
+			message: '#^Call to an undefined method WC_Order_Refund\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/class-wc-order-refund.php
+
+		-
+			message: '#^Call to an undefined static method WC_Abstract_Order\:\:__get\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-order-refund.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 6
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Access to an undefined property WC_Order\:\:\$changes\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Access to an undefined property WC_Order\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 5
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Access to an undefined property WC_Order\:\:\$object_read\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:get_hook_prefix\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 40
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:get_meta_data\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 17
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined method WC_Order\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 16
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Call to an undefined static method WC_Abstract_Order\:\:get_changes\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Expected 3 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: includes/class-wc-order.php
+
+		-
+			message: '#^Expected 4 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/class-wc-post-data.php
+
+		-
+			message: '#^Function as_next_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/class-wc-post-data.php
+
+		-
+			message: '#^Class WC_Post_Types referenced with incorrect case\: WC_Post_types\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: includes/class-wc-post-types.php
+
+		-
+			message: '#^Access to an undefined property WC_Privacy_Background_Process\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-privacy-background-process.php
+
+		-
+			message: '#^Access to an undefined property WC_Privacy_Background_Process\:\:\$prefix\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-privacy-background-process.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:__construct\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-privacy-background-process.php
+
+		-
+			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Customer\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-privacy-exporters.php
+
+		-
+			message: '#^Expected 1 @param tags, found 4\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/class-wc-privacy.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_External\:\:error\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-product-external.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_External\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-product-external.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_External\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/class-wc-product-external.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Grouped\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-product-grouped.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Grouped\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-product-grouped.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-product-simple.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Simple\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-product-simple.php
+
+		-
+			message: '#^@param WC_Product_Variation \$variation does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-product-variable.php
+
+		-
+			message: '#^Access to an undefined property WC_Product_Variable\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 11
+			path: includes/class-wc-product-variable.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Variable\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-product-variable.php
+
+		-
+			message: '#^Call to an undefined static method WC_Product_Variable\:\:sync_attributes\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-product-variable.php
+
+		-
+			message: '#^Access to an undefined property WC_Product_Variation\:\:\$changes\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-product-variation.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Variation\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/class-wc-product-variation.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Variation\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 13
+			path: includes/class-wc-product-variation.php
+
+		-
+			message: '#^Call to an undefined method WC_Product_Variation\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-product-variation.php
+
+		-
+			message: '#^Call to static method get_value\(\) on an unknown class WPSEO_Meta\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/class-wc-query.php
+
+		-
+			message: '#^Access to an undefined property WC_Regenerate_Images_Request\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-regenerate-images-request.php
+
+		-
+			message: '#^Access to an undefined property WC_Regenerate_Images_Request\:\:\$prefix\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/class-wc-regenerate-images-request.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:__construct\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-regenerate-images-request.php
+
+		-
+			message: '#^Call to an undefined static method WC_Background_Process\:\:complete\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/class-wc-regenerate-images-request.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: includes/class-wc-regenerate-images.php
+
+		-
+			message: '#^Call to static method is_module_active\(\) on an unknown class Jetpack\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/class-wc-regenerate-images.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 10
+			path: includes/class-wc-shipping-rate.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Access to an undefined property WC_Shipping_Zone\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 10
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 15
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:get_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^Call to an undefined method WC_Shipping_Zone\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 5
+			path: includes/class-wc-shipping-zone.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-shipping.php
+
+		-
+			message: '#^@param bool \$force_rendering does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-wc-shortcodes.php
+
+		-
+			message: '#^Method WC_Template_Loader\:\:comments_template_loader\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/class-wc-template-loader.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Access to an undefined property WC_Webhook\:\:\$data_store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Action callback returns mixed but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 20
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 11
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:save\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:set_date_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:set_id\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:set_object_read\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^Call to an undefined method WC_Webhook\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 9
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^WC_Webhook\:\:__construct\(\) calls parent\:\:__construct\(\) but WC_Webhook does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/class-wc-webhook.php
+
+		-
+			message: '#^@param int \$limit does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Function as_next_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Function as_unschedule_all_actions not found\.$#'
+			identifier: function.notFound
+			count: 6
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Method WooCommerce\:\:is_request\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Undefined variable\: \$site_url$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Call to static method confirm\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\get_flag_value not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Instantiated class WP_CLI\\Formatter not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-command.php
+
+		-
+			message: '#^Access to an undefined property WC_CLI_COM_Extension_Command\:\:\$item_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-extension-command.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-extension-command.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-extension-command.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\report_batch_operation_results not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-com-extension-command.php
+
+		-
+			message: '#^WC_CLI_COM_Extension_Command\:\:install\(\) calls parent\:\:install\(\) but WC_CLI_COM_Extension_Command does not extend any class\.$#'
+			identifier: class.noParent
+			count: 1
+			path: includes/cli/class-wc-cli-com-extension-command.php
+
+		-
+			message: '#^Access to an undefined property WC_CLI_REST_Command\:\:\$api_url\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method debug\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method get_config\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method line\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\get_flag_value not found\.$#'
+			identifier: function.notFound
+			count: 3
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Instantiated class WP_CLI\\Formatter not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-rest-command.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-runner.php
+
+		-
+			message: '#^Call to static method debug\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-runner.php
+
+		-
+			message: '#^Call to static method get_config\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-runner.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-tool-command.php
+
+		-
+			message: '#^Call to static method get_config\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-tool-command.php
+
+		-
+			message: '#^Undefined variable\: \$command_args$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/cli/class-wc-cli-tool-command.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-tracker-command.php
+
+		-
+			message: '#^Instantiated class WP_CLI\\Formatter not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/cli/class-wc-cli-tracker-command.php
+
+		-
+			message: '#^Class WP_CLI not found\.$#'
+			identifier: class.notFound
+			count: 4
+			path: includes/cli/class-wc-cli-update-command.php
+
+		-
+			message: '#^Method Abstract_WC_Order_Item_Type_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/data-stores/abstract-wc-order-item-type-data-store.php
+
+		-
+			message: '#^Method WC_Coupon_Data_Store_CPT\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/data-stores/class-wc-coupon-data-store-cpt.php
+
+		-
+			message: '#^Method WC_Customer_Data_Store_Session\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/data-stores/class-wc-customer-data-store-session.php
+
+		-
+			message: '#^Method WC_Customer_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/data-stores/class-wc-customer-data-store.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/data-stores/class-wc-customer-data-store.php
+
+		-
+			message: '#^Call to an undefined static method WC_Order\:\:generate_meta_cache_key\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/data-stores/class-wc-order-data-store-cpt.php
+
+		-
+			message: '#^Call to an undefined static method WC_Order\:\:prime_raw_meta_data_cache\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: includes/data-stores/class-wc-order-data-store-cpt.php
+
+		-
+			message: '#^Expected 3 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/data-stores/class-wc-order-data-store-cpt.php
+
+		-
+			message: '#^@param WC_Order_Refund \$refund does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/data-stores/class-wc-order-refund-data-store-cpt.php
+
+		-
+			message: '#^Method WC_Payment_Token_Data_Store\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/data-stores/class-wc-payment-token-data-store.php
+
+		-
+			message: '#^@param int \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: includes/data-stores/class-wc-product-data-store-cpt.php
+
+		-
+			message: '#^Method WC_Product_Data_Store_CPT\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/data-stores/class-wc-product-data-store-cpt.php
+
+		-
+			message: '#^@param array \$package does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/data-stores/class-wc-shipping-zone-data-store.php
+
+		-
+			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
+			identifier: arguments.count
+			count: 1
+			path: includes/emails/class-wc-email-customer-pos-completed-order.php
+
+		-
+			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
+			identifier: arguments.count
+			count: 1
+			path: includes/emails/class-wc-email-customer-pos-refunded-order.php
+
+		-
+			message: '#^@param string \$email does not accept actual type of parameter\: \$this\(WC_Email\)\.$#'
+			identifier: parameter.phpDocType
+			count: 4
+			path: includes/emails/class-wc-email.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 5
+			path: includes/emails/class-wc-email.php
+
+		-
+			message: '#^Action callback returns PHPMailer but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/emails/class-wc-email.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/emails/class-wc-email.php
+
+		-
+			message: '#^Method WC_Email\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/emails/class-wc-email.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/gateways/bacs/class-wc-gateway-bacs.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/gateways/cheque/class-wc-gateway-cheque.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/gateways/cod/class-wc-gateway-cod.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/gateways/cod/class-wc-gateway-cod.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/gateways/paypal/class-wc-gateway-paypal.php
+
+		-
+			message: '#^Found usage of constant DOING_AJAX\. Use wp_doing_ajax\(\) instead\.$#'
+			identifier: phpstanWP.wpConstant.fetch
+			count: 1
+			path: includes/gateways/paypal/class-wc-gateway-paypal.php
+
+		-
+			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: includes/import/abstract-wc-product-importer.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/integrations/maxmind-geolocation/class-wc-integration-maxmind-geolocation.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/log-handlers/class-wc-log-handler-email.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token_CC\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/payment-tokens/class-wc-payment-token-cc.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token_CC\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 4
+			path: includes/payment-tokens/class-wc-payment-token-cc.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token_ECheck\:\:get_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/payment-tokens/class-wc-payment-token-echeck.php
+
+		-
+			message: '#^Call to an undefined method WC_Payment_Token_ECheck\:\:set_prop\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/payment-tokens/class-wc-payment-token-echeck.php
+
+		-
+			message: '#^Function as_get_scheduled_actions not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_next_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_schedule_cron_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_unschedule_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Function as_unschedule_all_actions not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/queue/class-wc-action-queue.php
+
+		-
+			message: '#^Call to static method update_db_version\(\) on an unknown class Installer\.$#'
+			identifier: class.notFound
+			count: 2
+			path: includes/react-admin/wc-admin-update-functions.php
+
+		-
+			message: '#^Function as_unschedule_action not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: includes/react-admin/wc-admin-update-functions.php
+
+		-
+			message: '#^@param stdObject \$attribute does not accept actual type of parameter\: stdClass\.$#'
+			identifier: parameter.phpDocType
+			count: 3
+			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-attributes-v1-controller.php
+
+		-
+			message: '#^@param WP_Post \$product_review does not accept actual type of parameter\: WP_Comment\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version1/class-wc-rest-product-reviews-v1-controller.php
+
+		-
+			message: '#^Function set_product_images not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
+
+		-
+			message: '#^@param WC_Data \$coupon does not accept actual type of parameter\: WC_Coupon\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-coupons-v2-controller.php
+
+		-
+			message: '#^@param WC_Data \$coupon does not accept actual type of parameter\: WC_Order_Refund\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-refunds-v2-controller.php
+
+		-
+			message: '#^@param WC_Data \$order does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
+
+		-
+			message: '#^@param WC_Data \$variation does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-product-variations-v2-controller.php
+
+		-
+			message: '#^@param WC_Data \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_Products_V2_Controller\:\:\$request\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_System_Status_V2_Controller\:\:\$available_updates\.$#'
+			identifier: property.notFound
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
+
+		-
+			message: '#^@param WP_Post_Type \$post_type does not accept actual type of parameter\: string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-crud-controller.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-data-continents-controller.php
+
+		-
+			message: '#^@param array \$data does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-data-countries-controller.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-data-currencies-controller.php
+
+		-
+			message: '#^@param WC_Data \$coupon does not accept actual type of parameter\: WC_Order_Refund\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-order-refunds-controller.php
+
+		-
+			message: '#^@param WC_Data \$order does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-orders-controller.php
+
+		-
+			message: '#^@param string \$allowed_query_var does not accept actual type of parameter\: non\-empty\-array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-posts-controller.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-posts-controller.php
+
+		-
+			message: '#^@param stdObject \$attribute does not accept actual type of parameter\: stdClass\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-attributes-controller.php
+
+		-
+			message: '#^@param WC_Data \$variation does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
+			message: '#^@param WC_Data \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_Terms_Controller\:\:\$sort_column\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_Terms_Controller\:\:\$total_terms\.$#'
+			identifier: property.notFound
+			count: 3
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
+
+		-
+			message: '#^@param WC_Data \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/rest-api/Controllers/Version4/Products/class-wc-rest-products-v4-controller.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: includes/rest-api/Server.php
+
+		-
+			message: '#^Undefined variable\: \$images$#'
+			identifier: variable.undefined
+			count: 1
+			path: includes/rest-api/Utilities/ImageAttachment.php
+
+		-
+			message: '#^Access to static property \$last_error on an unknown class WC_Eval_Math\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
+
+		-
+			message: '#^Call to static method evaluate\(\) on an unknown class WC_Eval_Math\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/shipping/flat-rate/class-wc-shipping-flat-rate.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/free-shipping/class-wc-shipping-free-shipping.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/legacy-flat-rate/class-wc-shipping-legacy-flat-rate.php
+
+		-
+			message: '#^Call to static method evaluate\(\) on an unknown class WC_Eval_Math\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/shipping/legacy-flat-rate/class-wc-shipping-legacy-flat-rate.php
+
+		-
+			message: '#^Method WC_Shipping_Legacy_Flat_Rate\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/shipping/legacy-flat-rate/class-wc-shipping-legacy-flat-rate.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php
+
+		-
+			message: '#^Method WC_Shipping_Legacy_Free_Shipping\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/shipping/legacy-free-shipping/class-wc-shipping-legacy-free-shipping.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/legacy-international-delivery/class-wc-shipping-legacy-international-delivery.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/legacy-local-delivery/class-wc-shipping-legacy-local-delivery.php
+
+		-
+			message: '#^Method WC_Shipping_Legacy_Local_Delivery\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/shipping/legacy-local-delivery/class-wc-shipping-legacy-local-delivery.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/legacy-local-pickup/class-wc-shipping-legacy-local-pickup.php
+
+		-
+			message: '#^Method WC_Shipping_Legacy_Local_Pickup\:\:process_admin_options\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/shipping/legacy-local-pickup/class-wc-shipping-legacy-local-pickup.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shipping/local-pickup/class-wc-shipping-local-pickup.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/shortcodes/class-wc-shortcode-products.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/shortcodes/class-wc-shortcode-products.php
+
+		-
+			message: '#^Function jetpack_require_lib_dir not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: includes/tracks/class-wc-tracks-client.php
+
+		-
+			message: '#^Result of method WC_Importer_Tracking\:\:track_product_importer_complete\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: includes/tracks/events/class-wc-importer-tracking.php
+
+		-
+			message: '#^Result of method WC_Importer_Tracking\:\:track_product_importer_start\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: includes/tracks/events/class-wc-importer-tracking.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: includes/tracks/events/class-wc-products-tracking.php
+
+		-
+			message: '#^Function wc_cart_totals_coupon_label\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-cart-functions.php
+
+		-
+			message: '#^Action callback returns int but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/wc-core-functions.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/wc-core-functions.php
+
+		-
+			message: '#^@param float \$formatted_price does not accept actual type of parameter\: string\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/wc-formatting-functions.php
+
+		-
+			message: '#^Function wc_get_filename_from_url\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-formatting-functions.php
+
+		-
+			message: '#^@param WC_Order_Item_Product \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
+			identifier: parameter.phpDocType
+			count: 3
+			path: includes/wc-stock-functions.php
+
+		-
+			message: '#^@param int \$product does not accept actual type of parameter\: WC_Product\|false\|null\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: includes/wc-stock-functions.php
+
+		-
+			message: '#^Action callback returns WC_Product but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 2
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Expected 4 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function get_product_search_form\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function wc_query_string_form_fields\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function woocommerce_form_field\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function woocommerce_page_title\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function woocommerce_product_loop_end\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function woocommerce_product_loop_start\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Function woocommerce_quantity_input\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'
+			identifier: function.inner
+			count: 1
+			path: includes/wc-template-functions.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: includes/wc-term-functions.php
+
+		-
+			message: '#^Inner named functions are not supported by PHPStan\. Consider refactoring to an anonymous function, class method, or a top\-level\-defined function\. See issue \#165 \(https\://github\.com/phpstan/phpstan/issues/165\) for more details\.$#'
+			identifier: function.inner
+			count: 1
+			path: includes/wc-update-functions.php
+
+		-
+			message: '#^@param string \$password_generated does not accept actual type of parameter\: bool\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: includes/wc-user-functions.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: includes/wccom-site/class-wc-wccom-site.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_WCCOM_Site_Installer_Error\:\:\$error_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_WCCOM_Site_Installer_Error\:\:\$error_message\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php
+
+		-
+			message: '#^Access to an undefined property WC_REST_WCCOM_Site_Installer_Error\:\:\$http_code\.$#'
+			identifier: property.notFound
+			count: 2
+			path: includes/wccom-site/rest-api/class-wc-rest-wccom-site-installer-error.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/DataDownloadIPs.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/DataDownloadIPs.php
+
+		-
+			message: '#^Access to an undefined property Automattic\\WooCommerce\\Admin\\API\\Init\:\:\$Automattic\\WooCommerce\\Admin\\API\\LaunchYourStore\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Admin/API/Init.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Admin/API/Init.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Leaderboards.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Leaderboards.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Notes.php
+
+		-
+			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Admin/API/Notice.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/OnboardingProfile.php
+
+		-
+			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Admin/API/ProductAttributeTerms.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_REST_Request \$request does not accept actual type of parameter\: WP_REST_Request\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Categories/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Categories/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Coupons/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_REST_Request \$request does not accept actual type of parameter\: WP_REST_Request\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Controller.php
+
+		-
+			message: '#^@param object \$export_item does not accept actual type of parameter\: array\{name\: mixed, username\: mixed, last_active\: mixed, registered\: mixed, email\: mixed, orders_count\: mixed, total_spend\: string, avg_order_value\: string, \.\.\.\}\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Controller.php
+
+		-
+			message: '#^@param object \$item does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Controller.php
+
+		-
+			message: '#^Action callback returns bool\|int\|null but should not return anything\.$#'
+			identifier: return.void
+			count: 3
+			path: src/Admin/API/Reports/Customers/DataStore.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Admin/API/Reports/Customers/DataStore.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Stats\\WP_REST_Request \$request does not accept actual type of parameter\: WP_REST_Request\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Stats/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\Stats\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Stats/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Customers/Stats/Controller.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:interval_cmp\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 2
+			path: src/Admin/API/Reports/DataStore.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Downloads/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Downloads/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Downloads/Stats/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
+
+		-
+			message: '#^Result of method WC_Object_Query\:\:__construct\(\) \(void\) is used\.$#'
+			identifier: staticMethod.void
+			count: 1
+			path: src/Admin/API/Reports/GenericQuery.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Import\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Import/Controller.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Import/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\WP_REST_Request \$request does not accept actual type of parameter\: WP_REST_Request\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Orders/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Orders/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: non\-empty\-array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Orders/Controller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Orders/Stats/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Orders/Stats/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/PerformanceIndicators/Controller.php
+
+		-
+			message: '#^Access to an undefined property Automattic\\WooCommerce\\Admin\\API\\Reports\\PerformanceIndicators\\Controller\:\:\$formats\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Admin/API/Reports/PerformanceIndicators/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Products/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Products/Stats/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Products/Stats/DataStore.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Revenue/Stats/Controller.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:get_order_related_segments\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/API/Reports/Segmenter.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:get_product_related_segments\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/API/Reports/Segmenter.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:segment_cmp\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/API/Reports/Segmenter.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Stock\\Stats\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Stock/Stats/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Variations/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Variations/Controller.php
+
+		-
+			message: '#^@param object \$report does not accept actual type of parameter\: array\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Reports/Variations/Stats/Controller.php
+
+		-
+			message: '#^Cannot unset property Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:\$subquery because it might have hooks in a subclass\.$#'
+			identifier: unset.possiblyHookedProperty
+			count: 1
+			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Themes.php
+
+		-
+			message: '#^@param array \$item does not accept actual type of parameter\: object\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/API/Themes.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Admin/Features/Blueprint/Init.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Admin/Features/LaunchYourStore.php
+
+		-
+			message: '#^Action callback returns string but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:get_deprecated_options\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\DeprecatedOptions\:\:update_deprecated_options\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/DeprecatedOptions.php
+
+		-
+			message: '#^Access to an undefined property Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/Task.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskList\:\:get_parent_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/TaskList.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\TaskLists\:\:add_task\(\) should return Automattic\\WooCommerce\\Admin\\Features\\OnboardingTasks\\Task\|WP_Error but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/TaskLists.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/TaskLists.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Admin/Features/OnboardingTasks/Tasks/Appearance.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Admin/Features/PaymentGatewaySuggestions/Init.php
+
+		-
+			message: '#^Class Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\Init referenced with incorrect case\: Automattic\\WooCommerce\\Admin\\Features\\ProductBlockEditor\\INIT\.$#'
+			identifier: class.nameCase
+			count: 1
+			path: src/Admin/Features/ProductBlockEditor/BlockRegistry.php
+
+		-
+			message: '#^Action callback returns string but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Admin/Features/ProductBlockEditor/Init.php
+
+		-
+			message: '#^Cannot unset offset array on array\.$#'
+			identifier: unset.offset
+			count: 1
+			path: src/Admin/Features/TransientNotices.php
+
+		-
+			message: '#^Function Pinterest_For_Woocommerce not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Admin/Marketing/InstalledExtensions.php
+
+		-
+			message: '#^@param int \$note_id does not accept actual type of parameter\: Automattic\\WooCommerce\\Admin\\Notes\\Note\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: src/Admin/Notes/DataStore.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\Notes\\DataStore\:\:delete\(\) should return bool but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/Notes/DataStore.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\Overrides\\Order\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Admin/Overrides/Order.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Admin\\Overrides\\Order\:\:get_meta_data\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Admin/Overrides/Order.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: WP_Screen\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/PageController.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Admin\\WP_Screen \$current_screen does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Admin/PageController.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Admin/PluginsHelper.php
+
+		-
+			message: '#^Action callback returns array\|WP_Error but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Admin/PluginsHelper.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Admin/PluginsHelper.php
+
+		-
+			message: '#^Instantiated class ActionScheduler_DBStore not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Admin/PluginsHelper.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\PluginsInstallLoggers\\AsyncPluginsInstallLogger\:\:get_timeframe\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Admin/PluginsInstallLoggers/AsyncPluginsInstallLogger.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 3
+			path: src/Admin/RemoteSpecs/DataSourcePoller.php
+
+		-
+			message: '#^Function as_enqueue_async_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Admin/RemoteSpecs/RuleProcessors/StoredStateSetupForProducts.php
+
+		-
+			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Admin/ReportExporter.php
+
+		-
+			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Admin/ReportExporter.php
+
+		-
+			message: '#^Expected 3 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Admin/ReportExporter.php
+
+		-
+			message: '#^Action callback returns array\|string but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: src/Blocks/AssetsController.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Blocks/BlockTemplatesController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:register_block_type\(\) should return array\<string\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/BlockTypes/AbstractBlock.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractInnerBlock\:\:register_block_type\(\) should return array\<string\> but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/AbstractProductGrid.php
+
+		-
+			message: '#^@param array \$data does not accept actual type of parameter\: object\{permalink\: string, image\: string, title\: string, rating\: string, price\: string, badge\: string, button\: string\}&stdClass\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/AbstractProductGrid.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/AddToCartWithOptions.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductItemSelector.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Blocks/BlockTypes/ComingSoon.php
+
+		-
+			message: '#^Undefined variable\: \$attributes$#'
+			identifier: variable.undefined
+			count: 1
+			path: src/Blocks/BlockTypes/MiniCart.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/OrderConfirmation/AbstractOrderConfirmationBlock.php
+
+		-
+			message: '#^Callback expects 3 parameters, \$accepted_args is set to 4\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Blocks/BlockTypes/OrderConfirmation/CreateAccount.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\OrderConfirmation\\WC_Order\|false \$order does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/OrderConfirmation/Status.php
+
+		-
+			message: '#^Expected 3 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Blocks/BlockTypes/ProductButton.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Blocks/BlockTypes/ProductDetails.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductPrice\:\:render\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/BlockTypes/ProductPrice.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductRatingStars\:\:render\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/BlockTypes/ProductRatingStars.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/BlockTypes/ProductSaleBadge.php
+
+		-
+			message: '#^Class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Blocks/BlockTypes/ProductStockIndicator.php
+
+		-
+			message: '#^Expected 1 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewForm.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Blocks/BlockTypesController.php
+
+		-
+			message: '#^@param WC_Customer\|WC_Order \$wc_object does not accept actual type of parameter\: WC_Data\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Blocks/Domain/Services/CheckoutFields.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Blocks/Domain/Services/CheckoutFields.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Blocks/Domain/Services/DraftOrders.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Blocks/Domain/Services/DraftOrders.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Blocks\\Domain\\Services\\WP_REST_Request \$request does not accept actual type of parameter\: WP_REST_Request\<array\>\.$#'
+			identifier: parameter.phpDocType
+			count: 2
+			path: src/Blocks/Domain/Services/Hydration.php
+
+		-
+			message: '#^@param tag must not be named \$this\. Choose a descriptive alias, for example \$instance\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Blocks/Integrations/IntegrationRegistry.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 3
+			path: src/Blocks/Patterns/PTKPatternsStore.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Blocks/Patterns/PTKPatternsStore.php
+
+		-
+			message: '#^Action callback returns bool but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Blocks/Shipping/ShippingController.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Blocks/Templates/ProductSearchResultsTemplate.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\SingleProductTemplateCompatibility\:\:inject_hook_to_first_and_last_blocks\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/Templates/SingleProductTemplateCompatibility.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Blocks\\Utils\\CartCheckoutUtils\:\:find_express_checkout_attributes_in_parsed_blocks\(\) should return array but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Blocks/Utils/CartCheckoutUtils.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Caches/OrderCountCacheService.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Checkout/Helpers/ReserveStock.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order_Item_Product \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Checkout/Helpers/ReserveStock.php
+
+		-
+			message: '#^Template type T of method Automattic\\WooCommerce\\Container\:\:get\(\) is not referenced in a parameter\.$#'
+			identifier: method.templateTypeNotInParameter
+			count: 1
+			path: src/Container.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 10
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method colorize\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method debug\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 5
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 17
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 15
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 10
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 23
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\format_items not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\make_progress_bar not found\.$#'
+			identifier: function.notFound
+			count: 3
+			path: src/Database/Migrations/CustomOrderTable/CLIRunner.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\AddressProvider\\AbstractAutomatticAddressProvider\:\:get_jwt_cache_duration\(\) should return int but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Internal/AddressProvider/AbstractAutomatticAddressProvider.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\Admin\\BlockTemplates\\AbstractBlockTemplate\:\:get_attributes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Internal/Admin/BlockTemplates/AbstractBlockTemplate.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\Admin\\BlockTemplates\\AbstractBlockTemplate\:\:get_disable_conditions\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Internal/Admin/BlockTemplates/AbstractBlockTemplate.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\Admin\\BlockTemplates\\AbstractBlockTemplate\:\:get_hide_conditions\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Internal/Admin/BlockTemplates/AbstractBlockTemplate.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\Admin\\BlockTemplates\\AbstractBlockTemplate\:\:get_name\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Internal/Admin/BlockTemplates/AbstractBlockTemplate.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\Admin\\BlockTemplates\\AbstractBlockTemplate\:\:get_order\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Internal/Admin/BlockTemplates/AbstractBlockTemplate.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/CategoryLookup.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/Admin/Coupons.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 6
+			path: src/Internal/Admin/CustomerEffortScoreTracks.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/EmailPreview/EmailPreview.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Events.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/FeaturePlugin.php
+
+		-
+			message: '#^Call to static method allow_suggestions\(\) on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\WC_Marketplace_Suggestions\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Loader.php
+
+		-
+			message: '#^Call to static method get_active_plugins\(\) on an unknown class Automattic\\WooCommerce\\Internal\\Admin\\Plugins\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Loader.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/Admin/Notes/NewSalesRecord.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/Admin/Notes/OrderMilestones.php
+
+		-
+			message: '#^Class Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WC_Admin_Note not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Notes/UnsecuredReportFiles.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Onboarding\\OnboardingFonts\:\:start_install_fonts_async_job\(\) should return string but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingFonts.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingHelper.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 2
+			path: src/Internal/Admin/Onboarding/OnboardingJetpack.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingJetpack.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingMailchimp.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingSetupWizard.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/Onboarding/OnboardingSync.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/Admin/Orders/Edit.php
+
+		-
+			message: '#^Expected 3 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Internal/Admin/Orders/ListTable.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Internal/Admin/Orders/ListTable.php
+
+		-
+			message: '#^Action callback returns string but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/Admin/Orders/PageController.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Internal/Admin/ProductForm/FormFactory.php
+
+		-
+			message: '#^@param array \$count does not accept actual type of parameter\: int\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/Admin/ProductReviews/Reviews.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/Admin/ProductReviews/ReviewsListTable.php
+
+		-
+			message: '#^Access to an undefined static property static\(Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\)\:\:\$name\.$#'
+			identifier: staticProperty.notFound
+			count: 13
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:delete\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Call to an undefined static method Automattic\\WooCommerce\\Internal\\Admin\\Schedulers\\ImportScheduler\:\:import\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Call to static method instance\(\) on an unknown class ActionScheduler_Versions\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Call to static method store\(\) on an unknown class ActionScheduler\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Expected 3 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Internal/Admin/Schedulers/ImportScheduler.php
+
+		-
+			message: '#^Access to constant SANDBOX on an unknown class WooCommerce\\PayPalCommerce\\Onboarding\\Environment\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
+
+		-
+			message: '#^Access to constant STATE_ONBOARDED on an unknown class WooCommerce\\PayPalCommerce\\Onboarding\\State\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
+
+		-
+			message: '#^Access to constant FROM_WCADMIN_PAYMENTS_SETTINGS on an unknown class WC_Payments_Onboarding_Service\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
+
+		-
+			message: '#^Access to constant SOURCE_WCADMIN_SETTINGS_PAGE on an unknown class WC_Payments_Onboarding_Service\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
+
+		-
+			message: '#^Callback expects 0 parameters, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/Admin/ShippingLabelBanner.php
+
+		-
+			message: '#^Used function WP_CLI\\Utils\\get_plugin_name not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/Admin/ShippingLabelBanner.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
+			message: '#^Function as_has_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 2
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
+			message: '#^Function as_unschedule_all_actions not found\.$#'
+			identifier: function.notFound
+			count: 3
+			path: src/Internal/BatchProcessing/BatchProcessingController.php
+
+		-
+			message: '#^Call to static method line\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/ListCommand.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\format_items not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/ListCommand.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Internal/CLI/Migrator/Commands/ProductsCommand.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Internal/CLI/Migrator/Commands/ProductsCommand.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Internal/CLI/Migrator/Commands/ProductsCommand.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/ResetCommand.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/ResetCommand.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/SetupCommand.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Commands/SetupCommand.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/CredentialManager.php
+
+		-
+			message: '#^Call to static method line\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/CredentialManager.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/CredentialManager.php
+
+		-
+			message: '#^Call to static method readline\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/CredentialManager.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Internal/CLI/Migrator/Core/PlatformRegistry.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/PlatformRegistry.php
+
+		-
+			message: '#^Call to static method colorize\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 9
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method line\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 34
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method out\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 7
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\make_progress_bar not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/ProductsController.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Core/WooCommerceProductImporter.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Internal/CLI/Migrator/Core/WooCommerceProductImporter.php
+
+		-
+			message: '#^Function get_all_post_meta_flat not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Lib/ImportSession.php
+
+		-
+			message: '#^Used function get_all_post_meta_flat not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Lib/ImportSession.php
+
+		-
+			message: '#^Call to static method debug\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/CLI/Migrator/Platforms/Shopify/ShopifyFetcher.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Internal/CLI/Migrator/Platforms/Shopify/ShopifyFetcher.php
+
+		-
+			message: '#^Call to static method add_command\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Internal/CLI/Migrator/Runner.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Internal/DataStores/Orders/CustomOrdersTableController.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 3
+			path: src/Internal/DataStores/Orders/DataSynchronizer.php
+
+		-
+			message: '#^Function as_schedule_recurring_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/DataStores/Orders/DataSynchronizer.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Internal/DataStores/Orders/DataSynchronizer.php
+
+		-
+			message: '#^Call to an undefined static method WC_Order\:\:generate_meta_cache_key\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Internal/DataStores/Orders/LegacyDataHandler.php
+
+		-
+			message: '#^@param WC_Abstract_Order \$product does not accept actual type of parameter\: WC_Data\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Abstract_Order\.$#'
+			identifier: parameter.phpDocType
+			count: 4
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^@param array\<int\> \$order_ids does not accept actual type of parameter\: array\<WC_Order\>\|stdClass\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^Call to an undefined static method WC_Order\:\:generate_meta_cache_key\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableSearchQuery.php
+
+		-
+			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/DownloadPermissionsAdjuster.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 2\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/EmailEditor/BlockEmailRenderer.php
+
+		-
+			message: '#^Callback expects 2 parameters, \$accepted_args is set to 3\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/Features/FeaturesController.php
+
+		-
+			message: '#^Filter callback return statement is missing\.$#'
+			identifier: return.missing
+			count: 3
+			path: src/Internal/Features/FeaturesController.php
+
+		-
+			message: '#^Method Automattic\\WooCommerce\\Internal\\Font\\FontFace\:\:insert_font_face\(\) should return WP_Error\|WP_Post but return statement is missing\.$#'
+			identifier: return.missing
+			count: 1
+			path: src/Internal/Font/FontFace.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/Integrations/WPPostsImporter.php
+
+		-
+			message: '#^@param string \$default_whitelist does not accept actual type of parameter\: array\{''path'', ''page'', ''step'', ''task'', ''tab'', ''section'', ''status'', ''post_type'', \.\.\.\}\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/Logging/RemoteLogger.php
+
+		-
+			message: '#^Callback expects 2 parameters, \$accepted_args is set to 10\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/Orders/OrderAttributionController.php
+
+		-
+			message: '#^Call to static method colorize\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Call to static method confirm\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 3
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Call to static method log\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 4
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Call to static method success\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 2
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class WP_CLI\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Function WP_CLI\\Utils\\make_progress_bar not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/ProductAttributesLookup/CLIRunner.php
+
+		-
+			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
+
+		-
+			message: '#^Callback expects 1 parameter, \$accepted_args is set to 999\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Internal/ProductAttributesLookup/DataRegenerator.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Internal\\ProductAttributesLookup\\WP_Query \$wp_query does not accept actual type of parameter\: WP_Query\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/ProductAttributesLookup/Filterer.php
+
+		-
+			message: '#^Access to constant STATUS_PENDING on an unknown class ActionScheduler_Store\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Internal/ProductAttributesLookup/LookupDataStore.php
+
+		-
+			message: '#^@param array \$results does not accept actual type of parameter\: null\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/ProductFilters/FilterData.php
+
+		-
+			message: '#^@param string \$line_item_display_data does not accept actual type of parameter\: array\{inner_html\: non\-falsy\-string, tr_attributes\: array\{\}, row_index\: int\<0, max\>\}\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/ReceiptRendering/ReceiptRenderingEngine.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/AbstractController.php
+
+		-
+			message: '#^Access to an undefined property Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\OrderNotes\\Controller\:\:\$collection_query\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Internal/RestApi/Routes/V4/OrderNotes/Controller.php
+
+		-
+			message: '#^Access to an undefined property Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\Controller\:\:\$collection_query\.$#'
+			identifier: property.notFound
+			count: 4
+			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
+
+		-
+			message: '#^Expected 2 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
+
+		-
+			message: '#^Cannot unset offset ''cogs_value'' on array\{id\: int, name\: string, image\: string, product_id\: int, product_data\: array\|null, quantity\: int, price\: mixed, tax_class\: string, \.\.\.\}\.$#'
+			identifier: unset.offset
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Orders/Schema/OrderItemSchema.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\WC_Order_Item \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Orders/UpdateUtils.php
+
+		-
+			message: '#^Action callback returns bool\|void but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/StockNotifications/Admin/MenusController.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/StockNotifications/Emails/EmailManager.php
+
+		-
+			message: '#^Expected 1 @param tags, found 2\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/Internal/TransientFiles/TransientFilesEngine.php
+
+		-
+			message: '#^Function as_has_scheduled_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/TransientFiles/TransientFilesEngine.php
+
+		-
+			message: '#^Function as_schedule_single_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/TransientFiles/TransientFilesEngine.php
+
+		-
+			message: '#^Function as_unschedule_action not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: src/Internal/TransientFiles/TransientFilesEngine.php
+
+		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/Utilities/LegacyRestApiStub.php
+
+		-
+			message: '#^@param bool \$display_notice does not accept actual type of parameter\: ''__return_true''\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/Utilities/PluginInstaller.php
+
+		-
+			message: '#^@param Automattic\\WooCommerce\\Internal\\Utilities\\WC_Order \$order does not accept actual type of parameter\: bool\|WC_Order\|WC_Order_Refund\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: src/Internal/Utilities/Users.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/Internal/Utilities/Users.php
+
+		-
+			message: '#^Expected 2 @param tags, found 3\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/StoreApi/Routes/V1/AbstractCartRoute.php
+
+		-
+			message: '#^Call to an undefined method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Agentic\\CheckoutSessionsComplete\:\:get_request_payment_method\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
+
+		-
+			message: '#^Expected 2 @param tags, found 1\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/StoreApi/Routes/V1/CartAddItem.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/StoreApi/Routes/V1/Checkout.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 1
+			path: src/StoreApi/Routes/V1/CheckoutOrder.php
+
+		-
+			message: '#^Expected 6 @param tags, found 5\.$#'
+			identifier: paramTag.count
+			count: 1
+			path: src/StoreApi/Utilities/CartController.php
+
+		-
+			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
+			identifier: phpDoc.parseError
+			count: 2
+			path: src/StoreApi/Utilities/OrderController.php
+
+		-
+			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
+			identifier: unset.offset
+			count: 1
+			path: src/StoreApi/Utilities/ProductQueryFilters.php

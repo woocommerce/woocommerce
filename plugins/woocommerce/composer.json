@@ -61,9 +61,12 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
+		"phpstan/extension-installer": "*",
+		"phpstan/phpstan": "*",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
+		"szepeviktor/phpstan-wordpress": "*",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
@@ -77,8 +80,9 @@
 		},
 		"allow-plugins": {
 			"automattic/jetpack-autoloader": true,
-			"composer/installers": true,
 			"bamarni/composer-bin-plugin": true,
+			"composer/installers": true,
+			"phpstan/extension-installer": true,
 			"woocommerce/monorepo-plugin": true
 		}
 	},
