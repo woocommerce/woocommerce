@@ -75,7 +75,31 @@ class AgenticSettingsPage {
 		 * @param array $providers Array of provider configurations.
 		 * @param array $registry  Current registry data.
 		 */
-		return apply_filters( 'woocommerce_agentic_commerce_providers', $providers, $registry );
+		$providers = apply_filters( 'woocommerce_agentic_commerce_providers', $providers, $registry );
+
+		// Validate provider structure.
+		$validated = array();
+		foreach ( $providers as $provider ) {
+			if (
+				! is_array( $provider )
+				|| empty( $provider['id'] )
+				|| empty( $provider['name'] )
+				|| ! is_array( $provider['fields'] ?? null )
+			) {
+				continue;
+			}
+
+			// Sanitize text fields.
+			$provider['id']   = sanitize_key( $provider['id'] );
+			$provider['name'] = sanitize_text_field( $provider['name'] );
+			if ( ! empty( $provider['description'] ) ) {
+				$provider['description'] = wp_kses_post( $provider['description'] );
+			}
+
+			$validated[] = $provider;
+		}
+
+		return $validated;
 	}
 
 	/**
@@ -108,7 +132,7 @@ class AgenticSettingsPage {
 				'desc'    => __( 'Allow products to be visible by default to the AI agents you integrate with. Can be overridden per product.', 'woocommerce' ),
 				'id'      => 'woocommerce_agentic_enable_products_default',
 				'type'    => 'checkbox',
-				'default' => $config['enable_products_default'] ?? 'no',
+				'default' => ( ! empty( $config['enable_products_default'] ) && 'yes' === $config['enable_products_default'] ) ? 'yes' : 'no',
 			),
 			array(
 				'title'             => __( 'Privacy Policy URL', 'woocommerce' ),
@@ -120,7 +144,7 @@ class AgenticSettingsPage {
 				'id'                => 'woocommerce_agentic_privacy_url_display',
 				'type'              => 'text',
 				'css'               => 'min-width:400px;',
-				'default'           => $privacy_url,
+				'default'           => esc_url( $privacy_url ),
 				'custom_attributes' => array(
 					'disabled' => 'disabled',
 					'readonly' => 'readonly',
@@ -136,7 +160,7 @@ class AgenticSettingsPage {
 				'id'                => 'woocommerce_agentic_terms_url_display',
 				'type'              => 'text',
 				'css'               => 'min-width:400px;',
-				'default'           => $terms_url,
+				'default'           => esc_url( $terms_url ),
 				'custom_attributes' => array(
 					'disabled' => 'disabled',
 					'readonly' => 'readonly',
@@ -163,16 +187,16 @@ class AgenticSettingsPage {
 				'id'      => 'woocommerce_agentic_openai_bearer_token',
 				'type'    => 'password',
 				'css'     => 'min-width:400px;',
-				'default' => $config['bearer_token'] ?? '',
+				'default' => esc_attr( $config['bearer_token'] ?? '' ),
 			),
 			array(
 				'title'       => __( 'Webhook URL', 'woocommerce' ),
-				'desc'        => __( 'The URL where order events will be to ChatGPT.', 'woocommerce' ),
+				'desc'        => __( 'The URL where order events will be sent to ChatGPT.', 'woocommerce' ),
 				'id'          => 'woocommerce_agentic_openai_webhook_url',
 				'type'        => 'text',
 				'css'         => 'min-width:400px;',
 				'placeholder' => 'https://openai.example.com/agentic_checkout/webhooks/order_events',
-				'default'     => $config['webhook_url'] ?? '',
+				'default'     => esc_url( $config['webhook_url'] ?? '' ),
 			),
 			array(
 				'title'   => __( 'Webhook Secret', 'woocommerce' ),
@@ -180,7 +204,7 @@ class AgenticSettingsPage {
 				'id'      => 'woocommerce_agentic_openai_webhook_secret',
 				'type'    => 'password',
 				'css'     => 'min-width:400px;',
-				'default' => $config['webhook_secret'] ?? '',
+				'default' => esc_attr( $config['webhook_secret'] ?? '' ),
 			),
 		);
 	}
@@ -259,25 +283,23 @@ class AgenticSettingsPage {
 			'webhook_secret'   => isset( $_POST['woocommerce_agentic_openai_webhook_secret'] )
 				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_webhook_secret'] ) )
 				: '',
-			'payment_provider' => isset( $_POST['woocommerce_agentic_openai_payment_provider'] )
-				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_payment_provider'] ) )
-				: '',
 		);
 
 		/**
 		 * Filter registry before saving.
 		 *
 		 * Allows extensions to save their own agent provider settings.
-		 * Extensions should inspect $_POST for their settings and add them to the registry.
+		 * Extensions can access $_POST directly for their settings but MUST sanitize all input
+		 * using appropriate WordPress sanitization functions (sanitize_text_field, esc_url_raw, etc.)
+		 * and call wp_unslash() on POST data.
 		 *
 		 * @since 10.4.0
 		 *
 		 * @internal This filter is experimental and behind a non-visible feature flag. Backwards compatibility not guaranted.
 		 *
-		 * @param array $registry   Registry data to save.
-		 * @param array $posted_data Posted form data.
+		 * @param array $registry Registry data to save. Extensions should add their provider settings to this array.
 		 */
-		$registry = apply_filters( 'woocommerce_agentic_commerce_save_settings', $registry, $_POST );
+		$registry = apply_filters( 'woocommerce_agentic_commerce_save_settings', $registry );
 
 		// Save registry (don't autoload to prevent performance issues).
 		update_option( self::REGISTRY_OPTION, $registry, false );
