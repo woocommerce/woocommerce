@@ -25,7 +25,7 @@ function maybeModifyDecimal( value, config ) {
 		return value;
 	}
 
-	const formulaRegex = /[\[\]()\*\+\-\/\"a-zA-Z]/;
+	const formulaRegex = /[\[\]()\*\+\-\/\"'a-zA-Z]/;
 	if ( ! formulaRegex.test( value ) && '.' !== config.decimalSeparator && value.includes( '.' ) ) {
 		return value.replace( '.', config.decimalSeparator );
 	}

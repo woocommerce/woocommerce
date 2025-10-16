@@ -115,7 +115,7 @@ describe( 'Maybe Modify Decimal Utils - maybeModifyDecimal', () => {
 			const config = { decimalSeparator: ',' };
 
 			expect( maybeModifyDecimal( '"123.45"', config ) ).toBe( '"123.45"' );
-			expect( maybeModifyDecimal( "'123.45'", config ) ).toBe( "'123,45'" );
+			expect( maybeModifyDecimal( "'123.45'", config ) ).toBe( "'123.45'" );
 		} );
 
 		test( 'should not modify values containing letters', () => {
