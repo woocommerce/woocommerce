@@ -134,36 +134,36 @@ const TestOrLiveAccountStep = () => {
 														false
 													);
 												} );
-										} else {
-											// If no test step is present, start the live account creation process directly.
-											const liveAccountStep =
-												getStepByKey(
-													LIVE_ACCOUNT_STEP_ID
-												);
+										}
+									} else {
+										// If no test step is present, start the live account creation process directly.
+										const liveAccountStep =
+											getStepByKey(
+												LIVE_ACCOUNT_STEP_ID
+											);
 
-											const liveAccountActionURL =
-												liveAccountStep?.actions?.start
-													?.href;
+										const liveAccountActionURL =
+											liveAccountStep?.actions?.start
+												?.href;
 
-											if ( liveAccountActionURL ) {
-												apiFetch( {
-													url: liveAccountActionURL,
-													method: 'POST',
+										if ( liveAccountActionURL ) {
+											apiFetch( {
+												url: liveAccountActionURL,
+												method: 'POST',
+											} )
+												.then( () => {
+													setIsContinueButtonLoading(
+														false
+													);
+
+													refreshStoreData();
 												} )
-													.then( () => {
-														setIsContinueButtonLoading(
-															false
-														);
-
-														refreshStoreData();
-													} )
-													.catch( () => {
-														// Handle any errors that occur during the process.
-														setIsContinueButtonLoading(
-															false
-														);
-													} );
-											}
+												.catch( () => {
+													// Handle any errors that occur during the process.
+													setIsContinueButtonLoading(
+														false
+													);
+												} );
 										}
 									}
 								} }
