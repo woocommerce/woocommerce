@@ -1,17 +1,20 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Request class.
+ * Unit tests for Request class.
  *
  * @package WooCommerce\Tests\Paypal.
  */
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
+
 /**
- * Class WC_Gateway_Paypal_Test.
+ * Class RequestTests.
  */
-class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
+class RequestTests extends \WC_Unit_Test_Case {
 	/**
 	 * Set up the test environment.
 	 */
@@ -39,12 +42,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * Test create_paypal_order when API returns error.
 	 */
 	public function test_create_paypal_order_error() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 2 );
 
-		$request = new PayPalRequest( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ) );
@@ -56,12 +59,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * Test create_paypal_order when API returns success.
 	 */
 	public function test_create_paypal_order_success() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 2 );
 
-		$request = new PayPalRequest( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
@@ -74,7 +77,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * Test that the create_paypal_order params are correct.
 	 */
 	public function test_create_paypal_order_params_are_correct() {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
@@ -82,7 +85,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
 
-		$request = new PayPalRequest( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 		$this->assertNotNull( $request->create_paypal_order( $order ) );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
@@ -211,7 +214,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	public function test_get_paypal_order_details( string $paypal_order_id, ?string $expected_exception, ?string $expected_exception_message ) {
 		$response_mock_ref = function () use ( $paypal_order_id ) {
 			if ( 'ERROR_ID' === $paypal_order_id ) {
-				return new WP_Error( 'error', 'Some error occurred.' );
+				return new \WP_Error( 'error', 'Some error occurred.' );
 			}
 
 			if ( 'FAILED_ID' === $paypal_order_id ) {
@@ -245,7 +248,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 			$this->expectExceptionMessage( $expected_exception_message );
 		}
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 
 		$response_data = $request->get_paypal_order_details( $paypal_order_id );
 
@@ -266,12 +269,12 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		return array(
 			'order details error response'   => array(
 				'PayPal order ID'            => 'ERROR_ID',
-				'expected exception'         => Exception::class,
+				'expected exception'         => \Exception::class,
 				'expected exception message' => 'PayPal order details request failed: Some error occurred.',
 			),
 			'order details failed response'  => array(
 				'PayPal order ID'            => 'FAILED_ID',
-				'expected exception'         => Exception::class,
+				'expected exception'         => \Exception::class,
 				'expected exception message' => 'PayPal order details request failed. HTTP 500',
 			),
 			'order details success response' => array(
@@ -295,14 +298,14 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_get_paypal_order_purchase_unit_amount
 	 */
 	public function test_get_paypal_order_purchase_unit_amount( int $cart_tax, int $shipping_tax, int $discount_total, int $total, array $expected ): void {
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( $cart_tax );
 		$order->set_shipping_tax( $shipping_tax );
 		$order->set_discount_total( $discount_total );
 		$order->set_total( $total );
 		$order->save();
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 
 		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
 		$this->assertEquals( $expected, $actual );
@@ -445,7 +448,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 
 		$actual = $request->fetch_paypal_client_id();
 
@@ -461,7 +464,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_test_fetch_paypal_client_id(): array {
-		$error_response   = new WP_Error( 'error', 'Some error occurred.' );
+		$error_response   = new \WP_Error( 'error', 'Some error occurred.' );
 		$invalid_response = array(
 			'response' => array(
 				'code' => 200,
