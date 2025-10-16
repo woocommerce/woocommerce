@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Moves all the remaining new PayPal Standard files to the src folder, so they can be autoloaded using namespaces

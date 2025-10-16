@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Includes additional unit tests for the PayPal Standard plugin, increasing coverage for the recent changes
