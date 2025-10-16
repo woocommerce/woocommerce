@@ -39,10 +39,6 @@ class AgenticCommerceIntegration extends \WC_Integration {
 	 * Admin options output.
 	 */
 	public function admin_options() {
-		echo '<h2>' . esc_html( $this->get_method_title() ) . '</h2>';
-		echo wp_kses_post( wpautop( $this->get_method_description() ) );
-
-		// Get settings from AgenticSettingsPage.
 		$settings = $this->settings_page->get_settings( array(), 'agentic_commerce' );
 		\WC_Admin_Settings::output_fields( $settings );
 	}

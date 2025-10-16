@@ -77,6 +77,93 @@ class AgenticSettingsPage {
 	}
 
 	/**
+	 * Get general Agentic Commerce settings.
+	 *
+	 * @param array $config Current general configuration.
+	 * @return array Settings fields.
+	 */
+	private function get_general_settings( $config ) {
+		// Get URLs from WooCommerce/WordPress settings.
+		$terms_page_id   = wc_terms_and_conditions_page_id();
+		$privacy_page_id = get_option( 'wp_page_for_privacy_policy' );
+
+		$terms_url   = $terms_page_id ? get_permalink( $terms_page_id ) : '';
+		$privacy_url = $privacy_page_id ? get_permalink( $privacy_page_id ) : '';
+
+		// Build admin URLs for configuration links.
+		$advanced_settings_url = admin_url( 'admin.php?page=wc-settings&tab=advanced' );
+		$privacy_settings_url  = admin_url( 'options-privacy.php' );
+
+		return array(
+			array(
+				'title' => __( 'Agentic Commerce Configuration', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => __( 'General settings for AI agents purchasing from your store.', 'woocommerce' ),
+				'id'    => 'agentic_commerce_general_settings',
+			),
+			array(
+				'title'   => __( 'Enable products by default', 'woocommerce' ),
+				'desc'    => __( 'Allow products to be visible by default to the AI agents you integrate with. Can be overridden per product.', 'woocommerce' ),
+				'id'      => 'woocommerce_agentic_enable_products_default',
+				'type'    => 'checkbox',
+				'default' => $config['enable_products_default'] ?? 'no',
+			),
+			array(
+				'title'             => __( 'Privacy Policy URL', 'woocommerce' ),
+				'desc'              => sprintf(
+					/* translators: %s: URL to WordPress privacy settings */
+					__( 'Configure your Privacy Policy page in <a href="%s">Settings &gt; Privacy</a>.', 'woocommerce' ),
+					esc_url( $privacy_settings_url )
+				),
+				'id'                => 'woocommerce_agentic_privacy_url_display',
+				'type'              => 'text',
+				'css'               => 'min-width:400px;',
+				'default'           => $privacy_url,
+				'custom_attributes' => array(
+					'disabled' => 'disabled',
+					'readonly' => 'readonly',
+				),
+			),
+			array(
+				'title'             => __( 'Terms of Service URL', 'woocommerce' ),
+				'desc'              => sprintf(
+					/* translators: %s: URL to WooCommerce advanced settings */
+					__( 'Configure your Terms and Conditions page in <a href="%s">WooCommerce &gt; Settings &gt; Advanced &gt; Page setup</a>.', 'woocommerce' ),
+					esc_url( $advanced_settings_url )
+				),
+				'id'                => 'woocommerce_agentic_terms_url_display',
+				'type'              => 'text',
+				'css'               => 'min-width:400px;',
+				'default'           => $terms_url,
+				'custom_attributes' => array(
+					'disabled' => 'disabled',
+					'readonly' => 'readonly',
+				),
+			),
+			array(
+				'title'             => __( 'Return Policy URL', 'woocommerce' ),
+				'desc'              => sprintf(
+					/* translators: %s: URL to WooCommerce advanced settings */
+					__( 'Defaults to your Terms of Service page. Configure in <a href="%s">WooCommerce &gt; Settings &gt; Advanced &gt; Page setup</a>.', 'woocommerce' ),
+					esc_url( $advanced_settings_url )
+				),
+				'id'                => 'woocommerce_agentic_returns_url_display',
+				'type'              => 'text',
+				'css'               => 'min-width:400px;',
+				'default'           => $terms_url,
+				'custom_attributes' => array(
+					'disabled' => 'disabled',
+					'readonly' => 'readonly',
+				),
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'agentic_commerce_general_settings',
+			),
+		);
+	}
+
+	/**
 	 * Get OpenAI provider fields.
 	 *
 	 * @param array $config Current OpenAI configuration.
@@ -86,7 +173,7 @@ class AgenticSettingsPage {
 		return array(
 			array(
 				'title'   => __( 'Authorization Token', 'woocommerce' ),
-				'desc'    => __( 'The bearer token that ChatGPT uses to authenticate API requests. Provided by OpenAI.', 'woocommerce' ),
+				'desc'    => __( 'The bearer token that ChatGPT uses to authenticate checkout requests.', 'woocommerce' ),
 				'id'      => 'woocommerce_agentic_openai_bearer_token',
 				'type'    => 'password',
 				'css'     => 'min-width:400px;',
@@ -94,7 +181,7 @@ class AgenticSettingsPage {
 			),
 			array(
 				'title'       => __( 'Webhook URL', 'woocommerce' ),
-				'desc'        => __( 'The URL where order events will be sent. Provided by OpenAI.', 'woocommerce' ),
+				'desc'        => __( 'The URL where order events will be to ChatGPT.', 'woocommerce' ),
 				'id'          => 'woocommerce_agentic_openai_webhook_url',
 				'type'        => 'text',
 				'css'         => 'min-width:400px;',
@@ -103,7 +190,7 @@ class AgenticSettingsPage {
 			),
 			array(
 				'title'   => __( 'Webhook Secret', 'woocommerce' ),
-				'desc'    => __( 'Secret key used to sign outgoing webhook requests. Provided by OpenAI.', 'woocommerce' ),
+				'desc'    => __( 'Secret key used to sign outgoing webhook requests to ChatGPT.', 'woocommerce' ),
 				'id'      => 'woocommerce_agentic_openai_webhook_secret',
 				'type'    => 'password',
 				'css'     => 'min-width:400px;',
@@ -125,9 +212,13 @@ class AgenticSettingsPage {
 		}
 
 		$agentic_settings = array();
-		$providers        = $this->get_providers();
+		$registry         = $this->get_registry();
+
+		// Add general Agentic Commerce settings section.
+		$agentic_settings = array_merge( $agentic_settings, $this->get_general_settings( $registry['general'] ?? array() ) );
 
 		// Build settings for each provider.
+		$providers = $this->get_providers();
 		foreach ( $providers as $provider ) {
 			// Provider section header.
 			$agentic_settings[] = array(
@@ -162,6 +253,14 @@ class AgenticSettingsPage {
 		// Get current registry.
 		$registry = $this->get_registry();
 
+		// Update general settings.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
+		$registry['general'] = array(
+			'enable_products_default' => isset( $_POST['woocommerce_agentic_enable_products_default'] ) && '1' === $_POST['woocommerce_agentic_enable_products_default']
+				? 'yes'
+				: 'no',
+		);
+
 		// Update OpenAI settings.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['openai'] = array(
@@ -187,8 +286,8 @@ class AgenticSettingsPage {
 		 *
 		 * @since 10.4.0
 		 *
-		 * @param array $registry Registry data to save.
-		 * @param array $_POST    Posted form data.
+		 * @param array $registry   Registry data to save.
+		 * @param array $posted_data Posted form data.
 		 */
 		$registry = apply_filters( 'woocommerce_agentic_commerce_save_settings', $registry, $_POST );
 
