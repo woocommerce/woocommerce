@@ -532,7 +532,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_tax_status_mapping_simple_product() {
 		// Test non-taxable simple product.
-		$non_taxable_product = $this->create_simple_shopify_product();
+		$non_taxable_product                                    = $this->create_simple_shopify_product();
 		$non_taxable_product->variants->edges[0]->node->taxable = false;
 
 		$result = $this->mapper->map_product_data( $non_taxable_product );
@@ -540,7 +540,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'none', $result['tax_status'] );
 
 		// Test taxable simple product.
-		$taxable_product = $this->create_simple_shopify_product();
+		$taxable_product                                    = $this->create_simple_shopify_product();
 		$taxable_product->variants->edges[0]->node->taxable = true;
 
 		$result = $this->mapper->map_product_data( $taxable_product );
@@ -553,7 +553,7 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_tax_status_mapping_variable_product() {
 		$variable_product = $this->create_variable_shopify_product();
-		
+
 		// Set first variation as non-taxable, second as taxable.
 		$variable_product->variants->edges[0]->node->taxable = false;
 		$variable_product->variants->edges[1]->node->taxable = true;
@@ -562,10 +562,10 @@ class ShopifyMapperTest extends \WC_Unit_Test_Case {
 
 		$this->assertTrue( $result['is_variable'] );
 		$this->assertCount( 2, $result['variations'] );
-		
+
 		// Check first variation is not taxable.
 		$this->assertEquals( 'none', $result['variations'][0]['tax_status'] );
-		
+
 		// Check second variation is taxable.
 		$this->assertEquals( 'taxable', $result['variations'][1]['tax_status'] );
 	}

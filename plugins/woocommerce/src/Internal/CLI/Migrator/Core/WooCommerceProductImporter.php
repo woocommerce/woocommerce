@@ -556,7 +556,6 @@ class WooCommerceProductImporter {
 				$this->set_cogs_value_direct( $product, (float) $product_data['cost_of_goods'] );
 			}
 		}
-
 	}
 
 	/**
