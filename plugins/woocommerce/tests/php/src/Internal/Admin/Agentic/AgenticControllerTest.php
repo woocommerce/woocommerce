@@ -25,6 +25,9 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 		$controller = wc_get_container()->get( AgenticController::class );
 		$controller->register();
 
+		// Call on_init directly to initialize the webhook manager.
+		$controller->on_init();
+
 		/**
 		 * Verify webhook topics are registered (indicates manager was initialized).
 		 *
