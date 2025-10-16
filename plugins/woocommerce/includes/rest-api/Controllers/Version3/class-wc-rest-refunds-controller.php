@@ -155,7 +155,7 @@ class WC_REST_Refunds_Controller extends WC_REST_Order_Refunds_Controller {
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $refund->get_parent_id() ) ),
 			),
 			'refunded_by' => array(
-				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $refund->get_user_id() ) ),
+				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $refund->get_refunded_by() ) ),
 				'embeddable' => true,
 			),
 		);

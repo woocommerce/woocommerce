@@ -243,14 +243,18 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 	protected function prepare_links( $object, $request ) {
 		$base  = str_replace( '(?P<order_id>[\d]+)', $object->get_parent_id(), $this->rest_base );
 		$links = array(
-			'self'       => array(
+			'self'        => array(
 				'href' => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $base, $object->get_id() ) ),
 			),
-			'collection' => array(
+			'collection'  => array(
 				'href' => rest_url( sprintf( '/%s/%s', $this->namespace, $base ) ),
 			),
-			'up'         => array(
+			'up'          => array(
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $object->get_parent_id() ) ),
+			),
+			'refunded_by' => array(
+				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $object->get_refunded_by() ) ),
+				'embeddable' => true,
 			),
 		);
 
