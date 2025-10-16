@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WC_Gateway_BACS;
 use WC_Gateway_COD;
+use WC_Gateway_Pay_At_Location;
 
 /**
  * Default Payment Gateways
@@ -193,6 +194,17 @@ class DefaultPaymentGateways {
 				'id'          => WC_Gateway_COD::ID,
 				'title'       => __( 'Cash on delivery', 'woocommerce' ),
 				'content'     => __( 'Take payments in cash upon delivery.', 'woocommerce' ),
+				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
+				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/cod.png',
+				'is_visible'  => array(
+					self::get_rules_for_cbd( false ),
+				),
+				'is_offline'  => true,
+			),
+			array(
+				'id'          => WC_Gateway_Pay_At_Location::ID,
+				'title'       => __( 'Pay at location', 'woocommerce' ),
+				'content'     => __( 'Take payments at a location.', 'woocommerce' ),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
 				'image_72x72' => WC_ADMIN_IMAGES_FOLDER_URL . '/payment_methods/72x72/cod.png',
 				'is_visible'  => array(
