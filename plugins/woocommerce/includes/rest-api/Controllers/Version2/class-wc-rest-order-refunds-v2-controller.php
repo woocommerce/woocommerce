@@ -381,64 +381,64 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'date_created'     => array(
 					'description' => __( "The date the order refund was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'date_created_gmt' => array(
 					'description' => __( 'The date the order refund was created, as GMT.', 'woocommerce' ),
 					'type'        => 'date-time',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'amount'           => array(
 					'description' => __( 'Refund amount.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 				),
 				'reason'           => array(
 					'description' => __( 'Reason for refund.', 'woocommerce' ),
 					'type'        => 'string',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 				),
 				'refunded_by'      => array(
 					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 					'type'        => 'integer',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 				),
 				'refunded_payment' => array(
 					'description' => __( 'If the payment was refunded via the API.', 'woocommerce' ),
 					'type'        => 'boolean',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 				),
 				'meta_data'        => array(
 					'description' => __( 'Meta data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'    => array(
 								'description' => __( 'Meta ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'key'   => array(
 								'description' => __( 'Meta key.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'value' => array(
 								'description' => __( 'Meta value.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 						),
 					),
@@ -446,7 +446,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 				'line_items'       => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 					'items'       => array(
 						'type'       => 'object',
@@ -454,67 +454,67 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'id'           => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'name'         => array(
 								'description' => __( 'Product name.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'product_id'   => array(
 								'description' => __( 'Product ID.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'variation_id' => array(
 								'description' => __( 'Variation ID, if applicable.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'quantity'     => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'tax_class'    => array(
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'subtotal'     => array(
 								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'subtotal_tax' => array(
 								'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'total'        => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'total_tax'    => array(
 								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'taxes'        => array(
 								'description' => __( 'Line taxes.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 								'items'       => array(
 									'type'       => 'object',
@@ -522,19 +522,19 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 										'id'       => array(
 											'description' => __( 'Tax rate ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'total'    => array(
 											'description' => __( 'Tax total.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'subtotal' => array(
 											'description' => __( 'Tax subtotal.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 									),
@@ -543,7 +543,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'meta_data'    => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 								'items'       => array(
 									'type'       => 'object',
@@ -551,19 +551,19 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 										'id'    => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'key'   => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 									),
@@ -572,13 +572,13 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'sku'          => array(
 								'description' => __( 'Product SKU.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'price'        => array(
 								'description' => __( 'Product price.', 'woocommerce' ),
 								'type'        => 'number',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 						),
@@ -587,7 +587,7 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 				'tax_lines'        => array(
 					'description' => __( 'Tax lines data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'readonly'    => true,
 					'items'       => array(
 						'type'       => 'object',
@@ -595,67 +595,67 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'id'                 => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'rate_code'          => array(
 								'description' => __( 'Tax rate code.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'rate_id'            => array(
 								'description' => __( 'Tax rate ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'label'              => array(
 								'description' => __( 'Tax rate label.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'compound'           => array(
 								'description' => __( 'Show if is a compound tax rate.', 'woocommerce' ),
 								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'tax_total'          => array(
 								'description' => __( 'Tax total (not including shipping taxes).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'shipping_tax_total' => array(
 								'description' => __( 'Shipping tax total.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'meta_data'          => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
 										'id'    => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'key'   => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 									),
 								),
@@ -666,46 +666,46 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 				'shipping_lines'   => array(
 					'description' => __( 'Shipping lines data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'           => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'method_title' => array(
 								'description' => __( 'Shipping method name.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'method_id'    => array(
 								'description' => __( 'Shipping method ID.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'instance_id'  => array(
 								'description' => __( 'Shipping instance ID.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'total'        => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'total_tax'    => array(
 								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'taxes'        => array(
 								'description' => __( 'Line taxes.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 								'items'       => array(
 									'type'       => 'object',
@@ -713,13 +713,13 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 										'id'    => array(
 											'description' => __( 'Tax rate ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'total' => array(
 											'description' => __( 'Tax total.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 									),
@@ -728,25 +728,25 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'meta_data'    => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
 										'id'    => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'key'   => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 									),
 								),
@@ -757,47 +757,47 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 				'fee_lines'        => array(
 					'description' => __( 'Fee lines data.', 'woocommerce' ),
 					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
+					'context'     => array( 'view', 'edit', 'embed' ),
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'id'         => array(
 								'description' => __( 'Item ID.', 'woocommerce' ),
 								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'name'       => array(
 								'description' => __( 'Fee name.', 'woocommerce' ),
 								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'tax_class'  => array(
 								'description' => __( 'Tax class of fee.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'tax_status' => array(
 								'description' => __( 'Tax status of fee.', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ),
 							),
 							'total'      => array(
 								'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 							),
 							'total_tax'  => array(
 								'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 							),
 							'taxes'      => array(
 								'description' => __( 'Line taxes.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'readonly'    => true,
 								'items'       => array(
 									'type'       => 'object',
@@ -805,19 +805,19 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 										'id'       => array(
 											'description' => __( 'Tax rate ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'total'    => array(
 											'description' => __( 'Tax total.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'subtotal' => array(
 											'description' => __( 'Tax subtotal.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 									),
@@ -826,25 +826,25 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 							'meta_data'  => array(
 								'description' => __( 'Meta data.', 'woocommerce' ),
 								'type'        => 'array',
-								'context'     => array( 'view', 'edit' ),
+								'context'     => array( 'view', 'edit', 'embed' ),
 								'items'       => array(
 									'type'       => 'object',
 									'properties' => array(
 										'id'    => array(
 											'description' => __( 'Meta ID.', 'woocommerce' ),
 											'type'        => 'integer',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 											'readonly'    => true,
 										),
 										'key'   => array(
 											'description' => __( 'Meta key.', 'woocommerce' ),
 											'type'        => 'string',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 										'value' => array(
 											'description' => __( 'Meta value.', 'woocommerce' ),
 											'type'        => 'mixed',
-											'context'     => array( 'view', 'edit' ),
+											'context'     => array( 'view', 'edit', 'embed' ),
 										),
 									),
 								),
