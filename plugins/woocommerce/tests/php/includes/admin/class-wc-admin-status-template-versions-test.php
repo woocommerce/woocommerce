@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 /**
  * Class WC_Admin_Status_Template_Versions_Test.
  *
