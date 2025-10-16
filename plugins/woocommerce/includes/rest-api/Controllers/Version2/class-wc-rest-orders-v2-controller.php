@@ -225,21 +225,20 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Add SKU, PRICE, and IMAGE to products.
 		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$data['sku']              = $item->get_product() ? $item->get_product()->get_sku() : null;
-			$data['global_unique_id'] = $item->get_product() ? $item->get_product()->get_global_unique_id() : null;
+			$product = $item->get_product();
+
+			$data['sku']              = $product ? $product->get_sku() : null;
+			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
 			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
 
-			$image_id      = $item->get_product() ? $item->get_product()->get_image_id() : 0;
+			$image_id = $product ? $product->get_image_id() : 0;
+
 			$data['image'] = array(
 				'id'  => $image_id,
 				'src' => $image_id ? wp_get_attachment_image_url( $image_id, 'full' ) : '',
 			);
-		}
 
-		// Add parent_name if the product is a variation.
-		if ( is_callable( array( $item, 'get_product' ) ) ) {
-			$product = $item->get_product();
-
+			// Add parent_name if the product is a variation.
 			if ( is_callable( array( $product, 'get_parent_data' ) ) ) {
 				$data['parent_name'] = $product->get_title();
 			} else {

@@ -1368,7 +1368,19 @@ WHERE
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
-		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
+
+		$post_orders = array();
+		if ( $data_sync_enabled ) {
+			global $wpdb;
+
+			// Exclude orders that do not exist in the posts table.
+			if ( $load_posts_for ) {
+				$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
+				$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
+
+			$post_orders = $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) );
+		}
 
 		$cogs_is_enabled = $this->cogs_is_enabled();
 
@@ -1524,6 +1536,8 @@ WHERE
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
+	 *
+	 * @throws \Exception If no CPT data store is found for an order.
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
@@ -1542,8 +1556,13 @@ WHERE
 		$cpt_stores       = array();
 		$cpt_store_orders = array();
 		foreach ( $orders as $order_id => $order ) {
-			$table_data_store     = $order->get_data_store();
-			$cpt_data_store       = $table_data_store->get_cpt_data_store_instance();
+			$table_data_store = $order->get_data_store();
+			$cpt_data_store   = $table_data_store->get_cpt_data_store_instance();
+
+			if ( ! $cpt_data_store ) {
+				throw new \Exception( sprintf( 'No CPT data store found for order %d.', absint( $order_id ) ) );
+			}
+
 			$cpt_store_class_name = get_class( $cpt_data_store );
 			if ( ! isset( $cpt_stores[ $cpt_store_class_name ] ) ) {
 				$cpt_stores[ $cpt_store_class_name ]       = $cpt_data_store;
