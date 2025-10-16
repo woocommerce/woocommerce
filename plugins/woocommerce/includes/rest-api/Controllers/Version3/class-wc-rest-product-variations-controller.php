@@ -51,17 +51,8 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->register_response_cache_hooks();
-
-		$this->product_util = wc_get_container()->get( ProductUtil::class );
+		$this->initialize_output_caching();
 	}
-
-	/**
-	 * Product utility instance for version retrieval.
-	 *
-	 * @var ProductUtil
-	 */
-	private $product_util;
 
 	/**
 	 * Register the routes for products.
@@ -1339,6 +1330,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 	/**
 	 * Get the default entity type for caching.
+	 * See the RestApiCache trait.
 	 *
 	 * @return string|null Entity type.
 	 */
@@ -1348,6 +1340,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 	/**
 	 * Get the names of the filters that can modify the endpoint responses.
+	 * See the RestApiCache trait.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Array of filter names.
@@ -1361,6 +1354,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 	/**
 	 * Extract variation IDs from response data.
+	 * See the RestApiCache trait.
 	 *
 	 * For variations, we need to track both the variation ID and parent product ID
 	 * for proper cache invalidation.
@@ -1383,16 +1377,5 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		return array_unique( array_filter( $ids ) );
-	}
-
-	/**
-	 * Get the current version of a product.
-	 *
-	 * @param string $entity_type Entity type.
-	 * @param int    $entity_id   Entity ID.
-	 * @return string|null Entity version (timestamp), or null if not available.
-	 */
-	protected function get_entity_version_core( string $entity_type, int $entity_id ): ?string {
-		return 'product' === $entity_type ? (string) $this->product_util->get_last_modified_date( $entity_id ) : null;
 	}
 }

@@ -85,28 +85,11 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	private $processed_attachment_ids_for_request = array();
 
 	/**
-	 * Product utility instance for version retrieval.
-	 *
-	 * @var ProductUtil
-	 */
-	private $product_util;
-
-	/**
 	 * Creates a new instance of the class.
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->register_response_cache_hooks();
-
-		$this->product_util = wc_get_container()->get( ProductUtil::class );
-
-		add_action( 'woocommerce_new_product', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_new_product_variation', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_update_product', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_update_product_variation', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_delete_product', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_trash_product', array( $this, 'handle_product_change' ), 10, 1 );
-		add_action( 'woocommerce_untrash_product', array( $this, 'handle_product_change' ), 10, 1 );
+		$this->initialize_output_caching();
 	}
 
 	/**
@@ -2179,7 +2162,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Get the default entity type for caching.
+	 * Get the default entity type for version caching.
+     * See the RestApiCache trait.
 	 *
 	 * @return string|null Entity type.
 	 */
@@ -2188,54 +2172,8 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Get the current version of a product.
-	 *
-	 * @param string $entity_type Entity type.
-	 * @param int    $entity_id   Entity ID.
-	 * @return string|null Entity version (timestamp), or null if not available.
-	 */
-	protected function get_entity_version_core( string $entity_type, int $entity_id ): ?string {
-		return 'product' === $entity_type ? (string) $this->product_util->get_last_modified_date( $entity_id ) : null;
-	}
-
-	/**
-	 * Handle product change events to invalidate the related REST API responses cached.
-	 *
-	 * @param int $product_id Product ID.
-	 */
-	public function handle_product_change( int $product_id ): void {
-		$this->invalidate_entity_cache( 'product', $product_id );
-
-		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
-			return;
-		}
-
-		// If the product is variable we need to invalidate the cache entries for the variations too.
-		// On the other hand, if it's a variation, we need to invalidate the parent's cache entries
-		// and this involves registering the parent as modified (saving a variation won't alter
-		// the last modification date of the parent).
-
-		if ( $product->is_type( 'variable' ) ) {
-			$variation_ids = $product->get_children();
-			foreach ( $variation_ids as $variation_id ) {
-				$this->invalidate_entity_cache( 'product', $variation_id );
-			}
-		} elseif ( $product->is_type( 'variation' ) ) {
-			$parent_id = $product->get_parent_id();
-			if ( $parent_id ) {
-				$this->invalidate_entity_cache( 'product', $parent_id );
-
-				$parent = wc_get_product( $parent_id );
-				if ( $parent ) {
-					$parent->save();
-				}
-			}
-		}
-	}
-
-	/**
 	 * Get the names of the filters that can modify the endpoint responses.
+     * See the RestApiCache trait.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Array of filter names.

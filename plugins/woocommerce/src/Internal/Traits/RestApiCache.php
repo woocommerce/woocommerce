@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Traits;
 
+use Automattic\WooCommerce\Internal\Caches\EntityVersionsCache;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_REST_Server;
@@ -20,7 +21,6 @@ use WP_REST_Server;
  *   (and none of the non-GET endpoints is cacheable).
  * - The default lifetime for cached entries (see get_cache_ttl)
  *   is acceptable for all the endpoints.
- * - All the involved entities are immutable (they never change).
  * - All endpoints return deterministic information
  *   (the returned information is always the same if the request is the same
  *    and the involved entities are the same ones).
@@ -30,7 +30,6 @@ use WP_REST_Server;
  *
  * Further customization will often be needed by overriding the following trait methods in the controller:
  *
- * - get_entity_version_core(): If mutable entities are involved in the generation of the response.
  * - extract_entity_ids(): If mutable entity ids don't identify by an 'id' field,
  *   or not all the entities included in the response are mutable.
  * - get_cache_hash_filters(): If the output can be customized via filters before being sent.
@@ -41,9 +40,8 @@ use WP_REST_Server;
  *   The get_matched_route method can be useful when overriding this method.
  *
  * If entities are mutable and serving stale cached data is unacceptable, the entity
- * modification (or deletion) event must be captured (in the controller itself or externally)
- * and the cached entries for the corresponding entities must be invalidated
- * by invoking invalidate_entity_cache.
+ * modification (or deletion) event must be captured and the cached version of the
+ * corresponding entities must be modified. See the EntityVersionsCache class.
  *
  * See WC_REST_Products_Controller for an example of trait usage and customization.
  *
@@ -51,10 +49,41 @@ use WP_REST_Server;
  */
 trait RestApiCache {
 	/**
+	 * The instance of EntityVersionsCache to use.
+	 *
+	 * @var EntityVersionsCache
+	 */
+	private EntityVersionsCache $entity_versions_cache;
+
+	/**
 	 * Register the appropriate hooks.
 	 * Call this from the controller's constructor.
 	 */
-	protected function register_response_cache_hooks(): void {
+	protected function initialize_output_caching(): void {
+		$this->entity_versions_cache = wc_get_container()->get( EntityVersionsCache::class );
+
+		if ( ! $this->entity_versions_cache->is_enabled() ) {
+			return;
+		}
+
+		/**
+		 * Filter whether to enable response caching for a given REST API controller.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool   $enable_hooks Whether to enable response caching for the controller.
+		 * @param object $controller   The controller instance.
+		 * @return bool True to enable response caching, false to disable.
+		 */
+		$enable_caching = apply_filters(
+			'woocommerce_rest_api_enable_response_caching',
+			true,
+			$this
+		);
+		if ( ! $enable_caching ) {
+			return;
+		}
+
 		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
 		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ), 10, 3 );
 	}
@@ -93,65 +122,6 @@ trait RestApiCache {
 	 */
 	protected function get_default_entity_type(): ?string {
 		return null;
-	}
-
-	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
-
-	/**
-	 * Core method to get the current version of an entity.
-	 *
-	 * This is called when get_entity_version doesn't find
-	 * a cached value. It's mandatory to override this method in controllers that include the trait
-	 * when mutable entities are involved in responses.
-	 *
-	 * @param string $entity_type Entity type.
-	 * @param int    $entity_id Entity ID.
-	 * @return string|null Entity version, or null if not available.
-	 */
-	protected function get_entity_version_core( string $entity_type, int $entity_id ): ?string {
-		return null;
-	}
-
-	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
-
-	/**
-	 * Get the current version of an entity.
-	 * Attempts to retrieve the version from transient cache first,
-	 * falls back to get_entity_version_core as needed.
-	 *
-	 * @param string $entity_type Entity type.
-	 * @param int    $entity_id Entity ID.
-	 * @return int|string|null Entity version, or null if not available.
-	 */
-	protected function get_entity_version( string $entity_type, int $entity_id ) {
-		/**
-		 * Filter to customize the TTL (in seconds) for entity version transients.
-		 * Set to 0 to disable transient caching and always resort to get_entity_version_core.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param int    $ttl         TTL in seconds. Default is HOUR_IN_SECONDS (3600).
-		 * @param string $entity_type Entity type (e.g., 'product', 'variation').
-		 * @param int    $entity_id   Entity ID.
-		 * @param object $controller  Controller instance.
-		 */
-		$ttl = apply_filters( 'woocommerce_rest_api_entity_version_ttl', HOUR_IN_SECONDS, $entity_type, $entity_id, $this );
-
-		if ( 0 === $ttl ) {
-			return $this->get_entity_version_core( $entity_type, $entity_id );
-		}
-
-		$transient_key = 'wc_rest_api_entity_version_' . $entity_type . '_' . $entity_id;
-		$version       = get_transient( $transient_key );
-
-		if ( false === $version ) {
-			$version = $this->get_entity_version_core( $entity_type, $entity_id );
-			if ( null !== $version ) {
-				set_transient( $transient_key, $version, $ttl );
-			}
-		}
-
-		return $version;
 	}
 
 	/**
@@ -271,7 +241,7 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request Request object.
 	 * @return int Cache TTL in seconds.
 	 */
-	protected function get_cache_ttl( WP_REST_Request $request ): int {
+	protected function get_cached_output_ttl( WP_REST_Request $request ): int {
 		/**
 		 * Filter the cache TTL for REST API responses.
 		 *
@@ -281,7 +251,7 @@ trait RestApiCache {
 		 * @param WP_REST_Request $request    Request object.
 		 * @param object          $controller Controller instance.
 		 */
-		return apply_filters( 'woocommerce_rest_api_cache_ttl', HOUR_IN_SECONDS, $request, $this );
+		return apply_filters( 'woocommerce_rest_api_cached_output_ttl', HOUR_IN_SECONDS, $request, $this );
 	}
 
 	/**
@@ -373,33 +343,33 @@ trait RestApiCache {
 
 		// See if we have a usable cached response.
 		$transient_key = "wc_rest_api_cache_{$entity_type}-{$uid_info['request_hash']}";
-		$cached        = get_transient( $transient_key );
+		$cached        = $this->get_cached_data( $transient_key );
 
 		if ( ! $cached || ! isset( $cached['hooks_hash'], $cached['data'], $cached['created_at'], $cached['entity_versions'] ) ) {
 			return null;
 		}
 
 		$current_time    = time();
-		$expiration_time = $cached['created_at'] + $this->get_cache_ttl( $request );
+		$expiration_time = $cached['created_at'] + $this->get_cached_output_ttl( $request );
 		if ( $current_time >= $expiration_time ) {
 			// Entry has expired (TTL is now lower than the lifetime of the transient).
-			delete_transient( $transient_key );
+			$this->delete_cached_data( $transient_key );
 			return null;
 		}
 
 		$current_hooks_hash = $this->generate_hooks_hash( $request );
 		if ( $cached['hooks_hash'] !== $current_hooks_hash ) {
 			// Hooks have changed - invalidate cache entry.
-			delete_transient( $transient_key );
+			$this->delete_cached_data( $transient_key );
 			return null;
 		}
 
 		// Validate versions for all the entities involved in the cached response:
 		// if any has changed, the entire cached response is invalid.
 		foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
-			$current_version = $this->get_entity_version( $entity_type, $entity_id );
+			$current_version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
 			if ( is_null( $current_version ) || $current_version !== $cached_version ) {
-				delete_transient( $transient_key );
+				$this->delete_cached_data( $transient_key );
 				return null;
 			}
 		}
@@ -457,8 +427,8 @@ trait RestApiCache {
 		$entity_type     = $uid_info['entity_type'];
 		$entity_versions = array();
 		foreach ( $entity_ids as $entity_id ) {
-			$version = $this->get_entity_version( $entity_type, $entity_id );
-			if ( null !== $version ) {
+			$version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
+			if ( ! is_null( $version ) ) {
 				$entity_versions[ $entity_id ] = $version;
 			}
 		}
@@ -472,7 +442,7 @@ trait RestApiCache {
 		);
 
 		$transient_key = "wc_rest_api_cache_{$entity_type}-{$uid_info['request_hash']}";
-		set_transient( $transient_key, $cache_data, $this->get_cache_ttl( $request ) );
+		$this->set_cached_data( $transient_key, $cache_data, $this->get_cached_output_ttl( $request ) );
 
 		$request->set_param( '_cache_uid_info', null );
 
@@ -481,32 +451,34 @@ trait RestApiCache {
 	}
 
 	/**
-	 * Invalidate the entity version cache for an entity.
+	 * Get cached data from persistent storage.
 	 *
-	 * This method should be called when an entity changes to ensure immediate cache invalidation.
-	 * While entity versioning provides automatic invalidation through get_entity_version_core(),
-	 * the entity version is cached in a transient (1 hour TTL) for performance. This means
-	 * there could be a delay before the new version is detected.
-	 *
-	 * This deletes the entity version transient, causing all cached responses containing
-	 * this entity to be invalidated on next retrieval if the entity version has actually changed.
-	 *
-	 * @param string $entity_type Entity type.
-	 * @param int    $entity_id   Entity ID.
+	 * @param string $key Storage key.
+	 * @return mixed Cached value or false if not found.
 	 */
-	public function invalidate_entity_cache( string $entity_type, int $entity_id ): void {
-		$transient_key = 'wc_rest_api_entity_version_' . $entity_type . '_' . $entity_id;
-		delete_transient( $transient_key );
+	protected function get_cached_data( string $key ) {
+		return get_transient( $key );
+	}
 
-		/**
-		 * Fires after cache invalidation for an entity.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param string $entity_type Entity type.
-		 * @param int    $entity_id   Entity ID.
-		 * @param object $controller  Controller instance.
-		 */
-		do_action( 'woocommerce_rest_api_cache_invalidated', $entity_type, $entity_id, $this );
+	/**
+	 * Set cached data in persistent storage.
+	 *
+	 * @param string $key   Storage key.
+	 * @param mixed  $value Value to store.
+	 * @param int    $ttl   Time to live in seconds.
+	 * @return bool True on success, false on failure.
+	 */
+	protected function set_cached_data( string $key, $value, int $ttl ): bool {
+		return set_transient( $key, $value, $ttl );
+	}
+
+	/**
+	 * Delete cached data from persistent storage.
+	 *
+	 * @param string $key Storage key.
+	 * @return bool True on success, false on failure.
+	 */
+	protected function delete_cached_data( string $key ): bool {
+		return delete_transient( $key );
 	}
 }
