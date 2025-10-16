@@ -70,6 +70,8 @@ class AgenticSettingsPage {
 		 *
 		 * @since 10.4.0
 		 *
+		 * @internal This filter is experimental and behind a non-visible feature flag. Backwards compatibility not guaranted.
+		 *
 		 * @param array $providers Array of provider configurations.
 		 * @param array $registry  Current registry data.
 		 */
@@ -269,6 +271,8 @@ class AgenticSettingsPage {
 		 * Extensions should inspect $_POST for their settings and add them to the registry.
 		 *
 		 * @since 10.4.0
+		 *
+		 * @internal This filter is experimental and behind a non-visible feature flag. Backwards compatibility not guaranted.
 		 *
 		 * @param array $registry   Registry data to save.
 		 * @param array $posted_data Posted form data.
