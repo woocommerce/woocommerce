@@ -261,11 +261,9 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#search-submit' ).click();
 
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
-				productNamesOverride.length,
-				{ timeout: 30000 }
+				productNamesOverride.length
 			);
 
-			// Compare imported products to what's expected
 			const productTitles = await page
 				.locator( 'a.row-title' )
 				.allInnerTexts();
