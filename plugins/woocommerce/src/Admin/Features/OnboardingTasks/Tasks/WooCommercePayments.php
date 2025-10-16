@@ -262,7 +262,7 @@ class WooCommercePayments extends Task {
 				// Filter out any WooPayments-related or offline gateways.
 				return 'yes' === $gateway->enabled
 					&& 0 !== strpos( $gateway->id, 'woocommerce_payments' )
-					&& ! in_array( $gateway->id, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), true );
+					&& ! in_array( $gateway->id, array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID ), true );
 			}
 		);
 

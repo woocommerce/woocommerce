@@ -41,6 +41,7 @@ use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Gateway_Paypal;
+use WC_Gateway_Pay_At_Location;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -56,7 +57,7 @@ class PaymentsProviders {
 	public const TYPE_OFFLINE_PMS_GROUP = 'offline_pms_group';
 	public const TYPE_SUGGESTION        = 'suggestion';
 
-	public const OFFLINE_METHODS = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID );
+	public const OFFLINE_METHODS = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID );
 
 	public const EXTENSION_NOT_INSTALLED = 'not_installed';
 	public const EXTENSION_INSTALLED     = 'installed';
@@ -86,43 +87,44 @@ class PaymentsProviders {
 	 * @var \class-string[]
 	 */
 	private array $payment_gateways_providers_class_map = array(
-		WC_Gateway_BACS::ID           => WCCore::class,
-		WC_Gateway_Cheque::ID         => WCCore::class,
-		WC_Gateway_COD::ID            => WCCore::class,
-		WC_Gateway_Paypal::ID         => WCCore::class,
-		'woocommerce_payments'        => WooPayments::class,
-		'ppcp-gateway'                => PayPal::class,
-		'stripe'                      => Stripe::class,
-		'stripe_*'                    => Stripe::class,
-		'mollie'                      => Mollie::class,
-		'mollie_wc_gateway_*'         => Mollie::class, // Target all the Mollie gateways.
-		'amazon_payments_advanced*'   => AmazonPay::class,
-		'woo-mercado-pago-*'          => MercadoPago::class,
-		'affirm'                      => Affirm::class,
-		'klarna_payments'             => Klarna::class,
-		'afterpay'                    => AfterpayClearpay::class,
-		'clearpay'                    => AfterpayClearpay::class,
-		'antom_*'                     => Antom::class,
-		'razorpay'                    => Razorpay::class,
-		'paystack'                    => Paystack::class,
-		'paystack-*'                  => Paystack::class,
-		'payfast'                     => Payfast::class,
-		'payoneer-*'                  => Payoneer::class,
-		'payubiz'                     => PayUIndia::class,
-		'paymob'                      => Paymob::class,
-		'paymob-*'                    => Paymob::class,
-		'airwallex_*'                 => Airwallex::class,
-		'vivawallet*'                 => Vivacom::class,
-		'tilopay'                     => Tilopay::class,
-		'helio'                       => HelioPay::class,
-		'paytrail'                    => Paytrail::class,
-		'monei'                       => Monei::class,
-		'monei_*'                     => Monei::class,
-		'gocardless'                  => GoCardless::class,
-		'kco'                         => KlarnaCheckout::class,
-		'visa_acceptance_solutions_*' => Visa::class,
-		'eway'                        => Eway::class,
-		'dibs_easy'                   => NexiCheckout::class,
+		WC_Gateway_BACS::ID             => WCCore::class,
+		WC_Gateway_Cheque::ID           => WCCore::class,
+		WC_Gateway_COD::ID              => WCCore::class,
+		\WC_Gateway_Pay_At_Location::ID => WCCore::class,
+		WC_Gateway_Paypal::ID           => WCCore::class,
+		'woocommerce_payments'          => WooPayments::class,
+		'ppcp-gateway'                  => PayPal::class,
+		'stripe'                        => Stripe::class,
+		'stripe_*'                      => Stripe::class,
+		'mollie'                        => Mollie::class,
+		'mollie_wc_gateway_*'           => Mollie::class, // Target all the Mollie gateways.
+		'amazon_payments_advanced*'     => AmazonPay::class,
+		'woo-mercado-pago-*'            => MercadoPago::class,
+		'affirm'                        => Affirm::class,
+		'klarna_payments'               => Klarna::class,
+		'afterpay'                      => AfterpayClearpay::class,
+		'clearpay'                      => AfterpayClearpay::class,
+		'antom_*'                       => Antom::class,
+		'razorpay'                      => Razorpay::class,
+		'paystack'                      => Paystack::class,
+		'paystack-*'                    => Paystack::class,
+		'payfast'                       => Payfast::class,
+		'payoneer-*'                    => Payoneer::class,
+		'payubiz'                       => PayUIndia::class,
+		'paymob'                        => Paymob::class,
+		'paymob-*'                      => Paymob::class,
+		'airwallex_*'                   => Airwallex::class,
+		'vivawallet*'                   => Vivacom::class,
+		'tilopay'                       => Tilopay::class,
+		'helio'                         => HelioPay::class,
+		'paytrail'                      => Paytrail::class,
+		'monei'                         => Monei::class,
+		'monei_*'                       => Monei::class,
+		'gocardless'                    => GoCardless::class,
+		'kco'                           => KlarnaCheckout::class,
+		'visa_acceptance_solutions_*'   => Visa::class,
+		'eway'                          => Eway::class,
+		'dibs_easy'                     => NexiCheckout::class,
 	);
 
 	/**
