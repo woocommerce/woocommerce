@@ -224,7 +224,7 @@ class Server {
 			'ping'                      => 'WC_REST_Ping_V4_Controller',
 			'fulfillments'              => 'WC_REST_Fulfillments_V4_Controller',
 			'products'                  => 'WC_REST_Products_V4_Controller',
-      'customers'                 => CustomersController::class,
+			'customers'                 => CustomersController::class,
 			'order-notes'               => OrderNotesController::class,
 			'shipping-zones'            => ShippingZonesController::class,
 			'shipping-zone-method'      => ShippingZoneMethodController::class,
