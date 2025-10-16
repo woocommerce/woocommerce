@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Filter product class in REST API like in `WC_Product_Factory::get_product_classname()`
