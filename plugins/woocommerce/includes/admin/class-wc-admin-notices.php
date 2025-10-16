@@ -216,7 +216,11 @@ class WC_Admin_Notices {
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
 		self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
-		delete_option( 'woocommerce_admin_notice_' . $name );
+
+		$option_name = 'woocommerce_admin_notice_' . $name;
+		if ( false !== get_option( $option_name, false ) ) {
+			delete_option( $option_name );
+		}
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
