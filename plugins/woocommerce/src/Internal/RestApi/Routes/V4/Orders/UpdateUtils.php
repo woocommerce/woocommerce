@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
@@ -251,7 +252,10 @@ class UpdateUtils {
 						)
 					),
 					false,
-					true
+					true,
+					array(
+						'note_type' => OrderNoteType::PRODUCT_STOCK,
+					)
 				);
 			}
 		}
