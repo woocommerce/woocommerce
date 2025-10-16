@@ -125,29 +125,13 @@ class AgenticSettingsPage {
 				),
 			),
 			array(
-				'title'             => __( 'Terms of Service URL', 'woocommerce' ),
+				'title'             => __( 'Terms and Conditions URL', 'woocommerce' ),
 				'desc'              => sprintf(
 					/* translators: %s: URL to WooCommerce advanced settings */
 					__( 'Configure your Terms and Conditions page in <a href="%s">WooCommerce &gt; Settings &gt; Advanced &gt; Page setup</a>.', 'woocommerce' ),
 					esc_url( $advanced_settings_url )
 				),
 				'id'                => 'woocommerce_agentic_terms_url_display',
-				'type'              => 'text',
-				'css'               => 'min-width:400px;',
-				'default'           => $terms_url,
-				'custom_attributes' => array(
-					'disabled' => 'disabled',
-					'readonly' => 'readonly',
-				),
-			),
-			array(
-				'title'             => __( 'Return Policy URL', 'woocommerce' ),
-				'desc'              => sprintf(
-					/* translators: %s: URL to WooCommerce advanced settings */
-					__( 'Defaults to your Terms of Service page. Configure in <a href="%s">WooCommerce &gt; Settings &gt; Advanced &gt; Page setup</a>.', 'woocommerce' ),
-					esc_url( $advanced_settings_url )
-				),
-				'id'                => 'woocommerce_agentic_returns_url_display',
 				'type'              => 'text',
 				'css'               => 'min-width:400px;',
 				'default'           => $terms_url,
