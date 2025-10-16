@@ -57,7 +57,10 @@ class AgenticController implements RegisterHooksInterface {
 	 * @param array $integrations Existing integrations.
 	 * @return array Modified integrations.
 	 */
-	public function add_agentic_commerce_integration( $integrations ) {
+	public function add_agentic_commerce_integration( $integrations ): array {
+		if ( ! is_array( $integrations ) ) {
+			$integrations = array();
+		}
 		$integrations[] = AgenticCommerceIntegration::class;
 		return $integrations;
 	}
