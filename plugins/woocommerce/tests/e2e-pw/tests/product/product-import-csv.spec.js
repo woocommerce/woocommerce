@@ -263,7 +263,6 @@ test.describe( 'Import Products from a CSV file', () => {
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
 				productNamesOverride.length
 			);
-
 			const productTitles = await page
 				.locator( 'a.row-title' )
 				.allInnerTexts();
