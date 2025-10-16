@@ -15,7 +15,10 @@ import WooPaymentsStepHeader from '../../components/header';
 import { useOnboardingContext } from '../../data/onboarding-context';
 import { WC_ASSET_URL } from '~/utils/admin-settings';
 import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
-import { TESTING_ACCOUNT_STEP_ID } from '~/settings-payments/onboarding/providers/woopayments/steps';
+import {
+	TESTING_ACCOUNT_STEP_ID,
+	LIVE_ACCOUNT_STEP_ID,
+} from '~/settings-payments/onboarding/providers/woopayments/steps';
 import './style.scss';
 
 const TestOrLiveAccountStep = () => {
@@ -29,6 +32,11 @@ const TestOrLiveAccountStep = () => {
 	} = useOnboardingContext();
 	const [ isContinueButtonLoading, setIsContinueButtonLoading ] =
 		useState( false );
+
+	const testAccountStepActions = getStepByKey(
+		TESTING_ACCOUNT_STEP_ID
+	)?.actions;
+	const canCreateTestAccount = testAccountStepActions?.finish?.href;
 
 	return (
 		<>
@@ -102,31 +110,61 @@ const TestOrLiveAccountStep = () => {
 										}
 									);
 
-									const testAccountStep = getStepByKey(
-										TESTING_ACCOUNT_STEP_ID
-									);
+									if ( canCreateTestAccount ) {
+										// Mark the test account as finished.
+										const actionUrl =
+											testAccountStepActions?.finish
+												?.href;
 
-									const actionUrl =
-										testAccountStep?.actions?.finish?.href;
-
-									if ( actionUrl ) {
-										apiFetch( {
-											url: actionUrl,
-											method: 'POST',
-										} )
-											.then( () => {
-												setIsContinueButtonLoading(
-													false
-												);
-
-												refreshStoreData();
+										if ( actionUrl ) {
+											apiFetch( {
+												url: actionUrl,
+												method: 'POST',
 											} )
-											.catch( () => {
-												// Handle any errors that occur during the process.
-												setIsContinueButtonLoading(
-													false
-												);
-											} );
+												.then( () => {
+													setIsContinueButtonLoading(
+														false
+													);
+
+													refreshStoreData();
+												} )
+												.catch( () => {
+													// Handle any errors that occur during the process.
+													setIsContinueButtonLoading(
+														false
+													);
+												} );
+										}
+									} else {
+										// If no test step is present, start the live account creation process directly.
+										const liveAccountStep =
+											getStepByKey(
+												LIVE_ACCOUNT_STEP_ID
+											);
+
+										const liveAccountActionURL =
+											liveAccountStep?.actions?.start
+												?.href;
+
+										if ( liveAccountActionURL ) {
+											apiFetch( {
+												url: liveAccountActionURL,
+												method: 'POST',
+											} )
+												.then( () => {
+													setIsContinueButtonLoading(
+														false
+													);
+
+													refreshStoreData();
+												} )
+												.catch( () => {
+													// Handle any errors that occur during the process.
+													setIsContinueButtonLoading(
+														false
+													);
+												} );
+										}
 									}
 								} }
 								isBusy={ isContinueButtonLoading }
@@ -138,59 +176,63 @@ const TestOrLiveAccountStep = () => {
 								) }
 							</Button>
 
-							<div className="woocommerce-payments-test-or-live-account-step__success_content_or-divider">
-								<hr />
-								{ __( 'OR', 'woocommerce' ) }
-								<hr />
-							</div>
-
-							<div className="woocommerce-woopayments-modal__content__item-flex">
-								<img
-									src={
-										WC_ASSET_URL +
-										'images/icons/post-list.svg'
-									}
-									alt=""
-									role="presentation"
-								/>
-								<div className="woocommerce-woopayments-modal__content__item-flex__description">
-									<h3>
-										{ __(
-											'Test payments first, activate later',
-											'woocommerce'
-										) }
-									</h3>
-									<div>
-										<p>
-											{ interpolateComponents( {
-												mixedString: __(
-													"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll need to activate payments later to process real transactions.",
-													'woocommerce'
-												),
-												components: {
-													link: (
-														<Link
-															href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
-															target="_blank"
-															rel="noreferrer"
-															type="external"
-														/>
-													),
-												},
-											} ) }
-										</p>
+							{ canCreateTestAccount && (
+								<>
+									<div className="woocommerce-payments-test-or-live-account-step__success_content_or-divider">
+										<hr />
+										{ __( 'OR', 'woocommerce' ) }
+										<hr />
 									</div>
-								</div>
-							</div>
-							<Button
-								variant="secondary"
-								disabled={ isContinueButtonLoading }
-								onClick={ () => {
-									navigateToNextStep();
-								} }
-							>
-								{ __( 'Test payments', 'woocommerce' ) }
-							</Button>
+
+									<div className="woocommerce-woopayments-modal__content__item-flex">
+										<img
+											src={
+												WC_ASSET_URL +
+												'images/icons/post-list.svg'
+											}
+											alt=""
+											role="presentation"
+										/>
+										<div className="woocommerce-woopayments-modal__content__item-flex__description">
+											<h3>
+												{ __(
+													'Test payments first, activate later',
+													'woocommerce'
+												) }
+											</h3>
+											<div>
+												<p>
+													{ interpolateComponents( {
+														mixedString: __(
+															"A test account will be created for you to {{link}}test payments on your store{{/link}}. You'll need to activate payments later to process real transactions.",
+															'woocommerce'
+														),
+														components: {
+															link: (
+																<Link
+																	href="https://woocommerce.com/document/woopayments/testing-and-troubleshooting/test-accounts/"
+																	target="_blank"
+																	rel="noreferrer"
+																	type="external"
+																/>
+															),
+														},
+													} ) }
+												</p>
+											</div>
+										</div>
+									</div>
+									<Button
+										variant="secondary"
+										disabled={ isContinueButtonLoading }
+										onClick={ () => {
+											navigateToNextStep();
+										} }
+									>
+										{ __( 'Test payments', 'woocommerce' ) }
+									</Button>
+								</>
+							) }
 						</div>
 					</div>
 				</div>
