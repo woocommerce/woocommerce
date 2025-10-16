@@ -7,12 +7,14 @@
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-notices.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Notices as PayPalNotices;
 
 /**
  * Class WC_Gateway_Paypal_Notices_Test
  */
-class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
+class NoticesTests extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for `add_paypal_migration_notice` method.
 	 *
@@ -50,15 +52,15 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 
 		update_user_meta( $user_id, 'dismissed_paypal_migration_completed_notice', $notice_dismissed );
 
-		$mocked_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+		$mocked_gateway = $this->getMockBuilder( \WC_Gateway_Paypal::class )
 			->setMethods( array( 'should_use_orders_v2' ) )
 			->getMock();
 		$mocked_gateway->method( 'should_use_orders_v2' )
 			->willReturn( true );
 
-		WC_Gateway_Paypal::set_instance( $mocked_gateway );
+		\WC_Gateway_Paypal::set_instance( $mocked_gateway );
 
-		$notices = new WC_Gateway_Paypal_Notices();
+		$notices = new PayPalNotices();
 
 		ob_start();
 		$notices->add_paypal_migration_notice();
@@ -138,7 +140,7 @@ class WC_Gateway_Paypal_Notices_Test extends \WC_Unit_Test_Case {
 			set_current_screen( 'dashboard' );
 		}
 
-		$mocked_notices = $this->getMockBuilder( WC_Gateway_Paypal_Notices::class )
+		$mocked_notices = $this->getMockBuilder( PayPalNotices::class )
 			->setMethods( array( 'add_paypal_migration_notice' ) )
 			->getMock();
 		$mocked_notices->expects( $expected_to_render ? $this->once() : $this->never() )
