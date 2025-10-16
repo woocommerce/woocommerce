@@ -54,6 +54,7 @@ describe( 'Maybe Modify Decimal Utils - maybeModifyDecimal', () => {
 			expect( maybeModifyDecimal( '999.00', config ) ).toBe( '999,00' );
 			expect( maybeModifyDecimal( '.5', config ) ).toBe( ',5' );
 			expect( maybeModifyDecimal( '5.', config ) ).toBe( '5,' );
+			expect( maybeModifyDecimal( '1234.56', config ) ).toBe('1234,56');
 		} );
 
 		test( 'should replace dot with other decimal separators', () => {
@@ -72,6 +73,7 @@ describe( 'Maybe Modify Decimal Utils - maybeModifyDecimal', () => {
 			expect( maybeModifyDecimal( '123.45', config ) ).toBe( '123.45' );
 			expect( maybeModifyDecimal( '0.99', config ) ).toBe( '0.99' );
 			expect( maybeModifyDecimal( '999.00', config ) ).toBe( '999.00' );
+			expect( maybeModifyDecimal( '1234.56', config ) ).toBe('1234.56');
 		} );
 
 		test( 'should not modify values without decimal points', () => {
