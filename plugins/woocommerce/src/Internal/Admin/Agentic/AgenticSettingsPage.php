@@ -274,13 +274,13 @@ class AgenticSettingsPage {
 		// Update OpenAI settings.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['openai'] = array(
-			'bearer_token'     => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
+			'bearer_token'   => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
 				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
 				: '',
-			'webhook_url'      => isset( $_POST['woocommerce_agentic_openai_webhook_url'] )
+			'webhook_url'    => isset( $_POST['woocommerce_agentic_openai_webhook_url'] )
 				? esc_url_raw( wp_unslash( $_POST['woocommerce_agentic_openai_webhook_url'] ) )
 				: '',
-			'webhook_secret'   => isset( $_POST['woocommerce_agentic_openai_webhook_secret'] )
+			'webhook_secret' => isset( $_POST['woocommerce_agentic_openai_webhook_secret'] )
 				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_webhook_secret'] ) )
 				: '',
 		);
