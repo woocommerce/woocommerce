@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Moves all the new PayPal Standard files to the src folder, allowing them to be autoloaded, and adds new unit tests for the same classes
