@@ -557,9 +557,6 @@ class WooCommerceProductImporter {
 			}
 		}
 
-		if ( ! empty( $product_data['tax_status'] ) ) {
-			$product->set_tax_status( $product_data['tax_status'] );
-		}
 	}
 
 	/**
