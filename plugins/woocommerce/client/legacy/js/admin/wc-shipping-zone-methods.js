@@ -510,7 +510,6 @@
 						// Cost values are saved to the DB with thousands separators stripped and decimal separators converted to a dot.
 						// If value is not a formula, then we need to check for incorrect decimal separator in the value returned
 						// from the DB, and replace it with the correct one before passing it to the localiseMonetaryValue function.
-						// Formula detection regex matches: brackets [], parentheses (), operators */+-, quotes "', and letters a-z and A-Z.
 						// Note: Negative flat rate shipping cost numbers are not supported.
 						value = WCMaybeModifyDecimal.maybeModifyDecimal( value, config );
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );

@@ -18,9 +18,6 @@ function maybeModifyDecimal( value, config ) {
 		|| ! config
 		|| typeof config !== 'object'
 		|| ! config.decimalSeparator
-		|| config === null
-		|| config === undefined
-		|| Object.keys(config).length === 0
 	) {
 		return value;
 	}
