@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 
+use WC_Gateway_Pay_At_Location;
 use WC_Payment_Gateway;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
@@ -34,6 +35,8 @@ class WCCore extends PaymentGateway {
 				return plugins_url( 'assets/images/payment_methods/cheque.svg', WC_PLUGIN_FILE );
 			case WC_Gateway_COD::ID:
 				return plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE );
+			case WC_Gateway_Pay_At_Location::ID:
+				return plugins_url( 'assets/images/payment_methods/cod.svg', WC_PLUGIN_FILE );
 			case WC_Gateway_Paypal::ID:
 				return plugins_url( 'assets/images/payment_methods/72x72/paypal.png', WC_PLUGIN_FILE );
 		}
@@ -57,6 +60,7 @@ class WCCore extends PaymentGateway {
 				return property_exists( $payment_gateway, 'account_details' ) && ! empty( $payment_gateway->account_details );
 			case WC_Gateway_Cheque::ID:
 			case WC_Gateway_COD::ID:
+			case WC_Gateway_Pay_At_Location::ID:
 				// There is no account setup for these gateways, so we return true.
 				return true;
 			case WC_Gateway_Paypal::ID:
@@ -82,6 +86,7 @@ class WCCore extends PaymentGateway {
 		switch ( $payment_gateway->id ) {
 			case WC_Gateway_BACS::ID:
 			case WC_Gateway_Cheque::ID:
+			case WC_Gateway_Pay_At_Location::ID:
 			case WC_Gateway_COD::ID:
 				return false; // These gateways do not have a test mode onboarding.
 			case WC_Gateway_Paypal::ID:
