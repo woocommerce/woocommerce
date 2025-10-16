@@ -7,13 +7,11 @@
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 /**
  * Class WC_Gateway_Paypal_Test.
  */
 class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
-
 	/**
 	 * Set up the test environment.
 	 */
@@ -46,7 +44,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ) );
@@ -63,7 +61,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
@@ -84,7 +82,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$this->assertNotNull( $request->create_paypal_order( $order ) );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
@@ -198,5 +196,302 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 	 */
 	public function return_blog_token( $value ) {
 		return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
+	}
+
+	/**
+	 * Tests for the `get_paypal_order_details` method.
+	 *
+	 * @param string      $paypal_order_id            The PayPal order ID.
+	 * @param string|null $expected_exception         The expected exception class, or null if no exception is expected.
+	 * @param string|null $expected_exception_message The expected exception message, or null if no exception is expected.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_get_paypal_order_details
+	 */
+	public function test_get_paypal_order_details( string $paypal_order_id, ?string $expected_exception, ?string $expected_exception_message ) {
+		$response_mock_ref = function () use ( $paypal_order_id ) {
+			if ( 'ERROR_ID' === $paypal_order_id ) {
+				return new WP_Error( 'error', 'Some error occurred.' );
+			}
+
+			if ( 'FAILED_ID' === $paypal_order_id ) {
+				return array(
+					'response' => array(
+						'code' => 500,
+					),
+					'body'     => wp_json_encode(
+						array(
+							'name'    => 'SOME_ERROR',
+							'details' => array(
+								array( 'issue' => 'SOME_ISSUE' ),
+							),
+						)
+					),
+				);
+			}
+
+			return array(
+				'response' => array(
+					'code' => 200,
+				),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
+		if ( $expected_exception ) {
+			$this->expectException( $expected_exception );
+			$this->expectExceptionMessage( $expected_exception_message );
+		}
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$response_data = $request->get_paypal_order_details( $paypal_order_id );
+
+		// Clean up the filter.
+		remove_filter( 'pre_http_request', $response_mock_ref );
+
+		if ( ! $expected_exception ) {
+			$this->assertIsArray( $response_data );
+		}
+	}
+
+	/**
+	 * Data provider for the `test_get_paypal_order_details` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_get_paypal_order_details(): array {
+		return array(
+			'order details error response'   => array(
+				'PayPal order ID'            => 'ERROR_ID',
+				'expected exception'         => Exception::class,
+				'expected exception message' => 'PayPal order details request failed: Some error occurred.',
+			),
+			'order details failed response'  => array(
+				'PayPal order ID'            => 'FAILED_ID',
+				'expected exception'         => Exception::class,
+				'expected exception message' => 'PayPal order details request failed. HTTP 500',
+			),
+			'order details success response' => array(
+				'PayPal order ID'            => 'SUCCESS_ID',
+				'expected exception'         => null,
+				'expected exception message' => null,
+			),
+		);
+	}
+
+	/**
+	 * Tests for the `get_paypal_order_purchase_unit_amount` method.
+	 *
+	 * @param int   $cart_tax       The cart tax amount.
+	 * @param int   $shipping_tax   The shipping tax amount.
+	 * @param int   $discount_total The discount total amount.
+	 * @param int   $total          The order total amount.
+	 * @param array $expected       The expected purchase unit amount array.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_get_paypal_order_purchase_unit_amount
+	 */
+	public function test_get_paypal_order_purchase_unit_amount( int $cart_tax, int $shipping_tax, int $discount_total, int $total, array $expected ): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_cart_tax( $cart_tax );
+		$order->set_shipping_tax( $shipping_tax );
+		$order->set_discount_total( $discount_total );
+		$order->set_total( $total );
+		$order->save();
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
+		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * Data provider for `test_get_paypal_order_purchase_unit_amount` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_get_paypal_order_purchase_unit_amount(): array {
+		return array(
+			'test 1' => array(
+				'cart tax'       => 10,
+				'shipping tax'   => 0,
+				'discount total' => 0,
+				'total'          => 60,
+				'expected'       => array(
+					'currency_code' => 'USD',
+					'value'         => '60.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
+				),
+			),
+			'test 2' => array(
+				'cart tax'       => 0,
+				'shipping tax'   => 5,
+				'discount total' => 0,
+				'total'          => 55,
+				'expected'       => array(
+					'currency_code' => 'USD',
+					'value'         => '55.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '5.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
+				),
+			),
+			'test 3' => array(
+				'cart tax'       => 0,
+				'shipping tax'   => 0,
+				'discount total' => 0,
+				'total'          => 50,
+				'expected'       => array(
+					'currency_code' => 'USD',
+					'value'         => '50.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '0.00',
+						),
+					),
+				),
+			),
+			'test 4' => array(
+				'cart tax'       => 10,
+				'shipping tax'   => 0,
+				'discount total' => 5,
+				'total'          => 55,
+				'expected'       => array(
+					'currency_code' => 'USD',
+					'value'         => '55.00',
+					'breakdown'     => array(
+						'item_total' => array(
+							'currency_code' => 'USD',
+							'value'         => '40.00',
+						),
+						'shipping'   => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'tax_total'  => array(
+							'currency_code' => 'USD',
+							'value'         => '10.00',
+						),
+						'discount'   => array(
+							'currency_code' => 'USD',
+							'value'         => '5.00',
+						),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Tests for the `fetch_paypal_client_id` method.
+	 *
+	 * @param array       $response The mocked HTTP response.
+	 * @param string|null $client_id The expected client ID, or null if none is.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_fetch_paypal_client_id
+	 */
+	public function test_fetch_paypal_client_id( $response, $client_id ): void {
+		$response_mock_ref = function () use ( $response ) {
+			return $response;
+		};
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
+		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+
+		$actual = $request->fetch_paypal_client_id();
+
+		// Clean up the filter.
+		remove_filter( 'pre_http_request', $response_mock_ref );
+
+		$this->assertEquals( $client_id, $actual );
+	}
+
+	/**
+	 * Data provider for the `test_fetch_paypal_client_id` method.
+	 *
+	 * @return array
+	 */
+	public function provide_test_fetch_paypal_client_id(): array {
+		$error_response   = new WP_Error( 'error', 'Some error occurred.' );
+		$invalid_response = array(
+			'response' => array(
+				'code' => 200,
+			),
+			'body'     => 'Invalid JSON',
+		);
+		$valid_response   = array(
+			'response' => array(
+				'code' => 200,
+			),
+			'body'     => wp_json_encode(
+				array(
+					'client_id' => 'SOME_CLIENT_ID',
+				)
+			),
+		);
+
+		return array(
+			'request error'    => array(
+				'response'  => $error_response,
+				'client ID' => null,
+			),
+			'invalid response' => array(
+				'response'  => $invalid_response,
+				'client ID' => null,
+			),
+			'valid response'   => array(
+				'response'  => $valid_response,
+				'client ID' => 'SOME_CLIENT_ID',
+			),
+		);
 	}
 }

@@ -6,11 +6,11 @@
  */
 
 declare(strict_types=1);
+
 /**
  * Class WC_Gateway_Paypal_Test.
  */
 class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
-
 	/**
 	 * @var string Dummy identifiable transaction ID.
 	 */
@@ -222,5 +222,245 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 				$this->assertArrayHasKey( $key, $form_fields, "Legacy field '{$key}' should be present when Orders v2 is disabled" );
 			}
 		}
+	}
+
+	/**
+	 * Tests for the `update_addresses_in_order` method.
+	 *
+	 * @param int  $order_id Order ID to test with.
+	 * @param bool $should_use_orders_v2 Whether Orders v2 is enabled.
+	 * @param bool $mock_jetpack_params Whether to mock valid Jetpack params.
+	 * @param bool $expect_to_save Whether we expect the order to be saved.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_update_addresses_in_order
+	 */
+	public function test_update_addresses_in_order(
+		int $order_id,
+		bool $should_use_orders_v2,
+		bool $mock_jetpack_params,
+		bool $expect_to_save
+	) {
+		$return_valid_site_id = function () {
+			return array( 'id' => 12345 );
+		};
+		$return_blog_token    = function () {
+			return array( 'blog_token' => 'IAM.AJETPACKBLOGTOKEN' );
+		};
+
+		if ( $mock_jetpack_params ) {
+			add_filter( 'pre_option_jetpack_options', $return_valid_site_id );
+			add_filter( 'pre_option_jetpack_private_options', $return_blog_token );
+		}
+
+		$response_mock_ref = function () {
+			return array(
+				'response' => array(
+					'code' => 200,
+				),
+				'body'     => wp_json_encode( array() ),
+			);
+		};
+		add_filter( 'pre_http_request', $response_mock_ref, 10, 2 );
+
+		$triggered = false;
+		$callback  = static function () use ( &$triggered ) {
+			$triggered = true;
+		};
+		add_action( 'woocommerce_before_order_object_save', $callback );
+
+		/**
+		 * @var WC_Gateway_Paypal $mock_gateway Mocked gateway with Orders v2 enabled.
+		 */
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )
+			->willReturn( $should_use_orders_v2 );
+		$mock_gateway->testmode = false;
+
+		$mock_gateway->update_addresses_in_order( $order_id );
+
+		// Clean up after test.
+		remove_filter( 'pre_option_jetpack_options', $return_valid_site_id );
+		remove_filter( 'pre_option_jetpack_private_options', $return_blog_token );
+		remove_action( 'woocommerce_before_order_object_save', $callback );
+		remove_filter( 'pre_http_request', $response_mock_ref );
+
+		$this->assertSame( $expect_to_save, $triggered );
+
+		// If we expected the order to be saved, verify that addresses were set.
+		if ( $expect_to_save ) {
+			$order = wc_get_order( $order_id );
+
+			$this->assertEquals( 'US', $order->get_billing_country() );
+			$this->assertEquals( '12345', $order->get_billing_postcode() );
+			$this->assertEquals( 'NY', $order->get_billing_state() );
+			$this->assertEquals( 'WooCity', $order->get_billing_city() );
+			$this->assertEquals( 'WooAddress', $order->get_billing_address_1() );
+			$this->assertEquals( '', $order->get_billing_address_2() );
+		}
+	}
+
+	/**
+	 * Data provider for `test_update_addresses_in_order`.
+	 *
+	 * @return array[]
+	 * @throws WC_Data_Exception If order creation fails.
+	 */
+	public function provide_test_update_addresses_in_order(): array {
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'paypal' );
+		$order->update_meta_data( '_paypal_order_id', 'TEST_PAYPAL_ORDER_ID' );
+		$order->save();
+
+		$order_not_paypal = WC_Helper_Order::create_order();
+		$order_not_paypal->set_payment_method( 'bacs' );
+		$order_not_paypal->save();
+
+		$order_missing_paypal_id = WC_Helper_Order::create_order();
+		$order_missing_paypal_id->set_payment_method( WC_Gateway_Paypal::ID );
+		$order_missing_paypal_id->save();
+
+		return array(
+			'order not found'         => array(
+				'order ID'             => 0,
+				'should use orders v2' => true,
+				'mock Jetpack params'  => true,
+				'expect to save'       => false,
+			),
+			'invalid payment method'  => array(
+				'order ID'             => $order_not_paypal->get_id(),
+				'should use orders v2' => true,
+				'mock Jetpack params'  => true,
+				'expect to save'       => false,
+			),
+			'orders v2 not enabled'   => array(
+				'order ID'             => $order->get_id(),
+				'should use orders v2' => false,
+				'mock Jetpack params'  => true,
+				'expect to save'       => false,
+			),
+			'missing PayPal order ID' => array(
+				'order ID'             => $order_missing_paypal_id->get_id(),
+				'should use orders v2' => true,
+				'mock Jetpack params'  => true,
+				'expect to save'       => false,
+			),
+			'exception thrown'        => array(
+				'order ID'             => $order->get_id(),
+				'should use orders v2' => true,
+				'mock Jetpack params'  => false,
+				'expect to save'       => false,
+			),
+			'successful update'       => array(
+				'order ID'             => $order->get_id(),
+				'should use orders v2' => true,
+				'mock Jetpack params'  => true,
+				'expect to save'       => true,
+			),
+		);
+	}
+
+	/**
+	 * Tests for the `enqueue_scripts` method.
+	 *
+	 * @param bool   $gateway_enabled Whether the gateway is enabled.
+	 * @param string $client_id       The client ID to set in options.
+	 * @param bool   $script_expected Whether we expect the script to be enqueued.
+	 * @return void
+	 *
+	 * @dataProvider provide_test_enqueue_scripts
+	 */
+	public function test_enqueue_scripts( $gateway_enabled, $client_id, $script_expected ) {
+		// Enable the gateway.
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => $gateway_enabled ? 'yes' : 'no' ) );
+
+		// Set cached client ID.
+		update_option( 'woocommerce_paypal_client_id_live', $client_id );
+
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+
+		/**
+		 * @var WC_Gateway_Paypal $mock_gateway Mocked gateway with Orders v2 enabled.
+		 */
+		$mock_gateway = $this->getMockBuilder( WC_Gateway_Paypal::class )
+			->onlyMethods( array( 'should_use_orders_v2' ) )
+			->getMock();
+		$mock_gateway->method( 'should_use_orders_v2' )->willReturn( true );
+		$mock_gateway->testmode = false;
+
+		$mock_gateway->enqueue_scripts();
+
+		// Clean up.
+		delete_option( 'woocommerce_paypal_settings' );
+		delete_option( 'woocommerce_paypal_client_id_live' );
+		remove_filter( 'woocommerce_is_cart', '__return_true' );
+
+		$this->assertEquals( $script_expected, wp_script_is( 'paypal-standard-sdk', 'enqueued' ) );
+	}
+
+	/**
+	 * Data provider for `test_enqueue_scripts`.
+	 *
+	 * @return array[]
+	 */
+	public function provide_test_enqueue_scripts(): array {
+		return array(
+			'gateway disabled'  => array(
+				'gateway enabled' => false,
+				'client ID'       => 'test_client_id',
+				'script expected' => false,
+			),
+			'missing client ID' => array(
+				'gateway enabled' => true,
+				'client ID'       => '',
+				'script expected' => false,
+			),
+			'script enqueued'   => array(
+				'gateway enabled' => true,
+				'client ID'       => 'test_client_id',
+				'script expected' => true,
+			),
+		);
+	}
+
+	/**
+	 * Tests for the `add_paypal_sdk_attributes` method.
+	 *
+	 * @return void
+	 */
+	public function test_add_paypal_sdk_attributes() {
+		$gateway = new WC_Gateway_Paypal();
+
+		// Without the JS SDK.
+		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => '' ) );
+		$this->assertSame( array( 'id' => '' ), $actual );
+
+		// With the JS SDK.
+		$actual = $gateway->add_paypal_sdk_attributes( array( 'id' => 'paypal-standard-sdk-js' ) );
+		$this->assertSame(
+			array(
+				'id'                          => 'paypal-standard-sdk-js',
+				'data-page-type'              => 'checkout',
+				'data-partner-attribution-id' => 'Woo_Cart_CoreUpgrade',
+			),
+			$actual
+		);
+	}
+
+	/**
+	 * Tests for the `render_buttons_container` method.
+	 *
+	 * @return void
+	 */
+	public function test_render_buttons_container() {
+		$gateway = new WC_Gateway_Paypal();
+
+		ob_start();
+		$gateway->render_buttons_container();
+		$output = ob_get_clean();
+
+		$this->assertSame( '<div id="paypal-standard-container"></div>', trim( $output ) );
 	}
 }

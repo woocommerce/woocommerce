@@ -7,18 +7,18 @@
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once __DIR__ . '/class-wc-gateway-paypal-constants.php';
 }
 
 /**
  * Helper for PayPal gateway.
  */
-class WC_Gateway_Paypal_Helper {
+class Helper {
 	/**
 	 * Check if the PayPal gateway is enabled.
 	 *
@@ -53,7 +53,7 @@ class WC_Gateway_Paypal_Helper {
 	 * Get the WC order from the PayPal custom ID.
 	 *
 	 * @param string $custom_id The custom ID string from the PayPal order.
-	 * @return WC_Order|null
+	 * @return \WC_Order|null
 	 */
 	public static function get_wc_order_from_paypal_custom_id( $custom_id ) {
 		if ( ! is_string( $custom_id ) || '' === $custom_id ) {
@@ -114,7 +114,7 @@ class WC_Gateway_Paypal_Helper {
 
 			if ( is_array( $value ) ) {
 				$redacted_data[ $key ] = self::redact_data( $value );
-			} elseif ( in_array( $key, WC_Gateway_Paypal_Constants::FIELDS_TO_REDACT, true ) ) {
+			} elseif ( in_array( $key, PayPalConstants::FIELDS_TO_REDACT, true ) ) {
 				$redacted_data[ $key ] = '[redacted]';
 			} else {
 				// Keep non-PII data as is.

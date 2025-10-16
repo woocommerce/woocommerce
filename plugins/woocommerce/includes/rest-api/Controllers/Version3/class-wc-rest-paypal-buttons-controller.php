@@ -12,15 +12,8 @@ declare(strict_types=1);
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Constants' ) ) {
-	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-constants.php';
-}
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-}
-
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 /**
  * REST API PayPal buttons controller class.
@@ -113,7 +106,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		}
 
 		$payment_source = isset( $data['payment_source'] ) ? sanitize_text_field( $data['payment_source'] ) : '';
-		if ( empty( $payment_source ) || ! in_array( $payment_source, WC_Gateway_Paypal_Constants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
+		if ( empty( $payment_source ) || ! in_array( $payment_source, PayPalConstants::SUPPORTED_PAYMENT_SOURCES, true ) ) {
 			return new WP_REST_Response( array( 'error' => 'Missing/Invalid payment source: ' . esc_html( $payment_source ) ), 400 );
 		}
 
@@ -139,7 +132,7 @@ class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
 		$order->set_payment_method( $gateway->id );
 		$order->save();
 
-		$paypal_request = new WC_Gateway_Paypal_Request( $gateway );
+		$paypal_request = new PayPalRequest( $gateway );
 		$paypal_order   = $paypal_request->create_paypal_order(
 			$order,
 			$payment_source,
