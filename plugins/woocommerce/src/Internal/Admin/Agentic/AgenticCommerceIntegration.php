@@ -39,7 +39,7 @@ class AgenticCommerceIntegration extends \WC_Integration {
 	 * Admin options output.
 	 */
 	public function admin_options() {
-		$settings = $this->settings_page->get_settings( array(), 'agentic_commerce' );
+		$settings = $this->settings_page->get_settings( array(), $this->id );
 		\WC_Admin_Settings::output_fields( $settings );
 	}
 
