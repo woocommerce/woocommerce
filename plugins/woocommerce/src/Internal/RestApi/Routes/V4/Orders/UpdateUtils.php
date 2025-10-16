@@ -56,10 +56,9 @@ class UpdateUtils {
 	 * @throws WC_REST_Exception When fails to set any item, \WC_Data_Exception When fails to set any item.
 	 * @param WC_Order        $order Order object.
 	 * @param WP_REST_Request $request Request object.
-	 * @param bool            $creating True when creating object, false when updating.
 	 * @return void
 	 */
-	public function update_order_from_request( WC_Order $order, WP_REST_Request $request, bool $creating = false ) {
+	public function update_order_from_request( WC_Order $order, WP_REST_Request $request ) {
 		// Get data that can be edited from schema.
 		$ignore_keys = array( 'created_via', 'status', 'customer_id' );
 		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
