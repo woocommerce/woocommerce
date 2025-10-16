@@ -218,7 +218,6 @@ test.describe( 'Import Products from a CSV file', () => {
 				{ timeout: 30000 }
 			);
 
-			// Compare imported products to what's expected
 			const productTitles = await page
 				.locator( 'a.row-title' )
 				.allTextContents();
@@ -261,8 +260,6 @@ test.describe( 'Import Products from a CSV file', () => {
 			await page.locator( '#post-search-input' ).fill( 'Imported' );
 			await page.locator( '#search-submit' ).click();
 
-			// Wait for search results to load completely
-			await page.waitForSelector( 'a.row-title', { timeout: 30000 } );
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
 				productNamesOverride.length,
 				{ timeout: 30000 }
@@ -279,8 +276,7 @@ test.describe( 'Import Products from a CSV file', () => {
 
 			// Compare product prices to what's expected
 			await expect( page.locator( '.amount' ) ).toHaveCount(
-				productPricesOverride.length,
-				{ timeout: 30000 }
+				productPricesOverride.length
 			);
 			const productPrices = await page
 				.locator( '.amount' )
