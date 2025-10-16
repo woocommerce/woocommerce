@@ -56,7 +56,6 @@ class RestAbilityFactory {
 				'label'               => $ability_config['label'],
 				'description'         => $ability_config['description'],
 				'category'            => 'woocommerce-rest',
-				'show_in_rest'        => true,
 				'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
 				'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
 				'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
@@ -66,14 +65,15 @@ class RestAbilityFactory {
 					return self::check_permission( $controller, $ability_config['operation'] );
 				},
 				'ability_class'       => RestAbility::class,
+				'meta'                => array(
+					'show_in_rest' => true,
+				),
 			);
 
 			// Add readonly annotation for GET operations (list and get).
 			if ( in_array( $ability_config['operation'], array( 'list', 'get' ), true ) ) {
-				$ability_args['meta'] = array(
-					'annotations' => array(
-						'readonly' => true,
-					),
+				$ability_args['meta']['annotations'] = array(
+					'readonly' => true,
 				);
 			}
 

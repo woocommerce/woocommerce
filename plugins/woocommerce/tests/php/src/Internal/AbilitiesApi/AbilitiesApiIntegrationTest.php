@@ -33,6 +33,22 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
+		// Register test category for abilities used in tests.
+		if ( function_exists( 'wp_register_ability_category' ) ) {
+			add_action(
+				'abilities_api_categories_init',
+				function () {
+					wp_register_ability_category(
+						'test',
+						array(
+							'label'       => 'Test',
+							'description' => 'Test abilities for unit tests',
+						)
+					);
+				}
+			);
+		}
+
 		// Ensure REST API routes are registered (hook may be cleared by parent tear_down).
 		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
 			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
@@ -59,10 +75,21 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$instance_property->setValue( null );
 		}
 
-		// Reset action counter to allow abilities_api_init to fire again.
+		// Reset category registry singleton to allow fresh category registration in next test.
+		if ( class_exists( 'WP_Abilities_Category_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Abilities_Category_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
+		// Reset action counters to allow init actions to fire again.
 		global $wp_actions;
 		if ( isset( $wp_actions['abilities_api_init'] ) ) {
 			unset( $wp_actions['abilities_api_init'] );
+		}
+		if ( isset( $wp_actions['abilities_api_categories_init'] ) ) {
+			unset( $wp_actions['abilities_api_categories_init'] );
 		}
 
 		// Reset user.
@@ -172,6 +199,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'Get Test Ability',
 						'description'         => 'A test ability for testing retrieval',
+						'category'            => 'test',
 						'input_schema'        => array( 'type' => 'object' ),
 						'output_schema'       => array( 'type' => 'object' ),
 						'execute_callback'    => function ( $input ) {
@@ -183,6 +211,8 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'permission_callback' => function () {
 							return true;
 						},
+						'meta'                => array(
+						),
 					)
 				);
 			}
@@ -215,6 +245,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'Execute Test Ability',
 						'description'         => 'A test ability for testing execution',
+						'category'            => 'test',
 						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
@@ -294,6 +325,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'REST Fetch Test 1',
 						'description'         => 'First ability for REST API testing',
+						'category'            => 'test',
 						'input_schema'        => array( 'type' => 'object' ),
 						'output_schema'       => array( 'type' => 'object' ),
 						'execute_callback'    => function ( $input ) {
@@ -310,6 +342,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'REST Fetch Test 2',
 						'description'         => 'Second ability for REST API testing',
+						'category'            => 'test',
 						'input_schema'        => array( 'type' => 'object' ),
 						'output_schema'       => array( 'type' => 'object' ),
 						'execute_callback'    => function ( $input ) {
@@ -369,6 +402,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'REST Execute Test',
 						'description'         => 'Test ability for REST API execution',
+						'category'            => 'test',
 						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
@@ -447,6 +481,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'List Test 1',
 						'description'         => 'First test ability',
+						'category'            => 'test',
 						'input_schema'        => array( 'type' => 'object' ),
 						'output_schema'       => array( 'type' => 'object' ),
 						'execute_callback'    => function ( $input ) {
@@ -463,6 +498,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 					array(
 						'label'               => 'List Test 2',
 						'description'         => 'Second test ability',
+						'category'            => 'test',
 						'input_schema'        => array( 'type' => 'object' ),
 						'output_schema'       => array( 'type' => 'object' ),
 						'execute_callback'    => function ( $input ) {
