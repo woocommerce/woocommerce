@@ -1653,9 +1653,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test UPDATE endpoint with mark_as_paid action.
+	 * Test UPDATE endpoint with payment_complete action.
 	 */
-	public function test_orders_update_with_mark_as_paid_action(): void {
+	public function test_orders_update_with_payment_complete_action(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = $this->create_test_order(
 			array(
@@ -1673,7 +1673,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEmpty( $order->get_date_paid() );
 
 		$update_data = array(
-			'mark_as_paid' => true,
+			'payment_complete' => true,
 		);
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
@@ -1696,9 +1696,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test UPDATE endpoint with mark_as_paid action and transaction_id.
+	 * Test UPDATE endpoint with payment_complete action and transaction_id.
 	 */
-	public function test_orders_update_with_mark_as_paid_action_and_transaction_id(): void {
+	public function test_orders_update_with_payment_complete_action_and_transaction_id(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$order   = $this->create_test_order(
 			array(
@@ -1712,8 +1712,8 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 
 		$update_data = array(
-			'mark_as_paid'   => true,
-			'transaction_id' => 'test-transaction-123',
+			'payment_complete' => true,
+			'transaction_id'   => 'test-transaction-123',
 		);
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
@@ -1731,9 +1731,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test UPDATE endpoint with regenerate_download_permissions action.
+	 * Test UPDATE endpoint with reset_download_permissions action.
 	 */
-	public function test_orders_update_with_regenerate_download_permissions_action(): void {
+	public function test_orders_update_with_reset_download_permissions_action(): void {
 		// Create a downloadable product.
 		$product  = WC_Helper_Product::create_downloadable_product(
 			array(
@@ -1768,7 +1768,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEmpty( $initial_permissions );
 
 		$update_data = array(
-			'regenerate_download_permissions' => true,
+			'reset_download_permissions' => true,
 		);
 
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
@@ -1777,9 +1777,9 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		// Verify download permissions were regenerated.
-		$regenerated_permissions = $data_store->get_downloads_for_customer( $customer->get_id() );
-		$this->assertNotEmpty( $regenerated_permissions, print_r( $regenerated_permissions, true ) );
+		// Verify download permissions were reset.
+		$reset_permissions = $data_store->get_downloads_for_customer( $customer->get_id() );
+		$this->assertNotEmpty( $reset_permissions );
 
 		$product->delete( true );
 		$order->delete( true );
