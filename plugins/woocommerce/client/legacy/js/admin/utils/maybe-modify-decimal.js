@@ -25,6 +25,7 @@ function maybeModifyDecimal( value, config ) {
 		return value;
 	}
 
+	// Formula detection regex matches: brackets [], parentheses (), operators */+-, quotes "', and letters a-z and A-Z.
 	const formulaRegex = /[\[\]()\*\+\-\/\"'a-zA-Z]/;
 	if ( ! formulaRegex.test( value ) && '.' !== config.decimalSeparator && value.includes( '.' ) ) {
 		return value.replace( '.', config.decimalSeparator );
