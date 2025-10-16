@@ -2163,7 +2163,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	/**
 	 * Get the default entity type for version caching.
-     * See the RestApiCache trait.
+	 * See the RestApiCache trait.
 	 *
 	 * @return string|null Entity type.
 	 */
@@ -2173,7 +2173,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 	/**
 	 * Get the names of the filters that can modify the endpoint responses.
-     * See the RestApiCache trait.
+	 * See the RestApiCache trait.
 	 *
 	 * @param WP_REST_Request $request Request object.
 	 * @return array Array of filter names.
