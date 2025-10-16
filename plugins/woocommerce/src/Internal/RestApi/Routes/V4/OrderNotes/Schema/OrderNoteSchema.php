@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
 use WP_REST_Request;
 
 /**
@@ -80,6 +81,21 @@ class OrderNoteSchema extends AbstractSchema {
 				'default'     => false,
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
+			'note_type'        => array(
+				'description' => __( 'The type of order note.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+				'default'     => OrderNoteType::DEFAULT,
+				'enum'        => array(
+					OrderNoteType::DEFAULT,
+					OrderNoteType::ERROR,
+					OrderNoteType::CONFIRMATION_EMAIL,
+					OrderNoteType::PRODUCT_STOCK,
+					OrderNoteType::PAYMENT,
+					OrderNoteType::ORDER_UPDATE,
+				),
+			),
 		);
 
 		return $schema;
@@ -102,6 +118,7 @@ class OrderNoteSchema extends AbstractSchema {
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'             => $note->comment_content,
 			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+			'note_type'        => get_comment_meta( $note->comment_ID, 'note_type', true ) ?? OrderNoteType::DEFAULT,
 		);
 	}
 }
