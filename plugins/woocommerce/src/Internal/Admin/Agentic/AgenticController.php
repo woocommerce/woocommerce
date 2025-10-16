@@ -17,9 +17,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class AgenticController implements RegisterHooksInterface {
 	/**
-	 * Register hooks and initialize components.
-	 *
-	 * This follows the WooCommerce pattern for controllers.
+	 * Register this class instance to the appropriate hooks.
 	 *
 	 * @internal
 	 */
@@ -29,7 +27,16 @@ class AgenticController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Only initialize if the agentic checkout feature is enabled.
+		add_action( 'woocommerce_init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 *
+	 * @internal
+	 */
+	public function on_init() {
+		// Bail if the feature is not enabled.
 		if ( ! FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
 			return;
 		}

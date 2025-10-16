@@ -4,7 +4,7 @@
 
 The WooCommerce Address Autocomplete system allows third-party services to provide address suggestions as customers type in their billing and shipping addresses during checkout. This guide explains how to create and register custom address providers to integrate with any address validation service.
 
-Please note, this only works on the shortcode checkout at present. There is no implementation for the Checkout block.
+Please note, this implementation will register the provider for both the shortcode and block-based checkouts.
 
 ## Architecture
 
