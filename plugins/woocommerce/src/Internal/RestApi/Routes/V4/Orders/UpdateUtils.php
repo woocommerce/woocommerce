@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
@@ -242,7 +242,7 @@ class UpdateUtils {
 				$order->add_order_note(
 					sprintf(
 						// translators: %s item name.
-						__( 'Adjusted stock: %s', 'woocommerce' ),
+						__( 'Adjusted stock: %s.', 'woocommerce' ),
 						sprintf(
 							'%1$s (%2$s&rarr;%3$s)',
 							$item->get_name(),
@@ -253,7 +253,7 @@ class UpdateUtils {
 					false,
 					true,
 					array(
-						'note_type' => OrderNoteType::PRODUCT_STOCK,
+						'note_group' => OrderNoteGroup::PRODUCT_STOCK,
 					)
 				);
 			}

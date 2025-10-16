@@ -10,7 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -146,7 +146,7 @@ class WC_Meta_Box_Order_Actions {
 				WC()->mailer()->customer_invoice( $order );
 
 				// Note the event.
-				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true, array( 'note_type' => OrderNoteType::CONFIRMATION_EMAIL ) );
+				$order->add_order_note( __( 'Order details manually sent to customer.', 'woocommerce' ), false, true, array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION ) );
 
 				/**
 				 * Fires after an order email has been resent.

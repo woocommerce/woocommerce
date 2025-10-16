@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Internal\Orders;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use WC_Data_Exception;
 use WC_Email;
 use WC_Order;
@@ -515,7 +515,7 @@ class OrderActionsRestController extends RestApiControllerBase {
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',
-					'note_type'  => OrderNoteType::CONFIRMATION_EMAIL,
+					'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION,
 				)
 			);
 		}
@@ -576,7 +576,8 @@ class OrderActionsRestController extends RestApiControllerBase {
 				true,
 				array(
 					'user_agent' => $user_agent ? $user_agent : 'REST API',
-					'note_type'  => OrderNoteType::CONFIRMATION_EMAIL,
+					'note_title' => __( 'Order confirmation email', 'woocommerce' ),
+					'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION,
 				)
 			);
 		}

@@ -16,7 +16,7 @@ use WC_REST_Exception;
 use WP_REST_Request;
 use WP_Error;
 use WC_Order;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 /**
  * ActionController class.
@@ -94,12 +94,13 @@ class ActionController {
 
 		$user_agent = esc_html( $request->get_header( 'User-Agent' ) );
 		$order->add_order_note(
-			esc_html__( 'Download permissions reset.', 'woocommerce' ),
+			esc_html__( 'Download permissions were reset manually.', 'woocommerce' ),
 			false,
 			true,
 			array(
 				'user_agent' => $user_agent ? $user_agent : 'REST API',
-				'note_type'  => OrderNoteType::ORDER_UPDATE,
+				'note_title' => __( 'Download permissions', 'woocommerce' ),
+				'note_group' => OrderNoteGroup::ORDER_UPDATE,
 			)
 		);
 

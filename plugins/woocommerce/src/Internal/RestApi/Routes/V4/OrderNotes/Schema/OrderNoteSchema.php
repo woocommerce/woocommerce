@@ -12,7 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use WP_REST_Request;
 
 /**
@@ -69,32 +69,38 @@ class OrderNoteSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'title'            => array(
+				'description' => __( 'The title of the order note group.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'note'             => array(
 				'description' => __( 'Order note content.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'required'    => true,
 			),
+			'group'            => array(
+				'description' => __( 'The group of order note.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+				'default'     => OrderNoteGroup::DEFAULT,
+				'enum'        => array(
+					OrderNoteGroup::DEFAULT,
+					OrderNoteGroup::ERROR,
+					OrderNoteGroup::EMAIL_NOTIFICATION,
+					OrderNoteGroup::PRODUCT_STOCK,
+					OrderNoteGroup::PAYMENT,
+					OrderNoteGroup::ORDER_UPDATE,
+				),
+			),
 			'is_customer_note' => array(
 				'description' => __( 'If true, the note will be shown to customers. If false, the note will be for admin reference only.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-			),
-			'note_type'        => array(
-				'description' => __( 'The type of order note.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'readonly'    => true,
-				'default'     => OrderNoteType::DEFAULT,
-				'enum'        => array(
-					OrderNoteType::DEFAULT,
-					OrderNoteType::ERROR,
-					OrderNoteType::CONFIRMATION_EMAIL,
-					OrderNoteType::PRODUCT_STOCK,
-					OrderNoteType::PAYMENT,
-					OrderNoteType::ORDER_UPDATE,
-				),
 			),
 		);
 
@@ -110,15 +116,26 @@ class OrderNoteSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $note, WP_REST_Request $request, array $include_fields = array() ): array {
+		$group            = get_comment_meta( $note->comment_ID, 'note_group', true ) ?? OrderNoteGroup::DEFAULT;
+		$title            = get_comment_meta( $note->comment_ID, 'note_title', true );
+		$author           = $note->comment_author;
+		$is_customer_note = (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true );
+		$added_by_user    = strtolower( $author ) !== strtolower( __( 'WooCommerce', 'woocommerce' ) );
+
+		if ( ! $title ) {
+			$title = OrderNoteGroup::get_default_group_title( $group, $added_by_user, $is_customer_note );
+		}
+
 		return array(
 			'id'               => (int) $note->comment_ID,
 			'order_id'         => (int) $note->comment_post_ID,
 			'author'           => $note->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
+			'title'            => $title,
 			'note'             => $note->comment_content,
-			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
-			'note_type'        => get_comment_meta( $note->comment_ID, 'note_type', true ) ?? OrderNoteType::DEFAULT,
+			'group'            => $group,
+			'is_customer_note' => $is_customer_note,
 		);
 	}
 }

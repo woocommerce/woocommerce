@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStock;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 /**
  * Update a product's stock amount.
@@ -202,7 +202,7 @@ function wc_reduce_stock_levels( $order_id ) {
 
 		if ( is_wp_error( $new_stock ) ) {
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Unable to reduce stock for item %s.', 'woocommerce' ), $item_name ), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+			$order->add_order_note( sprintf( __( 'Unable to reduce stock for item %s.', 'woocommerce' ), $item_name ), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			continue;
 		}
 
@@ -293,7 +293,7 @@ function wc_trigger_stock_change_notifications( $order, $changes ) {
 		}
 	}
 
-	$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $order_notes ), false, false, array( 'note_type' => OrderNoteType::PRODUCT_STOCK ) );
+	$order->add_order_note( __( 'Stock levels reduced:', 'woocommerce' ) . ' ' . implode( ', ', $order_notes ), false, false, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 }
 
 /**
@@ -377,7 +377,7 @@ function wc_increase_stock_levels( $order_id ) {
 
 		if ( is_wp_error( $new_stock ) ) {
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Unable to restore stock for item %s.', 'woocommerce' ), $item_name ), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+			$order->add_order_note( sprintf( __( 'Unable to restore stock for item %s.', 'woocommerce' ), $item_name ), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			continue;
 		}
 
@@ -399,7 +399,7 @@ function wc_increase_stock_levels( $order_id ) {
 	}
 
 	if ( $changes ) {
-		$order->add_order_note( __( 'Stock levels increased:', 'woocommerce' ) . ' ' . implode( ', ', $changes ), false, false, array( 'note_type' => OrderNoteType::PRODUCT_STOCK ) );
+		$order->add_order_note( __( 'Stock levels increased:', 'woocommerce' ) . ' ' . implode( ', ', $changes ), false, false, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 	}
 
 	do_action( 'woocommerce_restore_order_stock', $order );

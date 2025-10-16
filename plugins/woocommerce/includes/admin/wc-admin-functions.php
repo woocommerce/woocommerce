@@ -7,7 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -451,7 +451,7 @@ function wc_save_order_items( $order_id, $items ) {
 
 	if ( ! empty( $qty_change_order_notes ) ) {
 		/* translators: %s item name. */
-		$order->add_order_note( sprintf( __( 'Adjusted stock: %s', 'woocommerce' ), implode( ', ', $qty_change_order_notes ) ), false, true, array( 'note_type' => OrderNoteType::PRODUCT_STOCK ) );
+		$order->add_order_note( sprintf( __( 'Adjusted stock: %s', 'woocommerce' ), implode( ', ', $qty_change_order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 	}
 
 	$order->update_taxes();

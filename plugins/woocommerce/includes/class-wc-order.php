@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -179,7 +179,7 @@ class WC_Order extends WC_Abstract_Order {
 				$payment_complete_note = $payment_method && $transaction_id ? sprintf( __( 'Payment via %1$s (%2$s).', 'woocommerce' ), $payment_method, $transaction_id ) : __( 'Payment complete.', 'woocommerce' );
 
 				$this->set_status( $next_status, false );
-				$this->add_order_note( $payment_complete_note, false, false, array( 'note_type' => OrderNoteType::PAYMENT ) );
+				$this->add_order_note( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
 				$this->save();
 
 				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
@@ -201,7 +201,7 @@ class WC_Order extends WC_Abstract_Order {
 					'error' => $e,
 				)
 			);
-			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			return false;
 		}
 		return true;
@@ -302,7 +302,7 @@ class WC_Order extends WC_Abstract_Order {
 				'error' => $e,
 			)
 		);
-		$this->add_order_note( $message . ' ' . $e->getMessage(), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+		$this->add_order_note( $message . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 	}
 
 	/**
@@ -415,7 +415,7 @@ class WC_Order extends WC_Abstract_Order {
 					'error' => $e,
 				)
 			);
-			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+			$this->add_order_note( __( 'Update status event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			return false;
 		}
 		return true;
@@ -504,7 +504,7 @@ class WC_Order extends WC_Abstract_Order {
 						'error' => $e,
 					)
 				);
-				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_type' => OrderNoteType::ERROR ) );
+				$this->add_order_note( __( 'Error during status transition.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			}
 		}
 	}
@@ -2073,6 +2073,14 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
+		if ( empty( $meta_data['note_group'] ) ) {
+			$meta_data['note_group'] = OrderNoteGroup::DEFAULT;
+		}
+
+		if ( empty( $meta_data['note_title'] ) ) {
+			$meta_data['note_title'] = OrderNoteGroup::get_default_group_title( $meta_data['note_group'], $added_by_user, $is_customer_note );
+		}
+
 		if ( ! empty( $meta_data ) && is_array( $meta_data ) ) {
 			foreach ( $meta_data as $key => $value ) {
 				if ( is_scalar( $value ) ) {
@@ -2104,7 +2112,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int                  Comment ID.
 	 */
 	private function add_status_transition_note( $note, $transition ) {
-		return $this->add_order_note( trim( $transition['note'] . ' ' . $note ), 0, $transition['manual'], array( 'note_type' => OrderNoteType::ORDER_UPDATE ) );
+		return $this->add_order_note( trim( $transition['note'] . ' ' . $note ), 0, $transition['manual'], array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 	}
 
 	/**

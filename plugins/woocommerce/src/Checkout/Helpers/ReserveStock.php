@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Checkout\Helpers;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\Internal\Orders\OrderNoteType;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -168,7 +168,7 @@ final class ReserveStock {
 				false,
 				false,
 				array(
-					'note_type' => OrderNoteType::PRODUCT_STOCK,
+					'note_group' => OrderNoteGroup::PRODUCT_STOCK,
 				)
 			);
 		}
