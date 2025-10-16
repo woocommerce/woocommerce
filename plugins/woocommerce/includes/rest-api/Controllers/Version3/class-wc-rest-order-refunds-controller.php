@@ -128,9 +128,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 	 * @return array
 	 */
 	public function get_item_schema() {
-		$schema                       = parent::get_item_schema();
-		$schema['context']            = array( 'view', 'edit', 'embed' );
-		$schema['context']['default'] = 'view';
+		$schema = parent::get_item_schema();
 
 		$schema['properties']['line_items']['items']['properties']['refund_total'] = array(
 			'description' => __( 'Amount that will be refunded for this line item (excluding taxes).', 'woocommerce' ),
