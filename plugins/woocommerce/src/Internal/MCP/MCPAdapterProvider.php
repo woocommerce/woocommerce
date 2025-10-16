@@ -153,32 +153,38 @@ class MCPAdapterProvider {
 	/**
 	 * Get WooCommerce abilities for MCP server.
 	 *
-	 * Filters abilities to include only those with 'woocommerce/' namespace by default,
-	 * with a filter to allow inclusion of abilities from other namespaces.
+	 * Filters abilities to include only those in the 'woocommerce-rest' category,
+	 * with a filter to allow inclusion of abilities from other categories.
 	 *
 	 * @return array Array of ability IDs for MCP server.
 	 */
 	private function get_woocommerce_mcp_abilities(): array {
-		// Get all abilities from the registry.
-		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
-		$all_abilities_ids  = $abilities_registry->get_abilities_ids();
+		// Get all abilities and filter by category.
+		$all_abilities = wp_get_abilities();
+		$ability_ids   = array();
 
-		// Filter abilities based on namespace and custom filter.
+		// Filter abilities by woocommerce-rest category.
+		foreach ( $all_abilities as $ability_id => $ability ) {
+			// Check if ability has the woocommerce-rest category.
+			if ( $ability instanceof \WP_Ability && method_exists( $ability, 'get_category' ) ) {
+				if ( 'woocommerce-rest' === $ability->get_category() ) {
+					$ability_ids[] = $ability_id;
+				}
+			}
+		}
+
+		// Allow filter to include additional abilities from other categories.
 		$mcp_abilities = array_filter(
-			$all_abilities_ids,
+			$ability_ids,
 			function ( $ability_id ) {
-				// Include WooCommerce abilities by default.
-				$include = str_starts_with( $ability_id, 'woocommerce/' );
-
-				// Allow filter to override inclusion decision.
 				/**
 				 * Filter to override MCP ability inclusion decision.
 				 *
 				 * @since 10.3.0
-				 * @param bool   $include    Whether to include the ability.
+				 * @param bool   $include    Whether to include the ability. Default true for woocommerce-rest category.
 				 * @param string $ability_id The ability ID.
 				 */
-				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
+				return apply_filters( 'woocommerce_mcp_include_ability', true, $ability_id );
 			}
 		);
 

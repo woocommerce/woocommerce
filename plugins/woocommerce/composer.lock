@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2f40b8ae1cdc3bcfbb9b65fded05ecc2",
+    "content-hash": "b19de68cc35d1a85c835a0ec33b15124",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1554,16 +1554,16 @@
         },
         {
             "name": "wordpress/abilities-api",
-            "version": "dev-trunk",
+            "version": "v0.3.0-rc",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/abilities-api.git",
-                "reference": "41ec679e4182333f127ef82e5d5a9cde1b5f40f9"
+                "reference": "58bd39b666b4de4203503455042ae5fa4c765976"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/41ec679e4182333f127ef82e5d5a9cde1b5f40f9",
-                "reference": "41ec679e4182333f127ef82e5d5a9cde1b5f40f9",
+                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/58bd39b666b4de4203503455042ae5fa4c765976",
+                "reference": "58bd39b666b4de4203503455042ae5fa4c765976",
                 "shasum": ""
             },
             "require": {
@@ -1587,7 +1587,6 @@
                 "wpackagist-plugin/plugin-check": "^1.6",
                 "yoast/phpunit-polyfills": "^4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "installer-paths": {
@@ -1640,7 +1639,7 @@
                 "issues": "https://github.com/WordPress/abilities-api/issues",
                 "source": "https://github.com/WordPress/abilities-api"
             },
-            "time": "2025-10-02T10:53:48+00:00"
+            "time": "2025-10-14T15:17:45+00:00"
         },
         {
             "name": "wordpress/mcp-adapter",
@@ -5629,7 +5628,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "wordpress/abilities-api": 20,
         "wordpress/mcp-adapter": 20
     },
     "prefer-stable": true,
