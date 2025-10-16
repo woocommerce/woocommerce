@@ -1,19 +1,20 @@
 <?php
 /**
- * Unit tests for WC_Gateway_Paypal_Helper class.
+ * Unit tests for Helper class.
  *
  * @package WooCommerce\Tests\Paypal.
  */
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-helper.php';
+namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
+
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 
 /**
- * Class WC_Gateway_Paypal_Helper_Test.
+ * Class HelperTests.
  */
-class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
-
+class HelperTests extends \WC_Unit_Test_Case {
 	/**
 	 * Tear down the test environment.
 	 */
@@ -84,7 +85,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	public function test_is_paypal_gateway_available_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = WC_Gateway_Paypal_Helper::is_paypal_gateway_available();
+		$result = PayPalHelper::is_paypal_gateway_available();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -168,7 +169,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	public function test_is_orders_v2_migration_eligible_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible();
+		$result = PayPalHelper::is_orders_v2_migration_eligible();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -178,7 +179,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_order_when_valid() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -190,9 +191,9 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
-		$this->assertInstanceOf( WC_Order::class, $result );
+		$this->assertInstanceOf( \WC_Order::class, $result );
 		$this->assertEquals( $order->get_id(), $result->get_id() );
 
 		// Clean up.
@@ -210,7 +211,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -227,7 +228,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -237,7 +238,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_returns_null_when_order_key_mismatch() {
 		// Create a test order.
-		$order = WC_Helper_Order::create_order();
+		$order = \WC_Helper_Order::create_order();
 		$order->save();
 
 		$custom_id = wp_json_encode(
@@ -248,7 +249,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 
@@ -299,7 +300,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 * @param mixed $expected  The expected result.
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_invalid_inputs( $custom_id, $expected ) {
-		$result = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -313,7 +314,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 * @param string $expected The expected masked result.
 	 */
 	public function test_mask_email( $email, $expected ) {
-		$result = WC_Gateway_Paypal_Helper::mask_email( $email );
+		$result = PayPalHelper::mask_email( $email );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -392,7 +393,7 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$result = WC_Gateway_Paypal_Helper::redact_data( $data );
+		$result = PayPalHelper::redact_data( $data );
 
 		// PII fields should be redacted.
 		$this->assertEquals( '[redacted]', $result['given_name'] );
@@ -420,17 +421,17 @@ class WC_Gateway_Paypal_Helper_Test extends \WC_Unit_Test_Case {
 	 * Test redact_data handles non-array inputs.
 	 */
 	public function test_redact_data_handles_non_array_inputs() {
-		$this->assertEquals( 'string', WC_Gateway_Paypal_Helper::redact_data( 'string' ) );
-		$this->assertEquals( 123, WC_Gateway_Paypal_Helper::redact_data( 123 ) );
-		$this->assertEquals( null, WC_Gateway_Paypal_Helper::redact_data( null ) );
-		$this->assertEquals( true, WC_Gateway_Paypal_Helper::redact_data( true ) );
+		$this->assertEquals( 'string', PayPalHelper::redact_data( 'string' ) );
+		$this->assertEquals( 123, PayPalHelper::redact_data( 123 ) );
+		$this->assertEquals( null, PayPalHelper::redact_data( null ) );
+		$this->assertEquals( true, PayPalHelper::redact_data( true ) );
 	}
 
 	/**
 	 * Test redact_data handles empty arrays.
 	 */
 	public function test_redact_data_handles_empty_array() {
-		$result = WC_Gateway_Paypal_Helper::redact_data( array() );
+		$result = PayPalHelper::redact_data( array() );
 
 		$this->assertIsArray( $result );
 		$this->assertEmpty( $result );

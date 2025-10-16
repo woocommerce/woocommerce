@@ -7,8 +7,7 @@
 
 declare(strict_types=1);
 
-require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 /**
  * Class WC_Gateway_Paypal_Test.
  */
@@ -45,7 +44,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_error' ) );
@@ -62,7 +61,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$result  = $request->create_paypal_order( $order );
 
 		remove_filter( 'pre_http_request', array( $this, 'create_paypal_order_success' ) );
@@ -83,7 +82,7 @@ class WC_Gateway_Paypal_Request_Test extends \WC_Unit_Test_Case {
 
 		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
 
-		$request = new WC_Gateway_Paypal_Request( new WC_Gateway_Paypal() );
+		$request = new PayPalRequest( new WC_Gateway_Paypal() );
 		$this->assertNotNull( $request->create_paypal_order( $order ) );
 
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
