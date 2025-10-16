@@ -251,6 +251,10 @@ class Server {
 			'settings-account'          => AccountSettingsController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
+			// These are V3 controllers that are wrapped in V4 controllers.
+			'order-refunds'             => 'WC_REST_Order_Refunds_Controller',
+			'refunds'                   => 'WC_REST_Refunds_Controller',
+
 		);
 	}
 

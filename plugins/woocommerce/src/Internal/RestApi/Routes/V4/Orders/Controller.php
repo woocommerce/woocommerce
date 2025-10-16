@@ -220,7 +220,7 @@ class Controller extends AbstractController {
 				'embeddable' => true,
 			),
 			'payment_gateway'        => array(
-				'href'       => rest_url( sprintf( '/wc/v3/payment_gateways/%s', $item->get_payment_method() ) ),
+				'href'       => rest_url( sprintf( '/%s/settings/payment-gateways/%s', $this->namespace, $item->get_payment_method() ) ),
 				'embeddable' => true,
 			),
 		);

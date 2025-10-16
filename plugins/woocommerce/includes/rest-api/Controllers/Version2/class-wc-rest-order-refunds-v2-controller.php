@@ -105,7 +105,12 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'context' => $this->get_context_param( array( 'default' => 'view' ) ),
+						'context' => $this->get_context_param(
+							array(
+								'default' => 'view',
+								'enum'    => array( 'view', 'edit', 'embed' ),
+							)
+						),
 					),
 				),
 				array(
