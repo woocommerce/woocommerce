@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\Buttons as PayPalButtons;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -214,7 +215,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * Test get_client_id fetches from API when not cached.
 	 */
 	public function test_get_client_id_fetches_from_api_when_not_cached() {
-		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
+		$mock_request = $this->createMock( PayPalRequest::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( 'test_client_id' );
 
 		$buttons = new PayPalButtons( $this->mock_gateway );
@@ -234,7 +235,7 @@ class ButtonsTests extends \WC_Unit_Test_Case {
 	 * Test get_client_id returns null when API fails.
 	 */
 	public function test_get_client_id_returns_null_when_api_fails() {
-		$mock_request = $this->createMock( \WC_Gateway_Paypal_Request::class );
+		$mock_request = $this->createMock( PayPalRequest::class );
 		$mock_request->method( 'fetch_paypal_client_id' )->willReturn( '' );
 
 		$buttons = new PayPalButtons( $this->mock_gateway );

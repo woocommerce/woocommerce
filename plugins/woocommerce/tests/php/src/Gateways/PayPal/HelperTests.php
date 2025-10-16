@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
-use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
+use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
 
 /**
  * Class HelperTests.
@@ -85,7 +85,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 	public function test_is_paypal_gateway_available_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = PayPalConstants::is_paypal_gateway_available();
+		$result = PayPalHelper::is_paypal_gateway_available();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -169,7 +169,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 	public function test_is_orders_v2_migration_eligible_scenarios( $settings, $expected ) {
 		update_option( 'woocommerce_paypal_settings', $settings );
 
-		$result = PayPalConstants::is_orders_v2_migration_eligible();
+		$result = PayPalHelper::is_orders_v2_migration_eligible();
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -191,7 +191,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalConstants::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertInstanceOf( \WC_Order::class, $result );
 		$this->assertEquals( $order->get_id(), $result->get_id() );
@@ -211,7 +211,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalConstants::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -228,7 +228,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalConstants::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 	}
@@ -249,7 +249,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$result = PayPalConstants::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertNull( $result );
 
@@ -300,7 +300,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 	 * @param mixed $expected  The expected result.
 	 */
 	public function test_get_wc_order_from_paypal_custom_id_invalid_inputs( $custom_id, $expected ) {
-		$result = PayPalConstants::get_wc_order_from_paypal_custom_id( $custom_id );
+		$result = PayPalHelper::get_wc_order_from_paypal_custom_id( $custom_id );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -314,7 +314,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 	 * @param string $expected The expected masked result.
 	 */
 	public function test_mask_email( $email, $expected ) {
-		$result = PayPalConstants::mask_email( $email );
+		$result = PayPalHelper::mask_email( $email );
 
 		$this->assertEquals( $expected, $result );
 	}
@@ -393,7 +393,7 @@ class HelperTests extends \WC_Unit_Test_Case {
 			),
 		);
 
-		$result = PayPalConstants::redact_data( $data );
+		$result = PayPalHelper::redact_data( $data );
 
 		// PII fields should be redacted.
 		$this->assertEquals( '[redacted]', $result['given_name'] );
@@ -421,17 +421,17 @@ class HelperTests extends \WC_Unit_Test_Case {
 	 * Test redact_data handles non-array inputs.
 	 */
 	public function test_redact_data_handles_non_array_inputs() {
-		$this->assertEquals( 'string', PayPalConstants::redact_data( 'string' ) );
-		$this->assertEquals( 123, PayPalConstants::redact_data( 123 ) );
-		$this->assertEquals( null, PayPalConstants::redact_data( null ) );
-		$this->assertEquals( true, PayPalConstants::redact_data( true ) );
+		$this->assertEquals( 'string', PayPalHelper::redact_data( 'string' ) );
+		$this->assertEquals( 123, PayPalHelper::redact_data( 123 ) );
+		$this->assertEquals( null, PayPalHelper::redact_data( null ) );
+		$this->assertEquals( true, PayPalHelper::redact_data( true ) );
 	}
 
 	/**
 	 * Test redact_data handles empty arrays.
 	 */
 	public function test_redact_data_handles_empty_array() {
-		$result = PayPalConstants::redact_data( array() );
+		$result = PayPalHelper::redact_data( array() );
 
 		$this->assertIsArray( $result );
 		$this->assertEmpty( $result );

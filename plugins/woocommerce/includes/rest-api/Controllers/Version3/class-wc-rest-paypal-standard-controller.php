@@ -12,17 +12,13 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\Helper as PayPalHelper;
+use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Gateway_Paypal' ) ) {
 	require_once WC_ABSPATH . 'includes/gateways/paypal/class-wc-gateway-paypal.php';
 }
-
-if ( ! class_exists( 'WC_Gateway_Paypal_Request' ) ) {
-	require_once WC_ABSPATH . 'includes/gateways/paypal/includes/class-wc-gateway-paypal-request.php';
-}
-
 /**
  * REST API PayPal Standard controller class.
  *
@@ -132,7 +128,7 @@ class WC_REST_Paypal_Standard_Controller extends WC_REST_Controller {
 		// Recompute fees after everything has been updated.
 		$this->recompute_fees( $order );
 
-		$paypal_request = new WC_Gateway_Paypal_Request( WC_Gateway_Paypal::get_instance() );
+		$paypal_request = new PayPalRequest( WC_Gateway_Paypal::get_instance() );
 		$updated_amount = $paypal_request->get_paypal_order_purchase_unit_amount( $order );
 
 		$response = array(
