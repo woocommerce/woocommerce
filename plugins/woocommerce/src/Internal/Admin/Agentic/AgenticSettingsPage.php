@@ -85,13 +85,12 @@ class AgenticSettingsPage {
 	private function get_openai_fields( $config ) {
 		return array(
 			array(
-				'title'    => __( 'Authorization Token', 'woocommerce' ),
-				'desc'     => __( 'The bearer token that ChatGPT uses to authenticate API requests. Provided by OpenAI.', 'woocommerce' ),
-				'id'       => 'woocommerce_agentic_openai_bearer_token',
-				'type'     => 'password',
-				'css'      => 'min-width:400px;',
-				'default'  => $config['bearer_token'] ?? '',
-				'desc_tip' => true,
+				'title'   => __( 'Authorization Token', 'woocommerce' ),
+				'desc'    => __( 'The bearer token that ChatGPT uses to authenticate API requests. Provided by OpenAI.', 'woocommerce' ),
+				'id'      => 'woocommerce_agentic_openai_bearer_token',
+				'type'    => 'password',
+				'css'     => 'min-width:400px;',
+				'default' => $config['bearer_token'] ?? '',
 			),
 			array(
 				'title'       => __( 'Webhook URL', 'woocommerce' ),
@@ -101,16 +100,14 @@ class AgenticSettingsPage {
 				'css'         => 'min-width:400px;',
 				'placeholder' => 'https://openai.example.com/agentic_checkout/webhooks/order_events',
 				'default'     => $config['webhook_url'] ?? '',
-				'desc_tip'    => true,
 			),
 			array(
-				'title'    => __( 'Webhook Secret', 'woocommerce' ),
-				'desc'     => __( 'Secret key used to sign outgoing webhook requests. Provided by OpenAI.', 'woocommerce' ),
-				'id'       => 'woocommerce_agentic_openai_webhook_secret',
-				'type'     => 'password',
-				'css'      => 'min-width:400px;',
-				'default'  => $config['webhook_secret'] ?? '',
-				'desc_tip' => true,
+				'title'   => __( 'Webhook Secret', 'woocommerce' ),
+				'desc'    => __( 'Secret key used to sign outgoing webhook requests. Provided by OpenAI.', 'woocommerce' ),
+				'id'      => 'woocommerce_agentic_openai_webhook_secret',
+				'type'    => 'password',
+				'css'     => 'min-width:400px;',
+				'default' => $config['webhook_secret'] ?? '',
 			),
 		);
 	}
