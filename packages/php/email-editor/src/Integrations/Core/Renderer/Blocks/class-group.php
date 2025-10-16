@@ -65,7 +65,6 @@ class Group extends Abstract_Block_Renderer {
 			$table_styles,
 			array_filter(
 				array(
-					'padding'         => $block_attributes['style']['spacing']['margin'] ?? null,
 					'border-collapse' => 'separate',
 					'background-size' => $table_styles['background-size'] ?? 'cover',
 				)

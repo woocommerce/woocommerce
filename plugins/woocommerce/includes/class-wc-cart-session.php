@@ -289,7 +289,7 @@ final class WC_Cart_Session {
 			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
-			if ( $merge_saved_cart ) {
+			if ( $merge_saved_cart || $update_cart_session ) {
 				$this->persistent_cart_update();
 			}
 		}
@@ -317,6 +317,10 @@ final class WC_Cart_Session {
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
 		$wc_session->set( 'store_api_draft_order', null );
+		$wc_session->set( 'shipping_method_counts', null );
+		$wc_session->set( 'previous_shipping_methods', null );
+		$wc_session->set( 'chosen_shipping_methods', null );
+		$this->remove_shipping_for_package_from_session();
 	}
 
 	/**
@@ -414,6 +418,12 @@ final class WC_Cart_Session {
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
 		if ( empty( $cart ) ) {
 			$this->remove_draft_order();
+		}
+		if ( ! $this->cart_has_shippable_products() ) {
+			$wc_session->set( 'shipping_method_counts', null );
+			$wc_session->set( 'previous_shipping_methods', null );
+			$wc_session->set( 'chosen_shipping_methods', null );
+			$this->remove_shipping_for_package_from_session();
 		}
 
 		/**
@@ -666,5 +676,38 @@ final class WC_Cart_Session {
 		}
 
 		WC()->session->set( 'store_api_draft_order', null );
+	}
+
+	/**
+	 * Remove shipping data for all packages from session.
+	 *
+	 * @return void
+	 */
+	private function remove_shipping_for_package_from_session() {
+		$wc_session = WC()->session;
+
+		if ( ! is_a( $wc_session, 'WC_Session_Handler' ) ) {
+			return;
+		}
+
+		foreach ( array_keys( $wc_session->get_session_data() ) as $key ) {
+			if ( 0 === strpos( $key, 'shipping_for_package_' ) ) {
+				$wc_session->set( $key, null );
+			}
+		}
+	}
+
+	/**
+	 * Check if the cart has shippable products.
+	 *
+	 * @return bool
+	 */
+	private function cart_has_shippable_products() {
+		foreach ( $this->cart->get_cart() as $cart_item ) {
+			if ( $cart_item['data']->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

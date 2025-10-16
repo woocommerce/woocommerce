@@ -381,9 +381,15 @@ class WC_Frontend_Scripts {
 			),
 		);
 
+		$scripts['wc-address-autocomplete-common'] = array(
+			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+			'deps'    => array(),
+			'version' => $version,
+		);
+
 		$scripts['wc-address-autocomplete'] = array(
 			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
+			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
 			'version' => $version,
 		);
 
@@ -489,6 +495,8 @@ class WC_Frontend_Scripts {
 		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
 			$registered_providers = $address_provider_service->get_providers();
 			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+				// Always enqueue the common module if providers are registered.
+				self::enqueue_script( 'wc-address-autocomplete-common' );
 				self::enqueue_script( 'wc-address-autocomplete' );
 				self::enqueue_style( 'wc-address-autocomplete' );
 			}
@@ -502,7 +510,7 @@ class WC_Frontend_Scripts {
 		}
 
 		// Load gallery scripts on product pages only if supported.
-		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+		if ( ( is_product() && ! wp_is_block_theme() ) || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
 				self::enqueue_script( 'wc-zoom' );
 			}
@@ -658,7 +666,7 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				break;
-			case 'wc-address-autocomplete':
+			case 'wc-address-autocomplete-common':
 				$providers = array();
 				try {
 					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
@@ -681,13 +689,14 @@ class WC_Frontend_Scripts {
 							},
 							$providers
 						),
+						JSON_HEX_TAG | JSON_UNESCAPED_SLASHES
 					),
 				);
 				break;
 			case 'wc-address-i18n':
 				$params = array(
-					'locale'             => wp_json_encode( WC()->countries->get_country_locale() ),
-					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors() ),
+					'locale'             => wp_json_encode( WC()->countries->get_country_locale(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
 					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);
@@ -734,7 +743,7 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-country-select':
 				$params = array(
-					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),

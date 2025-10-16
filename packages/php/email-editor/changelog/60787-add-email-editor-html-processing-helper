@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Email Editor: Extract html processing helper from table class for reuse in other block rendering classes.
-

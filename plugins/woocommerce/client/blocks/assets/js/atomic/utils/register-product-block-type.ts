@@ -142,8 +142,9 @@ export class BlockRegistrationManager {
 				// Unsubscribe from the main subscription since we've detected our context
 				unsubscribe();
 
+				// getEditedPostSlug may return string or number so we cast it to string.
 				// @ts-expect-error getEditedPostSlug is not typed
-				const postSlug = editorSelectors.getEditedPostSlug();
+				const postSlug = String( editorSelectors.getEditedPostSlug() );
 
 				// Set initial template ID
 				this.currentTemplateId = postSlug;
@@ -155,8 +156,9 @@ export class BlockRegistrationManager {
 				subscribe( () => {
 					const previousTemplateId = this.currentTemplateId;
 					this.currentTemplateId =
+						// getEditedPostSlug may return string or number so we cast it to string.
 						// @ts-expect-error getEditedPostSlug is not typed
-						editorSelectors.getEditedPostSlug();
+						String( editorSelectors.getEditedPostSlug() );
 
 					if ( previousTemplateId !== this.currentTemplateId ) {
 						this.handleTemplateChange( previousTemplateId );

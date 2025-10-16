@@ -11,6 +11,40 @@
 	}
 }
 
+.woocommerce-marketplace__my-subscriptions__account {
+	background-color: $gray-0;
+	padding: $grid-unit-20 $grid-unit-30;
+	margin-bottom: $grid-unit-50;
+
+	&-header {
+		font-size: 16px;
+		line-height: 1.5;
+		padding-left: $grid-unit-40;
+		position: relative;
+		word-break: break-word;
+		font-weight: 500;
+		margin: 0;
+
+		svg {
+			position: absolute;
+			left: 0;
+		}
+	}
+
+	&-content {
+		color: $gray-700;
+		margin-top: $grid-unit-10;
+		margin-bottom: $grid-unit-20;
+		word-break: break-word;
+	}
+
+	&-actions {
+		.components-button.is-secondary {
+			background-color: $white;
+		}
+	}
+}
+
 .woocommerce-marketplace__my-subscriptions__header {
 	display: flex;
 	flex-direction: column;

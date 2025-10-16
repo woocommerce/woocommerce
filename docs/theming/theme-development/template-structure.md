@@ -11,16 +11,9 @@ Overview
 
 ---
 
-
 ## Overview
 
 WooCommerce template files contain the markup and template structure for the frontend and HTML emails of your store.
-
-Below is video walkthrough showing how one may go about updating the template files. 
-
-
-[![Documentation for Template structure & Overriding templates via a theme](https://embed-ssl.wistia.com/deliveries/a2f57c5896505b39952aa8411a474066.jpg?image_play_button_size=2x&amp;image_crop_resized=960x540&amp;image_play_button=1&amp;image_play_button_color=694397e0)](https://woocommerce.com/document/template-structure/?wvideo=8mvl4bro0g)
-
 
 ## Template list
 
@@ -28,11 +21,11 @@ The various template files on your WooCommerce site can be found via an FTP clie
 
 Note: if you are looking for the template files of older versions, you can find them in these paths:
 
-* Versions 6.0.0 and later: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/plugins/woocommerce/templates`
-    * For example, to find the template files for WooCommerce 9.4.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates](https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates).
-* Versions prior to 6.0.0: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/templates`
-    * For example, to find the template files for WooCommerce 5.9.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/5.9.0/templates](https://github.com/woocommerce/woocommerce/tree/5.9.0/templates).
-             
+-   Versions 6.0.0 and later: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/plugins/woocommerce/templates`
+    -   For example, to find the template files for WooCommerce 9.4.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates](https://github.com/woocommerce/woocommerce/tree/9.4.0/plugins/woocommerce/templates).
+-   Versions prior to 6.0.0: `https://github.com/woocommerce/woocommerce/tree/[VERSION_NUMBER]/templates`
+    -   For example, to find the template files for WooCommerce 5.9.0, you would navigate to [https://github.com/woocommerce/woocommerce/tree/5.9.0/templates](https://github.com/woocommerce/woocommerce/tree/5.9.0/templates).
+
 ## Changing Templates via Hooks
 
 When you open a template file, you will notice they all contain _hooks_ that allow you to add/move content without needing to edit template files themselves. Hooks are a way for one piece of code to interact/modify another piece of code at specific, pre-defined spots. This method allows implementing a code snippet that "hooks" into a particular a theme location. It avoids upgrade issues, as the template files can be left completely untouched and doesn't require a child theme to be configured.
@@ -49,15 +42,15 @@ Let's take a look at [/wp-content/plugins/woocommerce/templates/emails/admin-new
 do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
 ```
 
-The code above outputs the block highlighted in red in the image below, which is the New Order email a shop manager receives following a successful order on their site: 
+The code above outputs the block highlighted in red in the image below, which is the New Order email a shop manager receives following a successful order on their site:
 
-![image](https://woocommerce.com/wp-content/uploads/2020/05/templating-using-hooks.webp) 
+![image](https://woocommerce.com/wp-content/uploads/2020/05/templating-using-hooks.webp)
 
-A code below can be used as a starting point to build out desired functionality. It can then be added to a code snippets plugin to modify the output at that particular location in the template, without having to edit the template itself. The same goes for other hooks, wherever in the templates they may appear. 
+The code below can be used as a starting point to build out desired functionality. It can then be added to a code snippets plugin to modify the output at that particular location in the template, without having to edit the template itself. The same goes for other hooks, wherever in the templates they may appear.
 
 ```php
 add_action( 'woocommerce_email_order_details', 'my_custom_woo_function');
-function my_custom_woo_function() { 
+function my_custom_woo_function() {
     /* Your code goes here */
 }
 ```

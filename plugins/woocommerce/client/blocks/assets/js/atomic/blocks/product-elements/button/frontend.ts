@@ -213,7 +213,15 @@ const productButtonStore = {
 				addToCartWithOptionsState?.isFormValid
 			) {
 				context.hasPressedButton = true;
-				context.animationStatus = AnimationStatus.SLIDE_OUT;
+
+				// Only animate if the quantity number changes and there is no
+				// animation in progress.
+				if (
+					context.tempQuantity !== state.quantity &&
+					context.animationStatus === AnimationStatus.IDLE
+				) {
+					context.animationStatus = AnimationStatus.SLIDE_OUT;
+				}
 			}
 		},
 	},

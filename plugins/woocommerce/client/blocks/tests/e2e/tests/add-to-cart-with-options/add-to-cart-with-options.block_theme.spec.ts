@@ -8,6 +8,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -304,9 +305,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
-			const increaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const increaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await increaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -322,13 +325,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of Beanie'
-			);
+			const reduceQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
+				)
+				.getByLabel( 'Reduce quantity of Beanie' );
 			await reduceQuantityButton.click();
 			await reduceQuantityButton.click();
 
@@ -361,6 +372,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await addToCartButton.click();
 
+			// Wait for the add to cart request to complete before proceeding.
+			// This prevents a race condition where the subsequent page.reload()
+			// could execute before the product is fully added to the cart.
+			const addToCartRequest = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await expect(
 				page.getByRole( 'button', {
 					name: 'Added to cart',
@@ -368,7 +386,63 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
+			// Wait for the API response to ensure the DB has been updated.
+			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 3'
+						: '3 items in cart'
+				)
+			).toBeVisible();
+
+			await addToCartRequest;
+		} );
+
+		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
+			await page.reload();
+
+			// Try to add the individually sold product to cart again (it will fail).
+			const individuallySoldProductCheckbox = page.getByRole(
+				'checkbox',
+				{ name: 'Buy one of Hoodie with Logo' }
+			);
+			await individuallySoldProductCheckbox.click();
+
+			// Try to add another product to cart again (it will succeed).
+			const beanieIncreaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
+			await beanieIncreaseQuantityButton.click();
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			await addToCartButton.click();
+
+			// Verify button updated successfully.
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+			// Verify error message is displayed.
+			await expect(
+				page.getByText(
+					'The quantity of "Hoodie with Logo" cannot be changed'
+				)
+			).toBeVisible();
+			// Verify optimistic updates were applied, so the product that was
+			// successfully added to cart is counted.
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
 		} );
 	} );
 

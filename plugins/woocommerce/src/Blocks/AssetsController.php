@@ -44,6 +44,7 @@ final class AssetsController {
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_style_dependencies' ), 20 );
 		add_action( 'wp_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'update_block_settings_dependencies' ), 100 );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_wc_entities' ), 100 );
 		add_filter( 'js_do_concat', array( $this, 'skip_boost_minification_for_cart_checkout' ), 10, 2 );
 
 		if ( Features::is_enabled( 'experimental-iapi-runtime' ) ) {
@@ -96,6 +97,7 @@ final class AssetsController {
 		$this->register_style( 'wc-blocks-editor-style', plugins_url( $this->api->get_block_asset_build_path( 'wc-blocks-editor-style', 'css' ), dirname( __DIR__ ) ), array( 'wp-edit-blocks' ), 'all', true );
 
 		$this->api->register_script( 'wc-types', $this->api->get_block_asset_build_path( 'wc-types' ), array(), false );
+		$this->api->register_script( 'wc-entities', 'assets/client/blocks/wc-entities.js', array(), false );
 		$this->api->register_script( 'wc-blocks-middleware', 'assets/client/blocks/wc-blocks-middleware.js', array(), false );
 		$this->api->register_script( 'wc-blocks-data-store', 'assets/client/blocks/wc-blocks-data.js', array( 'wc-blocks-middleware' ) );
 		$this->api->register_script( 'wc-blocks-vendors', $this->api->get_block_asset_build_path( 'wc-blocks-vendors' ), array(), false );
@@ -343,17 +345,39 @@ final class AssetsController {
 	 */
 	private function get_script_dependency_src_array( array $dependencies ) {
 		$wp_scripts = wp_scripts();
-		return array_reduce(
-			$dependencies,
-			function ( $src, $handle ) use ( $wp_scripts ) {
-				if ( isset( $wp_scripts->registered[ $handle ] ) ) {
-					$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
-					$src   = array_merge( $src, $this->get_script_dependency_src_array( $wp_scripts->registered[ $handle ]->deps ) );
+
+		$found_dependencies = array();
+		$this->gather_script_dependency_handles( $dependencies, $wp_scripts, $found_dependencies );
+
+		$src = array();
+		foreach ( $found_dependencies as $handle => $unused ) {
+			$src[] = esc_url( add_query_arg( 'ver', $wp_scripts->registered[ $handle ]->ver, $this->get_absolute_url( $wp_scripts->registered[ $handle ]->src ) ) );
+		}
+		return $src;
+	}
+
+	/**
+	 * Recursively gather all unique script dependency handles from a starting list.
+	 *
+	 * Traverses the dependency graph for each input handle, collecting any found handles
+	 * and their nested dependencies in the provided array. Used internally to build a
+	 * complete, deduplicated set of handles for further processing (e.g., mapping to src URLs).
+	 *
+	 * @param array       $dependencies       Array of initial script handles to process.
+	 * @param \WP_Scripts $wp_scripts         WP_Scripts instance containing all registered scripts.
+	 * @param array       $found_dependencies Reference to array in which discovered handles are stored.
+	 *
+	 * @return void
+	 */
+	private function gather_script_dependency_handles( array $dependencies, \WP_Scripts $wp_scripts, &$found_dependencies = array() ) {
+		foreach ( $dependencies as $handle ) {
+			if ( isset( $wp_scripts->registered[ $handle ] ) && ! isset( $found_dependencies[ $handle ] ) ) {
+				$found_dependencies[ $handle ] = true;
+				if ( ! empty( $wp_scripts->registered[ $handle ]->deps ) ) {
+					$this->gather_script_dependency_handles( $wp_scripts->registered[ $handle ]->deps, $wp_scripts, $found_dependencies );
 				}
-				return $src;
-			},
-			array()
-		);
+			}
+		}
 	}
 
 	/**
@@ -498,5 +522,12 @@ final class AssetsController {
 
 			}
 		}
+	}
+
+	/**
+	 * Enqueue the wc-entities script.
+	 */
+	public function enqueue_wc_entities() {
+		wp_enqueue_script( 'wc-entities' );
 	}
 }

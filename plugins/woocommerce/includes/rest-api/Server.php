@@ -12,7 +12,15 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\Utilities\SingletonTrait;
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -44,13 +52,9 @@ class Server {
 		$legacy_proxy = $container->get( LegacyProxy::class );
 		foreach ( $this->get_rest_namespaces() as $namespace => $controllers ) {
 			foreach ( $controllers as $controller_name => $controller_class ) {
-				if ( 'wc/v4' === $namespace && ! str_starts_with( $controller_class, 'WC_REST_' ) ) {
-					$this->controllers[ $namespace ][ $controller_name ] = $this->get_v4_controller( $controller_name, $controller_class );
-				} else {
-					$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
+				$this->controllers[ $namespace ][ $controller_name ] = $container->has( $controller_class ) ?
 					$container->get( $controller_class ) :
 					$legacy_proxy->get_instance_of( $controller_class );
-				}
 				$this->controllers[ $namespace ][ $controller_name ]->register_routes();
 			}
 		}
@@ -203,6 +207,9 @@ class Server {
 			'data-continents'          => 'WC_REST_Data_Continents_Controller',
 			'data-countries'           => 'WC_REST_Data_Countries_Controller',
 			'data-currencies'          => 'WC_REST_Data_Currencies_Controller',
+			'paypal-standard'          => 'WC_REST_Paypal_Standard_Controller',
+			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
+			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
 	}
 
@@ -213,13 +220,20 @@ class Server {
 	 */
 	protected function get_v4_controllers() {
 		return array(
-			'ping'             => 'WC_REST_Ping_V4_Controller',
-			'fulfillments'     => 'WC_REST_Fulfillments_V4_Controller',
-			'products'         => 'WC_REST_Products_V4_Controller',
-			'order-notes'      => OrderNotesController::class,
-			'settings-general' => 'WC_REST_General_Settings_V4_Controller',
+			'ping'                      => 'WC_REST_Ping_V4_Controller',
+			'fulfillments'              => 'WC_REST_Fulfillments_V4_Controller',
+			'products'                  => 'WC_REST_Products_V4_Controller',
+			'order-notes'               => OrderNotesController::class,
+			'shipping-zones'            => ShippingZonesController::class,
+			'shipping-zone-method'      => ShippingZoneMethodController::class,
+			'orders'                    => OrdersController::class,
+			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
+			'settings-general'          => GeneralSettingsController::class,
+			'settings-email'            => EmailSettingsController::class,
+			'settings-products'         => ProductsController::class,
+			'settings-payment-gateways' => PaymentGatewaysController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
-			'settings'         => 'WC_REST_Settings_V4_Controller',
+			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);
 	}
 

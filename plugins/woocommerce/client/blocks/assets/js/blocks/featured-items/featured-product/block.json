@@ -30,6 +30,13 @@
 		},
 		"multiple": true
 	},
+	"allowedBlocks": [
+		"core/post-title",
+		"core/buttons",
+		"core/heading",
+		"woocommerce/product-price",
+		"woocommerce/product-summary"
+	],
 	"attributes": {
 		"alt": {
 			"type": "string",
@@ -42,10 +49,6 @@
 		"dimRatio": {
 			"type": "number",
 			"default": 50
-		},
-		"editMode": {
-			"type": "boolean",
-			"default": true
 		},
 		"focalPoint": {
 			"type": "object",
@@ -95,14 +98,6 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
-		},
-		"showDesc": {
-			"type": "boolean",
-			"default": true
-		},
-		"showPrice": {
-			"type": "boolean",
-			"default": true
 		}
 	},
 	"textdomain": "woocommerce",
