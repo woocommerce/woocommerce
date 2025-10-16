@@ -696,7 +696,7 @@ class Request {
 				$arg = mb_strimwidth( $arg, 0, $str_limit ) . '...';
 			}
 		} elseif ( strlen( $arg ) > $limit ) {
-				$arg = substr( $arg, 0, $str_limit ) . '...';
+			$arg = substr( $arg, 0, $str_limit ) . '...';
 		}
 		return $arg;
 	}
