@@ -69,32 +69,23 @@ class OrderNoteSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'title'            => array(
-				'description' => __( 'The title of the order note group.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'readonly'    => true,
-			),
 			'note'             => array(
 				'description' => __( 'Order note content.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'required'    => true,
 			),
+			'title'            => array(
+				'description' => __( 'The title of the order note group.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'group'            => array(
 				'description' => __( 'The group of order note.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
-				'default'     => OrderNoteGroup::DEFAULT,
-				'enum'        => array(
-					OrderNoteGroup::DEFAULT,
-					OrderNoteGroup::ERROR,
-					OrderNoteGroup::EMAIL_NOTIFICATION,
-					OrderNoteGroup::PRODUCT_STOCK,
-					OrderNoteGroup::PAYMENT,
-					OrderNoteGroup::ORDER_UPDATE,
-				),
 			),
 			'is_customer_note' => array(
 				'description' => __( 'If true, the note will be shown to customers. If false, the note will be for admin reference only.', 'woocommerce' ),
@@ -116,14 +107,12 @@ class OrderNoteSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $note, WP_REST_Request $request, array $include_fields = array() ): array {
-		$group            = get_comment_meta( $note->comment_ID, 'note_group', true ) ?? OrderNoteGroup::DEFAULT;
+		$group            = get_comment_meta( $note->comment_ID, 'note_group', true );
 		$title            = get_comment_meta( $note->comment_ID, 'note_title', true );
-		$author           = $note->comment_author;
-		$is_customer_note = (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true );
-		$added_by_user    = strtolower( $author ) !== strtolower( __( 'WooCommerce', 'woocommerce' ) );
+		$is_customer_note = wc_string_to_bool( get_comment_meta( $note->comment_ID, 'is_customer_note', true ) );
 
-		if ( ! $title ) {
-			$title = OrderNoteGroup::get_default_group_title( $group, $added_by_user, $is_customer_note );
+		if ( $group && ! $title ) {
+			$title = OrderNoteGroup::get_default_group_title( $group );
 		}
 
 		return array(
@@ -132,8 +121,8 @@ class OrderNoteSchema extends AbstractSchema {
 			'author'           => $note->comment_author,
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
-			'title'            => $title,
 			'note'             => $note->comment_content,
+			'title'            => $title,
 			'group'            => $group,
 			'is_customer_note' => $is_customer_note,
 		);

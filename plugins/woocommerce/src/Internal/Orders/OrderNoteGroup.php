@@ -11,13 +11,6 @@ namespace Automattic\WooCommerce\Internal\Orders;
  */
 final class OrderNoteGroup {
 	/**
-	 * Any note that is not categorized.
-	 *
-	 * @var string
-	 */
-	public const DEFAULT = '';
-
-	/**
 	 * Any note concerning errors.
 	 *
 	 * @var string
@@ -56,14 +49,10 @@ final class OrderNoteGroup {
 	 * Get the default group title for a given group.
 	 *
 	 * @param string $group The group.
-	 * @param bool   $added_by_user Whether the note was added by a user.
-	 * @param bool   $is_customer_note Whether the note is a customer note.
 	 * @return string The default group title.
 	 */
-	public static function get_default_group_title( string $group, bool $added_by_user = false, bool $is_customer_note = false ): string {
+	public static function get_default_group_title( string $group ): string {
 		switch ( $group ) {
-			case self::ORDER_UPDATE:
-				return __( 'Order updated', 'woocommerce' );
 			case self::PRODUCT_STOCK:
 				return __( 'Product stock', 'woocommerce' );
 			case self::PAYMENT:
@@ -72,12 +61,8 @@ final class OrderNoteGroup {
 				return __( 'Email notification', 'woocommerce' );
 			case self::ERROR:
 				return __( 'Error', 'woocommerce' );
+			default:
+				return __( 'Order updated', 'woocommerce' );
 		}
-
-		if ( ! $added_by_user ) {
-			return __( 'Order updated', 'woocommerce' );
-		}
-
-		return $is_customer_note ? __( 'Customer note', 'woocommerce' ) : __( 'Private note', 'woocommerce' );
 	}
 }

@@ -2073,14 +2073,6 @@ class WC_Order extends WC_Abstract_Order {
 			);
 		}
 
-		if ( empty( $meta_data['note_group'] ) ) {
-			$meta_data['note_group'] = OrderNoteGroup::DEFAULT;
-		}
-
-		if ( empty( $meta_data['note_title'] ) ) {
-			$meta_data['note_title'] = OrderNoteGroup::get_default_group_title( $meta_data['note_group'], $added_by_user, $is_customer_note );
-		}
-
 		if ( ! empty( $meta_data ) && is_array( $meta_data ) ) {
 			foreach ( $meta_data as $key => $value ) {
 				if ( is_scalar( $value ) ) {
