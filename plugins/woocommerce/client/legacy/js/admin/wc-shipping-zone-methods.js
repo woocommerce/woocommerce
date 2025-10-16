@@ -512,10 +512,7 @@
 						// from the DB, and replace it with the correct one before passing it to the localiseMonetaryValue function.
 						// Formula detection regex matches: brackets [], parentheses (), operators */+-, quotes ", and letters a-z and A-Z.
 						// Note: Negative flat rate shipping cost numbers are not supported.
-						const formulaRegex = /[\[\]()\*\+\-\/\"a-zA-Z]/;
-						if ( ! formulaRegex.test( value ) && '.' !== config.decimalSeparator && value.includes( '.' ) ) {
-							value = value.replace( '.', config.decimalSeparator );
-						}
+						value = WCMaybeModifyDecimal.maybeModifyDecimal( value, config );
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
