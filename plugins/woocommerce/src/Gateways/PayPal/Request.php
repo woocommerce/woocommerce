@@ -10,7 +10,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Gateways\PayPal;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
+use Automattic\Jetpack\Connection\Client as JetpackConnectionClient;
 use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -667,7 +667,7 @@ class Request {
 			$endpoint .= '?' . http_build_query( $request_body );
 		}
 
-		$response = Jetpack_Connection_Client::wpcom_json_api_request_as_blog(
+		$response = JetpackConnectionClient::wpcom_json_api_request_as_blog(
 			sprintf( '/sites/%d/%s/%s', $site_id, self::WPCOM_PROXY_REST_BASE, $endpoint ),
 			self::WPCOM_PROXY_ENDPOINT_API_VERSION,
 			array(
