@@ -40,7 +40,7 @@
 		}
 
 		.wc-block-components-product-metadata {
-			font-size: 12px;
+			@include font-small-locked;
 		}
 	}
 
