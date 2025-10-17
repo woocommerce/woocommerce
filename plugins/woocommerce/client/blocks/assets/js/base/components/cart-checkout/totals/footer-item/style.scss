@@ -1,7 +1,7 @@
 .wc-block-components-totals-footer-item {
 	.wc-block-components-totals-item__value,
 	.wc-block-components-totals-item__label {
-		@include font-size(large);
+		font-size: 21px;
 	}
 
 	.wc-block-components-totals-item__label {
