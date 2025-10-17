@@ -13,6 +13,7 @@ use WC_Unit_Test_Case;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
+use WC_Gateway_Pay_At_Location;
 use WC_Gateway_Paypal;
 
 /**

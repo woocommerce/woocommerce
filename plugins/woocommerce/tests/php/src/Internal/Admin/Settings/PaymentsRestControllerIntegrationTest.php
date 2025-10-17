@@ -15,6 +15,7 @@ use WP_REST_Request;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
+use WC_Gateway_Pay_At_Location;
 use WC_Gateway_Paypal;
 
 /**
