@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Trigger order status transition hooks regardless of dirty state. (Reverts #46887)
