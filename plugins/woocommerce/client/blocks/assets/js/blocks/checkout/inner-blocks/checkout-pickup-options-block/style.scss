@@ -32,7 +32,6 @@
 		.wc-block-components-radio-control__option-checked {
 			.wc-block-components-radio-control__description-group {
 				.read-more-content {
-					margin-left: $gap-small * 0.25;
 					position: initial;
 					visibility: visible;
 					z-index: initial;
@@ -48,14 +47,9 @@
 			display: flex;
 			flex-direction: column;
 			gap: $gap-smallest;
+			margin-top: $gap-smallest;
 
 			box-sizing: border-box;
-			padding: 0 $gap;
-
-			// Go to plugins/woocommerce/client/blocks/packages/components/radio-control/style.scss
-			// and inspect $content-padding-left to learn more about this "magic" value
-			margin-left: -#{calc($gap + 24px + $gap-smaller)};
-			margin-top: $gap-small;
 
 			.read-more-content {
 				position: absolute;
@@ -88,6 +82,7 @@
 				// Pixel perfect alignement needed as internal padding of the SVG
 				// is inconsistent (top one bigger that the bottom one).
 				margin-top: -2px;
+				margin-left: -3px;
 			}
 		}
 	}
