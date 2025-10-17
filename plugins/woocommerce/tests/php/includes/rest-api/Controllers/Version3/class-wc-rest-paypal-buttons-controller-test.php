@@ -347,7 +347,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 1235,
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'order data'        => array(
-					'id' 			   => 1235,
+					'id'               => 1235,
 					'_paypal_order_id' => '',
 				),
 				'expected status'   => 404,
@@ -358,7 +358,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 1236,
 				'PayPal order ID'   => '84M859702Y558133X',
 				'order data'        => array(
-					'id' 			   => 1236,
+					'id'               => 1236,
 					'status'           => OrderStatus::CHECKOUT_DRAFT,
 					'_paypal_order_id' => '84M859702Y558133X',
 				),
@@ -370,7 +370,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 1235,
 				'PayPal order ID'   => '74L758601X447022W',
 				'order data'        => array(
-					'id' 			   => 1235,
+					'id'               => 1235,
 					'status'           => OrderStatus::COMPLETED,
 					'_paypal_order_id' => '74L758601X447022W',
 				),
@@ -382,7 +382,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 1234,
 				'PayPal order ID'   => '94N960803Z669244Y',
 				'order data'        => array(
-					'id' 			   => 1234,
+					'id'               => 1234,
 					'_paypal_order_id' => '94N960803Z669244Y',
 				),
 				'expected status'   => 200,
