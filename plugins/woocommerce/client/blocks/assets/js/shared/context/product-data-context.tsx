@@ -80,7 +80,7 @@ const ProductDataContext = createContext< {
 
 type UseProductDataContextProps = {
 	isAdmin?: boolean | undefined;
-	product?: ProductResponseItem | ProductEntityResponse | undefined;
+	product?: ProductResponseItem | ProductEntityResponse | null | undefined;
 	isResolving?: boolean | undefined;
 };
 
@@ -108,7 +108,7 @@ export const useProductDataContext = (
 	const context = useContext( ProductDataContext );
 	const { isAdmin, product, isResolving } = props;
 
-	if ( ! isAdmin ) {
+	if ( ! isAdmin || ! product ) {
 		return context;
 	}
 

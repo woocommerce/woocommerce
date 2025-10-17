@@ -135,12 +135,14 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		return productPriceComponent;
 	}
 
-	let prices: PriceProps = product?.prices ?? {};
+	let prices: Partial< PriceProps > = product?.prices ?? {};
 	const currency = showPricePreview
 		? getCurrencyFromPriceResponse()
 		: getCurrencyFromPriceResponse( prices );
 
-	if ( isExperimentalWcRestApiV4Enabled ) {
+	// In the v4 API, the prices are in the root `product` object instead of a
+	// `prices` attribute.
+	if ( ! product?.prices && product.price ) {
 		prices = {
 			price: convertAdminPriceToStoreApiFormat(
 				product?.price,
