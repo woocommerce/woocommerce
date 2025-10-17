@@ -35,7 +35,7 @@ class ActionController {
 	public function get_endpoint_args_for_actions(): array {
 		return array(
 			'payment_complete'           => array(
-				'description' => __( 'Marks the order as paid. Updates the order status and reduces line item stock.', 'woocommerce' ),
+				'description' => __( 'Marks the order as paid. Updates the order status and reduces line item stock if necessary.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'default'     => false,
 			),
@@ -117,7 +117,11 @@ class ActionController {
 	 */
 	private function action_payment_complete( $action_value, WC_Order $order, WP_REST_Request $request ) {
 		if ( $action_value ) {
-			$order->payment_complete( $request['transaction_id'] ?? '' );
+			$result = $order->payment_complete( $request['transaction_id'] ?? '' );
+
+			if ( ! $result ) {
+				return new WP_Error( 'woocommerce_rest_payment_complete_failed', __( 'Could not mark the order as paid.', 'woocommerce' ) );
+			}
 		}
 		return true;
 	}
