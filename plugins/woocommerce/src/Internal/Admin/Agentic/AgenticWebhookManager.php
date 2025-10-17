@@ -157,7 +157,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( self::WEBHOOK_ACTION, $order_id, $order, 'order_update' );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order );
 	}
 
 	/**
