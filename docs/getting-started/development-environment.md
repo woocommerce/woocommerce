@@ -54,7 +54,7 @@ When developing for WooCommerce, it's helpful to install a development version o
 
 ### Option 1: WooCommerce Beta Tester
 
-If installing WooCommerce through the traditional WordPress dashboard, you can also install the [WooCommerce Beta Tester](/docs/contribution/testing/beta-testing) extension to change the version, including access to upcoming betas and release candidates. The WooCommerce Beta tester is available through the[ Woo Marketplace](https://woocommerce.com/marketplace). 
+If installing WooCommerce through the traditional WordPress dashboard, you can also install the [WooCommerce Beta Tester](/docs/contribution/testing/beta-testing) extension to change the version, including access to upcoming betas and release candidates. The WooCommerce Beta tester is available through the [Woo Marketplace](https://woocommerce.com/marketplace). 
 
 ### Option 2: Clone the WooCommerce Core repository
 
@@ -91,7 +91,7 @@ You can learn more about how to install and utilize nvm in [the nvm GitHub repos
 To install WooCommerce dependencies, use the following CLI command:
 
 ```shell
-pnpm install -frozen-lockfile
+pnpm install --frozen-lockfile
 ```
 
 #### Build WooCommerce
@@ -106,7 +106,7 @@ Note: If you try to run WooCommerce on your server without generating the compil
 
 #### Symlink the WooCommerce plugin 
 
-To load the WooCommerce plugin into your local develop environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress develoment environment.
+To load the WooCommerce plugin into your local development environment, you can create a symbolic link from the WooCommerce plugin in your cloned repository to your local WordPress development environment.
 
 ```shell
 ln -s woocommerce/plugins/woocommerce /path-to-local/wp-content/plugins

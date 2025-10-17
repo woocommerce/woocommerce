@@ -887,7 +887,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "10.32.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",
