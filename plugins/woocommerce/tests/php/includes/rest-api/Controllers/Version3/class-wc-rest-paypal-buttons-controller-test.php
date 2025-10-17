@@ -175,7 +175,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'payment source'    => 'paypal',
 				'order data'        => array(
 					'id'     => 123,
-					'status' => OrderStatus::PENDING
+					'status' => OrderStatus::PENDING,
 				),
 				'WPCOM response'    => null,
 				'expected status'   => 400,
@@ -199,9 +199,9 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 123,
 				'order key'         => 'some_key',
 				'payment source'    => 'paypal',
-				'order data'      => array(
+				'order data'        => array(
 					'id'     => 123,
-					'status' => OrderStatus::PENDING
+					'status' => OrderStatus::PENDING,
 				),
 				'WPCOM response'    => null,
 				'expected status'   => 404,
