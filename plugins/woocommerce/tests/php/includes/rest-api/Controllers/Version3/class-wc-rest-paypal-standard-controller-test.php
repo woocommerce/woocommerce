@@ -204,19 +204,19 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 								'currency_code' => 'USD',
 								'value'         => '50.00',
 								'breakdown'     => array(
-									'item_total'     => array(
+									'item_total' => array(
 										'currency_code' => 'USD',
 										'value'         => '40.00',
 									),
-									'shipping'       => array(
+									'shipping'   => array(
 										'currency_code' => 'USD',
 										'value'         => '10.00',
 									),
-									'tax_total'     => array(
+									'tax_total'  => array(
 										'currency_code' => 'USD',
 										'value'         => '0.00',
 									),
-									'discount'      => array(
+									'discount'   => array(
 										'currency_code' => 'USD',
 										'value'         => '0.00',
 									),
