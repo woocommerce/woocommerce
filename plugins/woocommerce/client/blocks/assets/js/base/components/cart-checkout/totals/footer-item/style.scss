@@ -1,7 +1,7 @@
 .wc-block-components-totals-footer-item {
 	.wc-block-components-totals-item__value,
 	.wc-block-components-totals-item__label {
-		@include font-large-locked;
+		@include font-size(large);
 	}
 
 	.wc-block-components-totals-item__label {
@@ -29,5 +29,12 @@
 
 	.wc-block-components-totals-item__value {
 		font-weight: 700;
+	}
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-totals-footer-item {
+	.wc-block-components-totals-item__value,
+	.wc-block-components-totals-item__label {
+		@include font-large-locked;
 	}
 }
