@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use WP_REST_Request;
 
 /**
@@ -74,6 +75,18 @@ class OrderNoteSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'required'    => true,
 			),
+			'title'            => array(
+				'description' => __( 'The title of the order note group.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'group'            => array(
+				'description' => __( 'The group of order note.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'is_customer_note' => array(
 				'description' => __( 'If true, the note will be shown to customers. If false, the note will be for admin reference only.', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -94,6 +107,14 @@ class OrderNoteSchema extends AbstractSchema {
 	 * @return array The item response.
 	 */
 	public function get_item_response( $note, WP_REST_Request $request, array $include_fields = array() ): array {
+		$group            = get_comment_meta( $note->comment_ID, 'note_group', true );
+		$title            = get_comment_meta( $note->comment_ID, 'note_title', true );
+		$is_customer_note = wc_string_to_bool( get_comment_meta( $note->comment_ID, 'is_customer_note', true ) );
+
+		if ( $group && ! $title ) {
+			$title = OrderNoteGroup::get_default_group_title( $group );
+		}
+
 		return array(
 			'id'               => (int) $note->comment_ID,
 			'order_id'         => (int) $note->comment_post_ID,
@@ -101,7 +122,9 @@ class OrderNoteSchema extends AbstractSchema {
 			'date_created'     => wc_rest_prepare_date_response( $note->comment_date ),
 			'date_created_gmt' => wc_rest_prepare_date_response( $note->comment_date_gmt ),
 			'note'             => $note->comment_content,
-			'is_customer_note' => (bool) get_comment_meta( $note->comment_ID, 'is_customer_note', true ),
+			'title'            => $title,
+			'group'            => $group,
+			'is_customer_note' => $is_customer_note,
 		);
 	}
 }
