@@ -19,8 +19,10 @@ class AbilitiesCategories {
 
 	/**
 	 * Initialize category registration.
+	 *
+	 * @internal
 	 */
-	public static function init(): void {
+	final public static function init(): void {
 		// Register categories when Abilities API categories are ready.
 		add_action( 'abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
 	}

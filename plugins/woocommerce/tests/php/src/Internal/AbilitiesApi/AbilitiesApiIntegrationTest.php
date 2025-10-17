@@ -33,7 +33,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
-
 		// Ensure REST API routes are registered (hook may be cleared by parent tear_down).
 		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
 			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
@@ -132,13 +131,12 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_permission_callback_is_required() {
-		$ability_id                    = 'woocommerce-test/missing-permission';
-		$this->registered_abilities[]  = $ability_id;
+		$ability_id                   = 'woocommerce-test/missing-permission';
+		$this->registered_abilities[] = $ability_id;
 
 		// Expect incorrect usage notices when permission_callback is missing.
 		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::register' );
 		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::get_registered' );
-
 
 		// Register test category for abilities used in tests.
 		add_action(
@@ -194,7 +192,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/get-test';
 		$this->registered_abilities[] = $ability_id;
 
-
 		// Register test category for abilities used in tests.
 		add_action(
 			'abilities_api_categories_init',
@@ -230,8 +227,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 						'permission_callback' => function () {
 							return true;
 						},
-						'meta'                => array(
-						),
+						'meta'                => array(),
 					)
 				);
 			}
@@ -254,7 +250,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	public function test_can_execute_ability() {
 		$ability_id                   = 'woocommerce-test/execute-test';
 		$this->registered_abilities[] = $ability_id;
-
 
 		// Register test category for abilities used in tests.
 		add_action(
@@ -349,7 +344,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id_2                 = 'woocommerce-test/rest-fetch-2';
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
-
 
 		// Register test category for abilities used in tests.
 		add_action(
@@ -448,7 +442,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/rest-execute-test';
 		$this->registered_abilities[] = $ability_id;
 
-
 		// Register test category for abilities used in tests.
 		add_action(
 			'abilities_api_categories_init',
@@ -544,7 +537,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id_2                 = 'woocommerce-test/list-test-2';
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
-
 
 		// Register test category for abilities used in tests.
 		add_action(
