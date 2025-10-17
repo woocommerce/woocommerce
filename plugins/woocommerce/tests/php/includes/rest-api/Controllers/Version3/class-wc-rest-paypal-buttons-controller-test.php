@@ -245,6 +245,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @param bool   $include_nonce Whether to include a nonce in the request.
 	 * @param int    $order_id Order ID.
 	 * @param string $paypal_order_id PayPal order ID.
+	 * @param array  $order_data Order meta data to set up before the test.
 	 * @param int    $expected_status Expected HTTP status code.
 	 * @param array  $expected_response Expected response data.
 	 * @return void
@@ -255,9 +256,28 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		bool $include_nonce,
 		int $order_id,
 		string $paypal_order_id,
+		array $order_data,
 		int $expected_status,
 		array $expected_response
 	) {
+		$order = null;
+		if ( ! empty( $order_data ) ) {
+			$order = new WC_Order();
+			if ( isset( $order_data['id'] ) ) {
+				$order->set_id( $order_data['id'] );
+			}
+			if ( isset( $order_data['status'] ) ) {
+				$order->set_status( $order_data['status'] );
+			} else {
+				$order->set_status( OrderStatus::PENDING );
+			}
+			$order->save();
+			if ( isset( $order_data['_paypal_order_id'] ) ) {
+				$order->update_meta_data( '_paypal_order_id', $order_data['_paypal_order_id'] );
+				$order->save_meta_data();
+			}
+		}
+
 		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-buttons/cancel-payment' );
 
 		if ( $include_nonce ) {
@@ -277,7 +297,6 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Clean up.
-		$order = wc_get_order( $order_id );
 		if ( $order ) {
 			$order->delete( true );
 		}
@@ -292,33 +311,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_test_cancel_payment(): array {
-		$order = new WC_Order();
-		$order->save();
-		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
-		$order->save_meta_data();
-
-		$order_invalid_paypal_id = new WC_Order();
-		$order_invalid_paypal_id->save();
-		$order_invalid_paypal_id->update_meta_data( '_paypal_order_id', '' );
-		$order_invalid_paypal_id->save_meta_data();
-
-		$order_draft = new WC_Order();
-		$order_draft->set_status( OrderStatus::CHECKOUT_DRAFT );
-		$order_draft->save();
-		$order_draft->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
-		$order_draft->save_meta_data();
-
-		$order_invalid_status = new WC_Order();
-		$order_invalid_status->set_status( OrderStatus::COMPLETED );
-		$order_invalid_status->save();
-		$order_invalid_status->update_meta_data( '_paypal_order_id', '74L758601X447022W' );
-		$order_invalid_status->save_meta_data();
-
 		return array(
 			'invalid nonce'                 => array(
 				'include nonce'     => false,
-				'order ID'          => $order->get_id(),
+				'order ID'          => 0,
 				'PayPal order ID'   => '94N960803Z669244Y',
+				'order data'        => [],
 				'expected status'   => 403,
 				'expected response' => array(
 					'code'    => 'rest_forbidden',
@@ -332,6 +330,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 0,
 				'PayPal order ID'   => '94N960803Z669244Y',
+				'order data'        => [],
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Invalid request' ),
 			),
@@ -339,34 +338,53 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 99999,
 				'PayPal order ID'   => '94N960803Z669244Y',
+				'order data'        => [],
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid PayPal order ID'       => array(
 				'include nonce'     => true,
-				'order ID'          => $order_invalid_paypal_id->get_id(),
+				'order ID'          => 1235,
 				'PayPal order ID'   => '94N960803Z669244Y',
+				'order data'        => [
+					'id' 			   => 1235,
+					'_paypal_order_id' => '',
+				],
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Invalid PayPal order' ),
 			),
 			'order already in draft status' => array(
 				'include nonce'     => true,
-				'order ID'          => $order_draft->get_id(),
+				'order ID'          => 1236,
 				'PayPal order ID'   => '84M859702Y558133X',
+				'order data'        => [
+					'id' 			   => 1236,
+					'status'           => OrderStatus::CHECKOUT_DRAFT,
+					'_paypal_order_id' => '84M859702Y558133X',
+				],
 				'expected status'   => 200,
 				'expected response' => array( 'success' => true ),
 			),
 			'invalid order status'          => array(
 				'include nonce'     => true,
-				'order ID'          => $order_invalid_status->get_id(),
+				'order ID'          => 1235,
 				'PayPal order ID'   => '74L758601X447022W',
+				'order data'        => [
+					'id' 			   => 1235,
+					'status'           => OrderStatus::COMPLETED,
+					'_paypal_order_id' => '74L758601X447022W',
+				],
 				'expected status'   => 409,
 				'expected response' => array( 'error' => 'Order is not pending' ),
 			),
 			'successful cancellation'       => array(
 				'include nonce'     => true,
-				'order ID'          => $order->get_id(),
+				'order ID'          => 1234,
 				'PayPal order ID'   => '94N960803Z669244Y',
+				'order data'        => [
+					'id' 			   => 1234,
+					'_paypal_order_id' => '94N960803Z669244Y',
+				],
 				'expected status'   => 200,
 				'expected response' => array( 'success' => true ),
 			),
