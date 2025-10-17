@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Patterns\AIPatterns;
 use Automattic\WooCommerce\Blocks\Patterns\PatternRegistry;
 use Automattic\WooCommerce\Blocks\Patterns\PTKClient;
 use Automattic\WooCommerce\Blocks\Patterns\PTKPatternsStore;
+use Automattic\WooCommerce\Blocks\Payments\Integrations\PayAtLocation;
 use Automattic\WooCommerce\Blocks\QueryFilters;
 use Automattic\WooCommerce\Blocks\Domain\Services\Notices;
 use Automattic\WooCommerce\Blocks\Domain\Services\DraftOrders;
@@ -498,6 +499,13 @@ class Bootstrap {
 			function ( Container $container ) {
 				$asset_api = $container->get( AssetApi::class );
 				return new CashOnDelivery( $asset_api );
+			}
+		);
+		$this->container->register(
+			PayAtLocation::class,
+			function ( Container $container ) {
+				$asset_api = $container->get( AssetApi::class );
+				return new PayAtLocation( $asset_api );
 			}
 		);
 	}
