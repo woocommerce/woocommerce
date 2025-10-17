@@ -197,7 +197,7 @@ function wc_reduce_stock_levels( $order_id ) {
 		 * @param WC_Order_Item_Product $item Order item data.
 		 */
 		$qty       = apply_filters( 'woocommerce_order_item_quantity', $item->get_quantity(), $order, $item );
-		$item_name = $product->get_formatted_name();
+		$item_name = $product->get_name();
 		$new_stock = wc_update_product_stock( $product, $qty, 'decrease' );
 
 		if ( is_wp_error( $new_stock ) ) {
