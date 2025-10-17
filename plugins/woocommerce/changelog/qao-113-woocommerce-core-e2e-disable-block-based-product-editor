@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+e2e tests: skip block-based product editor tests

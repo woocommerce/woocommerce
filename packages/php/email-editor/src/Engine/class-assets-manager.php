@@ -191,7 +191,7 @@ class Assets_Manager {
 		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L116-L120.
 		wp_add_inline_script(
 			'wp-blocks',
-			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $context ) ) ),
+			sprintf( 'wp.blocks.setCategories( %s );', wp_json_encode( get_block_categories( $context ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) ),
 			'after'
 		);
 
@@ -199,7 +199,7 @@ class Assets_Manager {
 		// See: https://github.com/WordPress/WordPress/blob/753817d462955eb4e40a89034b7b7c375a1e43f3/wp-admin/edit-form-blocks.php#L144C1-L148C3.
 		wp_add_inline_script(
 			'wp-blocks',
-			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings() ) )
+			sprintf( 'wp.blocks.unstable__bootstrapServerSideBlockDefinitions( %s );', wp_json_encode( get_block_editor_server_block_settings(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ) )
 		);
 
 		$localization_data = array(
@@ -265,7 +265,7 @@ class Assets_Manager {
 			'wp-blocks',
 			sprintf(
 				'wp.apiFetch.use( wp.apiFetch.createPreloadingMiddleware( %s ) );',
-				wp_json_encode( $preload_data )
+				wp_json_encode( $preload_data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES )
 			)
 		);
 	}

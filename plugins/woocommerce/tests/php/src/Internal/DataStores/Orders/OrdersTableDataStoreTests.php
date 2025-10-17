@@ -3787,4 +3787,31 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->save_meta_data();
 		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
 	}
+
+	/**
+	 * @testdox An order deleted from the posts table while sync was off is deleted from the orders table when sync runs.
+	 */
+	public function test_loading_order_deleted_from_posts_table() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( false );
+
+		// Create a synced order.
+		$this->enable_cot_sync();
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Temporarily disable sync and delete order from posts.
+		$this->disable_cot_sync();
+		$order->delete( true );
+
+		// Re-enable sync and attempt to read the order from the HPOS side.
+		$this->enable_cot_sync();
+
+		// Confirm that the order is deleted from HPOS when sync runs.
+		$this->assertEquals( true, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sync = wc_get_container()->get( DataSynchronizer::class );
+		$sync->process_batch( array( $order_id ) );
+		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
 }

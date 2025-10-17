@@ -13,10 +13,10 @@ concurrency:
   group: release-code-freeze
 
 env:
-    GIT_COMMITTER_NAME: 'WooCommerce Bot'
-    GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
-    GIT_AUTHOR_NAME: 'WooCommerce Bot'
-    GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
+  GIT_COMMITTER_NAME: 'WooCommerce Bot'
+  GIT_COMMITTER_EMAIL: 'no-reply@woocommerce.com'
+  GIT_AUTHOR_NAME: 'WooCommerce Bot'
+  GIT_AUTHOR_EMAIL: 'no-reply@woocommerce.com'
 
 jobs:
   check-feature-freeze-event:
@@ -257,3 +257,19 @@ jobs:
           WPCOM_RELEASE_WEBHOOK_URL: ${{ secrets.WPCOM_RELEASE_WEBHOOK_URL }}
           ENVIRONMENT: ${{ secrets.ENVIRONMENT }}
 
+  notify-slack-on-failure:
+    name: Notify Slack on Failure
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [ check-feature-freeze-event, prepare-for-code-freeze, run-code-freeze, bump-version-in-trunk, build-dev-release, publish-dev-release, notify-slack, trigger-webhook ]
+    if: always() && ((contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')))
+    steps:
+      - name: Notify Slack on failure
+        uses: archive/github-actions-slack@f530f3aa696b2eef0e5aba82450e387bd7723903 #v2.0.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_CHANNEL }}
+          slack-text: |
+            :x: Some steps in the Code Freeze workflow failed. Please check the logs for details and re-run if needed.
+            <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|View workflow run>
+          slack-optional-unfurl_links: false
+          slack-optional-unfurl_media: false

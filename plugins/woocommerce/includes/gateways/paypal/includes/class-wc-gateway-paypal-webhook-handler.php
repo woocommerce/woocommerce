@@ -44,6 +44,9 @@ class WC_Gateway_Paypal_Webhook_Handler {
 			case 'CHECKOUT.ORDER.APPROVED':
 				$this->process_checkout_order_approved( $data );
 				break;
+			case 'PAYMENT.CAPTURE.PENDING':
+				$this->process_payment_capture_pending( $data );
+				break;
 			case 'PAYMENT.CAPTURE.COMPLETED':
 				$this->process_payment_capture_completed( $data );
 				break;
@@ -138,6 +141,34 @@ class WC_Gateway_Paypal_Webhook_Handler {
 				$transaction_id
 			)
 		);
+		$order->save();
+	}
+
+	/**
+	 * Process the PAYMENT.CAPTURE.PENDING webhook event.
+	 *
+	 * @param array $event The webhook event data.
+	 */
+	private function process_payment_capture_pending( $event ) {
+		$custom_id = $event['resource']['custom_id'] ?? '';
+		$order     = WC_Gateway_Paypal_Helper::get_wc_order_from_paypal_custom_id( $custom_id );
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Invalid order. Custom ID: ' . wc_print_r( $custom_id, true ) );
+			return;
+		}
+
+		// Skip if the payment is already processed.
+		if ( WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $order->get_meta( '_paypal_status', true ) ) {
+			return;
+		}
+
+		$transaction_id = $event['resource']['id'] ?? null;
+		$status         = $event['resource']['status'] ?? null;
+		$reason         = $event['resource']['status_details']['reason'] ?? 'Unknown';
+		$order->set_transaction_id( $transaction_id );
+		$order->update_meta_data( '_paypal_status', $status );
+		/* translators: %s: reason */
+		$order->update_status( OrderStatus::ON_HOLD, sprintf( __( 'Payment pending (reason: %s).', 'woocommerce' ), $reason ) );
 		$order->save();
 	}
 

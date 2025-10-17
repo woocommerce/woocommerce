@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -20,6 +21,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @version  3.0.0
  */
 class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implements WC_Object_Data_Store_Interface, WC_Order_Data_Store_Interface {
+	use CogsAwareTrait;
 
 	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
@@ -80,6 +82,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -182,6 +185,10 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				'recorded_coupon_usage_counts' => $post_meta['_recorded_coupon_usage_counts'][0] ?? '',
 			)
 		);
+
+		if ( $this->cogs_is_enabled() && $order->has_cogs() ) {
+			$this->read_cogs_data( $order, $post_meta );
+		}
 	}
 
 	/**
@@ -263,13 +270,27 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'_recorded_coupon_usage_counts' => 'recorded_coupon_usage_counts',
 			'_new_order_email_sent'         => 'new_order_email_sent',
 			'_order_stock_reduced'          => 'order_stock_reduced',
+			'_cogs_total_value'             => 'cogs_total_value',
 		);
 
 		$props_to_update = $this->get_props_to_update( $order, $meta_key_to_props );
 
 		foreach ( $props_to_update as $meta_key => $prop ) {
-			$value = $order->{"get_$prop"}( 'edit' );
+			if ( 'cogs_total_value' === $prop ) {
+				if ( ! $this->cogs_is_enabled() ) {
+					continue;
+				}
+				$value = $order->get_cogs_total_value( 'edit' );
+				if ( $this->handle_cogs_value_update( $order, $value, $id, $meta_key, $updated_props, $prop ) ) {
+					continue;
+				}
+			} else {
+				$value = $order->{"get_$prop"}( 'edit' );
+			}
+
+			// Value is either already set (for COGS) or retrieved above.
 			$value = is_string( $value ) ? wp_slash( $value ) : $value;
+
 			switch ( $prop ) {
 				case 'date_paid':
 				case 'date_completed':
@@ -1112,7 +1133,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				__METHOD__,
 				esc_html(
 					sprintf(
-						// translators: %s is a comma separated list of query arguments.
+					// translators: %s is a comma separated list of query arguments.
 						_n(
 							'Order query argument (%s) is not supported on the current order datastore.',
 							'Order query arguments (%s) are not supported on the current order datastore.',
@@ -1386,5 +1407,105 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			'compare' => $operator,
 			'type'    => '=' === $operator ? 'CHAR' : 'DECIMAL(10,' . wc_get_price_decimals() . ')',
 		);
+	}
+
+	/**
+	 * Helper method to update order metadata from initialized order object.
+	 * Overrides the parent method to add COGS sync support for compatibility mode.
+	 *
+	 * @param WC_Abstract_Order $order Order object.
+	 */
+	protected function update_order_meta_from_object( $order ) {
+		parent::update_order_meta_from_object( $order );
+
+		if ( ! $this->cogs_is_enabled() || ! $order->has_cogs() ) {
+			return;
+		}
+
+		$cogs_value = $order->get_cogs_total_value( 'edit' );
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
+		 * or to suppress the saving of the value (so that custom storage can be used).
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
+
+		if ( ! is_null( $cogs_value ) ) {
+			if ( 0.0 === (float) $cogs_value ) {
+				delete_post_meta( $order->get_id(), '_cogs_total_value' );
+			} else {
+				update_post_meta( $order->get_id(), '_cogs_total_value', $cogs_value );
+			}
+		}
+	}
+
+	/**
+	 * Read the Cost of Goods Sold value for a given order from the database, if available, and apply it to the order.
+	 *
+	 * @param WC_Order $order The order to get the COGS value for.
+	 * @param array    $post_meta The post meta data array.
+	 */
+	private function read_cogs_data( $order, $post_meta ) {
+		$cogs_value = isset( $post_meta['_cogs_total_value'][0] ) ? (float) $post_meta['_cogs_total_value'][0] : 0;
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets loaded for a given order.
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float              $cogs_value The value as read from the database.
+		 * @param WC_Abstract_Order $order      The order for which the value is being loaded.
+		 */
+		$cogs_value = apply_filters( 'woocommerce_load_order_cogs_value', $cogs_value, $order );
+
+		$order->set_cogs_total_value( (float) $cogs_value );
+		$order->apply_changes();
+	}
+
+	/**
+	 * Handle the update of COGS value during post meta update.
+	 * This method processes COGS-specific logic and determines if the standard update flow should be skipped.
+	 *
+	 * @param WC_Order $order The order being updated.
+	 * @param mixed    &$value Reference to the COGS value to update (will be modified by filter).
+	 * @param int      $order_id The order ID.
+	 * @param string   $meta_key The meta key being updated.
+	 * @param array    &$updated_props Reference to the array of updated properties.
+	 * @param string   $prop The property name.
+	 * @return bool True if the standard update flow should be skipped, false otherwise.
+	 */
+	private function handle_cogs_value_update( $order, &$value, $order_id, $meta_key, &$updated_props, $prop ) {
+		if ( ! $this->cogs_is_enabled() || ! $order->has_cogs() ) {
+			return true;
+		}
+
+		/**
+		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
+		 * or to suppress the saving of the value (so that custom storage can be used).
+		 *
+		 * @since 9.5.0
+		 *
+		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 */
+		$value = apply_filters( 'woocommerce_save_order_cogs_value', $value, $order );
+		if ( is_null( $value ) ) {
+			return true;
+		}
+
+		// Delete meta if value is zero (optimization).
+		if ( 0.0 === (float) $value ) {
+			delete_post_meta( $order_id, $meta_key );
+			$updated_props[] = $prop;
+			return true;
+		}
+
+		// Let the standard flow handle the update (with the filtered value).
+		return false;
 	}
 }

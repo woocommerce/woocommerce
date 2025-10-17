@@ -17,6 +17,9 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
 
+	<!-- Only check PHP files. -->
+	<arg name="extensions" value="php" />
+
 	<!-- Show progress, show the error codes for each message (source). -->
 	<arg value="ps" />
 
