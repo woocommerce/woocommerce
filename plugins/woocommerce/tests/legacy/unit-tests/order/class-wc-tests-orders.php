@@ -251,7 +251,7 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The woocommerce_cogs_recalculate_on_order_status_transition filter can prevent COGS recalculation on status transition.
+	 * @testdox The woocommerce_recalculate_cogs_on_order_status_transition filter can prevent COGS recalculation on status transition.
 	 */
 	public function test_cogs_recalculation_filter_can_prevent_recalculation() {
 		$this->enable_cogs_feature();
