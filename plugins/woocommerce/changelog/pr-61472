@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix undefined array key warning when firing woocommerce_variation_prices
