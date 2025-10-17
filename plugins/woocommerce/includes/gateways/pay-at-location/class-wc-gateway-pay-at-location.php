@@ -4,6 +4,7 @@
  *
  * @package WooCommerce\Gateways
  */
+
 declare(strict_types=1);
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
