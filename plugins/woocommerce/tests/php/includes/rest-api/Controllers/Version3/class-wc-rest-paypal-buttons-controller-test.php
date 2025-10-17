@@ -316,7 +316,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => false,
 				'order ID'          => 0,
 				'PayPal order ID'   => '94N960803Z669244Y',
-				'order data'        => [],
+				'order data'        => array(),
 				'expected status'   => 403,
 				'expected response' => array(
 					'code'    => 'rest_forbidden',
@@ -330,7 +330,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 0,
 				'PayPal order ID'   => '94N960803Z669244Y',
-				'order data'        => [],
+				'order data'        => array(),
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Invalid request' ),
 			),
@@ -338,7 +338,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 99999,
 				'PayPal order ID'   => '94N960803Z669244Y',
-				'order data'        => [],
+				'order data'        => array(),
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
@@ -346,10 +346,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 1235,
 				'PayPal order ID'   => '94N960803Z669244Y',
-				'order data'        => [
+				'order data'        => array(
 					'id' 			   => 1235,
 					'_paypal_order_id' => '',
-				],
+				),
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Invalid PayPal order' ),
 			),
@@ -357,11 +357,11 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 1236,
 				'PayPal order ID'   => '84M859702Y558133X',
-				'order data'        => [
+				'order data'        => array(
 					'id' 			   => 1236,
 					'status'           => OrderStatus::CHECKOUT_DRAFT,
 					'_paypal_order_id' => '84M859702Y558133X',
-				],
+				),
 				'expected status'   => 200,
 				'expected response' => array( 'success' => true ),
 			),
@@ -369,11 +369,11 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 1235,
 				'PayPal order ID'   => '74L758601X447022W',
-				'order data'        => [
+				'order data'        => array(
 					'id' 			   => 1235,
 					'status'           => OrderStatus::COMPLETED,
 					'_paypal_order_id' => '74L758601X447022W',
-				],
+				),
 				'expected status'   => 409,
 				'expected response' => array( 'error' => 'Order is not pending' ),
 			),
@@ -381,10 +381,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'include nonce'     => true,
 				'order ID'          => 1234,
 				'PayPal order ID'   => '94N960803Z669244Y',
-				'order data'        => [
+				'order data'        => array(
 					'id' 			   => 1234,
 					'_paypal_order_id' => '94N960803Z669244Y',
-				],
+				),
 				'expected status'   => 200,
 				'expected response' => array( 'success' => true ),
 			),
