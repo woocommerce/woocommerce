@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure legacy > HPOS sync correctly handles deleted orders deleted while sync was off.
