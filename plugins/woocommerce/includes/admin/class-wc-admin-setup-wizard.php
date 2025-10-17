@@ -1589,25 +1589,25 @@ class WC_Admin_Setup_Wizard {
 	public function get_wizard_manual_payment_gateways() {
 		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', 'Onboarding is maintained in WooCommerce Admin.' );
 		$gateways = array(
-			WC_Gateway_Cheque::ID => array(
+			WC_Gateway_Cheque::ID          => array(
 				'name'        => _x( 'Check payments', 'Check payment method', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept a check as method of payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			WC_Gateway_BACS::ID   => array(
+			WC_Gateway_BACS::ID            => array(
 				'name'        => __( 'Bank transfer (BACS) payments', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept BACS payment.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			WC_Gateway_COD::ID    => array(
+			WC_Gateway_COD::ID             => array(
 				'name'        => __( 'Cash on delivery', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept cash on delivery.', 'woocommerce' ),
 				'image'       => '',
 				'class'       => '',
 			),
-			WC_Gateway_Pay_At_Location::ID    => array(
+			WC_Gateway_Pay_At_Location::ID => array(
 				'name'        => __( 'Pay at location', 'woocommerce' ),
 				'description' => __( 'A simple offline gateway that lets you accept payment at location.', 'woocommerce' ),
 				'image'       => '',
