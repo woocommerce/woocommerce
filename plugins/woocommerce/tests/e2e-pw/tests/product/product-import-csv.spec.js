@@ -213,7 +213,7 @@ test.describe( 'Import Products from a CSV file', () => {
 
 			// Wait for search results to load completely
 			await page.waitForSelector( 'a.row-title', { timeout: 30000 } );
-			
+
 			// Compare imported products to what's expected
 			await expect( page.locator( 'a.row-title' ) ).toHaveCount(
 				productNames.length,
