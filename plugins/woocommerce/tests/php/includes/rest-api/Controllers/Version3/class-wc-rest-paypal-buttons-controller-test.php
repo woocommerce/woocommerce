@@ -130,10 +130,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provide_test_create_order(): array {
-		$order = new \WC_Order();
+		$order = new WC_Order();
 		$order->save();
 
-		$order_invalid_status = new \WC_Order();
+		$order_invalid_status = new WC_Order();
 		$order_invalid_status->set_status( OrderStatus::COMPLETED );
 		$order_invalid_status->save();
 
