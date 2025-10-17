@@ -245,6 +245,7 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 		bool $mock_jetpack_params,
 		bool $expect_to_save
 	) {
+		$order = null;
 		if ( $should_create_order ) {
 			$order = WC_Helper_Order::create_order();
 			$order->set_payment_method( $payment_method );
