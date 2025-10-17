@@ -82,10 +82,27 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$order_id = null,
 		$order_key = null,
 		$payment_source = null,
+		$order_data = array(),
 		$wpcom_response = null,
 		$expected_status = 200,
 		$expected_response = null
 	) {
+		if ( count( $order_data ) > 0 ) {
+			$order = new WC_Order();
+			if ( isset( $order_data['id'] ) ) {
+				$order->set_id( $order_data['id'] );
+			}
+			if ( isset( $order_data['status'] ) ) {
+				$order->set_status( $order_data['status'] );
+			} else {
+				$order->set_status( OrderStatus::PENDING );
+			}
+			if ( isset( $order_data['order_key'] ) ) {
+				$order->set_order_key( $order_data['order_key'] );
+			}
+			$order->save();
+		}
+
 		$response_mock_ref = function () use ( $wpcom_response ) {
 			return $wpcom_response;
 		};
@@ -130,19 +147,16 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provide_test_create_order(): array {
-		$order = new WC_Order();
-		$order->save();
-
-		$order_invalid_status = new WC_Order();
-		$order_invalid_status->set_status( OrderStatus::COMPLETED );
-		$order_invalid_status->save();
-
 		return array(
 			'missing nonce'                => array(
 				'include nonce'     => false,
 				'order ID'          => 123,
 				'order key'         => 'some_key',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'     => 123,
+					'status' => OrderStatus::PENDING,
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 403,
 				'expected response' => array(
@@ -158,6 +172,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => '',
 				'order key'         => 'some_key',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'     => 123,
+					'status' => OrderStatus::PENDING
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Invalid request' ),
@@ -167,6 +185,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 123,
 				'order key'         => 'some_key',
 				'payment source'    => '',
+				'order data'        => array(
+					'id'     => 123,
+					'status' => OrderStatus::PENDING,
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Missing/Invalid payment source: ' ),
@@ -176,42 +198,65 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'order ID'          => 123,
 				'order key'         => 'some_key',
 				'payment source'    => 'paypal',
+				'order data'      => array(
+					'id'     => 123,
+					'status' => OrderStatus::PENDING
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid order key'            => array(
 				'include nonce'     => true,
-				'order ID'          => $order_invalid_status->get_id(),
+				'order ID'          => 1235,
 				'order key'         => 'invalid_key',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'     => 1235,
+					'status' => OrderStatus::PENDING,
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 404,
 				'expected response' => array( 'error' => 'Order not found' ),
 			),
 			'invalid order status'         => array(
 				'include nonce'     => true,
-				'order ID'          => $order_invalid_status->get_id(),
-				'order key'         => $order_invalid_status->get_order_key(),
+				'order ID'          => 1235,
+				'order key'         => 'wc_order_test_key_123',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'        => 1235,
+					'status'    => OrderStatus::COMPLETED,
+					'order_key' => 'wc_order_test_key_123',
+				),
 				'WPCOM response'    => null,
 				'expected status'   => 409,
 				'expected response' => array( 'error' => 'Invalid order status' ),
 			),
 			'PayPal order creation failed' => array(
 				'include nonce'     => true,
-				'order ID'          => $order->get_id(),
-				'order key'         => $order->get_order_key(),
+				'order ID'          => 1234,
+				'order key'         => 'wc_order_test_key_124',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'        => 1234,
+					'status'    => OrderStatus::PENDING,
+					'order_key' => 'wc_order_test_key_124',
+				),
 				'WPCOM response'    => '',
 				'expected status'   => 400,
 				'expected response' => array( 'error' => 'Failed to create PayPal order' ),
 			),
 			'successful order creation'    => array(
 				'include nonce'     => true,
-				'order ID'          => $order->get_id(),
-				'order key'         => $order->get_order_key(),
+				'order ID'          => 1234,
+				'order key'         => 'wc_order_test_key_125',
 				'payment source'    => 'paypal',
+				'order data'        => array(
+					'id'        => 1234,
+					'status'    => OrderStatus::PENDING,
+					'order_key' => 'wc_order_test_key_125',
+				),
 				'WPCOM response'    => array(
 					'response' => array(
 						'code' => 200,
@@ -232,8 +277,8 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'expected status'   => 200,
 				'expected response' => array(
 					'paypal_order_id' => '123',
-					'order_id'        => $order->get_id(),
-					'return_url'      => 'http://localhost:8086?order-received=' . $order->get_id() . '&key=' . $order->get_order_key() . '&utm_nooverride=1',
+					'order_id'        => 1234,
+					'return_url'      => 'http://localhost:8086?order-received=1234&key=wc_order_test_key_125&utm_nooverride=1',
 				),
 			),
 		);
