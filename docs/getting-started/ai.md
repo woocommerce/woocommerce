@@ -21,7 +21,7 @@ To feed the WooCommerce Developer Documentation into your LLM or AI-assisted IDE
 1. [`llms.txt`](https://developer.woocommerce.com/docs/llms.txt) - A table of contents that includes the title, URL, and description of each document in the developer docs.
 2. [`llms-full.txt`](https://developer.woocommerce.com/docs/llms-full.txt) - A full Markdown-formatted export of the entire documentation in one file.
 
-If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documention so that you can reference them as needed.
+If you are using an IDE like Cursor or Windsurf, we recommend adding these links as custom documentation so that you can reference them as needed.
 
 **Note** that these do not include the contents of the [WC REST API documentation](https://woocommerce.github.io/woocommerce-rest-api-docs/#introduction) or the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/).
 
