@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add v4 API routes for fetching and updating payment gateways.
