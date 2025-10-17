@@ -70,6 +70,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @param int        $order_id Order ID.
 	 * @param string     $order_key Order key.
 	 * @param string     $payment_source Payment source (e.g., 'paypal').
+	 * @param array      $order_data Order meta data to set up before the test.
 	 * @param array|null $wpcom_response Mocked response from WPCOM API.
 	 * @param int        $expected_status Expected HTTP status code.
 	 * @param array|null $expected_response Expected response data.
