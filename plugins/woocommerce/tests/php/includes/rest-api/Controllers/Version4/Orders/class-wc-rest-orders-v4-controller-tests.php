@@ -1650,4 +1650,72 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order3->delete( true );
 		$order4->delete( true );
 	}
+
+	/**
+	 * Test pagination functionality with posts_per_page=2 and 4 test orders.
+	 */
+	public function test_pagination(): void {
+		// Create 4 test orders.
+		$orders = array();
+		for ( $i = 1; $i <= 4; $i++ ) {
+			$order    = $this->create_test_order(
+				array(
+					'billing' => array(
+						'first_name' => "Test{$i}",
+						'last_name'  => 'User',
+						'email'      => "test{$i}@example.com",
+					),
+				)
+			);
+			$orders[] = $order;
+		}
+
+		// Test first page (page=1, per_page=2) - should return 2 orders.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 2 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data, 'First page should return exactly 2 orders' );
+
+		// Test second page (page=2, per_page=2) - should return 2 orders.
+		$request->set_param( 'page', 2 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data, 'Second page should return exactly 2 orders' );
+
+		// Test third page (page=3, per_page=2) - should return 0 orders.
+		$request->set_param( 'page', 3 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 0, $response_data, 'Third page should return 0 orders' );
+
+		// Test that no duplicate order IDs are returned across pages.
+		$all_order_ids = array();
+		for ( $page = 1; $page <= 2; $page++ ) {
+			$request->set_param( 'page', $page );
+			$response      = $this->server->dispatch( $request );
+			$response_data = $response->get_data();
+
+			foreach ( $response_data as $order_data ) {
+				$all_order_ids[] = $order_data['id'];
+			}
+		}
+
+		// Should have exactly 4 unique order IDs (no duplicates).
+		$unique_order_ids = array_unique( $all_order_ids );
+		$this->assertCount( 4, $unique_order_ids, 'Should have exactly 4 unique orders across all pages with no duplicates' );
+		$this->assertCount( 4, $all_order_ids, 'Total order IDs should equal unique order IDs (no duplicates)' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
+	}
 }
