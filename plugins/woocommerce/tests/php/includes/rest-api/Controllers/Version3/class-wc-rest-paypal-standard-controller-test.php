@@ -129,12 +129,12 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$flat_rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat Rate 1', '10.00', array(), 'flat_rate' );
 
-		$order = WC_Helper_Order::create_order();
+		$order = new WC_Order();
 		$order->save();
 		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
 		$order->save_meta_data();
 
-		$order_mismatch = WC_Helper_Order::create_order();
+		$order_mismatch = new WC_Order();
 		$order_mismatch->save();
 		$order_mismatch->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
 		$order_mismatch->save_meta_data();

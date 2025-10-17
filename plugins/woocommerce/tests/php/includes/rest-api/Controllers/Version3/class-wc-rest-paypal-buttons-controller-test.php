@@ -130,10 +130,10 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array[]
 	 */
 	public function provide_test_create_order(): array {
-		$order = WC_Helper_Order::create_order();
+		$order = new \WC_Order();
 		$order->save();
 
-		$order_invalid_status = WC_Helper_Order::create_order();
+		$order_invalid_status = new \WC_Order();
 		$order_invalid_status->set_status( OrderStatus::COMPLETED );
 		$order_invalid_status->save();
 
@@ -286,23 +286,23 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_test_cancel_payment(): array {
-		$order = WC_Helper_Order::create_order();
+		$order = new WC_Order();
 		$order->save();
 		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
 		$order->save_meta_data();
 
-		$order_invalid_paypal_id = WC_Helper_Order::create_order();
+		$order_invalid_paypal_id = new WC_Order();
 		$order_invalid_paypal_id->save();
 		$order_invalid_paypal_id->update_meta_data( '_paypal_order_id', '' );
 		$order_invalid_paypal_id->save_meta_data();
 
-		$order_draft = WC_Helper_Order::create_order();
+		$order_draft = new WC_Order();
 		$order_draft->set_status( OrderStatus::CHECKOUT_DRAFT );
 		$order_draft->save();
 		$order_draft->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
 		$order_draft->save_meta_data();
 
-		$order_invalid_status = WC_Helper_Order::create_order();
+		$order_invalid_status = new WC_Order();
 		$order_invalid_status->set_status( OrderStatus::COMPLETED );
 		$order_invalid_status->save();
 		$order_invalid_status->update_meta_data( '_paypal_order_id', '74L758601X447022W' );
