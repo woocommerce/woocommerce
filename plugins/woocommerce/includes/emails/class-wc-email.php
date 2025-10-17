@@ -1547,7 +1547,11 @@ class WC_Email extends WC_Settings_API {
 			</div>
 
 			<?php
-			wc_enqueue_js(
+            $handle = 'wc-settings-email';
+			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION );
+            wp_enqueue_script( $handle );
+            wp_add_inline_script(
+                    $handle,
 				"jQuery( 'select.email_type' ).on( 'change', function() {
 
 					var val = jQuery( this ).val();

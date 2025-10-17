@@ -405,7 +405,11 @@ class WC_Settings_General extends WC_Settings_Page {
 	public function output() {
 		parent::output();
 
-		wc_enqueue_js(
+		$handle = 'wc-admin-settings-general';
+		wp_register_script( $handle, '', array(), WC_VERSION );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"
 			var preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
 			var autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
