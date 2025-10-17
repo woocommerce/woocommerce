@@ -480,14 +480,15 @@ class WC_Admin_Taxonomies {
 		if ( ! isset( $_GET['taxonomy'] ) || 'product_cat' !== $_GET['taxonomy'] ) { // WPCS: CSRF ok, input var ok.
 			return;
 		}
+
 		// Ensure the tooltip is displayed when the image column is disabled on product categories.
-        $handle = 'wc-admin-taxonomies';
-        wp_register_script($handle, '');
-        wp_enqueue_script($handle);
-        wp_add_inline_script(
-                $handle,
-	        sprintf(
-        "document.addEventListener('DOMContentLoaded', function() {
+		$handle = 'wc-admin-taxonomies';
+		wp_register_script( $handle, '', array(), WC_VERSION );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
+			sprintf(
+				"document.addEventListener('DOMContentLoaded', function() {
                     'use strict';
                     var product_cat = document.getElementById('tag-%d');
                     if (product_cat) {
@@ -499,8 +500,8 @@ class WC_Admin_Taxonomies {
                         }
                     }
                 });",
-		        absint( $this->default_cat_id )
-	        )
+				absint( $this->default_cat_id )
+			)
 		);
 	}
 }
