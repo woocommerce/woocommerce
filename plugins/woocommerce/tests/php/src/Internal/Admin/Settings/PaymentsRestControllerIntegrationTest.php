@@ -269,9 +269,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			array( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, WC_Gateway_Paypal::ID ),
 			array_column( $data['providers'], 'id' )
 		);
-		// We have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
-		$this->assertSame( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID ), array_column( $data['offline_payment_methods'], 'id' ) );
+		// We have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
+		$this->assertSame( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID ), array_column( $data['offline_payment_methods'], 'id' ) );
 		// No suggestions are returned because the user can't install plugins.
 		$this->assertCount( 0, $data['suggestions'] );
 		// But we do get the suggestion categories.
@@ -313,8 +313,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// We have the core PayPal gateway registered, the offline PMs group entry, and 2 suggestions.
 		$this->assertCount( 4, $data['providers'] );
-		// We also have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We also have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
 		// We only have PSPs because there is no payment gateway enabled.
 		$this->assertCount( 4, $data['suggestions'] );
 		// Assert we get the suggestion categories.
@@ -359,8 +359,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// We have the core PayPal gateway registered, the offline PMs group entry, and 2 suggestions.
 		$this->assertCount( 4, $data['providers'] );
-		// We also have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We also have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
 		// We get all the suggestions.
 		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
@@ -407,8 +407,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// We have the core PayPal gateway registered, the offline PMs group entry, and 2 suggestions.
 		$this->assertCount( 4, $data['providers'] );
-		// We also have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We also have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
 		// We get all the suggestions.
 		$this->assertCount( 2, $data['suggestions'] );
 		// Assert we get the suggestion categories.
@@ -450,8 +450,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// We have the core PayPal gateway registered and the offline PMs group entry.
 		$this->assertCount( 2, $data['providers'] );
-		// We also have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We also have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
 		// No suggestions are returned.
 		$this->assertCount( 0, $data['suggestions'] );
 		// Assert we get the suggestion categories.
@@ -535,8 +535,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			array_column( $data['providers'], 'id' )
 		);
 
-		// We also have the 3 offline payment methods.
-		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We also have the 4 offline payment methods.
+		$this->assertCount( 4, $data['offline_payment_methods'] );
 		// We get all the suggestions.
 		$this->assertCount( 8, $data['suggestions'] );
 		// Assert we get the suggestion categories.
