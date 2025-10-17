@@ -184,26 +184,26 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 					'id' => 'flat_rate:1',
 				),
 				'expected response' => array(
-					'id'                 => '94N960803Z669244Y',
-					'purchase_units'     => array(
+					'id'             => '94N960803Z669244Y',
+					'purchase_units' => array(
 						array(
 							'shipping_options' => array(
 								array(
-									'id'          => 'flat_rate:1',
-									'label'       => 'Flat Rate 1',
-									'type'        => 'SHIPPING',
-									'amount'      => array(
+									'id'       => 'flat_rate:1',
+									'label'    => 'Flat Rate 1',
+									'type'     => 'SHIPPING',
+									'amount'   => array(
 										'currency_code' => 'USD',
 										'value'         => '10.00',
 									),
-									'selected'    => true,
+									'selected' => true,
 								),
 							),
-							'reference_id'    => '',
-							'amount'          => array(
+							'reference_id'     => '',
+							'amount'           => array(
 								'currency_code' => 'USD',
 								'value'         => '50.00',
-								'breakdown'    => array(
+								'breakdown'     => array(
 									'item_total'     => array(
 										'currency_code' => 'USD',
 										'value'         => '40.00',

@@ -227,12 +227,12 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for the `update_addresses_in_order` method.
 	 *
-	 * @param bool $should_create_order Whether the order exists.
-	 * @param string $payment_method Payment method to set on the order.
+	 * @param bool        $should_create_order Whether the order exists.
+	 * @param string      $payment_method Payment method to set on the order.
 	 * @param string|null $paypal_order_id PayPal order ID to set on the order.
-	 * @param bool $should_use_orders_v2 Whether Orders v2 is enabled.
-	 * @param bool $mock_jetpack_params Whether to mock valid Jetpack params.
-	 * @param bool $expect_to_save Whether we expect the order to be saved.
+	 * @param bool        $should_use_orders_v2 Whether Orders v2 is enabled.
+	 * @param bool        $mock_jetpack_params Whether to mock valid Jetpack params.
+	 * @param bool        $expect_to_save Whether we expect the order to be saved.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_update_addresses_in_order
