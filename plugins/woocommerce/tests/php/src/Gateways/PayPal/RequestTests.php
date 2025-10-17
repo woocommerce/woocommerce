@@ -298,7 +298,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_get_paypal_order_purchase_unit_amount
 	 */
 	public function test_get_paypal_order_purchase_unit_amount( int $cart_tax, int $shipping_tax, int $discount_total, int $total, array $expected ): void {
-		$order = new \WC_Order();
+		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( $cart_tax );
 		$order->set_shipping_tax( $shipping_tax );
 		$order->set_discount_total( $discount_total );
