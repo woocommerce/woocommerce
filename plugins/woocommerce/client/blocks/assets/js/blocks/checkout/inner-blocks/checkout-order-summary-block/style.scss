@@ -30,7 +30,7 @@
 		align-items: center;
 
 		.wc-block-components-checkout-order-summary__title-text {
-			margin: 0 0 0 $gap;
+			margin: 0 0 $gap-smaller $gap;
 			flex-grow: 1;
 			font-weight: 500;
 			@include font-large-locked;
