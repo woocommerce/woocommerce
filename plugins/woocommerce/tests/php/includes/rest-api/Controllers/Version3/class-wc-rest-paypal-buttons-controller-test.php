@@ -38,6 +38,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		remove_filter( 'pre_option_jetpack_options', array( $this, 'return_valid_site_id' ) );
 		remove_filter( 'pre_option_jetpack_private_options', array( $this, 'return_blog_token' ) );
+		wp_set_current_user( 0 );
 	}
 
 	/**
@@ -112,6 +113,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		// Cleanup the filter to avoid affecting other tests.
 		remove_filter( 'pre_http_request', $response_mock_ref );
+		if ( $order_id ) {
+			$order = wc_get_order( $order_id );
+			if ( $order ) {
+				$order->delete( true );
+			}
+		}
 
 		$this->assertEquals( $expected_status, $response->get_status() );
 		$this->assertEquals( $expected_response, $response->get_data() );
