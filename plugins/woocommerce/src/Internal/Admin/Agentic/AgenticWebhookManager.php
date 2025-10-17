@@ -63,7 +63,6 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	 *  @internal
 	 */
 	public function register() {
-		add_action( 'woocommerce_init', array( $this, 'create_webhook' ) );
 
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
@@ -80,60 +79,6 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 
 		// When the webhook is delivered (or not), mark the first event as delivered.
 		add_action( 'woocommerce_webhook_delivery', array( $this, 'mark_first_event_delivered' ), 10, 5 );
-	}
-
-	/**
-	 * Create the webhook for Agentic Commerce Protocol.
-	 *
-	 * @return void
-	 */
-	public function create_webhook(): void {
-		if ( ! current_user_can( 'manage_woocommerce' ) ) {
-			return;
-		}
-
-		$name_prefix  = 'ACP'; // Not translated on purpose, to make search more specific.
-		$data_store   = \WC_Data_Store::load( 'webhook' );
-		$webhooks_ids = $data_store->search_webhooks(
-			array(
-				'search' => $name_prefix,
-				'status' => 'active',
-				'limit'  => -1,
-			)
-		);
-
-		foreach ( $webhooks_ids as $webhook_id ) {
-			$webhook = wc_get_webhook( $webhook_id );
-			if ( self::WEBHOOK_TOPIC === $webhook->get_topic() ) {
-				// There is a correct webhook already.
-				return;
-			}
-		}
-
-		/**
-		 * Filter the delivery URL for Agentic webhooks.
-		 *
-		 * @since 10.3.0
-		 *
-		 * @param string $delivery_url Delivery URL.
-		 */
-		$delivery_url = apply_filters( 'woocommerce_agentic_webhook_delivery_url', 'https://acp.invalid' );
-
-		// Include the non-translated prefix (ACP) to allow searching for the webhook by name.
-		$name = sprintf(
-			// translators: %s: webhook name prefix (ACP).
-			__( '%s: Order Created or Updated', 'woocommerce' ),
-			$name_prefix
-		);
-
-		$webhook = new \WC_Webhook();
-		$webhook->set_name( $name );
-		$webhook->set_user_id( get_current_user_id() );
-		$webhook->set_topic( self::WEBHOOK_TOPIC );
-		$webhook->set_secret( wp_generate_password( 50, false ) ); // This will be ignored, but is required.
-		$webhook->set_delivery_url( $delivery_url );
-		$webhook->set_status( 'active' );
-		$webhook->save();
 	}
 
 	/**
