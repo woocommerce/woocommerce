@@ -68,7 +68,7 @@ describe( 'payment settings reducer', () => {
 		expect( state.providers ).toHaveLength( 3 );
 		expect( state.providers ).toBe( providersStub );
 
-		expect( state.offlinePaymentGateways ).toHaveLength( 3 );
+		expect( state.offlinePaymentGateways ).toHaveLength( 4 );
 		expect( state.offlinePaymentGateways ).toBe(
 			offlinePaymentGatewaysStub
 		);
