@@ -22,19 +22,6 @@ export const useProduct = ( postId: number | string | undefined ) => {
 			const parsedPostId =
 				typeof postId === 'string' ? parseInt( postId, 10 ) : postId;
 
-			const userCanEdit = select( coreStore ).canUser( 'update', {
-				kind: 'root',
-				name: 'product',
-				id: parsedPostId,
-			} );
-
-			if ( ! userCanEdit ) {
-				return {
-					product: undefined,
-					isResolving: false,
-				};
-			}
-
 			const product = select( coreStore ).getEditedEntityRecord(
 				'root',
 				'product',
