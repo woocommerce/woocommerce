@@ -179,6 +179,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			self::COD_SECTION_NAME,
 			self::BACS_SECTION_NAME,
 			self::CHEQUE_SECTION_NAME,
+			self::PAY_AT_LOCATION_SECTION_NAME,
 		);
 
 		/**
