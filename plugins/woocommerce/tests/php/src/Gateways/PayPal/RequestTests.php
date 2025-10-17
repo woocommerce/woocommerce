@@ -298,7 +298,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_get_paypal_order_purchase_unit_amount
 	 */
 	public function test_get_paypal_order_purchase_unit_amount( int $cart_tax, int $shipping_tax, int $discount_total, int $total, array $expected ): void {
-		$order = \WC_Helper_Order::create_order();
+		$order = new \WC_Order();
 		$order->set_cart_tax( $cart_tax );
 		$order->set_shipping_tax( $shipping_tax );
 		$order->set_discount_total( $discount_total );
@@ -308,6 +308,10 @@ class RequestTests extends \WC_Unit_Test_Case {
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 
 		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
+
+		// Clean up the order.
+		$order->delete( true );
+
 		$this->assertEquals( $expected, $actual );
 	}
 
