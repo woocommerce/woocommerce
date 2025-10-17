@@ -912,3 +912,154 @@ store(
 	},
 	{ lock: true }
 );
+
+store(
+	'woocommerce/mini-cart-footer-block',
+	{
+		state: {
+			get itemsInCartText() {
+				const cartItemsCount = miniCartState.totalItemsInCart;
+
+				return itemsInCartTextTemplate.replace(
+					'%d',
+					cartItemsCount.toString()
+				);
+			},
+			get totalDiscount(): string {
+				return woocommerceState.cart.totals.total_discount;
+			},
+			get totalDiscountLabel(): string {
+				return 'Discount: ';
+			},
+		},
+		callbacks: {
+			renderDiscountsMetaSlot() {
+				const container = document.querySelector(
+					'.wc-block-mini-cart__footer-discounts-meta-slot'
+				);
+
+				if (
+					! container ||
+					! ( window as any ).wp?.element?.createElement ||
+					! ( window as any ).wp?.element?.createRoot ||
+					! ( window as any ).wp?.plugins?.PluginArea ||
+					! ( window as any ).wc?.blocksCheckout
+						?.ExperimentalDiscountsMeta ||
+					! ( window as any ).wc?.blocksCheckout?.SlotFillProvider
+				) {
+					console.warn(
+						'Mini Cart: Missing dependencies for rendering discount slot',
+						{
+							hasContainer: !! container,
+							hasCreateElement: !! ( window as any ).wp?.element
+								?.createElement,
+							hasCreateRoot: !! ( window as any ).wp?.element
+								?.createRoot,
+							hasPluginArea: !! ( window as any ).wp?.plugins
+								?.PluginArea,
+							hasDiscountsMeta: !! ( window as any ).wc
+								?.blocksCheckout?.ExperimentalDiscountsMeta,
+							hasSlotFillProvider: !! ( window as any ).wc
+								?.blocksCheckout?.SlotFillProvider,
+						}
+					);
+					return;
+				}
+
+				const { createElement, Fragment } = ( window as any ).wp
+					.element;
+				const { PluginArea } = ( window as any ).wp.plugins;
+				const { ExperimentalDiscountsMeta, SlotFillProvider } = (
+					window as any
+				).wc.blocksCheckout;
+
+				// Create React root and render the slot component
+				// We need to use createElement instead of calling the component as a function
+				// and wrap it in SlotFillProvider for the slot/fill context
+				const root = ( window as any ).wp.element.createRoot(
+					container
+				);
+
+				// Transform Interactivity API cart format to match StoreCart format
+				// that plugins expect from useStoreCart() hook
+				const transformedCart = {
+					// Map raw Cart properties to StoreCart properties
+					cartCoupons: woocommerceState.cart.coupons || [],
+					cartItems: woocommerceState.cart.items || [],
+					cartItemsCount: woocommerceState.cart.itemsCount || 0,
+					cartItemsWeight: woocommerceState.cart.itemsWeight || 0,
+					cartTotals: woocommerceState.cart.totals || {},
+					cartFees: woocommerceState.cart.fees || [],
+					cartNeedsShipping:
+						woocommerceState.cart.needsShipping ?? true,
+					cartNeedsPayment:
+						woocommerceState.cart.needsPayment ?? false,
+					cartHasCalculatedShipping:
+						woocommerceState.cart.hasCalculatedShipping ?? false,
+					shippingAddress: woocommerceState.cart.shippingAddress || {},
+					billingAddress: woocommerceState.cart.billingAddress || {},
+					shippingRates: woocommerceState.cart.shippingRates || [],
+					crossSellsProducts: woocommerceState.cart.crossSells || [],
+					cartErrors: woocommerceState.cart.errors || [],
+					extensions: woocommerceState.cart.extensions || {},
+					paymentMethods: woocommerceState.cart.paymentMethods || [],
+					paymentRequirements:
+						woocommerceState.cart.paymentRequirements || [],
+					// Keep original raw cart for any direct access
+					...woocommerceState.cart,
+				};
+
+				const slotElement = createElement(
+					ExperimentalDiscountsMeta.Slot,
+					{
+						extensions: woocommerceState.cart.extensions,
+						cart: transformedCart,
+						context: 'woocommerce/mini-cart',
+					}
+				);
+
+				// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
+				// This allows fills registered via registerPlugin to appear
+				const pluginAreaElement = createElement( PluginArea, {
+					scope: 'woocommerce-checkout',
+				} );
+
+				// Wrap both the slot and PluginArea in SlotFillProvider so fills can be registered
+				const providerElement = createElement(
+					SlotFillProvider,
+					null,
+					createElement(
+						Fragment,
+						null,
+						slotElement,
+						pluginAreaElement
+					)
+				);
+
+				console.log(
+					'Mini Cart: Rendering discount slot with cart:',
+					woocommerceState.cart
+				);
+				console.log(
+					'Mini Cart: PluginArea will render plugins with scope "woocommerce-checkout"'
+				);
+
+				root.render( providerElement );
+
+				// Log registered plugins for debugging
+				setTimeout( () => {
+					if ( ( window as any ).wp?.plugins?.getPlugins ) {
+						const plugins = ( window as any ).wp.plugins.getPlugins(
+							'woocommerce-checkout'
+						);
+						console.log(
+							'Mini Cart: Registered plugins for woocommerce-checkout:',
+							plugins
+						);
+					}
+				}, 100 );
+			},
+		},
+	},
+	{ lock: true }
+);

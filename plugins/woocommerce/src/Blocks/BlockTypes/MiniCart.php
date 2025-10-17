@@ -501,6 +501,9 @@ class MiniCart extends AbstractBlock {
 			wp_enqueue_script( $handle );
 		}
 
+		wp_enqueue_script( 'wc-blocks-checkout' );
+		wp_enqueue_script( 'wp-element' );
+
 		$this->register_cart_interactivity( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->initialize_shared_config( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 		$this->placeholder_image( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
