@@ -430,8 +430,29 @@ class WC_Order extends WC_Abstract_Order {
 		if ( $status_transition && $order_persisted && $order_items_persisted ) {
 			try {
 				if ( OrderStatus::COMPLETED === $status_transition['to'] && $this->cogs_is_enabled() && $this->has_cogs() ) {
-					$this->calculate_cogs_total_value();
-					$this->save();
+					/**
+					 * Filter whether to recalculate Cost of Goods Sold for an order on status transition.
+					 * By default the value is true only when the order transitions to completed.
+					 *
+					 * @param bool     $recalculate Default boolean indicating if the cost should be recalculated.
+					 * @param string   $from        Previous order status.
+					 * @param string   $to          New order status.
+					 * @param WC_Order $order       The order undergoing the status transition.
+					 *
+					 * @since 10.4.0
+					 */
+					$must_recalculate_cogs = apply_filters(
+						'woocommerce_recalculate_cogs_on_order_status_transition',
+						OrderStatus::COMPLETED === $status_transition['to'],
+						$status_transition['from'],
+						$status_transition['to'],
+						$this
+					);
+
+					if ( $must_recalculate_cogs ) {
+						$this->calculate_cogs_total_value();
+						$this->save();
+					}
 				}
 
 				/**

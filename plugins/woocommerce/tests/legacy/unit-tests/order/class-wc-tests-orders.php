@@ -249,4 +249,52 @@ class WC_Tests_Orders extends WC_Unit_Test_Case {
 		$cogs_after_completion = $order->get_cogs_total_value();
 		$this->assertEquals( 75.00, $cogs_after_completion );
 	}
+
+	/**
+	 * @testdox The woocommerce_cogs_recalculate_on_order_status_transition filter can prevent COGS recalculation on status transition.
+	 */
+	public function test_cogs_recalculation_filter_can_prevent_recalculation() {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_cogs_value( 50 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->set_status( 'pending' );
+		$order->add_product( $product, 1 );
+		$order->calculate_cogs_total_value();
+		$order->save();
+
+		$initial_cogs = $order->get_cogs_total_value();
+
+		$product->set_cogs_value( 100.00 );
+		$product->save();
+
+		$from_status        = null;
+		$to_status          = null;
+		$transitioned_order = null;
+		add_filter(
+			'woocommerce_recalculate_cogs_on_order_status_transition',
+			function ( $recalculate, $from, $to, $order ) use ( &$from_status, &$to_status, &$transitioned_order ) {
+				$from_status        = $from;
+				$to_status          = $to;
+				$transitioned_order = $order;
+				return false;
+			},
+			10,
+			4
+		);
+
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$cogs_after_completion = $order->get_cogs_total_value();
+		$this->assertEquals( $initial_cogs, $cogs_after_completion, 'COGS should not be recalculated when filter returns false' );
+		$this->assertEquals( 'pending', $from_status );
+		$this->assertEquals( 'completed', $to_status );
+		$this->assertSame( $order, $transitioned_order );
+
+		remove_all_filters( 'woocommerce_recalculate_cogs_on_order_status_transition' );
+	}
 }
