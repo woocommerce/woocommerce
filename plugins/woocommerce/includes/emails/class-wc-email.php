@@ -1547,7 +1547,7 @@ class WC_Email extends WC_Settings_API {
 			</div>
 
 			<?php
-            $handle = 'wc-settings-email';
+            $handle = 'wc-admin-settings-email';
 			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION );
             wp_enqueue_script( $handle );
             wp_add_inline_script(

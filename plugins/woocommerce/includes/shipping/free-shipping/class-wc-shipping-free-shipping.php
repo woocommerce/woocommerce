@@ -236,7 +236,11 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 * Static so that's enqueued only once.
 	 */
 	public static function enqueue_admin_js() {
-		wc_enqueue_js(
+		$handle = 'wc-admin-shipping-free-shipping';
+		wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"jQuery( function( $ ) {
 				function wcFreeShippingShowHideMinAmountField( el ) {
 					var form = $( el ).closest( 'form' );
