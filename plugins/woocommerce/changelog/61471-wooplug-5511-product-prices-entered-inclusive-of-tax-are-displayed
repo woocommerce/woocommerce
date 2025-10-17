@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax-inclusive prices incorrectly adding customer taxes when no base tax rate is configured.
