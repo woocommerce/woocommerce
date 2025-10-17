@@ -287,4 +287,175 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $related_product2->get_id() );
 		WC_Helper_Product::delete_product( $related_product3->get_id() );
 	}
+
+	/**
+	 * @testDox Test 'wc_get_price_including_tax' with empty base tax rates (WOOPLUG-5511).
+	 *
+	 * When prices are entered inclusive of tax and no base tax rate exists, the price
+	 * should remain unchanged regardless of the customer's location tax rate.
+	 * This prevents incorrectly adding customer taxes on top of the inclusive price.
+	 *
+	 * @testWith ["20.0000", 100]
+	 *           ["10.0000", 100]
+	 *           ["0.0000", 100]
+	 *           ["25.0000", 50]
+	 *           ["15.0000", 150]
+	 *
+	 * @param string $customer_tax_rate The tax rate for the customer's location.
+	 * @param float  $product_price     The tax-inclusive product price.
+	 */
+	public function test_wc_get_price_including_tax_with_empty_base_rate( $customer_tax_rate, $product_price ) {
+		// Mock that prices are entered inclusive of tax.
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_prices_include_tax' => '__return_true',
+			)
+		);
+
+		$wc_tax_enabled = wc_tax_enabled();
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+		}
+
+		// Set up store base location with NO tax rate configured.
+		// This simulates the bug scenario where the store has a base location
+		// but hasn't configured a tax rate for it.
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Create customer tax rate for a different location.
+		$customer_tax_rate_data = array(
+			'tax_rate_country'  => 'AT',
+			'tax_rate_state'    => '',
+			'tax_rate'          => $customer_tax_rate,
+			'tax_rate_name'     => 'Customer VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$customer_tax_rate_id = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+
+		// Set customer location to Austria (where we have a tax rate).
+		WC()->customer->set_billing_country( 'AT' );
+		WC()->customer->set_shipping_country( 'AT' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		// Create product with tax-inclusive price.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( $product_price );
+		$product->save();
+
+		// The price should remain unchanged because it's already tax-inclusive
+		// and there's no base rate to adjust from.
+		$result = wc_get_price_including_tax( $product );
+		$this->assertEquals(
+			$product_price,
+			$result,
+			sprintf(
+				'Expected price to remain %s (tax-inclusive) when no base rate exists and customer has %s%% tax rate',
+				$product_price,
+				$customer_tax_rate
+			)
+		);
+
+		// Test with quantity to ensure it scales correctly.
+		$result_with_qty = wc_get_price_including_tax( $product, array( 'qty' => 2 ) );
+		$this->assertEquals(
+			$product_price * 2,
+			$result_with_qty,
+			sprintf(
+				'Expected price with qty=2 to be %s when no base rate exists',
+				$product_price * 2
+			)
+		);
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $customer_tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_shipping_country( 'US' );
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
+
+	/**
+	 * @testDox Test 'wc_get_price_including_tax' still adjusts prices correctly when both base and customer rates exist.
+	 *
+	 * This test ensures the fix for empty base rates doesn't break the existing behavior
+	 * when both base and customer tax rates are configured.
+	 */
+	public function test_wc_get_price_including_tax_with_base_and_customer_rates() {
+		// Mock that prices are entered inclusive of tax.
+		FunctionsMockerHack::add_function_mocks(
+			array(
+				'wc_prices_include_tax' => '__return_true',
+			)
+		);
+
+		$wc_tax_enabled = wc_tax_enabled();
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+		}
+
+		// Set up store base location with a 10% tax rate.
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		$base_tax_rate_data = array(
+			'tax_rate_country'  => 'US',
+			'tax_rate_state'    => 'CA',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'Base Tax',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$base_tax_rate_id = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
+
+		// Create customer tax rate for a different location (20% tax).
+		$customer_tax_rate_data = array(
+			'tax_rate_country'  => 'AT',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'Customer VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$customer_tax_rate_id = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+
+		// Set customer location to Austria.
+		WC()->customer->set_billing_country( 'AT' );
+		WC()->customer->set_shipping_country( 'AT' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		// Create product with price of 100 (inclusive of 10% base tax).
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->save();
+
+		// When base rate is 10% and customer rate is 20%:
+		// - Base price (excl. tax): 100 / 1.10 = 90.91
+		// - Customer price (incl. 20% tax): 90.91 * 1.20 = 109.09
+		$result = wc_get_price_including_tax( $product );
+		$this->assertEquals(
+			109.09,
+			$result,
+			'Expected price adjustment when both base and customer rates exist'
+		);
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $base_tax_rate_id );
+		WC_Tax::_delete_tax_rate( $customer_tax_rate_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_shipping_country( 'US' );
+		if ( ! $wc_tax_enabled ) {
+			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
 }

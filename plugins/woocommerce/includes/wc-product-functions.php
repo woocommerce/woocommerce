@@ -1240,18 +1240,26 @@ function wc_get_price_including_tax( $product, $args = array() ) {
 			 * This feature is experimental @since 2.4.7 and may change in the future. Use at your risk.
 			 */
 			} elseif ( $tax_rates !== $base_tax_rates && apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
-				$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
-				$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
-
-				if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
-					$base_taxes_total   = array_sum( $base_taxes );
-					$modded_taxes_total = array_sum( $modded_taxes );
+				// If no base tax rates exist, don't adjust the price - it's already correctly set as tax-inclusive.
+				// This prevents incorrectly adding customer taxes on top of the inclusive price.
+				if ( empty( $base_tax_rates ) ) {
+					// Price stays as-is when there's no base rate to adjust from.
+					// The $line_price is already tax-inclusive for whatever rate applies.
+					$return_price = $line_price;
 				} else {
-					$base_taxes_total   = array_sum( array_map( 'wc_round_tax_total', $base_taxes ) );
-					$modded_taxes_total = array_sum( array_map( 'wc_round_tax_total', $modded_taxes ) );
-				}
+					$base_taxes   = WC_Tax::calc_tax( $line_price, $base_tax_rates, true );
+					$modded_taxes = WC_Tax::calc_tax( $line_price - array_sum( $base_taxes ), $tax_rates, false );
 
-				$return_price = NumberUtil::round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
+					if ( 'yes' === get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+						$base_taxes_total   = array_sum( $base_taxes );
+						$modded_taxes_total = array_sum( $modded_taxes );
+					} else {
+						$base_taxes_total   = array_sum( array_map( 'wc_round_tax_total', $base_taxes ) );
+						$modded_taxes_total = array_sum( array_map( 'wc_round_tax_total', $modded_taxes ) );
+					}
+
+					$return_price = NumberUtil::round( $line_price - $base_taxes_total + $modded_taxes_total, wc_get_price_decimals() );
+				}
 			}
 		}
 	}
