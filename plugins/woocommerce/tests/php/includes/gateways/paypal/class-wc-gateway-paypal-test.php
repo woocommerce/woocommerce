@@ -227,7 +227,9 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for the `update_addresses_in_order` method.
 	 *
-	 * @param int  $order_id Order ID to test with.
+	 * @param bool $should_create_order Whether the order exists.
+	 * @param string $payment_method Payment method to set on the order.
+	 * @param string|null $paypal_order_id PayPal order ID to set on the order.
 	 * @param bool $should_use_orders_v2 Whether Orders v2 is enabled.
 	 * @param bool $mock_jetpack_params Whether to mock valid Jetpack params.
 	 * @param bool $expect_to_save Whether we expect the order to be saved.
@@ -236,11 +238,22 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_update_addresses_in_order
 	 */
 	public function test_update_addresses_in_order(
-		int $order_id,
+		bool $should_create_order,
+		string $payment_method,
+		?string $paypal_order_id,
 		bool $should_use_orders_v2,
 		bool $mock_jetpack_params,
 		bool $expect_to_save
 	) {
+		if ( $should_create_order ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method( $payment_method );
+			$order->update_meta_data( '_paypal_order_id', $paypal_order_id );
+			$order->save();
+		}
+
+		$order_id = $order ? $order->get_id() : 0;
+
 		$return_valid_site_id = function () {
 			return array( 'id' => 12345 );
 		};
@@ -291,14 +304,17 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 
 		// If we expected the order to be saved, verify that addresses were set.
 		if ( $expect_to_save ) {
-			$order = wc_get_order( $order_id );
-
 			$this->assertEquals( 'US', $order->get_billing_country() );
 			$this->assertEquals( '12345', $order->get_billing_postcode() );
 			$this->assertEquals( 'NY', $order->get_billing_state() );
 			$this->assertEquals( 'WooCity', $order->get_billing_city() );
 			$this->assertEquals( 'WooAddress', $order->get_billing_address_1() );
 			$this->assertEquals( '', $order->get_billing_address_2() );
+		}
+
+		// Clean up.
+		if ( $order ) {
+			$order->delete( true );
 		}
 	}
 
@@ -309,52 +325,51 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	 * @throws WC_Data_Exception If order creation fails.
 	 */
 	public function provide_test_update_addresses_in_order(): array {
-		$order = WC_Helper_Order::create_order();
-		$order->set_payment_method( 'paypal' );
-		$order->update_meta_data( '_paypal_order_id', 'TEST_PAYPAL_ORDER_ID' );
-		$order->save();
-
-		$order_not_paypal = WC_Helper_Order::create_order();
-		$order_not_paypal->set_payment_method( 'bacs' );
-		$order_not_paypal->save();
-
-		$order_missing_paypal_id = WC_Helper_Order::create_order();
-		$order_missing_paypal_id->set_payment_method( WC_Gateway_Paypal::ID );
-		$order_missing_paypal_id->save();
-
 		return array(
 			'order not found'         => array(
-				'order ID'             => 0,
+				'order exists'         => false,
+				'payment method'       => 'paypal',
+				'paypal order ID'      => 'TEST_PAYPAL_ORDER_ID',
 				'should use orders v2' => true,
 				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'invalid payment method'  => array(
-				'order ID'             => $order_not_paypal->get_id(),
+				'order exists'         => true,
+				'payment method'       => 'bacs',
+				'paypal order ID'      => null,
 				'should use orders v2' => true,
 				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'orders v2 not enabled'   => array(
-				'order ID'             => $order->get_id(),
+				'order exists'         => true,
+				'payment method'       => 'paypal',
+				'paypal order ID'      => 'TEST_PAYPAL_ORDER_ID',
 				'should use orders v2' => false,
 				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'missing PayPal order ID' => array(
-				'order ID'             => $order_missing_paypal_id->get_id(),
+				'order exists'         => true,
+				'payment method'       => 'paypal',
+				'paypal order ID'      => null,
 				'should use orders v2' => true,
 				'mock Jetpack params'  => true,
 				'expect to save'       => false,
 			),
 			'exception thrown'        => array(
-				'order ID'             => $order->get_id(),
+				'order exists'         => true,
+				'payment method'       => 'paypal',
+				'paypal order ID'      => 'TEST_PAYPAL_ORDER_ID',
 				'should use orders v2' => true,
 				'mock Jetpack params'  => false,
 				'expect to save'       => false,
 			),
 			'successful update'       => array(
-				'order ID'             => $order->get_id(),
+				'order exists'         => true,
+				'payment method'       => 'paypal',
+				'paypal order ID'      => 'TEST_PAYPAL_ORDER_ID',
 				'should use orders v2' => true,
 				'mock Jetpack params'  => true,
 				'expect to save'       => true,
