@@ -590,8 +590,6 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 * @throws Exception If the PayPal order creation fails.
 	 */
 	public function process_payment( $order_id ) {
-		include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
-
 		$order = wc_get_order( $order_id );
 
 		if ( $this->should_use_orders_v2() ) {
@@ -605,6 +603,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 			$redirect_url = $paypal_order['redirect_url'];
 		} else {
+			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
+
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
 			$redirect_url   = $paypal_request->get_request_url( $order, $this->testmode );
 		}
