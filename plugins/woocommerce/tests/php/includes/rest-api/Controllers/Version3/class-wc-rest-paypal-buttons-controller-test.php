@@ -276,6 +276,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		);
 		$response = $this->server->dispatch( $request );
 
+		// Clean up.
+		$order = wc_get_order( $order_id );
+		if ( $order ) {
+			$order->delete( true );
+		}
+
 		$this->assertEquals( $expected_status, $response->get_status() );
 		$this->assertEquals( $expected_response, $response->get_data() );
 	}
