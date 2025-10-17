@@ -109,6 +109,33 @@ class AgenticSettingsPage {
 	 * @return array Settings fields.
 	 */
 	private function get_general_settings( $config ) {
+		return array(
+			array(
+				'title' => __( 'Agentic commerce', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => '',
+				'id'    => 'agentic_commerce_general_settings',
+			),
+			array(
+				'title'   => __( 'Enable product visibility', 'woocommerce' ),
+				'desc'    => __( 'Allow products to be visible by default to the AI agents you integrate with. Can be overridden per product.', 'woocommerce' ),
+				'id'      => 'woocommerce_agentic_enable_products_default',
+				'type'    => 'checkbox',
+				'default' => ( ! empty( $config['enable_products_default'] ) && 'yes' === $config['enable_products_default'] ) ? 'yes' : 'no',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'agentic_commerce_general_settings',
+			),
+		);
+	}
+
+	/**
+	 * Get store policies settings.
+	 *
+	 * @return array Settings fields.
+	 */
+	private function get_store_policies_settings() {
 		// Get URLs from WooCommerce/WordPress settings.
 		$terms_page_id   = wc_terms_and_conditions_page_id();
 		$privacy_page_id = get_option( 'wp_page_for_privacy_policy' );
@@ -122,17 +149,10 @@ class AgenticSettingsPage {
 
 		return array(
 			array(
-				'title' => __( 'Agentic Commerce Configuration', 'woocommerce' ),
+				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'General settings for AI agents purchasing from your store.', 'woocommerce' ),
-				'id'    => 'agentic_commerce_general_settings',
-			),
-			array(
-				'title'   => __( 'Enable products by default', 'woocommerce' ),
-				'desc'    => __( 'Allow products to be visible by default to the AI agents you integrate with. Can be overridden per product.', 'woocommerce' ),
-				'id'      => 'woocommerce_agentic_enable_products_default',
-				'type'    => 'checkbox',
-				'default' => ( ! empty( $config['enable_products_default'] ) && 'yes' === $config['enable_products_default'] ) ? 'yes' : 'no',
+				'desc'  => '',
+				'id'    => 'agentic_commerce_store_policies',
 			),
 			array(
 				'title'             => __( 'Privacy Policy URL', 'woocommerce' ),
@@ -143,7 +163,6 @@ class AgenticSettingsPage {
 				),
 				'id'                => 'woocommerce_agentic_privacy_url_display',
 				'type'              => 'text',
-				'css'               => 'min-width:400px;',
 				'default'           => esc_url( $privacy_url ),
 				'custom_attributes' => array(
 					'disabled' => 'disabled',
@@ -159,7 +178,6 @@ class AgenticSettingsPage {
 				),
 				'id'                => 'woocommerce_agentic_terms_url_display',
 				'type'              => 'text',
-				'css'               => 'min-width:400px;',
 				'default'           => esc_url( $terms_url ),
 				'custom_attributes' => array(
 					'disabled' => 'disabled',
@@ -168,7 +186,7 @@ class AgenticSettingsPage {
 			),
 			array(
 				'type' => 'sectionend',
-				'id'   => 'agentic_commerce_general_settings',
+				'id'   => 'agentic_commerce_store_policies',
 			),
 		);
 	}
@@ -186,25 +204,7 @@ class AgenticSettingsPage {
 				'desc'    => __( 'The bearer token that ChatGPT uses to authenticate checkout requests.', 'woocommerce' ),
 				'id'      => 'woocommerce_agentic_openai_bearer_token',
 				'type'    => 'password',
-				'css'     => 'min-width:400px;',
 				'default' => esc_attr( $config['bearer_token'] ?? '' ),
-			),
-			array(
-				'title'       => __( 'Webhook URL', 'woocommerce' ),
-				'desc'        => __( 'The URL where order events will be sent to ChatGPT.', 'woocommerce' ),
-				'id'          => 'woocommerce_agentic_openai_webhook_url',
-				'type'        => 'text',
-				'css'         => 'min-width:400px;',
-				'placeholder' => 'https://openai.example.com/agentic_checkout/webhooks/order_events',
-				'default'     => esc_url( $config['webhook_url'] ?? '' ),
-			),
-			array(
-				'title'   => __( 'Webhook Secret', 'woocommerce' ),
-				'desc'    => __( 'Secret key used to sign outgoing webhook requests to ChatGPT.', 'woocommerce' ),
-				'id'      => 'woocommerce_agentic_openai_webhook_secret',
-				'type'    => 'password',
-				'css'     => 'min-width:400px;',
-				'default' => esc_attr( $config['webhook_secret'] ?? '' ),
 			),
 		);
 	}
@@ -250,6 +250,9 @@ class AgenticSettingsPage {
 			);
 		}
 
+		// Add store policies section.
+		$agentic_settings = array_merge( $agentic_settings, $this->get_store_policies_settings() );
+
 		return $agentic_settings;
 	}
 
@@ -274,14 +277,8 @@ class AgenticSettingsPage {
 		// Update OpenAI settings.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['openai'] = array(
-			'bearer_token'   => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
+			'bearer_token' => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
 				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
-				: '',
-			'webhook_url'    => isset( $_POST['woocommerce_agentic_openai_webhook_url'] )
-				? esc_url_raw( wp_unslash( $_POST['woocommerce_agentic_openai_webhook_url'] ) )
-				: '',
-			'webhook_secret' => isset( $_POST['woocommerce_agentic_openai_webhook_secret'] )
-				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_webhook_secret'] ) )
 				: '',
 		);
 
