@@ -279,7 +279,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 				'expected response' => array(
 					'paypal_order_id' => '123',
 					'order_id'        => 1234,
-					'return_url'      => 'http://localhost:8086?order-received=1234&key=wc_order_test_key_125&utm_nooverride=1',
+					'return_url'      => site_url() . '?order-received=1234&key=wc_order_test_key_125&utm_nooverride=1',
 				),
 			),
 		);
