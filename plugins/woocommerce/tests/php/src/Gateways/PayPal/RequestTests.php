@@ -91,6 +91,10 @@ class RequestTests extends \WC_Unit_Test_Case {
 		// Clean up the filter.
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
 
+		if ( null === $actual ) {
+			$this->fail( 'create_paypal_order returned null' );
+		}
+
 		$this->assertNotNull( $actual );
 	}
 
