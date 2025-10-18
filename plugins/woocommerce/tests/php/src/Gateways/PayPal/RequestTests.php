@@ -340,7 +340,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => 40.00 - $total_diff,
+							'value'         => (string) 40.00 - $total_diff,
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -368,7 +368,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => 40.00 - $total_diff,
+							'value'         => (string) 40.00 - $total_diff,
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -396,7 +396,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => 40.00 - $total_diff,
+							'value'         => (string) 40.00 - $total_diff,
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -424,7 +424,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => 40.00 - $total_diff,
+							'value'         => (string) 40.00 - $total_diff,
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
