@@ -132,7 +132,6 @@ class Request {
 				'redirect_url' => $redirect_url,
 			);
 		} catch ( \Exception $e ) {
-			var_dump( $e->getMessage(), $e->getFile(), $e->getLine() );
 			\WC_Gateway_Paypal::log( $e->getMessage() );
 			if ( $paypal_debug_id ) {
 				$order->add_order_note(
