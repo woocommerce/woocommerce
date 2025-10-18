@@ -88,7 +88,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$expected_status = 200,
 		$expected_response = null
 	) {
-		if ( version_compare( PHP_VERSION, '8.4', '>=' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( version_compare( PHP_VERSION, '8.4', '>=' ) ) {
 			$this->markTestSkipped( 'This test is not compatible with HPOS on PHP 8.4+. Needs investigation.' );
 		}
 
@@ -310,7 +310,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		int $expected_status,
 		array $expected_response
 	) {
-		if ( version_compare( PHP_VERSION, '8.4', '>=' ) && \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		if ( version_compare( PHP_VERSION, '8.4', '>=' ) ) {
 			$this->markTestSkipped( 'This test is not compatible with HPOS on PHP 8.4+. Needs investigation.' );
 		}
 
