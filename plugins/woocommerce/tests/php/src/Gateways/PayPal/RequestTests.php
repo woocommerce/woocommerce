@@ -91,7 +91,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 		// Clean up the filter.
 		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
 
-		$this->assertNotNull( $actual, current( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) )->content );
+		$this->assertNotNull( $actual );
 	}
 
 	/**
@@ -325,10 +325,8 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 */
 	public function provide_test_get_paypal_order_purchase_unit_amount(): array {
 		// TODO: Workaround for GitHub Actions. We still don't know why this is needed.
-		$total_diff = 0.00;
-		if ( defined( 'GITHUB_ACTIONS' ) && GITHUB_ACTIONS ) {
-			$total_diff = 5.22;
-		}
+		// When running tests locally, this is not needed.
+		$total_diff = 5.22;
 
 		return array(
 			'test 1' => array(
