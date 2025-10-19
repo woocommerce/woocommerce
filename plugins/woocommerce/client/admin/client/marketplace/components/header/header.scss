@@ -13,12 +13,12 @@
 	display: grid;
 	gap: $medium-gap;
 	grid-template: "mktpl-title mktpl-search mktpl-meta" 60px
-		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px 36px;
+		"mktpl-tabs mktpl-tabs mktpl-tabs" auto / 1fr 320px auto;
 	padding: 0 $content-spacing-large;
 	width: 100%;
 
 	// On narrow screens, "stack" header items and hide the bottom border
-	@media screen and (max-width: $breakpoint-medium) {
+	@media screen and (max-width: $breakpoint-large) {
 		border-bottom: 0;
 		grid-template: "mktpl-title mktpl-meta" 60px
 			"mktpl-tabs mktpl-tabs" 48px
@@ -32,14 +32,18 @@
 		margin: 0;
 		padding: 10px 0 0;
 
+		@media screen and (max-width: $breakpoint-large) {
+			padding-left: $content-spacing-large;
+		}
+
 		@media screen and (max-width: $breakpoint-medium) {
-			padding-left: var(--large-gap);
+			padding-left: $content-spacing-small;
 		}
 	}
 }
 
 .woocommerce-marketplace--my-subscriptions {
-	@media screen and (max-width: $breakpoint-medium) {
+	@media screen and (max-width: $breakpoint-large) {
 		.woocommerce-marketplace__search {
 			display: none;
 		}
@@ -53,6 +57,10 @@
 	grid-area: mktpl-title;
 	line-height: 18px;
 
+	@media screen and (max-width: $breakpoint-large) {
+		padding: 0 $content-spacing-large;
+	}
+
 	@media screen and (max-width: $breakpoint-medium) {
 		padding: 0 $content-spacing-small;
 	}
@@ -63,15 +71,23 @@
 	justify-self: end;
 	padding-top: 10px;
 
+	@media screen and (max-width: $breakpoint-large) {
+		margin-right: $content-spacing-large;
+		padding: 0;
+	}
+
 	@media screen and (max-width: $breakpoint-medium) {
 		margin-right: $content-spacing-small;
-		padding: 0;
 	}
 }
 
 .woocommerce-marketplace__header-tabs {
 	align-self: end;
 	grid-area: mktpl-tabs;
+
+	@media screen and (max-width: $breakpoint-large) {
+		padding: 0 $content-spacing-large;
+	}
 
 	@media screen and (max-width: $breakpoint-medium) {
 		padding: 0 $content-spacing-small;

@@ -5,12 +5,17 @@
 	margin-top: 15px;
 	width: 320px;
 
-	@media screen and (max-width: $breakpoint-medium) {
-		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
-		width: calc(100% - $grid-unit-20 * 2);
+	@media screen and (max-width: $breakpoint-large) {
+		margin: $grid-unit-20 $grid-unit-40 $grid-unit-10 $grid-unit-40;
+		width: calc(100% - $grid-unit-40 * 2);
 
 		.components-input-control__input {
 			font-size: 13px !important;
 		}
+	}
+
+	@media screen and (max-width: $breakpoint-medium) {
+		margin: $grid-unit-20 $grid-unit-20 $grid-unit-10 $grid-unit-20;
+		width: calc(100% - $grid-unit-20 * 2);
 	}
 }
