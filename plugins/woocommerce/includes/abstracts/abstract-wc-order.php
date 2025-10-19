@@ -1972,6 +1972,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_shipping_total( $shipping_total );
 
+		// Check for free shipping coupons and zero out shipping if found.
+		$coupons = $this->get_items( 'coupon' );
+		foreach ( $coupons as $coupon_item ) {
+			$coupon_code = $coupon_item->get_code();
+			$coupon = new WC_Coupon( $coupon_code );
+			
+			if ( $coupon->get_free_shipping() ) {
+				$this->set_shipping_total( 0 );
+				break; // One free shipping coupon is enough
+			}
+		}
+
 		// Sum fee costs.
 		foreach ( $this->get_fees() as $item ) {
 			$fee_total = (float) $item->get_total();

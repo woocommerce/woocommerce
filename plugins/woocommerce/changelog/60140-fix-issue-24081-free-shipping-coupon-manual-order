@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix free shipping coupons not being applied to manual orders. When a free shipping coupon is applied to a manually created order, shipping costs are now correctly reduced to zero.
