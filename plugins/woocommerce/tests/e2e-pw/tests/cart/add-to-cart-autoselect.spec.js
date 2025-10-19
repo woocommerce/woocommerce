@@ -152,7 +152,7 @@ async function saveBlockEditor( editor, isOnlyCurrentEntityDirty ) {
 	} )
 
 	if ( await firstSaveButton.isEnabled() ) {
-		firstSaveButton.click();
+		await firstSaveButton.click();
 
 		if ( ! isOnlyCurrentEntityDirty ) {
 			await editor.page
@@ -195,8 +195,8 @@ async function setCartBlockAttributes(
 	const disabledAttributesActionInput = await page.getByLabel( 'Values in conflict');
 
 	if (
-		autoselectInput.isChecked !== autoselect ||
-		disabledAttributesActionInput.getAttribute( 'value' ) !== disabledAttributesAction
+		await autoselectInput.isChecked() !== autoselect ||
+		await disabledAttributesActionInput.inputValue() !== disabledAttributesAction
 	) {
 		isOnlyCurrentEntityDirty = false;
 	}
@@ -241,7 +241,7 @@ async function expectSelectedAttributes( page, expectedValues={}, optionStyle=un
 				attributeValues = attributeValues.filter( item => item !== expectedValues[ attributeName ] ); // Omit attributeName
 				await expect (
 					page.getByLabel( attributeName, { exact: true } ).getByLabel( expectedValues[ attributeName ], { exact: true } )
-				).toBeChecked;
+				).toBeChecked();
 			}
 			if ( attributeValues.length ) {
 				for ( const attributeValue of attributeValues ) {

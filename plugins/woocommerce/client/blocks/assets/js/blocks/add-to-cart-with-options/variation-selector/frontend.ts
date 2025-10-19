@@ -23,7 +23,7 @@ import type {
 import { getMatchedVariation } from '../../../base/utils/variations/get-matched-variation';
 import setStyles from './set-styles';
 
-var $ = jQuery;
+const $ = jQuery;
 
 type Option = {
 	value: string;
@@ -39,7 +39,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 };
 
 // When true, do not handle clicks on attributes, this is to avoid infinite recursion
-var in_autoselect_scope = false;
+let inAutoselectScope = false;
 
 // Set selected pill styles for proper contrast.
 setStyles();
@@ -50,9 +50,7 @@ const universalLock =
 
 function attributesAutoselect( $variation_selectors ) {
 	const { selectedAttributes } =
-		getContext< Context >(
-			'woocommerce/add-to-cart-with-options'
-		);
+		getContext< Context >();
 	$variation_selectors.each( function () {
 		const $current_variation_selector = $( this ),
 			// 'pill' is not actually a possible optionStyle value, pills are simply the default option, and they don't give a value to optionStyle
@@ -60,7 +58,7 @@ function attributesAutoselect( $variation_selectors ) {
 		// Dropdown options or Pill inputs,
 		// that HAVE a value (Choose an Option has an empty value of ""),
 		// and are compatible with the possible variations
-		const $valid_choices = $current_variation_selector.find( ':is(option, input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input):not([value=""])' ).filter( ( i, e ) => {
+		const $valid_choices = $current_variation_selector.find( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).filter( ( i, e ) => {
 			const $el = $( e );
 			var name = '';
 			switch ( optionStyle ) {
@@ -71,8 +69,7 @@ function attributesAutoselect( $variation_selectors ) {
 					name = $el.data( 'wpContext' )['name'];
 					break;
 				default:
-					throw new Error( 'optionStyle not implemented!: ', optionStyle );
-					break;
+					throw new Error( 'optionStyle not implemented!: ' + optionStyle );
 			}
 			return isAttributeValueValid( {
 				attributeName: name,
@@ -85,25 +82,26 @@ function attributesAutoselect( $variation_selectors ) {
 			const $selected = $current_variation_selector.find(':checked');
 			if ( $selected.length === 0 || $selected.val() !== $valid_choices.val() ) {
 				// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
-				in_autoselect_scope = true;
+				inAutoselectScope = true;
+				let ev;
 				switch ( optionStyle ) {
 					case 'pills':
 						// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
 						$valid_choices.removeClass( 'disabled' ).prop( 'disabled', false );
-						$valid_choices.click();
+						ev = new MouseEvent( 'click', { bubbles: true } );
+						$valid_choices[0].dispatchEvent( ev );
 						break;
 					case 'dropdown':
 						const $select = $valid_choices.parent( 'select' );
 						$select.val( $valid_choices.val() );
 						// Manually dispatch a native javascript event because Wordpress uses native events, not jQuery events
-						const ev = new Event('change');
-						$select[0].dispatchEvent(ev);
+						ev = new Event( 'change' , { bubbles: true } );
+						$select[0].dispatchEvent( ev );
 						break;
 					default:
-						throw new Error( 'optionStyle not implemented!: ', optionStyle );
-						break;
+						throw new Error( 'optionStyle not implemented!: ' + optionStyle );
 				}
-				in_autoselect_scope = false;
+				inAutoselectScope = false;
 			}
 		}
 	} );
@@ -116,7 +114,7 @@ function attributesAutoselectOthers() {
 		autoselect =
 			$variation_selectors.first().data( 'autoselect' ) ||
 			false;
-	if ( autoselect && context.selectedValue !== '' ) {
+	if ( autoselect && context.selectedValue ) {
 		const $target_variation_selector = $variation_selectors.has( `[name="${ context.name }"]` );
 		const $other_variation_selectors = $variation_selectors.not( $target_variation_selector );
 		attributesAutoselect( $other_variation_selectors );
@@ -313,17 +311,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			handlePillClick() {
 				const context = getContext< Context >();
-				const { selectedAttributes } =
-					getContext< Context >(
-						'woocommerce/add-to-cart-with-options'
-					);
+
 				if ( context.selectedValue === context.option.value ) {
 					context.selectedValue = '';
 				} else {
 					context.selectedValue = context.option.value;
 				}
 				actions.setAttribute( context.name, context.selectedValue );
-				if ( in_autoselect_scope ) {
+				if ( inAutoselectScope ) {
 					// Avoid infinite recursion
 				} else {
 					attributesAutoselectOthers();
@@ -333,7 +328,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const context = getContext< Context >();
 				context.selectedValue = event.currentTarget.value;
 				actions.setAttribute( context.name, context.selectedValue );
-				if ( in_autoselect_scope ) {
+				if ( inAutoselectScope ) {
 					// Avoid infinite recursion
 				} else {
 					attributesAutoselectOthers();

@@ -156,8 +156,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				$wp_interactivity_directive = 'data-wp-bind--disabled';
 				break;
 			default:
-				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );
-				break;
+				throw new ValueError( 'disabled_attributes_action value not implemented!: ' . $disabled_attributes_action );
 		}
 
 		wp_interactivity_state(
@@ -255,8 +254,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 				$wp_interactivity_directive = 'data-wp-bind--disabled';
 				break;
 			default:
-				throw new ValueError( 'disabled_attributes_action value not implemented!: ', $disabled_attributes_action );
-				break;
+				throw new ValueError( 'disabled_attributes_action value not implemented!: ' . $disabled_attributes_action );
 		}
 
 		$options = '';
