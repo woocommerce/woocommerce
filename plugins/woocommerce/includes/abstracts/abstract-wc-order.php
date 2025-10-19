@@ -1555,10 +1555,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 
 					$discount_tax += $taxes;
-
-					if ( $this->get_prices_include_tax() ) {
-						$amount = $amount - $taxes;
-					}
 				}
 
 				$coupon_item->set_discount( $amount );
