@@ -53,7 +53,7 @@ jobs:
 
           # Must run from trunk.
           if [ "${{ github.ref }}" != "refs/heads/trunk" ]; then
-              echo "::error::This workflow must be run from the `trunk` branch. Enter the release branch as input."
+              echo "::error::This workflow must be run from the 'trunk' branch. Enter the release branch as input."
               exit 1
           fi
 

@@ -7,12 +7,6 @@ import { useMemo } from '@wordpress/element';
 import { EditorBlock } from '@woocommerce/types';
 import { addFilter } from '@wordpress/hooks';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
-import {
-	revertMigration,
-	getUpgradeStatus,
-	HOURS_TO_DISPLAY_UPGRADE_NOTICE,
-	UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD,
-} from '@woocommerce/blocks/migration-products-to-product-collection';
 import { recordEvent } from '@woocommerce/tracks';
 import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
@@ -35,7 +29,6 @@ import {
 	CoreCollectionNames,
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
-import UpgradeNotice from './upgrade-notice';
 import ColumnsControl from './columns-control';
 import {
 	InheritQueryControl,
@@ -269,59 +262,6 @@ export default ProductCollectionInspectorControls;
 const isProductCollection = ( blockName: string ) =>
 	blockName === metadata.name;
 
-const lessThanThresholdSinceUpdate = ( t: number ) => {
-	// Xh * 60m * 60s * 1000ms
-	const xHoursFromT = t + HOURS_TO_DISPLAY_UPGRADE_NOTICE * 60 * 60 * 1000;
-	return Date.now() < xHoursFromT;
-};
-
-const displayedLessThanThreshold = ( displayCount = 0 ) => {
-	return displayCount <= UPGRADE_NOTICE_DISPLAY_COUNT_THRESHOLD;
-};
-
-// Upgrade Notice should be displayed only if:
-// - block is converted from Products
-// - user haven't acknowledged seeing the notice
-// - less than X hours since the notice was first displayed
-// - notice was displayed less than X times
-const shouldDisplayUpgradeNotice = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes } = props;
-	const { convertedFromProducts } = attributes;
-	const { status, time, displayCount } = getUpgradeStatus();
-
-	return (
-		convertedFromProducts &&
-		status === 'notseen' &&
-		lessThanThresholdSinceUpdate( time ) &&
-		displayedLessThanThreshold( displayCount )
-	);
-};
-
-// Block should be unmarked as converted from Products if:
-// block is converted from Products and either:
-// - user acknowledged seeing the notice
-// - it's more than X hours since the notice was first displayed
-// - notice was displayed more than X times
-// We do that to prevent showing the notice again after Products on
-// other page were updated or local storage was cleared or user
-// switched to another machine/browser.
-const shouldBeUnmarkedAsConverted = (
-	props: ProductCollectionEditComponentProps
-) => {
-	const { attributes } = props;
-	const { convertedFromProducts } = attributes;
-	const { status, time, displayCount } = getUpgradeStatus();
-
-	return (
-		convertedFromProducts &&
-		( status === 'seen' ||
-			! lessThanThresholdSinceUpdate( time ) ||
-			! displayedLessThanThreshold( displayCount ) )
-	);
-};
-
 const CollectionSpecificControls = (
 	props: ProductCollectionEditComponentProps
 ) => {
@@ -407,35 +347,3 @@ const withCollectionSpecificControls =
 	};
 
 addFilter( 'editor.BlockEdit', metadata.name, withCollectionSpecificControls );
-
-export const withUpgradeNoticeControls =
-	< T extends EditorBlock< T > >( BlockEdit: ElementType ) =>
-	( props: ProductCollectionEditComponentProps ) => {
-		if ( ! isProductCollection( props.name ) ) {
-			return <BlockEdit { ...props } />;
-		}
-
-		const displayUpgradeNotice = shouldDisplayUpgradeNotice( props );
-		const unmarkAsConverted = shouldBeUnmarkedAsConverted( props );
-
-		if ( unmarkAsConverted ) {
-			props.setAttributes( { convertedFromProducts: false } );
-		}
-
-		return (
-			<>
-				{ displayUpgradeNotice && (
-					<InspectorControls>
-						{
-							<UpgradeNotice
-								revertMigration={ revertMigration }
-							/>
-						}
-					</InspectorControls>
-				) }
-				<BlockEdit { ...props } />
-			</>
-		);
-	};
-
-addFilter( 'editor.BlockEdit', metadata.name, withUpgradeNoticeControls );

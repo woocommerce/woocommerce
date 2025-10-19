@@ -668,12 +668,23 @@ class WC_Email extends WC_Settings_API {
 	public function get_headers() {
 		$header = 'Content-Type: ' . $this->get_content_type() . "\r\n";
 
+		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
 			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
 				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
 			}
-		} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-			$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+		} else {
+			// Check if custom reply-to is enabled and configured for non-admin notification emails.
+			$reply_to_enabled = $this->get_reply_to_enabled();
+			$reply_to_address = $this->get_reply_to_address();
+			$reply_to_name    = $this->get_reply_to_name();
+
+			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
+				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
+				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
+				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+			}
 		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
@@ -1018,6 +1029,61 @@ class WC_Email extends WC_Settings_API {
 	public function get_from_address( $from_email = '' ) {
 		$from_email = apply_filters( 'woocommerce_email_from_address', get_option( 'woocommerce_email_from_address' ), $this, $from_email );
 		return sanitize_email( $from_email );
+	}
+
+	/**
+	 * Check if reply-to is enabled for outgoing emails.
+	 *
+	 * @return bool
+	 */
+	public function get_reply_to_enabled() {
+		/**
+		 * Filter whether reply-to is enabled for emails.
+		 *
+		 * @since 10.4.0
+		 * @param bool     $enabled Whether reply-to is enabled.
+		 * @param WC_Email $email   WC_Email instance managing the email.
+		 */
+		$enabled = apply_filters( 'woocommerce_email_reply_to_enabled', 'yes' === get_option( 'woocommerce_email_reply_to_enabled', 'no' ), $this );
+		return (bool) $enabled;
+	}
+
+	/**
+	 * Get the reply-to name for outgoing emails.
+	 *
+	 * @param string $reply_to_name Default reply-to name.
+	 * @return string
+	 */
+	public function get_reply_to_name( $reply_to_name = '' ) {
+		/**
+		 * Filter the reply-to name for emails.
+		 *
+		 * @since 10.4.0
+		 * @param string   $reply_to_name Reply-to name.
+		 * @param WC_Email $email         WC_Email instance managing the email.
+		 * @param string   $default_name  Default reply-to name.
+		 */
+		$reply_to_name = apply_filters( 'woocommerce_email_reply_to_name', get_option( 'woocommerce_email_reply_to_name', '' ), $this, $reply_to_name );
+		return wp_specialchars_decode( sanitize_text_field( $reply_to_name ), ENT_QUOTES );
+	}
+
+	/**
+	 * Get the reply-to address for outgoing emails.
+	 *
+	 * @param string $reply_to_email Default reply-to email address.
+	 * @return string
+	 */
+	public function get_reply_to_address( $reply_to_email = '' ) {
+		/**
+		 * Filter the reply-to address for emails.
+		 *
+		 * @since 10.4.0
+		 * @param string   $reply_to_email Reply-to email address.
+		 * @param WC_Email $email          WC_Email instance managing the email.
+		 * @param string   $default_email  Default reply-to email address.
+		 */
+		$reply_to_email = apply_filters( 'woocommerce_email_reply_to_address', get_option( 'woocommerce_email_reply_to_address', '' ), $this, $reply_to_email );
+		return sanitize_email( $reply_to_email );
 	}
 
 	/**

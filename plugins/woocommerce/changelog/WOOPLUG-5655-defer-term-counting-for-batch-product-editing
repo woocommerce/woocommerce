@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Defer term counting when running BATCH REST requests against products.

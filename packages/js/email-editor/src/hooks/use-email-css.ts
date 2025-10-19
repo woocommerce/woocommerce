@@ -55,7 +55,7 @@ export function useEmailCss() {
 
 	let rootContainerStyles = '';
 	if ( layout && deviceType !== 'Mobile' ) {
-		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;max-width: 100%;`;
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
 	if ( padding ) {

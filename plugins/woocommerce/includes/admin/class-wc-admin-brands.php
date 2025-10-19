@@ -99,6 +99,7 @@ class WC_Brands_Admin {
 		// Import.
 		add_filter( 'woocommerce_csv_product_import_mapping_options', array( $this, 'add_column_to_importer_exporter' ), 10 );
 		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', array( $this, 'add_default_column_mapping' ), 10 );
+		add_filter( 'woocommerce_product_importer_formatting_callbacks', array( $this, 'add_formatting_callback' ), 10, 2 );
 		add_filter( 'woocommerce_product_import_inserted_product_object', array( $this, 'process_import' ), 10, 2 );
 
 		// Export.
@@ -690,18 +691,38 @@ class WC_Brands_Admin {
 	}
 
 	/**
+	 * Add formatting callback for brand_ids during CSV import.
+	 *
+	 * @param  array               $callbacks Formatting callbacks.
+	 * @param  WC_Product_Importer $importer  Importer instance.
+	 * @return array $callbacks
+	 */
+	public function add_formatting_callback( $callbacks, $importer ) {
+		$mapped_keys = $importer->get_mapped_keys();
+
+		// Find the index of brand_ids in the mapped keys.
+		$brand_ids_index = array_search( 'brand_ids', $mapped_keys, true );
+
+		// If brand_ids exists in the mapping, add our custom parser.
+		if ( false !== $brand_ids_index ) {
+			$callbacks[ $brand_ids_index ] = array( $this, 'parse_brands_field' );
+		}
+
+		return $callbacks;
+	}
+
+	/**
 	 * Add brands to newly imported product.
 	 *
 	 * @param WC_Product $product Product being imported.
 	 * @param array      $data    Raw CSV data.
 	 */
 	public function process_import( $product, $data ) {
-		if ( empty( $data['brand_ids'] ) ) {
+		if ( empty( $data['brand_ids'] ) || ! is_array( $data['brand_ids'] ) ) {
 			return;
 		}
 
-		$brand_ids = array_map( 'intval', $this->parse_brands_field( $data['brand_ids'] ) );
-
+		$brand_ids = array_map( 'intval', $data['brand_ids'] );
 		wp_set_object_terms( $product->get_id(), $brand_ids, 'product_brand' );
 	}
 
