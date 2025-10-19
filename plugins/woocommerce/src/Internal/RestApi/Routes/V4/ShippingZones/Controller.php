@@ -43,6 +43,11 @@ class Controller extends AbstractController {
 	protected $item_schema;
 
 	/**
+	 * Custom error constant for shipping-specific errors.
+	 */
+	const INVALID_ZONE_ID = 'invalid_zone_id';
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @param ShippingZoneSchema $zone_schema Order schema class.
@@ -98,6 +103,12 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_item' ),
 					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
 				),
 			)
 		);
@@ -205,46 +216,10 @@ class Controller extends AbstractController {
 	public function create_item( $request ) {
 		$zone = new WC_Shipping_Zone( null );
 
-		// Set zone name (required).
-		if ( ! is_null( $request->get_param( 'name' ) ) ) {
-			$zone->set_zone_name( $request->get_param( 'name' ) );
+		$result = $zone->update_from_api_request( $request->get_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
-
-		// Set zone order (optional).
-		if ( ! is_null( $request->get_param( 'order' ) ) ) {
-			$zone->set_zone_order( $request->get_param( 'order' ) );
-		}
-
-		// Set locations (required, can be empty array).
-		$raw_locations = $request->get_param( 'locations' );
-		$locations     = array();
-
-		foreach ( (array) $raw_locations as $raw_location ) {
-			if ( empty( $raw_location['code'] ) ) {
-				continue;
-			}
-
-			$type = ! empty( $raw_location['type'] ) ? sanitize_text_field( $raw_location['type'] ) : 'country';
-
-			if ( ! in_array( $type, array( 'postcode', 'state', 'country:state', 'country', 'continent' ), true ) ) {
-				continue;
-			}
-
-			// Normalize 'country:state' to 'state' for backward compatibility with core.
-			if ( 'country:state' === $type ) {
-				$type = 'state';
-			}
-
-			$locations[] = array(
-				'code' => sanitize_text_field( $raw_location['code'] ),
-				'type' => sanitize_text_field( $type ),
-			);
-		}
-
-		$zone->set_locations( $locations );
-
-		// Save the zone.
-		$zone->save();
 
 		// Verify zone was created successfully.
 		if ( 0 === $zone->get_id() ) {
@@ -261,5 +236,74 @@ class Controller extends AbstractController {
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
 
 		return $response;
+	}
+
+	/**
+	 * Get route error by code, including custom shipping zone errors.
+	 *
+	 * @param string $error_code Error code.
+	 * @return WP_Error
+	 */
+	protected function get_route_error_by_code( string $error_code ): WP_Error {
+		$custom_errors = array(
+			self::INVALID_ZONE_ID => array(
+				'message' => __( 'Invalid shipping zone ID.', 'woocommerce' ),
+				'status'  => WP_Http::NOT_FOUND,
+			),
+		);
+
+		if ( isset( $custom_errors[ $error_code ] ) ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . $error_code,
+				$custom_errors[ $error_code ]['message'],
+				$custom_errors[ $error_code ]['status']
+			);
+		}
+
+		return parent::get_route_error_by_code( $error_code );
+	}
+
+	/**
+	 * Validate that a shipping zone exists.
+	 *
+	 * @param int $zone_id Zone ID.
+	 * @return WC_Shipping_Zone|WP_Error Zone object or error.
+	 */
+	protected function validate_zone( $zone_id ) {
+		$zone = WC_Shipping_Zones::get_zone( $zone_id );
+
+		if ( ! $zone || ( 0 !== $zone->get_id() && ! $zone->get_zone_name() ) ) {
+			return $this->get_route_error_by_code( self::INVALID_ZONE_ID );
+		}
+
+		return $zone;
+	}
+
+	/**
+	 * Update a shipping zone.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
+	 */
+	public function update_item( $request ) {
+		$zone_id = (int) $request['id'];
+
+		// Validate zone exists.
+		$zone = $this->validate_zone( $zone_id );
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
+		}
+
+		// Update zone from request.
+		$result = $zone->update_from_api_request( $request->get_params() );
+		if ( is_wp_error( $result ) ) {
+			return $result;
+		}
+
+		// Reload zone to get fresh data after save.
+		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
+
+		// Prepare response.
+		return rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 	}
 }

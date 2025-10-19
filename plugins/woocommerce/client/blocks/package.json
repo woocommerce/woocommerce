@@ -164,7 +164,7 @@
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/editor": "wp-6.7",
 		"@wordpress/element": "5.22.0",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "10.32.0",
 		"@wordpress/format-library": "wp-6.6",
 		"@wordpress/hooks": "wp-6.6",
 		"@wordpress/html-entities": "3.24.0",

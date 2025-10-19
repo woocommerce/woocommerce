@@ -8,7 +8,13 @@ import {
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
 } from '@wordpress/components';
-import { Icon, commentAuthorAvatar, external, linkOff } from '@wordpress/icons';
+import {
+	Icon,
+	commentAuthorAvatar,
+	external,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -64,6 +70,36 @@ export default function HeaderAccount( {
 		);
 	};
 
+	const dropdownTrigger = () => {
+		const isInApp = page === 'wc-addons';
+		if ( ! isInApp ) {
+			return avatar();
+		}
+
+		return (
+			<span className="woocommerce-marketplace__header-account-trigger">
+				{ avatar() }
+				<span
+					className="woocommerce-marketplace__header-account-trigger__email"
+					title={
+						isConnected
+							? userEmail
+							: __( 'Connect to WooCommerce.com', 'woocommerce' )
+					}
+				>
+					{ isConnected
+						? userEmail
+						: __( 'Connect to WooCommerce.com', 'woocommerce' ) }
+				</span>
+				<Icon
+					icon={ chevronDown }
+					size={ 24 }
+					className="woocommerce-marketplace__header-account-trigger__expand-icon"
+				/>
+			</span>
+		);
+	};
+
 	const connectionStatusText = isConnected
 		? __( 'Connected to WooCommerce.com', 'woocommerce' )
 		: __( 'Connect to WooCommerce.com', 'woocommerce' );
@@ -107,7 +143,7 @@ export default function HeaderAccount( {
 		<>
 			<DropdownMenu
 				className="woocommerce-layout__activity-panel-tab woocommerce-marketplace__user-menu"
-				icon={ avatar() }
+				icon={ dropdownTrigger() }
 				label={ __( 'User options', 'woocommerce' ) }
 				toggleProps={ {
 					className: 'woocommerce-layout__activity-panel-tab',
