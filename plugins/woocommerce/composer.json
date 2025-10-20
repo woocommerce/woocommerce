@@ -57,7 +57,11 @@
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.3.0",
+<<<<<<< HEAD
 		"wordpress/mcp-adapter": "^0.3.0"
+=======
+		"wordpress/mcp-adapter": "dev-trunk#7a2d22cff92328bc94f5b1648a66ae4273e949c5"
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",

@@ -23,12 +23,17 @@ class AbilitiesCategories {
 	 * @internal
 	 */
 	final public static function init(): void {
+<<<<<<< HEAD
 		/*
 		 * Register categories when Abilities API categories are ready.
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		add_action( 'abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
 		add_action( 'wp_abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
+=======
+		// Register categories when Abilities API categories are ready.
+		add_action( 'abilities_api_categories_init', array( __CLASS__, 'register_categories' ) );
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 	}
 
 	/**

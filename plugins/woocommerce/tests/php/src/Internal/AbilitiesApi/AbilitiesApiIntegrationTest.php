@@ -128,19 +128,33 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		}
 
 		// Reset category registry singleton to allow fresh category registration in next test.
+<<<<<<< HEAD
 		if ( class_exists( $this->category_registry_class ) ) {
 			$reflection        = new \ReflectionClass( $this->category_registry_class );
+=======
+		if ( class_exists( 'WP_Abilities_Category_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Abilities_Category_Registry' );
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			$instance_property = $reflection->getProperty( 'instance' );
 			$instance_property->setAccessible( true );
 			$instance_property->setValue( null );
 		}
 
 		// Reset action counters to allow init actions to fire again.
+<<<<<<< HEAD
 		if ( isset( $wp_actions[ $this->abilities_init_action ] ) ) {
 			unset( $wp_actions[ $this->abilities_init_action ] );
 		}
 		if ( isset( $wp_actions[ $this->abilities_categories_init_action ] ) ) {
 			unset( $wp_actions[ $this->abilities_categories_init_action ] );
+=======
+		global $wp_actions;
+		if ( isset( $wp_actions['abilities_api_init'] ) ) {
+			unset( $wp_actions['abilities_api_init'] );
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
+		}
+		if ( isset( $wp_actions['abilities_api_categories_init'] ) ) {
+			unset( $wp_actions['abilities_api_categories_init'] );
 		}
 
 		// Reset user.
@@ -211,7 +225,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -225,7 +243,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration without permission_callback.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_init_action,
+=======
+			'abilities_api_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () use ( $ability_id ) {
 				wp_register_ability(
 					$ability_id,
@@ -265,7 +287,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -324,7 +350,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -427,7 +457,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -526,7 +560,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -624,7 +662,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
+<<<<<<< HEAD
 			$this->abilities_categories_init_action,
+=======
+			'abilities_api_categories_init',
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 			function () {
 				wp_register_ability_category(
 					'test',
