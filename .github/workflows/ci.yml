@@ -316,8 +316,9 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
+    if: ${{ !cancelled() }}
     outputs:
       non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:

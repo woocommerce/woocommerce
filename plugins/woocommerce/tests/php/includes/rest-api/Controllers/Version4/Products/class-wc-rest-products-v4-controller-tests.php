@@ -1058,6 +1058,49 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the `exclude_category` parameter excludes products assigned to the provided category IDs.
+	 *
+	 * @return void
+	 */
+	public function test_products_filter_with_exclude_category() {
+		$excluded_category = wp_create_term( 'Excluded Category ' . uniqid( 'excluded_', true ), 'product_cat' );
+		$included_category = wp_create_term( 'Included Category ' . uniqid( 'included_', true ), 'product_cat' );
+
+		$this->assertNotWPError( $excluded_category );
+		$this->assertNotWPError( $included_category );
+
+		$excluded_product = WC_Helper_Product::create_simple_product();
+		$included_product = WC_Helper_Product::create_simple_product();
+
+		wp_set_object_terms( $excluded_product->get_id(), array( $excluded_category['term_id'] ), 'product_cat' );
+		wp_set_object_terms( $included_product->get_id(), array( $included_category['term_id'] ), 'product_cat' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'exclude_category' => array( $excluded_category['term_id'] ),
+				'per_page'         => 20,
+				'orderby'          => 'id',
+				'order'            => 'asc',
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $response->get_data(), 'id' );
+
+		$this->assertNotContains( $excluded_product->get_id(), $product_ids );
+		$this->assertContains( $included_product->get_id(), $product_ids );
+
+		WC_Helper_Product::delete_product( $excluded_product->get_id() );
+		WC_Helper_Product::delete_product( $included_product->get_id() );
+		wp_delete_term( $excluded_category['term_id'], 'product_cat' );
+		wp_delete_term( $included_category['term_id'], 'product_cat' );
+	}
+
+	/**
 	 * Test that `exclude_types` parameter correctly excludes a single type.
 	 */
 	public function test_products_filter_with_single_exclude_types() {
