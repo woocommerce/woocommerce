@@ -20,6 +20,14 @@ use WC_Unit_Test_Case;
  */
 class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
+
+	/**
+	 * Previous payment gateways to restore after tests.
+	 *
+	 * @var $previous_payment_gateways WC_Payment_Gateways Previous payment gateways.
+	 */
+	public $previous_payment_gateways;
+
 	/**
 	 * Setup test case.
 	 */
@@ -38,6 +46,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 				'enable_for_virtual' => 'yes',
 			)
 		);
+		$this->previous_payment_gateways = WC()->payment_gateways;
 
 		// Reset WC payment gateways to pick up the new settings.
 		WC()->payment_gateways = new WC_Payment_Gateways();
@@ -49,6 +58,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( 'woocommerce_pay-at-location_settings' );
 		remove_all_filters( 'woocommerce_shipping_methods' );
+		WC()->payment_gateways = $this->previous_payment_gateways;
 		parent::tearDown();
 	}
 
