@@ -48,13 +48,18 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 					'permission_callback' => array( $this, 'generate_products_catalog_permissions_check' ),
 					'args'                => array(
 						'fields'         => array(
-							'description' => __( 'Product/variation fields to include in the catalog.', 'woocommerce' ),
-							'type'        => 'array',
+							'description'       => __( 'Product/variation fields to include in the catalog.', 'woocommerce' ),
+							'type'              => 'array',
+							'items'             => array( 'type' => 'string' ),
+							'default'           => array(),
+							'validate_callback' => array( $this, 'validate_fields_arg' ),
+							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
 						),
 						'force_generate' => array(
-							'description' => __( 'Force generation of a new catalog file.', 'woocommerce' ),
-							'type'        => 'boolean',
-							'default'     => false,
+							'description'       => __( 'Force generation of a new catalog file.', 'woocommerce' ),
+							'type'              => 'boolean',
+							'default'           => false,
+							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
 					),
 				),
@@ -92,7 +97,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function generate_catalog( $request ) {
-		$fields         = $request->get_param( 'fields' ) ?? array();
+		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 		$file_info      = $this->get_catalog_file_info( $fields );
 
@@ -186,6 +191,33 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	}
 
 	/**
+	 * Validate fields argument.
+	 *
+	 * @param mixed $value The value to validate.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function validate_fields_arg( $value ) {
+		if ( ! is_array( $value ) ) {
+			return new WP_Error( 'invalid_fields', __( 'fields must be an array of strings.', 'woocommerce' ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Sanitize fields argument.
+	 *
+	 * @param mixed $value The value to sanitize.
+	 * @return array Sanitized and canonicalized fields array.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function sanitize_fields_arg( $value ) {
+		return $this->canonicalize_fields( is_array( $value ) ? $value : array() );
+	}
+
+	/**
 	 * Products catalog generation schema.
 	 *
 	 * @return array Products catalog generation schema data.
@@ -257,5 +289,17 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			'url'       => $catalog_url . $filename,
 			'directory' => $catalog_dir,
 		);
+	}
+
+	/**
+	 * Canonicalize fields array for stable hashing.
+	 *
+	 * @param array $fields Product/variation fields.
+	 * @return array Canonicalized fields array.
+	 */
+	private function canonicalize_fields( array $fields ) {
+		$fields = array_values( array_unique( array_map( 'strval', $fields ) ) );
+		sort( $fields, SORT_STRING );
+		return $fields;
 	}
 }
