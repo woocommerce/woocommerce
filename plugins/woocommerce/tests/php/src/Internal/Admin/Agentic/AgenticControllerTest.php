@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
 use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController;
+use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
 
 /**
  * Tests for AgenticController class.
@@ -35,7 +36,6 @@ class AgenticControllerTest extends \WC_Unit_Test_Case {
 		 * @see AgenticWebhookManager::register_webhook_topic_names()
 		 */
 		$topics = apply_filters( 'woocommerce_webhook_topics', array() );
-		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_created', $topics );
-		$this->assertArrayHasKey( 'action.woocommerce_agentic_order_updated', $topics );
+		$this->assertArrayHasKey( AgenticWebhookManager::WEBHOOK_TOPIC, $topics );
 	}
 }
