@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Functions\Stock
  */
 
+declare(strict_types=1);
+
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -289,7 +291,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Test 'wc_get_price_including_tax' with empty base tax rates (WOOPLUG-5511).
+	 * @testdox Test 'wc_get_price_including_tax' with empty base tax rates (WOOPLUG-5511).
 	 *
 	 * When prices are entered inclusive of tax and no base tax rate exists, the price
 	 * should remain unchanged regardless of the customer's location tax rate.
@@ -317,6 +319,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			update_option( 'woocommerce_calc_taxes', 'yes' );
 		}
 
+		// Capture original state to restore later.
+		$original_default_country = get_option( 'woocommerce_default_country' );
+
 		// Set up store base location with NO tax rate configured.
 		// This simulates the bug scenario where the store has a base location
 		// but hasn't configured a tax rate for it.
@@ -334,7 +339,11 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
-		$customer_tax_rate_id = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+		$customer_tax_rate_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+
+		// Capture original customer location to restore later.
+		$original_billing_country  = WC()->customer->get_billing_country();
+		$original_shipping_country = WC()->customer->get_shipping_country();
 
 		// Set customer location to Austria (where we have a tax rate).
 		WC()->customer->set_billing_country( 'AT' );
@@ -373,15 +382,18 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		// Clean up.
 		WC_Tax::_delete_tax_rate( $customer_tax_rate_id );
 		WC_Helper_Product::delete_product( $product->get_id() );
-		WC()->customer->set_billing_country( 'US' );
-		WC()->customer->set_shipping_country( 'US' );
+
+		// Restore original global state.
+		update_option( 'woocommerce_default_country', $original_default_country );
+		WC()->customer->set_billing_country( $original_billing_country );
+		WC()->customer->set_shipping_country( $original_shipping_country );
 		if ( ! $wc_tax_enabled ) {
 			update_option( 'woocommerce_calc_taxes', 'no' );
 		}
 	}
 
 	/**
-	 * @testDox Test 'wc_get_price_including_tax' still adjusts prices correctly when both base and customer rates exist.
+	 * @testdox Test 'wc_get_price_including_tax' still adjusts prices correctly when both base and customer rates exist.
 	 *
 	 * This test ensures the fix for empty base rates doesn't break the existing behavior
 	 * when both base and customer tax rates are configured.
@@ -412,7 +424,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
-		$base_tax_rate_id = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
+		$base_tax_rate_id   = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
 
 		// Create customer tax rate for a different location (20% tax).
 		$customer_tax_rate_data = array(
@@ -426,7 +438,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
-		$customer_tax_rate_id = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+		$customer_tax_rate_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
 
 		// Set customer location to Austria.
 		WC()->customer->set_billing_country( 'AT' );
@@ -439,8 +451,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$product->save();
 
 		// When base rate is 10% and customer rate is 20%:
-		// - Base price (excl. tax): 100 / 1.10 = 90.91
-		// - Customer price (incl. 20% tax): 90.91 * 1.20 = 109.09
+		// - Base price (excl. tax): 100 / 1.10 = 90.91.
+		// - Customer price (incl. 20% tax): 90.91 * 1.20 = 109.09.
 		$result = wc_get_price_including_tax( $product );
 		$this->assertEquals(
 			109.09,
