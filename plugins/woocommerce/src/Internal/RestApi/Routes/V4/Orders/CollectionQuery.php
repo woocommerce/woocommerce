@@ -247,7 +247,7 @@ class CollectionQuery extends AbstractCollectionQuery {
 			'offset'         => $request['offset'],
 			'order'          => $request['order'],
 			'orderby'        => $request['orderby'],
-			'paged'          => $request['page'],
+			'page'           => $request['page'],
 			'post__in'       => $request['include'],
 			'post__not_in'   => $request['exclude'],
 			'posts_per_page' => $request['per_page'],
