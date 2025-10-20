@@ -442,8 +442,8 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
-		if (  WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING !== $shipping_preference) {
-			$params['payment_source'][$payment_source]['experience_context']['order_update_callback_config'] = array(
+		if ( WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING !== $shipping_preference ) {
+			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
 				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
 			);
