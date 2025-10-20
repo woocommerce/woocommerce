@@ -47,9 +47,14 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 					'callback'            => array( $this, 'generate_catalog' ),
 					'permission_callback' => array( $this, 'generate_products_catalog_permissions_check' ),
 					'args'                => array(
-						'fields' => array(
+						'fields'         => array(
 							'description' => __( 'Product/variation fields to include in the catalog.', 'woocommerce' ),
 							'type'        => 'array',
+						),
+						'force_generate' => array(
+							'description' => __( 'Force generation of a new catalog file.', 'woocommerce' ),
+							'type'        => 'boolean',
+							'default'     => false,
 						),
 					),
 				),
@@ -87,10 +92,25 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
 	public function generate_catalog( $request ) {
-		// Mock job ID.
-		$response_data = array(
-			'job_id' => '134aec',
-		);
+		$fields         = $request->get_param( 'fields' ) ?? array();
+		$force_generate = $request->get_param( 'force_generate' ) ?? false;
+		$file_info      = $this->get_catalog_file_info( $fields );
+
+		// Check if file exists and force_generate is false.
+		if ( ! $force_generate && file_exists( $file_info['filepath'] ) ) {
+			$response_data = array(
+				'download_url' => $file_info['url'],
+			);
+		} else {
+			// Temporarily return job_id with base64-encoded fields for use in status endpoint.
+			// TODO: WOOMOB-1455 - Replace with proper async job tracking once we have a job tracking system.
+			$job_id = base64_encode( wp_json_encode( $fields ) );
+
+			$response_data = array(
+				'job_id' => $job_id,
+			);
+		}
+
 		return rest_ensure_response( $response_data );
 	}
 
@@ -108,11 +128,44 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 		$job_id = sanitize_text_field( $job_id );
-		// Mock response to make it look like the generation is complete.
+
+		// Decode fields from job_id (base64-encoded JSON).
+		$fields_json = base64_decode( $job_id, true );
+		if ( false === $fields_json ) {
+			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
+		$fields = json_decode( $fields_json, true );
+		if ( null === $fields ) {
+			$fields = array();
+		}
+
+		// Get file info based on decoded fields.
+		$file_info = $this->get_catalog_file_info( $fields );
+
+		// Create directory if it doesn't exist.
+		if ( ! file_exists( $file_info['directory'] ) ) {
+			wp_mkdir_p( $file_info['directory'] );
+		}
+
+		// Generate empty catalog file.
+		$catalog_data = array(
+			'products'   => array(),
+			'variations' => array(),
+		);
+
+		// Write to file.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		$result = file_put_contents( $file_info['filepath'], wp_json_encode( $catalog_data ) );
+
+		if ( false === $result ) {
+			return new WP_Error( 'catalog_generation_failed', __( 'Failed to generate catalog file.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
 		$response_data = array(
 			'job_id'       => $job_id,
 			'status'       => 'complete',
-			'download_url' => rest_url( $this->namespace . '/' . $this->rest_base . '/download?filename=products_catalog.json' ),
+			'download_url' => $file_info['url'],
 		);
 		return rest_ensure_response( $response_data );
 	}
@@ -143,12 +196,15 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			'title'      => 'generate_products_catalog',
 			'type'       => 'object',
 			'properties' => array(
-				'job_id' => array(
-					'description' => __( 'Products catalog generation job ID.', 'woocommerce' ),
+				'job_id'       => array(
+					'description' => __( 'Products catalog generation job ID. Returned when catalog needs to be generated.', 'woocommerce' ),
+					'type'        => 'string',
+				),
+				'download_url' => array(
+					'description' => __( 'Products catalog download URL. Returned when catalog file already exists.', 'woocommerce' ),
 					'type'        => 'string',
 				),
 			),
-			'required'   => array( 'job_id' ),
 		);
 	}
 
@@ -178,6 +234,28 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				),
 			),
 			'required'   => array( 'job_id', 'status' ),
+		);
+	}
+
+	/**
+	 * Get catalog file information based on fields.
+	 *
+	 * @param array $fields Product/variation fields to include in the catalog.
+	 * @return array Array with 'filepath', 'url', and 'directory' keys.
+	 */
+	private function get_catalog_file_info( $fields ) {
+		$upload_dir  = wp_upload_dir();
+		$catalog_dir = trailingslashit( $upload_dir['basedir'] ) . 'wc-catalog/';
+		$catalog_url = trailingslashit( $upload_dir['baseurl'] ) . 'wc-catalog/';
+
+		$today        = gmdate( 'Y-m-d' );
+		$catalog_hash = wp_hash( $today . wp_json_encode( $fields ) );
+		$filename     = "products-{$today}-{$catalog_hash}.json";
+
+		return array(
+			'filepath'  => $catalog_dir . $filename,
+			'url'       => $catalog_url . $filename,
+			'directory' => $catalog_dir,
 		);
 	}
 }
