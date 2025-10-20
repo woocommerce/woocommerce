@@ -183,8 +183,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		);
 
 		// Write to file.
+		$json = wp_json_encode( $catalog_data );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		$result = file_put_contents( $file_info['filepath'], wp_json_encode( $catalog_data ) );
+		$result = file_put_contents( $file_info['filepath'], $json, LOCK_EX );
 
 		if ( false === $result ) {
 			return new WP_Error( 'catalog_generation_failed', __( 'Failed to generate catalog file.', 'woocommerce' ), array( 'status' => 500 ) );
