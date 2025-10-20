@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Use items_count in store api cart response instead of adding the returned line items. cart.items_count has passed through the woocommerce_cart_contents_count filter
