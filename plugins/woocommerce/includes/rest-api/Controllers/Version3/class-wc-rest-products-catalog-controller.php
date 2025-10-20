@@ -343,7 +343,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 */
 	private function base64url_encode( $data ) {
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		return str_replace( array( '+', '/', '=' ), array( '-', '_', '' ), base64_encode( $data ) );
+		$b64 = base64_encode( $data );
+		$b64 = strtr( $b64, '+/', '-_' );
+		return rtrim( $b64, '=' );
 	}
 
 	/**
@@ -353,7 +355,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @return string|false Decoded data or false on failure.
 	 */
 	private function base64url_decode( $data ) {
+		$b64  = strtr( $data, '-_', '+/' );
+		$b64 .= str_repeat( '=', ( 4 - strlen( $b64 ) % 4 ) % 4 );
 		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-		return base64_decode( str_replace( array( '-', '_' ), array( '+', '/' ), $data ), true );
+		return base64_decode( $b64, true );
 	}
 }
