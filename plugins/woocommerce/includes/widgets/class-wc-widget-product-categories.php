@@ -240,43 +240,46 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				)
 			);
 
-			wp_enqueue_script( 'selectWoo' );
+
+			$handle = 'wc-product-category-dropdown-widget';
+			wp_register_script( $handle, '', array( 'jquery', 'selectWoo' ), WC_VERSION, true );
 			wp_enqueue_style( 'select2' );
-
-			wc_enqueue_js(
+			wp_enqueue_script( $handle );
+			wp_add_inline_script(
+				$handle,
 				"
-				jQuery( '.dropdown_product_cat' ).on( 'change', function() {
-					if ( jQuery(this).val() != '' ) {
-						var this_page = '';
-						var home_url  = '" . esc_js( home_url( '/' ) ) . "';
-						if ( home_url.indexOf( '?' ) > 0 ) {
-							this_page = home_url + '&product_cat=' + jQuery(this).val();
-						} else {
-							this_page = home_url + '?product_cat=' + jQuery(this).val();
-						}
-						location.href = this_page;
-					} else {
-						location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
-					}
-				});
-
-				if ( jQuery().selectWoo ) {
-					var wc_product_cat_select = function() {
-						jQuery( '.dropdown_product_cat' ).selectWoo( {
-							placeholder: '" . esc_js( __( 'Select a category', 'woocommerce' ) ) . "',
-							minimumResultsForSearch: 5,
-							width: '100%',
-							allowClear: true,
-							language: {
-								noResults: function() {
-									return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
-								}
+					jQuery( '.dropdown_product_cat' ).on( 'change', function() {
+						if ( jQuery(this).val() != '' ) {
+							var this_page = '';
+							var home_url  = '" . esc_js( home_url( '/' ) ) . "';
+							if ( home_url.indexOf( '?' ) > 0 ) {
+								this_page = home_url + '&product_cat=' + jQuery(this).val();
+							} else {
+								this_page = home_url + '?product_cat=' + jQuery(this).val();
 							}
-						} );
-					};
-					wc_product_cat_select();
-				}
-			"
+							location.href = this_page;
+						} else {
+							location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
+						}
+					});
+	
+					if ( jQuery().selectWoo ) {
+						var wc_product_cat_select = function() {
+							jQuery( '.dropdown_product_cat' ).selectWoo( {
+								placeholder: '" . esc_js( __( 'Select a category', 'woocommerce' ) ) . "',
+								minimumResultsForSearch: 5,
+								width: '100%',
+								allowClear: true,
+								language: {
+									noResults: function() {
+										return '" . esc_js( _x( 'No matches found', 'enhanced select', 'woocommerce' ) ) . "';
+									}
+								}
+							} );
+						};
+						wc_product_cat_select();
+					}
+				"
 			);
 		} else {
 			include_once WC()->plugin_path() . '/includes/walkers/class-wc-product-cat-list-walker.php';
