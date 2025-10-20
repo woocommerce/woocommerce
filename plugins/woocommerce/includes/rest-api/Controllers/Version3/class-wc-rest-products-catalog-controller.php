@@ -101,6 +101,10 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 		$file_info      = $this->get_catalog_file_info( $fields );
 
+		if ( is_wp_error( $file_info ) ) {
+			return $file_info;
+		}
+
 		// Check if file exists and force_generate is false.
 		if ( ! $force_generate && file_exists( $file_info['filepath'] ) ) {
 			$response_data = array(
@@ -108,6 +112,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			);
 		} else {
 			// Temporarily return job_id with base64-encoded fields for use in status endpoint.
+			// Base64 encoding ensures the job_id is URL-safe when passed as a query parameter.
 			// TODO: WOOMOB-1455 - Replace with proper async job tracking once we have a job tracking system.
 			$job_id = base64_encode( wp_json_encode( $fields ) );
 
@@ -145,8 +150,15 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			$fields = array();
 		}
 
+		// Sanitize and canonicalize fields.
+		$fields = $this->sanitize_fields_arg( $fields );
+
 		// Get file info based on decoded fields.
 		$file_info = $this->get_catalog_file_info( $fields );
+
+		if ( is_wp_error( $file_info ) ) {
+			return $file_info;
+		}
 
 		// Create directory if it doesn't exist.
 		if ( ! file_exists( $file_info['directory'] ) ) {
@@ -273,10 +285,15 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * Get catalog file information based on fields.
 	 *
 	 * @param array $fields Product/variation fields to include in the catalog.
-	 * @return array Array with 'filepath', 'url', and 'directory' keys.
+	 * @return array|WP_Error Array with 'filepath', 'url', and 'directory' keys, or WP_Error on failure.
 	 */
 	private function get_catalog_file_info( $fields ) {
-		$upload_dir  = wp_upload_dir();
+		$upload_dir = wp_upload_dir();
+
+		if ( ! empty( $upload_dir['error'] ) ) {
+			return new WP_Error( 'upload_dir_error', $upload_dir['error'], array( 'status' => 500 ) );
+		}
+
 		$catalog_dir = trailingslashit( $upload_dir['basedir'] ) . 'wc-catalog/';
 		$catalog_url = trailingslashit( $upload_dir['baseurl'] ) . 'wc-catalog/';
 
