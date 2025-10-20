@@ -9,6 +9,7 @@ declare(strict_types=1);
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -186,6 +187,25 @@ class WC_Gateway_Pay_At_Location extends WC_Payment_Gateway {
 		// If Pay at Location is not enabled for virtual orders and the order does not need shipping, return false.
 		if ( ! $this->enable_for_virtual && $is_virtual ) {
 			return false;
+		}
+
+		// Check if any of the selected shipping methods support local pickup.
+		$has_local_pickup_method = false;
+		if ( ! $is_virtual && $shipping_methods ) {
+			foreach ( $shipping_methods as $shipping_method ) {
+				if ( $shipping_method && is_callable( array( $shipping_method, 'get_method_id' ) ) ) {
+					$method_id = $shipping_method->get_method_id();
+					if ( LocalPickupUtils::is_local_pickup_method( $method_id ) ) {
+						$has_local_pickup_method = true;
+						break;
+					}
+				}
+			}
+
+			// Only allow Pay at Location if a local pickup shipping method is selected.
+			if ( ! $has_local_pickup_method ) {
+				return false;
+			}
 		}
 
 		// Return early if:
