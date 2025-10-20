@@ -189,9 +189,9 @@ class WC_Gateway_PAL extends WC_Payment_Gateway {
 			return false;
 		}
 
-		// Check if any of the selected shipping methods support local pickup.
-		$has_local_pickup_method = false;
+		// For non-virtual orders, only allow Pay at Location if a local pickup shipping method is selected.
 		if ( ! $is_virtual && $shipping_methods ) {
+			$has_local_pickup_method = false;
 			foreach ( $shipping_methods as $shipping_method ) {
 				if ( $shipping_method && is_callable( array( $shipping_method, 'get_method_id' ) ) ) {
 					$method_id = $shipping_method->get_method_id();
@@ -209,7 +209,7 @@ class WC_Gateway_PAL extends WC_Payment_Gateway {
 		}
 
 		// Return early if:
-		// - There are no shipping methods resrictions in place.
+		// - There are no shipping methods restrictions in place.
 		// - The order is virtual so needs no shipping.
 		// - Shipping methods are not set yet.
 		if ( empty( $this->enable_for_methods ) || $is_virtual || ! $shipping_methods ) {
