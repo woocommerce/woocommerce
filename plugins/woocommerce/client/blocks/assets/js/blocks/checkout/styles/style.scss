@@ -16,6 +16,14 @@
 		&:last-child {
 			margin-bottom: 0;
 		}
+
+		.wc-block-components-radio-control
+			.wc-block-components-radio-control__input {
+			// We want it to stick to the top, since it has position: absolute we
+			// can position it to be aligned with the top padding value.
+			top: $gap;
+			transform: none;
+		}
 	}
 	.wc-block-checkout__login-prompt {
 		float: right;
