@@ -1547,14 +1547,10 @@ class WC_Email extends WC_Settings_API {
 			</div>
 
 			<?php
-			$handle = 'wc-admin-settings-email';
-			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
-			wp_enqueue_script( $handle );
-			wp_add_inline_script(
-				$handle,
+			wc_enqueue_js(
 				"jQuery( 'select.email_type' ).on( 'change', function() {
 
-					const val = jQuery( this ).val();
+					var val = jQuery( this ).val();
 
 					jQuery( '.template_plain, .template_html' ).show();
 
@@ -1568,14 +1564,14 @@ class WC_Email extends WC_Settings_API {
 
 				}).trigger( 'change' );
 
-				const view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
-				const hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
+				var view = '" . esc_js( __( 'View template', 'woocommerce' ) ) . "';
+				var hide = '" . esc_js( __( 'Hide template', 'woocommerce' ) ) . "';
 
 				jQuery( 'a.toggle_editor' ).text( view ).on( 'click', function() {
-					let label = hide;
+					var label = hide;
 
 					if ( jQuery( this ).closest(' .template' ).find( '.editor' ).is(':visible') ) {
-						label = view;
+						var label = view;
 					}
 
 					jQuery( this ).text( label ).closest(' .template' ).find( '.editor' ).slideToggle();
@@ -1591,7 +1587,7 @@ class WC_Email extends WC_Settings_API {
 				});
 
 				jQuery( '.editor textarea' ).on( 'change', function() {
-					const name = jQuery( this ).attr( 'data-name' );
+					var name = jQuery( this ).attr( 'data-name' );
 
 					if ( name ) {
 						jQuery( this ).attr( 'name', name );
