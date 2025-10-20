@@ -13,7 +13,11 @@ const merchantPages = [
 	{
 		name: 'WC Dashboard',
 		url: 'wp-admin/admin.php?page=wc-admin',
+<<<<<<< HEAD
 		expectedCount: 83,
+=======
+		expectedCount: 81,
+>>>>>>> 654c7ed833 (Update WordPress Abilities API integration to v0.3.0 (#60799))
 	},
 	{
 		name: 'Reports',
