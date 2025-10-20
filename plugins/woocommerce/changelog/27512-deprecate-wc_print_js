@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Deprecate wc_enqueue_js in preference of wp_add_inline_script().
