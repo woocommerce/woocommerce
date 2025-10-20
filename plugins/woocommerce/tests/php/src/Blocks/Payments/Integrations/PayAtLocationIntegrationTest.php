@@ -48,6 +48,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_pay-at-location_settings' );
+		remove_all_filters( 'woocommerce_shipping_methods' );
 		parent::tearDown();
 	}
 
@@ -133,6 +134,9 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $rates );
 		$this->assertEquals( 'test_regular_rate_1', $rates['test_regular_rate:1']->id );
 		$this->assertEquals( 'test_regular_method', $rates['test_regular_rate:1']->method_id );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_shipping_methods' );
 	}
 
 	/**
@@ -174,6 +178,9 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		$this->assertArrayNotHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_shipping_methods' );
 	}
 }
 
