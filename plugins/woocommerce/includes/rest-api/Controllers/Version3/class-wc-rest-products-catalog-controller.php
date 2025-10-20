@@ -112,7 +112,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			);
 		} else {
 			// Temporarily return job_id with URL-safe base64-encoded fields for use in status endpoint.
-			// TODO: WOOMOB-1455 - Replace with proper async job tracking once we have a job tracking system.
+			// WOOMOB-1455 - Replace base64 fields job ID with proper async job tracking once we have a job tracking system.
 			$job_id = $this->base64url_encode( wp_json_encode( $fields ) );
 
 			$response_data = array(
@@ -172,7 +172,8 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$index_file = trailingslashit( $file_info['directory'] ) . 'index.html';
 		if ( ! file_exists( $index_file ) ) {
 			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			@file_put_contents( $index_file, '' );
+			$result = file_put_contents( $index_file, '' );
+			// Non-critical: ignore if index.html creation fails.
 		}
 
 		// Generate empty catalog file.
@@ -243,8 +244,10 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * Products catalog generation schema.
 	 *
 	 * @return array Products catalog generation schema data.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	function catalog_generation_schema() {
+	public function catalog_generation_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'generate_products_catalog',
@@ -266,8 +269,10 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * Products catalog generation status schema.
 	 *
 	 * @return array Products catalog generation status schema data.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	function catalog_generation_status_schema() {
+	public function catalog_generation_status_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'products_catalog_generation_status',
@@ -337,6 +342,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @return string URL-safe base64-encoded string.
 	 */
 	private function base64url_encode( $data ) {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 		return str_replace( array( '+', '/', '=' ), array( '-', '_', '' ), base64_encode( $data ) );
 	}
 
@@ -347,6 +353,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @return string|false Decoded data or false on failure.
 	 */
 	private function base64url_decode( $data ) {
+		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
 		return base64_decode( str_replace( array( '-', '_' ), array( '+', '/' ), $data ), true );
 	}
 }
