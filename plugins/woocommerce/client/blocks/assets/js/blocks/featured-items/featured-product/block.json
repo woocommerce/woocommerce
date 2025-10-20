@@ -11,6 +11,9 @@
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
 		"html": false,
+		"filter": {
+			"duotone": true
+		},
 		"color": {
 			"background": true,
 			"text": true
@@ -98,6 +101,11 @@
 		"previewProduct": {
 			"type": "object",
 			"default": null
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-woocommerce-featured-product .wc-block-featured-product__background-image"
 		}
 	},
 	"textdomain": "woocommerce",
