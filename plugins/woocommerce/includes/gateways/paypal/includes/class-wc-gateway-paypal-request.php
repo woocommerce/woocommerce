@@ -415,15 +415,15 @@ class WC_Gateway_Paypal_Request {
 			'payment_source' => array(
 				$payment_source => array(
 					'experience_context' => array(
-						'user_action'                  => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
-						'shipping_preference'          => $shipping_preference,
+						'user_action'           => WC_Gateway_Paypal_Constants::USER_ACTION_PAY_NOW,
+						'shipping_preference'   => $shipping_preference,
 						// Customer redirected here on approval.
-						'return_url'                   => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
+						'return_url'            => esc_url_raw( add_query_arg( 'utm_nooverride', '1', $this->gateway->get_return_url( $order ) ) ),
 						// Customer redirected here on cancellation.
-						'cancel_url'                   => esc_url_raw( $order->get_cancel_order_url_raw() ),
+						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                       => str_replace( '_', '-', get_locale() ),
-						'app_switch_preference'        => array(
+						'locale'                => str_replace( '_', '-', get_locale() ),
+						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
 					),
