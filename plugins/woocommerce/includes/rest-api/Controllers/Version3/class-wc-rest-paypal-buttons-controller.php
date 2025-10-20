@@ -22,6 +22,7 @@ use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
  * @extends WC_REST_Controller
  */
 class WC_REST_Paypal_Buttons_Controller extends WC_REST_Controller {
+
 	/**
 	 * Endpoint namespace.
 	 *
