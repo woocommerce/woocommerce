@@ -137,7 +137,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 *
 	 * @return array Products catalog generation schema data.
 	 */
-	private function catalog_generation_schema() {
+	function catalog_generation_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'generate_products_catalog',
@@ -157,7 +157,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 *
 	 * @return array Products catalog generation status schema data.
 	 */
-	private function catalog_generation_status_schema() {
+	function catalog_generation_status_schema() {
 		return array(
 			'$schema'    => 'http://json-schema.org/draft-04/schema#',
 			'title'      => 'products_catalog_generation_status',
