@@ -163,9 +163,16 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			return $file_info;
 		}
 
-		// Create directory if it doesn't exist.
-		if ( ! file_exists( $file_info['directory'] ) ) {
-			wp_mkdir_p( $file_info['directory'] );
+		// Ensure directory exists.
+		if ( ! wp_mkdir_p( $file_info['directory'] ) ) {
+			return new WP_Error( 'catalog_dir_creation_failed', __( 'Unable to create catalog directory.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		// Prevent directory listing.
+		$index_file = trailingslashit( $file_info['directory'] ) . 'index.html';
+		if ( ! file_exists( $index_file ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			@file_put_contents( $index_file, '' );
 		}
 
 		// Generate empty catalog file.
