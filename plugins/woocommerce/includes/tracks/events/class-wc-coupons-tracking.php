@@ -18,6 +18,11 @@ class WC_Coupons_Tracking {
 		add_action( 'load-edit.php', array( $this, 'tracks_coupons_events' ), 10 );
 	}
 
+	/**
+	 * Enqueue JS to handle tracking for bulk editing of coupons.
+	 *
+	 * @return void
+	 */
 	public function tracks_coupons_bulk_actions() {
 		$handle = 'wc-tracks-coupons-bulk-actions';
 		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );

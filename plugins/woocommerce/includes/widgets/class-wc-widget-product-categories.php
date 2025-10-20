@@ -240,7 +240,6 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				)
 			);
 
-
 			$handle = 'wc-product-category-dropdown-widget';
 			wp_register_script( $handle, '', array( 'jquery', 'selectWoo' ), WC_VERSION, array( 'in_footer' => true ) );
 			wp_enqueue_style( 'select2' );

@@ -57,5 +57,4 @@ class WC_Status_Tracking {
 			}
 		}
 	}
-
 }

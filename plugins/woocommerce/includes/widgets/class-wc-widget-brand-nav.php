@@ -361,10 +361,10 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				$handle = 'wc-brand-widget-dropdown-layered-nav-' . $taxonomy;
 				wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 				wp_enqueue_script( $handle );
-                $redirect_url = add_query_arg( 'filtering', '1', preg_replace( '%\/page\/[0-9]+%', '', esc_url_raw( $link ) ) );
+				$redirect_url = add_query_arg( 'filtering', '1', preg_replace( '%\/page\/[0-9]+%', '', esc_url_raw( $link ) ) );
 
 				wp_add_inline_script(
-                    $handle,
+					$handle,
 					"
                     (function() {
                         'use strict';
@@ -372,12 +372,12 @@ class WC_Widget_Brand_Nav extends WC_Widget {
                         if ( dropdown ) {
                             dropdown.addEventListener( 'change', function() {
                                 const slug = this.value;
-                                location.href = '" . esc_js( $redirect_url ) . "&filter_" . esc_js( $taxonomy ) . "=' + slug;
+                                location.href = '" . esc_js( $redirect_url ) . '&filter_' . esc_js( $taxonomy ) . "=' + slug;
                             } );
                         }
                     })();
                     "
-                );
+				);
 			}
 		}
 
