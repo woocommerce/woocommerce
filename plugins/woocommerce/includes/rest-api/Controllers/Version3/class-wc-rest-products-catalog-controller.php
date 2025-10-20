@@ -76,26 +76,6 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'schema' => array( $this, 'catalog_generation_status_schema' ),
 			)
 		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/download',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'download_catalog' ),
-					'permission_callback' => array( $this, 'generate_products_catalog_permissions_check' ),
-					'args'                => array(
-						'filename' => array(
-							'description' => __( 'Products catalog filename to download.', 'woocommerce' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-					),
-				),
-				'schema' => array( $this, 'catalog_download_schema' ),
-			)
-		);
 	}
 
 	/**
@@ -133,23 +113,6 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			'job_id'       => $job_id,
 			'status'       => 'complete',
 			'download_url' => rest_url( $this->namespace . '/' . $this->rest_base . '/download?filename=products_catalog.json' ),
-		);
-		return rest_ensure_response( $response_data );
-	}
-
-	/**
-	 * Download catalog file.
-	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function download_catalog( $request ) {
-		// Mock empty catalog.
-		$response_data = array(
-			'products'   => array(),
-			'variations' => array(),
 		);
 		return rest_ensure_response( $response_data );
 	}
@@ -215,30 +178,6 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				),
 			),
 			'required'   => array( 'job_id', 'status' ),
-		);
-	}
-
-	/**
-	 * Products catalog download schema.
-	 *
-	 * @return array Products catalog download schema data.
-	 */
-	private function catalog_download_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'products_catalog_download',
-			'type'       => 'object',
-			'properties' => array(
-				'products'   => array(
-					'description' => __( 'Products catalog products.', 'woocommerce' ),
-					'type'        => 'array',
-				),
-				'variations' => array(
-					'description' => __( 'Products catalog variations.', 'woocommerce' ),
-					'type'        => 'array',
-				),
-			),
-			'required'   => array( 'products', 'variations' ),
 		);
 	}
 }
