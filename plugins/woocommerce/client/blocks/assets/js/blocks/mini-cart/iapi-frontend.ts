@@ -913,6 +913,10 @@ store(
 	{ lock: true }
 );
 
+// Store React root and render function for discounts slot at module level
+let discountsSlotReactRoot: any = null;
+let discountsSlotRenderFn: ( () => void ) | null = null;
+
 store(
 	'woocommerce/mini-cart-footer-block',
 	{
@@ -971,93 +975,113 @@ store(
 				const { PluginArea } = ( window as any ).wp.plugins;
 				const { ExperimentalDiscountsMeta, SlotFillProvider } = (
 					window as any
-				).wc.blocksCheckout;
+				 ).wc.blocksCheckout;
 
-				// Create React root and render the slot component
+				// Create React root once and render the slot component
 				// We need to use createElement instead of calling the component as a function
 				// and wrap it in SlotFillProvider for the slot/fill context
-				const root = ( window as any ).wp.element.createRoot(
-					container
-				);
+				if ( ! discountsSlotReactRoot ) {
+					discountsSlotReactRoot = (
+						window as any
+					 ).wp.element.createRoot( container );
+				}
 
-				// Transform Interactivity API cart format to match StoreCart format
-				// that plugins expect from useStoreCart() hook
-				const transformedCart = {
-					// Map raw Cart properties to StoreCart properties
-					cartCoupons: woocommerceState.cart.coupons || [],
-					cartItems: woocommerceState.cart.items || [],
-					cartItemsCount: woocommerceState.cart.itemsCount || 0,
-					cartItemsWeight: woocommerceState.cart.itemsWeight || 0,
-					cartTotals: woocommerceState.cart.totals || {},
-					cartFees: woocommerceState.cart.fees || [],
-					cartNeedsShipping:
-						woocommerceState.cart.needsShipping ?? true,
-					cartNeedsPayment:
-						woocommerceState.cart.needsPayment ?? false,
-					cartHasCalculatedShipping:
-						woocommerceState.cart.hasCalculatedShipping ?? false,
-					shippingAddress: woocommerceState.cart.shippingAddress || {},
-					billingAddress: woocommerceState.cart.billingAddress || {},
-					shippingRates: woocommerceState.cart.shippingRates || [],
-					crossSellsProducts: woocommerceState.cart.crossSells || [],
-					cartErrors: woocommerceState.cart.errors || [],
-					extensions: woocommerceState.cart.extensions || {},
-					paymentMethods: woocommerceState.cart.paymentMethods || [],
-					paymentRequirements:
-						woocommerceState.cart.paymentRequirements || [],
-					// Keep original raw cart for any direct access
-					...woocommerceState.cart,
+				// Create render function that can be called from watch callback
+				discountsSlotRenderFn = () => {
+					// Transform Interactivity API cart format to match StoreCart format
+					// move this to a getter in the WooCommerce store
+					const transformedCart = {
+						cartCoupons: woocommerceState.cart.coupons || [],
+						cartItems: woocommerceState.cart.items || [],
+						cartItemsCount: woocommerceState.cart.itemsCount || 0,
+						cartItemsWeight: woocommerceState.cart.itemsWeight || 0,
+						cartTotals: woocommerceState.cart.totals || {},
+						cartFees: woocommerceState.cart.fees || [],
+						cartNeedsShipping:
+							woocommerceState.cart.needsShipping ?? true,
+						cartNeedsPayment:
+							woocommerceState.cart.needsPayment ?? false,
+						cartHasCalculatedShipping:
+							woocommerceState.cart.hasCalculatedShipping ??
+							false,
+						shippingAddress:
+							woocommerceState.cart.shippingAddress || {},
+						billingAddress:
+							woocommerceState.cart.billingAddress || {},
+						shippingRates:
+							woocommerceState.cart.shippingRates || [],
+						crossSellsProducts:
+							woocommerceState.cart.crossSells || [],
+						cartErrors: woocommerceState.cart.errors || [],
+						extensions: woocommerceState.cart.extensions || {},
+						paymentMethods:
+							woocommerceState.cart.paymentMethods || [],
+						paymentRequirements:
+							woocommerceState.cart.paymentRequirements || [],
+						...woocommerceState.cart,
+					};
+
+					const slotElement = createElement(
+						ExperimentalDiscountsMeta.Slot,
+						{
+							extensions: woocommerceState.cart.extensions,
+							cart: transformedCart,
+							context: 'woocommerce/mini-cart',
+						}
+					);
+
+					// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
+					// This allows fills registered via registerPlugin to appear
+					const pluginAreaElement = createElement( PluginArea, {
+						scope: 'woocommerce-checkout',
+					} );
+
+					// Wrap both the slot and PluginArea in SlotFillProvider so fills can be registered
+					const providerElement = createElement(
+						SlotFillProvider,
+						null,
+						createElement(
+							Fragment,
+							null,
+							slotElement,
+							pluginAreaElement
+						)
+					);
+
+					console.log(
+						'Mini Cart: Rendering discount slot with cart:',
+						woocommerceState.cart
+					);
+					console.log(
+						'Mini Cart: PluginArea will render plugins with scope "woocommerce-checkout"'
+					);
+					discountsSlotReactRoot.render( providerElement );
 				};
 
-				const slotElement = createElement(
-					ExperimentalDiscountsMeta.Slot,
-					{
-						extensions: woocommerceState.cart.extensions,
-						cart: transformedCart,
-						context: 'woocommerce/mini-cart',
-					}
-				);
+				// Initial render
+				discountsSlotRenderFn();
+			},
 
-				// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
-				// This allows fills registered via registerPlugin to appear
-				const pluginAreaElement = createElement( PluginArea, {
-					scope: 'woocommerce-checkout',
-				} );
+			// Log registered plugins for debugging
 
-				// Wrap both the slot and PluginArea in SlotFillProvider so fills can be registered
-				const providerElement = createElement(
-					SlotFillProvider,
-					null,
-					createElement(
-						Fragment,
-						null,
-						slotElement,
-						pluginAreaElement
-					)
-				);
+			watchCartForSlotUpdate() {
+				// Access cart properties to make this callback reactive to cart changes
+				// When any of these properties change, this callback will run again
+				// woocommerceState is accessed the same way as in state getters above
+				const { coupons, items, totals } = woocommerceState.cart;
 
-				console.log(
-					'Mini Cart: Rendering discount slot with cart:',
-					woocommerceState.cart
-				);
-				console.log(
-					'Mini Cart: PluginArea will render plugins with scope "woocommerce-checkout"'
-				);
-
-				root.render( providerElement );
-
-				// Log registered plugins for debugging
-				setTimeout( () => {
-					if ( ( window as any ).wp?.plugins?.getPlugins ) {
-						const plugins = ( window as any ).wp.plugins.getPlugins(
-							'woocommerce-checkout'
-						);
-						console.log(
-							'Mini Cart: Registered plugins for woocommerce-checkout:',
-							plugins
-						);
-					}
-				}, 100 );
+				// Trigger re-render when cart changes
+				if ( discountsSlotRenderFn ) {
+					console.log(
+						'Mini Cart: Cart changed via data-wp-watch, re-rendering slot',
+						{
+							couponsCount: ( coupons as any[] )?.length,
+							itemsCount: ( items as any[] )?.length,
+							totalPrice: ( totals as any )?.total_price,
+						}
+					);
+					discountsSlotRenderFn();
+				}
 			},
 		},
 	},

@@ -67,7 +67,8 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 				</div>
 			</div>
 			<div class="wc-block-mini-cart__footer-discounts-meta-slot"
-			data-wp-init="callbacks.renderDiscountsMetaSlot"></div>
+			data-wp-init="callbacks.renderDiscountsMetaSlot"
+			data-wp-watch="callbacks.watchCartForSlotUpdate"></div>
 			<div>
 				<span class="wc-block-components-totals-item__discount-label" data-wp-text="state.totalDiscountLabel"></span>
 				<span class="wc-block-components-totals-item__discount" data-wp-text="state.totalDiscount"></span>
