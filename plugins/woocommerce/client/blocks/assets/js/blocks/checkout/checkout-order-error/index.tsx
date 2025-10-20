@@ -21,6 +21,8 @@ import {
 	GENERIC_CART_ITEM_ERROR,
 } from './constants';
 
+const reloadPage = () => void window.location.reload( true );
+
 // Type definitions
 interface ErrorData {
 	code: string;
@@ -114,7 +116,7 @@ const ErrorButton = ( { errorData }: ErrorComponentProps ) => {
 			) : (
 				<button
 					className="wp-block-button__link"
-					onClick={ () => window.location.reload() }
+					onClick={ reloadPage }
 				>
 					{ buttonText }
 				</button>
