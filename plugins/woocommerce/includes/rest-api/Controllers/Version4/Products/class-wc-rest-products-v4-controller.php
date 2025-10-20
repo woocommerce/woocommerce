@@ -271,6 +271,15 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 			}
 		}
 
+		if ( ! empty( $request['exclude_category'] ) ) {
+			$tax_query[] = array(
+				'taxonomy' => 'product_cat',
+				'field'    => 'term_id',
+				'terms'    => $request['exclude_category'],
+				'operator' => 'NOT IN',
+			);
+		}
+
 		// Filter product type by slug.
 		$terms = array();
 		if ( ! empty( $request['include_types'] ) ) {
@@ -1976,6 +1985,17 @@ class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
 				'enum' => array_keys( wc_get_product_types() ),
 			),
 			'sanitize_callback' => 'wp_parse_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['exclude_category'] = array(
+			'description'       => __( 'Exclude products that belong to specific product category IDs.', 'woocommerce' ),
+			'type'              => 'array',
+			'items'             => array(
+				'type' => 'integer',
+			),
+			'default'           => array(),
+			'sanitize_callback' => 'wp_parse_id_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

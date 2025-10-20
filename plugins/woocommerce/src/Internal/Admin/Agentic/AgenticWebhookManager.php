@@ -19,14 +19,25 @@ use WC_Webhook;
  */
 class AgenticWebhookManager implements RegisterHooksInterface {
 	/**
-	 * Custom webhook topic for Agentic order creation.
+	 * Action that will be triggered for webhooks.
+	 *
+	 * @var string
 	 */
-	const TOPIC_ORDER_CREATED = 'action.woocommerce_agentic_order_created';
+	const WEBHOOK_ACTION = 'woocommerce_agentic_order_changed';
 
 	/**
-	 * Custom webhook topic for Agentic order updates.
+	 * Topic that will be used for webhooks.
+	 *
+	 * @var string
 	 */
-	const TOPIC_ORDER_UPDATED = 'action.woocommerce_agentic_order_updated';
+	const WEBHOOK_TOPIC = 'action.' . self::WEBHOOK_ACTION;
+
+	/**
+	 * Meta key to store if the first event has been delivered.
+	 *
+	 * @var string
+	 */
+	const FIRST_EVENT_DELIVERED_META_KEY = '_acp_order_created_sent';
 
 	/**
 	 * Payload builder instance.
@@ -52,6 +63,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	 *  @internal
 	 */
 	public function register() {
+
 		add_filter( 'woocommerce_webhook_topics', array( $this, 'register_webhook_topic_names' ) );
 
 		// Hook into order lifecycle events to fire our custom actions.
@@ -64,6 +76,9 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 
 		// Customize webhook HTTP arguments for our topics.
 		add_filter( 'woocommerce_webhook_http_args', array( $this, 'customize_webhook_http_args' ), 10, 3 );
+
+		// When the webhook is delivered (or not), mark the first event as delivered.
+		add_action( 'woocommerce_webhook_delivery', array( $this, 'mark_first_event_delivered' ), 10, 5 );
 	}
 
 	/**
@@ -73,8 +88,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 	 * @return array Modified topics.
 	 */
 	public function register_webhook_topic_names( $topics ): array {
-		$topics[ self::TOPIC_ORDER_CREATED ] = __( 'Agentic Order Created', 'woocommerce' );
-		$topics[ self::TOPIC_ORDER_UPDATED ] = __( 'Agentic Order Updated', 'woocommerce' );
+		$topics[ self::WEBHOOK_TOPIC ] = __( 'Agentic Commerce Protocol: Order created or updated', 'woocommerce' );
 		return $topics;
 	}
 
@@ -90,14 +104,14 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		}
 
 		/**
-		 * Fires when an Agentic order is created.
+		 * Fires when an Agentic order is updated or created.
 		 *
 		 * @since 10.3.0
 		 *
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_created', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order );
 	}
 
 	/**
@@ -121,7 +135,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order );
 	}
 
 	/**
@@ -143,7 +157,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		 * @param int      $order_id Order ID.
 		 * @param WC_Order $order    Order object.
 		 */
-		do_action( 'woocommerce_agentic_order_updated', $order_id, $order );
+		do_action( self::WEBHOOK_ACTION, $order_id, $order );
 	}
 
 	/**
@@ -195,7 +209,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		$topic = $webhook->get_topic();
 
 		// Check if this is one of our Agentic topics.
-		if ( ! in_array( $topic, array( self::TOPIC_ORDER_CREATED, self::TOPIC_ORDER_UPDATED ), true ) ) {
+		if ( self::WEBHOOK_TOPIC !== $topic ) {
 			return $payload;
 		}
 
@@ -205,8 +219,8 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 			return $payload;
 		}
 
-		// Determine event type based on topic.
-		$event = ( self::TOPIC_ORDER_CREATED === $topic ) ? 'order_create' : 'order_update';
+		$is_first_event = 'sent' !== $order->get_meta( self::FIRST_EVENT_DELIVERED_META_KEY );
+		$event          = $is_first_event ? 'order_create' : 'order_update';
 
 		// Build ACP-compliant payload.
 		return $this->payload_builder->build_payload( $event, $order );
@@ -229,7 +243,7 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		$topic = $webhook->get_topic();
 
 		// Check if this is one of our Agentic topics.
-		if ( ! in_array( $topic, array( self::TOPIC_ORDER_CREATED, self::TOPIC_ORDER_UPDATED ), true ) ) {
+		if ( self::WEBHOOK_TOPIC !== $topic ) {
 			return $http_args;
 		}
 
@@ -244,5 +258,42 @@ class AgenticWebhookManager implements RegisterHooksInterface {
 		}
 
 		return $http_args;
+	}
+
+	/**
+	 * Mark first event as delivered on successful webhook delivery.
+	 *
+	 * @param array $http_args   HTTP request args.
+	 * @param mixed $response    HTTP response.
+	 * @param float $duration    Request duration.
+	 * @param int   $arg         First argument to the action (order_id).
+	 * @param int   $webhook_id  Webhook ID.
+	 */
+	public function mark_first_event_delivered( $http_args, $response, $duration, $arg, $webhook_id ) {
+		// Only proceed for successful responses.
+		if ( is_wp_error( $response ) ) {
+			return;
+		}
+		$code = wp_remote_retrieve_response_code( $response );
+		if ( $code < 200 || $code >= 300 ) {
+			return;
+		}
+
+		// Verify this is our webhook topic.
+		$webhook = wc_get_webhook( $webhook_id );
+		if ( ! $webhook || self::WEBHOOK_TOPIC !== $webhook->get_topic() ) {
+			return;
+		}
+
+		// $arg contains the order_id from do_action( self::WEBHOOK_ACTION, $order_id, $order ).
+		$order = wc_get_order( $arg );
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( 'sent' !== $order->get_meta( self::FIRST_EVENT_DELIVERED_META_KEY ) ) {
+			$order->update_meta_data( self::FIRST_EVENT_DELIVERED_META_KEY, 'sent' );
+			$order->save();
+		}
 	}
 }
