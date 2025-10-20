@@ -26,9 +26,9 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-
 		wp_set_current_user( 0 );
+
+		parent::tearDown();
 	}
 
 	/**
