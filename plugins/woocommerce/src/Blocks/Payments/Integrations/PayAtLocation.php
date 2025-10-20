@@ -13,7 +13,7 @@ use WC_Gateway_Pay_At_Location;
  */
 final class PayAtLocation extends AbstractPaymentMethodType {
 	/**
-	 * Payment method name/id/slug (matches id in WC_Gateway_COD in core).
+	 * Payment method name/id/slug (matches id in WC_Gateway_Pay_At_Location in core).
 	 *
 	 * @var string
 	 */
@@ -54,7 +54,7 @@ final class PayAtLocation extends AbstractPaymentMethodType {
 	/**
 	 * Return enable_for_virtual option.
 	 *
-	 * @return boolean True if store allows COD payment for orders containing only virtual products.
+	 * @return boolean True if store allows Pay at Location payment for orders containing only virtual products.
 	 */
 	private function get_enable_for_virtual() {
 		return filter_var( $this->get_setting( 'enable_for_virtual', false ), FILTER_VALIDATE_BOOLEAN );
@@ -63,7 +63,8 @@ final class PayAtLocation extends AbstractPaymentMethodType {
 	/**
 	 * Return enable_for_methods option.
 	 *
-	 * @return array Array of shipping methods (string ids) that allow COD. (If empty, all support COD.)
+	 * @return array Array of shipping methods (string ids) that allow Pay at Location.
+	 * Methods that support the `local-pickup` feature are always included.
 	 */
 	private function get_enable_for_methods() {
 		$enable_for_methods = $this->get_setting( 'enable_for_methods', [] );
