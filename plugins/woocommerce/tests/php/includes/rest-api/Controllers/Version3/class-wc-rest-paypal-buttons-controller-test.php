@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
  * class WC_REST_Paypal_Buttons_Controller_Test.
@@ -89,12 +88,12 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$expected_status = 200,
 		$expected_response = null
 	) {
-//		if ( version_compare( PHP_VERSION, '8.4', '>=' ) && ! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-//			$this->markTestSkipped( 'This test is not compatible with PHP 8.4+ without HPOS. Needs investigation.' );
-//		}
+		if ( version_compare( PHP_VERSION, '8.4', '>=' ) && ! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'This test is not compatible with PHP 8.4+ without HPOS. Needs investigation.' );
+		}
 
 		if ( count( $order_data ) > 0 ) {
-			$order = OrderHelper::create_order( $this->user );
+			$order = new WC_Order();
 			if ( isset( $order_data['id'] ) ) {
 				$order->set_id( $order_data['id'] );
 			}
