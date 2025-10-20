@@ -243,9 +243,9 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			$handle,
 			"jQuery( function( $ ) {
 				function wcFreeShippingShowHideMinAmountField( el ) {
-					var form = $( el ).closest( 'form' );
-					var minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
-					var ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
+					const form = $( el ).closest( 'form' );
+					const minAmountField = $( '#woocommerce_free_shipping_min_amount', form ).closest( 'tr' );
+					const ignoreDiscountField = $( '#woocommerce_free_shipping_ignore_discounts', form ).closest( 'tr' );
 					if ( 'coupon' === $( el ).val() || '' === $( el ).val() ) {
 						minAmountField.hide();
 						ignoreDiscountField.hide();

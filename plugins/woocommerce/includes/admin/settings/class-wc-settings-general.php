@@ -411,9 +411,9 @@ class WC_Settings_General extends WC_Settings_Page {
 		wp_add_inline_script(
 			$handle,
 			"
-			var preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
-			var autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
-			var preferredProviderRow = null;
+			const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
+			const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
+			let preferredProviderRow = null;
 			if ( preferredProviderInput ) {
 				preferredProviderRow = preferredProviderInput.closest( 'tr' );
 			}

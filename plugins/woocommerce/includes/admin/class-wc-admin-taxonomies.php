@@ -490,10 +490,10 @@ class WC_Admin_Taxonomies {
 			sprintf(
 				"document.addEventListener('DOMContentLoaded', function() {
                     'use strict';
-                    var product_cat = document.getElementById('tag-%d');
+                    const product_cat = document.getElementById('tag-%d');
                     if (product_cat) {
-                        var th = product_cat.querySelector('th');
-                        var thumbSpan = product_cat.querySelector('td.thumb span');
+                        const th = product_cat.querySelector('th');
+                        const thumbSpan = product_cat.querySelector('td.thumb span');
                         if (th && thumbSpan) {
                             th.innerHTML = '';
                             th.appendChild(thumbSpan);
