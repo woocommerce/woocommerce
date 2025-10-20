@@ -144,7 +144,7 @@ class WC_Products_Tracking {
 	 */
 	public function track_product_updated_client_side( $post ) {
 		$handle = 'wc-tracks-product-updated-client-side';
-		wp_register_script( $handle, '', array('jquery'), WC_VERSION, true );
+		wp_register_script( $handle, '', array('jquery'), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script(
 			$handle,

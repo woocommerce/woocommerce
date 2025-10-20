@@ -406,7 +406,7 @@ class WC_Settings_General extends WC_Settings_Page {
 		parent::output();
 
 		$handle = 'wc-admin-settings-general';
-		wp_register_script( $handle, '', array(), WC_VERSION );
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script(
 			$handle,

@@ -237,7 +237,7 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 	 */
 	public static function enqueue_admin_js() {
 		$handle = 'wc-admin-shipping-free-shipping';
-		wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION );
+		wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script(
 			$handle,

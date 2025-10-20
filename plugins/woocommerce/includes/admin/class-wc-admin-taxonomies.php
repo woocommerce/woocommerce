@@ -483,7 +483,7 @@ class WC_Admin_Taxonomies {
 
 		// Ensure the tooltip is displayed when the image column is disabled on product categories.
 		$handle = 'wc-admin-taxonomies';
-		wp_register_script( $handle, '', array(), WC_VERSION );
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script(
 			$handle,

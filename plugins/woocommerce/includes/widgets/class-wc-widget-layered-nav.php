@@ -297,7 +297,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo '</form>';
 
 			$handle = 'wc-brand-widget-dropdown-layered-nav-' . $taxonomy_filter_name;
-			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, true );
+			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
 			wp_enqueue_script( $handle );
 			wp_add_inline_script(
 				$handle,

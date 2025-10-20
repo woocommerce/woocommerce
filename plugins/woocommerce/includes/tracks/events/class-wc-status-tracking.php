@@ -36,7 +36,7 @@ class WC_Status_Tracking {
 
 			if ( 'status' === $tab ) {
 				$handle = 'wc-tracks-status-view';
-				wp_register_script( $handle, '', array(), WC_VERSION, true );
+				wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 				wp_enqueue_script( $handle );
 				wp_add_inline_script(
 					$handle,

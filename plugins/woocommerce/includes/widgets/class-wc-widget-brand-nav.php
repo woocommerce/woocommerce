@@ -359,7 +359,7 @@ class WC_Widget_Brand_Nav extends WC_Widget {
 				echo '</select>';
 
 				$handle = 'wc-brand-widget-dropdown-layered-nav-' . $taxonomy;
-				wp_register_script( $handle, '', array(), WC_VERSION, true );
+				wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 				wp_enqueue_script( $handle );
                 $redirect_url = add_query_arg( 'filtering', '1', preg_replace( '%\/page\/[0-9]+%', '', esc_url_raw( $link ) ) );
 

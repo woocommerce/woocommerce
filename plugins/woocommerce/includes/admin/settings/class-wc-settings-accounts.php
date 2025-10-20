@@ -356,7 +356,6 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 	public function output() {
 		parent::output();
 
-
 		// The following code toggles disabled state on the account options based on other values.
 		$script =
 			'
@@ -422,7 +421,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		}
 
 		$handle = 'wc-admin-settings-accounts';
-		wp_register_script( $handle, '', array(), WC_VERSION );
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
 		wp_enqueue_script( $handle );
 		wp_add_inline_script( $handle, $script );
 	}
