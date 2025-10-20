@@ -89,7 +89,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		$expected_response = null
 	) {
 		if ( version_compare( PHP_VERSION, '8.4', '>=' ) ) {
-			$this->markTestSkipped( 'This test is not compatible with HPOS on PHP 8.4+. Needs investigation.' );
+			$this->markTestSkipped( 'This test is not compatible with PHP 8.4+. Needs investigation.' );
 		}
 
 		if ( count( $order_data ) > 0 ) {
@@ -311,7 +311,7 @@ class WC_REST_Paypal_Buttons_Controller_Test extends WC_REST_Unit_Test_Case {
 		array $expected_response
 	) {
 		if ( version_compare( PHP_VERSION, '8.4', '>=' ) ) {
-			$this->markTestSkipped( 'This test is not compatible with HPOS on PHP 8.4+. Needs investigation.' );
+			$this->markTestSkipped( 'This test is not compatible with PHP 8.4+. Needs investigation.' );
 		}
 
 		$order = null;
