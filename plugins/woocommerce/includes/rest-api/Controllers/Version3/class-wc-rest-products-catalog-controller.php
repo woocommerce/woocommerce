@@ -111,10 +111,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'download_url' => $file_info['url'],
 			);
 		} else {
-			// Temporarily return job_id with base64-encoded fields for use in status endpoint.
-			// Base64 encoding ensures the job_id is URL-safe when passed as a query parameter.
+			// Temporarily return job_id with URL-safe base64-encoded fields for use in status endpoint.
 			// TODO: WOOMOB-1455 - Replace with proper async job tracking once we have a job tracking system.
-			$job_id = base64_encode( wp_json_encode( $fields ) );
+			$job_id = $this->base64url_encode( wp_json_encode( $fields ) );
 
 			$response_data = array(
 				'job_id' => $job_id,
@@ -137,17 +136,21 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		if ( empty( $job_id ) || ! is_string( $job_id ) ) {
 			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
-		$job_id = sanitize_text_field( $job_id );
 
-		// Decode fields from job_id (base64-encoded JSON).
-		$fields_json = base64_decode( $job_id, true );
-		if ( false === $fields_json ) {
+		// Enforce size and URL-safe base64 charset.
+		if ( strlen( $job_id ) > 4096 || ! preg_match( '/^[A-Za-z0-9\-_]+$/', $job_id ) ) {
 			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
+		// Decode fields from job_id (URL-safe base64-encoded JSON).
+		$fields_json = $this->base64url_decode( $job_id );
+		if ( false === $fields_json ) {
+			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID encoding.', 'woocommerce' ), array( 'status' => 400 ) );
+		}
+
 		$fields = json_decode( $fields_json, true );
-		if ( null === $fields ) {
-			$fields = array();
+		if ( ! is_array( $fields ) ) {
+			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID format.', 'woocommerce' ), array( 'status' => 400 ) );
 		}
 
 		// Sanitize and canonicalize fields.
@@ -318,5 +321,25 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$fields = array_values( array_unique( array_map( 'strval', $fields ) ) );
 		sort( $fields, SORT_STRING );
 		return $fields;
+	}
+
+	/**
+	 * Encode data using URL-safe base64.
+	 *
+	 * @param string $data Data to encode.
+	 * @return string URL-safe base64-encoded string.
+	 */
+	private function base64url_encode( $data ) {
+		return str_replace( array( '+', '/', '=' ), array( '-', '_', '' ), base64_encode( $data ) );
+	}
+
+	/**
+	 * Decode URL-safe base64 data.
+	 *
+	 * @param string $data URL-safe base64-encoded string.
+	 * @return string|false Decoded data or false on failure.
+	 */
+	private function base64url_decode( $data ) {
+		return base64_decode( str_replace( array( '-', '_' ), array( '+', '/' ), $data ), true );
 	}
 }
