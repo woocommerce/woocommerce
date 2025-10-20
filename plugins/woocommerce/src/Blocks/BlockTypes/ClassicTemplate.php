@@ -160,9 +160,15 @@ class ClassicTemplate extends AbstractDynamicBlock {
 		}
 
 		if ( is_product() ) {
-			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+			add_filter( 'woocommerce_single_product_zoom_enabled', function() {
+				return get_theme_support( 'wc-product-gallery-zoom' );
+			} );
+			add_filter( 'woocommerce_single_product_photoswipe_enabled', function() {
+				return get_theme_support( 'wc-product-gallery-lightbox' );
+			} );
+			add_filter( 'woocommerce_single_product_flexslider_enabled', function() {
+				return get_theme_support( 'wc-product-gallery-slider' );
+			} );
 
 			return $this->render_single_product();
 		}
