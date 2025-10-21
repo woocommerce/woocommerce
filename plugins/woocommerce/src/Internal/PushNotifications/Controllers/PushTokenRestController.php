@@ -266,7 +266,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		$slug = $slug[ $e->getCode() ] ?? 'rest_internal_error';
 		$code = $e->getCode() ? (int) $e->getCode() : WP_Http::INTERNAL_SERVER_ERROR;
 
-		return new WP_Error( $slug, esc_html( $e->getMessage() ), array( 'status' => $code ) );
+		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $code ) );
 	}
 
 	/**

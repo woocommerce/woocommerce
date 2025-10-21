@@ -51,7 +51,8 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		);
 
 		if ( is_wp_error( $id ) ) {
-			throw new Exception( esc_html( $id->get_error_message() ), WP_Http::INTERNAL_SERVER_ERROR );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( $id->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
 		}
 
 		$push_token->set_id( $id );
@@ -89,7 +90,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			|| empty( $meta['origin'] )
 			|| (
 				empty( $meta['device_uuid'] )
-				&& $meta['platform'] !== PushToken::PLATFORM_BROWSER
+				&& PushToken::PLATFORM_BROWSER !== $meta['platform']
 			)
 		) {
 			throw new InvalidArgumentException(
@@ -139,7 +140,8 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			throw new Exception( esc_html( $result->get_error_message() ), WP_Http::INTERNAL_SERVER_ERROR );
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( $result->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
 		}
 	}
 

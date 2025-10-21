@@ -264,4 +264,91 @@ class PushTokenTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $push_token->can_be_deleted() );
 	}
+
+	/**
+	 * Tests it's possible to set and get the origin.
+	 */
+	public function test_it_can_get_and_set_origin() {
+		$push_token = new PushToken();
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
+	}
+
+	/**
+	 * Tests it's possible to set device UUID to null.
+	 */
+	public function test_it_can_set_device_uuid_to_null() {
+		$push_token = new PushToken();
+		$push_token->set_device_uuid( 'test-uuid' );
+		$push_token->set_device_uuid( null );
+
+		$this->assertNull( $push_token->get_device_uuid() );
+	}
+
+	/**
+	 * Tests can_be_created returns true for browser tokens without device UUID.
+	 */
+	public function test_it_can_be_created_for_browser_without_device_uuid() {
+		$push_token = new PushToken();
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$this->assertTrue( $push_token->can_be_created() );
+	}
+
+	/**
+	 * Tests can_be_updated returns true for browser tokens without device UUID.
+	 */
+	public function test_it_can_be_updated_for_browser_without_device_uuid() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$this->assertTrue( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * Tests can_be_created returns false when origin is missing.
+	 */
+	public function test_it_cannot_be_created_when_origin_is_missing() {
+		$push_token = new PushToken();
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_created() );
+	}
+
+	/**
+	 * Tests can_be_updated returns false when origin is missing.
+	 */
+	public function test_it_cannot_be_updated_when_origin_is_missing() {
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_device_uuid( 'test-device-uuid' );
+
+		$this->assertFalse( $push_token->can_be_updated() );
+	}
+
+	/**
+	 * Tests set_platform throws exception with invalid platform.
+	 */
+	public function test_it_throws_exception_when_setting_invalid_platform() {
+		$push_token = new PushToken();
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Platform &#039;invalid&#039; for PushToken is invalid.' );
+
+		$push_token->set_platform( 'invalid' );
+	}
 }
