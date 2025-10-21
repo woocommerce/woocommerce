@@ -150,7 +150,7 @@ class WC_Products_Tracking {
 			$handle,
 			"
 			jQuery(function($) {
-				if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . __( 'Edit product', 'woocommerce' ) . "') {
+				if ( $( 'h1.wp-heading-inline' ).text().trim() === '" . esc_js( __( 'Edit product', 'woocommerce' ) ) . "') {
 					var initialStockValue = $( '#_stock' ).val();
 					var isBlockEditor = false;
 					var child_element = '#publish';

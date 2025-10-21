@@ -296,7 +296,7 @@ class WC_Widget_Layered_Nav extends WC_Widget {
 			echo wc_query_string_form_fields( null, array( 'filter_' . $taxonomy_filter_name, 'query_type_' . $taxonomy_filter_name ), '', true ); // @codingStandardsIgnoreLine
 			echo '</form>';
 
-			$handle = 'wc-brand-widget-dropdown-layered-nav-' . $taxonomy_filter_name;
+			$handle = 'wc-widget-dropdown-layered-nav-' . $taxonomy_filter_name;
 			wp_register_script( $handle, '', array( 'jquery' ), WC_VERSION, array( 'in_footer' => true ) );
 			wp_enqueue_script( $handle );
 			wp_add_inline_script(

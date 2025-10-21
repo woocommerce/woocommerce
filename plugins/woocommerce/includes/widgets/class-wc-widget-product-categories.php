@@ -248,15 +248,13 @@ class WC_Widget_Product_Categories extends WC_Widget {
 				$handle,
 				"
 					jQuery( '.dropdown_product_cat' ).on( 'change', function() {
-						if ( jQuery(this).val() != '' ) {
-							var this_page = '';
-							var home_url  = '" . esc_js( home_url( '/' ) ) . "';
-							if ( home_url.indexOf( '?' ) > 0 ) {
-								this_page = home_url + '&product_cat=' + jQuery(this).val();
-							} else {
-								this_page = home_url + '?product_cat=' + jQuery(this).val();
-							}
-							location.href = this_page;
+						const categoryValue = jQuery(this).val();
+
+						if ( categoryValue ) {
+							const homeUrl = '" . esc_js( home_url( '/' ) ) . "';
+							const separator = homeUrl.includes( '?' ) ? '&' : '?';
+							const targetUrl = homeUrl + separator + 'product_cat=' + encodeURIComponent( categoryValue );
+							location.href = targetUrl;
 						} else {
 							location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
 						}
