@@ -195,7 +195,7 @@ class OrderHelper {
 		$tax_rate     = array(
 			'tax_rate_country'  => '',
 			'tax_rate_state'    => '',
-			'tax_rate'          => '10.0000',
+			'tax_rate'          => '15.0000',
 			'tax_rate_name'     => 'tax',
 			'tax_rate_priority' => '1',
 			'tax_rate_order'    => '1',
