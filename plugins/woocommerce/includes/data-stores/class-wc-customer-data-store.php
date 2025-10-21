@@ -672,15 +672,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		// Custom WC_Customer meta ordering.
 		switch ( $orderby_key ) {
 			case 'orders_count':
-				$query_args['meta_key'] = 'wc_order_count';
+				$query_args['meta_key'] = 'wc_order_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'total_spent':
-				$query_args['meta_key'] = 'wc_money_spent';
+				$query_args['meta_key'] = 'wc_money_spent'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'last_active':
-				$query_args['meta_key'] = 'wc_last_active';
+				$query_args['meta_key'] = 'wc_last_active'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'user_registered':
@@ -705,7 +705,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		/**
 		 * Filter customer query args before execution.
 		 *
-		 * @since TBD
+		 * @since 10.4.0
 		 *
 		 * @param array $query_args Arguments for WP_User_Query.
 		 * @param array $args       Original method args.
