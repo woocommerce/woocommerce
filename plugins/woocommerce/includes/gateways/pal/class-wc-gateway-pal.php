@@ -35,7 +35,7 @@ class WC_Gateway_PAL extends WC_Payment_Gateway {
 	const ID = 'pay-at-location';
 
 	/**
-	 * Gateway instructions that will be added to the thank you page and emails.
+	 * Gateway instructions that will be added to the "Thank you" page and various emails.
 	 *
 	 * @var string
 	 */
