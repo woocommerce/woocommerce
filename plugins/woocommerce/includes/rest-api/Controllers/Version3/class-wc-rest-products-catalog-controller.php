@@ -176,14 +176,15 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			// Non-critical: ignore if index.html creation fails.
 		}
 
-		// Generate empty catalog file.
-		$catalog_data = array(
-			'products'   => array(),
-			'variations' => array(),
-		);
+		// Generate catalog file asynchronously.
+		$catalog_data = $this->generate_catalog_async();
+
+		if ( is_wp_error( $catalog_data ) ) {
+			return $catalog_data;
+		}
 
 		// Write to file.
-		$json = wp_json_encode( $catalog_data );
+		$json = $catalog_data;
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		$result = file_put_contents( $file_info['filepath'], $json, LOCK_EX );
 
@@ -301,6 +302,30 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			),
 			'required'   => array( 'job_id', 'status' ),
 		);
+	}
+
+	/**
+	 * Generate products catalog asynchronously by fetching from OpenAI feed endpoint.
+	 *
+	 * @return WP_Error|string Catalog data JSON string or WP_Error on failure.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	private function generate_catalog_async() {
+		// TODO: replace API request with feed generator call and proper async job tracking once the foundation is in core.
+		$internal_request = new WP_REST_Request( 'GET', '/wc/v3/openai-feed' );
+		$api_response     = rest_do_request( $internal_request );
+
+		if ( $api_response->is_error() ) {
+			return $api_response->as_error();
+		}
+
+		$catalog_data = wp_json_encode( $api_response->get_data() );
+		if ( empty( $catalog_data ) ) {
+			return new WP_Error( 'catalog_api_empty_response', __( 'API returned an empty response.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
+
+		return $catalog_data;
 	}
 
 	/**
