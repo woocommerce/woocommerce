@@ -51,6 +51,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		}
 		$this->registered_abilities = array();
 
+		// Clean up test category.
+		$this->cleanup_category( 'test' );
+
 		// Reset abilities registry singleton to allow fresh abilities_api_init in next test.
 		if ( class_exists( 'WP_Abilities_Registry' ) ) {
 			$reflection        = new \ReflectionClass( 'WP_Abilities_Registry' );
@@ -59,10 +62,21 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			$instance_property->setValue( null );
 		}
 
-		// Reset action counter to allow abilities_api_init to fire again.
+		// Reset category registry singleton to allow fresh category registration in next test.
+		if ( class_exists( 'WP_Abilities_Category_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Abilities_Category_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
+		// Reset action counters to allow init actions to fire again.
 		global $wp_actions;
 		if ( isset( $wp_actions['abilities_api_init'] ) ) {
 			unset( $wp_actions['abilities_api_init'] );
+		}
+		if ( isset( $wp_actions['abilities_api_categories_init'] ) ) {
+			unset( $wp_actions['abilities_api_categories_init'] );
 		}
 
 		// Reset user.
@@ -112,6 +126,64 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that permission_callback is required for ability registration.
+	 *
+	 * @group abilities-api
+	 */
+	public function test_permission_callback_is_required() {
+		$ability_id                   = 'woocommerce-test/missing-permission';
+		$this->registered_abilities[] = $ability_id;
+
+		// Expect incorrect usage notices when permission_callback is missing.
+		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::register' );
+		$this->setExpectedIncorrectUsage( 'WP_Abilities_Registry::get_registered' );
+
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
+		// Hook ability registration without permission_callback.
+		add_action(
+			'abilities_api_init',
+			function () use ( $ability_id ) {
+				wp_register_ability(
+					$ability_id,
+					array(
+						'label'            => 'Test Missing Permission',
+						'description'      => 'Ability without permission_callback',
+						'input_schema'     => array( 'type' => 'object' ),
+						'output_schema'    => array( 'type' => 'object' ),
+						'category'         => 'test',
+						'execute_callback' => function () {
+							return array( 'success' => true );
+						},
+						// Note: permission_callback intentionally omitted.
+					)
+				);
+			}
+		);
+
+		// Attempt to retrieve the ability - should fail or return null.
+		$ability = wp_get_ability( $ability_id );
+
+		// In trunk, abilities without permission_callback should not be registered.
+		$this->assertNull(
+			$ability,
+			'Ability without permission_callback should not be registered.'
+		);
+	}
+
+	/**
 	 * Test that we can retrieve a registered ability.
 	 *
 	 * @group abilities-api
@@ -120,6 +192,20 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/get-test';
 		$this->registered_abilities[] = $ability_id;
 
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
 		// Hook ability registration to the init action.
 		add_action(
 			'abilities_api_init',
@@ -127,16 +213,21 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'Get Test Ability',
-						'description'      => 'A test ability for testing retrieval',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'Get Test Ability',
+						'description'         => 'A test ability for testing retrieval',
+						'category'            => 'test',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array(
 								'success' => true,
 								'input'   => $input,
 							);
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(),
 					)
 				);
 			}
@@ -160,6 +251,20 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/execute-test';
 		$this->registered_abilities[] = $ability_id;
 
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
 		// Hook ability registration to the init action.
 		add_action(
 			'abilities_api_init',
@@ -167,9 +272,10 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'Execute Test Ability',
-						'description'      => 'A test ability for testing execution',
-						'input_schema'     => array(
+						'label'               => 'Execute Test Ability',
+						'description'         => 'A test ability for testing execution',
+						'category'            => 'test',
+						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
 								'input_value' => array(
@@ -177,7 +283,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'output_schema'    => array(
+						'output_schema'       => array(
 							'type'       => 'object',
 							'properties' => array(
 								'processed_value' => array(
@@ -185,10 +291,13 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'execute_callback' => function ( $input ) {
+						'execute_callback'    => function ( $input ) {
 							return array(
 								'processed_value' => 'Processed: ' . ( $input['input_value'] ?? 'empty' ),
 							);
+						},
+						'permission_callback' => function () {
+							return true;
 						},
 					)
 				);
@@ -236,6 +345,20 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
 
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
 		// Hook ability registration to the init action.
 		add_action(
 			'abilities_api_init',
@@ -243,26 +366,40 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_1,
 					array(
-						'label'            => 'REST Fetch Test 1',
-						'description'      => 'First ability for REST API testing',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'REST Fetch Test 1',
+						'description'         => 'First ability for REST API testing',
+						'category'            => 'test',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(
+							'show_in_rest' => true,
+						),
 					)
 				);
 
 				wp_register_ability(
 					$ability_id_2,
 					array(
-						'label'            => 'REST Fetch Test 2',
-						'description'      => 'Second ability for REST API testing',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'REST Fetch Test 2',
+						'description'         => 'Second ability for REST API testing',
+						'category'            => 'test',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(
+							'show_in_rest' => true,
+						),
 					)
 				);
 			}
@@ -305,6 +442,20 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$ability_id                   = 'woocommerce-test/rest-execute-test';
 		$this->registered_abilities[] = $ability_id;
 
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
 		// Hook ability registration to the init action.
 		add_action(
 			'abilities_api_init',
@@ -312,9 +463,10 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id,
 					array(
-						'label'            => 'REST Execute Test',
-						'description'      => 'Test ability for REST API execution',
-						'input_schema'     => array(
+						'label'               => 'REST Execute Test',
+						'description'         => 'Test ability for REST API execution',
+						'category'            => 'test',
+						'input_schema'        => array(
 							'type'       => 'object',
 							'properties' => array(
 								'test_value' => array(
@@ -322,7 +474,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'output_schema'    => array(
+						'output_schema'       => array(
 							'type'       => 'object',
 							'properties' => array(
 								'result' => array(
@@ -330,13 +482,19 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 								),
 							),
 						),
-						'execute_callback' => function ( $input ) {
+						'execute_callback'    => function ( $input ) {
 							$test_value = isset( $input['test_value'] ) ? $input['test_value'] : 'default';
 							return array(
 								'result'     => 'Executed with: ' . $test_value,
 								'input_echo' => $input,
 							);
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(
+							'show_in_rest' => true,
+						),
 					)
 				);
 			}
@@ -380,6 +538,20 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->registered_abilities[] = $ability_id_1;
 		$this->registered_abilities[] = $ability_id_2;
 
+		// Register test category for abilities used in tests.
+		add_action(
+			'abilities_api_categories_init',
+			function () {
+				wp_register_ability_category(
+					'test',
+					array(
+						'label'       => 'Test',
+						'description' => 'Test abilities for unit tests',
+					)
+				);
+			}
+		);
+
 		// Hook ability registration to the init action.
 		add_action(
 			'abilities_api_init',
@@ -387,26 +559,40 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 				wp_register_ability(
 					$ability_id_1,
 					array(
-						'label'            => 'List Test 1',
-						'description'      => 'First test ability',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'List Test 1',
+						'description'         => 'First test ability',
+						'category'            => 'test',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(
+							'show_in_rest' => true,
+						),
 					)
 				);
 
 				wp_register_ability(
 					$ability_id_2,
 					array(
-						'label'            => 'List Test 2',
-						'description'      => 'Second test ability',
-						'input_schema'     => array( 'type' => 'object' ),
-						'output_schema'    => array( 'type' => 'object' ),
-						'execute_callback' => function ( $input ) {
+						'label'               => 'List Test 2',
+						'description'         => 'Second test ability',
+						'category'            => 'test',
+						'input_schema'        => array( 'type' => 'object' ),
+						'output_schema'       => array( 'type' => 'object' ),
+						'execute_callback'    => function ( $input ) {
 							return array( 'input' => $input );
 						},
+						'permission_callback' => function () {
+							return true;
+						},
+						'meta'                => array(
+							'show_in_rest' => true,
+						),
 					)
 				);
 			}
@@ -437,6 +623,17 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	private function cleanup_ability( $ability_id ) {
 		if ( function_exists( 'wp_unregister_ability' ) ) {
 			wp_unregister_ability( $ability_id );
+		}
+	}
+
+	/**
+	 * Helper method to clean up categories after testing.
+	 *
+	 * @param string $category_id The category ID to clean up.
+	 */
+	private function cleanup_category( $category_id ) {
+		if ( function_exists( 'wp_unregister_ability_category' ) ) {
+			wp_unregister_ability_category( $category_id );
 		}
 	}
 }
