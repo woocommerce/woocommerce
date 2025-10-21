@@ -659,8 +659,8 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$query_args = array(
 			'order'   => $args['order'],
 			'number'  => absint( $args['per_page'] ),
-			'exclude' => $args['exclude'],
-			'include' => $args['include'],
+			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
+			'include' => array_map( 'absint', (array) $args['include'] ),
 		);
 
 		if ( ! empty( $args['offset'] ) ) {
