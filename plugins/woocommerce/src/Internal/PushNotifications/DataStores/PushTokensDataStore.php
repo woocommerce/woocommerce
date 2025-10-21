@@ -89,8 +89,11 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		if (
 			empty( $meta['token'] )
 			|| empty( $meta['platform'] )
-			|| empty( $meta['device_uuid'] )
 			|| empty( $meta['origin'] )
+			|| (
+				empty( $meta['device_uuid'] )
+				&& $meta['platform'] !== PushToken::PLATFORM_BROWSER
+			)
 		) {
 			throw new InvalidArgumentException(
 				'Can\'t read push token because the push token record is malformed.',
@@ -187,7 +190,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		return array_map(
-			fn ( $meta ) => $meta[0] ?? $meta,
+			function ( $meta ) {
+				$meta = array_filter( $meta ) ? array_filter( $meta ) : null;
+				return $meta[0] ?? $meta;
+			},
 			get_post_meta( $push_token->get_id() )
 		);
 	}

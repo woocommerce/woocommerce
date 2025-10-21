@@ -186,8 +186,8 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'publish',
 				'meta_input'  => array(
-					'platform'    => PushToken::PLATFORM_IOS,
-					'token'       => 'test_token',
+					'platform' => PushToken::PLATFORM_IOS,
+					'token'    => 'test_token',
 					// Missing device_uuid and origin.
 				),
 			)
@@ -658,6 +658,37 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$this->expectExceptionCode( 400 );
 
 		$data_store->get_by_token_or_device_id( $push_token );
+	}
+
+	/**
+	 * Tests that browser tokens can be created without device_uuid and then read back.
+	 */
+	public function test_it_can_create_and_read_browser_token_without_device_uuid() {
+		$data_store = new PushTokensDataStore();
+
+		// Create a browser token without device_uuid.
+		$push_token = new PushToken();
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}' );
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$data_store->create( $push_token );
+
+		$this->assertNotNull( $push_token->get_id() );
+
+		// Now try to read it back.
+		$read_token = new PushToken();
+		$read_token->set_id( $push_token->get_id() );
+
+		$data_store->read( $read_token );
+
+		$this->assertEquals( $push_token->get_id(), $read_token->get_id() );
+		$this->assertEquals( $push_token->get_user_id(), $read_token->get_user_id() );
+		$this->assertEquals( $push_token->get_platform(), $read_token->get_platform() );
+		$this->assertEquals( $push_token->get_token(), $read_token->get_token() );
+		$this->assertEquals( $push_token->get_origin(), $read_token->get_origin() );
+		$this->assertNull( $read_token->get_device_uuid() );
 	}
 
 	/**

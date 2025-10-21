@@ -202,9 +202,12 @@ class PushToken {
 		return ! $this->get_id()
 			&& $this->get_user_id()
 			&& $this->get_token()
-			&& $this->get_device_uuid()
 			&& $this->get_platform()
-			&& $this->get_origin();
+			&& $this->get_origin()
+			&& (
+				$this->get_device_uuid()
+				|| $this->get_platform() === self::PLATFORM_BROWSER
+			);
 	}
 
 	/**
@@ -216,9 +219,12 @@ class PushToken {
 		return $this->get_id()
 			&& $this->get_user_id()
 			&& $this->get_token()
-			&& $this->get_device_uuid()
 			&& $this->get_platform()
-			&& $this->get_origin();
+			&& $this->get_origin()
+			&& (
+				$this->get_device_uuid()
+				|| $this->get_platform() === self::PLATFORM_BROWSER
+			);
 	}
 
 	/**

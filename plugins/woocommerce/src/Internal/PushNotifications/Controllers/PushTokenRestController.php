@@ -56,9 +56,9 @@ class PushTokenRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'create' ),
-					'permission_callback' => fn ( WP_REST_Request $request ) => $this->authorize( $request ),
 					'args'                => $this->get_args( 'create' ),
-					'schema'              => $this->get_schema(),
+					'permission_callback' => array( $this, 'authorize' ),
+					'schema'              => array( $this, 'get_schema' ),
 				),
 			)
 		);
@@ -70,9 +70,9 @@ class PushTokenRestController extends RestApiControllerBase {
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => fn ( WP_REST_Request $request ) => $this->run( $request, 'delete' ),
-					'permission_callback' => fn ( WP_REST_Request $request ) => $this->authorize( $request ),
 					'args'                => $this->get_args( 'delete' ),
-					'schema'              => $this->get_schema(),
+					'permission_callback' => array( $this, 'authorize' ),
+					'schema'              => array( $this, 'get_schema' ),
 				),
 			)
 		);
@@ -179,6 +179,25 @@ class PushTokenRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Validates the device UUID, which is required unless the token is for
+	 * a browser.
+	 *
+	 * @param string          $device_uuid The device UUID string.
+	 * @param WP_REST_Request $request The request object.
+	 * @return bool|WP_Error
+	 */
+	public function validate_device_uuid( ?string $device_uuid, WP_REST_Request $request ) {
+		if (
+			! $device_uuid
+			&& $request->get_param( 'platform' ) !== PushToken::PLATFORM_BROWSER
+		) {
+			return new WP_Error( 'rest_missing_callback_param', 'Missing parameter(s): device_uuid.' );
+		}
+
+		return true;
+	}
+
+	/**
 	 * Get the schema for the POST endpoint.
 	 *
 	 * @return array[]
@@ -202,7 +221,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 * @param WP_REST_Request $request The request object.
 	 * @return bool|WP_Error
 	 */
-	private function authorize( WP_REST_Request $request ) {
+	public function authorize( WP_REST_Request $request ) {
 		if (
 			! get_current_user_id()
 			|| ! wc_get_container()->get( PushNotifications::class )->should_be_enabled()
@@ -245,8 +264,9 @@ class PushTokenRestController extends RestApiControllerBase {
 		);
 
 		$slug = $slug[ $e->getCode() ] ?? 'rest_internal_error';
+		$code = $e->getCode() ? (int) $e->getCode() : WP_Http::INTERNAL_SERVER_ERROR;
 
-		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $e->getCode() ) );
+		return new WP_Error( $slug, $e->getMessage(), array( 'status' => $code ) );
 	}
 
 	/**
@@ -272,10 +292,11 @@ class PushTokenRestController extends RestApiControllerBase {
 				'enum'        => PushToken::ORIGINS,
 			),
 			'device_uuid' => array(
-				'description' => __( 'Device UUID', 'woocommerce' ),
-				'type'        => 'string',
-				'required'    => true,
-				'context'     => array( 'create' ),
+				'description'       => __( 'Device UUID', 'woocommerce' ),
+				'default'           => '',
+				'type'              => 'string',
+				'context'           => array( 'create' ),
+				'validate_callback' => array( $this, 'validate_device_uuid' ),
 			),
 			'platform'    => array(
 				'description' => __( 'Platform', 'woocommerce' ),
