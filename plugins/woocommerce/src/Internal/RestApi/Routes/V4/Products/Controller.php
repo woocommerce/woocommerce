@@ -26,6 +26,7 @@ use WP_REST_Response;
 use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
+use WC_Product_Factory;
 
 
 defined( 'ABSPATH' ) || exit;

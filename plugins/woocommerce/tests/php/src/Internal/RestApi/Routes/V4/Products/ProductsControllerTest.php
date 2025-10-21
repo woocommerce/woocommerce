@@ -12,6 +12,7 @@ use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 
 
+
 /**
  * class ProductsControllerTest.
  * Product Controller tests for V4 REST API.
@@ -266,7 +267,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$call_product_data_wrapper = function () use ( $product ) {
 			return $this->get_product_data( $product );
 		};
-		$response                  = $call_product_data_wrapper->call( new WC_REST_Products_V4_Controller() );
+		$response                  = $call_product_data_wrapper->call( new ProductsController() );
 		$this->assertArrayHasKey( 'id', $response );
 	}
 
@@ -1962,7 +1963,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @param WC_Product $product The product to update.
 	 * @param array      $request_body Data to be sent (JSON-encoded) as the body of the request.
 	 */
-	private function update_product_via_post_request( WC_Product $product, array $request_body ) {
+	private function update_product_via_post_request( $product, $request_body ) {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $product->get_id() );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( $request_body ) );
