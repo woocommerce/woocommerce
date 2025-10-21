@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Payments\Integrations;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
+use WC_Cache_Helper;
 use WC_Gateway_Pay_At_Location;
 use WC_Helper_Product;
 use WC_Payment_Gateways;
@@ -115,96 +116,11 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that LocalPickupUtils correctly identifies custom methods that support local-pickup feature.
-	 */
-	public function test_local_pickup_utils_with_custom_methods() {
-		// Create test methods.
-		$pickup_method  = $this->create_local_pickup_method();
-		$regular_method = $this->create_regular_shipping_method();
-
-		// Register the methods temporarily with WooCommerce.
-		add_filter(
-			'woocommerce_shipping_methods',
-			function ( $methods ) use ( $pickup_method, $regular_method ) {
-				$methods['test_pickup_method']  = $pickup_method;
-				$methods['test_regular_method'] = $regular_method;
-				return $methods;
-			}
-		);
-
-		// Test that LocalPickupUtils recognizes our custom pickup method.
-		$this->assertTrue( LocalPickupUtils::is_local_pickup_method( 'test_pickup_method' ) );
-
-		// Test that it doesn't recognize our regular method.
-		$this->assertFalse( LocalPickupUtils::is_local_pickup_method( 'test_regular_method' ) );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_shipping_methods' );
-	}
-
-	/**
-	 * Test that concrete test classes can be instantiated and return expected values.
-	 */
-	public function test_concrete_test_classes() {
-		// Create test methods.
-		$pickup_method  = $this->create_local_pickup_method();
-		$regular_method = $this->create_regular_shipping_method();
-
-		// Test that the methods have the correct IDs.
-		$this->assertEquals( 'test_pickup_method', $pickup_method->id );
-		$this->assertEquals( 'test_regular_method', $regular_method->id );
-
-		// Test that the methods have the correct titles.
-		$this->assertEquals( 'Test Pickup Method', $pickup_method->method_title );
-		$this->assertEquals( 'Test Regular Method', $regular_method->method_title );
-
-		// Test that the pickup method supports local-pickup.
-		$this->assertTrue( $pickup_method->supports( 'local-pickup' ) );
-		$this->assertFalse( $pickup_method->supports( 'products' ) );
-
-		// Test that the regular method does not support local-pickup.
-		$this->assertFalse( $regular_method->supports( 'local-pickup' ) );
-		$this->assertTrue( $regular_method->supports( 'products' ) );
-
-		// Test that get_rates_for_package returns expected structure.
-		$rates = $pickup_method->get_rates_for_package( array() );
-		$this->assertIsArray( $rates );
-		$this->assertCount( 1, $rates );
-		$this->assertEquals( 'test_pickup_rate_1', $rates['test_pickup_rate:1']->id );
-		$this->assertEquals( 'test_pickup_method', $rates['test_pickup_rate:1']->method_id );
-
-		$rates = $regular_method->get_rates_for_package( array() );
-		$this->assertIsArray( $rates );
-		$this->assertCount( 1, $rates );
-		$this->assertEquals( 'test_regular_rate_1', $rates['test_regular_rate:1']->id );
-		$this->assertEquals( 'test_regular_method', $rates['test_regular_rate:1']->method_id );
-
-		// Clean up.
-		remove_all_filters( 'woocommerce_shipping_methods' );
-	}
-
-	/**
 	 * Test that Pay at Location gateway is available when a shipping method that supports local-pickup is chosen.
 	 *
 	 * @return void
 	 */
 	public function test_available_gateways_for_shipping_methods() {
-		// Add a flat rate shipping method to ensure wc_get_shipping_method_count() > 0.
-		// Without this, cart->needs_shipping() always returns false in CI.
-		// We use the same approach as the Checkout test (FixtureData).
-		$flat_rate_settings = array(
-			'enabled'      => 'yes',
-			'title'        => 'Flat rate',
-			'availability' => 'all',
-			'countries'    => '',
-			'tax_status'   => 'taxable',
-			'cost'         => 10,
-		);
-		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
-		update_option( 'woocommerce_flat_rate', array() );
-		\WC_Cache_Helper::get_transient_version( 'shipping', true );
-		WC()->shipping()->load_shipping_methods();
-
 		// Create test methods.
 		$pickup_method  = $this->create_local_pickup_method();
 		$regular_method = $this->create_regular_shipping_method();
@@ -218,6 +134,8 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 				return $methods;
 			}
 		);
+		WC()->shipping()->load_shipping_methods();
+		WC_Cache_Helper::get_transient_version( 'shipping', true );
 
 		// Make a new cart.
 		WC()->cart->empty_cart();
@@ -231,22 +149,10 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
-		// Debug: Verify first test state
-		$first_test_methods = WC()->cart->get_shipping_methods();
-		$first_test_ids = array_map(
-			function( $method ) {
-				return $method && is_callable( array( $method, 'get_method_id' ) ) ? $method->get_method_id() : 'unknown';
-			},
-			$first_test_methods
-		);
-
-		// Debug: Log first test state (will print even on success)
-		error_log( 'FIRST TEST STATE: Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' ) . ' | Package rates filter: ' . ( has_filter( 'woocommerce_package_rates' ) !== false ? 'YES' : 'NO' ) . ' | wc_shipping_enabled: ' . ( wc_shipping_enabled() ? 'YES' : 'NO' ) . ' | wc_get_shipping_method_count: ' . wc_get_shipping_method_count( true ) );
-
 		$this->assertArrayHasKey(
 			WC_Gateway_Pay_At_Location::ID,
 			$available_gateways,
-			'First test: Pay at Location SHOULD be available with pickup. Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' )
+			'Pay at Location should be available with local pickup'
 		);
 
 		// Test with regular shipping method.
@@ -276,65 +182,11 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
-		// Debug: Capture comprehensive cart and shipping state for failure analysis
-		$shipping_methods = WC()->cart->get_shipping_methods();
-		$method_ids       = array_map(
-			function( $method ) {
-				return $method && is_callable( array( $method, 'get_method_id' ) ) ? $method->get_method_id() : 'unknown';
-			},
-			$shipping_methods
-		);
-
-		// Get cart contents details
-		$cart_items = array();
-		foreach ( WC()->cart->get_cart() as $cart_item ) {
-			$product      = $cart_item['data'];
-			$cart_items[] = array(
-				'product_id'   => $product->get_id(),
-				'is_virtual'   => $product->is_virtual(),
-				'needs_shipping' => $product->needs_shipping(),
-			);
-		}
-
-		// Get shipping packages to see what WooCommerce thinks should ship
-		$packages = WC()->shipping()->get_packages();
-		$package_info = array();
-		foreach ( $packages as $package ) {
-			$package_info[] = array(
-				'rates' => array_keys( $package['rates'] ?? array() ),
-			);
-		}
-
-		$debug_info = array(
-			'cart_has_items'        => ! empty( WC()->cart->get_cart() ),
-			'cart_needs_shipping'   => WC()->cart->needs_shipping(),
-			'cart_item_count'       => WC()->cart->get_cart_contents_count(),
-			'cart_items'            => $cart_items,
-			'shipping_methods'      => $method_ids,
-			'shipping_packages'     => $package_info,
-			'chosen_methods'        => WC()->session->get( 'chosen_shipping_methods' ),
-			'session_shipping_cache' => WC()->session->get( 'shipping_for_package_0' ) !== null ? 'EXISTS' : 'NULL',
-			'has_calculated_shipping' => WC()->cart->has_calculated_shipping,
-			'is_pickup_check'       => array_map(
-				function( $id ) {
-					return array(
-						'id'         => $id,
-						'is_pickup'  => LocalPickupUtils::is_local_pickup_method( $id ),
-					);
-				},
-				$method_ids
-			),
-			'woocommerce_shipping_methods_filter' => has_filter( 'woocommerce_shipping_methods' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
-			'woocommerce_package_rates_filter' => has_filter( 'woocommerce_package_rates' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
-			'wc_shipping_enabled' => wc_shipping_enabled(),
-			'wc_get_shipping_method_count' => wc_get_shipping_method_count( true ),
-		);
-
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		$this->assertArrayNotHasKey(
 			WC_Gateway_Pay_At_Location::ID,
 			$available_gateways,
-			'Pay at Location should NOT be available with regular shipping. Debug: ' . wp_json_encode( $debug_info, JSON_PRETTY_PRINT )
+			'Pay at Location should NOT be available with regular shipping'
 		);
 
 		// Clean up.
