@@ -261,7 +261,12 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'download_url' => array(
 					'description' => __( 'Products catalog download URL. Returned when catalog file already exists.', 'woocommerce' ),
 					'type'        => 'string',
+					'format'      => 'uri',
 				),
+			),
+			'anyOf'      => array(
+				array( 'required' => array( 'job_id' ) ),
+				array( 'required' => array( 'download_url' ) ),
 			),
 		);
 	}
@@ -291,6 +296,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'download_url' => array(
 					'description' => __( 'Products catalog download URL when the generation is complete.', 'woocommerce' ),
 					'type'        => 'string',
+					'format'      => 'uri',
 				),
 			),
 			'required'   => array( 'job_id', 'status' ),
