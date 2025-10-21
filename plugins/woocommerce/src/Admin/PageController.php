@@ -12,6 +12,7 @@ use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Gateway_Paypal;
+use WC_Gateway_PAL;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -315,7 +316,7 @@ class PageController {
 			array(
 				'products'          => array( '', 'inventory', 'downloadable', 'download_urls', 'advanced' ),
 				'shipping'          => array( '', 'options', 'classes', 'pickup_location' ),
-				'checkout'          => array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Paypal::ID ),
+				'checkout'          => array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Paypal::ID, WC_Gateway_PAL::ID ),
 				'email'             => $wc_email_ids,
 				'advanced'          => array(
 					'',

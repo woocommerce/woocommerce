@@ -294,6 +294,49 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		_links: {},
 	},
+	{
+		id: 'pal',
+		_type: PaymentsProviderType.OfflinePm,
+		_order: 1002,
+		title: 'Pay at location',
+		description:
+			'Let your shoppers pay at your location — by cash or other methods of payment.',
+		supports: [ 'products', 'optional-billing' ],
+		state: {
+			enabled: true,
+			account_connected: true,
+			needs_setup: false,
+			test_mode: false,
+			dev_mode: false,
+		},
+		management: {
+			_links: {
+				settings: {
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pal',
+				},
+			},
+		},
+		onboarding: {
+			state: {
+				started: true,
+				completed: true,
+				test_mode: false,
+			},
+			_links: {
+				onboard: {
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pal',
+				},
+			},
+		},
+		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/payment_methods/cod.svg',
+		plugin: {
+			_type: 'wporg',
+			slug: 'woocommerce',
+			file: 'woocommerce/woocommerce',
+			status: 'active',
+		},
+		_links: {},
+	},
 ];
 
 export const suggestionsStub: SuggestedPaymentsExtension[] = [

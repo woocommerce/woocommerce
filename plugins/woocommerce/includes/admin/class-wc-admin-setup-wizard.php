@@ -1607,6 +1607,12 @@ class WC_Admin_Setup_Wizard {
 				'image'       => '',
 				'class'       => '',
 			),
+			WC_Gateway_PAL::ID    => array(
+				'name'        => __( 'Pay at location', 'woocommerce' ),
+				'description' => __( 'A simple offline gateway that lets you accept payment at location.', 'woocommerce' ),
+				'image'       => '',
+				'class'       => '',
+			),
 		);
 
 		return $gateways;

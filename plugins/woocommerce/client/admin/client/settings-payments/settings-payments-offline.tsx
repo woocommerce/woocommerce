@@ -68,7 +68,7 @@ export const SettingsPaymentsOffline = () => {
 	return (
 		<>
 			{ isFetching ? (
-				<ListPlaceholder rows={ 3 } />
+				<ListPlaceholder rows={ 4 } />
 			) : (
 				<OfflinePaymentGatewayList
 					gateways={

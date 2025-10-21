@@ -206,7 +206,7 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	 * Output the gateway settings screen.
 	 */
 	public function admin_options() {
-		$offline_payment_gateways = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID );
+		$offline_payment_gateways = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID );
 		$is_offline_gateway       = in_array( $this->id, $offline_payment_gateways, true );
 
 		$return_path = null;
