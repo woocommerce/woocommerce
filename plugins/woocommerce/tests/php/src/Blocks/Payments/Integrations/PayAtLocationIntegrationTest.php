@@ -71,7 +71,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		// Force reset WC payment gateways to pick up the new settings.
 		WC()->payment_gateways()->payment_gateways = array();
-		WC()->payment_gateways = new WC_Payment_Gateways();
+		WC()->payment_gateways                     = new WC_Payment_Gateways();
 		WC()->payment_gateways()->init();
 	}
 
