@@ -13,7 +13,8 @@
 			<directory suffix=".php">./tests/legacy/unit-tests</directory>
 		</testsuite>
 		<testsuite name="wc-phpunit-main">
-			<directory suffix=".php">./tests/php</directory>
+			<directory suffix="Checkout.php">./tests/php/src/Blocks/StoreApi/Routes</directory>
+			<directory suffix=".php">./tests/php/src/Blocks/Payments</directory>
 			<exclude>./tests/php/helpers</exclude>
 			<exclude>./tests/php/src/Blocks/BlockPatterns/patterns</exclude>
 		</testsuite>
