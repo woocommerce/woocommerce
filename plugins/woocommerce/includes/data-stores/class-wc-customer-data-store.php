@@ -624,10 +624,10 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 */
 	private function get_orderby_mapping() {
 		return array(
-			'date_created' => 'user_registered',
-			'orders_count' => 'orders_count',
-			'total_spent'  => 'total_spent',
-			'last_active'  => 'last_active',
+			'registered_date' => 'user_registered',
+			'orders_count'    => 'orders_count',
+			'total_spent'     => 'total_spent',
+			'last_active'     => 'last_active',
 		);
 	}
 
@@ -640,7 +640,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	public function query_customers( array $args = array() ) {
 		$defaults = array(
 			'order'    => 'asc',
-			'orderby'  => 'date_created',
+			'orderby'  => 'registered_date',
 			'per_page' => 10,
 			'page'     => 1,
 			'offset'   => 0,

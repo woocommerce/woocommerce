@@ -92,7 +92,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 					'id',
 					'include',
 					'name',
-					'date_created',
+					'registered_date',
 					'orders_count',
 					'total_spent',
 					'last_active',
@@ -139,10 +139,10 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		}
 
 		$orderby_possibles        = array(
-			'date_created' => 'user_registered',
-			'orders_count' => 'orders_count',
-			'total_spent'  => 'total_spent',
-			'last_active'  => 'last_active',
+			'registered_date' => 'user_registered',
+			'orders_count'    => 'orders_count',
+			'total_spent'     => 'total_spent',
+			'last_active'     => 'last_active',
 		);
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['search']  = $request['search'];
@@ -243,13 +243,13 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		if ( isset( $query_args['orderby'] ) ) {
 			switch ( $query_args['orderby'] ) {
 				case 'user_registered':
-					return 'date_created';
+					return 'registered_date';
 				case 'meta_value_num':
 					// This should have been handled by meta_key above.
-					return 'date_created';
+					return 'registered_date';
 			}
 		}
 
-		return 'date_created';
+		return 'registered_date';
 	}
 }
