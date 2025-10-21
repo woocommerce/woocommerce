@@ -98,32 +98,14 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a test shipping method that supports local-pickup feature.
-	 *
-	 * @return Test_Local_Pickup_Shipping_Method
-	 */
-	private function create_local_pickup_method() {
-		return new Test_Local_Pickup_Shipping_Method();
-	}
-
-	/**
-	 * Create a test shipping method that does NOT support local-pickup feature.
-	 *
-	 * @return Test_Regular_Shipping_Method
-	 */
-	private function create_regular_shipping_method() {
-		return new Test_Regular_Shipping_Method();
-	}
-
-	/**
 	 * Test that Pay at Location gateway is available when a shipping method that supports local-pickup is chosen.
 	 *
 	 * @return void
 	 */
 	public function test_available_gateways_for_shipping_methods() {
 		// Create test methods.
-		$pickup_method  = $this->create_local_pickup_method();
-		$regular_method = $this->create_regular_shipping_method();
+		$pickup_method  = new Test_Local_Pickup_Shipping_Method();
+		$regular_method = new Test_Regular_Shipping_Method();
 
 		// Register the methods temporarily with WooCommerce.
 		add_filter(
