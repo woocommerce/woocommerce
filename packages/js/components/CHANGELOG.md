@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Remove scrollbar when 9 items are in list [#47605]
 -   Minor - Show 'up' and 'down' chevron in SelectTree and remove suffix prop [#46939]
 -   Patch - Update ProductImage component so it doesn't forces a 1:1 aspect ratio by setting the default 'height' to 'auto' [#52828]
--   Patch - Vertically align chart type buttons in <Chart> component [#57110]
+-   Patch - Vertically align chart type buttons in `<Chart>` component [#57110]
 -   Minor - Add AnalyticsError component. [#50108]
 -   Minor - Add error boundary component and fix empty content button [#48363]
 -   Patch - Add onBlur prop to experimental-select-control [#56847]
@@ -71,10 +71,10 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Monorepo: Webpack deps review and consolidation and a bit of deps grooming [#56746]
 -   Minor - Removed defaultProps from React functional components since they will be deprecated for React 19 [#50266]
 -   Patch - Remove propTypes and defaultProps from react components in TypeScript. [#56733]
--   Major [ **BREAKING CHANGE** ] - Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection. [#54149]
+-   Major [ **BREAKING CHANGE** ] Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection. [#54149]
 -   Minor - Remove unused React imports [#55554]
 -   Patch - Stabilize JS dependency updates [#52815]
--   Major [ **BREAKING CHANGE** ] - Updated declared dependencies to React 18 and Wordpress 6.6 [#53531]
+-   Major [ **BREAKING CHANGE** ] Updated declared dependencies to React 18 and Wordpress 6.6 [#53531]
 -   Patch - Update events that should trigger the test job(s) [#47612]
 -   Patch - Update pnpm to 9.1.0 [#47385]
 -   Patch - Update wireit to 0.14.10 [#54996]
@@ -306,7 +306,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
 -   Minor - Improve experimental SelectControl accessibility [#35140]
 -   Minor - Improve Sortable component acessibility [#35140]
--    - Create new experimental SelectControl component [#35140]
+-   Create new experimental SelectControl component [#35140]
 
 ## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12 
 
