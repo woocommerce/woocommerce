@@ -65,7 +65,7 @@ const SettingsPaymentsCodChunk = lazy(
 		)
 );
 
-const SettingsPaymentsPayAtLocationChunk = lazy(
+const SettingsPaymentsPalChunk = lazy(
 	() =>
 		import(
 			/* webpackChunkName: "settings-payments-pal" */ './offline/settings-payments-pal'
@@ -295,10 +295,10 @@ export const SettingsPaymentsChequeWrapper = () =>
 		title: __( 'Check payments', 'woocommerce' ),
 		chunkComponent: SettingsPaymentsChequeChunk,
 	} );
-export const SettingsPaymentsPayAtLocationWrapper = () =>
+export const SettingsPaymentsPalWrapper = () =>
 	OfflinePaymentGatewayWrapper( {
 		title: __( 'Pay at location', 'woocommerce' ),
-		chunkComponent: SettingsPaymentsPayAtLocationChunk,
+		chunkComponent: SettingsPaymentsPalChunk,
 	} );
 
 /**
@@ -331,7 +331,7 @@ export const SettingsPaymentsMainWrapper = () => {
 					/>
 					<Route
 						path="/offline/pal"
-						element={ <SettingsPaymentsPayAtLocationWrapper /> }
+						element={ <SettingsPaymentsPalWrapper /> }
 					/>
 					<Route path="/*" element={ <SettingsPaymentsMain /> } />
 				</Routes>

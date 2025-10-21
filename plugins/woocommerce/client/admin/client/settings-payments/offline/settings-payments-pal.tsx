@@ -24,12 +24,12 @@ import { FieldPlaceholder } from '~/settings-payments/components/field-placehold
 /**
  * This page is used to manage the settings for the Pay at Location payment gateway.
  */
-export const SettingsPaymentsPayAtLocation = () => {
+export const SettingsPaymentsPal = () => {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( 'core/notices' );
-	const { payAtLocationSettings, isLoading } = useSelect(
+	const { palSettings, isLoading } = useSelect(
 		( select ) => ( {
-			payAtLocationSettings:
+			palSettings:
 				select( paymentGatewaysStore ).getPaymentGateway( 'pal' ),
 			isLoading: ! select( paymentGatewaysStore ).hasFinishedResolution(
 				'getPaymentGateway',
@@ -55,27 +55,26 @@ export const SettingsPaymentsPayAtLocation = () => {
 	const [ hasChanges, setHasChanges ] = useState( false );
 
 	useEffect( () => {
-		if ( payAtLocationSettings ) {
+		if ( palSettings ) {
 			setFormValues( {
-				enabled: payAtLocationSettings.enabled,
-				title: payAtLocationSettings.settings.title.value,
-				description: payAtLocationSettings.description,
-				instructions: payAtLocationSettings.settings.instructions.value,
+				enabled: palSettings.enabled,
+				title: palSettings.settings.title.value,
+				description: palSettings.description,
+				instructions: palSettings.settings.instructions.value,
 				enable_for_methods: Array.isArray(
-					payAtLocationSettings.settings.enable_for_methods.value
+					palSettings.settings.enable_for_methods.value
 				)
-					? payAtLocationSettings.settings.enable_for_methods.value
+					? palSettings.settings.enable_for_methods.value
 					: [],
 				enable_for_virtual:
-					payAtLocationSettings.settings.enable_for_virtual.value ===
-					'yes',
+					palSettings.settings.enable_for_virtual.value === 'yes',
 			} );
 			setHasChanges( false );
 		}
-	}, [ payAtLocationSettings ] );
+	}, [ palSettings ] );
 
 	const saveSettings = () => {
-		if ( ! payAtLocationSettings ) {
+		if ( ! palSettings ) {
 			return;
 		}
 
@@ -211,7 +210,7 @@ export const SettingsPaymentsPayAtLocation = () => {
 								} }
 							/>
 						) }
-						{ isLoading || ! payAtLocationSettings ? (
+						{ isLoading || ! palSettings ? (
 							<FieldPlaceholder size="medium" />
 						) : (
 							<TreeSelectControl
@@ -224,10 +223,10 @@ export const SettingsPaymentsPayAtLocation = () => {
 									'woocommerce'
 								) }
 								options={
-									payAtLocationSettings.settings
-										.enable_for_methods?.options
+									palSettings.settings.enable_for_methods
+										?.options
 										? mapShippingMethodsOptions(
-												payAtLocationSettings.settings
+												palSettings.settings
 													.enable_for_methods.options
 										  )
 										: []
@@ -290,4 +289,4 @@ export const SettingsPaymentsPayAtLocation = () => {
 	);
 };
 
-export default SettingsPaymentsPayAtLocation;
+export default SettingsPaymentsPal;
