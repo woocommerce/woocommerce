@@ -11,7 +11,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
-import type { ProductDataWithId, VariationDataWithId } from '../types';
+import { isVariation } from '../type-guards';
 
 export type Context = {
 	productId: number;
@@ -70,12 +70,6 @@ export type QuantitySelectorStore = {
 			event: HTMLElementEvent< HTMLInputElement >
 		) => void;
 	};
-};
-
-const isVariation = (
-	productData: ProductDataWithId | VariationDataWithId | null
-): productData is VariationDataWithId => {
-	return productData?.type === 'variation';
 };
 
 store< QuantitySelectorStore >(

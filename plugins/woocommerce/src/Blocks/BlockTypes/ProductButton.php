@@ -232,7 +232,7 @@ class ProductButton extends AbstractBlock {
 
 		$button_directives = $is_descendant_of_add_to_cart_form ?
 			'data-wp-class--disabled="woocommerce/add-to-cart-with-options::!state.isFormValid"
-			data-wp-bind--hidden="woocommerce/add-to-cart-with-options::!state.productData.is_in_stock"
+			data-wp-bind--hidden="woocommerce/add-to-cart-with-options::!state.allowsAddingToCart"
 			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';

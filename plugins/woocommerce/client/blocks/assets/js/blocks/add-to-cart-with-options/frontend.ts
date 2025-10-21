@@ -18,6 +18,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  */
 import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
+import { isVariation } from './type-guards';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { ProductDataWithId, VariationDataWithId } from './types';
@@ -140,9 +141,10 @@ export const getNewQuantity = (
 
 export type AddToCartWithOptionsStore = {
 	state: {
-		isFormValid: boolean;
 		noticeIds: string[];
 		validationErrors: AddToCartError[];
+		isFormValid: boolean;
+		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
 		productData: ProductDataWithId | VariationDataWithId | null;
@@ -177,6 +179,15 @@ const { actions, state } = store<
 			},
 			get isFormValid(): boolean {
 				return state.validationErrors.length === 0;
+			},
+			get allowsAddingToCart(): boolean {
+				const { productData } = state;
+
+				if ( ! isVariation( productData ) ) {
+					return true;
+				}
+
+				return productData.is_in_stock;
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();

@@ -20,6 +20,7 @@ export type ProductDataWithId = ProductData & {
 	is_in_stock: boolean;
 	sold_individually: boolean;
 };
+
 export type VariationDataWithId = VariationData & {
 	id: number;
 	min: number;
