@@ -701,7 +701,10 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( $this->should_use_orders_v2() ) {
+		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+
+		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
 			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );

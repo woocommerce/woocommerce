@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Capture the PayPal payment using legacy API if it was authorized with the legacy API.
