@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @class       WC_Gateway_PAL
  * @extends     WC_Payment_Gateway
- * @version     2.1.0
+ * @version     10.4.0
  * @package     WooCommerce\Classes\Payment
  */
 class WC_Gateway_PAL extends WC_Payment_Gateway {
