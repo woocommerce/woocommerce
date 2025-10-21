@@ -245,12 +245,8 @@ const productGallery = {
 			actions.selectImage( newImageIndex );
 		},
 		onSelectedLargeImageKeyDown: ( event: KeyboardEvent ) => {
-			if (
-				event.key === 'Enter' ||
-				event.key === 'Space' ||
-				event.key === 'NumpadEnter'
-			) {
-				if ( event.key === 'Space' ) {
+			if ( event.key === 'Enter' || event.key === ' ' ) {
+				if ( event.key === ' ' ) {
 					event.preventDefault();
 				}
 				actions.openDialog();
