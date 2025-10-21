@@ -219,6 +219,9 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 			$first_test_methods
 		);
 
+		// Debug: Log first test state (will print even on success)
+		error_log( 'FIRST TEST STATE: Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' ) . ' | Package rates filter: ' . ( has_filter( 'woocommerce_package_rates' ) !== false ? 'YES' : 'NO' ) );
+
 		$this->assertArrayHasKey(
 			WC_Gateway_Pay_At_Location::ID,
 			$available_gateways,
@@ -232,6 +235,18 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		$product->set_virtual( false );
 		$product->save();
 		WC()->cart->add_to_cart( $product->get_id() );
+
+		// Re-add the package_rates filter in case it was removed by empty_cart() or other WooCommerce internals.
+		add_filter(
+			'woocommerce_package_rates',
+			function ( $rates, $package ) use ( $pickup_method, $regular_method ) {
+				$pickup_rates  = $pickup_method->get_rates_for_package( $package );
+				$regular_rates = $regular_method->get_rates_for_package( $package );
+				return array_merge( $rates, $pickup_rates, $regular_rates );
+			},
+			10,
+			2
+		);
 
 		// Clear the shipping cache and cart shipping methods to force recalculation.
 		WC()->session->set( 'shipping_for_package_0', null );
