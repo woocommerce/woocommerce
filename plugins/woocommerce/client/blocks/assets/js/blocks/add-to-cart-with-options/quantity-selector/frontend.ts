@@ -51,6 +51,7 @@ export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 
 export type QuantitySelectorStore = {
 	state: {
+		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 	};
@@ -74,6 +75,24 @@ store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
+			get allowsQuantityChange(): boolean {
+				const { productId } = getContext< Context >();
+				const { selectedAttributes } = addToCartWithOptionsStore.state;
+
+				const productObject = getProductData(
+					productId,
+					selectedAttributes
+				);
+
+				if ( ! productObject ) {
+					return true;
+				}
+
+				return (
+					productObject.is_in_stock &&
+					! productObject.sold_individually
+				);
+			},
 			get allowsDecrease() {
 				const { quantity, selectedAttributes } =
 					addToCartWithOptionsStore.state;

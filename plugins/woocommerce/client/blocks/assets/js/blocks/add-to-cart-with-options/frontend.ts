@@ -51,16 +51,35 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
+type ProductOrVariationData =
+	| ( ProductData & {
+			id: number;
+			min: number;
+			max: number;
+			step: number;
+			is_in_stock: boolean;
+			sold_individually: boolean;
+	  } )
+	| ( VariationData & {
+			id: number;
+			min: number;
+			max: number;
+			step: number;
+			is_in_stock: boolean;
+			sold_individually: boolean;
+			type: string;
+	  } );
+
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-) => {
+): ProductOrVariationData | null => {
 	let productId = id;
 	let productData: ProductData | VariationData | undefined;
 
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type: ProductData[ 'type' ] | 'variation' | null = null;
+	let type: ProductData[ 'type' ] | 'variation' = 'simple';
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		if ( ! products || ! products[ id ] ) {
 			return null;
@@ -93,7 +112,13 @@ export const getProductData = (
 			: Infinity;
 	const step = productData.step || 1;
 
+	const defaults = {
+		is_in_stock: true,
+		sold_individually: false,
+	};
+
 	return {
+		...defaults,
 		id: productId,
 		...productData,
 		min,
@@ -138,6 +163,7 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
+		productData: ProductOrVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -177,6 +203,14 @@ const { actions, state } = store<
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
+			},
+			get productData(): ProductOrVariationData | null {
+				const { selectedAttributes } = getContext< Context >();
+
+				return getProductData(
+					productDataState.productId,
+					selectedAttributes
+				);
 			},
 		},
 		actions: {
@@ -233,11 +267,7 @@ const { actions, state } = store<
 					};
 				}
 
-				const productObject = getProductData(
-					productDataState.productId,
-					context.selectedAttributes
-				);
-				if ( productObject?.type === 'grouped' ) {
+				if ( state.productData?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );

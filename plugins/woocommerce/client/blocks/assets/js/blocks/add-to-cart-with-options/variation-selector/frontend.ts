@@ -312,7 +312,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				if ( ! matchedVariation?.is_in_stock ) {
+				if ( matchedVariation?.is_in_stock === false ) {
 					actions.addError( {
 						code: 'variableProductOutOfStock',
 						message: errorMessages?.variableProductOutOfStock || '',

@@ -165,6 +165,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
+		const quantitySelector = page.getByLabel( 'Product quantity' );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
@@ -183,6 +184,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.click();
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeVisible();
+			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
 				page
@@ -199,6 +202,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeHidden();
+			await expect( quantitySelector ).toBeHidden();
 			await expect(
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
