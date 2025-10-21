@@ -78,6 +78,7 @@ const isInProductArchive = () => {
 		// That includes:
 		// - taxonomy-product_cat
 		// - taxonomy-product_tag
+		// - taxonomy-product_brand
 		'taxonomy-product_cat',
 		'taxonomy-product_tag',
 		'taxonomy-product_brand',
