@@ -85,7 +85,7 @@ class WC_Payment_Gateways {
 			'WC_Gateway_BACS',
 			'WC_Gateway_Cheque',
 			'WC_Gateway_COD',
-			'WC_Gateway_Pay_At_Location',
+			'WC_Gateway_PAL',
 			'WC_Gateway_Paypal',
 		);
 

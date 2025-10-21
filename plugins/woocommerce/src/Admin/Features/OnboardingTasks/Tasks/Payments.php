@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestio
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 
 /**
  * Payments Task
@@ -358,7 +358,7 @@ class Payments extends Task {
 			if (
 				! empty( $provider['state']['enabled'] ) &&
 				! empty( $provider['id'] ) &&
-				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID ), true )
+				! in_array( $provider['id'], array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID ), true )
 			) {
 				return true;
 			}

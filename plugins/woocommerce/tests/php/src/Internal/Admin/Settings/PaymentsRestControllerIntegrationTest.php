@@ -15,7 +15,7 @@ use WP_REST_Request;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 use WC_Gateway_Paypal;
 
 /**
@@ -272,7 +272,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		);
 		// We have the 4 offline payment methods.
 		$this->assertCount( 4, $data['offline_payment_methods'] );
-		$this->assertSame( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID ), array_column( $data['offline_payment_methods'], 'id' ) );
+		$this->assertSame( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID ), array_column( $data['offline_payment_methods'], 'id' ) );
 		// No suggestions are returned because the user can't install plugins.
 		$this->assertCount( 0, $data['suggestions'] );
 		// But we do get the suggestion categories.

@@ -13,7 +13,7 @@ use WC_Unit_Test_Case;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 use WC_Gateway_Paypal;
 
 /**
@@ -70,7 +70,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// We have the core PayPal gateway registered and the 4 offline payment methods.
 		$this->assertCount( 5, $data );
 		$this->assertEquals(
-			array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID, WC_Gateway_Paypal::ID ),
+			array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID, WC_Gateway_Paypal::ID ),
 			// Extract the IDs from the list of objects.
 			array_values(
 				array_map(

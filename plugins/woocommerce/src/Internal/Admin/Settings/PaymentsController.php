@@ -9,7 +9,7 @@ use Throwable;
 use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 
 defined( 'ABSPATH' ) || exit;
 /**
@@ -210,7 +210,7 @@ class PaymentsController {
 		}
 
 		// For WooPayments and offline payment methods settings pages, we don't want any section navigation.
-		if ( in_array( $current_section, array( WooPaymentsService::GATEWAY_ID, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID ), true ) ) {
+		if ( in_array( $current_section, array( WooPaymentsService::GATEWAY_ID, WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID ), true ) ) {
 			return array();
 		}
 

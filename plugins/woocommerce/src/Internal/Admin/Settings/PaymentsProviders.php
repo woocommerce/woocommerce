@@ -41,7 +41,7 @@ use WC_Gateway_BACS;
 use WC_Gateway_Cheque;
 use WC_Gateway_COD;
 use WC_Gateway_Paypal;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -57,7 +57,7 @@ class PaymentsProviders {
 	public const TYPE_OFFLINE_PMS_GROUP = 'offline_pms_group';
 	public const TYPE_SUGGESTION        = 'suggestion';
 
-	public const OFFLINE_METHODS = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_Pay_At_Location::ID );
+	public const OFFLINE_METHODS = array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID, WC_Gateway_COD::ID, WC_Gateway_PAL::ID );
 
 	public const EXTENSION_NOT_INSTALLED = 'not_installed';
 	public const EXTENSION_INSTALLED     = 'installed';
@@ -90,7 +90,7 @@ class PaymentsProviders {
 		WC_Gateway_BACS::ID            => WCCore::class,
 		WC_Gateway_Cheque::ID          => WCCore::class,
 		WC_Gateway_COD::ID             => WCCore::class,
-		WC_Gateway_Pay_At_Location::ID => WCCore::class,
+		WC_Gateway_PAL::ID => WCCore::class,
 		WC_Gateway_Paypal::ID          => WCCore::class,
 		'woocommerce_payments'         => WooPayments::class,
 		'ppcp-gateway'                 => PayPal::class,

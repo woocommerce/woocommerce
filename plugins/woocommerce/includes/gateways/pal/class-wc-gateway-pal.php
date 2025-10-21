@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Gateway_Pay_At_Location file.
+ * Class WC_Gateway_PAL file.
  *
  * @package WooCommerce\Gateways
  */
@@ -20,12 +20,12 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Provides a Pay at Location Payment Gateway.
  *
- * @class       WC_Gateway_Pay_At_Location
+ * @class       WC_Gateway_PAL
  * @extends     WC_Payment_Gateway
  * @version     2.1.0
  * @package     WooCommerce\Classes\Payment
  */
-class WC_Gateway_Pay_At_Location extends WC_Payment_Gateway {
+class WC_Gateway_PAL extends WC_Payment_Gateway {
 
 	/**
 	 * Unique ID for this gateway.
@@ -95,7 +95,7 @@ class WC_Gateway_Pay_At_Location extends WC_Payment_Gateway {
 		 *
 		 * @since 10.4
 		 */
-		$this->icon               = apply_filters( 'woocommerce_pay_at_location_icon', '' );
+		$this->icon               = apply_filters( 'woocommerce_pal_icon', '' );
 		$this->method_title       = __( 'Pay at location', 'woocommerce' );
 		$this->method_description = __( 'Let your shoppers pay at your location — by cash or other methods of payment.', 'woocommerce' );
 		$this->has_fields         = false;
@@ -352,7 +352,7 @@ class WC_Gateway_Pay_At_Location extends WC_Payment_Gateway {
 			 *
 			 * @param string $order_status Default status for Pay At Location orders.
 			 */
-			$process_payment_status = apply_filters( 'woocommerce_pay_at_location_process_payment_order_status', $order->has_downloadable_item() ? OrderStatus::ON_HOLD : OrderStatus::PROCESSING, $order );
+			$process_payment_status = apply_filters( 'woocommerce_pal_process_payment_order_status', $order->has_downloadable_item() ? OrderStatus::ON_HOLD : OrderStatus::PROCESSING, $order );
 			// Mark as processing or on-hold (payment won't be taken until collection).
 			$order->update_status( $process_payment_status, __( 'Payment to be made upon collection.', 'woocommerce' ) );
 		} else {
@@ -426,7 +426,7 @@ class WC_Gateway_Pay_At_Location extends WC_Payment_Gateway {
 			return SettingsUtils::wc_payments_settings_url( '/' . WC_Settings_Payment_Gateways::OFFLINE_SECTION_NAME . '/' . $this->id );
 		}
 
-		$should_use_react_settings_page = $payments_settings_page->should_render_react_section( WC_Settings_Payment_Gateways::PAY_AT_LOCATION_SECTION_NAME );
+		$should_use_react_settings_page = $payments_settings_page->should_render_react_section( WC_Settings_Payment_Gateways::PAL_SECTION_NAME );
 
 		// We must not include both the path and the section query parameter, as this can cause weird behavior.
 		return SettingsUtils::wc_payments_settings_url(

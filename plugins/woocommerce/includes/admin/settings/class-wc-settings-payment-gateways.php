@@ -25,7 +25,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 	const MAIN_SECTION_NAME            = 'main';
 	const OFFLINE_SECTION_NAME         = 'offline';
 	const COD_SECTION_NAME             = 'cod';  // Cash on delivery.
-	const PAY_AT_LOCATION_SECTION_NAME = 'pay-at-location';  // Pay at Location.
+	const PAL_SECTION_NAME = 'pal';  // Pay at Location.
 	const BACS_SECTION_NAME            = 'bacs';  // Direct bank transfer.
 	const CHEQUE_SECTION_NAME          = 'cheque';  // Cheque payments.
 
@@ -179,7 +179,7 @@ class WC_Settings_Payment_Gateways extends WC_Settings_Page {
 			self::COD_SECTION_NAME,
 			self::BACS_SECTION_NAME,
 			self::CHEQUE_SECTION_NAME,
-			self::PAY_AT_LOCATION_SECTION_NAME,
+			self::PAL_SECTION_NAME,
 		);
 
 		/**

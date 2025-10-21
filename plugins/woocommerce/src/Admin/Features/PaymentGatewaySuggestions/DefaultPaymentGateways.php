@@ -9,7 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use WC_Gateway_BACS;
 use WC_Gateway_COD;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 
 /**
  * Default Payment Gateways
@@ -202,7 +202,7 @@ class DefaultPaymentGateways {
 				'is_offline'  => true,
 			),
 			array(
-				'id'          => WC_Gateway_Pay_At_Location::ID,
+				'id'          => WC_Gateway_PAL::ID,
 				'title'       => __( 'Pay at location', 'woocommerce' ),
 				'content'     => __( 'Take payments at a location.', 'woocommerce' ),
 				'image'       => WC_ADMIN_IMAGES_FOLDER_URL . '/onboarding/cod.svg',
