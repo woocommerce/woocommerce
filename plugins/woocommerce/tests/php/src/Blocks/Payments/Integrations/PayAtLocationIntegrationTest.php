@@ -34,12 +34,20 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Ensure shipping is enabled (previous tests may have disabled it).
+		update_option( 'woocommerce_ship_to_countries', 'all' );
+		update_option( 'woocommerce_calc_shipping', 'yes' );
+
 		// Clean up any existing filters.
 		remove_all_filters( 'woocommerce_shipping_methods' );
 		remove_all_filters( 'woocommerce_package_rates' );
 
 		// Clear shipping method cache.
 		WC()->shipping()->unregister_shipping_methods();
+
+		// Re-load shipping methods to ensure we have at least the default methods available.
+		// This ensures wc_get_shipping_method_count() > 0 so cart->needs_shipping() works.
+		WC()->shipping()->load_shipping_methods();
 
 		// Empty and reset cart.
 		WC()->cart->empty_cart();
@@ -220,7 +228,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		);
 
 		// Debug: Log first test state (will print even on success)
-		error_log( 'FIRST TEST STATE: Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' ) . ' | Package rates filter: ' . ( has_filter( 'woocommerce_package_rates' ) !== false ? 'YES' : 'NO' ) );
+		error_log( 'FIRST TEST STATE: Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' ) . ' | Package rates filter: ' . ( has_filter( 'woocommerce_package_rates' ) !== false ? 'YES' : 'NO' ) . ' | wc_shipping_enabled: ' . ( wc_shipping_enabled() ? 'YES' : 'NO' ) . ' | wc_get_shipping_method_count: ' . wc_get_shipping_method_count( true ) );
 
 		$this->assertArrayHasKey(
 			WC_Gateway_Pay_At_Location::ID,
@@ -305,6 +313,8 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 			),
 			'woocommerce_shipping_methods_filter' => has_filter( 'woocommerce_shipping_methods' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
 			'woocommerce_package_rates_filter' => has_filter( 'woocommerce_package_rates' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
+			'wc_shipping_enabled' => wc_shipping_enabled(),
+			'wc_get_shipping_method_count' => wc_get_shipping_method_count( true ),
 		);
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
