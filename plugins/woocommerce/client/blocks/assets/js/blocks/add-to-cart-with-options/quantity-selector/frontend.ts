@@ -11,6 +11,7 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
+import type { ProductDataWithId, VariationDataWithId } from '../types';
 
 export type Context = {
 	productId: number;
@@ -71,26 +72,25 @@ export type QuantitySelectorStore = {
 	};
 };
 
+const isVariation = (
+	productData: ProductDataWithId | VariationDataWithId | null
+): productData is VariationDataWithId => {
+	return productData?.type === 'variation';
+};
+
 store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
 			get allowsQuantityChange(): boolean {
-				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { productData } = addToCartWithOptionsStore.state;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! isVariation( productData ) ) {
 					return true;
 				}
 
 				return (
-					productObject.is_in_stock &&
-					! productObject.sold_individually
+					productData.is_in_stock && ! productData.sold_individually
 				);
 			},
 			get allowsDecrease() {

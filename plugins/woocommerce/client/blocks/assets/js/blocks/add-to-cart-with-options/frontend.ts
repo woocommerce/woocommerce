@@ -20,6 +20,7 @@ import { getMatchedVariation } from '../../base/utils/variations/get-matched-var
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
+import type { ProductDataWithId, VariationDataWithId } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -51,31 +52,12 @@ const { state: productDataState } = store< ProductDataStore >(
 	{ lock: universalLock }
 );
 
-type ProductOrVariationData =
-	| ( ProductData & {
-			id: number;
-			min: number;
-			max: number;
-			step: number;
-			is_in_stock: boolean;
-			sold_individually: boolean;
-	  } )
-	| ( VariationData & {
-			id: number;
-			min: number;
-			max: number;
-			step: number;
-			is_in_stock: boolean;
-			sold_individually: boolean;
-			type: string;
-	  } );
-
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-): ProductOrVariationData | null => {
+): ProductDataWithId | VariationDataWithId | null => {
 	let productId = id;
-	let productData: ProductData | VariationData | undefined;
+	let productData;
 
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
@@ -163,7 +145,7 @@ export type AddToCartWithOptionsStore = {
 		validationErrors: AddToCartError[];
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: ProductOrVariationData | null;
+		productData: ProductDataWithId | VariationDataWithId | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -204,7 +186,7 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
-			get productData(): ProductOrVariationData | null {
+			get productData(): ProductDataWithId | VariationDataWithId | null {
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(
