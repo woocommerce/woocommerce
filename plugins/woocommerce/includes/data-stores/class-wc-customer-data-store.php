@@ -670,12 +670,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		if ( ! empty( $args['search'] ) ) {
-			$query_args['search']         = $args['search'];
+			$search                       = sanitize_text_field( $args['search'] );
+			$query_args['search']         = '*' . esc_attr( $search ) . '*';
 			$query_args['search_columns'] = array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' );
 		}
 
 		if ( ! empty( $args['email'] ) ) {
-			$query_args['search']         = $args['email'];
+			$email = sanitize_email( $args['email'] );
+			if ( $email ) {
+				$query_args['search'] = $email;
+			}
 			$query_args['search_columns'] = array( 'user_email' );
 		}
 
