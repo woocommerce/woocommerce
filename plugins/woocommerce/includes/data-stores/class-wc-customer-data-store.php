@@ -669,7 +669,16 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$query_args['offset'] = ( $args['page'] - 1 ) * $query_args['number'];
 		}
 
-		// Custom WC_Customer meta ordering.
+		if ( ! empty( $args['search'] ) ) {
+			$query_args['search']         = $args['search'];
+			$query_args['search_columns'] = array( 'user_login', 'user_url', 'user_email', 'user_nicename', 'display_name' );
+		}
+
+		if ( ! empty( $args['email'] ) ) {
+			$query_args['search']         = $args['email'];
+			$query_args['search_columns'] = array( 'user_email' );
+		}
+
 		switch ( $orderby_key ) {
 			case 'orders_count':
 				$query_args['meta_key'] = 'wc_order_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
