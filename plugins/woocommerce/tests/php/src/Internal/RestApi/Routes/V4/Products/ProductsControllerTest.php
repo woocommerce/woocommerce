@@ -28,6 +28,8 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		$this->disable_rest_api_v4_feature();
+		// Reset tax settings.
+		delete_option( 'woocommerce_calc_taxes' );
 	}
 
 	/**
@@ -135,6 +137,9 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		// Disable tax calculations
+		update_option( 'woocommerce_calc_taxes', 'no' );
 	}
 
 	/**
@@ -1993,7 +1998,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'min_price', $data );
 		$this->assertArrayHasKey( 'max_price', $data );
-		$this->assertEquals( '0.869565', $data['min_price'] );
+		$this->assertEquals( '1', $data['min_price'] );
 		$this->assertEquals( '10', $data['max_price'] );
 	}
 
