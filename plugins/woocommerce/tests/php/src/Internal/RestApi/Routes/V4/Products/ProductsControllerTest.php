@@ -1,15 +1,22 @@
 <?php
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
+
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use WC_Helper_Product;
+use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+
 
 /**
- * class WC_REST_Products_Controller_Tests.
+ * class ProductsControllerTest.
  * Product Controller tests for V4 REST API.
  */
-class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
+class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 
@@ -120,7 +127,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
-		$this->endpoint = new WC_REST_Products_V4_Controller();
+		$this->endpoint = new ProductsController();
 		$this->user     = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
