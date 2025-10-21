@@ -108,9 +108,9 @@ class PushToken {
 	/**
 	 * Sets the device UUID.
 	 *
-	 * @param string $device_uuid The UUID of the device that generated the token.
+	 * @param string|null $device_uuid The UUID of the device that generated the token.
 	 */
-	public function set_device_uuid( string $device_uuid ) {
+	public function set_device_uuid( ?string $device_uuid ) {
 		$this->device_uuid = $device_uuid;
 	}
 

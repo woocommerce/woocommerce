@@ -51,10 +51,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		);
 
 		if ( is_wp_error( $id ) ) {
-			throw new Exception(
-				esc_html( $id->get_error_message() ),
-				(int) ( $id->get_error_data() ? $id->get_error_data() : WP_Http::INTERNAL_SERVER_ERROR )
-			);
+			throw new Exception( esc_html( $id->get_error_message() ), WP_Http::INTERNAL_SERVER_ERROR );
 		}
 
 		$push_token->set_id( $id );
@@ -142,12 +139,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		);
 
 		if ( is_wp_error( $result ) ) {
-			throw new Exception(
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				$result->get_error_message(),
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				(int) ( $result->get_error_data() ? $result->get_error_data() : WP_Http::INTERNAL_SERVER_ERROR )
-			);
+			throw new Exception( esc_html( $result->get_error_message() ), WP_Http::INTERNAL_SERVER_ERROR );
 		}
 	}
 
@@ -339,7 +331,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				INNER JOIN {$wpdb->postmeta} AS token_meta
 					ON posts.ID = token_meta.post_id
 					AND token_meta.meta_key = 'token'
-				INNER JOIN {$wpdb->postmeta} AS device_uuid_meta
+				LEFT JOIN {$wpdb->postmeta} AS device_uuid_meta
 					ON posts.ID = device_uuid_meta.post_id
 					AND device_uuid_meta.meta_key = 'device_uuid'
 				INNER JOIN {$wpdb->postmeta} AS origin_meta
