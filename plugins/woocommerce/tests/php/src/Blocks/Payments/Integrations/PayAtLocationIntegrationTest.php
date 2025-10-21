@@ -45,10 +45,6 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		// Clear shipping method cache.
 		WC()->shipping()->unregister_shipping_methods();
 
-		// Re-load shipping methods to ensure we have at least the default methods available.
-		// This ensures wc_get_shipping_method_count() > 0 so cart->needs_shipping() works.
-		WC()->shipping()->load_shipping_methods();
-
 		// Empty and reset cart.
 		WC()->cart->empty_cart();
 		WC()->session->set( 'chosen_shipping_methods', array() );
@@ -88,6 +84,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( 'woocommerce_pay-at-location_settings' );
+
 		remove_all_filters( 'woocommerce_shipping_methods' );
 		remove_all_filters( 'woocommerce_package_rates' );
 
@@ -192,6 +189,22 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_available_gateways_for_shipping_methods() {
+		// Add a flat rate shipping method to ensure wc_get_shipping_method_count() > 0.
+		// Without this, cart->needs_shipping() always returns false in CI.
+		// We use the same approach as the Checkout test (FixtureData).
+		$flat_rate_settings = array(
+			'enabled'      => 'yes',
+			'title'        => 'Flat rate',
+			'availability' => 'all',
+			'countries'    => '',
+			'tax_status'   => 'taxable',
+			'cost'         => 10,
+		);
+		update_option( 'woocommerce_flat_rate_settings', $flat_rate_settings );
+		update_option( 'woocommerce_flat_rate', array() );
+		\WC_Cache_Helper::get_transient_version( 'shipping', true );
+		WC()->shipping()->load_shipping_methods();
+
 		// Create test methods.
 		$pickup_method  = $this->create_local_pickup_method();
 		$regular_method = $this->create_regular_shipping_method();
@@ -327,6 +340,8 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		// Clean up.
 		remove_all_filters( 'woocommerce_shipping_methods' );
 		remove_all_filters( 'woocommerce_package_rates' );
+		delete_option( 'woocommerce_flat_rate_settings' );
+		delete_option( 'woocommerce_flat_rate' );
 	}
 }
 
