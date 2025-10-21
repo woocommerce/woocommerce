@@ -209,9 +209,30 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$this->assertArrayHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
+
+		// Debug: Verify first test state
+		$first_test_methods = WC()->cart->get_shipping_methods();
+		$first_test_ids = array_map(
+			function( $method ) {
+				return $method && is_callable( array( $method, 'get_method_id' ) ) ? $method->get_method_id() : 'unknown';
+			},
+			$first_test_methods
+		);
+
+		$this->assertArrayHasKey(
+			WC_Gateway_Pay_At_Location::ID,
+			$available_gateways,
+			'First test: Pay at Location SHOULD be available with pickup. Methods: ' . implode( ', ', $first_test_ids ) . ' | Needs shipping: ' . ( WC()->cart->needs_shipping() ? 'YES' : 'NO' )
+		);
 
 		// Test with regular shipping method.
+		// Some previous test may have made products virtual, so ensure we have a physical product.
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->save();
+		WC()->cart->add_to_cart( $product->get_id() );
+
 		// Clear the shipping cache and cart shipping methods to force recalculation.
 		WC()->session->set( 'shipping_for_package_0', null );
 		WC()->cart->shipping_methods = array();
@@ -219,7 +240,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
-		// Debug: Capture cart state for failure analysis
+		// Debug: Capture comprehensive cart and shipping state for failure analysis
 		$shipping_methods = WC()->cart->get_shipping_methods();
 		$method_ids       = array_map(
 			function( $method ) {
@@ -227,12 +248,38 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 			},
 			$shipping_methods
 		);
-		$debug_info       = array(
-			'cart_has_items'      => ! empty( WC()->cart->get_cart() ),
-			'cart_needs_shipping' => WC()->cart->needs_shipping(),
-			'shipping_methods'    => $method_ids,
-			'chosen_methods'      => WC()->session->get( 'chosen_shipping_methods' ),
-			'is_pickup_check'     => array_map(
+
+		// Get cart contents details
+		$cart_items = array();
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product      = $cart_item['data'];
+			$cart_items[] = array(
+				'product_id'   => $product->get_id(),
+				'is_virtual'   => $product->is_virtual(),
+				'needs_shipping' => $product->needs_shipping(),
+			);
+		}
+
+		// Get shipping packages to see what WooCommerce thinks should ship
+		$packages = WC()->shipping()->get_packages();
+		$package_info = array();
+		foreach ( $packages as $package ) {
+			$package_info[] = array(
+				'rates' => array_keys( $package['rates'] ?? array() ),
+			);
+		}
+
+		$debug_info = array(
+			'cart_has_items'        => ! empty( WC()->cart->get_cart() ),
+			'cart_needs_shipping'   => WC()->cart->needs_shipping(),
+			'cart_item_count'       => WC()->cart->get_cart_contents_count(),
+			'cart_items'            => $cart_items,
+			'shipping_methods'      => $method_ids,
+			'shipping_packages'     => $package_info,
+			'chosen_methods'        => WC()->session->get( 'chosen_shipping_methods' ),
+			'session_shipping_cache' => WC()->session->get( 'shipping_for_package_0' ) !== null ? 'EXISTS' : 'NULL',
+			'has_calculated_shipping' => WC()->cart->has_calculated_shipping,
+			'is_pickup_check'       => array_map(
 				function( $id ) {
 					return array(
 						'id'         => $id,
@@ -241,6 +288,8 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 				},
 				$method_ids
 			),
+			'woocommerce_shipping_methods_filter' => has_filter( 'woocommerce_shipping_methods' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
+			'woocommerce_package_rates_filter' => has_filter( 'woocommerce_package_rates' ) !== false ? 'HAS_FILTER' : 'NO_FILTER',
 		);
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
