@@ -23,8 +23,8 @@ jQuery( function ( $ ) {
 	} else {
 		$( '.woocommerce-store-notice' ).show();
 		/**
-		 * After adding the role="button" attribute to the 
-		 * .woocommerce-store-notice__dismiss-link element, 
+		 * After adding the role="button" attribute to the
+		 * .woocommerce-store-notice__dismiss-link element,
 		 * we need to add the keydown event listener to it.
 		 */
 		function store_notice_keydown_handler( event ) {
@@ -43,7 +43,7 @@ jQuery( function ( $ ) {
 				.off( 'click', store_notice_click_handler )
 				.off( 'keydown', store_notice_keydown_handler );
 		}
-		
+
 		$( '.woocommerce-store-notice__dismiss-link' )
 			.on( 'click', store_notice_click_handler )
 			.on( 'keydown', store_notice_keydown_handler );
@@ -249,7 +249,7 @@ function refresh_sorted_by_live_region() {
 	if ( sorted_by_live_region ) {
 		var text = sorted_by_live_region.innerHTML;
 		sorted_by_live_region.setAttribute('aria-hidden', 'true');
-		
+
 		var sorted_by_live_region_id = setTimeout( function () {
 			sorted_by_live_region.setAttribute('aria-hidden', 'false');
 			sorted_by_live_region.innerHTML = '';
