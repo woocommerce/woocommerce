@@ -28,10 +28,6 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		$this->disable_rest_api_v4_feature();
-		// Reset tax settings to ensure consistent product pricing.
-		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
-		// which can affect product prices in subsequent tests. We reset here to maintain test isolation.
-		delete_option( 'woocommerce_calc_taxes' );
 	}
 
 	/**
@@ -140,8 +136,10 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		);
 		wp_set_current_user( $this->user );
 
-		// Disable tax calculations
-		update_option( 'woocommerce_calc_taxes', 'no' );
+		// Reset tax settings to ensure consistent product pricing.
+		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
+		// which can affect product prices in subsequent tests. We reset here to maintain test isolation.
+		delete_option( 'woocommerce_calc_taxes' );
 	}
 
 	/**

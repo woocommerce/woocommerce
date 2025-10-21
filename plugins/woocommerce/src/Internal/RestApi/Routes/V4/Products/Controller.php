@@ -34,7 +34,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * REST API Products controller class.
  *
- * @extends AbstractController
+ * @extends WC_REST_Products_V2_Controller
  */
 class Controller extends WC_REST_Products_V2_Controller {
 
