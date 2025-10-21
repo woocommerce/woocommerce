@@ -133,6 +133,16 @@ class RestAbilityFactory {
 						$schema['required'][] = 'id';
 					}
 
+					if ( $controller instanceof \WC_REST_Product_Variations_Controller ) {
+						$schema['properties']['product_id'] = array(
+							'type'        => 'integer',
+							'description' => __( 'Unique identifier for the parent product', 'woocommerce' ),
+						);
+						if ( ! in_array( 'product_id', $schema['required'], true ) ) {
+							$schema['required'][] = 'product_id';
+						}
+					}
+
 					return $schema;
 				}
 				break;
@@ -282,8 +292,14 @@ class RestAbilityFactory {
 	private static function execute_operation( $controller, string $operation, array $input, string $route ) {
 		$method = self::get_http_method_for_operation( $operation );
 
-		// Build final route - add ID for single item operations.
+		// Build final route - add ID for single item operations. and product ID for operations on variations.
 		$request_route = $route;
+
+		if ( $controller instanceof \WC_REST_Product_Variations_Controller && isset( $input['product_id'] ) ) {
+			$request_route .= '/' . intval( $input['product_id'] ) . '/variations';
+			unset( $input['product_id'] );
+		}
+
 		if ( isset( $input['id'] ) && in_array( $operation, array( 'get', 'update', 'delete' ), true ) ) {
 			$request_route .= '/' . intval( $input['id'] );
 			unset( $input['id'] );
