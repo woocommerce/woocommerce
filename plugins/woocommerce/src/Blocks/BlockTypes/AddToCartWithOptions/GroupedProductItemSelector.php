@@ -54,7 +54,7 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'input_name'  => 'quantity[' . $product->get_id() . ']',
 				'input_id'    => 'quantity_' . $product->get_id(),
 				'input_value' => isset( $_POST['quantity'][ $product->get_id() ] ) ? wc_stock_amount( wc_clean( wp_unslash( $_POST['quantity'][ $product->get_id() ] ) ) ) : '', // phpcs:ignore WordPress.Security.NonceVerification.Missing
-				'min_value'   => 0,
+				'min_value'   => $min_value,
 				'max_value'   => $max_value,
 				/**
 				 * Filter the placeholder value allowed for the product.
