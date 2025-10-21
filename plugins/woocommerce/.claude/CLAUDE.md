@@ -96,13 +96,13 @@ When making changes to the codebase, run these commands to ensure code quality:
 
 ```bash
 # Run PHP linting
-pnpm run lint:php
+pnpm run lint:changes:branch:php
 
 # Fix PHP code style issues
 pnpm run lint:php:fix
 
 # Run JS linting
-pnpm run lint:lang:js
+pnpm run lint:changes:branch:js
 ```
 
 ## Working with Payment Extension Tests
