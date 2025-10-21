@@ -295,7 +295,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		_links: {},
 	},
 	{
-		id: 'pay-at-location',
+		id: 'pal',
 		_type: PaymentsProviderType.OfflinePm,
 		_order: 1002,
 		title: 'Pay at location',
@@ -312,7 +312,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		management: {
 			_links: {
 				settings: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pay-at-location',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pal',
 				},
 			},
 		},
@@ -324,7 +324,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 			},
 			_links: {
 				onboard: {
-					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pay-at-location',
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-settings&tab=checkout&path=/offline/pal',
 				},
 			},
 		},

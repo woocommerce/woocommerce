@@ -68,7 +68,7 @@ const SettingsPaymentsCodChunk = lazy(
 const SettingsPaymentsPayAtLocationChunk = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "settings-payments-pay-at-location" */ './offline/settings-payments-pay-at-location'
+			/* webpackChunkName: "settings-payments-pal" */ './offline/settings-payments-pal'
 		)
 );
 
@@ -330,7 +330,7 @@ export const SettingsPaymentsMainWrapper = () => {
 						element={ <SettingsPaymentsChequeWrapper /> }
 					/>
 					<Route
-						path="/offline/pay-at-location"
+						path="/offline/pal"
 						element={ <SettingsPaymentsPayAtLocationWrapper /> }
 					/>
 					<Route path="/*" element={ <SettingsPaymentsMain /> } />

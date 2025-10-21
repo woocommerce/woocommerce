@@ -30,12 +30,10 @@ export const SettingsPaymentsPayAtLocation = () => {
 	const { payAtLocationSettings, isLoading } = useSelect(
 		( select ) => ( {
 			payAtLocationSettings:
-				select( paymentGatewaysStore ).getPaymentGateway(
-					'pay-at-location'
-				),
+				select( paymentGatewaysStore ).getPaymentGateway( 'pal' ),
 			isLoading: ! select( paymentGatewaysStore ).hasFinishedResolution(
 				'getPaymentGateway',
-				[ 'pay-at-location' ]
+				[ 'pal' ]
 			),
 		} ),
 		[]
@@ -92,7 +90,7 @@ export const SettingsPaymentsPayAtLocation = () => {
 			enable_for_virtual: formValues.enable_for_virtual ? 'yes' : 'no',
 		};
 
-		updatePaymentGateway( 'pay-at-location', {
+		updatePaymentGateway( 'pal', {
 			enabled: Boolean( formValues.enabled ),
 			description: String( formValues.description ),
 			settings,
