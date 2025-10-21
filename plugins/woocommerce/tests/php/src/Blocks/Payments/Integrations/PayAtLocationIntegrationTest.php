@@ -34,6 +34,28 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
+		// Clean up any existing filters.
+		remove_all_filters( 'woocommerce_shipping_methods' );
+		remove_all_filters( 'woocommerce_package_rates' );
+
+		// Clear shipping method cache.
+		WC()->shipping()->unregister_shipping_methods();
+
+		// Empty and reset cart.
+		WC()->cart->empty_cart();
+		WC()->session->set( 'chosen_shipping_methods', array() );
+
+		// Clear shipping package cache from session.
+		// The Checkout test leaves cached shipping rates in the session which prevents
+		// our test shipping methods from being calculated.
+		WC()->session->set( 'shipping_for_package_0', null );
+
+		// Invalidate shipping cache transient to force recalculation.
+		\WC_Cache_Helper::invalidate_cache_group( 'shipping' );
+
+		// Save the previous payment gateways.
+		$this->previous_payment_gateways = WC()->payment_gateways;
+
 		// Enable the Pay at Location gateway.
 		update_option(
 			'woocommerce_pay-at-location_settings',
@@ -46,10 +68,11 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 				'enable_for_virtual' => 'yes',
 			)
 		);
-		$this->previous_payment_gateways = WC()->payment_gateways;
 
-		// Reset WC payment gateways to pick up the new settings.
+		// Force reset WC payment gateways to pick up the new settings.
+		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways = new WC_Payment_Gateways();
+		WC()->payment_gateways()->init();
 	}
 
 	/**
@@ -58,6 +81,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( 'woocommerce_pay-at-location_settings' );
 		remove_all_filters( 'woocommerce_shipping_methods' );
+		remove_all_filters( 'woocommerce_package_rates' );
 		WC()->payment_gateways = $this->previous_payment_gateways;
 		parent::tearDown();
 	}
@@ -158,6 +182,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		// Create test methods.
 		$pickup_method  = $this->create_local_pickup_method();
 		$regular_method = $this->create_regular_shipping_method();
+
 		// Register the methods temporarily with WooCommerce.
 		add_filter(
 			'woocommerce_shipping_methods',
@@ -175,22 +200,23 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		// Test with local pickup method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'test_pickup_rate:1' ) );
-		WC()->cart->calculate_totals();
 		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		$this->assertArrayHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
 
-		// Test with local pickup method.
+		// Test with regular shipping method.
 		WC()->session->set( 'chosen_shipping_methods', array( 'test_regular_rate:1' ) );
-		WC()->cart->calculate_totals();
 		WC()->cart->calculate_shipping();
+		WC()->cart->calculate_totals();
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		$this->assertArrayNotHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
 
 		// Clean up.
 		remove_all_filters( 'woocommerce_shipping_methods' );
+		remove_all_filters( 'woocommerce_package_rates' );
 	}
 }
 
