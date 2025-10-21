@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Caches;
 
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+
 /**
  * Entity versions vache class.
  *
@@ -59,7 +61,7 @@ class EntityVersionsCache {
 		 */
 		$this->is_enabled = apply_filters(
 			'woocommerce_enable_entity_versions_cache',
-			wp_using_ext_object_cache() ?? false
+			wc_get_container()->get( LegacyProxy::class )->call_function( 'wp_using_ext_object_cache' ) ?? false
 		);
 
 		return $this->is_enabled;
@@ -74,12 +76,12 @@ class EntityVersionsCache {
 	 */
 	public function get_entity_version( string $entity_type, int $entity_id ): string {
 		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
-		$version        = get_transient( $transient_name );
+		$version        = $this->get_cached( $transient_name );
 		if ( false === $version ) {
 			$version = $this->modify_entity_version( $entity_type, $entity_id );
 		} else {
 			// Refresh the transient lifetime.
-			$this->store_entity_version( $entity_type, $entity_id, $version );
+			$this->store_entity_version( $entity_type, $entity_id, $version, false );
 		}
 		return $version;
 	}
@@ -93,7 +95,7 @@ class EntityVersionsCache {
 	 */
 	public function modify_entity_version( string $entity_type, int $entity_id ): string {
 		$version = wp_generate_uuid4();
-		$this->store_entity_version( $entity_type, $entity_id, $version );
+		$this->store_entity_version( $entity_type, $entity_id, $version, true );
 		return $version;
 	}
 
@@ -103,9 +105,10 @@ class EntityVersionsCache {
 	 * @param string $entity_type Entity type.
 	 * @param int    $entity_id   Entity ID.
 	 * @param string $version     The version to store.
+	 * @param bool   $is_new      Whether this is a new version (true) or a refresh (false).
 	 * @return bool True on success, false on failure.
 	 */
-	protected function store_entity_version( string $entity_type, int $entity_id, string $version ): bool {
+	protected function store_entity_version( string $entity_type, int $entity_id, string $version, bool $is_new ): bool {
 		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
 
 		/**
@@ -117,8 +120,22 @@ class EntityVersionsCache {
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl = apply_filters( 'woocommerce_cached_entity_version_ttl', HOUR_IN_SECONDS, $entity_type, $entity_id );
-		return set_transient( $transient_name, $version, $ttl );
+		$ttl    = apply_filters( 'woocommerce_cached_entity_version_ttl', HOUR_IN_SECONDS, $entity_type, $entity_id );
+		$result = $this->set_cached( $transient_name, $version, $ttl );
+
+		/**
+		 * Fires after an entity version has been generated or modified.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param string $entity_type The type of the entity.
+		 * @param int    $entity_id   The ID of the entity.
+		 * @param int    $ttl         Time to live in seconds.
+		 * @param bool   $is_new      Whether this is a new version (true) or a refresh of existing version (false).
+		 */
+		do_action( 'woocommerce_entity_version_cached', $entity_type, $entity_id, $ttl, $is_new );
+
+		return $result;
 	}
 
 	/**
@@ -130,7 +147,51 @@ class EntityVersionsCache {
 	 */
 	public function forget_entity_version( string $entity_type, int $entity_id ): bool {
 		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
-		return delete_transient( $transient_name );
+		$result         = $this->delete_cached( $transient_name );
+
+		/**
+		 * Fires after an entity version has been explicitly deleted.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param string $entity_type The type of the entity.
+		 * @param int    $entity_id   The ID of the entity.
+		 */
+		do_action( 'woocommerce_entity_version_cache_deleted', $entity_type, $entity_id );
+
+		return $result;
+	}
+
+	/**
+	 * Get a value from the cache.
+	 *
+	 * @param string $cache_key The cache key.
+	 * @return mixed The cached value or false if not found.
+	 */
+	protected function get_cached( string $cache_key ) {
+		return get_transient( $cache_key );
+	}
+
+	/**
+	 * Set a value in the cache.
+	 *
+	 * @param string $cache_key The cache key.
+	 * @param mixed  $value     The value to cache.
+	 * @param int    $ttl       Time to live in seconds.
+	 * @return bool True on success, false on failure.
+	 */
+	protected function set_cached( string $cache_key, $value, int $ttl ): bool {
+		return set_transient( $cache_key, $value, $ttl );
+	}
+
+	/**
+	 * Delete a value from the cache.
+	 *
+	 * @param string $cache_key The cache key.
+	 * @return bool True on success, false on failure.
+	 */
+	protected function delete_cached( string $cache_key ): bool {
+		return delete_transient( $cache_key );
 	}
 
 	/**

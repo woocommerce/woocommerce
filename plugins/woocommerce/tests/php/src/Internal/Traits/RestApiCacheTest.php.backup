@@ -1,0 +1,378 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Traits;
+
+use Automattic\WooCommerce\Internal\Caches\EntityVersionsCache;
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+use WC_Unit_Test_Case;
+use WP_REST_Controller;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+use WP_Error;
+
+/**
+ * Tests for the RestApiCache trait.
+ */
+class RestApiCacheTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var object
+	 */
+	private $sut;
+
+	/**
+	 * Mock EntityVersionsCache instance.
+	 *
+	 * @var object
+	 */
+	private $mock_entity_cache;
+
+	/**
+	 * REST API server instance.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * Set up before each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Clear DI container cache.
+		wc_get_container()->reset_all_resolved();
+
+		// Create and register mock EntityVersionsCache.
+		$this->mock_entity_cache = $this->create_mock_entity_versions_cache();
+		wc_get_container()->replace( EntityVersionsCache::class, $this->mock_entity_cache );
+
+		// Create test controller.
+		$this->sut = $this->create_test_controller();
+			use RestApiCache;
+
+			/**
+			 * Response data for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $responses = array(
+				'get1' => array(
+					'id'   => 1,
+					'name' => 'Product 1',
+				),
+				'get2' => array(
+					array(
+						'id'   => 2,
+						'name' => 'Product 2',
+					),
+					array(
+						'id'   => 3,
+						'name' => 'Product 3',
+					),
+					array( 'name' => 'Product without ID' ),
+				),
+				'get3' => array( 'name' => 'Product without ID' ),
+				'get4' => array(
+					'id'   => 4,
+					'name' => 'Product 4',
+				),
+			);
+
+			/**
+			 * Stored requests for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $requests = array();
+
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->namespace = 'wc/v3';
+				$this->rest_base = 'rest_api_cache_test';
+				$this->initialize_rest_api_cache();
+			}
+
+			/**
+			 * Register routes.
+			 */
+			public function register_routes() {
+				// get1 - cacheable, returns single entity.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/get1',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache( array( $this, 'handle_get1' ) ),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// get2 - cacheable, returns collection.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/get2',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache( array( $this, 'handle_get2' ) ),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// get3 - cacheable, returns entity without ID.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/get3',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache( array( $this, 'handle_get3' ) ),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// get4 - not cacheable.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/get4',
+					array(
+						'methods'             => 'GET',
+						'callback'            => array( $this, 'handle_get4' ),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+
+			/**
+			 * Get default entity type.
+			 *
+			 * @return string
+			 */
+			protected function get_default_entity_type(): ?string {
+				return 'product';
+			}
+
+			/**
+			 * Handle get1 request.
+			 *
+			 * @param WP_REST_Request $request Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			public function handle_get1( $request ) {
+				return $this->handle_request( 'get1', $request );
+			}
+
+			/**
+			 * Handle get2 request.
+			 *
+			 * @param WP_REST_Request $request Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			public function handle_get2( $request ) {
+				return $this->handle_request( 'get2', $request );
+			}
+
+			/**
+			 * Handle get3 request.
+			 *
+			 * @param WP_REST_Request $request Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			public function handle_get3( $request ) {
+				return $this->handle_request( 'get3', $request );
+			}
+
+			/**
+			 * Handle get4 request.
+			 *
+			 * @param WP_REST_Request $request Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			public function handle_get4( $request ) {
+				return $this->handle_request( 'get4', $request );
+			}
+
+			/**
+			 * Generic request handler.
+			 *
+			 * @param string          $endpoint Endpoint name.
+			 * @param WP_REST_Request $request  Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			private function handle_request( string $endpoint, WP_REST_Request $request ) {
+				// Store the request.
+				$this->requests[ $endpoint ] = $request;
+
+				// Return error if response is null.
+				if ( is_null( $this->responses[ $endpoint ] ) ) {
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					return new WP_Error( 'server_error', 'Internal server error', array( 'status' => 500 ) );
+				}
+
+				// Return the response.
+				return new WP_REST_Response( $this->responses[ $endpoint ], 200 );
+			}
+		};
+
+		// Set up REST server.
+		global $wp_rest_server;
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
+
+		// Register controller routes.
+		$this->sut->register_routes();
+	}
+
+	/**
+	 * Tear down after each test.
+	 */
+	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox Get1 endpoint returns expected data
+	 */
+	public function test_get1_endpoint_returns_expected_data() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get1' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				'id'   => 1,
+				'name' => 'Product 1',
+			),
+			$response->get_data()
+		);
+	}
+
+	/**
+	 * @testdox Get2 endpoint returns expected data
+	 */
+	public function test_get2_endpoint_returns_expected_data() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get2' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				array(
+					'id'   => 2,
+					'name' => 'Product 2',
+				),
+				array(
+					'id'   => 3,
+					'name' => 'Product 3',
+				),
+				array( 'name' => 'Product without ID' ),
+			),
+			$response->get_data()
+		);
+	}
+
+	/**
+	 * @testdox Get3 endpoint returns expected data
+	 */
+	public function test_get3_endpoint_returns_expected_data() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get3' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array( 'name' => 'Product without ID' ),
+			$response->get_data()
+		);
+	}
+
+	/**
+	 * @testdox Get4 endpoint returns expected data
+	 */
+	public function test_get4_endpoint_returns_expected_data() {
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get4' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals(
+			array(
+				'id'   => 4,
+				'name' => 'Product 4',
+			),
+			$response->get_data()
+		);
+	}
+
+	/**
+	 * @testdox Endpoints store the request object
+	 */
+	public function test_endpoints_store_request_object() {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get1' );
+		$request->set_query_params( array( 'foo' => 'bar' ) );
+		$this->server->dispatch( $request );
+
+		$this->assertInstanceOf( WP_REST_Request::class, $this->sut->requests['get1'] );
+		$this->assertEquals( 'bar', $this->sut->requests['get1']->get_param( 'foo' ) );
+	}
+
+	/**
+	 * @testdox Endpoint returns WP_Error when response is null
+	 */
+	public function test_endpoint_returns_error_when_response_is_null() {
+		$this->sut->responses['get1'] = null;
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/rest_api_cache_test/get1' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response->as_error() );
+		$this->assertEquals( 500, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Mock EntityVersionsCache stores and retrieves versions
+	 */
+	public function test_mock_entity_cache_stores_and_retrieves_versions() {
+		$version = $this->mock_entity_cache->modify_entity_version( 'product', 123 );
+
+		$this->assertNotEmpty( $version );
+		$this->assertEquals( $version, $this->mock_entity_cache->get_entity_version( 'product', 123 ) );
+	}
+
+	/**
+	 * @testdox Mock EntityVersionsCache stores TTL
+	 */
+	public function test_mock_entity_cache_stores_ttl() {
+		$this->mock_entity_cache->modify_entity_version( 'product', 123 );
+
+		$key = 'wc_entity_version_product_123';
+		$this->assertArrayHasKey( $key, $this->mock_entity_cache->cache );
+		$this->assertEquals( HOUR_IN_SECONDS, $this->mock_entity_cache->cache[ $key ]['ttl'] );
+	}
+
+	/**
+	 * @testdox Mock EntityVersionsCache deletes versions
+	 */
+	public function test_mock_entity_cache_deletes_versions() {
+		$this->mock_entity_cache->modify_entity_version( 'product', 123 );
+		$this->mock_entity_cache->forget_entity_version( 'product', 123 );
+
+		$this->assertEmpty( $this->mock_entity_cache->get_entity_version( 'product', 123 ) );
+	}
+
+	/**
+	 * @testdox Mock EntityVersionsCache returns empty string for non-existent versions
+	 */
+	public function test_mock_entity_cache_returns_empty_string_for_nonexistent_versions() {
+		$this->assertEmpty( $this->mock_entity_cache->get_entity_version( 'product', 999 ) );
+	}
+}

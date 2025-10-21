@@ -26,6 +26,8 @@ defined( 'ABSPATH' ) || exit;
  */
 class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
+	use RestApiCache;
+
 	/**
 	 * Endpoint namespace.
 	 *
@@ -58,6 +60,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * Initialize product actions.
 	 */
 	public function __construct() {
+		$this->initialize_rest_api_cache();
 		add_action( "woocommerce_rest_insert_{$this->post_type}_object", array( $this, 'clear_transients' ) );
 	}
 
@@ -71,7 +74,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			array(
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_items' ),
+					'callback'            => $this->with_cache( array( $this, 'get_items' ) ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => $this->get_collection_params(),
 				),
@@ -97,7 +100,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 				),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_item' ),
+					'callback'            => $this->with_cache( array( $this, 'get_item' ) ),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
 						'context' => $this->get_context_param(
@@ -2462,5 +2465,31 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		);
 
 		return $params;
+	}
+
+	/**
+	 * Get the default entity type for caching.
+	 * See the RestApiCache trait.
+	 *
+	 * @return string|null Entity type.
+	 */
+	protected function get_default_entity_type(): ?string {
+		return 'product';
+	}
+
+	/**
+	 * Get the names of filters that can modify product responses.
+	 * See the RestApiCache trait.
+	 *
+	 * When these filters change (callbacks added/removed), cached responses will be invalidated.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return array Array of filter names to track.
+	 */
+	protected function get_hooks_relevant_to_caching($request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return array(
+			'woocommerce_rest_prepare_product_object',
+			'woocommerce_rest_product_object_query',
+		);
 	}
 }

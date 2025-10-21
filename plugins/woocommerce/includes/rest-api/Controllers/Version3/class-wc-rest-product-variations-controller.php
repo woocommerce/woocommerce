@@ -51,15 +51,34 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->initialize_output_caching();
+		$this->initialize_rest_api_cache();
 	}
 
 	/**
-	 * Register the routes for products.
+	 * Register the routes for variations.
+	 *
+	 * Note: To enable caching for parent routes, they would need to be re-registered here
+	 * with callbacks wrapped using $this->with_cache(). For example:
+	 *
+	 * register_rest_route(
+	 *     $this->namespace,
+	 *     '/' . $this->rest_base,
+	 *     array(
+	 *         'methods'  => WP_REST_Server::READABLE,
+	 *         'callback' => $this->with_cache(
+	 *             array( $this, 'get_items' ),
+	 *             array(
+	 *                 'extract_entity_ids' => array( $this, 'extract_entity_ids' ),
+	 *             )
+	 *         ),
+	 *         // ... other args
+	 *     )
+	 * );
 	 */
 	public function register_routes() {
 		parent::register_routes();
 
+		// Generate variations endpoint - POST endpoint, not cacheable.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/generate',
@@ -1339,13 +1358,15 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	}
 
 	/**
-	 * Get the names of the filters that can modify the endpoint responses.
+	 * Get the names of filters that can modify variation responses.
 	 * See the RestApiCache trait.
 	 *
+	 * When these filters change (callbacks added/removed), cached responses will be invalidated.
+	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return array Array of filter names.
+	 * @return array Array of filter names to track.
 	 */
-	protected function get_cache_hash_filters( WP_REST_Request $request ): array {
+	protected function get_relevant_filters( $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		return array(
 			'woocommerce_rest_prepare_product_variation_object',
 			'woocommerce_rest_product_object_query',
@@ -1359,11 +1380,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * For variations, we need to track both the variation ID and parent product ID
 	 * for proper cache invalidation.
 	 *
-	 * @param array $data Response data.
+	 * @param array           $data    Response data.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Variation and parent product IDs.
 	 */
-	protected function extract_entity_ids( array $data ): array {
-		$ids = $this->parent_extract_entity_ids( $data );
+	protected function extract_entity_ids( $data, $request ) {
+		$ids = $this->parent_extract_entity_ids( $data, $request );
 
 		$parent_id = 0;
 		if ( isset( $data[0]['parent_id'] ) ) {
