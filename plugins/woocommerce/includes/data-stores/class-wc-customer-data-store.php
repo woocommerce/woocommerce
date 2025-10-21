@@ -689,19 +689,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				break;
 		}
 
-		// Search handling.
-		if ( ! empty( $args['email'] ) ) {
-			$query_args['search']         = $args['email'];
-			$query_args['search_columns'] = array( 'user_email' );
-		} elseif ( ! empty( $args['search'] ) ) {
-			$query_args['search'] = '*' . $args['search'] . '*';
-		}
-
-		// Role filter.
-		if ( 'all' !== $args['role'] ) {
-			$query_args['role'] = $args['role'];
-		}
-
 		/**
 		 * Filter customer query args before execution.
 		 *
