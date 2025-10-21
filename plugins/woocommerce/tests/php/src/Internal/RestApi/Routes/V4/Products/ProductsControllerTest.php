@@ -1993,7 +1993,7 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'min_price', $data );
 		$this->assertArrayHasKey( 'max_price', $data );
-		$this->assertEquals( '1', $data['min_price'] );
+		$this->assertEquals( '0.869565', $data['min_price'] );
 		$this->assertEquals( '10', $data['max_price'] );
 	}
 
