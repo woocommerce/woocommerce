@@ -1769,6 +1769,9 @@ class FeaturesController {
             for(const warningRow of warningRows) {
                 const pluginName = warningRow.getAttribute('data-plugin');
                 const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
+                if(!pluginInfoRow) {
+                    continue;
+                }
                 if(pluginInfoRow.classList.contains('update')) {
                     warningRow.classList.remove('plugin-update-tr');
                     warningRow.querySelector('.notice').style.margin = '5px 10px 15px 30px';

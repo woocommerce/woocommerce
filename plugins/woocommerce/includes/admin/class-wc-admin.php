@@ -305,7 +305,7 @@ class WC_Admin {
 		                var ratingLink = document.querySelector('a.wc-rating-link');
 		                if (ratingLink) {
 		                    ratingLink.addEventListener('click', function(e) {
-		                        var link = e.target;
+		                        var link = e.currentTarget;
 		                        var formData = new FormData();
 		                        formData.append('action', 'woocommerce_rated');
 		                        

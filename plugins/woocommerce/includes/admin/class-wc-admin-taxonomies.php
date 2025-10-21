@@ -488,7 +488,7 @@ class WC_Admin_Taxonomies {
 		wp_add_inline_script(
 			$handle,
 			sprintf(
-				"document.addEventListener('DOMContentLoaded', function() {
+				"(function() {
                     'use strict';
                     const product_cat = document.getElementById('tag-%d');
                     if (product_cat) {
@@ -499,7 +499,7 @@ class WC_Admin_Taxonomies {
                             th.appendChild(thumbSpan);
                         }
                     }
-                });",
+                })();",
 				absint( $this->default_cat_id )
 			)
 		);
