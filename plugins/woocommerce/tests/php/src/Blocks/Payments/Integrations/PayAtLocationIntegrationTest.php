@@ -82,6 +82,11 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		delete_option( 'woocommerce_pay-at-location_settings' );
 		remove_all_filters( 'woocommerce_shipping_methods' );
 		remove_all_filters( 'woocommerce_package_rates' );
+
+		// Clear shipping method cache.
+		WC()->shipping()->unregister_shipping_methods();
+
+		// Restore previous payment gateways.
 		WC()->payment_gateways = $this->previous_payment_gateways;
 		parent::tearDown();
 	}
@@ -207,6 +212,9 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
 
 		// Test with regular shipping method.
+		// Clear the shipping cache and cart shipping methods to force recalculation.
+		WC()->session->set( 'shipping_for_package_0', null );
+		WC()->cart->shipping_methods = array();
 		WC()->session->set( 'chosen_shipping_methods', array( 'test_regular_rate:1' ) );
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
