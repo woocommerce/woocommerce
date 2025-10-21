@@ -219,8 +219,36 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		WC()->cart->calculate_shipping();
 		WC()->cart->calculate_totals();
 
+		// Debug: Capture cart state for failure analysis
+		$shipping_methods = WC()->cart->get_shipping_methods();
+		$method_ids       = array_map(
+			function( $method ) {
+				return $method && is_callable( array( $method, 'get_method_id' ) ) ? $method->get_method_id() : 'unknown';
+			},
+			$shipping_methods
+		);
+		$debug_info       = array(
+			'cart_has_items'      => ! empty( WC()->cart->get_cart() ),
+			'cart_needs_shipping' => WC()->cart->needs_shipping(),
+			'shipping_methods'    => $method_ids,
+			'chosen_methods'      => WC()->session->get( 'chosen_shipping_methods' ),
+			'is_pickup_check'     => array_map(
+				function( $id ) {
+					return array(
+						'id'         => $id,
+						'is_pickup'  => LocalPickupUtils::is_local_pickup_method( $id ),
+					);
+				},
+				$method_ids
+			),
+		);
+
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
-		$this->assertArrayNotHasKey( WC_Gateway_Pay_At_Location::ID, $available_gateways );
+		$this->assertArrayNotHasKey(
+			WC_Gateway_Pay_At_Location::ID,
+			$available_gateways,
+			'Pay at Location should NOT be available with regular shipping. Debug: ' . wp_json_encode( $debug_info, JSON_PRETTY_PRINT )
+		);
 
 		// Clean up.
 		remove_all_filters( 'woocommerce_shipping_methods' );
