@@ -160,6 +160,45 @@ class RestAbilityFactory {
 					),
 					'required'   => array( 'id' ),
 				);
+
+			case 'batch':
+				// Use controller's batch schema.
+				if ( method_exists( $controller, 'get_public_batch_schema' ) ) {
+					$schema = $controller->get_public_batch_schema( \WP_REST_Server::EDITABLE );
+
+					if ( $controller instanceof \WC_REST_Product_Variations_Controller ) {
+						$schema['properties']['product_id'] = array(
+							'type'        => 'integer',
+							'description' => __( 'Unique identifier for the parent product', 'woocommerce' ),
+						);
+					}
+
+					if ( isset( $schema['properties']['create']['type'] ) && 'array' === $schema['properties']['create']['type'] ) {
+						$schema['properties']['create']['items'] = self::sanitize_args_to_schema(
+							$controller->get_endpoint_args_for_item_schema( \WP_REST_Server::CREATABLE )
+						);
+					}
+					if ( isset( $schema['properties']['update']['type'] ) && 'array' === $schema['properties']['update']['type'] ) {
+						$schema['properties']['update']['items'] = self::sanitize_args_to_schema(
+							$controller->get_endpoint_args_for_item_schema( \WP_REST_Server::EDITABLE )
+						);
+
+						// Add ID field for update operations.
+						$schema['properties']['update']['items']['properties']['id'] = array(
+							'type'        => 'integer',
+							'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
+						);
+					}
+					if ( isset( $schema['properties']['delete']['type'] ) && 'array' === $schema['properties']['delete']['type'] ) {
+						$schema['properties']['delete']['items'] = array(
+							'type'        => 'integer',
+							'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
+						);
+					}
+
+					return $schema;
+				}
+				break;
 		}
 
 		// Fallback.
@@ -271,6 +310,24 @@ class RestAbilityFactory {
 						'previous' => $schema,
 					),
 				);
+			} elseif ( 'batch' === $operation ) {
+				return array(
+					'type'       => 'object',
+					'properties' => array(
+						'create' => array(
+							'type'  => 'array',
+							'items' => $schema,
+						),
+						'update' => array(
+							'type'  => 'array',
+							'items' => $schema,
+						),
+						'delete' => array(
+							'type'  => 'array',
+							'items' => $schema,
+						),
+					),
+				);
 			}
 
 			// For get, create, update operations.
@@ -303,6 +360,10 @@ class RestAbilityFactory {
 		if ( isset( $input['id'] ) && in_array( $operation, array( 'get', 'update', 'delete' ), true ) ) {
 			$request_route .= '/' . intval( $input['id'] );
 			unset( $input['id'] );
+		}
+
+		if ( 'batch' === $operation ) {
+			$request_route .= '/batch';
 		}
 
 		// Create REST request.
@@ -341,6 +402,7 @@ class RestAbilityFactory {
 			'create' => 'POST',
 			'update' => 'PUT',
 			'delete' => 'DELETE',
+			'batch'  => 'POST',
 		);
 		return $method_map[ $operation ] ?? 'GET';
 	}
