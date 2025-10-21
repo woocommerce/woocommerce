@@ -5,7 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\Payments\Integrations;
 
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use WC_Cache_Helper;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 use WC_Helper_Product;
 use WC_Payment_Gateways;
 use WC_Shipping_Method;
@@ -132,7 +132,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		$this->assertArrayHasKey(
-			WC_Gateway_Pay_At_Location::ID,
+			WC_Gateway_PAL::ID,
 			$available_gateways,
 			'Pay at Location should be available with local pickup'
 		);
@@ -166,7 +166,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 		$this->assertArrayNotHasKey(
-			WC_Gateway_Pay_At_Location::ID,
+			WC_Gateway_PAL::ID,
 			$available_gateways,
 			'Pay at Location should NOT be available with regular shipping'
 		);

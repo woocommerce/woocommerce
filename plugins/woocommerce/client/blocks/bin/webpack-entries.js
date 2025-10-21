@@ -374,8 +374,8 @@ const entries = {
 			'./assets/js/extensions/payment-methods/bacs/index.js',
 		'wc-payment-method-cod':
 			'./assets/js/extensions/payment-methods/cod/index.js',
-		'wc-payment-method-pay-at-location':
-			'./assets/js/extensions/payment-methods/pay-at-location/index.tsx',
+		'wc-payment-method-pal':
+			'./assets/js/extensions/payment-methods/pal/index.tsx',
 	},
 	extensions: {
 		'wc-blocks-google-analytics':

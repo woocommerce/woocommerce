@@ -15,7 +15,7 @@ import { selectedRatesAreCollectable } from '@woocommerce/base-utils';
  */
 import { PAYMENT_METHOD_NAME } from './constants';
 
-const settings = getPaymentMethodData( 'pay-at-location', {} );
+const settings = getPaymentMethodData( PAYMENT_METHOD_NAME, {} );
 const defaultLabel = __( 'Pay at location', 'woocommerce' );
 const label = decodeEntities( settings?.title || '' ) || defaultLabel;
 

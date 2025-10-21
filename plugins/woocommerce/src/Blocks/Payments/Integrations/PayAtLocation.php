@@ -4,7 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Payments\Integrations;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
-use WC_Gateway_Pay_At_Location;
+use WC_Gateway_PAL;
 
 /**
  * Pay at Location payment method integration
@@ -13,11 +13,11 @@ use WC_Gateway_Pay_At_Location;
  */
 final class PayAtLocation extends AbstractPaymentMethodType {
 	/**
-	 * Payment method name/id/slug (matches id in WC_Gateway_Pay_At_Location in core).
+	 * Payment method name/id/slug (matches id in WC_Gateway_PAL in core).
 	 *
 	 * @var string
 	 */
-	protected $name = WC_Gateway_Pay_At_Location::ID;
+	protected $name = WC_Gateway_PAL::ID;
 
 	/**
 	 * An instance of the Asset Api
@@ -82,10 +82,10 @@ final class PayAtLocation extends AbstractPaymentMethodType {
 	 */
 	public function get_payment_method_script_handles() {
 		$this->asset_api->register_script(
-			'wc-payment-method-pay-at-location',
-			'assets/client/blocks/wc-payment-method-pay-at-location.js'
+			'wc-payment-method-pal',
+			'assets/client/blocks/wc-payment-method-pal.js'
 		);
-		return [ 'wc-payment-method-pay-at-location' ];
+		return [ 'wc-payment-method-pal' ];
 	}
 
 	/**
