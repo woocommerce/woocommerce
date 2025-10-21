@@ -616,4 +616,109 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 		return array_unique( $users_query->get_results() );
 	}
+
+	/**
+	 * Get orderby mapping for customer queries.
+	 *
+	 * @return array
+	 */
+	private function get_orderby_mapping() {
+		return array(
+			'date_created' => 'user_registered',
+			'orders_count' => 'orders_count',
+			'total_spent'  => 'total_spent',
+			'last_active'  => 'last_active',
+		);
+	}
+
+	/**
+	 * Query customers ordered by allowed fields.
+	 *
+	 * @param array $args Query arguments.
+	 * @return WC_Customer[] Array of customers in the requested order.
+	 */
+	public function query_customers( array $args = array() ) {
+		$defaults = array(
+			'order'    => 'asc',
+			'orderby'  => 'date_created',
+			'per_page' => 10,
+			'page'     => 1,
+			'offset'   => 0,
+			'search'   => '',
+			'email'    => '',
+			'role'     => 'customer',
+			'include'  => array(),
+			'exclude'  => array(),
+		);
+
+		$args = wp_parse_args( $args, $defaults );
+
+		$orderby_mapping = $this->get_orderby_mapping();
+		$orderby_key     = isset( $orderby_mapping[ $args['orderby'] ] ) ? $orderby_mapping[ $args['orderby'] ] : 'user_registered';
+
+		$query_args = array(
+			'order'   => $args['order'],
+			'number'  => absint( $args['per_page'] ),
+			'exclude' => $args['exclude'],
+			'include' => $args['include'],
+		);
+
+		if ( ! empty( $args['offset'] ) ) {
+			$query_args['offset'] = $args['offset'];
+		} else {
+			$query_args['offset'] = ( $args['page'] - 1 ) * $query_args['number'];
+		}
+
+		// Custom WC_Customer meta ordering.
+		switch ( $orderby_key ) {
+			case 'orders_count':
+				$query_args['meta_key'] = 'wc_order_count';
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'total_spent':
+				$query_args['meta_key'] = 'wc_money_spent';
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'last_active':
+				$query_args['meta_key'] = 'wc_last_active';
+				$query_args['orderby']  = 'meta_value_num';
+				break;
+			case 'user_registered':
+			default:
+				$query_args['orderby'] = 'user_registered';
+				break;
+		}
+
+		// Search handling.
+		if ( ! empty( $args['email'] ) ) {
+			$query_args['search']         = $args['email'];
+			$query_args['search_columns'] = array( 'user_email' );
+		} elseif ( ! empty( $args['search'] ) ) {
+			$query_args['search'] = '*' . $args['search'] . '*';
+		}
+
+		// Role filter.
+		if ( 'all' !== $args['role'] ) {
+			$query_args['role'] = $args['role'];
+		}
+
+		/**
+		 * Filter customer query args before execution.
+		 *
+		 * @since TBD
+		 *
+		 * @param array $query_args Arguments for WP_User_Query.
+		 * @param array $args       Original method args.
+		 */
+		$query_args = apply_filters( 'woocommerce_customer_query_args', $query_args, $args );
+
+		$wp_user_query = new \WP_User_Query( $query_args );
+
+		$customers = array();
+		foreach ( $wp_user_query->get_results() as $user ) {
+			$customers[] = new \WC_Customer( $user->ID );
+		}
+
+		return $customers;
+	}
 }

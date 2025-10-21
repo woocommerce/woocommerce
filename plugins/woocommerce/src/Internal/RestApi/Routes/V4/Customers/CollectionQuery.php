@@ -92,7 +92,10 @@ final class CollectionQuery extends AbstractCollectionQuery {
 					'id',
 					'include',
 					'name',
-					'registered_date',
+					'date_created',
+					'orders_count',
+					'total_spent',
+					'last_active',
 				),
 				'sanitize_callback' => 'sanitize_key',
 				'validate_callback' => 'rest_validate_request_arg',
@@ -136,10 +139,10 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		}
 
 		$orderby_possibles        = array(
-			'id'              => 'ID',
-			'include'         => 'include',
-			'name'            => 'display_name',
-			'registered_date' => 'registered',
+			'date_created' => 'user_registered',
+			'orders_count' => 'orders_count',
+			'total_spent'  => 'total_spent',
+			'last_active'  => 'last_active',
 		);
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['search']  = $request['search'];
@@ -181,22 +184,27 @@ final class CollectionQuery extends AbstractCollectionQuery {
 	 * @return array
 	 */
 	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
-		$query = new WP_User_Query( $query_args );
+		$method_args = array(
+			'order'    => $query_args['order'] ?? 'asc',
+			'orderby'  => $this->reverse_map_orderby( $query_args ),
+			'per_page' => $query_args['number'] ?? 10,
+			'offset'   => $query_args['offset'] ?? 0,
+			'search'   => $query_args['search'] ?? '',
+			'email'    => $request['email'] ?? '',
+			'role'     => $request['role'] ?? 'customer',
+			'include'  => $query_args['include'] ?? array(),
+			'exclude'  => $query_args['exclude'] ?? array(),
+		);
 
-		$users = array();
-		foreach ( $query->results as $user ) {
-			$users[] = new \WC_Customer( $user->ID );
-		}
+		$data_store = \WC_Data_Store::load( 'customer' );
+		$users      = $data_store->query_customers( $method_args );
 
-		// Store pagination values for headers then unset for count query.
 		$per_page = (int) $query_args['number'];
-		$page     = ceil( ( ( (int) $query_args['offset'] ) / $per_page ) + 1 );
 
 		$query_args['fields'] = 'ID';
 
-		$total_users = $query->get_total();
+		$total_users = ( new WP_User_Query( $query_args ) )->get_total();
 		if ( $total_users < 1 ) {
-			// Out-of-bounds, run the query again without LIMIT for total count.
 			unset( $query_args['number'] );
 			unset( $query_args['offset'] );
 			$count_query = new WP_User_Query( $query_args );
@@ -210,5 +218,38 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'total'   => $total_users,
 			'pages'   => $max_pages,
 		);
+	}
+
+	/**
+	 * Reverse map orderby from WP_User_Query format back to our API format.
+	 *
+	 * @param array $query_args The query arguments.
+	 * @return string
+	 */
+	private function reverse_map_orderby( array $query_args ): string {
+		// Handle meta-based ordering.
+		if ( isset( $query_args['meta_key'] ) ) {
+			switch ( $query_args['meta_key'] ) {
+				case 'wc_order_count':
+					return 'orders_count';
+				case 'wc_money_spent':
+					return 'total_spent';
+				case 'wc_last_active':
+					return 'last_active';
+			}
+		}
+
+		// Handle direct field ordering.
+		if ( isset( $query_args['orderby'] ) ) {
+			switch ( $query_args['orderby'] ) {
+				case 'user_registered':
+					return 'date_created';
+				case 'meta_value_num':
+					// This should have been handled by meta_key above.
+					return 'date_created';
+			}
+		}
+
+		return 'date_created';
 	}
 }
