@@ -33,6 +33,11 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 	private $prev_default_country;
 
 	/**
+	 * @var string $initial_currency that is set on site which is a platform for unit tests, before running tests in this test suite.
+	 */
+	private $initial_currency = '';
+
+	/**
 	 * Setup.
 	 */
 	public function setUp(): void {
@@ -48,6 +53,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 
 		// This is to reset the country after the test.
 		$this->prev_default_country = get_option( 'woocommerce_default_country' );
+		$this->initial_currency     = get_woocommerce_currency();
 
 		// Create a user with permissions.
 		$this->user_id = $this->factory->user->create(
@@ -68,7 +74,7 @@ class WC_REST_General_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case
 			update_option( 'woocommerce_default_country', $this->prev_default_country );
 		}
 		delete_option( 'general_options' );
-		delete_option( 'woocommerce_currency' );
+		update_option( 'woocommerce_currency', $this->initial_currency );
 		delete_option( 'woocommerce_price_num_decimals' );
 		delete_option( 'woocommerce_share_key_display' );
 		parent::tearDown();
