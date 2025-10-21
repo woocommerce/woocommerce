@@ -1,1 +1,1 @@
-export const PAYMENT_METHOD_NAME = 'pay-at-location';
+export const PAYMENT_METHOD_NAME = 'pal';

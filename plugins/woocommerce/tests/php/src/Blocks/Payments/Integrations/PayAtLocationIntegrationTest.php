@@ -63,7 +63,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 
 		// Enable the Pay at Location gateway.
 		update_option(
-			'woocommerce_pay-at-location_settings',
+			'woocommerce_pal_settings',
 			array(
 				'enabled'            => 'yes',
 				'title'              => 'Pay at location',
@@ -84,7 +84,7 @@ class PayAtLocationIntegrationTest extends WC_Unit_Test_Case {
 	 * Tear down test case.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_pay-at-location_settings' );
+		delete_option( 'woocommerce_pal_settings' );
 
 		remove_all_filters( 'woocommerce_shipping_methods' );
 		remove_all_filters( 'woocommerce_package_rates' );

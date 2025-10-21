@@ -55,7 +55,7 @@ const canMakePayment = ( {
 /**
  * Pay at location payment method config object.
  */
-const payAtLocationPaymentMethod = {
+const palPaymentMethod = {
 	name: PAYMENT_METHOD_NAME,
 	label: <Label />,
 	content: <Content />,
@@ -67,4 +67,4 @@ const payAtLocationPaymentMethod = {
 	},
 };
 
-registerPaymentMethod( payAtLocationPaymentMethod );
+registerPaymentMethod( palPaymentMethod );

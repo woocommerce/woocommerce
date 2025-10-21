@@ -39,7 +39,7 @@ final class PayAtLocation extends AbstractPaymentMethodType {
 	 * Initializes the payment method type.
 	 */
 	public function initialize() {
-		$this->settings = get_option( 'woocommerce_pay-at-location_settings', [] );
+		$this->settings = get_option( 'woocommerce_pal_settings', [] );
 	}
 
 	/**
