@@ -62,7 +62,7 @@ pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_cou
 
 - Tests run in a Docker-based WordPress environment using `wp-env`
 - The test environment is automatically set up and configured
-- Tests use PHPUnit 9.6.24 with PHP 8.0.30
+- Tests use PHPUnit 9.6.24 with PHP 8.1
 - WordPress and WooCommerce are automatically installed in the test environment
 
 
