@@ -155,7 +155,8 @@
 
 	&__inner-blocks {
 		a,
-		.wp-block-post-title {
+		.wp-block-post-title,
+		.wp-block-woocommerce-category-title {
 			color: inherit;
 		}
 	}
