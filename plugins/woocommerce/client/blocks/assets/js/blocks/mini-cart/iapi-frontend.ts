@@ -337,22 +337,11 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemDiscount(): string {
-				const { prices, extensions } = cartItemState.cartItem;
-
-				const regularAmountSingle = scalePrice( {
-					price: parseInt( prices.raw_prices.regular_price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
-
-				const purchaseAmountSingle = scalePrice( {
-					price: parseInt( prices.raw_prices.price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				const { extensions } = cartItemState.cartItem;
 
 				const discountPrice =
-					regularAmountSingle - purchaseAmountSingle;
+					cartItemState.regularAmountSingle -
+					cartItemState.purchaseAmountSingle;
 
 				const price = formatPriceWithCurrency(
 					discountPrice,
@@ -387,22 +376,12 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices, extensions } = cartItemState.cartItem;
-
-				const regularAmountSingle = scalePrice( {
-					price: parseInt( prices.raw_prices.regular_price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
-
-				const purchaseAmountSingle = scalePrice( {
-					price: parseInt( prices.raw_prices.price, 10 ),
-					inputDecimals: prices.raw_prices.precision,
-					outputDecimals: cartItemState.currency.minorUnit,
-				} );
+				const { quantity, extensions } = cartItemState.cartItem;
 
 				const totalLineItemDiscount =
-					( regularAmountSingle - purchaseAmountSingle ) * quantity;
+					( cartItemState.regularAmountSingle -
+						cartItemState.purchaseAmountSingle ) *
+					quantity;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -535,6 +514,26 @@ const { state: cartItemState } = store(
 					priceWithoutDiscount,
 					cartItemState.currency
 				);
+			},
+
+			get regularAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+			},
+
+			get purchaseAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 			},
 
 			get beforeItemPrice(): string | null {
