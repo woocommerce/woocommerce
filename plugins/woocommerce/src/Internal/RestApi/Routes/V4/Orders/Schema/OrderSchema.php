@@ -220,6 +220,18 @@ class OrderSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'refund_total'         => array(
+				'description' => __( 'Total refund amount for the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'refund_tax'           => array(
+				'description' => __( 'Total refund tax amount for the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'prices_include_tax'   => array(
 				'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -630,6 +642,14 @@ class OrderSchema extends AbstractSchema {
 			'needs_processing'     => $order->needs_processing(),
 			'fulfillment_status'   => FulfillmentUtils::get_order_fulfillment_status( $order ),
 		);
+
+		if ( in_array( 'refund_total', $include_fields, true ) ) {
+			$data['refund_total'] = wc_format_decimal( $order->get_total_refunded(), $dp );
+		}
+
+		if ( in_array( 'refund_tax', $include_fields, true ) ) {
+			$data['refund_tax'] = wc_format_decimal( $order->get_total_tax_refunded(), $dp );
+		}
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$line_items         = $order->get_items( 'line_item' );
