@@ -58,7 +58,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
 						),
 						'force_generate' => array(
-							'description'       => __( 'Whether to generate of a new catalog file regardless of whether a catalog file already exists.', 'woocommerce' ),
+							'description'       => __( 'Whether to generate a new catalog file regardless of whether a catalog file already exists.', 'woocommerce' ),
 							'type'              => 'boolean',
 							'default'           => false,
 							'sanitize_callback' => 'rest_sanitize_boolean',
