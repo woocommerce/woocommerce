@@ -959,7 +959,7 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			$current_url        = isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) . sanitize_text_field( wp_parse_url( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) ) : '';
+			$current_url        = isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) . wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
 			$product_url        = str_replace( array( 'https://', 'http://' ), '', get_permalink( $product_id ) );
 			$is_in_product_page = rtrim( $current_url, '/' ) === rtrim( $product_url, '/' );
 
