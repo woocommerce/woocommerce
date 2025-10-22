@@ -40,7 +40,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		( new PushTokenRestController() )->register_routes();
 
-		$this->user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 	}
 
 	/**
@@ -261,6 +261,52 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( WP_Http::UNAUTHORIZED, $response->get_status() );
+	}
+
+	/**
+	 * Test it cannot create a push token without required role.
+	 */
+	public function test_it_cannot_create_push_token_without_required_role() {
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'e', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
+		$request->set_param( 'device_uuid', 'test-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
+	 * Test it can create a push token with administrator role.
+	 */
+	public function test_it_can_create_push_token_with_administrator_role() {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'f', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
+		$request->set_param( 'device_uuid', 'test-device-uuid-admin' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::CREATED, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertIsInt( $data['id'] );
+		$this->assertGreaterThan( 0, $data['id'] );
 	}
 
 	/**
@@ -736,14 +782,29 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test it can't delete a push token without required role.
+	 */
+	public function test_it_cannot_delete_push_token_without_required_role() {
+		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
 	 * Test it can't delete a push token that doesn't belong to the
 	 * authenticated user.
 	 */
 	public function test_it_cannot_delete_push_token_belonging_to_another_user() {
 		/**
-		 * Create a token for user 1.
+		 * Create a token for another shop manager.
 		 */
-		$other_user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$other_user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 
 		$push_token = new PushToken();
 		$push_token->set_user_id( $other_user_id );

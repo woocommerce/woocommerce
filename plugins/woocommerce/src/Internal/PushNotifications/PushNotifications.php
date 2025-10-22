@@ -17,6 +17,14 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestC
  */
 class PushNotifications {
 	/**
+	 * Roles that can receive push notifications.
+	 */
+	const ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED = array(
+		'administrator',
+		'shop_manager',
+	);
+
+	/**
 	 * Loads the push notifications class.
 	 *
 	 * @return void
