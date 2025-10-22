@@ -138,14 +138,15 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
 		}
 
-		$orderby_possibles        = array(
+		$orderby_possibles = array(
 			'id'              => 'ID',
 			'name'            => 'display_name',
 			'registered_date' => 'user_registered',
-			'order_count'     => 'order_count',
-			'total_spent'     => 'total_spent',
-			'last_active'     => 'last_active',
+			'order_count'     => 'wc_order_count',
+			'total_spent'     => 'wc_money_spent',
+			'last_active'     => 'wc_last_active',
 		);
+
 		$prepared_args['orderby'] = $orderby_possibles[ $request['orderby'] ];
 		$prepared_args['search']  = $request['search'];
 
@@ -188,7 +189,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
 		$method_args = array(
 			'order'    => $query_args['order'] ?? 'asc',
-			'orderby'  => $this->map_orderby_to_wp_user_query( $query_args ),
+			'orderby'  => $query_args['orderby'] ?? 'user_registered',
 			'per_page' => $query_args['number'] ?? 10,
 			'offset'   => $query_args['offset'] ?? 0,
 			'search'   => $query_args['search'] ?? '',
@@ -220,34 +221,5 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'total'   => $total_users,
 			'pages'   => $max_pages,
 		);
-	}
-
-	/**
-	 * Maps orderby keys to WP_User_Query format.
-	 *
-	 * @param array $query_args The query arguments.
-	 * @return string
-	 */
-	private function map_orderby_to_wp_user_query( array $query_args ): string {
-		if ( isset( $query_args['orderby'] ) ) {
-			switch ( $query_args['orderby'] ) {
-				case 'ID':
-					return 'id';
-				case 'name':
-					return 'display_name';
-				case 'registered_date':
-					return 'user_registered';
-				case 'order_count':
-					return 'wc_order_count';
-				case 'total_spent':
-					return 'wc_money_spent';
-				case 'last_active':
-					return 'wc_last_active';
-				default:
-					return 'user_registered';
-			}
-		}
-
-		return 'user_registered';
 	}
 }
