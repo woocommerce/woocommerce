@@ -21,7 +21,7 @@ import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-ca
 import { isVariation } from './type-guards';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import type { ProductDataWithId, VariationDataWithId } from './types';
+import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -56,7 +56,7 @@ const { state: productDataState } = store< ProductDataStore >(
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-): ProductDataWithId | VariationDataWithId | null => {
+): NormalizedProductData | NormalizedVariationData | null => {
 	let productId = id;
 	let productData;
 
@@ -147,7 +147,7 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: ProductDataWithId | VariationDataWithId | null;
+		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -197,7 +197,10 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
-			get productData(): ProductDataWithId | VariationDataWithId | null {
+			get productData():
+				| NormalizedProductData
+				| NormalizedVariationData
+				| null {
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(

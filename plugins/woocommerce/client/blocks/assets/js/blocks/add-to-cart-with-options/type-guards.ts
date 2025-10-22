@@ -1,10 +1,10 @@
 /**
  * Internal dependencies
  */
-import type { ProductDataWithId, VariationDataWithId } from './types';
+import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export const isVariation = (
-	productData: ProductDataWithId | VariationDataWithId | null
-): productData is VariationDataWithId => {
+	productData: NormalizedProductData | NormalizedVariationData | null
+): productData is NormalizedVariationData => {
 	return productData?.type === 'variation';
 };

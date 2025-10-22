@@ -12,7 +12,7 @@ export interface Attributes {
 	className?: string;
 }
 
-export type ProductDataWithId = ProductData & {
+export type NormalizedProductData = ProductData & {
 	id: number;
 	min: number;
 	max: number;
@@ -21,7 +21,7 @@ export type ProductDataWithId = ProductData & {
 	sold_individually: boolean;
 };
 
-export type VariationDataWithId = VariationData & {
+export type NormalizedVariationData = VariationData & {
 	id: number;
 	min: number;
 	max: number;
