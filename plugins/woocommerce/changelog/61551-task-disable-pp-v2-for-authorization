@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Disable PayPal orders v2 API when the payment intent is `authorize`.
