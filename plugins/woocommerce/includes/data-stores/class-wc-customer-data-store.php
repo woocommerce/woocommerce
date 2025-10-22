@@ -664,9 +664,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		if ( ! empty( $args['email'] ) ) {
 			$email = sanitize_email( $args['email'] );
 			if ( $email ) {
-				$query_args['search'] = $email;
+				$query_args['search']         = $email;
+				$query_args['search_columns'] = array( 'user_email' );
 			}
-			$query_args['search_columns'] = array( 'user_email' );
 		}
 
 		switch ( $orderby_key ) {
