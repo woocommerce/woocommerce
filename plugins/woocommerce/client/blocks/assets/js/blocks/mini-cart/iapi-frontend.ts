@@ -689,24 +689,30 @@ const { state: cartItemState } = store(
 					return { hidden: true };
 				}
 
-				const dataItemAttrKey =
+				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
+				const rawName =
 					dataItemAttr.key ||
 					dataItemAttr.attribute ||
 					dataItemAttr.name ||
 					'';
 
+				// Extract value - prefer 'display' over 'value' for item_data if available
+				const rawValue =
+					dataItemAttr.display || dataItemAttr.value || '';
+
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = dataItemAttrKey;
+				nameTxt.innerHTML = rawName;
 				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = dataItemAttr.value;
+				valueTxt.innerHTML = rawValue;
 
 				return {
 					name: nameTxt.value,
 					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ dataItemAttrKey
+					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /[\s_]+/g, '-' )
+						.replace( /<[^>]*>/g, '' )
+						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
 					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
@@ -846,74 +852,29 @@ const { state: cartItemState } = store(
 					}
 				}
 			},
-			itemItemData() {
+
+			itemDataNameInnerHTML() {
 				const { ref } = getElement();
 
 				if ( ! ref ) {
 					return;
 				}
 
-				const populateSingleItemData = (
-					element: Element,
-					item: CartItemDataAttr
-				) => {
-					const nameEl = element.querySelector(
-						'div span.wc-block-components-product-details__name'
-					);
-					const valueEl = element.querySelector(
-						'div span.wc-block-components-product-details__value'
-					);
+				const dataAttr = cartItemState.cartItemDataAttr;
+				if ( 'name' in dataAttr && dataAttr.name ) {
+					ref.innerHTML = trimWords( dataAttr.name );
+				}
+			},
+			itemDataValueInnerHTML() {
+				const { ref } = getElement();
 
-					const name = item?.key || item.name || '';
-					const value = item?.display || item.value;
-
-					if ( nameEl && item.name ) {
-						nameEl.innerHTML = trimWords( name );
-					}
-					if ( valueEl && item.value ) {
-						valueEl.innerHTML = trimWords( value );
-					}
-				};
-
-				const populateMultipleItemData = (
-					element: Element,
-					itemData: CartItemDataAttr[]
-				) => {
-					const listItems = element.querySelectorAll( 'li' );
-
-					itemData.forEach( ( item, index ) => {
-						const listItem = listItems[ index ];
-						const nameEl = listItem?.querySelector(
-							'.wc-block-components-product-details__name'
-						);
-						const valueEl = listItem?.querySelector(
-							'.wc-block-components-product-details__value'
-						);
-
-						const name = item?.key || item.name || '';
-						const value = item?.display || item.value;
-
-						if ( nameEl && ( item.name || item.key ) ) {
-							nameEl.innerHTML = trimWords( name );
-						}
-						if ( valueEl && item.value ) {
-							valueEl.innerHTML = trimWords( value );
-						}
-					} );
-				};
-
-				const itemData = cartItemState.cartItem?.item_data || [];
-
-				if ( itemData.length === 0 ) {
+				if ( ! ref ) {
 					return;
 				}
 
-				// A workaround for the lack of dangerous set HTML directive
-				// in interactivity API.
-				if ( itemData.length === 1 ) {
-					populateSingleItemData( ref, itemData[ 0 ] );
-				} else {
-					populateMultipleItemData( ref, itemData );
+				const dataAttr = cartItemState.cartItemDataAttr;
+				if ( 'value' in dataAttr && dataAttr.value ) {
+					ref.innerHTML = trimWords( dataAttr.value );
 				}
 			},
 
