@@ -959,8 +959,19 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			/* translators: 1: product link, 2: product name */
-			wc_add_notice( sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) ), 'error' );
+			$current_url        = isset( $_SERVER['HTTP_HOST'] ) && isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) . sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ), PHP_URL_PATH ) : '';
+			$product_url        = str_replace( array( 'https://', 'http://' ), '', get_permalink( $product_id ) );
+			$is_in_product_page = rtrim( $current_url, '/' ) === rtrim( $product_url, '/' );
+
+			if ( $is_in_product_page ) {
+				/* translators: 1: product name */
+				$error_message = sprintf( __( 'Please choose product options for %1$s.', 'woocommerce' ), esc_html( $product->get_name() ) );
+			} else {
+				/* translators: 1: product link, 2: product name */
+				$error_message = sprintf( __( 'Please choose product options by visiting <a href="%1$s" title="%2$s">%2$s</a>.', 'woocommerce' ), esc_url( get_permalink( $product_id ) ), esc_html( $product->get_name() ) );
+			}
+
+			wc_add_notice( $error_message, 'error' );
 
 			return false;
 		}
