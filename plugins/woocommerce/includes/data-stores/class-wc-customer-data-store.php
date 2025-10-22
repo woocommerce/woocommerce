@@ -618,26 +618,15 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	}
 
 	/**
-	 * Get orderby mapping for customer queries.
-	 *
-	 * @return array
-	 */
-	private function get_orderby_mapping() {
-		return array(
-			'registered_date' => 'user_registered',
-			'orders_count'    => 'orders_count',
-			'total_spent'     => 'total_spent',
-			'last_active'     => 'last_active',
-		);
-	}
-
-	/**
 	 * Query customers ordered by allowed fields.
 	 *
 	 * @param array $args Query arguments.
 	 * @return WC_Customer[] Array of customers in the requested order.
 	 */
 	public function query_customers( array $args = array() ) {
+		global $wpdb;
+		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
+
 		$defaults = array(
 			'order'    => 'asc',
 			'orderby'  => 'registered_date',
@@ -651,12 +640,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'exclude'  => array(),
 		);
 
-		$args = wp_parse_args( $args, $defaults );
-
-		$orderby_mapping = $this->get_orderby_mapping();
-		$orderby_key     = isset( $orderby_mapping[ $args['orderby'] ] ) ? $orderby_mapping[ $args['orderby'] ] : 'user_registered';
-
-		$query_args = array(
+		$args        = wp_parse_args( $args, $defaults );
+		$orderby_key = $args['orderby'] ?? 'user_registered';
+		$query_args  = array(
 			'order'   => $args['order'],
 			'number'  => absint( $args['per_page'] ),
 			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
@@ -684,15 +670,21 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		}
 
 		switch ( $orderby_key ) {
-			case 'orders_count':
-				$query_args['meta_key'] = 'wc_order_count'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			case 'ID':
+				$query_args['orderby'] = 'ID';
+				break;
+			case 'display_name':
+				$query_args['orderby'] = 'display_name';
+				break;
+			case 'wc_order_count':
+				$query_args['meta_key'] = 'wc_order_count_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;
-			case 'total_spent':
-				$query_args['meta_key'] = 'wc_money_spent'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			case 'wc_money_spent':
+				$query_args['meta_key'] = 'wc_money_spent_' . $site_specific_key; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;
-			case 'last_active':
+			case 'wc_last_active':
 				$query_args['meta_key'] = 'wc_last_active'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 				$query_args['orderby']  = 'meta_value_num';
 				break;

@@ -93,7 +93,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 					'include',
 					'name',
 					'registered_date',
-					'orders_count',
+					'order_count',
 					'total_spent',
 					'last_active',
 				),
@@ -139,8 +139,10 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		}
 
 		$orderby_possibles        = array(
+			'id'              => 'ID',
+			'name'            => 'display_name',
 			'registered_date' => 'user_registered',
-			'orders_count'    => 'orders_count',
+			'order_count'     => 'order_count',
 			'total_spent'     => 'total_spent',
 			'last_active'     => 'last_active',
 		);
@@ -186,7 +188,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 	public function get_query_results( array $query_args, WP_REST_Request $request ): array {
 		$method_args = array(
 			'order'    => $query_args['order'] ?? 'asc',
-			'orderby'  => $this->reverse_map_orderby( $query_args ),
+			'orderby'  => $this->map_orderby_to_wp_user_query( $query_args ),
 			'per_page' => $query_args['number'] ?? 10,
 			'offset'   => $query_args['offset'] ?? 0,
 			'search'   => $query_args['search'] ?? '',
@@ -221,35 +223,31 @@ final class CollectionQuery extends AbstractCollectionQuery {
 	}
 
 	/**
-	 * Reverse map orderby from WP_User_Query format back to our API format.
+	 * Maps orderby keys to WP_User_Query format.
 	 *
 	 * @param array $query_args The query arguments.
 	 * @return string
 	 */
-	private function reverse_map_orderby( array $query_args ): string {
-		// Handle meta-based ordering.
-		if ( isset( $query_args['meta_key'] ) ) {
-			switch ( $query_args['meta_key'] ) {
-				case 'wc_order_count':
-					return 'orders_count';
-				case 'wc_money_spent':
-					return 'total_spent';
-				case 'wc_last_active':
-					return 'last_active';
-			}
-		}
-
-		// Handle direct field ordering.
+	private function map_orderby_to_wp_user_query( array $query_args ): string {
 		if ( isset( $query_args['orderby'] ) ) {
 			switch ( $query_args['orderby'] ) {
-				case 'user_registered':
-					return 'registered_date';
-				case 'meta_value_num':
-					// This should have been handled by meta_key above.
-					return 'registered_date';
+				case 'ID':
+					return 'id';
+				case 'name':
+					return 'display_name';
+				case 'registered_date':
+					return 'user_registered';
+				case 'order_count':
+					return 'wc_order_count';
+				case 'total_spent':
+					return 'wc_money_spent';
+				case 'last_active':
+					return 'wc_last_active';
+				default:
+					return 'user_registered';
 			}
 		}
 
-		return 'registered_date';
+		return 'user_registered';
 	}
 }
