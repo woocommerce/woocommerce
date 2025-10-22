@@ -39,6 +39,14 @@ class WC_Gateway_Paypal_Helper {
 	public static function is_orders_v2_migration_eligible() {
 		$settings = get_option( 'woocommerce_paypal_settings', array() );
 
+		// If the intent is 'authorization' store is not eligible for migration.
+		// ToDo: Support authorization payments.
+		$intent = $settings['paymentaction'] ?? 'sale';
+
+		if ( 'authorization' === $intent ) {
+			return false;
+		}
+
 		// If API keys are set, the merchant is not eligible for migration
 		// as they may be using features that cannot be seamlessly migrated.
 		$is_test_mode  = isset( $settings['testmode'] ) && 'yes' === $settings['testmode'];
