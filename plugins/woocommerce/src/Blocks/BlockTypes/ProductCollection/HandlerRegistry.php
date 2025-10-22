@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use InvalidArgumentException;
 
 /**
@@ -330,6 +331,25 @@ class HandlerRegistry {
 				return $collection_args;
 			}
 		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/cart-contents',
+			function ( $collection_args ) {
+				$cart_product_ids = $collection_args['cartProductIds'] ?? null;
+				if ( empty( $cart_product_ids ) ) {
+					return array( 'post__in' => array( -1 ) );
+				}
+				return array( 'post__in' => $cart_product_ids );
+			},
+			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, null );
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) {
+				$collection_args['cartProductIds'] = $this->get_cart_product_ids( $collection_args, $request );
+				return $collection_args;
+			}
+		);
 		return $this->collection_handler_store;
 	}
 
@@ -377,5 +397,46 @@ class HandlerRegistry {
 			);
 		}
 		return $product_references;
+	}
+
+	/**
+	 * Get cart product IDs from various sources.
+	 * Handles loading cart products from location context, request params, or current session.
+	 *
+	 * @param array                 $collection_args Collection arguments with location context.
+	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
+	 * @return array<int> The product IDs from the cart.
+	 */
+	private function get_cart_product_ids( $collection_args, $request = null ) {
+		$location = $collection_args['productCollectionLocation'] ?? array();
+
+		if ( $request ) {
+			$user_id    = $request->get_param( 'userId' );
+			$user_email = $request->get_param( 'userEmail' );
+			if ( $user_id || $user_email ) {
+				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+			}
+		}
+
+		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
+			$user_id    = $location['sourceData']['userId'] ?? null;
+			$user_email = $location['sourceData']['userEmail'] ?? null;
+			if ( $user_id || $user_email ) {
+				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+			}
+		}
+
+		global $wpdb;
+		$recent_product_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT ID FROM {$wpdb->posts}
+				WHERE post_type = %s AND post_status = 'publish'
+				ORDER BY post_date DESC
+				LIMIT %d",
+				'product',
+				3
+			)
+		);
+		return ! empty( $recent_product_ids ) ? array_map( 'intval', $recent_product_ids ) : array();
 	}
 }
