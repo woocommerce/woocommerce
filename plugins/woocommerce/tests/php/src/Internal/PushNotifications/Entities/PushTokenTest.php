@@ -347,7 +347,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token = new PushToken();
 
 		$this->expectException( \InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Platform &#039;invalid&#039; for PushToken is invalid.' );
+		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
 
 		$push_token->set_platform( 'invalid' );
 	}
