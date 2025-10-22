@@ -50,11 +50,17 @@ const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
-const scalePrice = (
-	price: number,
-	inputDecimals: number,
-	outputDecimals = 0
-) => price * Math.pow( 10, outputDecimals - inputDecimals );
+type ScalePriceArgs = {
+	price: number;
+	inputDecimals: number;
+	outputDecimals?: number;
+};
+
+const scalePrice = ( {
+	price,
+	inputDecimals,
+	outputDecimals = 0,
+}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
 
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
@@ -333,17 +339,17 @@ const { state: cartItemState } = store(
 			get cartItemDiscount(): string {
 				const { prices, extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = scalePrice(
-					parseInt( prices.raw_prices.regular_price, 10 ),
-					prices.raw_prices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const regularAmountSingle = scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
-				const purchaseAmountSingle = scalePrice(
-					parseInt( prices.raw_prices.price, 10 ),
-					prices.raw_prices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const purchaseAmountSingle = scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
 				const discountPrice =
 					regularAmountSingle - purchaseAmountSingle;
@@ -383,17 +389,17 @@ const { state: cartItemState } = store(
 			get lineItemDiscount(): string {
 				const { quantity, prices, extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = scalePrice(
-					parseInt( prices.raw_prices.regular_price, 10 ),
-					prices.raw_prices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const regularAmountSingle = scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
-				const purchaseAmountSingle = scalePrice(
-					parseInt( prices.raw_prices.price, 10 ),
-					prices.raw_prices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const purchaseAmountSingle = scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
 				const totalLineItemDiscount =
 					( regularAmountSingle - purchaseAmountSingle ) * quantity;
@@ -519,11 +525,11 @@ const { state: cartItemState } = store(
 
 			get priceWithoutDiscount(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const priceWithoutDiscount = scalePrice(
-					parseInt( rawPrices.regular_price, 10 ),
-					rawPrices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const priceWithoutDiscount = scalePrice( {
+					price: parseInt( rawPrices.regular_price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
 				return formatPriceWithCurrency(
 					priceWithoutDiscount,
@@ -585,11 +591,11 @@ const { state: cartItemState } = store(
 
 			get itemPrice(): string {
 				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
-				const itemPrice = scalePrice(
-					parseInt( rawPrices.price, 10 ),
-					rawPrices.precision,
-					cartItemState.currency.minorUnit
-				);
+				const itemPrice = scalePrice( {
+					price: parseInt( rawPrices.price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 
 				return formatPriceWithCurrency(
 					itemPrice,
