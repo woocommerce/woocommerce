@@ -215,11 +215,9 @@
 					],
 					"onlyForDependencies": [],
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"**/*.php",
-						".wp-env.json",
+						"tests/legacy/**",
+						"tests/php/**",
+						"tests/unit-tests/**",
 						"phpunit.xml"
 					],
 					"testEnv": {
