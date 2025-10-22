@@ -781,9 +781,6 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"src/Blocks/**",
-						"templates/**",
-						"patterns/**",
 						"client/blocks/tests/e2e/**"
 					],
 					"testEnv": {
