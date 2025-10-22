@@ -35,6 +35,8 @@ const config: PlaywrightTestConfig = {
 					'junit',
 					{
 						outputFile: `${ __dirname }/artifacts/test-results/results.xml`,
+						stripANSIControlSequences: true,
+						includeProjectInTestName: true,
 					},
 				],
 		  ]
