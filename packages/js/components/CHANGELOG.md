@@ -18,7 +18,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Patch - Remove scrollbar when 9 items are in list [#47605]
 -   Minor - Show 'up' and 'down' chevron in SelectTree and remove suffix prop [#46939]
 -   Patch - Update ProductImage component so it doesn't forces a 1:1 aspect ratio by setting the default 'height' to 'auto' [#52828]
--   Patch - Vertically align chart type buttons in <Chart> component [#57110]
+-   Patch - Vertically align chart type buttons in `<Chart>` component [#57110]
 -   Minor - Add AnalyticsError component. [#50108]
 -   Minor - Add error boundary component and fix empty content button [#48363]
 -   Patch - Add onBlur prop to experimental-select-control [#56847]
@@ -306,7 +306,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix DateTimePickerControl's onChange date arg to only be a string (TypeScript). [#35140]
 -   Minor - Improve experimental SelectControl accessibility [#35140]
 -   Minor - Improve Sortable component acessibility [#35140]
--    - Create new experimental SelectControl component [#35140]
+-   Create new experimental SelectControl component [#35140]
 
 ## [10.3.0](https://www.npmjs.com/package/@woocommerce/components/v/10.3.0) - 2022-08-12 
 
