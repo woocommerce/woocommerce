@@ -215,10 +215,6 @@ export type State = {
 		sendingPreviewStatus: SendingPreviewStatus | null;
 		errorMessage?: string;
 	};
-	personalizationTags: {
-		list: PersonalizationTag[];
-		isFetching: boolean;
-	};
 	contentValidation?: ContentValidation;
 };
 
