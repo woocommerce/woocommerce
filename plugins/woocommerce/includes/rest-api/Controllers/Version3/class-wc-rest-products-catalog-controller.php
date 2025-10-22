@@ -218,10 +218,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		}
 
 		// Generate empty catalog file.
-		$catalog_data = array(
-			'products'   => array(),
-			'variations' => array(),
-		);
+		$catalog_data = array();
 
 		// Write to file.
 		$json = wp_json_encode( $catalog_data );
