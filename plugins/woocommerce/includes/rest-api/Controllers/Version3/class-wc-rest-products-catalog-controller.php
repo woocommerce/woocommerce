@@ -45,9 +45,9 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_catalog' ),
-					'permission_callback' => array( $this, 'get_catalog_permissions_check' ),
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'request_catalog' ),
+					'permission_callback' => array( $this, 'request_catalog_permissions_check' ),
 					'args'                => array(
 						'fields'         => array(
 							'description'       => __( 'Product/variation fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
@@ -71,14 +71,14 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Get products catalog.
+	 * Request products catalog.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function get_catalog( $request ) {
+	public function request_catalog( $request ) {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 		$file_info      = $this->get_catalog_file_info( $fields );
@@ -101,14 +101,14 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	}
 
 	/**
-	 * Checks if a given request has permission to get products catalog.
+	 * Checks if a given request has permission to request products catalog.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_Error|bool
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function get_catalog_permissions_check( $request ) {
+	public function request_catalog_permissions_check( $request ) {
 		if ( ! ( wc_rest_check_post_permissions( 'product', 'read' ) && wc_rest_check_post_permissions( 'product_variation', 'read' ) ) ) {
 			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
