@@ -40,63 +40,43 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	public function register_routes() {
 		register_rest_route(
 			$this->namespace,
-			'/' . $this->rest_base . '/generate',
+			'/' . $this->rest_base,
 			array(
 				array(
-					'methods'             => WP_REST_Server::CREATABLE,
-					'callback'            => array( $this, 'generate_catalog' ),
-					'permission_callback' => array( $this, 'generate_products_catalog_permissions_check' ),
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_catalog' ),
+					'permission_callback' => array( $this, 'get_catalog_permissions_check' ),
 					'args'                => array(
 						'fields'         => array(
-							'description'       => __( 'Product/variation fields to include in the catalog.', 'woocommerce' ),
-							'type'              => 'array',
+							'description'       => __( 'Product/variation fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
+							'type'              => array( 'array', 'string' ),
 							'items'             => array( 'type' => 'string' ),
 							'default'           => array(),
 							'validate_callback' => array( $this, 'validate_fields_arg' ),
 							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
 						),
 						'force_generate' => array(
-							'description'       => __( 'Force generation of a new catalog file.', 'woocommerce' ),
+							'description'       => __( 'Whether to generate of a new catalog file regardless of whether a catalog file already exists.', 'woocommerce' ),
 							'type'              => 'boolean',
 							'default'           => false,
 							'sanitize_callback' => 'rest_sanitize_boolean',
 						),
 					),
 				),
-				'schema' => array( $this, 'catalog_generation_schema' ),
-			)
-		);
-
-		register_rest_route(
-			$this->namespace,
-			'/' . $this->rest_base . '/status',
-			array(
-				array(
-					'methods'             => WP_REST_Server::READABLE,
-					'callback'            => array( $this, 'get_catalog_generation_status' ),
-					'permission_callback' => array( $this, 'generate_products_catalog_permissions_check' ),
-					'args'                => array(
-						'job_id' => array(
-							'description' => __( 'Products catalog generation job ID.', 'woocommerce' ),
-							'type'        => 'string',
-							'required'    => true,
-						),
-					),
-				),
-				'schema' => array( $this, 'catalog_generation_status_schema' ),
+				'schema' => array( $this, 'catalog_schema' ),
 			)
 		);
 	}
 
 	/**
-	 * Generate products catalog.
+	 * Get products catalog.
 	 *
 	 * @param WP_REST_Request $request Request data.
 	 * @return WP_Error|WP_REST_Response
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function generate_catalog( $request ) {
+	public function get_catalog( $request ) {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 		$file_info      = $this->get_catalog_file_info( $fields );
@@ -108,61 +88,121 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		// Check if file exists and force_generate is false.
 		if ( ! $force_generate && file_exists( $file_info['filepath'] ) ) {
 			$response_data = array(
+				'status'       => 'complete',
 				'download_url' => $file_info['url'],
 			);
-		} else {
-			// Temporarily return job_id with URL-safe base64-encoded fields for use in status endpoint.
-			// WOOMOB-1455 - Replace base64 fields job ID with proper async job tracking once we have a job tracking system.
-			$job_id = $this->base64url_encode( wp_json_encode( $fields ) );
-
-			$response_data = array(
-				'job_id' => $job_id,
-			);
+			return rest_ensure_response( $response_data );
 		}
 
-		return rest_ensure_response( $response_data );
+		// Generate catalog and return response.
+		return $this->catalog_generation_response( $file_info );
 	}
 
 	/**
-	 * Get products catalog generation job status.
+	 * Checks if a given request has permission to get products catalog.
 	 *
-	 * @param WP_REST_Request $request Request data.
-	 * @return WP_Error|WP_REST_Response
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_Error|bool
 	 *
 	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
 	 */
-	public function get_catalog_generation_status( $request ) {
-		$job_id = $request->get_param( 'job_id' );
-		if ( empty( $job_id ) || ! is_string( $job_id ) ) {
-			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
+	public function get_catalog_permissions_check( $request ) {
+		if ( ! ( wc_rest_check_post_permissions( 'product', 'read' ) && wc_rest_check_post_permissions( 'product_variation', 'read' ) ) ) {
+			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Validate fields argument.
+	 *
+	 * @param mixed $value The value to validate.
+	 * @return true|WP_Error True if valid, WP_Error otherwise.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function validate_fields_arg( $value ) {
+		if ( ! is_array( $value ) && ! is_string( $value ) ) {
+			return new WP_Error( 'invalid_fields', __( 'fields must be an array of strings or a comma-separated string.', 'woocommerce' ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Sanitize fields argument.
+	 *
+	 * @param mixed $value The value to sanitize. Can be an array or comma-separated string.
+	 * @return array Sanitized and canonicalized fields array.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function sanitize_fields_arg( $value ) {
+		if ( is_string( $value ) ) {
+			$value = array_map( 'trim', explode( ',', $value ) );
+		}
+		return $this->canonicalize_fields( is_array( $value ) ? $value : array() );
+	}
+
+	/**
+	 * Products catalog schema.
+	 *
+	 * @return array Products catalog schema data.
+	 *
+	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
+	 */
+	public function catalog_schema() {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'products_catalog',
+			'type'       => 'object',
+			'properties' => array(
+				'status'       => array(
+					'description' => __( 'Products catalog generation status.', 'woocommerce' ),
+					'type'        => 'string',
+					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
+				),
+				'download_url' => array(
+					'description' => __( 'Products catalog file URL. Null when catalog is not ready.', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'format'      => 'uri',
+				),
+			),
+			'required'   => array( 'status', 'download_url' ),
+		);
+	}
+
+	/**
+	 * Generate catalog and return REST response.
+	 *
+	 * This function orchestrates catalog generation and returns the appropriate response.
+	 * In the future, it will check if a generation based on the file_info is in progress.
+	 *
+	 * @param array $file_info File information with 'filepath', 'url', and 'directory' keys.
+	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error on failure.
+	 */
+	private function catalog_generation_response( $file_info ) {
+		// In the future, check if generation is in progress and return appropriate status.
+		// For now, generate synchronously.
+		$result = $this->generate_catalog_file( $file_info );
+		if ( is_wp_error( $result ) ) {
+			return $result;
 		}
 
-		// Enforce size and URL-safe base64 charset.
-		if ( strlen( $job_id ) > 4096 || ! preg_match( '/^[A-Za-z0-9\-_]+$/', $job_id ) ) {
-			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
+		return rest_ensure_response(
+			array(
+				'status'       => 'complete',
+				'download_url' => $file_info['url'],
+			)
+		);
+	}
 
-		// Decode fields from job_id (URL-safe base64-encoded JSON).
-		$fields_json = $this->base64url_decode( $job_id );
-		if ( false === $fields_json ) {
-			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID encoding.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		$fields = json_decode( $fields_json, true );
-		if ( ! is_array( $fields ) ) {
-			return new WP_Error( 'invalid_job_id', __( 'Invalid products catalog generation job ID format.', 'woocommerce' ), array( 'status' => 400 ) );
-		}
-
-		// Sanitize and canonicalize fields.
-		$fields = $this->sanitize_fields_arg( $fields );
-
-		// Get file info based on decoded fields.
-		$file_info = $this->get_catalog_file_info( $fields );
-
-		if ( is_wp_error( $file_info ) ) {
-			return $file_info;
-		}
-
+	/**
+	 * Generate catalog file and save it to the specified file path.
+	 *
+	 * @param array $file_info File information with 'filepath', 'url', and 'directory' keys.
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	private function generate_catalog_file( $file_info ) {
 		// Ensure directory exists.
 		if ( ! wp_mkdir_p( $file_info['directory'] ) ) {
 			return new WP_Error( 'catalog_dir_creation_failed', __( 'Unable to create catalog directory.', 'woocommerce' ), array( 'status' => 500 ) );
@@ -191,116 +231,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			return new WP_Error( 'catalog_generation_failed', __( 'Failed to generate catalog file.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		$response_data = array(
-			'job_id'       => $job_id,
-			'status'       => 'complete',
-			'download_url' => $file_info['url'],
-		);
-		return rest_ensure_response( $response_data );
-	}
-
-	/**
-	 * Checks if a given request has permission to generate products catalog.
-	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_Error|bool
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function generate_products_catalog_permissions_check( $request ) {
-		if ( ! ( wc_rest_check_post_permissions( 'product', 'read' ) && wc_rest_check_post_permissions( 'product_variation', 'read' ) ) ) {
-			return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot list resources.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-		}
 		return true;
-	}
-
-	/**
-	 * Validate fields argument.
-	 *
-	 * @param mixed $value The value to validate.
-	 * @return true|WP_Error True if valid, WP_Error otherwise.
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function validate_fields_arg( $value ) {
-		if ( ! is_array( $value ) ) {
-			return new WP_Error( 'invalid_fields', __( 'fields must be an array of strings.', 'woocommerce' ) );
-		}
-		return true;
-	}
-
-	/**
-	 * Sanitize fields argument.
-	 *
-	 * @param mixed $value The value to sanitize.
-	 * @return array Sanitized and canonicalized fields array.
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function sanitize_fields_arg( $value ) {
-		return $this->canonicalize_fields( is_array( $value ) ? $value : array() );
-	}
-
-	/**
-	 * Products catalog generation schema.
-	 *
-	 * @return array Products catalog generation schema data.
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function catalog_generation_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'generate_products_catalog',
-			'type'       => 'object',
-			'properties' => array(
-				'job_id'       => array(
-					'description' => __( 'Products catalog generation job ID. Returned when catalog needs to be generated.', 'woocommerce' ),
-					'type'        => 'string',
-				),
-				'download_url' => array(
-					'description' => __( 'Products catalog download URL. Returned when catalog file already exists.', 'woocommerce' ),
-					'type'        => 'string',
-					'format'      => 'uri',
-				),
-			),
-			'anyOf'      => array(
-				array( 'required' => array( 'job_id' ) ),
-				array( 'required' => array( 'download_url' ) ),
-			),
-		);
-	}
-
-	/**
-	 * Products catalog generation status schema.
-	 *
-	 * @return array Products catalog generation status schema data.
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	public function catalog_generation_status_schema() {
-		return array(
-			'$schema'    => 'http://json-schema.org/draft-04/schema#',
-			'title'      => 'products_catalog_generation_status',
-			'type'       => 'object',
-			'properties' => array(
-				'job_id'       => array(
-					'description' => __( 'Products catalog generation job ID.', 'woocommerce' ),
-					'type'        => 'string',
-				),
-				'status'       => array(
-					'description' => __( 'Products catalog generation status. Possible values: pending, processing, complete, failed.', 'woocommerce' ),
-					'type'        => 'string',
-					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
-				),
-				'download_url' => array(
-					'description' => __( 'Products catalog download URL when the generation is complete.', 'woocommerce' ),
-					'type'        => 'string',
-					'format'      => 'uri',
-				),
-			),
-			'required'   => array( 'job_id', 'status' ),
-		);
 	}
 
 	/**
@@ -340,31 +271,5 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$fields = array_values( array_unique( array_map( 'strval', $fields ) ) );
 		sort( $fields, SORT_STRING );
 		return $fields;
-	}
-
-	/**
-	 * Encode data using URL-safe base64.
-	 *
-	 * @param string $data Data to encode.
-	 * @return string URL-safe base64-encoded string.
-	 */
-	private function base64url_encode( $data ) {
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
-		$b64 = base64_encode( $data );
-		$b64 = strtr( $b64, '+/', '-_' );
-		return rtrim( $b64, '=' );
-	}
-
-	/**
-	 * Decode URL-safe base64 data.
-	 *
-	 * @param string $data URL-safe base64-encoded string.
-	 * @return string|false Decoded data or false on failure.
-	 */
-	private function base64url_decode( $data ) {
-		$b64  = strtr( $data, '-_', '+/' );
-		$b64 .= str_repeat( '=', ( 4 - strlen( $b64 ) % 4 ) % 4 );
-		// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_decode
-		return base64_decode( $b64, true );
 	}
 }
