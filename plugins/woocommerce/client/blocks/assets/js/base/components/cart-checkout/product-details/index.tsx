@@ -19,11 +19,8 @@ const CONTENT_TAGS = [
 	'strong',
 	'br',
 	'abbr',
-	'ul',
-	'li',
 	'img',
 	'span',
-	'ol',
 ];
 
 const CONTENT_ATTR = [
