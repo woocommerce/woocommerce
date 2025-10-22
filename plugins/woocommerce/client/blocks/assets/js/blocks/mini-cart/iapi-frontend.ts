@@ -126,10 +126,7 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
-				return woocommerceState.cart.items.reduce< number >(
-					( total, { quantity } ) => total + quantity,
-					0
-				);
+				return woocommerceState.cart.items_count;
 			},
 
 			get formattedSubtotal(): string {
@@ -305,12 +302,12 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
 				const cartItem =
 					woocommerceState.cart.items.find(
-						( item ) => item.id === id
+						( item ) => item.key === key
 					) || ( {} as CartItem );
 
 				return {
