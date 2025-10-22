@@ -678,6 +678,7 @@ const { state: cartItemState } = store(
 						attribute: string;
 						name: string;
 						value: string;
+						display: string;
 						hidden: string;
 					};
 					dataProperty: DataProperty;
@@ -700,7 +701,7 @@ const { state: cartItemState } = store(
 				const nameTxt = document.createElement( 'textarea' );
 				nameTxt.innerHTML = dataItemAttrKey + ':';
 				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = dataItemAttr.value;
+				valueTxt.innerHTML = dataItemAttr.display || dataItemAttr.value;
 
 				return {
 					name: nameTxt.value,
