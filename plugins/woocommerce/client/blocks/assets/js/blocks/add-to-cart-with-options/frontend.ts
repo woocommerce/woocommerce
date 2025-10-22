@@ -18,7 +18,6 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  */
 import { getMatchedVariation } from '../../base/utils/variations/get-matched-variation';
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
-import { isVariation } from './type-guards';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
 import type { NormalizedProductData, NormalizedVariationData } from './types';
@@ -95,13 +94,7 @@ export const getProductData = (
 			: Infinity;
 	const step = productData.step || 1;
 
-	const defaults = {
-		is_in_stock: true,
-		sold_individually: false,
-	};
-
 	return {
-		...defaults,
 		id: productId,
 		...productData,
 		min,
@@ -183,7 +176,7 @@ const { actions, state } = store<
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
 
-				if ( ! isVariation( productData ) ) {
+				if ( ! productData ) {
 					return true;
 				}
 

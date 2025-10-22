@@ -17,8 +17,6 @@ export type NormalizedProductData = ProductData & {
 	min: number;
 	max: number;
 	step: number;
-	is_in_stock: boolean;
-	sold_individually: boolean;
 };
 
 export type NormalizedVariationData = VariationData & {
@@ -26,7 +24,5 @@ export type NormalizedVariationData = VariationData & {
 	min: number;
 	max: number;
 	step: number;
-	is_in_stock: boolean;
-	sold_individually: boolean;
 	type: 'variation';
 };

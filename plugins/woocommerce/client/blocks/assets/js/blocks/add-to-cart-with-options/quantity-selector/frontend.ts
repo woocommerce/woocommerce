@@ -11,7 +11,6 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-d
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
-import { isVariation } from '../type-guards';
 
 export type Context = {
 	productId: number;
@@ -79,7 +78,7 @@ store< QuantitySelectorStore >(
 			get allowsQuantityChange(): boolean {
 				const { productData } = addToCartWithOptionsStore.state;
 
-				if ( ! isVariation( productData ) ) {
+				if ( ! productData ) {
 					return true;
 				}
 
