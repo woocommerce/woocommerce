@@ -12,6 +12,8 @@ declare( strict_types = 1 );
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+
 /**
  * REST API Products Catalog controller class.
  *
@@ -203,17 +205,11 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 * @return true|WP_Error True on success, WP_Error on failure.
 	 */
 	private function generate_catalog_file( $file_info ) {
-		// Ensure directory exists.
-		if ( ! wp_mkdir_p( $file_info['directory'] ) ) {
-			return new WP_Error( 'catalog_dir_creation_failed', __( 'Unable to create catalog directory.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		// Prevent directory listing.
-		$index_file = trailingslashit( $file_info['directory'] ) . 'index.html';
-		if ( ! file_exists( $index_file ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-			$result = file_put_contents( $index_file, '' );
-			// Non-critical: ignore if index.html creation fails.
+		// Ensure directory exists and is not indexable.
+		try {
+			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'] );
+		} catch ( \Exception $exception ) {
+			return new WP_Error( 'catalog_dir_creation_failed', $exception->getMessage(), array( 'status' => 500 ) );
 		}
 
 		// Generate empty catalog file.
