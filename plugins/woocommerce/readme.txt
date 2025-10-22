@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.3.0 2025-10-21 =
+= 10.3.0 2025-10-22 =
 
 **WooCommerce**
 
@@ -301,6 +301,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Dev - Use the latest Email editor version v1.4.2
 * Dev - [Migrator]: Write performance metrics to the logs [#61152](https://github.com/woocommerce/woocommerce/pull/61152)
 * Dev - `Add To Cart With Options`: Refactor admin asset loading. [#61070](https://github.com/woocommerce/woocommerce/pull/61070)
+* Dev - dev: update CI configuration [#61540](https://github.com/woocommerce/woocommerce/pull/61540)
 * Tweak - Add Kosovo to list of countries based on CLDR [#61029](https://github.com/woocommerce/woocommerce/pull/61029)
 * Tweak - Add missing `no_terms` label to Brands taxonomy for proper empty state messaging. [#60610](https://github.com/woocommerce/woocommerce/pull/60610)
 * Tweak - Classic template: Ensure related product images are lazy loaded. [#60701](https://github.com/woocommerce/woocommerce/pull/60701)
@@ -313,6 +314,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Tweak - Update Customer Effort Score track queue logic to avoid PHP errors around wrong type coming from wp_options. [#60875](https://github.com/woocommerce/woocommerce/pull/60875)
 * Tweak - Update schema.org link from http:// to https:// for product availability [#60399](https://github.com/woocommerce/woocommerce/pull/60399)
 * Tweak - “Featured Category” and “Featured Product” inner blocks are no longer locked. [#60691](https://github.com/woocommerce/woocommerce/pull/60691)
+* Tweak - Update address autocomplete copy. [#61541](https://github.com/woocommerce/woocommerce/pull/61541)
 * Performance - Add cache priming to `ProductQuery::get_objects` [#61057](https://github.com/woocommerce/woocommerce/pull/61057)
 * Performance - Coupons: optimize coupon usage lookup for per-user limited coupons. [#60676](https://github.com/woocommerce/woocommerce/pull/60676)
 * Performance - Fix index key length for status on wc_order_stats table [#60896](https://github.com/woocommerce/woocommerce/pull/60896)
