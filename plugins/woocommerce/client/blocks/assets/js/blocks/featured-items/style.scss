@@ -153,6 +153,13 @@
 		}
 	}
 
+	&__inner-blocks {
+		a,
+		.wp-block-post-title {
+			color: inherit;
+		}
+	}
+
 	& &__title {
 		color: inherit;
 		margin-top: 0;
