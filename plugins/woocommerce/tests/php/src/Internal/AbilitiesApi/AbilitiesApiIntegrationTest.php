@@ -21,10 +21,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * Set up before each test
 	 */
 	public function set_up() {
+		global $wp_actions;
+
 		/*
 		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
-		 * The bootstrap file has an ABSPATH check that ensures it only loads in a proper
-		 * WordPress context, which may require manual loading in test environments.
+		 * WordPress 6.9+ has abilities API in core, so we don't need to load the vendor version.
 		 */
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
@@ -39,12 +40,18 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		}
 
 		parent::set_up();
+
+		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
+		// Fake this by setting the action counter directly.
+		$wp_actions['init'] = 1;
 	}
 
 	/**
 	 * Tear down the test environment.
 	 */
 	public function tear_down() {
+		global $wp_actions;
+
 		// Clean up any abilities registered during tests.
 		foreach ( $this->registered_abilities as $ability_id ) {
 			$this->cleanup_ability( $ability_id );
@@ -63,26 +70,29 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		}
 
 		// Reset category registry singleton to allow fresh category registration in next test.
-		if ( class_exists( 'WP_Abilities_Category_Registry' ) ) {
-			$reflection        = new \ReflectionClass( 'WP_Abilities_Category_Registry' );
+		if ( class_exists( 'WP_Ability_Categories_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Ability_Categories_Registry' );
 			$instance_property = $reflection->getProperty( 'instance' );
 			$instance_property->setAccessible( true );
 			$instance_property->setValue( null );
 		}
 
 		// Reset action counters to allow init actions to fire again.
-		global $wp_actions;
-		if ( isset( $wp_actions['abilities_api_init'] ) ) {
-			unset( $wp_actions['abilities_api_init'] );
+		if ( isset( $wp_actions['wp_abilities_api_init'] ) ) {
+			unset( $wp_actions['wp_abilities_api_init'] );
 		}
-		if ( isset( $wp_actions['abilities_api_categories_init'] ) ) {
-			unset( $wp_actions['abilities_api_categories_init'] );
+		if ( isset( $wp_actions['wp_abilities_api_categories_init'] ) ) {
+			unset( $wp_actions['wp_abilities_api_categories_init'] );
 		}
 
 		// Reset user.
 		wp_set_current_user( 0 );
 
 		parent::tear_down();
+
+		// Restore 'init' action counter after parent::tear_down() resets it.
+		// WordPress 6.9+ requires did_action('init') to return truthy.
+		$wp_actions['init'] = 1;
 	}
 
 	/**
@@ -140,7 +150,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -154,7 +164,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration without permission_callback.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id ) {
 				wp_register_ability(
 					$ability_id,
@@ -194,7 +204,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -208,7 +218,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration to the init action.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id ) {
 				wp_register_ability(
 					$ability_id,
@@ -253,7 +263,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -267,7 +277,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration to the init action.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id ) {
 				wp_register_ability(
 					$ability_id,
@@ -347,7 +357,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -361,7 +371,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration to the init action.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id_1, $ability_id_2 ) {
 				wp_register_ability(
 					$ability_id_1,
@@ -444,7 +454,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -458,7 +468,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration to the init action.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id ) {
 				wp_register_ability(
 					$ability_id,
@@ -540,7 +550,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Register test category for abilities used in tests.
 		add_action(
-			'abilities_api_categories_init',
+			'wp_abilities_api_categories_init',
 			function () {
 				wp_register_ability_category(
 					'test',
@@ -554,7 +564,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Hook ability registration to the init action.
 		add_action(
-			'abilities_api_init',
+			'wp_abilities_api_init',
 			function () use ( $ability_id_1, $ability_id_2 ) {
 				wp_register_ability(
 					$ability_id_1,
