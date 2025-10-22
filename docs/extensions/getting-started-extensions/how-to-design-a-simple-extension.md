@@ -16,7 +16,7 @@ Your extension's main PHP file is a bootstrapping file. It contains important me
 
 ## Declaring extension metadata
 
-Your extension's main plugin file should have a header comment that includes a number of important pieces of metadata about your extension. WordPress has a list of header requirements to which all plugins must adhere, but there are additional considerations for WooCommerce extensions:
+Your extension's main plugin file should have a header comment that includes a number of important pieces of metadata about your extension. WordPress has a list of [header requirements](https://developer.wordpress.org/plugins/plugin-basics/header-requirements/) to which all plugins must adhere, but there are additional considerations for WooCommerce extensions:
 
 - The `Author` and `Developer` fields are required and should be set to  
   either your name or your company name.
@@ -24,6 +24,8 @@ Your extension's main plugin file should have a header comment that includes a n
 - The `Developer URI` field should be your official webpage URL.
 
 - The `Plugin URI` field should contain the URL of the extension's product page in the WooCommerce Marketplace or the extension's official landing page on your website.
+
+- The `Requires Plugins` field should list the slugs of any required plugins, separated by commas. WooCommerce extensions should require WooCommerce to activate. 
 
 - The `Woo` field is used for extensions listed in the WooCommerce Marketplace. This code is automatically added upon deployment for products sold on WooCommerce.com to facilitate updates. Please don't add it manually, and refrain from adding it to products offered outside of the WooCommerce Marketplace. Including this header in other versions will prevent updates from working.
 
@@ -41,6 +43,7 @@ Below is an example of what the header content might look like for an extension 
  * Developer URI: http://yourdomain.com/
  * Text Domain: my-extension-name
  * Domain Path: /languages
+ * Requires Plugins: woocommerce
  *
  * Woo: 12345:342928dfsfhsf8429842374wdf4234sfd
  *
