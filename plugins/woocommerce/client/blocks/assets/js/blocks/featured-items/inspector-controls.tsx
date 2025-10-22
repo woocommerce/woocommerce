@@ -237,6 +237,7 @@ export const InspectorControls = ( {
 				) }
 			</GutenbergInspectorControls>
 			{ colorGradientSettings.hasColorsOrGradients && (
+				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore - group prop is valid but not in TS definitions yet
 				<GutenbergInspectorControls group="color">
 					{ !! backgroundImageSrc && (
