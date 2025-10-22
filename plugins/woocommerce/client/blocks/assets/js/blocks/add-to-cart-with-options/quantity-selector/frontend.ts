@@ -89,11 +89,11 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				const { id, min, step } = productObject;
+				const { allowZero, id, min, step } = productObject;
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return currentQuantity - step >= min;
+				return allowZero || currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
 				const { quantity, selectedAttributes } =
@@ -176,9 +176,13 @@ store< QuantitySelectorStore >(
 				let newValue = currentValue - 1;
 
 				if ( productObject ) {
-					const { max, min, step } = productObject;
+					const { allowZero, max, min, step } = productObject;
 					newValue = currentValue - step;
-					newValue = Math.min( max, Math.max( min, newValue ) );
+					if ( allowZero && newValue < min ) {
+						newValue = 0;
+					} else {
+						newValue = Math.min( max, Math.max( min, newValue ) );
+					}
 				}
 
 				if ( newValue !== currentValue ) {
@@ -199,7 +203,7 @@ store< QuantitySelectorStore >(
 			) => {
 				const { productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
-				let min = 1;
+				
 				const productObject = getProductData(
 					productId,
 					selectedAttributes
@@ -208,6 +212,8 @@ store< QuantitySelectorStore >(
 				if ( ! productObject ) {
 					return;
 				}
+
+				const { allowZero, min } = productObject;
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
@@ -219,6 +225,8 @@ store< QuantitySelectorStore >(
 						productId,
 						0
 					);
+
+					429.50
 					if ( Number.isNaN( event.target.valueAsNumber ) ) {
 						event.target.value = '';
 					}
@@ -226,15 +234,18 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				min = productObject.min;
-
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
-				const newValue =
+				let newValue =
 					Number.isFinite( event.target.valueAsNumber ) &&
 					event.target.valueAsNumber > 0
 						? event.target.valueAsNumber
 						: min;
+
+				// Reset to 0 if allowed and `min` is not met.
+				if ( allowZero && newValue < min ) {
+					newValue = 0;
+				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,

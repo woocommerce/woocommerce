@@ -70,6 +70,7 @@ export type ProductData = {
 	sku?: string;
 	weight?: string;
 	dimensions?: string;
+	allowZero?: boolean;
 	min?: number;
 	max?: number;
 	step?: number;

@@ -86,6 +86,7 @@ export const getProductData = (
 		return null;
 	}
 
+	const allowZero = productData.allowZero ?? false;
 	const min = typeof productData.min === 'number' ? productData.min : 1;
 	const max =
 		typeof productData.max === 'number' && productData.max >= 1
@@ -100,6 +101,7 @@ export const getProductData = (
 		max,
 		step,
 		type,
+		allowZero,
 	};
 };
 

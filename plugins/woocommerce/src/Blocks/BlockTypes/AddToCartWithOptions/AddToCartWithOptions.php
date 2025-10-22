@@ -298,6 +298,7 @@ class AddToCartWithOptions extends AbstractBlock {
 						$child_product_quantity_constraints = Utils::get_product_quantity_constraints( $child_product );
 
 						$children_product_data[ $child_product_id ] = array(
+							'allowZero' => true,
 							'min'  => $child_product_quantity_constraints['min'],
 							'max'  => $child_product_quantity_constraints['max'],
 							'step' => $child_product_quantity_constraints['step'],
