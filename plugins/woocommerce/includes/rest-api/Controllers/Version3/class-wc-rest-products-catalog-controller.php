@@ -207,7 +207,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	private function generate_catalog_file( $file_info ) {
 		// Ensure directory exists and is not indexable.
 		try {
-			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'] );
+			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'], true );
 		} catch ( \Exception $exception ) {
 			return new WP_Error( 'catalog_dir_creation_failed', $exception->getMessage(), array( 'status' => 500 ) );
 		}
