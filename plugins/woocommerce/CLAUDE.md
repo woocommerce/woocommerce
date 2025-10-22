@@ -107,3 +107,7 @@ Key directories for testing:
 - Test failures provide detailed output showing expected vs actual values
 - The test environment handles WordPress/WooCommerce setup automatically
 - Extension counts in payment tests must match the actual implementation exactly
+
+# User-specific rules
+
+@~/.claude/woocommerce.md
