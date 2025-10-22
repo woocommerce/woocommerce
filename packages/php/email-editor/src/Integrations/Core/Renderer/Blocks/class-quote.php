@@ -41,7 +41,7 @@ class Quote extends Abstract_Block_Renderer {
 
 		return str_replace(
 			array( '{quote_content}', '{citation_content}' ),
-			array( $block_content, $citation_content ),
+			array( $this->get_inner_content( $block_content ), $citation_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}

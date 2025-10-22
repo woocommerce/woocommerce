@@ -28,7 +28,7 @@ class Group extends Abstract_Block_Renderer {
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		return str_replace(
 			'{group_content}',
-			$block_content,
+			$this->get_inner_content( $block_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
