@@ -53,7 +53,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 							'description'       => __( 'Product/variation fields to include in the catalog. Can be an array or comma-separated string.', 'woocommerce' ),
 							'type'              => array( 'array', 'string' ),
 							'items'             => array( 'type' => 'string' ),
-							'default'           => array(),
+							'required'          => true,
 							'validate_callback' => array( $this, 'validate_fields_arg' ),
 							'sanitize_callback' => array( $this, 'sanitize_fields_arg' ),
 						),
@@ -127,6 +127,11 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		if ( ! is_array( $value ) && ! is_string( $value ) ) {
 			return new WP_Error( 'invalid_fields', __( 'fields must be an array of strings or a comma-separated string.', 'woocommerce' ) );
 		}
+
+		if ( ( is_array( $value ) && empty( $value ) ) || ( is_string( $value ) && '' === trim( $value ) ) ) {
+			return new WP_Error( 'invalid_fields', __( 'fields cannot be empty.', 'woocommerce' ) );
+		}
+
 		return true;
 	}
 
@@ -207,7 +212,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	private function generate_catalog_file( $file_info ) {
 		// Ensure directory exists and is not indexable.
 		try {
-			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'] );
+			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'], true );
 		} catch ( \Exception $exception ) {
 			return new WP_Error( 'catalog_dir_creation_failed', $exception->getMessage(), array( 'status' => 500 ) );
 		}
