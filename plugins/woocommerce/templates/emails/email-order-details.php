@@ -102,7 +102,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		if ( $item_totals ) {
 			$i = 0;
 			foreach ( $item_totals as $total ) {
-				$i++;
+				++$i;
 				$last_class = ( $i === $item_totals_count ) ? ' order-totals-last' : '';
 				?>
 				<tr class="order-totals order-totals-<?php echo esc_attr( $total['type'] ?? 'unknown' ); ?><?php echo esc_attr( $last_class ); ?>">
