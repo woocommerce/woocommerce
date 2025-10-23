@@ -76,8 +76,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
-		// Ensure REST API routes are registered (hook may be cleared by parent tear_down).
-		if ( class_exists( 'WP_REST_Abilities_Init' ) ) {
+		/*
+		 * Ensure REST API routes are registered (hook may be cleared by parent tear_down).
+		 * WordPress 6.9+ handles REST API registration in core, so only do this for vendor package.
+		 */
+		if ( ! $is_wp_69_plus && class_exists( 'WP_REST_Abilities_Init' ) ) {
 			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
 		}
 
@@ -377,8 +380,14 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_rest_endpoints_are_registered() {
-		// Ensure the bootstrap file has been loaded by checking for the class.
-		$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+		// Ensure REST API classes are loaded.
+		// WordPress 6.9+ uses core controllers, earlier versions use vendor package's init class.
+		$is_wp_69_plus = class_exists( 'WP_Ability_Categories_Registry' );
+		if ( $is_wp_69_plus ) {
+			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
+		} else {
+			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+		}
 
 		$routes = $this->server->get_routes();
 
