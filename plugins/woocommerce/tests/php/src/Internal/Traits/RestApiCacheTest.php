@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Traits;
 use Automattic\WooCommerce\Internal\Caches\EntityVersionsCache;
 use Automattic\WooCommerce\Internal\Traits\RestApiCache;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use WC_Unit_Test_Case;
+use WC_REST_Unit_Test_Case;
 use WP_REST_Controller;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -28,7 +28,7 @@ use WP_Error;
  * IMPORTANT: If you add new tests, find the "TESTS END HERE" comment
  * and add them before that point.
  */
-class RestApiCacheTest extends WC_Unit_Test_Case {
+class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
@@ -49,7 +49,7 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 	 *
 	 * @var WP_REST_Server
 	 */
-	private $server;
+	protected $server;
 
 	/**
 	 * Fixed timestamp for testing.
@@ -1021,7 +1021,7 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 
 		$this->assertCacheSkipHeader( $response );
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( $expected_data, $response->get_Data() );
+		$this->assertEquals( $expected_data, $response->get_data() );
 
 		// Verify nothing was cached.
 

@@ -7,10 +7,9 @@ namespace Automattic\WooCommerce\Internal\Caches;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Entity versions vache class.
+ * Entity versions cache class.
  *
- * Provides a generic mechanism for caching versions of mutable entities,
- * with built-in support for detecting and handling changes in products.
+ * Provides a generic mechanism for caching versions of mutable entities.
  */
 class EntityVersionsCache {
 

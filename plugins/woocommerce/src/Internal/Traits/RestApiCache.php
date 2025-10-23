@@ -34,7 +34,7 @@ use WP_REST_Response;
  *
  * IMPORTANT: Caching only occurs when EntityVersionsCache::is_enabled() returns true,
  * and by default this only happens when object caching is enabled site-wide
- * (configurable via the 'woocommerce_enable_object_cache' hook).
+ * (configurable via the 'woocommerce_enable_entity_versions_cache' hook).
  *
  * Required setup:
  *

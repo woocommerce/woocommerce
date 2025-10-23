@@ -198,10 +198,6 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 		$cache_key                      = 'wc_entity_version_custom_entity_789';
 		$this->sut->cache[ $cache_key ] = $expected_version;
 
-		// Track set_cached calls by monitoring the cache.
-
-		$initial_cache_state = $this->sut->cache;
-
 		$this->sut->get_entity_version( 'custom_entity', 789 );
 
 		// Verify the cache entry still exists (refresh happened).
