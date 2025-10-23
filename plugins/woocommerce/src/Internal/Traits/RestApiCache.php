@@ -5,206 +5,370 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Traits;
 
 use Automattic\WooCommerce\Internal\Caches\EntityVersionsCache;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WP_REST_Request;
 use WP_REST_Response;
-use WP_REST_Server;
 
 /**
- * This trait allows adding transient-based caching capabilities
- * for outputs of REST API endpoints.
+ * This trait provides transient-based caching capabilities for REST API endpoints
+ * (see "why transients?" at the end of this comment).
  *
- * The minimum setup required is 'use RestApiCache' in the corresponding
- * REST API controller, adding '$this->register_response_cache_hooks();' to __construct,
- * and overriding the get_default_entity_type method. This is enough if:
+ * - The output of all the REST API endpoints whose callback declaration is wrapped
+ *   in a call to 'with_cache' will be cached using transients.
+ * - For the purposes of caching, a request is uniquely identified by its route
+ *   and query string.
+ * - The EntityVersionsCache class is used to track versions of entities included
+ *   in the responses (an "entity" is any object that is uniquely identified by type and id
+ *   and contributes with information to be included in the response),
+ *   so that when those entities change, the relevant cached responses become invalid.
+ *   Modification of entity versions must be done externally by the code that modifies
+ *   those entities (via calls to EntityVersionsCache::modify_entity_version).
+ * - Various parameters (cached outputs TTL, entity type for a given response, extraction
+ *   of entity ids from the response data, filters that affect the response) can be configured
+ *   globally for the controller (via overriding protected methods) or per-endpoint
+ *   (via arguments passed to with_cache).
+ * - Caching can be disabled for a given request by adding a '_skip_cache=true|1'
+ *   to the query string.
+ * - A X-WC-Cache HTTP header is added to responses to indicate cache status:
+ *   HIT, MISS, or SKIP.
  *
- * - All the GET endpoints defined in the controller are cacheable
- *   (and none of the non-GET endpoints is cacheable).
- * - The default lifetime for cached entries (see get_cache_ttl)
- *   is acceptable for all the endpoints.
- * - All endpoints return deterministic information
- *   (the returned information is always the same if the request is the same
- *    and the involved entities are the same ones).
+ * IMPORTANT: Caching only occurs when EntityVersionsCache::is_enabled() returns true,
+ * and by default this only happens when object caching is enabled site-wide
+ * (configurable via the 'woocommerce_enable_object_cache' hook).
+ *
+ * Required setup:
+ *
+ * 1. `use RestApiCache;` in the controller class.
+ * 1. Call `$this->initialize_rest_api_cache()` in the controller's constructor.
+ * 2. Either override `get_default_entity_type()` to return the default entity type
+ *    associated to all endpoints (e.g., 'product', 'order'),  OR specify 'entity_type'
+ *    in the config array for every `with_cache()` call.
+ *
+ * Usage: Wrap endpoint callbacks with the `with_cache()` method when registering routes,
+ * so `'callback' => $this->with_cache( array( $this, 'get_item' ), [ ...config... ] )`.
+ *
+ * Example:
+ *
+ * class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
+ *     use RestApiCache;
+ *
+ *     public function __construct() {
+ *         parent::__construct();
+ *         $this->initialize_rest_api_cache();  // REQUIRED
+ *     }
+ *
+ *     protected function get_default_entity_type(): ?string {
+ *         return 'product';  // REQUIRED (or specify entity_type in each with_cache call)
+ *     }
+ *
+ *     public function register_routes() {
+ *         register_rest_route(
+ *             $this->namespace,
+ *             '/' . $this->rest_base . '/(?P<id>[\d]+)',
+ *             array(
+ *                 'methods'  => WP_REST_Server::READABLE,
+ *                 'callback' => $this->with_cache(
+ *                     array( $this, 'get_item' ),
+ *                     array(
+ *                         // String, optional if get_default_entity_type() is overridden.
+ *                         'entity_type'        => 'product',
+ *                         // Optional callback, defaults to the controller's get_cache_ttl().
+ *                         'cache_ttl'          => HOUR_IN_SECONDS,
+ *                         // Optional callback, defaults to the controller's extract_entity_ids().
+ *                         'extract_entity_ids' => array( $this, 'custom_extract_ids' ),
+ *                         // Optional callback, defaults to the controller's must_cache().
+ *                         'must_cache'         => array( $this, 'should_cache' ),
+ *                         // Optional array, defaults to the controller's get_hooks_relevant_to_caching().
+ *                         'relevant_hooks'     => array( 'filter_name_1', 'filter_name_2' ),
+ *                     )
+ *                 ),
+ *             )
+ *         );
+ *     }
+ * }
  *
  * Note: we define an "entity" as an object that is uniquely identified by an entity type
  *       and entity id pair, and provides information to be included in the response.
  *
- * Further customization will often be needed by overriding the following trait methods in the controller:
+ * Override these methods in your controller as needed:
+ * - get_default_entity_type(): Default entity type for endpoints without explicit config.
+ * - get_relevant_filters(): Filter names to track for cache invalidation.
+ * - get_cache_ttl(): TTL for cached outputs in seconds.
+ * - must_cache(): Whether to cache a specific request or not.
+ * - extract_entity_ids(): Extract entity IDs from response data.
  *
- * - extract_entity_ids(): If mutable entity ids don't identify by an 'id' field,
- *   or not all the entities included in the response are mutable.
- * - get_cache_hash_filters(): If the output can be customized via filters before being sent.
- * - get_cache_ttl(): To customize the lifetime of the cache entries.
- * - get_request_uid_info(): To fine-tune which requests/endpoints are to be cached,
- *   and which is the type of entity being cached; or if the request needs to be
- *   uniquely identified by anything else than the route and the query string.
- *   The get_matched_route method can be useful when overriding this method.
+ * Cache invalidation happens when:
+ * - Entity versions change (tracked via EntityVersionsCache).
+ * - Filter callbacks change
+ *   (if the `get_hooks_relevant_to_caching()` call result or the 'relevant_hooks' array isn't empty).
+ * - Cached response TTL expires.
  *
- * If entities are mutable and serving stale cached data is unacceptable, the entity
- * modification (or deletion) event must be captured and the cached version of the
- * corresponding entities must be modified. See the EntityVersionsCache class.
+ * NOTE: Why transients and not the WordPress global cache?
  *
- * See WC_REST_Products_Controller for an example of trait usage and customization.
+ * Using transients for this kind of cache implementation in a site without a proper persistent global cache
+ * configured is a bad idea, as it can lead to performance issues since as transients are stored directly
+ * in the database. However, if a global cache is in place, transients will be stored using it, making
+ * the usage of transients functionally equivalent to using the WordPress global cache.
+ *
+ * By default this caching mechanism is only enabled when an external object cache is enabled
+ * (checked via call to EntityVersionsCache::is_enabled()), so database-backed transients won't be used.
+ * However it's still possible to force-enable it via the 'woocommerce_enable_entity_versions_cache' filter,
+ * and this can be useful in scenarios without a global cache in place for testing, experimenting, troubleshooting,
+ * staging, and development purposes.
  *
  * @since   10.4.0
  */
 trait RestApiCache {
 	/**
-	 * The instance of EntityVersionsCache to use.
+	 * The instance of EntityVersionsCache to use, or null if caching is disabled.
 	 *
-	 * @var EntityVersionsCache
+	 * @var EntityVersionsCache|null
 	 */
-	private EntityVersionsCache $entity_versions_cache;
+	private ?EntityVersionsCache $entity_versions_cache;
 
 	/**
-	 * Register the appropriate hooks.
-	 * Call this from the controller's constructor.
+	 * Initialize the entity versions cache.
+	 * This MUST be called from the controller's constructor.
 	 */
-	protected function initialize_output_caching(): void {
-		$this->entity_versions_cache = wc_get_container()->get( EntityVersionsCache::class );
+	protected function initialize_rest_api_cache(): void {
+		$cache                       = wc_get_container()->get( EntityVersionsCache::class );
+		$this->entity_versions_cache = $cache->is_enabled() ? $cache : null;
+	}
 
-		if ( ! $this->entity_versions_cache->is_enabled() ) {
-			return;
+	/**
+	 * Wrap an endpoint callback declaration with caching logic.
+	 * Usage: `'callback' => $this->with_cache( array( $this, 'endpoint_callback_method' ), [ ...config... ] )`
+	 *
+	 * @param callable $callback The original endpoint callback.
+	 * @param array    $config   Caching configuration:
+	 *                           - entity_type: string (falls back to get_default_entity_type()).
+	 *                           - cache_ttl: int (defaults to HOUR_IN_SECONDS).
+	 *                           - extract_entity_ids: callable (defaults to $this->extract_entity_ids).
+	 *                           - must_cache: callable (defaults to $this->must_cache).
+	 *                           - relevant_hooks: array (defaults to $this->get_relevant_hooks()).
+	 * @return callable Wrapped callback.
+	 */
+	protected function with_cache( callable $callback, array $config = array() ): callable {
+		return fn( $request ) => $this->handle_cacheable_request( $request, $callback, $config );
+	}
+
+	/**
+	 * Handle a request with caching logic.
+	 *
+	 * Strategy: Try to use cached response if available and valid, otherwise execute the endpoint
+	 * callback and cache the response (if successful) for future requests.
+	 *
+	 * @param WP_REST_Request $request  The request object.
+	 * @param callable        $callback The original endpoint callback.
+	 * @param array           $config   Caching configuration specified for the endpoint.
+	 * @return WP_REST_Response|\WP_Error The response.
+	 */
+	protected function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
+		if ( ! $this->should_use_cache_for_request( $request, $config ) ) {
+			$response = call_user_func( $callback, $request );
+			if ( $response instanceof WP_REST_Response ) {
+				$response->header( 'X-WC-Cache', 'SKIP' );
+			}
+			return $response;
+		}
+
+		$cached_config = $this->build_cache_config( $request, $config );
+		if ( is_null( $cached_config ) ) {
+			$response = call_user_func( $callback, $request );
+			if ( $response instanceof WP_REST_Response ) {
+				$response->header( 'X-WC-Cache', 'SKIP' );
+			}
+			return $response;
+		}
+
+		$cached_response = $this->get_cached_response( $request, $config );
+
+		if ( $cached_response ) {
+			$cached_response->header( 'X-WC-Cache', 'HIT' );
+			return $cached_response;
+		}
+
+		$authoritative_response = call_user_func( $callback, $request );
+
+		return $this->maybe_cache_response( $request, $authoritative_response, $config );
+	}
+
+	/**
+	 * Check if caching should be used for a particular incoming request.
+	 *
+	 * @param WP_REST_Request $request The request object.
+	 * @param array           $config  Caching configuration.
+	 * @return bool True if caching should be used, false otherwise.
+	 */
+	private function should_use_cache_for_request( WP_REST_Request $request, array $config ): bool {
+		if ( is_null( $this->entity_versions_cache ) ) {
+			return false;
+		}
+
+		// Check for explicit skip parameter.
+		$skip_cache   = $request->get_param( '_skip_cache' );
+		$should_cache = ! ( 'true' === $skip_cache || '1' === $skip_cache );
+
+		// Check custom must_cache callback.
+		if ( $should_cache ) {
+			$must_cache_fn = $config['must_cache'] ?? array( $this, 'must_cache' );
+			$should_cache  = call_user_func( $must_cache_fn, $request );
 		}
 
 		/**
 		 * Filter whether to enable response caching for a given REST API controller.
 		 *
+		 * Based on the _skip_cache parameter and must_cache callback evaluation,
+		 * the first parameter indicates whether caching should be enabled.
+		 * This filter can override that decision.
+		 *
 		 * @since 10.4.0
 		 *
-		 * @param bool   $enable_hooks Whether to enable response caching for the controller.
-		 * @param object $controller   The controller instance.
+		 * @param bool            $enable_caching Whether to enable response caching (result of !_skip_cache && must_cache evaluation).
+		 * @param object          $controller     The controller instance.
+		 * @param WP_REST_Request $request        The request object.
 		 * @return bool True to enable response caching, false to disable.
 		 */
-		$enable_caching = apply_filters(
+		return apply_filters(
 			'woocommerce_rest_api_enable_response_caching',
-			true,
-			$this
+			$should_cache,
+			$this,
+			$request
 		);
-		if ( ! $enable_caching ) {
-			return;
-		}
-
-		add_filter( 'rest_pre_dispatch', array( $this, 'handle_rest_pre_dispatch' ), 10, 3 );
-		add_filter( 'rest_post_dispatch', array( $this, 'handle_rest_post_dispatch' ), 10, 3 );
 	}
 
 	/**
-	 * Get the matched route pattern for the current request.
+	 * Build the output cache entry configuration from the request and per-endpoint config.
 	 *
-	 * This returns the route pattern that was matched (e.g., '/wc/v3/products/(?P<id>[\d]+)')
-	 * rather than the actual route (e.g., '/wc/v3/products/123').
-	 * Useful for determining which endpoint was matched without actually parsing the route
-	 * of the current request.
-	 *
-	 * @param WP_REST_Request $request Current request object.
-	 * @return string|null Matched route pattern or null if none of the routes match.
+	 * @param WP_REST_Request $request The request object.
+	 * @param array           $config  Raw configuration array passed to with_cache.
+	 * @return array|null Normalized cache config with keys: entity_type, cache_ttl, extract_entity_ids, relevant_hooks, cache_key. Returns null if entity type is not available.
 	 */
-	protected function get_matched_route( WP_REST_Request $request ): ?string {
-		$route  = $request->get_route();
-		$routes = rest_get_server()->get_routes();
+	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
+		$entity_type = $config['entity_type'] ?? $this->get_default_entity_type();
 
-		foreach ( $routes as $pattern => $handlers ) {
-			if ( preg_match( '@^' . $pattern . '$@i', $route ) ) {
-				return $pattern;
+		if ( ! $entity_type ) {
+			wc_get_container()->get( LegacyProxy::class )->call_function(
+				'wc_doing_it_wrong',
+				__METHOD__,
+				'No entity type provided and no default entity type available. Skipping cache.',
+				'10.4.0'
+			);
+			return null;
+		}
+
+		return array(
+			'entity_type'        => $entity_type,
+			'cache_ttl'          => $config['cache_ttl'] ?? $this->get_cache_ttl( $request ),
+			'extract_entity_ids' => $config['extract_entity_ids'] ?? array( $this, 'extract_entity_ids' ),
+			'relevant_hooks'     => $config['relevant_hooks'] ?? $this->get_hooks_relevant_to_caching( $request ),
+			'cache_key'          => $this->get_cache_key( $request, $entity_type ),
+		);
+	}
+
+	/**
+	 * Cache the response if it's successful and return it with appropriate headers.
+	 *
+	 * Only caches responses with 2xx status codes. Always adds the X-WC-Cache header
+	 * with value MISS if the response was cached, or SKIP if it was not cached.
+	 *
+	 * @param WP_REST_Request            $request  The request object.
+	 * @param WP_REST_Response|\WP_Error $response The response to potentially cache.
+	 * @param array                      $config   Caching configuration.
+	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
+	 */
+	private function maybe_cache_response( WP_REST_Request $request, $response, array $config ) {
+		if ( ! ( $response instanceof WP_REST_Response ) ) {
+			return $response;
+		}
+
+		$cached = false;
+
+		$status = $response->get_status();
+		if ( $status >= 200 && $status <= 299 ) {
+			$cached_config = $this->build_cache_config( $request, $config );
+
+			if ( ! is_null( $cached_config ) ) {
+				$data       = $response->get_data();
+				$entity_ids = call_user_func( $cached_config['extract_entity_ids'], $data, $request );
+
+				$this->store_cached_response(
+					$cached_config['cache_key'],
+					$data,
+					$status,
+					$cached_config['entity_type'],
+					$entity_ids,
+					$cached_config['cache_ttl'],
+					$cached_config['relevant_hooks']
+				);
+
+				$cached = true;
 			}
 		}
 
-		return null;
+		$response->header( 'X-WC-Cache', $cached ? 'MISS' : 'SKIP' );
+		return $response;
 	}
 
 	/**
-	 * Get the default entity type for caching.
+	 * Get the default type for entities included in responses.
 	 *
-	 * It's mandatory to override this method in controllers that include the trait,
-	 * except if get_request_uid_info is also overridden to always provide an entity type
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('entity_type' key).
 	 *
-	 * @return string|null Entity type (e.g., 'product', 'variation'), or null if no default.
+	 * @return string|null Entity type (e.g., 'product', 'order'), or null if no controller-wide default.
 	 */
 	protected function get_default_entity_type(): ?string {
 		return null;
 	}
 
-	/**
-	 * Get the information that uniquely identifies a request for caching purposes.
-	 *
-	 * Override this method in controllers in these cases:
-	 *
-	 * - Not all GET requests are to be cached.
-	 * - Non-GET requests are to be cached.
-	 * - The requests needs to be uniquely identified by something other than
-	 *   route and query string.
-	 * - Entity types other than the default one are involved.
-	 *
-	 * Return null to skip caching for this request.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return array|null Array with 'request_hash' (string) and 'entity_type' (string), or null to skip caching.
-	 */
-	protected function get_request_uid_info( WP_REST_Request $request ): ?array {
-		if ( ! $this->route_belongs_to_this_controller( $request ) || $request->get_method() !== 'GET' ) {
-			return null;
-		}
-
-		$uid_info = array(
-			'request_hash' => md5( $request->get_route() . '-' . wp_json_encode( $request->get_query_params() ) ),
-			'entity_type'  => $this->get_default_entity_type(),
-		);
-
-		/**
-		 * Filter the request UID information for REST API caching.
-		 *
-		 * Allows customization of the cache key and entity type for a request.
-		 * Return null to skip caching for the current request.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param array|null      $uid_info  Array with 'request_hash' and 'entity_type', or null to skip caching.
-		 * @param WP_REST_Request $request   Request object.
-		 * @param object          $controller Controller instance.
-		 */
-		return apply_filters( 'woocommerce_rest_api_request_uid_info', $uid_info, $request, $this );
-	}
-
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
 
 	/**
-	 * Check if the current request route belongs to this controller.
+	 * Get the names of filters that can customize the response.
+	 *
+	 * All the existing instances of add_action/add_filter for these filters
+	 * will be included in the information that gets cached together with the response,
+	 * and if any of these has changed when the cached response is retrieved,
+	 * the cache entry will be invalidated.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('relevant_hooks' key).
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return bool True if route belongs to this controller, false otherwise.
+	 * @return array Array of filter names to track.
 	 */
-	protected function route_belongs_to_this_controller( WP_REST_Request $request ): bool {
-		$matched_route = $this->get_matched_route( $request );
-		if ( ! $matched_route ) {
-			return false;
-		}
-
-		$routes = rest_get_server()->get_routes();
-		if ( ! isset( $routes[ $matched_route ] ) ) {
-			return false;
-		}
-
-		$handlers = $routes[ $matched_route ];
-
-		foreach ( $handlers as $handler ) {
-			$callback = $handler['callback'] ?? null;
-			if ( is_array( $callback ) && ( $callback[0] ?? null ) === $this ) {
-				return true;
-			}
-		}
-
-		return false;
+	protected function get_hooks_relevant_to_caching( WP_REST_Request $request ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return array();
 	}
 
 	/**
-	 * Get the names of the filters that can customize the response for a given request
-	 * before it's sent (likely fired in the prepare_object_for_response method).
+	 * Get the TTL (Time To Live) for a cached response in seconds.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('cache_ttl' key).
 	 *
 	 * @param WP_REST_Request $request Request object.
-	 * @return array Array of filter names.
+	 * @return int Cache TTL in seconds.
 	 */
-	protected function get_cache_hash_filters( WP_REST_Request $request ): array {
-		return array();
+	protected function get_cache_ttl( WP_REST_Request $request ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return HOUR_IN_SECONDS;
+	}
+
+	/**
+	 * Determine whether a given request should be cached.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('must_cache' key).
+	 *
+	 * Note: Additionally, the _skip_cache query parameter and the woocommerce_rest_api_cache_must_cache filter
+	 * can be used to control the enabling of caching for a given request.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool True to cache the request, false to skip caching.
+	 */
+	protected function must_cache( WP_REST_Request $request ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return true;
 	}
 
 	// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
@@ -212,17 +376,21 @@ trait RestApiCache {
 	/**
 	 * Extract entity IDs from response data.
 	 *
-	 * This implementation assumes that the response is either an array with an 'id' field,
-	 * or an array of arrays each having an 'id' field; and that all of these ids
-	 * correspond to mutable entities. If that's not the case this method needs to be overridden.
+	 * The default implementation assumes the response is either:
+	 * - An array with an 'id' field (single item)
+	 * - An array of arrays each having an 'id' field (collection)
 	 *
-	 * @param array $data Response data.
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('extract_entity_ids' key).
+	 *
+	 * @param array           $data    Response data.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array Array of entity IDs.
 	 */
-	protected function extract_entity_ids( array $data ): array {
+	protected function extract_entity_ids( array $data, WP_REST_Request $request ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$ids = array();
 
-		if ( isset( $data[0] ) ) {
+		if ( isset( $data[0] ) && is_array( $data[0] ) ) {
 			foreach ( $data as $item ) {
 				if ( isset( $item['id'] ) ) {
 					$ids[] = $item['id'];
@@ -232,39 +400,45 @@ trait RestApiCache {
 			$ids[] = $data['id'];
 		}
 
-		return array_unique( array_filter( $ids ) );
+		// Filter out null/false values but keep 0 and empty strings as they could be valid IDs.
+		return array_unique(
+			array_filter(
+				$ids,
+				function ( $id ) {
+					return ! is_null( $id ) && false !== $id;
+				}
+			)
+		);
 	}
 
 	/**
-	 * Get the TTL for cached responses in seconds.
+	 * Generate a cache key for a given request.
 	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return int Cache TTL in seconds.
+	 * @param WP_REST_Request $request     The request object.
+	 * @param string          $entity_type The entity type.
+	 * @return string Cache key.
 	 */
-	protected function get_cached_output_ttl( WP_REST_Request $request ): int {
-		/**
-		 * Filter the cache TTL for REST API responses.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param int             $ttl        Cache TTL in seconds. Default is one hour (3600 seconds).
-		 * @param WP_REST_Request $request    Request object.
-		 * @param object          $controller Controller instance.
-		 */
-		return apply_filters( 'woocommerce_rest_api_cached_output_ttl', HOUR_IN_SECONDS, $request, $this );
+	protected function get_cache_key( WP_REST_Request $request, string $entity_type ): string {
+		$request_hash = md5(
+			$request->get_route() . '-' . wp_json_encode( $request->get_query_params() )
+		);
+		return "wc_rest_api_cache_{$entity_type}-{$request_hash}";
 	}
 
 	/**
-	 * Generate a hash based on the filters that affect the response.
+	 * Generate a hash based on the actual usages of the hooks that affect the response.
 	 *
-	 * @param WP_REST_Request $request Request object.
+	 * @param array $filter_names Array of hook names to track.
 	 * @return string Hooks hash.
 	 */
-	protected function generate_hooks_hash( WP_REST_Request $request ): string {
+	protected function generate_hooks_hash( array $filter_names ): string {
+		if ( empty( $filter_names ) ) {
+			return '';
+		}
+
 		global $wp_filter;
 
 		$cache_hash_data = array();
-		$filter_names    = $this->get_cache_hash_filters( $request );
 
 		foreach ( $filter_names as $filter_name ) {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
@@ -279,18 +453,18 @@ trait RestApiCache {
 		}
 
 		/**
-		 * Filter the data used to generate the hooks hash for the purposes of caching REST API responses.
+		 * Filter the data used to generate the hooks hash for REST API response caching.
 		 *
 		 * @since 10.4.0
 		 *
-		 * @param array           $cache_hash_data Hook callbacks data used for hash generation.
-		 * @param WP_REST_Request $request         Request object.
-		 * @param object          $controller      Controller instance.
+		 * @param array  $cache_hash_data Hook callbacks data used for hash generation.
+		 * @param array  $filter_names    Filter names being tracked.
+		 * @param object $controller      Controller instance.
 		 */
 		$cache_hash_data = apply_filters(
 			'woocommerce_rest_api_cache_hooks_hash_data',
 			$cache_hash_data,
-			$request,
+			$filter_names,
 			$this
 		);
 
@@ -298,187 +472,127 @@ trait RestApiCache {
 	}
 
 	/**
-	 * Handle the rest_pre_dispatch action to return a cached response if appropriate.
+	 * Get a cached response, but only if it's valid
+	 * (otherwise the cached response will be invalidated).
 	 *
-	 * @internal
-	 *
-	 * @param mixed           $result  Response to replace the requested version with.
-	 * @param WP_REST_Server  $server  Server instance.
-	 * @param WP_REST_Request $request Request used to generate the response.
-	 * @return WP_REST_Response|null Response, or null to use the original response.
+	 * @param WP_REST_Request $request The request object.
+	 * @param array           $config  Caching configuration.
+	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
-	public function handle_rest_pre_dispatch( $result, WP_REST_Server $server, WP_REST_Request $request ) {
-		if ( $request->get_param( '_skip_cache' ) === 'true' ) {
+	protected function get_cached_response( WP_REST_Request $request, array $config ): ?WP_REST_Response {
+		$cached_config = $this->build_cache_config( $request, $config );
+
+		if ( is_null( $cached_config ) ) {
 			return null;
 		}
 
-		// Skip if another handler already returned a result.
-		if ( ! is_null( $result ) ) {
-			return $result;
-		}
+		$cache_key      = $cached_config['cache_key'];
+		$entity_type    = $cached_config['entity_type'];
+		$cache_ttl      = $cached_config['cache_ttl'];
+		$relevant_hooks = $cached_config['relevant_hooks'];
 
-		// Skip if another controller already handled caching.
-		if ( $request->get_param( '_cache_uid_info' ) ) {
-			return $result;
-		}
+		$cached = $this->get_cached( $cache_key );
 
-		$uid_info = $this->get_request_uid_info( $request );
-		if ( ! $uid_info ) {
+		if ( ! $cached || ! isset( $cached['data'], $cached['entity_versions'], $cached['created_at'] ) ) {
 			return null;
 		}
 
-		$entity_type = $uid_info['entity_type'] ?? null;
-		if ( ! $entity_type ) {
-			wc_doing_it_wrong(
-				__METHOD__,
-				'Request is cacheable but no entity type is provided. Override either get_default_entity_type or get_request_uid_info in the controller.',
-				'10.4.0'
-			);
-			return null;
-		}
-
-		// Store request UID info for post-dispatch.
-		$uid_info['controller_class'] = get_class( $this );
-		$request->set_param( '_cache_uid_info', $uid_info );
-
-		// See if we have a usable cached response.
-		$transient_key = "wc_rest_api_cache_{$entity_type}-{$uid_info['request_hash']}";
-		$cached        = $this->get_cached_data( $transient_key );
-
-		if ( ! $cached || ! isset( $cached['hooks_hash'], $cached['data'], $cached['created_at'], $cached['entity_versions'] ) ) {
-			return null;
-		}
-
-		$current_time    = time();
-		$expiration_time = $cached['created_at'] + $this->get_cached_output_ttl( $request );
+		$current_time    = wc_get_container()->get( LegacyProxy::class )->call_function( 'time' );
+		$expiration_time = $cached['created_at'] + $cache_ttl;
 		if ( $current_time >= $expiration_time ) {
-			// Entry has expired (TTL is now lower than the lifetime of the transient).
-			$this->delete_cached_data( $transient_key );
+			$this->delete_cached( $cache_key );
 			return null;
 		}
 
-		$current_hooks_hash = $this->generate_hooks_hash( $request );
-		if ( $cached['hooks_hash'] !== $current_hooks_hash ) {
-			// Hooks have changed - invalidate cache entry.
-			$this->delete_cached_data( $transient_key );
-			return null;
-		}
+		if ( ! empty( $relevant_hooks ) ) {
+			$current_hooks_hash = $this->generate_hooks_hash( $relevant_hooks );
+			$cached_hooks_hash  = $cached['hooks_hash'] ?? '';
 
-		// Validate versions for all the entities involved in the cached response:
-		// if any has changed, the entire cached response is invalid.
-		foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
-			$current_version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
-			if ( is_null( $current_version ) || $current_version !== $cached_version ) {
-				$this->delete_cached_data( $transient_key );
+			if ( $current_hooks_hash !== $cached_hooks_hash ) {
+				$this->delete_cached( $cache_key );
 				return null;
 			}
 		}
 
-		// If we reach this point the cached response is valid.
-		return new WP_REST_Response( $cached['data'], 200, array( 'X-WC-Cache' => 'HIT' ) );
+		foreach ( $cached['entity_versions'] as $entity_id => $cached_version ) {
+			$current_version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
+			if ( $current_version !== $cached_version ) {
+				$this->delete_cached( $cache_key );
+				return null;
+			}
+		}
+
+		// In this point the cached response is valid.
+		$status_code = $cached['status_code'] ?? 200;
+		return new WP_REST_Response( $cached['data'], $status_code );
 	}
 
 	/**
-	 * Handle the rest_post_dispatch filter to possibly cache the response
-	 * after all the hooks that can modify it have run.
+	 * Store a response in cache.
 	 *
-	 * @internal
-	 *
-	 * @param WP_REST_Response $response Result to send to the client.
-	 * @param WP_REST_Server   $server   Server instance.
-	 * @param WP_REST_Request  $request  Request used to generate the response.
-	 * @return WP_REST_Response Response object.
+	 * @param string $cache_key        The cache key.
+	 * @param array  $data             The response data to cache.
+	 * @param int    $status_code      The HTTP status code of the response.
+	 * @param string $entity_type      The entity type.
+	 * @param array  $entity_ids       Array of entity IDs in the response.
+	 * @param int    $cache_ttl        Cache TTL in seconds.
+	 * @param array  $relevant_hooks   Hook names to track for invalidation.
 	 */
-	public function handle_rest_post_dispatch( WP_REST_Response $response, WP_REST_Server $server, WP_REST_Request $request ): WP_REST_Response {
-		if ( $request->get_param( '_skip_cache' ) === 'true' ) {
-			$response->header( 'X-WC-Cache', 'SKIP' );
-			return $response;
-		}
-
-		// Only handle successful requests.
-		$status = $response->get_status();
-		if ( $status < 200 || $status > 299 ) {
-			return $response;
-		}
-
-		$uid_info = $request->get_param( '_cache_uid_info' );
-		if ( ! $uid_info ) {
-			// Pre-dispatch didn't set UID info, so this request doesn't use caching.
-			return $response;
-		}
-
-		if ( ! isset( $uid_info['controller_class'] ) || get_class( $this ) !== $uid_info['controller_class'] ) {
-			// Pre-dispatch was handled by a different controller.
-			return $response;
-		}
-
-		$headers = $response->get_headers();
-		if ( isset( $headers['X-WC-Cache'] ) ) {
-			// Pre-dispatch already set the response from cache.
-			return $response;
-		}
-
-		$data = $response->get_data();
-
-		// If we reach this point we're going to cache the response
-		// and then send it.
-
-		$entity_ids      = $this->extract_entity_ids( $data );
-		$entity_type     = $uid_info['entity_type'];
+	protected function store_cached_response( string $cache_key, array $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks ): void {
 		$entity_versions = array();
 		foreach ( $entity_ids as $entity_id ) {
 			$version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
-			if ( ! is_null( $version ) ) {
+			if ( $version ) {
 				$entity_versions[ $entity_id ] = $version;
 			}
 		}
 
 		$cache_data = array(
-			'entity_type'     => $entity_type,
-			'created_at'      => time(),
-			'hooks_hash'      => $this->generate_hooks_hash( $request ),
 			'data'            => $data,
 			'entity_versions' => $entity_versions,
+			'created_at'      => wc_get_container()->get( LegacyProxy::class )->call_function( 'time' ),
 		);
 
-		$transient_key = "wc_rest_api_cache_{$entity_type}-{$uid_info['request_hash']}";
-		$this->set_cached_data( $transient_key, $cache_data, $this->get_cached_output_ttl( $request ) );
+		if ( 200 !== $status_code ) {
+			$cache_data['status_code'] = $status_code;
+		}
 
-		$request->set_param( '_cache_uid_info', null );
+		if ( ! empty( $relevant_hooks ) ) {
+			$cache_data['hooks_hash'] = $this->generate_hooks_hash( $relevant_hooks );
+		}
 
-		$response->header( 'X-WC-Cache', 'MISS' );
-		return $response;
+		$this->set_cached( $cache_key, $cache_data, $cache_ttl );
 	}
 
 	/**
-	 * Get cached data from persistent storage.
+	 * Get a value from the cache.
 	 *
-	 * @param string $key Storage key.
-	 * @return mixed Cached value or false if not found.
+	 * @param string $cache_key The cache key.
+	 * @return mixed|false The cached value or false if not found.
 	 */
-	protected function get_cached_data( string $key ) {
-		return get_transient( $key );
+	protected function get_cached( string $cache_key ) {
+		return get_transient( $cache_key );
 	}
 
 	/**
-	 * Set cached data in persistent storage.
+	 * Set a value in the cache.
 	 *
-	 * @param string $key   Storage key.
-	 * @param mixed  $value Value to store.
-	 * @param int    $ttl   Time to live in seconds.
+	 * @param string $cache_key The cache key.
+	 * @param mixed  $value     The value to cache.
+	 * @param int    $ttl       Time to live in seconds.
 	 * @return bool True on success, false on failure.
 	 */
-	protected function set_cached_data( string $key, $value, int $ttl ): bool {
-		return set_transient( $key, $value, $ttl );
+	protected function set_cached( string $cache_key, $value, int $ttl ): bool {
+		return set_transient( $cache_key, $value, $ttl );
 	}
 
 	/**
-	 * Delete cached data from persistent storage.
+	 * Delete a value from the cache.
 	 *
-	 * @param string $key Storage key.
+	 * @param string $cache_key The cache key.
 	 * @return bool True on success, false on failure.
 	 */
-	protected function delete_cached_data( string $key ): bool {
-		return delete_transient( $key );
+	protected function delete_cached( string $cache_key ): bool {
+		return delete_transient( $cache_key );
 	}
 }
