@@ -170,6 +170,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.3.1 2025-10-22 =
+= 10.3.1 2025-10-23 =
+
+**WooCommerce**
+
+* Fix - Check the get_session_data method exists on the session object [#61561](https://github.com/woocommerce/woocommerce/pull/61561)
+* Fix - Check the payment method ID before sending a request to capture a PayPal payment. [#61564](https://github.com/woocommerce/woocommerce/pull/61564)
+
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
