@@ -307,9 +307,10 @@ class WC_Frontend_Scripts {
 				'legacy_handle' => 'jquery-cookie',
 			),
 			'wc-jquery-payment'          => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
+				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.0.0-wc.' . $version,
+				'legacy_handle' => 'jquery-payment',
 			),
 			'wc-jquery-tiptip'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
