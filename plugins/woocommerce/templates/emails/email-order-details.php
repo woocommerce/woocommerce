@@ -25,6 +25,7 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 $heading_class              = $email_improvements_enabled ? 'email-order-detail-heading' : '';
 $order_table_class          = $email_improvements_enabled ? 'email-order-details' : '';
 $order_total_text_align     = $email_improvements_enabled ? 'right' : 'left';
+$order_quantity_text_align  = $email_improvements_enabled ? 'right' : 'left';
 
 if ( $email_improvements_enabled ) {
 	add_filter( 'woocommerce_order_shipping_to_display_shipped_via', '__return_false' );
@@ -74,7 +75,7 @@ do_action( 'woocommerce_email_before_order_table', $order, $sent_to_admin, $plai
 		<thead>
 			<tr>
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
-				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
+				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_quantity_text_align ); ?>;"><?php esc_html_e( 'Quantity', 'woocommerce' ); ?></th>
 				<th class="td" scope="col" style="text-align:<?php echo esc_attr( $order_total_text_align ); ?>;"><?php esc_html_e( 'Price', 'woocommerce' ); ?></th>
 			</tr>
 		</thead>
