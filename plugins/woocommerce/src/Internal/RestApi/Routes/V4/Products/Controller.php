@@ -10,7 +10,8 @@
 
 declare(strict_types=1);
 
-use Automattic\WooCommerce\Admin\Features\Features;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products;
+
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
@@ -18,16 +19,24 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use WC_REST_Products_V2_Controller;
+use WP_REST_Server;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_Error;
+use WC_Admin_Duplicate_Product;
+use WC_REST_CRUD_Controller;
+use WC_Product_Factory;
+
 
 defined( 'ABSPATH' ) || exit;
 
 /**
  * REST API Products controller class.
  *
- * @package WooCommerce\RestApi
  * @extends WC_REST_Products_V2_Controller
  */
-class WC_REST_Products_V4_Controller extends WC_REST_Products_V2_Controller {
+class Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
 

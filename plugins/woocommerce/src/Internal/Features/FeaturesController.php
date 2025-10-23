@@ -1759,21 +1759,28 @@ class FeaturesController {
 			return;
 		}
 
-		wc_enqueue_js(
+		$handle = 'wc-features-fix-plugin-list-html';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"
-		const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
-		for(const warningRow of warningRows) {
-			const pluginName = warningRow.getAttribute('data-plugin');
-			const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
-			if(pluginInfoRow.classList.contains('update')) {
-				warningRow.classList.remove('plugin-update-tr');
-				warningRow.querySelector('.notice').style.margin = '5px 10px 15px 30px';
-			}
-			else {
-				pluginInfoRow.classList.add('update');
-			}
-		}
-		"
+            const warningRows = document.querySelectorAll('tr[data-plugin-row-type=\"feature-incomp-warn\"]');
+            for(const warningRow of warningRows) {
+                const pluginName = warningRow.getAttribute('data-plugin');
+                const pluginInfoRow = document.querySelector('tr.active[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr), tr.inactive[data-plugin=\"' + pluginName + '\"]:not(.plugin-update-tr)');
+                if(!pluginInfoRow) {
+                    continue;
+                }
+                if(pluginInfoRow.classList.contains('update')) {
+                    warningRow.classList.remove('plugin-update-tr');
+                    warningRow.querySelector('.notice').style.margin = '5px 10px 15px 30px';
+                }
+                else {
+                    pluginInfoRow.classList.add('update');
+                }
+            }
+            "
 		);
 	}
 
