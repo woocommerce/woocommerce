@@ -12,8 +12,6 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
-use Automattic\WooCommerce\Internal\Traits\RestApiCache;
-use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -28,9 +26,6 @@ use Automattic\Jetpack\Constants;
  */
 class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V2_Controller {
 	use CogsAwareRestControllerTrait;
-	use RestApiCache {
-		extract_entity_ids as protected parent_extract_entity_ids;
-	}
 
 	/**
 	 * Endpoint namespace.
@@ -45,14 +40,6 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @var array
 	 */
 	private $exclude_status = array();
-
-	/**
-	 * Creates a new instance of the class.
-	 */
-	public function __construct() {
-		parent::__construct();
-		$this->initialize_output_caching();
-	}
 
 	/**
 	 * Register the routes for products.
@@ -1267,7 +1254,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				continue;
 			}
 			$existing_variation->delete( true );
-			++$deleted_count;
+			$deleted_count ++;
 		}
 
 		return $deleted_count;
@@ -1326,56 +1313,5 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		return $where;
-	}
-
-	/**
-	 * Get the default entity type for caching.
-	 * See the RestApiCache trait.
-	 *
-	 * @return string|null Entity type.
-	 */
-	protected function get_default_entity_type(): ?string {
-		return 'product';
-	}
-
-	/**
-	 * Get the names of the filters that can modify the endpoint responses.
-	 * See the RestApiCache trait.
-	 *
-	 * @param WP_REST_Request $request Request object.
-	 * @return array Array of filter names.
-	 */
-	protected function get_cache_hash_filters( WP_REST_Request $request ): array {
-		return array(
-			'woocommerce_rest_prepare_product_variation_object',
-			'woocommerce_rest_product_object_query',
-		);
-	}
-
-	/**
-	 * Extract variation IDs from response data.
-	 * See the RestApiCache trait.
-	 *
-	 * For variations, we need to track both the variation ID and parent product ID
-	 * for proper cache invalidation.
-	 *
-	 * @param array $data Response data.
-	 * @return array Variation and parent product IDs.
-	 */
-	protected function extract_entity_ids( array $data ): array {
-		$ids = $this->parent_extract_entity_ids( $data );
-
-		$parent_id = 0;
-		if ( isset( $data[0]['parent_id'] ) ) {
-			$parent_id = $data[0]['parent_id'];
-		} elseif ( isset( $data['parent_id'] ) ) {
-			$parent_id = $data['parent_id'];
-		}
-
-		if ( 0 !== $parent_id ) {
-			$ids[] = $parent_id;
-		}
-
-		return array_unique( array_filter( $ids ) );
 	}
 }

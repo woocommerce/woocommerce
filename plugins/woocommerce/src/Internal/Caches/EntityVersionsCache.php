@@ -21,18 +21,6 @@ class EntityVersionsCache {
 	 */
 	private ?bool $is_enabled = null;
 
-	/**
-	 * Creates a new instance of the class.
-	 */
-	public function __construct() {
-		add_action( 'woocommerce_new_product', array( $this, 'handle_product_changed' ), 10, 1 );
-		add_action( 'woocommerce_new_product_variation', array( $this, 'handle_product_changed' ), 10, 1 );
-		add_action( 'woocommerce_update_product', array( $this, 'handle_product_changed' ), 10, 1 );
-		add_action( 'woocommerce_update_product_variation', array( $this, 'handle_product_changed' ), 10, 1 );
-		add_action( 'woocommerce_delete_product', array( $this, 'handle_product_deleted' ), 10, 1 );
-		add_action( 'woocommerce_trash_product', array( $this, 'handle_product_deleted' ), 10, 1 );
-		add_action( 'woocommerce_untrash_product', array( $this, 'handle_product_deleted' ), 10, 1 );
-	}
 
 	/**
 	 * Tells whether the entity versions cache is enabled or not.
@@ -192,71 +180,5 @@ class EntityVersionsCache {
 	 */
 	protected function delete_cached( string $cache_key ): bool {
 		return delete_transient( $cache_key );
-	}
-
-	/**
-	 * Handle product changes by modifying the entity version.
-	 *
-	 * @param int $product_id Product ID.
-	 */
-	public function handle_product_changed( int $product_id ): void {
-		$this->handle_product_changed_or_deleted( $product_id, false );
-	}
-
-	/**
-	 * Handle product deletions by forgetting the entity version.
-	 *
-	 * @param int $product_id Product ID.
-	 */
-	public function handle_product_deleted( int $product_id ): void {
-		$this->handle_product_changed_or_deleted( $product_id, true );
-	}
-
-	/**
-	 * Handle product changes or deletions by modifying or forgetting the entity version.
-	 *
-	 * @param int  $product_id  Product ID.
-	 * @param bool $is_deletion Whether the product is being deleted.
-	 */
-	private function handle_product_changed_or_deleted( int $product_id, bool $is_deletion ): void {
-		if ( ! $this->is_enabled() ) {
-			return;
-		}
-
-		$this->modify_or_forget_product_version( $product_id, $is_deletion );
-
-		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
-			return;
-		}
-
-		// If the product is variable we need to modify/delete the cache versions for the variations too.
-		// On the other hand, if it's a variation, we need to modify/delete the parent's cached version.
-
-		if ( $product->is_type( 'variable' ) ) {
-			$variation_ids = $product->get_children();
-			foreach ( $variation_ids as $variation_id ) {
-				$this->modify_or_forget_product_version( $variation_id, $is_deletion );
-			}
-		} elseif ( $product->is_type( 'variation' ) ) {
-			$parent_id = $product->get_parent_id();
-			if ( $parent_id ) {
-				$this->modify_or_forget_product_version( $parent_id, $is_deletion );
-			}
-		}
-	}
-
-	/**
-	 * Modify or forget the version of a product based on the action.
-	 *
-	 * @param int  $product_id Product ID.
-	 * @param bool $delete     Whether to forget the version (true) or modify it (false).
-	 */
-	private function modify_or_forget_product_version( int $product_id, bool $delete ): void {
-		if ( $delete ) {
-			$this->forget_entity_version( 'product', $product_id );
-		} else {
-			$this->modify_entity_version( 'product', $product_id );
-		}
 	}
 }
