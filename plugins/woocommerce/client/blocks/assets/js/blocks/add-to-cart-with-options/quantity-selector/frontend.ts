@@ -226,7 +226,6 @@ store< QuantitySelectorStore >(
 						0
 					);
 
-					429.50
 					if ( Number.isNaN( event.target.valueAsNumber ) ) {
 						event.target.value = '';
 					}
