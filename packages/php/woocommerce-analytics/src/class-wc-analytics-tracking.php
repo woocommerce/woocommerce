@@ -8,6 +8,7 @@
 namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use WC_Site_Tracking;
 use WC_Tracks;
 use WC_Tracks_Client;
 use WC_Tracks_Event;
@@ -244,7 +245,15 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	 * @return array Server details.
 	 */
 	public static function get_server_details() {
-		$data = parent::get_server_details();
+		$data = array();
+
+		if ( method_exists( parent::class, 'get_server_details' ) ) {
+			$data = parent::get_server_details();
+		} elseif ( method_exists( WC_Site_Tracking::class, 'get_server_details' ) ) {
+			// WC < 6.8
+			$data = WC_Site_Tracking::get_server_details(); // @phan-suppress-current-line PhanUndeclaredStaticMethod -- method is available in WC < 6.8
+		}
+
 		return array_merge(
 			$data,
 			array(
@@ -255,6 +264,22 @@ class WC_Analytics_Tracking extends WC_Tracks {
 				'_lg'      => isset( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ? substr( sanitize_text_field( wp_unslash( $_SERVER['HTTP_ACCEPT_LANGUAGE'] ) ), 0, 5 ) : '',
 			)
 		);
+	}
+
+	/**
+	 * Get the blog details.
+	 *
+	 * @param int $blog_id The blog ID.
+	 * @return array The blog details.
+	 */
+	public static function get_blog_details( $blog_id ) {
+		if ( method_exists( parent::class, 'get_blog_details' ) ) {
+			return parent::get_blog_details( $blog_id );
+		} elseif ( method_exists( WC_Site_Tracking::class, 'get_blog_details' ) ) {
+			// WC < 6.8
+			return WC_Site_Tracking::get_blog_details( $blog_id ); // @phan-suppress-current-line PhanUndeclaredStaticMethod -- method is available in WC < 6.8
+		}
+		return array();
 	}
 
 	/**

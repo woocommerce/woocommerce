@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix call to undefined method WC_Tracks::get_server_details()
