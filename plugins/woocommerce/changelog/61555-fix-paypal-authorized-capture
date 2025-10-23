@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Check the payment method ID before sending a request to capture a PayPal payment.

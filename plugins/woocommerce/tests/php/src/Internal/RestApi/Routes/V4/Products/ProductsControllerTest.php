@@ -1,15 +1,23 @@
 <?php
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
+
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use WC_Helper_Product;
+use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+
+
 
 /**
- * class WC_REST_Products_Controller_Tests.
+ * class ProductsControllerTest.
  * Product Controller tests for V4 REST API.
  */
-class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
+class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 
@@ -120,13 +128,18 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
-		$this->endpoint = new WC_REST_Products_V4_Controller();
+		$this->endpoint = new ProductsController();
 		$this->user     = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		// Reset tax settings to ensure consistent product pricing.
+		// Some tests (like OrderHelper::create_complex_wp_post_order) modify tax settings globally,
+		// which can affect product prices in subsequent tests. We reset here to maintain test isolation.
+		delete_option( 'woocommerce_calc_taxes' );
 	}
 
 	/**
@@ -259,7 +272,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 		$call_product_data_wrapper = function () use ( $product ) {
 			return $this->get_product_data( $product );
 		};
-		$response                  = $call_product_data_wrapper->call( new WC_REST_Products_V4_Controller() );
+		$response                  = $call_product_data_wrapper->call( new ProductsController() );
 		$this->assertArrayHasKey( 'id', $response );
 	}
 
@@ -1955,7 +1968,7 @@ class WC_REST_Products_V4_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @param WC_Product $product The product to update.
 	 * @param array      $request_body Data to be sent (JSON-encoded) as the body of the request.
 	 */
-	private function update_product_via_post_request( WC_Product $product, array $request_body ) {
+	private function update_product_via_post_request( $product, $request_body ) {
 		$request = new WP_REST_Request( 'POST', '/wc/v4/products/' . $product->get_id() );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body( wp_json_encode( $request_body ) );

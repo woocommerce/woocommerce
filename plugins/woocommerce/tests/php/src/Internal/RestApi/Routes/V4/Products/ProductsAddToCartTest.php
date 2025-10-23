@@ -2,11 +2,18 @@
 declare(strict_types=1);
 
 
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
+
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
+use WC_Helper_Product;
+use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+
 /**
- * WC_REST_Products_V4_Add_To_Cart_Tests.
+ * ProductsAddToCartTest.
  * This class is responsible for testing the add to cart field functionality of the V4 REST API Products endpoint.
  */
-class WC_REST_Products_V4_Add_To_Cart_Tests extends WC_REST_Unit_Test_Case {
+class ProductsAddToCartTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -21,7 +28,7 @@ class WC_REST_Products_V4_Add_To_Cart_Tests extends WC_REST_Unit_Test_Case {
 			},
 		);
 		parent::setUp();
-		$this->endpoint = new WC_REST_Products_V4_Controller();
+		$this->endpoint = new ProductsController();
 		$this->user     = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
