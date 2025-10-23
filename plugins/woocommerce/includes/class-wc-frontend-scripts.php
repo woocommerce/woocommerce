@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Frontend scripts class.
+ *
+ * These scripts are enqueued in the frontend of the store.  The registered script handles in this class
+ * can be used to enqueue the scripts in the frontend by third party plugins and the handles will follow
+ * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+ * and can be removed in future versions of WooCommerce.
  */
 class WC_Frontend_Scripts {
 
