@@ -33,6 +33,13 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected $mock_gateway;
 
 	/**
+	 * Test bearer token for authorization.
+	 *
+	 * @var string
+	 */
+	protected $test_bearer_token;
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
@@ -49,6 +56,18 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with test bearer token for authorization.
+		$this->test_bearer_token = 'test_token_' . uniqid();
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => $this->test_bearer_token,
+				),
+			),
+			false
+		);
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -86,6 +105,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+		delete_option( 'woocommerce_agentic_agent_registry' );
 
 		// Clear session data.
 		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
@@ -201,6 +221,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function create_session( $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -214,6 +235,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function update_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -227,6 +249,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function complete_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id . '/complete' );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}

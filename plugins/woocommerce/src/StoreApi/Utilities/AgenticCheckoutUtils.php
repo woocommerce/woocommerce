@@ -332,14 +332,14 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Check if the Agentic Checkout feature is enabled.
+	 * Check if the Agentic Checkout feature is enabled and request is authorized.
 	 *
-	 * V1 implementation: Returns true if feature is enabled (no auth check).
-	 * Future: Implement Bearer token authentication.
+	 * Validates bearer token against registered agents in the agent registry.
 	 *
+	 * @param \WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
-	public static function is_authorized() {
+	public static function is_authorized( $request = null ) {
 		// Check if feature is enabled.
 		$features_controller = wc_get_container()->get( FeaturesController::class );
 		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
@@ -350,8 +350,67 @@ class AgenticCheckoutUtils {
 			);
 		}
 
-		// V1: Allow all requests (implement proper auth in future).
-		return true;
+		// If no request provided, cannot validate (should not happen in normal flow).
+		if ( null === $request ) {
+			return new \WP_Error(
+				'woocommerce_rest_agentic_checkout_invalid_request',
+				__( 'Invalid request object.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		// Extract Authorization header.
+		$auth_header = $request->get_header( 'Authorization' );
+		if ( empty( $auth_header ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_agentic_checkout_missing_auth',
+				__( 'Missing authorization header.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		// Parse bearer token from header.
+		if ( ! preg_match( '/^Bearer\s+(.+)$/i', $auth_header, $matches ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_agentic_checkout_invalid_auth_format',
+				__( 'Invalid authorization header format. Expected: Bearer <token>', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$provided_token = $matches[1];
+
+		// Load agent registry.
+		$registry = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
+
+		// Check each provider's bearer token.
+		foreach ( $registry as $provider_id => $provider_config ) {
+			// Skip non-array configs and special keys like 'general'.
+			if ( ! is_array( $provider_config ) ) {
+				continue;
+			}
+
+			// Skip if no bearer token configured.
+			if ( empty( $provider_config['bearer_token'] ) ) {
+				continue;
+			}
+
+			// Use hash_equals for constant-time comparison to prevent timing attacks.
+			if ( hash_equals( $provider_config['bearer_token'], $provided_token ) ) {
+				// Store provider ID in session for tracking.
+				if ( WC()->session ) {
+					WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $provider_id );
+				}
+				return true;
+			}
+		}
+
+		// No matching token found.
+		return new \WP_Error(
+			'woocommerce_rest_agentic_checkout_invalid_token',
+			__( 'Invalid authorization token.', 'woocommerce' ),
+			array( 'status' => 401 )
+		);
 	}
 
 	/**

@@ -140,4 +140,234 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Assert that status is READY_FOR_PAYMENT after clearing IN_PROGRESS.
 		$this->assertNotEquals( CheckoutSessionStatus::IN_PROGRESS, $status );
 	}
+
+	/**
+	 * Test authorization with valid OpenAI token.
+	 */
+	public function test_is_authorized_with_valid_token() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with OpenAI token.
+		$test_token = 'test_bearer_token_12345';
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => $test_token,
+				),
+			),
+			false
+		);
+
+		// Create mock request with Authorization header.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer ' . $test_token );
+
+		// Test authorization.
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+
+		// Assert authorization succeeds.
+		$this->assertTrue( $result );
+
+		// Assert provider ID is stored in session.
+		$this->assertEquals( 'openai', WC()->session->get( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID ) );
+	}
+
+	/**
+	 * Test authorization with invalid token.
+	 */
+	public function test_is_authorized_with_invalid_token() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with OpenAI token.
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => 'correct_token',
+				),
+			),
+			false
+		);
+
+		// Create mock request with wrong token.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer wrong_token' );
+
+		// Test authorization.
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+
+		// Assert authorization fails.
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_token', $result->get_error_code() );
+		$this->assertEquals( 401, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * Test authorization with missing Authorization header.
+	 */
+	public function test_is_authorized_with_missing_header() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Create mock request without Authorization header.
+		$request = new \WP_REST_Request();
+
+		// Test authorization.
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+
+		// Assert authorization fails.
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_agentic_checkout_missing_auth', $result->get_error_code() );
+		$this->assertEquals( 401, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * Test authorization with malformed Bearer token format.
+	 */
+	public function test_is_authorized_with_malformed_header() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Test various malformed formats.
+		$malformed_headers = array(
+			'token_without_bearer',
+			'Basic token123',
+			'Bearertoken123', // Missing space.
+			'Bearer',         // No token.
+		);
+
+		foreach ( $malformed_headers as $header ) {
+			$request = new \WP_REST_Request();
+			$request->set_header( 'Authorization', $header );
+
+			$result = AgenticCheckoutUtils::is_authorized( $request );
+
+			$this->assertWPError( $result, "Failed for header: $header" );
+			$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_auth_format', $result->get_error_code() );
+			$this->assertEquals( 401, $result->get_error_data()['status'] );
+		}
+	}
+
+	/**
+	 * Test authorization when feature is disabled.
+	 */
+	public function test_is_authorized_when_feature_disabled() {
+		// Disable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'no' );
+
+		// Create mock request with valid token.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer test_token' );
+
+		// Test authorization.
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+
+		// Assert authorization fails due to disabled feature.
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_agentic_checkout_disabled', $result->get_error_code() );
+		$this->assertEquals( 403, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * Test authorization with empty provider tokens.
+	 */
+	public function test_is_authorized_with_empty_provider_tokens() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with empty token.
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => '',
+				),
+			),
+			false
+		);
+
+		// Create mock request with token.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer some_token' );
+
+		// Test authorization.
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+
+		// Assert authorization fails (empty tokens are skipped).
+		$this->assertWPError( $result );
+		$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_token', $result->get_error_code() );
+	}
+
+	/**
+	 * Test authorization with multiple providers.
+	 */
+	public function test_is_authorized_with_multiple_providers() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with multiple providers.
+		$token_a = 'provider_a_token';
+		$token_b = 'provider_b_token';
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'general'    => array(
+					'enable_products_default' => 'yes',
+				),
+				'provider_a' => array(
+					'bearer_token' => $token_a,
+				),
+				'provider_b' => array(
+					'bearer_token' => $token_b,
+				),
+			),
+			false
+		);
+
+		// Test with provider A token.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer ' . $token_a );
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+		$this->assertTrue( $result );
+		$this->assertEquals( 'provider_a', WC()->session->get( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID ) );
+
+		// Test with provider B token.
+		$request = new \WP_REST_Request();
+		$request->set_header( 'Authorization', 'Bearer ' . $token_b );
+		$result = AgenticCheckoutUtils::is_authorized( $request );
+		$this->assertTrue( $result );
+		$this->assertEquals( 'provider_b', WC()->session->get( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID ) );
+	}
+
+	/**
+	 * Test authorization with case-insensitive Bearer keyword.
+	 */
+	public function test_is_authorized_with_case_insensitive_bearer() {
+		// Enable the feature.
+		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry.
+		$test_token = 'test_token';
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => $test_token,
+				),
+			),
+			false
+		);
+
+		// Test with different casings of "Bearer".
+		$casings = array( 'Bearer', 'bearer', 'BEARER', 'BeArEr' );
+		foreach ( $casings as $casing ) {
+			$request = new \WP_REST_Request();
+			$request->set_header( 'Authorization', $casing . ' ' . $test_token );
+			$result = AgenticCheckoutUtils::is_authorized( $request );
+			$this->assertTrue( $result, "Failed for casing: $casing" );
+		}
+	}
 }
