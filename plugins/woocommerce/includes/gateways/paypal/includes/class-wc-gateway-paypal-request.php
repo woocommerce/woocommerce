@@ -558,7 +558,7 @@ class WC_Gateway_Paypal_Request {
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
 					'value'         => wc_format_decimal(
-						'fee' === $item['type'] ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
+						'fee' === $item->get_type() ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
 						wc_get_price_decimals()
 					),
 				),
