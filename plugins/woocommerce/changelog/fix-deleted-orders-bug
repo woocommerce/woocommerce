@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Race condition where orders may be deleted from the database
