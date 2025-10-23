@@ -16,7 +16,8 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as O
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as ProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as SettingsProductsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMethods\Controller as OfflinePaymentMethodsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
@@ -164,7 +165,7 @@ class Server {
 	 * @return array
 	 */
 	protected function get_v3_controllers() {
-		return array(
+		$controllers = array(
 			'coupons'                  => 'WC_REST_Coupons_Controller',
 			'customer-downloads'       => 'WC_REST_Customer_Downloads_Controller',
 			'customers'                => 'WC_REST_Customers_Controller',
@@ -212,6 +213,12 @@ class Server {
 			'paypal-webhooks'          => 'WC_REST_Paypal_Webhooks_Controller',
 			'paypal-buttons'           => 'WC_REST_Paypal_Buttons_Controller',
 		);
+
+		if ( Features::is_enabled( 'products-catalog-api' ) ) {
+			$controllers['products-catalog'] = 'WC_REST_Products_Catalog_Controller';
+		}
+
+		return $controllers;
 	}
 
 	/**
@@ -222,7 +229,7 @@ class Server {
 	protected function get_v4_controllers() {
 		return array(
 			'fulfillments'              => 'WC_REST_Fulfillments_V4_Controller',
-			'products'                  => 'WC_REST_Products_V4_Controller',
+			'products'                  => ProductsController::class,
 			'customers'                 => CustomersController::class,
 			'order-notes'               => OrderNotesController::class,
 			'shipping-zones'            => ShippingZonesController::class,
@@ -231,7 +238,7 @@ class Server {
 			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
 			'settings-general'          => GeneralSettingsController::class,
 			'settings-email'            => EmailSettingsController::class,
-			'settings-products'         => ProductsController::class,
+			'settings-products'         => SettingsProductsController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',

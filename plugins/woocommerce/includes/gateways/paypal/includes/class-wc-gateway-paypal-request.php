@@ -550,7 +550,7 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_order_items( $order ) {
 		$items = array();
 
-		foreach ( $order->get_items() as $item ) {
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
 			$items[] = array(
 				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
@@ -558,7 +558,7 @@ class WC_Gateway_Paypal_Request {
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
 					'value'         => wc_format_decimal(
-						$order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
+						'fee' === $item->get_type() ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
 						wc_get_price_decimals()
 					),
 				),
@@ -578,6 +578,10 @@ class WC_Gateway_Paypal_Request {
 		$total = 0;
 		foreach ( $order->get_items() as $item ) {
 			$total += (float) $item->get_subtotal();
+		}
+
+		foreach ( $order->get_items( 'fee' ) as $fee ) {
+			$total += (float) $fee->get_amount();
 		}
 
 		return $total;
