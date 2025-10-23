@@ -39,6 +39,13 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	private $category_registry_class;
 
 	/**
+	 * Original value of $wp_actions['init'] to restore in tear_down.
+	 *
+	 * @var int|null
+	 */
+	private $original_init_action_count;
+
+	/**
 	 * Set up before each test
 	 */
 	public function set_up() {
@@ -77,8 +84,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		parent::set_up();
 
 		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
-		// Fake this by setting the action counter directly. Doesn't hurt pre-6.9 versions.
-		$wp_actions['init'] = 1;
+		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
+		$this->original_init_action_count = $wp_actions['init'] ?? null;
+		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 
 	/**
@@ -125,9 +133,12 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		parent::tear_down();
 
-		// Restore 'init' action counter after parent::tear_down() resets it.
-		// WordPress 6.9+ requires did_action('init') to return truthy.
-		$wp_actions['init'] = 1;
+		// Restore 'init' action counter to its original value.
+		if ( null !== $this->original_init_action_count ) {
+			$wp_actions['init'] = $this->original_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		} elseif ( isset( $wp_actions['init'] ) ) {
+			unset( $wp_actions['init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 	}
 
 	/**
