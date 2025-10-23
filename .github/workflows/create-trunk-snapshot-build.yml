@@ -5,7 +5,7 @@ on:
 env:
     SOURCE_REF: trunk
     TARGET_REF: trunk-snapshot
-    RELEASE_ID: WIP
+    RELEASE_ID: 256718410
 
 permissions: {}
 
