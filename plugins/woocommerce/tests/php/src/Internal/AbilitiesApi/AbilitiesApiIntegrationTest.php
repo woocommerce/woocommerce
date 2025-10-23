@@ -46,14 +46,14 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	private $original_init_action_count;
 
 	/**
-	 * Check if WordPress 6.9+ is being used.
+	 * Check if Abilities API is in WordPress core.
 	 *
 	 * WordPress 6.9+ has the Abilities API in core with different class names than the vendor package.
 	 * We detect this by checking for the core class name (plural "Categories" instead of singular "Category").
 	 *
-	 * @return bool True if WordPress 6.9+, false otherwise.
+	 * @return bool True if Abilities API is in core, false if using vendor package.
 	 */
-	private function is_wp_69_plus(): bool {
+	private function are_abilities_in_wp_core(): bool {
 		return class_exists( 'WP_Ability_Categories_Registry' );
 	}
 
@@ -65,9 +65,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 
 		// Detect WordPress 6.9+ by checking for the core class name (plural "Categories").
 		// WP 6.9+ uses different action names and class names than the vendor package.
-		$is_wp_69_plus = $this->is_wp_69_plus();
+		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
 
-		if ( $is_wp_69_plus ) {
+		if ( $are_abilities_in_wp_core ) {
 			$this->abilities_init_action            = 'wp_abilities_api_init';
 			$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
 			$this->category_registry_class          = 'WP_Ability_Categories_Registry';
@@ -92,7 +92,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		 * Ensure REST API routes are registered (hook may be cleared by parent tear_down).
 		 * WordPress 6.9+ handles REST API registration in core, so only do this for vendor package.
 		 */
-		if ( ! $is_wp_69_plus && class_exists( 'WP_REST_Abilities_Init' ) ) {
+		if ( ! $are_abilities_in_wp_core && class_exists( 'WP_REST_Abilities_Init' ) ) {
 			add_action( 'rest_api_init', array( 'WP_REST_Abilities_Init', 'register_routes' ) );
 		}
 
@@ -394,8 +394,8 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	public function test_rest_endpoints_are_registered() {
 		// Ensure REST API classes are loaded.
 		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
-		$is_wp_69_plus = $this->is_wp_69_plus();
-		if ( $is_wp_69_plus ) {
+		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
+		if ( $are_abilities_in_wp_core ) {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
 			$list_endpoint = '/wp-abilities/v1/abilities';
 			$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
@@ -486,9 +486,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		// Create REST request - use version-appropriate namespace.
-		$is_wp_69_plus = $this->is_wp_69_plus();
-		$list_endpoint = $is_wp_69_plus ? '/wp-abilities/v1/abilities' : '/wp/v2/abilities';
-		$request       = new \WP_REST_Request( 'GET', $list_endpoint );
+		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
+		$list_endpoint            = $are_abilities_in_wp_core ? '/wp-abilities/v1/abilities' : '/wp/v2/abilities';
+		$request                  = new \WP_REST_Request( 'GET', $list_endpoint );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( $request );
@@ -583,9 +583,9 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		// Create REST request for execution - use version-appropriate namespace.
-		$is_wp_69_plus = $this->is_wp_69_plus();
-		$namespace     = $is_wp_69_plus ? '/wp-abilities/v1' : '/wp/v2';
-		$request       = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
+		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
+		$namespace                = $are_abilities_in_wp_core ? '/wp-abilities/v1' : '/wp/v2';
+		$request                  = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
