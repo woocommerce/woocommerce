@@ -9,6 +9,7 @@ import { ApiClient } from './api-client';
 import { consentManager } from './consent';
 import { EVENT_NAME_REGEX, EVENT_PREFIX, CLICK_HOUSE_EVENTS } from './constants';
 import SessionManager from './session-manager';
+import { getCookie, generateRandomToken } from './utils';
 import type { AnalyticsConfig } from './types/shared';
 
 const debug = debugFactory( 'wc-analytics:analytics' );
@@ -82,6 +83,7 @@ export class Analytics {
 			this.recordEvent( 'page_view' );
 		}
 
+		this.maybeSetAnonId();
 		this.processEventQueue();
 		this.initListeners();
 
@@ -250,4 +252,18 @@ export class Analytics {
 			this.sessionManager.init();
 		}
 	};
+
+	/**
+	 * Set anonymous ID if not already set
+	 */
+	private maybeSetAnonId() {
+		const anonId = getCookie( 'tk_ai' );
+
+		if ( ! anonId ) {
+			// Set a first-party cookie (same domain only, 1 year)
+			const randomToken = generateRandomToken( 18 ); // 18 * 4/3 = 24 (base64 encoded chars)
+			const expires = new Date( Date.now() + 1 * 365 * 24 * 60 * 60 * 1000 ).toUTCString();
+			document.cookie = `tk_ai=${ randomToken }; path=/; secure; samesite=strict; expires=${ expires }`;
+		}
+	}
 }

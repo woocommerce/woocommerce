@@ -2,6 +2,7 @@
  * Internal dependencies
  */
 import { COOKIE_NAME } from './constants';
+import { getCookie } from './utils';
 import type { SessionCookieData } from './types/shared';
 
 /**
@@ -71,7 +72,7 @@ export default class SessionManager {
 	 * @return SessionCookieData | null
 	 */
 	getSessionCookie(): SessionCookieData | null {
-		const rawCookie = this.getCookie( COOKIE_NAME );
+		const rawCookie = getCookie( COOKIE_NAME );
 		if ( ! rawCookie ) {
 			return null;
 		}
@@ -82,21 +83,6 @@ export default class SessionManager {
 			console.error( 'Error parsing session cookie', _error );
 			return null;
 		}
-	}
-
-	/**
-	 * Get cookie value by name
-	 *
-	 * @param name - Cookie name
-	 * @return string | null
-	 */
-	getCookie( name: string ): string | null {
-		const value = `; ${ document.cookie }`;
-		const parts = value.split( `; ${ name }=` );
-		if ( parts.length === 2 ) {
-			return parts.pop()?.split( ';' ).shift() || null;
-		}
-		return null;
 	}
 
 	/**
@@ -111,7 +97,7 @@ export default class SessionManager {
 
 		document.cookie = `${ COOKIE_NAME }=${ encoded }; expires=${ expires }; path=/; secure; samesite=strict`;
 
-		const isCookieSet = this.getCookie( COOKIE_NAME ) === encoded;
+		const isCookieSet = getCookie( COOKIE_NAME ) === encoded;
 		return isCookieSet;
 	}
 
