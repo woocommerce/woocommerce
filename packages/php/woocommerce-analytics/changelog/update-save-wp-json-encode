@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Enhance JSON encoding by adding JSON_HEX_TAG and JSON_UNESCAPED_SLASHES options

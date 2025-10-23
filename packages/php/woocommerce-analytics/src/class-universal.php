@@ -84,10 +84,10 @@ class Universal {
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set common properties for all events.
-				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties ); ?>;
+				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
 				// Set the event queue.
-				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue() ); ?>;
+				wcAnalytics.eventQueue = <?php echo wp_json_encode( WC_Analytics_Tracking::get_event_queue(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
 				// Features.
 				wcAnalytics.features = {
@@ -96,7 +96,7 @@ class Universal {
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
 
-				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles() ); ?>;
+				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
 				// Page context flags.
 				wcAnalytics.pages = {

@@ -90,7 +90,7 @@ trait Woo_Analytics_Trait {
 			$products[] = $data;
 		}
 
-		return wp_json_encode( $products );
+		return wp_json_encode( $products, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES );
 	}
 
 	/**
