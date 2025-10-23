@@ -68,7 +68,8 @@ foreach ( $items as $item_id => $item ) :
 							 * @param WC_Order_Item_Product $item      The item being displayed.
 							 * @since 2.1.0
 							 */
-							echo wp_kses_post( apply_filters( 'woocommerce_order_item_name', "<h3 style='font-size: inherit;'>" . $item->get_name() . '</h3>', $item, false ) );
+							$order_item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $item, false );
+							echo wp_kses_post( "<h3 style='font-size: inherit;font-weight: inherit;'>{$order_item_name}</h3>" );
 
 							// SKU.
 							if ( $show_sku && $sku ) {
