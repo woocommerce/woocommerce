@@ -61,7 +61,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			if ( ! $address_autocomplete_available ) {
 				// translators: %s: WooPayments URL.
-				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'To use this feature, you need to install an address provider such as <a href="%s">WooPayments</a>.', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
+				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'Requires a plugin with predictive address search support (e.g. <a href="%s" target="_blank">WooPayments</a>).', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
 			}
 
 			$enable_address_autocomplete_setting = array(

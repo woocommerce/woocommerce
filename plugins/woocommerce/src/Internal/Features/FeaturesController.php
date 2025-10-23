@@ -375,10 +375,10 @@ class FeaturesController {
 			'hpos_datastore_caching' => array(
 				'name'                         => __( 'HPOS Data Caching', 'woocommerce' ),
 				'description'                  => __(
-					'Enable order data caching in the datastore. This feature only works with high-performance order storage.',
+					'Enable order data caching in the datastore. This feature only works with high-performance order storage and is recommended for stores using object caching.',
 					'woocommerce'
 				),
-				'is_experimental'              => true,
+				'is_experimental'              => false,
 				'enabled_by_default'           => false,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
