@@ -1787,6 +1787,80 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test refund_total and refund_tax fields with refunds.
+	 */
+	public function test_refund_total_and_refund_tax_fields(): void {
+		// Enable taxes.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Create tax rate.
+		$tax_rate = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '8.25',
+				'tax_rate_name'     => 'CA Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+				'billing'    => array(
+					'country' => 'US',
+					'state'   => 'CA',
+				),
+			)
+		);
+
+		// Calculate taxes.
+		$order->calculate_taxes();
+		$order->calculate_totals();
+		$order->save();
+
+		// Create a refund for the order.
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertNotInstanceOf( 'WP_Error', $refund );
+
+		// Test that refund_total and refund_tax are included when requested.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_param( '_fields', 'id,refund_total,refund_tax' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'refund_total', $response_data );
+		$this->assertArrayHasKey( 'refund_tax', $response_data );
+		$this->assertEquals( '10.00', $response_data['refund_total'] );
+		$this->assertIsString( $response_data['refund_tax'] );
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $tax_rate );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
 	 * Test pagination functionality with posts_per_page=2 and 4 test orders.
 	 */
 	public function test_pagination(): void {
