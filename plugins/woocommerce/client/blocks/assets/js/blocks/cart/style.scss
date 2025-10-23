@@ -22,12 +22,6 @@
 		margin: 0;
 	}
 
-	table.wc-block-cart-items,
-	table.wc-block-cart-items th,
-	table.wc-block-cart-items td {
-		margin: 0 0 $gap * 2.5;
-	}
-
 	.wp-block-woocommerce-cart-order-summary-block {
 		border-bottom: 1px solid $universal-border-light;
 		margin-bottom: $gap;
@@ -115,9 +109,6 @@
 		.wc-block-components-sale-badge {
 			display: none;
 		}
-	}
-	table.wc-block-cart-items {
-		margin: 0;
 	}
 
 	.wc-block-cart {
