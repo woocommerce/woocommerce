@@ -122,11 +122,25 @@ class WooPayments extends PaymentGateway {
 				}
 
 				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
+				// Merge the onboarding state with the one provided by the service.
 				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
-					// Merge the onboarding state with the one provided by the service.
 					$details['onboarding']['state'] = array_merge(
 						$details['onboarding']['state'],
 						$onboarding_details['state']
+					);
+				}
+				// The steps provided by the service override any existing steps.
+				if ( ! empty( $onboarding_details['steps'] ) && is_array( $onboarding_details['steps'] ) ) {
+					$details['onboarding']['steps'] = $onboarding_details['steps'];
+				}
+				// Merge any context provided by the service.
+				if ( ! empty( $onboarding_details['context'] ) && is_array( $onboarding_details['context'] ) ) {
+					if ( ! isset( $details['onboarding']['context'] ) || ! is_array( $details['onboarding']['context'] ) ) {
+						$details['onboarding']['context'] = array();
+					}
+					$details['onboarding']['context'] = array_merge(
+						$details['onboarding']['context'],
+						$onboarding_details['context']
 					);
 				}
 			} catch ( \Throwable $e ) {
