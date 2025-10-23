@@ -580,7 +580,6 @@ class WC_Gateway_Paypal_Request {
 			$total += (float) $item->get_subtotal();
 		}
 
-
 		foreach ( $order->get_items( 'fee' ) as $fee ) {
 			$total += (float) $fee->get_amount();
 		}
