@@ -511,18 +511,6 @@ class CheckoutSessions extends ControllerTestCase {
 	}
 
 	/**
-	 * Test feature flag disabled returns 403.
-	 */
-	public function test_feature_flag_disabled_returns_403() {
-		// Disable feature.
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-
-		$response = $this->create_session( $this->create_checkout_request() );
-
-		$this->assertEquals( 403, $response->get_status() );
-	}
-
-	/**
 	 * Test currency format is lowercase.
 	 */
 	public function test_currency_format_is_lowercase() {

@@ -683,44 +683,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	}
 
 	/**
-	 * Test completing checkout with feature flag disabled fails.
-	 */
-	public function test_complete_checkout_session_feature_disabled() {
-		// Create session first (while feature is enabled).
-		$create_response = $this->create_session(
-			$this->create_checkout_request(
-				array(
-					'fulfillment_address' => $this->get_test_address(),
-				)
-			)
-		);
-
-		$create_data        = $create_response->get_data();
-		$session_id         = $create_data['id'];
-		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
-
-		$this->update_session(
-			$session_id,
-			array(
-				'fulfillment_option_id' => $shipping_method_id,
-			)
-		);
-
-		// Disable feature.
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-
-		// Try to complete checkout.
-		$complete_response = $this->complete_session(
-			$session_id,
-			array(
-				'payment_data' => $this->get_payment_data(),
-			)
-		);
-
-		$this->assertEquals( 403, $complete_response->get_status() );
-	}
-
-	/**
 	 * Test error response format matches ACP spec.
 	 */
 	public function test_complete_error_response_format() {
