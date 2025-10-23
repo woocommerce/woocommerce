@@ -30,7 +30,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox is_enabled respects the woocommerce_enable_entity_versions_cache filter value.
-	 * 
+	 *
 	 * @testWith [true]
 	 *           [false]
 	 *
@@ -111,6 +111,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 			 */
 			public function is_enabled(): bool {
 				// Simulate what the parent does: call filter with wp_using_ext_object_cache as default.
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks
 				return apply_filters(
 					'woocommerce_enable_entity_versions_cache',
 					$this->expected_value
