@@ -673,7 +673,17 @@ final class WC_Cart_Session {
 		}
 
 		$order = wc_get_order( $draft_order );
-		if ( $order ) {
+		if ( ! $order ) {
+			// Clear session if order doesn't exist.
+			WC()->session->set( 'store_api_draft_order', null );
+			return;
+		}
+
+		// Only delete orders that are actually drafts.
+		// This prevents deletion of completed/processing orders due to race conditions
+		// or stale session data.
+		$order_status = $order->get_status();
+		if ( in_array( $order_status, array( 'checkout-draft', 'draft' ), true ) ) {
 			$order->delete( true );
 		}
 
