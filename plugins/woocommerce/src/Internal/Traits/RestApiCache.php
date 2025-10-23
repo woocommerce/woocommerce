@@ -16,7 +16,8 @@ use WP_REST_Response;
  * - The output of all the REST API endpoints whose callback declaration is wrapped
  *   in a call to 'with_cache' will be cached using transients.
  * - For the purposes of caching, a request is uniquely identified by its route
- *   and query string.
+ *   and query string. Optionally, the user ID can also be included in the cache key
+ *   when 'vary_by_user' is enabled, making responses user-specific.
  * - The EntityVersionsCache class is used to track versions of entities included
  *   in the responses (an "entity" is any object that is uniquely identified by type and id
  *   and contributes with information to be included in the response),
@@ -80,6 +81,8 @@ use WP_REST_Response;
  *                         'must_cache'         => array( $this, 'should_cache' ),
  *                         // Optional array, defaults to the controller's get_hooks_relevant_to_caching().
  *                         'relevant_hooks'     => array( 'filter_name_1', 'filter_name_2' ),
+ *                         // Optional bool, defaults to the controller's response_cache_vary_by_user().
+ *                         'vary_by_user'       => true,
  *                     )
  *                 ),
  *             )
@@ -89,6 +92,7 @@ use WP_REST_Response;
  *
  * Override these methods in your controller as needed:
  * - get_default_entity_type(): Default entity type for endpoints without explicit config.
+ * - response_cache_vary_by_user(): Whether cache should be user-specific.
  * - get_hooks_relevant_to_caching(): Hook names to track for cache invalidation.
  * - get_cache_ttl(): TTL for cached outputs in seconds.
  * - must_cache(): Whether to cache a specific request or not.
@@ -143,6 +147,7 @@ trait RestApiCache {
 	 *                           - extract_entity_ids: callable (defaults to $this->extract_entity_ids).
 	 *                           - must_cache: callable (defaults to $this->must_cache).
 	 *                           - relevant_hooks: array (defaults to $this->get_hooks_relevant_to_caching()).
+	 *                           - vary_by_user: bool (defaults to $this->response_cache_vary_by_user()).
 	 * @return callable Wrapped callback.
 	 */
 	protected function with_cache( callable $callback, array $config = array() ): callable {
@@ -239,10 +244,11 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @param array           $config  Raw configuration array passed to with_cache.
-	 * @return array|null Normalized cache config with keys: entity_type, cache_ttl, extract_entity_ids, relevant_hooks, cache_key. Returns null if entity type is not available.
+	 * @return array|null Normalized cache config with keys: entity_type, cache_ttl, extract_entity_ids, relevant_hooks, vary_by_user, cache_key. Returns null if entity type is not available.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
-		$entity_type = $config['entity_type'] ?? $this->get_default_entity_type();
+		$entity_type  = $config['entity_type'] ?? $this->get_default_entity_type();
+		$vary_by_user = $config['vary_by_user'] ?? $this->response_cache_vary_by_user( $request );
 
 		if ( ! $entity_type ) {
 			wc_get_container()->get( LegacyProxy::class )->call_function(
@@ -259,7 +265,8 @@ trait RestApiCache {
 			'cache_ttl'          => $config['cache_ttl'] ?? $this->get_cache_ttl( $request ),
 			'extract_entity_ids' => $config['extract_entity_ids'] ?? array( $this, 'extract_entity_ids' ),
 			'relevant_hooks'     => $config['relevant_hooks'] ?? $this->get_hooks_relevant_to_caching( $request ),
-			'cache_key'          => $this->get_cache_key( $request, $entity_type ),
+			'vary_by_user'       => $vary_by_user,
+			'cache_key'          => $this->get_cache_key( $request, $entity_type, $vary_by_user ),
 		);
 	}
 
@@ -316,6 +323,22 @@ trait RestApiCache {
 	}
 
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
+
+	/**
+	 * Determine whether the response cache should vary by user.
+	 *
+	 * When true, the user ID is included in the cache key, making responses
+	 * user-specific. This is useful for endpoints that return user-specific data.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('vary_by_user' key).
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return bool True to make cache user-specific, false otherwise.
+	 */
+	protected function response_cache_vary_by_user( WP_REST_Request $request ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return false;
+	}
 
 	/**
 	 * Get the names of filters that can customize the response.
@@ -407,14 +430,23 @@ trait RestApiCache {
 	/**
 	 * Generate a cache key for a given request.
 	 *
-	 * @param WP_REST_Request $request     The request object.
-	 * @param string          $entity_type The entity type.
+	 * @param WP_REST_Request $request      The request object.
+	 * @param string          $entity_type  The entity type.
+	 * @param bool            $vary_by_user Whether to include user ID in cache key.
 	 * @return string Cache key.
 	 */
-	protected function get_cache_key( WP_REST_Request $request, string $entity_type ): string {
-		$request_hash = md5(
-			$request->get_route() . '-' . wp_json_encode( $request->get_query_params() )
+	protected function get_cache_key( WP_REST_Request $request, string $entity_type, bool $vary_by_user = false ): string {
+		$cache_key_parts = array(
+			$request->get_route(),
+			wp_json_encode( $request->get_query_params() ),
 		);
+
+		if ( $vary_by_user ) {
+			$user_id           = wc_get_container()->get( LegacyProxy::class )->call_function( 'get_current_user_id' );
+			$cache_key_parts[] = "user_{$user_id}";
+		}
+
+		$request_hash = md5( implode( '-', $cache_key_parts ) );
 		return "wc_rest_api_cache_{$entity_type}-{$request_hash}";
 	}
 

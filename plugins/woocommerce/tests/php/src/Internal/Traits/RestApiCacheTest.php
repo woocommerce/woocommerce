@@ -880,6 +880,169 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertCachingSkipped( $response, $this->sut->responses['single_entity'] );
 	}
 
+	/**
+	 * @testdox Cache keys are unique per route and query string only (without user variance).
+	 */
+	public function test_cache_key_without_user_variance() {
+
+		// Mock get_current_user_id to return user 1.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		// First request by user 1 - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the cache key and modify cached data.
+
+		$cache_key                              = array_key_first( $this->sut->cache );
+		$modified_data                          = array(
+			'id'   => 999,
+			'name' => 'User 1 Modified',
+		);
+		$this->sut->cache[ $cache_key ]['data'] = $modified_data;
+
+		// Mock get_current_user_id to return user 2 (different user).
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		// Second request by user 2 to same endpoint - should be cache HIT with user 1's data.
+		// (Since vary_by_user is false by default, user ID is NOT included in cache key).
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+
+		// Verify still only one cache entry (same cache key for both users).
+
+		$this->assertCount( 1, $this->sut->cache );
+		$this->assertEquals( $cache_key, array_key_first( $this->sut->cache ), 'Cache key should be the same for different users when vary_by_user is false' );
+	}
+
+	/**
+	 * @testdox Cache varies by user when vary_by_user is enabled.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_cache_varies_by_user( bool $use_with_cache_config ) {
+
+		if ( $use_with_cache_config ) {
+			// Configure custom_endpoint_config endpoint with vary_by_user: true.
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					'vary_by_user' => true,
+				)
+			);
+			$endpoint = 'custom_endpoint_config';
+		} else {
+			// Enable vary_by_user via controller method.
+			$this->sut->vary_by_user_return_value = true;
+			$endpoint                             = 'single_entity';
+		}
+
+		// Mock get_current_user_id to return user 1.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		// First request by user 1 - cache MISS.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( $this->sut->responses[ $endpoint ], $response1->get_data() );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store user 1's cache info and modify cached data.
+
+		$user1_cache_info = $this->get_cache_info();
+		$user1_data       = array(
+			'id'   => 101,
+			'name' => 'User 1 Data',
+		);
+		$this->sut->cache[ $user1_cache_info['key'] ]['data'] = $user1_data;
+
+		// Mock get_current_user_id to return user 2 (different user).
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		// Second request by user 2 to same endpoint - should be cache MISS (different cache key).
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response2 );
+		$this->assertEquals( $this->sut->responses[ $endpoint ], $response2->get_data() );
+
+		// Verify we now have two cache entries (different users = different cache keys).
+
+		$this->assertCount( 2, $this->sut->cache );
+
+		// Store user 2's cache info and modify cached data.
+
+		$user2_cache_keys                             = array_diff( array_keys( $this->sut->cache ), array( $user1_cache_info['key'] ) );
+		$user2_cache_key                              = reset( $user2_cache_keys );
+		$user2_data                                   = array(
+			'id'   => 202,
+			'name' => 'User 2 Data',
+		);
+		$this->sut->cache[ $user2_cache_key ]['data'] = $user2_data;
+
+		// Third request by user 1 again - should be cache HIT with user 1's modified data.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		$response3 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response3 );
+		$this->assertEquals( $user1_data, $response3->get_data() );
+
+		// Fourth request by user 2 again - should be cache HIT with user 2's modified data.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		$response4 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response4 );
+		$this->assertEquals( $user2_data, $response4->get_data() );
+
+		// Verify still only two cache entries (one per user).
+
+		$this->assertCount( 2, $this->sut->cache );
+
+		// Verify cache keys are different.
+
+		$this->assertNotEquals( $user1_cache_info['key'], $user2_cache_key, 'Cache keys should differ for different users when vary_by_user is true' );
+
+		// Reset vary_by_user if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->vary_by_user_return_value = false;
+		}
+	}
+
 	// TESTS END HERE. Below there's auxiliary methods only.
 
 	/**
@@ -1214,6 +1377,13 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			public $use_custom_entity_id_extraction = false;
 
 			/**
+			 * Return value for response_cache_vary_by_user method.
+			 *
+			 * @var bool
+			 */
+			public $vary_by_user_return_value = false;
+
+			/**
 			 * Constructor.
 			 */
 			public function __construct() {
@@ -1356,6 +1526,16 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			 */
 			protected function get_cache_ttl( $request ) {
 				return $this->custom_cache_ttl ?? HOUR_IN_SECONDS;
+			}
+
+			/**
+			 * Override response_cache_vary_by_user to use configurable return value.
+			 *
+			 * @param WP_REST_Request $request Request object.
+			 * @return bool
+			 */
+			protected function response_cache_vary_by_user( $request ) {
+				return $this->vary_by_user_return_value;
 			}
 
 			/**
