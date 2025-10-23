@@ -176,6 +176,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 * Fix - Race condition where orders may be deleted from the database [#61582](https://github.com/woocommerce/woocommerce/pull/61582)
 * Fix - Resolve PayPal order creation failures caused by a mismatch between the total and breakdown amounts. [#61586](https://github.com/woocommerce/woocommerce/pull/61586)
-
+* Tweak - Fixes a typo copy on Autocomplete setting tooltip [#61577](https://github.com/woocommerce/woocommerce/pull/61577)
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
