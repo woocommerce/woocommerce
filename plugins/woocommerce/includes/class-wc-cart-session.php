@@ -422,6 +422,9 @@ final class WC_Cart_Session {
 			$wc_session->set( 'chosen_shipping_methods', null );
 			$this->remove_shipping_for_package_from_session();
 		}
+		if ( empty( $cart ) ) {
+			$wc_session->set( 'store_api_draft_order', null );
+		}
 
 		/**
 		 * Fires when cart is updated.
