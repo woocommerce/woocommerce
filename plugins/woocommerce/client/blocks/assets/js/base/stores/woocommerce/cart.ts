@@ -35,7 +35,7 @@ export type WooCommerceConfig = {
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 export type OptimisticCartItem = {
-	key?: string;
+	key?: string | undefined;
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
@@ -304,7 +304,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{ id, quantity, variation }: ClientCartItem,
+				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -314,7 +314,7 @@ const { state, actions } = store< Store >(
 						// some variations might accept 'Any' value for an attribute,
 						// in which case, we need to check that the attributes match.
 						if (
-							id !== cartItem.id ||
+							key !== cartItem.key ||
 							! cartItem.variation ||
 							! variation ||
 							cartItem.variation.length !== variation.length
@@ -327,7 +327,7 @@ const { state, actions } = store< Store >(
 						);
 					}
 
-					return id === cartItem.id;
+					return key === cartItem.key;
 				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );

@@ -674,11 +674,11 @@ const { state: cartItemState } = store(
 			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
 					itemData: {
-						key: string;
+						key?: string | undefined;
 						attribute: string;
 						name: string;
 						value: string;
-						display: string;
+						display?: string;
 						hidden: string;
 					};
 					dataProperty: DataProperty;
@@ -778,6 +778,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -799,6 +800,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -816,6 +818,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
