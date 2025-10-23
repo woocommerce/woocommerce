@@ -381,21 +381,24 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_rest_endpoints_are_registered() {
 		// Ensure REST API classes are loaded.
-		// WordPress 6.9+ uses core controllers, earlier versions use vendor package's init class.
+		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
 		$is_wp_69_plus = class_exists( 'WP_Ability_Categories_Registry' );
 		if ( $is_wp_69_plus ) {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
+			$list_endpoint = '/wp-abilities/v1/abilities';
+			$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		} else {
 			$this->assertTrue( class_exists( 'WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
+			$list_endpoint = '/wp/v2/abilities';
+			$run_endpoint  = '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		}
 
 		$routes = $this->server->get_routes();
 
 		// Check for abilities list endpoint.
-		$this->assertArrayHasKey( '/wp/v2/abilities', $routes, 'Abilities list endpoint should be registered' );
+		$this->assertArrayHasKey( $list_endpoint, $routes, 'Abilities list endpoint should be registered' );
 
 		// Check for ability run endpoint - look for the exact pattern from the controller.
-		$run_endpoint = '/wp/v2/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 		$this->assertArrayHasKey( $run_endpoint, $routes, 'Ability run endpoint should be registered' );
 	}
 
@@ -470,8 +473,10 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request.
-		$request = new \WP_REST_Request( 'GET', '/wp/v2/abilities' );
+		// Create REST request - use version-appropriate namespace.
+		$is_wp_69_plus = class_exists( 'WP_Ability_Categories_Registry' );
+		$list_endpoint = $is_wp_69_plus ? '/wp-abilities/v1/abilities' : '/wp/v2/abilities';
+		$request       = new \WP_REST_Request( 'GET', $list_endpoint );
 		// Set up authentication for admin user.
 		wp_set_current_user( 1 );
 		$response = $this->server->dispatch( $request );
@@ -565,8 +570,10 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		// Create REST request for execution.
-		$request = new \WP_REST_Request( 'POST', '/wp/v2/abilities/' . $ability_id . '/run' );
+		// Create REST request for execution - use version-appropriate namespace.
+		$is_wp_69_plus = class_exists( 'WP_Ability_Categories_Registry' );
+		$namespace     = $is_wp_69_plus ? '/wp-abilities/v1' : '/wp/v2';
+		$request       = new \WP_REST_Request( 'POST', $namespace . '/abilities/' . $ability_id . '/run' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
 			wp_json_encode(
