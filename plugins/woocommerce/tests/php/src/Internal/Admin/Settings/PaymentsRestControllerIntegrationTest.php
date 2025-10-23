@@ -3,13 +3,21 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
+use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
+use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
+use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
 use WC_Gateway_BACS;
@@ -53,6 +61,35 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * The current time in seconds.
+	 *
+	 * Use it instead of time() to avoid using the real time in tests.
+	 *
+	 * @var int
+	 */
+	protected int $current_time;
+
+	/**
+	 * @var MockableLegacyProxy|MockObject
+	 */
+	protected $mockable_proxy;
+
+	/**
+	 * @var WPCOM_Connection_Manager|MockObject
+	 */
+	protected $mock_wpcom_connection_manager;
+
+	/**
+	 * @var object&MockObject
+	 */
+	protected $mock_woopayments_account_service;
+
+	/**
+	 * @var FakePaymentGateway
+	 */
+	private FakePaymentGateway $mock_woopayments_gateway;
+
+	/**
 	 * Gateways mock.
 	 *
 	 * @var callable
@@ -64,7 +101,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @var callable
 	 */
-	private $incentives_response_mock_ref;
+	private $woopayments_incentives_response_mock_ref;
 
 	/**
 	 * The initial country that is set before running tests in this test suite.
@@ -107,16 +144,44 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
 
-		$this->controller = wc_get_container()->get( PaymentsRestController::class );
-		$this->controller->register_routes();
+		$this->current_time = 1234567890;
 
-		$this->providers_service = wc_get_container()->get( PaymentsProviders::class );
-		$this->service           = wc_get_container()->get( Payments::class );
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
 
-		$this->load_core_paypal_pg();
+		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
+													->onlyMethods(
+														array(
+															'is_connected',
+															'has_connected_owner',
+															'is_connection_owner',
+														)
+													)
+													->getMock();
+		// Make it connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connection_owner' )
+			->willReturn( true );
+
+		$this->mock_woopayments_account_service = $this->getMockBuilder( \stdClass::class )
+														->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
+														->getMock();
 
 		// Mock the response from the WPCOM incentives API.
-		$this->incentives_response_mock_ref = function ( $preempt, $parsed_args, $url ) {
+		$this->woopayments_incentives_response_mock_ref = function ( $preempt, $parsed_args, $url ) {
 			if ( str_contains( $url, 'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives' ) ) {
 				return array(
 					'success'  => true,
@@ -154,60 +219,158 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			return $preempt;
 		};
 
-		add_filter( 'pre_http_request', $this->incentives_response_mock_ref, 10, 3 );
+		add_filter( 'pre_http_request', $this->woopayments_incentives_response_mock_ref, 10, 3 );
 
-		$this->gateways_mock_ref = function ( \WC_Payment_Gateways $wc_payment_gateways ) {
-			$mock_gateways = array(
-				'woocommerce_payments' => array(
-					'enabled'                     => false,
-					'account_connected'           => false,
-					'needs_setup'                 => true,
-					'test_mode'                   => true,
-					'dev_mode'                    => true,
-					'onboarding_started'          => false,
-					'onboarding_completed'        => false,
-					'onboarding_test_mode'        => false,
-					'plugin_slug'                 => 'woocommerce-payments',
-					'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
-					'recommended_payment_methods' => array(
-						array(
-							'id'          => 'card',
-							'_order'      => 0,
-							'enabled'     => true,
-							'required'    => true,
-							'title'       => 'Credit/debit card (required)',
-							'description' => 'Accepts all major credit and debit cards',
-							'icon'        => 'https://example.com/card-icon.png',
-						),
-						array(
-							'id'          => 'woopay',
-							'_order'      => 1,
-							'enabled'     => false,
-							'title'       => 'WooPay',
-							'description' => 'WooPay express checkout',
-							'icon'        => 'https://example.com/woopay-icon.png',
-						),
+		// Use this instance to set different states depending on your specific test needs.
+		$this->mock_woopayments_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'                     => false,
+				'account_connected'           => false,
+				'needs_setup'                 => true,
+				'test_mode'                   => true,
+				'dev_mode'                    => true,
+				'onboarding_started'          => false,
+				'onboarding_completed'        => false,
+				'onboarding_test_mode'        => false,
+				'plugin_slug'                 => 'woocommerce-payments',
+				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
+				'recommended_payment_methods' => array(
+					array(
+						'id'          => 'card',
+						'_order'      => 0,
+						'enabled'     => true,
+						'required'    => true,
+						'title'       => 'Credit/debit card (required)',
+						'description' => 'Accepts all major credit and debit cards',
+						'icon'        => 'https://example.com/card-icon.png',
+					),
+					array(
+						'id'          => 'woopay',
+						'_order'      => 1,
+						'enabled'     => false,
+						'title'       => 'WooPay',
+						'description' => 'WooPay express checkout',
+						'icon'        => 'https://example.com/woopay-icon.png',
 					),
 				),
-			);
+			)
+		);
 
-			$order = 99999;
-			foreach ( $mock_gateways as $gateway_id => $gateway_data ) {
-				$fake_gateway = new FakePaymentGateway( $gateway_id, $gateway_data );
+		// Use this instance to set different states depending on your specific test needs.
+		$this->mock_visa_gateway = new FakePaymentGateway(
+			'visa_acceptance_solutions',
+			array(
+				'enabled'              => false,
+				'account_connected'    => false,
+				'needs_setup'          => true,
+				'test_mode'            => true,
+				'dev_mode'             => true,
+				'onboarding_started'   => false,
+				'onboarding_completed' => false,
+				'onboarding_test_mode' => false,
+				'plugin_slug'          => 'visa-acceptance-solutions',
+				'plugin_file'          => 'visa-acceptance-solutions/visa-acceptance-solutions.php',
+			)
+		);
 
-				$wc_payment_gateways->payment_gateways[ $order++ ] = $fake_gateway;
-			}
-		};
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
+		$this->mockable_proxy->register_class_mocks(
+			array(
+				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
+			)
+		);
+		// We have no way of knowing if the container has already resolved the mocked classes,
+		// so we need to reset all resolved instances.
+		$container->reset_all_resolved();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WC_Payments_Utils' => array(
+					'supported_countries' => function () {
+						return $this->get_woopayments_supported_countries();
+					},
+				),
+				PluginsHelper::class => array(
+					'is_plugin_installed'       => function ( $plugin_slug ) {
+						// By default, only WooCommerce is installed.
+						if ( 'woocommerce' === $plugin_slug ) {
+							return true;
+						}
+
+						return false;
+					},
+					'is_plugin_active'          => function ( $plugin_slug ) {
+						// By default, only WooCommerce is active.
+						if ( 'woocommerce' === $plugin_slug ) {
+							return true;
+						}
+
+						return false;
+					},
+					'get_plugin_path_from_slug' => function ( $plugin_slug ) {
+						if ( 'woocommerce' === $plugin_slug ) {
+							return 'woocommerce/woocommerce.php';
+						}
+
+						if ( 'woocommerce-payments' === $plugin_slug ) {
+							return 'woocommerce-payments/woocommerce-payments.php';
+						}
+
+						return '';
+					},
+				),
+			)
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				// Mock the current time.
+				'time'         => function () {
+					return $this->current_time;
+				},
+				'class_exists' => function ( $class_to_check ) {
+					// By default, the WooPayments extension is mocked as active.
+					if ( '\WC_Payments' === $class_to_check ) {
+						return true;
+					}
+
+					return false;
+				},
+			),
+		);
+
+		$this->providers_service = $container->get( PaymentsProviders::class );
+		$this->service           = $container->get( Payments::class );
+
+		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
+		$sut = new PaymentsRestController();
+		$sut->init( $this->service );
+		$sut->register_routes( true );
+
+		$this->load_core_paypal_pg();
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'pre_http_request', $this->incentives_response_mock_ref );
+		remove_filter( 'pre_http_request', $this->woopayments_incentives_response_mock_ref );
 
 		$this->unmock_payment_gateways();
 		delete_option( 'woocommerce_gateway_order' );
+
+		$this->mockable_proxy->reset();
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -491,9 +654,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting payment providers returns all the data.
+	 * Test getting payment providers with no partner gateway active returns all the data.
 	 */
-	public function test_get_payment_providers_has_all_the_data() {
+	public function test_get_payment_providers_has_all_the_data_with_no_partner_gateway_active() {
 		// Arrange.
 		// Reset the WooCommerce gateway order.
 		delete_option( 'woocommerce_gateway_order' );
@@ -505,7 +668,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		$this->enable_core_paypal_pg();
-		$this->mock_payment_gateways();
 
 		// Act.
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
@@ -517,20 +679,15 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 
-		// We have the core PayPal gateway and the fake WooPayments gateway registered, the offline PMs group entry, and 2 suggestions.
-		$this->assertCount( 5, $data['providers'] );
+		// We have the core PayPal gateway registered, the offline PMs group entry, and 2 suggestions.
+		$this->assertCount( 4, $data['providers'] );
 		// Assert that the preferred suggestions are WooPayments and PayPal (full stack).
-		// The order is different because of the presence of the fake WooPayments gateway:
-		// the WooPayments suggestion gets attached to the fake gateway entry.
-		// Under normal circumstances, the WooPayments suggestion would not be present
-		// because the WooPayments extension would be identified as active.
 		$this->assertSame(
 			array(
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
 				WC_Gateway_Paypal::ID,
-				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::WOOPAYMENTS, // The WooPayments suggestion.
-				'woocommerce_payments', // The fake WooPayments gateway.
-				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
 			),
 			array_column( $data['providers'], 'id' )
 		);
@@ -543,7 +700,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 4, $data['suggestion_categories'] );
 
 		// Assert that the WooPayments suggestion has all the details, including the incentive data.
-		$suggestion = $data['providers'][2];
+		$suggestion = $data['providers'][0];
 		$this->assertArrayHasKey( 'id', $suggestion, 'Provider (suggestion) `id` entry is missing' );
 		$this->assertArrayHasKey( '_order', $suggestion, 'Provider (suggestion) `_order` entry is missing' );
 		$this->assertArrayHasKey( '_type', $suggestion, 'Provider (suggestion) `_type` entry is missing' );
@@ -584,103 +741,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '_links', $suggestion, 'Provider (suggestion) `_links` entry is missing' );
 		$this->assertArrayHasKey( 'hide', $suggestion['_links'], 'Provider (suggestion) `_links[hide]` entry is missing' );
 
-		// Assert that the fake WooPayments gateway is returned as NOT enabled.
-		$provider = $data['providers'][3];
-		$this->assertFalse( $provider['state']['enabled'] );
-		// Assert that the fake WooPayments gateway has all the details.
-		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
-		$this->assertArrayHasKey( '_order', $provider, 'Provider (gateway) `_order` entry is missing' );
-		$this->assertArrayHasKey( '_type', $provider, 'Provider (gateway) `_type` entry is missing' );
-		$this->assertSame( PaymentsProviders::TYPE_GATEWAY, $provider['_type'], 'Provider (gateway) `_type` entry is not `' . PaymentsProviders::TYPE_GATEWAY . '`' );
-		$this->assertArrayHasKey( 'title', $provider, 'Provider (gateway) `title` entry is missing' );
-		$this->assertArrayHasKey( 'description', $provider, 'Provider (gateway) `description` entry is missing' );
-		$this->assertArrayHasKey( 'supports', $provider, 'Provider (gateway) `supports` entry is missing' );
-		$this->assertIsList( $provider['supports'], 'Provider (gateway) `supports` entry is not a list' );
-		$this->assertArrayHasKey( 'plugin', $provider, 'Provider (gateway) `plugin` entry is missing' );
-		$this->assertArrayHasKey( '_type', $provider['plugin'], 'Provider (gateway) `plugin[_type]` entry is missing' );
-		$this->assertArrayHasKey( 'slug', $provider['plugin'], 'Provider (gateway) `plugin[slug]` entry is missing' );
-		$this->assertSame( 'woocommerce-payments', $provider['plugin']['slug'] );
-		$this->assertArrayHasKey( 'file', $provider['plugin'], 'Provider (gateway) `plugin[file]` entry is missing' );
-		$this->assertSame( 'woocommerce-payments/woocommerce-payments', $provider['plugin']['file'] ); // Skips the .php extension.
-		$this->assertArrayHasKey( 'status', $provider['plugin'], 'Provider (gateway) `plugin[status]` entry is missing' );
-		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $provider['plugin']['status'] );
-		$this->assertArrayHasKey( 'links', $provider, 'Provider (gateway) `links` entry is missing' );
-		$this->assertCount( 5, $provider['links'] ); // Receives the links from the suggestion.
-		$this->assertArrayHasKey( 'state', $provider, 'Provider (gateway) `state` entry is missing' );
-		$this->assertArrayHasKey( 'enabled', $provider['state'], 'Provider (gateway) `state[enabled]` entry is missing' );
-		$this->assertFalse( $provider['state']['enabled'] );
-		$this->assertArrayHasKey( 'account_connected', $provider['state'], 'Provider (gateway) `state[account_connected]` entry is missing' );
-		$this->assertFalse( $provider['state']['account_connected'] );
-		$this->assertArrayHasKey( 'needs_setup', $provider['state'], 'Provider (gateway) `state[needs_setup]` entry is missing' );
-		$this->assertTrue( $provider['state']['needs_setup'] );
-		$this->assertArrayHasKey( 'test_mode', $provider['state'], 'Provider (gateway) `state[test_mode]` entry is missing' );
-		$this->assertTrue( $provider['state']['test_mode'] );
-		$this->assertArrayHasKey( 'dev_mode', $provider['state'], 'Provider (gateway) `state[dev_mode]` entry is missing' );
-		$this->assertTrue( $provider['state']['dev_mode'] );
-		$this->assertArrayHasKey( 'management', $provider, 'Provider (gateway) `management` entry is missing' );
-		$this->assertArrayHasKey( '_links', $provider['management'], 'Provider (gateway) `management[_links]` entry is missing' );
-		$this->assertArrayHasKey( 'settings', $provider['management']['_links'], 'Provider (gateway) `management[_links][settings]` entry is missing' );
-		$this->assertArrayHasKey( 'onboarding', $provider, 'Provider (gateway) `onboarding` entry is missing' );
-		$this->assertArrayHasKey( 'state', $provider['onboarding'], 'Provider (gateway) `onboarding[state]` entry is missing' );
-		$this->assertArrayHasKey( 'started', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][started]` entry is missing' );
-		$this->assertFalse( $provider['onboarding']['state']['started'] );
-		$this->assertArrayHasKey( 'completed', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][completed]` entry is missing' );
-		$this->assertFalse( $provider['onboarding']['state']['completed'] );
-		$this->assertArrayHasKey( 'test_mode', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][test_mode]` entry is missing' );
-		$this->assertFalse( $provider['onboarding']['state']['test_mode'] );
-		$this->assertArrayHasKey( '_links', $provider['onboarding'], 'Provider (gateway) `onboarding[_links]` entry is missing' );
-		$this->assertArrayHasKey( 'onboard', $provider['onboarding']['_links'], 'Provider (gateway) `onboarding[_links][onboard]` entry is missing' );
-		$this->assertArrayHasKey( 'recommended_payment_methods', $provider['onboarding'], 'Provider (gateway) `onboarding[recommended_payment_methods]` entry is missing' );
-		$this->assertCount( 2, $provider['onboarding']['recommended_payment_methods'] ); // Receives recommended PMs.
-		$this->assertSame(
-			array(
-				array(
-					'id'          => 'card',
-					'_order'      => 0,
-					'enabled'     => true,
-					'required'    => true,
-					'title'       => 'Credit/debit card (required)',
-					'description' => 'Accepts all major credit and debit cards',
-					'icon'        => 'https://example.com/card-icon.png',
-				),
-				array(
-					'id'          => 'woopay',
-					'_order'      => 1,
-					'enabled'     => false,
-					'required'    => false,
-					'title'       => 'WooPay',
-					'description' => 'WooPay express checkout',
-					'icon'        => 'https://example.com/woopay-icon.png',
-				),
-			),
-			$provider['onboarding']['recommended_payment_methods']
-		);
-		$this->assertArrayHasKey( '_suggestion_id', $provider, 'Provider (gateway) `_suggestion_id` entry is missing' );
-		$this->assertSame( PaymentsExtensionSuggestions::WOOPAYMENTS, $provider['_suggestion_id'] );
-		$this->assertArrayHasKey( '_incentive', $provider, 'Provider (suggestion) `_incentive` entry is missing' );
-		$this->assertSame(
-			array(
-				'id'                => 'promo-discount__wc_settings_payments',
-				'promo_id'          => 'promo-discount',
-				'title'             => 'Save X% on processing fees.',
-				'description'       => 'Use the native payments solution built and supported by Woo.',
-				'short_description' => 'Save X% on processing fees.',
-				'cta_label'         => 'Save X%',
-				'tc_url'            => 'https://woocommerce.com/terms-conditions',
-				'badge'             => 'Save X% on processing fees',
-				'_dismissals'       => array(),
-				'_links'            => array(
-					'dismiss' => array(
-						'href' => rest_url( self::ENDPOINT . '/suggestion/' . $provider['_suggestion_id'] . '/incentive/' . $provider['_incentive']['id'] . '/dismiss' ),
-					),
-				),
-			),
-			$provider['_incentive']
-		);
-		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
-
 		// Assert that the offline payment methods group has all the details.
-		$offline_pms_group = $data['providers'][0];
+		$offline_pms_group = $data['providers'][2];
 		$this->assertArrayHasKey( 'id', $offline_pms_group, 'Provider (offline payment methods group) `id` entry is missing' );
 		$this->assertSame( PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP, $offline_pms_group['id'] );
 		$this->assertArrayHasKey( '_type', $offline_pms_group, 'Provider (offline payment methods group) `_type` entry is missing' );
@@ -702,7 +764,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $offline_pms_group['plugin']['status'] );
 
 		// Assert that the PayPal gateway is returned as enabled.
-		$provider = $data['providers'][1];
+		$provider = $data['providers'][3];
 		$this->assertTrue( $provider['state']['enabled'] );
 		// Assert that the PayPal gateway has all the details.
 		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
@@ -777,6 +839,499 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( '_priority', $suggestion_category, 'Suggestion category `_order` entry is missing' );
 		$this->assertArrayHasKey( 'title', $suggestion_category, 'Suggestion category `title` entry is missing' );
 		$this->assertArrayHasKey( 'description', $suggestion_category, 'Suggestion category `description` entry is missing' );
+
+		// Clean up.
+		remove_filter( 'user_has_cap', $filter_callback );
+	}
+
+	/**
+	 * Test getting payment providers with WooPayments gateway active but not enabled returns all the data.
+	 */
+	public function test_get_payment_providers_has_all_the_data_with_woopayments_gateway_active_but_not_enabled() {
+		// Arrange.
+		// Reset the WooCommerce gateway order.
+		delete_option( 'woocommerce_gateway_order' );
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$filter_callback = fn( $caps ) => array(
+			'manage_woocommerce' => true,
+			'install_plugins'    => true,
+		);
+		add_filter( 'user_has_cap', $filter_callback );
+
+		$this->enable_core_paypal_pg();
+		$this->mock_payment_gateways();
+
+		// Arrange the WooPayments version constant to meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		// We have the core PayPal gateway and the fake WooPayments gateway registered, the offline PMs group entry, and 1 suggestion.
+		$this->assertCount( 4, $data['providers'] );
+		// Assert that the preferred suggestion is PayPal (full stack).
+		$this->assertSame(
+			array(
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				WC_Gateway_Paypal::ID,
+				'woocommerce_payments', // The fake WooPayments gateway.
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
+			),
+			array_column( $data['providers'], 'id' )
+		);
+
+		// We also have the 3 offline payment methods.
+		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We don't get BNPL suggestions since WooPayments is active (even if not enabled), so only 5 suggestions are returned.
+		$this->assertCount( 5, $data['suggestions'] );
+		// Assert we get the suggestion categories.
+		$this->assertCount( 4, $data['suggestion_categories'] );
+
+		// Assert that the PayPal suggestion has all the details.
+		$suggestion = $data['providers'][3];
+		$this->assertArrayHasKey( 'id', $suggestion, 'Provider (suggestion) `id` entry is missing' );
+		$this->assertArrayHasKey( '_order', $suggestion, 'Provider (suggestion) `_order` entry is missing' );
+		$this->assertArrayHasKey( '_type', $suggestion, 'Provider (suggestion) `_type` entry is missing' );
+		$this->assertSame( PaymentsProviders::TYPE_SUGGESTION, $suggestion['_type'], 'Provider (suggestion) `_type` entry is not `' . PaymentsProviders::TYPE_SUGGESTION . '`' );
+		$this->assertArrayHasKey( 'title', $suggestion, 'Provider (suggestion) `title` entry is missing' );
+		$this->assertArrayHasKey( 'description', $suggestion, 'Provider (suggestion) `description` entry is missing' );
+		$this->assertArrayHasKey( 'links', $suggestion, 'Provider (suggestion) `links` entry is missing' );
+		$this->assertCount( 5, $suggestion['links'] );
+		$this->assertArrayHasKey( 'plugin', $suggestion, 'Provider (suggestion) `plugin` entry is missing' );
+		$this->assertArrayHasKey( 'slug', $suggestion['plugin'], 'Provider (suggestion) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'woocommerce-paypal-payments', $suggestion['plugin']['slug'] );
+		$this->assertArrayHasKey( 'status', $suggestion['plugin'], 'Provider (suggestion) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_NOT_INSTALLED, $suggestion['plugin']['status'] );
+		$this->assertArrayHasKey( 'tags', $suggestion, 'Provider (suggestion) `tags` entry is missing' );
+		$this->assertIsList( $suggestion['tags'], 'Provider (suggestion) `tags` entry is not a list' );
+		$this->assertArrayHasKey( '_suggestion_id', $suggestion, 'Provider (suggestion) `_suggestion_id` entry is missing' );
+		$this->assertSame( PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, $suggestion['_suggestion_id'] );
+		$this->assertArrayHasKey( '_links', $suggestion, 'Provider (suggestion) `_links` entry is missing' );
+		$this->assertArrayHasKey( 'hide', $suggestion['_links'], 'Provider (suggestion) `_links[hide]` entry is missing' );
+
+		// Assert that the fake WooPayments gateway is returned as NOT enabled.
+		$provider = $data['providers'][2];
+		$this->assertFalse( $provider['state']['enabled'] );
+		// Assert that the fake WooPayments gateway has all the details.
+		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
+		$this->assertArrayHasKey( '_order', $provider, 'Provider (gateway) `_order` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider, 'Provider (gateway) `_type` entry is missing' );
+		$this->assertSame( PaymentsProviders::TYPE_GATEWAY, $provider['_type'], 'Provider (gateway) `_type` entry is not `' . PaymentsProviders::TYPE_GATEWAY . '`' );
+		$this->assertArrayHasKey( 'title', $provider, 'Provider (gateway) `title` entry is missing' );
+		$this->assertArrayHasKey( 'description', $provider, 'Provider (gateway) `description` entry is missing' );
+		$this->assertArrayHasKey( 'supports', $provider, 'Provider (gateway) `supports` entry is missing' );
+		$this->assertIsList( $provider['supports'], 'Provider (gateway) `supports` entry is not a list' );
+		$this->assertArrayHasKey( 'plugin', $provider, 'Provider (gateway) `plugin` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider['plugin'], 'Provider (gateway) `plugin[_type]` entry is missing' );
+		$this->assertArrayHasKey( 'slug', $provider['plugin'], 'Provider (gateway) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'woocommerce-payments', $provider['plugin']['slug'] );
+		$this->assertArrayHasKey( 'file', $provider['plugin'], 'Provider (gateway) `plugin[file]` entry is missing' );
+		$this->assertSame( 'woocommerce-payments/woocommerce-payments', $provider['plugin']['file'] ); // Skips the .php extension.
+		$this->assertArrayHasKey( 'status', $provider['plugin'], 'Provider (gateway) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $provider['plugin']['status'] );
+		$this->assertArrayHasKey( 'links', $provider, 'Provider (gateway) `links` entry is missing' );
+		$this->assertCount( 5, $provider['links'] ); // Receives the links from the suggestion.
+		$this->assertArrayHasKey( 'state', $provider, 'Provider (gateway) `state` entry is missing' );
+		$this->assertArrayHasKey( 'enabled', $provider['state'], 'Provider (gateway) `state[enabled]` entry is missing' );
+		$this->assertFalse( $provider['state']['enabled'] );
+		$this->assertArrayHasKey( 'account_connected', $provider['state'], 'Provider (gateway) `state[account_connected]` entry is missing' );
+		$this->assertFalse( $provider['state']['account_connected'] );
+		$this->assertArrayHasKey( 'needs_setup', $provider['state'], 'Provider (gateway) `state[needs_setup]` entry is missing' );
+		$this->assertTrue( $provider['state']['needs_setup'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['state'], 'Provider (gateway) `state[test_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['test_mode'] );
+		$this->assertArrayHasKey( 'dev_mode', $provider['state'], 'Provider (gateway) `state[dev_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['dev_mode'] );
+		$this->assertArrayHasKey( 'management', $provider, 'Provider (gateway) `management` entry is missing' );
+		$this->assertArrayHasKey( '_links', $provider['management'], 'Provider (gateway) `management[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'settings', $provider['management']['_links'], 'Provider (gateway) `management[_links][settings]` entry is missing' );
+		$this->assertArrayHasKey( 'onboarding', $provider, 'Provider (gateway) `onboarding` entry is missing' );
+		$this->assertArrayHasKey( 'state', $provider['onboarding'], 'Provider (gateway) `onboarding[state]` entry is missing' );
+		$this->assertArrayHasKey( 'started', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][started]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['started'] );
+		$this->assertArrayHasKey( 'completed', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][completed]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['completed'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][test_mode]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['test_mode'] );
+		$this->assertArrayHasKey( 'steps', $provider['onboarding'], 'Provider (gateway) `onboarding[steps]` entry is missing' );
+		$this->assertIsArray( $provider['onboarding']['steps'], 'Provider (gateway) `onboarding[steps]` entry is not an array' );
+		$this->assertArrayHasKey( 'context', $provider['onboarding'], 'Provider (gateway) `onboarding[context]` entry is missing' );
+		$this->assertIsArray( $provider['onboarding']['context'], 'Provider (gateway) `onboarding[context]` entry is not an array' );
+		$this->assertArrayHasKey( '_links', $provider['onboarding'], 'Provider (gateway) `onboarding[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'onboard', $provider['onboarding']['_links'], 'Provider (gateway) `onboarding[_links][onboard]` entry is missing' );
+		$this->assertArrayHasKey( 'recommended_payment_methods', $provider['onboarding'], 'Provider (gateway) `onboarding[recommended_payment_methods]` entry is missing' );
+		$this->assertCount( 2, $provider['onboarding']['recommended_payment_methods'] ); // Receives recommended PMs.
+		$this->assertSame(
+			array(
+				array(
+					'id'          => 'card',
+					'_order'      => 0,
+					'enabled'     => true,
+					'required'    => true,
+					'title'       => 'Credit/debit card (required)',
+					'description' => 'Accepts all major credit and debit cards',
+					'icon'        => 'https://example.com/card-icon.png',
+				),
+				array(
+					'id'          => 'woopay',
+					'_order'      => 1,
+					'enabled'     => false,
+					'required'    => false,
+					'title'       => 'WooPay',
+					'description' => 'WooPay express checkout',
+					'icon'        => 'https://example.com/woopay-icon.png',
+				),
+			),
+			$provider['onboarding']['recommended_payment_methods']
+		);
+		$this->assertArrayHasKey( '_suggestion_id', $provider, 'Provider (gateway) `_suggestion_id` entry is missing' );
+		$this->assertSame( PaymentsExtensionSuggestions::WOOPAYMENTS, $provider['_suggestion_id'] );
+		$this->assertArrayHasKey( '_incentive', $provider, 'Provider (suggestion) `_incentive` entry is missing' );
+		$this->assertSame(
+			array(
+				'id'                => 'promo-discount__wc_settings_payments',
+				'promo_id'          => 'promo-discount',
+				'title'             => 'Save X% on processing fees.',
+				'description'       => 'Use the native payments solution built and supported by Woo.',
+				'short_description' => 'Save X% on processing fees.',
+				'cta_label'         => 'Save X%',
+				'tc_url'            => 'https://woocommerce.com/terms-conditions',
+				'badge'             => 'Save X% on processing fees',
+				'_dismissals'       => array(),
+				'_links'            => array(
+					'dismiss' => array(
+						'href' => rest_url( self::ENDPOINT . '/suggestion/' . $provider['_suggestion_id'] . '/incentive/' . $provider['_incentive']['id'] . '/dismiss' ),
+					),
+				),
+			),
+			$provider['_incentive']
+		);
+		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
+
+		// Assert that the PayPal gateway is returned as enabled.
+		$provider = $data['providers'][1];
+		$this->assertTrue( $provider['state']['enabled'] );
+
+		// Clean up.
+		remove_filter( 'user_has_cap', $filter_callback );
+	}
+
+	/**
+	 * Test getting payment providers with WooPayments gateway active and enabled returns all the data.
+	 */
+	public function test_get_payment_providers_has_all_the_data_with_woopayments_gateway_active_and_enabled() {
+		// Arrange.
+		// Reset the WooCommerce gateway order.
+		delete_option( 'woocommerce_gateway_order' );
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$filter_callback = fn( $caps ) => array(
+			'manage_woocommerce' => true,
+			'install_plugins'    => true,
+		);
+		add_filter( 'user_has_cap', $filter_callback );
+
+		$this->enable_core_paypal_pg();
+		$this->mock_payment_gateways();
+
+		// Arrange the gateway.
+		$this->mock_woopayments_gateway->enabled     = 'yes';
+		$this->mock_woopayments_gateway->needs_setup = false;
+
+		// Arrange the gateway account.
+		$this->mock_woopayments_gateway->account_connected = true;
+		$this->mock_woopayments_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->mock_woopayments_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Arrange the WooPayments version constant to meet the minimum requirements for the native in-context onboarding.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		// We have the core PayPal gateway and the fake WooPayments gateway registered, the offline PMs group entry, and 1 suggestion.
+		$this->assertCount( 4, $data['providers'] );
+		// Assert that the preferred suggestion is PayPal (full stack).
+		$this->assertSame(
+			array(
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				WC_Gateway_Paypal::ID,
+				'woocommerce_payments', // The fake WooPayments gateway ID.
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
+			),
+			array_column( $data['providers'], 'id' )
+		);
+
+		// We also have the 3 offline payment methods.
+		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We don't get BNPL suggestions since WooPayments is active, so only 5 suggestions are returned.
+		$this->assertCount( 5, $data['suggestions'] );
+		// Assert we get the suggestion categories.
+		$this->assertCount( 4, $data['suggestion_categories'] );
+
+		// Assert that the fake WooPayments gateway is returned as enabled.
+		$provider = $data['providers'][2];
+		$this->assertTrue( $provider['state']['enabled'] );
+		// Assert that the fake WooPayments gateway has all the details.
+		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
+		$this->assertArrayHasKey( '_order', $provider, 'Provider (gateway) `_order` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider, 'Provider (gateway) `_type` entry is missing' );
+		$this->assertSame( PaymentsProviders::TYPE_GATEWAY, $provider['_type'], 'Provider (gateway) `_type` entry is not `' . PaymentsProviders::TYPE_GATEWAY . '`' );
+		$this->assertArrayHasKey( 'title', $provider, 'Provider (gateway) `title` entry is missing' );
+		$this->assertArrayHasKey( 'description', $provider, 'Provider (gateway) `description` entry is missing' );
+		$this->assertArrayHasKey( 'supports', $provider, 'Provider (gateway) `supports` entry is missing' );
+		$this->assertIsList( $provider['supports'], 'Provider (gateway) `supports` entry is not a list' );
+		$this->assertArrayHasKey( 'plugin', $provider, 'Provider (gateway) `plugin` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider['plugin'], 'Provider (gateway) `plugin[_type]` entry is missing' );
+		$this->assertArrayHasKey( 'slug', $provider['plugin'], 'Provider (gateway) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'woocommerce-payments', $provider['plugin']['slug'] );
+		$this->assertArrayHasKey( 'file', $provider['plugin'], 'Provider (gateway) `plugin[file]` entry is missing' );
+		$this->assertSame( 'woocommerce-payments/woocommerce-payments', $provider['plugin']['file'] ); // Skips the .php extension.
+		$this->assertArrayHasKey( 'status', $provider['plugin'], 'Provider (gateway) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $provider['plugin']['status'] );
+		$this->assertArrayHasKey( 'links', $provider, 'Provider (gateway) `links` entry is missing' );
+		$this->assertCount( 5, $provider['links'] ); // Receives the links from the suggestion.
+		$this->assertArrayHasKey( 'state', $provider, 'Provider (gateway) `state` entry is missing' );
+		$this->assertArrayHasKey( 'enabled', $provider['state'], 'Provider (gateway) `state[enabled]` entry is missing' );
+		$this->assertTrue( $provider['state']['enabled'] );
+		$this->assertArrayHasKey( 'account_connected', $provider['state'], 'Provider (gateway) `state[account_connected]` entry is missing' );
+		$this->assertTrue( $provider['state']['account_connected'] );
+		$this->assertArrayHasKey( 'needs_setup', $provider['state'], 'Provider (gateway) `state[needs_setup]` entry is missing' );
+		$this->assertFalse( $provider['state']['needs_setup'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['state'], 'Provider (gateway) `state[test_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['test_mode'] );
+		$this->assertArrayHasKey( 'dev_mode', $provider['state'], 'Provider (gateway) `state[dev_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['dev_mode'] );
+		$this->assertArrayHasKey( 'management', $provider, 'Provider (gateway) `management` entry is missing' );
+		$this->assertArrayHasKey( '_links', $provider['management'], 'Provider (gateway) `management[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'settings', $provider['management']['_links'], 'Provider (gateway) `management[_links][settings]` entry is missing' );
+		$this->assertArrayHasKey( 'onboarding', $provider, 'Provider (gateway) `onboarding` entry is missing' );
+		$this->assertArrayHasKey( 'state', $provider['onboarding'], 'Provider (gateway) `onboarding[state]` entry is missing' );
+		$this->assertArrayHasKey( 'started', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][started]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['started'] );
+		$this->assertArrayHasKey( 'completed', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][completed]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['completed'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][test_mode]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['test_mode'] );
+		$this->assertArrayHasKey( 'steps', $provider['onboarding'], 'Provider (gateway) `onboarding[steps]` entry is missing' );
+		$this->assertIsArray( $provider['onboarding']['steps'], 'Provider (gateway) `onboarding[steps]` entry is not an array' );
+		$this->assertArrayHasKey( 'context', $provider['onboarding'], 'Provider (gateway) `onboarding[context]` entry is missing' );
+		$this->assertIsArray( $provider['onboarding']['context'], 'Provider (gateway) `onboarding[context]` entry is not an array' );
+		$this->assertArrayHasKey( '_links', $provider['onboarding'], 'Provider (gateway) `onboarding[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'onboard', $provider['onboarding']['_links'], 'Provider (gateway) `onboarding[_links][onboard]` entry is missing' );
+		$this->assertArrayHasKey( 'recommended_payment_methods', $provider['onboarding'], 'Provider (gateway) `onboarding[recommended_payment_methods]` entry is missing' );
+		$this->assertCount( 2, $provider['onboarding']['recommended_payment_methods'] ); // Receives recommended PMs.
+		$this->assertSame(
+			array(
+				array(
+					'id'          => 'card',
+					'_order'      => 0,
+					'enabled'     => true,
+					'required'    => true,
+					'title'       => 'Credit/debit card (required)',
+					'description' => 'Accepts all major credit and debit cards',
+					'icon'        => 'https://example.com/card-icon.png',
+				),
+				array(
+					'id'          => 'woopay',
+					'_order'      => 1,
+					'enabled'     => false,
+					'required'    => false,
+					'title'       => 'WooPay',
+					'description' => 'WooPay express checkout',
+					'icon'        => 'https://example.com/woopay-icon.png',
+				),
+			),
+			$provider['onboarding']['recommended_payment_methods']
+		);
+		$this->assertArrayHasKey( '_suggestion_id', $provider, 'Provider (gateway) `_suggestion_id` entry is missing' );
+		$this->assertSame( PaymentsExtensionSuggestions::WOOPAYMENTS, $provider['_suggestion_id'] );
+		$this->assertArrayHasKey( '_incentive', $provider, 'Provider (suggestion) `_incentive` entry is missing' );
+		$this->assertSame(
+			array(
+				'id'                => 'promo-discount__wc_settings_payments',
+				'promo_id'          => 'promo-discount',
+				'title'             => 'Save X% on processing fees.',
+				'description'       => 'Use the native payments solution built and supported by Woo.',
+				'short_description' => 'Save X% on processing fees.',
+				'cta_label'         => 'Save X%',
+				'tc_url'            => 'https://woocommerce.com/terms-conditions',
+				'badge'             => 'Save X% on processing fees',
+				'_dismissals'       => array(),
+				'_links'            => array(
+					'dismiss' => array(
+						'href' => rest_url( self::ENDPOINT . '/suggestion/' . $provider['_suggestion_id'] . '/incentive/' . $provider['_incentive']['id'] . '/dismiss' ),
+					),
+				),
+			),
+			$provider['_incentive']
+		);
+		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
+
+		// Assert that the PayPal gateway is returned as enabled.
+		$provider = $data['providers'][1];
+		$this->assertTrue( $provider['state']['enabled'] );
+
+		// Clean up.
+		remove_filter( 'user_has_cap', $filter_callback );
+	}
+
+	/**
+	 * Test getting payment providers with Visa gateway active but not enabled returns all the data.
+	 *
+	 * The important thing is that Visa is a partner PSP that is NOT WooPayments or Stripe.
+	 */
+	public function test_get_payment_providers_has_all_the_data_with_visa_gateway_active_but_not_enabled() {
+		// Arrange.
+		// Reset the WooCommerce gateway order.
+		delete_option( 'woocommerce_gateway_order' );
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		$filter_callback = fn( $caps ) => array(
+			'manage_woocommerce' => true,
+			'install_plugins'    => true,
+		);
+		add_filter( 'user_has_cap', $filter_callback );
+
+		$this->enable_core_paypal_pg();
+		$this->mock_payment_gateways( false, true ); // Mock Visa gateway instead of WooPayments.
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
+		$request->set_param( 'location', 'US' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		// We have the core PayPal gateway and the fake Visa gateway registered, the offline PMs group entry, and 2 suggestions.
+		$this->assertCount( 5, $data['providers'] );
+		// Assert that the preferred suggestion is WooPayments and PayPal (full stack).
+		$this->assertSame(
+			array(
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::WOOPAYMENTS, // Preferred suggestion.
+				PaymentsProviders::SUGGESTION_ORDERING_PREFIX . PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, // Preferred suggestion.
+				PaymentsProviders::OFFLINE_METHODS_ORDERING_GROUP,
+				WC_Gateway_Paypal::ID,
+				'visa_acceptance_solutions', // The fake Visa gateway ID.
+			),
+			array_column( $data['providers'], 'id' )
+		);
+
+		// We also have the 3 offline payment methods.
+		$this->assertCount( 3, $data['offline_payment_methods'] );
+		// We get BNPL suggestions since WooPayments or Stripe are not active, so 7 suggestions are returned.
+		$this->assertCount( 7, $data['suggestions'] );
+		// Assert we get the suggestion categories.
+		$this->assertCount( 4, $data['suggestion_categories'] );
+
+		// Assert that the PayPal suggestion has all the details.
+		$suggestion = $data['providers'][1];
+		$this->assertArrayHasKey( 'id', $suggestion, 'Provider (suggestion) `id` entry is missing' );
+		$this->assertArrayHasKey( '_order', $suggestion, 'Provider (suggestion) `_order` entry is missing' );
+		$this->assertArrayHasKey( '_type', $suggestion, 'Provider (suggestion) `_type` entry is missing' );
+		$this->assertSame( PaymentsProviders::TYPE_SUGGESTION, $suggestion['_type'], 'Provider (suggestion) `_type` entry is not `' . PaymentsProviders::TYPE_SUGGESTION . '`' );
+		$this->assertArrayHasKey( 'title', $suggestion, 'Provider (suggestion) `title` entry is missing' );
+		$this->assertArrayHasKey( 'description', $suggestion, 'Provider (suggestion) `description` entry is missing' );
+		$this->assertArrayHasKey( 'links', $suggestion, 'Provider (suggestion) `links` entry is missing' );
+		$this->assertCount( 5, $suggestion['links'] );
+		$this->assertArrayHasKey( 'plugin', $suggestion, 'Provider (suggestion) `plugin` entry is missing' );
+		$this->assertArrayHasKey( 'slug', $suggestion['plugin'], 'Provider (suggestion) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'woocommerce-paypal-payments', $suggestion['plugin']['slug'] );
+		$this->assertArrayHasKey( 'status', $suggestion['plugin'], 'Provider (suggestion) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_NOT_INSTALLED, $suggestion['plugin']['status'] );
+		$this->assertArrayHasKey( 'tags', $suggestion, 'Provider (suggestion) `tags` entry is missing' );
+		$this->assertIsList( $suggestion['tags'], 'Provider (suggestion) `tags` entry is not a list' );
+		$this->assertArrayHasKey( '_suggestion_id', $suggestion, 'Provider (suggestion) `_suggestion_id` entry is missing' );
+		$this->assertSame( PaymentsExtensionSuggestions::PAYPAL_FULL_STACK, $suggestion['_suggestion_id'] );
+		$this->assertArrayHasKey( '_links', $suggestion, 'Provider (suggestion) `_links` entry is missing' );
+		$this->assertArrayHasKey( 'hide', $suggestion['_links'], 'Provider (suggestion) `_links[hide]` entry is missing' );
+
+		// Assert that the fake Visa gateway is returned as NOT enabled.
+		$provider = $data['providers'][4];
+		$this->assertFalse( $provider['state']['enabled'] );
+		// Assert that the fake Visa gateway has all the details.
+		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
+		$this->assertArrayHasKey( '_order', $provider, 'Provider (gateway) `_order` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider, 'Provider (gateway) `_type` entry is missing' );
+		$this->assertSame( PaymentsProviders::TYPE_GATEWAY, $provider['_type'], 'Provider (gateway) `_type` entry is not `' . PaymentsProviders::TYPE_GATEWAY . '`' );
+		$this->assertArrayHasKey( 'title', $provider, 'Provider (gateway) `title` entry is missing' );
+		$this->assertArrayHasKey( 'description', $provider, 'Provider (gateway) `description` entry is missing' );
+		$this->assertArrayHasKey( 'supports', $provider, 'Provider (gateway) `supports` entry is missing' );
+		$this->assertIsList( $provider['supports'], 'Provider (gateway) `supports` entry is not a list' );
+		$this->assertArrayHasKey( 'plugin', $provider, 'Provider (gateway) `plugin` entry is missing' );
+		$this->assertArrayHasKey( '_type', $provider['plugin'], 'Provider (gateway) `plugin[_type]` entry is missing' );
+		$this->assertArrayHasKey( 'slug', $provider['plugin'], 'Provider (gateway) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'visa-acceptance-solutions', $provider['plugin']['slug'] );
+		$this->assertArrayHasKey( 'file', $provider['plugin'], 'Provider (gateway) `plugin[file]` entry is missing' );
+		$this->assertSame( 'visa-acceptance-solutions/visa-acceptance-solutions', $provider['plugin']['file'] ); // Skips the .php extension.
+		$this->assertArrayHasKey( 'status', $provider['plugin'], 'Provider (gateway) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $provider['plugin']['status'] );
+		$this->assertArrayHasKey( 'links', $provider, 'Provider (gateway) `links` entry is missing' );
+		$this->assertCount( 3, $provider['links'] ); // Receives the links from the suggestion.
+		$this->assertArrayHasKey( 'state', $provider, 'Provider (gateway) `state` entry is missing' );
+		$this->assertArrayHasKey( 'enabled', $provider['state'], 'Provider (gateway) `state[enabled]` entry is missing' );
+		$this->assertFalse( $provider['state']['enabled'] );
+		$this->assertArrayHasKey( 'account_connected', $provider['state'], 'Provider (gateway) `state[account_connected]` entry is missing' );
+		$this->assertFalse( $provider['state']['account_connected'] );
+		$this->assertArrayHasKey( 'needs_setup', $provider['state'], 'Provider (gateway) `state[needs_setup]` entry is missing' );
+		$this->assertTrue( $provider['state']['needs_setup'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['state'], 'Provider (gateway) `state[test_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['test_mode'] );
+		$this->assertArrayHasKey( 'dev_mode', $provider['state'], 'Provider (gateway) `state[dev_mode]` entry is missing' );
+		$this->assertTrue( $provider['state']['dev_mode'] );
+		$this->assertArrayHasKey( 'management', $provider, 'Provider (gateway) `management` entry is missing' );
+		$this->assertArrayHasKey( '_links', $provider['management'], 'Provider (gateway) `management[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'settings', $provider['management']['_links'], 'Provider (gateway) `management[_links][settings]` entry is missing' );
+		$this->assertArrayHasKey( 'onboarding', $provider, 'Provider (gateway) `onboarding` entry is missing' );
+		$this->assertArrayHasKey( 'state', $provider['onboarding'], 'Provider (gateway) `onboarding[state]` entry is missing' );
+		$this->assertArrayHasKey( 'started', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][started]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['started'] );
+		$this->assertArrayHasKey( 'completed', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][completed]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['completed'] );
+		$this->assertArrayHasKey( 'test_mode', $provider['onboarding']['state'], 'Provider (gateway) `onboarding[state][test_mode]` entry is missing' );
+		$this->assertFalse( $provider['onboarding']['state']['test_mode'] );
+		$this->assertArrayNotHasKey( 'steps', $provider['onboarding'], 'Provider (gateway) `onboarding[steps]` entry should be missing' );
+		$this->assertArrayHasKey( '_links', $provider['onboarding'], 'Provider (gateway) `onboarding[_links]` entry is missing' );
+		$this->assertArrayHasKey( 'onboard', $provider['onboarding']['_links'], 'Provider (gateway) `onboarding[_links][onboard]` entry is missing' );
+		$this->assertArrayHasKey( 'recommended_payment_methods', $provider['onboarding'], 'Provider (gateway) `onboarding[recommended_payment_methods]` entry is missing' );
+		$this->assertCount( 0, $provider['onboarding']['recommended_payment_methods'] ); // No recommended PMs.
+		$this->assertArrayHasKey( '_suggestion_id', $provider, 'Provider (gateway) `_suggestion_id` entry is missing' );
+		$this->assertSame( PaymentsExtensionSuggestions::VISA, $provider['_suggestion_id'] );
+		$this->assertArrayNotHasKey( '_incentive', $provider, 'Provider (suggestion) `_incentive` entry should be missing' );
+		$this->assertArrayHasKey( '_links', $provider, 'Provider (gateway) `_links` entry is missing' );
+
+		// Assert that the PayPal gateway is returned as enabled.
+		$provider = $data['providers'][3];
+		$this->assertTrue( $provider['state']['enabled'] );
 
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );
@@ -975,7 +1530,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		$this->enable_core_paypal_pg();
-		$this->mock_payment_gateways();
 
 		// Act.
 		// Dismiss it for all contexts - no context param.
@@ -996,11 +1550,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		// Assert that the incentive is not in the WooPayments suggestion anymore.
-		$suggestion = $data['providers'][2];
+		$suggestion = $data['providers'][0];
 		$this->assertArrayNotHasKey( '_incentive', $suggestion );
-		// Assert that the incentive is not in the WooPayments gateway anymore.
-		$gateway = $data['providers'][3];
-		$this->assertArrayNotHasKey( '_incentive', $gateway );
 
 		// Delete the user meta.
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
@@ -1016,11 +1567,8 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		// Assert that the incentive is in the WooPayments suggestion again.
-		$suggestion = $data['providers'][2];
+		$suggestion = $data['providers'][0];
 		$this->assertArrayHasKey( '_incentive', $suggestion );
-		// Assert that the incentive is in the WooPayments gateway again.
-		$gateway = $data['providers'][3];
-		$this->assertArrayHasKey( '_incentive', $gateway );
 
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );
@@ -1046,7 +1594,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		$this->enable_core_paypal_pg();
-		$this->mock_payment_gateways();
 
 		// Act.
 		// Dismiss it for all contexts - no context param.
@@ -1068,13 +1615,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		// Assert that the incentive is in the WooPayments suggestion with the right dismissals list.
-		$suggestion = $data['providers'][2];
+		$suggestion = $data['providers'][0];
 		$this->assertArrayHasKey( '_incentive', $suggestion );
 		$this->assertEquals( $context, $suggestion['_incentive']['_dismissals'][0]['context'] );
-		// Assert that the incentive is in the WooPayments gateway with the right dismissals list.
-		$gateway = $data['providers'][3];
-		$this->assertArrayHasKey( '_incentive', $gateway );
-		$this->assertEquals( $context, $gateway['_incentive']['_dismissals'][0]['context'] );
 
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );
@@ -1123,8 +1666,27 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Mock the WC payment gateways.
+	 *
+	 * @param bool $woopayments Whether to mock WooPayments gateway. Default true.
+	 * @param bool $visa        Whether to mock Visa gateway. Default false.
 	 */
-	protected function mock_payment_gateways() {
+	protected function mock_payment_gateways( bool $woopayments = true, bool $visa = false ) {
+		$this->gateways_mock_ref = function ( \WC_Payment_Gateways $wc_payment_gateways ) use ( $woopayments, $visa ) {
+			$mock_gateways = array();
+
+			if ( $woopayments ) {
+				$mock_gateways['woocommerce_payments'] = $this->mock_woopayments_gateway;
+			}
+			if ( $visa ) {
+				$mock_gateways['visa_acceptance_solutions'] = $this->mock_visa_gateway;
+			}
+
+			$order = 99999;
+			foreach ( $mock_gateways as $gateway_id => $fake_gateway ) {
+				$wc_payment_gateways->payment_gateways[ $order++ ] = $fake_gateway;
+			}
+		};
+
 		// Hook into the payment gateways initialization to mock the gateways.
 		add_action( 'wc_payment_gateways_initialized', $this->gateways_mock_ref, 100 );
 		// Reinitialize the WC gateways.
@@ -1132,6 +1694,58 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 
 		$this->providers_service->reset_memo();
+
+		$active_plugin_slugs = array( 'woocommerce' );
+		if ( $woopayments ) {
+			$active_plugin_slugs[] = 'woocommerce-payments';
+		}
+		if ( $visa ) {
+			$active_plugin_slugs[] = 'visa-acceptance-solutions';
+		}
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WC_Payments'         => array(
+					'get_gateway'         => function () {
+						return $this->mock_woopayments_gateway;
+					},
+					'get_account_service' => function () {
+						return $this->mock_woopayments_account_service;
+					},
+				),
+				'\WC_Payments_Account' => array(
+					'get_connect_url'       => function () {
+						return 'https://example.com/kyc_fallback';
+					},
+					'get_overview_page_url' => function () {
+						return 'https://example.com/overview_page?from=' . WooPaymentsService::FROM_NOX_IN_CONTEXT;
+					},
+				),
+				'\WC_Payments_Utils'   => array(
+					'supported_countries' => function () {
+						return $this->get_woopayments_supported_countries();
+					},
+				),
+				PluginsHelper::class   => array(
+					'is_plugin_installed' => function ( $plugin_slug ) use ( $active_plugin_slugs ) {
+						// WooCommerce and WooPayments are installed.
+						if ( in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
+							return true;
+						}
+
+						return false;
+					},
+					'is_plugin_active'    => function ( $plugin_slug ) use ( $active_plugin_slugs ) {
+						// WooCommerce and WooPayments are active.
+						if ( in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
+							return true;
+						}
+
+						return false;
+					},
+				),
+			)
+		);
 	}
 
 	/**
@@ -1206,6 +1820,55 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 				'yes_im_selling_online',
 				false,
 			),
+		);
+	}
+
+	/**
+	 * Get the mock WooPayments supported countries.
+	 *
+	 * @return string[]
+	 */
+	private function get_woopayments_supported_countries(): array {
+		return array(
+			'AE' => 'United Arab Emirates',
+			'AT' => 'Austria',
+			'AU' => 'Australia',
+			'BE' => 'Belgium',
+			'BG' => 'Bulgaria',
+			'CA' => 'Canada',
+			'CH' => 'Switzerland',
+			'CY' => 'Cyprus',
+			'CZ' => 'Czech Republic',
+			'DE' => 'Germany',
+			'DK' => 'Denmark',
+			'EE' => 'Estonia',
+			'FI' => 'Finland',
+			'ES' => 'Spain',
+			'FR' => 'France',
+			'HR' => 'Croatia',
+			'JP' => 'Japan',
+			'LU' => 'Luxembourg',
+			'GB' => 'United Kingdom (UK)',
+			'GR' => 'Greece',
+			'HK' => 'Hong Kong',
+			'HU' => 'Hungary',
+			'IE' => 'Ireland',
+			'IT' => 'Italy',
+			'LT' => 'Lithuania',
+			'LV' => 'Latvia',
+			'MT' => 'Malta',
+			'NL' => 'Netherlands',
+			'NO' => 'Norway',
+			'NZ' => 'New Zealand',
+			'PL' => 'Poland',
+			'PT' => 'Portugal',
+			'RO' => 'Romania',
+			'SE' => 'Sweden',
+			'SI' => 'Slovenia',
+			'SK' => 'Slovakia',
+			'SG' => 'Singapore',
+			'US' => 'United States (US)',
+			'PR' => 'Puerto Rico',
 		);
 	}
 }
