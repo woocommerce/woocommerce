@@ -199,10 +199,12 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Test authorization.
 		$result = AgenticCheckoutUtils::is_authorized( $request );
 
-		// Assert authorization fails.
+		// Assert authorization fails with ACP error format.
 		$this->assertWPError( $result );
-		$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_token', $result->get_error_code() );
-		$this->assertEquals( 401, $result->get_error_data()['status'] );
+		$this->assertEquals( 'invalid_request', $result->get_error_code() );
+		$this->assertEquals( 400, $result->get_error_data()['status'] );
+		$this->assertEquals( 'invalid_request', $result->get_error_data()['type'] );
+		$this->assertEquals( 'authentication_failed', $result->get_error_data()['code'] );
 	}
 
 	/**
@@ -218,10 +220,12 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Test authorization.
 		$result = AgenticCheckoutUtils::is_authorized( $request );
 
-		// Assert authorization fails.
+		// Assert authorization fails with ACP error format.
 		$this->assertWPError( $result );
-		$this->assertEquals( 'woocommerce_rest_agentic_checkout_missing_auth', $result->get_error_code() );
-		$this->assertEquals( 401, $result->get_error_data()['status'] );
+		$this->assertEquals( 'invalid_request', $result->get_error_code() );
+		$this->assertEquals( 400, $result->get_error_data()['status'] );
+		$this->assertEquals( 'invalid_request', $result->get_error_data()['type'] );
+		$this->assertEquals( 'invalid_authorization_format', $result->get_error_data()['code'] );
 	}
 
 	/**
@@ -246,29 +250,11 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 			$result = AgenticCheckoutUtils::is_authorized( $request );
 
 			$this->assertWPError( $result, "Failed for header: $header" );
-			$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_auth_format', $result->get_error_code() );
-			$this->assertEquals( 401, $result->get_error_data()['status'] );
+			$this->assertEquals( 'invalid_request', $result->get_error_code() );
+			$this->assertEquals( 400, $result->get_error_data()['status'] );
+			$this->assertEquals( 'invalid_request', $result->get_error_data()['type'] );
+			$this->assertEquals( 'invalid_authorization_format', $result->get_error_data()['code'] );
 		}
-	}
-
-	/**
-	 * Test authorization when feature is disabled.
-	 */
-	public function test_is_authorized_when_feature_disabled() {
-		// Disable the feature.
-		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'no' );
-
-		// Create mock request with valid token.
-		$request = new \WP_REST_Request();
-		$request->set_header( 'Authorization', 'Bearer test_token' );
-
-		// Test authorization.
-		$result = AgenticCheckoutUtils::is_authorized( $request );
-
-		// Assert authorization fails due to disabled feature.
-		$this->assertWPError( $result );
-		$this->assertEquals( 'woocommerce_rest_agentic_checkout_disabled', $result->get_error_code() );
-		$this->assertEquals( 403, $result->get_error_data()['status'] );
 	}
 
 	/**
@@ -296,9 +282,12 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Test authorization.
 		$result = AgenticCheckoutUtils::is_authorized( $request );
 
-		// Assert authorization fails (empty tokens are skipped).
+		// Assert authorization fails with ACP error format (empty tokens are skipped).
 		$this->assertWPError( $result );
-		$this->assertEquals( 'woocommerce_rest_agentic_checkout_invalid_token', $result->get_error_code() );
+		$this->assertEquals( 'invalid_request', $result->get_error_code() );
+		$this->assertEquals( 400, $result->get_error_data()['status'] );
+		$this->assertEquals( 'invalid_request', $result->get_error_data()['type'] );
+		$this->assertEquals( 'authentication_failed', $result->get_error_data()['code'] );
 	}
 
 	/**

@@ -342,51 +342,52 @@ class AgenticCheckoutUtils {
 	public static function is_authorized( $request = null ) {
 		if ( null === $request ) {
 			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_invalid_request',
+				'invalid_request',
 				__( 'Invalid request object.', 'woocommerce' ),
-				array( 'status' => 500 )
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_request',
+				)
 			);
 		}
 
-		// Extract Authorization header.
 		$auth_header = $request->get_header( 'Authorization' );
-		if ( empty( $auth_header ) ) {
+		if ( empty( $auth_header ) || 0 !== stripos( $auth_header, 'Bearer ' ) ) {
 			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_missing_auth',
+				'invalid_request',
 				__( 'Invalid authorization.', 'woocommerce' ),
-				array( 'status' => 401 )
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_authorization_format',
+				)
 			);
 		}
 
-		// Parse bearer token from header.
-		if ( ! preg_match( '/^Bearer\s+(.+)$/i', $auth_header, $matches ) ) {
+		$provided_token = trim( substr( $auth_header, 7 ) ); // "Bearer " is 7 characters
+		if ( empty( $provided_token ) ) {
 			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_invalid_auth_format',
+				'invalid_request',
 				__( 'Invalid authorization.', 'woocommerce' ),
-				array( 'status' => 401 )
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_authorization_format',
+				)
 			);
 		}
-
-		$provided_token = $matches[1];
 
 		// Load agent registry.
 		$registry = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
 
 		// Check each provider's bearer token.
 		foreach ( $registry as $provider_id => $provider_config ) {
-			// Skip non-array configs and special keys like 'general'.
-			if ( ! is_array( $provider_config ) ) {
+			if ( ! is_array( $provider_config ) || empty( $provider_config['bearer_token'] ) ) {
 				continue;
 			}
 
-			// Skip if no bearer token configured.
-			if ( empty( $provider_config['bearer_token'] ) ) {
-				continue;
-			}
-
-			// Use hash_equals for constant-time comparison to prevent timing attacks.
 			if ( hash_equals( $provider_config['bearer_token'], $provided_token ) ) {
-				// Store provider ID in session for tracking.
 				if ( WC()->session ) {
 					WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $provider_id );
 				}
@@ -394,11 +395,14 @@ class AgenticCheckoutUtils {
 			}
 		}
 
-		// No matching token found.
 		return new \WP_Error(
-			'woocommerce_rest_agentic_checkout_invalid_token',
-			__( 'Invalid authorization token.', 'woocommerce' ),
-			array( 'status' => 401 )
+			'invalid_request',
+			__( 'Invalid authorization.', 'woocommerce' ),
+			array(
+				'status' => 400,
+				'type'   => 'invalid_request',
+				'code'   => 'authentication_failed',
+			)
 		);
 	}
 
