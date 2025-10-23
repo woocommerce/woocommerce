@@ -164,6 +164,10 @@ trait RestApiCache {
 	 * @return WP_REST_Response|\WP_Error The response.
 	 */
 	protected function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
+		if ( is_null( $this->entity_versions_cache ) ) {
+			return call_user_func( $callback, $request );
+		}
+
 		if ( ! $this->should_use_cache_for_request( $request, $config ) ) {
 			$response = call_user_func( $callback, $request );
 			if ( $response instanceof WP_REST_Response ) {
@@ -201,10 +205,6 @@ trait RestApiCache {
 	 * @return bool True if caching should be used, false otherwise.
 	 */
 	private function should_use_cache_for_request( WP_REST_Request $request, array $config ): bool {
-		if ( is_null( $this->entity_versions_cache ) ) {
-			return false;
-		}
-
 		// Check for explicit skip parameter.
 		$skip_cache   = $request->get_param( '_skip_cache' );
 		$should_cache = ! ( 'true' === $skip_cache || '1' === $skip_cache );

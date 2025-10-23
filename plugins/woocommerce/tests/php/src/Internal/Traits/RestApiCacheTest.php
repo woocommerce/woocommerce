@@ -744,7 +744,7 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Caching is skipped when entity versions cache is disabled.
+	 * @testdox Caching is skipped (without X-WC-Cache header) when entity versions cache is disabled.
 	 */
 	public function test_caching_skipped_when_entity_cache_disabled() {
 
@@ -762,7 +762,7 @@ class RestApiCacheTest extends WC_Unit_Test_Case {
 
 		// Verify caching was skipped.
 
-		$this->assertCachingSkipped( $response, $this->sut->responses['single_entity'] );
+		$this->assertArrayNotHasKey( 'X-WC-Cache', $response->get_headers() );
 	}
 
 	/**
