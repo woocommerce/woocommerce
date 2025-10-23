@@ -441,7 +441,7 @@ trait RestApiCache {
 			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
 				$cache_hash_data[ $filter_name ] = array();
 
-				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+				foreach ( $wp_filter[ $filter_name ]->callbacks as $priority => $callbacks ) {
 					$cache_hash_data[ $filter_name ][ $priority ] = array_values(
 						wp_list_pluck( $callbacks, 'function' )
 					);
