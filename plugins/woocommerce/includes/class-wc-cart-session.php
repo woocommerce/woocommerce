@@ -416,9 +416,6 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
-		if ( empty( $cart ) ) {
-			$this->remove_draft_order();
-		}
 		if ( ! $this->cart_has_shippable_products() ) {
 			$wc_session->set( 'shipping_method_counts', null );
 			$wc_session->set( 'previous_shipping_methods', null );
@@ -657,35 +654,6 @@ final class WC_Cart_Session {
 		}
 
 		return $cart;
-	}
-
-	/**
-	 * Remove the draft order from the session and delete it.
-	 */
-	private function remove_draft_order() {
-		$wc_session = WC()->session;
-
-		$draft_order = $wc_session->get( 'store_api_draft_order' );
-		if ( ! $draft_order ) {
-			return;
-		}
-
-		$order = wc_get_order( $draft_order );
-		if ( ! $order ) {
-			// Clear session if order doesn't exist.
-			WC()->session->set( 'store_api_draft_order', null );
-			return;
-		}
-
-		// Only delete orders that are actually drafts.
-		// This prevents deletion of completed/processing orders due to race conditions
-		// or stale session data.
-		$order_status = $order->get_status();
-		if ( in_array( $order_status, array( 'checkout-draft', 'draft' ), true ) ) {
-			$order->delete( true );
-		}
-
-		WC()->session->set( 'store_api_draft_order', null );
 	}
 
 	/**
