@@ -139,7 +139,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the onboarding details for the settings page.
+	 * Get the onboarding details for the Payments settings page.
 	 *
 	 * @param string      $location  The location for which we are onboarding.
 	 *                               This is an ISO 3166-1 alpha-2 country code.
