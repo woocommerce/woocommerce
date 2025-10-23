@@ -58,6 +58,8 @@ module.exports = {
 				ignoreRestSiblings: true,
 			},
 		],
+		'@typescript-eslint/no-floating-promises': 'error',
+		'@typescript-eslint/require-await': 'error',
 		'react/react-in-jsx-scope': 'off',
 	},
 	settings: {
