@@ -5,13 +5,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
-use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
@@ -31,17 +32,17 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	const ENDPOINT = '/wc-admin/settings/payments/woopayments';
 
 	/**
-	 * @var WooPaymentsRestController
+	 * @var WooPaymentsRestController|object
 	 */
 	protected WooPaymentsRestController $controller;
 
 	/**
-	 * @var PaymentsProviders
+	 * @var PaymentsProviders|object
 	 */
 	protected PaymentsProviders $providers_service;
 
 	/**
-	 * @var WooPaymentsService
+	 * @var WooPaymentsService|object
 	 */
 	protected WooPaymentsService $woopayments_provider_service;
 
@@ -129,10 +130,15 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->current_time = 1234567890;
 
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
-
-		$this->providers_service = wc_get_container()->get( PaymentsProviders::class );
 
 		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
 													->onlyMethods(
@@ -145,12 +151,15 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 													)
 													->getMock();
 
-		$this->mockable_proxy = wc_get_container()->get( LegacyProxy::class );
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
 		$this->mockable_proxy->register_class_mocks(
 			array(
 				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
 			)
 		);
+		// We have no way of knowing if the container has already resolved the mocked classes,
+		// so we need to reset all resolved instances.
+		$container->reset_all_resolved();
 
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 											->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
@@ -235,15 +244,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			),
 		);
 
-		// Reinitialize the controller with the mocked dependencies.
-		$this->woopayments_provider_service = new WooPaymentsService();
-		$this->woopayments_provider_service->init( $this->providers_service, $this->mockable_proxy );
-		$sut = new WooPaymentsRestController();
-		$sut->init( wc_get_container()->get( Payments::class ), $this->woopayments_provider_service );
-		$sut->register_routes( true );
-		// Replace the controller in the container so that it can be used during tests.
-		wc_get_container()->replace( WooPaymentsRestController::class, $sut );
-
 		$this->gateways_mock_ref = function ( \WC_Payment_Gateways $wc_payment_gateways ) {
 			$mock_gateways = array(
 				'woocommerce_payments' => $this->mock_gateway,
@@ -253,6 +253,14 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 				$wc_payment_gateways->payment_gateways[ $order++ ] = $fake_gateway;
 			}
 		};
+
+		$this->providers_service            = $container->get( PaymentsProviders::class );
+		$this->woopayments_provider_service = $container->get( WooPaymentsService::class );
+
+		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
+		$sut = new WooPaymentsRestController();
+		$sut->init( $container->get( Payments::class ), $this->woopayments_provider_service );
+		$sut->register_routes( true );
 	}
 
 	/**
@@ -265,8 +273,15 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
 		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
 
-		// Reset the shared mockable proxy so no mocks leak between tests.
-		wc_get_container()->get( LegacyProxy::class )->reset();
+		$this->mockable_proxy->reset();
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->reset_all_resolved();
 
 		parent::tearDown();
 	}
@@ -1013,12 +1028,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Arrange the WPCOM connection.
 		// Make it not connected.
 		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
+			->expects( $this->atLeastOnce() )
 			->method( 'is_connected' )
-			->willReturn( false );
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'has_connected_owner' )
 			->willReturn( false );
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
