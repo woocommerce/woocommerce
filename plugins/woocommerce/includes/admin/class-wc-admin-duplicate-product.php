@@ -190,7 +190,8 @@ class WC_Admin_Duplicate_Product {
 		 */
 		if ( ! apply_filters( 'woocommerce_duplicate_product_exclude_children', false, $product ) && $product->is_type( ProductType::VARIABLE ) ) {
 			foreach ( $product->get_children() as $child_id ) {
-				$child           = wc_get_product( $child_id );
+				$child = wc_get_product( $child_id );
+				$child->read_meta_data();
 				$child_duplicate = clone $child;
 				$child_duplicate->set_parent_id( $duplicate->get_id() );
 				$child_duplicate->set_id( 0 );

@@ -152,23 +152,6 @@ abstract class WC_Data {
 	}
 
 	/**
-	 * When the object is cloned, make sure meta is duplicated correctly.
-	 *
-	 * @since 3.0.2
-	 */
-	public function __clone() {
-		$this->maybe_read_meta_data();
-		if ( ! empty( $this->meta_data ) ) {
-			foreach ( $this->meta_data as $array_key => $meta ) {
-				$this->meta_data[ $array_key ] = clone $meta;
-				if ( ! empty( $meta->id ) ) {
-					$this->meta_data[ $array_key ]->id = null;
-				}
-			}
-		}
-	}
-
-	/**
 	 * Get the data store.
 	 *
 	 * @since  3.0.0
@@ -738,7 +721,20 @@ abstract class WC_Data {
 	 * @param int $id ID.
 	 */
 	public function set_id( $id ) {
-		$this->id = absint( $id );
+		$id = absint( $id );
+		if ( $id !== $this->id ) {
+			if ( 0 !== $this->id ) {
+				if ( ! empty( $this->meta_data ) ) {
+					foreach ( $this->meta_data as $array_key => $meta ) {
+						$this->meta_data[ $array_key ] = clone $meta;
+						if ( ! empty( $meta->id ) ) {
+							$this->meta_data[ $array_key ]->id = null;
+						}
+					}
+				}
+			}
+			$this->id = $id;
+		}
 	}
 
 	/**
