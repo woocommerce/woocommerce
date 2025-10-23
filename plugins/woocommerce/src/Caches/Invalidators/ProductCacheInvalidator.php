@@ -39,31 +39,45 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	 * @return void
 	 */
 	private function register_hooks(): void {
-		// Product lifecycle hooks.
-		add_action( 'woocommerce_new_product', array( $this, 'on_product_created' ), 10, 2 );
-		add_action( 'woocommerce_update_product', array( $this, 'on_product_updated' ), 10, 2 );
-		add_action( 'woocommerce_delete_product', array( $this, 'on_product_deleted' ), 10, 2 );
-		add_action( 'woocommerce_trash_product', array( $this, 'on_product_trashed' ), 10, 1 );
-		add_action( 'woocommerce_untrash_product', array( $this, 'on_product_untrashed' ), 10, 1 );
+		add_action( 'woocommerce_update_product', array( $this, 'on_product_saved' ), 10, 2 );
 
-		// Product variation hooks.
-		add_action( 'woocommerce_new_product_variation', array( $this, 'on_product_variation_created' ), 10, 2 );
-		add_action( 'woocommerce_update_product_variation', array( $this, 'on_product_variation_updated' ), 10, 2 );
+		add_action( 'delete_post', array( $this, 'on_post_deleted' ), 10, 2 );
+		add_action( 'wp_trash_post', array( $this, 'on_post_trashed' ), 10, 1 );
+		add_action( 'untrashed_post', array( $this, 'on_post_untrashed' ), 10, 1 );
+
+		add_action( 'woocommerce_update_product_variation', array( $this, 'on_product_variation_saved' ), 10, 2 );
 		add_action( 'woocommerce_delete_product_variation', array( $this, 'on_product_variation_deleted' ), 10, 1 );
 	}
 
 	/**
-	 * Handle new product creation.
+	 * Handle product being saved (both create and update).
+	 *
+	 * This hook fires for both new products and product updates.
+	 * We determine if it's a new product by checking if the date_created
+	 * is very recent (within the last 2 seconds).
 	 *
 	 * @param int         $product_id The product ID.
 	 * @param \WC_Product $product The product object.
 	 *
 	 * @return void
 	 */
-	public function on_product_created( int $product_id, $product ): void {
+	public function on_product_saved( int $product_id, $product ): void {
+		$date_created  = $product->get_date_created();
+		$date_modified = $product->get_date_modified();
+		
+		// Determine if this is a new product (created within the last 2 seconds).
+		$is_new_product = false;
+		if ( $date_created && $date_modified ) {
+			$created_timestamp  = $date_created->getTimestamp();
+			$modified_timestamp = $date_modified->getTimestamp();
+			$is_new_product     = abs( $created_timestamp - $modified_timestamp ) <= 2;
+		}
+
+		$operation = $is_new_product ? 'create' : 'update';
+
 		$this->invalidate(
 			$product_id,
-			'create',
+			$operation,
 			array(
 				'product' => $product,
 			)
@@ -71,130 +85,123 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	}
 
 	/**
-	 * Handle product update.
+	 * Handle post deletion.
 	 *
-	 * @param int         $product_id The product ID.
-	 * @param \WC_Product $product The product object.
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post The post object.
 	 *
 	 * @return void
 	 */
-	public function on_product_updated( int $product_id, $product ): void {
-		$this->invalidate(
-			$product_id,
-			'update',
-			array(
-				'product' => $product,
-			)
-		);
-	}
+	public function on_post_deleted( int $post_id, $post ): void {
+		if ( ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
 
-	/**
-	 * Handle product deletion.
-	 *
-	 * @param int              $product_id The product ID.
-	 * @param \WC_Product|null $product The product object (may not be available).
-	 *
-	 * @return void
-	 */
-	public function on_product_deleted( int $product_id, $product = null ): void {
+		$product = wc_get_product( $post_id );
+
 		$this->invalidate(
-			$product_id,
+			$post_id,
 			'delete',
 			array(
-				'product' => $product,
+				'product'   => $product,
+				'post_type' => $post->post_type,
 			)
 		);
 	}
 
 	/**
-	 * Handle product being trashed.
+	 * Handle post being trashed.
 	 *
-	 * @param int $product_id The product ID.
+	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 */
-	public function on_product_trashed( int $product_id ): void {
+	public function on_post_trashed( int $post_id ): void {
+		$post_type = get_post_type( $post_id );
+
+		if ( ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
 		$this->invalidate(
-			$product_id,
+			$post_id,
 			'trash',
 			array(
-				'product_id' => $product_id,
+				'product_id' => $post_id,
+				'post_type'  => $post_type,
 			)
 		);
 	}
 
 	/**
-	 * Handle product being untrashed.
+	 * Handle post being untrashed.
 	 *
-	 * @param int $product_id The product ID.
+	 * @param int $post_id The post ID.
 	 *
 	 * @return void
 	 */
-	public function on_product_untrashed( int $product_id ): void {
+	public function on_post_untrashed( int $post_id ): void {
+		$post_type = get_post_type( $post_id );
+
+		// Only handle product post types.
+		if ( ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
+			return;
+		}
+
 		$this->invalidate(
-			$product_id,
+			$post_id,
 			'untrash',
 			array(
-				'product_id' => $product_id,
+				'product_id' => $post_id,
+				'post_type'  => $post_type,
 			)
 		);
 	}
 
 	/**
-	 * Handle new product variation creation.
+	 * Handle product variation being saved (both create and update).
+	 *
+	 * This hook fires for both new variations and variation updates.
+	 * We determine if it's a new variation by checking if the date_created
+	 * is very recent (within the last 2 seconds).
 	 *
 	 * @param int         $variation_id The variation ID.
 	 * @param \WC_Product $variation The variation object.
 	 *
 	 * @return void
 	 */
-	public function on_product_variation_created( int $variation_id, $variation ): void {
-		$this->invalidate(
-			$variation_id,
-			'create',
-			array(
-				'product'      => $variation,
-				'is_variation' => true,
-				'parent_id'    => $variation->get_parent_id(),
-			)
-		);
-
-		// Also invalidate parent product.
-		if ( $parent_id = $variation->get_parent_id() ) {
-			$this->invalidate(
-				$parent_id,
-				'variation_created',
-				array(
-					'variation_id' => $variation_id,
-				)
-			);
+	public function on_product_variation_saved( int $variation_id, $variation ): void {
+		$date_created  = $variation->get_date_created();
+		$date_modified = $variation->get_date_modified();
+		
+		// Determine if this is a new variation (created within the last 2 seconds).
+		$is_new_variation = false;
+		if ( $date_created && $date_modified ) {
+			$created_timestamp  = $date_created->getTimestamp();
+			$modified_timestamp = $date_modified->getTimestamp();
+			$is_new_variation   = abs( $created_timestamp - $modified_timestamp ) <= 2;
 		}
-	}
 
-	/**
-	 * Handle product variation update.
-	 *
-	 * @param int         $variation_id The variation ID.
-	 * @param \WC_Product $variation The variation object.
-	 *
-	 * @return void
-	 */
-	public function on_product_variation_updated( int $variation_id, $variation ): void {
+		$operation = $is_new_variation ? 'create' : 'update';
+
 		$this->invalidate(
 			$variation_id,
-			'update',
+			$operation,
 			array(
-				'product'      => $variation,
-				'is_variation' => true,
-				'parent_id'    => $variation->get_parent_id(),
+				'product'         => $variation,
+				'is_variation'    => true,
+				'is_new_product'  => $is_new_variation,
+				'parent_id'       => $variation->get_parent_id(),
 			)
 		);
 
 		// Also invalidate parent product.
 		if ( $parent_id = $variation->get_parent_id() ) {
+			$parent_operation = $is_new_variation ? 'variation_created' : 'variation_updated';
+			
 			$this->invalidate(
 				$parent_id,
-				'variation_updated',
+				$parent_operation,
 				array(
 					'variation_id' => $variation_id,
 				)
@@ -210,7 +217,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	 * @return void
 	 */
 	public function on_product_variation_deleted( int $variation_id ): void {
-		// Try to get the parent ID before the variation is fully deleted.
 		$variation = wc_get_product( $variation_id );
 		$parent_id = $variation ? $variation->get_parent_id() : null;
 
@@ -257,8 +263,12 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		 * @param string     $operation The operation that triggered the invalidation
 		 *                              (create, update, delete, trash, untrash, variation_*).
 		 * @param mixed      $context Optional additional context about the invalidation.
-		 *                           May include 'product' (WC_Product object), 'changes' (array),
-		 *                           'is_variation' (bool), 'parent_id' (int), 'variation_id' (int).
+		 *                           May include:
+		 *                           - 'product' (WC_Product object)
+		 *                           - 'is_variation' (bool) - Whether this is a variation
+		 *                           - 'parent_id' (int) - Parent product ID for variations
+		 *                           - 'variation_id' (int) - Variation ID when parent is notified
+		 *                           - 'post_type' (string) - The post type (for delete/trash/untrash)
 		 */
 		do_action( 'woocommerce_product_cache_invalidated', $product_id, $operation, $context );
 	}
