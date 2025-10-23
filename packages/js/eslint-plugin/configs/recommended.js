@@ -58,8 +58,6 @@ module.exports = {
 				ignoreRestSiblings: true,
 			},
 		],
-		'@typescript-eslint/no-floating-promises': 'error',
-		'@typescript-eslint/require-await': 'error',
 		'react/react-in-jsx-scope': 'off',
 	},
 	settings: {
@@ -80,9 +78,15 @@ module.exports = {
 		},
 		{
 			files: [ '*.ts', '*.tsx' ],
+			parser: '@typescript-eslint/parser',
+			parserOptions: {
+				project: true,
+			},
 			rules: {
 				// Making use of typescript no-shadow instead.
 				'no-shadow': 'off',
+				'@typescript-eslint/no-floating-promises': 'error',
+				'@typescript-eslint/require-await': 'error',
 			},
 		},
 		{
