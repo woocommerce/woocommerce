@@ -182,7 +182,7 @@ trait RestApiCache {
 			return $response;
 		}
 
-		$cached_response = $this->get_cached_response( $request, $config );
+		$cached_response = $this->get_cached_response( $request, $cached_config );
 
 		if ( $cached_response ) {
 			$cached_response->header( 'X-WC-Cache', 'HIT' );
@@ -191,7 +191,7 @@ trait RestApiCache {
 
 		$authoritative_response = call_user_func( $callback, $request );
 
-		return $this->maybe_cache_response( $request, $authoritative_response, $config );
+		return $this->maybe_cache_response( $request, $authoritative_response, $cached_config );
 	}
 
 	/**
@@ -269,12 +269,12 @@ trait RestApiCache {
 	 * Only caches responses with 2xx status codes. Always adds the X-WC-Cache header
 	 * with value MISS if the response was cached, or SKIP if it was not cached.
 	 *
-	 * @param WP_REST_Request            $request  The request object.
-	 * @param WP_REST_Response|\WP_Error $response The response to potentially cache.
-	 * @param array                      $config   Caching configuration.
+	 * @param WP_REST_Request            $request       The request object.
+	 * @param WP_REST_Response|\WP_Error $response      The response to potentially cache.
+	 * @param array                      $cached_config Built caching configuration from build_cache_config().
 	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
 	 */
-	private function maybe_cache_response( WP_REST_Request $request, $response, array $config ) {
+	private function maybe_cache_response( WP_REST_Request $request, $response, array $cached_config ) {
 		if ( ! ( $response instanceof WP_REST_Response ) ) {
 			return $response;
 		}
@@ -283,24 +283,20 @@ trait RestApiCache {
 
 		$status = $response->get_status();
 		if ( $status >= 200 && $status <= 299 ) {
-			$cached_config = $this->build_cache_config( $request, $config );
+			$data       = $response->get_data();
+			$entity_ids = call_user_func( $cached_config['extract_entity_ids'], $data, $request );
 
-			if ( ! is_null( $cached_config ) ) {
-				$data       = $response->get_data();
-				$entity_ids = call_user_func( $cached_config['extract_entity_ids'], $data, $request );
+			$this->store_cached_response(
+				$cached_config['cache_key'],
+				$data,
+				$status,
+				$cached_config['entity_type'],
+				$entity_ids,
+				$cached_config['cache_ttl'],
+				$cached_config['relevant_hooks']
+			);
 
-				$this->store_cached_response(
-					$cached_config['cache_key'],
-					$data,
-					$status,
-					$cached_config['entity_type'],
-					$entity_ids,
-					$cached_config['cache_ttl'],
-					$cached_config['relevant_hooks']
-				);
-
-				$cached = true;
-			}
+			$cached = true;
 		}
 
 		$response->header( 'X-WC-Cache', $cached ? 'MISS' : 'SKIP' );
@@ -472,17 +468,11 @@ trait RestApiCache {
 	 * Get a cached response, but only if it's valid
 	 * (otherwise the cached response will be invalidated).
 	 *
-	 * @param WP_REST_Request $request The request object.
-	 * @param array           $config  Caching configuration.
+	 * @param WP_REST_Request $request       The request object.
+	 * @param array           $cached_config Built caching configuration from build_cache_config().
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
-	protected function get_cached_response( WP_REST_Request $request, array $config ): ?WP_REST_Response {
-		$cached_config = $this->build_cache_config( $request, $config );
-
-		if ( is_null( $cached_config ) ) {
-			return null;
-		}
-
+	protected function get_cached_response( WP_REST_Request $request, array $cached_config ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];
 		$entity_type    = $cached_config['entity_type'];
 		$cache_ttl      = $cached_config['cache_ttl'];
