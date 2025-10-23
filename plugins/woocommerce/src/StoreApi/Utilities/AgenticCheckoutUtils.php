@@ -340,17 +340,6 @@ class AgenticCheckoutUtils {
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
 	public static function is_authorized( $request = null ) {
-		// Check if feature is enabled.
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
-			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_disabled',
-				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
-				array( 'status' => 403 )
-			);
-		}
-
-		// If no request provided, cannot validate (should not happen in normal flow).
 		if ( null === $request ) {
 			return new \WP_Error(
 				'woocommerce_rest_agentic_checkout_invalid_request',
