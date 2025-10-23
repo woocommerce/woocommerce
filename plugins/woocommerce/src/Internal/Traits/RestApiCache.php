@@ -87,12 +87,9 @@ use WP_REST_Response;
  *     }
  * }
  *
- * Note: we define an "entity" as an object that is uniquely identified by an entity type
- *       and entity id pair, and provides information to be included in the response.
- *
  * Override these methods in your controller as needed:
  * - get_default_entity_type(): Default entity type for endpoints without explicit config.
- * - get_relevant_filters(): Filter names to track for cache invalidation.
+ * - get_hooks_relevant_to_caching(): Hook names to track for cache invalidation.
  * - get_cache_ttl(): TTL for cached outputs in seconds.
  * - must_cache(): Whether to cache a specific request or not.
  * - extract_entity_ids(): Extract entity IDs from response data.
@@ -145,7 +142,7 @@ trait RestApiCache {
 	 *                           - cache_ttl: int (defaults to HOUR_IN_SECONDS).
 	 *                           - extract_entity_ids: callable (defaults to $this->extract_entity_ids).
 	 *                           - must_cache: callable (defaults to $this->must_cache).
-	 *                           - relevant_hooks: array (defaults to $this->get_relevant_hooks()).
+	 *                           - relevant_hooks: array (defaults to $this->get_hooks_relevant_to_caching()).
 	 * @return callable Wrapped callback.
 	 */
 	protected function with_cache( callable $callback, array $config = array() ): callable {
