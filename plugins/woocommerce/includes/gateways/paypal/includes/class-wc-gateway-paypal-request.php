@@ -644,6 +644,9 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
+		// Make sure the country code is in the correct format.
+		$country = strtoupper( substr( $country, 2 ) );
+
 		// Postal code is typically required, but not always. The create-order request
 		// will fail if it is missing for a country that requires it.
 		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
