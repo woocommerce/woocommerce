@@ -412,7 +412,7 @@ class WC_Frontend_Scripts {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 
 			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
 			}
 		}
 	}

@@ -361,10 +361,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				if ( isset( $script['legacy_handle'] ) ) {
 					wp_register_script(
 						$script['legacy_handle'],
-						$script['path'],
-						$script['dependencies'] ?? array(),
+						false,
+						array( $script['handle'] ),
 						$script['version'] ?? null,
-						$script['args'] ?? array( 'in_footer' => false )
+						true
 					);
 				}
 			}
