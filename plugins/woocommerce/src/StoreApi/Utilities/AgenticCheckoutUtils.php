@@ -353,7 +353,7 @@ class AgenticCheckoutUtils {
 		if ( empty( $auth_header ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_agentic_checkout_missing_auth',
-				__( 'Missing authorization header.', 'woocommerce' ),
+				__( 'Invalid authorization.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
@@ -362,7 +362,7 @@ class AgenticCheckoutUtils {
 		if ( ! preg_match( '/^Bearer\s+(.+)$/i', $auth_header, $matches ) ) {
 			return new \WP_Error(
 				'woocommerce_rest_agentic_checkout_invalid_auth_format',
-				__( 'Invalid authorization header format. Expected: Bearer <token>', 'woocommerce' ),
+				__( 'Invalid authorization.', 'woocommerce' ),
 				array( 'status' => 401 )
 			);
 		}
