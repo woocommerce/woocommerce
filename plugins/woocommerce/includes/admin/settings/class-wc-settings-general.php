@@ -61,7 +61,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			if ( ! $address_autocomplete_available ) {
 				// translators: %s: WooPayments URL.
-				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'To use this feature, you need to install an address provider such as <a href="%s">WooPayments</a>.', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
+				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'Requires a plugin with predictive address search support (e.g. <a href="%s" target="_blank">WooPayments</a>).', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
 			}
 
 			$enable_address_autocomplete_setting = array(
@@ -405,11 +405,15 @@ class WC_Settings_General extends WC_Settings_Page {
 	public function output() {
 		parent::output();
 
-		wc_enqueue_js(
+		$handle = 'wc-admin-settings-general';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"
-			var preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
-			var autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
-			var preferredProviderRow = null;
+			const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
+			const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
+			let preferredProviderRow = null;
 			if ( preferredProviderInput ) {
 				preferredProviderRow = preferredProviderInput.closest( 'tr' );
 			}

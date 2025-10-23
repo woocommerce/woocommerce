@@ -357,7 +357,7 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 		parent::output();
 
 		// The following code toggles disabled state on the account options based on other values.
-		wc_enqueue_js(
+		$script =
 			'
 			// Move tooltips to label element. This is not possible through the settings field API so this is a workaround
 			// until said API is refactored.
@@ -397,12 +397,11 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					});
 				}
 			}
-		'
-		);
+		';
 
 		// If the checkout block is not default, delayed account creation is always disabled. Otherwise its based on other settings.
 		if ( CartCheckoutUtils::is_checkout_block_default() ) {
-			wc_enqueue_js(
+			$script .=
 				'
 				// Guest checkout should toggle off some options.
 				const guestCheckout = document.getElementById("woocommerce_enable_guest_checkout");
@@ -418,9 +417,13 @@ class WC_Settings_Accounts extends WC_Settings_Page {
 					});
 					guestCheckout.dispatchEvent(new Event("change")); // Initial state
 				}
-			'
-			);
+			';
 		}
+
+		$handle = 'wc-admin-settings-accounts';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script( $handle, $script );
 	}
 }
 
