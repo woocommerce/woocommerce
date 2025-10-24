@@ -63,7 +63,10 @@ export const PaymentGatewayListItem = ( {
 
 	const determineGatewayStatus = () => {
 		// If the gateway needs onboarding and is not supported, show the not_supported status.
-		if ( gatewayNeedsOnboarding && ! gateway.onboarding.state.supported ) {
+		if (
+			gatewayNeedsOnboarding &&
+			! gateway.onboarding?.state?.supported
+		) {
 			return 'not_supported';
 		}
 
@@ -104,10 +107,12 @@ export const PaymentGatewayListItem = ( {
 		// If the gateway needs onboarding and is not supported, show the not_supported message.
 		if (
 			gatewayNeedsOnboarding &&
-			! gateway.onboarding.state.supported &&
-			gateway.onboarding.messages.not_supported
+			! gateway.onboarding?.state?.supported
 		) {
-			return <p>{ gateway.onboarding.messages.not_supported }</p>;
+			const msg = gateway.onboarding?.messages?.not_supported;
+			if ( msg ) {
+				return <p>{ msg }</p>;
+			}
 		}
 
 		return undefined;
