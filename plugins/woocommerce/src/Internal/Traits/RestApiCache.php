@@ -174,7 +174,7 @@ trait RestApiCache {
 	 * @param array           $config   Caching configuration specified for the endpoint.
 	 * @return WP_REST_Response|\WP_Error The response.
 	 */
-	protected function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
+	private function handle_cacheable_request( WP_REST_Request $request, callable $callback, array $config ) {
 		if ( is_null( $this->entity_versions_cache ) ) {
 			return call_user_func( $callback, $request );
 		}
@@ -574,7 +574,7 @@ trait RestApiCache {
 	 * @param array $filter_names Array of hook names to track.
 	 * @return string Hooks hash.
 	 */
-	protected function generate_hooks_hash( array $filter_names ): string {
+	private function generate_hooks_hash( array $filter_names ): string {
 		if ( empty( $filter_names ) ) {
 			return '';
 		}
@@ -622,7 +622,7 @@ trait RestApiCache {
 	 * @param array           $cached_config Built caching configuration from build_cache_config().
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
-	protected function get_cached_response( WP_REST_Request $request, array $cached_config ): ?WP_REST_Response {
+	private function get_cached_response( WP_REST_Request $request, array $cached_config ): ?WP_REST_Response {
 		$cache_key      = $cached_config['cache_key'];
 		$entity_type    = $cached_config['entity_type'];
 		$cache_ttl      = $cached_config['cache_ttl'];
@@ -684,7 +684,7 @@ trait RestApiCache {
 	 * @param array  $relevant_hooks   Hook names to track for invalidation.
 	 * @param array  $headers          Response headers to cache.
 	 */
-	protected function store_cached_response( string $cache_key, array $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $headers = array() ): void {
+	private function store_cached_response( string $cache_key, array $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl, array $relevant_hooks, array $headers = array() ): void {
 		$entity_versions = array();
 		foreach ( $entity_ids as $entity_id ) {
 			$version = $this->entity_versions_cache->get_entity_version( $entity_type, $entity_id );
