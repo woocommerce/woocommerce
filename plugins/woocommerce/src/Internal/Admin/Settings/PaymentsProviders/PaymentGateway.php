@@ -48,6 +48,8 @@ class PaymentGateway {
 	 * @return array The payment gateway provider details.
 	 */
 	public function get_details( WC_Payment_Gateway $gateway, int $order = 0, string $country_code = '' ): array {
+		$onboarding_supported = $this->is_onboarding_supported( $gateway, $country_code ) ?? true; // Assume supported if unknown.
+
 		return array(
 			'id'          => $gateway->id,
 			'_order'      => $order,
@@ -72,9 +74,13 @@ class PaymentGateway {
 			'onboarding'  => array(
 				'type'                        => self::ONBOARDING_TYPE_EXTERNAL,
 				'state'                       => array(
+					'supported' => $onboarding_supported,
 					'started'   => $this->is_onboarding_started( $gateway ),
 					'completed' => $this->is_onboarding_completed( $gateway ),
 					'test_mode' => $this->is_in_test_mode_onboarding( $gateway ),
+				),
+				'messages'                     => array(
+					'not_supported' => ! $onboarding_supported ? $this->get_onboarding_not_supported_message( $gateway, $country_code ) : null,
 				),
 				'_links'                      => array(
 					'onboard' => array(
@@ -412,6 +418,87 @@ class PaymentGateway {
 
 		// Fall back to assuming that it is connected. This is the safest option.
 		return true;
+	}
+
+	/**
+	 * Check if the payment gateway supports the current store state for onboarding.
+	 *
+	 * Most of the time the current business location should be the main factor, but could also
+	 * consider other store settings like currency.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool|null True if the payment gateway supports onboarding, false otherwise.
+	 *                   If the payment gateway does not provide the information,
+	 *                   we will return null to indicate that we don't know.
+	 */
+	public function is_onboarding_supported( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?bool {
+		try {
+			if ( is_callable( array( $payment_gateway, 'is_onboarding_supported' ) ) ) {
+				return wc_string_to_bool(
+					call_user_func_array(
+						array( $payment_gateway, 'is_onboarding_supported' ),
+						array( 'country_code' => $country_code ),
+					)
+				);
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine if gateway supports onboarding: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'country'   => $country_code,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that we don't know if the gateway supports onboarding.
+		return null;
+	}
+
+	/**
+	 * Get the message to show when the payment gateway does not support onboarding.
+	 *
+	 * @see self::is_onboarding_supported()
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return string|null The message to show when the payment gateway does not support onboarding,
+	 *                     or null if no specific message should be provided.
+	 */
+	public function get_onboarding_not_supported_message( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?string {
+		try {
+			if ( is_callable( array( $payment_gateway, 'get_onboarding_not_supported_message' ) ) ) {
+				$message = call_user_func_array(
+					array( $payment_gateway, 'get_onboarding_not_supported_message' ),
+					array( 'country_code' => $country_code ),
+				);
+				if ( is_string( $message ) && ! empty( $message ) ) {
+					return sanitize_textarea_field( trim( $message ) );
+				}
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to determine the gateway onboarding not supported message: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'country'   => $country_code,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+		}
+
+		// If we reach here, just assume that no specific message should be provided.
+		return null;
 	}
 
 	/**
