@@ -15,10 +15,10 @@ import type {
  */
 import { PaymentGatewayListItem } from '../payment-gateway-list-item';
 
-// Define the enum value directly to avoid importing from @woocommerce/data
+// Define the enum value directly to avoid importing from @woocommerce/data.
 const PaymentsProviderTypeGateway = 'gateway' as const;
 
-// Mock dependencies
+// Mock dependencies.
 jest.mock( '@woocommerce/onboarding', () => ( {
 	WooPaymentsMethodsLogos: () => <div>WooPaymentsMethodsLogos</div>,
 } ) );
@@ -118,7 +118,7 @@ jest.mock( '~/utils/admin-settings', () => ( {
 	WC_ASSET_URL: 'https://localhost/wp-content/plugins/woocommerce/assets/',
 } ) );
 
-// Helper function to create a mock gateway
+// Helper function to create a mock gateway.
 const createMockGateway = (
 	overrides: Partial< PaymentGatewayProvider > = {}
 ): PaymentGatewayProvider => {
@@ -1052,7 +1052,7 @@ describe( 'PaymentGatewayListItem', () => {
 	} );
 
 	describe( 'Props Handling', () => {
-		it( 'passes installingPlugin to child components', () => {
+		it( 'renders without error when installingPlugin prop is provided', () => {
 			const gateway = createMockGateway( {
 				state: {
 					enabled: false,
@@ -1070,13 +1070,13 @@ describe( 'PaymentGatewayListItem', () => {
 				/>
 			);
 
-			// CompleteSetupButton should be present when gateway needs onboarding
+			// Verify component renders successfully with installingPlugin prop.
 			expect(
 				getByTestId( 'complete-setup-button' )
 			).toBeInTheDocument();
 		} );
 
-		it( 'passes acceptIncentive callback to child components', () => {
+		it( 'renders without error when acceptIncentive callback is provided', () => {
 			const acceptIncentive = jest.fn();
 			const gateway = createMockGateway( {
 				_incentive: {
@@ -1103,12 +1103,11 @@ describe( 'PaymentGatewayListItem', () => {
 				/>
 			);
 
-			// The acceptIncentive callback is passed to child components
-			// This test verifies the component accepts the prop without error
+			// Verify component renders successfully and doesn't call callback during render.
 			expect( acceptIncentive ).not.toHaveBeenCalled();
 		} );
 
-		it( 'passes setIsOnboardingModalOpen callback to child components', () => {
+		it( 'renders without error when setIsOnboardingModalOpen callback is provided', () => {
 			const setIsOnboardingModalOpen = jest.fn();
 			const gateway = createMockGateway();
 
@@ -1120,9 +1119,173 @@ describe( 'PaymentGatewayListItem', () => {
 				/>
 			);
 
-			// The setIsOnboardingModalOpen callback is passed to child components
-			// This test verifies the component accepts the prop without error
+			// Verify component renders successfully and doesn't call callback during render.
 			expect( setIsOnboardingModalOpen ).not.toHaveBeenCalled();
+		} );
+	} );
+
+	describe( 'Edge Cases and Error Conditions', () => {
+		it( 'handles missing gateway icon gracefully', () => {
+			const gateway = createMockGateway( {
+				icon: undefined,
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			const icon = container.querySelector(
+				'.woocommerce-list__item-image'
+			);
+			// Component should handle missing icon without crashing.
+			expect( icon ).not.toBeInTheDocument();
+		} );
+
+		it( 'handles missing description gracefully', () => {
+			const gateway = createMockGateway( {
+				description: undefined,
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should render without crashing when description is missing.
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
+		} );
+
+		it( 'handles gateway without _suggestion_id', () => {
+			const gateway = createMockGateway( {
+				_suggestion_id: undefined,
+			} );
+			const { queryByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Official badge should not be shown when _suggestion_id is undefined.
+			expect( queryByTestId( 'official-badge' ) ).not.toBeInTheDocument();
+		} );
+
+		it( 'handles gateway without incentive gracefully', () => {
+			const gateway = createMockGateway( {
+				_incentive: undefined,
+			} );
+			const { getByTestId, queryByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Should show regular status badge, not incentive badge.
+			expect( getByTestId( 'status-badge' ) ).toBeInTheDocument();
+			expect(
+				queryByTestId( 'incentive-badge' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'handles null onboarding messages gracefully', () => {
+			const gateway = createMockGateway( {
+				onboarding: {
+					state: {
+						supported: true,
+						started: false,
+						completed: false,
+						test_mode: false,
+					},
+					messages: {
+						not_supported: null,
+					},
+					_links: {
+						onboard: { href: '/onboard' },
+						reset: { href: '/reset' },
+					},
+					recommended_payment_methods: [],
+					type: 'standard',
+				},
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should render without crashing when messages are null.
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
+		} );
+
+		it( 'handles empty supports array', () => {
+			const gateway = createMockGateway( {
+				supports: [],
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Recurring payments icon should not be shown.
+			const recurringIcon = container.querySelector(
+				'.woocommerce-list__item-recurring-payments-icon'
+			);
+			expect( recurringIcon ).not.toBeInTheDocument();
+		} );
+
+		it( 'handles undefined supports array', () => {
+			const gateway = createMockGateway( {
+				supports: undefined,
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should render without crashing when supports is undefined.
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
+		} );
+
+		it( 'handles conflicting state flags gracefully', () => {
+			const gateway = createMockGateway( {
+				state: {
+					enabled: true,
+					account_connected: false,
+					needs_setup: true,
+					test_mode: true,
+					dev_mode: false,
+				},
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should prioritize status determination without crashing.
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
 		} );
 	} );
 } );
