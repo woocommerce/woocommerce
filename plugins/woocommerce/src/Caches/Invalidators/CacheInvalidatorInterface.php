@@ -13,6 +13,13 @@ namespace Automattic\WooCommerce\Caches\Invalidators;
 interface CacheInvalidatorInterface {
 
 	/**
+	 * Operation constants.
+	 */
+	const OPERATION_CREATE = 'create';
+	const OPERATION_UPDATE = 'update';
+	const OPERATION_DELETE = 'delete';
+
+	/**
 	 * Invalidate cache for a specific entity.
 	 *
 	 * @param int|string $entity_id The ID of the entity to invalidate.

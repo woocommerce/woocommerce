@@ -74,7 +74,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			$is_new_product     = abs( $created_timestamp - $modified_timestamp ) <= 2;
 		}
 
-		$operation = $is_new_product ? 'create' : 'update';
+		$operation = $is_new_product ? self::OPERATION_CREATE : self::OPERATION_UPDATE;
 
 		$this->invalidate(
 			$product_id,
@@ -102,7 +102,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 
 		$this->invalidate(
 			$post_id,
-			'delete',
+			self::OPERATION_DELETE,
 			array(
 				'product'   => $product,
 				'post_type' => $post->post_type,
@@ -126,7 +126,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 
 		$this->invalidate(
 			$post_id,
-			'trash',
+			self::OPERATION_UPDATE,
 			array(
 				'product_id' => $post_id,
 				'post_type'  => $post_type,
@@ -151,7 +151,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 
 		$this->invalidate(
 			$post_id,
-			'untrash',
+			self::OPERATION_UPDATE,
 			array(
 				'product_id' => $post_id,
 				'post_type'  => $post_type,
@@ -170,7 +170,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	public function on_product_variation_saved( int $variation_id, $variation ): void {
 		$this->invalidate(
 			$variation_id,
-			'update',
+			self::OPERATION_UPDATE,
 			array(
 				'product'   => $variation,
 				'parent_id' => $variation->get_parent_id(),
@@ -181,7 +181,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		if ( $parent_id = $variation->get_parent_id() ) {
 			$this->invalidate(
 				$parent_id,
-				'variation_updated',
+				self::OPERATION_UPDATE,
 				array(
 					'variation_id' => $variation_id,
 				)
@@ -200,7 +200,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	public function on_product_variation_created( int $variation_id, $variation ): void {
 		$this->invalidate(
 			$variation_id,
-			'create',
+			self::OPERATION_CREATE,
 			array(
 				'product'   => $variation,
 				'parent_id' => $variation->get_parent_id(),
@@ -211,7 +211,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		if ( $parent_id = $variation->get_parent_id() ) {
 			$this->invalidate(
 				$parent_id,
-				'variation_updated',
+				self::OPERATION_UPDATE,
 				array(
 					'variation_id' => $variation_id,
 				)
@@ -232,7 +232,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 
 		$this->invalidate(
 			$variation_id,
-			'delete',
+			self::OPERATION_DELETE,
 			array(
 				'is_variation' => true,
 				'parent_id'    => $parent_id,
@@ -243,7 +243,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		if ( $parent_id ) {
 			$this->invalidate(
 				$parent_id,
-				'variation_deleted',
+				self::OPERATION_UPDATE,
 				array(
 					'variation_id' => $variation_id,
 				)
