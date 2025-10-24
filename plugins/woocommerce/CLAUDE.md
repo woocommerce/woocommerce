@@ -166,9 +166,50 @@ Key directories for testing:
 
 ## Instructions for Claude Code
 
-**Maintaining Your Documentation (CLAUDE.md files):**
+**CRITICAL: All CLAUDE.md files must be optimized for AI assistant use.**
 
-These CLAUDE.md files are **your working notes**, not official project documentation. They help you work more efficiently across sessions.
+These CLAUDE.md files are **internal working notes for Claude Code (AI assistant)**, not user-facing documentation. They enable faster, more accurate assistance across sessions.
+
+### Writing AI-Optimized Documentation
+
+**Structure for fast scanning:**
+1. **Quick Reference at top** - Most frequently needed info first
+2. **Tables for lookups** - Common errors, patterns, commands
+3. **Concise sections** - Remove verbose explanations
+4. **Code examples** - Correct vs incorrect patterns
+5. **Action-oriented** - "Do this" not "This is how it works"
+
+**Format guidelines:**
+- Use tables for comparisons, lookups, and decision trees
+- Keep sections under 20 lines when possible
+- Use bullet points over paragraphs
+- Include file paths with line numbers for references
+- Provide copy/paste ready commands
+- Avoid redundancy - link to other docs instead
+
+**Example structure:**
+```markdown
+# Module Name - Claude Code Documentation
+
+## Quick Reference: [Most Common Task]
+
+**Common patterns:**
+| Pattern | Code |
+|---------|------|
+| ... | ... |
+
+## Critical Rules
+- Rule 1
+- Rule 2
+
+## Known Issues
+- Issue + fix in one line
+
+## Related Documentation
+- Link to other CLAUDE.md files
+```
+
+### Maintaining Your Documentation (CLAUDE.md files)
 
 **After completing any task, ask the user:**
 
@@ -193,17 +234,19 @@ Use AskUserQuestion tool with these options:
 - Details that only apply to a single component/function
 
 **How to update:**
+- **Optimize for AI scanning** - Tables, bullet points, concise sections
 - **Keep it high-level** - Patterns and principles, not specifics
 - **Add to existing CLAUDE.md** if it fits the current scope
 - **Create new CLAUDE.md** in a module directory only if:
   - The module has broadly applicable patterns
   - It would bloat top-level docs unnecessarily
-- **Follow the established pattern**: Quick Reference → When to Use → Patterns → Examples
+- **Follow the pattern**: Quick Reference → Critical Rules → Patterns → Examples → Related Docs
 
 **Documentation locations:**
 - `CLAUDE.md` (this file) - PHP tests, plugin-level workflows
 - `client/admin/CLAUDE.md` - React/Jest/Webpack development
 - `client/admin/client/[module]/CLAUDE.md` - Module-specific patterns
+- `src/Internal/Admin/Settings/CLAUDE.md` - Settings backend patterns
 - Create new docs in other modules as needed
 
 ---
