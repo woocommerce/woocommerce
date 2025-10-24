@@ -1,6 +1,6 @@
 <?php
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
@@ -41,6 +41,16 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		( new PushTokenRestController() )->register_routes();
 
 		$this->user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
+
+	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		wp_set_current_user( 0 );
+		unset( $this->user_id );
+		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( array() );
+		parent::tearDown();
 	}
 
 	/**
@@ -858,8 +868,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test it cannot create a push token when push notifications are
 	 * disabled.
-	 *
-	 * @skip Temporarily skipped because PushNotifications::should_be_enabled() is hardcoded to return true for testing.
 	 */
 	public function test_it_cannot_create_push_token_when_push_notifications_disabled() {
 		wp_set_current_user( $this->user_id );

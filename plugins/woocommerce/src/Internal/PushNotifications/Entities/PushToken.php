@@ -132,8 +132,13 @@ class PushToken {
 	 * Sets the origin.
 	 *
 	 * @param string $origin The origin of the token, e.g. the app it came from.
+	 * @throws InvalidArgumentException If the origin is invalid.
 	 */
 	public function set_origin( string $origin ) {
+		if ( ! in_array( $origin, self::ORIGINS, true ) ) {
+			throw new InvalidArgumentException( 'Origin for PushToken is invalid.' );
+		}
+
 		$this->origin = $origin;
 	}
 

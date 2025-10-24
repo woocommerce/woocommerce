@@ -231,7 +231,8 @@ class PushTokenRestController extends RestApiControllerBase {
 
 		$has_valid_role = array_reduce(
 			PushNotifications::ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED,
-			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry
+			fn ( $carry, $role ) => $this->check_permission( $request, $role ) === true ? true : $carry,
+			false
 		);
 
 		if ( ! $has_valid_role ) {

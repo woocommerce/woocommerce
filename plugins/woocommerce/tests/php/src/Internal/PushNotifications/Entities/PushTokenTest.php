@@ -351,4 +351,35 @@ class PushTokenTest extends WC_Unit_Test_Case {
 
 		$push_token->set_platform( 'invalid' );
 	}
+
+	/**
+	 * Tests set_origin throws exception with invalid origin.
+	 */
+	public function test_it_throws_exception_when_setting_invalid_origin() {
+		$push_token = new PushToken();
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Origin for PushToken is invalid.' );
+
+		$push_token->set_origin( 'com.invalid.app' );
+	}
+
+	/**
+	 * Tests set_origin accepts valid origin values.
+	 */
+	public function test_it_accepts_valid_origin_values() {
+		$push_token = new PushToken();
+
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_ANDROID, $push_token->get_origin() );
+
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_ANDROID_DEV );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_ANDROID_DEV, $push_token->get_origin() );
+
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
+
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV );
+		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV, $push_token->get_origin() );
+	}
 }

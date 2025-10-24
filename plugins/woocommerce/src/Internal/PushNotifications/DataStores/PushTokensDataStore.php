@@ -39,7 +39,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			array(
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
-				'post_status' => 'publish',
+				'post_status' => 'private',
 				'meta_input'  => array(
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
@@ -128,7 +128,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				'ID'          => $push_token->get_id(),
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
-				'post_status' => 'publish',
+				'post_status' => 'private',
 				'meta_input'  => array(
 					'platform'    => $push_token->get_platform(),
 					'token'       => $push_token->get_token(),
@@ -185,7 +185,8 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 		return array_map(
 			function ( $meta ) {
-				$meta = array_filter( $meta ) ? array_filter( $meta ) : null;
+				$filtered_meta = array_filter( $meta, fn ( $meta ) => $meta || 0 === $meta );
+				$meta          = $filtered_meta ? $filtered_meta : null;
 				return $meta[0] ?? $meta;
 			},
 			get_post_meta( $push_token->get_id() )
@@ -340,7 +341,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					ON posts.ID = origin_meta.post_id
 					AND origin_meta.meta_key = 'origin'
 				WHERE posts.post_type = %s
-					AND posts.post_status = 'publish'
+					AND posts.post_status = 'private'
 					AND posts.post_author = %d
 					AND platform_meta.meta_value = %s
 					AND origin_meta.meta_value = %s

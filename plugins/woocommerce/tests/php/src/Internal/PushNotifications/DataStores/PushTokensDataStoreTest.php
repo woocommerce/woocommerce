@@ -23,13 +23,18 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$wpdb->query(
 			$wpdb->prepare(
-				"DELETE FROM {$wpdb->posts} WHERE post_type = %s",
+				"DELETE postmeta FROM {$wpdb->postmeta} postmeta
+				LEFT JOIN {$wpdb->posts} posts ON postmeta.post_id = posts.ID
+				WHERE posts.post_type = %s",
 				PushToken::POST_TYPE
 			)
 		);
 
 		$wpdb->query(
-			"DELETE FROM {$wpdb->postmeta} WHERE post_id NOT IN (SELECT ID FROM {$wpdb->posts})"
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->posts} WHERE post_type = %s",
+				PushToken::POST_TYPE
+			)
 		);
 
 		parent::tearDown();
@@ -52,6 +57,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $push_token->get_id() );
 		$this->assert_push_token_in_db( $push_token );
+
+		$post = get_post( $push_token->get_id() );
+		$this->assertEquals( 'private', $post->post_status );
 	}
 
 	/**
@@ -86,6 +94,9 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$data_store->update( $push_token );
 
 		$this->assert_push_token_in_db( $push_token );
+
+		$post = get_post( $push_token->get_id() );
+		$this->assertEquals( 'private', $post->post_status );
 	}
 
 	/**
@@ -159,7 +170,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 			array(
 				'post_title'  => 'Test Post',
 				'post_type'   => 'post',
-				'post_status' => 'publish',
+				'post_status' => 'private',
 			)
 		);
 
@@ -184,7 +195,7 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 			array(
 				'post_author' => 1,
 				'post_type'   => PushToken::POST_TYPE,
-				'post_status' => 'publish',
+				'post_status' => 'private',
 				'meta_input'  => array(
 					'platform' => PushToken::PLATFORM_IOS,
 					'token'    => 'test_token',
