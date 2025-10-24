@@ -130,7 +130,16 @@ class WooPayments extends PaymentGateway {
 						$onboarding_details['state']
 					);
 				}
-
+				// Merge any messages provided by the service.
+				if ( ! empty( $onboarding_details['messages'] ) && is_array( $onboarding_details['messages'] ) ) {
+					if ( ! isset( $details['onboarding']['messages'] ) || ! is_array( $details['onboarding']['messages'] ) ) {
+						$details['onboarding']['messages'] = array();
+					}
+					$details['onboarding']['messages'] = array_merge(
+						$details['onboarding']['messages'],
+						$onboarding_details['messages']
+					);
+				}
 				// The steps provided by the service override any existing steps.
 				if ( ! empty( $onboarding_details['steps'] ) && is_array( $onboarding_details['steps'] ) ) {
 					$details['onboarding']['steps'] = $onboarding_details['steps'];
@@ -320,6 +329,99 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return parent::is_in_dev_mode( $payment_gateway );
+	}
+
+	/**
+	 * Check if the payment gateway supports the current store state for onboarding.
+	 *
+	 * Most of the time the current business location should be the main factor, but could also
+	 * consider other store settings like currency.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool|null True if the payment gateway supports onboarding, false otherwise.
+	 *                   If the payment gateway does not provide the information,
+	 *                   we will return null to indicate that we don't know.
+	 */
+	public function is_onboarding_supported( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?bool {
+		$is_onboarding_supported = parent::is_onboarding_supported( $payment_gateway, $country_code );
+		if ( ! is_null( $is_onboarding_supported ) ) {
+			return $is_onboarding_supported;
+		}
+
+		// Without a country code to check against, we assume onboarding is supported to avoid blocking the user.
+		if ( empty( $country_code ) ) {
+			return true;
+		}
+
+		// Normalize the country code.
+		$country_code = strtoupper( $country_code );
+
+		// The payment gateway didn't provide the information. We will do it the hard way.
+		$supported_country_codes = $this->get_supported_country_codes();
+		// If we can't get the supported countries, we assume onboarding supported to avoid blocking the user.
+		if ( is_null( $supported_country_codes ) ) {
+			return true;
+		}
+
+		return in_array( $country_code, $supported_country_codes, true );
+	}
+
+	/**
+	 * Get the message to show when the payment gateway does not support onboarding.
+	 *
+	 * @see self::is_onboarding_supported()
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return string|null The message to show when the payment gateway does not support onboarding,
+	 *                     or null if no specific message should be provided.
+	 */
+	public function get_onboarding_not_supported_message( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?string {
+		$message = parent::get_onboarding_not_supported_message( $payment_gateway, $country_code );
+		if ( ! is_null( $message ) ) {
+			return $message;
+		}
+
+		return sprintf(
+			esc_html__( '%s is not supported in the selected business location.', 'woocommerce' ),
+			'WooPayments'
+		);
+	}
+
+	/**
+	 * Get the list of supported country codes for WooPayments.
+	 *
+	 * @return array|null The list of supported countries as ISO 3166-1 alpha-2 country codes.
+	 *                    The country codes are normalized in uppercase.
+	 *                    If the list cannot be retrieved, null is returned.
+	 */
+	public function get_supported_country_codes(): ?array {
+		try {
+			if ( class_exists( '\WC_Payments_Utils' ) &&
+				 is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+
+				$supported_country_codes = \WC_Payments_Utils::supported_countries();
+				if ( is_array( $supported_country_codes ) ) {
+					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
+				}
+			}
+		} catch ( Throwable $e ) {
+			// This is not a critical error, so we just ignore it.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WooPayments supported country codes list: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
+
+		return null;
 	}
 
 	/**
