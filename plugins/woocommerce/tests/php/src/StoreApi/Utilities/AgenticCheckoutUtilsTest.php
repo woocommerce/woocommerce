@@ -148,19 +148,19 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Enable the feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry with OpenAI token.
+		// Set up registry with OpenAI token (hashed).
 		$test_token = 'test_bearer_token_12345';
 		update_option(
 			'woocommerce_agentic_agent_registry',
 			array(
 				'openai' => array(
-					'bearer_token' => $test_token,
+					'bearer_token' => wp_hash_password( $test_token ),
 				),
 			),
 			false
 		);
 
-		// Create mock request with Authorization header.
+		// Create mock request with Authorization header (plaintext).
 		$request = new \WP_REST_Request();
 		$request->set_header( 'Authorization', 'Bearer ' . $test_token );
 
@@ -181,12 +181,12 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Enable the feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry with OpenAI token.
+		// Set up registry with OpenAI token (hashed).
 		update_option(
 			'woocommerce_agentic_agent_registry',
 			array(
 				'openai' => array(
-					'bearer_token' => 'correct_token',
+					'bearer_token' => wp_hash_password( 'correct_token' ),
 				),
 			),
 			false
@@ -297,7 +297,7 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Enable the feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry with multiple providers.
+		// Set up registry with multiple providers (hashed tokens).
 		$token_a = 'provider_a_token';
 		$token_b = 'provider_b_token';
 		update_option(
@@ -307,23 +307,23 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 					'enable_products_default' => 'yes',
 				),
 				'provider_a' => array(
-					'bearer_token' => $token_a,
+					'bearer_token' => wp_hash_password( $token_a ),
 				),
 				'provider_b' => array(
-					'bearer_token' => $token_b,
+					'bearer_token' => wp_hash_password( $token_b ),
 				),
 			),
 			false
 		);
 
-		// Test with provider A token.
+		// Test with provider A token (plaintext).
 		$request = new \WP_REST_Request();
 		$request->set_header( 'Authorization', 'Bearer ' . $token_a );
 		$result = AgenticCheckoutUtils::is_authorized( $request );
 		$this->assertTrue( $result );
 		$this->assertEquals( 'provider_a', WC()->session->get( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID ) );
 
-		// Test with provider B token.
+		// Test with provider B token (plaintext).
 		$request = new \WP_REST_Request();
 		$request->set_header( 'Authorization', 'Bearer ' . $token_b );
 		$result = AgenticCheckoutUtils::is_authorized( $request );
@@ -338,19 +338,19 @@ class AgenticCheckoutUtilsTest extends \WC_Unit_Test_Case {
 		// Enable the feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
 
-		// Set up registry.
+		// Set up registry (hashed token).
 		$test_token = 'test_token';
 		update_option(
 			'woocommerce_agentic_agent_registry',
 			array(
 				'openai' => array(
-					'bearer_token' => $test_token,
+					'bearer_token' => wp_hash_password( $test_token ),
 				),
 			),
 			false
 		);
 
-		// Test with different casings of "Bearer".
+		// Test with different casings of "Bearer" (plaintext token).
 		$casings = array( 'Bearer', 'bearer', 'BEARER', 'BeArEr' );
 		foreach ( $casings as $casing ) {
 			$request = new \WP_REST_Request();

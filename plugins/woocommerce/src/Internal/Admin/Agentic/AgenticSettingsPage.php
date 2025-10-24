@@ -267,7 +267,6 @@ class AgenticSettingsPage {
 		$registry = $this->get_registry();
 
 		// Update general settings.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['general'] = array(
 			'enable_products_default' => isset( $_POST['woocommerce_agentic_enable_products_default'] ) && '1' === $_POST['woocommerce_agentic_enable_products_default']
 				? 'yes'
@@ -275,10 +274,9 @@ class AgenticSettingsPage {
 		);
 
 		// Update OpenAI settings.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['openai'] = array(
-			'bearer_token' => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
-				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
+			'bearer_token' => ! empty( $_POST['woocommerce_agentic_openai_bearer_token'] )
+				? wp_hash_password( sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) ) )
 				: '',
 		);
 

@@ -57,7 +57,7 @@ class CheckoutSessions extends ControllerTestCase {
 			'woocommerce_agentic_agent_registry',
 			array(
 				'openai' => array(
-					'bearer_token' => $this->test_bearer_token,
+					'bearer_token' => wp_hash_password( $this->test_bearer_token ),
 				),
 			),
 			false
