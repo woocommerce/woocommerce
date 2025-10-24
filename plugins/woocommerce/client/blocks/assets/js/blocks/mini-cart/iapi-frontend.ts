@@ -30,6 +30,29 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+function itemDataInnerHTML( field: 'name' | 'value' ) {
+	const { ref } = getElement();
+
+	if ( ! ref ) {
+		return;
+	}
+
+	const dataAttr = cartItemState.cartItemDataAttr as
+		| CartItemDataAttr
+		| { hidden: boolean };
+
+	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+		return;
+	}
+
+	if ( field in dataAttr ) {
+		const value = dataAttr[ field as keyof typeof dataAttr ];
+		if ( typeof value === 'string' && value ) {
+			ref.innerHTML = trimWords( value );
+		}
+	}
+}
+
 const { currency, placeholderImgSrc } = getConfig(
 	'woocommerce'
 ) as WooCommerceConfig;
@@ -854,28 +877,10 @@ const { state: cartItemState } = store(
 			},
 
 			itemDataNameInnerHTML() {
-				const { ref } = getElement();
-
-				if ( ! ref ) {
-					return;
-				}
-
-				const dataAttr = cartItemState.cartItemDataAttr;
-				if ( 'name' in dataAttr && dataAttr.name ) {
-					ref.innerHTML = trimWords( dataAttr.name );
-				}
+				itemDataInnerHTML( 'name' );
 			},
 			itemDataValueInnerHTML() {
-				const { ref } = getElement();
-
-				if ( ! ref ) {
-					return;
-				}
-
-				const dataAttr = cartItemState.cartItemDataAttr;
-				if ( 'value' in dataAttr && dataAttr.value ) {
-					ref.innerHTML = trimWords( dataAttr.value );
-				}
+				itemDataInnerHTML( 'value' );
 			},
 
 			filterCartItemClass() {
