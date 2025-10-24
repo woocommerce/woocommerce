@@ -378,7 +378,6 @@ class AgenticCheckoutUtils {
 			);
 		}
 
-		// Load agent registry.
 		$registry = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
 
 		// Check each provider's bearer token.
@@ -387,7 +386,6 @@ class AgenticCheckoutUtils {
 				continue;
 			}
 
-			// Use wp_check_password for hashed token verification.
 			if ( wp_check_password( $provided_token, $provider_config['bearer_token'] ) ) {
 				if ( WC()->session ) {
 					WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $provider_id );
