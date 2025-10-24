@@ -1,11 +1,21 @@
 == Changelog ==
 
+= 10.3.2 2025-10-23 =
+
+**WooCommerce**
+
+* Fix - Race condition where orders may be deleted from the database [#61582](https://github.com/woocommerce/woocommerce/pull/61582)
+* Fix - Resolve PayPal order creation failures caused by a mismatch between the total and breakdown amounts. [#61586](https://github.com/woocommerce/woocommerce/pull/61586)
+* Tweak - Fixes a typo copy on Autocomplete setting tooltip [#61577](https://github.com/woocommerce/woocommerce/pull/61577)
+
+
 = 10.3.1 2025-10-23 =
 
 **WooCommerce**
 
 * Fix - Check the get_session_data method exists on the session object [#61561](https://github.com/woocommerce/woocommerce/pull/61561)
 * Fix - Check the payment method ID before sending a request to capture a PayPal payment. [#61564](https://github.com/woocommerce/woocommerce/pull/61564)
+
 
 
 = 10.3.0 2025-10-22 =
