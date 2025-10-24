@@ -19,7 +19,7 @@ class WC_Tests_Admin_Duplicate_Product extends WC_Unit_Test_Case {
 	 */
 	public function test_simple_product_duplication() {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->add_meta_data('test_meta_key', 'test_meta_value' );
+		$product->add_meta_data( 'test_meta_key', 'test_meta_value' );
 		$product->save();
 
 		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
