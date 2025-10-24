@@ -867,7 +867,7 @@ class PaymentsRestController extends RestApiControllerBase {
 						),
 					),
 				),
-				'onboarding' => array(
+				'onboarding'     => array(
 					'type'        => 'object',
 					'description' => esc_html__( 'Onboarding-related details for the provider.', 'woocommerce' ),
 					'properties'  => array(
@@ -883,11 +883,11 @@ class PaymentsRestController extends RestApiControllerBase {
 							'context'     => array( 'view', 'edit' ),
 						),
 						'messages'                    => array(
-							'type'        => 'object',
-							'description' => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
-							'context'     => array( 'view', 'edit' ),
-							'readonly'    => true,
-							'items'       => array(
+							'type'                 => 'object',
+							'description'          => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
+							'context'              => array( 'view', 'edit' ),
+							'readonly'             => true,
+							'additionalProperties' => array(
 								'type'        => 'string',
 								'description' => esc_html__( 'Message to show the user.', 'woocommerce' ),
 								'readonly'    => true,

@@ -981,7 +981,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		}
 
 		if ( ! array_key_exists( 'properties', $schema ) ||
-			 ! is_array( $schema['properties'] ) ) {
+			! is_array( $schema['properties'] ) ) {
 
 			// Filter out null values for loosely defined schema types.
 			if ( is_array( $response_item ) ) {
@@ -1064,11 +1064,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 				),
 			),
 			'messages' => array(
-				'type'        => 'object',
-				'description' => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
+				'type'                 => 'object',
+				'description'          => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
+				'context'              => array( 'view', 'edit' ),
+				'readonly'             => true,
+				'additionalProperties' => array(
 					'type'        => 'string',
 					'description' => esc_html__( 'Message to show the user.', 'woocommerce' ),
 					'readonly'    => true,
@@ -1104,7 +1104,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							),
 						),
 						'status'         => array(
-							'type'        => 'enum',
+							'type'        => 'string',
 							'description' => esc_html__( 'The current status of the step.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
@@ -1243,7 +1243,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 	private function get_schema_properties_for_onboarding_step_action(): array {
 		return array(
 			'type' => array(
-				'type'        => 'enum',
+				'type'        => 'string',
 				'description' => esc_html__( 'The action type to determine how to use the URL.', 'woocommerce' ),
 				'enum'        => array( WooPaymentsService::ACTION_TYPE_REST, WooPaymentsService::ACTION_TYPE_REDIRECT ),
 				'context'     => array( 'view', 'edit' ),
