@@ -23,6 +23,7 @@ class EntityVersionsCache {
 
 	/**
 	 * Tells whether the entity versions cache is enabled or not.
+	 * The other methods of this class should be used only if this method returns true.
 	 *
 	 * @return bool
 	 */
@@ -33,8 +34,6 @@ class EntityVersionsCache {
 
 		/**
 		 * Filter whether to enable the entity versions cache.
-		 * REST API controllers will use the built-in output caching mechanism only if
-		 * the entity versions cache is enabled.
 		 *
 		 * By default, the entity versions cache will be enabled only if an external
 		 * object cache is configured in WordPress. Enabling it otherwise is not recommended
