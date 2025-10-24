@@ -479,7 +479,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		// Schedule immediate next batch.
 		if ( $processed_count === $batch_size ) {
 			$logger->info( 'Full batch processed, scheduling next batch', $context );
-			self::schedule_action( 'process_pending_batch', array() );
+			self::schedule_action( 'process_pending_batch', array(
+				'last_date_since' => $last_processed_order_modified_date,
+				'last_id_since' => $last_processed_order_id,
+			) );
 		}
 	}
 
