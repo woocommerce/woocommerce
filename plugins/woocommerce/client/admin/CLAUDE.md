@@ -121,22 +121,30 @@ pnpm run lint:fix
 
 ### JavaScript/TypeScript Linting
 
+**CRITICAL**: Always run auto-fix on ONLY the files you changed to ensure perfect formatting.
+
 ```bash
-# Lint JavaScript/TypeScript files
-pnpm run lint:lang:js
+# ALWAYS run auto-fix first on the specific file you changed
+pnpm run lint:fix:lang:js -- path/to/changed-file.tsx
 
-# Fix JavaScript/TypeScript linting issues
-pnpm run lint:fix:lang:js
+# Example:
+pnpm run lint:fix:lang:js -- client/settings-payments/components/status-badge/status-badge.tsx
 
-# Lint specific file
-pnpm run lint:lang:js -- client/settings-payments/components/status-badge/status-badge.tsx
+# Then verify (optional, but recommended)
+pnpm run lint:lang:js -- path/to/changed-file.tsx
 ```
+
+**Workflow after making changes:**
+1. Run auto-fix on the specific changed file(s)
+2. Verify the fix worked (optional)
+3. Commit
 
 **JavaScript Linting Configuration:**
 - **Tool**: ESLint 8.x
 - **Config**: Uses `@woocommerce/eslint-plugin`
 - **Files**: `./client/**/*.{js,ts,tsx}`
 - **Cache**: `node_modules/.cache/eslint`
+- **Note**: ESLint scans entire `client/` directory; warnings from other files can be ignored
 
 ### CSS/SCSS Linting
 
