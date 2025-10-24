@@ -45,6 +45,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		add_action( 'wp_trash_post', array( $this, 'on_post_trashed' ), 10, 1 );
 		add_action( 'untrashed_post', array( $this, 'on_post_untrashed' ), 10, 1 );
 
+		add_action( 'woocommerce_new_product_variation', array( $this, 'on_product_variation_created' ), 10, 2 );
 		add_action( 'woocommerce_update_product_variation', array( $this, 'on_product_variation_saved' ), 10, 2 );
 		add_action( 'woocommerce_delete_product_variation', array( $this, 'on_product_variation_deleted' ), 10, 1 );
 	}
@@ -161,47 +162,56 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	/**
 	 * Handle product variation being saved (both create and update).
 	 *
-	 * This hook fires for both new variations and variation updates.
-	 * We determine if it's a new variation by checking if the date_created
-	 * is very recent (within the last 2 seconds).
-	 *
 	 * @param int         $variation_id The variation ID.
 	 * @param \WC_Product $variation The variation object.
 	 *
 	 * @return void
 	 */
 	public function on_product_variation_saved( int $variation_id, $variation ): void {
-		$date_created  = $variation->get_date_created();
-		$date_modified = $variation->get_date_modified();
-		
-		// Determine if this is a new variation (created within the last 2 seconds).
-		$is_new_variation = false;
-		if ( $date_created && $date_modified ) {
-			$created_timestamp  = $date_created->getTimestamp();
-			$modified_timestamp = $date_modified->getTimestamp();
-			$is_new_variation   = abs( $created_timestamp - $modified_timestamp ) <= 2;
-		}
-
-		$operation = $is_new_variation ? 'create' : 'update';
-
 		$this->invalidate(
 			$variation_id,
-			$operation,
+			'update',
 			array(
-				'product'         => $variation,
-				'is_variation'    => true,
-				'is_new_product'  => $is_new_variation,
-				'parent_id'       => $variation->get_parent_id(),
+				'product'   => $variation,
+				'parent_id' => $variation->get_parent_id(),
 			)
 		);
 
 		// Also invalidate parent product.
 		if ( $parent_id = $variation->get_parent_id() ) {
-			$parent_operation = $is_new_variation ? 'variation_created' : 'variation_updated';
-			
 			$this->invalidate(
 				$parent_id,
-				$parent_operation,
+				'variation_updated',
+				array(
+					'variation_id' => $variation_id,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Handle product variation being saved (both create and update).
+	 *
+	 * @param int         $variation_id The variation ID.
+	 * @param \WC_Product $variation The variation object.
+	 *
+	 * @return void
+	 */
+	public function on_product_variation_created( int $variation_id, $variation ): void {
+		$this->invalidate(
+			$variation_id,
+			'create',
+			array(
+				'product'   => $variation,
+				'parent_id' => $variation->get_parent_id(),
+			)
+		);
+
+		// Also invalidate parent product.
+		if ( $parent_id = $variation->get_parent_id() ) {
+			$this->invalidate(
+				$parent_id,
+				'variation_updated',
 				array(
 					'variation_id' => $variation_id,
 				)
@@ -254,10 +264,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		/**
 		 * Fires when a product cache is invalidated.
 		 *
-		 * This action allows other code to respond to product changes and clear
-		 * their own caches or update external systems.
-		 *
-		 * @since 9.5.0
+		 * @since 10.4.0
 		 *
 		 * @param int|string $product_id The product ID.
 		 * @param string     $operation The operation that triggered the invalidation
