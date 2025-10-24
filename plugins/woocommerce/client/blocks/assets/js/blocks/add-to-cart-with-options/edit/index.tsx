@@ -63,7 +63,7 @@ const AddToCartOptionsEdit = (
 			) : (
 				<div { ...blockProps }>
 					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<MultiLineTextSkeleton isStatic={ true } />
+						<MultiLineTextSkeleton />
 					</div>
 					<Disabled>
 						<button

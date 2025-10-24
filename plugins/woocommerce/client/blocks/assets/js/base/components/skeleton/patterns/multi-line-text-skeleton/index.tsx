@@ -3,18 +3,12 @@
  */
 import { Skeleton } from '../..';
 
-interface MultiLineTextSkeletonProps {
-	isStatic?: boolean;
-}
-
-export const MultiLineTextSkeleton = ( {
-	isStatic = false,
-}: MultiLineTextSkeletonProps ) => {
+export const MultiLineTextSkeleton = () => {
 	return (
 		<div className="wc-block-components-skeleton">
-			<Skeleton height="16px" isStatic={ isStatic } />
-			<Skeleton height="16px" isStatic={ isStatic } />
-			<Skeleton height="16px" width="80%" isStatic={ isStatic } />
+			<Skeleton height="16px" />
+			<Skeleton height="16px" />
+			<Skeleton height="16px" width="80%" />
 		</div>
 	);
 };
