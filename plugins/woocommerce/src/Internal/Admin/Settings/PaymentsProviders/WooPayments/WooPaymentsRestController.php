@@ -1025,12 +1025,18 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			'type'    => 'object',
 		);
 		$schema['properties'] = array(
-			'state'   => array(
+			'state'    => array(
 				'type'        => 'object',
 				'description' => esc_html__( 'The general state of the onboarding process.', 'woocommerce' ),
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 				'properties'  => array(
+					'supported' => array(
+						'type'        => 'boolean',
+						'description' => esc_html__( 'Whether onboarding is supported.', 'woocommerce' ),
+						'context'     => array( 'view', 'edit' ),
+						'readonly'    => true,
+					),
 					'started'   => array(
 						'type'        => 'boolean',
 						'description' => esc_html__( 'Whether the onboarding process is started.', 'woocommerce' ),
@@ -1057,7 +1063,18 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-			'steps'   => array(
+			'messages' => array(
+				'type'        => 'object',
+				'description' => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'        => 'string',
+					'description' => esc_html__( 'Message to show the user.', 'woocommerce' ),
+					'readonly'    => true,
+				),
+			),
+			'steps'    => array(
 				'type'        => 'array',
 				'description' => esc_html__( 'The onboarding steps.', 'woocommerce' ),
 				'context'     => array( 'view', 'edit' ),
@@ -1207,7 +1224,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 					),
 				),
 			),
-			'context' => array(
+			'context'  => array(
 				'type'        => 'object',
 				'description' => esc_html__( 'Various contextual data for the onboarding process to use.', 'woocommerce' ),
 				'context'     => array( 'view', 'edit' ),
