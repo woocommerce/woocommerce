@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Throwable;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
 use WooCommerce\Admin\Experimental_Abtest;
@@ -129,6 +130,7 @@ class WooPayments extends PaymentGateway {
 						$onboarding_details['state']
 					);
 				}
+
 				// The steps provided by the service override any existing steps.
 				if ( ! empty( $onboarding_details['steps'] ) && is_array( $onboarding_details['steps'] ) ) {
 					$details['onboarding']['steps'] = $onboarding_details['steps'];
@@ -219,7 +221,7 @@ class WooPayments extends PaymentGateway {
 				$extension_suggestion['onboarding']['_links']['preload'] = array(
 					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/preload' ) ),
 				);
-			} catch ( \Throwable $e ) {
+			} catch ( Throwable $e ) {
 				// If the REST controller is not available, we can't preload the onboarding data.
 				// This is not a critical error, so we just ignore it.
 				// Log so we can investigate.
