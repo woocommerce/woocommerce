@@ -7,7 +7,7 @@ Whether you’re new to block development or looking to deepen your expertise, t
 
 ## Start Here
 
-- **[Getting Started](/docs/block-development/getting-started/extensibility-overview/)**: Set up your environment and create your first block.
+- **[Getting Started](/docs/block-development/getting-started/extensibility-overview.md/)**: Set up your environment and create your first block.
 - **[Tutorials](/docs/category/tutorials/)**: Follow hands-on guides to build and enhance your blocks.
 - **[Reference](/docs/category/reference/)**: Look up APIs, filters, and block details as you build.
 - **[Extensibility](/docs/category/extensible-blocks/)**: Learn to extend and customize blocks for advanced use cases.
