@@ -763,6 +763,7 @@ class PaymentGateway {
 				'Failed to get recommended payment methods: ' . $e->getMessage(),
 				array(
 					'gateway'   => $payment_gateway->id,
+					'country'    => $country_code,
 					'source'    => 'settings-payments',
 					'exception' => $e,
 				)
