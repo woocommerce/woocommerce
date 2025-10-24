@@ -39,8 +39,13 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	 * @return void
 	 */
 	private function register_hooks(): void {
+		// Use save_post for products as they fire reliably for both create and update.
 		add_action( 'save_post_product', array( $this, 'on_product_post_saved' ), 10, 3 );
-		add_action( 'save_post_product_variation', array( $this, 'on_variation_post_saved' ), 10, 3 );
+
+		// Use WooCommerce hooks for variations since they fire more reliably for saving that bypasses save_post.
+		add_action( 'woocommerce_new_product_variation', array( $this, 'on_product_variation_created' ), 10, 2 );
+		add_action( 'woocommerce_update_product_variation', array( $this, 'on_product_variation_saved' ), 10, 2 );
+
 		add_action( 'delete_post', array( $this, 'on_post_deleted' ), 10, 2 );
 	}
 
@@ -67,38 +72,58 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	}
 
 	/**
-	 * Handle product variation post being saved (both create and update).
+	 * Handle product variation being created.
 	 *
-	 * @param int      $post_id The post ID.
-	 * @param \WP_Post $post The post object.
-	 * @param bool     $update Whether this is an update or new post.
+	 * @param int         $variation_id The variation ID.
+	 * @param \WC_Product $variation The variation object.
 	 *
 	 * @return void
 	 */
-	public function on_variation_post_saved( int $post_id, $post, bool $update ): void {
-		error_log('IS SAVING VARIATION');
-		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
-			return;
-		}
-
-		$operation = $update ? self::OPERATION_UPDATE : self::OPERATION_CREATE;
-		$parent_id = $post->post_parent;
-
+	public function on_product_variation_created( int $variation_id, $variation ): void {
 		$this->invalidate(
-			$post_id,
-			$operation,
+			$variation_id,
+			self::OPERATION_CREATE,
 			array(
-				'parent_id' => $parent_id,
+				'parent_id' => $variation->get_parent_id(),
 			)
 		);
 
 		// Also invalidate parent product.
-		if ( $parent_id ) {
+		if ( $parent_id = $variation->get_parent_id() ) {
 			$this->invalidate(
 				$parent_id,
 				self::OPERATION_UPDATE,
 				array(
-					'variation_id' => $post_id,
+					'variation_id' => $variation_id,
+				)
+			);
+		}
+	}
+
+	/**
+	 * Handle product variation being updated.
+	 *
+	 * @param int         $variation_id The variation ID.
+	 * @param \WC_Product $variation The variation object.
+	 *
+	 * @return void
+	 */
+	public function on_product_variation_saved( int $variation_id, $variation ): void {
+		$this->invalidate(
+			$variation_id,
+			self::OPERATION_UPDATE,
+			array(
+				'parent_id' => $variation->get_parent_id(),
+			)
+		);
+
+		// Also invalidate parent product.
+		if ( $parent_id = $variation->get_parent_id() ) {
+			$this->invalidate(
+				$parent_id,
+				self::OPERATION_UPDATE,
+				array(
+					'variation_id' => $variation_id,
 				)
 			);
 		}
