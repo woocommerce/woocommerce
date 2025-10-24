@@ -860,7 +860,7 @@ class PaymentsRestController extends RestApiControllerBase {
 						),
 					),
 				),
-				'onboarding'     => array(
+				'onboarding' => array(
 					'type'        => 'object',
 					'description' => esc_html__( 'Onboarding-related details for the provider.', 'woocommerce' ),
 					'properties'  => array(
@@ -875,7 +875,7 @@ class PaymentsRestController extends RestApiControllerBase {
 							'description' => esc_html__( 'The state of the onboarding process.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 						),
-						'steps'   => array(
+						'steps'                       => array(
 							'type'        => 'array',
 							'description' => esc_html__( 'The onboarding steps in case this provider supports native in-context onboarding.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
@@ -1000,7 +1000,7 @@ class PaymentsRestController extends RestApiControllerBase {
 								),
 							),
 						),
-						'context' => array(
+						'context'                     => array(
 							'type'        => 'object',
 							'description' => esc_html__( 'Various contextual data for the onboarding process to use.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
