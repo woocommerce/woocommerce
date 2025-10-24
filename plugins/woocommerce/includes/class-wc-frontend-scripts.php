@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Frontend scripts class.
+ *
+ * These scripts are enqueued in the frontend of the store.  The registered script handles in this class
+ * can be used to enqueue the scripts in the frontend by third party plugins and the handles will follow
+ * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+ * and can be removed in future versions of WooCommerce.
  */
 class WC_Frontend_Scripts {
 
@@ -307,9 +312,10 @@ class WC_Frontend_Scripts {
 				'legacy_handle' => 'jquery-cookie',
 			),
 			'wc-jquery-payment'          => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
+				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.0.0-wc.' . $version,
+				'legacy_handle' => 'jquery-payment',
 			),
 			'wc-jquery-tiptip'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
@@ -406,7 +412,7 @@ class WC_Frontend_Scripts {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 
 			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
 			}
 		}
 	}
