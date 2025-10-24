@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiArgumentExcepti
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WP_Error;
@@ -156,7 +157,10 @@ class WooPaymentsService {
 
 		$source = $this->validate_onboarding_source( $source );
 
-		$onboarding_started = $this->provider->is_onboarding_started( $this->get_payment_gateway() );
+		$gateway = $this->get_payment_gateway();
+
+		$onboarding_supported = $this->provider->is_onboarding_supported( $gateway, $location ) ?? true;
+		$onboarding_started = $this->provider->is_onboarding_started( $gateway );
 		if ( ! $onboarding_started && ! empty( $this->get_nox_profile_onboarding( $location ) ) ) {
 			// If the onboarding profile is stored, we consider the onboarding started.
 			$onboarding_started = true;
@@ -164,14 +168,18 @@ class WooPaymentsService {
 
 		return array(
 			// This state is high-level data, independent of the type of onboarding flow.
-			'state'   => array(
+			'state'    => array(
+				'supported' => $onboarding_supported,
 				'started'   => $onboarding_started,
-				'completed' => $this->provider->is_onboarding_completed( $this->get_payment_gateway() ),
-				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
-				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
+				'completed' => $this->provider->is_onboarding_completed( $gateway ),
+				'test_mode' => $this->provider->is_in_test_mode_onboarding( $gateway ),
+				'dev_mode'  => $this->provider->is_in_dev_mode( $gateway ),
 			),
-			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
-			'context' => array(
+			'messages' => array(
+				'not_supported' => ! $onboarding_supported ? $this->provider->get_onboarding_not_supported_message( $gateway, $location ) : null,
+			),
+			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
+			'context'  => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
 				),
