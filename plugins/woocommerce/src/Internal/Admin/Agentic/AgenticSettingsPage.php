@@ -58,7 +58,7 @@ class AgenticSettingsPage {
 					__( 'To get started, <a href="%s" target="_blank">apply to ChatGPT</a>. Once approved, ChatGPT will provide the credentials below.', 'woocommerce' ),
 					'https://chatgpt.com/merchants'
 				),
-				'fields'      => $this->get_openai_fields( $registry['openai'] ?? array() ),
+				'fields'      => $this->get_openai_fields(),
 			),
 		);
 
@@ -194,10 +194,9 @@ class AgenticSettingsPage {
 	/**
 	 * Get OpenAI provider fields.
 	 *
-	 * @param array $config Current OpenAI configuration.
 	 * @return array Fields configuration.
 	 */
-	private function get_openai_fields( $config ) {
+	private function get_openai_fields() {
 		return array(
 			array(
 				'title'   => __( 'Authorization Token', 'woocommerce' ),
