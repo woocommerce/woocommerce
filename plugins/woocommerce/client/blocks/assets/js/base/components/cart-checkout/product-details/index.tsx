@@ -11,17 +11,7 @@ import type { ProductResponseItemData } from '@woocommerce/types';
  */
 import './style.scss';
 
-const CONTENT_TAGS = [
-	'a',
-	'b',
-	'em',
-	'i',
-	'strong',
-	'br',
-	'abbr',
-	'img',
-	'span',
-];
+const CONTENT_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'br', 'abbr', 'span' ];
 
 const CONTENT_ATTR = [
 	'target',
@@ -29,7 +19,6 @@ const CONTENT_ATTR = [
 	'rel',
 	'name',
 	'download',
-	'src',
 	'class',
 	'title',
 ];
