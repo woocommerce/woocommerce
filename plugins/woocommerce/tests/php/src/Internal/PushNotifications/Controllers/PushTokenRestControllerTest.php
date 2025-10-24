@@ -246,7 +246,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 * Create again with different token but same device UUID.
 		 */
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'token', str_repeat( 'b', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );

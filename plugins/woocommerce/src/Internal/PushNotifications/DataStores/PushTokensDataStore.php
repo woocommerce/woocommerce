@@ -337,11 +337,12 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 		if ( $push_token->get_device_uuid() ) {
 			$device_uuid_condition = 'OR device_uuid_meta.meta_value = %s';
-			$params[]      = $push_token->get_device_uuid();
+			$params[]              = $push_token->get_device_uuid();
 		}
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$push_token_data = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
 			$wpdb->prepare(
 				"SELECT
 					posts.ID,
@@ -373,7 +374,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 						{$device_uuid_condition}
 					)
 				LIMIT 1",
-				$params
+				...$params
 			)
 		);
 
