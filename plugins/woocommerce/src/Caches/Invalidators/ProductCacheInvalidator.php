@@ -39,47 +39,69 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	 * @return void
 	 */
 	private function register_hooks(): void {
-		add_action( 'woocommerce_update_product', array( $this, 'on_product_saved' ), 10, 2 );
-
+		add_action( 'save_post_product', array( $this, 'on_product_post_saved' ), 10, 3 );
+		add_action( 'save_post_product_variation', array( $this, 'on_variation_post_saved' ), 10, 3 );
 		add_action( 'delete_post', array( $this, 'on_post_deleted' ), 10, 2 );
-		add_action( 'wp_trash_post', array( $this, 'on_post_trashed' ), 10, 1 );
-		add_action( 'untrashed_post', array( $this, 'on_post_untrashed' ), 10, 1 );
-
-		add_action( 'woocommerce_new_product_variation', array( $this, 'on_product_variation_created' ), 10, 2 );
-		add_action( 'woocommerce_update_product_variation', array( $this, 'on_product_variation_saved' ), 10, 2 );
-		add_action( 'woocommerce_delete_product_variation', array( $this, 'on_product_variation_deleted' ), 10, 1 );
 	}
 
 	/**
 	 * Handle product being saved (both create and update).
 	 *
-	 * This hook fires for both new products and product updates.
-	 * We determine if it's a new product by checking if the date_created
-	 * is very recent (within the last 2 seconds).
-	 *
-	 * @param int         $product_id The product ID.
-	 * @param \WC_Product $product The product object.
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post The post object.
+	 * @param bool     $update Whether this is an update or new post.
 	 *
 	 * @return void
 	 */
-	public function on_product_saved( int $product_id, $product ): void {
-		$date_created  = $product->get_date_created();
-		$date_modified = $product->get_date_modified();
-		
-		// Determine if this is a new product (created within the last 2 seconds).
-		$is_new_product = false;
-		if ( $date_created && $date_modified ) {
-			$created_timestamp  = $date_created->getTimestamp();
-			$modified_timestamp = $date_modified->getTimestamp();
-			$is_new_product     = abs( $created_timestamp - $modified_timestamp ) <= 2;
+	public function on_product_post_saved( int $post_id, $post, bool $update ): void {
+		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+			return;
 		}
 
-		$operation = $is_new_product ? self::OPERATION_CREATE : self::OPERATION_UPDATE;
+		$operation = $update ? self::OPERATION_UPDATE : self::OPERATION_CREATE;
 
 		$this->invalidate(
-			$product_id,
+			$post_id,
 			$operation,
 		);
+	}
+
+	/**
+	 * Handle product variation post being saved (both create and update).
+	 *
+	 * @param int      $post_id The post ID.
+	 * @param \WP_Post $post The post object.
+	 * @param bool     $update Whether this is an update or new post.
+	 *
+	 * @return void
+	 */
+	public function on_variation_post_saved( int $post_id, $post, bool $update ): void {
+		error_log('IS SAVING VARIATION');
+		if ( wp_is_post_autosave( $post_id ) || wp_is_post_revision( $post_id ) ) {
+			return;
+		}
+
+		$operation = $update ? self::OPERATION_UPDATE : self::OPERATION_CREATE;
+		$parent_id = $post->post_parent;
+
+		$this->invalidate(
+			$post_id,
+			$operation,
+			array(
+				'parent_id' => $parent_id,
+			)
+		);
+
+		// Also invalidate parent product.
+		if ( $parent_id ) {
+			$this->invalidate(
+				$parent_id,
+				self::OPERATION_UPDATE,
+				array(
+					'variation_id' => $post_id,
+				)
+			);
+		}
 	}
 
 	/**
@@ -99,135 +121,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			$post_id,
 			self::OPERATION_DELETE,
 		);
-	}
-
-	/**
-	 * Handle post being trashed.
-	 *
-	 * @param int $post_id The post ID.
-	 *
-	 * @return void
-	 */
-	public function on_post_trashed( int $post_id ): void {
-		$post_type = get_post_type( $post_id );
-
-		if ( ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
-		$this->invalidate(
-			$post_id,
-			self::OPERATION_UPDATE,
-		);
-	}
-
-	/**
-	 * Handle post being untrashed.
-	 *
-	 * @param int $post_id The post ID.
-	 *
-	 * @return void
-	 */
-	public function on_post_untrashed( int $post_id ): void {
-		$post_type = get_post_type( $post_id );
-
-		if ( ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
-			return;
-		}
-
-		$this->invalidate(
-			$post_id,
-			self::OPERATION_UPDATE,
-		);
-	}
-
-	/**
-	 * Handle product variation being saved (both create and update).
-	 *
-	 * @param int         $variation_id The variation ID.
-	 * @param \WC_Product $variation The variation object.
-	 *
-	 * @return void
-	 */
-	public function on_product_variation_saved( int $variation_id, $variation ): void {
-		$this->invalidate(
-			$variation_id,
-			self::OPERATION_UPDATE,
-			array(
-				'parent_id' => $variation->get_parent_id(),
-			)
-		);
-
-		// Also invalidate parent product.
-		if ( $parent_id = $variation->get_parent_id() ) {
-			$this->invalidate(
-				$parent_id,
-				self::OPERATION_UPDATE,
-				array(
-					'variation_id' => $variation_id,
-				)
-			);
-		}
-	}
-
-	/**
-	 * Handle product variation being saved (both create and update).
-	 *
-	 * @param int         $variation_id The variation ID.
-	 * @param \WC_Product $variation The variation object.
-	 *
-	 * @return void
-	 */
-	public function on_product_variation_created( int $variation_id, $variation ): void {
-		$this->invalidate(
-			$variation_id,
-			self::OPERATION_CREATE,
-			array(
-				'parent_id' => $variation->get_parent_id(),
-			)
-		);
-
-		// Also invalidate parent product.
-		if ( $parent_id = $variation->get_parent_id() ) {
-			$this->invalidate(
-				$parent_id,
-				self::OPERATION_UPDATE,
-				array(
-					'variation_id' => $variation_id,
-				)
-			);
-		}
-	}
-
-	/**
-	 * Handle product variation deletion.
-	 *
-	 * @param int $variation_id The variation ID.
-	 *
-	 * @return void
-	 */
-	public function on_product_variation_deleted( int $variation_id ): void {
-		$variation = wc_get_product( $variation_id );
-		$parent_id = $variation ? $variation->get_parent_id() : null;
-
-		$this->invalidate(
-			$variation_id,
-			self::OPERATION_DELETE,
-			array(
-				'parent_id' => $parent_id,
-			)
-		);
-
-		// Also invalidate parent product.
-		if ( $parent_id ) {
-			$this->invalidate(
-				$parent_id,
-				self::OPERATION_UPDATE,
-				array(
-					'variation_id' => $variation_id,
-				)
-			);
-		}
 	}
 
 	/**
