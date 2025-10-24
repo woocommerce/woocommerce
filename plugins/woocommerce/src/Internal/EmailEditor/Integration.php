@@ -134,7 +134,7 @@ class Integration {
 		$post_types[] = array(
 			'name' => self::EMAIL_POST_TYPE,
 			'args' => array(
-				'labels'   => array(
+				'labels'          => array(
 					'name'          => __( 'Emails', 'woocommerce' ),
 					'singular_name' => __( 'Email', 'woocommerce' ),
 					'add_new_item'  => __( 'Add Email', 'woocommerce' ),
@@ -143,14 +143,27 @@ class Integration {
 					'view_item'     => __( 'View Email', 'woocommerce' ),
 					'search_items'  => __( 'Search Emails', 'woocommerce' ),
 				),
-				'rewrite'  => array( 'slug' => self::EMAIL_POST_TYPE ),
-				'supports' => array(
+				'rewrite'         => array( 'slug' => self::EMAIL_POST_TYPE ),
+				'supports'        => array(
 					'title',
 					'editor' => array(
 						'default-mode' => 'template-locked',
 					),
 					'excerpt',
 				),
+				'capability_type' => self::EMAIL_POST_TYPE,
+				'capabilities'    => array(
+					'edit_post'          => 'manage_woocommerce',
+					'read_post'          => 'manage_woocommerce',
+					'delete_post'        => 'manage_woocommerce',
+					'edit_posts'         => 'manage_woocommerce',
+					'edit_others_posts'  => 'manage_woocommerce',
+					'delete_posts'       => 'manage_woocommerce',
+					'publish_posts'      => 'manage_woocommerce',
+					'read_private_posts' => 'manage_woocommerce',
+					'create_posts'       => 'manage_woocommerce',
+				),
+				'map_meta_cap'    => false,
 			),
 		);
 		return $post_types;

@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
 import apiFetch from '@wordpress/api-fetch';
+import { addQueryArgs } from '@wordpress/url';
 
 /**
  * Internal dependencies
@@ -24,12 +25,10 @@ interface TrackingNumberParsingPossibility {
 }
 
 interface TrackingNumberParsingResponse {
-	tracking_number_details: {
-		tracking_number: string;
-		tracking_url: string;
-		shipping_provider: string;
-		possibilities?: Record< string, TrackingNumberParsingPossibility >;
-	};
+	tracking_number: string;
+	tracking_url: string;
+	shipping_provider: string;
+	possibilities?: Record< string, TrackingNumberParsingPossibility >;
 }
 
 const ShipmentProviderIcon = ( { providerKey }: { providerKey: string } ) => {
@@ -73,12 +72,17 @@ export default function ShipmentTrackingNumberForm() {
 		setError( null );
 		try {
 			setIsLoading( true );
-			const { tracking_number_details } =
+			const tracking_number_response =
 				await apiFetch< TrackingNumberParsingResponse >( {
-					path: `/wc/v3/orders/${ order?.id }/fulfillments/lookup?tracking_number=${ trackingNumberTemp }`,
+					path: addQueryArgs(
+						`/wc/v3/orders/${ order?.id }/fulfillments/lookup`,
+						{
+							tracking_number: trackingNumberTemp.trim(),
+						}
+					),
 					method: 'GET',
 				} );
-			if ( ! tracking_number_details.tracking_number ) {
+			if ( ! tracking_number_response.tracking_number ) {
 				setError(
 					__(
 						'No information found for this tracking number. Check the number or enter the details manually.',
@@ -92,11 +96,11 @@ export default function ShipmentTrackingNumberForm() {
 			setIsAmbiguousProvider( false );
 
 			if (
-				tracking_number_details.possibilities &&
-				Object.keys( tracking_number_details.possibilities ).length > 1
+				tracking_number_response.possibilities &&
+				Object.keys( tracking_number_response.possibilities ).length > 1
 			) {
 				const possibilities = Object.values(
-					tracking_number_details.possibilities
+					tracking_number_response.possibilities
 				);
 				// If one possibility has an ambiguity score of 85 or more, we assume it's a clear match. (test  123456789012:US)
 				// If all possibilities have an ambiguity score less than 85, show the ambiguous provider message. (test 1234567890123456:US)
@@ -113,9 +117,9 @@ export default function ShipmentTrackingNumberForm() {
 				}
 			}
 
-			setTrackingNumber( tracking_number_details.tracking_number );
-			setTrackingUrl( tracking_number_details.tracking_url );
-			setShipmentProvider( tracking_number_details.shipping_provider );
+			setTrackingNumber( tracking_number_response.tracking_number );
+			setTrackingUrl( tracking_number_response.tracking_url );
+			setShipmentProvider( tracking_number_response.shipping_provider );
 			setProviderName( '' );
 			setEditMode( false );
 		} catch ( err ) {

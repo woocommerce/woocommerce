@@ -113,6 +113,7 @@
 	}
 
 	&__description,
+	&__inner-blocks,
 	&__link,
 	&__price,
 	&__title,
@@ -149,6 +150,16 @@
 
 		p {
 			margin: 0;
+		}
+	}
+
+	&__inner-blocks {
+		.wp-block-post-title,
+		.wp-block-woocommerce-category-title {
+			&,
+			a {
+				color: inherit;
+			}
 		}
 	}
 

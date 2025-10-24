@@ -4,11 +4,11 @@
 import { createElement, Fragment } from '@wordpress/element';
 import { RadioControl } from '@wordpress/components';
 import clsx from 'clsx';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
-import { sanitizeHTML } from '../../utils/sanitize-html';
 import { RadioFieldProps } from './types';
 
 export function RadioField( {
@@ -29,9 +29,9 @@ export function RadioField( {
 					{ description && (
 						<span
 							className="woocommerce-radio-field__description"
-							dangerouslySetInnerHTML={ sanitizeHTML(
-								description
-							) }
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML( description ),
+							} }
 						/>
 					) }
 				</>

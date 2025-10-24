@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix race condition for woocommerce_admin_reports_list filter, preventing dynamically registered reports from being recognized

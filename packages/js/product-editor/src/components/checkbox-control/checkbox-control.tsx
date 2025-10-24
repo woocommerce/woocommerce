@@ -5,11 +5,11 @@ import { createElement } from '@wordpress/element';
 import { CheckboxControl } from '@wordpress/components';
 import { __experimentalTooltip as Tooltip } from '@woocommerce/components';
 import { Icon, help } from '@wordpress/icons';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 /**
  * Internal dependencies
  */
-import { sanitizeHTML } from '../../utils/sanitize-html';
 
 export type CheckboxProps = {
 	label: string;
@@ -60,9 +60,9 @@ export const Checkbox = ( {
 					<Tooltip
 						text={
 							<span
-								dangerouslySetInnerHTML={ sanitizeHTML(
-									tooltip
-								) }
+								dangerouslySetInnerHTML={ {
+									__html: sanitizeHTML( tooltip ),
+								} }
 							></span>
 						}
 						position="top center"

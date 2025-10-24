@@ -19,6 +19,15 @@ class EmailContent extends AbstractBlock {
 	protected $block_name = 'email-content';
 
 	/**
+	 * Get the frontend style handle for this block type.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
+
+	/**
 	 * Get the editor script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.

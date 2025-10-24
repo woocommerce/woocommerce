@@ -35,6 +35,7 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 			$this->id             = 'customer_invoice';
 			$this->customer_email = true;
 			$this->title          = __( 'Order details', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-invoice.php';
 			$this->template_plain = 'emails/plain/customer-invoice.php';
 			$this->placeholders   = array(

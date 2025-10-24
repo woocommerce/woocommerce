@@ -6,7 +6,6 @@ import { __ } from '@wordpress/i18n';
 import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled, Tooltip } from '@wordpress/components';
-import { useSelect } from '@wordpress/data';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import { getSetting } from '@woocommerce/settings';
 
@@ -29,10 +28,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
 	} );
 
-	const isSiteEditor = useSelect(
-		( select ) => isSiteEditorPage( select( 'core/edit-site' ) ),
-		[]
-	);
+	const isSiteEditor = isSiteEditorPage();
 
 	const isBlockTheme = getSetting( 'isBlockTheme', false );
 	const buttonBlockClass = ! isBlockTheme ? 'wp-block-button' : '';

@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
-import { createReduxStore, register } from '@wordpress/data';
+import { createReduxStore, register, select, dispatch } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+
 import {
 	ReduxStoreConfig,
 	StoreDescriptor as GenericStoreDescriptor,
@@ -12,18 +14,17 @@ import { controls } from '@wordpress/data-controls';
  * Internal dependencies
  */
 import * as actions from './actions';
-import { storeName } from './constants';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
 import { getInitialState } from './initial-state';
 import { reducer } from './reducer';
 import * as selectors from './selectors';
-import * as resolvers from './resolvers';
 
 const getConfig = () =>
 	( {
 		actions,
 		controls,
 		selectors,
-		resolvers,
+		resolvers: {},
 		reducer,
 		initialState: getInitialState(),
 	} as const );
@@ -31,8 +32,18 @@ const getConfig = () =>
 export type EditorStoreConfig = ReturnType< typeof getConfig >;
 
 export const createStore = () => {
+	// Check if store is already registered
+	const storeState = select( storeName );
+	if ( storeState !== undefined ) {
+		return select( storeName );
+	}
+
 	const store = createReduxStore( storeName, getConfig() );
 	register( store );
+
+	// Register personalization tag entity with core-data
+	dispatch( coreStore ).addEntities( [ PERSONALIZATION_TAG_ENTITY ] );
+
 	return store;
 };
 

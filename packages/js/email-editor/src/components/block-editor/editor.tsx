@@ -26,6 +26,7 @@ import { storeName } from '../../store';
 import { useNavigateToEntityRecord } from '../../hooks/use-navigate-to-entity-record';
 import { Editor, FullscreenMode } from '../../private-apis';
 import { useEmailCss } from '../../hooks';
+import { PreviewSaveGuard } from '../preview/preview-save-guard';
 import { TemplateSelection } from '../template-select';
 import { StylesSidebar } from '../styles-sidebar';
 import { SendPreview } from '../preview';
@@ -145,6 +146,7 @@ export function InnerEditor( {
 					<TemplateSelection />
 					<StylesSidebar />
 					<SendPreview />
+					<PreviewSaveGuard />
 					<FullscreenMode
 						isActive={ isFullScreenForced || isFullscreenEnabled }
 					/>

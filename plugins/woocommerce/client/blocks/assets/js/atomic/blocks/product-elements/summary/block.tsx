@@ -99,17 +99,6 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 
 	const summaryClassName = 'wc-block-components-product-summary';
 
-	if ( ! product ) {
-		return (
-			<div
-				className={ clsx( className, summaryClassName, {
-					[ `${ parentClassName }__product-summary` ]:
-						parentClassName,
-				} ) }
-			/>
-		);
-	}
-
 	if ( isDescendentOfSingleProductTemplate ) {
 		return (
 			<div className={ summaryClassName }>
@@ -120,6 +109,17 @@ const Block = ( props: BlockProps ): JSX.Element | null => {
 					) }
 				</p>
 			</div>
+		);
+	}
+
+	if ( ! product ) {
+		return (
+			<div
+				className={ clsx( className, summaryClassName, {
+					[ `${ parentClassName }__product-summary` ]:
+						parentClassName,
+				} ) }
+			/>
 		);
 	}
 

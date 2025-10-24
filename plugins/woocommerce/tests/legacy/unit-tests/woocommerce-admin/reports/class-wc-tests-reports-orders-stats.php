@@ -22,6 +22,10 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+
+		$db_version = strstr( WC()->version, '-', true );
+		$db_version = $db_version ? $db_version : WC()->version;
+		update_option( 'woocommerce_db_version', $db_version );
 	}
 
 	/**
@@ -626,6 +630,215 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_old_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
+
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals = array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 8, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 20,
+			'shipping'            => 20,
+			'net_revenue'         => 10, // 50 + 100 - 100 - 20 - 20.
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals = array(
+			'orders_count'        => 0,
+			'num_items_sold'      => 0, // bug fixed by PR #58744.
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100, // bug fixed by PR #58744.
+			'taxes'               => 0,
+			'shipping'            => 0,
+			'net_revenue'         => -100,       // @todo - does this value make sense?
+			'total_customers'     => 1,
+			'products'            => 0, // bug fixed by PR #58744.
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+	}
+
+	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_new_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
+
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals = array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 4, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 10,
+			'shipping'            => 10,
+			'net_revenue'         => 30,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals = array(
+			'orders_count'        => 0,
+			'num_items_sold'      => -4,
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => -10,
+			'shipping'            => -10,
+			'net_revenue'         => -80,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+	}
+
+	/**
 	 * Test the calculation of multiple coupons on orders.
 	 */
 	public function test_populate_and_query_multiple_coupons() {
@@ -666,7 +879,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			foreach ( $coupons as $amount => $coupon ) {
 				if ( $amount >= $order_number ) {
 					$order->apply_coupon( $coupon );
-					$applied_coupons++;
+					++$applied_coupons;
 					$applied_amount += $amount;
 				}
 			}
@@ -3809,7 +4022,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
-
 	}
 
 	/**
@@ -4678,7 +4890,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -4822,7 +5034,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -4977,7 +5189,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5467,7 +5679,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5648,7 +5860,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5821,7 +6033,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -6178,7 +6390,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
-
 	}
 
 	/**

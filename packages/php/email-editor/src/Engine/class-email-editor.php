@@ -279,6 +279,17 @@ class Email_Editor {
 				},
 			)
 		);
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/personalization_tags',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this->email_api_controller, 'get_personalization_tags_collection' ),
+				'permission_callback' => function () {
+					return current_user_can( 'edit_posts' );
+				},
+			)
+		);
 	}
 
 	/**

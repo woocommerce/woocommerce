@@ -39,6 +39,7 @@ class WC_Post_Data {
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'set_object_terms', array( __CLASS__, 'recount_terms_for_product_visibility_change' ), 10, 6 );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
@@ -575,6 +576,50 @@ class WC_Post_Data {
 			if ( $default_term && ! in_array( $default_term, $tt_ids, true ) ) {
 				wp_set_post_terms( $object_id, array( $default_term ), 'product_cat', true );
 			}
+		}
+	}
+
+	/**
+	 * Recounts product terms when product visibility changes affect catalog display.
+	 *
+	 * @param int    $object_id   The object ID.
+	 * @param array  $terms       An array of object terms.
+	 * @param array  $tt_ids      An array of term taxonomy IDs.
+	 * @param string $taxonomy    Taxonomy slug.
+	 * @param bool   $append      Whether to append new terms to the old terms.
+	 * @param array  $old_tt_ids  The old array of term taxonomy IDs.
+	 *
+	 * @since 10.4.0
+	 */
+	public static function recount_terms_for_product_visibility_change( $object_id, $terms, $tt_ids, $taxonomy, $append, $old_tt_ids ) {
+		if ( 'product_visibility' !== $taxonomy ) {
+			return;
+		}
+
+		if ( $append ) {
+			$modified_tt_ids = $tt_ids;
+		} else {
+			$modified_tt_ids = array_merge( array_diff( $tt_ids, $old_tt_ids ), array_diff( $old_tt_ids, $tt_ids ) );
+		}
+
+		if ( empty( $modified_tt_ids ) ) {
+			return;
+		}
+
+		// Despite the name, wc_get_product_visibility_term_ids() actually returns an associative array with term_taxonomy_ids.
+		$visibility_tt_ids = wc_get_product_visibility_term_ids();
+
+		$tt_ids_modifying_term_counts = array();
+		if ( ! empty( $visibility_tt_ids['exclude-from-catalog'] ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['exclude-from-catalog'];
+		}
+
+		if ( ! empty( $visibility_tt_ids['outofstock'] ) && 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
+			$tt_ids_modifying_term_counts[] = $visibility_tt_ids['outofstock'];
+		}
+
+		if ( ! empty( array_intersect( $modified_tt_ids, $tt_ids_modifying_term_counts ) ) ) {
+			_wc_recount_terms_by_product( $object_id );
 		}
 	}
 

@@ -63,6 +63,19 @@ const CartExpressPayment = () => {
 	) {
 		return null;
 	}
+	/*
+	 * Define the elements used for the Express Payments markup.
+	 *
+	 * When multiple express payment options are available, this will use an
+	 * unordered list to display each option.
+	 *
+	 * When only one express payment option is available, this will use a
+	 * non-semantic DIV for both the wrapper and the individual items. This
+	 * is to prevent accessibility issues caused by a list of one (which isn't
+	 * a list).
+	 */
+	const ExpressPayWrapper = availableExpressPaymentsCount > 1 ? 'ul' : 'div';
+	const ExpressPayItem = availableExpressPaymentsCount > 1 ? 'li' : 'div';
 
 	return (
 		<>
@@ -90,11 +103,11 @@ const CartExpressPayment = () => {
 						context={ noticeContexts.EXPRESS_PAYMENTS }
 					/>
 					{ showSkeleton ? (
-						<ul className="wc-block-components-express-payment__event-buttons">
+						<ExpressPayWrapper className="wc-block-components-express-payment__event-buttons">
 							{ Array.from( {
 								length: availableExpressPaymentsCount,
 							} ).map( ( _, index ) => (
-								<li key={ index }>
+								<ExpressPayItem key={ index }>
 									<Skeleton
 										height="48px"
 										ariaMessage={ __(
@@ -102,9 +115,9 @@ const CartExpressPayment = () => {
 											'woocommerce'
 										) }
 									/>
-								</li>
+								</ExpressPayItem>
 							) ) }
-						</ul>
+						</ExpressPayWrapper>
 					) : (
 						<ExpressPaymentMethods />
 					) }

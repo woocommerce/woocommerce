@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-Introduce entity-based data fetching system for WooCommerce blocks, refactoring product data retrieval to use WordPress Core Data API patterns for improved consistency and performance.

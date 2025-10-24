@@ -3,7 +3,7 @@
  */
 import { RawHTML, useMemo } from '@wordpress/element';
 import { WordCountType } from '@woocommerce/block-settings';
-import { sanitizeHTML } from '@woocommerce/utils';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import type { CSSProperties } from 'react';
 
 /**

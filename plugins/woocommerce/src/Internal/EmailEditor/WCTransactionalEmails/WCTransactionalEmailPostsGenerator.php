@@ -121,7 +121,9 @@ class WCTransactionalEmailPostsGenerator {
 		try {
 			$template_html = wc_get_template_html(
 				$template_name,
-				array()
+				array(),
+				'',
+				$email->template_base ?? ''
 			);
 		} catch ( \Exception $e ) {
 			$template_html = '';

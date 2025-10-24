@@ -36,6 +36,11 @@ class WC_Install {
 	 * via dbDelta at both install and update time. If any other kind of database change is required
 	 * at install time (e.g. populating tables), use the 'woocommerce_installed' hook.
 	 *
+	 * IMPORTANT:
+	 * When adding new update callbacks after feature freeze, always use a unique version key with a suffix (e.g. `10.2.0-1`)
+	 * if the base version already exists in the array.
+	 * This ensures all users, including those on beta or RC versions, receive the update.
+	 *
 	 * @var array
 	 */
 	private static $db_updates = array(
@@ -298,6 +303,12 @@ class WC_Install {
 		'10.2.0' => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
 		),
+		'10.3.0' => array(
+			'wc_update_1030_add_comments_date_type_index',
+		),
+		'10.4.0' => array(
+			'wc_update_1040_add_idx_date_paid_status_parent',
+		),
 	);
 
 	/**
@@ -336,7 +347,6 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'wc_admin_db_update_notice' ) );
 		add_action( 'admin_init', array( __CLASS__, 'add_admin_note_after_page_created' ) );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -348,6 +358,10 @@ class WC_Install {
 		add_filter( 'cron_schedules', array( __CLASS__, 'cron_schedules' ) );
 		add_action( 'admin_init', array( __CLASS__, 'newly_installed' ) );
 		add_action( 'woocommerce_activate_legacy_rest_api_plugin', array( __CLASS__, 'maybe_install_legacy_api_plugin' ) );
+
+		// DB update notice.
+		add_filter( 'woocommerce_get_note_from_db', array( \WC_Notes_Run_Db_Update::class, 'maybe_update_notice' ), 10 );
+		add_action( 'woocommerce_hide_update_notice', array( __CLASS__, 'remove_update_db_notice' ) );
 	}
 
 	/**
@@ -414,14 +428,52 @@ class WC_Install {
 	 * Add WC Admin based db update notice.
 	 *
 	 * @since 4.0.0
+	 * @deprecated 10.3.0
 	 */
 	public static function wc_admin_db_update_notice() {
 		if (
 			WC()->is_wc_admin_active()
 			&& false !== get_option( 'woocommerce_admin_install_timestamp' )
-			&& ! self::is_db_auto_update_enabled()
 		) {
 			new WC_Notes_Run_Db_Update();
+		}
+	}
+
+	/**
+	 * Adds the db update notice.
+	 *
+	 * @since 10.3.0
+	 */
+	private static function add_update_db_notice() {
+		if ( ! \WC_Admin_Notices::has_notice( 'update' ) ) {
+			\WC_Admin_Notices::add_notice( 'update', true );
+		}
+
+		try {
+			if ( WC()->is_wc_admin_active() && false !== get_option( 'woocommerce_admin_install_timestamp' ) ) {
+				\WC_Notes_Run_Db_Update::add_notice();
+			}
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( 'Error adding db update note: ' . $e->getMessage(), array( 'source' => 'wc-updater' ) );
+		}
+	}
+
+	/**
+	 * Removes the db update notice.
+	 *
+	 * @since 10.3.0
+	 */
+	public static function remove_update_db_notice() {
+		if ( \WC_Admin_Notices::has_notice( 'update' ) ) {
+			\WC_Admin_Notices::remove_notice( 'update', true );
+		}
+
+		try {
+			if ( WC()->is_wc_admin_active() && false !== get_option( 'woocommerce_admin_install_timestamp' ) ) {
+				\WC_Notes_Run_Db_Update::set_notice_actioned();
+			}
+		} catch ( Exception $e ) {
+			wc_get_logger()->error( 'Error removing db update note: ' . $e->getMessage(), array( 'source' => 'wc-updater' ) );
 		}
 	}
 
@@ -488,11 +540,27 @@ class WC_Install {
 			check_admin_referer( 'wc_db_update', 'wc_db_update_nonce' );
 			wc_get_logger()->info( 'Manual database update triggered.', array( 'source' => 'wc-updater' ) );
 			self::update();
-			WC_Admin_Notices::add_notice( 'update', true );
+			self::add_update_db_notice();
 
-			if ( ! empty( $_GET['return_url'] ) ) { // WPCS: input var ok.
-				$return_url = esc_url_raw( wp_unslash( $_GET['return_url'] ) );
+			$return_url = $_GET['return_url'] ?? ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- sanitized below before use.
+			if ( ! empty( $return_url ) ) {
+				// Try to go back to the previous page.
+				if ( 'wc-admin-referer' === $return_url ) {
+					$return_url = preg_replace( '/^' . preg_quote( untrailingslashit( admin_url() ), '/' ) . '\/?/i', '', wp_get_referer() ? wp_get_referer() : '' );
+
+					if ( $return_url && false === strpos( $return_url, 'do_update_woocommerce' ) ) {
+						$return_url = remove_query_arg(
+							array( '_wpnonce', '_wc_notice_nonce', 'wc_db_update', 'wc_db_update_nonce', 'wc-hide-notice' ),
+							admin_url( $return_url )
+						);
+					} else {
+						$return_url = admin_url( 'admin.php?page=wc-settings' );
+					}
+				}
+
+				$return_url = esc_url_raw( wp_unslash( $return_url ) );
 				wp_safe_redirect( $return_url ); // WPCS: input var ok.
+				exit;
 			}
 		}
 	}
@@ -647,6 +715,7 @@ class WC_Install {
 		include_once __DIR__ . '/admin/class-wc-admin-notices.php';
 
 		WC_Admin_Notices::remove_all_notices();
+		self::remove_update_db_notice();
 	}
 
 	/**
@@ -687,11 +756,8 @@ class WC_Install {
 	 */
 	public static function needs_db_update() {
 		$current_db_version = get_option( 'woocommerce_db_version', null );
-		$updates            = self::get_db_update_callbacks();
-		$update_versions    = array_keys( $updates );
-		usort( $update_versions, 'version_compare' );
 
-		return ! is_null( $current_db_version ) && version_compare( $current_db_version, end( $update_versions ), '<' );
+		return ! is_null( $current_db_version ) && version_compare( $current_db_version, array_key_last( self::$db_updates ), '<' );
 	}
 
 	/**
@@ -738,7 +804,7 @@ class WC_Install {
 				wc_get_logger()->info( 'Automatic database update triggered.', array( 'source' => 'wc-updater' ) );
 				self::update();
 			} else {
-				WC_Admin_Notices::add_notice( 'update', true );
+				self::add_update_db_notice();
 			}
 		} else {
 			self::update_db_version();
@@ -778,11 +844,11 @@ class WC_Install {
 	 */
 	private static function update() {
 		$current_db_version = get_option( 'woocommerce_db_version' );
-		$current_wc_version = WC()->version;
+		$updates            = self::get_db_update_callbacks();
 		$scheduled_time     = time();
 
 		wc_get_logger()->info(
-			sprintf( 'Scheduling database updates (from %s to %s)...', $current_db_version, $current_wc_version ),
+			sprintf( 'Scheduling database updates (from %s)...', $current_db_version ),
 			array( 'source' => 'wc-updater' )
 		);
 
@@ -807,36 +873,41 @@ class WC_Install {
 		}
 
 		$loop = 0;
-		foreach ( self::get_db_update_callbacks() as $version => $update_callbacks ) {
-			if ( version_compare( $current_db_version, $version, '<' ) ) {
-				foreach ( $update_callbacks as $update_callback ) {
-					WC()->queue()->schedule_single(
-						$scheduled_time + $loop,
-						'woocommerce_run_update_callback',
-						array(
-							'update_callback' => $update_callback,
-						),
-						'woocommerce-db-updates'
-					);
-					++$loop;
-				}
+		foreach ( $updates as $version => $update_callbacks ) {
+			if ( version_compare( $current_db_version, $version, '>=' ) ) {
+				continue;
+			}
+
+			foreach ( $update_callbacks as $update_callback ) {
+				WC()->queue()->schedule_single(
+					$scheduled_time + $loop,
+					'woocommerce_run_update_callback',
+					array(
+						'update_callback' => $update_callback,
+					),
+					'woocommerce-db-updates'
+				);
+				++$loop;
 
 				wc_get_logger()->info(
-					sprintf( '  Updates from version %s scheduled.', $version ),
+					sprintf( '  [%s] Scheduled \'%s\'.', $version, $update_callback ),
 					array( 'source' => 'wc-updater' )
 				);
 			}
 		}
 
-		// After the callbacks finish, update the db version to the current WC version.
+		// After the callbacks finish, update the db version to the current WC db version.
+		$wc_db_version = array_key_last( $updates );
+		$wc_db_version = version_compare( WC()->version, $wc_db_version, '>' ) ? WC()->version : $wc_db_version;
+
 		$success = true;
-		if ( version_compare( $current_db_version, $current_wc_version, '<' ) &&
+		if ( version_compare( $current_db_version, $wc_db_version, '<' ) &&
 			! WC()->queue()->get_next( 'woocommerce_update_db_to_current_version' ) ) {
 			$success = WC()->queue()->schedule_single(
 				$scheduled_time + $loop,
 				'woocommerce_update_db_to_current_version',
 				array(
-					'version' => $current_wc_version,
+					'version' => $wc_db_version,
 				),
 				'woocommerce-db-updates'
 			) > 0;
@@ -847,8 +918,7 @@ class WC_Install {
 
 			// Revert back to nudge so updates are not missed.
 			if ( self::is_db_auto_update_enabled() ) {
-				WC_Admin_Notices::add_notice( 'update', true );
-				WC()->is_wc_admin_active() && new WC_Notes_Run_Db_Update();
+				self::add_update_db_notice();
 			}
 
 			return;
@@ -863,7 +933,12 @@ class WC_Install {
 	 * @param string|null $version New WooCommerce DB version or null.
 	 */
 	public static function update_db_version( $version = null ) {
-		update_option( 'woocommerce_db_version', is_null( $version ) ? WC()->version : $version );
+		if ( is_null( $version ) ) {
+			$last_db_version = array_key_last( self::$db_updates );
+			$version         = version_compare( WC()->version, $last_db_version, '>' ) ? WC()->version : $last_db_version;
+		}
+
+		update_option( 'woocommerce_db_version', $version );
 	}
 
 	/**
@@ -1575,12 +1650,19 @@ class WC_Install {
 
 		$db_delta_result = dbDelta( self::get_schema() );
 
-		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
 
-		if ( is_null( $index_exists ) ) {
+		if ( is_null( $comment_type_index_exists ) ) {
 			// Add an index to the field comment_type to improve the response time of the query
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		}
+
+		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
+
+		if ( is_null( $date_type_index_exists ) ) {
+			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 		}
 
 		// Clear table caches.
@@ -1641,6 +1723,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_value longtext NOT NULL,
   session_expiry bigint(20) unsigned NOT NULL,
   PRIMARY KEY  (session_id),
+  KEY session_expiry (session_expiry),
   UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
@@ -1877,12 +1960,13 @@ CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	shipping_total double DEFAULT 0 NOT NULL,
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
-	status varchar(200) NOT NULL,
+	status varchar(20) NOT NULL,
 	customer_id bigint(20) unsigned NOT NULL,
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
-	KEY status (status({$max_index_length}))
+	KEY status (status),
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,
@@ -2655,7 +2739,7 @@ $stock_notifications_table_schema;
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
 		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
-			( new WC_Gateway_Paypal() )->should_load();
+			WC_Gateway_Paypal::get_instance()->should_load();
 		}
 	}
 
@@ -2863,7 +2947,7 @@ EOT;
 <div class="wp-block-woocommerce-cart-line-items-block"></div>
 <!-- /wp:woocommerce/cart-line-items-block -->
 
-<!-- wp:woocommerce/product-collection {"query":{"queryId":0,"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":true,"previewMessage":"Actual products will vary depending on the page being viewed."}} -->
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":3,"pages":1,"offset":0,"postType":"product","order":"asc","orderBy":"title","search":"","exclude":[],"inherit":false,"taxQuery":{},"isProductCollectionBlock":true,"featured":false,"woocommerceOnSale":false,"woocommerceStockStatus":["instock","outofstock","onbackorder"],"woocommerceAttributes":[],"woocommerceHandPickedProducts":[],"filterable":false,"relatedBy":{"categories":true,"tags":true}},"tagName":"div","displayLayout":{"type":"flex","columns":3,"shrinkColumns":true},"dimensions":{"widthType":"fill"},"collection":"woocommerce/product-collection/cross-sells","hideControls":["filterable"],"queryContextIncludes":["collection"],"__privatePreviewState":{"isPreview":true,"previewMessage":"Actual products will vary depending on the page being viewed."}} -->
 <div class="wp-block-woocommerce-product-collection"><!-- wp:heading {"textAlign":"left","style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
 <h2 class="wp-block-heading has-text-align-left" style="margin-bottom:1rem">' . __( 'You may be interested in&hellip;', 'woocommerce' ) . '</h2>
 

@@ -12,6 +12,7 @@
 declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
@@ -89,6 +90,7 @@ class WC_Session_Handler extends WC_Session {
 	protected function init_hooks() {
 		add_action( 'woocommerce_set_cart_cookies', array( $this, 'set_customer_session_cookie' ), 10 );
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
+		add_action( 'template_redirect', array( $this, 'destroy_session_if_empty' ), 999 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
 		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
 
@@ -117,7 +119,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	private function init_session_from_request() {
-		$session_token = wc_clean( wp_unslash( $_GET['session'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$session_token = is_string( $_GET['session'] ?? '' ) ? wc_clean( wp_unslash( $_GET['session'] ?? '' ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		if ( empty( $session_token ) || ! CartTokenUtils::validate_cart_token( $session_token ) ) {
 			return false;
@@ -179,12 +181,6 @@ class WC_Session_Handler extends WC_Session {
 
 		/**
 		 * This clears the session if the cookie is invalid.
-		 *
-		 * Previously this also cleared the session when $this->_data was empty, and the cart was not yet initialised,
-		 * however this caused a conflict with WooCommerce Payments session handler which overrides this class.
-		 *
-		 * Ref: https://github.com/woocommerce/woocommerce/pull/57652
-		 * See also: https://github.com/woocommerce/woocommerce/pull/59530
 		 */
 		if ( ! $this->is_session_cookie_valid() ) {
 			$this->destroy_session();
@@ -413,7 +409,6 @@ class WC_Session_Handler extends WC_Session {
 		$expiring_seconds = intval( apply_filters( 'wc_session_expiring', $default_expiring_seconds ) ) ?: $default_expiring_seconds; // phpcs:ignore Universal.Operators.DisallowShortTernary.Found
 
 		if ( $expiring_seconds > $max_expiring_seconds ) {
-			$expiring_seconds       = $max_expiring_seconds;
 			$session_limit_exceeded = true;
 		}
 		/**
@@ -426,14 +421,19 @@ class WC_Session_Handler extends WC_Session {
 
 		// We limit the expiration time to 30 days to avoid performance issues and the session table growing too large.
 		if ( $expiration_seconds > $max_expiration_seconds ) {
-			$expiration_seconds     = $max_expiration_seconds;
 			$session_limit_exceeded = true;
 		}
 
 		if ( $session_limit_exceeded ) {
 			$transient_key = 'wc_session_handler_warning';
 			if ( false === get_transient( $transient_key ) ) {
-				wc_get_logger()->warning( sprintf( 'Keeping sessions for longer than %d days results in performance isues, expiry has been capped.', $max_expiration_seconds / DAY_IN_SECONDS ), array( 'source' => 'wc_session_handler' ) );
+				wc_get_logger()->warning(
+					sprintf(
+						'Keeping sessions for longer than %d days can cause performance issues and larger session tables. Monitor usage and adjust lifetimes via the wc_session_expiring and wc_session_expiration filters as needed.',
+						$max_expiration_seconds / DAY_IN_SECONDS
+					),
+					array( 'source' => 'wc_session_handler' )
+				);
 				set_transient( $transient_key, true, $max_expiration_seconds );
 			}
 		}
@@ -627,9 +627,23 @@ class WC_Session_Handler extends WC_Session {
 	public function cleanup_sessions() {
 		global $wpdb;
 
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE session_expiry < %d', $this->_table, time() ) );
+		// Batch size of 100 and sleep time of 10ms = max 100 SQL queries and 10K entries deletion per second.
+		$batch_size            = 100;
+		$deleted_entries_total = 0;
+		do {
+			$deleted_entries_count  = (int) $wpdb->query(
+				$wpdb->prepare(
+					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
+					$this->_table,
+					time(),
+					$batch_size
+				)
+			);
+			$deleted_entries_total += $deleted_entries_count;
+			usleep( ( 10_000 / $batch_size ) * $deleted_entries_count );
+		} while ( $deleted_entries_count === $batch_size );
 
-		if ( class_exists( 'WC_Cache_Helper' ) ) {
+		if ( $deleted_entries_total > 0 && class_exists( 'WC_Cache_Helper' ) ) {
 			WC_Cache_Helper::invalidate_cache_group( WC_SESSION_CACHE_GROUP );
 		}
 	}
@@ -691,6 +705,47 @@ class WC_Session_Handler extends WC_Session {
 			return;
 		}
 		$GLOBALS['wpdb']->update( $this->_table, array( 'session_expiry' => $timestamp ), array( 'session_key' => $customer_id ), array( '%d' ) );
+	}
+
+	/**
+	 * Destroys the WooCommerce session if it contains no data for non-logged-in users.
+	 *
+	 * This method helps improve caching performance by removing session cookies when they
+	 * are no longer needed, allowing non-logged-in customers to receive cached pages.
+	 * Only runs if the destroy-empty-sessions feature is enabled.
+	 *
+	 * @return void
+	 *
+	 * @since 10.3.0
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 */
+	public function destroy_session_if_empty() {
+		if ( is_user_logged_in() || ! $this->_has_cookie ) {
+			return;
+		}
+
+		if ( ! isset( $_COOKIE[ $this->_cookie ] ) ) {
+			// If $_COOKIE isn't set, then something triggered setting the cookie during this request. So we won't
+			// yet destroy the session if it is empty to expand compatibility at the cost of one additional request being uncached.
+			return;
+		}
+
+		if ( ! empty( $this->_data ) ) {
+			return;
+		}
+
+		if ( is_object( WC()->cart ) && ! WC()->cart->is_empty() ) {
+			// There is a pending cart to save that isn't yet in the session data.
+			return;
+		}
+
+		$feature_controller = wc_get_container()->get( FeaturesController::class );
+		if ( ! $feature_controller->feature_is_enabled( 'destroy-empty-sessions' ) ) {
+			return;
+		}
+
+		$this->destroy_session();
 	}
 
 	/**

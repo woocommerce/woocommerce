@@ -8,10 +8,7 @@ import { addFilter } from '@wordpress/hooks';
 import { type ElementType } from '@wordpress/element';
 import { EditorBlock, isNumber } from '@woocommerce/types';
 import { usePrevious } from '@woocommerce/base-hooks';
-import {
-	manualUpdate,
-	MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION,
-} from '@woocommerce/blocks/migration-products-to-product-collection';
+import { manualUpdate } from '@woocommerce/blocks/migration-products-to-product-collection';
 import { getSettingWithCoercion } from '@woocommerce/settings';
 import { ProductQueryBlockQuery } from '@woocommerce/blocks/product-query/types';
 import {
@@ -230,10 +227,9 @@ const ProductQueryControls = ( props: ProductQueryBlock ) => {
 	return (
 		<>
 			<InspectorControls>
-				{ isProductsBlock &&
-					MANUAL_REPLACE_PRODUCTS_WITH_PRODUCT_COLLECTION && (
-						<UpgradeNotice upgradeBlock={ manualUpdate } />
-					) }
+				{ isProductsBlock && (
+					<UpgradeNotice upgradeBlock={ manualUpdate } />
+				) }
 				{ allowedControls?.includes( 'presets' ) && (
 					<PopularPresets { ...props } />
 				) }

@@ -11,8 +11,14 @@ import { Post } from '@wordpress/core-data/build-types/entity-types/post';
 /**
  * Internal dependencies
  */
-import { storeName } from './constants';
-import { State, EmailTemplate, EmailEditorPostType, Feature } from './types';
+import { storeName, PERSONALIZATION_TAG_ENTITY } from './constants';
+import {
+	State,
+	EmailTemplate,
+	EmailEditorPostType,
+	Feature,
+	PersonalizationTag,
+} from './types';
 
 function getContentFromEntity( entity ): string {
 	if ( entity?.content && typeof entity.content === 'function' ) {
@@ -352,22 +358,24 @@ export function getPaletteColors(
 	state: State
 ): State[ 'editorSettings' ][ '__experimentalFeatures' ][ 'color' ][ 'palette' ] {
 	// eslint-disable-next-line no-underscore-dangle
-	return state.editorSettings.__experimentalFeatures.color.palette;
+	return state.editorSettings?.__experimentalFeatures?.color?.palette;
 }
 
 export function getPreviewState( state: State ): State[ 'preview' ] {
 	return state.preview;
 }
 
-export function getPersonalizationTagsState(
-	state: State
-): State[ 'personalizationTags' ] {
-	return state.personalizationTags;
-}
-
 export const getPersonalizationTagsList = createRegistrySelector(
-	( select ) => ( state: State ) => {
-		const tags = state.personalizationTags.list;
+	( select ) => () => {
+		const tags = ( select( coreDataStore ).getEntityRecords(
+			PERSONALIZATION_TAG_ENTITY.kind,
+			PERSONALIZATION_TAG_ENTITY.name,
+			{
+				context: 'view',
+				per_page: -1,
+			}
+		) || [] ) as PersonalizationTag[];
+
 		const postType = select( storeName ).getEmailPostType();
 
 		if ( ! postType ) {
@@ -400,7 +408,7 @@ export const getPersonalizationTagsList = createRegistrySelector(
 );
 
 export function getStyles( state: State ): State[ 'theme' ][ 'styles' ] {
-	return state.theme.styles;
+	return state.theme?.styles;
 }
 
 export function getTheme( state: State ): State[ 'theme' ] {

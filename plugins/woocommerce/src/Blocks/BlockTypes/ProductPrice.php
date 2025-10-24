@@ -3,6 +3,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use Automattic\WooCommerce\Enums\ProductType;
 
 /**
  * ProductPrice class.
@@ -62,25 +63,22 @@ class ProductPrice extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
-			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( 'variable' );
+			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
 
-			$wrapper_attributes = array();
-			$watch_attribute    = '';
+			$wrapper_attributes     = array(
+				'style' => $styles_and_classes['styles'] ?? '',
+				'class' => $styles_and_classes['classes'] ?? '',
+			);
+			$interactive_attributes = '';
+			$context_directive      = '';
 
 			if ( $is_interactive ) {
 				$variations_data           = $product->get_available_variations();
@@ -105,7 +103,7 @@ class ProductPrice extends AbstractBlock {
 				if ( ! $has_variation_price_html ) {
 					$is_interactive = false;
 				} else {
-					wp_interactivity_state(
+					wp_interactivity_config(
 						'woocommerce',
 						array(
 							'products' => array(
@@ -119,23 +117,22 @@ class ProductPrice extends AbstractBlock {
 
 					wp_enqueue_script_module( 'woocommerce/product-elements' );
 					$wrapper_attributes['data-wp-interactive'] = 'woocommerce/product-elements';
-					$context                                   = array(
-						'productElementKey' => 'price_html',
+					$context_directive                         = wp_interactivity_data_wp_context(
+						array(
+							'productElementKey' => 'price_html',
+						)
 					);
-					$wrapper_attributes['data-wp-context']     = wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
-					$watch_attribute                           = 'data-wp-watch="callbacks.updateValue"';
+					$interactive_attributes                    = 'data-wp-watch="callbacks.updateValue" aria-live="polite" aria-atomic="true"';
 				}
 			}
 
 			return sprintf(
-				'<div %1$s><div class="wc-block-components-product-price wc-block-grid__product-price %2$s %3$s" style="%4$s" %5$s>
-					%6$s
+				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price" %3$s>
+					%4$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
-				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-				esc_attr( $styles_and_classes['classes'] ),
-				esc_attr( $styles_and_classes['styles'] ?? '' ),
-				$watch_attribute,
+				$context_directive,
+				$interactive_attributes,
 				$product->get_price_html()
 			);
 		}

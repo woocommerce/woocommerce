@@ -17,11 +17,22 @@ require_once __DIR__ . '/class-wc-gateway-paypal-helper.php';
  * Class WC_Gateway_Paypal_Notices.
  */
 class WC_Gateway_Paypal_Notices {
+	/**
+	 * The PayPal gateway instance.
+	 *
+	 * @var WC_Gateway_Paypal
+	 */
+	private $gateway;
 
 	/**
 	 * Constructor.
 	 */
 	public function __construct() {
+		$this->gateway = WC_Gateway_Paypal::get_instance();
+		if ( ! $this->gateway ) {
+			return;
+		}
+
 		add_action( 'admin_notices', array( $this, 'add_paypal_migration_notice' ) );
 
 		// Use admin_head to inject notice on payments settings page.
@@ -41,8 +52,8 @@ class WC_Gateway_Paypal_Notices {
 			return;
 		}
 
-		// Skip if the gateway is not available or the merchant is not eligible for migration.
-		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() ) {
+		// Skip if the gateway is not available or the merchant has not been onboarded.
+		if ( ! WC_Gateway_Paypal_Helper::is_paypal_gateway_available() || ! $this->gateway->should_use_orders_v2() ) {
 			return;
 		}
 
@@ -52,17 +63,14 @@ class WC_Gateway_Paypal_Notices {
 		}
 
 		$doc_url     = 'https://woocommerce.com/document/woocommerce-paypal-payments/paypal-payments-upgrade-guide/';
-		$release_url = 'https://developer.woocommerce.com/release-calendar/';
 		$dismiss_url = wp_nonce_url(
-			add_query_arg( 'wc-hide-notice', 'paypal_migration' ),
+			add_query_arg( 'wc-hide-notice', 'paypal_migration_completed' ),
 			'woocommerce_hide_notices_nonce',
 			'_wc_notice_nonce'
 		);
 		$message     = sprintf(
-			/* translators: 1: opening <a> tag, 2: closing </a> tag, 3: opening <a> tag, 4: closing </a> tag */
-			esc_html__( 'WooCommerce will automatically upgrade your PayPal integration from PayPal Standard to PayPal Payments (PPCP) in version %1$s10.3.0%2$s, for a more reliable and modern checkout experience. If you prefer not to migrate, we recommend switching to %3$sPayPal Payments%4$s extension.', 'woocommerce' ),
-			'<a href="' . esc_url( $release_url ) . '" target="_blank" rel="noopener noreferrer">',
-			'</a>',
+			/* translators: 1: opening <a> tag, 2: closing </a> tag */
+			esc_html__( 'WooCommerce has upgraded your PayPal integration from PayPal Standard to PayPal Payments (PPCP), for a more reliable and modern checkout experience. If you do not prefer the upgraded integration in WooCommerce, we recommend switching to %1$sPayPal Payments%2$s extension.', 'woocommerce' ),
 			'<a href="' . esc_url( $doc_url ) . '" target="_blank" rel="noopener noreferrer">',
 			'</a>',
 		);
@@ -97,6 +105,6 @@ class WC_Gateway_Paypal_Notices {
 	 * @return bool
 	 */
 	protected static function paypal_migration_notice_dismissed() {
-		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_notice', true );
+		return get_user_meta( get_current_user_id(), 'dismissed_paypal_migration_completed_notice', true );
 	}
 }

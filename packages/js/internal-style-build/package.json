@@ -46,15 +46,15 @@
 		"postcss-loader": "4.3.x",
 		"sass-loader": "10.5.x",
 		"webpack-remove-empty-scripts": "1.0.x",
-		"webpack-rtl-plugin": "2.0.x"
+		"@automattic/webpack-rtl-plugin": "6.0.x"
 	},
 	"private": true,
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
 		"typescript": "5.7.x",
