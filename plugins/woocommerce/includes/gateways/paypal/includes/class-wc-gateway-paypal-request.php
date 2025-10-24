@@ -422,7 +422,8 @@ class WC_Gateway_Paypal_Request {
 						// Customer redirected here on cancellation.
 						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                => substr( get_locale(), 0, 2 ),
+						// Limit to 5 characters to handle edge cases like 'de_DE_formal' while preserving region.
+						'locale'                => str_replace( '_', '-', substr( get_locale(), 0, 5 ) ),
 						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
