@@ -884,7 +884,7 @@ class PaymentsRestController extends RestApiControllerBase {
 						),
 						'messages'                    => array(
 							'type'        => 'object',
-							'description' => esc_html__( 'Various messages to possibly show the user', 'woocommerce' ),
+							'description' => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'items'       => array(
