@@ -29,6 +29,30 @@ class OrdersScheduler extends ImportScheduler {
 	public static $name = 'orders';
 
 	/**
+	 * Option name for storing the last processed order modified date.
+	 *
+	 * This is used as a cursor to track progress through the orders table.
+	 * We need both date and ID because multiple orders can have the same
+	 * date_updated timestamp (e.g., bulk operations, imports). Without tracking
+	 * the ID, we would endlessly reprocess orders at the same timestamp when
+	 * the batch size is smaller than the number of orders at that timestamp.
+	 *
+	 * @var string
+	 */
+	const LAST_PROCESSED_ORDER_DATE_OPTION = 'woocommerce_admin_scheduler_last_processed_order_modified_date';
+
+	/**
+	 * Option name for storing the last processed order ID.
+	 *
+	 * Used in conjunction with LAST_PROCESSED_ORDER_DATE_OPTION to handle
+	 * cases where multiple orders have the same date_updated timestamp.
+	 * Query pattern: WHERE (date > last_date) OR (date = last_date AND id > last_id)
+	 *
+	 * @var string
+	 */
+	const LAST_PROCESSED_ORDER_ID_OPTION = 'woocommerce_admin_scheduler_last_processed_order_id';
+
+	/**
 	 * Attach order lookup update hooks.
 	 *
 	 * @internal
@@ -38,11 +62,26 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
-		// Order and refund data must be run on these hooks to ensure meta data is set.
-		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
-		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+		/**
+		 * Filters whether to enable immediate order import on every order create/update.
+		 * When false (default), orders are imported in batches periodically.
+		 * When true, maintains legacy behavior of immediate per-order import.
+		 *
+		 * @since 10.4.0
+		 * @param bool $enable_immediate_import Whether to enable immediate import. Default false.
+		 */
+		$enable_immediate_import = apply_filters( 'woocommerce_analytics_enable_immediate_import', false );
+
+		if ( $enable_immediate_import ) {
+			// Legacy behavior: Schedule import immediately on order create/update/delete.
+			add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
+			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
+		} else {
+			// New behavior: Schedule recurring batch processor.
+			self::schedule_recurring_batch_processor();
+		}
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -62,6 +101,37 @@ class OrdersScheduler extends ImportScheduler {
 	public static function get_dependencies() {
 		return array(
 			'import_batch_init' => \Automattic\WooCommerce\Internal\Admin\Schedulers\CustomersScheduler::get_action( 'import_batch_init' ),
+		);
+	}
+
+	/**
+	 * Get all available scheduling actions.
+	 * Extends parent to add the new batch processor action.
+	 *
+	 * @internal
+	 * @return array
+	 */
+	public static function get_scheduler_actions() {
+		return array_merge(
+			parent::get_scheduler_actions(),
+			array(
+				'process_pending_batch' => 'wc-admin_process_pending_orders_batch',
+			)
+		);
+	}
+
+	/**
+	 * Get batch sizes for OrdersScheduler actions.
+	 *
+	 * @internal
+	 * @return array
+	 */
+	public static function get_batch_sizes() {
+		return array_merge(
+			parent::get_batch_sizes(),
+			array(
+				'process_pending_batch' => 100,
+			)
 		);
 	}
 
@@ -208,6 +278,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Schedule this import if the post is an order or refund.
+	 * Note: This method is only called when immediate import is enabled
+	 * via the 'woocommerce_analytics_enable_immediate_import' filter.
+	 * Otherwise, orders are processed in batches periodically.
 	 *
 	 * @param int $order_id Post ID.
 	 *
@@ -277,6 +350,223 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $order_id Order or refund ID.
 		 */
 		do_action( 'woocommerce_order_scheduler_after_import_order', $order_id );
+	}
+
+	/**
+	 * Schedule recurring batch processor for order imports.
+	 *
+	 * @internal
+	 */
+	private static function schedule_recurring_batch_processor() {
+		// Initialize last processed date if not set.
+		self::initialize_last_processed_date();
+
+		/**
+		 * Filters the interval for the recurring batch processor.
+		 *
+		 * @since 9.5.0
+		 * @param int $interval Interval in seconds. Default 12 hours.
+		 */
+		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+
+		$action_hook = self::get_action( 'process_pending_batch' );
+
+		// Schedule recurring action if not already scheduled.
+		if ( ! self::has_existing_jobs( 'process_pending_batch', array() ) ) {
+			self::queue()->schedule_recurring( time(), $interval, $action_hook, array(), static::$group );
+		}
+	}
+
+	/**
+	 * Initialize the last processed date option if not set.
+	 *
+	 * @internal
+	 */
+	private static function initialize_last_processed_date() {
+		if ( false !== get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, false ) ) {
+			return; // Already initialized.
+		}
+
+		/**
+		 * Add buffer to ensure orders created or updated during plugin activation, upgrade, or prior to import are accounted for.
+		 * Buffer in seconds. 10 minutes.
+		 */
+		$buffer_seconds = 10 * MINUTE_IN_SECONDS;
+		$start_date     = gmdate( 'Y-m-d H:i:s', time() - $buffer_seconds );
+
+		update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $start_date, false );
+		update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
+	}
+
+	/**
+	 * Process pending orders in batch.
+	 * This method queries for orders updated since the last processed date
+	 * and imports them into the analytics tables.
+	 *
+	 * @internal
+	 */
+	public static function process_pending_batch() {
+		$logger = wc_get_logger();
+		$context = array( 'source' => 'wc-analytics-order-import' );
+
+		$last_processed_order_modified_date = get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
+		$last_processed_order_id = (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+
+		if ( ! $last_processed_order_modified_date || ! strtotime( $last_processed_order_modified_date ) ) {
+			$logger->error( 'Invalid last processed date: ' . $last_processed_order_modified_date, $context );
+			$last_processed_order_modified_date = gmdate( 'Y-m-d H:i:s', 0 ); // Fallback to the earliest possible date.
+		}
+
+		$batch_size = self::get_batch_size( 'process_pending_batch' );
+
+		$logger->info(
+			sprintf( 'Starting batch import from date: %s, ID: %d, batch size: %d', $last_processed_order_modified_date, $last_processed_order_id, $batch_size ),
+			$context
+		);
+
+		$start_time = microtime( true );
+
+		// Get orders updated since last processed date and ID.
+		$orders = self::get_orders_since( $last_processed_order_modified_date, $last_processed_order_id, $batch_size );
+
+		if ( empty( $orders ) ) {
+			$logger->info( 'No orders to process', $context );
+			return;
+		}
+
+		$processed_count = 0;
+		foreach ( $orders as $order ) {
+			try {
+				self::import( $order->id );
+				$processed_count++;
+
+				// Update cursors after each successful import. Since orders are sorted by
+				// date ASC, id ASC, we can simply overwrite with the current order's values.
+				// If an error occurs, we break and save the last successful position.
+				$last_processed_order_modified_date = $order->date_updated_gmt;
+				$last_processed_order_id = $order->id;
+			} catch ( \Exception $e ) {
+				$logger->error(
+					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
+					$context
+				);
+				break;
+			}
+		}
+
+		// Update the markers to the latest processed date and order ID.
+		update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $last_processed_order_modified_date, false );
+		update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, $last_processed_order_id, false );
+
+		$elapsed_time = microtime( true ) - $start_time;
+		$logger->info(
+			sprintf(
+				'Batch import completed. Processed: %d orders in %.2f seconds. Updated marker to: %s, order ID: %d',
+				$processed_count,
+				$elapsed_time,
+				$last_processed_order_modified_date,
+				$last_processed_order_id
+			),
+			$context
+		);
+
+		// If we got a full batch, there might be more orders to process.
+		// Schedule immediate next batch.
+		if ( $processed_count === $batch_size ) {
+			$logger->info( 'Full batch processed, scheduling next batch', $context );
+			self::schedule_action( 'process_pending_batch', array() );
+		}
+	}
+
+	/**
+	 * Get orders updated since the specified date and ID.
+	 *
+	 * @internal
+	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
+	 * @param int    $last_id   Last processed order ID.
+	 * @param int    $limit     Number of orders to retrieve.
+	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
+	 */
+	private static function get_orders_since( $last_date, $last_id, $limit ) {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return self::get_orders_since_from_orders_table( $last_date, $last_id, $limit );
+		} else {
+			return self::get_orders_since_from_posts_table( $last_date, $last_id, $limit );
+		}
+	}
+
+	/**
+	 * Get orders from HPOS orders table updated since the specified date and ID.
+	 *
+	 * @internal
+	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
+	 * @param int    $last_id   Last processed order ID.
+	 * @param int    $limit     Number of orders to retrieve.
+	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
+	 */
+	private static function get_orders_since_from_orders_table( $last_date, $last_id, $limit ) {
+		global $wpdb;
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+
+		// Query orders after the last processed position using a compound cursor (date, id).
+		// This handles cases where multiple orders have the same date_updated timestamp:
+		// - Get orders with date > last_date (moved to next timestamp)
+		// - OR orders with date = last_date AND id > last_id (continue same timestamp)
+		// Example: If batch_size=100 and 1000 orders exist at '2024-01-01 10:00:00',
+		// we'll process them across 10 batches without infinite loops.
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, date_updated_gmt
+				FROM {$orders_table}
+				WHERE type IN ('shop_order', 'shop_order_refund')
+				AND status NOT IN ('auto-draft', 'trash')
+				AND (
+					date_updated_gmt > %s
+					OR (date_updated_gmt = %s AND id > %d)
+				)
+				ORDER BY date_updated_gmt ASC, id ASC
+				LIMIT %d",
+				$last_date,
+				$last_date,
+				$last_id,
+				$limit
+			)
+		);
+	}
+
+	/**
+	 * Get orders from posts table updated since the specified date and ID.
+	 *
+	 * @internal
+	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
+	 * @param int    $last_id   Last processed order ID.
+	 * @param int    $limit     Number of orders to retrieve.
+	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
+	 */
+	private static function get_orders_since_from_posts_table( $last_date, $last_id, $limit ) {
+		global $wpdb;
+
+		// Query orders after the last processed position using a compound cursor (date, id).
+		// This handles cases where multiple orders have the same post_modified timestamp.
+		// See get_orders_since_from_orders_table() for detailed explanation.
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID as id, post_modified_gmt as date_updated_gmt
+				FROM {$wpdb->posts}
+				WHERE post_type IN ('shop_order', 'shop_order_refund')
+				AND post_status NOT IN ('auto-draft', 'trash')
+				AND (
+					post_modified_gmt > %s
+					OR (post_modified_gmt = %s AND ID > %d)
+				)
+				ORDER BY post_modified_gmt ASC, ID ASC
+				LIMIT %d",
+				$last_date,
+				$last_date,
+				$last_id,
+				$limit
+			)
+		);
 	}
 
 	/**
