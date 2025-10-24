@@ -104,7 +104,7 @@ abstract class WC_Data {
 	 * Stores additional meta data.
 	 *
 	 * @since 3.0.0
-	 * @var array
+	 * @var WC_Meta_Data[]|null
 	 */
 	protected $meta_data = null;
 
@@ -722,19 +722,25 @@ abstract class WC_Data {
 	 */
 	public function set_id( $id ) {
 		$id = absint( $id );
-		if ( $id !== $this->id ) {
-			if ( 0 !== $this->id ) {
-				if ( ! empty( $this->meta_data ) ) {
-					foreach ( $this->meta_data as $array_key => $meta ) {
-						$this->meta_data[ $array_key ] = clone $meta;
-						if ( ! empty( $meta->id ) ) {
-							$this->meta_data[ $array_key ]->id = null;
-						}
-					}
+		if ( $id === $this->id ) {
+			return;
+		}
+
+		if ( 0 !== $this->id && ! empty( $this->meta_data ) ) {
+			/**
+			 * Clone meta data objects to prevent shared references between the original
+			 * and new entity. Reset meta IDs to null so they're saved as new database
+			 * records rather than updating the original object's meta.
+			 */
+			foreach ( $this->meta_data as $array_key => $meta ) {
+				$this->meta_data[ $array_key ] = clone $meta;
+				if ( ! empty( $meta->id ) ) {
+					$this->meta_data[ $array_key ]->id = null;
 				}
 			}
-			$this->id = $id;
 		}
+
+		$this->id = $id;
 	}
 
 	/**
