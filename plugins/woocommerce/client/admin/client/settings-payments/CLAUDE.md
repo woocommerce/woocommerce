@@ -47,12 +47,28 @@ settings-payments/
 ### Security: Disabled/Unsupported Features
 
 When features are disabled or unsupported, use **minimal props** to avoid exposing sensitive actions:
-- Empty strings for URLs (`onboardingHref=""`)
+- Placeholder URLs for disabled links (`onboardingHref="#"`)
 - No-op functions for callbacks (`setOnboardingModalOpen={() => {}}`)
-- Omit sensitive props (`onboardingType`, `incentive`, `acceptIncentive`)
+- Conditionally spread sensitive props only when enabled (use spread operator pattern)
 - Explicitly set `disabled={true}`
 
-**Rationale**: Prevents inadvertent triggering of onboarding actions even if button is somehow activated.
+**Pattern for conditional props**:
+```tsx
+<Component
+	{ ...baseProps }
+	href={ enabled ? realUrl : '#' }
+	disabled={ ! enabled }
+	{ ...( enabled && {
+		sensitiveActionProp,
+		otherSensitiveProp,
+	} ) }
+/>
+```
+
+**Rationale**:
+- Prevents inadvertent triggering of onboarding actions even if button is somehow activated
+- Placeholder `#` is safer than empty string `""` if disabled state is bypassed
+- Spread operator ensures sensitive props are only present when feature is enabled
 
 ### Component Architecture Pattern
 
@@ -193,6 +209,36 @@ describe( 'ComponentName', () => {
 } );
 ```
 
+### Test Naming
+
+**CRITICAL**: Test names must accurately describe what the test actually verifies.
+
+**Bad** (misleading):
+```typescript
+it( 'passes installingPlugin to child components', () => {
+	// Only verifies component renders, doesn't check prop passing
+	render( <Component installingPlugin="test" /> );
+	expect( getByTestId( 'child' ) ).toBeInTheDocument();
+} );
+```
+
+**Good** (honest):
+```typescript
+it( 'renders without error when installingPlugin prop is provided', () => {
+	// Accurately describes what we're testing
+	render( <Component installingPlugin="test" /> );
+	expect( getByTestId( 'child' ) ).toBeInTheDocument();
+} );
+```
+
+**Why this matters**:
+- Prevents false confidence in test coverage
+- Makes it clear when tests need enhancement
+- Helps future developers understand actual coverage gaps
+- To truly verify prop passing, you'd need mock inspection infrastructure
+
+**Pattern**: Name tests for what they verify, not what you wish they verified.
+
 ### Testing State Variations
 
 Use the mock helper to test different states:
@@ -217,15 +263,73 @@ it( 'shows status for unsupported gateway', () => {
 3. Conditional rendering (badges, buttons based on state)
 4. WooPayments-specific behavior
 5. Props handling and callbacks
+6. **Edge cases and error conditions** (see below)
+
+### Edge Case Testing (Critical for Defensive Coding)
+
+Always include tests for defensive coding scenarios to prevent runtime errors:
+
+**Missing optional fields:**
+```typescript
+it( 'handles missing gateway icon gracefully', () => {
+	const gateway = createMockGateway( { icon: undefined } );
+	const { container } = render( <Component gateway={ gateway } /> );
+	// Verify component doesn't crash.
+	expect( container.querySelector( '.icon' ) ).not.toBeInTheDocument();
+} );
+```
+
+**Undefined nested objects:**
+```typescript
+it( 'handles undefined supports array', () => {
+	const gateway = createMockGateway( { supports: undefined } );
+	// Component should render without crashing.
+	render( <Component gateway={ gateway } /> );
+} );
+```
+
+**Invalid or conflicting state combinations:**
+```typescript
+it( 'handles conflicting state flags gracefully', () => {
+	const gateway = createMockGateway( {
+		state: {
+			enabled: true,
+			account_connected: false,
+			needs_setup: true,
+			// ... conflicting flags
+		},
+	} );
+	// Component should prioritize and handle gracefully.
+	render( <Component gateway={ gateway } /> );
+} );
+```
+
+**Common edge cases to test:**
+- Missing `icon`, `description`, `_suggestion_id`, `_incentive`
+- `null` values in nested objects (e.g., `messages.not_supported`)
+- Empty arrays (`supports: []`)
+- `undefined` arrays or objects
+- Conflicting boolean state flags
+- Empty strings vs `null` vs `undefined`
+
+**Why edge case testing matters:**
+- Prevents crashes from unexpected API responses
+- Validates defensive coding patterns
+- Ensures graceful degradation
+- Documents expected behavior under error conditions
+- Catches regressions when refactoring null checks
 
 ### Code Quality Checklist
 
 Before committing tests, verify:
 - ✅ No `any` types - use proper TypeScript interfaces
 - ✅ Import order: external dependencies before internal
-- ✅ ESLint disable directives include inline documentation
+- ✅ ESLint disable directives include inline documentation (with proper punctuation)
+- ✅ **All inline comments end with proper punctuation (periods)**
 - ✅ All URLs use HTTPS (never HTTP)
 - ✅ Mock components have proper type definitions
+- ✅ Test names accurately describe what they verify
+- ✅ **Edge case tests included** (undefined/null values, missing fields, conflicting states)
 - ✅ Tests pass: `pnpm run test:js -- [test-file]`
 - ✅ No linting errors: `pnpm run lint:lang:js -- [test-file]`
 

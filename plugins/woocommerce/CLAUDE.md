@@ -30,8 +30,8 @@
 # PHP Tests
 pnpm run test:php:env -- --filter TestClassName
 
-# JavaScript Tests (from plugin root)
-pnpm run test:client -- status-badge.test.tsx
+# JavaScript Tests (run from client/admin directory)
+cd client/admin && pnpm run test:js -- status-badge.test.tsx
 
 # PHP Linting
 pnpm run lint:php
@@ -96,20 +96,23 @@ pnpm run test:php:env -- --coverage-text
 
 ### JavaScript/Jest Tests
 
-To run JavaScript tests for the admin client:
+To run JavaScript tests for the admin client, navigate to the `client/admin` directory:
 
 ```bash
+# Navigate to client/admin directory first
+cd client/admin
+
 # Run all JavaScript tests
-pnpm run test:client
+pnpm run test:js
 
 # Run tests in watch mode
-pnpm run test:client -- --watch
+pnpm run test:js -- --watch
 
 # Run a specific test file
-pnpm run test:client -- status-badge.test.tsx
+pnpm run test:js -- status-badge.test.tsx
 
 # Run tests with coverage
-pnpm run test:client -- --coverage
+pnpm run test:js -- --coverage
 ```
 
 For detailed Jest configuration and testing patterns, see `client/admin/CLAUDE.md`.

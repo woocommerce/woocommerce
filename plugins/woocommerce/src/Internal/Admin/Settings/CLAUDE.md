@@ -86,6 +86,45 @@ $schema = array(
 | WooPaymentsRestController.php | 1107 | `type: enum` | Changed to `type: string` |
 | WooPaymentsRestController.php | 1246 | `type: enum` | Changed to `type: string` |
 
+## Known Issues (Incomplete Schemas)
+
+### onboarding.state Schema (PaymentsRestController.php:880-884)
+
+The `onboarding.state` field has an incomplete schema definition:
+
+**Current schema:**
+```php
+'state' => array(
+    'type'        => 'object',
+    'description' => esc_html__( 'The state of the onboarding process.', 'woocommerce' ),
+    'context'     => array( 'view', 'edit' ),
+    // Missing: properties, readonly
+),
+```
+
+**Actual implementation** (PaymentGateway.php:76-81):
+```php
+'state' => array(
+    'supported' => $onboarding_supported,  // boolean
+    'started'   => $this->is_onboarding_started( $gateway ),  // boolean
+    'completed' => $this->is_onboarding_completed( $gateway ),  // boolean
+    'test_mode' => $this->is_in_test_mode_onboarding( $gateway ),  // boolean
+),
+```
+
+**Issues:**
+1. Schema lacks `properties` definition constraining object structure
+2. Missing `readonly` flag (inconsistent with other onboarding fields: `type`, `messages`, `steps`, `_links`)
+3. No `required` array to indicate which fields are optional
+4. No type validation for the boolean fields
+
+**Impact:**
+- API clients cannot rely on schema for validation
+- Object structure depends on provider implementation
+- No schema-level guarantees about field presence or types
+
+**Note:** The `onboarding.messages.not_supported` field contains the reason when `onboarding.state.supported` is `false`.
+
 ## Validation Checklist
 
 **Before committing schema changes:**
@@ -120,6 +159,8 @@ grep -B2 "'type'.*=>.*'object'" *.php | grep -A2 "'items'"
 - Plugin: `plugin.{slug, status, file, _type}`
 - State: `state.{enabled, account_connected, needs_setup, test_mode, dev_mode}`
 - Onboarding: `onboarding.{type, state, messages, steps, _links}`
+  - `state` fields (no schema validation): `{supported, started, completed, test_mode}`
+  - `messages.not_supported`: Populated when `state.supported` is `false`
 - Management: `management._links.settings.href`
 - Metadata: `_suggestion_id`, `_incentive`
 
@@ -139,7 +180,7 @@ array(
 | File | Endpoint | Key Methods |
 |------|----------|-------------|
 | PaymentsRestController.php | `/wc-admin/settings/payments/*` | `get_providers()`, `set_country()`, `update_providers_order()` |
-| WooPaymentsRestController.php | `/wc-admin/settings/payments/providers/woopayments/*` | `get_onboarding_data()` |
+| WooPaymentsRestController.php | `/wc-admin/settings/payments/providers/woopayments/*` | `get_onboarding_details()` |
 | Payments.php | N/A (business logic) | `get_payment_providers()`, `get_payment_extension_suggestions()` |
 
 ## Linting
