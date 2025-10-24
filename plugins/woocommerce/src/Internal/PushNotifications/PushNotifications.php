@@ -36,7 +36,7 @@ class PushNotifications {
 	 *
 	 * @return void
 	 */
-	public function register() {
+	public function register(): void {
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}

@@ -211,6 +211,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}

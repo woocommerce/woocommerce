@@ -373,6 +373,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 						token_meta.meta_value = %s
 						{$device_uuid_condition}
 					)
+				ORDER BY posts.ID DESC
 				LIMIT 1",
 				...$params
 			)

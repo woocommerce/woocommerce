@@ -8,13 +8,14 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Exception;
 use InvalidArgumentException;
+use WC_Unit_Test_Case;
 
 /**
  * Tests for the PushTokensDataStore class.
  *
  * @package WooCommerce\Tests\PushNotifications
  */
-class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
+class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	/**
 	 * Tear down the test case.
 	 */

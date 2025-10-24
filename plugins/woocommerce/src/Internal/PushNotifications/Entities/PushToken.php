@@ -82,8 +82,13 @@ class PushToken {
 	 * Sets the ID.
 	 *
 	 * @param int $id The id of the token post.
+	 * @throws InvalidArgumentException If ID is <= 0.
 	 */
 	public function set_id( int $id ) {
+		if ( $id <= 0 ) {
+			throw new InvalidArgumentException( 'ID must be a positive integer.' );
+		}
+
 		$this->id = $id;
 	}
 
@@ -91,8 +96,13 @@ class PushToken {
 	 * Sets the user ID.
 	 *
 	 * @param int $user_id The id of the user who owns the token.
+	 * @throws InvalidArgumentException If ID is <= 0.
 	 */
 	public function set_user_id( int $user_id ) {
+		if ( $user_id <= 0 ) {
+			throw new InvalidArgumentException( 'User ID must be a positive integer.' );
+		}
+
 		$this->user_id = $user_id;
 	}
 
