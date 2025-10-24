@@ -527,7 +527,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT id, date_updated_gmt
 				FROM {$orders_table}
 				WHERE type IN ('shop_order', 'shop_order_refund')
-				AND status NOT IN ('auto-draft', 'trash')
+				AND status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
@@ -562,7 +562,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
-				AND post_status NOT IN ('auto-draft', 'trash')
+				AND post_status NOT IN ('wc-auto-draft', 'auto-draft', 'trash')
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)

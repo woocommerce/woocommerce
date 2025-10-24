@@ -103,10 +103,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		// Ensure option doesn't exist.
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 
-		// Enable batch mode to trigger initialization.
-		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_false' );
-
-		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
 
 		$last_date = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 
@@ -134,10 +131,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$existing_date = '2024-01-01 12:00:00';
 		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, $existing_date );
 
-		// Enable batch mode to trigger initialization.
-		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_false' );
-
-		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
 
 		$last_date = get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 
