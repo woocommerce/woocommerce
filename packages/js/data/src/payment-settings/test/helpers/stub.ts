@@ -78,9 +78,13 @@ export const providersStub: PaymentsProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: false,
 				completed: false,
 				test_mode: true,
+			},
+			messages: {
+				not_supported: null,
 			},
 			_links: {
 				onboard: {
@@ -189,6 +193,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
@@ -232,6 +237,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
@@ -275,6 +281,7 @@ export const offlinePaymentGatewaysStub: OfflinePaymentMethodProvider[] = [
 		},
 		onboarding: {
 			state: {
+				supported: true,
 				started: true,
 				completed: true,
 				test_mode: false,
