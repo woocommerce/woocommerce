@@ -588,13 +588,23 @@ trait RestApiCache {
 		$cache_hash_data = array();
 
 		foreach ( $filter_names as $filter_name ) {
-			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$cache_hash_data[ $filter_name ] = array();
+			if ( empty( $wp_filter[ $filter_name ] ) ) {
+				continue;
+			}
 
-				foreach ( $wp_filter[ $filter_name ]->callbacks as $priority => $callbacks ) {
-					$cache_hash_data[ $filter_name ][ $priority ] = array_values(
-						wp_list_pluck( $callbacks, 'function' )
-					);
+			$cache_hash_data[ $filter_name ] = array();
+			$callbacks_by_priority           = $wp_filter[ $filter_name ]->callbacks ?? array();
+
+			foreach ( $callbacks_by_priority as $priority => $callbacks ) {
+				$normalized = array();
+				foreach ( $callbacks as $cb ) {
+					if ( ! isset( $cb['function'] ) ) {
+						continue;
+					}
+					$normalized[] = $this->normalize_callback_for_hash( $cb['function'] );
+				}
+				if ( $normalized ) {
+					$cache_hash_data[ $filter_name ][ $priority ] = array_values( array_unique( $normalized ) );
 				}
 			}
 		}
@@ -616,6 +626,37 @@ trait RestApiCache {
 		);
 
 		return md5( wp_json_encode( $cache_hash_data ) );
+	}
+
+	/**
+	 * Normalize a hook callback into a stable string for hashing.
+	 *
+	 * Converts various callback types to stable string representations to ensure
+	 * consistent hash generation across requests. This prevents spurious cache
+	 * invalidations caused by callback serialization inconsistencies.
+	 *
+	 * @param mixed $callback A WordPress hook callback.
+	 * @return string Normalized callback representation.
+	 */
+	private function normalize_callback_for_hash( $callback ): string {
+		if ( is_string( $callback ) ) {
+			return $callback;
+		}
+
+		if ( is_array( $callback ) && 2 === count( $callback ) ) {
+			$class = is_object( $callback[0] ) ? get_class( $callback[0] ) : $callback[0];
+			return "{$class}::{$callback[1]}";
+		}
+
+		if ( $callback instanceof \Closure ) {
+			return 'Closure@' . spl_object_hash( $callback );
+		}
+
+		if ( is_object( $callback ) ) {
+			return get_class( $callback ) . '::__invoke';
+		}
+
+		return 'unknown_callback';
 	}
 
 	/**
