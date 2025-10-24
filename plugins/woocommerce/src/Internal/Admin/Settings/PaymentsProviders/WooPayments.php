@@ -394,37 +394,6 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
-	 * Get the list of supported country codes for WooPayments.
-	 *
-	 * @return array|null The list of supported countries as ISO 3166-1 alpha-2 country codes.
-	 *                    The country codes are normalized in uppercase.
-	 *                    If the list cannot be retrieved, null is returned.
-	 */
-	public function get_supported_country_codes(): ?array {
-		try {
-			if ( class_exists( '\WC_Payments_Utils' ) &&
-				 is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
-
-				$supported_country_codes = \WC_Payments_Utils::supported_countries();
-				if ( is_array( $supported_country_codes ) ) {
-					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
-				}
-			}
-		} catch ( Throwable $e ) {
-			// This is not a critical error, so we just ignore it.
-			// Log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->error(
-				'Failed to get the WooPayments supported country codes list: ' . $e->getMessage(),
-				array(
-					'source' => 'settings-payments',
-				)
-			);
-		}
-
-		return null;
-	}
-
-	/**
 	 * Try to determine if the payment gateway is in test mode onboarding (aka sandbox or test-drive).
 	 *
 	 * This is a best-effort attempt, as there is no standard way to determine this.
@@ -680,5 +649,36 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the list of supported country codes for WooPayments.
+	 *
+	 * @return array|null The list of supported countries as ISO 3166-1 alpha-2 country codes.
+	 *                    The country codes are normalized in uppercase.
+	 *                    If the list cannot be retrieved, null is returned.
+	 */
+	private function get_supported_country_codes(): ?array {
+		try {
+			if ( class_exists( '\WC_Payments_Utils' ) &&
+				 is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+
+				$supported_country_codes = \WC_Payments_Utils::supported_countries();
+				if ( is_array( $supported_country_codes ) ) {
+					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
+				}
+			}
+		} catch ( Throwable $e ) {
+			// This is not a critical error, so we just ignore it.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WooPayments supported country codes list: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
+
+		return null;
 	}
 }
