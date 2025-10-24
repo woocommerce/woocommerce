@@ -66,7 +66,7 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $recommended_payment_methods = array();
 
 	/**
-	 * Whether or not this gateway still requires setup to function.
+	 * Whether this gateway still requires setup to function.
 	 *
 	 * @var bool
 	 */
@@ -145,7 +145,7 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Return whether or not this gateway still requires setup to function.
+	 * Return whether this gateway still requires setup to function.
 	 *
 	 * @return bool
 	 */
