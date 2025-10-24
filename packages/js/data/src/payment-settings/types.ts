@@ -70,6 +70,7 @@ export type RecommendedPaymentMethod = {
 };
 
 export type PaymentsProviderOnboardingState = {
+	supported: boolean;
 	started: boolean;
 	completed: boolean;
 	test_mode: boolean;
@@ -127,6 +128,9 @@ export type PaymentGatewayProvider = PaymentsProvider & {
 	state: PaymentsProviderState;
 	onboarding: {
 		state: PaymentsProviderOnboardingState;
+		messages: {
+			not_supported: string | null;
+		};
 		_links: {
 			onboard: LinkData;
 			reset: LinkData;
