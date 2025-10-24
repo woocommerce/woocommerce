@@ -79,8 +79,7 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 		} else {
-			// New behavior: Schedule recurring batch processor.
-			self::schedule_recurring_batch_processor();
+			add_action( 'init', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
 		}
 
 		OrdersStatsDataStore::init();
@@ -357,7 +356,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 *
 	 * @internal
 	 */
-	private static function schedule_recurring_batch_processor() {
+	public static function schedule_recurring_batch_processor() {
 		// Initialize last processed date if not set.
 		self::initialize_last_processed_date();
 
@@ -408,6 +407,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	public static function process_pending_batch() {
 		$logger = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
+
+		if ( self::is_importing() ) {
+			// No need to process if an import is already in progress.
+			$logger->info( 'Import is already in progress, skipping batch import.' );
+			return;
+		}
 
 		$last_processed_order_modified_date = get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
 		$last_processed_order_id = (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
