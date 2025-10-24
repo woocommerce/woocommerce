@@ -404,18 +404,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 *
 	 * @internal
 	 */
-	public static function process_pending_batch() {
+	public static function process_pending_batch( $last_processed_order_modified_date = null, $last_processed_order_id = null ) {
 		$logger = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
 
 		if ( self::is_importing() ) {
 			// No need to process if an import is already in progress.
-			$logger->info( 'Import is already in progress, skipping batch import.' );
+			$logger->info( 'Import is already in progress, skipping batch import.', $context );
 			return;
 		}
 
-		$last_processed_order_modified_date = get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
-		$last_processed_order_id = (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+		$last_processed_order_modified_date = $last_processed_order_modified_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
+		$last_processed_order_id = $last_processed_order_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
 		if ( ! $last_processed_order_modified_date || ! strtotime( $last_processed_order_modified_date ) ) {
 			$logger->error( 'Invalid last processed date: ' . $last_processed_order_modified_date, $context );
