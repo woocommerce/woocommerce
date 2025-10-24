@@ -65,6 +65,10 @@ interface CompleteSetupButtonProps {
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
 	incentive?: PaymentsProviderIncentive | null;
+	/**
+	 * Whether the button should be disabled.
+	 */
+	disabled?: boolean;
 }
 
 /**
@@ -83,6 +87,7 @@ export const CompleteSetupButton = ( {
 	onboardingType,
 	acceptIncentive = () => {},
 	incentive = null,
+	disabled = false,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
@@ -161,7 +166,7 @@ export const CompleteSetupButton = ( {
 				key={ gatewayProvider.id }
 				variant="primary"
 				isBusy={ isUpdating }
-				disabled={ isUpdating || !! installingPlugin }
+				disabled={ disabled || isUpdating || !! installingPlugin }
 				onClick={ completeSetup }
 			>
 				{ buttonText }
