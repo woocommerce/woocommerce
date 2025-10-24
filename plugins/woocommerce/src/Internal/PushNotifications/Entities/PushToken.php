@@ -106,12 +106,16 @@ class PushToken {
 	}
 
 	/**
-	 * Sets the device UUID.
+	 * Sets the device UUID, normalize empty (non zero) values to null.
 	 *
 	 * @param string|null $device_uuid The UUID of the device that generated the token.
 	 */
 	public function set_device_uuid( ?string $device_uuid ) {
-		$this->device_uuid = $device_uuid;
+		if ( null !== $device_uuid ) {
+			$device_uuid = trim( $device_uuid );
+		}
+
+		$this->device_uuid = ( '' === $device_uuid ) ? null : $device_uuid;
 	}
 
 	/**

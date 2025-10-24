@@ -107,6 +107,40 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that enablement state is cached within an instance.
+	 */
+	public function test_it_caches_enablement_state_correctly() {
+		// First instance with Jetpack disconnected - should return false.
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+		$push_notifications = new PushNotifications();
+
+		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should be disabled when Jetpack is not connected' );
+
+		// Second call should return cached false without calling is_connected again.
+		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should return cached false value' );
+
+		// Create a new instance with Jetpack connected.
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
+		$push_notifications_2 = new PushNotifications();
+
+		// Should now return true with the new instance.
+		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should be enabled with new instance when Jetpack connected' );
+
+		// Subsequent call should return cached true.
+		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
+	}
+
+	/**
 	 * Sets up the Jetpack connection manager mocking.
 	 *
 	 * @param array $methods The methods that will be mocked.

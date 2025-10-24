@@ -25,6 +25,13 @@ class PushNotifications {
 	);
 
 	/**
+	 * 'Memoized' enablement flag.
+	 *
+	 * @var bool|null
+	 */
+	private ?bool $enabled = null;
+
+	/**
 	 * Loads the push notifications class.
 	 *
 	 * @return void
@@ -44,15 +51,19 @@ class PushNotifications {
 	 * @return bool
 	 */
 	public function should_be_enabled(): bool {
-		$proxy = wc_get_container()->get( LegacyProxy::class );
+		if ( null === $this->enabled ) {
+			$proxy = wc_get_container()->get( LegacyProxy::class );
 
-		if (
-			! class_exists( JetpackConnectionManager::class )
-			|| ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
-		) {
-			return false;
+			if (
+				! class_exists( JetpackConnectionManager::class )
+				|| ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
+			) {
+				$this->enabled = false;
+			} else {
+				$this->enabled = true;
+			}
 		}
 
-		return true;
+		return $this->enabled;
 	}
 }

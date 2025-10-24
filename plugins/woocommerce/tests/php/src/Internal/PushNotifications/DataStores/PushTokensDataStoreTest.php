@@ -414,6 +414,26 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( $browser_token_1->get_id(), $found_token->get_id(), 'Should match browser_token_1 ID' );
 		$this->assertEquals( $browser_token_1->get_token(), $found_token->get_token(), 'Should match browser_token_1 token' );
 		$this->assertNotEquals( $browser_token_2->get_id(), $found_token->get_id(), 'Should not match browser_token_2 ID' );
+
+		// Now search with a DIFFERENT token - should return null, not match by empty device_uuid.
+		$different_token = new PushToken();
+		$different_token->set_user_id( 1 );
+		$different_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$different_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$different_token->set_token(
+			wp_json_encode(
+				array(
+					'endpoint' => 'https://example.com/push/subscription3',
+					'keys'     => array(
+						'auth'   => 'a3',
+						'p256dh' => 'p3',
+					),
+				)
+			)
+		);
+
+		$found = $data_store->get_by_token_or_device_id( $different_token );
+		$this->assertNull( $found, 'Should not match existing tokens by empty device_uuid' );
 	}
 
 	/**

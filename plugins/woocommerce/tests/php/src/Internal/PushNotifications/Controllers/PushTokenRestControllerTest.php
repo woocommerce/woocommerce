@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use ReflectionClass;
 use WC_REST_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
@@ -37,6 +38,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		$this->reset_push_notifications_cache();
 
 		( new PushTokenRestController() )->register_routes();
 
@@ -327,7 +330,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'token', str_repeat( 'A', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid-uppercase' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -965,7 +968,9 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Sets up the Jetpack connection manager mocking.
+	 * Sets up the Jetpack connection manager mocking, and ensures the
+	 * PushNotifications class state is reset so `should_be_enabled` calculates
+	 * this from scratch.
 	 *
 	 * @param bool $is_connected Whether the manager should report Jetpack is connected or not.
 	 */
@@ -984,5 +989,20 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'is_connected' )
 			->willReturn( $is_connected );
+
+		$this->reset_push_notifications_cache();
+	}
+
+	/**
+	 * Resets the cached enablement state on the container's PushNotifications
+	 * instance.
+	 */
+	private function reset_push_notifications_cache() {
+		$push_notifications = wc_get_container()->get( PushNotifications::class );
+		$reflection         = new ReflectionClass( $push_notifications );
+		$property           = $reflection->getProperty( 'enabled' );
+
+		$property->setAccessible( true );
+		$property->setValue( $push_notifications, null );
 	}
 }
