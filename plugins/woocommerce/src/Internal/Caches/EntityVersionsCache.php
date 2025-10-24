@@ -59,8 +59,11 @@ class EntityVersionsCache {
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id Entity ID.
 	 * @return string Entity version.
+	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
 	 */
 	public function get_entity_version( string $entity_type, $entity_id ): string {
+		$this->validate_input( $entity_type, $entity_id );
+
 		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
 		$version        = $this->get_cached( $transient_name );
 		if ( false === $version ) {
@@ -78,8 +81,11 @@ class EntityVersionsCache {
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id   Entity ID.
 	 * @return string The new entity version.
+	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
 	 */
 	public function modify_entity_version( string $entity_type, $entity_id ): string {
+		$this->validate_input( $entity_type, $entity_id );
+
 		$version = wp_generate_uuid4();
 		$this->store_entity_version( $entity_type, $entity_id, $version, true );
 		return $version;
@@ -106,7 +112,9 @@ class EntityVersionsCache {
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl    = apply_filters( 'woocommerce_cached_entity_version_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
+		$ttl = apply_filters( 'woocommerce_cached_entity_version_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
+		$ttl = max( 0, (int) $ttl );
+
 		$result = $this->set_cached( $transient_name, $version, $ttl );
 
 		/**
@@ -130,8 +138,11 @@ class EntityVersionsCache {
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id   Entity ID.
 	 * @return bool True on success, false on failure.
+	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
 	 */
 	public function forget_entity_version( string $entity_type, $entity_id ): bool {
+		$this->validate_input( $entity_type, $entity_id );
+
 		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
 		$result         = $this->delete_cached( $transient_name );
 
@@ -146,6 +157,28 @@ class EntityVersionsCache {
 		do_action( 'woocommerce_entity_version_cache_deleted', $entity_type, $entity_id );
 
 		return $result;
+	}
+
+	/**
+	 * Validate entity type and entity ID inputs.
+	 *
+	 * @param string     $entity_type Entity type.
+	 * @param string|int $entity_id   Entity ID.
+	 * @return void
+	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
+	 */
+	private function validate_input( string $entity_type, $entity_id ): void {
+		if ( '' === $entity_type ) {
+			throw new \InvalidArgumentException( 'Entity type cannot be empty.' );
+		}
+
+		if ( ! is_numeric( $entity_id ) && ! is_string( $entity_id ) ) {
+			throw new \InvalidArgumentException( 'Entity ID must be a number or a string.' );
+		}
+
+		if ( is_string( $entity_id ) && '' === $entity_id ) {
+			throw new \InvalidArgumentException( 'Entity ID cannot be an empty string.' );
+		}
 	}
 
 	/**

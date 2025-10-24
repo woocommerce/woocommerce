@@ -460,6 +460,128 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_entity_version throws InvalidArgumentException when entity_type is empty.
+	 */
+	public function test_get_entity_version_throws_on_empty_entity_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity type cannot be empty.' );
+
+		$this->sut->get_entity_version( '', 123 );
+	}
+
+	/**
+	 * @testdox get_entity_version throws InvalidArgumentException when entity_id is empty string.
+	 */
+	public function test_get_entity_version_throws_on_empty_entity_id() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID cannot be an empty string.' );
+
+		$this->sut->get_entity_version( 'product', '' );
+	}
+
+	/**
+	 * @testdox get_entity_version throws InvalidArgumentException when entity_id is invalid type.
+	 */
+	public function test_get_entity_version_throws_on_invalid_entity_id_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID must be a number or a string.' );
+
+		$this->sut->get_entity_version( 'product', array( 123 ) );
+	}
+
+	/**
+	 * @testdox modify_entity_version throws InvalidArgumentException when entity_type is empty.
+	 */
+	public function test_modify_entity_version_throws_on_empty_entity_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity type cannot be empty.' );
+
+		$this->sut->modify_entity_version( '', 123 );
+	}
+
+	/**
+	 * @testdox modify_entity_version throws InvalidArgumentException when entity_id is empty string.
+	 */
+	public function test_modify_entity_version_throws_on_empty_entity_id() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID cannot be an empty string.' );
+
+		$this->sut->modify_entity_version( 'product', '' );
+	}
+
+	/**
+	 * @testdox modify_entity_version throws InvalidArgumentException when entity_id is invalid type.
+	 */
+	public function test_modify_entity_version_throws_on_invalid_entity_id_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID must be a number or a string.' );
+
+		$this->sut->modify_entity_version( 'product', null );
+	}
+
+	/**
+	 * @testdox forget_entity_version throws InvalidArgumentException when entity_type is empty.
+	 */
+	public function test_forget_entity_version_throws_on_empty_entity_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity type cannot be empty.' );
+
+		$this->sut->forget_entity_version( '', 123 );
+	}
+
+	/**
+	 * @testdox forget_entity_version throws InvalidArgumentException when entity_id is empty string.
+	 */
+	public function test_forget_entity_version_throws_on_empty_entity_id() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID cannot be an empty string.' );
+
+		$this->sut->forget_entity_version( 'product', '' );
+	}
+
+	/**
+	 * @testdox forget_entity_version throws InvalidArgumentException when entity_id is invalid type.
+	 */
+	public function test_forget_entity_version_throws_on_invalid_entity_id_type() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Entity ID must be a number or a string.' );
+
+		$this->sut->forget_entity_version( 'product', true );
+	}
+
+	/**
+	 * @testdox Negative TTL from filter is converted to 0.
+	 */
+	public function test_negative_ttl_is_converted_to_zero() {
+		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter
+
+		add_filter(
+			'woocommerce_cached_entity_version_ttl',
+			function ( $ttl, $entity_type, $entity_id ) {
+				return -100;
+			},
+			10,
+			3
+		);
+
+		$captured_ttl = null;
+		add_action(
+			'woocommerce_entity_version_cached',
+			function ( $entity_type, $entity_id, $ttl, $is_new ) use ( &$captured_ttl ) {
+				$captured_ttl = $ttl;
+			},
+			10,
+			4
+		);
+
+		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
+
+		$this->sut->modify_entity_version( 'product', 123 );
+
+		$this->assertEquals( 0, $captured_ttl, 'Negative TTL should be converted to 0' );
+	}
+
+	/**
 	 * Create an instance of EntityVersionsCache that uses
 	 * local storage instead of transients.
 	 *
