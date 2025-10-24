@@ -48,7 +48,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		unset( $this->user_id );
 		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( array() );
 		parent::tearDown();
 	}
@@ -90,7 +89,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'test_android_token_123' );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid-456' );
-		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
 
 		$response = $this->server->dispatch( $request );
 
@@ -180,7 +179,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
-		$token_value = str_repeat( 'b', 64 );
+		$token_value = str_repeat( 'a', 64 );
 
 		/**
 		 * Create initial token.
@@ -229,7 +228,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 * Create initial token.
 		 */
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'c', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -244,7 +243,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 * Create again with different token but same device UUID.
 		 */
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'd', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', $device_uuid );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -263,7 +262,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_it_cannot_create_push_token_without_authentication() {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'e', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -283,7 +282,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'e', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -303,7 +302,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'f', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid-admin' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -328,7 +327,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'A', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid-uppercase' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -453,7 +452,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', 'invalid token with spaces' );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
-		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
 
 		$response = $this->server->dispatch( $request );
 
@@ -476,7 +475,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'token', str_repeat( 'a', 4097 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_ANDROID );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
-		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
 
 		$response = $this->server->dispatch( $request );
 
@@ -612,6 +611,38 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test it cannot create a push token for browser if the token is too long.
+	 */
+	public function test_it_cannot_create_push_token_if_browser_token_is_too_long() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$browser_token = wp_json_encode(
+			array(
+				'endpoint' => 'https://example.com/push/' . str_repeat( 'a', 4000 ),
+				'keys'     => array(
+					'auth'   => 'test_auth_key',
+					'p256dh' => 'test_p256_key',
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', $browser_token );
+		$request->set_param( 'platform', PushToken::PLATFORM_BROWSER );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+	}
+
+	/**
 	 * Test it cannot create a push token without required token parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_token() {
@@ -642,7 +673,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'f', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
@@ -665,7 +696,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'g', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
@@ -712,7 +743,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->mock_jetpack_connection_manager_is_connected( true );
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
-		$request->set_param( 'token', str_repeat( 'h', 64 ) );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
 		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
 		$request->set_param( 'device_uuid', 'test-device-uuid' );
 
@@ -761,7 +792,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		 */
 		$push_token = new PushToken();
 		$push_token->set_user_id( $this->user_id );
-		$push_token->set_token( str_repeat( 'i', 64 ) );
+		$push_token->set_token( str_repeat( 'a', 64 ) );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'device-to-delete' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
@@ -818,7 +849,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$push_token = new PushToken();
 		$push_token->set_user_id( $other_user_id );
-		$push_token->set_token( str_repeat( 'j', 64 ) );
+		$push_token->set_token( str_repeat( 'a', 64 ) );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'device-other-user' );
 		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );

@@ -146,7 +146,14 @@ class PushTokenRestController extends RestApiControllerBase {
 			$request->get_param( 'platform' ) === PushToken::PLATFORM_IOS
 			&& ! preg_match( '/^[A-Fa-f0-9]{64}$/', $token )
 		) {
-			return new WP_Error( 'rest_invalid_param', 'Invalid push token format.' );
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid push token format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param' => 'token'
+				)
+			);
 		}
 
 		if (
@@ -156,7 +163,14 @@ class PushTokenRestController extends RestApiControllerBase {
 				|| strlen( $token ) > 4096
 			)
 		) {
-			return new WP_Error( 'rest_invalid_param', 'Invalid push token format.' );
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid push token format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param' => 'token'
+				)
+			);
 		}
 
 		if ( $request->get_param( 'platform' ) === PushToken::PLATFORM_BROWSER ) {
@@ -170,8 +184,16 @@ class PushTokenRestController extends RestApiControllerBase {
 				|| ! isset( $token_object['keys']['p256dh'] )
 				|| ! wp_http_validate_url( $endpoint )
 				|| ( wp_parse_url( $endpoint, PHP_URL_SCHEME ) !== 'https' )
+				|| strlen( $token ) > 4096
 			) {
-				return new WP_Error( 'rest_invalid_param', 'Invalid push token format.' );
+				return new WP_Error(
+					'rest_invalid_param',
+					'Invalid push token format.',
+					array(
+						'status' => WP_Http::BAD_REQUEST,
+						'param' => 'token'
+					)
+				);
 			}
 		}
 
@@ -191,7 +213,14 @@ class PushTokenRestController extends RestApiControllerBase {
 			! $device_uuid
 			&& $request->get_param( 'platform' ) !== PushToken::PLATFORM_BROWSER
 		) {
-			return new WP_Error( 'rest_missing_callback_param', 'Missing parameter(s): device_uuid.' );
+			return new WP_Error(
+				'rest_missing_callback_param',
+				'Missing parameter(s): device_uuid.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param' => 'device_uuid'
+				)
+			);
 		}
 
 		return true;
