@@ -20,12 +20,24 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Set up before each test.
+	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$this->sut = $this->create_test_entity_versions_cache();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_enable_entity_versions_cache' );
+		remove_all_filters( 'woocommerce_cached_entity_version_ttl' );
+		remove_all_actions( 'woocommerce_entity_version_cached' );
+		remove_all_actions( 'woocommerce_entity_version_cache_deleted' );
+		$this->sut = null;
+		parent::tearDown();
 	}
 
 	/**
