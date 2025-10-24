@@ -378,7 +378,8 @@ class AgenticCheckoutUtils {
 			);
 		}
 
-		$registry = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
+		$registry               = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
+		$authenticated_provider = null;
 
 		// Check each provider's bearer token.
 		foreach ( $registry as $provider_id => $provider_config ) {
@@ -387,11 +388,16 @@ class AgenticCheckoutUtils {
 			}
 
 			if ( wp_check_password( $provided_token, $provider_config['bearer_token'] ) ) {
-				if ( WC()->session ) {
-					WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $provider_id );
-				}
-				return true;
+				// Store and continue checking to minimize timing attack.
+				$authenticated_provider = $provider_id;
 			}
+		}
+
+		if ( null !== $authenticated_provider ) {
+			if ( WC()->session ) {
+				WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $authenticated_provider );
+			}
+			return true;
 		}
 
 		return new \WP_Error(
