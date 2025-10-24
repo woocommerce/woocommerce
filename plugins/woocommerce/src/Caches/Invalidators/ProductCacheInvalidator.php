@@ -79,9 +79,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		$this->invalidate(
 			$product_id,
 			$operation,
-			array(
-				'product' => $product,
-			)
 		);
 	}
 
@@ -98,15 +95,9 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			return;
 		}
 
-		$product = wc_get_product( $post_id );
-
 		$this->invalidate(
 			$post_id,
 			self::OPERATION_DELETE,
-			array(
-				'product'   => $product,
-				'post_type' => $post->post_type,
-			)
 		);
 	}
 
@@ -127,10 +118,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		$this->invalidate(
 			$post_id,
 			self::OPERATION_UPDATE,
-			array(
-				'product_id' => $post_id,
-				'post_type'  => $post_type,
-			)
 		);
 	}
 
@@ -144,7 +131,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	public function on_post_untrashed( int $post_id ): void {
 		$post_type = get_post_type( $post_id );
 
-		// Only handle product post types.
 		if ( ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
 			return;
 		}
@@ -152,10 +138,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		$this->invalidate(
 			$post_id,
 			self::OPERATION_UPDATE,
-			array(
-				'product_id' => $post_id,
-				'post_type'  => $post_type,
-			)
 		);
 	}
 
@@ -172,7 +154,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			$variation_id,
 			self::OPERATION_UPDATE,
 			array(
-				'product'   => $variation,
 				'parent_id' => $variation->get_parent_id(),
 			)
 		);
@@ -202,7 +183,6 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			$variation_id,
 			self::OPERATION_CREATE,
 			array(
-				'product'   => $variation,
 				'parent_id' => $variation->get_parent_id(),
 			)
 		);
@@ -234,8 +214,7 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 			$variation_id,
 			self::OPERATION_DELETE,
 			array(
-				'is_variation' => true,
-				'parent_id'    => $parent_id,
+				'parent_id' => $parent_id,
 			)
 		);
 
@@ -272,10 +251,8 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 		 * @param mixed      $context Optional additional context about the invalidation.
 		 *                           May include:
 		 *                           - 'product' (WC_Product object)
-		 *                           - 'is_variation' (bool) - Whether this is a variation
 		 *                           - 'parent_id' (int) - Parent product ID for variations
 		 *                           - 'variation_id' (int) - Variation ID when parent is notified
-		 *                           - 'post_type' (string) - The post type (for delete/trash/untrash)
 		 */
 		do_action( 'woocommerce_product_cache_invalidated', $product_id, $operation, $context );
 	}
