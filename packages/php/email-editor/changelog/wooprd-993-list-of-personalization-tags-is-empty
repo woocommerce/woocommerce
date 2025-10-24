@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refactor personalization tags fetching to use core entities

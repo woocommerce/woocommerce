@@ -588,18 +588,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$coupon->delete( true );
 	}
 
-	/**
-	 * @testdox should clear store_api_draft_order from session when cart is empty
-	 */
-	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
-		$cart     = WC()->cart;
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
-
-		$cart->set_session();
-
-		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
-	}
 
 	/**
 	 * @testdox should not clear store_api_draft_order from session when cart is not empty
@@ -609,7 +597,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$cart->add_to_cart( $product->get_id() );
-		$order_id = WC_Helper_Order::create_order()->save();
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'checkout-draft' );
+		$order_id = $order->save();
 		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
@@ -621,20 +611,33 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
 	}
 
+
 	/**
-	 * @testdox should clear store_api_draft_order from session and db when the cart is emptied
+	 * @testdox should NOT delete non-draft orders when clearing store_api_draft_order from session
 	 */
-	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
+	public function test_emptying_cart_should_not_delete_non_draft_orders() {
 		$cart = WC()->cart;
 
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
+		// Create a processing order (simulating a completed checkout).
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order_id = $order->save();
 
-		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+		// Simulate stale session data where order ID still exists in session.
+		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$cart->empty_cart();
 
+		// Session should be cleared.
 		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
+
+		// BUT the order should NOT be deleted.
+		$order = wc_get_order( $order_id );
+		$this->assertNotFalse( $order, 'Non-draft order should not be deleted' );
+		$this->assertEquals( 'processing', $order->get_status(), 'Order status should remain unchanged' );
+
+		// Clean up.
+		$order->delete( true );
 	}
 
 	/**

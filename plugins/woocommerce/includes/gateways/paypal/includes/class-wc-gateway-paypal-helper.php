@@ -50,15 +50,6 @@ class WC_Gateway_Paypal_Helper {
 	}
 
 	/**
-	 * Feature flag for Orders v2.
-	 *
-	 * @return bool
-	 */
-	public static function is_orders_v2_feature_flag_enabled() {
-		return false;
-	}
-
-	/**
 	 * Get the WC order from the PayPal custom ID.
 	 *
 	 * @param string $custom_id The custom ID string from the PayPal order.
