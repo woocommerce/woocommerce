@@ -152,6 +152,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * @param array     $args Not used, enforced by interface.
 	 * @return void
 	 * @throws InvalidArgumentException If the token can't be deleted.
+	 * @throws Exception If the item to delete is not a push token.
 	 */
 	public function delete( &$push_token, $args = array() ) {
 		if ( ! $push_token->can_be_deleted() ) {
@@ -160,6 +161,13 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				WP_Http::BAD_REQUEST
 			);
+		}
+
+		$post = get_post( $push_token->get_id() );
+
+		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
 		$force_delete = (bool) ( $args['force_delete'] ?? false );

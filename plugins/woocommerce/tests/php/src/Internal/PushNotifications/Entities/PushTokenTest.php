@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Entities;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use InvalidArgumentException;
 use WC_Unit_Test_Case;
 
 /**
@@ -72,7 +73,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertTrue( $push_token->can_be_created() );
 	}
@@ -87,58 +88,59 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
 
 	/**
-	 * Tests can_be_created returns false when user ID is already set.
+	 * Tests can_be_created returns false when user ID is missing.
 	 */
 	public function test_it_cannot_be_created_when_user_id_is_missing() {
 		$push_token = new PushToken();
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
 
 	/**
-	 * Tests can_be_created returns false when platform is already set.
+	 * Tests can_be_created returns false when platform is missing.
 	 */
 	public function test_it_cannot_be_created_when_platform_is_missing() {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
 
 	/**
-	 * Tests can_be_created returns false when token is already set.
+	 * Tests can_be_created returns false when token is missing.
 	 */
 	public function test_it_cannot_be_created_when_token_is_missing() {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
 
 	/**
-	 * Tests can_be_created returns false when device UUID is already set.
+	 * Tests can_be_created returns false when device UUID is missing.
 	 */
 	public function test_it_cannot_be_created_when_device_uuid_is_missing() {
 		$push_token = new PushToken();
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_created() );
 	}
@@ -153,7 +155,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertTrue( $push_token->can_be_updated() );
 	}
@@ -167,13 +169,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
 
 	/**
-	 * Tests can_be_updated returns false when user ID is is not set.
+	 * Tests can_be_updated returns false when user ID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_user_id_is_not_set() {
 		$push_token = new PushToken();
@@ -181,13 +183,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_token( 'test_token' );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
 
 	/**
-	 * Tests can_be_updated returns false when platform is is not set.
+	 * Tests can_be_updated returns false when platform is not set.
 	 */
 	public function test_it_cannot_be_updated_when_platform_is_not_set() {
 		$push_token = new PushToken();
@@ -195,13 +197,13 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( 'test_token' );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
 
 	/**
-	 * Tests can_be_updated returns false when device UUID is is not set.
+	 * Tests can_be_updated returns false when device UUID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_device_uuid_is_not_set() {
 		$push_token = new PushToken();
@@ -214,7 +216,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when token is is not set.
+	 * Tests can_be_updated returns false when token is not set.
 	 */
 	public function test_it_cannot_be_updated_when_token_is_not_set() {
 		$push_token = new PushToken();
@@ -222,7 +224,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_platform( PushToken::PLATFORM_IOS );
 		$push_token->set_device_uuid( 'test-device-uuid' );
-		$push_token->set_origin( 'com.automattic.woocommerce' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 
 		$this->assertFalse( $push_token->can_be_updated() );
 	}
@@ -346,7 +348,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_invalid_platform() {
 		$push_token = new PushToken();
 
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Platform for PushToken is invalid.' );
 
 		$push_token->set_platform( 'invalid' );
@@ -358,7 +360,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	public function test_it_throws_exception_when_setting_invalid_origin() {
 		$push_token = new PushToken();
 
-		$this->expectException( \InvalidArgumentException::class );
+		$this->expectException( InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Origin for PushToken is invalid.' );
 
 		$push_token->set_origin( 'com.invalid.app' );
