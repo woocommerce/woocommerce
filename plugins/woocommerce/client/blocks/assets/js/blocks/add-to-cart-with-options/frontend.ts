@@ -57,15 +57,19 @@ export const getProductData = (
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
 	let productId = id;
-	let productData;
-
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type: ProductData[ 'type' ] | 'variation' = 'simple';
-	if ( selectedAttributes && selectedAttributes.length > 0 ) {
-		if ( ! products || ! products[ id ] ) {
-			return null;
-		}
+	if ( ! products || ! products[ id ] ) {
+		return null;
+	}
+
+	let productData = products?.[ id ] as ProductData;
+
+	if (
+		productData.type === 'variable' &&
+		selectedAttributes &&
+		selectedAttributes.length > 0
+	) {
 		const variations = products[ id ].variations;
 		const matchedVariation = getMatchedVariation(
 			variations,
@@ -73,14 +77,13 @@ export const getProductData = (
 		);
 		if ( matchedVariation?.variation_id ) {
 			productId = matchedVariation.variation_id;
-			productData = products?.[ id ]?.variations?.[
-				matchedVariation?.variation_id
-			] as VariationData;
-			type = 'variation';
+			productData = {
+				...( products?.[ id ]?.variations?.[
+					matchedVariation?.variation_id
+				] as VariationData ),
+				type: 'variation',
+			};
 		}
-	} else {
-		productData = products?.[ productId ] as ProductData;
-		type = productData?.type;
 	}
 
 	if ( typeof productData !== 'object' || productData === null ) {
@@ -100,7 +103,6 @@ export const getProductData = (
 		min,
 		max,
 		step,
-		type,
 	};
 };
 
