@@ -90,6 +90,11 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	private FakePaymentGateway $mock_woopayments_gateway;
 
 	/**
+	 * @var FakePaymentGateway
+	 */
+	private FakePaymentGateway $mock_visa_gateway;
+
+	/**
 	 * Gateways mock.
 	 *
 	 * @var callable
@@ -329,12 +334,9 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 				'time'         => function () {
 					return $this->current_time;
 				},
-				'class_exists' => function ( $class_to_check ) {
-					// By default, the WooPayments extension is mocked as active.
-					if ( '\WC_Payments' === $class_to_check ) {
-						return true;
-					}
-
+				'class_exists' => function () {
+					// All classes don't exist by default.
+					// Replace/reregister with specific logic in tests if needed.
 					return false;
 				},
 			),
@@ -1744,6 +1746,19 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return false;
 					},
 				),
+			)
+		);
+
+		// Ensure extension-activity checks reflect the scenario under test.
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				'class_exists' => function ( $class_to_check ) use ( $woopayments ) {
+					if ( '\WC_Payments' === $class_to_check ) {
+						return $woopayments;
+					}
+
+					return false;
+				},
 			)
 		);
 	}
