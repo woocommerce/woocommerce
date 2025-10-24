@@ -35,6 +35,9 @@ class WC_Widget_Price_Filter extends WC_Widget {
 		$suffix                   = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
 		$version                  = Constants::get_constant( 'WC_VERSION' );
 		wp_register_script( 'wc-accounting', WC()->plugin_url() . '/assets/js/accounting/accounting' . $suffix . '.js', array( 'jquery' ), '0.4.2', true );
+		// This script is deprecated, but we need to register it for backwards compatibility.
+		// This can be removed in WooCommerce 10.5.0.
+		wp_register_script( 'accounting', false, array( 'wc-accounting' ), '0.4.2', true );
 		wp_register_script( 'wc-jquery-ui-touchpunch', WC()->plugin_url() . '/assets/js/jquery-ui-touch-punch/jquery-ui-touch-punch' . $suffix . '.js', array( 'jquery-ui-slider' ), $version, true );
 		wp_register_script( 'wc-price-slider', WC()->plugin_url() . '/assets/js/frontend/price-slider' . $suffix . '.js', array( 'jquery-ui-slider', 'wc-jquery-ui-touchpunch', 'wc-accounting' ), $version, true );
 		wp_localize_script(
@@ -53,7 +56,24 @@ class WC_Widget_Price_Filter extends WC_Widget {
 			wp_enqueue_script( 'wc-price-slider' );
 		}
 
+		add_action( 'shutdown', array( $this, 'add_legacy_script_warnings' ) );
+
 		parent::__construct();
+	}
+
+	/**
+	 * Add warnings for deprecated script handles.
+	 */
+	public function add_legacy_script_warnings() {
+		$exists = wp_script_is( 'accounting' );
+		if ( $exists ) {
+			wc_deprecated_argument(
+				'wp_enqueue_script',
+				'10.3.0',
+				/* translators: %1$s: new script handle, %2$s: previous script handle */
+				sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), 'wc-accounting', 'accounting' )
+			);
+		}
 	}
 
 	/**
