@@ -15,38 +15,6 @@ export function reducer( state: State, action ): State {
 				...state,
 				...action.state,
 			};
-		case 'CHANGE_PERSONALIZATION_TAGS_STATE':
-			return {
-				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
-				},
-			};
-		case 'SET_PERSONALIZATION_TAGS':
-			return {
-				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					list: action.personalizationTags,
-				},
-			};
-		case 'SET_IS_FETCHING_PERSONALIZATION_TAGS':
-			return {
-				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
-				},
-			};
-		case 'SET_PERSONALIZATION_TAGS_LIST':
-			return {
-				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
-				},
-			};
 		case 'SET_CONTENT_VALIDATION':
 			return {
 				...state,

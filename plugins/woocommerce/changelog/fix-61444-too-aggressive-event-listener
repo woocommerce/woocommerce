@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove glboal event handler for a['role=button'] and assign specific ones to elements that needs it
