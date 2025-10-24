@@ -2566,7 +2566,10 @@ class WooPaymentsService {
 		$fields = $response['data'];
 
 		// If there is no available_countries entry, add it.
-		if ( ! isset( $fields['available_countries'] ) && $this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+		if ( ! isset( $fields['available_countries'] ) &&
+			class_exists( '\WC_Payments_Utils' ) &&
+			$this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+
 			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
 		}
 
