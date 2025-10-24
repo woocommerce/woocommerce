@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Exception;
 use WP_Error;
 use WP_REST_Request;
@@ -495,9 +496,17 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @return mixed The prepared response item.
 	 */
 	private function prepare_payment_providers_response_recursive( $response_item, array $schema ) {
-		if ( is_null( $response_item ) ||
-			! array_key_exists( 'properties', $schema ) ||
+		if ( is_null( $response_item ) ) {
+			return null;
+		}
+
+		if ( ! array_key_exists( 'properties', $schema ) ||
 			! is_array( $schema['properties'] ) ) {
+
+			// Filter out null values for loosely defined schema types.
+			if ( is_array( $response_item ) ) {
+				return ArrayUtil::filter_null_values_recursive( $response_item );
+			}
 			return $response_item;
 		}
 
@@ -521,9 +530,7 @@ class PaymentsRestController extends RestApiControllerBase {
 		$prepared_response = array_merge( array_fill_keys( array_keys( $schema['properties'] ), null ), $prepared_response );
 
 		// Remove any null values from the response.
-		$prepared_response = array_filter( $prepared_response, fn( $value ) => ! is_null( $value ) );
-
-		return $prepared_response;
+		return ArrayUtil::filter_null_values_recursive( $prepared_response );
 	}
 
 	/**
