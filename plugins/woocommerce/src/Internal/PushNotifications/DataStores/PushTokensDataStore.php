@@ -325,6 +325,21 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 
 		global $wpdb;
 
+		$device_uuid_condition = '';
+
+		$params = array(
+			PushToken::POST_TYPE,
+			$push_token->get_user_id(),
+			$push_token->get_platform(),
+			$push_token->get_origin(),
+			$push_token->get_token(),
+		);
+
+		if ( $push_token->get_device_uuid() ) {
+			$device_uuid_condition = 'OR device_uuid_meta.meta_value = %s';
+			$params[]      = $push_token->get_device_uuid();
+		}
+
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$push_token_data = $wpdb->get_row(
 			$wpdb->prepare(
@@ -355,15 +370,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 					AND origin_meta.meta_value = %s
 					AND (
 						token_meta.meta_value = %s
-						OR device_uuid_meta.meta_value = %s
+						{$device_uuid_condition}
 					)
 				LIMIT 1",
-				PushToken::POST_TYPE,
-				$push_token->get_user_id(),
-				$push_token->get_platform(),
-				$push_token->get_origin(),
-				$push_token->get_token(),
-				$push_token->get_device_uuid()
+				$params
 			)
 		);
 

@@ -376,6 +376,47 @@ class PushTokensDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that browser tokens with null device_uuid don't incorrectly match
+	 * each other by empty device_uuid.
+	 */
+	public function test_it_does_not_match_browser_tokens_by_empty_device_uuid() {
+		$data_store = new PushTokensDataStore();
+
+		// Create first browser token for user.
+		$browser_token_1 = new PushToken();
+		$browser_token_1->set_user_id( 1 );
+		$browser_token_1->set_token( 'browser_token_1_' . wp_rand() );
+		$browser_token_1->set_platform( PushToken::PLATFORM_BROWSER );
+		$browser_token_1->set_device_uuid( null );
+		$browser_token_1->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data_store->create( $browser_token_1 );
+
+		// Create second browser token for same user (different browser/tab).
+		$browser_token_2 = new PushToken();
+		$browser_token_2->set_user_id( 1 );
+		$browser_token_2->set_token( 'browser_token_2_' . wp_rand() );
+		$browser_token_2->set_platform( PushToken::PLATFORM_BROWSER );
+		$browser_token_2->set_device_uuid( null );
+		$browser_token_2->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$data_store->create( $browser_token_2 );
+
+		// Try to find browser_token_1 by its token - should only match itself, not browser_token_2.
+		$search_token = new PushToken();
+		$search_token->set_user_id( 1 );
+		$search_token->set_token( $browser_token_1->get_token() );
+		$search_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$search_token->set_device_uuid( null );
+		$search_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$found_token = $data_store->get_by_token_or_device_id( $search_token );
+
+		$this->assertNotNull( $found_token, 'Should find browser_token_1 by its token value' );
+		$this->assertEquals( $browser_token_1->get_id(), $found_token->get_id(), 'Should match browser_token_1 ID' );
+		$this->assertEquals( $browser_token_1->get_token(), $found_token->get_token(), 'Should match browser_token_1 token' );
+		$this->assertNotEquals( $browser_token_2->get_id(), $found_token->get_id(), 'Should not match browser_token_2 ID' );
+	}
+
+	/**
 	 * Tests the read_meta method of the push tokens data store.
 	 */
 	public function test_it_can_read_meta() {
