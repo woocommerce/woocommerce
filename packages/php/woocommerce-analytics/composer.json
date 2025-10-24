@@ -8,6 +8,7 @@
 		"automattic/jetpack-assets": "@dev",
 		"automattic/jetpack-connection": "@dev",
 		"automattic/jetpack-constants": "@dev",
+		"automattic/jetpack-device-detection": "@dev",
 		"automattic/block-delimiter": "@dev"
 	},
 	"require-dev": {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Use existing bot detection from Device Detection package to skip event recording in analytics tracking

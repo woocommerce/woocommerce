@@ -8,6 +8,7 @@
 namespace Automattic\Woocommerce_Analytics;
 
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Jetpack\Device_Detection\User_Agent_Info;
 use WC_Site_Tracking;
 use WC_Tracks;
 use WC_Tracks_Client;
@@ -85,6 +86,11 @@ class WC_Analytics_Tracking extends WC_Tracks {
 		// Check consent before recording any event
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
+		}
+
+		// Skip recording if the request is coming from a bot.
+		if ( User_Agent_Info::is_bot() ) {
+			return true;
 		}
 
 		$prefixed_event_name = self::PREFIX . $event_name;
