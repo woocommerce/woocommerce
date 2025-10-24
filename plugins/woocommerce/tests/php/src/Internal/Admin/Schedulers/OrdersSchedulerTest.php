@@ -149,9 +149,11 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 
 		$custom_interval = 6 * HOUR_IN_SECONDS;
+		$filter_called = false;
 		add_filter(
 			'woocommerce_analytics_import_interval',
-			function() use ( $custom_interval ) {
+			function() use ( $custom_interval, &$filter_called ) {
+				$filter_called = true;
 				return $custom_interval;
 			}
 		);
@@ -160,13 +162,13 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_false' );
 
 		// This will trigger the filter.
-		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
 
 		// Verify filter was applied (we can't directly check ActionScheduler without complex mocking,
 		// but we can verify the filter is called by checking if it was applied).
 		$this->assertTrue(
-			has_filter( 'woocommerce_analytics_import_interval' ),
-			'Import interval filter should be registered'
+			$filter_called,
+			'Import interval filter should be applied during initialization'
 		);
 	}
 }
