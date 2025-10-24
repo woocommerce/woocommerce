@@ -62,25 +62,15 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
-		/**
-		 * Filters whether to enable immediate order import on every order create/update.
-		 * When false (default), orders are imported in batches periodically.
-		 * When true, maintains legacy behavior of immediate per-order import.
-		 *
-		 * @since 10.4.0
-		 * @param bool $enable_immediate_import Whether to enable immediate import. Default false.
-		 */
-		$enable_immediate_import = apply_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import', false );
+		// Legacy behavior: Schedule import immediately on order create/update/delete.
+		add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
+		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 
-		if ( $enable_immediate_import ) {
-			// Legacy behavior: Schedule import immediately on order create/update/delete.
-			add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
-			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
-			add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
-			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
-		} else {
-			add_action( 'init', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
-		}
+		// Schedule recurring batch processor
+		add_action( 'init', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
+
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -287,6 +277,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
+		if ( !self::is_immediate_import_enabled() ) {
+			return $order_id;
+		}
+
 		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() && 'woocommerce_schedule_import' !== current_filter() ) {
 			return $order_id;
 		}
@@ -357,6 +351,17 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @internal
 	 */
 	public static function schedule_recurring_batch_processor() {
+		if ( self::is_immediate_import_enabled() ) {
+			error_log( 'Immediate import is enabled, skipping batch processor.' );
+			// No need to schedule if immediate import is enabled.
+
+			if ( self::has_existing_jobs( 'process_pending_batch', array() ) ) {
+				$action_hook = self::get_action( 'process_pending_batch' );
+				as_unschedule_all_actions( $action_hook, array(), static::$group );
+			}
+			return;
+		}
+
 		// Initialize last processed date if not set.
 		self::initialize_last_processed_date();
 
@@ -611,5 +616,25 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		foreach ( $order_ids as $order_id ) {
 			OrdersStatsDataStore::delete_order( $order_id );
 		}
+	}
+
+	/**
+	 * Check if immediate import is enabled.
+	 *
+	 * @internal
+	 * @return bool
+	 */
+	private static function is_immediate_import_enabled(): bool {
+		/**
+		 * Filters whether to enable immediate order import on every order create/update.
+		 * When false (default), orders are imported in batches periodically.
+		 * When true, maintains legacy behavior of immediate per-order import.
+		 *
+		 * @since 10.4.0
+		 * @param bool $enable_immediate_import Whether to enable immediate import. Default false.
+		 */
+		$enable_immediate_import = apply_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import', false );
+
+		return filter_var( $enable_immediate_import, FILTER_VALIDATE_BOOLEAN );
 	}
 }
