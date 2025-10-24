@@ -52,6 +52,8 @@ export const PaymentGatewayListItem = ( {
 	const gatewayHasRecommendedPaymentMethods =
 		( gateway.onboarding.recommended_payment_methods ?? [] ).length > 0;
 
+	const isOnboardingSupported = gateway.onboarding.state.supported;
+
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
 	const gatewayNeedsOnboarding =
 		! gateway.state.account_connected ||
@@ -63,10 +65,7 @@ export const PaymentGatewayListItem = ( {
 
 	const determineGatewayStatus = () => {
 		// If the gateway needs onboarding and is not supported, show the not_supported status.
-		if (
-			gatewayNeedsOnboarding &&
-			! gateway.onboarding?.state?.supported
-		) {
+		if ( gatewayNeedsOnboarding && ! isOnboardingSupported ) {
 			return 'not_supported';
 		}
 
@@ -105,10 +104,7 @@ export const PaymentGatewayListItem = ( {
 
 	const determineGatewayStatusMessage = () => {
 		// If the gateway needs onboarding and is not supported, show the not_supported message.
-		if (
-			gatewayNeedsOnboarding &&
-			! gateway.onboarding?.state?.supported
-		) {
+		if ( gatewayNeedsOnboarding && ! isOnboardingSupported ) {
 			const msg = gateway.onboarding?.messages?.not_supported;
 			if ( msg ) {
 				return <p>{ msg }</p>;
@@ -236,51 +232,42 @@ export const PaymentGatewayListItem = ( {
 							/>
 						) }
 
-						{ /* When onboarding is supported, render the button with full functionality. */ }
-						{ gatewayNeedsOnboarding &&
-							gateway.onboarding.state.supported && (
-								<CompleteSetupButton
-									gatewayProvider={ gateway }
-									settingsHref={
-										gateway.management._links.settings.href
-									}
-									onboardingHref={
-										gateway.onboarding._links.onboard.href
-									}
-									gatewayHasRecommendedPaymentMethods={
-										gatewayHasRecommendedPaymentMethods
-									}
-									installingPlugin={ installingPlugin }
-									setOnboardingModalOpen={
-										setIsOnboardingModalOpen
-									}
-									onboardingType={ gateway.onboarding.type }
-									incentive={ incentive }
-									acceptIncentive={ acceptIncentive }
-								/>
-							) }
 						{ /*
-						 * When onboarding is not supported, render a disabled button with minimal props.
-						 * We deliberately avoid passing onboarding-related props (like onboardingType,
-						 * incentive, acceptIncentive) to ensure no onboarding actions can be inadvertently
-						 * triggered. Empty/no-op values are used for required props.
+						 * CompleteSetupButton with conditional props based on onboarding support.
+						 * When not supported, we use minimal props and disabled state to prevent
+						 * inadvertent onboarding actions. Sensitive props (onboardingType, incentive,
+						 * acceptIncentive) are only spread when onboarding is supported.
 						 */ }
-						{ gatewayNeedsOnboarding &&
-							! gateway.onboarding.state.supported && (
-								<CompleteSetupButton
-									gatewayProvider={ gateway }
-									settingsHref={
-										gateway.management._links.settings.href
-									}
-									onboardingHref=""
-									gatewayHasRecommendedPaymentMethods={
-										false
-									}
-									installingPlugin={ installingPlugin }
-									setOnboardingModalOpen={ () => {} }
-									disabled={ true }
-								/>
-							) }
+						{ gatewayNeedsOnboarding && (
+							<CompleteSetupButton
+								gatewayProvider={ gateway }
+								settingsHref={
+									gateway.management._links.settings.href
+								}
+								onboardingHref={
+									isOnboardingSupported
+										? gateway.onboarding._links.onboard.href
+										: '#'
+								}
+								gatewayHasRecommendedPaymentMethods={
+									isOnboardingSupported
+										? gatewayHasRecommendedPaymentMethods
+										: false
+								}
+								installingPlugin={ installingPlugin }
+								setOnboardingModalOpen={
+									isOnboardingSupported
+										? setIsOnboardingModalOpen
+										: () => {}
+								}
+								disabled={ ! isOnboardingSupported }
+								{ ...( isOnboardingSupported && {
+									onboardingType: gateway.onboarding.type,
+									incentive,
+									acceptIncentive,
+								} ) }
+							/>
+						) }
 
 						{ isWooPayments( gateway.id ) &&
 							// There is no actual switch-to-live in dev mode.
