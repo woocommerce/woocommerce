@@ -399,12 +399,16 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Process pending orders in batch.
-	 * This method queries for orders updated since the last processed date
-	 * and imports them into the analytics tables.
+	 *
+	 * This method queries for orders updated since the last cursor position
+	 * (compound cursor: date + ID) and imports them into the analytics tables.
 	 *
 	 * @internal
+	 * @param string|null $cursor_date Cursor date in 'Y-m-d H:i:s' format. Orders after this date will be processed.
+	 * @param int|null    $cursor_id   Cursor order ID. Combined with $cursor_date to form compound cursor.
+	 * @return void
 	 */
-	public static function process_pending_batch( $last_processed_order_modified_date = null, $last_processed_order_id = null ) {
+	public static function process_pending_batch( $cursor_date = null, $cursor_id = null ) {
 		$logger = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
 
@@ -414,25 +418,27 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		$last_processed_order_modified_date = $last_processed_order_modified_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
-		$last_processed_order_id = $last_processed_order_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+		// Load cursor position from options if not provided.
+		$cursor_date = $cursor_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
+		$cursor_id = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
-		if ( ! $last_processed_order_modified_date || ! strtotime( $last_processed_order_modified_date ) ) {
-			$logger->error( 'Invalid last processed date: ' . $last_processed_order_modified_date, $context );
-			$last_processed_order_modified_date = gmdate( 'Y-m-d H:i:s', 0 ); // Fallback to the earliest possible date.
+		// Validate cursor date.
+		if ( ! $cursor_date || ! strtotime( $cursor_date ) ) {
+			$logger->error( 'Invalid cursor date: ' . $cursor_date, $context );
+			$cursor_date = gmdate( 'Y-m-d H:i:s', 0 ); // Fallback to the earliest possible date.
 		}
 
 		$batch_size = self::get_batch_size( 'process_pending_batch' );
 
 		$logger->info(
-			sprintf( 'Starting batch import from date: %s, ID: %d, batch size: %d', $last_processed_order_modified_date, $last_processed_order_id, $batch_size ),
+			sprintf( 'Starting batch import. Cursor: %s (ID: %d), batch size: %d', $cursor_date, $cursor_id, $batch_size ),
 			$context
 		);
 
 		$start_time = microtime( true );
 
-		// Get orders updated since last processed date and ID.
-		$orders = self::get_orders_since( $last_processed_order_modified_date, $last_processed_order_id, $batch_size );
+		// Get orders updated since the cursor position.
+		$orders = self::get_orders_since( $cursor_date, $cursor_id, $batch_size );
 
 		if ( empty( $orders ) ) {
 			$logger->info( 'No orders to process', $context );
@@ -445,11 +451,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				self::import( $order->id );
 				$processed_count++;
 
-				// Update cursors after each successful import. Since orders are sorted by
+				// Advance cursor after each successful import. Since orders are sorted by
 				// date ASC, id ASC, we can simply overwrite with the current order's values.
 				// If an error occurs, we break and save the last successful position.
-				$last_processed_order_modified_date = $order->date_updated_gmt;
-				$last_processed_order_id = $order->id;
+				$cursor_date = $order->date_updated_gmt;
+				$cursor_id = $order->id;
 			} catch ( \Exception $e ) {
 				$logger->error(
 					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
@@ -459,18 +465,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			}
 		}
 
-		// Update the markers to the latest processed date and order ID.
-		update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $last_processed_order_modified_date, false );
-		update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, $last_processed_order_id, false );
+		// Save the updated cursor position.
+		update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $cursor_date, false );
+		update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, $cursor_id, false );
 
 		$elapsed_time = microtime( true ) - $start_time;
 		$logger->info(
 			sprintf(
-				'Batch import completed. Processed: %d orders in %.2f seconds. Updated marker to: %s, order ID: %d',
+				'Batch import completed. Processed: %d orders in %.2f seconds. Cursor: %s (ID: %d)',
 				$processed_count,
 				$elapsed_time,
-				$last_processed_order_modified_date,
-				$last_processed_order_id
+				$cursor_date,
+				$cursor_id
 			),
 			$context
 		);
@@ -479,49 +485,55 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		// Schedule immediate next batch.
 		if ( $processed_count === $batch_size ) {
 			$logger->info( 'Full batch processed, scheduling next batch', $context );
-			self::schedule_action( 'process_pending_batch', array(
-				'last_date_since' => $last_processed_order_modified_date,
-				'last_id_since' => $last_processed_order_id,
-			) );
+			self::schedule_action(
+				'process_pending_batch',
+				array( $cursor_date, $cursor_id )
+			);
 		}
 	}
 
 	/**
-	 * Get orders updated since the specified date and ID.
+	 * Get orders updated since the specified cursor position.
+	 *
+	 * Uses a compound cursor (date + ID) to handle cases where multiple orders
+	 * have the same timestamp. This ensures we can paginate through orders reliably
+	 * even when batch_size < number of orders at the same timestamp.
 	 *
 	 * @internal
-	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
-	 * @param int    $last_id   Last processed order ID.
-	 * @param int    $limit     Number of orders to retrieve.
+	 * @param string $cursor_date Cursor date in 'Y-m-d H:i:s' format.
+	 * @param int    $cursor_id   Cursor order ID.
+	 * @param int    $limit       Number of orders to retrieve.
 	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
 	 */
-	private static function get_orders_since( $last_date, $last_id, $limit ) {
+	private static function get_orders_since( $cursor_date, $cursor_id, $limit ) {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			return self::get_orders_since_from_orders_table( $last_date, $last_id, $limit );
+			return self::get_orders_since_from_orders_table( $cursor_date, $cursor_id, $limit );
 		} else {
-			return self::get_orders_since_from_posts_table( $last_date, $last_id, $limit );
+			return self::get_orders_since_from_posts_table( $cursor_date, $cursor_id, $limit );
 		}
 	}
 
 	/**
-	 * Get orders from HPOS orders table updated since the specified date and ID.
+	 * Get orders from HPOS orders table updated since the specified cursor position.
+	 *
+	 * Query logic uses a compound cursor (date, ID) to handle pagination when multiple
+	 * orders share the same timestamp:
+	 * - WHERE date > cursor_date: Get orders with newer timestamps
+	 * - OR (date = cursor_date AND id > cursor_id): Continue processing same timestamp
+	 *
+	 * Example: With batch_size=100 and 1000 orders at '2024-01-01 10:00:00',
+	 * this processes them across 10 batches without infinite loops or duplicates.
 	 *
 	 * @internal
-	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
-	 * @param int    $last_id   Last processed order ID.
-	 * @param int    $limit     Number of orders to retrieve.
+	 * @param string $cursor_date Cursor date in 'Y-m-d H:i:s' format.
+	 * @param int    $cursor_id   Cursor order ID.
+	 * @param int    $limit       Number of orders to retrieve.
 	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
 	 */
-	private static function get_orders_since_from_orders_table( $last_date, $last_id, $limit ) {
+	private static function get_orders_since_from_orders_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
 		$orders_table = OrdersTableDataStore::get_orders_table_name();
 
-		// Query orders after the last processed position using a compound cursor (date, id).
-		// This handles cases where multiple orders have the same date_updated timestamp:
-		// - Get orders with date > last_date (moved to next timestamp)
-		// - OR orders with date = last_date AND id > last_id (continue same timestamp)
-		// Example: If batch_size=100 and 1000 orders exist at '2024-01-01 10:00:00',
-		// we'll process them across 10 batches without infinite loops.
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, date_updated_gmt
@@ -534,29 +546,29 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				)
 				ORDER BY date_updated_gmt ASC, id ASC
 				LIMIT %d",
-				$last_date,
-				$last_date,
-				$last_id,
+				$cursor_date,
+				$cursor_date,
+				$cursor_id,
 				$limit
 			)
 		);
 	}
 
 	/**
-	 * Get orders from posts table updated since the specified date and ID.
+	 * Get orders from posts table updated since the specified cursor position.
+	 *
+	 * Uses the same compound cursor logic as get_orders_since_from_orders_table()
+	 * but queries the posts table instead of the HPOS orders table.
 	 *
 	 * @internal
-	 * @param string $last_date Last processed date in 'Y-m-d H:i:s' format.
-	 * @param int    $last_id   Last processed order ID.
-	 * @param int    $limit     Number of orders to retrieve.
+	 * @param string $cursor_date Cursor date in 'Y-m-d H:i:s' format.
+	 * @param int    $cursor_id   Cursor order ID.
+	 * @param int    $limit       Number of orders to retrieve.
 	 * @return array Array of objects with 'id' and 'date_updated_gmt' properties.
 	 */
-	private static function get_orders_since_from_posts_table( $last_date, $last_id, $limit ) {
+	private static function get_orders_since_from_posts_table( $cursor_date, $cursor_id, $limit ) {
 		global $wpdb;
 
-		// Query orders after the last processed position using a compound cursor (date, id).
-		// This handles cases where multiple orders have the same post_modified timestamp.
-		// See get_orders_since_from_orders_table() for detailed explanation.
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT ID as id, post_modified_gmt as date_updated_gmt
@@ -569,9 +581,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				)
 				ORDER BY post_modified_gmt ASC, ID ASC
 				LIMIT %d",
-				$last_date,
-				$last_date,
-				$last_id,
+				$cursor_date,
+				$cursor_date,
+				$cursor_id,
 				$limit
 			)
 		);
