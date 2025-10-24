@@ -292,7 +292,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $filter_calls, 'TTL filter should be called once' );
 		$this->assertEquals( 'custom_entity', $filter_calls[0]['entity_type'] );
 		$this->assertEquals( 555, $filter_calls[0]['entity_id'] );
-		$this->assertEquals( HOUR_IN_SECONDS, $filter_calls[0]['ttl'], 'Default TTL should be passed to filter' );
+		$this->assertEquals( DAY_IN_SECONDS, $filter_calls[0]['ttl'], 'Default TTL should be passed to filter' );
 	}
 
 	/**
@@ -322,7 +322,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $action_calls, 'Action should be fired once for new version' );
 		$this->assertEquals( 'test_entity', $action_calls[0]['entity_type'] );
 		$this->assertEquals( 666, $action_calls[0]['entity_id'] );
-		$this->assertEquals( HOUR_IN_SECONDS, $action_calls[0]['ttl'] );
+		$this->assertEquals( DAY_IN_SECONDS, $action_calls[0]['ttl'] );
 		$this->assertTrue( $action_calls[0]['is_new'], 'is_new should be true for new version' );
 
 		// Test refreshing existing version.

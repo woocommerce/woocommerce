@@ -884,6 +884,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Cache keys are unique per route and query string only (without user variance).
 	 */
 	public function test_cache_key_without_user_variance() {
+		$this->sut->vary_by_user_return_value = false;
 
 		// Mock get_current_user_id to return user 1.
 
@@ -917,7 +918,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		);
 
 		// Second request by user 2 to same endpoint - should be cache HIT with user 1's data.
-		// (Since vary_by_user is false by default, user ID is NOT included in cache key).
+		// (Since vary_by_user is false, user ID is NOT included in cache key).
 
 		$response2 = $this->query_endpoint( 'single_entity' );
 		$this->assertCacheHitHeader( $response2 );
@@ -1041,6 +1042,173 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		if ( ! $use_with_cache_config ) {
 			$this->sut->vary_by_user_return_value = false;
 		}
+	}
+
+	/**
+	 * @testdox Response headers are cached and restored on cache hit.
+	 */
+	public function test_response_headers_are_cached() {
+		$this->sut->response_headers['single_entity'] = array(
+			'X-Custom-Header'  => 'custom-value',
+			'X-Another-Header' => 'another-value',
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry contains the custom headers.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertEquals( 'custom-value', $cached_entry['headers']['X-Custom-Header'] );
+		$this->assertEquals( 'another-value', $cached_entry['headers']['X-Another-Header'] );
+
+		// Second request - cache HIT, should restore headers.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Verify custom headers are restored.
+
+		$headers = $response2->get_headers();
+		$this->assertEquals( 'custom-value', $headers['X-Custom-Header'] );
+		$this->assertEquals( 'another-value', $headers['X-Another-Header'] );
+	}
+
+	/**
+	 * @testdox Certain response headers are always excluded from caching.
+	 */
+	public function test_headers_always_excluded_from_caching() {
+		$this->sut->response_headers['single_entity'] = array(
+			'Set-Cookie'     => 'session=abc123',  // Always excluded.
+			'Date'           => 'Mon, 01 Jan 2024 00:00:00 GMT',  // Always excluded.
+			'X-Custom-Valid' => 'should-be-present',  // NOT excluded.
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry does NOT contain always-excluded headers, but does contain valid custom header.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'Set-Cookie', $cached_entry['headers'], 'Set-Cookie should be excluded from cache' );
+		$this->assertArrayNotHasKey( 'Date', $cached_entry['headers'], 'Date should be excluded from cache' );
+		$this->assertEquals( 'should-be-present', $cached_entry['headers']['X-Custom-Valid'] );
+
+		// Second request - cache HIT, verify excluded headers are NOT restored.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		$headers = $response2->get_headers();
+
+		// Verify always-excluded headers are NOT present.
+
+		$this->assertArrayNotHasKey( 'Set-Cookie', $headers, 'Set-Cookie header should not be cached' );
+		$this->assertArrayNotHasKey( 'Date', $headers, 'Date header should not be cached' );
+
+		// Verify non-excluded custom header IS present.
+
+		$this->assertEquals( 'should-be-present', $headers['X-Custom-Valid'] );
+	}
+
+	/**
+	 * @testdox Custom headers can be excluded from caching via controller method and endpoint config.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_custom_headers_excluded_from_caching( bool $use_with_cache_config ) {
+		if ( $use_with_cache_config ) {
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					'exclude_headers' => array( 'X-Custom-Exclude' ),
+				)
+			);
+			$endpoint = 'custom_endpoint_config';
+		} else {
+			$this->sut->custom_exclude_headers = array( 'X-Custom-Exclude' );
+			$endpoint                          = 'single_entity';
+		}
+
+		// Configure endpoint to return headers including custom-excluded ones.
+
+		$this->sut->response_headers[ $endpoint ] = array(
+			'X-Custom-Exclude' => 'should-not-be-cached',
+			'X-Custom-Include' => 'should-be-cached',
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry does NOT contain custom-excluded header, but does contain included header.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'X-Custom-Exclude', $cached_entry['headers'], 'Custom excluded header should be excluded from cache' );
+		$this->assertEquals( 'should-be-cached', $cached_entry['headers']['X-Custom-Include'] );
+
+		// Second request - cache HIT.
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response2 );
+
+		$headers = $response2->get_headers();
+
+		// Verify excluded header is NOT present.
+
+		$this->assertArrayNotHasKey( 'X-Custom-Exclude', $headers, 'Custom excluded header should not be cached' );
+
+		// Verify included header IS present.
+
+		$this->assertEquals( 'should-be-cached', $headers['X-Custom-Include'] );
+
+		// Reset custom exclusion if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->custom_exclude_headers = array();
+		}
+	}
+
+	/**
+	 * @testdox Endpoint IDs are passed to customization methods.
+	 */
+	public function test_endpoint_ids_passed_to_methods() {
+
+		// Track which methods received endpoint_id.
+
+		$this->sut->received_endpoint_ids = array();
+
+		// Make a request to single_entity endpoint (has endpoint_id: 'single_entity').
+
+		$response = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response );
+
+		// Verify endpoint_id was passed to all relevant methods.
+
+		$received = $this->sut->received_endpoint_ids;
+
+		$this->assertEquals( 'single_entity', $received['response_cache_vary_by_user'] ?? null, 'endpoint_id should be passed to response_cache_vary_by_user' );
+		$this->assertEquals( 'single_entity', $received['get_hooks_relevant_to_caching'] ?? null, 'endpoint_id should be passed to get_hooks_relevant_to_caching' );
+		$this->assertEquals( 'single_entity', $received['get_cache_ttl'] ?? null, 'endpoint_id should be passed to get_cache_ttl' );
+		$this->assertEquals( 'single_entity', $received['must_cache'] ?? null, 'endpoint_id should be passed to must_cache' );
+		$this->assertEquals( 'single_entity', $received['extract_entity_ids'] ?? null, 'endpoint_id should be passed to extract_entity_ids' );
+		$this->assertEquals( 'single_entity', $received['get_response_headers_to_exclude_from_caching'] ?? null, 'endpoint_id should be passed to get_response_headers_to_exclude_from_caching' );
 	}
 
 	// TESTS END HERE. Below there's auxiliary methods only.
@@ -1384,6 +1552,27 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			public $vary_by_user_return_value = false;
 
 			/**
+			 * Custom headers to exclude from caching.
+			 *
+			 * @var array
+			 */
+			public $custom_exclude_headers = array();
+
+			/**
+			 * Track which methods received endpoint_id and what value.
+			 *
+			 * @var array
+			 */
+			public $received_endpoint_ids = array();
+
+			/**
+			 * Custom response headers to add to responses for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $response_headers = array();
+
+			/**
 			 * Constructor.
 			 */
 			public function __construct() {
@@ -1405,7 +1594,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 						'callback'            => $this->with_cache(
 							function ( $request ) {
 								return $this->handle_request( 'single_entity', $request );
-							}
+							},
+							array(
+								'endpoint_id' => 'single_entity',
+							)
 						),
 						'permission_callback' => '__return_true',
 					)
@@ -1420,7 +1612,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 						'callback'            => $this->with_cache(
 							function ( $request ) {
 								return $this->handle_request( 'multiple_entities', $request );
-							}
+							},
+							array(
+								'endpoint_id' => 'multiple_entities',
+							)
 						),
 						'permission_callback' => '__return_true',
 					)
@@ -1435,7 +1630,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 						'callback'            => $this->with_cache(
 							function ( $request ) {
 								return $this->handle_request( 'entity_without_id', $request );
-							}
+							},
+							array(
+								'endpoint_id' => 'entity_without_id',
+							)
 						),
 						'permission_callback' => '__return_true',
 					)
@@ -1465,7 +1663,8 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 								return $this->handle_request( 'false_must_cache', $request );
 							},
 							array(
-								'must_cache' => '__return_false',
+								'endpoint_id' => 'false_must_cache',
+								'must_cache'  => '__return_false',
 							)
 						),
 						'permission_callback' => '__return_true',
@@ -1482,7 +1681,10 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 							function ( $request ) {
 								return $this->handle_request( 'custom_endpoint_config', $request );
 							},
-							$this->custom_endpoint_config_cache_config
+							array_merge(
+								array( 'endpoint_id' => 'custom_endpoint_config' ),
+								$this->custom_endpoint_config_cache_config
+							)
 						),
 						'permission_callback' => '__return_true',
 					)
@@ -1501,58 +1703,80 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			/**
 			 * Override must_cache to use configurable return value.
 			 *
-			 * @param WP_REST_Request $request Request object.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 			 * @return bool
 			 */
-			protected function must_cache( $request ) {
+			protected function must_cache( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['must_cache'] = $endpoint_id;
 				return $this->must_cache_return_value;
 			}
 
 			/**
 			 * Override get_hooks_relevant_to_caching to return test hooks.
 			 *
-			 * @param WP_REST_Request $request Request object.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 			 * @return array Array of filter names.
 			 */
-			protected function get_hooks_relevant_to_caching( $request ) {
+			protected function get_hooks_relevant_to_caching( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_hooks_relevant_to_caching'] = $endpoint_id;
 				return array( 'test_controller_hook_for_caching' );
 			}
 
 			/**
 			 * Override get_cache_ttl to return custom TTL.
 			 *
-			 * @param WP_REST_Request $request Request object.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 			 * @return int Cache TTL in seconds.
 			 */
-			protected function get_cache_ttl( $request ) {
+			protected function get_cache_ttl( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_cache_ttl'] = $endpoint_id;
 				return $this->custom_cache_ttl ?? HOUR_IN_SECONDS;
 			}
 
 			/**
 			 * Override response_cache_vary_by_user to use configurable return value.
 			 *
-			 * @param WP_REST_Request $request Request object.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 			 * @return bool
 			 */
-			protected function response_cache_vary_by_user( $request ) {
+			protected function response_cache_vary_by_user( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['response_cache_vary_by_user'] = $endpoint_id;
 				return $this->vary_by_user_return_value;
 			}
 
 			/**
 			 * Override extract_entity_ids to use custom extraction logic.
 			 *
-			 * @param array           $data    Response data.
-			 * @param WP_REST_Request $request Request object.
+			 * @param array           $data        Response data.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 			 * @return array Array of entity IDs.
 			 */
-			protected function extract_entity_ids( $data, $request ) {
-				$ids = $this->parent_extract_entity_ids( $data, $request );
+			protected function extract_entity_ids( $data, $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['extract_entity_ids'] = $endpoint_id;
+				$ids = $this->parent_extract_entity_ids( $data, $request, $endpoint_id );
 
 				if ( $this->use_custom_entity_id_extraction ) {
 					$ids = array_map( fn( $id ) => $id * 10, $ids );
 				}
 
 				return $ids;
+			}
+
+			/**
+			 * Override get_response_headers_to_exclude_from_caching.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return array Array of header names to exclude.
+			 */
+			protected function get_response_headers_to_exclude_from_caching( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_response_headers_to_exclude_from_caching'] = $endpoint_id;
+				return $this->custom_exclude_headers;
 			}
 
 			/**
@@ -1571,7 +1795,16 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				}
 
 				$status_code = $this->status_codes[ $endpoint ] ?? 200;
-				return new WP_REST_Response( $this->responses[ $endpoint ], $status_code );
+				$response    = new WP_REST_Response( $this->responses[ $endpoint ], $status_code );
+
+				// Add custom headers if configured for this endpoint.
+				if ( ! empty( $this->response_headers[ $endpoint ] ) ) {
+					foreach ( $this->response_headers[ $endpoint ] as $name => $value ) {
+						$response->header( $name, $value );
+					}
+				}
+
+				return $response;
 			}
 
 			/**

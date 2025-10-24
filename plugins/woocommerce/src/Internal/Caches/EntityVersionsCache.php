@@ -101,13 +101,13 @@ class EntityVersionsCache {
 		/**
 		 * Filter the TTL for entity version cache.
 		 *
-		 * @param int        $ttl         Time to live in seconds. Default 1 hour.
+		 * @param int        $ttl         Time to live in seconds. Default 1 day.
 		 * @param string     $entity_type The type of the entity.
 		 * @param string|int $entity_id   The ID of the entity.
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl    = apply_filters( 'woocommerce_cached_entity_version_ttl', HOUR_IN_SECONDS, $entity_type, $entity_id );
+		$ttl    = apply_filters( 'woocommerce_cached_entity_version_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
 		$result = $this->set_cached( $transient_name, $version, $ttl );
 
 		/**
