@@ -70,7 +70,7 @@ class OrdersScheduler extends ImportScheduler {
 		 * @since 10.4.0
 		 * @param bool $enable_immediate_import Whether to enable immediate import. Default false.
 		 */
-		$enable_immediate_import = apply_filters( 'woocommerce_analytics_enable_immediate_import', false );
+		$enable_immediate_import = apply_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import', false );
 
 		if ( $enable_immediate_import ) {
 			// Legacy behavior: Schedule import immediately on order create/update/delete.
@@ -409,7 +409,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return void
 	 */
 	public static function process_pending_batch( $cursor_date = null, $cursor_id = null ) {
-		$logger = wc_get_logger();
+		$logger  = wc_get_logger();
 		$context = array( 'source' => 'wc-analytics-order-import' );
 
 		if ( self::is_importing() ) {
@@ -420,7 +420,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		// Load cursor position from options if not provided.
 		$cursor_date = $cursor_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
-		$cursor_id = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
+		$cursor_id   = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
 		// Validate cursor date.
 		if ( ! $cursor_date || ! strtotime( $cursor_date ) ) {
@@ -449,13 +449,13 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		foreach ( $orders as $order ) {
 			try {
 				self::import( $order->id );
-				$processed_count++;
+				++$processed_count;
 
 				// Advance cursor after each successful import. Since orders are sorted by
 				// date ASC, id ASC, we can simply overwrite with the current order's values.
 				// If an error occurs, we break and save the last successful position.
 				$cursor_date = $order->date_updated_gmt;
-				$cursor_id = $order->id;
+				$cursor_id   = $order->id;
 			} catch ( \Exception $e ) {
 				$logger->error(
 					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
@@ -534,6 +534,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		global $wpdb;
 		$orders_table = OrdersTableDataStore::get_orders_table_name();
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		return $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, date_updated_gmt
@@ -552,6 +553,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$limit
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**

@@ -24,7 +24,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
 
 		// Remove filters.
-		remove_all_filters( 'woocommerce_analytics_enable_immediate_import' );
+		remove_all_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import' );
 		remove_all_filters( 'woocommerce_analytics_import_interval' );
 	}
 
@@ -32,7 +32,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 * Test that immediate import mode registers order hooks.
 	 */
 	public function test_immediate_import_enabled_registers_hooks() {
-		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_true' );
+		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_true' );
 
 		OrdersScheduler::init();
 
@@ -57,7 +57,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_batch_mode_does_not_register_immediate_hooks() {
 		// Ensure immediate import is disabled (default behavior).
-		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_false' );
+		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_false' );
 
 		OrdersScheduler::init();
 
@@ -149,17 +149,17 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 
 		$custom_interval = 6 * HOUR_IN_SECONDS;
-		$filter_called = false;
+		$filter_called   = false;
 		add_filter(
 			'woocommerce_analytics_import_interval',
-			function() use ( $custom_interval, &$filter_called ) {
+			function () use ( $custom_interval, &$filter_called ) {
 				$filter_called = true;
 				return $custom_interval;
 			}
 		);
 
 		// Enable batch mode.
-		add_filter( 'woocommerce_analytics_enable_immediate_import', '__return_false' );
+		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_false' );
 
 		// This will trigger the filter.
 		OrdersScheduler::schedule_recurring_batch_processor();
