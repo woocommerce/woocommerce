@@ -151,7 +151,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'Invalid push token format.',
 				array(
 					'status' => WP_Http::BAD_REQUEST,
-					'param' => 'token'
+					'param'  => 'token',
 				)
 			);
 		}
@@ -168,7 +168,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'Invalid push token format.',
 				array(
 					'status' => WP_Http::BAD_REQUEST,
-					'param' => 'token'
+					'param'  => 'token',
 				)
 			);
 		}
@@ -191,7 +191,7 @@ class PushTokenRestController extends RestApiControllerBase {
 					'Invalid push token format.',
 					array(
 						'status' => WP_Http::BAD_REQUEST,
-						'param' => 'token'
+						'param'  => 'token',
 					)
 				);
 			}
@@ -218,7 +218,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'Missing parameter(s): device_uuid.',
 				array(
 					'status' => WP_Http::BAD_REQUEST,
-					'param' => 'device_uuid'
+					'param'  => 'device_uuid',
 				)
 			);
 		}
