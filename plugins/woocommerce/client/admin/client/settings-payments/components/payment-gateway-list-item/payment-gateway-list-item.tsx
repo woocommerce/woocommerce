@@ -52,7 +52,7 @@ export const PaymentGatewayListItem = ( {
 	const gatewayHasRecommendedPaymentMethods =
 		( gateway.onboarding.recommended_payment_methods ?? [] ).length > 0;
 
-	const isOnboardingSupported = gateway.onboarding.state.supported;
+	const isOnboardingSupported = gateway.onboarding?.state?.supported ?? false;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
 	const gatewayNeedsOnboarding =

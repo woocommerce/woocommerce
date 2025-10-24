@@ -1287,5 +1287,32 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( item ).toBeInTheDocument();
 		} );
+
+		it( 'handles undefined onboarding.state gracefully', () => {
+			const gateway = createMockGateway( {
+				onboarding: {
+					...createMockGateway().onboarding,
+					state: undefined as any,
+				},
+			} );
+			const { container } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should treat undefined state as not supported (disabled).
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
+
+			// Button should be disabled when state is undefined.
+			const completeSetupButton = container.querySelector(
+				'[data-testid="complete-setup-button"]'
+			);
+			expect( completeSetupButton ).toBeInTheDocument();
+		} );
 	} );
 } );
