@@ -450,11 +450,17 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		// Arrange.
 		$expected_state = array(
+			'supported' => true,
 			'started'   => true,
 			'completed' => false,
 			'test_mode' => true,
 			'dev_mode'  => false,
 		);
+		$this->mock_provider
+			->expects( $this->atLeastOnce() )
+			->method( 'is_onboarding_supported' )
+			->with( $this->anything(), $location )
+			->willReturn( $expected_state['supported'] );
 		$this->mock_provider
 			->expects( $this->atLeastOnce() )
 			->method( 'is_onboarding_started' )
@@ -471,6 +477,9 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 			->expects( $this->atLeastOnce() )
 			->method( 'is_in_dev_mode' )
 			->willReturn( $expected_state['dev_mode'] );
+		$this->mock_provider
+			->expects( $this->never() )
+			->method( 'get_onboarding_not_supported_message' );
 
 		// Act.
 		$result = $this->sut->get_onboarding_details( $location, '/some/path' );
@@ -479,6 +488,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'state', $result );
 		$this->assertSame( $expected_state, $result['state'] );
+		$this->assertArrayHasKey( 'messages', $result );
+		$this->assertSame(
+			array(
+				'not_supported' => null,
+			),
+			$result['messages']
+		);
 		$this->assertArrayHasKey( 'context', $result );
 		$this->assertSame(
 			array(

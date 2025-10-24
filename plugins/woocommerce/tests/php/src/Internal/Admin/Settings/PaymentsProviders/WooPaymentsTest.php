@@ -43,14 +43,19 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$this->mock_rest_controller = $this->createMock( WooPaymentsRestController::class );
 		$this->mock_rest_controller
 			->method( 'get_rest_url_path' )
-			->willReturn( '/some/rest/path' );
+			->willReturnCallback(
+				function ( $endpoint = '' ) {
+					$base = '/some/rest/path';
+					return $endpoint ? $base . '/' . $endpoint : $base;
+				}
+			);
 		wc_get_container()->replace( WooPaymentsRestController::class, $this->mock_rest_controller );
 	}
 
 	/**
-	 * Test get_details.
+	 * Test get_details without country code.
 	 */
-	public function test_get_details() {
+	public function test_get_details_without_country_code() {
 		// Arrange.
 		$fake_gateway = new FakePaymentGateway(
 			'woocommerce_payments',
@@ -155,6 +160,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 				'onboarding'  => array(
 					'type'                        => PaymentGateway::ONBOARDING_TYPE_NATIVE_IN_CONTEXT,
 					'state'                       => array(
+						'supported'                    => true,
 						'started'                      => true,
 						'completed'                    => true,
 						'test_mode'                    => true,
@@ -164,12 +170,15 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						'wpcom_has_connected_owner'    => false,
 						'wpcom_is_connection_owner'    => false,
 					),
+					'messages'                    => array(
+						'not_supported' => null,
+					),
 					'_links'                      => array(
 						'onboard' => array(
 							'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 						),
 						'reset'   => array(
-							'href' => rest_url( '/some/rest/path' ),
+							'href' => rest_url( '/some/rest/path/onboarding/reset' ),
 						),
 					),
 					'recommended_payment_methods' => array(
@@ -218,6 +227,299 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			),
 			$gateway_details
 		);
+
+		// Clean up.
+		Constants::clear_constants();
+	}
+
+	/**
+	 * Test get_details with country code integrates WooPaymentsService.
+	 */
+	public function test_get_details_with_country_code_integrates_service() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'              => true,
+				'account_connected'    => true,
+				'onboarding_started'   => true,
+				'onboarding_completed' => false,
+				'test_mode_onboarding' => false,
+				'plugin_slug'          => 'woocommerce-payments',
+				'plugin_file'          => 'woocommerce-payments/woocommerce-payments.php',
+			),
+		);
+
+		// Arrange the version constant to meet the minimum requirements.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Mock the WooPaymentsService to return onboarding details.
+		$mock_service = $this->createMock( WooPaymentsService::class );
+		$mock_service
+			->expects( $this->once() )
+			->method( 'get_onboarding_details' )
+			->with( 'US', '/some/rest/path/onboarding' )
+			->willReturn(
+				array(
+					'state'    => array(
+						'supported' => true,
+						'started'   => true,
+						'completed' => false,
+					),
+					'messages' => array(
+						'not_supported' => null,
+						'custom'        => 'Custom message from service',
+					),
+					'steps'    => array(
+						array(
+							'id'    => 'step1',
+							'title' => 'Step 1',
+						),
+					),
+					'context'  => array(
+						'custom_context' => 'value',
+					),
+				)
+			);
+
+		wc_get_container()->replace( WooPaymentsService::class, $mock_service );
+
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
+
+		// Assert that the service details are merged.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
+
+		// Assert that the onboarding state was merged from the service.
+		// The service returns started=true and completed=false, which overrides the gateway values.
+		$this->assertFalse( $gateway_details['onboarding']['state']['completed'] );
+		$this->assertTrue( $gateway_details['onboarding']['state']['started'] );
+
+		// Assert messages exist (the parent class sets not_supported).
+		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+
+		// Clean up.
+		Constants::clear_constants();
+	}
+
+	/**
+	 * Test get_details with country code handles service error gracefully.
+	 */
+	public function test_get_details_with_country_code_handles_service_error() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'              => true,
+				'account_connected'    => true,
+				'onboarding_started'   => true,
+				'onboarding_completed' => false,
+				'plugin_slug'          => 'woocommerce-payments',
+				'plugin_file'          => 'woocommerce-payments/woocommerce-payments.php',
+			),
+		);
+
+		// Arrange the version constant.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Mock the service to throw an exception.
+		$mock_service = $this->createMock( WooPaymentsService::class );
+		$mock_service
+			->method( 'get_onboarding_details' )
+			->willThrowException( new \Exception( 'Service error' ) );
+
+		wc_get_container()->replace( WooPaymentsService::class, $mock_service );
+
+		// Act - should not throw exception.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
+
+		// Assert that details are still returned despite service error.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+
+		// Clean up.
+		Constants::clear_constants();
+	}
+
+	/**
+	 * Test is_onboarding_supported returns true for supported countries when gateway doesn't provide method.
+	 */
+	public function test_is_onboarding_supported_with_supported_country() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array() );
+
+		// Load the mock WC_Payments_Utils if the real class doesn't exist.
+		if ( ! class_exists( '\WC_Payments_Utils' ) ) {
+			require_once __DIR__ . '/../Mocks/MockWCPaymentsUtils.php';
+		}
+
+		// Act.
+		$is_supported = $this->sut->is_onboarding_supported( $fake_gateway, 'US' );
+
+		// Assert.
+		$this->assertTrue( $is_supported );
+
+		// Test with lowercase country code.
+		$is_supported = $this->sut->is_onboarding_supported( $fake_gateway, 'gb' );
+		$this->assertTrue( $is_supported );
+	}
+
+	/**
+	 * Test is_onboarding_supported returns false for unsupported countries.
+	 */
+	public function test_is_onboarding_supported_with_unsupported_country() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array(
+			'onboarding_supported' => null, // Ensure gateway doesn't provide info.
+		) );
+
+		// Load the mock WC_Payments_Utils if the real class doesn't exist.
+		if ( ! class_exists( '\WC_Payments_Utils' ) ) {
+			require_once __DIR__ . '/../Mocks/MockWCPaymentsUtils.php';
+		}
+
+		// Act - testing with a country definitely not in the supported list.
+		$is_supported = $this->sut->is_onboarding_supported( $fake_gateway, 'XX' );
+
+		// Assert.
+		$this->assertFalse( $is_supported );
+	}
+
+	/**
+	 * Test is_onboarding_supported returns true when no country code provided.
+	 */
+	public function test_is_onboarding_supported_without_country_code() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array() );
+
+		// Act.
+		$is_supported = $this->sut->is_onboarding_supported( $fake_gateway, '' );
+
+		// Assert - should default to true to avoid blocking users.
+		$this->assertTrue( $is_supported );
+	}
+
+	/**
+	 * Test is_onboarding_supported defers to gateway method when available.
+	 */
+	public function test_is_onboarding_supported_defers_to_gateway_method() {
+		// Arrange - Create a gateway that provides the is_onboarding_supported method.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'onboarding_supported' => false,
+			)
+		);
+
+		// Act.
+		$is_supported = $this->sut->is_onboarding_supported( $fake_gateway, 'XX' );
+
+		// Assert - should return the gateway's value, not fall through to WooPayments logic.
+		$this->assertFalse( $is_supported );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message returns WooPayments-specific message.
+	 */
+	public function test_get_onboarding_not_supported_message() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array() );
+
+		// Act.
+		$message = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert.
+		$this->assertStringContainsString( 'WooPayments', $message );
+		$this->assertStringContainsString( 'not supported', $message );
+		$this->assertStringContainsString( 'business location', $message );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message defers to gateway method when available.
+	 */
+	public function test_get_onboarding_not_supported_message_defers_to_gateway_method() {
+		// Arrange - Create a gateway with a custom message.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'onboarding_not_supported_message' => 'Custom unsupported message from gateway',
+			)
+		);
+
+		// Act.
+		$message = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should return the gateway's message.
+		$this->assertEquals( 'Custom unsupported message from gateway', $message );
+	}
+
+	/**
+	 * Test get_details includes supported state in onboarding section.
+	 */
+	public function test_get_details_includes_supported_state() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'           => true,
+				'account_connected' => true,
+				'plugin_slug'       => 'woocommerce-payments',
+				'plugin_file'       => 'woocommerce-payments/woocommerce-payments.php',
+			),
+		);
+
+		// Arrange the version constant.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0 );
+
+		// Assert - when no country code is provided, supported state should be true by default.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
+
+		// Clean up.
+		Constants::clear_constants();
+	}
+
+	/**
+	 * Test get_details with unsupported country code.
+	 */
+	public function test_get_details_with_unsupported_country() {
+		// Arrange - Create a gateway that doesn't support onboarding for a specific country.
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'                          => true,
+				'account_connected'                => true,
+				'onboarding_supported'             => false,
+				'onboarding_not_supported_message' => 'WooPayments is not available in your country.',
+				'plugin_slug'                      => 'woocommerce-payments',
+				'plugin_file'                      => 'woocommerce-payments/woocommerce-payments.php',
+			)
+		);
+
+		// Arrange the version constant.
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
+
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
+
+		// Assert - should include the unsupported state and message.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
+
+		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+		$this->assertEquals( 'WooPayments is not available in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
 
 		// Clean up.
 		Constants::clear_constants();
