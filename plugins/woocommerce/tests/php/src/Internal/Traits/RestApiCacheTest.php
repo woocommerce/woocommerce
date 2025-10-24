@@ -505,14 +505,12 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$endpoint    = 'custom_endpoint_config';
-			$ttl         = 20;
 			$time_within = 15;
 			$time_beyond = 6;
 		} else {
 			// Set custom TTL to 10 seconds via controller property.
 			$this->sut->custom_cache_ttl = 10;
 			$endpoint                    = 'single_entity';
-			$ttl                         = 10;
 			$time_within                 = 5;
 			$time_beyond                 = 6;
 		}
@@ -762,7 +760,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 		// Verify caching was skipped.
 
-		$this->assertArrayNotHasKey( 'X-WC-Cache', $response->get_headers() );
+		$this->assertNoCacheHeader( $response );
 	}
 
 	/**
@@ -1209,6 +1207,87 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'single_entity', $received['must_cache'] ?? null, 'endpoint_id should be passed to must_cache' );
 		$this->assertEquals( 'single_entity', $received['extract_entity_ids'] ?? null, 'endpoint_id should be passed to extract_entity_ids' );
 		$this->assertEquals( 'single_entity', $received['get_response_headers_to_exclude_from_caching'] ?? null, 'endpoint_id should be passed to get_response_headers_to_exclude_from_caching' );
+	}
+
+	/**
+	 * @testdox Query strings with the same parameters in different order produce the same cache key.
+	 */
+	public function test_query_string_parameter_order_independence() {
+
+		// First request with query parameters in one order: ?foo=1&bar=2&baz=3.
+
+		$response1 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'foo' => '1',
+				'bar' => '2',
+				'baz' => '3',
+			)
+		);
+
+		// Verify response is cache MISS and data is correct.
+
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( 200, $response1->get_status() );
+		$this->assertEquals( $this->sut->responses['single_entity'], $response1->get_data() );
+
+		// Verify response was cached.
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the cache key and modify cached data to verify subsequent request uses cached value.
+
+		$cache_key                              = array_key_first( $this->sut->cache );
+		$modified_data                          = array(
+			'id'   => 999,
+			'name' => 'Cached Product',
+		);
+		$this->sut->cache[ $cache_key ]['data'] = $modified_data;
+
+		// Second request with SAME parameters but DIFFERENT order: ?baz=3&foo=1&bar=2.
+
+		$response2 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'baz' => '3',
+				'foo' => '1',
+				'bar' => '2',
+			)
+		);
+
+		// Verify response is cache HIT (same cache key was used).
+
+		$this->assertCacheHitHeader( $response2 );
+		$this->assertEquals( 200, $response2->get_status() );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+
+		// Verify still only one cache entry exists (same cache key was used).
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Verify the cache key is the same.
+
+		$cache_key_after = array_key_first( $this->sut->cache );
+		$this->assertEquals( $cache_key, $cache_key_after, 'Cache key should be the same for query strings with same parameters in different order' );
+
+		// Third request with DIFFERENT parameter value should create new cache entry: ?foo=1&bar=2&baz=DIFFERENT.
+
+		$response3 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'foo' => '1',
+				'bar' => '2',
+				'baz' => 'DIFFERENT',
+			)
+		);
+
+		// Verify response is cache MISS (different parameters = different cache key).
+
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify we now have two cache entries (different cache keys).
+
+		$this->assertCount( 2, $this->sut->cache );
 	}
 
 	// TESTS END HERE. Below there's auxiliary methods only.

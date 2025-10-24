@@ -400,7 +400,7 @@ trait RestApiCache {
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('must_cache' key).
 	 *
-	 * Note: Additionally, the _skip_cache query parameter and the woocommerce_rest_api_cache_must_cache filter
+	 * Note: Additionally, the _skip_cache query parameter and the woocommerce_rest_api_enable_response_caching filter
 	 * can be used to control the enabling of caching for a given request.
 	 *
 	 * @param WP_REST_Request $request     Request object.
@@ -516,9 +516,13 @@ trait RestApiCache {
 	 * @return array Array of cache key information parts.
 	 */
 	protected function get_cache_key_info( WP_REST_Request $request, bool $vary_by_user = false, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$request_query_params = $request->get_query_params();
+		if ( is_array( $request_query_params ) ) {
+			ksort( $request_query_params );
+		}
 		$cache_key_parts = array(
 			$request->get_route(),
-			wp_json_encode( $request->get_query_params() ),
+			wp_json_encode( $request_query_params ),
 		);
 
 		if ( $vary_by_user ) {
