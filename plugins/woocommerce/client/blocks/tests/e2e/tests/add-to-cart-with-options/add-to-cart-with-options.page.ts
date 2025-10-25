@@ -72,13 +72,15 @@ class AddToCartWithOptionsPage {
 		const addToCartFormBlock = await this.editor.getBlockByName(
 			'woocommerce/add-to-cart-form'
 		);
-		await this.editor.selectBlocks( addToCartFormBlock );
+		if ( await addToCartFormBlock.isVisible() ) {
+			await this.editor.selectBlocks( addToCartFormBlock );
 
-		await this.page
-			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
-			} )
-			.click();
+			await this.page
+				.getByRole( 'button', {
+					name: 'Upgrade to the Add to Cart + Options block',
+				} )
+				.click();
+		}
 	}
 
 	async updateSingleProductTemplate() {
