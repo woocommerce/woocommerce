@@ -27,9 +27,11 @@ class AddToCartWithOptionsPage {
 
 	async switchProductType( productType: string ) {
 		await this.page.getByRole( 'tab', { name: 'Template' } ).click();
-		await this.page
-			.getByRole( 'button', { name: 'Product Type', exact: true } )
-			.click();
+		const productTypePanel = await this.page
+			.getByRole( 'button', { name: 'Product Type', exact: true } );
+		if ( await productTypePanel.getAttribute( 'aria-expanded' ) !== 'true' ) {
+			await productTypePanel.click();
+		}
 		await this.page
 			.getByLabel( 'Type switcher' )
 			.selectOption( { label: productType } );
