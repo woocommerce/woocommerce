@@ -11,6 +11,7 @@ import {
 	LOCAL_PICKUP_ENABLED,
 	SHIPPING_METHODS_EXIST,
 	SHIPPING_ENABLED,
+	SHIPPING_METHOD_SELECTOR_ENABLED,
 } from '@woocommerce/block-settings';
 import { useCheckoutBlockContext } from '@woocommerce/blocks/checkout/context';
 
@@ -56,6 +57,7 @@ const FrontendBlock = ( {
 	// Note that display logic is also found in plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/register-components.ts
 	// where the block is not registered if the conditions are not met.
 	if (
+		! SHIPPING_METHOD_SELECTOR_ENABLED ||
 		! SHIPPING_ENABLED ||
 		! needsShipping ||
 		! isCollectable ||

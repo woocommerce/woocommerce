@@ -250,6 +250,7 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'localPickupEnabled', $pickup_location_settings['enabled'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
+		$this->asset_data_registry->add( 'isMixingShippingAndLocalPickup', apply_filters( 'woocommerce_blocks_is_mixing_shipping_and_local_pickup', false ) );
 
 		$is_block_editor = $this->is_block_editor();
 

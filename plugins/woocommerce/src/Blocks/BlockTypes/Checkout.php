@@ -464,6 +464,7 @@ class Checkout extends AbstractBlock {
 		$this->asset_data_registry->add( 'localPickupCost', $pickup_location_settings['cost'] );
 		$this->asset_data_registry->add( 'collectableMethodIds', $local_pickup_method_ids );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() );
+		$this->asset_data_registry->add( 'shippingMethodSelectorEnabled', apply_filters( 'woocommerce_blocks_is_shipping_method_selector_enabled', true ) );
 
 		$is_block_editor = $this->is_block_editor();
 

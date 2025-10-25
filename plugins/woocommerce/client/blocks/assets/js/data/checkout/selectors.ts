@@ -12,6 +12,7 @@ import type { AddressFormType } from '@woocommerce/settings';
 import { STATUS } from './constants';
 import { CheckoutState } from './default-state';
 import { STORE_KEY as cartStoreKey } from '../cart/constants';
+import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;
@@ -94,6 +95,9 @@ export const isCalculating = ( state: CheckoutState ) => {
 };
 
 export const prefersCollection = ( state: CheckoutState ) => {
+	if ( ! SHIPPING_METHOD_SELECTOR_ENABLED ) {
+		return false;
+	}
 	if ( typeof state.prefersCollection === 'undefined' ) {
 		const shippingRates = select( cartStoreKey ).getShippingRates();
 		if ( ! shippingRates || ! shippingRates.length ) {

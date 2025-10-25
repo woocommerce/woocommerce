@@ -16,6 +16,7 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
  */
 import { useStoreEvents } from '../use-store-events';
 import type { ShippingData } from './types';
+import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 export const useShippingData = (): ShippingData => {
 	const {
@@ -88,9 +89,12 @@ export const useShippingData = (): ShippingData => {
 			/**
 			 * Picking location handling
 			 *
-			 * Forces pickup location to be selected for all packages since we don't allow a mix of shipping and pickup.
+			 * Forces pickup location to be selected for all packages when the shipping method selector is enabled.
 			 */
-			if ( hasCollectableRate( newShippingRateId.split( ':' )[ 0 ] ) ) {
+			if (
+				SHIPPING_METHOD_SELECTOR_ENABLED &&
+				hasCollectableRate( newShippingRateId.split( ':' )[ 0 ] )
+			) {
 				selectPromise = dispatchSelectShippingRate(
 					newShippingRateId,
 					null

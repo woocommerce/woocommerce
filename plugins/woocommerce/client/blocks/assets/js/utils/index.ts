@@ -15,3 +15,4 @@ export * from './find-block';
 export * from './get-unique-id';
 export * from './html-entities';
 export * from './get-inner-block-by-name';
+export * from './render-package-rate-option';

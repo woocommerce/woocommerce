@@ -10,7 +10,6 @@ import { registerBlockType } from '@wordpress/blocks';
 import { Edit, Save } from './edit';
 import attributes from './attributes';
 import metadata from './block.json';
-import './style.scss';
 
 registerBlockType( 'woocommerce/checkout-pickup-options-block', {
 	apiVersion: metadata.apiVersion,

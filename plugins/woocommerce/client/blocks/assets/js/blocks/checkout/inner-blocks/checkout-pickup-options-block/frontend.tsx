@@ -47,7 +47,10 @@ const FrontendBlock = ( {
 		<FormStep
 			id="pickup-options"
 			disabled={ checkoutIsProcessing }
-			className={ clsx( 'wc-block-checkout__pickup-options', className ) }
+			className={ clsx(
+				'wc-block-checkout__shipping-option',
+				className
+			) }
 			title={ title }
 			description={ description }
 			showStepNumber={ showFormStepNumbers }

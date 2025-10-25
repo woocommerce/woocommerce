@@ -17,3 +17,90 @@
 		border-radius: $universal-border-radius;
 	}
 }
+
+.wc-block-components-local-pickup-rates-control, .wc-block-components-shipping-rates-control {
+	.wc-block-components-radio-control
+		.wc-block-components-radio-control__input {
+		// We want it to stick to the top, since it has position: absolute we
+		// can position it to be aligned with the top padding value.
+		top: $gap;
+		transform: none;
+	}
+
+	.wc-block-components-radio-control__option-layout {
+		display: block;
+	}
+
+	.wc-block-components-radio-control__label-group {
+		width: 100%;
+		display: flex;
+
+		> :last-child {
+			margin-left: auto;
+		}
+	}
+
+	.wc-block-components-radio-control__label-group {
+		em {
+			text-transform: uppercase;
+			font-style: inherit;
+		}
+	}
+
+	.wc-block-components-radio-control__option-checked {
+		.wc-block-components-radio-control__description-group {
+			.read-more-content {
+				position: initial;
+				visibility: visible;
+				z-index: initial;
+				hyphens: auto;
+				word-break: normal;
+			}
+		}
+	}
+
+	.wc-block-components-radio-control__description-group {
+		@include font-regular-locked;
+
+		display: flex;
+		flex-direction: column;
+		gap: $gap-smallest;
+		margin-top: $gap-smallest;
+
+		box-sizing: border-box;
+
+		.wc-block-components-radio-control__description,
+		.wc-block-components-radio-control__secondary-description {
+			width: 100%;
+			text-align: left;
+			margin: 0;
+			display: block;
+		}
+
+		.wc-block-components-radio-control__description {
+			display: flex;
+			align-items: center;
+			gap: $gap-smallest;
+
+			color: $gray-700;
+
+			.has-dark-controls & {
+				color: $gray-300;
+			}
+
+			.wc-block-editor-components-block-icon {
+				fill: currentColor;
+				// Pixel perfect alignement needed as internal padding of the SVG
+				// is inconsistent (top one bigger that the bottom one).
+				margin-top: -2px;
+				margin-left: -3px;
+			}
+		}
+
+		.read-more-content {
+			position: absolute;
+			visibility: hidden;
+			z-index: -1;
+		}
+	}
+}

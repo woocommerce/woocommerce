@@ -12,61 +12,13 @@ import {
 	hasCollectableRate,
 	hasAllFieldsForShippingRates,
 } from '@woocommerce/base-utils';
-import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
-import {
-	FormattedMonetaryAmount,
-	StoreNoticesContainer,
-} from '@woocommerce/blocks-components';
+import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { useEditorContext, noticeContexts } from '@woocommerce/base-context';
-import { decodeEntities } from '@wordpress/html-entities';
-import { getSetting } from '@woocommerce/settings';
-import type {
-	PackageRateOption,
-	CartShippingPackageShippingRate,
-} from '@woocommerce/types';
 import NoticeBanner from '@woocommerce/base-components/notice-banner';
 import type { ReactElement } from 'react';
 import { useMemo } from '@wordpress/element';
-import ReadMore from '@woocommerce/base-components/read-more';
-
-/**
- * Renders a shipping rate control option.
- *
- * @param {Object} option Shipping Rate.
- */
-const renderShippingRatesControlOption = (
-	option: CartShippingPackageShippingRate
-): PackageRateOption => {
-	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
-		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
-		: parseInt( option.price, 10 );
-	const isSelected = option?.selected;
-
-	const secondaryLabel =
-		priceWithTaxes === 0 ? (
-			<span className="wc-block-checkout__shipping-option--free">
-				{ __( 'Free', 'woocommerce' ) }
-			</span>
-		) : (
-			<FormattedMonetaryAmount
-				currency={ getCurrencyFromPriceResponse( option ) }
-				value={ priceWithTaxes }
-			/>
-		);
-
-	return {
-		label: decodeEntities( option.name ),
-		value: option.rate_id,
-		description: decodeEntities( option.delivery_time ),
-		secondaryLabel,
-		secondaryDescription:
-			isSelected && option.description ? (
-				<ReadMore maxLines={ 2 }>
-					{ decodeEntities( option.description ) }
-				</ReadMore>
-			) : undefined,
-	};
-};
+import { renderPackageRateOption } from '@woocommerce/utils';
+import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 const NoShippingAddressMessage = () => {
 	return (
@@ -101,7 +53,7 @@ const Block = ( {
 	const { shippingAddress } = useCustomerData();
 
 	const filteredShippingRates = useMemo( () => {
-		return isCollectable
+		return SHIPPING_METHOD_SELECTOR_ENABLED && isCollectable
 			? shippingRates.map( ( shippingRatesPackage ) => {
 					return {
 						...shippingRatesPackage,
@@ -156,7 +108,7 @@ const Block = ( {
 							) }
 						</>
 					}
-					renderOption={ renderShippingRatesControlOption }
+					renderOption={ renderPackageRateOption }
 					collapsible={ false }
 					shippingRates={ filteredShippingRates }
 					isLoadingRates={ isLoadingRates }

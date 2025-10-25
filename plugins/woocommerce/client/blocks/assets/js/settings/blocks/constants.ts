@@ -61,6 +61,11 @@ export const SHIPPING_ENABLED = getSetting< boolean >(
 	true
 );
 
+export const SHIPPING_METHOD_SELECTOR_ENABLED = getSetting< boolean >(
+	'shippingMethodSelectorEnabled',
+	true
+);
+
 type FieldsLocations = {
 	address: Array< keyof AddressForm >;
 	contact: Array< keyof ContactForm >;
