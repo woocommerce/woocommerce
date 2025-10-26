@@ -271,7 +271,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 		$table_name     = $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
 		$id_column_name = $this->hpos_in_use ? 'post_id' : 'order_id';
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query(
 			$wpdb->prepare(
 				"DELETE FROM {$table_name}
@@ -280,6 +280,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
 			)
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
