@@ -444,10 +444,11 @@ class WC_Gateway_Paypal_Request {
 
 		if ( ! in_array(
 			$shipping_preference,
-			[
+			array(
 				WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING,
 				WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS,
-			], true
+			),
+			true
 		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
