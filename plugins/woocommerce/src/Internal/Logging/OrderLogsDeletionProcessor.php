@@ -266,13 +266,20 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 		// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
 
 		$order_ids    = array_map( fn( $item ) => absint( $item['order_id'] ), $batch );
-		$placeholders = implode( ',', array_map( 'absint', $order_ids ) );
+		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
 		$table_name     = $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
 		$id_column_name = $this->hpos_in_use ? 'post_id' : 'order_id';
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table_name}
+				 WHERE {$id_column_name} IN ({$placeholders})
+				 AND meta_key = %s",
+				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
+			)
+		);
 	}
 
 	/**
