@@ -583,7 +583,7 @@ class WC_Gateway_Paypal_Request {
 	/**
 	 * Get the amount for a specific order item.
 	 *
-	 * @param WC_Order $order Order object.
+	 * @param WC_Order      $order Order object.
 	 * @param WC_Order_Item $item Order item.
 	 * @return float
 	 */
