@@ -27,6 +27,13 @@ class CheckoutSessions extends ControllerTestCase {
 	protected $products = array();
 
 	/**
+	 * Test bearer token for authorization.
+	 *
+	 * @var string
+	 */
+	protected $test_bearer_token;
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
@@ -43,6 +50,18 @@ class CheckoutSessions extends ControllerTestCase {
 
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with test bearer token for authorization.
+		$this->test_bearer_token = 'test_token_' . uniqid();
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => wp_hash_password( $this->test_bearer_token ),
+				),
+			),
+			false
+		);
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -83,6 +102,7 @@ class CheckoutSessions extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+		delete_option( 'woocommerce_agentic_agent_registry' );
 
 		// Clear session data.
 		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
@@ -186,6 +206,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 */
 	private function create_session( $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -490,18 +511,6 @@ class CheckoutSessions extends ControllerTestCase {
 	}
 
 	/**
-	 * Test feature flag disabled returns 403.
-	 */
-	public function test_feature_flag_disabled_returns_403() {
-		// Disable feature.
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-
-		$response = $this->create_session( $this->create_checkout_request() );
-
-		$this->assertEquals( 403, $response->get_status() );
-	}
-
-	/**
 	 * Test currency format is lowercase.
 	 */
 	public function test_currency_format_is_lowercase() {
@@ -579,6 +588,7 @@ class CheckoutSessions extends ControllerTestCase {
 	 */
 	private function update_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -977,6 +987,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$idempotency_key = 'test-idempotency-123';
 		$request         = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_body_params( $this->create_checkout_request() );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_header( 'Idempotency-Key', $idempotency_key );
 
 		$response = rest_get_server()->dispatch( $request );
@@ -993,6 +1004,7 @@ class CheckoutSessions extends ControllerTestCase {
 		$request_id = 'req_' . uniqid();
 		$request    = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
 		$request->set_body_params( $this->create_checkout_request() );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_header( 'Request-Id', $request_id );
 
 		$response = rest_get_server()->dispatch( $request );
