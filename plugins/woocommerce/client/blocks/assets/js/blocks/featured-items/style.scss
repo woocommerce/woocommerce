@@ -153,6 +153,16 @@
 		}
 	}
 
+	&__inner-blocks {
+		.wp-block-post-title,
+		.wp-block-woocommerce-category-title {
+			&,
+			a {
+				color: inherit;
+			}
+		}
+	}
+
 	& &__title {
 		color: inherit;
 		margin-top: 0;
