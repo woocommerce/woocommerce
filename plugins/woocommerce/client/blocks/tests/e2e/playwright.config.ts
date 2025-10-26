@@ -43,7 +43,7 @@ const config: PlaywrightTestConfig = {
 		: 'list',
 	use: {
 		baseURL: BASE_URL,
-		screenshot: 'only-on-failure',
+		screenshot: { mode: 'only-on-failure', fullPage: true },
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
 				? 'retain-on-first-failure'
