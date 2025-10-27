@@ -123,12 +123,13 @@ class Utils {
 
 		} else {
 			// Check if we're in a cart block context.
-			$current_page       = $wp_query->get_queried_object();
-			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
-			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
-			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
+			$current_page        = $wp_query->get_queried_object();
+			$has_cart_block      = $current_page && has_block( 'woocommerce/cart', $current_page );
+			$has_checkout_block  = $current_page && has_block( 'woocommerce/checkout', $current_page );
+			$has_mini_cart_block = self::has_mini_cart_block( $current_page );
+			$is_cart_available   = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
 
-			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
+			if ( ( $has_mini_cart_block || $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {
 				$type  = 'cart';
 				$items = array();
 				foreach ( WC()->cart->get_cart() as $cart_item ) {
@@ -168,6 +169,53 @@ class Utils {
 		);
 
 		return $context;
+	}
+
+	/**
+	 * Check if the mini-cart block is present in the page or template parts.
+	 *
+	 * This method checks if the site is using a block theme, then searches for the
+	 * mini-cart block in the current page and template parts (e.g., header, footer).
+	 * The result is cached using a static variable for the duration of the request.
+	 *
+	 * @param WP_Post|null $current_page The current page object to check.
+	 * @return bool True if mini-cart block is found, false otherwise.
+	 */
+	private static function has_mini_cart_block( $current_page ) {
+		static $has_mini_cart = null;
+
+		if ( null !== $has_mini_cart ) {
+			return $has_mini_cart;
+		}
+
+		// Mini-cart in templates is only supported in block themes.
+		if ( ! wp_is_block_theme() ) {
+			$has_mini_cart = false;
+			return false;
+		}
+
+		// Check current page content first.
+		if ( $current_page && has_block( 'woocommerce/mini-cart', $current_page ) ) {
+			$has_mini_cart = true;
+			return true;
+		}
+
+		// Check template parts (header, footer, etc.).
+		$template_parts = \Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils::get_block_templates_from_db(
+			array(),
+			'wp_template_part'
+		);
+
+		foreach ( $template_parts as $part ) {
+			// Check for both the mini-cart button and its contents block.
+			if ( has_block( 'woocommerce/mini-cart', $part->content ) || has_block( 'woocommerce/mini-cart-contents', $part->content ) ) {
+				$has_mini_cart = true;
+				return true;
+			}
+		}
+
+		$has_mini_cart = false;
+		return false;
 	}
 
 	/**
