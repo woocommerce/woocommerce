@@ -48,7 +48,8 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 
 export type VariationData = {
 	attributes: Record< string, string >;
-	is_in_stock?: boolean;
+	is_in_stock: boolean;
+	sold_individually: boolean;
 	price_html?: string;
 	image_id?: number;
 	availability?: string;
@@ -59,11 +60,12 @@ export type VariationData = {
 	min?: number;
 	max?: number;
 	step?: number;
-	sold_individually?: boolean;
 };
 
 export type ProductData = {
 	type: string;
+	is_in_stock: boolean;
+	sold_individually: boolean;
 	price_html?: string;
 	image_id?: number;
 	availability?: string;
