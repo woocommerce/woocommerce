@@ -13,7 +13,7 @@ use WC_Unit_Test_Case;
 class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 
 	/**
-	 * System under test.
+	 * The System Under Test.
 	 *
 	 * @var object
 	 */
@@ -32,143 +32,54 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_enable_entity_versions_cache' );
+		remove_all_filters( 'woocommerce_should_use_entity_versions_cache' );
 		remove_all_filters( 'woocommerce_cached_entity_version_ttl' );
-		remove_all_actions( 'woocommerce_entity_version_cached' );
-		remove_all_actions( 'woocommerce_entity_version_cache_deleted' );
+		remove_all_filters( 'woocommerce_pre_entity_versions_cache_get' );
+		remove_all_filters( 'woocommerce_pre_entity_versions_cache_set' );
+		remove_all_filters( 'woocommerce_pre_entity_versions_cache_delete' );
 		$this->sut = null;
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox is_enabled respects the woocommerce_enable_entity_versions_cache filter value.
+	 * @testdox should_use respects the woocommerce_should_use_entity_versions_cache filter value.
 	 *
 	 * @testWith [true]
 	 *           [false]
 	 *
 	 * @param bool $filter_value Value the filter should return.
 	 */
-	public function test_is_enabled_respects_filter( bool $filter_value ) {
+	public function test_should_use_respects_filter( bool $filter_value ) {
 		add_filter(
-			'woocommerce_enable_entity_versions_cache',
+			'woocommerce_should_use_entity_versions_cache',
 			$filter_value ? '__return_true' : '__return_false'
 		);
 
-		// Create a new instance to test fresh is_enabled state.
+		// Create a new instance to test fresh should_use state.
 
 		$cache = $this->create_test_entity_versions_cache();
 
-		$this->assertEquals( $filter_value, $cache->is_enabled() );
+		$this->assertEquals( $filter_value, $cache->should_use() );
 	}
 
 	/**
-	 * @testdox is_enabled caches the result and returns the same value on subsequent calls.
+	 * @testdox should_use caches the result and returns the same value on subsequent calls.
 	 */
-	public function test_is_enabled_is_cached() {
+	public function test_should_use_is_cached() {
 		$call_count = 0;
 		add_filter(
-			'woocommerce_enable_entity_versions_cache',
+			'woocommerce_should_use_entity_versions_cache',
 			function ( $enabled ) use ( &$call_count ) {
 				$call_count++;
 				return $enabled;
 			}
 		);
 
-		$result1 = $this->sut->is_enabled();
-		$result2 = $this->sut->is_enabled();
+		$result1 = $this->sut->should_use();
+		$result2 = $this->sut->should_use();
 
 		$this->assertEquals( $result1, $result2 );
 		$this->assertEquals( 1, $call_count, 'Filter should only be called once, result is cached' );
-	}
-
-	/**
-	 * @testdox is_enabled returns wp_using_ext_object_cache value by default.
-	 * @testWith [true]
-	 *           [false]
-	 *
-	 * @param bool $wp_using_ext_object_cache_value Value wp_using_ext_object_cache should return.
-	 */
-	public function test_is_enabled_without_filter( bool $wp_using_ext_object_cache_value ) {
-		// Create a test cache with overridden is_enabled to test the default logic.
-
-		$cache = new class( $wp_using_ext_object_cache_value ) extends EntityVersionsCache {
-			/**
-			 * Cache storage.
-			 *
-			 * @var array
-			 */
-			public $cache = array();
-
-			/**
-			 * Expected wp_using_ext_object_cache value.
-			 *
-			 * @var bool
-			 */
-			private $expected_value;
-
-			/**
-			 * Constructor.
-			 *
-			 * @param bool $expected_value Expected value.
-			 */
-			public function __construct( bool $expected_value ) {
-				$this->expected_value = $expected_value;
-				// Don't call parent constructor to avoid registering hooks.
-			}
-
-			/**
-			 * Override is_enabled to test without filter.
-			 *
-			 * @return bool
-			 */
-			public function is_enabled(): bool {
-				// Simulate what the parent does: call filter with wp_using_ext_object_cache as default.
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks
-				return apply_filters(
-					'woocommerce_enable_entity_versions_cache',
-					$this->expected_value
-				);
-			}
-
-			/**
-			 * Get a value from the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @return mixed|false The cached value or false if not found.
-			 */
-			protected function get_cached( string $cache_key ) {
-				return $this->cache[ $cache_key ] ?? false;
-			}
-
-			/**
-			 * Set a value in the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @param mixed  $value     The value to cache.
-			 * @param int    $ttl       Time to live in seconds.
-			 * @return bool True on success, false on failure.
-			 */
-			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
-				$this->cache[ $cache_key ] = $value;
-				return true;
-			}
-
-			/**
-			 * Delete a value from the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @return bool True on success, false on failure.
-			 */
-			protected function delete_cached( string $cache_key ): bool {
-				if ( isset( $this->cache[ $cache_key ] ) ) {
-					unset( $this->cache[ $cache_key ] );
-					return true;
-				}
-				return false;
-			}
-		};
-
-		$this->assertEquals( $wp_using_ext_object_cache_value, $cache->is_enabled() );
 	}
 
 	/**
@@ -219,10 +130,10 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox modify_entity_version sets a new version for a not yet versioned entity.
+	 * @testdox regenerate_entity_version sets a new version for a not yet versioned entity.
 	 */
-	public function test_modify_entity_version_creates_new() {
-		$version = $this->sut->modify_entity_version( 'new_entity', 111 );
+	public function test_regenerate_entity_version_creates_new() {
+		$version = $this->sut->regenerate_entity_version( 'new_entity', 111 );
 
 		$this->assertNotEmpty( $version, 'Version should not be empty' );
 		$this->assertIsString( $version, 'Version should be a string' );
@@ -235,16 +146,16 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox modify_entity_version changes the version of an already versioned entity.
+	 * @testdox regenerate_entity_version changes the version of an already versioned entity.
 	 */
-	public function test_modify_entity_version_updates_existing() {
+	public function test_regenerate_entity_version_updates_existing() {
 		// Pre-populate cache with a known version.
 
 		$old_version                    = 'old-version-uuid';
 		$cache_key                      = 'wc_entity_version_updated_entity_222';
 		$this->sut->cache[ $cache_key ] = $old_version;
 
-		$new_version = $this->sut->modify_entity_version( 'updated_entity', 222 );
+		$new_version = $this->sut->regenerate_entity_version( 'updated_entity', 222 );
 
 		$this->assertNotEmpty( $new_version, 'New version should not be empty' );
 		$this->assertNotEquals( $old_version, $new_version, 'New version should differ from old version' );
@@ -252,27 +163,27 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox forget_entity_version removes the cached entry for an already versioned entity.
+	 * @testdox delete_entity_version removes the cached entry for an already versioned entity.
 	 */
-	public function test_forget_entity_version_removes_existing() {
+	public function test_delete_entity_version_removes_existing() {
 		// Pre-populate cache with a known version.
 
 		$cache_key                      = 'wc_entity_version_forgotten_entity_333';
 		$this->sut->cache[ $cache_key ] = 'version-to-forget';
 
-		$result = $this->sut->forget_entity_version( 'forgotten_entity', 333 );
+		$result = $this->sut->delete_entity_version( 'forgotten_entity', 333 );
 
-		$this->assertTrue( $result, 'forget_entity_version should return true when entity existed' );
+		$this->assertTrue( $result, 'delete_entity_version should return true when entity existed' );
 		$this->assertArrayNotHasKey( $cache_key, $this->sut->cache, 'Cache entry should be deleted' );
 	}
 
 	/**
-	 * @testdox forget_entity_version does nothing for an entity that isn't versioned.
+	 * @testdox delete_entity_version does nothing for an entity that isn't versioned.
 	 */
-	public function test_forget_entity_version_nonexistent() {
-		$result = $this->sut->forget_entity_version( 'nonexistent_entity', 999 );
+	public function test_delete_entity_version_nonexistent() {
+		$result = $this->sut->delete_entity_version( 'nonexistent_entity', 999 );
 
-		$this->assertFalse( $result, 'forget_entity_version should return false when entity does not exist' );
+		$this->assertFalse( $result, 'delete_entity_version should return false when entity does not exist' );
 	}
 
 	/**
@@ -299,105 +210,12 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 			3
 		);
 
-		$this->sut->modify_entity_version( 'custom_entity', 555 );
+		$this->sut->regenerate_entity_version( 'custom_entity', 555 );
 
 		$this->assertCount( 1, $filter_calls, 'TTL filter should be called once' );
 		$this->assertEquals( 'custom_entity', $filter_calls[0]['entity_type'] );
 		$this->assertEquals( 555, $filter_calls[0]['entity_id'] );
 		$this->assertEquals( DAY_IN_SECONDS, $filter_calls[0]['ttl'], 'Default TTL should be passed to filter' );
-	}
-
-	/**
-	 * @testdox woocommerce_entity_version_cached action is fired when version is created or modified.
-	 */
-	public function test_entity_version_cached_action() {
-		$action_calls = array();
-
-		add_action(
-			'woocommerce_entity_version_cached',
-			function ( $entity_type, $entity_id, $ttl, $is_new ) use ( &$action_calls ) {
-				$action_calls[] = array(
-					'entity_type' => $entity_type,
-					'entity_id'   => $entity_id,
-					'ttl'         => $ttl,
-					'is_new'      => $is_new,
-				);
-			},
-			10,
-			4
-		);
-
-		// Test creating new version.
-
-		$this->sut->modify_entity_version( 'test_entity', 666 );
-
-		$this->assertCount( 1, $action_calls, 'Action should be fired once for new version' );
-		$this->assertEquals( 'test_entity', $action_calls[0]['entity_type'] );
-		$this->assertEquals( 666, $action_calls[0]['entity_id'] );
-		$this->assertEquals( DAY_IN_SECONDS, $action_calls[0]['ttl'] );
-		$this->assertTrue( $action_calls[0]['is_new'], 'is_new should be true for new version' );
-
-		// Test refreshing existing version.
-
-		$action_calls = array();
-		$this->sut->get_entity_version( 'test_entity', 666 );
-
-		$this->assertCount( 1, $action_calls, 'Action should be fired once for refresh' );
-		$this->assertFalse( $action_calls[0]['is_new'], 'is_new should be false for refresh' );
-	}
-
-	/**
-	 * @testdox woocommerce_entity_version_cache_deleted action is fired when version is deleted.
-	 */
-	public function test_entity_version_cache_deleted_action() {
-		$action_calls = array();
-
-		add_action(
-			'woocommerce_entity_version_cache_deleted',
-			function ( $entity_type, $entity_id ) use ( &$action_calls ) {
-				$action_calls[] = array(
-					'entity_type' => $entity_type,
-					'entity_id'   => $entity_id,
-				);
-			},
-			10,
-			2
-		);
-
-		// Pre-populate a version to delete.
-
-		$this->sut->cache['wc_entity_version_deleted_entity_777'] = 'version-to-delete';
-
-		$this->sut->forget_entity_version( 'deleted_entity', 777 );
-
-		$this->assertCount( 1, $action_calls, 'Action should be fired once' );
-		$this->assertEquals( 'deleted_entity', $action_calls[0]['entity_type'] );
-		$this->assertEquals( 777, $action_calls[0]['entity_id'] );
-	}
-
-	/**
-	 * @testdox woocommerce_entity_version_cache_deleted action is fired even when entity doesn't exist.
-	 */
-	public function test_entity_version_cache_deleted_action_for_nonexistent() {
-		$action_calls = array();
-
-		add_action(
-			'woocommerce_entity_version_cache_deleted',
-			function ( $entity_type, $entity_id ) use ( &$action_calls ) {
-				$action_calls[] = array(
-					'entity_type' => $entity_type,
-					'entity_id'   => $entity_id,
-				);
-			},
-			10,
-			2
-		);
-
-		$this->sut->forget_entity_version( 'nonexistent_entity', 888 );
-
-		$this->assertCount( 1, $action_calls, 'Action should still be fired even when entity does not exist' );
-		$this->assertEquals( 'nonexistent_entity', $action_calls[0]['entity_type'] );
-		$this->assertEquals( 888, $action_calls[0]['entity_id'] );
 	}
 
 	/**
@@ -422,12 +240,12 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 
 		// Modifying version should create new UUID.
 
-		$version3 = $this->sut->modify_entity_version( 'custom_entity', $entity_id );
+		$version3 = $this->sut->regenerate_entity_version( 'custom_entity', $entity_id );
 		$this->assertNotEquals( $version1, $version3, 'Modified version should be different' );
 
 		// Forgetting version should work.
 
-		$result = $this->sut->forget_entity_version( 'custom_entity', $entity_id );
+		$result = $this->sut->delete_entity_version( 'custom_entity', $entity_id );
 		$this->assertTrue( $result, 'Should successfully forget entity version' );
 
 		// After forgetting, getting should create new version.
@@ -451,7 +269,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 
 		// Modifying one should affect the other (because they share the same cache key).
 
-		$this->sut->modify_entity_version( 'product', 123 );
+		$this->sut->regenerate_entity_version( 'product', 123 );
 		$new_numeric_version = $this->sut->get_entity_version( 'product', 123 );
 		$new_string_version  = $this->sut->get_entity_version( 'product', '123' );
 
@@ -490,63 +308,63 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox modify_entity_version throws InvalidArgumentException when entity_type is empty.
+	 * @testdox regenerate_entity_version throws InvalidArgumentException when entity_type is empty.
 	 */
-	public function test_modify_entity_version_throws_on_empty_entity_type() {
+	public function test_regenerate_entity_version_throws_on_empty_entity_type() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity type cannot be empty.' );
 
-		$this->sut->modify_entity_version( '', 123 );
+		$this->sut->regenerate_entity_version( '', 123 );
 	}
 
 	/**
-	 * @testdox modify_entity_version throws InvalidArgumentException when entity_id is empty string.
+	 * @testdox regenerate_entity_version throws InvalidArgumentException when entity_id is empty string.
 	 */
-	public function test_modify_entity_version_throws_on_empty_entity_id() {
+	public function test_regenerate_entity_version_throws_on_empty_entity_id() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity ID cannot be an empty string.' );
 
-		$this->sut->modify_entity_version( 'product', '' );
+		$this->sut->regenerate_entity_version( 'product', '' );
 	}
 
 	/**
-	 * @testdox modify_entity_version throws InvalidArgumentException when entity_id is invalid type.
+	 * @testdox regenerate_entity_version throws InvalidArgumentException when entity_id is invalid type.
 	 */
-	public function test_modify_entity_version_throws_on_invalid_entity_id_type() {
+	public function test_regenerate_entity_version_throws_on_invalid_entity_id_type() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity ID must be a number or a string.' );
 
-		$this->sut->modify_entity_version( 'product', null );
+		$this->sut->regenerate_entity_version( 'product', null );
 	}
 
 	/**
-	 * @testdox forget_entity_version throws InvalidArgumentException when entity_type is empty.
+	 * @testdox delete_entity_version throws InvalidArgumentException when entity_type is empty.
 	 */
-	public function test_forget_entity_version_throws_on_empty_entity_type() {
+	public function test_delete_entity_version_throws_on_empty_entity_type() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity type cannot be empty.' );
 
-		$this->sut->forget_entity_version( '', 123 );
+		$this->sut->delete_entity_version( '', 123 );
 	}
 
 	/**
-	 * @testdox forget_entity_version throws InvalidArgumentException when entity_id is empty string.
+	 * @testdox delete_entity_version throws InvalidArgumentException when entity_id is empty string.
 	 */
-	public function test_forget_entity_version_throws_on_empty_entity_id() {
+	public function test_delete_entity_version_throws_on_empty_entity_id() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity ID cannot be an empty string.' );
 
-		$this->sut->forget_entity_version( 'product', '' );
+		$this->sut->delete_entity_version( 'product', '' );
 	}
 
 	/**
-	 * @testdox forget_entity_version throws InvalidArgumentException when entity_id is invalid type.
+	 * @testdox delete_entity_version throws InvalidArgumentException when entity_id is invalid type.
 	 */
-	public function test_forget_entity_version_throws_on_invalid_entity_id_type() {
+	public function test_delete_entity_version_throws_on_invalid_entity_id_type() {
 		$this->expectException( \InvalidArgumentException::class );
 		$this->expectExceptionMessage( 'Entity ID must be a number or a string.' );
 
-		$this->sut->forget_entity_version( 'product', true );
+		$this->sut->delete_entity_version( 'product', true );
 	}
 
 	/**
@@ -576,7 +394,7 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
 
-		$this->sut->modify_entity_version( 'product', 123 );
+		$this->sut->regenerate_entity_version( 'product', 123 );
 
 		$this->assertEquals( 0, $captured_ttl, 'Negative TTL should be converted to 0' );
 	}
@@ -600,10 +418,10 @@ class EntityVersionsCacheTest extends WC_Unit_Test_Case {
 			 * Get a value from the cache.
 			 *
 			 * @param string $cache_key The cache key.
-			 * @return mixed|false The cached value or false if not found.
+			 * @return mixed|null The cached value or null if not found.
 			 */
 			protected function get_cached( string $cache_key ) {
-				return $this->cache[ $cache_key ] ?? false;
+				return $this->cache[ $cache_key ] ?? null;
 			}
 
 			/**
