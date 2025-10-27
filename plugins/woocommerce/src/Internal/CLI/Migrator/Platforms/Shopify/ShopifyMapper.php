@@ -453,13 +453,13 @@ class ShopifyMapper implements PlatformMapperInterface {
 			$simple_data['original_variant_id'] = ! empty( $variant_node->id ) ? basename( $variant_node->id ) : null;
 
 		} else {
-			$simple_data['sku']                 = null;
-			$simple_data['regular_price']       = null;
-			$simple_data['sale_price']          = null;
-			$simple_data['stock_quantity']      = null;
-			$simple_data['manage_stock']        = false;
-			$simple_data['stock_status']        = 'instock';
-			$simple_data['weight']              = null;
+			$simple_data['sku']            = null;
+			$simple_data['regular_price']  = null;
+			$simple_data['sale_price']     = null;
+			$simple_data['stock_quantity'] = null;
+			$simple_data['manage_stock']   = false;
+			$simple_data['stock_status']   = 'instock';
+			$simple_data['weight']         = null;
 			
 			if ( property_exists( $shopify_product, 'taxable' ) ) {
 				$simple_data['tax_status'] = $shopify_product->taxable ? 'taxable' : 'none';
