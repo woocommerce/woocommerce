@@ -83,9 +83,7 @@ export const providersStub: PaymentsProvider[] = [
 				completed: false,
 				test_mode: true,
 			},
-			messages: {
-				not_supported: undefined,
-			},
+			messages: {},
 			_links: {
 				onboard: {
 					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/onboarding',

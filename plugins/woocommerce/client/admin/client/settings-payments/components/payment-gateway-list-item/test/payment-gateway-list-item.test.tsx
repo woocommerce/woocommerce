@@ -151,9 +151,7 @@ const createMockGateway = (
 				completed: false,
 				test_mode: false,
 			} as PaymentsProviderOnboardingState,
-			messages: {
-				not_supported: null,
-			},
+			messages: {},
 			_links: {
 				onboard: {
 					href: '/onboard/test-gateway',
@@ -490,9 +488,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: true,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -531,9 +527,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -569,9 +563,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -607,9 +599,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -751,9 +741,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -790,9 +778,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -827,9 +813,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: false,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -906,9 +890,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: true,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -947,9 +929,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: true,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -987,9 +967,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -1027,9 +1005,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: true,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
@@ -1203,9 +1179,7 @@ describe( 'PaymentGatewayListItem', () => {
 						completed: false,
 						test_mode: false,
 					},
-					messages: {
-						not_supported: null,
-					},
+					messages: {},
 					_links: {
 						onboard: { href: '/onboard' },
 						reset: { href: '/reset' },
