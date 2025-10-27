@@ -30,29 +30,6 @@ import { translateJQueryEventToNative } from '../../base/stores/woocommerce/lega
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-function itemDataInnerHTML( field: 'name' | 'value' ) {
-	const { ref } = getElement();
-
-	if ( ! ref ) {
-		return;
-	}
-
-	const dataAttr = cartItemState.cartItemDataAttr as
-		| CartItemDataAttr
-		| { hidden: boolean };
-
-	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
-		return;
-	}
-
-	if ( field in dataAttr ) {
-		const value = dataAttr[ field as keyof typeof dataAttr ];
-		if ( typeof value === 'string' && value ) {
-			ref.innerHTML = trimWords( value );
-		}
-	}
-}
-
 const { currency, placeholderImgSrc } = getConfig(
 	'woocommerce'
 ) as WooCommerceConfig;
@@ -319,6 +296,30 @@ store< MiniCart >(
 	},
 	{ lock: universalLock }
 );
+
+function itemDataInnerHTML( field: 'name' | 'value' ) {
+	const { ref } = getElement();
+
+	if ( ! ref ) {
+		return;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	const dataAttr = cartItemState.cartItemDataAttr as
+		| CartItemDataAttr
+		| { hidden: boolean };
+
+	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+		return;
+	}
+
+	if ( field in dataAttr ) {
+		const value = dataAttr[ field as keyof typeof dataAttr ];
+		if ( typeof value === 'string' && value ) {
+			ref.innerHTML = trimWords( value );
+		}
+	}
+}
 
 const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
