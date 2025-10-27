@@ -7,16 +7,18 @@ namespace Automattic\WooCommerce\Internal\Caches;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Entity versions cache class.
+ * Entity version keys cache class.
  *
- * Provides a generic mechanism for caching versions of mutable entities.
+ * Provides a generic mechanism for caching version keys of mutable entities.
  * An "entity" is any item (object, array of data...) that can be uniquely
  * identified by a type and an ID, and whose data can change over time.
+ * A "version key" is a unique identifier (UUID) that changes whenever the
+ * entity data is modified, allowing efficient cache invalidation.
  */
-class EntityVersionsCache {
+class EntityVersionKeysCache {
 
 	/**
-	 * Should the entity versions cache be used?
+	 * Should the entity version keys cache be used?
 	 *
 	 * @var bool|null
 	 */
@@ -41,7 +43,7 @@ class EntityVersionsCache {
 	}
 
 	/**
-	 * Tells whether the entity versions cache should be used or not.
+	 * Tells whether the entity version keys cache should be used or not.
 	 *
 	 * By default this will return true only if an external object cache is configured in WordPress,
 	 * since otherwise the cached entries will only persist for the current session.
@@ -56,14 +58,14 @@ class EntityVersionsCache {
 		$default_value = is_null( $this->legacy_proxy ) ? false : ( $this->legacy_proxy->call_function( 'wp_using_ext_object_cache' ) ?? false );
 
 		/**
-		 * Filter whether to use the entity versions cache.
+		 * Filter whether to use the entity version keys cache.
 		 * By default returns true only if an external object cache is configured in WordPress.
 		 *
-		 * To use a different storing mechanism for the stored versions
+		 * To use a different storing mechanism for the stored version keys
 		 * (like e.g. transients) for testing purposes (not recommended for production):
 		 *
 		 * 1. Hook on this filter to return true.
-		 * 2. Hook on the woocommerce_pre_entity_versions_cache_get/set/delete filters,
+		 * 2. Hook on the woocommerce_pre_entity_version_keys_cache_get/set/delete filters,
 		 *    where you handle the storage and return a non-null value.
 		 *
 		 * @since 10.4.0
@@ -72,7 +74,7 @@ class EntityVersionsCache {
 		 * @return bool True to use the cache, false otherwise.
 		 */
 		$this->should_use = apply_filters(
-			'woocommerce_should_use_entity_versions_cache',
+			'woocommerce_should_use_entity_version_keys_cache',
 			$default_value
 		);
 
@@ -80,18 +82,18 @@ class EntityVersionsCache {
 	}
 
 	/**
-	 * Get the current version of an entity.
+	 * Get the current version key of an entity.
 	 *
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id Entity ID.
-	 * @return string Entity version.
+	 * @return string Entity version key.
 	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
 	 */
 	public function get_entity_version( string $entity_type, $entity_id ): string {
 		$this->validate_input( $entity_type, $entity_id );
 
-		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
-		$version        = $this->get_cached( $transient_name );
+		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+		$version   = $this->get_cached( $cache_key );
 		if ( is_null( $version ) ) {
 			$version = $this->regenerate_entity_version( $entity_type, $entity_id );
 		} else {
@@ -102,11 +104,11 @@ class EntityVersionsCache {
 	}
 
 	/**
-	 * Regenerate and store a new version for an entity.
+	 * Regenerate and store a new version key for an entity.
 	 *
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id   Entity ID.
-	 * @return string The new entity version.
+	 * @return string The new entity version key.
 	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
 	 */
 	public function regenerate_entity_version( string $entity_type, $entity_id ): string {
@@ -118,18 +120,18 @@ class EntityVersionsCache {
 	}
 
 	/**
-	 * Store the entity version in cache with a filterable TTL.
+	 * Store the entity version key in cache with a filterable TTL.
 	 *
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id   Entity ID.
-	 * @param string     $version     The version to store.
+	 * @param string     $version     The version key to store.
 	 * @return bool True on success, false on failure.
 	 */
 	protected function store_entity_version( string $entity_type, $entity_id, string $version ): bool {
-		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
+		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
 
 		/**
-		 * Filter the TTL for entity version cache.
+		 * Filter the TTL for entity version key cache.
 		 *
 		 * @param int        $ttl         Time to live in seconds. Default 1 day.
 		 * @param string     $entity_type The type of the entity.
@@ -137,14 +139,14 @@ class EntityVersionsCache {
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl = apply_filters( 'woocommerce_cached_entity_version_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
+		$ttl = apply_filters( 'woocommerce_entity_version_key_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
 		$ttl = max( 0, (int) $ttl );
 
-		return $this->set_cached( $transient_name, $version, $ttl );
+		return $this->set_cached( $cache_key, $version, $ttl );
 	}
 
 	/**
-	 * Delete the version of an entity by deleting its cached entry.
+	 * Delete the version key of an entity by deleting its cached entry.
 	 *
 	 * @param string     $entity_type Entity type.
 	 * @param string|int $entity_id   Entity ID.
@@ -154,8 +156,8 @@ class EntityVersionsCache {
 	public function delete_entity_version( string $entity_type, $entity_id ): bool {
 		$this->validate_input( $entity_type, $entity_id );
 
-		$transient_name = "wc_entity_version_{$entity_type}_{$entity_id}";
-		return $this->delete_cached( $transient_name );
+		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+		return $this->delete_cached( $cache_key );
 	}
 
 	/**
@@ -200,14 +202,14 @@ class EntityVersionsCache {
 		 * @param string     $cache_key  The cache key.
 		 * @return mixed|null Value to use, or null to proceed with normal cache retrieval.
 		 */
-		$pre_value = apply_filters( 'woocommerce_pre_entity_versions_cache_get', null, $cache_key );
+		$pre_value = apply_filters( 'woocommerce_pre_entity_version_keys_cache_get', null, $cache_key );
 
 		if ( ! is_null( $pre_value ) ) {
 			return $pre_value;
 		}
 
 		$found = false;
-		$value = $this->legacy_proxy->call_function( 'wp_cache_get', $cache_key, 'woocommerce_entity_versions', false, $found );
+		$value = $this->legacy_proxy->call_function( 'wp_cache_get', $cache_key, 'woocommerce_entity_version_keys', false, $found );
 		return $found ? $value : null;
 	}
 
@@ -234,13 +236,13 @@ class EntityVersionsCache {
 		 * @param int        $ttl        Time to live in seconds.
 		 * @return bool|null Result to return, or null to proceed with normal cache storage.
 		 */
-		$pre_result = apply_filters( 'woocommerce_pre_entity_versions_cache_set', null, $cache_key, $value, $ttl );
+		$pre_result = apply_filters( 'woocommerce_pre_entity_version_keys_cache_set', null, $cache_key, $value, $ttl );
 
 		if ( ! is_null( $pre_result ) ) {
 			return $pre_result;
 		}
 
-		return $this->legacy_proxy->call_function( 'wp_cache_set', $cache_key, $value, 'woocommerce_entity_versions', $ttl );
+		return $this->legacy_proxy->call_function( 'wp_cache_set', $cache_key, $value, 'woocommerce_entity_version_keys', $ttl );
 	}
 
 	/**
@@ -262,12 +264,12 @@ class EntityVersionsCache {
 		 * @param string     $cache_key  The cache key.
 		 * @return bool|null Result to return, or null to proceed with normal cache deletion.
 		 */
-		$pre_result = apply_filters( 'woocommerce_pre_entity_versions_cache_delete', null, $cache_key );
+		$pre_result = apply_filters( 'woocommerce_pre_entity_version_keys_cache_delete', null, $cache_key );
 
 		if ( ! is_null( $pre_result ) ) {
 			return $pre_result;
 		}
 
-		return $this->legacy_proxy->call_function( 'wp_cache_delete', $cache_key, 'woocommerce_entity_versions' );
+		return $this->legacy_proxy->call_function( 'wp_cache_delete', $cache_key, 'woocommerce_entity_version_keys' );
 	}
 }
