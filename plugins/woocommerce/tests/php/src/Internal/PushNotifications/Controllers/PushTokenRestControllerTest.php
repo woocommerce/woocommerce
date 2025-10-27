@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
@@ -34,11 +35,17 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	private $jetpack_connection_manager_mock;
 
 	/**
+	 * @var FeaturesController|MockObject
+	 */
+	private $features_controller_mock;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		$this->set_up_features_controller_mock();
 		$this->reset_push_notifications_cache();
 
 		( new PushTokenRestController() )->register_routes();
@@ -56,7 +63,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for iOS.
+	 * @testdox Test it can create a push token for iOS.
 	 */
 	public function test_it_can_create_push_token_for_ios() {
 		wp_set_current_user( $this->user_id );
@@ -81,7 +88,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for Android.
+	 * @testdox Test it can create a push token for Android.
 	 */
 	public function test_it_can_create_push_token_for_android() {
 		wp_set_current_user( $this->user_id );
@@ -106,7 +113,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for browsers.
+	 * @testdox Test it can create a push token for browsers.
 	 */
 	public function test_it_can_create_push_token_for_browser() {
 		wp_set_current_user( $this->user_id );
@@ -141,7 +148,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for browsers without device_uuid.
+	 * @testdox Test it can create a push token for browsers without device_uuid.
 	 */
 	public function test_it_can_create_push_token_for_browser_without_device_uuid() {
 		wp_set_current_user( $this->user_id );
@@ -175,7 +182,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it updates an existing push token by token value.
+	 * @testdox Test it updates an existing push token by token value.
 	 */
 	public function test_it_updates_existing_token_by_token_value() {
 		wp_set_current_user( $this->user_id );
@@ -218,7 +225,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it updates an existing push token by device UUID.
+	 * @testdox Test it updates an existing push token by device UUID.
 	 */
 	public function test_it_updates_existing_token_by_device_uuid() {
 		wp_set_current_user( $this->user_id );
@@ -261,7 +268,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without authentication.
+	 * @testdox Test it cannot create a push token without authentication.
 	 */
 	public function test_it_cannot_create_push_token_without_authentication() {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
@@ -276,7 +283,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without required role.
+	 * @testdox Test it cannot create a push token without required role.
 	 */
 	public function test_it_cannot_create_push_token_without_required_role() {
 		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -296,7 +303,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token with administrator role.
+	 * @testdox Test it can create a push token with administrator role.
 	 */
 	public function test_it_can_create_push_token_with_administrator_role() {
 		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
@@ -322,7 +329,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for iOS with uppercase hex token.
+	 * @testdox Test it can create a push token for iOS with uppercase hex token.
 	 */
 	public function test_it_can_create_push_token_for_ios_with_uppercase_hex() {
 		wp_set_current_user( $this->user_id );
@@ -347,7 +354,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can create a push token for iOS with mixed case hex token.
+	 * @testdox Test it can create a push token for iOS with mixed case hex token.
 	 */
 	public function test_it_can_create_push_token_for_ios_with_mixed_case_hex() {
 		wp_set_current_user( $this->user_id );
@@ -372,7 +379,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for iOS if the token is not in the
+	 * @testdox Test it cannot create a push token for iOS if the token is not in the
 	 * correct format.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_ios_token() {
@@ -396,7 +403,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for iOS with non-hex characters.
+	 * @testdox Test it cannot create a push token for iOS with non-hex characters.
 	 */
 	public function test_it_cannot_create_push_token_for_ios_with_non_hex_characters() {
 		wp_set_current_user( $this->user_id );
@@ -420,7 +427,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for iOS with wrong length.
+	 * @testdox Test it cannot create a push token for iOS with wrong length.
 	 */
 	public function test_it_cannot_create_push_token_for_ios_with_wrong_length() {
 		wp_set_current_user( $this->user_id );
@@ -443,7 +450,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for Android if the token is not in the
+	 * @testdox Test it cannot create a push token for Android if the token is not in the
 	 * correct format.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_android_token() {
@@ -467,7 +474,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for Android if the token is too long.
+	 * @testdox Test it cannot create a push token for Android if the token is too long.
 	 */
 	public function test_it_cannot_create_push_token_with_android_token_that_is_too_long() {
 		wp_set_current_user( $this->user_id );
@@ -490,7 +497,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for browser if the token is not valid
+	 * @testdox Test it cannot create a push token for browser if the token is not valid
 	 * JSON.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_invalid_json() {
@@ -514,7 +521,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for browser if the token is missing an
+	 * @testdox Test it cannot create a push token for browser if the token is missing an
 	 * endpoint property.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_missing_endpoint() {
@@ -547,7 +554,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for browser if the endpoint contains
+	 * @testdox Test it cannot create a push token for browser if the endpoint contains
 	 * invalid characters.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_contains_invalid_characters() {
@@ -581,7 +588,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for browser if the endpoint is not HTTPS.
+	 * @testdox Test it cannot create a push token for browser if the endpoint is not HTTPS.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_endpoint_is_not_https() {
 		wp_set_current_user( $this->user_id );
@@ -614,7 +621,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token for browser if the token is too long.
+	 * @testdox Test it cannot create a push token for browser if the token is too long.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_too_long() {
 		wp_set_current_user( $this->user_id );
@@ -646,7 +653,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without required token parameter.
+	 * @testdox Test it cannot create a push token without required token parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_token() {
 		wp_set_current_user( $this->user_id );
@@ -668,7 +675,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without required platform parameter.
+	 * @testdox Test it cannot create a push token without required platform parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_platform() {
 		wp_set_current_user( $this->user_id );
@@ -690,7 +697,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without required device_uuid
+	 * @testdox Test it cannot create a push token without required device_uuid
 	 * parameter for non-browser platforms.
 	 */
 	public function test_it_cannot_create_push_token_for_non_browser_with_a_missing_device_uuid() {
@@ -714,7 +721,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token with invalid platform value.
+	 * @testdox Test it cannot create a push token with invalid platform value.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_platform() {
 		wp_set_current_user( $this->user_id );
@@ -737,7 +744,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token without required origin
+	 * @testdox Test it cannot create a push token without required origin
 	 * parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_origin() {
@@ -760,7 +767,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token with invalid origin value.
+	 * @testdox Test it cannot create a push token with invalid origin value.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_origin() {
 		wp_set_current_user( $this->user_id );
@@ -783,7 +790,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can delete a push token.
+	 * @testdox Test it can delete a push token.
 	 */
 	public function test_it_can_delete_push_token() {
 		wp_set_current_user( $this->user_id );
@@ -816,7 +823,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can't delete a push token without being authenticated.
+	 * @testdox Test it can't delete a push token without being authenticated.
 	 */
 	public function test_it_cannot_delete_push_token_without_authentication() {
 		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
@@ -826,7 +833,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can't delete a push token without required role.
+	 * @testdox Test it can't delete a push token without required role.
 	 */
 	public function test_it_cannot_delete_push_token_without_required_role() {
 		$customer_id = $this->factory->user->create( array( 'role' => 'customer' ) );
@@ -841,7 +848,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it can't delete a push token that doesn't belong to the
+	 * @testdox Test it can't delete a push token that doesn't belong to the
 	 * authenticated user.
 	 */
 	public function test_it_cannot_delete_push_token_belonging_to_another_user() {
@@ -880,7 +887,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it gets 404 response trying to delete a push token that doesn't
+	 * @testdox Test it gets 404 response trying to delete a push token that doesn't
 	 * exist.
 	 */
 	public function test_it_cannot_delete_push_token_that_does_not_exist() {
@@ -900,7 +907,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test it cannot create a push token when push notifications are
+	 * @testdox Test it cannot create a push token when push notifications are
 	 * disabled.
 	 */
 	public function test_it_cannot_create_push_token_when_push_notifications_disabled() {
@@ -920,7 +927,7 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the schema is correctly formatted.
+	 * @testdox Test the schema is correctly formatted.
 	 */
 	public function test_get_schema_returns_correct_structure() {
 		$controller = new PushTokenRestController();
@@ -991,6 +998,27 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 			->willReturn( $is_connected );
 
 		$this->reset_push_notifications_cache();
+	}
+
+	/**
+	 * Sets up the FeaturesController mock to enable push_notifications feature.
+	 */
+	private function set_up_features_controller_mock() {
+		$this->features_controller_mock = $this
+			->getMockBuilder( FeaturesController::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'feature_is_enabled' ) )
+			->getMock();
+
+		$this->features_controller_mock
+			->method( 'feature_is_enabled' )
+			->willReturnCallback(
+				function ( $feature_id ) {
+					return PushNotifications::FEATURE_NAME === $feature_id;
+				}
+			);
+
+		wc_get_container()->replace( FeaturesController::class, $this->features_controller_mock );
 	}
 
 	/**

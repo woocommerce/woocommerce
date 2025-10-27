@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use WC_Unit_Test_Case;
@@ -21,6 +22,21 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	private $jetpack_connection_manager_mock;
 
 	/**
+	 * @var FeaturesController|MockObject
+	 */
+	private $features_controller_mock;
+
+	/**
+	 * Set up the test case.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		// Set up FeaturesController mock to enable push_notifications by default.
+		$this->set_up_features_controller_mock();
+	}
+
+	/**
 	 * Tear down the test case.
 	 */
 	public function tearDown(): void {
@@ -35,7 +51,20 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the functionality is enabled if Jetpack is connected.
+	 * @testdox Tests the functionality is disabled if the feature flag is disabled.
+	 */
+	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_feature_is_disabled() {
+		// Set up FeaturesController to return false for push_notifications.
+		$this->set_up_features_controller_mock( false );
+
+		// Jetpack connection mock should not be called when feature is disabled.
+		$push_notifications = new PushNotifications();
+
+		$this->assertFalse( $push_notifications->should_be_enabled() );
+	}
+
+	/**
+	 * @testdox Tests the functionality is enabled if feature flag is enabled and Jetpack is connected.
 	 */
 	public function test_it_can_tell_push_notifications_should_be_enabled_if_jetpack_is_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -51,7 +80,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the functionality is disabled if Jetpack is not connected.
+	 * @testdox Tests the functionality is disabled if Jetpack is not connected even when feature flag is enabled.
 	 */
 	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_jetpack_is_not_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -67,7 +96,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the endpoints haven't been registered if Jetpack is not connected.
+	 * @testdox Tests the endpoints haven't been registered if Jetpack is not connected.
 	 */
 	public function test_it_does_not_register_endpoints_if_disabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -87,7 +116,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests the endpoints have been registered if Jetpack is connected.
+	 * @testdox Tests the endpoints have been registered if Jetpack is connected.
 	 */
 	public function test_it_registers_endpoints_if_enabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -107,7 +136,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that enablement state is cached within an instance.
+	 * @testdox Tests that enablement state is cached within an instance.
 	 */
 	public function test_it_caches_enablement_state_correctly() {
 		// First instance with Jetpack disconnected - should return false.
@@ -138,6 +167,30 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		// Subsequent call should return cached true.
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
+	}
+
+	/**
+	 * Sets up the FeaturesController mock.
+	 *
+	 * @param bool $feature_enabled Whether the push_notifications feature should be enabled.
+	 */
+	private function set_up_features_controller_mock( bool $feature_enabled = true ) {
+		$this->features_controller_mock = $this
+			->getMockBuilder( FeaturesController::class )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'feature_is_enabled' ) )
+			->getMock();
+
+		$this->features_controller_mock
+			->method( 'feature_is_enabled' )
+			->willReturnCallback(
+				function ( $feature_id ) use ( $feature_enabled ) {
+					// Return the specified value for push_notifications, false for all others.
+					return PushNotifications::FEATURE_NAME === $feature_id ? $feature_enabled : false;
+				}
+			);
+
+		wc_get_container()->replace( FeaturesController::class, $this->features_controller_mock );
 	}
 
 	/**

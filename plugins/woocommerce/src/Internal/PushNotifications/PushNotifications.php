@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * WC Push Notifications
@@ -16,6 +17,11 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestC
  * Class for setting up the WooCommerce-driven push notifications.
  */
 class PushNotifications {
+	/**
+	 * Feature name for the push notifications feature.
+	 */
+	const FEATURE_NAME = 'push_notifications';
+
 	/**
 	 * Roles that can receive push notifications.
 	 */
@@ -45,13 +51,20 @@ class PushNotifications {
 	}
 
 	/**
-	 * Determines if local push notification functionality should be enabled. It
-	 * should be enabled if Jetpack is connected.
+	 * Determines if local push notification functionality should be enabled.
+	 * Push notifications require both the feature flag to be enabled and
+	 * Jetpack to be connected.
 	 *
 	 * @return bool
 	 */
 	public function should_be_enabled(): bool {
 		if ( null === $this->enabled ) {
+			if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+				$this->enabled = false;
+
+				return $this->enabled;
+			}
+
 			$proxy = wc_get_container()->get( LegacyProxy::class );
 
 			if (

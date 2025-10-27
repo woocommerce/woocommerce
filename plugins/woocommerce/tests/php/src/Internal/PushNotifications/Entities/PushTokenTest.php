@@ -15,7 +15,7 @@ use WC_Unit_Test_Case;
  */
 class PushTokenTest extends WC_Unit_Test_Case {
 	/**
-	 * Tests it's possible to set and get the ID.
+	 * @testdox Tests it's possible to set and get the ID.
 	 */
 	public function test_it_can_get_and_set_id() {
 		$push_token = new PushToken();
@@ -25,7 +25,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set and get the user ID.
+	 * @testdox Tests it's possible to set and get the user ID.
 	 */
 	public function test_it_can_get_and_set_user_id() {
 		$push_token = new PushToken();
@@ -35,7 +35,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set and get the token.
+	 * @testdox Tests it's possible to set and get the token.
 	 */
 	public function test_it_can_get_and_set_token() {
 		$push_token = new PushToken();
@@ -45,7 +45,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set and get the device UUID.
+	 * @testdox Tests it's possible to set and get the device UUID.
 	 */
 	public function test_it_can_get_and_set_device_uuid() {
 		$push_token = new PushToken();
@@ -55,7 +55,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set and get the platform.
+	 * @testdox Tests it's possible to set and get the platform.
 	 */
 	public function test_it_can_get_and_set_platform() {
 		$push_token = new PushToken();
@@ -65,7 +65,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns true when all fields are set except ID.
+	 * @testdox Tests can_be_created returns true when all fields are set except ID.
 	 */
 	public function test_it_can_be_created_when_all_fields_are_set_except_id() {
 		$push_token = new PushToken();
@@ -79,7 +79,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when ID is already set.
+	 * @testdox Tests can_be_created returns false when ID is already set.
 	 */
 	public function test_it_cannot_be_created_when_id_is_set() {
 		$push_token = new PushToken();
@@ -94,7 +94,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when user ID is missing.
+	 * @testdox Tests can_be_created returns false when user ID is missing.
 	 */
 	public function test_it_cannot_be_created_when_user_id_is_missing() {
 		$push_token = new PushToken();
@@ -107,7 +107,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when platform is missing.
+	 * @testdox Tests can_be_created returns false when platform is missing.
 	 */
 	public function test_it_cannot_be_created_when_platform_is_missing() {
 		$push_token = new PushToken();
@@ -120,7 +120,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when token is missing.
+	 * @testdox Tests can_be_created returns false when token is missing.
 	 */
 	public function test_it_cannot_be_created_when_token_is_missing() {
 		$push_token = new PushToken();
@@ -133,7 +133,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when device UUID is missing.
+	 * @testdox Tests can_be_created returns false when device UUID is missing.
 	 */
 	public function test_it_cannot_be_created_when_device_uuid_is_missing() {
 		$push_token = new PushToken();
@@ -146,7 +146,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns true when all required fields are set.
+	 * @testdox Tests can_be_updated returns true when all required fields are set.
 	 */
 	public function test_it_can_be_updated_when_all_fields_are_set() {
 		$push_token = new PushToken();
@@ -161,7 +161,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when ID is not set.
+	 * @testdox Tests can_be_updated returns false when ID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_id_is_not_set() {
 		$push_token = new PushToken();
@@ -175,7 +175,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when user ID is not set.
+	 * @testdox Tests can_be_updated returns false when user ID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_user_id_is_not_set() {
 		$push_token = new PushToken();
@@ -189,7 +189,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when platform is not set.
+	 * @testdox Tests can_be_updated returns false when platform is not set.
 	 */
 	public function test_it_cannot_be_updated_when_platform_is_not_set() {
 		$push_token = new PushToken();
@@ -203,7 +203,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when device UUID is not set.
+	 * @testdox Tests can_be_updated returns false when device UUID is not set.
 	 */
 	public function test_it_cannot_be_updated_when_device_uuid_is_not_set() {
 		$push_token = new PushToken();
@@ -217,7 +217,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when token is not set.
+	 * @testdox Tests can_be_updated returns false when token is not set.
 	 */
 	public function test_it_cannot_be_updated_when_token_is_not_set() {
 		$push_token = new PushToken();
@@ -231,7 +231,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_read returns true when ID is set.
+	 * @testdox Tests can_be_read returns true when ID is set.
 	 */
 	public function test_it_can_be_read_when_id_is_set() {
 		$push_token = new PushToken();
@@ -241,7 +241,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_read returns false when ID is not set.
+	 * @testdox Tests can_be_read returns false when ID is not set.
 	 */
 	public function test_it_cannot_be_read_when_id_is_not_set() {
 		$push_token = new PushToken();
@@ -250,7 +250,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_deleted returns true when ID is set.
+	 * @testdox Tests can_be_deleted returns true when ID is set.
 	 */
 	public function test_it_can_be_deleted_when_id_is_set() {
 		$push_token = new PushToken();
@@ -260,7 +260,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_deleted returns false when ID is not set.
+	 * @testdox Tests can_be_deleted returns false when ID is not set.
 	 */
 	public function test_it_cannot_be_deleted_when_id_is_not_set() {
 		$push_token = new PushToken();
@@ -269,7 +269,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set and get the origin.
+	 * @testdox Tests it's possible to set and get the origin.
 	 */
 	public function test_it_can_get_and_set_origin() {
 		$push_token = new PushToken();
@@ -279,7 +279,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests it's possible to set device UUID to null.
+	 * @testdox Tests it's possible to set device UUID to null.
 	 */
 	public function test_it_can_set_device_uuid_to_null() {
 		$push_token = new PushToken();
@@ -290,7 +290,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns true for browser tokens without device UUID.
+	 * @testdox Tests can_be_created returns true for browser tokens without device UUID.
 	 */
 	public function test_it_can_be_created_for_browser_without_device_uuid() {
 		$push_token = new PushToken();
@@ -303,7 +303,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns true for browser tokens without device UUID.
+	 * @testdox Tests can_be_updated returns true for browser tokens without device UUID.
 	 */
 	public function test_it_can_be_updated_for_browser_without_device_uuid() {
 		$push_token = new PushToken();
@@ -317,7 +317,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_created returns false when origin is missing.
+	 * @testdox Tests can_be_created returns false when origin is missing.
 	 */
 	public function test_it_cannot_be_created_when_origin_is_missing() {
 		$push_token = new PushToken();
@@ -330,7 +330,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests can_be_updated returns false when origin is missing.
+	 * @testdox Tests can_be_updated returns false when origin is missing.
 	 */
 	public function test_it_cannot_be_updated_when_origin_is_missing() {
 		$push_token = new PushToken();
@@ -344,7 +344,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests set_platform throws exception with invalid platform.
+	 * @testdox Tests set_platform throws exception with invalid platform.
 	 */
 	public function test_it_throws_exception_when_setting_invalid_platform() {
 		$push_token = new PushToken();
@@ -356,7 +356,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests set_origin throws exception with invalid origin.
+	 * @testdox Tests set_origin throws exception with invalid origin.
 	 */
 	public function test_it_throws_exception_when_setting_invalid_origin() {
 		$push_token = new PushToken();
@@ -368,7 +368,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests set_origin accepts valid origin values.
+	 * @testdox Tests set_origin accepts valid origin values.
 	 */
 	public function test_it_accepts_valid_origin_values() {
 		$push_token = new PushToken();
