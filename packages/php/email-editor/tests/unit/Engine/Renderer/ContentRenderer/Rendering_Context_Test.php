@@ -118,7 +118,7 @@ class Rendering_Context_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertSame( 123, $context->get_user_id() );
 		$this->assertSame( 'user@example.com', $context->get_recipient_email() );
-		$this->assertSame( 456, $context->get_order_id() );
+		$this->assertSame( 456, $context->get( 'order_id' ) );
 		$this->assertSame( 'order_confirmation', $context->get( 'email_type' ) );
 		$this->assertSame( $email_context, $context->get_email_context() );
 	}
@@ -138,7 +138,7 @@ class Rendering_Context_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertNull( $context->get_user_id() );
 		$this->assertNull( $context->get_recipient_email() );
-		$this->assertNull( $context->get_order_id() );
+		$this->assertNull( $context->get( 'order_id' ) );
 		$this->assertNull( $context->get( 'non_existent_key' ) );
 		$this->assertSame( 'default', $context->get( 'non_existent_key', 'default' ) );
 		$this->assertSame( array(), $context->get_email_context() );

@@ -29,8 +29,7 @@ class Rendering_Context {
 	 * such as:
 	 * - 'user_id': The ID of the user receiving the email
 	 * - 'recipient_email': The recipient's email address
-	 * - 'order_id': The order ID (for order-related emails)
-	 * - 'woo_email_type': The type of email being rendered (e.g., 'abandoned_cart', 'order_confirmation')
+	 * - Additional context can be added by extensions using the generic get() method
 	 *
 	 * @var array<string, mixed>
 	 */
@@ -151,16 +150,10 @@ class Rendering_Context {
 	}
 
 	/**
-	 * Get the order ID from the email context.
-	 *
-	 * @return int|null The order ID if available, null otherwise.
-	 */
-	public function get_order_id(): ?int {
-		return isset( $this->email_context['order_id'] ) && is_numeric( $this->email_context['order_id'] ) ? (int) $this->email_context['order_id'] : null;
-	}
-
-	/**
 	 * Get a specific value from the email context.
+	 *
+	 * This method allows extensions to access custom context data that may be
+	 * specific to their implementation (e.g., order IDs, email types, etc.).
 	 *
 	 * @param string $key The context key.
 	 * @param mixed  $default_value Default value if key is not found.

@@ -34,6 +34,17 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->initializer = $this->di_container->get( Initializer::class );
 		$this->initializer->initialize();
+
+		// Manually trigger block settings update for core/post-content
+		// This simulates what the block_type_metadata_settings filter does in Bootstrap.
+		$registry   = \WP_Block_Type_Registry::get_instance();
+		$block_type = $registry->get_registered( 'core/post-content' );
+		if ( $block_type ) {
+			$settings                    = (array) $block_type;
+			$settings['name']            = 'core/post-content';
+			$updated_settings            = $this->initializer->update_block_settings( $settings );
+			$block_type->render_callback = $updated_settings['render_callback'] ?? null;
+		}
 	}
 
 	/**
