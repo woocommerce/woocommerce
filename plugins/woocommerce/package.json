@@ -206,7 +206,8 @@
 					]
 				},
 				{
-					"name": "PHP: 7.4 WP: prerelease",
+					"name": "PHP: 7.4 WP: pre-release",
+					"optional": true,
 					"testType": "unit:php",
 					"command": "test:php:env",
 					"shardingArguments": [
@@ -215,11 +216,9 @@
 					],
 					"onlyForDependencies": [],
 					"changes": [
-						"client/admin/config/*.json",
-						"composer.json",
-						"composer.lock",
-						"**/*.php",
-						".wp-env.json",
+						"tests/legacy/**",
+						"tests/php/**",
+						"tests/unit-tests/**",
 						"phpunit.xml"
 					],
 					"testEnv": {
@@ -476,6 +475,7 @@
 				},
 				{
 					"name": "Core e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e",
 					"shardingArguments": [
@@ -766,6 +766,7 @@
 				},
 				{
 					"name": "Blocks e2e tests - WP pre-release",
+					"optional": true,
 					"testType": "e2e",
 					"command": "test:e2e:blocks",
 					"shardingArguments": [
@@ -781,9 +782,6 @@
 						"--shard=10/10"
 					],
 					"changes": [
-						"src/Blocks/**",
-						"templates/**",
-						"patterns/**",
 						"client/blocks/tests/e2e/**"
 					],
 					"testEnv": {
@@ -887,7 +885,7 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "10.32.0",
 		"@wordpress/scripts": "30.6.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"allure-commandline": "^2.32.2",

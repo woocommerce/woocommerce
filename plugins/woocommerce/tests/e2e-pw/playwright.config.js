@@ -53,7 +53,11 @@ if ( process.env.CI ) {
 	reporter.push( [ `${ TESTS_ROOT_PATH }/reporters/skipped-tests.js` ] );
 	reporter.push( [
 		'junit',
-		{ outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml` },
+		{
+			outputFile: `${ TESTS_ROOT_PATH }/test-results/results.xml`,
+			stripANSIControlSequences: true,
+			includeProjectInTestName: true,
+		},
 	] );
 } else {
 	reporter.push( [

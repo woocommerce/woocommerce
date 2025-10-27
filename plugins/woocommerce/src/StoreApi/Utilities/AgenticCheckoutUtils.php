@@ -332,26 +332,83 @@ class AgenticCheckoutUtils {
 	}
 
 	/**
-	 * Check if the Agentic Checkout feature is enabled.
+	 * Check if the Agentic Checkout feature is enabled and request is authorized.
 	 *
-	 * V1 implementation: Returns true if feature is enabled (no auth check).
-	 * Future: Implement Bearer token authentication.
+	 * Validates bearer token against registered agents in the agent registry.
 	 *
+	 * @param \WP_REST_Request $request Request object.
 	 * @return bool|\WP_Error True if authorized, WP_Error otherwise.
 	 */
-	public static function is_authorized() {
-		// Check if feature is enabled.
-		$features_controller = wc_get_container()->get( FeaturesController::class );
-		if ( ! $features_controller->feature_is_enabled( 'agentic_checkout' ) ) {
+	public static function is_authorized( $request = null ) {
+		if ( null === $request ) {
 			return new \WP_Error(
-				'woocommerce_rest_agentic_checkout_disabled',
-				__( 'Agentic Checkout API is not enabled.', 'woocommerce' ),
-				array( 'status' => 403 )
+				'invalid_request',
+				__( 'Invalid request object.', 'woocommerce' ),
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_request',
+				)
 			);
 		}
 
-		// V1: Allow all requests (implement proper auth in future).
-		return true;
+		$auth_header = $request->get_header( 'Authorization' );
+		if ( empty( $auth_header ) || 0 !== stripos( $auth_header, 'Bearer ' ) ) {
+			return new \WP_Error(
+				'invalid_request',
+				__( 'Invalid authorization.', 'woocommerce' ),
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_authorization_format',
+				)
+			);
+		}
+
+		$provided_token = trim( substr( $auth_header, 7 ) ); // "Bearer " is 7 characters
+		if ( empty( $provided_token ) ) {
+			return new \WP_Error(
+				'invalid_request',
+				__( 'Invalid authorization.', 'woocommerce' ),
+				array(
+					'status' => 400,
+					'type'   => 'invalid_request',
+					'code'   => 'invalid_authorization_format',
+				)
+			);
+		}
+
+		$registry               = get_option( \Automattic\WooCommerce\Internal\Admin\Agentic\AgenticSettingsPage::REGISTRY_OPTION, array() );
+		$authenticated_provider = null;
+
+		// Check each provider's bearer token.
+		foreach ( $registry as $provider_id => $provider_config ) {
+			if ( ! is_array( $provider_config ) || empty( $provider_config['bearer_token'] ) ) {
+				continue;
+			}
+
+			if ( wp_check_password( $provided_token, $provider_config['bearer_token'] ) ) {
+				// Store and continue checking to minimize timing attack.
+				$authenticated_provider = $provider_id;
+			}
+		}
+
+		if ( null !== $authenticated_provider ) {
+			if ( WC()->session ) {
+				WC()->session->set( SessionKey::AGENTIC_CHECKOUT_PROVIDER_ID, $authenticated_provider );
+			}
+			return true;
+		}
+
+		return new \WP_Error(
+			'invalid_request',
+			__( 'Invalid authorization.', 'woocommerce' ),
+			array(
+				'status' => 400,
+				'type'   => 'invalid_request',
+				'code'   => 'authentication_failed',
+			)
+		);
 	}
 
 	/**
