@@ -7,9 +7,15 @@
  * @package WooCommerce\Tests\Internal\Admin\Settings\Mocks
  */
 
+declare( strict_types=1 );
+
 if ( ! class_exists( 'WC_Payments_Utils' ) ) {
 	/**
 	 * Mock WC_Payments_Utils class.
+	 *
+	 * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+	 * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+	 * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
 	 */
 	class WC_Payments_Utils {
 		/**
