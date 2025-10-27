@@ -130,7 +130,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the read method throws exception when push token has no ID.
+	 * @testdox Tests the read method throws exception when push token has no
+	 * ID.
 	 */
 	public function test_it_throws_exception_when_reading_push_token_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -145,7 +146,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the read method throws exception when push token is not found.
+	 * @testdox Tests the read method throws exception when push token is not
+	 * found.
 	 */
 	public function test_it_throws_exception_when_reading_push_token_that_does_not_exist() {
 		$data_store = new PushTokensDataStore();
@@ -161,7 +163,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the read method throws exception when the post exists but is not the correct post type.
+	 * @testdox Tests the read method throws exception when the post exists but
+	 * is not the correct post type.
 	 */
 	public function test_it_throws_exception_when_reading_push_token_with_wrong_post_type() {
 		$data_store = new PushTokensDataStore();
@@ -186,7 +189,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the read method throws exception when push token metadata is malformed/missing.
+	 * @testdox Tests the read method throws exception when push token metadata
+	 * is malformed/missing.
 	 */
 	public function test_it_throws_exception_when_reading_push_token_with_malformed_metadata() {
 		$data_store = new PushTokensDataStore();
@@ -216,7 +220,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the update method throws exception when push token data is incomplete.
+	 * @testdox Tests the update method throws exception when push token data is
+	 * incomplete.
 	 */
 	public function test_it_throws_exception_when_updating_push_token_with_incomplete_data() {
 		$data_store = new PushTokensDataStore();
@@ -233,7 +238,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the delete method throws exception when push token has no ID.
+	 * @testdox Tests the delete method throws exception when push token has no
+	 * ID.
 	 */
 	public function test_it_throws_exception_when_deleting_push_token_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -247,8 +253,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method finds push token by token when
-	 * platform and user ID match.
+	 * @testdox Tests the get_by_token_or_device_id method finds push token by
+	 * token when platform and user ID match.
 	 */
 	public function test_it_can_get_by_token_if_platform_and_user_id_matches() {
 		$data_store = new PushTokensDataStore();
@@ -270,8 +276,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method finds push token by device
-	 * UUID when platform and user ID match.
+	 * @testdox Tests the get_by_token_or_device_id method finds push token by
+	 * device UUID when platform and user ID match.
 	 */
 	public function test_it_can_get_by_device_uuid_if_platform_and_user_id_matches() {
 		$data_store = new PushTokensDataStore();
@@ -293,8 +299,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method returns null when user ID
-	 * and platform match but token and device UUID don't.
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * user ID and platform match but token and device UUID don't.
 	 */
 	public function test_it_cannot_get_by_token_or_device_id_if_token_and_device_do_not_match() {
 		$data_store = new PushTokensDataStore();
@@ -314,8 +320,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method returns null when user ID
-	 * does not match.
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * user ID does not match.
 	 */
 	public function test_it_cannot_get_by_token_or_device_id_if_user_id_does_not_match() {
 		$data_store = new PushTokensDataStore();
@@ -335,8 +341,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method returns null when platform
-	 * does not match.
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * platform does not match.
 	 */
 	public function test_it_cannot_get_by_token_or_device_id_if_platform_does_not_match() {
 		$data_store = new PushTokensDataStore();
@@ -356,8 +362,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method returns null when origin
-	 * does not match.
+	 * @testdox Tests the get_by_token_or_device_id method returns null when
+	 * origindoes not match.
 	 */
 	public function test_it_cannot_get_by_token_or_device_id_if_origin_does_not_match() {
 		$data_store = new PushTokensDataStore();
@@ -377,13 +383,15 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that browser tokens with null device_uuid don't incorrectly match
-	 * each other by empty device_uuid.
+	 * @testdox Tests that browser tokens with null device_uuid don't
+	 * incorrectly match each other by empty device_uuid.
 	 */
 	public function test_it_does_not_match_browser_tokens_by_empty_device_uuid() {
 		$data_store = new PushTokensDataStore();
 
-		// Create first browser token for user.
+		/**
+		 * Create first browser token for user.
+		 */
 		$browser_token_1 = new PushToken();
 		$browser_token_1->set_user_id( 1 );
 		$browser_token_1->set_token( 'browser_token_1_' . wp_rand() );
@@ -392,7 +400,9 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$browser_token_1->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 		$data_store->create( $browser_token_1 );
 
-		// Create second browser token for same user (different browser/tab).
+		/**
+		 * Create second browser token for same user (different browser/tab).
+		 */
 		$browser_token_2 = new PushToken();
 		$browser_token_2->set_user_id( 1 );
 		$browser_token_2->set_token( 'browser_token_2_' . wp_rand() );
@@ -401,7 +411,10 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$browser_token_2->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
 		$data_store->create( $browser_token_2 );
 
-		// Try to find browser_token_1 by its token - should only match itself, not browser_token_2.
+		/**
+		 * Try to find browser_token_1 by its token - should only match itself,
+		 * not browser_token_2.
+		 */
 		$search_token = new PushToken();
 		$search_token->set_user_id( 1 );
 		$search_token->set_token( $browser_token_1->get_token() );
@@ -416,7 +429,10 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $browser_token_1->get_token(), $found_token->get_token(), 'Should match browser_token_1 token' );
 		$this->assertNotEquals( $browser_token_2->get_id(), $found_token->get_id(), 'Should not match browser_token_2 ID' );
 
-		// Now search with a DIFFERENT token - should return null, not match by empty device_uuid.
+		/**
+		 * Now search with a DIFFERENT token - should return null, not match by
+		 * empty device_uuid.
+		 */
 		$different_token = new PushToken();
 		$different_token->set_user_id( 1 );
 		$different_token->set_platform( PushToken::PLATFORM_BROWSER );
@@ -460,7 +476,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the read_meta method throws exception when push token ID is not set.
+	 * @testdox Tests the read_meta method throws exception when push token ID
+	 * is not set.
 	 */
 	public function test_it_throws_exception_when_reading_meta_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -541,7 +558,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the add_meta method throws exception when meta_key is missing.
+	 * @testdox Tests the add_meta method throws exception when meta_key is
+	 * missing.
 	 */
 	public function test_it_throws_exception_when_adding_meta_without_key() {
 		$data_store = new PushTokensDataStore();
@@ -559,7 +577,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the add_meta method throws exception when push token ID is not set.
+	 * @testdox Tests the add_meta method throws exception when push token ID is
+	 * not set.
 	 */
 	public function test_it_throws_exception_when_adding_meta_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -582,7 +601,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the update_meta method throws exception when meta_key is missing.
+	 * @testdox Tests the update_meta method throws exception when meta_key is
+	 * missing.
 	 */
 	public function test_it_throws_exception_when_updating_meta_without_key() {
 		$data_store = new PushTokensDataStore();
@@ -600,7 +620,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the update_meta method throws exception when push token ID is not set.
+	 * @testdox Tests the update_meta method throws exception when push token ID
+	 * is not set.
 	 */
 	public function test_it_throws_exception_when_updating_meta_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -623,7 +644,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the delete_meta method throws exception when meta_key is missing.
+	 * @testdox Tests the delete_meta method throws exception when meta_key is
+	 * missing.
 	 */
 	public function test_it_throws_exception_when_deleting_meta_without_key() {
 		$data_store = new PushTokensDataStore();
@@ -640,7 +662,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the delete_meta method throws exception when push token ID is not set.
+	 * @testdox Tests the delete_meta method throws exception when push token ID
+	 * is not set.
 	 */
 	public function test_it_throws_exception_when_deleting_meta_without_id() {
 		$data_store = new PushTokensDataStore();
@@ -659,7 +682,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method throws exception when user ID is missing.
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * user ID is missing.
 	 */
 	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_user_id() {
 		$data_store = new PushTokensDataStore();
@@ -678,7 +702,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method throws exception when platform is missing.
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * platform is missing.
 	 */
 	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_platform() {
 		$data_store = new PushTokensDataStore();
@@ -697,7 +722,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method throws exception when origin is missing.
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * origin is missing.
 	 */
 	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_origin() {
 		$data_store = new PushTokensDataStore();
@@ -716,7 +742,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the get_by_token_or_device_id method throws exception when both token and device_uuid are missing.
+	 * @testdox Tests the get_by_token_or_device_id method throws exception when
+	 * both token and device_uuid are missing.
 	 */
 	public function test_it_throws_exception_when_getting_by_token_or_device_id_without_token_and_device_uuid() {
 		$data_store = new PushTokensDataStore();
@@ -734,7 +761,8 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that browser tokens can be created without device_uuid and then read back.
+	 * @testdox Tests that browser tokens can be created without device_uuid and
+	 * then read back.
 	 */
 	public function test_it_can_create_and_read_browser_token_without_device_uuid() {
 		$data_store = new PushTokensDataStore();

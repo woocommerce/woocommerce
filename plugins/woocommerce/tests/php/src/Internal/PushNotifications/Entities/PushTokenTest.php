@@ -146,7 +146,8 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests can_be_updated returns true when all required fields are set.
+	 * @testdox Tests can_be_updated returns true when all required fields are
+	 * set.
 	 */
 	public function test_it_can_be_updated_when_all_fields_are_set() {
 		$push_token = new PushToken();
@@ -290,7 +291,8 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests can_be_created returns true for browser tokens without device UUID.
+	 * @testdox Tests can_be_created returns true for browser tokens without
+	 * device UUID.
 	 */
 	public function test_it_can_be_created_for_browser_without_device_uuid() {
 		$push_token = new PushToken();
@@ -303,7 +305,8 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests can_be_updated returns true for browser tokens without device UUID.
+	 * @testdox Tests can_be_updated returns true for browser tokens without
+	 * device UUID.
 	 */
 	public function test_it_can_be_updated_for_browser_without_device_uuid() {
 		$push_token = new PushToken();

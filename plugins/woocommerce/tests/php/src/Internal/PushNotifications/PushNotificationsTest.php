@@ -32,7 +32,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Set up FeaturesController mock to enable push_notifications by default.
 		$this->set_up_features_controller_mock();
 	}
 
@@ -40,31 +39,36 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * Tear down the test case.
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-
-		// Reset the REST server to clear registered routes.
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
-		// Clear LegacyProxy mocks to avoid affecting other tests.
-		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( array() );
+		$this->reset_container_replacements();
+		wc_get_container()->reset_all_resolved();
+
+		parent::tearDown();
 	}
 
 	/**
-	 * @testdox Tests the functionality is disabled if the feature flag is disabled.
+	 * @testdox Tests the functionality is disabled if the feature flag is
+	 * disabled.
 	 */
 	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_feature_is_disabled() {
-		// Set up FeaturesController to return false for push_notifications.
 		$this->set_up_features_controller_mock( false );
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
-		// Jetpack connection mock should not be called when feature is disabled.
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( true );
+
 		$push_notifications = new PushNotifications();
 
 		$this->assertFalse( $push_notifications->should_be_enabled() );
 	}
 
 	/**
-	 * @testdox Tests the functionality is enabled if feature flag is enabled and Jetpack is connected.
+	 * @testdox Tests the functionality is enabled if feature flag is enabled
+	 * and Jetpack is connected.
 	 */
 	public function test_it_can_tell_push_notifications_should_be_enabled_if_jetpack_is_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -80,7 +84,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the functionality is disabled if Jetpack is not connected even when feature flag is enabled.
+	 * @testdox Tests the functionality is disabled if Jetpack is not connected
+	 * even when feature flag is enabled.
 	 */
 	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_jetpack_is_not_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -96,7 +101,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the endpoints haven't been registered if Jetpack is not connected.
+	 * @testdox Tests the endpoints haven't been registered if Jetpack is not
+	 * connected.
 	 */
 	public function test_it_does_not_register_endpoints_if_disabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -116,7 +122,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the endpoints have been registered if Jetpack is connected.
+	 * @testdox Tests the endpoints have been registered if Jetpack is
+	 * connected.
 	 */
 	public function test_it_registers_endpoints_if_enabled() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -139,7 +146,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * @testdox Tests that enablement state is cached within an instance.
 	 */
 	public function test_it_caches_enablement_state_correctly() {
-		// First instance with Jetpack disconnected - should return false.
+		/**
+		 * First instance with Jetpack disconnected - should return false.
+		 */
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 		$this->jetpack_connection_manager_mock
 			->expects( $this->once() )
@@ -150,10 +159,14 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should be disabled when Jetpack is not connected' );
 
-		// Second call should return cached false without calling is_connected again.
+		/**
+		 * Second call should return cached false without calling is_connected again.
+		 */
 		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should return cached false value' );
 
-		// Create a new instance with Jetpack connected.
+		/**
+		 * Create a new instance with Jetpack connected.
+		 */
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 		$this->jetpack_connection_manager_mock
 			->expects( $this->once() )
@@ -162,10 +175,14 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		$push_notifications_2 = new PushNotifications();
 
-		// Should now return true with the new instance.
+		/**
+		 * Should now return true with the new instance.
+		 */
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should be enabled with new instance when Jetpack connected' );
 
-		// Subsequent call should return cached true.
+		/**
+		 * Subsequent call should return cached true.
+		 */
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
 	}
 
@@ -185,7 +202,9 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->method( 'feature_is_enabled' )
 			->willReturnCallback(
 				function ( $feature_id ) use ( $feature_enabled ) {
-					// Return the specified value for push_notifications, false for all others.
+					/**
+					 * Return the specified value for push_notifications, false for all others.
+					 */
 					return PushNotifications::FEATURE_NAME === $feature_id ? $feature_enabled : false;
 				}
 			);

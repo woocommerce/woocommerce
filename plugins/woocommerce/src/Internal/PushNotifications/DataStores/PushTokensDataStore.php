@@ -170,9 +170,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
 		}
 
-		$force_delete = (bool) ( $args['force_delete'] ?? false );
-
-		wp_delete_post( $push_token->get_id(), $force_delete );
+		wp_delete_post( $push_token->get_id(), true );
 	}
 
 	/**

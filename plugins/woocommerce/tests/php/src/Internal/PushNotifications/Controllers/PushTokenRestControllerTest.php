@@ -58,7 +58,10 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-		wc_get_container()->get( LegacyProxy::class )->register_class_mocks( array() );
+
+		$this->reset_container_replacements();
+		wc_get_container()->reset_all_resolved();
+
 		parent::tearDown();
 	}
 
@@ -148,7 +151,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it can create a push token for browsers without device_uuid.
+	 * @testdox Test it can create a push token for browsers without
+	 * device_uuid.
 	 */
 	public function test_it_can_create_push_token_for_browser_without_device_uuid() {
 		wp_set_current_user( $this->user_id );
@@ -329,7 +333,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it can create a push token for iOS with uppercase hex token.
+	 * @testdox Test it can create a push token for iOS with uppercase hex
+	 * token.
 	 */
 	public function test_it_can_create_push_token_for_ios_with_uppercase_hex() {
 		wp_set_current_user( $this->user_id );
@@ -354,7 +359,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it can create a push token for iOS with mixed case hex token.
+	 * @testdox Test it can create a push token for iOS with mixed case hex
+	 * token.
 	 */
 	public function test_it_can_create_push_token_for_ios_with_mixed_case_hex() {
 		wp_set_current_user( $this->user_id );
@@ -379,8 +385,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for iOS if the token is not in the
-	 * correct format.
+	 * @testdox Test it cannot create a push token for iOS if the token is not
+	 * in the correct format.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_ios_token() {
 		wp_set_current_user( $this->user_id );
@@ -403,7 +409,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for iOS with non-hex characters.
+	 * @testdox Test it cannot create a push token for iOS with non-hex
+	 * characters.
 	 */
 	public function test_it_cannot_create_push_token_for_ios_with_non_hex_characters() {
 		wp_set_current_user( $this->user_id );
@@ -450,8 +457,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for Android if the token is not in the
-	 * correct format.
+	 * @testdox Test it cannot create a push token for Android if the token is
+	 * not in the correct format.
 	 */
 	public function test_it_cannot_create_push_token_with_invalid_android_token() {
 		wp_set_current_user( $this->user_id );
@@ -474,7 +481,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for Android if the token is too long.
+	 * @testdox Test it cannot create a push token for Android if the token is
+	 * too long.
 	 */
 	public function test_it_cannot_create_push_token_with_android_token_that_is_too_long() {
 		wp_set_current_user( $this->user_id );
@@ -497,8 +505,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for browser if the token is not valid
-	 * JSON.
+	 * @testdox Test it cannot create a push token for browser if the token is
+	 * not valid JSON.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_invalid_json() {
 		wp_set_current_user( $this->user_id );
@@ -521,8 +529,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for browser if the token is missing an
-	 * endpoint property.
+	 * @testdox Test it cannot create a push token for browser if the token is
+	 * missing an endpoint property.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_missing_endpoint() {
 		wp_set_current_user( $this->user_id );
@@ -554,8 +562,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for browser if the endpoint contains
-	 * invalid characters.
+	 * @testdox Test it cannot create a push token for browser if the endpoint
+	 * contains invalid characters.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_contains_invalid_characters() {
 		wp_set_current_user( $this->user_id );
@@ -588,7 +596,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for browser if the endpoint is not HTTPS.
+	 * @testdox Test it cannot create a push token for browser if the endpoint
+	 * is not HTTPS.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_endpoint_is_not_https() {
 		wp_set_current_user( $this->user_id );
@@ -621,7 +630,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token for browser if the token is too long.
+	 * @testdox Test it cannot create a push token for browser if the token is
+	 * too long.
 	 */
 	public function test_it_cannot_create_push_token_if_browser_token_is_too_long() {
 		wp_set_current_user( $this->user_id );
@@ -653,7 +663,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token without required token parameter.
+	 * @testdox Test it cannot create a push token without required token
+	 * parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_token() {
 		wp_set_current_user( $this->user_id );
@@ -675,7 +686,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it cannot create a push token without required platform parameter.
+	 * @testdox Test it cannot create a push token without required platform
+	 * parameter.
 	 */
 	public function test_it_cannot_create_push_token_with_a_missing_platform() {
 		wp_set_current_user( $this->user_id );
@@ -887,8 +899,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Test it gets 404 response trying to delete a push token that doesn't
-	 * exist.
+	 * @testdox Test it gets 404 response trying to delete a push token that
+	 * doesn't exist.
 	 */
 	public function test_it_cannot_delete_push_token_that_does_not_exist() {
 		wp_set_current_user( $this->user_id );
@@ -924,6 +936,71 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test it cannot delete a push token when push notifications are
+	 * disabled.
+	 */
+	public function test_it_cannot_delete_push_token_when_push_notifications_disabled() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( false );
+
+		$request  = new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/123' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::FORBIDDEN, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with device_uuid exceeding
+	 * 255 characters.
+	 */
+	public function test_it_cannot_create_push_token_with_device_uuid_too_long() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
+		$request->set_param( 'device_uuid', str_repeat( 'a', 256 ) );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'device_uuid', $data['message'] );
+	}
+
+	/**
+	 * @testdox Test it cannot create a push token with device_uuid containing
+	 * invalid characters.
+	 */
+	public function test_it_cannot_create_push_token_with_device_uuid_invalid_characters() {
+		wp_set_current_user( $this->user_id );
+
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_IOS );
+		$request->set_param( 'device_uuid', 'invalid device uuid with spaces' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( WP_Http::BAD_REQUEST, $response->get_status() );
+
+		$data = $response->get_data();
+
+		$this->assertEquals( 'rest_invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'device_uuid', $data['message'] );
 	}
 
 	/**
@@ -979,7 +1056,8 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * PushNotifications class state is reset so `should_be_enabled` calculates
 	 * this from scratch.
 	 *
-	 * @param bool $is_connected Whether the manager should report Jetpack is connected or not.
+	 * @param bool $is_connected Whether the manager should report Jetpack is
+	 * connected or not.
 	 */
 	private function mock_jetpack_connection_manager_is_connected( bool $is_connected = true ) {
 		$this->jetpack_connection_manager_mock = $this

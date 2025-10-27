@@ -223,6 +223,23 @@ class PushTokenRestController extends RestApiControllerBase {
 			);
 		}
 
+		if (
+			$device_uuid
+			&& (
+				strlen( $device_uuid ) > 255
+				|| ! preg_match( '/^[A-Za-z0-9._:-]+$/', $device_uuid )
+			)
+		) {
+			return new WP_Error(
+				'rest_invalid_param',
+				'Invalid device_uuid format.',
+				array(
+					'status' => WP_Http::BAD_REQUEST,
+					'param'  => 'device_uuid',
+				)
+			);
+		}
+
 		return true;
 	}
 
