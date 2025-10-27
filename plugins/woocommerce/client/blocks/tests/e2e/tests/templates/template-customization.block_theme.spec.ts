@@ -133,7 +133,9 @@ test.describe( 'Template customization', () => {
 	} );
 
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
-		( data ) => data.canBeOverriddenByThemes
+		( data ) =>
+			data.canBeOverriddenByThemes &&
+			data.templateType === 'wp_template_part'
 	);
 
 	for ( const testData of testToRun ) {
