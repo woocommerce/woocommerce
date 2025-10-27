@@ -102,10 +102,12 @@ class RefundSchema extends AbstractSchema {
 				'sanitize_callback' => 'absint',
 			),
 			'amount'           => array(
-				'description' => __( 'Amount that was refunded', 'woocommerce' ),
-				'type'        => 'number',
-				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'readonly'    => true,
+				'description'       => __( 'Amount that was refunded. This is calculated from the line items if not provided.', 'woocommerce' ),
+				'type'              => 'number',
+				'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+				'default'           => 0,
+				'sanitize_callback' => 'sanitize_text_field',
+				'validate_callback' => 'rest_validate_request_arg',
 			),
 			'reason'           => array(
 				'description'       => __( 'Reason for the refund.', 'woocommerce' ),

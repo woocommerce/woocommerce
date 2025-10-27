@@ -269,7 +269,7 @@ class Controller extends AbstractController {
 
 			// Convert line items to internal format.
 			$line_item_data = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'] );
-			$refund_amount  = $this->data_utils->calculate_refund_amount( $request['line_items'] );
+			$refund_amount  = ! empty( $request['amount'] ) ? $request['amount'] : $this->data_utils->calculate_refund_amount( $request['line_items'] );
 
 			if ( 0 > $refund_amount || ! $refund_amount ) {
 				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
