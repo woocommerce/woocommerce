@@ -12,17 +12,15 @@
 ```bash
 # Testing
 pnpm run test:js                              # Run all tests
-pnpm run test:js -- --watch                   # Watch mode
 pnpm run test:js -- status-badge.test.tsx    # Specific file
 
-# Linting
-pnpm run lint                                 # All linting
-pnpm run lint:fix                             # Auto-fix issues
-pnpm run ts:check                             # Type checking
+# Linting (ONLY specific files)
+npx eslint --fix path/to/file.tsx                 # Fix specific file
+npx eslint path/to/file.tsx                       # Check specific file
+pnpm run ts:check                                 # Type checking
 
 # Building
 pnpm run build                                # Production build
-pnpm run watch:build                          # Development watch mode
 ```
 
 ## When to Use This Documentation
@@ -64,9 +62,6 @@ Run JavaScript tests using Jest and React Testing Library:
 # Run all JavaScript tests
 pnpm run test:js
 
-# Run tests in watch mode (re-runs on file changes)
-pnpm run test:js -- --watch
-
 # Run a specific test file
 pnpm run test:js -- status-badge.test.tsx
 
@@ -81,7 +76,7 @@ pnpm run test:js -- -u
 
 # Examples:
 pnpm run test:js -- client/settings-payments/components/status-badge
-pnpm run test:js -- --testPathPattern="complete-setup-button" --watch
+pnpm run test:js -- --testPathPattern="complete-setup-button"
 ```
 
 ### Jest Configuration
@@ -121,30 +116,45 @@ pnpm run lint:fix
 
 ### JavaScript/TypeScript Linting
 
-**CRITICAL**: Always run auto-fix on ONLY the files you changed to ensure perfect formatting.
+**CRITICAL: Only lint/fix specific files you changed - NEVER the entire codebase**
 
 ```bash
-# ALWAYS run auto-fix first on the specific file you changed
-pnpm run lint:fix:lang:js -- path/to/changed-file.tsx
+# ALWAYS run auto-fix on specific changed files only (use npx eslint directly)
+npx eslint --fix client/settings-payments/components/status-badge/status-badge.tsx
 
-# Example:
-pnpm run lint:fix:lang:js -- client/settings-payments/components/status-badge/status-badge.tsx
+# Check a specific file after fixing
+npx eslint client/settings-payments/components/status-badge/status-badge.tsx
 
-# Then verify (optional, but recommended)
-pnpm run lint:lang:js -- path/to/changed-file.tsx
+# Fix multiple specific files
+npx eslint --fix file1.tsx file2.tsx file3.tsx
+
+# ❌ NEVER run these commands (they lint the entire codebase):
+pnpm run lint               # NO - lints everything
+pnpm run lint:fix           # NO - lints everything
+pnpm run lint:lang:js       # NO - lints entire ./client directory
+pnpm run lint:fix:lang:js   # NO - lints entire ./client directory
 ```
 
-**Workflow after making changes:**
-1. Run auto-fix on the specific changed file(s)
-2. Verify the fix worked (optional)
-3. Commit
+**Correct workflow:**
+1. Make your code changes
+2. Run `npx eslint --fix path/to/file.tsx` for each changed file
+3. Verify (optional): `npx eslint path/to/file.tsx`
+4. Commit
+
+**Note:** The pnpm lint scripts have hardcoded paths (`./client`) so they always lint the entire directory even when you pass file arguments. Use `npx eslint` directly for per-file linting.
+
+**Why this matters:**
+- Prevents unrelated formatting changes in other files
+- Keeps commits focused on your changes
+- Avoids merge conflicts from mass formatting changes
+- Respects existing code style in unchanged files
 
 **JavaScript Linting Configuration:**
 - **Tool**: ESLint 8.x
 - **Config**: Uses `@woocommerce/eslint-plugin`
 - **Files**: `./client/**/*.{js,ts,tsx}`
 - **Cache**: `node_modules/.cache/eslint`
-- **Note**: ESLint scans entire `client/` directory; warnings from other files can be ignored
+- **Note**: ESLint may show warnings from other files during scans; ignore them
 
 ### CSS/SCSS Linting
 
@@ -228,9 +238,9 @@ Watch mode automatically rebuilds when source files change.
    pnpm run ts:check
    ```
 
-5. **Run linting** and fix issues:
+5. **Lint/fix only changed files**:
    ```bash
-   pnpm run lint:fix
+   npx eslint --fix path/to/changed-file.tsx
    ```
 
 6. **Commit** only after tests pass and linting is clean

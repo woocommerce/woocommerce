@@ -28,17 +28,17 @@
 
 ```bash
 # PHP Tests
-pnpm run test:php:env -- --filter TestClassName
+pnpm test:php:env -- --filter TestClassName
 
 # JavaScript Tests (run from client/admin directory)
-cd client/admin && pnpm run test:js -- status-badge.test.tsx
+cd client/admin && pnpm test:js -- status-badge.test.tsx
 
-# PHP Linting
-pnpm run lint:php
-pnpm run lint:php:fix
+# PHP Linting (ONLY changed files or specific files)
+pnpm lint:php:changes                          # Check changed files
+pnpm lint:php:fix -- path/to/file.php          # Fix specific file
 
 # JavaScript Linting (see client/admin/CLAUDE.md for details)
-cd client/admin && pnpm run lint
+cd client/admin && npx eslint --fix path/to/file.tsx
 ```
 
 ## Running Tests
@@ -49,20 +49,20 @@ To run PHP unit tests in the WooCommerce plugin directory, use the following com
 
 ```bash
 # Run all PHP unit tests
-pnpm run test:php:env
+pnpm test:php:env
 
 # Run specific test class
-pnpm run test:php:env -- --filter TestClassName
+pnpm test:php:env -- --filter TestClassName
 
 # Run specific test method
-pnpm run test:php:env -- --filter TestClassName::test_method_name
+pnpm test:php:env -- --filter TestClassName::test_method_name
 
 # Run tests with verbose output
-pnpm run test:php:env -- --verbose --filter TestClassName
+pnpm test:php:env -- --verbose --filter TestClassName
 
 # Examples:
-pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest
-pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_country_extensions_count_with_merchant_selling_online
+pnpm test:php:env -- --filter PaymentsExtensionSuggestionsTest
+pnpm test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_country_extensions_count_with_merchant_selling_online
 ```
 
 ### Test Environment
@@ -82,16 +82,16 @@ pnpm run test:php:env -- --filter PaymentsExtensionSuggestionsTest::test_get_cou
 
 ```bash
 # Run tests for a specific directory
-pnpm run test:php:env -- tests/php/src/Internal/Admin/
+pnpm test:php:env -- tests/php/src/Internal/Admin/
 
 # Run tests matching a pattern
-pnpm run test:php:env -- --filter "Admin.*Test"
+pnpm test:php:env -- --filter "Admin.*Test"
 
 # Run tests and stop on first failure
-pnpm run test:php:env -- --stop-on-failure
+pnpm test:php:env -- --stop-on-failure
 
 # Get test coverage (if configured)
-pnpm run test:php:env -- --coverage-text
+pnpm test:php:env -- --coverage-text
 ```
 
 ### JavaScript/Jest Tests
@@ -103,16 +103,16 @@ To run JavaScript tests for the admin client, navigate to the `client/admin` dir
 cd client/admin
 
 # Run all JavaScript tests
-pnpm run test:js
+pnpm test:js
 
 # Run tests in watch mode
-pnpm run test:js -- --watch
+pnpm test:js -- --watch
 
 # Run a specific test file
-pnpm run test:js -- status-badge.test.tsx
+pnpm test:js -- status-badge.test.tsx
 
 # Run tests with coverage
-pnpm run test:js -- --coverage
+pnpm test:js -- --coverage
 ```
 
 For detailed Jest configuration and testing patterns, see `client/admin/CLAUDE.md`.
@@ -132,12 +132,108 @@ For detailed Jest configuration and testing patterns, see `client/admin/CLAUDE.m
 
 ### PHP Linting
 
-```bash
-# Run PHP linting
-pnpm run lint:php
+**CRITICAL: Only lint/fix specific files or changed files - NEVER the entire codebase**
 
-# Fix PHP code style issues
-pnpm run lint:php:fix
+```bash
+# RECOMMENDED: Check only changed files in current branch
+pnpm lint:php:changes
+
+# Lint a specific file
+pnpm lint:php -- path/to/file.php
+
+# Fix a specific file
+pnpm lint:php:fix -- path/to/file.php
+
+# Example:
+pnpm lint:php:fix -- src/Internal/Admin/Settings/PaymentsProviders/WooPayments.php
+
+# ❌ NEVER run without file arguments (lints entire codebase):
+pnpm lint:php           # NO
+pnpm lint:php:fix       # NO
+```
+
+**Correct workflow:**
+1. Make your PHP changes
+2. Run `pnpm lint:php:changes` to check changed files
+3. Fix specific files: `pnpm lint:php:fix -- path/to/file.php`
+4. Verify: `pnpm lint:php -- path/to/file.php`
+5. Commit
+
+#### Common PHP Linting Issues & Fixes
+
+| Issue | Wrong | Correct |
+|-------|-------|---------|
+| **Translators comment placement** | Before return statement | Immediately before function call |
+| **File docblock order (PSR-12)** | After `declare(strict_types=1)` | After `<?php`, before `declare` |
+| **Alignment: use tabs not spaces** | Spaces for indentation | Tabs for all indentation |
+| **Array alignment** | Inconsistent spacing | Aligned `=>` with surrounding context |
+| **Equals sign alignment** | Inconsistent spacing | Match surrounding assignment spacing |
+
+**Translators comment patterns:**
+
+```php
+// WRONG - comment before return
+/* translators: %s: Gateway name. */
+return sprintf(
+    esc_html__( '%s is not supported.', 'woocommerce' ),
+    'Gateway'
+);
+
+// CORRECT - comment before esc_html__()
+return sprintf(
+    /* translators: %s: Gateway name. */
+    esc_html__( '%s is not supported.', 'woocommerce' ),
+    'Gateway'
+);
+```
+
+**File header order (PSR-12):**
+
+```php
+// WRONG
+<?php
+declare( strict_types=1 );
+
+/**
+ * File docblock
+ */
+
+// CORRECT
+<?php
+/**
+ * File docblock
+ */
+
+declare( strict_types=1 );
+```
+
+**Mock classes with intentional violations:**
+
+When creating mock classes that must match external class names, use phpcs:disable:
+
+```php
+if ( ! class_exists( 'WC_Payments_Utils' ) ) {
+    /**
+     * Mock class.
+     *
+     * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
+     * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+     * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
+     */
+    class WC_Payments_Utils {
+        // Mock implementation
+    }
+}
+```
+
+**Multi-line conditions alignment:**
+
+```php
+// Use tabs for continuation lines
+if ( class_exists( '\WC_Payments_Utils' ) &&
+    is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+    // code
+}
 ```
 
 ### JavaScript Linting
@@ -163,7 +259,7 @@ Key directories for testing:
 ## Development Workflow
 
 1. Make code changes
-2. Run relevant tests: `pnpm run test:php:env -- --filter YourTestClass`
+2. Run relevant tests: `pnpm test:php:env -- --filter YourTestClass`
 3. Run linting/type checking if available
 4. Commit changes only after tests pass
 
