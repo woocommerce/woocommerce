@@ -29,6 +29,11 @@
 			"color": true,
 			"radius": true,
 			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"width": true
+			},
 			"__experimentalSkipSerialization": true
 		}
 	},
