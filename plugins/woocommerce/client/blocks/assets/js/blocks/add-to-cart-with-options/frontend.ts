@@ -6,7 +6,6 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
-	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
@@ -56,17 +55,19 @@ export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
-	let productId = id;
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	if ( ! products || ! products[ id ] ) {
+	if ( ! Array.isArray( products ) || ! products[ id ] ) {
 		return null;
 	}
 
-	let productData = products?.[ id ] as ProductData;
+	let product = {
+		id,
+		...products[ id ],
+	} as ProductData & { id: number };
 
 	if (
-		productData.type === 'variable' &&
+		product.type === 'variable' &&
 		selectedAttributes &&
 		selectedAttributes.length > 0
 	) {
@@ -75,31 +76,24 @@ export const getProductData = (
 			variations,
 			selectedAttributes
 		);
-		if ( matchedVariation?.variation_id ) {
-			productId = matchedVariation.variation_id;
-			productData = {
-				...( products?.[ id ]?.variations?.[
-					matchedVariation?.variation_id
-				] as VariationData ),
+		if ( matchedVariation ) {
+			product = {
+				...matchedVariation,
+				id: matchedVariation.variation_id,
 				type: 'variation',
 			};
 		}
 	}
 
-	if ( typeof productData !== 'object' || productData === null ) {
-		return null;
-	}
-
-	const min = typeof productData.min === 'number' ? productData.min : 1;
+	const min = typeof product.min === 'number' ? product.min : 1;
 	const max =
-		typeof productData.max === 'number' && productData.max >= 1
-			? productData.max
+		typeof product.max === 'number' && product.max >= 1
+			? product.max
 			: Infinity;
-	const step = productData.step || 1;
+	const step = product.step || 1;
 
 	return {
-		id: productId,
-		...productData,
+		...product,
 		min,
 		max,
 		step,
