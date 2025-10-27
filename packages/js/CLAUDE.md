@@ -21,11 +21,13 @@ Type: <type>
 ```
 
 **Significance (Semver):**
+
 - `patch` → Bug fixes, no API changes (0.0.X)
 - `minor` → New features, non-breaking (0.X.0)
 - `major` → Breaking changes (X.0.0)
 
 **Type:**
+
 - `fix` → Fixes a bug
 - `add` → Adds functionality
 - `update` → Update existing functionality
@@ -49,7 +51,8 @@ Type: <type>
 | Performance improvement | `performance` | `minor` |
 
 **Examples:**
-```
+
+```text
 # Bug fix
 Significance: patch
 Type: fix
@@ -57,7 +60,7 @@ Type: fix
 Fix race condition in payment settings data loader
 ```
 
-```
+```text
 # New feature
 Significance: minor
 Type: add
@@ -65,7 +68,7 @@ Type: add
 Add `onboardingSupported` property to PaymentGateway interface
 ```
 
-```
+```text
 # Breaking change
 Significance: major
 Type: update
@@ -73,7 +76,7 @@ Type: update
 Remove deprecated `getPaymentMethods` selector
 ```
 
-```
+```text
 # Dev/tooling
 Significance: patch
 Type: dev
@@ -84,6 +87,7 @@ Update test stubs to include new gateway properties
 ## Important: @woocommerce/data Package
 
 **Central data layer** - Always add changelog when making changes. Update order:
+
 1. Types in `src/[module]/types.ts`
 2. Test stubs in `src/[module]/test/helpers/`
 3. Implementation

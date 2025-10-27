@@ -4,12 +4,14 @@
 **Location**: `plugins/woocommerce/client/admin/client/settings-payments`
 
 **See also:**
+
 - `../CLAUDE.md` - Testing, linting, and build commands
 - `packages/js/data/src/payment-settings/` - Data layer and types
 
 ## Quick Workflow
 
 **Modifying payment gateway features (data + UI must be updated together):**
+
 1. Update types: `packages/js/data/src/payment-settings/types.ts`
 2. Update test stubs: `packages/js/data/src/payment-settings/test/helpers/stub.ts`
 3. Update UI: `client/settings-payments/components/`
@@ -20,17 +22,19 @@
 ### Data/UI Separation (Critical Pattern)
 
 **Data layer** (must be updated first):
+
 - Types: `packages/js/data/src/payment-settings/types.ts`
 - Test stubs: `packages/js/data/src/payment-settings/test/helpers/stub.ts`
 - Key types: `PaymentGatewayProvider`, `PaymentsProviderOnboardingState`, `OfflinePaymentMethodProvider`
 
 **UI layer** (depends on data layer):
+
 - Components: `client/settings-payments/components/`
 - Tests: Component-level tests in `test/` subdirectories
 
 ### Directory Structure
 
-```
+```text
 settings-payments/
 ├── components/               # UI components
 │   ├── buttons/             # Action buttons (CompleteSetup, Enable, etc.)
@@ -47,12 +51,14 @@ settings-payments/
 ### Security: Disabled/Unsupported Features
 
 When features are disabled or unsupported, use **minimal props** to avoid exposing sensitive actions:
+
 - Placeholder URLs for disabled links (`onboardingHref="#"`)
 - No-op functions for callbacks (`setOnboardingModalOpen={() => {}}`)
 - Conditionally spread sensitive props only when enabled (use spread operator pattern)
 - Explicitly set `disabled={true}`
 
 **Pattern for conditional props**:
+
 ```tsx
 <Component
 	{ ...baseProps }
@@ -66,6 +72,7 @@ When features are disabled or unsupported, use **minimal props** to avoid exposi
 ```
 
 **Rationale**:
+
 - Prevents inadvertent triggering of onboarding actions even if button is somehow activated
 - Placeholder `#` is safer than empty string `""` if disabled state is bypassed
 - Spread operator ensures sensitive props are only present when feature is enabled
@@ -73,14 +80,17 @@ When features are disabled or unsupported, use **minimal props** to avoid exposi
 ### Component Architecture Pattern
 
 **Status determination priority** (in `PaymentGatewayListItem.determineGatewayStatus()`):
+
 1. not_supported → needs_setup → test states → active/inactive
 
 **Button pattern**:
+
 - Accept `gatewayProvider` prop for gateway data
 - Support `disabled` prop (combines with internal states)
 - Record analytics events on interactions
 
 **Status badge pattern**:
+
 - Supports `popoverContent` for additional context messages
 - Located in `components/status-badge/`
 
@@ -89,6 +99,7 @@ When features are disabled or unsupported, use **minimal props** to avoid exposi
 **Endpoint**: `/wc-admin/settings/payments/providers`
 
 **Key fields**:
+
 - `onboarding.state.supported` - Whether onboarding is supported
 - `onboarding.messages.not_supported` - Why not supported (shown in popover)
 - `state.account_connected` - Account connection status
@@ -144,6 +155,7 @@ const createMockGateway = (
 ```
 
 **Benefits**:
+
 - Single source of truth for test data
 - Easy to create variations with `overrides`
 - Keeps tests focused on what's being tested
@@ -191,6 +203,7 @@ EllipsisMenuWrapper: ( { provider }: { provider: { id: string } } ) => (
 ```
 
 **Patterns**:
+
 - Use `data-testid` to make components testable
 - **Never use `any` types** - always define proper TypeScript interfaces
 - Add inline documentation for ESLint disables explaining why
@@ -214,6 +227,7 @@ describe( 'ComponentName', () => {
 **CRITICAL**: Test names must accurately describe what the test actually verifies.
 
 **Bad** (misleading):
+
 ```typescript
 it( 'passes installingPlugin to child components', () => {
 	// Only verifies component renders, doesn't check prop passing
@@ -223,6 +237,7 @@ it( 'passes installingPlugin to child components', () => {
 ```
 
 **Good** (honest):
+
 ```typescript
 it( 'renders without error when installingPlugin prop is provided', () => {
 	// Accurately describes what we're testing
@@ -232,6 +247,7 @@ it( 'renders without error when installingPlugin prop is provided', () => {
 ```
 
 **Why this matters**:
+
 - Prevents false confidence in test coverage
 - Makes it clear when tests need enhancement
 - Helps future developers understand actual coverage gaps
@@ -258,6 +274,7 @@ it( 'shows status for unsupported gateway', () => {
 ### Common Test Scenarios
 
 **For payment gateway components, test**:
+
 1. Basic rendering (title, icon, description)
 2. Status determination logic (all status types)
 3. Conditional rendering (badges, buttons based on state)
@@ -270,6 +287,7 @@ it( 'shows status for unsupported gateway', () => {
 Always include tests for defensive coding scenarios to prevent runtime errors:
 
 **Missing optional fields:**
+
 ```typescript
 it( 'handles missing gateway icon gracefully', () => {
 	const gateway = createMockGateway( { icon: undefined } );
@@ -280,6 +298,7 @@ it( 'handles missing gateway icon gracefully', () => {
 ```
 
 **Undefined nested objects:**
+
 ```typescript
 it( 'handles undefined supports array', () => {
 	const gateway = createMockGateway( { supports: undefined } );
@@ -289,6 +308,7 @@ it( 'handles undefined supports array', () => {
 ```
 
 **Invalid or conflicting state combinations:**
+
 ```typescript
 it( 'handles conflicting state flags gracefully', () => {
 	const gateway = createMockGateway( {
@@ -305,6 +325,7 @@ it( 'handles conflicting state flags gracefully', () => {
 ```
 
 **Common edge cases to test:**
+
 - Missing `icon`, `description`, `_suggestion_id`, `_incentive`
 - `null` values in nested objects (e.g., `messages.not_supported`)
 - Empty arrays (`supports: []`)
@@ -313,6 +334,7 @@ it( 'handles conflicting state flags gracefully', () => {
 - Empty strings vs `null` vs `undefined`
 
 **Why edge case testing matters:**
+
 - Prevents crashes from unexpected API responses
 - Validates defensive coding patterns
 - Ensures graceful degradation
@@ -322,6 +344,7 @@ it( 'handles conflicting state flags gracefully', () => {
 ### Code Quality Checklist
 
 Before committing tests, verify:
+
 - ✅ No `any` types - use proper TypeScript interfaces
 - ✅ Import order: external dependencies before internal
 - ✅ ESLint disable directives include inline documentation (with proper punctuation)

@@ -4,6 +4,7 @@
 **Location**: `plugins/woocommerce/client/admin`
 
 **See also:**
+
 - `../../CLAUDE.md` - PHP tests and plugin-level documentation
 - `client/settings-payments/CLAUDE.md` - Settings Payments module patterns
 
@@ -11,21 +12,23 @@
 
 ```bash
 # Testing
-pnpm run test:js                              # Run all tests
+pnpm run test:js                             # Run all tests
 pnpm run test:js -- status-badge.test.tsx    # Specific file
 
 # Linting (ONLY specific files)
-npx eslint --fix path/to/file.tsx                 # Fix specific file
-npx eslint path/to/file.tsx                       # Check specific file
-pnpm run ts:check                                 # Type checking
+npx eslint --fix path/to/file.tsx            # Fix specific file
+npx eslint path/to/file.tsx                  # Check specific file
+pnpm run ts:check                            # Type checking
+markdownlint --fix path/to/file.md           # Lint markdown files
 
 # Building
-pnpm run build                                # Production build
+pnpm run build                               # Production build
 ```
 
 ## When to Use This Documentation
 
 Use this doc when you need to:
+
 - Run or write Jest tests for React components
 - Lint JavaScript/TypeScript/SCSS code
 - Build or watch the admin client bundle
@@ -36,7 +39,8 @@ For module-specific patterns (like settings-payments), see the module's CLAUDE.m
 
 ## Overview
 
-The WooCommerce Admin client is a React-based application that provides the modern admin interface for WooCommerce. It includes:
+The WooCommerce Admin client is a React-based application that provides the modern admin interface for WooCommerce.
+It includes:
 
 - Analytics dashboards and reports
 - Onboarding flows
@@ -46,6 +50,7 @@ The WooCommerce Admin client is a React-based application that provides the mode
 - Custom components and UI elements
 
 **Technology Stack:**
+
 - React 18.3.x
 - TypeScript 5.7.x
 - Jest for testing
@@ -84,7 +89,7 @@ pnpm run test:js -- --testPathPattern="complete-setup-button"
 - **Config file**: `client/jest.config.js`
 - **Test framework**: Jest 29.5.x with React Testing Library
 - **Test files**: Located in `test/` subdirectories next to components
-  - Example: `client/settings-payments/components/status-badge/test/status-badge.test.tsx`
+    - Example: `client/settings-payments/components/status-badge/test/status-badge.test.tsx`
 
 ### Writing Tests
 
@@ -116,7 +121,7 @@ pnpm run lint:fix
 
 ### JavaScript/TypeScript Linting
 
-**CRITICAL: Only lint/fix specific files you changed - NEVER the entire codebase**
+### CRITICAL: Only lint/fix specific files you changed - NEVER the entire codebase
 
 ```bash
 # ALWAYS run auto-fix on specific changed files only (use npx eslint directly)
@@ -136,20 +141,24 @@ pnpm run lint:fix:lang:js   # NO - lints entire ./client directory
 ```
 
 **Correct workflow:**
+
 1. Make your code changes
 2. Run `npx eslint --fix path/to/file.tsx` for each changed file
 3. Verify (optional): `npx eslint path/to/file.tsx`
 4. Commit
 
-**Note:** The pnpm lint scripts have hardcoded paths (`./client`) so they always lint the entire directory even when you pass file arguments. Use `npx eslint` directly for per-file linting.
+**Note:** The pnpm lint scripts have hardcoded paths (`./client`) so they always lint the entire directory
+even when you pass file arguments. Use `npx eslint` directly for per-file linting.
 
 **Why this matters:**
+
 - Prevents unrelated formatting changes in other files
 - Keeps commits focused on your changes
 - Avoids merge conflicts from mass formatting changes
 - Respects existing code style in unchanged files
 
 **JavaScript Linting Configuration:**
+
 - **Tool**: ESLint 8.x
 - **Config**: Uses `@woocommerce/eslint-plugin`
 - **Files**: `./client/**/*.{js,ts,tsx}`
@@ -167,6 +176,7 @@ pnpm run lint:fix:lang:css
 ```
 
 **CSS Linting Configuration:**
+
 - **Tool**: Stylelint 14.x
 - **Config**: Uses `@wordpress/stylelint-config`
 - **Files**: `**/*.scss` (excludes `storybook/wordpress`)
@@ -180,6 +190,11 @@ pnpm run ts:check
 ```
 
 This runs `tsc --build` to check TypeScript types without emitting files.
+
+### Markdown Linting
+
+For detailed markdown linting instructions, see the "Markdown Linting"
+section in `../../CLAUDE.md`.
 
 ## Building
 
@@ -200,6 +215,7 @@ pnpm run build:project:feature-config
 ```
 
 **Build Configuration:**
+
 - **Tool**: Webpack 5.x
 - **Config**: `webpack.config.js`
 - **Output**: `build/` directory
@@ -222,11 +238,13 @@ Watch mode automatically rebuilds when source files change.
 ### Recommended Workflow
 
 1. **Start watch mode** to automatically rebuild on changes:
+
    ```bash
    pnpm run watch:build
    ```
 
 2. **Run tests in watch mode** in a separate terminal:
+
    ```bash
    pnpm run test:js -- --watch
    ```
@@ -234,11 +252,13 @@ Watch mode automatically rebuilds when source files change.
 3. **Make your changes** to the code
 
 4. **Check types** before committing:
+
    ```bash
    pnpm run ts:check
    ```
 
 5. **Lint/fix only changed files**:
+
    ```bash
    npx eslint --fix path/to/changed-file.tsx
    ```
@@ -250,9 +270,11 @@ Watch mode automatically rebuilds when source files change.
 The repository uses lint-staged for pre-commit checks:
 
 **SCSS files:**
+
 - Runs `pnpm lint:css-fix` on staged `.scss` files
 
 **JS/TS files:**
+
 - Runs `pnpm lint:js-pre-commit` on staged `.(t|j)s?(x)` files
 - Runs `pnpm test-staged` to test affected files
 
@@ -263,16 +285,19 @@ The repository uses lint-staged for pre-commit checks:
 WooCommerce uses a strict separation between data layer and UI layer:
 
 **Data layer** (in `packages/js/data/`):
+
 - TypeScript types and interfaces
 - Data store selectors and actions
 - Must be updated BEFORE UI changes
 
 **UI layer** (in `client/admin/client/`):
+
 - React components
 - Depends on data layer types
 - Update AFTER data layer
 
 **Workflow**: When adding features, always update in this order:
+
 1. Update types in `packages/js/data/src/[module]/types.ts`
 2. Update test stubs in `packages/js/data/src/[module]/test/helpers/`
 3. Update UI components in `client/[module]/components/`
@@ -281,6 +306,7 @@ WooCommerce uses a strict separation between data layer and UI layer:
 ### Security Pattern: Minimal Props for Disabled Features
 
 When rendering disabled/unsupported features, pass minimal props to prevent inadvertent action exposure:
+
 - Use empty strings for URLs instead of actual endpoints
 - Pass no-op functions (`() => {}`) instead of real callbacks
 - Omit sensitive props (API keys, onboarding tokens, etc.)
@@ -292,7 +318,7 @@ When rendering disabled/unsupported features, pass minimal props to prevent inad
 
 ### Directory Organization
 
-```
+```text
 client/admin/
 ├── client/                    # Source code
 │   ├── settings-payments/    # Payment settings interface
@@ -334,7 +360,7 @@ client/admin/
 
 Component tests should be placed in a `test/` directory next to the component:
 
-```
+```text
 components/
 ├── status-badge/
 │   ├── status-badge.tsx
@@ -366,26 +392,31 @@ Coverage reports help identify untested code paths.
 ### Common Issues
 
 **Tests failing:**
+
 - Ensure dependencies are installed: `pnpm install`
 - Clear Jest cache: `pnpm run test:js -- --clearCache`
 - Check TypeScript types: `pnpm run ts:check`
 
 **Build failures:**
+
 - Clean build directory: `rm -rf build/`
 - Rebuild dependencies: `pnpm install`
 - Check webpack config for errors
 
 **Linting errors:**
+
 - Auto-fix what's possible: `pnpm run lint:fix`
 - Review remaining errors manually
 - Check `.eslintrc.js` for rule configuration
 
 **TypeScript errors:**
+
 - Run type checking: `pnpm run ts:check`
 - Ensure all dependencies have types installed
 - Check `tsconfig.json` configuration
 
 **Module not found errors:**
+
 - Verify import paths are correct
 - Check if package is in `dependencies` or `devDependencies`
 - Run `pnpm install` to ensure all packages are installed
@@ -393,11 +424,13 @@ Coverage reports help identify untested code paths.
 ### Performance Tips
 
 **Speed up tests:**
+
 - Run specific tests instead of the entire suite
 - Use watch mode to only run affected tests
 - Consider using `--maxWorkers=50%` to limit CPU usage
 
 **Speed up builds:**
+
 - Use watch mode instead of rebuilding manually
 - Ensure webpack cache is enabled (default)
 - Consider using webpack-bundle-analyzer to identify large bundles
@@ -416,6 +449,7 @@ Coverage reports help identify untested code paths.
 ### Extension Development
 
 The `docs/examples/extensions/` directory contains examples for:
+
 - Adding custom reports
 - Creating inbox notifications
 - Adding dashboard sections
@@ -449,17 +483,19 @@ This uses Composer's changelogger to manage changelog entries.
 The package includes CI configuration in `config.ci`:
 
 **Linting:**
+
 - Command: `lint`
 - Triggers on changes to: `client/**/*.{js,ts,tsx,scss}`
 
 **Tests:**
+
 - Command: `test:js`
 - Triggers on changes to:
-  - `jest.config.js`
-  - `webpack.config.js`
-  - `babel.config.js`
-  - `tsconfig.json`
-  - `client/**/*.{js,jsx,ts,tsx,scss,json}`
+    - `jest.config.js`
+    - `webpack.config.js`
+    - `babel.config.js`
+    - `tsconfig.json`
+    - `client/**/*.{js,jsx,ts,tsx,scss,json}`
 
 ## Notes for Development
 
