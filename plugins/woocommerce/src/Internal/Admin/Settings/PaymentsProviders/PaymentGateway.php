@@ -397,11 +397,11 @@ class PaymentGateway {
 	 */
 	public function is_account_connected( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_account_connected' ) && is_callable( array( $payment_gateway, 'is_account_connected' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_account_connected() );
 			}
 
-			if ( is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_connected' ) && is_callable( array( $payment_gateway, 'is_connected' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_connected() );
 			}
 		} catch ( Throwable $e ) {
@@ -436,7 +436,9 @@ class PaymentGateway {
 	 */
 	public function is_onboarding_supported( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_onboarding_supported' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_onboarding_supported' ) &&
+				is_callable( array( $payment_gateway, 'is_onboarding_supported' ) ) ) {
+
 				return wc_string_to_bool(
 					call_user_func_array(
 						array( $payment_gateway, 'is_onboarding_supported' ),
@@ -475,7 +477,9 @@ class PaymentGateway {
 	 */
 	public function get_onboarding_not_supported_message( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?string {
 		try {
-			if ( is_callable( array( $payment_gateway, 'get_onboarding_not_supported_message' ) ) ) {
+			if ( method_exists( $payment_gateway, 'get_onboarding_not_supported_message' ) &&
+				is_callable( array( $payment_gateway, 'get_onboarding_not_supported_message' ) ) ) {
+
 				$message = call_user_func_array(
 					array( $payment_gateway, 'get_onboarding_not_supported_message' ),
 					array( 'country_code' => $country_code ),
@@ -512,7 +516,7 @@ class PaymentGateway {
 	 */
 	public function is_onboarding_started( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_onboarding_started' ) && is_callable( array( $payment_gateway, 'is_onboarding_started' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_onboarding_started() );
 			}
 		} catch ( Throwable $e ) {
@@ -547,12 +551,12 @@ class PaymentGateway {
 		}
 
 		try {
-			if ( is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_onboarding_completed' ) && is_callable( array( $payment_gateway, 'is_onboarding_completed' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_onboarding_completed() );
 			}
 
 			// Note: This is what WooPayments provides, but it should become standard.
-			if ( is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_account_partially_onboarded' ) && is_callable( array( $payment_gateway, 'is_account_partially_onboarded' ) ) ) {
 				return ! wc_string_to_bool( $payment_gateway->is_account_partially_onboarded() );
 			}
 		} catch ( Throwable $e ) {
@@ -584,10 +588,10 @@ class PaymentGateway {
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
 		try {
 			// Try various gateway methods to check if the payment gateway is in test mode onboarding.
-			if ( is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_test_mode_onboarding' ) && is_callable( array( $payment_gateway, 'is_test_mode_onboarding' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_test_mode_onboarding() );
 			}
-			if ( is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
+			if ( method_exists( $payment_gateway, 'is_in_test_mode_onboarding' ) && is_callable( array( $payment_gateway, 'is_in_test_mode_onboarding' ) ) ) {
 				return wc_string_to_bool( $payment_gateway->is_in_test_mode_onboarding() );
 			}
 		} catch ( Throwable $e ) {
@@ -614,7 +618,7 @@ class PaymentGateway {
 	 */
 	public function get_settings_url( WC_Payment_Gateway $payment_gateway ): string {
 		try {
-			if ( is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
+			if ( method_exists( $payment_gateway, 'get_settings_url' ) && is_callable( array( $payment_gateway, 'get_settings_url' ) ) ) {
 				$url = trim( (string) $payment_gateway->get_settings_url() );
 				if ( ! empty( $url ) && ! wc_is_valid_url( $url ) ) {
 					// Back-compat: normalize common relative admin URLs.
@@ -671,7 +675,7 @@ class PaymentGateway {
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
 		try {
-			if ( is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
+			if ( method_exists( $payment_gateway, 'get_connection_url' ) && is_callable( array( $payment_gateway, 'get_connection_url' ) ) ) {
 				// If we received no return URL, we will set the WC Payments Settings page as the return URL.
 				$return_url = ! empty( $return_url ) ? $return_url : admin_url( 'admin.php?page=wc-settings&tab=checkout&from=' . Payments::FROM_PROVIDER_ONBOARDING );
 
@@ -830,7 +834,9 @@ class PaymentGateway {
 	 */
 	public function get_recommended_payment_methods( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
 		// Bail if the payment gateway does not implement the method.
-		if ( ! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
+		if ( ! method_exists( $payment_gateway, 'get_recommended_payment_methods' ) ||
+			! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
+
 			return array();
 		}
 
