@@ -17,9 +17,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
  */
 class AgenticController implements RegisterHooksInterface {
 	/**
-	 * Register hooks and initialize components.
-	 *
-	 * This follows the WooCommerce pattern for controllers.
+	 * Register this class instance to the appropriate hooks.
 	 *
 	 * @internal
 	 */
@@ -29,12 +27,41 @@ class AgenticController implements RegisterHooksInterface {
 			return;
 		}
 
-		// Only initialize if the agentic checkout feature is enabled.
+		// We want to run on init for translations but before woocommerce_init so that
+		// we can hook the new integration settings page. We should be able to simplify
+		// this by just hooking here when we no longer need to check if the feature is enabled.
+		add_action( 'before_woocommerce_init', array( $this, 'on_init' ) );
+	}
+
+	/**
+	 * Hook into WordPress on init.
+	 *
+	 * @internal
+	 */
+	public function on_init() {
+		// Bail if the feature is not enabled.
 		if ( ! FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
 			return;
 		}
 
 		// Resolve webhook manager from container.
 		wc_get_container()->get( AgenticWebhookManager::class )->register();
+
+		// Register Agentic Commerce integration.
+		add_filter( 'woocommerce_integrations', array( $this, 'add_agentic_commerce_integration' ) );
+	}
+
+	/**
+	 * Add Agentic Commerce integration to WooCommerce integrations.
+	 *
+	 * @param array $integrations Existing integrations.
+	 * @return array Modified integrations.
+	 */
+	public function add_agentic_commerce_integration( $integrations ): array {
+		if ( ! is_array( $integrations ) ) {
+			$integrations = array();
+		}
+		$integrations[] = AgenticCommerceIntegration::class;
+		return $integrations;
 	}
 }

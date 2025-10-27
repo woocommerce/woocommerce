@@ -54,6 +54,7 @@ export default function HeaderAccount( {
 
 	const accountURL = MARKETPLACE_HOST + '/my-dashboard/';
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
+	const isInApp = page === 'wc-addons';
 
 	const avatar = () => {
 		if ( ! isConnected || useDefaultAvatar ) {
@@ -71,7 +72,6 @@ export default function HeaderAccount( {
 	};
 
 	const dropdownTrigger = () => {
-		const isInApp = page === 'wc-addons';
 		if ( ! isInApp ) {
 			return avatar();
 		}
@@ -158,7 +158,11 @@ export default function HeaderAccount( {
 					<>
 						<MenuGroup
 							className="woocommerce-layout__homescreen-display-options"
-							label={ connectionStatusText }
+							label={
+								isInApp && ! isConnected
+									? undefined
+									: connectionStatusText
+							}
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"

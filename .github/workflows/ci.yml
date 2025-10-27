@@ -245,6 +245,8 @@ jobs:
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
+          PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"
@@ -316,8 +318,9 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
+    if: ${{ !cancelled() }}
     outputs:
       non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
