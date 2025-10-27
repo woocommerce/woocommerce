@@ -3,23 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useState, useEffect } from '@wordpress/element';
-import { createBlock, BlockInstance } from '@wordpress/blocks';
-import { dispatch, useSelect } from '@wordpress/data';
+import { BlockInstance } from '@wordpress/blocks';
+import { select } from '@wordpress/data';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { findBlock } from '@woocommerce/utils';
 
-const upgradeToBlockifiedProductGallery = (
-	productImageGalleryBlockClientId: string
-) => {
-	const newBlock = createBlock( 'woocommerce/product-gallery' );
-
-	dispatch( 'core/block-editor' ).replaceBlock(
-		productImageGalleryBlockClientId,
-		newBlock
-	);
-
-	return true;
-};
+/**
+ * Internal dependencies
+ */
+import { replaceBlockWithProductGallery } from '../../../product-gallery/edit-utils';
 
 export const UpgradeProductImageGallery = () => {
 	const [ productImageGalleryBlock, setProductImageGalleryBlock ] =
@@ -61,7 +53,7 @@ export const UpgradeProductImageGallery = () => {
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
 			onActionClick={ () => {
-				upgradeToBlockifiedProductGallery(
+				replaceBlockWithProductGallery(
 					productImageGalleryBlock.clientId
 				);
 				setProductImageGalleryBlock( null );

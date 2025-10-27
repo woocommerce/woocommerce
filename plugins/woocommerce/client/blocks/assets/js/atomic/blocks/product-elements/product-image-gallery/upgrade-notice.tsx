@@ -3,15 +3,15 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
-import { dispatch, select } from '@wordpress/data';
+import { select } from '@wordpress/data';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { findBlock } from '@woocommerce/utils';
-import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import metadata from './block.json';
+import { replaceBlockWithProductGallery } from '../../../../blocks/product-gallery/edit-utils';
 
 const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	const blocks = select( 'core/block-editor' ).getBlocks();
@@ -22,12 +22,9 @@ const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	} );
 
 	if ( foundBlock ) {
-		const newBlock = createBlock( 'woocommerce/product-gallery' );
-		dispatch( 'core/block-editor' ).replaceBlock(
-			foundBlock.clientId,
-			newBlock
-		);
+		return replaceBlockWithProductGallery( foundBlock.clientId );
 	}
+	return false;
 };
 
 export const UpgradeNotice = ( {
