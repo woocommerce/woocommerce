@@ -351,7 +351,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 		$basic_data['name']              = sanitize_text_field( $shopify_product->title );
 		$basic_data['slug']              = $shopify_product->handle;
 		$basic_data['description']       = wp_kses_post( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
-		$basic_data['short_description'] = sanitize_textarea_field( $shopify_product->descriptionPlainSummary ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['short_description'] = wp_kses_post( $shopify_product->descriptionPlainSummary ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		$basic_data['status']            = $this->get_woo_product_status( $shopify_product );
 		$basic_data['date_created_gmt']  = $shopify_product->createdAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 
