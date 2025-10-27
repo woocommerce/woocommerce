@@ -8,6 +8,7 @@ import { Icon } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { CheckoutResponse } from '@woocommerce/types';
+import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -20,8 +21,6 @@ import {
 	PRODUCT_SOLD_INDIVIDUALLY,
 	GENERIC_CART_ITEM_ERROR,
 } from './constants';
-
-const reloadPage = () => void window.location.reload( true );
 
 // Type definitions
 interface ErrorData {
