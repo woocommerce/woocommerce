@@ -68,6 +68,14 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 				$this->sources_cleared[] = $source;
 			}
 
+			/**
+			 * During sync tests, the migration controller may fail to set transaction isolation level
+			 * (MySQL error: "Transaction characteristics can't be changed while a transaction is in progress").
+			 * These errors are harmless in the test environment and don't affect deletion behavior assertions.
+			 */
+			public function error( $message, $context = array() ) {
+			}
+
 			public function reset() {
 				$this->sources_cleared = array();
 			}
@@ -284,7 +292,7 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 
 		global $wpdb;
 
-		$this->setup_hpos_and_reset_container( true );
+		$this->setup_hpos_and_reset_container( $with_hpos );
 		$previous_data_sync_option = get_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 
