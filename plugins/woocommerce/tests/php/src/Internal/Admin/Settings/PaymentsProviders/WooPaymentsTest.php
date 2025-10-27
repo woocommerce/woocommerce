@@ -114,6 +114,28 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
+		// Mock the WooPaymentsRestController to provide REST URL paths.
+		$mock_rest_controller = $this->createMock( WooPaymentsRestController::class );
+		$mock_rest_controller
+			->method( 'get_rest_url_path' )
+			->willReturnCallback(
+				function ( $relative_path = '' ) {
+					$path = '/some/rest/for/woopayments';
+					if ( ! empty( $relative_path ) ) {
+						$path .= '/' . ltrim( $relative_path, '/' );
+					}
+					return $path;
+				}
+			);
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
+
 		// Act.
 		$gateway_details = $this->sut->get_details( $fake_gateway, 999 );
 
@@ -167,7 +189,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 							'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 						),
 						'reset'   => array(
-							'href' => rest_url( '/wc-admin/settings/payments/woopayments/onboarding/reset' ),
+							'href' => rest_url( '/some/rest/for/woopayments/onboarding/reset' ),
 						),
 					),
 					'recommended_payment_methods' => array(
@@ -219,6 +241,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		Constants::clear_constants();
+		$container->reset_replacement( WooPaymentsRestController::class );
 	}
 
 	/**
@@ -242,12 +265,26 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant to meet the minimum requirements.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
+		// Mock the WooPaymentsRestController to provide REST URL paths.
+		$mock_rest_controller = $this->createMock( WooPaymentsRestController::class );
+		$mock_rest_controller
+			->method( 'get_rest_url_path' )
+			->willReturnCallback(
+				function ( $relative_path = '' ) {
+					$path = '/some/rest/for/woopayments';
+					if ( ! empty( $relative_path ) ) {
+						$path .= '/' . ltrim( $relative_path, '/' );
+					}
+					return $path;
+				}
+			);
+
 		// Mock the WooPaymentsService to return onboarding details.
 		$mock_service = $this->createMock( WooPaymentsService::class );
 		$mock_service
 			->expects( $this->once() )
 			->method( 'get_onboarding_details' )
-			->with( 'US', '/wc-admin/settings/payments/woopayments/onboarding' )
+			->with( 'US', '/some/rest/for/woopayments/onboarding' )
 			->willReturn(
 				array(
 					'state'    => array(
@@ -277,6 +314,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		 * @var TestingContainer $container
 		 */
 		$container = wc_get_container();
+		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
 		$container->replace( WooPaymentsService::class, $mock_service );
 
 		// Act.
@@ -299,6 +337,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		Constants::clear_constants();
+		$container->reset_replacement( WooPaymentsRestController::class );
 		$container->reset_replacement( WooPaymentsService::class );
 	}
 
@@ -322,6 +361,20 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
+		// Mock the WooPaymentsRestController to provide REST URL paths.
+		$mock_rest_controller = $this->createMock( WooPaymentsRestController::class );
+		$mock_rest_controller
+			->method( 'get_rest_url_path' )
+			->willReturnCallback(
+				function ( $relative_path = '' ) {
+					$path = '/some/rest/for/woopayments';
+					if ( ! empty( $relative_path ) ) {
+						$path .= '/' . ltrim( $relative_path, '/' );
+					}
+					return $path;
+				}
+			);
+
 		// Mock the service to throw an exception.
 		$mock_service = $this->createMock( WooPaymentsService::class );
 		$mock_service
@@ -334,6 +387,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		 * @var TestingContainer $container
 		 */
 		$container = wc_get_container();
+		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
 		$container->replace( WooPaymentsService::class, $mock_service );
 
 		// Act - should not throw exception.
@@ -345,6 +399,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		Constants::clear_constants();
+		$container->reset_replacement( WooPaymentsRestController::class );
 		$container->reset_replacement( WooPaymentsService::class );
 	}
 
