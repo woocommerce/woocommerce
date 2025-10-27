@@ -93,11 +93,12 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->order_schema->init( $order_item_schema, $order_coupon_schema, $order_fee_schema, $order_tax_schema, $order_shipping_schema );
 
 		// Create utils instances.
-		$collection_query = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery();
-		$update_utils     = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\UpdateUtils();
+		$collection_query  = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\CollectionQuery();
+		$update_utils      = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\UpdateUtils();
+		$action_controller = new \Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\ActionController();
 
 		$this->endpoint = new OrdersController();
-		$this->endpoint->init( $this->order_schema, $collection_query, $update_utils );
+		$this->endpoint->init( $this->order_schema, $collection_query, $update_utils, $action_controller );
 
 		$this->user_id = $this->factory->user->create(
 			array(
@@ -1649,5 +1650,280 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order2->delete( true );
 		$order3->delete( true );
 		$order4->delete( true );
+	}
+
+	/**
+	 * Test UPDATE endpoint with payment_complete action.
+	 */
+	public function test_orders_update_with_payment_complete_action(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+
+		// Verify order is initially pending.
+		$this->assertEquals( OrderStatus::PENDING, $order->get_status() );
+		$this->assertEmpty( $order->get_date_paid() );
+
+		$update_data = array(
+			'payment_complete' => true,
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Verify order status changed to processing (payment complete).
+		$this->assertEquals( OrderStatus::PROCESSING, $response_data['status'] );
+
+		// Verify order was marked as paid.
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $updated_order->get_date_paid() );
+		$this->assertEquals( OrderStatus::PROCESSING, $updated_order->get_status() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test UPDATE endpoint with payment_complete action and transaction_id.
+	 */
+	public function test_orders_update_with_payment_complete_action_and_transaction_id(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+
+		$update_data = array(
+			'payment_complete' => true,
+			'transaction_id'   => 'test-transaction-123',
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify transaction ID was set.
+		$updated_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'test-transaction-123', $updated_order->get_transaction_id() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test UPDATE endpoint with reset_download_permissions action.
+	 */
+	public function test_orders_update_with_reset_download_permissions_action(): void {
+		// Create a downloadable product.
+		$product  = WC_Helper_Product::create_downloadable_product(
+			array(
+				array(
+					'name' => 'Book 1',
+					'file' => 'https://always.trusted/123.pdf',
+				),
+				array(
+					'name' => 'Book 2',
+					'file' => 'https://new.supplier/456.pdf',
+				),
+			)
+		);
+		$customer = WC_Helper_Customer::create_customer( 'test', 'password', 'test@example.com' );
+		$order    = $this->create_test_order(
+			array(
+				'customer_id' => $customer->get_id(),
+				'status'      => OrderStatus::COMPLETED,
+				'line_items'  => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+
+		// Delete the download permissions to simulate a scenario where they need regeneration.
+		$data_store = \WC_Data_Store::load( 'customer-download' );
+		$data_store->delete_by_user_id( $customer->get_id() );
+		$initial_permissions = $data_store->get_downloads_for_customer( $customer->get_id() );
+		$this->assertEmpty( $initial_permissions );
+
+		$update_data = array(
+			'reset_download_permissions' => true,
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params( $update_data );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		// Verify download permissions were reset.
+		$reset_permissions = $data_store->get_downloads_for_customer( $customer->get_id() );
+		$this->assertNotEmpty( $reset_permissions );
+
+		$product->delete( true );
+		$order->delete( true );
+		$customer->delete( true );
+	}
+
+	/**
+	 * Test refund_total and refund_tax fields with refunds.
+	 */
+	public function test_refund_total_and_refund_tax_fields(): void {
+		// Enable taxes.
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Create tax rate.
+		$tax_rate = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'CA',
+				'tax_rate'          => '8.25',
+				'tax_rate_name'     => 'CA Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = $this->create_test_order(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+				'billing'    => array(
+					'country' => 'US',
+					'state'   => 'CA',
+				),
+			)
+		);
+
+		// Calculate taxes.
+		$order->calculate_taxes();
+		$order->calculate_totals();
+		$order->save();
+
+		// Create a refund for the order.
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+				'reason'   => 'Test refund',
+			)
+		);
+
+		$this->assertNotInstanceOf( 'WP_Error', $refund );
+
+		// Test that refund_total and refund_tax are included when requested.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_param( '_fields', 'id,refund_total,refund_tax' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'refund_total', $response_data );
+		$this->assertArrayHasKey( 'refund_tax', $response_data );
+		$this->assertEquals( '10.00', $response_data['refund_total'] );
+		$this->assertIsString( $response_data['refund_tax'] );
+
+		// Clean up.
+		WC_Tax::_delete_tax_rate( $tax_rate );
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * Test pagination functionality with posts_per_page=2 and 4 test orders.
+	 */
+	public function test_pagination(): void {
+		// Create 4 test orders.
+		$orders = array();
+		for ( $i = 1; $i <= 4; $i++ ) {
+			$order    = $this->create_test_order(
+				array(
+					'billing' => array(
+						'first_name' => "Test{$i}",
+						'last_name'  => 'User',
+						'email'      => "test{$i}@example.com",
+					),
+				)
+			);
+			$orders[] = $order;
+		}
+
+		// Test first page (page=1, per_page=2) - should return 2 orders.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'per_page', 2 );
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data, 'First page should return exactly 2 orders' );
+
+		// Test second page (page=2, per_page=2) - should return 2 orders.
+		$request->set_param( 'page', 2 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 2, $response_data, 'Second page should return exactly 2 orders' );
+
+		// Test third page (page=3, per_page=2) - should return 0 orders.
+		$request->set_param( 'page', 3 );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+		$this->assertCount( 0, $response_data, 'Third page should return 0 orders' );
+
+		// Test that no duplicate order IDs are returned across pages.
+		$all_order_ids = array();
+		for ( $page = 1; $page <= 2; $page++ ) {
+			$request->set_param( 'page', $page );
+			$response      = $this->server->dispatch( $request );
+			$response_data = $response->get_data();
+
+			foreach ( $response_data as $order_data ) {
+				$all_order_ids[] = $order_data['id'];
+			}
+		}
+
+		// Should have exactly 4 unique order IDs (no duplicates).
+		$unique_order_ids = array_unique( $all_order_ids );
+		$this->assertCount( 4, $unique_order_ids, 'Should have exactly 4 unique orders across all pages with no duplicates' );
+		$this->assertCount( 4, $all_order_ids, 'Total order IDs should equal unique order IDs (no duplicates)' );
+
+		// Clean up.
+		foreach ( $orders as $order ) {
+			$order->delete( true );
+		}
 	}
 }
