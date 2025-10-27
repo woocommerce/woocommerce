@@ -81,23 +81,60 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	public function request_catalog( $request ) {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
-		$file_info      = $this->get_catalog_file_info( $fields );
 
-		if ( is_wp_error( $file_info ) ) {
-			return $file_info;
+		// TODO: replace API request with feed generator call and proper async job tracking once the foundation is in core.
+		$internal_request = new WP_REST_Request( 'GET', '/wc/product-catalog/v1/create' );
+		$internal_request->set_param( 'force', $force_generate );
+		// TODO: support fields param
+		// $internal_request->set_param( 'fields', $fields );
+		$api_response     = rest_do_request( $internal_request );
+
+		if ( $api_response->is_error() ) {
+			return $api_response->as_error();
 		}
 
-		// Check if file exists and force_generate is false.
-		if ( ! $force_generate && file_exists( $file_info['filepath'] ) ) {
-			$response_data = array(
-				'status'       => 'complete',
-				'download_url' => $file_info['url'],
-			);
-			return rest_ensure_response( $response_data );
+		$status = $api_response->get_data();
+
+		// Validate state exists.
+		if ( ! isset( $status['state'] ) ) {
+			// TODO: update error message to be more generic
+			return new WP_Error( 'catalog_api_invalid_response', __( 'API response missing state field.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
 
-		// Generate catalog and return response.
-		return $this->catalog_generation_response( $file_info );
+		error_log( 'Status: ' . print_r( $status, true ) );
+
+		switch ( $status['state'] ) {
+			case 'completed':
+				if ( ! isset( $status['url'] ) ) {
+					// TODO: update error message to be more generic
+					return new WP_Error( 'catalog_api_missing_url', __( 'Completed status missing url field.', 'woocommerce' ), array( 'status' => 500 ) );
+				}
+				return rest_ensure_response(
+					array(
+						'status'       => 'complete',
+						'download_url' => $status['url'],
+					)
+				);
+			case 'scheduled':
+				return rest_ensure_response(
+					array(
+						'status'       => 'pending',
+						'download_url' => null,
+					)
+				);
+			case 'in_progress':
+				return rest_ensure_response(
+					array(
+						'status'       => 'processing',
+						'download_url' => null,
+					)
+				);
+			case 'failed':
+				return new WP_Error( 'catalog_generation_failed', $status['error'] ?? __( 'Catalog generation failed.', 'woocommerce' ), array( 'status' => 500 ) );
+
+			default:
+				return new WP_Error( 'catalog_api_unknown_state', sprintf( __( 'Unknown state: %s', 'woocommerce' ), $status['state'] ), array( 'status' => 500 ) );
+		}
 	}
 
 	/**
@@ -166,7 +203,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'status'       => array(
 					'description' => __( 'Products catalog generation status.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
+					'enum'        => array( 'pending', 'processing', 'complete' ),
 				),
 				'download_url' => array(
 					'description' => __( 'Products catalog file URL. Null when catalog is not ready.', 'woocommerce' ),
@@ -176,88 +213,6 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 			),
 			'required'   => array( 'status', 'download_url' ),
 		);
-	}
-
-	/**
-	 * Generate catalog and return REST response.
-	 *
-	 * This function orchestrates catalog generation and returns the appropriate response.
-	 * In the future, it will check if a generation based on the file_info is in progress.
-	 *
-	 * @param array $file_info File information with 'filepath', 'url', and 'directory' keys.
-	 * @return WP_Error|WP_REST_Response Response object on success, or WP_Error on failure.
-	 */
-	private function catalog_generation_response( $file_info ) {
-		// In the future, check if generation is in progress and return appropriate status.
-		// For now, generate synchronously.
-		$result = $this->generate_catalog_file( $file_info );
-		if ( is_wp_error( $result ) ) {
-			return $result;
-		}
-
-		return rest_ensure_response(
-			array(
-				'status'       => 'complete',
-				'download_url' => $file_info['url'],
-			)
-		);
-	}
-
-	/**
-	 * Generate catalog file and save it to the specified file path.
-	 *
-	 * @param array $file_info File information with 'filepath', 'url', and 'directory' keys.
-	 * @return true|WP_Error True on success, WP_Error on failure.
-	 */
-	private function generate_catalog_file( $file_info ) {
-		// Ensure directory exists and is not indexable.
-		try {
-			FilesystemUtil::mkdir_p_not_indexable( $file_info['directory'], true );
-		} catch ( \Exception $exception ) {
-			return new WP_Error( 'catalog_dir_creation_failed', $exception->getMessage(), array( 'status' => 500 ) );
-		}
-
-		// Generate catalog file asynchronously.
-		$catalog_data = $this->generate_catalog_async();
-
-		if ( is_wp_error( $catalog_data ) ) {
-			return $catalog_data;
-		}
-
-		// Write to file.
-		$json = $catalog_data;
-		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		$result = file_put_contents( $file_info['filepath'], $json, LOCK_EX );
-
-		if ( false === $result ) {
-			return new WP_Error( 'catalog_generation_failed', __( 'Failed to generate catalog file.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		return true;
-	}
-
-	/**
-	 * Generate products catalog asynchronously by fetching from OpenAI feed endpoint.
-	 *
-	 * @return WP_Error|string Catalog data JSON string or WP_Error on failure.
-	 *
-	 * @internal For exclusive usage within this class, backwards compatibility not guaranteed.
-	 */
-	private function generate_catalog_async() {
-		// TODO: replace API request with feed generator call and proper async job tracking once the foundation is in core.
-		$internal_request = new WP_REST_Request( 'GET', '/wc/v3/openai-feed' );
-		$api_response     = rest_do_request( $internal_request );
-
-		if ( $api_response->is_error() ) {
-			return $api_response->as_error();
-		}
-
-		$catalog_data = wp_json_encode( $api_response->get_data() );
-		if ( empty( $catalog_data ) ) {
-			return new WP_Error( 'catalog_api_empty_response', __( 'API returned an empty response.', 'woocommerce' ), array( 'status' => 500 ) );
-		}
-
-		return $catalog_data;
 	}
 
 	/**
