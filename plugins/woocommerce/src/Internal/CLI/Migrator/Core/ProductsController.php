@@ -177,7 +177,7 @@ class ProductsController {
 
 		// Set initial progress - either show resumed progress or 1% for new sessions.
 		$initial_tick = max( 1, (int) ceil( $total_count * 0.01 ) );
-		
+
 		if ( ! $this->parsed_args['dry_run'] ) {
 			$already_imported = $this->session->count_all_imported_entities();
 			if ( $already_imported > 0 ) {
@@ -188,7 +188,7 @@ class ProductsController {
 				$progress->tick( $initial_tick );
 			}
 		} else {
-			// For dry runs, show initial 1% tick
+			// For dry runs, show initial 1% tick.
 			$progress->tick( $initial_tick );
 		}
 
