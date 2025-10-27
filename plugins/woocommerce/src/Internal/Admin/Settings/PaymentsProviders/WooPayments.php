@@ -96,7 +96,6 @@ class WooPayments extends PaymentGateway {
 				'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/reset' ) ),
 			);
 		} catch ( \Throwable $e ) {
-			var_dump( $e->getMessage() );
 			// If the REST controller is not available, we can't generate the REST API endpoint URLs.
 			// This is not a critical error, so we just ignore it.
 			// Log so we can investigate.
@@ -156,7 +155,6 @@ class WooPayments extends PaymentGateway {
 					);
 				}
 			} catch ( \Throwable $e ) {
-				var_dump( $e->getMessage() );
 				// If the service is not available, we can't impose the more specific logic.
 				// This is not a critical error, so we just ignore it.
 				// Log so we can investigate.

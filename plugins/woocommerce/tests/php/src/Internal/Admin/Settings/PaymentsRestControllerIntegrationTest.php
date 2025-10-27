@@ -870,7 +870,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
-		var_dump( $response->get_data() );
 
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
