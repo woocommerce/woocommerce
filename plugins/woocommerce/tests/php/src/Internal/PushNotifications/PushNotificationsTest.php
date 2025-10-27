@@ -57,9 +57,8 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$this->jetpack_connection_manager_mock
-			->expects( $this->once() )
-			->method( 'is_connected' )
-			->willReturn( true );
+			->expects( $this->never() )
+			->method( 'is_connected' );
 
 		$push_notifications = new PushNotifications();
 

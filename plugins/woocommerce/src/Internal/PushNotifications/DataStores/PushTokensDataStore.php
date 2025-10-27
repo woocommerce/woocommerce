@@ -40,11 +40,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => array(
-					'platform'    => $push_token->get_platform(),
-					'token'       => $push_token->get_token(),
-					'device_uuid' => $push_token->get_device_uuid(),
-					'origin'      => $push_token->get_origin(),
+				'meta_input'  => array_filter(
+					array(
+						'platform'    => $push_token->get_platform(),
+						'token'       => $push_token->get_token(),
+						'device_uuid' => $push_token->get_device_uuid(),
+						'origin'      => $push_token->get_origin(),
+					),
+					static fn ( $value, $key ) => 'device_uuid' !== $key || null !== $value,
+					ARRAY_FILTER_USE_BOTH
 				),
 			),
 			true
@@ -103,7 +107,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		$push_token->set_user_id( (int) $post->post_author );
 		$push_token->set_token( $meta['token'] );
 		$push_token->set_platform( $meta['platform'] );
-		$push_token->set_device_uuid( $meta['device_uuid'] );
+		$push_token->set_device_uuid( $meta['device_uuid'] ?? null );
 		$push_token->set_origin( $meta['origin'] );
 	}
 
@@ -129,11 +133,15 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 				'post_author' => $push_token->get_user_id(),
 				'post_type'   => PushToken::POST_TYPE,
 				'post_status' => 'private',
-				'meta_input'  => array(
-					'platform'    => $push_token->get_platform(),
-					'token'       => $push_token->get_token(),
-					'device_uuid' => $push_token->get_device_uuid(),
-					'origin'      => $push_token->get_origin(),
+				'meta_input'  => array_filter(
+					array(
+						'platform'    => $push_token->get_platform(),
+						'token'       => $push_token->get_token(),
+						'device_uuid' => $push_token->get_device_uuid(),
+						'origin'      => $push_token->get_origin(),
+					),
+					static fn ( $value, $key ) => 'device_uuid' !== $key || null !== $value,
+					ARRAY_FILTER_USE_BOTH
 				),
 			),
 			true
@@ -190,11 +198,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 		}
 
 		return array_map(
-			function ( $meta ) {
-				$filtered_meta = array_filter( $meta, fn ( $meta ) => $meta || 0 === $meta );
-				$meta          = $filtered_meta ? $filtered_meta : null;
-				return $meta[0] ?? $meta;
-			},
+			fn ( $meta ) => $meta[0] ?? $meta,
 			get_post_meta( $push_token->get_id() )
 		);
 	}

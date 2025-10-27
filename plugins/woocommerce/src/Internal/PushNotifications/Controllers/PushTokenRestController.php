@@ -339,6 +339,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'required'    => true,
 				'context'     => array( 'delete' ),
 				'minimum'     => 1,
+				'sanitize_callback' => 'absint',
 			),
 			'origin'      => array(
 				'description' => __( 'Origin', 'woocommerce' ),
@@ -353,6 +354,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'type'              => 'string',
 				'context'           => array( 'create' ),
 				'validate_callback' => array( $this, 'validate_device_uuid' ),
+				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'platform'    => array(
 				'description' => __( 'Platform', 'woocommerce' ),
@@ -367,6 +369,7 @@ class PushTokenRestController extends RestApiControllerBase {
 				'required'          => true,
 				'context'           => array( 'create' ),
 				'validate_callback' => array( $this, 'validate_token' ),
+				'sanitize_callback' => 'wp_unslash',
 			),
 		);
 
