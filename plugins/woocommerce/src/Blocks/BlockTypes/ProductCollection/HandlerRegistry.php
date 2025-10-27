@@ -426,17 +426,15 @@ class HandlerRegistry {
 			}
 		}
 
-		global $wpdb;
-		$recent_product_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT ID FROM {$wpdb->posts}
-				WHERE post_type = %s AND post_status = 'publish'
-				ORDER BY post_date DESC
-				LIMIT %d",
-				'product',
-				3
+		$recent_product_ids = wc_get_products(
+			array(
+				'status'  => 'publish',
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 3,
+				'return'  => 'ids',
 			)
 		);
-		return ! empty( $recent_product_ids ) ? array_map( 'intval', $recent_product_ids ) : array();
+		return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
 	}
 }
