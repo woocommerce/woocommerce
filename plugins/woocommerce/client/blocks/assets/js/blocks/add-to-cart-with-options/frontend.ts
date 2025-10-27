@@ -71,9 +71,8 @@ export const getProductData = (
 		selectedAttributes &&
 		selectedAttributes.length > 0
 	) {
-		const variations = products[ id ].variations;
 		const matchedVariation = getMatchedVariation(
-			variations,
+			product.variations,
 			selectedAttributes
 		);
 		if ( matchedVariation ) {
