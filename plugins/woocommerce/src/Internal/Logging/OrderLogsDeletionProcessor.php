@@ -252,8 +252,8 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
 		$id_column_name = $this->hpos_in_use ? 'id' : 'meta_id';
 
-		$meta_ids     = array_map( fn( $item ) => absint( $item['meta_id'] ), $batch );
-		$placeholders = implode( ',', array_map( 'absint', $meta_ids ) );
+		$meta_ids     = array_map( 'absint', array_column( $batch, 'meta_id' ) );
+		$placeholders = implode( ',', $meta_ids );
 
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
