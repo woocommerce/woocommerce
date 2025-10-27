@@ -3,13 +3,14 @@
  */
 import {
 	OfflinePaymentMethodProvider,
+	PaymentGatewayProvider,
 	PaymentsProvider,
 	PaymentsProviderType,
 	SuggestedPaymentsExtension,
 	SuggestedPaymentsExtensionCategory,
 } from '../../types';
 
-export const providersStub: PaymentsProvider[] = [
+export const providersStub: ( PaymentsProvider | PaymentGatewayProvider )[] = [
 	{
 		id: '_wc_pes_paypal_full_stack',
 		_order: 2,
@@ -90,6 +91,9 @@ export const providersStub: PaymentsProvider[] = [
 				onboard: {
 					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/onboarding',
 				},
+				reset: {
+					href: 'http://localhost:8082/wp-admin/admin.php?page=wc-admin&path=/payments/reset',
+				},
 			},
 			recommended_payment_methods: [
 				{
@@ -117,6 +121,7 @@ export const providersStub: PaymentsProvider[] = [
 						'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/extra-icon.svg',
 				},
 			],
+			type: 'native_in_context',
 		},
 		image: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
 		icon: 'http://localhost:8082/wp-content/plugins/woocommerce/assets/images/onboarding/woopayments.svg',
