@@ -76,7 +76,7 @@ class WooPayments extends PaymentGateway {
 			'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 		);
 
-		try {
+//		try {
 			/**
 			 * The WooPayments REST controller instance.
 			 *
@@ -95,21 +95,21 @@ class WooPayments extends PaymentGateway {
 			$details['onboarding']['_links']['reset'] = array(
 				'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/reset' ) ),
 			);
-		} catch ( \Throwable $e ) {
-			// If the REST controller is not available, we can't generate the REST API endpoint URLs.
-			// This is not a critical error, so we just ignore it.
-			// Log so we can investigate.
-			SafeGlobalFunctionProxy::wc_get_logger()->error(
-				'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
-				array(
-					'source' => 'settings-payments',
-				)
-			);
-		}
+//		} catch ( \Throwable $e ) {
+//			// If the REST controller is not available, we can't generate the REST API endpoint URLs.
+//			// This is not a critical error, so we just ignore it.
+//			// Log so we can investigate.
+//			SafeGlobalFunctionProxy::wc_get_logger()->error(
+//				'Failed to get the WooPayments REST controller instance: ' . $e->getMessage(),
+//				array(
+//					'source' => 'settings-payments',
+//				)
+//			);
+//		}
 
 		// Override the onboarding state with the entries provided by the WooPayments service.
 		if ( ! empty( $country_code ) ) {
-			try {
+//			try {
 				/**
 				 * The WooPayments service instance.
 				 *
@@ -154,17 +154,17 @@ class WooPayments extends PaymentGateway {
 						$onboarding_details['context']
 					);
 				}
-			} catch ( \Throwable $e ) {
-				// If the service is not available, we can't impose the more specific logic.
-				// This is not a critical error, so we just ignore it.
-				// Log so we can investigate.
-				SafeGlobalFunctionProxy::wc_get_logger()->error(
-					'Failed to get the WooPayments service instance: ' . $e->getMessage(),
-					array(
-						'source' => 'settings-payments',
-					)
-				);
-			}
+//			} catch ( \Throwable $e ) {
+//				// If the service is not available, we can't impose the more specific logic.
+//				// This is not a critical error, so we just ignore it.
+//				// Log so we can investigate.
+//				SafeGlobalFunctionProxy::wc_get_logger()->error(
+//					'Failed to get the WooPayments service instance: ' . $e->getMessage(),
+//					array(
+//						'source' => 'settings-payments',
+//					)
+//				);
+//			}
 		}
 
 		return $details;
