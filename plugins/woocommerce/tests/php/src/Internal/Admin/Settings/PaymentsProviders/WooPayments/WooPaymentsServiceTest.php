@@ -172,10 +172,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					},
 				),
 				Utils::class           => array(
-					'wc_payments_settings_url'           => function () {
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) {
 						return 'https://example.com/payments-settings';
 					},
-					'get_wpcom_connection_authorization' => function () {
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+					'get_wpcom_connection_authorization' => function ( string $return_url ) {
 						return array(
 							'success'      => true,
 							'errors'       => array(),
@@ -183,7 +185,8 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 							'url'          => 'https://wordpress.com/auth?query=some_query',
 						);
 					},
-					'rest_endpoint_get_request'          => function ( string $endpoint ) {
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
 						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
 							return array(
 								'data' => array(),
@@ -198,13 +201,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 
 		$this->sut = new WooPaymentsService();
 		$this->sut->init( $this->mock_providers, $this->mockable_proxy );
-	}
-
-	/**
-	 * Tear down test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
 	}
 
 	/**

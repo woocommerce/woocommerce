@@ -225,7 +225,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				Utils::class           => array(
-					'get_wpcom_connection_authorization' => function () {
+					'get_wpcom_connection_authorization' => function ( string $return_url ) {
 						return array(
 							'success'      => true,
 							'errors'       => array(),
