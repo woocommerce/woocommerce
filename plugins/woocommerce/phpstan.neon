@@ -1,6 +1,8 @@
+includes:
+	- phpstan-baseline.neon
 parameters:
 	# Analysis level (0-9, 9 being strictest)
-	level: 0
+	level: 8
 
 	# PHP version to analyze for
 	phpVersion: 80400
@@ -13,8 +15,6 @@ parameters:
 
 	# Exclude paths from analysis
 	excludePaths:
-		- includes/legacy/
-		- includes/libraries/
 		- includes/class-wc-geo-ip.php
 		- vendor/
 
