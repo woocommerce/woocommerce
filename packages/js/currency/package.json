@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/currency",
-	"version": "4.3.0",
+	"version": "5.0.0",
 	"description": "WooCommerce currency utilities.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
