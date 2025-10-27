@@ -920,6 +920,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// Assert that the fake WooPayments gateway is returned as NOT enabled.
 		$provider = $data['providers'][2];
+		var_dump( $provider );
 		$this->assertFalse( $provider['state']['enabled'] );
 		// Assert that the fake WooPayments gateway has all the details.
 		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
