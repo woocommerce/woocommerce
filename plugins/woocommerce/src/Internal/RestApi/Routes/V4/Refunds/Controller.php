@@ -313,6 +313,10 @@ class Controller extends AbstractController {
 					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item not found.', 'woocommerce' ) );
 				}
 
+				if ( ! $item instanceof \WC_Order_Item_Product && ! $item instanceof \WC_Order_Item_Fee && ! $item instanceof \WC_Order_Item_Shipping ) {
+					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
+				}
+
 				// Validate item quantity is not greater than the item quantity.
 				if ( $item->get_quantity() < $line_item['qty'] ) {
 					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item quantity cannot be greater than the item quantity.', 'woocommerce' ) );
@@ -330,30 +334,34 @@ class Controller extends AbstractController {
 					);
 				}
 
-				if ( isset( $line_item['refund_tax'] ) && ( $item_taxes = $item->get_taxes() ) ) {
-					$allowed_tax_ids = array_keys( $item_taxes['total'] ?? array() );
+				if ( isset( $line_item['refund_tax'] ) ) {
+					$item_taxes = $item->get_taxes();
 
-					foreach ( $line_item['refund_tax'] as $tax_id => $refund_total ) {
-						if ( ! in_array( $tax_id, $allowed_tax_ids, true ) ) {
-							return $this->get_route_error_response(
-								'invalid_line_item',
-								sprintf(
+					if ( $item_taxes ) {
+						$allowed_tax_ids = array_keys( $item_taxes['total'] ?? array() );
+
+						foreach ( $line_item['refund_tax'] as $tax_id => $refund_total ) {
+							if ( ! in_array( $tax_id, $allowed_tax_ids, true ) ) {
+								return $this->get_route_error_response(
+									'invalid_line_item',
+									sprintf(
 									/* translators: %s: tax IDs */
-									__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
-									implode( ', ', $allowed_tax_ids )
-								)
-							);
-						}
+										__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
+										implode( ', ', $allowed_tax_ids )
+									)
+								);
+							}
 
-						if ( $item_taxes['total'][ $tax_id ] < $refund_total ) {
-							return $this->get_route_error_response(
-								'invalid_refund_amount',
-								sprintf(
+							if ( $item_taxes['total'][ $tax_id ] < $refund_total ) {
+								return $this->get_route_error_response(
+									'invalid_refund_amount',
+									sprintf(
 									/* translators: %s: tax total */
-									__( 'Refund tax total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
-									$item_taxes['total'][ $tax_id ]
-								)
-							);
+										__( 'Refund tax total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
+										$item_taxes['total'][ $tax_id ]
+									)
+								);
+							}
 						}
 					}
 				}

@@ -287,7 +287,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		if ( $response->get_status() !== 201 ) {
 			$response_data = $response->get_data();
-			$this->fail( 'Expected 201, got ' . $response->get_status() . '. Response: ' . print_r( $response_data, true ) );
+			$this->fail( 'Expected 201, got ' . $response->get_status() . '. Response: ' . print_r( $response_data, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		}
 		$response_data = $response->get_data();
 
@@ -476,7 +476,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		if ( $response->get_status() !== 201 ) {
 			$response_data = $response->get_data();
-			$this->fail( 'Expected 201, got ' . $response->get_status() . '. Response: ' . print_r( $response_data, true ) );
+			$this->fail( 'Expected 201, got ' . $response->get_status() . '. Response: ' . print_r( $response_data, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		}
 		$response_data = $response->get_data();
 
