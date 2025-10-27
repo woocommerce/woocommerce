@@ -225,6 +225,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				Utils::class           => array(
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 					'get_wpcom_connection_authorization' => function ( string $return_url ) {
 						return array(
 							'success'      => true,
@@ -233,7 +234,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 							'url'          => 'https://wordpress.com/auth?query=some_query',
 						);
 					},
-					'rest_endpoint_get_request'          => function ( string $endpoint ) {
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
 						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
 							return array(
 								'data' => array(),
