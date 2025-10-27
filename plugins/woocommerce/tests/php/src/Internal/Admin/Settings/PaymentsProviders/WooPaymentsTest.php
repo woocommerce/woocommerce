@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use WC_Unit_Test_Case;
 
@@ -38,18 +39,6 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->sut = new WooPayments();
-
-		// Replace the controller in the container so that it can be used during tests.
-		$this->mock_rest_controller = $this->createMock( WooPaymentsRestController::class );
-		$this->mock_rest_controller
-			->method( 'get_rest_url_path' )
-			->willReturnCallback(
-				function ( $endpoint = '' ) {
-					$base = '/some/rest/path';
-					return $endpoint ? $base . '/' . $endpoint : $base;
-				}
-			);
-		wc_get_container()->replace( WooPaymentsRestController::class, $this->mock_rest_controller );
 	}
 
 	/**
@@ -178,7 +167,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 							'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
 						),
 						'reset'   => array(
-							'href' => rest_url( '/some/rest/path/onboarding/reset' ),
+							'href' => rest_url( '/wc-admin/settings/payments/woopayments/onboarding/reset' ),
 						),
 					),
 					'recommended_payment_methods' => array(
@@ -258,7 +247,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$mock_service
 			->expects( $this->once() )
 			->method( 'get_onboarding_details' )
-			->with( 'US', '/some/rest/path/onboarding' )
+			->with( 'US', '/wc-admin/settings/payments/woopayments/onboarding' )
 			->willReturn(
 				array(
 					'state'    => array(
@@ -282,7 +271,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 				)
 			);
 
-		wc_get_container()->replace( WooPaymentsService::class, $mock_service );
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->replace( WooPaymentsService::class, $mock_service );
 
 		// Act.
 		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
@@ -304,6 +299,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		Constants::clear_constants();
+		$container->reset_replacement( WooPaymentsService::class );
 	}
 
 	/**
@@ -332,7 +328,13 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 			->method( 'get_onboarding_details' )
 			->willThrowException( new \Exception( 'Service error' ) );
 
-		wc_get_container()->replace( WooPaymentsService::class, $mock_service );
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->replace( WooPaymentsService::class, $mock_service );
 
 		// Act - should not throw exception.
 		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
@@ -343,6 +345,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Clean up.
 		Constants::clear_constants();
+		$container->reset_replacement( WooPaymentsService::class );
 	}
 
 	/**
@@ -354,7 +357,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Load the mock WC_Payments_Utils if the real class doesn't exist.
 		if ( ! class_exists( '\WC_Payments_Utils' ) ) {
-			require_once __DIR__ . '/../Mocks/MockWCPaymentsUtils.php';
+			require_once __DIR__ . '/../Mocks/WCPaymentsUtils.php';
 		}
 
 		// Act.
@@ -382,7 +385,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		// Load the mock WC_Payments_Utils if the real class doesn't exist.
 		if ( ! class_exists( '\WC_Payments_Utils' ) ) {
-			require_once __DIR__ . '/../Mocks/MockWCPaymentsUtils.php';
+			require_once __DIR__ . '/../Mocks/WCPaymentsUtils.php';
 		}
 
 		// Act - testing with a country definitely not in the supported list.

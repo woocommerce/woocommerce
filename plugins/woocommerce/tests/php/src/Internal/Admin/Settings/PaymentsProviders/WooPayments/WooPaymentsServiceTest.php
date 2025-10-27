@@ -171,7 +171,29 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
-			)
+				Utils::class           => array(
+					'wc_payments_settings_url'           => function () {
+						return 'https://example.com/payments-settings';
+					},
+					'get_wpcom_connection_authorization' => function () {
+						return array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => array(),
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			),
 		);
 
 		$this->sut = new WooPaymentsService();
@@ -182,9 +204,6 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		// Reset the shared mockable proxy so no mocks leak between tests.
-		wc_get_container()->get( LegacyProxy::class )->reset();
-
 		parent::tearDown();
 	}
 

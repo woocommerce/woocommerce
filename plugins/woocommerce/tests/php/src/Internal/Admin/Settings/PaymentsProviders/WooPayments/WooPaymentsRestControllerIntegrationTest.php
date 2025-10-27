@@ -224,6 +224,25 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
+				Utils::class           => array(
+					'get_wpcom_connection_authorization' => function () {
+						return array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => array(),
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
 			)
 		);
 

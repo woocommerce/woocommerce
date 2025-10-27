@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController;
+use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\Incentives\Incentive;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -323,6 +324,25 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						}
 
 						return '';
+					},
+				),
+				Utils::class         => array(
+					'get_wpcom_connection_authorization' => function () {
+						return array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint ) {
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => array(),
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
 			)
@@ -1732,27 +1752,31 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				PluginsHelper::class   => array(
-					'is_plugin_installed' => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
+					'is_plugin_installed'       => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
 						if ( in_array( $plugin_path_or_slug, $active_plugin_paths, true ) ) {
 							return true;
 						}
-						if( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
+						if ( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
 							return true;
 						}
 
 						return false;
 					},
-					'is_plugin_active'    => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
+					'is_plugin_active'          => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
 						if ( in_array( $plugin_path_or_slug, $active_plugin_paths, true ) ) {
 							return true;
 						}
-						if( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
+						if ( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
 							return true;
 						}
 
 						return false;
 					},
-					'get_plugin_path_from_slug' => function ( $plugin_slug ) {
+					'get_plugin_path_from_slug' => function ( $plugin_slug ) use ( $active_plugin_slugs ) {
+						if ( ! in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
+							return false; // This means the plugin is not installed.
+						}
+
 						switch ( $plugin_slug ) {
 							case 'woocommerce':
 								return 'woocommerce/woocommerce.php';
@@ -1765,7 +1789,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						}
 
 						return false; // This means the plugin is not installed.
-					}
+					},
 				),
 			)
 		);
