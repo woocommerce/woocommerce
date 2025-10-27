@@ -86,10 +86,9 @@ export const getProductData = (
 
 	const min = typeof product.min === 'number' ? product.min : 1;
 	const max =
-		typeof product.max === 'number' && product.max >= 1
-			? product.max
-			: Infinity;
-	const step = product.step || 1;
+		typeof product.max === 'number' ? Math.max( product.max, 0 ) : Infinity;
+	const step =
+		typeof product.step === 'number' && product.step > 0 ? product.step : 1;
 
 	return {
 		...product,
