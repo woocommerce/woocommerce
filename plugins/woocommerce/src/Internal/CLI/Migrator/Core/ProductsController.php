@@ -568,13 +568,13 @@ class ProductsController {
 
 		if ( $should_resume ) {
 			WP_CLI::success( sprintf( 'Resuming migration session %d', $session->get_id() ) );
-			
+
 			$original_args = $session->get_original_arguments();
 			if ( $original_args ) {
 				$this->restore_original_arguments( $original_args );
 				WP_CLI::line( 'Original command arguments have been restored.' );
 			}
-			
+
 			return $session;
 		} else {
 			$session->archive();
