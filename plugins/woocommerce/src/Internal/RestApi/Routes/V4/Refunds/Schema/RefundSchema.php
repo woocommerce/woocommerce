@@ -225,6 +225,7 @@ class RefundSchema extends AbstractSchema {
 							'description' => __( 'Taxes refunded for this item.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+							'default'     => array(),
 							'items'       => array(
 								'type'       => 'object',
 								'properties' => array(
