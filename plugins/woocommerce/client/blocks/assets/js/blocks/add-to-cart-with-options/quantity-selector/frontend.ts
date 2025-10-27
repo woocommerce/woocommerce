@@ -250,19 +250,13 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				let childProductData = null;
+				const childProductData =
+					productData.type === 'grouped'
+						? getProductData( productId, selectedAttributes )
+						: productData;
 
-				if ( productData.type === 'grouped' ) {
-					childProductData = getProductData(
-						productId,
-						selectedAttributes
-					);
-
-					if ( ! childProductData ) {
-						return;
-					}
-				} else {
-					childProductData = productData;
+				if ( ! childProductData ) {
+					return;
 				}
 
 				min = childProductData.min;

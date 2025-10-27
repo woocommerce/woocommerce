@@ -176,11 +176,7 @@ const { actions, state } = store<
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
 
-				if ( ! productData ) {
-					return true;
-				}
-
-				return productData.is_in_stock;
+				return productData?.is_in_stock ?? true;
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
@@ -190,10 +186,7 @@ const { actions, state } = store<
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
-			get productData():
-				| NormalizedProductData
-				| NormalizedVariationData
-				| null {
+			get productData() {
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(
