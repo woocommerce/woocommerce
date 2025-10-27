@@ -320,42 +320,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 		return (float) $weight * self::WEIGHT_CONVERSION_FACTORS[ $shopify_unit_key ][ $store_weight_unit ];
 	}
 
-	/**
-	 * Sanitize product description HTML to prevent XSS attacks.
-	 *
-	 * @param string $html Raw description HTML.
-	 * @return string Sanitized HTML.
-	 */
-	private function sanitize_product_description( string $html ): string {
-		$allowed_html = array(
-			'a'          => array(
-				'href'   => array(),
-				'title'  => array(),
-				'target' => array(),
-			),
-			'br'         => array(),
-			'em'         => array(),
-			'strong'     => array(),
-			'b'          => array(),
-			'i'          => array(),
-			'u'          => array(),
-			'ul'         => array(),
-			'ol'         => array(),
-			'li'         => array(),
-			'p'          => array(),
-			'div'        => array(),
-			'span'       => array(),
-			'h1'         => array(),
-			'h2'         => array(),
-			'h3'         => array(),
-			'h4'         => array(),
-			'h5'         => array(),
-			'h6'         => array(),
-			'blockquote' => array(),
-		);
-
-		return wp_kses( trim( $html ), $allowed_html );
-	}
 
 	/**
 	 * Checks if a specific field should be processed based on constructor args.
@@ -386,7 +350,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 		// Basic Product Fields.
 		$basic_data['name']              = sanitize_text_field( $shopify_product->title );
 		$basic_data['slug']              = $shopify_product->handle;
-		$basic_data['description']       = $this->sanitize_product_description( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['description']       = wp_kses_post( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		$basic_data['short_description'] = sanitize_textarea_field( $shopify_product->descriptionPlainSummary ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		$basic_data['status']            = $this->get_woo_product_status( $shopify_product );
 		$basic_data['date_created_gmt']  = $shopify_product->createdAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
