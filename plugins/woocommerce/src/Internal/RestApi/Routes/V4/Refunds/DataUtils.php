@@ -43,7 +43,7 @@ class DataUtils {
 			$prepared_line_items[ $line_item['line_item_id'] ] = array(
 				'qty'          => $line_item['quantity'],
 				'refund_total' => $line_item['refund_total'],
-				'refund_tax'   => $this->convert_line_item_taxes_to_internal_format( $line_item['refund_tax'] ),
+				'refund_tax'   => $this->convert_line_item_taxes_to_internal_format( $line_item['refund_tax'] ?? array() ),
 			);
 		}
 
