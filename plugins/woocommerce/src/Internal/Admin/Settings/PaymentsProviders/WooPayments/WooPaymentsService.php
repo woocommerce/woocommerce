@@ -160,7 +160,7 @@ class WooPaymentsService {
 		$gateway = $this->get_payment_gateway();
 
 		$onboarding_supported = $this->provider->is_onboarding_supported( $gateway, $location ) ?? true;
-		$onboarding_started = $this->provider->is_onboarding_started( $gateway );
+		$onboarding_started   = $this->provider->is_onboarding_started( $gateway );
 		if ( ! $onboarding_started && ! empty( $this->get_nox_profile_onboarding( $location ) ) ) {
 			// If the onboarding profile is stored, we consider the onboarding started.
 			$onboarding_started = true;

@@ -79,7 +79,7 @@ class PaymentGateway {
 					'completed' => $this->is_onboarding_completed( $gateway ),
 					'test_mode' => $this->is_in_test_mode_onboarding( $gateway ),
 				),
-				'messages'                     => array(
+				'messages'                    => array(
 					'not_supported' => ! $onboarding_supported ? $this->get_onboarding_not_supported_message( $gateway, $country_code ) : null,
 				),
 				'_links'                      => array(
@@ -850,7 +850,7 @@ class PaymentGateway {
 				'Failed to get recommended payment methods: ' . $e->getMessage(),
 				array(
 					'gateway'   => $payment_gateway->id,
-					'country'    => $country_code,
+					'country'   => $country_code,
 					'source'    => 'settings-payments',
 					'exception' => $e,
 				)

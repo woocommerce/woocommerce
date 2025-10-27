@@ -1059,6 +1059,9 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function test_is_onboarding_supported_returns_null_when_method_not_provided() {
 		// Arrange - Create a simple gateway without the is_onboarding_supported method.
 		$basic_gateway = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Constructor.
+			 */
 			public function __construct() {
 				$this->id = 'basic_gateway';
 			}
@@ -1231,7 +1234,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		$fake_gateway = new FakePaymentGateway(
 			'gateway1',
 			array(
-				'onboarding_supported'              => false,
+				'onboarding_supported'             => false,
 				'onboarding_not_supported_message' => 'This gateway is not supported in your country.',
 			)
 		);

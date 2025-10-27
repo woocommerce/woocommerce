@@ -388,6 +388,7 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return sprintf(
+			/* translators: %s: WooPayments. */
 			esc_html__( '%s is not supported in the selected business location.', 'woocommerce' ),
 			'WooPayments'
 		);
@@ -661,7 +662,7 @@ class WooPayments extends PaymentGateway {
 	private function get_supported_country_codes(): ?array {
 		try {
 			if ( class_exists( '\WC_Payments_Utils' ) &&
-				 is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+				is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
 
 				$supported_country_codes = \WC_Payments_Utils::supported_countries();
 				if ( is_array( $supported_country_codes ) ) {

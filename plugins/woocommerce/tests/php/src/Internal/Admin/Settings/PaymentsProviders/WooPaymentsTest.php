@@ -373,9 +373,12 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_is_onboarding_supported_with_unsupported_country() {
 		// Arrange.
-		$fake_gateway = new FakePaymentGateway( 'woocommerce_payments', array(
-			'onboarding_supported' => null, // Ensure gateway doesn't provide info.
-		) );
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'onboarding_supported' => null, // Ensure gateway doesn't provide info.
+			)
+		);
 
 		// Load the mock WC_Payments_Utils if the real class doesn't exist.
 		if ( ! class_exists( '\WC_Payments_Utils' ) ) {

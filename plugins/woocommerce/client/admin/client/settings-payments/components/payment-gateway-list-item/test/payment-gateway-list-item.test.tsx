@@ -1292,7 +1292,7 @@ describe( 'PaymentGatewayListItem', () => {
 			const gateway = createMockGateway( {
 				onboarding: {
 					...createMockGateway().onboarding,
-					state: undefined as any,
+					state: undefined,
 				},
 			} );
 			const { container } = render(
