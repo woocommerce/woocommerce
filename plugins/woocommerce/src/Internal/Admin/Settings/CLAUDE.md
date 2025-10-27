@@ -25,7 +25,7 @@
 
 ## File Structure
 
-```
+```text
 Settings/
 |-- PaymentsRestController.php       # Main REST endpoint
 |-- WooPaymentsRestController.php    # WooPayments endpoints
@@ -93,6 +93,7 @@ $schema = array(
 The `onboarding.state` field has an incomplete schema definition:
 
 **Current schema:**
+
 ```php
 'state' => array(
     'type'        => 'object',
@@ -103,6 +104,7 @@ The `onboarding.state` field has an incomplete schema definition:
 ```
 
 **Actual implementation** (PaymentGateway.php:76-81):
+
 ```php
 'state' => array(
     'supported' => $onboarding_supported,  // boolean
@@ -113,12 +115,14 @@ The `onboarding.state` field has an incomplete schema definition:
 ```
 
 **Issues:**
+
 1. Schema lacks `properties` definition constraining object structure
 2. Missing `readonly` flag (inconsistent with other onboarding fields: `type`, `messages`, `steps`, `_links`)
 3. No `required` array to indicate which fields are optional
 4. No type validation for the boolean fields
 
 **Impact:**
+
 - API clients cannot rely on schema for validation
 - Object structure depends on provider implementation
 - No schema-level guarantees about field presence or types
@@ -128,12 +132,14 @@ The `onboarding.state` field has an incomplete schema definition:
 ## Validation Checklist
 
 **Before committing schema changes:**
+
 1. All `object` types use `properties` OR `additionalProperties` (never `items`)
 2. All `array` types use `items` (never `additionalProperties`)
 3. No `'type' => 'enum'` - use `'type' => 'string'` with `'enum' => [...]`
 4. Schema version declared: `'$schema' => 'http://json-schema.org/draft-04/schema#'`
 
 **Quick validation commands:**
+
 ```bash
 # Find invalid enum types
 grep -n "'type'.*=>.*'enum'" *.php
@@ -145,7 +151,8 @@ grep -B2 "'type'.*=>.*'object'" *.php | grep -A2 "'items'"
 ## Response Structure Reference
 
 **GET /wc-admin/settings/payments/providers:**
-```
+
+```json
 {
   providers: [],               # Main list (gateways, suggestions, offline PM group)
   offline_payment_methods: [], # Individual offline PMs
@@ -155,16 +162,18 @@ grep -B2 "'type'.*=>.*'object'" *.php | grep -A2 "'items'"
 ```
 
 **Provider object:**
+
 - Core: `id`, `_order`, `_type`, `title`, `description`
 - Plugin: `plugin.{slug, status, file, _type}`
 - State: `state.{enabled, account_connected, needs_setup, test_mode, dev_mode}`
 - Onboarding: `onboarding.{type, state, messages, steps, _links}`
-  - `state` fields (no schema validation): `{supported, started, completed, test_mode}`
-  - `messages.not_supported`: Populated when `state.supported` is `false`
+    - `state` fields (no schema validation): `{supported, started, completed, test_mode}`
+    - `messages.not_supported`: Populated when `state.supported` is `false`
 - Management: `management._links.settings.href`
 - Metadata: `_suggestion_id`, `_incentive`
 
 **Messages field structure:**
+
 ```php
 array(
     'messages' => array(
@@ -186,11 +195,13 @@ array(
 ## Linting
 
 **Array alignment auto-fix:**
+
 ```bash
 pnpm run lint:php:fix -- src/Internal/Admin/Settings/PaymentsRestController.php
 ```
 
 **Common fix:**
+
 ```php
 'onboarding' => array(      # Before
 'onboarding'     => array(  # After (aligned arrows)
@@ -198,6 +209,6 @@ pnpm run lint:php:fix -- src/Internal/Admin/Settings/PaymentsRestController.php
 
 ## Related Documentation
 
-- JSON Schema Draft 04: http://json-schema.org/draft-04/schema#
-- WordPress REST API: https://developer.wordpress.org/rest-api/
+- JSON Schema Draft 04: <http://json-schema.org/draft-04/schema#>
+- WordPress REST API: <https://developer.wordpress.org/rest-api/>
 - Main plugin docs: `../../CLAUDE.md`

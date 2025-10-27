@@ -263,23 +263,23 @@ markdownlint validation.
 the config and may show incorrect errors.
 
 ```bash
-# Lint specific markdown files (run from repo root)
+# Check markdown files (run from repo root)
 markdownlint plugins/woocommerce/CLAUDE.md
 
-# Lint multiple files
+# RECOMMENDED: Auto-fix issues first (handles most errors)
+markdownlint --fix plugins/woocommerce/CLAUDE.md
+
+# Check multiple files
 markdownlint packages/js/CLAUDE.md plugins/woocommerce/CLAUDE.md
 
 # Lint all CLAUDE.md files
 markdownlint packages/js/CLAUDE.md plugins/woocommerce/CLAUDE.md \
   plugins/woocommerce/client/admin/CLAUDE.md
-
-# Auto-fix basic issues only (most errors require manual fixing)
-markdownlint --fix plugins/woocommerce/CLAUDE.md
 ```
 
-**Note**: `markdownlint --fix` only fixes simple issues like trailing
-whitespace. Most errors (missing blank lines, language specifications,
-heading levels) require manual editing.
+**Note**: `markdownlint --fix` automatically fixes most issues including
+blank lines around code blocks/lists, list indentation, and bare URLs.
+Only a few issues require manual fixing (missing language specs, long lines).
 
 **Installation** (if markdownlint is not available):
 
@@ -302,12 +302,12 @@ npm install -g markdownlint-cli
 **Workflow for CLAUDE.md changes:**
 
 1. Make your markdown changes
-2. Run `markdownlint path/to/CLAUDE.md` to check
-3. Try `markdownlint --fix path/to/CLAUDE.md` (only fixes basic issues)
-4. **Manually fix remaining errors**: Split long lines (MD013: max 80 chars),
-   add blank lines around code blocks and lists, use 4-space indentation for
-   nested list items, and add language specifications to code blocks
-5. Verify: `markdownlint path/to/CLAUDE.md` (should show no errors)
+2. **Run auto-fix first**: `markdownlint --fix path/to/CLAUDE.md`
+   (handles blank lines, indentation, bare URLs automatically)
+3. Check remaining errors: `markdownlint path/to/CLAUDE.md`
+4. **Manually fix only what remains**: Usually just missing language specs
+   on code blocks (add `bash`, `php`, `json`, etc.) and splitting long lines
+5. Verify clean: `markdownlint path/to/CLAUDE.md` (should show no errors)
 6. Commit
 
 **Note**: CLAUDE.md files are AI assistant documentation and must be
