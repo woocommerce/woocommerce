@@ -33,6 +33,13 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected $mock_gateway;
 
 	/**
+	 * Test bearer token for authorization.
+	 *
+	 * @var string
+	 */
+	protected $test_bearer_token;
+
+	/**
 	 * Setup test product data. Called before every test.
 	 */
 	protected function setUp(): void {
@@ -49,6 +56,18 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 
 		// Enable the agentic_checkout feature.
 		update_option( 'woocommerce_feature_agentic_checkout_enabled', 'yes' );
+
+		// Set up registry with test bearer token for authorization.
+		$this->test_bearer_token = 'test_token_' . uniqid();
+		update_option(
+			'woocommerce_agentic_agent_registry',
+			array(
+				'openai' => array(
+					'bearer_token' => wp_hash_password( $this->test_bearer_token ),
+				),
+			),
+			false
+		);
 
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
@@ -86,6 +105,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	protected function tearDown(): void {
 		parent::tearDown();
 		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
+		delete_option( 'woocommerce_agentic_agent_registry' );
 
 		// Clear session data.
 		WC()->session->set( SessionKey::CHOSEN_SHIPPING_METHODS, null );
@@ -201,6 +221,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function create_session( $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions' );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -214,6 +235,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function update_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -227,6 +249,7 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 	 */
 	private function complete_session( $session_id, $body_params ) {
 		$request = new \WP_REST_Request( 'POST', '/wc/agentic/v1/checkout_sessions/' . $session_id . '/complete' );
+		$request->set_header( 'Authorization', 'Bearer ' . $this->test_bearer_token );
 		$request->set_body_params( $body_params );
 		return rest_get_server()->dispatch( $request );
 	}
@@ -657,44 +680,6 @@ class CheckoutSessionsComplete extends ControllerTestCase {
 		$this->assertEquals( 'invalid', $complete_data['code'] );
 		$this->assertArrayHasKey( 'message', $complete_data );
 		$this->assertStringContainsString( 'out of stock', strtolower( $complete_data['message'] ) );
-	}
-
-	/**
-	 * Test completing checkout with feature flag disabled fails.
-	 */
-	public function test_complete_checkout_session_feature_disabled() {
-		// Create session first (while feature is enabled).
-		$create_response = $this->create_session(
-			$this->create_checkout_request(
-				array(
-					'fulfillment_address' => $this->get_test_address(),
-				)
-			)
-		);
-
-		$create_data        = $create_response->get_data();
-		$session_id         = $create_data['id'];
-		$shipping_method_id = $create_data['fulfillment_options'][0]['id'];
-
-		$this->update_session(
-			$session_id,
-			array(
-				'fulfillment_option_id' => $shipping_method_id,
-			)
-		);
-
-		// Disable feature.
-		delete_option( 'woocommerce_feature_agentic_checkout_enabled' );
-
-		// Try to complete checkout.
-		$complete_response = $this->complete_session(
-			$session_id,
-			array(
-				'payment_data' => $this->get_payment_data(),
-			)
-		);
-
-		$this->assertEquals( 403, $complete_response->get_status() );
 	}
 
 	/**

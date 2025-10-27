@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Support both WordPress 6.9+ and pre-6.9 action hook names for Abilities API registration to ensure compatibility across WordPress versions.

@@ -175,15 +175,21 @@ class ProductsController {
 			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
 		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
 
-		// Set initial 1% progress to show activity has started.
+		// Set initial progress - either show resumed progress or 1% for new sessions.
 		$initial_tick = max( 1, (int) ceil( $total_count * 0.01 ) );
-		$progress->tick( $initial_tick );
 
 		if ( ! $this->parsed_args['dry_run'] ) {
 			$already_imported = $this->session->count_all_imported_entities();
-			if ( $already_imported > $initial_tick ) {
-				$progress->tick( $already_imported - $initial_tick );
+			if ( $already_imported > 0 ) {
+				// Show actual resumed progress.
+				$progress->tick( $already_imported );
+			} else {
+				// Show 1% for new sessions to indicate activity has started.
+				$progress->tick( $initial_tick );
 			}
+		} else {
+			// For dry runs, show initial 1% tick.
+			$progress->tick( $initial_tick );
 		}
 
 		$this->configure_product_importer();

@@ -38,10 +38,10 @@ class WebpackRTLPlugin {
 				async ( assets ) => {
 					const cssRe = /\.css(?:$|\?)/;
 					return Promise.all(
-						Array.from( compilation.chunks )
+						[ ...compilation.chunks ]
 							.flatMap( ( chunk ) =>
 								// Collect all files form all chunks, and generate an array of {chunk, file} objects
-								Array.from( chunk.files ).map( ( asset ) => ( {
+								[ ...chunk.files ].map( ( asset ) => ( {
 									chunk,
 									asset,
 								} ) )
@@ -58,7 +58,7 @@ class WebpackRTLPlugin {
 								// Compute the filename
 								const filename = asset.replace(
 									cssRe,
-									this.options.filenameSuffix || `.rtl$&`
+									this.options.filenameSuffix || '-rtl$&'
 								);
 								const assetInstance = assets[ asset ];
 								chunk.files.add( filename );
@@ -66,7 +66,10 @@ class WebpackRTLPlugin {
 								if ( this.cache.has( assetInstance ) ) {
 									const cachedRTL =
 										this.cache.get( assetInstance );
-									assets[ filename ] = cachedRTL;
+									compilation.emitAsset(
+										filename,
+										cachedRTL
+									);
 								} else {
 									const baseSource = assetInstance.source();
 									const rtlSource = rtlcss.process(
@@ -75,13 +78,11 @@ class WebpackRTLPlugin {
 										this.options.plugins
 									);
 									// Save the asset
-									assets[ filename ] = new ConcatSource(
+									const rtlAsset = new ConcatSource(
 										rtlSource
 									);
-									this.cache.set(
-										assetInstance,
-										assets[ filename ]
-									);
+									compilation.emitAsset( filename, rtlAsset );
+									this.cache.set( assetInstance, rtlAsset );
 								}
 							} )
 					);
