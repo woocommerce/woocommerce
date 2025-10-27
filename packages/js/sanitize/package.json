@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/sanitize",
-	"version": "0.1.0",
+	"version": "1.0.0",
 	"description": "WooCommerce HTML sanitization utilities.",
 	"main": "build/index.js",
 	"module": "build/index.js",
