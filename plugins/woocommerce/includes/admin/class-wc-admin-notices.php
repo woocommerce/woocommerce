@@ -473,7 +473,7 @@ class WC_Admin_Notices {
 		if ( $enabled ) {
 			include __DIR__ . '/views/html-notice-legacy-shipping.php';
 		} else {
-			self::remove_notice( 'template_files' );
+			self::remove_notice( 'legacy_shipping' );
 		}
 	}
 
