@@ -334,11 +334,11 @@ class PushTokenRestController extends RestApiControllerBase {
 	private function get_args( ?string $context = null ): array {
 		$args = array(
 			'id'          => array(
-				'description' => __( 'Push Token ID', 'woocommerce' ),
-				'type'        => 'integer',
-				'required'    => true,
-				'context'     => array( 'delete' ),
-				'minimum'     => 1,
+				'description'       => __( 'Push Token ID', 'woocommerce' ),
+				'type'              => 'integer',
+				'required'          => true,
+				'context'           => array( 'delete' ),
+				'minimum'           => 1,
 				'sanitize_callback' => 'absint',
 			),
 			'origin'      => array(
