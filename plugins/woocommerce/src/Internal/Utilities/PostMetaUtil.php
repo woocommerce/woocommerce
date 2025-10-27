@@ -38,6 +38,10 @@ class PostMetaUtil {
 			return (bool) add_post_meta( $post_id, $key, $value, $unique );
 		}
 
+		if ( $unique && metadata_exists( 'post', $post_id, $key ) ) {
+			return false;
+		}
+
 		$value  = maybe_serialize( $value );
 		$result = $wpdb->insert(
 			_get_meta_table( 'post' ),
