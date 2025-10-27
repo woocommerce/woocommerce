@@ -149,21 +149,17 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 
 		$order_ids = $this->create_orders_with_logs( 5 );
 
-		$actual_meta_ids = $this->get_meta_ids( $with_hpos, 3 );
-		$expected_batch  = array(
+		$expected_batch = array(
 			array(
 				'order_id'   => $order_ids[0],
-				'meta_id'    => $actual_meta_ids[0],
 				'meta_value' => 'place-order-debug-0',
 			),
 			array(
 				'order_id'   => $order_ids[1],
-				'meta_id'    => $actual_meta_ids[1],
 				'meta_value' => 'place-order-debug-1',
 			),
 			array(
 				'order_id'   => $order_ids[2],
-				'meta_id'    => $actual_meta_ids[2],
 				'meta_value' => 'place-order-debug-2',
 			),
 		);
@@ -190,16 +186,13 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( 2, $this->sut->get_total_pending_count() );
 
-		$actual_meta_ids = $this->get_meta_ids( $with_hpos, 3 );
-		$expected_batch  = array(
+		$expected_batch = array(
 			array(
 				'order_id'   => $order_ids[3],
-				'meta_id'    => $actual_meta_ids[0],
 				'meta_value' => 'place-order-debug-3',
 			),
 			array(
 				'order_id'   => $order_ids[4],
-				'meta_id'    => $actual_meta_ids[1],
 				'meta_value' => 'place-order-debug-4',
 			),
 		);
@@ -374,14 +367,13 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith [[null]]
 	 *           [[34]]
-	 *           [[{"meta_id": 34}]]
 	 *           [[{"meta_value": "MSX"}]]
 	 *           [[{"order_id": 34}]]
 	 *
 	 * @param mixed $batch Batch to try to process.
 	 */
 	public function test_process_invalid_batch( $batch ) {
-		$this->expectExceptionMessage( "\$batch must be an array of arrays, each having a 'meta_id' key, a 'meta_value' key and an 'order_id' key" );
+		$this->expectExceptionMessage( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
 		$this->sut->process_batch( $batch );
 	}
 
@@ -447,26 +439,6 @@ class OrderLogsDeletionProcessorTest extends \WC_Unit_Test_Case {
 		}
 
 		return $order_ids;
-	}
-
-	/**
-	 * Get the ids of order debug meta entries, sorted by meta id.
-	 *
-	 * @param bool $with_hpos Test with HPOS active or not.
-	 * @param int  $limit Maximum count of ids to return.
-	 * @return array
-	 */
-	private function get_meta_ids( bool $with_hpos, int $limit ): array {
-		global $wpdb;
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$meta_ids =
-			$with_hpos ?
-				$wpdb->get_results( $wpdb->prepare( "select id from {$wpdb->prefix}wc_orders_meta where meta_key=%s order by order_id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N ) :
-				$wpdb->get_results( $wpdb->prepare( "select meta_id from {$wpdb->postmeta} where meta_key=%s order by post_id limit {$limit}", '_debug_log_source_pending_deletion' ), ARRAY_N );
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		return array_map( fn( $item ) => $item[0], $meta_ids );
 	}
 
 	/**

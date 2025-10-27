@@ -19,9 +19,6 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 	/**
 	 * Constant representing the default size of the batches to process.
-	 *
-	 * Note that meta entry ids taken from batch items will be concatenated to form a
-	 * "delete ... where id in (id, id...)" SQL query, so this value can't be very big.
 	 */
 	public const DEFAULT_BATCH_SIZE = 1000;
 
@@ -157,7 +154,7 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 	/**
 	 * Get the next batch of items to process.
-	 * An item will be an associative array of 'meta_id' and 'meta_value'.
+	 * An item will be an associative array of 'order_id' and 'meta_value'.
 	 *
 	 * @param int $size Maximum size of the batch to return.
 	 * @return array
@@ -184,10 +181,10 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT id as meta_id, meta_value, order_id
+				"SELECT order_id, meta_value
                  FROM {$wpdb->prefix}wc_orders_meta
                  WHERE meta_key = %s
-                 ORDER BY id
+                 ORDER BY order_id
                  LIMIT %d",
 				'_debug_log_source_pending_deletion',
 				$size
@@ -207,12 +204,12 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 
 		return $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT p.ID as order_id,pm.meta_id, pm.meta_value
+				"SELECT p.ID as order_id, pm.meta_value
                  FROM {$wpdb->postmeta} pm
                  INNER JOIN {$wpdb->posts} p ON pm.post_id = p.ID
                  WHERE pm.meta_key = %s
                  AND p.post_type = 'shop_order'
-                 ORDER BY pm.meta_id
+                 ORDER BY p.ID
                  LIMIT %d",
 				'_debug_log_source_pending_deletion',
 				$size
@@ -238,9 +235,9 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_id'] ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) );
+		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) );
 		if ( $invalid_items ) {
-			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_id' key, a 'meta_value' key and an 'order_id' key" );
+			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
 		}
 
 		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
@@ -249,14 +246,23 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 		}
 
 		global $wpdb;
+
+		$order_ids    = array_map( 'absint', array_column( $batch, 'order_id' ) );
+		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
+
 		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
-		$id_column_name = $this->hpos_in_use ? 'id' : 'meta_id';
+		$id_column_name = $this->hpos_in_use ? 'order_id' : 'post_id';
 
-		$meta_ids     = array_map( 'absint', array_column( $batch, 'meta_id' ) );
-		$placeholders = implode( ',', $meta_ids );
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query( "DELETE FROM {$table_name} WHERE {$id_column_name} IN ({$placeholders})" );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$table_name}
+				 WHERE {$id_column_name} IN ({$placeholders})
+				 AND meta_key = %s",
+				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
 			return;
