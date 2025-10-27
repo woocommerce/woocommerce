@@ -3,14 +3,13 @@
  */
 import {
 	OfflinePaymentMethodProvider,
-	PaymentGatewayProvider,
 	PaymentsProvider,
 	PaymentsProviderType,
 	SuggestedPaymentsExtension,
 	SuggestedPaymentsExtensionCategory,
 } from '../../types';
 
-export const providersStub: ( PaymentsProvider | PaymentGatewayProvider )[] = [
+export const providersStub: PaymentsProvider[] = [
 	{
 		id: '_wc_pes_paypal_full_stack',
 		_order: 2,
@@ -85,7 +84,7 @@ export const providersStub: ( PaymentsProvider | PaymentGatewayProvider )[] = [
 				test_mode: true,
 			},
 			messages: {
-				not_supported: null,
+				not_supported: undefined,
 			},
 			_links: {
 				onboard: {
