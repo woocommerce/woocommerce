@@ -17,13 +17,9 @@ export const UpgradeProductImageGallery = () => {
 	const [ productImageGalleryBlock, setProductImageGalleryBlock ] =
 		useState< BlockInstance | null >( null );
 
-	const getBlocks = useSelect( ( select ) => {
-		return select( 'core/block-editor' ).getBlocks;
-	}, [] );
-
 	useEffect( () => {
 		const foundBlock = findBlock( {
-			blocks: getBlocks(),
+			blocks: select( 'core/block-editor' ).getBlocks(),
 			findCondition: ( block ) =>
 				block.name === 'woocommerce/product-image-gallery',
 		} );
@@ -32,7 +28,7 @@ export const UpgradeProductImageGallery = () => {
 		} else {
 			setProductImageGalleryBlock( null );
 		}
-	}, [ getBlocks, setProductImageGalleryBlock ] );
+	}, [ setProductImageGalleryBlock ] );
 
 	if ( ! productImageGalleryBlock ) {
 		return null;
