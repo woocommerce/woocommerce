@@ -175,8 +175,15 @@ class ProductsController {
 			: 'Importing Products from ' . ucfirst( $this->parsed_args['platform'] );
 		$progress       = \WP_CLI\Utils\make_progress_bar( $progress_label, $total_count );
 
+		// Set initial 1% progress to show activity has started.
+		$initial_tick = max( 1, (int) ceil( $total_count * 0.01 ) );
+		$progress->tick( $initial_tick );
+
 		if ( ! $this->parsed_args['dry_run'] ) {
-			$progress->tick( $this->session->count_all_imported_entities() );
+			$already_imported = $this->session->count_all_imported_entities();
+			if ( $already_imported > $initial_tick ) {
+				$progress->tick( $already_imported - $initial_tick );
+			}
 		}
 
 		$this->configure_product_importer();
