@@ -94,6 +94,7 @@ class Utils {
 				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
 					$child_product_id :
 					$product->get_id(),
+				'allowZero' => true,
 			)
 		);
 

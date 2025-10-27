@@ -14,6 +14,7 @@ import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
 	productId: number;
+	allowZero?: boolean;
 };
 
 // Stores are locked to prevent 3PD usage until the API is stable.
@@ -78,7 +79,7 @@ store< QuantitySelectorStore >(
 				const { quantity, selectedAttributes } =
 					addToCartWithOptionsStore.state;
 
-				const { productId } = getContext< Context >();
+				const { allowZero, productId } = getContext< Context >();
 
 				const productObject = getProductData(
 					productId,
@@ -89,7 +90,7 @@ store< QuantitySelectorStore >(
 					return true;
 				}
 
-				const { allowZero, id, min, step } = productObject;
+				const { id, min, step } = productObject;
 
 				const currentQuantity = quantity[ id ] || 0;
 
@@ -165,7 +166,7 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { productId } = getContext< Context >();
+				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
 				const productObject = getProductData(
@@ -176,7 +177,7 @@ store< QuantitySelectorStore >(
 				let newValue = currentValue - 1;
 
 				if ( productObject ) {
-					const { allowZero, max, min, step } = productObject;
+					const { max, min, step } = productObject;
 					newValue = currentValue - step;
 					if ( allowZero && newValue < min ) {
 						newValue = 0;
@@ -201,7 +202,7 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { productId } = getContext< Context >();
+				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 				
 				const productObject = getProductData(
@@ -213,7 +214,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { allowZero, min } = productObject;
+				const { min } = productObject;
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
