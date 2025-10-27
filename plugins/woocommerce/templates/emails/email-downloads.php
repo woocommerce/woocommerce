@@ -44,9 +44,9 @@ $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improveme
 		<tr>
 			<?php foreach ( $columns as $column_id => $column_name ) : ?>
 				<?php
-					$column_alignment_class = $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left';
-					if ( 'download-product' === $column_id ) :
-				?>
+				$column_alignment_class = $email_improvements_enabled && array_key_last( $columns ) === $column_id ? 'text-align-right' : 'text-align-left';
+				if ( 'download-product' === $column_id ) :
+					?>
 					<th class="td <?php echo esc_attr( $column_alignment_class ); ?>" scope="row">
 				<?php else : ?>
 					<td class="td <?php echo esc_attr( $column_alignment_class ); ?>">
