@@ -144,14 +144,12 @@ class BlockEmailRenderer {
 		$emails        = array_values( array_filter( array_map( 'sanitize_email', array_map( 'trim', explode( ',', $recipient_raw ) ) ) ) );
 		$context       = array(
 			'recipient_email' => $emails[0] ?? null,
-			'woo_email_type'  => $wc_email->id,
 		);
 
 		// Extract order-related context if the email object is an order.
 		if ( isset( $wc_email->object ) && $wc_email->object instanceof \WC_Order ) {
-			$order               = $wc_email->object;
-			$context['order_id'] = $order->get_id();
-			$context['user_id']  = $order->get_customer_id();
+			$order              = $wc_email->object;
+			$context['user_id'] = $order->get_customer_id();
 		}
 
 		return $context;
