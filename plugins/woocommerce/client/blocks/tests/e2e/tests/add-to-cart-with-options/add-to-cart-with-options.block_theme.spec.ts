@@ -965,4 +965,31 @@ test.describe( 'Add to Cart + Options Block', () => {
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
 		).toBeVisible();
 	} );
+
+	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		const addToCartFormBlock = await editor.getBlockByName(
+			pageObject.BLOCK_SLUG
+		);
+		await editor.selectBlocks( addToCartFormBlock );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+		).toBeHidden();
+
+		await page
+			.getByRole( 'button', {
+				name: 'Upgrade to the blockified Product Gallery',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+		).toBeVisible();
+	} );
 } );
