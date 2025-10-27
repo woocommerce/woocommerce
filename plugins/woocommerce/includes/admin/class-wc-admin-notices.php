@@ -96,7 +96,20 @@ class WC_Admin_Notices {
 	 * Store the locally cached notices to DB.
 	 */
 	public static function store_notices() {
-		update_option( 'woocommerce_admin_notices', self::get_notices() );
+		$current_notices = self::get_notices();
+		$prev_notices    = get_option( 'woocommerce_admin_notices', array() );
+
+		// Store notices.
+		update_option( 'woocommerce_admin_notices', $current_notices );
+
+		// Clean up removed notices.
+		foreach ( array_diff( $prev_notices, $current_notices ) as $notice ) {
+			if ( isset( self::$core_notices[ $notice ] ) ) {
+				continue;
+			}
+
+			delete_option( 'woocommerce_admin_notice_' . $notice );
+		}
 	}
 
 	/**
