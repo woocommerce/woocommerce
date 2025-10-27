@@ -918,7 +918,7 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$order = wc_get_order( $order_id );
 		$this->assertEquals( OrderStatus::TRASH, $order->get_status( 'edit' ) );
 
-		// Force deletion, skip tash.
+		// Force deletion, skip trash.
 		$request = new WP_REST_Request( 'DELETE', '/wc/v4/orders/' . $order_id );
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
