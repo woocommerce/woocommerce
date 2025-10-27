@@ -5,7 +5,6 @@ import {
 	InnerBlocks,
 	InspectorControls,
 	useBlockProps,
-	useInnerBlocksProps,
 } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { withProductDataContext } from '@woocommerce/shared-hocs';
@@ -68,9 +67,3 @@ export const Edit = withProductDataContext(
 		);
 	}
 );
-
-export const Save = () => {
-	const blockProps = useBlockProps.save();
-	const innerBlocksProps = useInnerBlocksProps.save( blockProps );
-	return <div { ...innerBlocksProps } />;
-};

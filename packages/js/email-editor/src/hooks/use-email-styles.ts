@@ -24,6 +24,19 @@ interface EmailStylesData {
 }
 
 /**
+ * Check if a nested object is empty.
+ *
+ * @param {Object} obj The object to check.
+ * @return {boolean} True if the nested object is empty, false otherwise.
+ */
+function isNestedEmpty( obj ) {
+	const isNotEmpty = Object.keys( obj ).some(
+		( key ) => Object.keys( obj[ key ] ).length > 0
+	);
+	return ! isNotEmpty;
+}
+
+/**
  * Immutably sets a value inside an object. Like `lodash#set`, but returning a
  * new object. Treats nullish initial values as empty objects. Clones any
  * nested objects. Supports arrays, too.
@@ -114,7 +127,10 @@ function cleanupUserStyles( obj ) {
 			for ( const key in current ) {
 				if ( current.hasOwnProperty( key ) ) {
 					const cleanedValue = cleanObject( current[ key ] );
-					if ( cleanedValue === undefined ) {
+					if (
+						cleanedValue === undefined ||
+						isNestedEmpty( cleanedValue )
+					) {
 						delete current[ key ]; // Remove keys with undefined values
 					} else {
 						current[ key ] = cleanedValue;

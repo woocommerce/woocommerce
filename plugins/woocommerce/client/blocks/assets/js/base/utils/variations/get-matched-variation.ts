@@ -1,29 +1,27 @@
 /**
  * External dependencies
  */
-import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-
-export type AvailableVariation = {
-	attributes: Record< string, string >;
-	variation_id: number;
-	price_html: string;
-	is_in_stock: boolean;
-};
+import type {
+	SelectedAttributes,
+	ProductData,
+} from '@woocommerce/stores/woocommerce/cart';
 
 export const getMatchedVariation = (
-	availableVariations: AvailableVariation[],
+	availableVariations: ProductData[ 'variations' ],
 	selectedAttributes: SelectedAttributes[]
 ) => {
 	if (
-		! Array.isArray( availableVariations ) ||
+		! availableVariations ||
+		! Object.keys( availableVariations ).length ||
 		! Array.isArray( selectedAttributes ) ||
-		availableVariations.length === 0 ||
 		selectedAttributes.length === 0
 	) {
 		return null;
 	}
-	return (
-		availableVariations.find( ( availableVariation ) => {
+
+	const matchingVariation = Object.entries( availableVariations ).find(
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		( [ _, availableVariation ] ) => {
 			return Object.entries( availableVariation.attributes ).every(
 				( [ attributeName, attributeValue ] ) => {
 					const attributeMatched = selectedAttributes.some(
@@ -45,6 +43,15 @@ export const getMatchedVariation = (
 					return attributeMatched;
 				}
 			);
-		} ) || null
+		}
 	);
+
+	if ( ! matchingVariation ) {
+		return null;
+	}
+
+	return {
+		...matchingVariation[ 1 ],
+		variation_id: Number( matchingVariation[ 0 ] ),
+	};
 };

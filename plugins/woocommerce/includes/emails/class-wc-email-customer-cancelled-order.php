@@ -32,6 +32,7 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 			$this->id             = 'customer_cancelled_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Cancelled order', 'woocommerce' );
+			$this->email_group    = 'order-exceptions';
 			$this->template_html  = 'emails/customer-cancelled-order.php';
 			$this->template_plain = 'emails/plain/customer-cancelled-order.php';
 			$this->placeholders   = array(

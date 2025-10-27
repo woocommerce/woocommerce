@@ -2,6 +2,49 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.8.1](https://github.com/woocommerce/email-editor/releases/tag/1.8.1) - 2025-10-27 
+
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+
+## [1.8.0](https://github.com/woocommerce/email-editor/releases/tag/1.8.0) - 2025-10-09 
+
+-   Patch - Allow fetching core blocks' styles in the editor's iframe for blocks that support emails [#61306]
+-   Patch - Fix an error where group blocks with margin styles were causing the editor to crash. [#61309]
+-   Patch - Fixed image block link removal. [#61329]
+-   Patch - Fixed type errors caused by passing int to Styles_Helper::parse_value. [#61339]
+-   Patch - Prevent callback replacement attacks via __unserialize() [#61335]
+-   Patch - Add CssInliner library and ensure packages are prefixed to prevent package conflicts. [#61210]
+-   Patch - Angle brackets are now encoded in hex when rendered in a `<script>` tag via `json_encode()`. [#61245]
+-   Minor - Add email rendering instructions for the woocommerce/product-collection block. [#60941]
+
+## [1.7.0](https://github.com/woocommerce/email-editor/releases/tag/1.7.0) - 2025-09-26 
+
+-   Patch - Fix Fatal error when reading site styles for some themes [#60967]
+-   Minor - Add email rendering instructions for the core/video block and YouTube embeds. [#60957]
+
+## [1.6.0](https://github.com/woocommerce/email-editor/releases/tag/1.6.0) - 2025-09-18 
+
+-   Patch - Downgrade Emogrifier dependency to avoid conflict [#60994]
+-   Minor - Add email rendering instructions for the core/audio and core/embed blocks. [#60813]
+-   Minor - Add email rendering instructions for the core/cover block. [#60837]
+-   Minor - Add email rendering instructions for the core/gallery block. [#60775]
+
+## [1.5.0](https://github.com/woocommerce/email-editor/releases/tag/1.5.0) - 2025-09-09 
+
+-   Patch - Add type check when extracting vars from theme style values in email editor [#60538]
+-   Patch - Upgrade pelago/emogrifier to v8.0 [#60489]
+-   Patch - Use a more robust way to post-process the style attribute values within the Email Editor. [#60764]
+-   Minor - Add email block renderer for the Table core block. [#60514]
+-   Minor - Add email rendering instructions for the core/media-text block. [#60752]
+-   Minor - Remove `block_preview_url` from `WooCommerceEmailEditor` object [#60603]
+
+## [1.4.2](https://github.com/woocommerce/email-editor/releases/tag/1.4.2) - 2025-08-21 
+
+-   Patch - Filter unnecessary stylesheets from iframe assets [#60354]
+-   Patch - Fix Email editor conflict with the site editor. [#60465]
+-   Patch - Fix horizontal scrolling issue in the email editor on mobile devices. [#60355]
+-   Patch - Use custom log filepath defined in WP_DEBUG_LOG when specified. [#60255]
+
 ## [1.4.1](https://github.com/woocommerce/email-editor/releases/tag/1.4.1) - 2025-08-08 
 
 -   Patch - Introduce new class Assets_Manager to simplify integration. [#60165]

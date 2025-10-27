@@ -486,6 +486,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$set_props['category_ids']      = $this->get_term_ids( $product, 'product_cat' );
 		$set_props['tag_ids']           = $this->get_term_ids( $product, 'product_tag' );
+		$set_props['brand_ids']         = $this->get_term_ids( $product, 'product_brand' );
 		$set_props['shipping_class_id'] = current( $this->get_term_ids( $product, 'product_shipping_class' ) );
 		$set_props['gallery_image_ids'] = array_filter( explode( ',', $set_props['gallery_image_ids'] ?? '' ) );
 
@@ -919,11 +920,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		if ( $force || array_key_exists( 'tag_ids', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), $product->get_tag_ids( 'edit' ), 'product_tag', false );
 		}
+		if ( $force || array_key_exists( 'brand_ids', $changes ) ) {
+			wp_set_post_terms( $product->get_id(), $product->get_brand_ids( 'edit' ), 'product_brand', false );
+		}
 		if ( $force || array_key_exists( 'shipping_class_id', $changes ) ) {
 			wp_set_post_terms( $product->get_id(), array( $product->get_shipping_class_id( 'edit' ) ), 'product_shipping_class', false );
 		}
-
-		_wc_recount_terms_by_product( $product->get_id() );
 	}
 
 	/**
@@ -1020,6 +1022,15 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			// Note, we use wp_slash to add extra level of escaping. See https://codex.wordpress.org/Function_Reference/update_post_meta#Workaround.
 			$this->update_or_delete_post_meta( $product, '_product_attributes', wp_slash( $meta_values ) );
+
+			/**
+			 * Fires after WooCommerce product attributes have been updated.
+			 *
+			 * @since 10.2.0
+			 * @param WC_Product $product The product object whose attributes were updated.
+			 * @param bool $force Indicates if the update was forced.
+			 */
+			do_action( 'woocommerce_product_attributes_updated', $product, $force );
 		}
 	}
 

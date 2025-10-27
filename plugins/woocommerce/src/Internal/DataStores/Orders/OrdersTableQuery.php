@@ -687,33 +687,38 @@ class OrdersTableQuery {
 	 * @return void
 	 */
 	private function sanitize_status(): void {
-		// Sanitize status.
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
-		if ( empty( $this->args['status'] ) || 'any' === $this->args['status'] ) {
-			$this->args['status'] = $valid_statuses;
-		} elseif ( 'all' === $this->args['status'] ) {
+		if ( empty( $this->args['status'] ) ) {
 			$this->args['status'] = array();
-		} else {
-			$this->args['status'] = is_array( $this->args['status'] ) ? $this->args['status'] : array( $this->args['status'] );
-
-			foreach ( $this->args['status'] as &$status ) {
-				$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
-			}
-
-			$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
 		}
+
+		if ( ! is_array( $this->args['status'] ) ) {
+			$this->args['status'] = array( $this->args['status'] );
+		}
+
+		if ( in_array( 'any', $this->args['status'], true ) || in_array( 'all', $this->args['status'], true ) ) {
+			$this->args['status'] = array();
+		}
+
+		foreach ( $this->args['status'] as &$status ) {
+			$status = in_array( 'wc-' . $status, $valid_statuses, true ) ? 'wc-' . $status : $status;
+		}
+
+		$this->args['status'] = array_unique( array_filter( $this->args['status'] ) );
 	}
 
 	/**
 	 * Parses and sanitizes the 'orderby' query var.
 	 *
-	 * @return void
+	 * @param string|array $orderby The unsanitized orderby param which can be a string or an array of orderby keys and direction (ASC, DESC).
+	 * @return string|array The sanitized orderby param which can be a string or an array of orderby keys and direction (ASC, DESC).
 	 */
-	private function sanitize_order_orderby(): void {
-		// Allowed keys.
-		// TODO: rand, meta keys, etc.
-		$allowed_keys = array( 'ID', 'id', 'type', 'date', 'modified', 'parent' );
+	private function sanitize_order_orderby( $orderby ) {
+		// No need to sanitize, will be processed in calling function.
+		if ( 'include' === $orderby || 'post__in' === $orderby || 'none' === $orderby ) {
+			return $orderby;
+		}
 
 		// Translate $orderby to a valid field.
 		$mapping = array(
@@ -729,18 +734,10 @@ class OrdersTableQuery {
 			'order_total'   => "{$this->tables['orders']}.total_amount",
 		);
 
-		$order   = $this->args['order'] ?? '';
-		$orderby = $this->args['orderby'] ?? '';
+		$order           = $this->sanitize_order( $this->args['order'] ?? '' );
+		$allowed_orderby = array_merge( array_keys( $mapping ), array_values( $mapping ), $this->meta_query ? $this->meta_query->get_orderby_keys() : array() );
 
-		if ( 'none' === $orderby ) {
-			return;
-		}
-
-		// No need to sanitize, will be processed in calling function.
-		if ( 'include' === $orderby || 'post__in' === $orderby ) {
-			return;
-		}
-
+		// Convert string orderby to an array of orderby keys and direction (ASC, DESC).
 		if ( is_string( $orderby ) ) {
 			$orderby_fields = array_map( 'trim', explode( ' ', $orderby ) );
 			$orderby        = array();
@@ -749,13 +746,8 @@ class OrdersTableQuery {
 			}
 		}
 
-		$allowed_orderby = array_merge(
-			array_keys( $mapping ),
-			array_values( $mapping ),
-			$this->meta_query ? $this->meta_query->get_orderby_keys() : array()
-		);
+		$sanitized_orderby = array();
 
-		$this->args['orderby'] = array();
 		foreach ( $orderby as $order_key => $order ) {
 			if ( ! in_array( $order_key, $allowed_orderby, true ) ) {
 				continue;
@@ -765,8 +757,10 @@ class OrdersTableQuery {
 				$order_key = $mapping[ $order_key ];
 			}
 
-			$this->args['orderby'][ $order_key ] = $this->sanitize_order( $order );
+			$sanitized_orderby[ $order_key ] = $this->sanitize_order( $order );
 		}
+
+		return $sanitized_orderby;
 	}
 
 	/**
@@ -1082,7 +1076,7 @@ class OrdersTableQuery {
 			$operator = 'NOT IN';
 		}
 
-		if ( ! in_array( $operator, array( '=', '!=', 'IN', 'NOT IN' ), true ) ) {
+		if ( ! in_array( $operator, array( '=', '!=', 'IN', 'NOT IN', '>', '>=', '<', '<=' ), true ) ) {
 			return false;
 		}
 
@@ -1121,7 +1115,6 @@ class OrdersTableQuery {
 				'tax_amount',
 				'customer_id',
 				'billing_email',
-				'total_amount',
 				'parent_order_id',
 				'payment_method',
 				'payment_method_title',
@@ -1150,6 +1143,25 @@ class OrdersTableQuery {
 
 			if ( $customer_query ) {
 				$this->where[] = $customer_query;
+			}
+		}
+
+		// Handle total filtering with operators.
+		if ( $this->arg_isset( 'total_amount' ) ) {
+			$total_param = $this->args['total_amount'];
+
+			// If it's a simple number, convert to array format.
+			if ( is_numeric( $total_param ) ) {
+				$total_param = array(
+					'value'    => $total_param,
+					'operator' => '=',
+				);
+			}
+
+			$total_query = $this->generate_total_query( (array) $total_param );
+
+			if ( $total_query ) {
+				$this->where[] = $total_query;
 			}
 		}
 	}
@@ -1189,6 +1201,48 @@ class OrdersTableQuery {
 		}
 
 		return $pieces ? implode( " $relation ", $pieces ) : '';
+	}
+
+	/**
+	 * Generate SQL conditions for the 'total' query with operators.
+	 *
+	 * @param array $total_params Total query parameters with value, operator.
+	 * @return string SQL to be used in a WHERE clause.
+	 */
+	private function generate_total_query( array $total_params ): string {
+		if ( ! isset( $total_params['value'] ) ) {
+			return '';
+		}
+
+		$operator            = $total_params['operator'] ?? '=';
+		$value               = $total_params['value'];
+		$supported_operators = array( '=', '!=', '>', '>=', '<', '<=', 'BETWEEN', 'NOT BETWEEN' );
+
+		if ( ! in_array( $operator, $supported_operators, true ) ) {
+			return '';
+		}
+
+		// Handle between operators.
+		if ( 'BETWEEN' === $operator || 'NOT BETWEEN' === $operator ) {
+			if ( ! is_array( $value ) || count( $value ) !== 2 ) {
+				return '';
+			}
+			$value1 = wc_format_decimal( $value[0], wc_get_price_decimals() );
+			$value2 = wc_format_decimal( $value[1], wc_get_price_decimals() );
+
+			if ( 'BETWEEN' === $operator ) {
+				return $this->where( $this->tables['orders'], 'total_amount', '>=', $value1, 'decimal' ) . ' AND ' . $this->where( $this->tables['orders'], 'total_amount', '<=', $value2, 'decimal' );
+			} else {
+				return '(' . $this->where( $this->tables['orders'], 'total_amount', '<', $value1, 'decimal' ) . ' OR ' . $this->where( $this->tables['orders'], 'total_amount', '>', $value2, 'decimal' ) . ')';
+			}
+		}
+
+		// Handle other operators - value must be a single number.
+		if ( ! is_numeric( $value ) ) {
+			return '';
+		}
+
+		return $this->where( $this->tables['orders'], 'total_amount', $operator, wc_format_decimal( $value, wc_get_price_decimals() ), 'decimal' );
 	}
 
 	/**
@@ -1286,15 +1340,11 @@ class OrdersTableQuery {
 	 */
 	private function process_orderby(): void {
 		// 'order' and 'orderby' vars.
-		$this->args['order'] = $this->sanitize_order( $this->args['order'] ?? '' );
-		$this->sanitize_order_orderby();
+		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
+		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		$orderby = $this->args['orderby'];
-
-		if ( 'none' === $orderby ) {
-			$this->orderby = '';
-			return;
-		}
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {
 			$ids = $this->args['id'] ?? $this->args['includes'];
@@ -1306,18 +1356,20 @@ class OrdersTableQuery {
 			return;
 		}
 
-		$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+		if ( is_array( $orderby ) ) {
+			$meta_orderby_keys = $this->meta_query ? $this->meta_query->get_orderby_keys() : array();
+			$orderby_array     = array();
 
-		$orderby_array = array();
-		foreach ( $this->args['orderby'] as $_orderby => $order ) {
-			if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
-				$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+			foreach ( $orderby as $_orderby => $order ) {
+				if ( in_array( $_orderby, $meta_orderby_keys, true ) ) {
+					$_orderby = $this->meta_query->get_orderby_clause_for_key( $_orderby );
+				}
+
+				$orderby_array[] = "{$_orderby} {$order}";
 			}
 
-			$orderby_array[] = "{$_orderby} {$order}";
+			$this->orderby = $orderby_array;
 		}
-
-		$this->orderby = $orderby_array;
 	}
 
 	/**

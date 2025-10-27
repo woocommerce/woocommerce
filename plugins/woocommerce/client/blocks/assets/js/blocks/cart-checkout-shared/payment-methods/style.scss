@@ -1,5 +1,6 @@
 .wc-block-card-elements {
 	display: flex;
+	flex-wrap: wrap;
 	width: 100%;
 
 	.wc-block-components-validation-error {
@@ -14,21 +15,22 @@
 	white-space: nowrap;
 
 	&.wc-card-number-element {
-		flex-basis: 15em;
+		flex-basis: 100%;
 		flex-grow: 1;
 		// Currently, min() CSS function calls need to be wrapped with unquote.
 		min-width: string.unquote("min(15em, 60%)");
 	}
 
 	&.wc-card-expiry-element {
-		flex-basis: 7em;
-		margin-left: $gap-small;
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: 0;
+		margin-right: $gap-smaller;
 		min-width: string.unquote("min(7em, calc(24% - #{$gap-small}))");
 	}
 
 	&.wc-card-cvc-element {
-		flex-basis: 7em;
-		margin-left: $gap-small;
+		flex-basis: calc(50% - #{$gap-smaller});
+		margin-left: $gap-smaller;
 		// Notice the min width ems value is smaller than flex-basis. That's because
 		// by default we want it to have the same width as `expiry-element`, but
 		// if available space is scarce, `cvc-element` should get smaller faster.
@@ -149,31 +151,24 @@
 		}
 	}
 
-	.wc-block-card-elements {
-		flex-wrap: wrap;
-	}
-
-	.wc-block-gateway-container.wc-card-number-element {
-		flex-basis: 100%;
-	}
-
-	.wc-block-gateway-container.wc-card-expiry-element {
-		flex-basis: calc(50% - #{$gap-smaller});
-		margin-left: 0;
-		margin-right: $gap-smaller;
-	}
-
+	.wc-block-gateway-container.wc-card-expiry-element,
 	.wc-block-gateway-container.wc-card-cvc-element {
-		flex-basis: calc(50% - #{$gap-smaller});
-		margin-left: $gap-smaller;
+		flex-basis: 100%;
+		margin-left: 0;
+		margin-right: 0;
 	}
 }
 
-@include cart-checkout-small-container {
-	@include small-mobile-styles;
-}
-
-@include cart-checkout-mobile-container {
+/*
+ * Non standard container query for narrow viewports.
+ *
+ * A non-standard container query is required here for accessibility.
+ * Ems are used in order to prevent text being cropped in the credit
+ * card form based on the font size set for the element.
+ *
+ * See: https://github.com/woocommerce/woocommerce/issues/60516
+ */
+@container (max-width: 32em) {
 	@include small-mobile-styles;
 }
 

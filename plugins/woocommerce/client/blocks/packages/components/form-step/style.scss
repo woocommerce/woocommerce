@@ -2,41 +2,6 @@
 	counter-reset: checkout-step;
 }
 
-@mixin step-mobile-styles() {
-	padding-left: 0;
-	margin-bottom: $gap-larger;
-
-	// The below CSS rules are to show a separator between Checkout steps on mobile.
-	// This media query is required because on themes where the Checkout block is rendered alongside something else,
-	// e.g. Storefront using the "Default Template" (which has a sidebar) the checkout block can get the `.is-small`
-	// class, but the screen itself is larger than 400px.
-	@include breakpoint("<600px") {
-		padding-top: $gap-larger;
-
-		// Remove padding from the first checkout step. First of type is required here as the first-child is the express payment methods block.
-		&:first-of-type {
-			padding-top: 0;
-		}
-
-		&::after {
-			position: absolute;
-			content: "";
-			// Required because the box shadows are offset by 1px down so we need to move the element up by 1px.
-			bottom: calc(1px - $gap-larger);
-			width: 100%;
-			height: 1px;
-			opacity: 0.11;
-			background: currentColor;
-			// This box-shadow rule creates two visible shadows:
-			// - One 50vw to the left of the element.
-			// - Another 50vw to the right
-			// Both shadows are sharp (no blur) and use the current color of the element.
-			// Its purpose is to add a full-width divider between checkout sections which is otherwise impossible as
-			// the parent element has padding.
-			box-shadow: -50vw 0 0 0 currentColor, 50vw 0 0 0 currentColor;
-		}
-	}
-}
 .wc-block-components-form .wc-block-components-checkout-step {
 	position: relative;
 	border: none;
@@ -44,12 +9,45 @@
 	background: none;
 	margin: 0 0 $gap-largest 0;
 
-	@include cart-checkout-mobile-container {
-		@include step-mobile-styles();
-	}
+	@include cart-checkout-below-medium-container {
+		padding-left: 0;
+		margin-bottom: $gap-larger;
 
-	@include cart-checkout-small-container {
-		@include step-mobile-styles();
+		// The below CSS rules show a separator between Checkout steps on mobile.
+		// This media query is required because on themes where the Checkout
+		// block is rendered alongside something else, e.g. Storefront using the
+		// "Default Template" (which has a sidebar) the checkout block can get
+		// the `.is-small` class, but the screen itself is larger than 400px.
+		@include breakpoint("<600px") {
+			padding-top: $gap-larger;
+
+			// Remove padding from the first checkout step. First of type is
+			// required here as the first-child is the express payment methods
+			// block.
+			&:first-of-type {
+				padding-top: 0;
+			}
+
+			&::after {
+				position: absolute;
+				content: "";
+				// Required because the box shadows are offset by 1px down so we
+				// need to move the element up by 1px.
+				bottom: calc(1px - $gap-larger);
+				width: 100%;
+				height: 1px;
+				opacity: 0.11;
+				background: currentColor;
+				// This box-shadow rule creates two visible shadows:
+				// - One 50vw to the left of the element.
+				// - Another 50vw to the right
+				// Both shadows are sharp (no blur) and use the current color of the element.
+				// Its purpose is to add a full-width divider between checkout
+				// sections which is otherwise impossible as the parent element has
+				// padding.
+				box-shadow: -50vw 0 0 0 currentColor, 50vw 0 0 0 currentColor;
+			}
+		}
 	}
 }
 
@@ -73,14 +71,17 @@
 		margin-bottom: 0;
 	}
 }
+
 .wc-block-components-checkout-step--with-step-number
 	.wc-block-components-checkout-step__content
 	> :last-child {
 	margin-bottom: 0;
 }
+
 .wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
 	margin-top: em($gap-smaller);
 }
+
 .wc-block-components-checkout-step__heading {
 	margin: 0 0 $gap-smaller;
 	position: relative;
@@ -121,17 +122,20 @@
 	margin: 0 0 $gap;
 }
 
-@mixin step-number-mobile-styles {
-	position: static;
-	transform: none;
-	left: auto;
-	top: auto;
-	content: counter(checkout-step) ".\00a0";
-	content: counter(checkout-step) ".\00a0"/ "";
-}
 .wc-block-checkout__form--with-step-numbers {
 	.wc-block-components-checkout-step--with-step-number {
 		padding: 0 0 0 $gap-larger;
+
+		@include cart-checkout-below-medium-container {
+			// This media query is required because on themes where the Checkout
+			// block is rendered alongside something else, e.g. Storefront using
+			// the "Default Template" (which has a sidebar) the checkout block
+			// can get the `.is-small` class, but the screen itself is larger
+			// than 400px.
+			@include breakpoint("<600px") {
+				padding: $gap-larger 0 0 0;
+			}
+		}
 
 		.wc-block-components-checkout-step__title::before {
 			@include reset-box();
@@ -146,12 +150,13 @@
 			transform: translateX(-50%);
 			white-space: nowrap;
 
-			@include cart-checkout-mobile-container {
-				@include step-number-mobile-styles;
-			}
-
-			@include cart-checkout-small-container {
-				@include step-number-mobile-styles;
+			@include cart-checkout-below-medium-container {
+				position: static;
+				transform: none;
+				left: auto;
+				top: auto;
+				content: counter(checkout-step) ".\00a0";
+				content: counter(checkout-step) ".\00a0"/ "";
 			}
 		}
 

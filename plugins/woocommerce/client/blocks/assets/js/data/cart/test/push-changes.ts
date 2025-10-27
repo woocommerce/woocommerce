@@ -45,6 +45,10 @@ jest.mock( '@wordpress/data', () => ( {
 	dispatch: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/utils', () => ( {
+	isSiteEditorPage: jest.fn().mockReturnValue( true ),
+} ) );
+
 // Mocking processErrorResponse because we don't actually care about processing the error response, we just don't want
 // pushChanges to throw an error.
 jest.mock( '../../utils', () => ( {

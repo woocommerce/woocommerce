@@ -2,8 +2,6 @@
  * External dependencies
  */
 import {
-	registerFormatType,
-	unregisterFormatType,
 	applyFormat,
 	insert,
 	create,
@@ -14,7 +12,6 @@ import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
-import { addFilter } from '@wordpress/hooks';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import * as React from '@wordpress/element';
 
@@ -30,21 +27,28 @@ import { storeName } from '../../store';
 import { PersonalizationTagsPopover } from '../../components/personalization-tags/personalization-tags-popover';
 import { PersonalizationTagsLinkPopover } from '../../components/personalization-tags/personalization-tags-link-popover';
 import { recordEvent } from '../../events';
-import { useIsEmailEditor } from '../../hooks/use-is-email-editor';
+import {
+	registerFormatForEmail,
+	unregisterFormatForEmail,
+} from '../../config-tools/formats';
+import { addFilterForEmail } from '../../config-tools/filters';
 
 /**
  * Disable Rich text formats we currently cannot support
  * Note: This will remove its support for all blocks in the email editor e.g., p, h1,h2, etc
  */
 function disableCertainRichTextFormats() {
-	// remove support for inline image - We can't use it
-	unregisterFormatType( 'core/image' );
+	// Format types to disable
+	const formatTypesToDisable = [
+		'core/image', // remove support for inline image - We can't use it
+		'core/code', // remove support for Inline code - Not well formatted
+		'core/language', // remove support for Language - Not supported for now
+	];
 
-	// remove support for Inline code - Not well formatted
-	unregisterFormatType( 'core/code' );
-
-	// remove support for Language - Not supported for now
-	unregisterFormatType( 'core/language' );
+	// Unregister each format type and preserve its definition
+	formatTypesToDisable.forEach( ( formatName ) => {
+		unregisterFormatForEmail( formatName );
+	} );
 }
 
 type Props = {
@@ -135,12 +139,6 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 		]
 	);
 
-	const isEmailEditor = useIsEmailEditor();
-
-	if ( ! isEmailEditor ) {
-		return null;
-	}
-
 	return (
 		<BlockControls>
 			<ToolbarGroup>
@@ -210,28 +208,28 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
  * Extend the rich text formats with a button for personalization tags.
  */
 function extendRichTextFormats() {
-	registerFormatType( 'woocommerce-email-editor/shortcode', {
+	registerFormatForEmail( 'woocommerce-email-editor/shortcode', {
 		name: 'woocommerce-email-editor/shortcode',
 		title: __( 'Personalization Tags', 'woocommerce' ),
 		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
-		// @ts-expect-error attributes property is missing in build type for WPFormat type
 		attributes: {},
+		interactive: true,
 		edit: PersonalizationTagsButton,
 	} );
 
 	// Register format type for using personalization tags as link attributes
-	registerFormatType( 'woocommerce-email-editor/link-shortcode', {
+	registerFormatForEmail( 'woocommerce-email-editor/link-shortcode', {
 		name: 'woocommerce-email-editor/link-shortcode',
 		title: __( 'Personalization Tags Link', 'woocommerce' ),
 		className: 'woocommerce-email-editor-personalization-tags-link',
 		tagName: 'a',
-		// @ts-expect-error attributes property is missing in build type for WPFormat type
 		attributes: {
 			'data-link-href': 'data-link-href',
 			contenteditable: 'contenteditable',
 			style: 'style',
 		},
+		interactive: true,
 		edit: null,
 	} );
 }
@@ -303,7 +301,7 @@ const personalizationTagsLiveContentUpdate = createHigherOrderComponent(
  * Replace written personalization tags with HTML comments in real-time.
  */
 function activatePersonalizationTagsReplacing() {
-	addFilter(
+	addFilterForEmail(
 		'editor.BlockEdit',
 		'woocommerce-email-editor/with-live-content-update',
 		personalizationTagsLiveContentUpdate

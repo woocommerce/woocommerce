@@ -19,6 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -101,6 +102,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_download_permissions_granted',
 		'_order_stock_reduced',
 		'_new_order_email_sent',
+		'_cogs_total_value',
 	);
 
 	/**
@@ -843,7 +845,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	public function get_recorded_coupon_usage_counts( $order ) {
 		$order_id = is_int( $order ) ? $order : $order->get_id();
 		$order    = wc_get_order( $order_id );
-		return $order->get_recorded_coupon_usage_counts();
+		return $order && $order->get_recorded_coupon_usage_counts();
 	}
 
 	/**
@@ -1031,7 +1033,8 @@ WHERE
 	/**
 	 * Get the total tax refunded.
 	 *
-	 * @param  WC_Order $order Order object.
+	 * @param WC_Order $order Order object.
+	 *
 	 * @return float
 	 */
 	public function get_total_tax_refunded( $order ) {
@@ -1048,6 +1051,36 @@ WHERE
 				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
 				WHERE order_itemmeta.order_item_id = order_items.order_item_id
 				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
+				$order->get_id(),
+			)
+		) ?? 0;
+		// phpcs:enable
+
+		return abs( $total );
+	}
+
+	/**
+	 * Get the total shipping tax refunded.
+	 *
+	 * @param WC_Order $order Order object.
+	 *
+	 * @since 10.2.0
+	 * @return float
+	 */
+	public function get_total_shipping_tax_refunded( $order ) {
+		global $wpdb;
+
+		$order_table = self::get_orders_table_name();
+
+		$total = $wpdb->get_var(
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
+			$wpdb->prepare(
+				"SELECT SUM( order_itemmeta.meta_value )
+				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
+				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
+				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
+				WHERE order_itemmeta.order_item_id = order_items.order_item_id
+				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
 				$order->get_id()
 			)
 		) ?? 0;
@@ -1335,7 +1368,19 @@ WHERE
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
-		$post_orders    = $data_sync_enabled ? $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) ) : array();
+
+		$post_orders = array();
+		if ( $data_sync_enabled ) {
+			global $wpdb;
+
+			// Exclude orders that do not exist in the posts table.
+			if ( $load_posts_for ) {
+				$order_ids_placeholder = implode( ', ', array_fill( 0, count( $load_posts_for ), '%d' ) );
+				$load_posts_for        = array_map( 'absint', $wpdb->get_col( $wpdb->prepare( "SELECT ID FROM {$wpdb->posts} WHERE ID IN ( $order_ids_placeholder )", ...$load_posts_for ) ) ); // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			}
+
+			$post_orders = $this->get_post_orders_for_ids( array_intersect_key( $orders, array_flip( $load_posts_for ) ) );
+		}
 
 		$cogs_is_enabled = $this->cogs_is_enabled();
 
@@ -1349,7 +1394,7 @@ WHERE
 				$this->read_cogs_data( $order );
 			}
 
-			if ( $data_sync_enabled && $this->should_sync_order( $order ) && isset( $post_orders[ $order_id ] ) ) {
+			if ( $data_sync_enabled && isset( $post_orders[ $order_id ] ) && $this->should_sync_order( $order ) ) {
 				self::$reading_order_ids[] = $order_id;
 				$this->maybe_sync_order( $order, $post_orders[ $order->get_id() ] );
 			}
@@ -1491,19 +1536,33 @@ WHERE
 	 * @param array $orders    List of orders mapped by $order_id.
 	 *
 	 * @return array List of posts.
+	 *
+	 * @throws \Exception If no CPT data store is found for an order.
 	 */
 	private function get_post_orders_for_ids( array $orders ): array {
 		$order_ids = array_keys( $orders );
-		// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 		foreach ( $order_ids as $order_id ) {
+			// Exclude orders where the CPT version is a placeholder post.
+			$post_type = get_post_type( $order_id );
+			if ( ! $post_type || DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+				unset( $orders[ $order_id ] );
+				continue;
+			}
+
+			// We have to bust meta cache, otherwise we will just get the meta cached by OrderTableDataStore.
 			wp_cache_delete( WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
 		}
 
 		$cpt_stores       = array();
 		$cpt_store_orders = array();
 		foreach ( $orders as $order_id => $order ) {
-			$table_data_store     = $order->get_data_store();
-			$cpt_data_store       = $table_data_store->get_cpt_data_store_instance();
+			$table_data_store = $order->get_data_store();
+			$cpt_data_store   = $table_data_store->get_cpt_data_store_instance();
+
+			if ( ! $cpt_data_store ) {
+				throw new \Exception( sprintf( 'No CPT data store found for order %d.', absint( $order_id ) ) );
+			}
+
 			$cpt_store_class_name = get_class( $cpt_data_store );
 			if ( ! isset( $cpt_stores[ $cpt_store_class_name ] ) ) {
 				$cpt_stores[ $cpt_store_class_name ]       = $cpt_data_store;
@@ -1654,6 +1713,14 @@ WHERE
 		$diff                 = $this->migrate_meta_data_from_post_order( $order, $post_order );
 		$post_order_base_data = $post_order->get_base_data();
 		foreach ( $post_order_base_data as $key => $value ) {
+			// Skip migrating cogs_total_value if the HPOS order has a valid value and the CPT order has 0.
+			// This prevents overwriting valid COGS data with recalculated zero values during sync-on-read.
+			if ( 'cogs_total_value' === $key && $order->has_cogs() && $this->cogs_is_enabled() ) {
+				$hpos_cogs = $order->get_cogs_total_value( 'edit' );
+				if ( 0.0 !== $hpos_cogs && 0.0 === (float) $value ) {
+					continue;
+				}
+			}
 			$this->set_order_prop( $order, $key, $value );
 		}
 		$this->persist_updates( $order, false );
@@ -3061,6 +3128,11 @@ FROM $order_meta_table
 					'compare' => 'NOT EXISTS',
 				);
 			}
+		}
+
+		// Handle fulfillment status filtering.
+		if ( ! empty( $query_vars['fulfillment_status'] ) ) {
+			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
 		try {

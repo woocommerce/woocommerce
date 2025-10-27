@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add GraphQL product data fetching with cursor pagination to WooCommerce CLI Migrator for Shopify platform. Enables fetching detailed product information including variants, images, and metadata through new --fetch command with --limit and --after flags.

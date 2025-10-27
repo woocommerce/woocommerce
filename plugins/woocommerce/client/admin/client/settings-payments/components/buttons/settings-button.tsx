@@ -7,10 +7,11 @@ import {
 	OfflinePaymentMethodProvider,
 	PaymentGatewayProvider,
 	paymentGatewaysStore,
-	PaymentsProviderType,
 } from '@woocommerce/data';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from '@wordpress/data';
+import { getQueryArg } from '@wordpress/url';
+import { MouseEvent } from 'react';
 
 /**
  * Internal dependencies
@@ -50,7 +51,9 @@ export const SettingsButton = ( {
 	isInstallingPlugin,
 	buttonText = __( 'Manage', 'woocommerce' ),
 }: SettingsButtonProps ) => {
-	const isOffline = gatewayProvider._type === PaymentsProviderType.OfflinePm;
+	// Determine if the settingsHref is for a Reactified page.
+	// A Reactified page will have a 'path' query parameter.
+	const isReactifiedPage = !! getQueryArg( settingsHref, 'path' );
 	const navigate = useNavigate();
 	const { invalidateResolutionForStoreSelector } =
 		useDispatch( paymentGatewaysStore );
@@ -61,13 +64,34 @@ export const SettingsButton = ( {
 	return (
 		<Button
 			variant={ 'secondary' }
-			href={ ! isOffline ? settingsHref : undefined }
 			disabled={ isInstallingPlugin }
-			onClick={ () => {
+			onClick={ ( event: MouseEvent ) => {
 				recordButtonClickEvent();
-				if ( isOffline ) {
+
+				// Allow modified clicks (new tab/window, etc.) to proceed with default behavior.
+				const isModifiedClick =
+					event.metaKey ||
+					event.ctrlKey ||
+					event.shiftKey ||
+					event.altKey ||
+					event.button === 1;
+
+				// If it's a modified click, open in new tab/window.
+				if ( isModifiedClick ) {
+					window.open( settingsHref, '_blank' );
+					return;
+				}
+
+				// If it's a Reactified page, we invalidate the resolution for the store selector
+				// to ensure the latest data is fetched when navigating.
+				// Then we navigate to the settings URL.
+				// This is necessary to ensure that the page updates correctly with the latest data.
+				// If it's not a Reactified page, we just navigate to the settingsHref directly.
+				if ( isReactifiedPage ) {
 					invalidateResolutionForStoreSelector( 'getPaymentGateway' );
 					navigate( removeOriginFromURL( settingsHref ) );
+				} else {
+					window.location.href = settingsHref;
 				}
 			} }
 		>

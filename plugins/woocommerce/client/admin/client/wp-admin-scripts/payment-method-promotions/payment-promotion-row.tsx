@@ -11,7 +11,7 @@ import {
 } from '@woocommerce/data';
 import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { sanitize } from 'dompurify';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 import { __ } from '@wordpress/i18n';
 import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
 
@@ -20,11 +20,11 @@ import { WooPaymentsMethodsLogos } from '@woocommerce/onboarding';
  */
 import './payment-promotion-row.scss';
 
-function sanitizeHTML( html: string ) {
+function sanitizeHTMLForReact( html: string ) {
 	return {
-		__html: sanitize( html, {
-			ALLOWED_TAGS: [ 'a', 'img', 'br' ],
-			ALLOWED_ATTR: [ 'href', 'src', 'class', 'alt', 'target' ],
+		__html: sanitizeHTML( html, {
+			tags: [ 'a', 'img', 'br' ],
+			attr: [ 'href', 'src', 'class', 'alt', 'target' ],
 		} ),
 	};
 }
@@ -155,7 +155,7 @@ export const PaymentPromotionRow = ( {
 									<div
 										className="pre-install-payment-gateway__subtitle"
 										// eslint-disable-next-line react/no-danger -- innerHTML from the element with class name: gateway-subtitle.
-										dangerouslySetInnerHTML={ sanitizeHTML(
+										dangerouslySetInnerHTML={ sanitizeHTMLForReact(
 											subTitleContent
 										) }
 									></div>
@@ -220,7 +220,7 @@ export const PaymentPromotionRow = ( {
 								? {
 										__html: column.html,
 								  }
-								: sanitizeHTML( column.html )
+								: sanitizeHTMLForReact( column.html )
 						}
 					></td>
 				);

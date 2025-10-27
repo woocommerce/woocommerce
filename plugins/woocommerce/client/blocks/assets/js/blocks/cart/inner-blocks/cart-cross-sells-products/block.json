@@ -10,7 +10,8 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"email": true
 	},
 	"attributes": {
 		"columns": {

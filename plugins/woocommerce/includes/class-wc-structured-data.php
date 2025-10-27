@@ -160,7 +160,7 @@ class WC_Structured_Data {
 		$data  = $this->get_structured_data( $types );
 
 		if ( $data ) {
-			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+			echo '<script type="application/ld+json">' . wc_esc_json( wp_json_encode( $data, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ), true ) . '</script>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		}
 	}
 
@@ -393,7 +393,7 @@ class WC_Structured_Data {
 
 			$markup_offer += array(
 				'priceValidUntil' => $sale_price_valid_until ?? $price_valid_until,
-				'availability'    => 'http://schema.org/' . $stock_status_schema,
+				'availability'    => 'https://schema.org/' . $stock_status_schema,
 				'url'             => $permalink,
 				'seller'          => array(
 					'@type' => 'Organization',
