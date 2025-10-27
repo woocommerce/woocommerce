@@ -121,10 +121,16 @@ export class Editor extends CoreEditor {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		// Wait for the search to finish.
-		await expect(
-			this.page.getByRole( 'button', { name: 'Reset Search' } )
-		).toBeVisible();
-		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+		if ( this.wpCoreVersion >= 6.9 ) {
+			await this.page.waitForURL(
+				new RegExp( `search=${ encodeURIComponent( templateName ) }` )
+			);
+		} else {
+			await expect(
+				this.page.getByRole( 'button', { name: 'Reset Search' } )
+			).toBeVisible();
+			await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+		}
 	}
 
 	/**
@@ -157,7 +163,7 @@ export class Editor extends CoreEditor {
 			.first()
 			.click();
 		await this.page
-			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
+			.getByRole( 'menuitem', { name: /Reset|Delete|Move to trash/ } )
 			.click();
 
 		const responsePromise = this.page.waitForResponse(
@@ -170,14 +176,22 @@ export class Editor extends CoreEditor {
 				response.request().method() === 'POST'
 		);
 
-		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
-
-		await responsePromise;
-
 		await this.page
-			.getByLabel( 'Dismiss this notice' )
-			.getByText( /reset|deleted/ )
-			.waitFor();
+			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
+			.click();
+
+		if ( this.wpCoreVersion < 6.9 ) {
+			await responsePromise;
+
+			await this.page
+				.getByLabel( 'Dismiss this notice' )
+				.getByText( /reset|deleted/ )
+				.waitFor();
+		} else {
+			await responsePromise.catch( () => {
+				// Ignore the error.
+			} );
+		}
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {
