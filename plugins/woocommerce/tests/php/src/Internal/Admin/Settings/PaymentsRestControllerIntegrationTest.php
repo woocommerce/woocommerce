@@ -870,6 +870,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/providers' );
 		$request->set_param( 'location', 'US' );
 		$response = $this->server->dispatch( $request );
+		var_dump( $response->get_data() );
 
 		// Assert.
 		$this->assertSame( 200, $response->get_status() );
@@ -920,7 +921,6 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		// Assert that the fake WooPayments gateway is returned as NOT enabled.
 		$provider = $data['providers'][2];
-		var_dump( $provider );
 		$this->assertFalse( $provider['state']['enabled'] );
 		// Assert that the fake WooPayments gateway has all the details.
 		$this->assertArrayHasKey( 'id', $provider, 'Provider (gateway) `id` entry is missing' );
@@ -1699,11 +1699,14 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->providers_service->reset_memo();
 
 		$active_plugin_paths = array( 'woocommerce/woocommerce.php' );
+		$active_plugin_slugs = array( 'woocommerce' );
 		if ( $woopayments ) {
 			$active_plugin_paths[] = 'woocommerce-payments/woocommerce-payments.php';
+			$active_plugin_slugs[] = 'woocommerce-payments';
 		}
 		if ( $visa ) {
 			$active_plugin_paths[] = 'visa-acceptance-solutions/visa-acceptance-solutions.php';
+			$active_plugin_slugs[] = 'visa-acceptance-solutions';
 		}
 
 		$this->mockable_proxy->register_static_mocks(
@@ -1730,20 +1733,40 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				PluginsHelper::class   => array(
-					'is_plugin_installed' => function ( $plugin_path ) use ( $active_plugin_paths ) {
-						if ( in_array( $plugin_path, $active_plugin_paths, true ) ) {
+					'is_plugin_installed' => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
+						if ( in_array( $plugin_path_or_slug, $active_plugin_paths, true ) ) {
+							return true;
+						}
+						if( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
 							return true;
 						}
 
 						return false;
 					},
-					'is_plugin_active'    => function ( $plugin_path ) use ( $active_plugin_paths ) {
-						if ( in_array( $plugin_path, $active_plugin_paths, true ) ) {
+					'is_plugin_active'    => function ( $plugin_path_or_slug ) use ( $active_plugin_paths, $active_plugin_slugs ) {
+						if ( in_array( $plugin_path_or_slug, $active_plugin_paths, true ) ) {
+							return true;
+						}
+						if( in_array( $plugin_path_or_slug, $active_plugin_slugs, true ) ) {
 							return true;
 						}
 
 						return false;
 					},
+					'get_plugin_path_from_slug' => function ( $plugin_slug ) {
+						switch ( $plugin_slug ) {
+							case 'woocommerce':
+								return 'woocommerce/woocommerce.php';
+							case 'woocommerce-payments':
+								return 'woocommerce-payments/woocommerce-payments.php';
+							case 'visa-acceptance-solutions':
+								return 'visa-acceptance-solutions/visa-acceptance-solutions.php';
+							default:
+								break;
+						}
+
+						return false; // This means the plugin is not installed.
+					}
 				),
 			)
 		);
