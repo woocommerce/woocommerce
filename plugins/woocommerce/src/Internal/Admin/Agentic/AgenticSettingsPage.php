@@ -58,7 +58,7 @@ class AgenticSettingsPage {
 					__( 'To get started, <a href="%s" target="_blank">apply to ChatGPT</a>. Once approved, ChatGPT will provide the credentials below.', 'woocommerce' ),
 					'https://chatgpt.com/merchants'
 				),
-				'fields'      => $this->get_openai_fields( $registry['openai'] ?? array() ),
+				'fields'      => $this->get_openai_fields(),
 			),
 		);
 
@@ -194,17 +194,16 @@ class AgenticSettingsPage {
 	/**
 	 * Get OpenAI provider fields.
 	 *
-	 * @param array $config Current OpenAI configuration.
 	 * @return array Fields configuration.
 	 */
-	private function get_openai_fields( $config ) {
+	private function get_openai_fields() {
 		return array(
 			array(
 				'title'   => __( 'Authorization Token', 'woocommerce' ),
 				'desc'    => __( 'The bearer token that ChatGPT uses to authenticate checkout requests.', 'woocommerce' ),
 				'id'      => 'woocommerce_agentic_openai_bearer_token',
 				'type'    => 'password',
-				'default' => esc_attr( $config['bearer_token'] ?? '' ),
+				'default' => '',
 			),
 		);
 	}
@@ -260,14 +259,11 @@ class AgenticSettingsPage {
 	 * Save settings to registry structure.
 	 */
 	public function save_settings() {
-		// Verify nonce for security.
 		check_admin_referer( 'woocommerce-settings' );
 
-		// Get current registry.
 		$registry = $this->get_registry();
 
 		// Update general settings.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
 		$registry['general'] = array(
 			'enable_products_default' => isset( $_POST['woocommerce_agentic_enable_products_default'] ) && '1' === $_POST['woocommerce_agentic_enable_products_default']
 				? 'yes'
@@ -275,12 +271,16 @@ class AgenticSettingsPage {
 		);
 
 		// Update OpenAI settings.
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above with check_admin_referer.
-		$registry['openai'] = array(
-			'bearer_token' => isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
-				? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
-				: '',
-		);
+		$new_token = isset( $_POST['woocommerce_agentic_openai_bearer_token'] )
+			? sanitize_text_field( wp_unslash( $_POST['woocommerce_agentic_openai_bearer_token'] ) )
+			: '';
+
+		// Only update if a new token was provided; otherwise keep existing.
+		if ( ! empty( $new_token ) ) {
+			$registry['openai']['bearer_token'] = wp_hash_password( $new_token );
+		} elseif ( ! isset( $registry['openai']['bearer_token'] ) ) {
+			$registry['openai']['bearer_token'] = '';
+		}
 
 		/**
 		 * Filter registry before saving.
