@@ -5,6 +5,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 
 /**
  * Refunds Controller tests for V4 REST API.
@@ -113,9 +114,10 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Create utils instances.
 		$collection_query = new CollectionQuery();
+		$data_utils       = new DataUtils();
 
 		$this->endpoint = new RefundsController();
-		$this->endpoint->init( $this->refund_schema, $collection_query );
+		$this->endpoint->init( $this->refund_schema, $collection_query, $data_utils );
 
 		$this->user_id = wp_insert_user(
 			array(
