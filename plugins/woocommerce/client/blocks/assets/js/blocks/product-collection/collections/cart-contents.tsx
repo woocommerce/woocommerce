@@ -7,6 +7,7 @@ import type {
 } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/icons';
+import { cart } from '@woocommerce/icons';
 
 /**
  * Internal dependencies
@@ -14,31 +15,10 @@ import { Icon } from '@wordpress/icons';
 import { INNER_BLOCKS_PRODUCT_TEMPLATE } from '../constants';
 import { CoreCollectionNames, CoreFilterNames } from '../types';
 
-export const cartIcon = (
-	<svg
-		xmlns="http://www.w3.org/2000/svg"
-		fill="currentColor"
-		viewBox="0 0 32 32"
-	>
-		<circle cx="12.667" cy="24.667" r="2"></circle>
-		<circle cx="23.333" cy="24.667" r="2"></circle>
-		<path
-			fillRule="evenodd"
-			d="M9.285 10.036a1 1 0 0 1 .776-.37h15.272a1 1 0 0 1 .99 1.142l-1.333 9.333A1 1 0 0 1 24 21H12a1 1 0 0 1-.98-.797L9.083 10.87a1 1 0 0 1 .203-.834m2.005 1.63L12.814 19h10.319l1.047-7.333z"
-			clipRule="evenodd"
-		></path>
-		<path
-			fillRule="evenodd"
-			d="M5.667 6.667a1 1 0 0 1 1-1h2.666a1 1 0 0 1 .984.82l.727 4a1 1 0 1 1-1.967.359l-.578-3.18H6.667a1 1 0 0 1-1-1"
-			clipRule="evenodd"
-		></path>
-	</svg>
-);
-
 const collection = {
 	name: CoreCollectionNames.CART_CONTENTS,
 	title: __( 'Cart Contents', 'woocommerce' ),
-	icon: <Icon icon={ cartIcon } />,
+	icon: <Icon icon={ cart } />,
 	description: __(
 		'Display products from the customer cart for abandoned cart emails.',
 		'woocommerce'
