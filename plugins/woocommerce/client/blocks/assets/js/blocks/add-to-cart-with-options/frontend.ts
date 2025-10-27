@@ -57,7 +57,7 @@ export const getProductData = (
 ): NormalizedProductData | NormalizedVariationData | null => {
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	if ( ! Array.isArray( products ) || ! products[ id ] ) {
+	if ( ! products || ! products[ id ] ) {
 		return null;
 	}
 
