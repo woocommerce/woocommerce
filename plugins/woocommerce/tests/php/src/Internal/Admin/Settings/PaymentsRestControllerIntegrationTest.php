@@ -1698,12 +1698,12 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->providers_service->reset_memo();
 
-		$active_plugin_slugs = array( 'woocommerce' );
+		$active_plugin_paths = array( 'woocommerce/woocommerce.php' );
 		if ( $woopayments ) {
-			$active_plugin_slugs[] = 'woocommerce-payments';
+			$active_plugin_paths[] = 'woocommerce-payments/woocommerce-payments.php';
 		}
 		if ( $visa ) {
-			$active_plugin_slugs[] = 'visa-acceptance-solutions';
+			$active_plugin_paths[] = 'visa-acceptance-solutions/visa-acceptance-solutions.php';
 		}
 
 		$this->mockable_proxy->register_static_mocks(
@@ -1730,17 +1730,15 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				PluginsHelper::class   => array(
-					'is_plugin_installed' => function ( $plugin_slug ) use ( $active_plugin_slugs ) {
-						// WooCommerce and WooPayments are installed.
-						if ( in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
+					'is_plugin_installed' => function ( $plugin_path ) use ( $active_plugin_paths ) {
+						if ( in_array( $plugin_path, $active_plugin_paths, true ) ) {
 							return true;
 						}
 
 						return false;
 					},
-					'is_plugin_active'    => function ( $plugin_slug ) use ( $active_plugin_slugs ) {
-						// WooCommerce and WooPayments are active.
-						if ( in_array( $plugin_slug, $active_plugin_slugs, true ) ) {
+					'is_plugin_active'    => function ( $plugin_path ) use ( $active_plugin_paths ) {
+						if ( in_array( $plugin_path, $active_plugin_paths, true ) ) {
 							return true;
 						}
 
