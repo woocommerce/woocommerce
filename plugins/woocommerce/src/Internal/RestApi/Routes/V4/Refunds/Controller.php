@@ -13,7 +13,6 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
-use Automattic\WooCommerce\Internal\RestApiParameterUtil;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
 use Automattic\WooCommerce\StoreApi\Utilities\Pagination;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
@@ -57,15 +56,24 @@ class Controller extends AbstractController {
 	protected $collection_query;
 
 	/**
+	 * Data utils class.
+	 *
+	 * @var DataUtils
+	 */
+	protected $data_utils;
+
+	/**
 	 * Initialize the controller.
 	 *
 	 * @param RefundSchema    $item_schema Refund schema class.
 	 * @param CollectionQuery $collection_query Collection query class.
+	 * @param DataUtils       $data_utils Data utils class.
 	 * @internal
 	 */
-	final public function init( RefundSchema $item_schema, CollectionQuery $collection_query ) {
+	final public function init( RefundSchema $item_schema, CollectionQuery $collection_query, DataUtils $data_utils ) {
 		$this->item_schema      = $item_schema;
 		$this->collection_query = $collection_query;
+		$this->data_utils       = $data_utils;
 	}
 
 	/**
@@ -125,60 +133,18 @@ class Controller extends AbstractController {
 						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 						array(
 							'api_refund'  => array(
-								'description' => __( 'When true, the payment gateway API is used to perform the refund. If the payment gateway does not support refunds, the refund will fail.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'edit' ),
-								'default'     => false,
+								'description'       => __( 'When true, the payment gateway API is used to perform the refund. If the payment gateway does not support refunds, the refund will fail.', 'woocommerce' ),
+								'type'              => 'boolean',
+								'context'           => array( 'edit' ),
+								'default'           => false,
+								'sanitize_callback' => 'rest_sanitize_boolean',
 							),
 							'api_restock' => array(
-								'description' => __( 'When true, refunded items are restocked.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'edit' ),
-								'default'     => false,
-							),
-							'line_items'  => array(
-								'description' => __( 'Line items to refund. This can include products, fees, and shipping lines, combined into a single array.', 'woocommerce' ),
-								'type'        => 'array',
-								'context'     => array( 'edit' ),
-								'default'     => array(),
-								'items'       => array(
-									'type'       => 'object',
-									'properties' => array(
-										'id'           => array(
-											'description' => __( 'Item ID.', 'woocommerce' ),
-											'type'        => 'integer',
-										),
-										'quantity'     => array(
-											'description' => __( 'Quantity to refund for this item.', 'woocommerce' ),
-											'type'        => 'integer',
-											'minimum'     => 0,
-										),
-										'refund_total' => array(
-											'description' => __( 'Amount to refund for this item.', 'woocommerce' ),
-											'type'        => 'number',
-											'minimum'     => 0,
-										),
-										'refund_tax'   => array(
-											'description' => __( 'Taxes to refund for this item.', 'woocommerce' ),
-											'type'        => 'array',
-											'default'     => array(),
-											'items'       => array(
-												'type' => 'object',
-												'properties' => array(
-													'id' => array(
-														'description' => __( 'Tax ID.', 'woocommerce' ),
-														'type'        => 'integer',
-													),
-													'refund_total' => array(
-														'description' => __( 'Amount to refund for this tax.', 'woocommerce' ),
-														'type'        => 'number',
-														'minimum'     => 0,
-													),
-												),
-											),
-										),
-									),
-								),
+								'description'       => __( 'When true, refunded items are restocked.', 'woocommerce' ),
+								'type'              => 'boolean',
+								'context'           => array( 'edit' ),
+								'default'           => false,
+								'sanitize_callback' => 'rest_sanitize_boolean',
 							),
 						)
 					),
@@ -288,91 +254,33 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			RestApiParameterUtil::adjust_create_refund_request_parameters( $request );
-
 			$order = wc_get_order( $request['order_id'] );
 
 			if ( ! $order ) {
 				return $this->get_route_error_by_code( self::INVALID_ID );
 			}
 
-			if ( 0 > $request['amount'] || ! $request['amount'] ) {
-				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
+			// Validate request line_items before proceeding against the order being refunded.
+			$validation_error = $this->data_utils->validate_line_items( $request['line_items'], $order );
+
+			if ( is_wp_error( $validation_error ) ) {
+				return $this->get_route_error_response( $validation_error->get_error_code(), $validation_error->get_error_message() );
 			}
 
-			// Validate line items.
-			foreach ( $request['line_items'] as $line_item_id => $line_item ) {
-				if ( ! $line_item_id ) {
-					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
-				}
+			// Convert line items to internal format.
+			$line_item_data = $this->data_utils->convert_line_items_to_internal_format( $request['line_items'] );
+			$refund_amount  = $this->data_utils->calculate_refund_amount( $request['line_items'] );
 
-				$item = $order->get_item( $line_item_id );
-
-				// Validate item exists and belongs to the order.
-				if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
-					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item not found.', 'woocommerce' ) );
-				}
-
-				if ( ! $item instanceof \WC_Order_Item_Product && ! $item instanceof \WC_Order_Item_Fee && ! $item instanceof \WC_Order_Item_Shipping ) {
-					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
-				}
-
-				// Validate item quantity is not greater than the item quantity.
-				if ( $item->get_quantity() < $line_item['qty'] ) {
-					return $this->get_route_error_response( 'invalid_line_item', __( 'Line item quantity cannot be greater than the item quantity.', 'woocommerce' ) );
-				}
-
-				// Validate refund total is not greater than the item total.
-				if ( $item->get_total() < $line_item['refund_total'] ) {
-					return $this->get_route_error_response(
-						'invalid_refund_amount',
-						sprintf(
-							/* translators: %s: tax total */
-							__( 'Refund total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
-							$item->get_total()
-						)
-					);
-				}
-
-				if ( isset( $line_item['refund_tax'] ) ) {
-					$item_taxes = $item->get_taxes();
-
-					if ( $item_taxes ) {
-						$allowed_tax_ids = array_keys( $item_taxes['total'] ?? array() );
-
-						foreach ( $line_item['refund_tax'] as $tax_id => $refund_total ) {
-							if ( ! in_array( $tax_id, $allowed_tax_ids, true ) ) {
-								return $this->get_route_error_response(
-									'invalid_line_item',
-									sprintf(
-									/* translators: %s: tax IDs */
-										__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
-										implode( ', ', $allowed_tax_ids )
-									)
-								);
-							}
-
-							if ( $item_taxes['total'][ $tax_id ] < $refund_total ) {
-								return $this->get_route_error_response(
-									'invalid_refund_amount',
-									sprintf(
-									/* translators: %s: tax total */
-										__( 'Refund tax total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
-										$item_taxes['total'][ $tax_id ]
-									)
-								);
-							}
-						}
-					}
-				}
+			if ( 0 > $refund_amount || ! $refund_amount ) {
+				return $this->get_route_error_response( 'invalid_refund_amount', __( 'Refund total must be greater than zero.', 'woocommerce' ) );
 			}
 
 			$refund = wc_create_refund(
 				array(
 					'order_id'       => $order->get_id(),
-					'amount'         => $request['amount'],
+					'amount'         => $refund_amount,
 					'reason'         => $request['reason'],
-					'line_items'     => $request['line_items'],
+					'line_items'     => $line_item_data,
 					'refund_payment' => $request['api_refund'],
 					'restock_items'  => $request['api_restock'],
 				)

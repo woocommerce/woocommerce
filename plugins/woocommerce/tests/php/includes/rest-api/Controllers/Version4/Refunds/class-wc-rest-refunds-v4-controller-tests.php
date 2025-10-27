@@ -428,7 +428,7 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'reason'     => 'Partial refund for damaged item',
 			'line_items' => array(
 				array(
-					'id'           => $line_item->get_id(),
+					'line_item_id' => $line_item->get_id(),
 					'quantity'     => 1,
 					'refund_total' => 5.00,
 				),

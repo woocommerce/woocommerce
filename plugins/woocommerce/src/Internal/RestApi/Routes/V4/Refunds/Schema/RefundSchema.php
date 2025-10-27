@@ -89,28 +89,30 @@ class RefundSchema extends AbstractSchema {
 	public function get_item_schema_properties(): array {
 		$schema = array(
 			'id'               => array(
-				'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+				'description' => __( 'Unique identifier for the refund.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'order_id'         => array(
-				'description' => __( 'The ID of the order the refund belongs to.', 'woocommerce' ),
-				'type'        => 'integer',
-				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'required'    => true,
+				'description'       => __( 'The ID of the order that was refunded.', 'woocommerce' ),
+				'type'              => 'integer',
+				'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+				'required'          => true,
+				'sanitize_callback' => 'absint',
 			),
 			'amount'           => array(
-				'description' => __( 'Refund amount.', 'woocommerce' ),
+				'description' => __( 'Amount that was refunded', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'reason'           => array(
-				'description' => __( 'Reason for refund.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'default'     => '',
+				'description'       => __( 'Reason for the refund.', 'woocommerce' ),
+				'type'              => 'string',
+				'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+				'default'           => '',
+				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'currency'         => array(
 				'description' => __( 'Currency the refund was created with, in ISO format.', 'woocommerce' ),
@@ -143,13 +145,13 @@ class RefundSchema extends AbstractSchema {
 			'refunded_by'      => array(
 				'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
 				'type'        => 'integer',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'refunded_payment' => array(
 				'description' => __( 'If the payment was refunded via the API.', 'woocommerce' ),
 				'type'        => 'boolean',
-				'context'     => array( 'view', 'edit' ),
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
 			'meta_data'        => array(
@@ -180,36 +182,47 @@ class RefundSchema extends AbstractSchema {
 				),
 			),
 			'line_items'       => array(
-				'description' => __( 'A list of line items (products) that were refunded.', 'woocommerce' ),
+				'description' => __( 'Refunded line items. This can include products, fees, and shipping lines, combined into a single array.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-				'readonly'    => true,
+				'default'     => array(),
 				'items'       => array(
 					'type'       => 'object',
 					'properties' => array(
-						'refund_item_id' => array(
-							'description' => __( 'ID of the record for the refunded item.', 'woocommerce' ),
+						'id'           => array(
+							'description' => __( 'ID of the refund line item. This is not the ID of the original line item.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 							'readonly'    => true,
 						),
-						'quantity'       => array(
-							'description' => __( 'Quantity refunded.', 'woocommerce' ),
-							'type'        => 'integer',
-							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-							'readonly'    => true,
+						'line_item_id' => array(
+							'description'       => __( 'ID of the original line item.', 'woocommerce' ),
+							'type'              => 'integer',
+							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
-						'refund_total'   => array(
-							'description' => __( 'Total refunded for this item.', 'woocommerce' ),
-							'type'        => 'number',
-							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-							'readonly'    => true,
+						'quantity'     => array(
+							'description'       => __( 'Quantity refunded.', 'woocommerce' ),
+							'type'              => 'integer',
+							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+							'default'           => 0,
+							'sanitize_callback' => 'wc_stock_amount',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
-						'refund_tax'     => array(
+						'refund_total' => array(
+							'description'       => __( 'Total refunded for this item.', 'woocommerce' ),
+							'type'              => 'number',
+							'context'           => self::VIEW_EDIT_EMBED_CONTEXT,
+							'default'           => 0,
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
+						),
+						'refund_tax'   => array(
 							'description' => __( 'Taxes refunded for this item.', 'woocommerce' ),
 							'type'        => 'array',
 							'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-							'readonly'    => true,
 							'items'       => array(
 								'type'       => 'object',
 								'properties' => array(
@@ -217,13 +230,17 @@ class RefundSchema extends AbstractSchema {
 										'description' => __( 'Tax ID.', 'woocommerce' ),
 										'type'        => 'integer',
 										'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-										'readonly'    => true,
+										'required'    => true,
+										'sanitize_callback' => 'absint',
+										'validate_callback' => 'rest_validate_request_arg',
 									),
 									'refund_total' => array(
 										'description' => __( 'Amount refunded for this tax.', 'woocommerce' ),
 										'type'        => 'number',
 										'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
-										'readonly'    => true,
+										'required'    => true,
+										'sanitize_callback' => 'sanitize_text_field',
+										'validate_callback' => 'rest_validate_request_arg',
 									),
 								),
 							),
@@ -289,9 +306,9 @@ class RefundSchema extends AbstractSchema {
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$data['line_items'] = array_merge(
-				$this->get_line_items_response( $refund->get_items( 'line_item' ) ),
-				$this->get_line_items_response( $refund->get_items( 'fee' ) ),
-				$this->get_line_items_response( $refund->get_items( 'shipping' ) ),
+				$this->get_line_items_response( $refund->get_items( 'line_item' ), $request ),
+				$this->get_line_items_response( $refund->get_items( 'fee' ), $request ),
+				$this->get_line_items_response( $refund->get_items( 'shipping' ), $request ),
 			);
 		}
 
@@ -320,13 +337,14 @@ class RefundSchema extends AbstractSchema {
 	/**
 	 * Standardize the line items response.
 	 *
-	 * @param array $line_items Line items.
+	 * @param array           $line_items Line items.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function get_line_items_response( $line_items ) {
+	protected function get_line_items_response( $line_items, WP_REST_Request $request ) {
 		$line_items_response = array();
 		foreach ( $line_items as $line_item ) {
-			$line_items_response[] = $this->prepare_line_item( $line_item );
+			$line_items_response[] = $this->prepare_line_item( $line_item, $request );
 		}
 		return $line_items_response;
 	}
@@ -334,22 +352,25 @@ class RefundSchema extends AbstractSchema {
 	/**
 	 * Standardize the line item response.
 	 *
-	 * @param WC_Order_Item $line_item Line item instance.
+	 * @param WC_Order_Item   $line_item Line item instance.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array
 	 */
-	protected function prepare_line_item( $line_item ) {
+	protected function prepare_line_item( $line_item, WP_REST_Request $request ) {
+		$dp           = is_null( $request['num_decimals'] ) ? wc_get_price_decimals() : absint( $request['num_decimals'] );
 		$tax_response = array();
 		$taxes        = $line_item->get_taxes();
 		foreach ( $taxes['total'] ?? array() as $tax_rate_id => $tax ) {
 			$tax_response[] = array(
-				'id'           => $tax_rate_id,
-				'refund_total' => $tax,
+				'id'           => absint( $tax_rate_id ),
+				'refund_total' => wc_format_decimal( abs( (float) $tax ), $dp ),
 			);
 		}
 		return array(
-			'id'           => (int) $line_item->get_meta( '_refunded_item_id' ),
-			'quantity'     => $line_item->get_quantity(),
-			'refund_total' => $line_item->get_total(),
+			'id'           => absint( $line_item->get_id() ),
+			'line_item_id' => absint( $line_item->get_meta( '_refunded_item_id' ) ),
+			'quantity'     => wc_stock_amount( abs( (float) $line_item->get_quantity() ) ),
+			'refund_total' => wc_format_decimal( abs( (float) $line_item->get_total() ), $dp ),
 			'refund_tax'   => $tax_response,
 		);
 	}
