@@ -384,7 +384,74 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter
 
-		$this->sut->regenerate_entity_version( 'product', 123 );
+		// Create a test cache instance that captures the TTL.
+		$captured_ttl = null;
+		$cache        = new class( $captured_ttl ) extends EntityVersionKeysCache {
+			/**
+			 * Cache storage.
+			 *
+			 * @var array
+			 */
+			public $cache = array();
+
+			/**
+			 * Reference to captured TTL.
+			 *
+			 * @var int|null
+			 */
+			private $captured_ttl_ref;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param int|null $captured_ttl_ref Reference to captured TTL.
+			 */
+			public function __construct( &$captured_ttl_ref ) {
+				$this->captured_ttl_ref = &$captured_ttl_ref;
+			}
+
+			/**
+			 * Get a value from the cache.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @return mixed|null The cached value or null if not found.
+			 */
+			protected function get_cached( string $cache_key ) {
+				return $this->cache[ $cache_key ] ?? null;
+			}
+
+			/**
+			 * Set a value in the cache.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @param mixed  $value     The value to cache.
+			 * @param int    $ttl       Time to live in seconds.
+			 * @return bool True on success, false on failure.
+			 */
+			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
+				$this->captured_ttl_ref = $ttl;
+				$this->cache[ $cache_key ] = $value;
+				return true;
+			}
+
+			/**
+			 * Delete a value from the cache.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @return bool True on success, false on failure.
+			 */
+			protected function delete_cached( string $cache_key ): bool {
+				if ( isset( $this->cache[ $cache_key ] ) ) {
+					unset( $this->cache[ $cache_key ] );
+					return true;
+				}
+				return false;
+			}
+		};
+
+		$cache->regenerate_entity_version( 'product', 123 );
+
+		$this->assertEquals( 0, $captured_ttl, 'Negative TTL should be converted to 0' );
 	}
 
 	/**
