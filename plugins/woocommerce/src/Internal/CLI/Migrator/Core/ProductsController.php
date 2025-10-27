@@ -1009,6 +1009,8 @@ class ProductsController {
 					$value = $value ? 'Yes' : 'No';
 				} elseif ( is_array( $value ) ) {
 					$value = implode( ', ', $value );
+				} elseif ( 'limit' === $key && PHP_INT_MAX === $value ) {
+					$value = 'All';
 				}
 				WP_CLI::line( sprintf( '  %s: %s', $label, $value ) );
 			}
