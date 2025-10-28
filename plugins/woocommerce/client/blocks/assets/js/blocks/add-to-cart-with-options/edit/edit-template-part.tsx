@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useSelect } from '@wordpress/data';
-import { Spinner } from '@wordpress/components';
 import { useEntityBlockEditor, store as coreStore } from '@wordpress/core-data';
 import {
 	InnerBlocks,
