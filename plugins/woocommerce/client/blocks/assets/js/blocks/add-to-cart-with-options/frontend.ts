@@ -20,6 +20,7 @@ import { getMatchedVariation } from '../../base/utils/variations/get-matched-var
 import { doesCartItemMatchAttributes } from '../../base/utils/variations/does-cart-item-match-attributes';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
+import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -54,13 +55,13 @@ const { state: productDataState } = store< ProductDataStore >(
 export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
-) => {
+): NormalizedProductData | NormalizedVariationData | null => {
 	let productId = id;
-	let productData: ProductData | VariationData | undefined;
+	let productData;
 
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type: ProductData[ 'type' ] | 'variation' | null = null;
+	let type: ProductData[ 'type' ] | 'variation' = 'simple';
 	if ( selectedAttributes && selectedAttributes.length > 0 ) {
 		if ( ! products || ! products[ id ] ) {
 			return null;
@@ -133,11 +134,13 @@ export const getNewQuantity = (
 
 export type AddToCartWithOptionsStore = {
 	state: {
-		isFormValid: boolean;
 		noticeIds: string[];
 		validationErrors: AddToCartError[];
+		isFormValid: boolean;
+		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
+		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -170,6 +173,11 @@ const { actions, state } = store<
 			get isFormValid(): boolean {
 				return state.validationErrors.length === 0;
 			},
+			get allowsAddingToCart(): boolean {
+				const { productData } = state;
+
+				return productData?.is_in_stock ?? true;
+			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
 				return context.quantity || {};
@@ -177,6 +185,14 @@ const { actions, state } = store<
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
+			},
+			get productData() {
+				const { selectedAttributes } = getContext< Context >();
+
+				return getProductData(
+					productDataState.productId,
+					selectedAttributes
+				);
 			},
 		},
 		actions: {
@@ -233,11 +249,7 @@ const { actions, state } = store<
 					};
 				}
 
-				const productObject = getProductData(
-					productDataState.productId,
-					context.selectedAttributes
-				);
-				if ( productObject?.type === 'grouped' ) {
+				if ( state.productData?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
