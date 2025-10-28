@@ -559,6 +559,22 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test is_onboarding_supported with supported country when gateway returns null (unknown).
+	 *
+	 * To lock in tri-state behavior: gateway returns null, WooPayments resolves via country list.
+	 */
+	public function test_is_onboarding_supported_with_supported_country_when_gateway_unknown() {
+		$fake_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array( 'onboarding_supported' => null )
+		);
+		if ( ! class_exists( '\WC_Payments_Utils' ) ) {
+			require_once __DIR__ . '/../Mocks/WCPaymentsUtils.php';
+		}
+		$this->assertTrue( $this->sut->is_onboarding_supported( $fake_gateway, 'GB' ) );
+	}
+
+	/**
 	 * Test get_details with unsupported country code.
 	 */
 	public function test_get_details_with_unsupported_country() {
