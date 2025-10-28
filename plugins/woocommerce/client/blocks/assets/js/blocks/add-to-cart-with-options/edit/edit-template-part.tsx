@@ -83,22 +83,16 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 
 	const blockProps = useBlockProps();
 
-	const { canViewTemplatePart, canEditTemplatePart } = useSelect(
+	const { canEditTemplatePart } = useSelect(
 		( select ) => {
-			const templatePartData = {
-				kind: 'postType',
-				name: 'wp_template_part',
-				id: templatePartId,
-			};
 			return {
-				canViewTemplatePart: !! select( coreStore ).canUser(
-					'read',
-					templatePartData
-				),
-				canEditTemplatePart: !! select( coreStore ).canUser(
-					'update',
-					templatePartData
-				),
+				canEditTemplatePart:
+					templatePartId &&
+					select( coreStore ).canUser( 'update', {
+						kind: 'postType',
+						name: 'wp_template_part',
+						id: templatePartId,
+					} ),
 			};
 		},
 		[ templatePartId ]
@@ -112,7 +106,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 		);
 	}
 
-	if ( ! canViewTemplatePart || ! canEditTemplatePart ) {
+	if ( ! canEditTemplatePart ) {
 		return <Skeleton productType={ productType } />;
 	}
 
