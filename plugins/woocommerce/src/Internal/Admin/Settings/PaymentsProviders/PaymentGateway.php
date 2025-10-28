@@ -441,6 +441,10 @@ class PaymentGateway {
 
 				// Call with positional argument; normalize to bool|null.
 				$result = call_user_func( array( $payment_gateway, 'is_onboarding_supported' ), $country_code );
+				// Preserve null to indicate "unknown" state.
+				if ( is_null( $result ) ) {
+					return null;
+				}
 				if ( is_bool( $result ) ) {
 					return $result;
 				}
