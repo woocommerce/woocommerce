@@ -2,22 +2,26 @@
  * External dependencies
  */
 import { devices } from '@playwright/test';
-import { test, expect } from '@woocommerce/e2e-utils';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/product-image-gallery',
 	productPage: '/product/hoodie/',
 };
 
-/**
- * Note: These tests are run on a mobile device because the tap() method is required,
- * which is not supported on desktop devices.
- *
- * @see https://playwright.dev/docs/api/class-locator#locator-tap
- */
-test.use( { ...devices[ 'Pixel 7' ] } );
+test.describe( `${ blockData.name } frontend`, () => {
+	/**
+	 * Note: These tests are run on a mobile device because the tap() method is required,
+	 * which is not supported on desktop devices.
+	 *
+	 * @see https://playwright.dev/docs/api/class-locator#locator-tap
+	 */
+	test.use( {
+		viewport: { width: 412, height: 915 },
+		userAgent: devices[ 'Pixel 7' ].userAgent,
+		hasTouch: true,
+	} );
 
-test.describe( `${ blockData.name }`, () => {
 	test( 'should not switch to the next image when the user cursor is focused on the rating with keyboard', async ( {
 		page,
 	} ) => {
@@ -88,5 +92,38 @@ test.describe( `${ blockData.name }`, () => {
 			'src',
 			activeImageSrc as string
 		);
+	} );
+} );
+
+test.describe( `${ blockData.name } editor`, () => {
+	test( 'can be migrated to the Product Gallery block', async ( {
+		page,
+		editor,
+		admin,
+	} ) => {
+		await admin.visitSiteEditor( {
+			postId: `${ BLOCK_THEME_SLUG }//single-product`,
+			postType: 'wp_template',
+			canvas: 'edit',
+		} );
+
+		const productImageGalleryBlock = await editor.getBlockByName(
+			blockData.name
+		);
+		await editor.selectBlocks( productImageGalleryBlock );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+		).toBeHidden();
+
+		await page
+			.getByRole( 'button', {
+				name: 'Upgrade to the new Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+		).toBeVisible();
 	} );
 } );
