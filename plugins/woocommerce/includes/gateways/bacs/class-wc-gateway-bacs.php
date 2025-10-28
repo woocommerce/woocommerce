@@ -133,7 +133,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				'type' => 'account_details',
 			),
 		);
-
 	}
 
 	/**
@@ -178,7 +177,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							$i = -1;
 							if ( $this->account_details ) {
 								foreach ( $this->account_details as $account ) {
-									$i++;
+									++$i;
 
 									echo '<tr class="account">
 										<td class="sort"></td>
@@ -224,7 +223,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		</tr>
 		<?php
 		return ob_get_clean();
-
 	}
 
 	/**
@@ -236,7 +234,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verification already handled in WC_Admin_Settings::save()
 		if ( isset( $_POST['bacs_account_name'] ) && isset( $_POST['bacs_account_number'] ) && isset( $_POST['bacs_bank_name'] )
-			 && isset( $_POST['bacs_sort_code'] ) && isset( $_POST['bacs_iban'] ) && isset( $_POST['bacs_bic'] ) ) {
+			&& isset( $_POST['bacs_sort_code'] ) && isset( $_POST['bacs_iban'] ) && isset( $_POST['bacs_bic'] ) ) {
 
 			$account_names   = wc_clean( wp_unslash( $_POST['bacs_account_name'] ) );
 			$account_numbers = wc_clean( wp_unslash( $_POST['bacs_account_number'] ) );
@@ -277,7 +275,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			echo wp_kses_post( wpautop( wptexturize( wp_kses_post( $this->instructions ) ) ) );
 		}
 		$this->bank_details( $order_id );
-
 	}
 
 	/**
@@ -385,7 +382,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 				echo '<section class="woocommerce-bacs-bank-details"><h2 class="wc-bacs-bank-details-heading">' . esc_html__( 'Our bank details', 'woocommerce' ) . '</h2>' . wp_kses_post( PHP_EOL . $account_html ) . '</section>';
 			}
 		}
-
 	}
 
 	/**
@@ -409,7 +405,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			 */
 			$process_payment_status = apply_filters( 'woocommerce_bacs_process_payment_order_status', OrderStatus::ON_HOLD, $order );
 			// Mark as on-hold (we're awaiting the payment).
-			$order->update_status( $process_payment_status, __( 'Awaiting BACS payment', 'woocommerce' ) );
+			$order->update_status( $process_payment_status, __( 'Awaiting BACS payment.', 'woocommerce' ) );
 		} else {
 			$order->payment_complete();
 		}
@@ -422,7 +418,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			'result'   => 'success',
 			'redirect' => $this->get_return_url( $order ),
 		);
-
 	}
 
 	/**
@@ -484,7 +479,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 		}
 
 		return $this->locale;
-
 	}
 
 	/**

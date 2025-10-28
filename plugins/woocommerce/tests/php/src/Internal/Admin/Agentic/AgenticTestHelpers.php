@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Agentic;
 
+use Automattic\WooCommerce\Internal\Admin\Agentic\AgenticWebhookManager;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Agentic\Enums\OrderMetaKey;
 use WC_Order;
 use WC_Webhook;
@@ -27,12 +28,22 @@ trait AgenticTestHelpers {
 	}
 
 	/**
+	 * Add webhook sent meta to order.
+	 *
+	 * @param WC_Order $order Order object.
+	 */
+	protected function add_webhook_sent_meta( $order ) {
+		$order->update_meta_data( '_acp_order_created_sent', 'sent' );
+		$order->save();
+	}
+
+	/**
 	 * Create an Agentic webhook.
 	 *
 	 * @param string $topic Topic for webhook. Defaults to 'action.woocommerce_agentic_order_created'.
 	 * @return WC_Webhook Created webhook.
 	 */
-	protected function create_agentic_webhook( $topic = 'action.woocommerce_agentic_order_created' ) {
+	protected function create_agentic_webhook( $topic = AgenticWebhookManager::WEBHOOK_TOPIC ) {
 		$webhook = new WC_Webhook();
 		$webhook->set_topic( $topic );
 		$webhook->set_delivery_url( 'https://test.com' );
