@@ -56,7 +56,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					position="bottom right"
 				>
 					<div className="wc-block-editor-add-to-cart-form-container">
-						<MultiLineTextSkeleton />
+						<MultiLineTextSkeleton isStatic={ true } />
 						<Disabled>
 							{ props.attributes.quantitySelectorStyle ===
 								QuantitySelectorStyle.Input && (
