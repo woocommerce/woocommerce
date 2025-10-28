@@ -685,10 +685,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function has_fulfillment_status_column() {
 		global $wpdb;
 
-		if ( null !== self::$has_fulfillment_column ) {
-			return self::$has_fulfillment_column;
-		}
-
 		$table_name    = self::get_db_table_name();
 		$column_exists = $wpdb->get_var(
 			$wpdb->prepare(
