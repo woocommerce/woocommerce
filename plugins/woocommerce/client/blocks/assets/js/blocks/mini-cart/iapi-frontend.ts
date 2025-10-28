@@ -126,7 +126,10 @@ store< MiniCart >(
 	{
 		state: {
 			get totalItemsInCart() {
-				return woocommerceState.cart.items_count;
+				return woocommerceState.cart.items.reduce< number >(
+					( total, { quantity } ) => total + quantity,
+					0
+				);
 			},
 
 			get formattedSubtotal(): string {
@@ -701,6 +704,7 @@ const { state: cartItemState } = store(
 				const nameTxt = document.createElement( 'textarea' );
 				nameTxt.innerHTML = dataItemAttrKey + ':';
 				const valueTxt = document.createElement( 'textarea' );
+				console.log( dataItemAttr.display );
 				valueTxt.innerHTML = dataItemAttr.display || dataItemAttr.value;
 
 				return {
