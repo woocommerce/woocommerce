@@ -486,7 +486,7 @@ class PaymentGateway {
 
 				$message = call_user_func_array(
 					array( $payment_gateway, 'get_onboarding_not_supported_message' ),
-					array( 'country_code' => $country_code ),
+					array( $country_code ),
 				);
 				if ( is_string( $message ) && ! empty( $message ) ) {
 					return sanitize_textarea_field( trim( $message ) );
@@ -848,7 +848,7 @@ class PaymentGateway {
 			// Get the "raw" recommended payment methods from the payment gateway.
 			$recommended_pms = call_user_func_array(
 				array( $payment_gateway, 'get_recommended_payment_methods' ),
-				array( 'country_code' => $country_code ),
+				array( $country_code ),
 			);
 			if ( ! is_array( $recommended_pms ) ) {
 				// Bail if the recommended payment methods are not an array.
