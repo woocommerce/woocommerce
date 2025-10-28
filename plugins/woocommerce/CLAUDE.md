@@ -48,6 +48,30 @@ markdownlint plugins/woocommerce/CLAUDE.md     # Check markdown file
 markdownlint --fix plugins/woocommerce/CLAUDE.md # Auto-fix basic issues
 ```
 
+## Copy Guidelines
+
+### Sentence Case for UI Text
+
+**Always use sentence case for UI copy, not title case.**
+
+**Correct:**
+
+- "Payment provider options"
+- "Complete setup"
+- "Add new gateway"
+
+**Incorrect:**
+
+- "Payment Provider Options"
+- "Complete Setup"
+- "Add New Gateway"
+
+**Exceptions:**
+
+- Proper nouns (WooPayments, WordPress)
+- Acronyms (API, URL)
+- Brand names
+
 ## Running Tests
 
 ### PHP Unit Tests
