@@ -50,18 +50,19 @@ export const PaymentGatewayListItem = ( {
 	const incentive = hasIncentive( gateway ) ? gateway._incentive : null;
 
 	const gatewayHasRecommendedPaymentMethods =
-		( gateway.onboarding.recommended_payment_methods ?? [] ).length > 0;
+		( gateway.onboarding?.recommended_payment_methods ?? [] ).length > 0;
 
-	const isOnboardingSupported = gateway.onboarding?.state?.supported ?? false;
+	// Default to onboarding supported to avoid blocking the user.
+	const isOnboardingSupported = gateway.onboarding?.state?.supported ?? true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
 	const gatewayNeedsOnboarding =
 		! gateway.state.account_connected ||
 		( gateway.state.account_connected &&
-			! gateway.onboarding.state.started ) ||
+			! gateway.onboarding?.state?.started ) ||
 		( gateway.state.account_connected &&
-			gateway.onboarding.state.started &&
-			! gateway.onboarding.state.completed );
+			gateway.onboarding?.state?.started &&
+			! gateway.onboarding?.state?.completed );
 
 	const determineGatewayStatus = () => {
 		// If the gateway needs onboarding and is not supported, show the not_supported status.
@@ -86,7 +87,7 @@ export const PaymentGatewayListItem = ( {
 			if ( gateway.state.account_connected ) {
 				// The test account status badge supersedes the test mode badge since, obviously,
 				// a test account is always in test mode payments.
-				if ( gateway.onboarding.state.test_mode ) {
+				if ( gateway.onboarding?.state?.test_mode ) {
 					return 'test_account';
 				}
 
@@ -273,8 +274,8 @@ export const PaymentGatewayListItem = ( {
 							// There is no actual switch-to-live in dev mode.
 							! gateway.state.dev_mode &&
 							gateway.state.account_connected &&
-							gateway.onboarding.state.completed &&
-							gateway.onboarding.state.test_mode && (
+							gateway.onboarding?.state?.completed &&
+							gateway.onboarding?.state?.test_mode && (
 								<ActivatePaymentsButton
 									acceptIncentive={ acceptIncentive }
 									installingPlugin={ installingPlugin }
@@ -294,8 +295,8 @@ export const PaymentGatewayListItem = ( {
 							// There are no live payments in dev mode or test accounts, so no point in reactivating them.
 							! gateway.state.dev_mode &&
 							gateway.state.account_connected &&
-							gateway.onboarding.state.completed &&
-							! gateway.onboarding.state.test_mode &&
+							gateway.onboarding?.state?.completed &&
+							! gateway.onboarding?.state?.test_mode &&
 							gateway.state.test_mode && (
 								<ReactivateLivePaymentsButton
 									settingsHref={
