@@ -704,7 +704,6 @@ const { state: cartItemState } = store(
 				const nameTxt = document.createElement( 'textarea' );
 				nameTxt.innerHTML = dataItemAttrKey + ':';
 				const valueTxt = document.createElement( 'textarea' );
-				console.log( dataItemAttr.display );
 				valueTxt.innerHTML = dataItemAttr.display || dataItemAttr.value;
 
 				return {
