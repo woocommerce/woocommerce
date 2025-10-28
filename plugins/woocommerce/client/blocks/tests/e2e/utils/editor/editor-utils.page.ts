@@ -155,7 +155,7 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
-	async revertTemplate( { templateName }: { templateName: string } ) {
+	async revertTemplateSiceWP69( { templateName }: { templateName: string } ) {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
@@ -163,7 +163,23 @@ export class Editor extends CoreEditor {
 			.first()
 			.click();
 		await this.page
-			.getByRole( 'menuitem', { name: /Reset|Delete|Move to trash/ } )
+			.getByRole( 'menuitem', { name: /Move to trash/ } )
+			.click();
+
+		await this.page
+			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
+			.click();
+	}
+
+	async revertTemplateTillWP69( { templateName }: { templateName: string } ) {
+		await this.searchTemplate( { templateName } );
+
+		await this.page
+			.getByRole( 'button', { name: 'Actions' } )
+			.first()
+			.click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Reset|Delete/ } )
 			.click();
 
 		const responsePromise = this.page.waitForResponse(
@@ -176,21 +192,21 @@ export class Editor extends CoreEditor {
 				response.request().method() === 'POST'
 		);
 
+		await this.page.getByRole( 'button', { name: /Reset|Delete/ } ).click();
+
+		await responsePromise;
+
 		await this.page
-			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
-			.click();
+			.getByLabel( 'Dismiss this notice' )
+			.getByText( /reset|deleted/ )
+			.waitFor();
+	}
 
-		if ( this.wpCoreVersion < 6.9 ) {
-			await responsePromise;
-
-			await this.page
-				.getByLabel( 'Dismiss this notice' )
-				.getByText( /reset|deleted/ )
-				.waitFor();
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		if ( this.wpCoreVersion >= 6.9 ) {
+			await this.revertTemplateSiceWP69( { templateName } );
 		} else {
-			await responsePromise.catch( () => {
-				// Ignore the error.
-			} );
+			await this.revertTemplateTillWP69( { templateName } );
 		}
 	}
 
