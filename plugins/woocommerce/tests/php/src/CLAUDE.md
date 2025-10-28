@@ -141,7 +141,7 @@ public function test_behavior( string $country, $expected ): void {
 ## Setup and Teardown
 
 ```php
-protected function setUp(): void {
+public function setUp(): void {
     parent::setUp();
     $this->admin_id = $this->factory->user->create(
         array( 'role' => 'administrator' )
@@ -149,7 +149,7 @@ protected function setUp(): void {
     $this->service = new ServiceClass();
 }
 
-protected function tearDown(): void {
+public function tearDown(): void {
     wp_delete_user( $this->admin_id );
     unset( $GLOBALS['some_global'] );
     parent::tearDown();

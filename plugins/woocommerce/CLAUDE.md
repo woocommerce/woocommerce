@@ -309,7 +309,7 @@ markdownlint packages/js/CLAUDE.md plugins/woocommerce/CLAUDE.md \
   plugins/woocommerce/client/admin/CLAUDE.md
 ```
 
-**Note**: `markdownlint --fix` automatically fixes most issues including
+**Note**: `markdownlint --fix` automatically handles most issues including
 blank lines around code blocks/lists, list indentation, and bare URLs.
 Only a few issues require manual fixing (missing language specs, long lines).
 
