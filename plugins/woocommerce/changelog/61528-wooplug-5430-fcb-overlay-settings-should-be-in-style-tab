@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Moved Gradient controls for Featured Category and Featured Product block in the Style tab of the Inspector Controls, making it more consistent with existing Gutenberg patterns.
