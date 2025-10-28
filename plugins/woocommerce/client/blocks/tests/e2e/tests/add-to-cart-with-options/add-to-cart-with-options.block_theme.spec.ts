@@ -966,107 +966,7 @@ test.describe( 'Add to Cart + Options autoselect behavior', () => {
 	const productPermalink = '/product/' + productSlug;
 	const productPrice = '13.99';
 	let productId;
-	let commonSetupExecuted = false;
-	const productAttributes = [ // These reflect the values in sample_products.xml
-		{
-			name: "Type",
-			options: [
-				"T-shirt",
-			],
-			variation: true,
-			visible: true,
-		},
-		{
-			name: "Color",
-			options: [
-				"Red",
-				"Blue",
-				"Green",
-			],
-			variation: true,
-			visible: true,
-		},
-		{
-			name: "Size",
-			options: [
-				"S",
-				"L",
-				"XL",
-			],
-			variation: true,
-			visible: true,
-		},
-	]
-	const productVariations = [ // These reflect the values in sample_products.xml
-		{
-			regular_price: productPrice,
-			attributes: [
-				{
-					name: "Type",
-					option: "T-shirt"
-				},
-				{
-					name: "Color",
-					option: "Green"
-				},
-				{
-					name: "Size",
-					option: "S"
-				},
-			]
-		},
-		{
-			regular_price: productPrice,
-			attributes: [
-				{
-					name: "Type",
-					option: "T-shirt"
-				},
-				{
-					name: "Color",
-					option: "Red"
-				},
-				{
-					name: "Size",
-					option: "L"
-				},
-			]
-		},
-		{
-			regular_price: productPrice,
-			attributes: [
-				{
-					name: "Type",
-					option: "T-shirt"
-				},
-				{
-					name: "Color",
-					option: "Red"
-				},
-				{
-					name: "Size",
-					option: "XL"
-				},
-			]
-		},
-		{
-			regular_price: productPrice,
-			attributes: [
-				{
-					name: "Type",
-					option: "T-shirt"
-				},
-				{
-					name: "Color",
-					option: "Blue"
-				},
-				{
-					name: "Size",
-					option: "XL"
-				},
-			]
-		},
-	]
+	let productAttributes;
 
 	async function goToProductTemplateEditor ( pageObject, editor ) {
 		await pageObject.updateSingleProductTemplate();
@@ -1178,10 +1078,12 @@ test.describe( 'Add to Cart + Options autoselect behavior', () => {
 	}
 
 	test.beforeAll( async () => {
-		let cliOutput = await wpCLI(
-			`post list --post_type=product --field=ID --name="{ productSlug }" --format=ids`
+		const cliOutput = await wpCLI(
+			`wc product list --user=1 --slug="${ productSlug }" --format=json`
 		);
-		productId = cliOutput.stdout.match( /\d+/g )?.pop();
+		const cliOutputJSON = JSON.parse( cliOutput.stdout.match( /\[\{.*\}\]\n?$/ )?.pop() );
+		productId = cliOutputJSON[0].id;
+		productAttributes = cliOutputJSON[0].attributes;
 	} );
 
 	test.beforeEach( async ( {
