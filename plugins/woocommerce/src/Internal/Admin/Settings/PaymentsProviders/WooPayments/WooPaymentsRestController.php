@@ -80,6 +80,12 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'required'          => false,
 							'validate_callback' => fn( $value, $request ) => $this->check_location_arg( $value, $request ),
 						),
+						'source'   => array(
+							'description'       => esc_html__( 'The upmost entry point from where the merchant entered the onboarding flow.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => false,
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 				'schema' => fn() => $this->get_schema_for_get_onboarding_details(),
