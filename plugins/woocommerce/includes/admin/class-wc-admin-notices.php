@@ -227,12 +227,9 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
-		// Don't proceed if the notice doesn't exist.
-		if ( ! self::has_notice( $name ) ) {
-			return;
+		if ( self::has_notice( $name ) ) {
+			self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
 		}
-
-		self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
