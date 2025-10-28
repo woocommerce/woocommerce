@@ -18,9 +18,11 @@ import { Skeleton } from './skeleton';
 
 const TemplatePartInnerBlocks = ( {
 	blockProps,
+	productType,
 	templatePartId,
 }: {
 	blockProps: Record< string, unknown >;
+	productType: string;
 	templatePartId: string | undefined;
 } ) => {
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
@@ -33,13 +35,10 @@ const TemplatePartInnerBlocks = ( {
 		( select ) => {
 			const { hasFinishedResolution } = select( coreStore );
 
-			const hasResolvedEntity = templatePartId
-				? hasFinishedResolution( 'getEditedEntityRecord', [
-						'postType',
-						'wp_template_part',
-						templatePartId,
-				  ] )
-				: false;
+			const hasResolvedEntity = hasFinishedResolution(
+				'getEditedEntityRecord',
+				[ 'postType', 'wp_template_part', templatePartId ]
+			);
 
 			return {
 				isLoading: ! hasResolvedEntity,
@@ -61,7 +60,7 @@ const TemplatePartInnerBlocks = ( {
 	if ( isLoading ) {
 		return (
 			<div { ...blockProps }>
-				<Spinner />
+				<Skeleton productType={ productType } />
 			</div>
 		);
 	}
@@ -98,21 +97,18 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 		[ templatePartId ]
 	);
 
-	if ( ! templatePartId ) {
+	if ( ! templatePartId || ! canEditTemplatePart ) {
 		return (
 			<div { ...blockProps }>
-				<Spinner />
+				<Skeleton productType={ productType } />
 			</div>
 		);
-	}
-
-	if ( ! canEditTemplatePart ) {
-		return <Skeleton productType={ productType } />;
 	}
 
 	return (
 		<TemplatePartInnerBlocks
 			blockProps={ blockProps }
+			productType={ productType }
 			templatePartId={ templatePartId }
 		/>
 	);
