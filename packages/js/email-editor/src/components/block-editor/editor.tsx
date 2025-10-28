@@ -3,6 +3,7 @@
  */
 import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useEffect } from '@wordpress/element';
+import { applyFilters } from '@wordpress/hooks';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
@@ -116,6 +117,14 @@ export function InnerEditor( {
 			currentPost.postType,
 		]
 	);
+	const EditorExtensionComponent = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_extension_component',
+				() => null
+			) as () => JSX.Element | null,
+		[]
+	);
 	const canRenderEditor =
 		post &&
 		( currentPost.postType === 'wp_template' ||
@@ -171,6 +180,7 @@ export function InnerEditor( {
 					{ displaySendEmailButton && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
+					<EditorExtensionComponent />
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>
