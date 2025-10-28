@@ -13,6 +13,11 @@ use WC_Unit_Test_Case;
 class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Cache group name.
+	 */
+	private const CACHE_GROUP = 'woocommerce_entity_version_keys';
+
+	/**
 	 * The System Under Test.
 	 *
 	 * @var EntityVersionKeysCache
@@ -20,107 +25,34 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Local cache storage for tests.
-	 *
-	 * @var array
-	 */
-	private $entity_cache = array();
-
-	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->entity_cache = array();
-		$this->sut          = new EntityVersionKeysCache();
+		$this->sut = new EntityVersionKeysCache();
 
-		// Hook filters to use local cache array instead of wp_cache.
-		add_filter(
-			'woocommerce_pre_entity_version_keys_cache_get',
-			function ( $pre_value, $cache_key ) {
-				return $this->entity_cache[ $cache_key ] ?? null;
-			},
-			10,
-			2
-		);
-
-		add_filter(
-			'woocommerce_pre_entity_version_keys_cache_set',
-			function ( $pre_result, $cache_key, $value, $ttl ) {
-				$this->entity_cache[ $cache_key ] = $value;
-				return true;
-			},
-			10,
-			4
-		);
-
-		add_filter(
-			'woocommerce_pre_entity_version_keys_cache_delete',
-			function ( $pre_result, $cache_key ) {
-				if ( isset( $this->entity_cache[ $cache_key ] ) ) {
-					unset( $this->entity_cache[ $cache_key ] );
-					return true;
-				}
-				return false;
-			},
-			10,
-			2
-		);
+		// Flush the cache group before each test.
+		wp_cache_flush();
 	}
 
 	/**
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_should_use_entity_version_keys_cache' );
 		remove_all_filters( 'woocommerce_entity_version_key_ttl' );
-		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_get' );
-		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_set' );
-		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_delete' );
 		$this->sut = null;
 		parent::tearDown();
-	}
-
-	/**
-	 * @testdox should_use respects the woocommerce_should_use_entity_version_keys_cache filter value.
-	 *
-	 * @testWith [true]
-	 *           [false]
-	 *
-	 * @param bool $filter_value Value the filter should return.
-	 */
-	public function test_should_use_respects_filter( bool $filter_value ) {
-		add_filter(
-			'woocommerce_should_use_entity_version_keys_cache',
-			$filter_value ? '__return_true' : '__return_false'
-		);
-
-		// Create a new instance to test fresh should_use state.
-
-		$cache = new EntityVersionKeysCache();
-
-		$this->assertEquals( $filter_value, $cache->should_use() );
 	}
 
 	/**
 	 * @testdox should_use caches the result and returns the same value on subsequent calls.
 	 */
 	public function test_should_use_is_cached() {
-		$call_count = 0;
-		add_filter(
-			'woocommerce_should_use_entity_version_keys_cache',
-			function ( $enabled ) use ( &$call_count ) {
-				$call_count++;
-				return $enabled;
-			}
-		);
-
 		$result1 = $this->sut->should_use();
 		$result2 = $this->sut->should_use();
 
-		$this->assertEquals( $result1, $result2 );
-		$this->assertEquals( 1, $call_count, 'Filter should only be called once, result is cached' );
+		$this->assertEquals( $result1, $result2, 'should_use should return the same value on subsequent calls' );
 	}
 
 	/**
@@ -132,9 +64,10 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $version, 'Version should not be empty' );
 		$this->assertIsString( $version, 'Version should be a string' );
 
-		$cache_key = 'wc_entity_version_key_custom_entity_123';
-		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should be created' );
-		$this->assertEquals( $version, $this->entity_cache[ $cache_key ], 'Stored version should match returned version' );
+		$cache_key     = 'wc_entity_version_key_custom_entity_123';
+		$cached_value  = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertNotFalse( $cached_value, 'Cache entry should be created' );
+		$this->assertEquals( $version, $cached_value, 'Stored version should match returned version' );
 	}
 
 	/**
@@ -143,9 +76,9 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_get_entity_version_returns_existing() {
 		// Pre-populate cache with a known version.
 
-		$expected_version          = 'existing-version-uuid';
-		$cache_key                 = 'wc_entity_version_key_custom_entity_456';
-		$this->entity_cache[ $cache_key ] = $expected_version;
+		$expected_version = 'existing-version-uuid';
+		$cache_key        = 'wc_entity_version_key_custom_entity_456';
+		wp_cache_set( $cache_key, $expected_version, self::CACHE_GROUP );
 
 		$version = $this->sut->get_entity_version( 'custom_entity', 456 );
 
@@ -158,16 +91,17 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_get_entity_version_refreshes_ttl() {
 		// Pre-populate cache with a known version.
 
-		$expected_version          = 'existing-version-uuid';
-		$cache_key                 = 'wc_entity_version_key_custom_entity_789';
-		$this->entity_cache[ $cache_key ] = $expected_version;
+		$expected_version = 'existing-version-uuid';
+		$cache_key        = 'wc_entity_version_key_custom_entity_789';
+		wp_cache_set( $cache_key, $expected_version, self::CACHE_GROUP );
 
 		$this->sut->get_entity_version( 'custom_entity', 789 );
 
 		// Verify the cache entry still exists (refresh happened).
 
-		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should still exist after refresh' );
-		$this->assertEquals( $expected_version, $this->entity_cache[ $cache_key ], 'Value should remain the same after refresh' );
+		$cached_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertNotFalse( $cached_value, 'Cache entry should still exist after refresh' );
+		$this->assertEquals( $expected_version, $cached_value, 'Value should remain the same after refresh' );
 	}
 
 	/**
@@ -181,9 +115,10 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 
 		// Verify cache entry was created.
 
-		$cache_key = 'wc_entity_version_key_new_entity_111';
-		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should be created' );
-		$this->assertEquals( $version, $this->entity_cache[ $cache_key ] );
+		$cache_key    = 'wc_entity_version_key_new_entity_111';
+		$cached_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertNotFalse( $cached_value, 'Cache entry should be created' );
+		$this->assertEquals( $version, $cached_value );
 	}
 
 	/**
@@ -192,15 +127,17 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_regenerate_entity_version_updates_existing() {
 		// Pre-populate cache with a known version.
 
-		$old_version               = 'old-version-uuid';
-		$cache_key                 = 'wc_entity_version_key_updated_entity_222';
-		$this->entity_cache[ $cache_key ] = $old_version;
+		$old_version = 'old-version-uuid';
+		$cache_key   = 'wc_entity_version_key_updated_entity_222';
+		wp_cache_set( $cache_key, $old_version, self::CACHE_GROUP );
 
 		$new_version = $this->sut->regenerate_entity_version( 'updated_entity', 222 );
 
 		$this->assertNotEmpty( $new_version, 'New version should not be empty' );
 		$this->assertNotEquals( $old_version, $new_version, 'New version should differ from old version' );
-		$this->assertEquals( $new_version, $this->entity_cache[ $cache_key ], 'Stored version should be updated' );
+
+		$cached_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertEquals( $new_version, $cached_value, 'Stored version should be updated' );
 	}
 
 	/**
@@ -209,13 +146,14 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_delete_entity_version_removes_existing() {
 		// Pre-populate cache with a known version.
 
-		$cache_key                 = 'wc_entity_version_key_forgotten_entity_333';
-		$this->entity_cache[ $cache_key ] = 'version-to-forget';
+		$cache_key = 'wc_entity_version_key_forgotten_entity_333';
+		wp_cache_set( $cache_key, 'version-to-forget', self::CACHE_GROUP );
 
 		$result = $this->sut->delete_entity_version( 'forgotten_entity', 333 );
 
 		$this->assertTrue( $result, 'delete_entity_version should return true when entity existed' );
-		$this->assertArrayNotHasKey( $cache_key, $this->entity_cache, 'Cache entry should be deleted' );
+		$cached_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$this->assertFalse( $cached_value, 'Cache entry should be deleted' );
 	}
 
 	/**

@@ -18,6 +18,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 class EntityVersionKeysCache {
 
 	/**
+	 * Cache group name.
+	 */
+	private const CACHE_GROUP = 'woocommerce_entity_version_keys';
+
+	/**
 	 * Should the entity version keys cache be used?
 	 *
 	 * @var bool|null
@@ -46,7 +51,7 @@ class EntityVersionKeysCache {
 	 * Tells whether the entity version keys cache should be used or not.
 	 *
 	 * By default this will return true only if an external object cache is configured in WordPress,
-	 * since otherwise the cached entries will only persist for the current session.
+	 * since otherwise the cached entries will only persist for the current request.
 	 *
 	 * @return bool
 	 */
@@ -55,28 +60,7 @@ class EntityVersionKeysCache {
 			return $this->should_use;
 		}
 
-		$default_value = is_null( $this->legacy_proxy ) ? false : ( $this->legacy_proxy->call_function( 'wp_using_ext_object_cache' ) ?? false );
-
-		/**
-		 * Filter whether to use the entity version keys cache.
-		 * By default returns true only if an external object cache is configured in WordPress.
-		 *
-		 * To use a different storing mechanism for the stored version keys
-		 * (like e.g. transients) for testing purposes (not recommended for production):
-		 *
-		 * 1. Hook on this filter to return true.
-		 * 2. Hook on the woocommerce_pre_entity_version_keys_cache_get/set/delete filters,
-		 *    where you handle the storage and return a non-null value.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param bool   $should_use_cache Whether to use the cache. Default is the result of wp_using_ext_object_cache().
-		 * @return bool True to use the cache, false otherwise.
-		 */
-		$this->should_use = apply_filters(
-			'woocommerce_should_use_entity_version_keys_cache',
-			$default_value
-		);
+		$this->should_use = is_null( $this->legacy_proxy ) ? false : ( $this->legacy_proxy->call_function( 'wp_using_ext_object_cache' ) ?? false );
 
 		return $this->should_use;
 	}
@@ -93,8 +77,10 @@ class EntityVersionKeysCache {
 		$this->validate_input( $entity_type, $entity_id );
 
 		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
-		$version   = $this->get_cached( $cache_key );
-		if ( is_null( $version ) ) {
+		$found     = false;
+		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
+
+		if ( ! $found ) {
 			$version = $this->regenerate_entity_version( $entity_type, $entity_id );
 		} else {
 			// Refresh the cache lifetime.
@@ -142,7 +128,7 @@ class EntityVersionKeysCache {
 		$ttl = apply_filters( 'woocommerce_entity_version_key_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
 		$ttl = max( 0, (int) $ttl );
 
-		return $this->set_cached( $cache_key, $version, $ttl );
+		return wp_cache_set( $cache_key, $version, self::CACHE_GROUP, $ttl );
 	}
 
 	/**
@@ -157,7 +143,7 @@ class EntityVersionKeysCache {
 		$this->validate_input( $entity_type, $entity_id );
 
 		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
-		return $this->delete_cached( $cache_key );
+		return wp_cache_delete( $cache_key, self::CACHE_GROUP );
 	}
 
 	/**
@@ -180,96 +166,5 @@ class EntityVersionKeysCache {
 		if ( is_string( $entity_id ) && '' === $entity_id ) {
 			throw new \InvalidArgumentException( 'Entity ID cannot be an empty string.' );
 		}
-	}
-
-	/**
-	 * Get a value from the cache.
-	 *
-	 * @param string $cache_key The cache key.
-	 * @return mixed The cached value or null if not found.
-	 */
-	protected function get_cached( string $cache_key ) {
-		/**
-		 * Short-circuit the cache get operation.
-		 *
-		 * Return null to proceed with normal cache retrieval, or return
-		 * any other value to bypass the cache operation and use the returned
-		 * value directly.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param mixed|null $pre_value  Value to return instead of the cached value. Null means proceed normally.
-		 * @param string     $cache_key  The cache key.
-		 * @return mixed|null Value to use, or null to proceed with normal cache retrieval.
-		 */
-		$pre_value = apply_filters( 'woocommerce_pre_entity_version_keys_cache_get', null, $cache_key );
-
-		if ( ! is_null( $pre_value ) ) {
-			return $pre_value;
-		}
-
-		$found = false;
-		$value = wp_cache_get( $cache_key, 'woocommerce_entity_version_keys', false, $found );
-		return $found ? $value : null;
-	}
-
-	/**
-	 * Store a value in the cache.
-	 *
-	 * @param string $cache_key The cache key.
-	 * @param mixed  $value     The value to cache.
-	 * @param int    $ttl       Time to live in seconds.
-	 * @return bool True on success, false on failure.
-	 */
-	protected function set_cached( string $cache_key, $value, int $ttl ): bool {
-		/**
-		 * Short-circuit the cache set operation.
-		 *
-		 * Return null to proceed with normal cache storage, or return a boolean
-		 * to bypass the cache operation and use the returned value as the result.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param bool|null  $pre_result Result to return. Null means proceed normally.
-		 * @param string     $cache_key  The cache key.
-		 * @param mixed      $value      The value to cache.
-		 * @param int        $ttl        Time to live in seconds.
-		 * @return bool|null Result to return, or null to proceed with normal cache storage.
-		 */
-		$pre_result = apply_filters( 'woocommerce_pre_entity_version_keys_cache_set', null, $cache_key, $value, $ttl );
-
-		if ( ! is_null( $pre_result ) ) {
-			return $pre_result;
-		}
-
-		return wp_cache_set( $cache_key, $value, 'woocommerce_entity_version_keys', $ttl );
-	}
-
-	/**
-	 * Delete a value from the cache.
-	 *
-	 * @param string $cache_key The cache key.
-	 * @return bool True on success, false on failure.
-	 */
-	protected function delete_cached( string $cache_key ): bool {
-		/**
-		 * Short-circuit the cache delete operation.
-		 *
-		 * Return null to proceed with normal cache deletion, or return a boolean
-		 * to bypass the cache operation and use the returned value as the result.
-		 *
-		 * @since 10.4.0
-		 *
-		 * @param bool|null  $pre_result Result to return. Null means proceed normally.
-		 * @param string     $cache_key  The cache key.
-		 * @return bool|null Result to return, or null to proceed with normal cache deletion.
-		 */
-		$pre_result = apply_filters( 'woocommerce_pre_entity_version_keys_cache_delete', null, $cache_key );
-
-		if ( ! is_null( $pre_result ) ) {
-			return $pre_result;
-		}
-
-		return wp_cache_delete( $cache_key, 'woocommerce_entity_version_keys' );
 	}
 }
