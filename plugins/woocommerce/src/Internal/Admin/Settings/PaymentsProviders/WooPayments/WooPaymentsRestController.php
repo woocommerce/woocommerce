@@ -324,6 +324,8 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+		// This is a route to disable test accounts for the native onboarding UX.
+		// The handler is the same as the one for the non-native onboarding UX.
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_BUSINESS_VERIFICATION . '/test_account/disable',
@@ -425,6 +427,7 @@ class WooPaymentsRestController extends RestApiControllerBase {
 			),
 			$override
 		);
+		// This is the route to disable test accounts when not in a native in-context UX.
 		register_rest_route(
 			$this->route_namespace,
 			'/' . $this->rest_base . '/onboarding/test_account/disable',
