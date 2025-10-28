@@ -122,11 +122,11 @@ export const hasValidChangelogs = ( name: string ): boolean | void => {
 				return true;
 			}
 
-			const textAfterComment = /Comment:.*\n([\s\S]*)?/.exec( contents );
+			const textAfterComment = /Comment:.*\n([\s\S]*)/.exec( contents );
 
 			if ( textAfterComment ) {
 				// Return true if there is more than just whitespace.
-				return ( textAfterComment[ 1 ] || '' ).trim().length > 0;
+				return textAfterComment[ 1 ].trim().length > 0;
 			}
 
 			return false;
