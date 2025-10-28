@@ -79,8 +79,8 @@ final class AsyncGenerator {
 	 * Register hooks for the async generator.
 	 */
 	public function register_hooks(): void {
-		add_action( self::FEED_GENERATION_ACTION, [ $this, 'feed_generation_action' ] );
-		add_action( self::FEED_DELETION_ACTION, [ $this, 'feed_deletion_action' ] );
+		add_action( self::FEED_GENERATION_ACTION, array( $this, 'feed_generation_action' ) );
+		add_action( self::FEED_DELETION_ACTION, array( $this, 'feed_deletion_action' ) );
 	}
 
 	/**
