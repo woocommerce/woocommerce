@@ -154,20 +154,20 @@ class WC_Products_Tracking {
 					var initialStockValue = $( '#_stock' ).val();
 					var isBlockEditor = false;
 					var child_element = '#publish';
-	
+
 					if ( $( '.block-editor' ).length !== 0 && $( '.block-editor' )[0] ) {
 		                isBlockEditor = true;
 					}
-	
+
 					if ( isBlockEditor ) {
 						child_element = '.editor-post-publish-button';
 					}
-	
+
 					$( '#wpwrap' ).on( 'click', child_element, function() {
 						var description_value  = '';
 						var tagsText = '';
 						var currentStockValue = $( '#_stock' ).val();
-	
+
 						function getProductTypeOptions() {
 							const productTypeOptionsCheckboxes = $( 'input[type=\"checkbox\"][data-product-type-option-id]' );
 							const productTypeOptions = productTypeOptionsCheckboxes.map( function() {
@@ -178,17 +178,17 @@ class WC_Products_Tracking {
 							} ).get();
 							return productTypeOptions;
 						}
-	
+
 						function getProductTypeOptionsString( productTypeOptions ) {
 							return productTypeOptions
 								.filter( productTypeOption => productTypeOption.isEnabled )
 								.map( productTypeOption => productTypeOption.id )
 								.join( ', ' );
 						}
-	
+
 						const productTypeOptions = getProductTypeOptions();
 						const productTypeOptionsString = getProductTypeOptionsString( productTypeOptions );
-	
+
 						if ( ! isBlockEditor ) {
 							tagsText          = $( '[name=\"tax_input[product_tag]\"]' ).val();
 							if ( $( '#content' ).is( ':visible' ) ) {
@@ -199,7 +199,7 @@ class WC_Products_Tracking {
 						} else {
 							description_value  = $( '.block-editor-rich-text__editable' ).text();
 						}
-	
+
 						// We can't just check the number of '.woocommerce_attribute' elements because
 						// there might be empty ones, which get stripped out when saved. So, we'll check
 						// whether the name and values have been filled out.
@@ -207,10 +207,10 @@ class WC_Products_Tracking {
 							var attributeElement = $( this );
 							var attributeName = attributeElement.find( 'input.attribute_name' ).val();
 							var attributeValues = attributeElement.find( 'textarea[name^=\"attribute_values\"]' ).val();
-	
+
 							return attributeName !== '' && attributeValues !== '';
 						} ).length;
-	
+
 						var properties = {
 							attributes:				     numberOfAttributes,
 							categories:				     $( '[name=\"tax_input[product_cat][]\"]:checked' ).length,
@@ -234,7 +234,9 @@ class WC_Products_Tracking {
 							upsells:				     $( '#upsell_ids option' ).length ? 'Yes' : 'No',
 							weight:					     $( '#_weight' ).val() ? 'Yes' : 'No',
 						};
-						window.wcTracks.recordEvent( 'product_update', properties );
+						if ( window.wcTracks && window.wcTracks.recordEvent ) {
+							window.wcTracks.recordEvent( 'product_update', properties );
+						}
 					} );
 				}
 			});

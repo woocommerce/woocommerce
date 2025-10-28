@@ -32,25 +32,25 @@ class WC_Coupons_Tracking {
 			"
 				(function() {
 				    'use strict';
-				    
+
 				    function trackBulkAction( selectorId ) {
 				        return function() {
 				            const select = document.getElementById( selectorId );
 				            const action = select ? select.value : null;
-				            
+
 				            if ( action && '-1' !== action && window.wcTracks && window.wcTracks.recordEvent ) {
 				                window.wcTracks.recordEvent( 'coupons_view_bulk_action', { action: action } );
 				            }
 				        };
 				    }
-				    
+
 				    const topButton = document.getElementById( 'doaction' );
 				    const bottomButton = document.getElementById( 'doaction2' );
-				    
+
 				    if ( topButton ) {
 				        topButton.addEventListener( 'click', trackBulkAction( 'bulk-action-selector-top' ) );
 				    }
-				    
+
 				    if ( bottomButton ) {
 				        bottomButton.addEventListener( 'click', trackBulkAction( 'bulk-action-selector-bottom' ) );
 				    }
@@ -58,7 +58,6 @@ class WC_Coupons_Tracking {
 			"
 		);
 	}
-
 
 	/**
 	 * Track page view events.

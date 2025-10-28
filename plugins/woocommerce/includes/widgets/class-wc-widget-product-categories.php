@@ -252,9 +252,9 @@ class WC_Widget_Product_Categories extends WC_Widget {
 
 						if ( categoryValue ) {
 							const homeUrl = '" . esc_js( home_url( '/' ) ) . "';
-							const separator = homeUrl.includes( '?' ) ? '&' : '?';
-							const targetUrl = homeUrl + separator + 'product_cat=' + encodeURIComponent( categoryValue );
-							location.href = targetUrl;
+							const url = new URL( homeUrl, window.location.origin );
+							url.searchParams.set( 'product_cat', categoryValue );
+							location.href = url.toString();
 						} else {
 							location.href = '" . esc_js( wc_get_page_permalink( 'shop' ) ) . "';
 						}
