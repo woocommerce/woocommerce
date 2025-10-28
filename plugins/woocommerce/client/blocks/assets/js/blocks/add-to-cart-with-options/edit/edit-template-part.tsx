@@ -11,6 +11,11 @@ import {
 } from '@wordpress/block-editor';
 import { getSetting } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import { Skeleton } from './skeleton';
+
 const TemplatePartInnerBlocks = ( {
 	blockProps,
 	templatePartId,
@@ -78,12 +83,37 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 
 	const blockProps = useBlockProps();
 
+	const { canViewTemplatePart, canEditTemplatePart } = useSelect(
+		( select ) => {
+			const templatePartData = {
+				kind: 'postType',
+				name: 'wp_template_part',
+				id: templatePartId,
+			};
+			return {
+				canViewTemplatePart: !! select( coreStore ).canUser(
+					'read',
+					templatePartData
+				),
+				canEditTemplatePart: !! select( coreStore ).canUser(
+					'update',
+					templatePartData
+				),
+			};
+		},
+		[ templatePartId ]
+	);
+
 	if ( ! templatePartId ) {
 		return (
 			<div { ...blockProps }>
 				<Spinner />
 			</div>
 		);
+	}
+
+	if ( ! canViewTemplatePart || ! canEditTemplatePart ) {
+		return <Skeleton productType={ productType } />;
 	}
 
 	return (
