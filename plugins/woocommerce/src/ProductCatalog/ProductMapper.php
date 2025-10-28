@@ -315,7 +315,21 @@ class ProductMapper implements ProductMapperInterface {
 	 * @return bool True if managing stock.
 	 */
 	protected function get_manage_stock( WC_Product $product ): bool {
-		return $product->get_manage_stock();
+		$manage_stock = $product->get_manage_stock();
+
+		// Variations can return the string 'parent' when inheriting stock management.
+		if ( 'parent' === $manage_stock && $product->is_type( 'variation' ) ) {
+			$parent_id = $product->get_parent_id();
+			if ( $parent_id ) {
+				$parent = wc_get_product( $parent_id );
+				if ( $parent ) {
+					return (bool) $parent->get_manage_stock();
+				}
+			}
+			return false;
+		}
+
+		return (bool) $manage_stock;
 	}
 
 	/**
