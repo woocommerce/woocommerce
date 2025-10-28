@@ -14,7 +14,7 @@ use WC_Unit_Test_Case;
 class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 	/**
-	 * Clean up after each test.
+	 * Tear down the test environment.
 	 */
 	public function tearDown(): void {
 		parent::tearDown();
@@ -22,58 +22,38 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		// Clean up options.
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
 		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION );
-
-		// Remove filters.
-		remove_all_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import' );
-		remove_all_filters( 'woocommerce_analytics_import_interval' );
+		delete_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION );
 	}
 
 	/**
-	 * Test that immediate import mode registers order hooks.
+	 * Test that batch processor is NOT scheduled when immediate import is enabled.
 	 */
-	public function test_immediate_import_enabled_registers_hooks() {
-		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_true' );
+	public function test_batch_processor_not_scheduled_when_immediate_import_enabled() {
+		// Enable immediate import.
+		add_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, true );
 
-		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
 
-		$this->assertNotFalse(
-			has_action( 'woocommerce_update_order', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should register woocommerce_update_order hook when immediate import is enabled'
-		);
-
-		$this->assertNotFalse(
-			has_filter( 'woocommerce_create_order', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should register woocommerce_create_order hook when immediate import is enabled'
-		);
-
-		$this->assertNotFalse(
-			has_action( 'woocommerce_refund_created', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should register woocommerce_refund_created hook when immediate import is enabled'
+		// Verify the last processed date was NOT initialized (batch processor skipped).
+		$this->assertFalse(
+			get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ),
+			'Last processed date should not be initialized when immediate import is enabled'
 		);
 	}
 
 	/**
-	 * Test that batch mode does not register immediate import hooks.
+	 * Test that batch processor IS scheduled when immediate import is disabled.
 	 */
-	public function test_batch_mode_does_not_register_immediate_hooks() {
-		// Ensure immediate import is disabled (default behavior).
-		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_false' );
+	public function test_batch_processor_scheduled_when_immediate_import_disabled() {
+		// Disable immediate import (enable batch mode).
+		add_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, false );
 
-		OrdersScheduler::init();
+		OrdersScheduler::schedule_recurring_batch_processor();
 
-		$this->assertFalse(
-			has_action( 'woocommerce_update_order', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should not register woocommerce_update_order hook when batch mode is enabled'
-		);
-
-		$this->assertFalse(
-			has_filter( 'woocommerce_create_order', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should not register woocommerce_create_order hook when batch mode is enabled'
-		);
-
-		$this->assertFalse(
-			has_action( 'woocommerce_refund_created', array( OrdersScheduler::class, 'possibly_schedule_import' ) ),
-			'Should not register woocommerce_refund_created hook when batch mode is enabled'
+		// Verify the last processed date WAS initialized (batch processor scheduled).
+		$this->assertNotFalse(
+			get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ),
+			'Last processed date should be initialized when batch mode is enabled'
 		);
 	}
 
@@ -100,8 +80,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 * Test that last processed date is initialized correctly.
 	 */
 	public function test_initialize_sets_last_processed_date() {
-		// Ensure option doesn't exist.
-		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
+		// Disable immediate import to enable batch mode.
+		add_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, false );
 
 		OrdersScheduler::schedule_recurring_batch_processor();
 
@@ -129,7 +109,10 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_initialize_does_not_overwrite_existing_date() {
 		$existing_date = '2024-01-01 12:00:00';
-		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, $existing_date );
+		add_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, $existing_date );
+
+		// Disable immediate import to enable batch mode.
+		add_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, false );
 
 		OrdersScheduler::schedule_recurring_batch_processor();
 
@@ -146,8 +129,6 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 * Test that import interval filter is applied.
 	 */
 	public function test_import_interval_filter_is_applied() {
-		delete_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION );
-
 		$custom_interval = 6 * HOUR_IN_SECONDS;
 		$filter_called   = false;
 		add_filter(
@@ -158,8 +139,8 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		// Enable batch mode.
-		add_filter( 'woocommerce_admin_orders_scheduler_enable_immediate_import', '__return_false' );
+		// Enable batch mode (disable immediate import).
+		add_option( OrdersScheduler::IMMEDIATE_IMPORT_OPTION, false );
 
 		// This will trigger the filter.
 		OrdersScheduler::schedule_recurring_batch_processor();
