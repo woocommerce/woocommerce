@@ -1260,11 +1260,11 @@ class WC_Install {
 	status varchar(20) NOT NULL,
 	customer_id bigint(20) unsigned NOT NULL" .
 		( $is_new_install ? ',
-	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ",
+	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
-	KEY status (status)" .
+	KEY status (status)' .
 		( $is_new_install ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
 	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
