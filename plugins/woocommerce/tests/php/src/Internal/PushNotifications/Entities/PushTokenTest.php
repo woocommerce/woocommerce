@@ -93,6 +93,64 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests set_token throws exception with empty string.
+	 */
+	public function test_it_throws_exception_when_setting_empty_token() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Token cannot be empty.' );
+
+		$push_token->set_token( '' );
+	}
+
+	/**
+	 * @testdox Tests set_token throws exception with whitespace-only string.
+	 */
+	public function test_it_throws_exception_when_setting_whitespace_token() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Token cannot be empty.' );
+
+		$push_token->set_token( '   ' );
+	}
+
+	/**
+	 * @testdox Tests set_token throws exception when token exceeds 4096 characters.
+	 */
+	public function test_it_throws_exception_when_setting_token_too_long() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Token is too long.' );
+
+		$push_token->set_token( str_repeat( 'A', 4097 ) );
+	}
+
+	/**
+	 * @testdox Tests set_token accepts token at maximum length of 4096 characters.
+	 */
+	public function test_it_accepts_token_at_maximum_length() {
+		$push_token = new PushToken();
+		$max_token  = str_repeat( 'A', 4096 );
+
+		$push_token->set_token( $max_token );
+
+		$this->assertEquals( $max_token, $push_token->get_token() );
+	}
+
+	/**
+	 * @testdox Tests set_token trims whitespace from token.
+	 */
+	public function test_it_trims_whitespace_from_token() {
+		$push_token = new PushToken();
+		$push_token->set_token( '  test_token  ' );
+
+		$this->assertEquals( 'test_token', $push_token->get_token() );
+	}
+
+	/**
 	 * @testdox Tests it's possible to set and get the device UUID.
 	 */
 	public function test_it_can_get_and_set_device_uuid() {
