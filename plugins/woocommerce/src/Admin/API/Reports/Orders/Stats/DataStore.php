@@ -9,18 +9,27 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
+use WC_Order;
 
 /**
  * API\Reports\Orders\Stats\DataStore.
  */
 class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
+
+	/**
+	 * Cache for fulfillment_status column existence check.
+	 *
+	 * @var bool|null
+	 */
+	private static $has_fulfillment_column = null;
 
 	/**
 	 * Table used to get the data.
@@ -513,35 +522,6 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		/**
-		 * Filters order stats data.
-		 *
-		 * @param array $data Data written to order stats lookup table.
-		 * @param WC_Order $order  Order object.
-		 *
-		 * @since 4.0.0
-		 */
-		$data = apply_filters(
-			'woocommerce_analytics_update_order_stats_data',
-			array(
-				'order_id'           => $order->get_id(),
-				'parent_id'          => $order->get_parent_id(),
-				'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
-				'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
-				'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
-				'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
-				'num_items_sold'     => self::get_num_items_sold( $order ),
-				'total_sales'        => $order->get_total(),
-				'tax_total'          => $order->get_total_tax(),
-				'shipping_total'     => $order->get_shipping_total(),
-				'net_total'          => self::get_net_total( $order ),
-				'status'             => self::normalize_order_status( $order->get_status() ),
-				'customer_id'        => $order->get_report_customer_id(),
-				'returning_customer' => $order->is_returning_customer(),
-			),
-			$order
-		);
-
 		$format = array(
 			'%d',
 			'%d',
@@ -558,6 +538,40 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'%d',
 			'%d',
 		);
+
+		$data = array(
+			'order_id'           => $order->get_id(),
+			'parent_id'          => $order->get_parent_id(),
+			'date_created'       => $order->get_date_created()->date( 'Y-m-d H:i:s' ),
+			'date_paid'          => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : null,
+			'date_completed'     => $order->get_date_completed() ? $order->get_date_completed()->date( 'Y-m-d H:i:s' ) : null,
+			'date_created_gmt'   => gmdate( 'Y-m-d H:i:s', $order->get_date_created()->getTimestamp() ),
+			'num_items_sold'     => self::get_num_items_sold( $order ),
+			'total_sales'        => $order->get_total(),
+			'tax_total'          => $order->get_total_tax(),
+			'shipping_total'     => $order->get_shipping_total(),
+			'net_total'          => self::get_net_total( $order ),
+			'status'             => self::normalize_order_status( $order->get_status() ),
+			'customer_id'        => $order->get_report_customer_id(),
+			'returning_customer' => $order->is_returning_customer(),
+		);
+
+		$order_fulfillment_status = '';
+		if ( true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
+			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
+			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
+			$format[]                   = '%s';
+		}
+
+		/**
+		 * Filters order stats data.
+		 *
+		 * @param array $data Data written to order stats lookup table.
+		 * @param WC_Order $order  Order object.
+		 *
+		 * @since 4.0.0
+		 */
+		$data = apply_filters( 'woocommerce_analytics_update_order_stats_data', $data, $order );
 
 		if ( 'shop_order_refund' === $order->get_type() ) {
 			$parent_order = wc_get_order( $order->get_parent_id() );
@@ -661,6 +675,31 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	protected static function get_net_total( $order ) {
 		$net_total = floatval( $order->get_total() ) - floatval( $order->get_total_tax() ) - floatval( $order->get_shipping_total() );
 		return (float) $net_total;
+	}
+
+	/**
+	 * If the wc_order_stats table has the fulfillment_status column.
+	 *
+	 * @return boolean
+	 */
+	public static function has_fulfillment_status_column() {
+		global $wpdb;
+
+		if ( null !== self::$has_fulfillment_column ) {
+			return self::$has_fulfillment_column;
+		}
+
+		$table_name    = self::get_db_table_name();
+		$column_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+				'fulfillment_status'
+			)
+		);
+
+		self::$has_fulfillment_column = ! empty( $column_exists );
+		return self::$has_fulfillment_column;
 	}
 
 	/**

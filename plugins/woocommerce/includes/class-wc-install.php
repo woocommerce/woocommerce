@@ -1233,6 +1233,45 @@ class WC_Install {
 	}
 
 	/**
+	 * Get the wc_order_stats table schema.
+	 *
+	 * @since x.x.x
+	 * @param string $collate Database collation.
+	 * @return string SQL schema for wc_order_stats table.
+	 */
+	private static function get_order_stats_table_schema( $collate ) {
+		global $wpdb;
+
+		$is_new_install = self::is_new_install();
+
+		return "CREATE TABLE {$wpdb->prefix}wc_order_stats (
+	order_id bigint(20) unsigned NOT NULL,
+	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
+	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_paid datetime DEFAULT '0000-00-00 00:00:00',
+	date_completed datetime DEFAULT '0000-00-00 00:00:00',
+	num_items_sold int(11) DEFAULT 0 NOT NULL,
+	total_sales double DEFAULT 0 NOT NULL,
+	tax_total double DEFAULT 0 NOT NULL,
+	shipping_total double DEFAULT 0 NOT NULL,
+	net_total double DEFAULT 0 NOT NULL,
+	returning_customer tinyint(1) DEFAULT NULL,
+	status varchar(20) NOT NULL,
+	customer_id bigint(20) unsigned NOT NULL" .
+	( $is_new_install ? ",
+	fulfillment_status varchar(50) DEFAULT NULL" : '' ) . ",
+	PRIMARY KEY (order_id),
+	KEY date_created (date_created),
+	KEY customer_id (customer_id),
+	KEY status (status)" .
+	( $is_new_install ? ",
+	KEY fulfillment_status (fulfillment_status)" : '' ) . ",
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+) $collate;";
+	}
+
+	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
@@ -1708,6 +1747,7 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
+		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -1947,27 +1987,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	PRIMARY KEY (url_id),
 	KEY url (url($max_index_length))
 ) $collate;
-CREATE TABLE {$wpdb->prefix}wc_order_stats (
-	order_id bigint(20) unsigned NOT NULL,
-	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
-	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_paid datetime DEFAULT '0000-00-00 00:00:00',
-	date_completed datetime DEFAULT '0000-00-00 00:00:00',
-	num_items_sold int(11) DEFAULT 0 NOT NULL,
-	total_sales double DEFAULT 0 NOT NULL,
-	tax_total double DEFAULT 0 NOT NULL,
-	shipping_total double DEFAULT 0 NOT NULL,
-	net_total double DEFAULT 0 NOT NULL,
-	returning_customer tinyint(1) DEFAULT NULL,
-	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (order_id),
-	KEY date_created (date_created),
-	KEY customer_id (customer_id),
-	KEY status (status),
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
-) $collate;
+$order_stats_table_schema
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,
 	order_id bigint(20) unsigned NOT NULL,
