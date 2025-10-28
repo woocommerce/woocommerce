@@ -110,6 +110,7 @@ final class PushToken {
 	 * Sets the token.
 	 *
 	 * @param string $token The token representing a device we can send a push notification to.
+	 * @throws InvalidArgumentException If token is empty or too long.
 	 */
 	public function set_token( string $token ): void {
 		$token = trim( $token );

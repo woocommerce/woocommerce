@@ -421,6 +421,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Tests set_origin accepts valid origin values.
 	 *
+	 * @param string $origin The origin to test.
 	 * @dataProvider valid_origins_provider
 	 */
 	public function test_it_accepts_valid_origin_values( string $origin ) {

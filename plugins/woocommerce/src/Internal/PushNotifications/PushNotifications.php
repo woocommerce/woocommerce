@@ -49,7 +49,7 @@ class PushNotifications {
 			return;
 		}
 
-		// @todo register library endpoints and scheduled tasks here.
+		// Library endpoints and scheduled tasks will be registered here.
 	}
 
 	/**
