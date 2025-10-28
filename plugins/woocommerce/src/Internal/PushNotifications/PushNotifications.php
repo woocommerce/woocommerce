@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Exception;
 
 /**
  * WC Push Notifications
@@ -54,28 +55,34 @@ class PushNotifications {
 	/**
 	 * Determines if local push notification functionality should be enabled.
 	 * Push notifications require both the feature flag to be enabled and
-	 * Jetpack to be connected.
+	 * Jetpack to be connected. Memoize the value so we only check once per
+	 * request.
 	 *
 	 * @return bool
 	 */
 	public function should_be_enabled(): bool {
-		if ( null === $this->enabled ) {
-			if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
-				$this->enabled = false;
+		if ( null !== $this->enabled ) {
+			return $this->enabled;
+		}
 
-				return $this->enabled;
-			}
+		if ( ! FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) ) {
+			$this->enabled = false;
+			return $this->enabled;
+		}
 
+		try {
 			$proxy = wc_get_container()->get( LegacyProxy::class );
 
 			if (
-				! class_exists( JetpackConnectionManager::class )
-				|| ! $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
+				class_exists( JetpackConnectionManager::class )
+				&& $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
 			) {
-				$this->enabled = false;
-			} else {
 				$this->enabled = true;
+			} else {
+				$this->enabled = false;
 			}
+		} catch ( Exception $e ) {
+			$this->enabled = false;
 		}
 
 		return $this->enabled;
