@@ -235,13 +235,11 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			return;
 		}
 
-		$invalid_items = array_filter( $batch, fn( $item ) => ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) );
-		if ( $invalid_items ) {
-			throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
-		}
-
 		$logger = $this->legacy_proxy->call_function( 'wc_get_logger' );
 		foreach ( $batch as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['meta_value'] ) || ! isset( $item['order_id'] ) ) {
+				throw new \Exception( "\$batch must be an array of arrays, each having a 'meta_value' key and an 'order_id' key" );
+			}
 			$logger->clear( $item['meta_value'] );
 		}
 
