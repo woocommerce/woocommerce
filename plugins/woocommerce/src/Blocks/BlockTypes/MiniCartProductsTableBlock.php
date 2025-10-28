@@ -176,8 +176,8 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 										<div data-wp-watch="callbacks.itemShortDescription" >
 											<div class="wc-block-components-product-metadata__description"></div>
 										</div>
-										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										<?php echo $this->render_experimental_iapi_product_details_markup( 'item_data' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo $this->render_experimental_iapi_product_details_markup( 'variation' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</div>
 									<div class="wc-block-cart-item__quantity">
 										<div class="wc-block-components-quantity-selector" data-wp-bind--hidden="state.cartItem.sold_individually">
@@ -261,6 +261,9 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	protected function render_experimental_iapi_product_details_markup( $property ) {
 		$context = array( 'dataProperty' => $property );
 
+		// If the property is item_data, so not a variation, we need to skip the text directive.
+		$is_item_data = 'item_data' === $context['dataProperty'];
+
 		ob_start();
 		?>
 		<div
@@ -268,7 +271,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 			class="wc-block-components-product-details"
 			data-wp-bind--hidden="state.shouldHideSingleProductDetails"
 		>
-			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+			<?php echo $this->render_experimental_iapi_product_details_item_markup( 'div', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 		</div>
 		<ul
 			<?php echo wp_interactivity_data_wp_context( $context ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -279,7 +282,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
 				data-wp-each-key="context.itemData.raw_attribute"
 			>
-				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</template>
 		</ul>
 		<?php
@@ -289,18 +292,25 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	/**
 	 * Render markup for a single product detail item.
 	 *
-	 * @param string $tag_name The HTML tag to use for the item.
-	 * @return string Rendered product detail item output.
+	 * @param string $tag_name   The HTML tag to use for the item.
+	 * @param bool   $is_item_data Whether the item is of item_data type.
+	 * @return string Rendered product detail item output based on item type.
 	 */
-	private function render_experimental_iapi_product_details_item_markup( $tag_name ) {
+	private function render_experimental_iapi_product_details_item_markup( $tag_name, $is_item_data = false ) {
 		ob_start();
 		?>
 		<<?php echo tag_escape( $tag_name ); ?>
 			data-wp-bind--hidden="state.cartItemDataAttr.hidden"
 			data-wp-bind--class="state.cartItemDataAttr.className"
+
 		>
-			<span class="wc-block-components-product-details__name" data-wp-text="state.cartItemDataAttr.name"></span>
+		<?php if ( $is_item_data ) : ?>
+			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span><?php echo ': '; ?>
+			<span class="wc-block-components-product-details__value" data-wp-watch="callbacks.itemDataValueInnerHTML"></span>
+		<?php else : ?>
+			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span><?php echo ': '; ?>
 			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
+		<?php endif; ?>
 		</<?php echo tag_escape( $tag_name ); ?>>
 		<?php
 		return ob_get_clean();
