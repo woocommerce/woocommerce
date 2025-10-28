@@ -139,7 +139,9 @@ final class AsyncGenerator {
 				function ( WalkerProgress $progress ) use ( &$status ) {
 					$status = $this->update_feed_progress( $status, $progress );
 					update_option( self::OPTION_KEY, $status, false );
-				}
+				},
+				array(),
+				$this->integration->get_product_types()
 			);
 
 			// Store the final details.

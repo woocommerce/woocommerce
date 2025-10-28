@@ -105,4 +105,16 @@ class POSIntegration {
 	public function get_feed_validator(): FeedValidatorInterface {
 		return new FeedValidator();
 	}
+
+	/**
+	 * Get the product types to include in the feed.
+	 *
+	 * Note: This method is new and not part of the original IntegrationInterface.
+	 * Consider adding it to the interface in a future update.
+	 *
+	 * @return array The product types to include.
+	 */
+	public function get_product_types(): array {
+		return array( 'simple', 'variable', 'variation' );
+	}
 }

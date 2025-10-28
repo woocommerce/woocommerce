@@ -104,10 +104,14 @@ class ProductWalker {
 	 *
 	 * @param callable $callback The callback to call after each batch of products is processed.
 	 * @param array    $additional_args Optional. Additional arguments to merge into the base query args.
+	 * @param array    $product_types Optional. Product types to include. If provided, overrides the instance property.
 	 * @return int The total number of products processed.
 	 */
-	public function walk( ?callable $callback = null, array $additional_args = array() ): int {
+	public function walk( ?callable $callback = null, array $additional_args = array(), array $product_types = array() ): int {
 		$progress = null;
+
+		// Use provided product types or fall back to default.
+		$types = ! empty( $product_types ) ? $product_types : array( 'simple', 'variation' );
 
 		/**
 		 * Allows the base arguments for querying products for product feeds to be changed.
@@ -124,7 +128,7 @@ class ProductWalker {
 			array_merge(
 				array(
 					'status' => array( 'publish' ),
-					'type'   => array( 'simple', 'variation' ),
+					'type'   => $types,
 					'return' => 'objects',
 				),
 				$additional_args
