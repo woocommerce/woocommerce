@@ -1126,7 +1126,21 @@ class WooPaymentsRestController extends RestApiControllerBase {
 							'context'     => array( 'view', 'edit' ),
 							'readonly'    => true,
 							'items'       => array(
-								'type' => 'string',
+								'type'       => 'object',
+								'properties' => array(
+									'code'    => array(
+										'type'     => 'string',
+										'readonly' => true,
+									),
+									'message' => array(
+										'type'     => 'string',
+										'readonly' => true,
+									),
+									'context' => array(
+										'type'     => 'object',
+										'readonly' => true,
+									),
+								),
 							),
 						),
 						'actions'        => array(
