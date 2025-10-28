@@ -300,4 +300,83 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'WC_Install::$db_update_callbacks must not contain versions that are ahead of current stable (except, possibly, for suffix).',
 		);
 	}
+
+	/**
+	 * Test that order stats table schema includes fulfillment_status column for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_includes_fulfillment_status_for_new_install(): void {
+		// Mock is_new_install to return true.
+		$version   = null;
+		$shop_id   = null;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+
+		// Verify that is_new_install returns true.
+		$this->assertTrue( WC_Install::is_new_install(), 'is_new_install should return true for testing new installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema includes fulfillment_status column.
+		$this->assertStringContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should include fulfillment_status column for new installations.' );
+
+		// Assert that the schema includes fulfillment_status index.
+		$this->assertStringContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should include fulfillment_status index for new installations.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+	}
+
+	/**
+	 * Test that order stats table schema excludes fulfillment_status column for existing installations.
+	 *
+	 * @return void
+	 */
+	public function test_order_stats_schema_excludes_fulfillment_status_for_existing_install(): void {
+		// Mock is_new_install to return false.
+		$version   = '9.0.0';
+		$shop_id   = 10;
+
+		$supply_version = function () use ( &$version ) {
+			return $version;
+		};
+
+		$supply_shop_id = function () use ( &$shop_id ) {
+			return $shop_id;
+		};
+
+		add_filter( 'option_woocommerce_version', $supply_version );
+		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+
+		// Verify that is_new_install returns false.
+		$this->assertFalse( WC_Install::is_new_install(), 'is_new_install should return false for testing existing installation.' );
+
+		// Get the schema using reflection to call private method.
+		$get_order_stats_schema = function ( $collate ) {
+			return static::get_order_stats_table_schema( $collate );
+		};
+		$schema = $get_order_stats_schema->call( new \WC_Install(), '' );
+
+		// Assert that the schema does NOT include fulfillment_status column.
+		$this->assertStringNotContainsString( 'fulfillment_status', $schema, 'Schema should NOT include fulfillment_status column for existing installations.' );
+
+		// Cleanup.
+		remove_filter( 'option_woocommerce_version', $supply_version );
+		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
+	}
 }
