@@ -3,20 +3,17 @@
  */
 import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
-import { recordEvent } from '@woocommerce/tracks';
-import { dispatch, select } from '@wordpress/data';
+import { select } from '@wordpress/data';
 import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { findBlock } from '@woocommerce/utils';
-import { createBlock } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
-import metadata from '../../block.json';
+import metadata from './block.json';
+import { replaceBlockWithProductGallery } from '../../../../blocks/product-gallery/edit-utils';
 
-const upgradeToBlockifiedAddToCartWithOptions = async (
-	blockClientId: string
-) => {
+const upgradeToBlockifiedProductGallery = ( blockClientId: string ) => {
 	const blocks = select( 'core/block-editor' ).getBlocks();
 	const foundBlock = findBlock( {
 		blocks,
@@ -24,17 +21,10 @@ const upgradeToBlockifiedAddToCartWithOptions = async (
 			block.name === metadata.name && block.clientId === blockClientId,
 	} );
 
-	if ( ! foundBlock ) {
-		return false;
+	if ( foundBlock ) {
+		return replaceBlockWithProductGallery( foundBlock.clientId );
 	}
-
-	const newBlock = createBlock( 'woocommerce/add-to-cart-with-options' );
-	dispatch( 'core/block-editor' ).replaceBlock(
-		foundBlock.clientId,
-		newBlock
-	);
-
-	return true;
+	return false;
 };
 
 export const UpgradeNotice = ( {
@@ -57,26 +47,17 @@ export const UpgradeNotice = ( {
 	);
 
 	const buttonLabel = __(
-		'Upgrade to the Add to Cart + Options block',
+		'Upgrade to the new Product Gallery block',
 		'woocommerce'
 	);
-
-	const handleClick = async () => {
-		const upgraded = await upgradeToBlockifiedAddToCartWithOptions(
-			blockClientId
-		);
-		if ( upgraded ) {
-			recordEvent( 'blocks_add_to_cart_with_options_migration', {
-				transform_to: 'blockified',
-			} );
-		}
-	};
 
 	return (
 		<UpgradeDowngradeNotice
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
-			onActionClick={ handleClick }
+			onActionClick={ () =>
+				upgradeToBlockifiedProductGallery( blockClientId )
+			}
 		>
 			{ notice }
 		</UpgradeDowngradeNotice>

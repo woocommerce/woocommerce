@@ -29,7 +29,6 @@ export function UpgradeDowngradeNotice( {
 					label: actionLabel,
 					onClick: onActionClick,
 					noDefaultClasses: true,
-					// @ts-expect-error the 'variant' prop does exists.
 					variant: 'link',
 				},
 			] }

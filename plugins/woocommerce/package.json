@@ -784,6 +784,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -821,6 +822,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
