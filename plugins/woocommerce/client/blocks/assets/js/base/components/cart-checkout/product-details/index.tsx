@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { paramCase as kebabCase } from 'change-case';
-import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/sanitize';
+
 import type { ProductResponseItemData } from '@woocommerce/types';
 
 /**
@@ -10,9 +11,22 @@ import type { ProductResponseItemData } from '@woocommerce/types';
  */
 import './style.scss';
 
+const CONTENT_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'br', 'abbr', 'span' ];
+
+const CONTENT_ATTR = [
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'class',
+	'title',
+];
+
 interface ProductDetailsProps {
 	details: ProductResponseItemData[];
 }
+
 // Component to display cart item data and variations.
 const ProductDetails = ( {
 	details = [],
@@ -40,13 +54,19 @@ const ProductDetails = ( {
 			{ details.map( ( detail ) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
+				// Strip HTML tags from name for CSS class generation
+				const tempDiv = document.createElement( 'div' );
+				tempDiv.innerHTML = name;
+				const nameForClass =
+					tempDiv.textContent || tempDiv.innerText || '';
 				const className =
 					detail?.className ||
-					( name
+					( nameForClass
 						? `wc-block-components-product-details__${ kebabCase(
-								name
+								nameForClass
 						  ) }`
 						: '' );
+
 				return (
 					<ChildTag
 						key={ name + ( detail.display || detail.value ) }
@@ -54,14 +74,30 @@ const ProductDetails = ( {
 					>
 						{ name && (
 							<>
-								<span className="wc-block-components-product-details__name">
-									{ decodeEntities( name ) }:
-								</span>{ ' ' }
+								<span
+									className="wc-block-components-product-details__name"
+									dangerouslySetInnerHTML={ {
+										__html: sanitizeHTML( name, {
+											tags: CONTENT_TAGS,
+											attr: CONTENT_ATTR,
+										} ),
+									} }
+								/>
+								{ ': ' }
 							</>
 						) }
-						<span className="wc-block-components-product-details__value">
-							{ decodeEntities( detail.display || detail.value ) }
-						</span>
+						<span
+							className="wc-block-components-product-details__value"
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML(
+									detail.display || detail.value,
+									{
+										tags: CONTENT_TAGS,
+										attr: CONTENT_ATTR,
+									}
+								),
+							} }
+						/>
 					</ChildTag>
 				);
 			} ) }
