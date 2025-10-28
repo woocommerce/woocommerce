@@ -316,7 +316,7 @@ const { state, actions } = store< Store >(
 						// some variations might accept 'Any' value for an attribute,
 						// in which case, we need to check that the attributes match.
 						if (
-							key !== cartItem.key ||
+							id !== cartItem.id ||
 							! cartItem.variation ||
 							! variation ||
 							cartItem.variation.length !== variation.length
@@ -328,8 +328,8 @@ const { state, actions } = store< Store >(
 							variation
 						);
 					}
-
-					return key === cartItem.key;
+					// If no key is provided, rely on the id.
+					return key ? key === cartItem.key : id === cartItem.id;
 				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );
