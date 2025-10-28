@@ -1292,5 +1292,39 @@ describe( 'PaymentGatewayListItem', () => {
 			);
 			expect( completeSetupButton ).toBeInTheDocument();
 		} );
+
+		it( 'handles completely undefined gateway.onboarding without crashing', () => {
+			const gateway = createMockGateway( {
+				state: {
+					enabled: false,
+					account_connected: false,
+					needs_setup: false,
+					test_mode: false,
+					dev_mode: false,
+				},
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with undefined onboarding.
+				onboarding: undefined as any,
+			} );
+			const { container, getByTestId } = render(
+				<PaymentGatewayListItem
+					gateway={ gateway }
+					{ ...defaultProps }
+				/>
+			);
+
+			// Component should render without crashing when entire onboarding object is undefined.
+			const item = container.querySelector(
+				'.woocommerce-item__payment-gateway'
+			);
+			expect( item ).toBeInTheDocument();
+
+			// Should show status badge.
+			expect( getByTestId( 'status-badge' ) ).toBeInTheDocument();
+
+			// CompleteSetupButton should render with safe fallback props.
+			const completeSetupButton = getByTestId( 'complete-setup-button' );
+			expect( completeSetupButton ).toBeInTheDocument();
+			expect( completeSetupButton ).not.toBeDisabled();
+		} );
 	} );
 } );
