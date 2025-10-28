@@ -52,8 +52,10 @@ export const PaymentGatewayListItem = ( {
 	const gatewayHasRecommendedPaymentMethods =
 		( gateway.onboarding?.recommended_payment_methods ?? [] ).length > 0;
 
-	// Default to onboarding supported to avoid blocking the user.
-	const isOnboardingSupported = gateway.onboarding?.state?.supported ?? true;
+	// Default to onboarding supported to avoid blocking the user, but only when onboarding exists.
+	const isOnboardingSupported = gateway.onboarding
+		? gateway.onboarding.state?.supported ?? true
+		: true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
 	const gatewayNeedsOnboarding =
@@ -246,8 +248,9 @@ export const PaymentGatewayListItem = ( {
 									gateway.management._links.settings.href
 								}
 								onboardingHref={
-									isOnboardingSupported
-										? gateway.onboarding._links.onboard.href
+									isOnboardingSupported && gateway.onboarding
+										? gateway.onboarding._links?.onboard
+												?.href || '#'
 										: '#'
 								}
 								gatewayHasRecommendedPaymentMethods={
@@ -268,11 +271,13 @@ export const PaymentGatewayListItem = ( {
 												?.not_supported
 										: undefined
 								}
-								{ ...( isOnboardingSupported && {
-									onboardingType: gateway.onboarding.type,
-									incentive,
-									acceptIncentive,
-								} ) }
+								{ ...( isOnboardingSupported &&
+									gateway.onboarding && {
+										onboardingType:
+											gateway.onboarding?.type,
+										incentive,
+										acceptIncentive,
+									} ) }
 							/>
 						) }
 
