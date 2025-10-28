@@ -234,8 +234,8 @@ class WC_Structured_Data {
 			$price_valid_until = gmdate( 'Y-12-31', time() + YEAR_IN_SECONDS );
 
 			if ( $product->is_type( ProductType::VARIABLE ) ) {
-				$lowest  = $product->get_variation_price( 'min', false );
-				$highest = $product->get_variation_price( 'max', false );
+				$lowest  = $product->get_variation_price( 'min', true );
+				$highest = $product->get_variation_price( 'max', true );
 
 				if ( $lowest === $highest ) {
 					$markup_offer = array(
