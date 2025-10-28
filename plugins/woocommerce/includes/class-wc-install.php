@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
@@ -1244,9 +1243,6 @@ class WC_Install {
 		global $wpdb;
 
 		$is_new_install = self::is_new_install();
-		if ( true === $is_new_install ) {
-			update_option( DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
-		}
 
 		return "CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	order_id bigint(20) unsigned NOT NULL,

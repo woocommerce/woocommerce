@@ -25,11 +25,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
 
 	/**
-	 * Option name to store status of the wc_order_stats table has a column `fulfillment_status`
+	 * Cache for fulfillment_status column existence check.
 	 *
-	 * @var string
+	 * @var bool|null
 	 */
-	const OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS = 'woocommerce_order_stats_has_fulfillment_column';
+	private static $has_fulfillment_column = null;
 
 	/**
 	 * Table used to get the data.
@@ -683,7 +683,19 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return boolean
 	 */
 	public static function has_fulfillment_status_column() {
-		return 'yes' === get_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'no' );
+		global $wpdb;
+
+		$table_name    = self::get_db_table_name();
+		$column_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+				'fulfillment_status'
+			)
+		);
+
+		self::$has_fulfillment_column = ! empty( $column_exists );
+		return self::$has_fulfillment_column;
 	}
 
 	/**
