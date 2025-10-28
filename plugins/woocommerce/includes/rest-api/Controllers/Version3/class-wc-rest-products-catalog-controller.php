@@ -13,6 +13,7 @@ declare( strict_types = 1 );
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+use Automattic\WooCommerce\Internal\ProductCatalog\AsyncGenerator;
 
 /**
  * REST API Products Catalog controller class.
@@ -82,32 +83,47 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
 
-		// TODO: replace API request with feed generator call and proper async job tracking once the foundation is in core.
-		$internal_request = new WP_REST_Request( 'GET', '/wc/product-catalog/v1/create' );
-		$internal_request->set_param( 'force', $force_generate );
-		// TODO: support fields param
-		// $internal_request->set_param( 'fields', $fields );
-		$api_response     = rest_do_request( $internal_request );
+		try {
+			$generator = wc_get_container()->get( AsyncGenerator::class );
 
-		if ( $api_response->is_error() ) {
-			return $api_response->as_error();
+			$status = $force_generate ? $generator->force_regeneration() : $generator->get_status();
+
+			// Map internal status to API response.
+			return $this->map_status_to_response( $status );
+
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'catalog_generation_error',
+				$e->getMessage(),
+				array( 'status' => 500 )
+			);
 		}
+	}
 
-		$status = $api_response->get_data();
-
+	/**
+	 * Map internal status to API response format.
+	 *
+	 * @param array $status Internal status array.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	private function map_status_to_response( array $status ) {
 		// Validate state exists.
 		if ( ! isset( $status['state'] ) ) {
-			// TODO: update error message to be more generic
-			return new WP_Error( 'catalog_api_invalid_response', __( 'API response missing state field.', 'woocommerce' ), array( 'status' => 500 ) );
+			return new WP_Error(
+				'catalog_invalid_state',
+				__( 'Invalid catalog generation state.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
 		}
 
-		error_log( 'Status: ' . print_r( $status, true ) );
-
 		switch ( $status['state'] ) {
-			case 'completed':
+			case AsyncGenerator::STATE_COMPLETED:
 				if ( ! isset( $status['url'] ) ) {
-					// TODO: update error message to be more generic
-					return new WP_Error( 'catalog_api_missing_url', __( 'Completed status missing url field.', 'woocommerce' ), array( 'status' => 500 ) );
+					return new WP_Error(
+						'catalog_missing_url',
+						__( 'Completed catalog missing download URL.', 'woocommerce' ),
+						array( 'status' => 500 )
+					);
 				}
 				return rest_ensure_response(
 					array(
@@ -115,25 +131,37 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 						'download_url' => $status['url'],
 					)
 				);
-			case 'scheduled':
+
+			case AsyncGenerator::STATE_SCHEDULED:
 				return rest_ensure_response(
 					array(
 						'status'       => 'pending',
 						'download_url' => null,
 					)
 				);
-			case 'in_progress':
+
+			case AsyncGenerator::STATE_IN_PROGRESS:
 				return rest_ensure_response(
 					array(
 						'status'       => 'processing',
 						'download_url' => null,
 					)
 				);
-			case 'failed':
-				return new WP_Error( 'catalog_generation_failed', $status['error'] ?? __( 'Catalog generation failed.', 'woocommerce' ), array( 'status' => 500 ) );
+
+			case AsyncGenerator::STATE_FAILED:
+				return new WP_Error(
+					'catalog_generation_failed',
+					$status['error'] ?? __( 'Catalog generation failed.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
 
 			default:
-				return new WP_Error( 'catalog_api_unknown_state', sprintf( __( 'Unknown state: %s', 'woocommerce' ), $status['state'] ), array( 'status' => 500 ) );
+				return new WP_Error(
+					'catalog_unknown_state',
+					/* translators: %s: Catalog generation state */
+					sprintf( __( 'Unknown state: %s', 'woocommerce' ), $status['state'] ),
+					array( 'status' => 500 )
+				);
 		}
 	}
 
