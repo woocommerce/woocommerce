@@ -18,7 +18,7 @@ use WC_Unit_Test_Case;
 /**
  * WooPayments payment gateway provider service test.
  *
- * @class WCCore
+ * @class WooPayments
  */
 class WooPaymentsTest extends WC_Unit_Test_Case {
 
@@ -136,112 +136,114 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$container = wc_get_container();
 		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
 
-		// Act.
-		$gateway_details = $this->sut->get_details( $fake_gateway, 999 );
+		try {
+			// Act.
+			$gateway_details = $this->sut->get_details( $fake_gateway, 999 );
 
-		// Assert that we have all the details.
-		$this->assertEquals(
-			array(
-				'id'          => 'woocommerce_payments',
-				'_order'      => 999,
-				'title'       => 'WooPayments has a very long title that should be truncated after some length',
-				'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim…',
-				'icon'        => 'https://example.com/icon.png',
-				'supports'    => array( 'products', 'something', 'bogus' ),
-				'state'       => array(
-					'enabled'           => true,
-					'account_connected' => true,
-					'needs_setup'       => true,
-					'test_mode'         => true,
-					'dev_mode'          => true,
-				),
-				'management'  => array(
-					'_links' => array(
-						'settings' => array(
-							'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS,
+			// Assert that we have all the details.
+			$this->assertEquals(
+				array(
+					'id'          => 'woocommerce_payments',
+					'_order'      => 999,
+					'title'       => 'WooPayments has a very long title that should be truncated after some length',
+					'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim…',
+					'icon'        => 'https://example.com/icon.png',
+					'supports'    => array( 'products', 'something', 'bogus' ),
+					'state'       => array(
+						'enabled'           => true,
+						'account_connected' => true,
+						'needs_setup'       => true,
+						'test_mode'         => true,
+						'dev_mode'          => true,
+					),
+					'management'  => array(
+						'_links' => array(
+							'settings' => array(
+								'href' => 'https://example.com/wp-admin/admin.php?page=wc-settings&tab=checkout&section=bogus_settings&from=' . Payments::FROM_PAYMENTS_SETTINGS,
+							),
+						),
+					),
+					'plugin'      => array(
+						'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
+						'slug'   => 'woocommerce-payments',
+						'file'   => 'woocommerce-payments/woocommerce-payments',
+						'status' => PaymentsProviders::EXTENSION_ACTIVE,
+					),
+					'onboarding'  => array(
+						'type'                        => PaymentGateway::ONBOARDING_TYPE_NATIVE_IN_CONTEXT,
+						'state'                       => array(
+							'supported'                    => true,
+							'started'                      => true,
+							'completed'                    => true,
+							'test_mode'                    => true,
+							'test_drive_account'           => false,
+							'wpcom_has_working_connection' => false,
+							'wpcom_is_store_connected'     => false,
+							'wpcom_has_connected_owner'    => false,
+							'wpcom_is_connection_owner'    => false,
+						),
+						'messages'                    => array(
+							'not_supported' => null,
+						),
+						'_links'                      => array(
+							'onboard' => array(
+								'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
+							),
+							'reset'   => array(
+								'href' => rest_url( '/some/rest/for/woopayments/onboarding/reset' ),
+							),
+						),
+						'recommended_payment_methods' => array(
+							array(
+								'id'          => 'woopay',
+								'_order'      => 0,
+								'enabled'     => false,
+								'required'    => false,
+								'title'       => 'WooPay',
+								'description' => 'WooPay express checkout',
+								'icon'        => '', // The icon with an invalid URL is ignored.
+								'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							),
+							array(
+								'id'          => 'card',
+								'_order'      => 1,
+								'enabled'     => true,
+								'required'    => true,
+								'title'       => 'Credit/debit card (required)',
+								'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
+								'icon'        => 'https://example.com/card-icon.png',
+								'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							),
+							array(
+								'id'          => 'basic2',
+								'_order'      => 2,
+								'enabled'     => false,
+								'required'    => false,
+								'title'       => 'Title',
+								'description' => '',
+								'icon'        => '',
+								'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
+							),
+							array(
+								'id'          => 'basic',
+								'_order'      => 3,
+								'enabled'     => true,
+								'required'    => false,
+								'title'       => 'Title',
+								'description' => '',
+								'icon'        => '',
+								'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
+							),
 						),
 					),
 				),
-				'plugin'      => array(
-					'_type'  => PaymentsProviders::EXTENSION_TYPE_WPORG,
-					'slug'   => 'woocommerce-payments',
-					'file'   => 'woocommerce-payments/woocommerce-payments',
-					'status' => PaymentsProviders::EXTENSION_ACTIVE,
-				),
-				'onboarding'  => array(
-					'type'                        => PaymentGateway::ONBOARDING_TYPE_NATIVE_IN_CONTEXT,
-					'state'                       => array(
-						'supported'                    => true,
-						'started'                      => true,
-						'completed'                    => true,
-						'test_mode'                    => true,
-						'test_drive_account'           => false,
-						'wpcom_has_working_connection' => false,
-						'wpcom_is_store_connected'     => false,
-						'wpcom_has_connected_owner'    => false,
-						'wpcom_is_connection_owner'    => false,
-					),
-					'messages'                    => array(
-						'not_supported' => null,
-					),
-					'_links'                      => array(
-						'onboard' => array(
-							'href' => Utils::wc_payments_settings_url( '/woopayments/onboarding', array( 'from' => Payments::FROM_PAYMENTS_SETTINGS ) ),
-						),
-						'reset'   => array(
-							'href' => rest_url( '/some/rest/for/woopayments/onboarding/reset' ),
-						),
-					),
-					'recommended_payment_methods' => array(
-						array(
-							'id'          => 'woopay',
-							'_order'      => 0,
-							'enabled'     => false,
-							'required'    => false,
-							'title'       => 'WooPay',
-							'description' => 'WooPay express checkout',
-							'icon'        => '', // The icon with an invalid URL is ignored.
-							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
-						),
-						array(
-							'id'          => 'card',
-							'_order'      => 1,
-							'enabled'     => true,
-							'required'    => true,
-							'title'       => 'Credit/debit card (required)',
-							'description' => '<strong>Accepts</strong> <b>all major</b><em>credit</em> and <a href="#" target="_blank">debit cards</a>.',
-							'icon'        => 'https://example.com/card-icon.png',
-							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
-						),
-						array(
-							'id'          => 'basic2',
-							'_order'      => 2,
-							'enabled'     => false,
-							'required'    => false,
-							'title'       => 'Title',
-							'description' => '',
-							'icon'        => '',
-							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_PRIMARY,
-						),
-						array(
-							'id'          => 'basic',
-							'_order'      => 3,
-							'enabled'     => true,
-							'required'    => false,
-							'title'       => 'Title',
-							'description' => '',
-							'icon'        => '',
-							'category'    => PaymentGateway::PAYMENT_METHOD_CATEGORY_SECONDARY,
-						),
-					),
-				),
-			),
-			$gateway_details
-		);
-
-		// Clean up.
-		Constants::clear_constants();
-		$container->reset_replacement( WooPaymentsRestController::class );
+				$gateway_details
+			);
+		} finally {
+			// Clean up.
+			Constants::clear_constants();
+			$container->reset_replacement( WooPaymentsRestController::class );
+		}
 	}
 
 	/**
@@ -317,28 +319,30 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
 		$container->replace( WooPaymentsService::class, $mock_service );
 
-		// Act.
-		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
+		try {
+			// Act.
+			$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
 
-		// Assert that the service details are merged.
-		$this->assertArrayHasKey( 'onboarding', $gateway_details );
-		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
-		$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
+			// Assert that the service details are merged.
+			$this->assertArrayHasKey( 'onboarding', $gateway_details );
+			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+			$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+			$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
 
-		// Assert that the onboarding state was merged from the service.
-		// The service returns started=true and completed=false, which overrides the gateway values.
-		$this->assertFalse( $gateway_details['onboarding']['state']['completed'] );
-		$this->assertTrue( $gateway_details['onboarding']['state']['started'] );
+			// Assert that the onboarding state was merged from the service.
+			// The service returns started=true and completed=false, which overrides the gateway values.
+			$this->assertFalse( $gateway_details['onboarding']['state']['completed'] );
+			$this->assertTrue( $gateway_details['onboarding']['state']['started'] );
 
-		// Assert messages exist (the parent class sets not_supported).
-		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
-		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
-
-		// Clean up.
-		Constants::clear_constants();
-		$container->reset_replacement( WooPaymentsRestController::class );
-		$container->reset_replacement( WooPaymentsService::class );
+			// Assert messages exist (the parent class sets not_supported).
+			$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+			$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+		} finally {
+			// Clean up.
+			Constants::clear_constants();
+			$container->reset_replacement( WooPaymentsRestController::class );
+			$container->reset_replacement( WooPaymentsService::class );
+		}
 	}
 
 	/**
@@ -390,17 +394,20 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		$container->replace( WooPaymentsRestController::class, $mock_rest_controller );
 		$container->replace( WooPaymentsService::class, $mock_service );
 
-		// Act - should not throw exception.
-		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
+		try {
+			// Act - should not throw exception.
+			$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'US' );
 
-		// Assert that details are still returned despite service error.
-		$this->assertArrayHasKey( 'onboarding', $gateway_details );
-		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-
-		// Clean up.
-		Constants::clear_constants();
-		$container->reset_replacement( WooPaymentsRestController::class );
-		$container->reset_replacement( WooPaymentsService::class );
+			// Assert that details are still returned despite service error.
+			$this->assertArrayHasKey( 'onboarding', $gateway_details );
+			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+			$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
+		} finally {
+			// Clean up.
+			Constants::clear_constants();
+			$container->reset_replacement( WooPaymentsRestController::class );
+			$container->reset_replacement( WooPaymentsService::class );
+		}
 	}
 
 	/**
@@ -536,17 +543,19 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
-		// Act.
-		$gateway_details = $this->sut->get_details( $fake_gateway, 0 );
+		try {
+			// Act.
+			$gateway_details = $this->sut->get_details( $fake_gateway, 0 );
 
-		// Assert - when no country code is provided, supported state should be true by default.
-		$this->assertArrayHasKey( 'onboarding', $gateway_details );
-		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
-		$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
-
-		// Clean up.
-		Constants::clear_constants();
+			// Assert - when no country code is provided, supported state should be true by default.
+			$this->assertArrayHasKey( 'onboarding', $gateway_details );
+			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+			$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+			$this->assertTrue( $gateway_details['onboarding']['state']['supported'] );
+		} finally {
+			// Clean up.
+			Constants::clear_constants();
+		}
 	}
 
 	/**
@@ -569,20 +578,22 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 		// Arrange the version constant.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
 
-		// Act.
-		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
+		try {
+			// Act.
+			$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
 
-		// Assert - should include the unsupported state and message.
-		$this->assertArrayHasKey( 'onboarding', $gateway_details );
-		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
-		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
-		$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
+			// Assert - should include the unsupported state and message.
+			$this->assertArrayHasKey( 'onboarding', $gateway_details );
+			$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+			$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+			$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
 
-		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
-		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
-		$this->assertEquals( 'WooPayments is not available in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
-
-		// Clean up.
-		Constants::clear_constants();
+			$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+			$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+			$this->assertEquals( 'WooPayments is not available in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
+		} finally {
+			// Clean up.
+			Constants::clear_constants();
+		}
 	}
 }
