@@ -11,7 +11,7 @@ use WC_Unit_Test_Case;
 /**
  * PushToken test.
  *
- * @covers PushToken
+ * @covers \Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken
  */
 class PushTokenTest extends WC_Unit_Test_Case {
 	/**
@@ -25,6 +25,30 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests set_id throws exception with zero value.
+	 */
+	public function test_it_throws_exception_when_setting_id_to_zero() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'ID must be a positive integer.' );
+
+		$push_token->set_id( 0 );
+	}
+
+	/**
+	 * @testdox Tests set_id throws exception with negative value.
+	 */
+	public function test_it_throws_exception_when_setting_id_to_negative() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'ID must be a positive integer.' );
+
+		$push_token->set_id( -1 );
+	}
+
+	/**
 	 * @testdox Tests it's possible to set and get the user ID.
 	 */
 	public function test_it_can_get_and_set_user_id() {
@@ -32,6 +56,30 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 
 		$this->assertEquals( 1, $push_token->get_user_id() );
+	}
+
+	/**
+	 * @testdox Tests set_user_id throws exception with zero value.
+	 */
+	public function test_it_throws_exception_when_setting_user_id_to_zero() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'User ID must be a positive integer.' );
+
+		$push_token->set_user_id( 0 );
+	}
+
+	/**
+	 * @testdox Tests set_user_id throws exception with negative value.
+	 */
+	public function test_it_throws_exception_when_setting_user_id_to_negative() {
+		$push_token = new PushToken();
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'User ID must be a positive integer.' );
+
+		$push_token->set_user_id( -1 );
 	}
 
 	/**
@@ -372,20 +420,27 @@ class PushTokenTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Tests set_origin accepts valid origin values.
+	 *
+	 * @dataProvider valid_origins_provider
 	 */
-	public function test_it_accepts_valid_origin_values() {
+	public function test_it_accepts_valid_origin_values( string $origin ) {
 		$push_token = new PushToken();
+		$push_token->set_origin( $origin );
 
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_ANDROID );
-		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_ANDROID, $push_token->get_origin() );
+		$this->assertEquals( $origin, $push_token->get_origin() );
+	}
 
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_ANDROID_DEV );
-		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_ANDROID_DEV, $push_token->get_origin() );
-
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
-		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS, $push_token->get_origin() );
-
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV );
-		$this->assertEquals( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV, $push_token->get_origin() );
+	/**
+	 * Data provider for valid origin values.
+	 *
+	 * @return array
+	 */
+	public function valid_origins_provider(): array {
+		return array(
+			'Android'     => array( PushToken::ORIGIN_WOOCOMMERCE_ANDROID ),
+			'Android Dev' => array( PushToken::ORIGIN_WOOCOMMERCE_ANDROID_DEV ),
+			'iOS'         => array( PushToken::ORIGIN_WOOCOMMERCE_IOS ),
+			'iOS Dev'     => array( PushToken::ORIGIN_WOOCOMMERCE_IOS_DEV ),
+		);
 	}
 }

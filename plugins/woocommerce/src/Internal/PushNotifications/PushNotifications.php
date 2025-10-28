@@ -8,7 +8,6 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -24,6 +23,8 @@ class PushNotifications {
 
 	/**
 	 * Roles that can receive push notifications.
+	 *
+	 * This will be used to gate functionality access to just these roles.
 	 */
 	const ROLES_WITH_PUSH_NOTIFICATIONS_ENABLED = array(
 		'administrator',
@@ -46,6 +47,8 @@ class PushNotifications {
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
+
+		// @todo register library endpoints and scheduled tasks here.
 	}
 
 	/**

@@ -8,6 +8,7 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
 
 /**
