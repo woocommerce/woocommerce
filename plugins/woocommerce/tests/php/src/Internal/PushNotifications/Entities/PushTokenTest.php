@@ -161,6 +161,36 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests set_device_uuid normalizes empty string to null.
+	 */
+	public function test_it_normalizes_empty_device_uuid_to_null() {
+		$push_token = new PushToken();
+		$push_token->set_device_uuid( '' );
+
+		$this->assertNull( $push_token->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Tests set_device_uuid normalizes whitespace-only string to null.
+	 */
+	public function test_it_normalizes_whitespace_device_uuid_to_null() {
+		$push_token = new PushToken();
+		$push_token->set_device_uuid( '   ' );
+
+		$this->assertNull( $push_token->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Tests set_device_uuid trims leading and trailing whitespace.
+	 */
+	public function test_it_trims_device_uuid_whitespace() {
+		$push_token = new PushToken();
+		$push_token->set_device_uuid( '  test-device-uuid  ' );
+
+		$this->assertEquals( 'test-device-uuid', $push_token->get_device_uuid() );
+	}
+
+	/**
 	 * @testdox Tests it's possible to set and get the platform.
 	 */
 	public function test_it_can_get_and_set_platform() {
