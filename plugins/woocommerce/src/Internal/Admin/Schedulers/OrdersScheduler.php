@@ -53,6 +53,13 @@ class OrdersScheduler extends ImportScheduler {
 	const LAST_PROCESSED_ORDER_ID_OPTION = 'woocommerce_admin_scheduler_last_processed_order_id';
 
 	/**
+	 * Option name for storing whether to enable immediate order import.
+	 *
+	 * @var string
+	 */
+	const IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
+
+	/**
 	 * Attach order lookup update hooks.
 	 *
 	 * @internal
@@ -352,16 +359,13 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 */
 	public static function schedule_recurring_batch_processor() {
 		if ( self::is_immediate_import_enabled() ) {
-			error_log( 'Immediate import is enabled, skipping batch processor.' );
 			// No need to schedule if immediate import is enabled.
-
 			if ( self::has_existing_jobs( 'process_pending_batch', array() ) ) {
 				$action_hook = self::get_action( 'process_pending_batch' );
 				as_unschedule_all_actions( $action_hook, array(), static::$group );
 			}
 			return;
 		}
-
 		// Initialize last processed date if not set.
 		self::initialize_last_processed_date();
 
@@ -625,7 +629,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	private static function is_immediate_import_enabled(): bool {
-		$enable_immediate_import = get_option( 'woocommerce_analytics_immediate_import', true );
+		$enable_immediate_import = get_option( self::IMMEDIATE_IMPORT_OPTION, true );
 		return filter_var( $enable_immediate_import, FILTER_VALIDATE_BOOLEAN );
 	}
 }
