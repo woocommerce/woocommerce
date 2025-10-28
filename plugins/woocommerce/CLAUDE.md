@@ -246,6 +246,38 @@ if ( class_exists( '\WC_Payments_Utils' ) &&
 }
 ```
 
+**Unused closure parameters:**
+
+When creating closures with parameters required by signature but unused,
+use `unset()` to avoid `Generic.CodeAnalysis.UnusedFunctionParameter` errors:
+
+```php
+// WRONG - PHPCS error for unused $return_url
+'callback' => function ( string $return_url ) {
+    return array( 'success' => true );
+},
+
+// CORRECT - unset unused parameters with explanatory comment
+'callback' => function ( string $return_url ) {
+    unset( $return_url ); // Avoid parameter not used PHPCS errors.
+    return array( 'success' => true );
+},
+
+// Multiple unused parameters
+'callback' => function ( $arg1, $arg2, $arg3 ) {
+    unset( $arg1, $arg2 ); // Avoid parameter not used PHPCS errors.
+    return $arg3;
+},
+```
+
+**Common scenarios:**
+
+- Mock method callbacks in PHPUnit tests
+- Array/filter callbacks where signature is fixed
+- Interface implementations with unused parameters
+
+See: `tests/php/src/Internal/Admin/Settings/PaymentsRestControllerIntegrationTest.php:1647-1655`
+
 ### JavaScript Linting
 
 For JavaScript/TypeScript linting, see `client/admin/CLAUDE.md`
@@ -286,6 +318,27 @@ Only a few issues require manual fixing (missing language specs, long lines).
 ```bash
 npm install -g markdownlint-cli
 ```
+
+**Character encoding in markdown files:**
+
+> **CRITICAL**: Always use proper UTF-8 characters, never let control
+> characters or null bytes into markdown files
+
+When creating markdown files:
+
+- **Use UTF-8 box-drawing characters for directory trees:**
+  `├──`, `│`, `└──` (NOT spaces, tabs, or ASCII art)
+- **NEVER use Edit tool after markdownlint --fix** if the file contains
+  directory trees - check file encoding first with `file path/to/file.md`
+- **If file becomes corrupted** (shows as "data" instead of text):
+
+  ```bash
+  # Remove control characters and null bytes
+  tr -d '\000-\037' < file.md > file.clean.md && mv file.clean.md file.md
+  ```
+
+- **Verify encoding after edits:** `file path/to/file.md` should show
+  "UTF-8 text" or "ASCII text", never "data"
 
 **Common markdown linting issues:**
 

@@ -72,7 +72,7 @@ Settings/
 
 ```php
 $schema = array(
-    '$schema' => 'http://json-schema.org/draft-04/schema#',
+    '$schema' => 'https://json-schema.org/draft-04/schema#',
     'type'    => 'object',
 );
 ```
@@ -136,7 +136,7 @@ The `onboarding.state` field has an incomplete schema definition:
 1. All `object` types use `properties` OR `additionalProperties` (never `items`)
 2. All `array` types use `items` (never `additionalProperties`)
 3. No `'type' => 'enum'` - use `'type' => 'string'` with `'enum' => [...]`
-4. Schema version declared: `'$schema' => 'http://json-schema.org/draft-04/schema#'`
+4. Schema version declared: `'$schema' => 'https://json-schema.org/draft-04/schema#'`
 
 **Quick validation commands:**
 
@@ -209,6 +209,6 @@ pnpm run lint:php:fix -- src/Internal/Admin/Settings/PaymentsRestController.php
 
 ## Related Documentation
 
-- JSON Schema Draft 04: <http://json-schema.org/draft-04/schema#>
+- JSON Schema Draft 04: <https://json-schema.org/draft-04/schema#>
 - WordPress REST API: <https://developer.wordpress.org/rest-api/>
 - Main plugin docs: `../../CLAUDE.md`
