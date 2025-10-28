@@ -20,6 +20,7 @@ This document provides Claude Code with essential information about working with
     - **To determine the next WooCommerce version number for `@since` annotations**: Read the `$version` property in `includes/class-woocommerce.php` and remove the `-dev` suffix if present.
 - When an `@internal` annotation is added, it must be placed after the method description and before the arguments list, with a blank comment line before and after.
 - When modifying existing code, if the git diff shows changes to a line that fires a hook without a docblock, add a docblock for that hook. Use `git log` to determine which version introduced the hook, and add the appropriate `@since` annotation with that version number.
+- When making any changes to code that deletes or modifies orders/products/customer data, make sure that there are sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and delete orders that don't belong to the current customer. When in doubt, ask for clarification from the user.
 
 **Unit test file conventions:**
 
