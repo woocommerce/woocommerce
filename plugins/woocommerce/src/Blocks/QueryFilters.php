@@ -181,17 +181,17 @@ final class QueryFilters {
 
 		$attributes_to_count = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
 
-        $attribute_count_sql = "SELECT COUNT(DISTINCT posts.ID) as term_count, terms.term_id as term_count_id
-            FROM {$wpdb->posts} AS posts
-            INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
-            INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
-            INNER JOIN {$wpdb->terms} AS terms ON term_taxonomy.term_id = terms.term_id
-            WHERE posts.ID IN ( {$product_query_sql} )
-            AND term_taxonomy.taxonomy IN ('{$attributes_to_count}')
-            AND posts.post_status = 'publish'
-            AND posts.post_type = 'product'
-            GROUP BY terms.term_id
-            ORDER BY terms.name ASC";
+		$attribute_count_sql = "SELECT COUNT(DISTINCT posts.ID) as term_count, terms.term_id as term_count_id
+			FROM {$wpdb->posts} AS posts
+			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
+			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} AS terms ON term_taxonomy.term_id = terms.term_id
+			WHERE posts.ID IN ( {$product_query_sql} )
+			AND term_taxonomy.taxonomy IN ('{$attributes_to_count}')
+			AND posts.post_status = 'publish'
+			AND posts.post_type = 'product'
+			GROUP BY terms.term_id
+			ORDER BY terms.name ASC";
 
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
 
@@ -290,8 +290,8 @@ final class QueryFilters {
 			SELECT COUNT( DISTINCT posts.ID ) as status_count
 			FROM {$wpdb->posts} as posts
 			INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-            AND postmeta.meta_key = '_stock_status'
-            AND postmeta.meta_value = '{$status}'
+			AND postmeta.meta_key = '_stock_status'
+			AND postmeta.meta_value = '{$status}'
 			WHERE posts.ID IN ( {$product_query_sql} )
 		";
 	}
