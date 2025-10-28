@@ -243,37 +243,31 @@ class OrderLogsDeletionProcessor implements BatchProcessorInterface {
 			$logger->clear( $item['meta_value'] );
 		}
 
+		$order_ids = array_map( 'absint', array_column( $batch, 'order_id' ) );
+
+		// Delete from the authoritative meta table.
+		$this->delete_debug_log_source_meta_entries( true, $order_ids );
+
+		if ( $this->data_synchronizer->data_sync_is_enabled() ) {
+			// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
+			// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
+			$this->delete_debug_log_source_meta_entries( false, $order_ids );
+		}
+	}
+
+	/**
+	 * Delete meta entries for the given order IDs.
+	 *
+	 * @param bool  $from_authoritative_table True to delete from the authoritative table, false for the backup table.
+	 * @param array $order_ids Array of order IDs to delete.
+	 */
+	private function delete_debug_log_source_meta_entries( bool $from_authoritative_table, array $order_ids ): void {
 		global $wpdb;
 
-		$order_ids    = array_map( 'absint', array_column( $batch, 'order_id' ) );
-		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
-
-		$table_name     = $this->hpos_in_use ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
-		$id_column_name = $this->hpos_in_use ? 'order_id' : 'post_id';
-
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$wpdb->query(
-			$wpdb->prepare(
-				"DELETE FROM {$table_name}
-				 WHERE {$id_column_name} IN ({$placeholders})
-				 AND meta_key = %s",
-				array_merge( $order_ids, array( '_debug_log_source_pending_deletion' ) )
-			)
-		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		if ( ! $this->data_synchronizer->data_sync_is_enabled() ) {
-			return;
-		}
-
-		// When HPOS data sync is enabled we need to manually delete the entries in the backup meta table too,
-		// otherwise the next sync process will restore the rows we just deleted from the authoritative meta table.
-
-		$order_ids    = array_map( fn( $item ) => absint( $item['order_id'] ), $batch );
-		$placeholders = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
-
-		$table_name     = $this->hpos_in_use ? $wpdb->postmeta : "{$wpdb->prefix}wc_orders_meta";
-		$id_column_name = $this->hpos_in_use ? 'post_id' : 'order_id';
+		$use_hpos_table = $this->hpos_in_use === $from_authoritative_table;
+		$table_name     = $use_hpos_table ? "{$wpdb->prefix}wc_orders_meta" : $wpdb->postmeta;
+		$id_column_name = $use_hpos_table ? 'order_id' : 'post_id';
+		$placeholders   = implode( ',', array_fill( 0, count( $order_ids ), '%d' ) );
 
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$wpdb->query(
