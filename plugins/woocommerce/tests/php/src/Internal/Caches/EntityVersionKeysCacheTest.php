@@ -64,8 +64,8 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $version, 'Version should not be empty' );
 		$this->assertIsString( $version, 'Version should be a string' );
 
-		$cache_key     = 'wc_entity_version_key_custom_entity_123';
-		$cached_value  = wp_cache_get( $cache_key, self::CACHE_GROUP );
+		$cache_key    = 'wc_entity_version_key_custom_entity_123';
+		$cached_value = wp_cache_get( $cache_key, self::CACHE_GROUP );
 		$this->assertNotFalse( $cached_value, 'Cache entry should be created' );
 		$this->assertEquals( $version, $cached_value, 'Stored version should match returned version' );
 	}
@@ -408,7 +408,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 			 * @return bool True on success, false on failure.
 			 */
 			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
-				$this->captured_ttl_ref = $ttl;
+				$this->captured_ttl_ref           = $ttl;
 				$this->entity_cache[ $cache_key ] = $value;
 				return true;
 			}
