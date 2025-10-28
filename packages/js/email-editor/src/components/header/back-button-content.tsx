@@ -41,7 +41,7 @@ const siteIconVariants = {
 /**
  * Back button content component with animation effects.
  */
-export const BackButtonContent = () => {
+const DefaultBackButtonContent = () => {
 	const { urls } = useSelect(
 		( select ) => ( {
 			urls: select( storeName ).getUrls(),
@@ -56,51 +56,58 @@ export const BackButtonContent = () => {
 	}
 
 	return (
+		<motion.div
+			className="woocommerce-email-editor__view-mode-toggle"
+			transition={ {
+				duration: 0.2,
+			} }
+			animate="edit"
+			initial="edit"
+			whileHover="hover"
+			whileTap="tap"
+		>
+			<Button
+				label={ __( 'Close editor', 'woocommerce' ) }
+				showTooltip
+				tooltipPosition="middle right"
+				onClick={ () => {
+					recordEvent( 'header_close_button_clicked' );
+					const action = applyFilters(
+						'woocommerce_email_editor_close_action_callback',
+						backAction
+					) as () => void;
+					action();
+				} }
+			>
+				<motion.div variants={ siteIconVariants }>
+					<div className="woocommerce-email-editor__view-mode-toggle-icon">
+						<Icon
+							className="woocommerce-email-editor-icon__icon"
+							icon={ wordpress }
+							size={ 48 }
+						/>
+					</div>
+				</motion.div>
+			</Button>
+			<motion.div
+				className="woocommerce-email-editor-icon"
+				variants={ toggleHomeIconVariants }
+			>
+				<Icon icon={ arrowLeft } />
+			</motion.div>
+		</motion.div>
+	);
+};
+
+export const BackButtonContent = () => {
+	const BackButtonUsedContent = applyFilters(
+		'woocommerce_email_editor_close_content',
+		DefaultBackButtonContent
+	) as React.ComponentType;
+
+	return (
 		<BackButton>
-			{ ( { length } ) =>
-				length <= 1 && (
-					<motion.div
-						className="woocommerce-email-editor__view-mode-toggle"
-						transition={ {
-							duration: 0.2,
-						} }
-						animate="edit"
-						initial="edit"
-						whileHover="hover"
-						whileTap="tap"
-					>
-						<Button
-							label={ __( 'Close editor', 'woocommerce' ) }
-							showTooltip
-							tooltipPosition="middle right"
-							onClick={ () => {
-								recordEvent( 'header_close_button_clicked' );
-								const action = applyFilters(
-									'woocommerce_email_editor_close_action_callback',
-									backAction
-								) as () => void;
-								action();
-							} }
-						>
-							<motion.div variants={ siteIconVariants }>
-								<div className="woocommerce-email-editor__view-mode-toggle-icon">
-									<Icon
-										className="woocommerce-email-editor-icon__icon"
-										icon={ wordpress }
-										size={ 48 }
-									/>
-								</div>
-							</motion.div>
-						</Button>
-						<motion.div
-							className="woocommerce-email-editor-icon"
-							variants={ toggleHomeIconVariants }
-						>
-							<Icon icon={ arrowLeft } />
-						</motion.div>
-					</motion.div>
-				)
-			}
+			{ ( { length } ) => length <= 1 && <BackButtonUsedContent /> }
 		</BackButton>
 	);
 };

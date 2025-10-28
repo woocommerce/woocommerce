@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Frontend scripts class.
+ *
+ * These scripts are enqueued in the frontend of the store.  The registered script handles in this class
+ * can be used to enqueue the scripts in the frontend by third party plugins and the handles will follow
+ * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+ * and can be removed in future versions of WooCommerce.
  */
 class WC_Frontend_Scripts {
 
@@ -307,9 +312,10 @@ class WC_Frontend_Scripts {
 				'legacy_handle' => 'jquery-cookie',
 			),
 			'wc-jquery-payment'          => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
+				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.0.0-wc.' . $version,
+				'legacy_handle' => 'jquery-payment',
 			),
 			'wc-jquery-tiptip'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
@@ -381,17 +387,19 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$scripts['wc-address-autocomplete-common'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
-			'deps'    => array(),
-			'version' => $version,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$scripts['wc-address-autocomplete-common'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+				'deps'    => array(),
+				'version' => $version,
+			);
 
-		$scripts['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
-			'version' => $version,
-		);
+			$scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
+				'version' => $version,
+			);
+		}
 
 		return $scripts;
 	}
@@ -406,7 +414,7 @@ class WC_Frontend_Scripts {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 
 			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
 			}
 		}
 	}
@@ -444,12 +452,14 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$register_styles['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
-			'deps'    => array(),
-			'version' => $version,
-			'has_rtl' => false,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
 
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
@@ -491,14 +501,16 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-checkout' );
 		}
 
-		$address_provider_service = wc_get_container()->get( AddressProviderController::class );
-		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
-			$registered_providers = $address_provider_service->get_providers();
-			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
-				// Always enqueue the common module if providers are registered.
-				self::enqueue_script( 'wc-address-autocomplete-common' );
-				self::enqueue_script( 'wc-address-autocomplete' );
-				self::enqueue_style( 'wc-address-autocomplete' );
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+				$registered_providers = $address_provider_service->get_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					// Always enqueue the common module if providers are registered.
+					self::enqueue_script( 'wc-address-autocomplete-common' );
+					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
+				}
 			}
 		}
 
