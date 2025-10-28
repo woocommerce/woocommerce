@@ -209,7 +209,7 @@ class EntityVersionKeysCache {
 		}
 
 		$found = false;
-		$value = $this->legacy_proxy->call_function( 'wp_cache_get', $cache_key, 'woocommerce_entity_version_keys', false, $found );
+		$value = wp_cache_get( $cache_key, 'woocommerce_entity_version_keys', false, $found );
 		return $found ? $value : null;
 	}
 
@@ -242,7 +242,7 @@ class EntityVersionKeysCache {
 			return $pre_result;
 		}
 
-		return $this->legacy_proxy->call_function( 'wp_cache_set', $cache_key, $value, 'woocommerce_entity_version_keys', $ttl );
+		return wp_cache_set( $cache_key, $value, 'woocommerce_entity_version_keys', $ttl );
 	}
 
 	/**
@@ -270,6 +270,6 @@ class EntityVersionKeysCache {
 			return $pre_result;
 		}
 
-		return $this->legacy_proxy->call_function( 'wp_cache_delete', $cache_key, 'woocommerce_entity_version_keys' );
+		return wp_cache_delete( $cache_key, 'woocommerce_entity_version_keys' );
 	}
 }

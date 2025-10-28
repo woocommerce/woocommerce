@@ -15,9 +15,16 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	/**
 	 * The System Under Test.
 	 *
-	 * @var object
+	 * @var EntityVersionKeysCache
 	 */
 	private $sut;
+
+	/**
+	 * Local cache storage for tests.
+	 *
+	 * @var array
+	 */
+	private $entity_cache = array();
 
 	/**
 	 * Runs before each test.
@@ -25,7 +32,41 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = $this->create_test_entity_version_keys_cache();
+		$this->entity_cache = array();
+		$this->sut          = new EntityVersionKeysCache();
+
+		// Hook filters to use local cache array instead of wp_cache.
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_get',
+			function ( $pre_value, $cache_key ) {
+				return $this->entity_cache[ $cache_key ] ?? null;
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_set',
+			function ( $pre_result, $cache_key, $value, $ttl ) {
+				$this->entity_cache[ $cache_key ] = $value;
+				return true;
+			},
+			10,
+			4
+		);
+
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_delete',
+			function ( $pre_result, $cache_key ) {
+				if ( isset( $this->entity_cache[ $cache_key ] ) ) {
+					unset( $this->entity_cache[ $cache_key ] );
+					return true;
+				}
+				return false;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -57,7 +98,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 
 		// Create a new instance to test fresh should_use state.
 
-		$cache = $this->create_test_entity_version_keys_cache();
+		$cache = new EntityVersionKeysCache();
 
 		$this->assertEquals( $filter_value, $cache->should_use() );
 	}
@@ -92,8 +133,8 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 		$this->assertIsString( $version, 'Version should be a string' );
 
 		$cache_key = 'wc_entity_version_key_custom_entity_123';
-		$this->assertArrayHasKey( $cache_key, $this->sut->cache, 'Cache entry should be created' );
-		$this->assertEquals( $version, $this->sut->cache[ $cache_key ], 'Stored version should match returned version' );
+		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should be created' );
+		$this->assertEquals( $version, $this->entity_cache[ $cache_key ], 'Stored version should match returned version' );
 	}
 
 	/**
@@ -102,9 +143,9 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_get_entity_version_returns_existing() {
 		// Pre-populate cache with a known version.
 
-		$expected_version               = 'existing-version-uuid';
-		$cache_key                      = 'wc_entity_version_key_custom_entity_456';
-		$this->sut->cache[ $cache_key ] = $expected_version;
+		$expected_version          = 'existing-version-uuid';
+		$cache_key                 = 'wc_entity_version_key_custom_entity_456';
+		$this->entity_cache[ $cache_key ] = $expected_version;
 
 		$version = $this->sut->get_entity_version( 'custom_entity', 456 );
 
@@ -117,16 +158,16 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_get_entity_version_refreshes_ttl() {
 		// Pre-populate cache with a known version.
 
-		$expected_version               = 'existing-version-uuid';
-		$cache_key                      = 'wc_entity_version_key_custom_entity_789';
-		$this->sut->cache[ $cache_key ] = $expected_version;
+		$expected_version          = 'existing-version-uuid';
+		$cache_key                 = 'wc_entity_version_key_custom_entity_789';
+		$this->entity_cache[ $cache_key ] = $expected_version;
 
 		$this->sut->get_entity_version( 'custom_entity', 789 );
 
 		// Verify the cache entry still exists (refresh happened).
 
-		$this->assertArrayHasKey( $cache_key, $this->sut->cache, 'Cache entry should still exist after refresh' );
-		$this->assertEquals( $expected_version, $this->sut->cache[ $cache_key ], 'Value should remain the same after refresh' );
+		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should still exist after refresh' );
+		$this->assertEquals( $expected_version, $this->entity_cache[ $cache_key ], 'Value should remain the same after refresh' );
 	}
 
 	/**
@@ -141,8 +182,8 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 		// Verify cache entry was created.
 
 		$cache_key = 'wc_entity_version_key_new_entity_111';
-		$this->assertArrayHasKey( $cache_key, $this->sut->cache, 'Cache entry should be created' );
-		$this->assertEquals( $version, $this->sut->cache[ $cache_key ] );
+		$this->assertArrayHasKey( $cache_key, $this->entity_cache, 'Cache entry should be created' );
+		$this->assertEquals( $version, $this->entity_cache[ $cache_key ] );
 	}
 
 	/**
@@ -151,15 +192,15 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_regenerate_entity_version_updates_existing() {
 		// Pre-populate cache with a known version.
 
-		$old_version                    = 'old-version-uuid';
-		$cache_key                      = 'wc_entity_version_key_updated_entity_222';
-		$this->sut->cache[ $cache_key ] = $old_version;
+		$old_version               = 'old-version-uuid';
+		$cache_key                 = 'wc_entity_version_key_updated_entity_222';
+		$this->entity_cache[ $cache_key ] = $old_version;
 
 		$new_version = $this->sut->regenerate_entity_version( 'updated_entity', 222 );
 
 		$this->assertNotEmpty( $new_version, 'New version should not be empty' );
 		$this->assertNotEquals( $old_version, $new_version, 'New version should differ from old version' );
-		$this->assertEquals( $new_version, $this->sut->cache[ $cache_key ], 'Stored version should be updated' );
+		$this->assertEquals( $new_version, $this->entity_cache[ $cache_key ], 'Stored version should be updated' );
 	}
 
 	/**
@@ -168,13 +209,13 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function test_delete_entity_version_removes_existing() {
 		// Pre-populate cache with a known version.
 
-		$cache_key                      = 'wc_entity_version_key_forgotten_entity_333';
-		$this->sut->cache[ $cache_key ] = 'version-to-forget';
+		$cache_key                 = 'wc_entity_version_key_forgotten_entity_333';
+		$this->entity_cache[ $cache_key ] = 'version-to-forget';
 
 		$result = $this->sut->delete_entity_version( 'forgotten_entity', 333 );
 
 		$this->assertTrue( $result, 'delete_entity_version should return true when entity existed' );
-		$this->assertArrayNotHasKey( $cache_key, $this->sut->cache, 'Cache entry should be deleted' );
+		$this->assertArrayNotHasKey( $cache_key, $this->entity_cache, 'Cache entry should be deleted' );
 	}
 
 	/**
@@ -417,7 +458,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 			 * @return mixed|null The cached value or null if not found.
 			 */
 			protected function get_cached( string $cache_key ) {
-				return $this->cache[ $cache_key ] ?? null;
+				return $this->entity_cache[ $cache_key ] ?? null;
 			}
 
 			/**
@@ -430,7 +471,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 			 */
 			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
 				$this->captured_ttl_ref = $ttl;
-				$this->cache[ $cache_key ] = $value;
+				$this->entity_cache[ $cache_key ] = $value;
 				return true;
 			}
 
@@ -441,8 +482,8 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 			 * @return bool True on success, false on failure.
 			 */
 			protected function delete_cached( string $cache_key ): bool {
-				if ( isset( $this->cache[ $cache_key ] ) ) {
-					unset( $this->cache[ $cache_key ] );
+				if ( isset( $this->entity_cache[ $cache_key ] ) ) {
+					unset( $this->entity_cache[ $cache_key ] );
 					return true;
 				}
 				return false;
@@ -452,59 +493,5 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 		$cache->regenerate_entity_version( 'product', 123 );
 
 		$this->assertEquals( 0, $captured_ttl, 'Negative TTL should be converted to 0' );
-	}
-
-	/**
-	 * Create an instance of EntityVersionKeysCache that uses
-	 * local storage instead of transients.
-	 *
-	 * @return object Test EntityVersionKeysCache instance.
-	 */
-	private function create_test_entity_version_keys_cache() {
-		return new class() extends EntityVersionKeysCache {
-			/**
-			 * Cache storage.
-			 *
-			 * @var array
-			 */
-			public $cache = array();
-
-			/**
-			 * Get a value from the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @return mixed|null The cached value or null if not found.
-			 */
-			protected function get_cached( string $cache_key ) {
-				return $this->cache[ $cache_key ] ?? null;
-			}
-
-			/**
-			 * Set a value in the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @param mixed  $value     The value to cache.
-			 * @param int    $ttl       Time to live in seconds.
-			 * @return bool True on success, false on failure.
-			 */
-			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
-				$this->cache[ $cache_key ] = $value;
-				return true;
-			}
-
-			/**
-			 * Delete a value from the cache.
-			 *
-			 * @param string $cache_key The cache key.
-			 * @return bool True on success, false on failure.
-			 */
-			protected function delete_cached( string $cache_key ): bool {
-				if ( isset( $this->cache[ $cache_key ] ) ) {
-					unset( $this->cache[ $cache_key ] );
-					return true;
-				}
-				return false;
-			}
-		};
 	}
 }
