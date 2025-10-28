@@ -132,6 +132,9 @@ export const StatusBadge = ( {
 					className="woocommerce-status-badge__icon-container"
 					tabIndex={ 0 }
 					role="button"
+					aria-haspopup="dialog"
+					aria-expanded={ isPopoverVisible }
+					aria-label={ __( 'More information', 'woocommerce' ) }
 					ref={ buttonRef }
 					onClick={ handleClick }
 					onKeyDown={ ( event: React.KeyboardEvent ) => {
