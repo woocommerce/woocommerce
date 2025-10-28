@@ -14,7 +14,6 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import Dinero from 'dinero.js';
 
 /**
  * Internal dependencies
@@ -51,6 +50,18 @@ const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
+type ScalePriceArgs = {
+	price: number;
+	inputDecimals: number;
+	outputDecimals?: number;
+};
+
+const scalePrice = ( {
+	price,
+	inputDecimals,
+	outputDecimals = 0,
+}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
+
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
@@ -85,6 +96,7 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
+	key?: string | undefined;
 	value: string;
 	className?: string;
 	hidden?: boolean;
@@ -330,47 +342,32 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem =
-					woocommerceState.cart.items.find(
-						( item ) => item.id === id
-					) || ( {} as CartItem );
+				const cartItem = ( woocommerceState.cart.items.find(
+					( item ) => item.key === key
+				) || {} ) as CartItem;
 
-				return {
-					variation: [],
-					item_data: [],
-					...cartItem,
-				};
+				cartItem.variation = cartItem.variation || [];
+				cartItem.item_data = cartItem.item_data || [];
+
+				return cartItem;
 			},
 
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
-					currency
+					currency as Currency
 				);
 			},
 
 			get cartItemDiscount(): string {
-				const { prices } = cartItemState.cartItem;
+				const { extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountSingle =
-					regularAmountSingle.subtract( purchaseAmountSingle );
-
-				const discountPrice = saleAmountSingle
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const discountPrice =
+					cartItemState.regularAmountSingle -
+					cartItemState.purchaseAmountSingle;
 
 				const price = formatPriceWithCurrency(
 					discountPrice,
@@ -389,7 +386,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -405,25 +402,12 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = cartItemState.cartItem;
+				const { quantity, extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountLineItem = regularAmountSingle
-					.subtract( purchaseAmountSingle )
-					.multiply( quantity );
-
-				const totalLineItemDiscount = saleAmountLineItem
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const totalLineItemDiscount =
+					( cartItemState.regularAmountSingle -
+						cartItemState.purchaseAmountSingle ) *
+					quantity;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -442,7 +426,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -458,9 +442,10 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemHasDiscount(): boolean {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				return (
-					cartItemState.cartItem.prices.regular_price !==
-					cartItemState.cartItem.prices.price
+					parseInt( rawPrices.regular_price, 10 ) >
+					parseInt( rawPrices.price, 10 )
 				);
 			},
 
@@ -544,10 +529,37 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const priceWithoutDiscount = scalePrice( {
+					price: parseInt( rawPrices.regular_price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
+					priceWithoutDiscount,
 					cartItemState.currency
 				);
+			},
+
+			get regularAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+			},
+
+			get purchaseAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 			},
 
 			get beforeItemPrice(): string | null {
@@ -603,8 +615,15 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const itemPrice = scalePrice( {
+					price: parseInt( rawPrices.price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.price, 10 ),
+					itemPrice,
 					cartItemState.currency
 				);
 			},
@@ -806,6 +825,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -827,6 +847,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -844,6 +865,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
