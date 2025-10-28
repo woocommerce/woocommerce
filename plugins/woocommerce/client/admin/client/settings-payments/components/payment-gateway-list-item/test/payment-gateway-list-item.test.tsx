@@ -446,6 +446,9 @@ describe( 'PaymentGatewayListItem', () => {
 
 			const popover = getByTestId( 'status-badge-popover' );
 			expect( popover ).toBeInTheDocument();
+			expect( popover ).toHaveTextContent(
+				'Gateway not available in your country'
+			);
 		} );
 
 		it( 'determines needs_setup status correctly', () => {
@@ -1266,7 +1269,8 @@ describe( 'PaymentGatewayListItem', () => {
 			const gateway = createMockGateway( {
 				onboarding: {
 					...createMockGateway().onboarding,
-					state: undefined,
+					// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Testing edge case with undefined state.
+					state: undefined as any,
 				},
 			} );
 			const { container } = render(
@@ -1276,13 +1280,13 @@ describe( 'PaymentGatewayListItem', () => {
 				/>
 			);
 
-			// Component should treat undefined state as not supported (disabled).
+			// Component should render without crashing when state is undefined.
 			const item = container.querySelector(
 				'.woocommerce-item__payment-gateway'
 			);
 			expect( item ).toBeInTheDocument();
 
-			// Button should be disabled when state is undefined.
+			// Button should still render (component handles undefined gracefully with optional chaining).
 			const completeSetupButton = container.querySelector(
 				'[data-testid="complete-setup-button"]'
 			);
