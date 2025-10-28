@@ -96,6 +96,7 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
+	key?: string | undefined;
 	value: string;
 	className?: string;
 	hidden?: boolean;
@@ -341,11 +342,11 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
 				const cartItem = ( woocommerceState.cart.items.find(
-					( item ) => item.id === id
+					( item ) => item.key === key
 				) || {} ) as CartItem;
 
 				cartItem.variation = cartItem.variation || [];
@@ -824,6 +825,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -845,6 +847,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -862,6 +865,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
