@@ -262,6 +262,12 @@ export const PaymentGatewayListItem = ( {
 										: () => {}
 								}
 								disabled={ ! isOnboardingSupported }
+								ariaLabel={
+									! isOnboardingSupported
+										? gateway.onboarding?.messages
+												?.not_supported
+										: undefined
+								}
 								{ ...( isOnboardingSupported && {
 									onboardingType: gateway.onboarding.type,
 									incentive,

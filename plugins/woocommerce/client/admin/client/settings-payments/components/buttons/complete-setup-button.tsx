@@ -69,6 +69,10 @@ interface CompleteSetupButtonProps {
 	 * Whether the button should be disabled.
 	 */
 	disabled?: boolean;
+	/**
+	 * Accessible label for screen readers, especially useful when button is disabled.
+	 */
+	ariaLabel?: string;
 }
 
 /**
@@ -88,6 +92,7 @@ export const CompleteSetupButton = ( {
 	acceptIncentive = () => {},
 	incentive = null,
 	disabled = false,
+	ariaLabel,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
@@ -168,6 +173,7 @@ export const CompleteSetupButton = ( {
 				isBusy={ isUpdating }
 				disabled={ disabled || isUpdating || !! installingPlugin }
 				onClick={ completeSetup }
+				aria-label={ ariaLabel }
 			>
 				{ buttonText }
 			</Button>
