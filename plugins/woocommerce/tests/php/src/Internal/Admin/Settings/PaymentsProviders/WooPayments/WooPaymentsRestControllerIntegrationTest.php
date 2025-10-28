@@ -32,17 +32,17 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	const ENDPOINT = '/wc-admin/settings/payments/woopayments';
 
 	/**
-	 * @var WooPaymentsRestController|object
+	 * @var WooPaymentsRestController
 	 */
 	protected WooPaymentsRestController $controller;
 
 	/**
-	 * @var PaymentsProviders|object
+	 * @var PaymentsProviders
 	 */
 	protected PaymentsProviders $providers_service;
 
 	/**
-	 * @var WooPaymentsService|object
+	 * @var WooPaymentsService
 	 */
 	protected WooPaymentsService $woopayments_provider_service;
 
@@ -225,8 +225,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					},
 				),
 				Utils::class           => array(
-					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 					'get_wpcom_connection_authorization' => function ( string $return_url ) {
+						unset( $return_url ); // Avoid parameter not used PHPCS errors.
 						return array(
 							'success'      => true,
 							'errors'       => array(),
@@ -234,8 +234,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 							'url'          => 'https://wordpress.com/auth?query=some_query',
 						);
 					},
-					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
+						unset( $params ); // Avoid parameter not used PHPCS errors.
 						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
 							return array(
 								'data' => array(),

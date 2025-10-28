@@ -174,10 +174,12 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 				Utils::class           => array(
 					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 					'wc_payments_settings_url'           => function ( ?string $path = null, array $query = array() ) {
+						unset( $path, $query );
 						return 'https://example.com/payments-settings';
 					},
 					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
 					'get_wpcom_connection_authorization' => function ( string $return_url ) {
+						unset( $return_url );
 						return array(
 							'success'      => true,
 							'errors'       => array(),
@@ -187,6 +189,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 					},
 					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
+						unset( $params );
 						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
 							return array(
 								'data' => array(),
