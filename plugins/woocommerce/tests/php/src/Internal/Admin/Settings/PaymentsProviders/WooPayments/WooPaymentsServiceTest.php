@@ -6933,7 +6933,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
@@ -7004,7 +7004,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
@@ -7092,7 +7092,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
@@ -7205,7 +7205,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_error ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
@@ -7279,7 +7279,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return array(
@@ -7514,7 +7514,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/test_drive_account/init' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -7665,13 +7665,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_error ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
 						}
 
-						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
 			)
@@ -7710,13 +7710,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
 						}
 
-						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
 			)
@@ -7799,13 +7799,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
 						}
 
-						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
 			)
@@ -7892,13 +7892,13 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/session' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
 						}
 
-						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+						throw new \Exception( esc_html( 'POST endpoint response is not mocked: ' . $endpoint ) );
 					},
 				),
 			)
@@ -8045,7 +8045,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_error ) {
 						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
@@ -8090,7 +8090,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -8190,7 +8190,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/kyc/finalize' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -8466,7 +8466,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_error ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_error ) {
 						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
 							$requests_made[] = $params;
 							return new WP_Error( $expected_error['code'], $expected_error['message'] );
@@ -8509,7 +8509,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -8552,7 +8552,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
 							$requests_made[] = $params;
 							return $expected_response;
@@ -8601,7 +8601,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made, $expected_response ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made, $expected_response ) {
 						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
 							$requests_made[] = $params;
 
@@ -8676,7 +8676,7 @@ class WooPaymentsServiceTest extends WC_Unit_Test_Case {
 		$this->mockable_proxy->register_static_mocks(
 			array(
 				Utils::class => array(
-					'rest_endpoint_post_request' => function ( string $endpoint, $params = array() ) use ( &$requests_made ) {
+					'rest_endpoint_post_request' => function ( string $endpoint, array $params = array() ) use ( &$requests_made ) {
 						if ( '/wc/v3/payments/onboarding/reset' === $endpoint ) {
 							$requests_made[] = $params;
 
