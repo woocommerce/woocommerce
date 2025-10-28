@@ -85,11 +85,12 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
-	name?: string;
-	value?: string;
+	value: string;
 	className?: string;
 	hidden?: boolean;
-};
+	display?: string;
+	attribute?: string;
+} & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -295,6 +296,30 @@ store< MiniCart >(
 	},
 	{ lock: universalLock }
 );
+
+function itemDataInnerHTML( field: 'name' | 'value' ) {
+	const { ref } = getElement();
+
+	if ( ! ref ) {
+		return;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	const dataAttr = cartItemState.cartItemDataAttr as
+		| CartItemDataAttr
+		| { hidden: boolean };
+
+	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+		return;
+	}
+
+	if ( field in dataAttr ) {
+		const value = dataAttr[ field as keyof typeof dataAttr ];
+		if ( typeof value === 'string' && value ) {
+			ref.innerHTML = trimWords( value );
+		}
+	}
+}
 
 const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
@@ -674,15 +699,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | null {
+			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
 				const { itemData, dataProperty } = getContext< {
-					itemData: {
-						key: string;
-						attribute: string;
-						name: string;
-						value: string;
-						hidden: string;
-					};
+					itemData: CartItemDataAttr;
 					dataProperty: DataProperty;
 				} >();
 
@@ -694,23 +713,30 @@ const { state: cartItemState } = store(
 					return { hidden: true };
 				}
 
-				const dataItemAttrKey =
+				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
+				const rawName =
 					dataItemAttr.key ||
 					dataItemAttr.attribute ||
-					dataItemAttr.name;
+					dataItemAttr.name ||
+					'';
+
+				// Extract value - prefer 'display' over 'value' for item_data if available
+				const rawValue =
+					dataItemAttr.display || dataItemAttr.value || '';
 
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = dataItemAttrKey + ':';
+				nameTxt.innerHTML = rawName;
 				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = dataItemAttr.value;
+				valueTxt.innerHTML = rawValue;
 
 				return {
 					name: nameTxt.value,
 					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ dataItemAttrKey
+					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /[\s_]+/g, '-' )
+						.replace( /<[^>]*>/g, '' )
+						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
 					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
@@ -850,6 +876,14 @@ const { state: cartItemState } = store(
 					}
 				}
 			},
+
+			itemDataNameInnerHTML() {
+				itemDataInnerHTML( 'name' );
+			},
+			itemDataValueInnerHTML() {
+				itemDataInnerHTML( 'value' );
+			},
+
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,9 +900,11 @@ const { state: cartItemState } = store(
 						const { ref } = getElement();
 
 						// Remove previously applied classes.
-						ref!.classList.remove(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.remove(
+								...previouslyAppliedClasses.current
+							);
+						}
 
 						const newClassesString = applyCheckoutFilter( {
 							filterName: 'cartItemClass',
@@ -885,9 +921,11 @@ const { state: cartItemState } = store(
 						previouslyAppliedClasses.current = newClassesString
 							.split( ' ' )
 							.filter( Boolean );
-						ref!.classList.add(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.add(
+								...previouslyAppliedClasses.current
+							);
+						}
 					}
 				} );
 			},
