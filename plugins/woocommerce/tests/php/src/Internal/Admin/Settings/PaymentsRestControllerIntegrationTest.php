@@ -152,226 +152,12 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->current_time = 1234567890;
 
-		/**
-		 * TestingContainer instance.
-		 *
-		 * @var TestingContainer $container
-		 */
-		$container = wc_get_container();
-
-		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
-													->onlyMethods(
-														array(
-															'is_connected',
-															'has_connected_owner',
-															'is_connection_owner',
-														)
-													)
-													->getMock();
-		// Make it connected.
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'is_connected' )
-			->willReturn( true );
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'has_connected_owner' )
-			->willReturn( true );
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'is_connection_owner' )
-			->willReturn( true );
-
-		$this->mock_woopayments_account_service = $this->getMockBuilder( \stdClass::class )
-														->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
-														->getMock();
-
-		// Mock the response from the WPCOM incentives API.
-		$this->woopayments_incentives_response_mock_ref = function ( $preempt, $parsed_args, $url ) {
-			if ( str_contains( $url, 'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives' ) ) {
-				return array(
-					'success'  => true,
-					'body'     => wp_json_encode(
-						array(
-							array(
-								'id'                  => 'promo-discount',
-								'promo_id'            => 'promo-discount',
-								'type'                => 'welcome_page',
-								'cta_label'           => 'Install',
-								'tc_url'              => 'https://woocommerce.com/terms-conditions',
-								'description'         => 'Description.',
-								'task_header_content' => 'Some content.',
-								'task_badge'          => 'Save X% on payment processing fees',
-							),
-							array(
-								'id'                => 'promo-discount__wc_settings_payments',
-								'promo_id'          => 'promo-discount',
-								'type'              => 'wc_settings_payments',
-								'description'       => 'Use the native payments solution built and supported by Woo.',
-								'cta_label'         => 'Save X%',
-								'tc_url'            => 'https://woocommerce.com/terms-conditions',
-								'title'             => 'Save X% on processing fees.',
-								'short_description' => 'Save X% on processing fees.',
-								'badge'             => 'Save X% on processing fees',
-							),
-						)
-					),
-					'response' => array(
-						'code' => 200,
-					),
-				);
-			}
-
-			return $preempt;
-		};
-
-		add_filter( 'pre_http_request', $this->woopayments_incentives_response_mock_ref, 10, 3 );
-
-		// Use this instance to set different states depending on your specific test needs.
-		$this->mock_woopayments_gateway = new FakePaymentGateway(
-			'woocommerce_payments',
-			array(
-				'enabled'                     => false,
-				'account_connected'           => false,
-				'needs_setup'                 => true,
-				'test_mode'                   => true,
-				'dev_mode'                    => true,
-				'onboarding_started'          => false,
-				'onboarding_completed'        => false,
-				'onboarding_test_mode'        => false,
-				'plugin_slug'                 => 'woocommerce-payments',
-				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
-				'recommended_payment_methods' => array(
-					array(
-						'id'          => 'card',
-						'_order'      => 0,
-						'enabled'     => true,
-						'required'    => true,
-						'title'       => 'Credit/debit card (required)',
-						'description' => 'Accepts all major credit and debit cards',
-						'icon'        => 'https://example.com/card-icon.png',
-					),
-					array(
-						'id'          => 'woopay',
-						'_order'      => 1,
-						'enabled'     => false,
-						'title'       => 'WooPay',
-						'description' => 'WooPay express checkout',
-						'icon'        => 'https://example.com/woopay-icon.png',
-					),
-				),
-			)
-		);
-
-		// Use this instance to set different states depending on your specific test needs.
-		$this->mock_visa_gateway = new FakePaymentGateway(
-			'visa_acceptance_solutions',
-			array(
-				'enabled'              => false,
-				'account_connected'    => false,
-				'needs_setup'          => true,
-				'test_mode'            => true,
-				'dev_mode'             => true,
-				'onboarding_started'   => false,
-				'onboarding_completed' => false,
-				'onboarding_test_mode' => false,
-				'plugin_slug'          => 'visa-acceptance-solutions',
-				'plugin_file'          => 'visa-acceptance-solutions/visa-acceptance-solutions.php',
-			)
-		);
-
-		$this->mockable_proxy = $container->get( LegacyProxy::class );
-		$this->mockable_proxy->register_class_mocks(
-			array(
-				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
-			)
-		);
-		// We have no way of knowing if the container has already resolved the mocked classes,
-		// so we need to reset all resolved instances.
-		$container->reset_all_resolved();
-
-		$this->mockable_proxy->register_static_mocks(
-			array(
-				'\WC_Payments_Utils' => array(
-					'supported_countries' => function () {
-						return $this->get_woopayments_supported_countries();
-					},
-				),
-				PluginsHelper::class => array(
-					'is_plugin_installed'       => function ( $plugin_slug ) {
-						// By default, only WooCommerce is installed.
-						if ( 'woocommerce' === $plugin_slug ) {
-							return true;
-						}
-
-						return false;
-					},
-					'is_plugin_active'          => function ( $plugin_slug ) {
-						// By default, only WooCommerce is active.
-						if ( 'woocommerce' === $plugin_slug ) {
-							return true;
-						}
-
-						return false;
-					},
-					'get_plugin_path_from_slug' => function ( $plugin_slug ) {
-						if ( 'woocommerce' === $plugin_slug ) {
-							return 'woocommerce/woocommerce.php';
-						}
-
-						if ( 'woocommerce-payments' === $plugin_slug ) {
-							return 'woocommerce-payments/woocommerce-payments.php';
-						}
-
-						return '';
-					},
-				),
-				Utils::class         => array(
-					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-					'get_wpcom_connection_authorization' => function ( string $return_url ) {
-						return array(
-							'success'      => true,
-							'errors'       => array(),
-							'color_scheme' => 'fresh',
-							'url'          => 'https://wordpress.com/auth?query=some_query',
-						);
-					},
-					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
-						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
-							return array(
-								'data' => array(),
-							);
-						}
-
-						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
-					},
-				),
-			)
-		);
-
-		$this->mockable_proxy->register_function_mocks(
-			array(
-				// Mock the current time.
-				'time'         => function () {
-					return $this->current_time;
-				},
-				'class_exists' => function () {
-					// All classes don't exist by default.
-					// Replace/reregister with specific logic in tests if needed.
-					return false;
-				},
-			),
-		);
-
-		$this->providers_service = $container->get( PaymentsProviders::class );
-		$this->service           = $container->get( Payments::class );
-
-		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
-		$sut = new PaymentsRestController();
-		$sut->init( $this->service );
-		$sut->register_routes( true );
-
+		$this->setup_wpcom_connection_mock();
+		$this->setup_woopayments_account_service_mock();
+		$this->setup_incentives_response_mock();
+		$this->setup_fake_gateways();
+		$this->setup_legacy_proxy_mocks();
+		$this->reinitialize_services_and_controller();
 		$this->load_core_paypal_pg();
 	}
 
@@ -1646,6 +1432,278 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Clean up.
 		remove_filter( 'user_has_cap', $filter_callback );
 		delete_user_meta( get_current_user_id(), Incentive::PREFIX . 'dismissed' );
+	}
+
+	/**
+	 * Setup WPCOM connection manager mock.
+	 *
+	 * Creates a mock of the WPCOM connection manager and configures it to
+	 * simulate a connected Jetpack site with a connected owner.
+	 */
+	private function setup_wpcom_connection_mock(): void {
+		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
+													->onlyMethods(
+														array(
+															'is_connected',
+															'has_connected_owner',
+															'is_connection_owner',
+														)
+													)
+													->getMock();
+		// Make it connected.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connection_owner' )
+			->willReturn( true );
+	}
+
+	/**
+	 * Setup WooPayments account service mock.
+	 *
+	 * Creates a mock account service with standard methods for testing.
+	 */
+	private function setup_woopayments_account_service_mock(): void {
+		$this->mock_woopayments_account_service = $this->getMockBuilder( \stdClass::class )
+														->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
+														->getMock();
+	}
+
+	/**
+	 * Setup incentives response mock.
+	 *
+	 * Mocks the response from the WPCOM incentives API to return test data.
+	 */
+	private function setup_incentives_response_mock(): void {
+		// Mock the response from the WPCOM incentives API.
+		$this->woopayments_incentives_response_mock_ref = function ( $preempt, $parsed_args, $url ) {
+			if ( str_contains( $url, 'https://public-api.wordpress.com/wpcom/v2/wcpay/incentives' ) ) {
+				return array(
+					'success'  => true,
+					'body'     => wp_json_encode(
+						array(
+							array(
+								'id'                  => 'promo-discount',
+								'promo_id'            => 'promo-discount',
+								'type'                => 'welcome_page',
+								'cta_label'           => 'Install',
+								'tc_url'              => 'https://woocommerce.com/terms-conditions',
+								'description'         => 'Description.',
+								'task_header_content' => 'Some content.',
+								'task_badge'          => 'Save X% on payment processing fees',
+							),
+							array(
+								'id'                => 'promo-discount__wc_settings_payments',
+								'promo_id'          => 'promo-discount',
+								'type'              => 'wc_settings_payments',
+								'description'       => 'Use the native payments solution built and supported by Woo.',
+								'cta_label'         => 'Save X%',
+								'tc_url'            => 'https://woocommerce.com/terms-conditions',
+								'title'             => 'Save X% on processing fees.',
+								'short_description' => 'Save X% on processing fees.',
+								'badge'             => 'Save X% on processing fees',
+							),
+						)
+					),
+					'response' => array(
+						'code' => 200,
+					),
+				);
+			}
+
+			return $preempt;
+		};
+
+		add_filter( 'pre_http_request', $this->woopayments_incentives_response_mock_ref, 10, 3 );
+	}
+
+	/**
+	 * Setup fake payment gateways.
+	 *
+	 * Creates mock gateway instances for testing payment provider functionality.
+	 */
+	private function setup_fake_gateways(): void {
+		// Use this instance to set different states depending on your specific test needs.
+		$this->mock_woopayments_gateway = new FakePaymentGateway(
+			'woocommerce_payments',
+			array(
+				'enabled'                     => false,
+				'account_connected'           => false,
+				'needs_setup'                 => true,
+				'test_mode'                   => true,
+				'dev_mode'                    => true,
+				'onboarding_started'          => false,
+				'onboarding_completed'        => false,
+				'onboarding_test_mode'        => false,
+				'plugin_slug'                 => 'woocommerce-payments',
+				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
+				'recommended_payment_methods' => array(
+					array(
+						'id'          => 'card',
+						'_order'      => 0,
+						'enabled'     => true,
+						'required'    => true,
+						'title'       => 'Credit/debit card (required)',
+						'description' => 'Accepts all major credit and debit cards',
+						'icon'        => 'https://example.com/card-icon.png',
+					),
+					array(
+						'id'          => 'woopay',
+						'_order'      => 1,
+						'enabled'     => false,
+						'title'       => 'WooPay',
+						'description' => 'WooPay express checkout',
+						'icon'        => 'https://example.com/woopay-icon.png',
+					),
+				),
+			)
+		);
+
+		// Use this instance to set different states depending on your specific test needs.
+		$this->mock_visa_gateway = new FakePaymentGateway(
+			'visa_acceptance_solutions',
+			array(
+				'enabled'              => false,
+				'account_connected'    => false,
+				'needs_setup'          => true,
+				'test_mode'            => true,
+				'dev_mode'             => true,
+				'onboarding_started'   => false,
+				'onboarding_completed' => false,
+				'onboarding_test_mode' => false,
+				'plugin_slug'          => 'visa-acceptance-solutions',
+				'plugin_file'          => 'visa-acceptance-solutions/visa-acceptance-solutions.php',
+			)
+		);
+	}
+
+	/**
+	 * Setup legacy proxy mocks.
+	 *
+	 * Configures the mockable legacy proxy with class, static, and function mocks
+	 * needed for testing the payments functionality.
+	 */
+	private function setup_legacy_proxy_mocks(): void {
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
+		$this->mockable_proxy->register_class_mocks(
+			array(
+				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
+			)
+		);
+		// We have no way of knowing if the container has already resolved the mocked classes,
+		// so we need to reset all resolved instances.
+		$container->reset_all_resolved();
+
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				'\WC_Payments_Utils' => array(
+					'supported_countries' => function () {
+						return $this->get_woopayments_supported_countries();
+					},
+				),
+				PluginsHelper::class => array(
+					'is_plugin_installed'       => function ( $plugin_slug ) {
+						// By default, only WooCommerce is installed.
+						if ( 'woocommerce' === $plugin_slug ) {
+							return true;
+						}
+
+						return false;
+					},
+					'is_plugin_active'          => function ( $plugin_slug ) {
+						// By default, only WooCommerce is active.
+						if ( 'woocommerce' === $plugin_slug ) {
+							return true;
+						}
+
+						return false;
+					},
+					'get_plugin_path_from_slug' => function ( $plugin_slug ) {
+						if ( 'woocommerce' === $plugin_slug ) {
+							return 'woocommerce/woocommerce.php';
+						}
+
+						if ( 'woocommerce-payments' === $plugin_slug ) {
+							return 'woocommerce-payments/woocommerce-payments.php';
+						}
+
+						return '';
+					},
+				),
+				Utils::class         => array(
+					'get_wpcom_connection_authorization' => function ( string $return_url ) {
+						unset( $return_url ); // Avoid parameter not used PHPCS errors.
+						return array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
+						unset( $params ); // Avoid parameter not used PHPCS errors.
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => array(),
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
+			)
+		);
+
+		$this->mockable_proxy->register_function_mocks(
+			array(
+				// Mock the current time.
+				'time'         => function () {
+					return $this->current_time;
+				},
+				'class_exists' => function () {
+					// All classes don't exist by default.
+					// Replace/reregister with specific logic in tests if needed.
+					return false;
+				},
+			),
+		);
+	}
+
+	/**
+	 * Reinitialize services and REST controller.
+	 *
+	 * Gets fresh instances from the container and registers REST routes
+	 * to ensure the dependency tree uses our mocks.
+	 */
+	private function reinitialize_services_and_controller(): void {
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
+		$this->providers_service = $container->get( PaymentsProviders::class );
+		$this->service           = $container->get( Payments::class );
+
+		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
+		$sut = new PaymentsRestController();
+		$sut->init( $this->service );
+		$sut->register_routes( true );
 	}
 
 	/**
