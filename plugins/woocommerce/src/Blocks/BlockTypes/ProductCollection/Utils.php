@@ -124,8 +124,8 @@ class Utils {
 		} else {
 			// Check if we're in a cart block context.
 			$current_page       = $wp_query->get_queried_object();
-			$has_cart_block     = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/cart' );
-			$has_checkout_block = $current_page && \WC_Blocks_Utils::has_block_in_page( $current_page, 'woocommerce/checkout' );
+			$has_cart_block     = $current_page && has_block( 'woocommerce/cart', $current_page );
+			$has_checkout_block = $current_page && has_block( 'woocommerce/checkout', $current_page );
 			$is_cart_available  = isset( WC()->cart ) && is_a( WC()->cart, 'WC_Cart' );
 
 			if ( ( $has_cart_block || $has_checkout_block || is_cart() || is_checkout() ) && $is_cart_available ) {

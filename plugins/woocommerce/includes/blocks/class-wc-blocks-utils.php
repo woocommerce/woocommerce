@@ -67,6 +67,8 @@ class WC_Blocks_Utils {
 	 * @return bool Boolean value if the page contains the block or not. Null in case the page does not exist.
 	 */
 	public static function has_block_in_page( $page, $block_name ) {
+		wc_deprecated_function( __METHOD__, '10.4.0', 'has_block' );
+
 		$page_to_check = get_post( $page );
 		if ( null === $page_to_check ) {
 			return false;
