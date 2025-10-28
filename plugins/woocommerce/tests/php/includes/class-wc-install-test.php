@@ -308,8 +308,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_stats_schema_includes_fulfillment_status_for_new_install(): void {
 		// Mock is_new_install to return true.
-		$version   = null;
-		$shop_id   = null;
+		$version = null;
+		$shop_id = null;
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -329,7 +329,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$get_order_stats_schema = function ( $collate ) {
 			return static::get_order_stats_table_schema( $collate );
 		};
-		$schema = $get_order_stats_schema->call( new \WC_Install(), '' );
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
 
 		// Assert that the schema includes fulfillment_status column.
 		$this->assertStringContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should include fulfillment_status column for new installations.' );
@@ -349,8 +349,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_order_stats_schema_excludes_fulfillment_status_for_existing_install(): void {
 		// Mock is_new_install to return false.
-		$version   = '9.0.0';
-		$shop_id   = 10;
+		$version = '9.0.0';
+		$shop_id = 10;
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -370,7 +370,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$get_order_stats_schema = function ( $collate ) {
 			return static::get_order_stats_table_schema( $collate );
 		};
-		$schema = $get_order_stats_schema->call( new \WC_Install(), '' );
+		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
 
 		// Assert that the schema does NOT include fulfillment_status column.
 		$this->assertStringNotContainsString( 'fulfillment_status', $schema, 'Schema should NOT include fulfillment_status column for existing installations.' );
