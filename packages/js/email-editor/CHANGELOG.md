@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.3) - 2025-10-27 
+
+-   Patch - Fix for email preview to fit into the container in the preview column [#61442]
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+-   Patch - Add support for a custom back button component [#61535]
+
 ## [1.1.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.2) - 2025-10-09 
 
 -   Patch - Export hook isEmailEditor from the package. [#60941]

@@ -4,7 +4,6 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { HTMLElementEvent } from '@woocommerce/types';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
@@ -22,12 +21,6 @@ const universalLock =
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
-	{},
-	{ lock: universalLock }
-);
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -51,6 +44,7 @@ export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 
 export type QuantitySelectorStore = {
 	state: {
+		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 	};
@@ -74,29 +68,35 @@ store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
-			get allowsDecrease() {
-				const { quantity, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+			get allowsQuantityChange(): boolean {
+				const { productData } = addToCartWithOptionsStore.state;
 
-				// Note: in grouped products, this will be the parent product.
-				// We handle grouped products decrease differently because we
-				// allow setting the quantity to 0.
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! productData ) {
 					return true;
 				}
 
-				if ( productObject.type === 'grouped' ) {
+				return (
+					productData.is_in_stock && ! productData.sold_individually
+				);
+			},
+			get allowsDecrease() {
+				// Note: in grouped products, `productData` will be the parent product.
+				// We handle grouped products decrease differently because we
+				// allow setting the quantity to 0.
+				const { productData, quantity } =
+					addToCartWithOptionsStore.state;
+
+				if ( ! productData ) {
+					return true;
+				}
+
+				if ( productData.type === 'grouped' ) {
 					const { productId } = getContext< Context >();
 
 					return quantity[ productId ] > 0;
 				}
 
-				const { id, min, step } = productObject;
+				const { id, min, step } = productData;
 
 				const currentQuantity = quantity[ id ] || 0;
 
@@ -172,12 +172,10 @@ store< QuantitySelectorStore >(
 				const currentValue = Number( inputElement.value ) || 0;
 
 				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { productData, selectedAttributes } =
+					addToCartWithOptionsStore.state;
 
-				const parentProductObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
+				const parentProductObject = productData;
 
 				let productObject = parentProductObject;
 
@@ -225,14 +223,11 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { productData, selectedAttributes } =
+					addToCartWithOptionsStore.state;
 				let min = 1;
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
 
-				if ( ! productObject ) {
+				if ( ! productData ) {
 					return;
 				}
 
@@ -242,7 +237,7 @@ store< QuantitySelectorStore >(
 				if (
 					( Number.isNaN( event.target.valueAsNumber ) ||
 						event.target.valueAsNumber === 0 ) &&
-					productObject.type === 'grouped'
+					productData.type === 'grouped'
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
@@ -255,22 +250,16 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				let childProductObject = null;
+				const childProductData =
+					productData.type === 'grouped'
+						? getProductData( productId, selectedAttributes )
+						: productData;
 
-				if ( productObject.type === 'grouped' ) {
-					childProductObject = getProductData(
-						productId,
-						selectedAttributes
-					);
-
-					if ( ! childProductObject ) {
-						return;
-					}
-				} else {
-					childProductObject = productObject;
+				if ( ! childProductData ) {
+					return;
 				}
 
-				min = childProductObject.min;
+				min = childProductData.min;
 
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
