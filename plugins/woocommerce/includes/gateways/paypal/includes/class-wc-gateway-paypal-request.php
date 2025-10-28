@@ -417,8 +417,6 @@ class WC_Gateway_Paypal_Request {
 			$locale_parts = explode( '_', $src_locale );
 			if ( count( $locale_parts ) >= 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
-			} else {
-				$src_locale = $locale_parts[0];
 			}
 		}
 
