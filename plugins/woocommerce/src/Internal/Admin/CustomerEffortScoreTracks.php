@@ -167,7 +167,7 @@ class CustomerEffortScoreTracks {
 								clearInterval( interval );
 							}
 						}
-					}, 500 );
+					}, 1000 );
 				});
 			})( jQuery );",
 			esc_js( $action ),
