@@ -625,16 +625,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	private static function is_immediate_import_enabled(): bool {
-		/**
-		 * Filters whether to enable immediate order import on every order create/update.
-		 * When false (default), orders are imported in batches periodically.
-		 * When true, maintains legacy behavior of immediate per-order import.
-		 *
-		 * @since 10.4.0
-		 * @param bool $enable_immediate_import Whether to enable immediate import. Default false.
-		 */
-		$enable_immediate_import = apply_filters( 'woocommerce_admin_orders_scheduler_enable_immediate_import', false );
-
+		$enable_immediate_import = get_option( 'woocommerce_analytics_immediate_import', true );
 		return filter_var( $enable_immediate_import, FILTER_VALIDATE_BOOLEAN );
 	}
 }
