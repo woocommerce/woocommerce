@@ -1,0 +1,2024 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Traits;
+
+use Automattic\WooCommerce\Internal\Caches\EntityVersionKeysCache;
+use Automattic\WooCommerce\Internal\Traits\RestApiCache;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use WC_REST_Unit_Test_Case;
+use WP_REST_Controller;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
+use WP_Error;
+
+/**
+ * Tests for the RestApiCache trait.
+ *
+ * Worth knowing:
+ *
+ * - A trait can't be used directly, so for each test we instantiate
+ *   a test controller class that uses it and has customization points
+ *   (see create_test_controller).
+ * - We use a mock version of EntityVersionKeysCache that stores cached entries
+ *   in a local array, for easier testing.
+ *
+ * IMPORTANT: If you add new tests, find the "TESTS END HERE" comment
+ * and add them before that point.
+ */
+class RestApiCacheTest extends WC_REST_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var object
+	 */
+	private $sut;
+
+	/**
+	 * Mock EntityVersionKeysCache instance.
+	 *
+	 * @var object
+	 */
+	private $mock_entity_cache;
+
+	/**
+	 * REST API server instance.
+	 *
+	 * @var WP_REST_Server
+	 */
+	protected $server;
+
+	/**
+	 * Fixed timestamp for testing.
+	 *
+	 * @var int
+	 */
+	private $fixed_time = 1234567890;
+
+	/**
+	 * Set up before each test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		wc_get_container()->get( LegacyProxy::class )->register_function_mocks(
+			array(
+				'time' => function () {
+					return $this->fixed_time;
+				},
+			)
+		);
+
+		$this->mock_entity_cache = $this->create_mock_entity_version_keys_cache();
+		wc_get_container()->replace( EntityVersionKeysCache::class, $this->mock_entity_cache );
+
+		$this->sut = $this->create_test_controller();
+
+		// Set up filters for entity version keys cache to use the mock's array.
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_get',
+			function ( $pre_value, $cache_key ) {
+				return $this->mock_entity_cache->cache[ $cache_key ]['value'] ?? null;
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_set',
+			function ( $pre_result, $cache_key, $value, $ttl ) {
+				$this->mock_entity_cache->cache[ $cache_key ] = array(
+					'value' => $value,
+					'ttl'   => $ttl,
+				);
+				return true;
+			},
+			10,
+			4
+		);
+
+		add_filter(
+			'woocommerce_pre_entity_version_keys_cache_delete',
+			function ( $pre_result, $cache_key ) {
+				unset( $this->mock_entity_cache->cache[ $cache_key ] );
+				return true;
+			},
+			10,
+			2
+		);
+
+		// Set up filters to use the controller's local cache array.
+		add_filter(
+			'woocommerce_pre_rest_api_cache_get',
+			function ( $pre_value, $cache_key ) {
+				return $this->sut->cache[ $cache_key ] ?? false;
+			},
+			10,
+			2
+		);
+
+		add_filter(
+			'woocommerce_pre_rest_api_cache_set',
+			function ( $pre_result, $cache_key, $value, $ttl ) {
+				$this->sut->cache[ $cache_key ] = $value;
+				return true;
+			},
+			10,
+			4
+		);
+
+		add_filter(
+			'woocommerce_pre_rest_api_cache_delete',
+			function ( $pre_result, $cache_key ) {
+				unset( $this->sut->cache[ $cache_key ] );
+				return true;
+			},
+			10,
+			2
+		);
+
+		global $wp_rest_server;
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
+		$this->sut->register_routes();
+	}
+
+	/**
+	 * Tear down after each test.
+	 */
+	public function tearDown(): void {
+		global $wp_rest_server;
+		$wp_rest_server = null;
+
+		// Remove the cache filters.
+		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_get' );
+		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_set' );
+		remove_all_filters( 'woocommerce_pre_entity_version_keys_cache_delete' );
+		remove_all_filters( 'woocommerce_pre_rest_api_cache_get' );
+		remove_all_filters( 'woocommerce_pre_rest_api_cache_set' );
+		remove_all_filters( 'woocommerce_pre_rest_api_cache_delete' );
+
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox First request returns MISS and caches response, second request returns HIT with cached data.
+	 */
+	public function test_caching_workflow_miss_then_hit() {
+		$response1 = $this->query_endpoint( 'multiple_entities' );
+
+		// Verify response.
+
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( $this->sut->responses['multiple_entities'], $response1->get_data() );
+
+		// Verify the structure and contents of the cache entry for the response.
+
+		$this->assertCount( 1, $this->sut->cache );
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'data', $cached_entry );
+		$this->assertArrayHasKey( 'entity_versions', $cached_entry );
+		$this->assertArrayHasKey( 'created_at', $cached_entry );
+		$this->assertEquals( $this->sut->responses['multiple_entities'], $cached_entry['data'] );
+		$this->assertEquals( $this->fixed_time, $cached_entry['created_at'] );
+		$this->assertCount( 2, $cached_entry['entity_versions'] );
+		$this->assertArrayHasKey( 2, $cached_entry['entity_versions'] );
+		$this->assertArrayHasKey( 3, $cached_entry['entity_versions'] );
+
+		// Verify versions were created in entity cache.
+
+		$this->assertNotEmpty( $this->mock_entity_cache->get_entity_version( 'product', 2 ) );
+		$this->assertNotEmpty( $this->mock_entity_cache->get_entity_version( 'product', 3 ) );
+
+		// Modify the cached response data and query again,
+		// the response should be a cache HIT with the modified data.
+
+		$modified_data                          = array(
+			array(
+				'id'   => 999,
+				'name' => 'Modified Product',
+			),
+		);
+		$this->sut->cache[ $cache_key ]['data'] = $modified_data;
+
+		$response2 = $this->query_endpoint( 'multiple_entities' );
+
+		$this->assertCacheHitHeader( $response2 );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+		$this->assertNotEquals( $this->sut->responses['multiple_entities'], $response2->get_data() );
+	}
+
+	/**
+	 * @testdox Expired cache entries are rejected and deleted.
+	 */
+	public function test_expired_cache_entries_are_rejected() {
+
+		// First request - cache MISS, creates cache entry.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Advance time beyond TTL (default is HOUR_IN_SECONDS = 3600).
+
+		$this->fixed_time += HOUR_IN_SECONDS + 1;
+
+		// Third request after expiration - should be cache MISS.
+
+		$response3 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify exactly one cache entry exists (old deleted, new created)
+		// and the cache entry is new (created_at timestamp changed).
+		$this->assertCount( 1, $this->sut->cache );
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+	}
+
+	/**
+	 * @testdox Cache is invalidated when relevant hooks change.
+	 */
+	public function test_cache_invalidated_when_hooks_change() {
+
+		// Configure custom_endpoint_config endpoint with relevant_hooks.
+
+		$this->reconfigure_custom_endpoint_config_endpoint(
+			array(
+				'relevant_hooks' => array( 'test_hook_for_caching' ),
+			)
+		);
+
+		// First request - cache MISS, creates cache entry.
+
+		$response1 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Add a filter to the relevant hook to change the hooks hash.
+
+		add_filter( 'test_hook_for_caching', '__return_true' );
+
+		// Advance time to ensure new cache entry has different timestamp.
+
+		$this->fixed_time += 1;
+
+		// Third request after hooks changed - should be cache MISS.
+
+		$response3 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify exactly one cache entry exists (old deleted, new created).
+		// and the cache entry is new (created_at timestamp changed).
+
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCount( 1, $this->sut->cache );
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+
+		// Clean up.
+
+		remove_filter( 'test_hook_for_caching', '__return_true' );
+	}
+
+	/**
+	 * @testdox Cache is invalidated when controller-level hooks change.
+	 */
+	public function test_cache_invalidated_when_controller_hooks_change() {
+		// First request to single_entity - cache MISS, creates cache entry.
+		// single_entity uses controller-level hooks from get_hooks_relevant_to_caching().
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Add a filter to the controller-level hook to change the hooks hash.
+
+		add_filter( 'test_controller_hook_for_caching', '__return_false' );
+
+		// Advance time to ensure new cache entry has different timestamp.
+
+		$this->fixed_time += 1;
+
+		// Third request after hooks changed - should be cache MISS.
+
+		$response3 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify exactly one cache entry exists (old deleted, new created),
+		// and the cache entry is new (created_at timestamp changed).
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Clean up.
+
+		remove_filter( 'test_controller_hook_for_caching', '__return_false' );
+	}
+
+	/**
+	 * @testdox Entity ID extraction works for single entity responses.
+	 */
+	public function test_entity_id_extraction_for_single_entity() {
+		// First request to single_entity - cache MISS, creates cache entry.
+		// single_entity returns single entity with id=1.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Modify the entity version for entity 1 (the entity in the response).
+
+		$this->mock_entity_cache->regenerate_entity_version( 'product', 1 );
+
+		// Advance time to ensure new cache entry has different timestamp.
+
+		$this->fixed_time += 1;
+
+		// Third request after entity 1 version changed - should be cache MISS.
+
+		$response3 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify exactly one cache entry exists (old deleted, new created),
+		// and the cache entry is new (created_at timestamp changed).
+		$this->assertCount( 1, $this->sut->cache );
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+
+		// Verify that modifying a different entity (e.g., entity 2) does NOT invalidate cache.
+
+		$old_cache_info2 = $this->get_cache_info();
+		$this->mock_entity_cache->regenerate_entity_version( 'product', 2 );
+		$this->fixed_time += 1;
+
+		// Fourth request - should still be cache HIT (entity 2 change doesn't affect entity 1 cache).
+
+		$response4 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response4 );
+
+		// Verify cache entry was not recreated.
+
+		$new_cache_info2 = $this->get_cache_info();
+		$this->assertCacheInfoEqual( $old_cache_info2, $new_cache_info2 );
+	}
+
+	/**
+	 * @testdox Custom entity ID extraction works correctly.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_custom_entity_id_extraction( bool $use_with_cache_config ) {
+
+		if ( $use_with_cache_config ) {
+			// Configure custom_endpoint_config endpoint with custom extract_entity_ids callback.
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter
+					'extract_entity_ids' => fn( $data, $request ) => array( $data['id'] * 10 ),
+				)
+			);
+			$endpoint           = 'custom_endpoint_config';
+			$original_entity_id = 6;
+			$extracted_id       = 60;
+		} else {
+			// Enable custom entity ID extraction via controller method (IDs multiplied by 10).
+			$this->sut->use_custom_entity_id_extraction = true;
+			$endpoint                                   = 'single_entity';
+			$original_entity_id                         = 1;
+			$extracted_id                               = 10;
+		}
+
+		// First request - cache MISS, creates cache entry with custom extracted ID.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Verify cache entry stores modified entity ID (original * 10).
+
+		$cache_entry = array_values( $this->sut->cache )[0];
+		$entity_ids  = array_keys( $cache_entry['entity_versions'] );
+		$this->assertEquals( array( $extracted_id ), $entity_ids, "Cache should store custom extracted entity ID ({$original_entity_id} * 10 = {$extracted_id})" );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Modify entity version for the extracted ID.
+
+		$this->mock_entity_cache->regenerate_entity_version( 'product', $extracted_id );
+		$this->fixed_time += 1;
+
+		// Third request - should be cache MISS (extracted entity changed).
+
+		$response3 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify cache was recreated.
+
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+
+		// Verify that modifying the original entity ID does NOT invalidate cache.
+
+		$old_cache_info2 = $this->get_cache_info();
+		$this->mock_entity_cache->regenerate_entity_version( 'product', $original_entity_id );
+		$this->fixed_time += 1;
+
+		// Fourth request - should still be cache HIT (original entity change doesn't affect cache tracking extracted entity).
+
+		$response4 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response4 );
+
+		// Verify cache entry was not recreated.
+
+		$new_cache_info2 = $this->get_cache_info();
+		$this->assertCacheInfoEqual( $old_cache_info2, $new_cache_info2 );
+
+		// Reset custom extraction if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->use_custom_entity_id_extraction = false;
+		}
+	}
+
+	/**
+	 * @testdox Cache is invalidated when entity versions change for collection responses.
+	 * @testWith [1, false]
+	 *           [2, true]
+	 *           [3, true]
+	 *           [999, false]
+	 *
+	 * @param int  $entity_id                   Entity ID to modify.
+	 * @param bool $cache_invalidation_expected Whether cache invalidation is expected.
+	 */
+	public function test_cache_invalidated_when_entity_version_changes( int $entity_id, bool $cache_invalidation_expected ) {
+
+		// First request to multiple_entities - cache MISS, creates cache entry.
+		// multiple_entities returns collection with entities 2, 3, and one without ID.
+
+		$response1 = $this->query_endpoint( 'multiple_entities' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'multiple_entities' );
+
+		$this->assertCacheHitHeader( $response2 );
+
+		// Modify the entity version for the specified entity.
+
+		$this->mock_entity_cache->regenerate_entity_version( 'product', $entity_id );
+
+		// Advance time to ensure new cache entry has different timestamp.
+
+		$this->fixed_time += 1;
+
+		// Third request after entity version changed.
+
+		$response3 = $this->query_endpoint( 'multiple_entities' );
+
+		if ( $cache_invalidation_expected ) {
+
+			// Cache should be invalidated (MISS).
+
+			$this->assertCacheMissHeader( $response3 );
+
+			// Verify exactly one cache entry exists (old deleted, new created).
+
+			$this->assertCount( 1, $this->sut->cache );
+
+			// Verify the cache entry is new (created_at timestamp changed).
+
+			$new_cache_info = $this->get_cache_info();
+			$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+		} else {
+			// Cache should still be valid (HIT).
+
+			$this->assertCacheHitHeader( $response3 );
+
+			// Verify cache entry was not recreated (same created_at timestamp).
+
+			$new_cache_info = $this->get_cache_info();
+			$this->assertCacheInfoEqual( $old_cache_info, $new_cache_info );
+		}
+	}
+
+	/**
+	 * @testdox Custom cache TTL is respected.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_custom_cache_ttl( bool $use_with_cache_config ) {
+
+		if ( $use_with_cache_config ) {
+			// Configure custom_endpoint_config endpoint with custom cache_ttl (20 seconds).
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					'cache_ttl' => 20,
+				)
+			);
+			$endpoint    = 'custom_endpoint_config';
+			$time_within = 15;
+			$time_beyond = 6;
+		} else {
+			// Set custom TTL to 10 seconds via controller property.
+			$this->sut->custom_cache_ttl = 10;
+			$endpoint                    = 'single_entity';
+			$time_within                 = 5;
+			$time_beyond                 = 6;
+		}
+
+		// First request - cache MISS, creates cache entry with custom TTL.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Advance time (within TTL) - cache should still be valid.
+
+		$this->fixed_time += $time_within;
+
+		$response3 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response3 );
+
+		// Advance time beyond TTL.
+
+		$this->fixed_time += $time_beyond;
+
+		// Fourth request after custom TTL expiration - should be cache MISS.
+
+		$response4 = $this->query_endpoint( $endpoint );
+
+		$this->assertCacheMissHeader( $response4 );
+
+		// Verify exactly one cache entry exists (old deleted, new created).
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Verify the cache entry is new (created_at timestamp changed).
+
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+
+		// Reset custom TTL if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->custom_cache_ttl = null;
+		}
+	}
+
+	/**
+	 * @testdox Custom entity type via with_cache config is respected.
+	 */
+	public function test_custom_entity_type_via_with_cache_config() {
+
+		// Configure custom_endpoint_config endpoint with custom entity_type.
+
+		$this->reconfigure_custom_endpoint_config_endpoint(
+			array(
+				'entity_type' => 'custom_entity',
+			)
+		);
+
+		// First request - cache MISS, creates cache entry.
+
+		$response1 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the old cache info for verification.
+
+		$old_cache_info = $this->get_cache_info();
+
+		// Second request immediately after - cache HIT.
+
+		$response2 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Modify entity version for 'custom_entity' type (not 'product').
+
+		$this->mock_entity_cache->regenerate_entity_version( 'custom_entity', 6 );
+
+		// Advance time to ensure new cache entry has different timestamp.
+
+		$this->fixed_time += 1;
+
+		// Third request after custom entity version changed - should be cache MISS.
+
+		$response3 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify exactly one cache entry exists (old deleted, new created).
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Verify the cache entry is new (created_at timestamp changed).
+
+		$new_cache_info = $this->get_cache_info();
+		$this->assertCacheInfoDifferent( $old_cache_info, $new_cache_info, $this->fixed_time );
+
+		// Verify that modifying 'product' entity does NOT invalidate cache for 'custom_entity'.
+
+		$old_cache_info2 = $this->get_cache_info();
+		$this->mock_entity_cache->regenerate_entity_version( 'product', 6 );
+		$this->fixed_time += 1;
+
+		// Fourth request - should still be cache HIT (product entity change doesn't affect custom_entity cache).
+
+		$response4 = $this->query_endpoint( 'custom_endpoint_config' );
+		$this->assertCacheHitHeader( $response4 );
+
+		// Verify cache entry was not recreated.
+
+		$new_cache_info2 = $this->get_cache_info();
+		$this->assertCacheInfoEqual( $old_cache_info2, $new_cache_info2 );
+	}
+
+	/**
+	 * @testdox Cache keys differ based on query string parameters.
+	 */
+	public function test_cache_key_depends_on_query_string() {
+
+		// First request without query string - should be a cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+
+		// Verify response has MISS header and original data.
+
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( 200, $response1->get_status() );
+		$this->assertEquals( $this->sut->responses['single_entity'], $response1->get_data() );
+
+		// Store original response for later comparison.
+
+		$original_data = $response1->get_data();
+
+		// Verify response was cached.
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Modify the response in the controller for subsequent requests.
+
+		$modified_data                         = array(
+			'id'   => 999,
+			'name' => 'Modified Product',
+		);
+		$this->sut->responses['single_entity'] = $modified_data;
+
+		// Second request WITH query string - should be a cache MISS with modified data.
+
+		$response2 = $this->query_endpoint( 'single_entity', array( 'foo' => 'bar' ) );
+
+		// Verify response has MISS header and modified data.
+
+		$this->assertCacheMissHeader( $response2 );
+		$this->assertEquals( 200, $response2->get_status() );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+
+		// Verify we now have two cache entries (different query strings = different cache keys).
+
+		$this->assertCount( 2, $this->sut->cache );
+
+		// Third request without query string - should be a cache HIT with original data.
+
+		$response3 = $this->query_endpoint( 'single_entity' );
+
+		// Verify response has HIT header and original cached data.
+
+		$this->assertCacheHitHeader( $response3 );
+		$this->assertEquals( 200, $response3->get_status() );
+		$this->assertEquals( $original_data, $response3->get_data() );
+		$this->assertNotEquals( $modified_data, $response3->get_data() );
+
+		// Fourth request WITH same query string - should be a cache HIT with modified data.
+
+		$response4 = $this->query_endpoint( 'single_entity', array( 'foo' => 'bar' ) );
+
+		// Verify response has HIT header and modified cached data.
+
+		$this->assertCacheHitHeader( $response4 );
+		$this->assertEquals( 200, $response4->get_status() );
+		$this->assertEquals( $modified_data, $response4->get_data() );
+		$this->assertNotEquals( $original_data, $response4->get_data() );
+
+		// Verify we still have exactly two cache entries (no new entries created).
+
+		$this->assertCount( 2, $this->sut->cache );
+	}
+
+	/**
+	 * @testdox Caching is skipped when _skip_cache parameter is set.
+	 * @testWith ["1"]
+	 *           ["true"]
+	 *
+	 * @param string $skip_cache_value Value for _skip_cache parameter ("1" or "true").
+	 */
+	public function test_skip_cache_parameter_bypasses_caching( $skip_cache_value ) {
+
+		// First request with _skip_cache - should be a cache SKIP.
+
+		$response1 = $this->query_endpoint( 'single_entity', array( '_skip_cache' => $skip_cache_value ) );
+
+		// Verify caching was skipped.
+
+		$this->assertCachingSkipped( $response1, $this->sut->responses['single_entity'] );
+
+		// Store original response for later comparison.
+
+		$original_data = $response1->get_data();
+
+		// Modify the response in the controller for subsequent requests.
+
+		$modified_data                         = array(
+			'id'   => 999,
+			'name' => 'Modified Product',
+		);
+		$this->sut->responses['single_entity'] = $modified_data;
+
+		// Second request with _skip_cache - should still be a cache SKIP with modified data.
+
+		$response2 = $this->query_endpoint( 'single_entity', array( '_skip_cache' => $skip_cache_value ) );
+
+		// Verify caching was still skipped with modified data.
+
+		$this->assertCachingSkipped( $response2, $modified_data );
+		$this->assertNotEquals( $original_data, $response2->get_data() );
+	}
+
+	/**
+	 * @testdox Caching is skipped (without X-WC-Cache header) when entity versions cache is disabled.
+	 */
+	public function test_caching_skipped_when_entity_cache_disabled() {
+
+		// Disable the entity version keys cache.
+
+		$this->mock_entity_cache->should_use_cache = false;
+
+		// Re-initialize the cache in the controller to pick up the disabled state.
+
+		$this->sut->reinitialize_cache();
+
+		// Request single_entity.
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		// Verify caching was skipped.
+
+		$this->assertNoCacheHeader( $response );
+	}
+
+	/**
+	 * @testdox Caching is skipped when woocommerce_rest_api_enable_response_caching filter returns false.
+	 */
+	public function test_caching_skipped_when_filter_returns_false() {
+
+		// Track filter calls and arguments.
+
+		$filter_called = false;
+		$filter_args   = array();
+
+		// Add filter that returns false and captures arguments.
+
+		add_filter(
+			'woocommerce_rest_api_enable_response_caching',
+			function ( $enabled, $controller, $request ) use ( &$filter_called, &$filter_args ) {
+				$filter_called = true;
+				$filter_args   = array(
+					'enabled'    => $enabled,
+					'controller' => $controller,
+					'request'    => $request,
+				);
+				return false;
+			},
+			10,
+			3
+		);
+
+		// Request single_entity.
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		// Verify filter was called with correct arguments.
+
+		$this->assertTrue( $filter_called, 'Filter should have been called' );
+		$this->assertTrue( $filter_args['enabled'], 'Default enabled value should be true' );
+		$this->assertSame( $this->sut, $filter_args['controller'], 'Controller should be passed to filter' );
+		$this->assertInstanceOf( WP_REST_Request::class, $filter_args['request'], 'Request should be passed to filter' );
+
+		// Verify caching was skipped.
+
+		$this->assertCachingSkipped( $response, $this->sut->responses['single_entity'] );
+
+		// Clean up filter.
+
+		remove_all_filters( 'woocommerce_rest_api_enable_response_caching' );
+	}
+
+	/**
+	 * @testdox Caching is skipped when must_cache returns false.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_caching_skipped_when_must_cache_returns_false( bool $use_with_cache_config ) {
+
+		if ( $use_with_cache_config ) {
+			// Request false_must_cache endpoint which has a custom must_cache callback that returns false.
+			$endpoint = 'false_must_cache';
+		} else {
+			// Set controller's must_cache return value to false.
+			$this->sut->must_cache_return_value = false;
+			$endpoint                           = 'single_entity';
+		}
+
+		// Request endpoint.
+
+		$response = $this->query_endpoint( $endpoint );
+
+		// Verify caching was skipped.
+
+		$this->assertCachingSkipped( $response, $this->sut->responses[ $endpoint ] );
+	}
+
+	/**
+	 * @testdox Caching is skipped when no entity type is available and wc_doing_it_wrong is called.
+	 */
+	public function test_caching_skipped_when_no_entity_type_available() {
+
+		// Track wc_doing_it_wrong calls via LegacyProxy.
+
+		$doing_it_wrong_args = null;
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				// phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames
+				'wc_doing_it_wrong' => function ( $function, $message, $version ) use ( &$doing_it_wrong_args ) {
+					$doing_it_wrong_args = array(
+						'function' => $function,
+						'message'  => $message,
+						'version'  => $version,
+					);
+				},
+			)
+		);
+
+		// Override controller's get_default_entity_type to return null.
+
+		$this->sut->default_entity_type = null;
+
+		// Request single_entity endpoint (which doesn't specify entity_type in config).
+
+		$response = $this->query_endpoint( 'single_entity' );
+
+		// Verify wc_doing_it_wrong was called with correct arguments.
+
+		$this->assertNotNull( $doing_it_wrong_args, 'wc_doing_it_wrong should be called when no entity type is available' );
+		$this->assertStringContainsString( 'build_cache_config', $doing_it_wrong_args['function'] );
+		$this->assertStringContainsString( 'No entity type provided', $doing_it_wrong_args['message'] );
+		$this->assertEquals( '10.4.0', $doing_it_wrong_args['version'] );
+
+		// Verify caching was skipped.
+
+		$this->assertCachingSkipped( $response, $this->sut->responses['single_entity'] );
+	}
+
+	/**
+	 * @testdox Cache keys are unique per route and query string only (without user variance).
+	 */
+	public function test_cache_key_without_user_variance() {
+		$this->sut->vary_by_user_return_value = false;
+
+		// Mock get_current_user_id to return user 1.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		// First request by user 1 - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the cache key and modify cached data.
+
+		$cache_key                              = array_key_first( $this->sut->cache );
+		$modified_data                          = array(
+			'id'   => 999,
+			'name' => 'User 1 Modified',
+		);
+		$this->sut->cache[ $cache_key ]['data'] = $modified_data;
+
+		// Mock get_current_user_id to return user 2 (different user).
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		// Second request by user 2 to same endpoint - should be cache HIT with user 1's data.
+		// (Since vary_by_user is false, user ID is NOT included in cache key).
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+
+		// Verify still only one cache entry (same cache key for both users).
+
+		$this->assertCount( 1, $this->sut->cache );
+		$this->assertEquals( $cache_key, array_key_first( $this->sut->cache ), 'Cache key should be the same for different users when vary_by_user is false' );
+	}
+
+	/**
+	 * @testdox Cache varies by user when vary_by_user is enabled.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_cache_varies_by_user( bool $use_with_cache_config ) {
+
+		if ( $use_with_cache_config ) {
+			// Configure custom_endpoint_config endpoint with vary_by_user: true.
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					'vary_by_user' => true,
+				)
+			);
+			$endpoint = 'custom_endpoint_config';
+		} else {
+			// Enable vary_by_user via controller method.
+			$this->sut->vary_by_user_return_value = true;
+			$endpoint                             = 'single_entity';
+		}
+
+		// Mock get_current_user_id to return user 1.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		// First request by user 1 - cache MISS.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( $this->sut->responses[ $endpoint ], $response1->get_data() );
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store user 1's cache info and modify cached data.
+
+		$user1_cache_info = $this->get_cache_info();
+		$user1_data       = array(
+			'id'   => 101,
+			'name' => 'User 1 Data',
+		);
+		$this->sut->cache[ $user1_cache_info['key'] ]['data'] = $user1_data;
+
+		// Mock get_current_user_id to return user 2 (different user).
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		// Second request by user 2 to same endpoint - should be cache MISS (different cache key).
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response2 );
+		$this->assertEquals( $this->sut->responses[ $endpoint ], $response2->get_data() );
+
+		// Verify we now have two cache entries (different users = different cache keys).
+
+		$this->assertCount( 2, $this->sut->cache );
+
+		// Store user 2's cache info and modify cached data.
+
+		$user2_cache_keys                             = array_diff( array_keys( $this->sut->cache ), array( $user1_cache_info['key'] ) );
+		$user2_cache_key                              = reset( $user2_cache_keys );
+		$user2_data                                   = array(
+			'id'   => 202,
+			'name' => 'User 2 Data',
+		);
+		$this->sut->cache[ $user2_cache_key ]['data'] = $user2_data;
+
+		// Third request by user 1 again - should be cache HIT with user 1's modified data.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 1,
+			)
+		);
+
+		$response3 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response3 );
+		$this->assertEquals( $user1_data, $response3->get_data() );
+
+		// Fourth request by user 2 again - should be cache HIT with user 2's modified data.
+
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'get_current_user_id' => fn() => 2,
+			)
+		);
+
+		$response4 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response4 );
+		$this->assertEquals( $user2_data, $response4->get_data() );
+
+		// Verify still only two cache entries (one per user).
+
+		$this->assertCount( 2, $this->sut->cache );
+
+		// Verify cache keys are different.
+
+		$this->assertNotEquals( $user1_cache_info['key'], $user2_cache_key, 'Cache keys should differ for different users when vary_by_user is true' );
+
+		// Reset vary_by_user if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->vary_by_user_return_value = false;
+		}
+	}
+
+	/**
+	 * @testdox Response headers are cached and restored on cache hit.
+	 */
+	public function test_response_headers_are_cached() {
+		$this->sut->response_headers['single_entity'] = array(
+			'X-Custom-Header'  => 'custom-value',
+			'X-Another-Header' => 'another-value',
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry contains the custom headers.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertEquals( 'custom-value', $cached_entry['headers']['X-Custom-Header'] );
+		$this->assertEquals( 'another-value', $cached_entry['headers']['X-Another-Header'] );
+
+		// Second request - cache HIT, should restore headers.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		// Verify custom headers are restored.
+
+		$headers = $response2->get_headers();
+		$this->assertEquals( 'custom-value', $headers['X-Custom-Header'] );
+		$this->assertEquals( 'another-value', $headers['X-Another-Header'] );
+	}
+
+	/**
+	 * @testdox Certain response headers are always excluded from caching.
+	 */
+	public function test_headers_always_excluded_from_caching() {
+		$this->sut->response_headers['single_entity'] = array(
+			'Set-Cookie'     => 'session=abc123',  // Always excluded.
+			'Date'           => 'Mon, 01 Jan 2024 00:00:00 GMT',  // Always excluded.
+			'X-Custom-Valid' => 'should-be-present',  // NOT excluded.
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry does NOT contain always-excluded headers, but does contain valid custom header.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'Set-Cookie', $cached_entry['headers'], 'Set-Cookie should be excluded from cache' );
+		$this->assertArrayNotHasKey( 'Date', $cached_entry['headers'], 'Date should be excluded from cache' );
+		$this->assertEquals( 'should-be-present', $cached_entry['headers']['X-Custom-Valid'] );
+
+		// Second request - cache HIT, verify excluded headers are NOT restored.
+
+		$response2 = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheHitHeader( $response2 );
+
+		$headers = $response2->get_headers();
+
+		// Verify always-excluded headers are NOT present.
+
+		$this->assertArrayNotHasKey( 'Set-Cookie', $headers, 'Set-Cookie header should not be cached' );
+		$this->assertArrayNotHasKey( 'Date', $headers, 'Date header should not be cached' );
+
+		// Verify non-excluded custom header IS present.
+
+		$this->assertEquals( 'should-be-present', $headers['X-Custom-Valid'] );
+	}
+
+	/**
+	 * @testdox Custom headers can be excluded from caching via controller method and endpoint config.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_with_cache_config Whether to use with_cache config (true) or controller method override (false).
+	 */
+	public function test_custom_headers_excluded_from_caching( bool $use_with_cache_config ) {
+		if ( $use_with_cache_config ) {
+			$this->reconfigure_custom_endpoint_config_endpoint(
+				array(
+					'exclude_headers' => array( 'X-Custom-Exclude' ),
+				)
+			);
+			$endpoint = 'custom_endpoint_config';
+		} else {
+			$this->sut->custom_exclude_headers = array( 'X-Custom-Exclude' );
+			$endpoint                          = 'single_entity';
+		}
+
+		// Configure endpoint to return headers including custom-excluded ones.
+
+		$this->sut->response_headers[ $endpoint ] = array(
+			'X-Custom-Exclude' => 'should-not-be-cached',
+			'X-Custom-Include' => 'should-be-cached',
+		);
+
+		// First request - cache MISS.
+
+		$response1 = $this->query_endpoint( $endpoint );
+		$this->assertCacheMissHeader( $response1 );
+
+		// Verify cache entry does NOT contain custom-excluded header, but does contain included header.
+
+		$cache_key    = array_key_first( $this->sut->cache );
+		$cached_entry = $this->sut->cache[ $cache_key ];
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayNotHasKey( 'X-Custom-Exclude', $cached_entry['headers'], 'Custom excluded header should be excluded from cache' );
+		$this->assertEquals( 'should-be-cached', $cached_entry['headers']['X-Custom-Include'] );
+
+		// Second request - cache HIT.
+
+		$response2 = $this->query_endpoint( $endpoint );
+		$this->assertCacheHitHeader( $response2 );
+
+		$headers = $response2->get_headers();
+
+		// Verify excluded header is NOT present.
+
+		$this->assertArrayNotHasKey( 'X-Custom-Exclude', $headers, 'Custom excluded header should not be cached' );
+
+		// Verify included header IS present.
+
+		$this->assertEquals( 'should-be-cached', $headers['X-Custom-Include'] );
+
+		// Reset custom exclusion if using controller method.
+
+		if ( ! $use_with_cache_config ) {
+			$this->sut->custom_exclude_headers = array();
+		}
+	}
+
+	/**
+	 * @testdox Endpoint IDs are passed to customization methods.
+	 */
+	public function test_endpoint_ids_passed_to_methods() {
+
+		// Track which methods received endpoint_id.
+
+		$this->sut->received_endpoint_ids = array();
+
+		// Make a request to single_entity endpoint (has endpoint_id: 'single_entity').
+
+		$response = $this->query_endpoint( 'single_entity' );
+		$this->assertCacheMissHeader( $response );
+
+		// Verify endpoint_id was passed to all relevant methods.
+
+		$received = $this->sut->received_endpoint_ids;
+
+		$this->assertEquals( 'single_entity', $received['response_cache_vary_by_user'] ?? null, 'endpoint_id should be passed to response_cache_vary_by_user' );
+		$this->assertEquals( 'single_entity', $received['get_hooks_relevant_to_caching'] ?? null, 'endpoint_id should be passed to get_hooks_relevant_to_caching' );
+		$this->assertEquals( 'single_entity', $received['get_cache_ttl'] ?? null, 'endpoint_id should be passed to get_cache_ttl' );
+		$this->assertEquals( 'single_entity', $received['must_cache'] ?? null, 'endpoint_id should be passed to must_cache' );
+		$this->assertEquals( 'single_entity', $received['extract_entity_ids'] ?? null, 'endpoint_id should be passed to extract_entity_ids' );
+		$this->assertEquals( 'single_entity', $received['get_response_headers_to_exclude_from_caching'] ?? null, 'endpoint_id should be passed to get_response_headers_to_exclude_from_caching' );
+	}
+
+	/**
+	 * @testdox Query strings with the same parameters in different order produce the same cache key.
+	 */
+	public function test_query_string_parameter_order_independence() {
+
+		// First request with query parameters in one order: ?foo=1&bar=2&baz=3.
+
+		$response1 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'foo' => '1',
+				'bar' => '2',
+				'baz' => '3',
+			)
+		);
+
+		// Verify response is cache MISS and data is correct.
+
+		$this->assertCacheMissHeader( $response1 );
+		$this->assertEquals( 200, $response1->get_status() );
+		$this->assertEquals( $this->sut->responses['single_entity'], $response1->get_data() );
+
+		// Verify response was cached.
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Store the cache key and modify cached data to verify subsequent request uses cached value.
+
+		$cache_key                              = array_key_first( $this->sut->cache );
+		$modified_data                          = array(
+			'id'   => 999,
+			'name' => 'Cached Product',
+		);
+		$this->sut->cache[ $cache_key ]['data'] = $modified_data;
+
+		// Second request with SAME parameters but DIFFERENT order: ?baz=3&foo=1&bar=2.
+
+		$response2 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'baz' => '3',
+				'foo' => '1',
+				'bar' => '2',
+			)
+		);
+
+		// Verify response is cache HIT (same cache key was used).
+
+		$this->assertCacheHitHeader( $response2 );
+		$this->assertEquals( 200, $response2->get_status() );
+		$this->assertEquals( $modified_data, $response2->get_data() );
+
+		// Verify still only one cache entry exists (same cache key was used).
+
+		$this->assertCount( 1, $this->sut->cache );
+
+		// Verify the cache key is the same.
+
+		$cache_key_after = array_key_first( $this->sut->cache );
+		$this->assertEquals( $cache_key, $cache_key_after, 'Cache key should be the same for query strings with same parameters in different order' );
+
+		// Third request with DIFFERENT parameter value should create new cache entry: ?foo=1&bar=2&baz=DIFFERENT.
+
+		$response3 = $this->query_endpoint(
+			'single_entity',
+			array(
+				'foo' => '1',
+				'bar' => '2',
+				'baz' => 'DIFFERENT',
+			)
+		);
+
+		// Verify response is cache MISS (different parameters = different cache key).
+
+		$this->assertCacheMissHeader( $response3 );
+
+		// Verify we now have two cache entries (different cache keys).
+
+		$this->assertCount( 2, $this->sut->cache );
+	}
+
+	// TESTS END HERE. Below there's auxiliary methods only.
+
+	/**
+	 * Reconfigure custom_endpoint_config endpoint and re-register routes.
+	 *
+	 * @param array $config Configuration array for custom_endpoint_config endpoint.
+	 */
+	private function reconfigure_custom_endpoint_config_endpoint( array $config ) {
+		$this->sut->custom_endpoint_config_cache_config = $config;
+
+		// Recreate REST server to clear routes.
+
+		global $wp_rest_server;
+		$wp_rest_server = new WP_REST_Server();
+		$this->server   = $wp_rest_server;
+
+		// Trigger rest_api_init to register core routes.
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'rest_api_init' );
+
+		// Reinitialize cache and register routes with new configuration.
+
+		$this->sut->reinitialize_cache();
+		$this->sut->register_routes();
+	}
+
+	/**
+	 * Query an endpoint and return the response.
+	 *
+	 * @param string     $endpoint_name Endpoint name (e.g., 'single_entity', 'multiple_entities').
+	 * @param array|null $query_params  Optional query parameters.
+	 * @return WP_REST_Response The response from the endpoint.
+	 */
+	private function query_endpoint( $endpoint_name, $query_params = null ) {
+		$request = new WP_REST_Request( 'GET', "/wc/v3/rest_api_cache_test/{$endpoint_name}" );
+		if ( ! is_null( $query_params ) ) {
+			$request->set_query_params( $query_params );
+		}
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Get current cache information (key, entry, created_at timestamp).
+	 *
+	 * @return array|null Array with 'key', 'entry', and 'created_at', or null if cache is empty.
+	 */
+	private function get_cache_info() {
+		if ( empty( $this->sut->cache ) ) {
+			return null;
+		}
+
+		$cache_key   = array_key_first( $this->sut->cache );
+		$cache_entry = $this->sut->cache[ $cache_key ];
+		$created_at  = $cache_entry['created_at'];
+
+		return array(
+			'key'        => $cache_key,
+			'entry'      => $cache_entry,
+			'created_at' => $created_at,
+		);
+	}
+
+	/**
+	 * Assert that two cache info sets are equal (same key and created_at timestamp).
+	 *
+	 * @param array  $expected Expected cache info.
+	 * @param array  $actual   Actual cache info.
+	 * @param string $message  Optional message for assertion failure.
+	 */
+	private function assertCacheInfoEqual( array $expected, array $actual, string $message = '' ) {
+		$this->assertEquals( $expected['key'], $actual['key'], $message ? "{$message}: Cache key should be the same" : 'Cache key should be the same' );
+		$this->assertEquals( $expected['created_at'], $actual['created_at'], $message ? "{$message}: Cache entry should not have been recreated" : 'Cache entry should not have been recreated' );
+	}
+
+	/**
+	 * Assert that two cache info sets are different (same key but different created_at timestamp).
+	 *
+	 * @param array  $expected       Expected cache info.
+	 * @param array  $actual         Actual cache info.
+	 * @param int    $expected_time  Expected new created_at timestamp.
+	 * @param string $message        Optional message for assertion failure.
+	 */
+	private function assertCacheInfoDifferent( array $expected, array $actual, int $expected_time, string $message = '' ) {
+		$this->assertEquals( $expected['key'], $actual['key'], $message ? "{$message}: Cache key should be the same" : 'Cache key should be the same' );
+		$this->assertNotEquals( $expected['created_at'], $actual['created_at'], $message ? "{$message}: Cache entry should have new created_at timestamp" : 'Cache entry should have new created_at timestamp' );
+		$this->assertEquals( $expected_time, $actual['created_at'], $message ? "{$message}: New cache entry should use current time" : 'New cache entry should use current time' );
+	}
+
+	/**
+	 * Assert that response has X-WC-Cache: HIT header.
+	 *
+	 * @param WP_REST_Response $response The response to check.
+	 */
+	private function assertCacheHitHeader( $response ) {
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertEquals( 'HIT', $response->get_headers()['X-WC-Cache'] );
+	}
+
+	/**
+	 * Assert that response has X-WC-Cache: MISS header.
+	 *
+	 * @param WP_REST_Response $response The response to check.
+	 */
+	private function assertCacheMissHeader( $response ) {
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertEquals( 'MISS', $response->get_headers()['X-WC-Cache'] );
+	}
+
+	/**
+	 * Assert that response has X-WC-Cache: SKIP header.
+	 *
+	 * @param WP_REST_Response $response The response to check.
+	 */
+	private function assertCacheSkipHeader( $response ) {
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertEquals( 'SKIP', $response->get_headers()['X-WC-Cache'] );
+	}
+
+	/**
+	 * Assert that response has no X-WC-Cache header.
+	 *
+	 * @param WP_REST_Response $response The response to check.
+	 */
+	private function assertNoCacheHeader( $response ) {
+		$this->assertInstanceOf( WP_REST_Response::class, $response );
+		$this->assertArrayNotHasKey( 'X-WC-Cache', $response->get_headers() );
+	}
+
+	/**
+	 * Assert that caching was skipped (SKIP header, nothing cached, no entity versions).
+	 *
+	 * @param WP_REST_Response $response      The response to check.
+	 * @param array            $expected_data Expected response data.
+	 */
+	private function assertCachingSkipped( $response, $expected_data ) {
+
+		// Verify response has SKIP header.
+
+		$this->assertCacheSkipHeader( $response );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( $expected_data, $response->get_data() );
+
+		// Verify nothing was cached.
+
+		$this->assertCount( 0, $this->sut->cache );
+
+		// Verify no entity versions were created.
+
+		$this->assertCount( 0, $this->mock_entity_cache->cache );
+	}
+
+	/**
+	 * Create a mock EntityVersionKeysCache that stores cache entries in an array.
+	 *
+	 * @return object Mock EntityVersionKeysCache instance.
+	 */
+	private function create_mock_entity_version_keys_cache() {
+		return new class() extends EntityVersionKeysCache {
+			/**
+			 * Cache storage.
+			 *
+			 * @var array
+			 */
+			public $cache = array();
+
+			/**
+			 * Whether the cache should be used.
+			 *
+			 * @var bool
+			 */
+			public $should_use_cache = true;
+
+			/**
+			 * Check if cache should be used.
+			 *
+			 * @return bool
+			 */
+			public function should_use(): bool {
+				return $this->should_use_cache;
+			}
+
+			/**
+			 * Get entity version.
+			 *
+			 * @param string     $entity_type Entity type.
+			 * @param string|int $entity_id   Entity ID.
+			 * @return string Entity version.
+			 */
+			public function get_entity_version( string $entity_type, $entity_id ): string {
+				$key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+				if ( ! isset( $this->cache[ $key ] ) ) {
+					// Auto-create version if it doesn't exist (matching real EntityVersionKeysCache behavior).
+					return $this->regenerate_entity_version( $entity_type, $entity_id );
+				}
+				return $this->cache[ $key ]['value'] ?? '';
+			}
+
+			/**
+			 * Regenerate entity version (generate new version).
+			 *
+			 * @param string     $entity_type Entity type.
+			 * @param string|int $entity_id   Entity ID.
+			 * @return string New version.
+			 */
+			public function regenerate_entity_version( string $entity_type, $entity_id ): string {
+				$key                 = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+				$version             = wp_generate_uuid4();
+				$this->cache[ $key ] = array(
+					'value' => $version,
+					'ttl'   => HOUR_IN_SECONDS,
+				);
+				return $version;
+			}
+
+			/**
+			 * Delete entity version (delete from cache).
+			 *
+			 * @param string     $entity_type Entity type.
+			 * @param string|int $entity_id   Entity ID.
+			 * @return bool True on success.
+			 */
+			public function delete_entity_version( string $entity_type, $entity_id ): bool {
+				$key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+				unset( $this->cache[ $key ] );
+				return true;
+			}
+
+			/**
+			 * Override store_entity_version to use local cache array.
+			 *
+			 * @param string     $entity_type Entity type.
+			 * @param string|int $entity_id   Entity ID.
+			 * @param string     $version     The version key to store.
+			 * @return bool True on success.
+			 */
+			protected function store_entity_version( string $entity_type, $entity_id, string $version ): bool {
+				$key                 = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+				$this->cache[ $key ] = array(
+					'value' => $version,
+					'ttl'   => DAY_IN_SECONDS,
+				);
+				return true;
+			}
+
+			/**
+			 * Override get_cached to use local cache array.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @return mixed The cached value or null if not found.
+			 */
+			protected function get_cached( string $cache_key ) {
+				return $this->cache[ $cache_key ]['value'] ?? null;
+			}
+
+			/**
+			 * Override set_cached to use local cache array.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @param mixed  $value     The value to cache.
+			 * @param int    $ttl       Time to live in seconds.
+			 * @return bool True on success.
+			 */
+			protected function set_cached( string $cache_key, $value, int $ttl ): bool {
+				$this->cache[ $cache_key ] = array(
+					'value' => $value,
+					'ttl'   => $ttl,
+				);
+				return true;
+			}
+
+			/**
+			 * Override delete_cached to use local cache array.
+			 *
+			 * @param string $cache_key The cache key.
+			 * @return bool True on success.
+			 */
+			protected function delete_cached( string $cache_key ): bool {
+				unset( $this->cache[ $cache_key ] );
+				return true;
+			}
+		};
+	}
+
+	/**
+	 * Create a test controller.
+	 *
+	 * @return object Test controller instance.
+	 */
+	private function create_test_controller() {
+		return new class() extends WP_REST_Controller {
+			use RestApiCache {
+				extract_entity_ids as parent_extract_entity_ids;
+			}
+
+			/**
+			 * Response data for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $responses = array(
+				'single_entity'          => array(
+					'id'   => 1,
+					'name' => 'Product 1',
+				),
+				'multiple_entities'      => array(
+					array(
+						'id'   => 2,
+						'name' => 'Product 2',
+					),
+					array(
+						'id'   => 3,
+						'name' => 'Product 3',
+					),
+					array( 'name' => 'Product without ID' ),
+				),
+				'entity_without_id'      => array( 'name' => 'Product without ID' ),
+				'not_with_cache'         => array(
+					'id'   => 4,
+					'name' => 'Product 4',
+				),
+				'false_must_cache'       => array(
+					'id'   => 5,
+					'name' => 'Product 5',
+				),
+				'custom_endpoint_config' => array(
+					'id'   => 6,
+					'name' => 'Product 6',
+				),
+			);
+
+			/**
+			 * Stored requests for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $requests = array();
+
+			/**
+			 * Status codes for each endpoint (defaults to 200).
+			 *
+			 * @var array
+			 */
+			public $status_codes = array();
+
+			/**
+			 * Local cache storage for testing.
+			 *
+			 * @var array
+			 */
+			public $cache = array();
+
+			/**
+			 * Return value for must_cache method.
+			 *
+			 * @var bool
+			 */
+			public $must_cache_return_value = true;
+
+			/**
+			 * Default entity type to return from get_default_entity_type.
+			 *
+			 * @var string|null
+			 */
+			public $default_entity_type = 'product';
+
+			/**
+			 * Custom cache TTL to return from get_cache_ttl.
+			 *
+			 * @var int|null
+			 */
+			public $custom_cache_ttl = null;
+
+			/**
+			 * Configuration for custom_endpoint_config endpoint with_cache call.
+			 *
+			 * @var array
+			 */
+			public $custom_endpoint_config_cache_config = array();
+
+			/**
+			 * Whether to use custom entity ID extraction (multiply IDs by 10).
+			 *
+			 * @var bool
+			 */
+			public $use_custom_entity_id_extraction = false;
+
+			/**
+			 * Return value for response_cache_vary_by_user method.
+			 *
+			 * @var bool
+			 */
+			public $vary_by_user_return_value = false;
+
+			/**
+			 * Custom headers to exclude from caching.
+			 *
+			 * @var array
+			 */
+			public $custom_exclude_headers = array();
+
+			/**
+			 * Track which methods received endpoint_id and what value.
+			 *
+			 * @var array
+			 */
+			public $received_endpoint_ids = array();
+
+			/**
+			 * Custom response headers to add to responses for each endpoint.
+			 *
+			 * @var array
+			 */
+			public $response_headers = array();
+
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->namespace = 'wc/v3';
+				$this->rest_base = 'rest_api_cache_test';
+				$this->initialize_rest_api_cache();
+			}
+
+			/**
+			 * Register routes.
+			 */
+			public function register_routes() {
+				// single_entity - cacheable, returns single entity.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/single_entity',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								return $this->handle_request( 'single_entity', $request );
+							},
+							array(
+								'endpoint_id' => 'single_entity',
+							)
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// multiple_entities - cacheable, returns collection.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/multiple_entities',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								return $this->handle_request( 'multiple_entities', $request );
+							},
+							array(
+								'endpoint_id' => 'multiple_entities',
+							)
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// entity_without_id - cacheable, returns entity without ID.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/entity_without_id',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								return $this->handle_request( 'entity_without_id', $request );
+							},
+							array(
+								'endpoint_id' => 'entity_without_id',
+							)
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// not_with_cache - not cacheable.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/not_with_cache',
+					array(
+						'methods'             => 'GET',
+						'callback'            => function ( $request ) {
+							return $this->handle_request( 'not_with_cache', $request );
+						},
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// false_must_cache - cacheable but with must_cache callback that returns false.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/false_must_cache',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								return $this->handle_request( 'false_must_cache', $request );
+							},
+							array(
+								'endpoint_id' => 'false_must_cache',
+								'must_cache'  => '__return_false',
+							)
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+
+				// custom_endpoint_config - cacheable with configurable per-endpoint settings.
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/custom_endpoint_config',
+					array(
+						'methods'             => 'GET',
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								return $this->handle_request( 'custom_endpoint_config', $request );
+							},
+							array_merge(
+								array( 'endpoint_id' => 'custom_endpoint_config' ),
+								$this->custom_endpoint_config_cache_config
+							)
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+
+			/**
+			 * Get default entity type.
+			 *
+			 * @return string|null
+			 */
+			protected function get_default_entity_type(): ?string {
+				return $this->default_entity_type;
+			}
+
+			/**
+			 * Override must_cache to use configurable return value.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return bool
+			 */
+			protected function must_cache( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['must_cache'] = $endpoint_id;
+				return $this->must_cache_return_value;
+			}
+
+			/**
+			 * Override get_hooks_relevant_to_caching to return test hooks.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return array Array of filter names.
+			 */
+			protected function get_hooks_relevant_to_caching( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_hooks_relevant_to_caching'] = $endpoint_id;
+				return array( 'test_controller_hook_for_caching' );
+			}
+
+			/**
+			 * Override get_cache_ttl to return custom TTL.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return int Cache TTL in seconds.
+			 */
+			protected function get_cache_ttl( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_cache_ttl'] = $endpoint_id;
+				return $this->custom_cache_ttl ?? HOUR_IN_SECONDS;
+			}
+
+			/**
+			 * Override response_cache_vary_by_user to use configurable return value.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return bool
+			 */
+			protected function response_cache_vary_by_user( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['response_cache_vary_by_user'] = $endpoint_id;
+				return $this->vary_by_user_return_value;
+			}
+
+			/**
+			 * Override extract_entity_ids to use custom extraction logic.
+			 *
+			 * @param array           $data        Response data.
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return array Array of entity IDs.
+			 */
+			protected function extract_entity_ids( $data, $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['extract_entity_ids'] = $endpoint_id;
+				$ids = $this->parent_extract_entity_ids( $data, $request, $endpoint_id );
+
+				if ( $this->use_custom_entity_id_extraction ) {
+					$ids = array_map( fn( $id ) => $id * 10, $ids );
+				}
+
+				return $ids;
+			}
+
+			/**
+			 * Override get_response_headers_to_exclude_from_caching.
+			 *
+			 * @param WP_REST_Request $request     Request object.
+			 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+			 * @return array Array of header names to exclude.
+			 */
+			protected function get_response_headers_to_exclude_from_caching( $request, $endpoint_id = null ) {
+				$this->received_endpoint_ids['get_response_headers_to_exclude_from_caching'] = $endpoint_id;
+				return $this->custom_exclude_headers;
+			}
+
+			/**
+			 * Generic request handler.
+			 *
+			 * @param string          $endpoint Endpoint name.
+			 * @param WP_REST_Request $request  Request object.
+			 * @return WP_REST_Response|WP_Error
+			 */
+			private function handle_request( string $endpoint, WP_REST_Request $request ) {
+				$this->requests[ $endpoint ] = $request;
+
+				if ( is_null( $this->responses[ $endpoint ] ) ) {
+					// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+					return new WP_Error( 'server_error', 'Internal server error', array( 'status' => 500 ) );
+				}
+
+				$status_code = $this->status_codes[ $endpoint ] ?? 200;
+				$response    = new WP_REST_Response( $this->responses[ $endpoint ], $status_code );
+
+				// Add custom headers if configured for this endpoint.
+				if ( ! empty( $this->response_headers[ $endpoint ] ) ) {
+					foreach ( $this->response_headers[ $endpoint ] as $name => $value ) {
+						$response->header( $name, $value );
+					}
+				}
+
+				return $response;
+			}
+
+			/**
+			 * Public wrapper to reinitialize the REST API cache.
+			 *
+			 * This allows tests to reinitialize the cache after changing mock state.
+			 */
+			public function reinitialize_cache() {
+				$this->initialize_rest_api_cache();
+			}
+		};
+	}
+}
