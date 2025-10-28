@@ -79,40 +79,17 @@ final class AsyncGenerator {
 	 * Register hooks for the async generator.
 	 */
 	public function register_hooks(): void {
-		add_action( self::FEED_GENERATION_ACTION, array( self::class, 'handle_feed_generation_action' ) );
-		add_action( self::FEED_DELETION_ACTION, array( self::class, 'handle_feed_deletion_action' ), 10, 1 );
-	}
-
-	/**
-	 * Static wrapper for feed generation action.
-	 */
-	public static function handle_feed_generation_action(): void {
-		$instance = wc_get_container()->get( self::class );
-		$instance->feed_generation_action();
-	}
-
-	/**
-	 * Static wrapper for feed deletion action.
-	 *
-	 * @param array $args Arguments with 'path' key.
-	 */
-	public static function handle_feed_deletion_action( array $args ): void {
-		$instance = wc_get_container()->get( self::class );
-		$instance->feed_deletion_action( $args );
+		add_action( self::FEED_GENERATION_ACTION, [ $this, 'feed_generation_action' ] );
+		add_action( self::FEED_DELETION_ACTION, [ $this, 'feed_deletion_action' ] );
 	}
 
 	/**
 	 * Returns the current feed generation status.
 	 * Initiates one if not already running.
 	 *
-	 * @param bool $force Whether to force regeneration.
 	 * @return array The feed generation status.
 	 */
-	public function get_status( bool $force = false ): array {
-		if ( $force ) {
-			return $this->force_regeneration();
-		}
-
+	public function get_status(): array {
 		$status = get_option( self::OPTION_KEY );
 
 		if ( false === $status ) {
