@@ -75,9 +75,8 @@ class OrdersScheduler extends ImportScheduler {
 		add_action( 'woocommerce_refund_created', array( __CLASS__, 'possibly_schedule_import' ) );
 		add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 
-		// Schedule recurring batch processor
+		// Schedule recurring batch processor.
 		add_action( 'init', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
-
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -284,7 +283,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
-		if ( !self::is_immediate_import_enabled() ) {
+		if ( ! self::is_immediate_import_enabled() ) {
 			return $order_id;
 		}
 
