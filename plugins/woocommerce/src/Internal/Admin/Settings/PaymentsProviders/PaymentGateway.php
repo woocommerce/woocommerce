@@ -439,12 +439,12 @@ class PaymentGateway {
 			if ( method_exists( $payment_gateway, 'is_onboarding_supported' ) &&
 				is_callable( array( $payment_gateway, 'is_onboarding_supported' ) ) ) {
 
-				return wc_string_to_bool(
-					call_user_func_array(
-						array( $payment_gateway, 'is_onboarding_supported' ),
-						array( 'country_code' => $country_code ),
-					)
-				);
+				// Call with positional argument; normalize to bool|null.
+				$result = call_user_func( array( $payment_gateway, 'is_onboarding_supported' ), $country_code );
+				if ( is_bool( $result ) ) {
+					return $result;
+				}
+				return filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 			}
 		} catch ( Throwable $e ) {
 			// Do nothing but log so we can investigate.
