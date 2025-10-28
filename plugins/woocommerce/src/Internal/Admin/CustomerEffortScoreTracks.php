@@ -152,7 +152,7 @@ class CustomerEffortScoreTracks {
 		return sprintf(
 			"(function( $ ) {
 				'use strict';
-				// Hook on submit button and sets a 500ms interval function
+				// Hook on submit button and sets a 1000ms interval function
 				// to determine successful add tag or otherwise.
 				$('#addtag #submit').on( 'click', function() {
 					const initialCount = $('.tags tbody > tr').length;
