@@ -25,4 +25,9 @@ class SessionKey {
 	 * Whether payment is in progress.
 	 */
 	const AGENTIC_CHECKOUT_PAYMENT_IN_PROGRESS = 'agentic_checkout_payment_in_progress';
+
+	/**
+	 * Provider ID that authenticated the request.
+	 */
+	const AGENTIC_CHECKOUT_PROVIDER_ID = 'agentic_checkout_provider_id';
 }

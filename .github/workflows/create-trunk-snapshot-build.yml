@@ -50,6 +50,13 @@ jobs:
               working-directory: plugins/woocommerce
               run: bash bin/build-zip.sh
 
+            - name: 'Set build variables'
+              id: build_vars
+              shell: bash
+              run: |
+                  echo "BUILD_DATE=$(date -u +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+                  echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
             - name: 'Upload trunk snapshot build'
               uses: 'WebFreak001/deploy-nightly@46ecbabd7fad70d3e7d2c97fe8cd54e7a52e215b' #v3.2.0
               with:
@@ -57,6 +64,6 @@ jobs:
                   upload_url: https://uploads.github.com/repos/${{ github.repository }}/releases/${{ env.RELEASE_ID }}/assets{?name,label}
                   release_id: ${{ env.RELEASE_ID }}
                   asset_path: plugins/woocommerce/woocommerce.zip
-                  asset_name: woocommerce-$(date +'%Y-%m-%d')-$(git rev-parse --short HEAD)-trunk-snapshot.zip
+                  asset_name: woocommerce-${{ steps.build_vars.outputs.BUILD_DATE }}-${{ steps.build_vars.outputs.SHORT_SHA }}-trunk-snapshot.zip
                   asset_content_type: application/zip
                   max_releases: 1

@@ -40,7 +40,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 		<>
 			{ isBlockTheme && (
 				<InspectorControls>
-					<UpgradeNotice blockClientId={ props?.clientId } />
+					<UpgradeNotice blockClientId={ props.clientId } />
 				</InspectorControls>
 			) }
 			<AddToCartFormSettings

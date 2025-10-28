@@ -22,6 +22,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 	/**
 	 * WC_Admin_Assets Class.
+	 *
+	 * These scripts are enqueued in the admin of the store.  The registered script handles in this class
+	 * can be used to enqueue the scripts in the admin by third party plugins and the handles will follow
+	 * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+	 * and can be removed in future versions of WooCommerce.
 	 */
 	class WC_Admin_Assets {
 
@@ -356,10 +361,10 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				if ( isset( $script['legacy_handle'] ) ) {
 					wp_register_script(
 						$script['legacy_handle'],
-						$script['path'],
-						$script['dependencies'] ?? array(),
+						false,
+						array( $script['handle'] ),
 						$script['version'] ?? null,
-						$script['args'] ?? array( 'in_footer' => false )
+						true
 					);
 				}
 			}
