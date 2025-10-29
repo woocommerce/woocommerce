@@ -913,14 +913,16 @@ store(
 	{ lock: true }
 );
 
-// Store React root and render function for discounts slot at module level
+// Store React roots and render functions for slots at module level
 let discountsSlotReactRoot: any = null;
-let discountsSlotRenderFn: ( () => void ) | null = null;
+let shippingPackagesSlotReactRoot: any = null;
+let localPickupPackagesSlotReactRoot: any = null;
 
-store(
+const { state: footerState } = store(
 	'woocommerce/mini-cart-footer-block',
 	{
 		state: {
+			activeTab: 'shipping',
 			get itemsInCartText() {
 				const cartItemsCount = miniCartState.totalItemsInCart;
 
@@ -934,6 +936,40 @@ store(
 			},
 			get totalDiscountLabel(): string {
 				return 'Discount: ';
+			},
+			get selectedShippingMethod(): string {
+				return woocommerceState.cart.extensions.subscriptions
+					.map( ( subscription: any ) => {
+						const selectedRate =
+							subscription.shipping_rates[ 0 ]?.shipping_rates?.find(
+								( rate: any ) => rate.selected
+							);
+						return `${ subscription.shipping_rates[ 0 ].name }: ${
+							selectedRate?.name || 'None'
+						}`;
+					} )
+					.join( ', ' );
+			},
+			get isShippingTabActive(): boolean {
+				return footerState.activeTab === 'shipping';
+			},
+			get isLocalPickupTabActive(): boolean {
+				return footerState.activeTab === 'local-pickup';
+			},
+			get isShippingPanelHidden(): boolean {
+				return footerState.activeTab !== 'shipping';
+			},
+			get isLocalPickupPanelHidden(): boolean {
+				return footerState.activeTab !== 'local-pickup';
+			},
+		},
+		actions: {
+			switchTab( event: MouseEvent ) {
+				const button = event.currentTarget as HTMLButtonElement;
+				const tabName = button.getAttribute( 'data-tab' );
+				if ( tabName ) {
+					footerState.activeTab = tabName;
+				}
 			},
 		},
 		callbacks: {
@@ -1016,6 +1052,208 @@ store(
 				);
 
 				discountsSlotReactRoot.render( providerElement );
+			},
+			renderShippingPackagesSlot() {
+				const container = document.querySelector(
+					'.wc-block-mini-cart__footer-shipping-packages-slot'
+				);
+
+				if (
+					! container ||
+					! ( window as any ).wp?.element?.createElement ||
+					! ( window as any ).wp?.element?.createRoot ||
+					! ( window as any ).wp?.plugins?.PluginArea ||
+					! ( window as any ).wc?.blocksCheckout
+						?.ExperimentalOrderShippingPackages ||
+					! ( window as any ).wc?.blocksCheckout
+						?.MiniCartSlotWrapper ||
+					! ( window as any ).wc?.blocksCheckout?.SlotFillProvider ||
+					! ( window as any ).wc?.blocksCheckout
+						?.ShippingRatesControlPackage ||
+					! ( window as any ).wc?.blocksCheckout?.LocalPickupSelect ||
+					! ( window as any ).wc?.blocksCheckout
+						?.renderShippingRatesControlOption
+				) {
+					console.warn(
+						'Mini Cart: Missing dependencies for rendering shipping packages slot',
+						{
+							hasContainer: !! container,
+							hasCreateElement: !! ( window as any ).wp?.element
+								?.createElement,
+							hasCreateRoot: !! ( window as any ).wp?.element
+								?.createRoot,
+							hasPluginArea: !! ( window as any ).wp?.plugins
+								?.PluginArea,
+							hasShippingPackages: !! ( window as any ).wc
+								?.blocksCheckout
+								?.ExperimentalOrderShippingPackages,
+							hasMiniCartSlotWrapper: !! ( window as any ).wc
+								?.blocksCheckout?.MiniCartSlotWrapper,
+							hasSlotFillProvider: !! ( window as any ).wc
+								?.blocksCheckout?.SlotFillProvider,
+							hasShippingRatesControlPackage: !! ( window as any )
+								.wc?.blocksCheckout
+								?.ShippingRatesControlPackage,
+							hasLocalPickupSelect: !! ( window as any ).wc
+								?.blocksCheckout?.LocalPickupSelect,
+							hasRenderShippingRatesControlOption: !! (
+								window as any
+							 ).wc?.blocksCheckout
+								?.renderShippingRatesControlOption,
+						}
+					);
+					return;
+				}
+
+				const { createElement, Fragment } = ( window as any ).wp
+					.element;
+				const { PluginArea } = ( window as any ).wp.plugins;
+				const {
+					ExperimentalOrderShippingPackages,
+					MiniCartSlotWrapper,
+					SlotFillProvider,
+					ShippingRatesControlPackage,
+					LocalPickupSelect,
+					renderShippingRatesControlOption,
+					NoticeBanner,
+				} = ( window as any ).wc.blocksCheckout;
+
+				// Create React root once and render the slot component
+				if ( ! shippingPackagesSlotReactRoot ) {
+					shippingPackagesSlotReactRoot = (
+						window as any
+					 ).wp.element.createRoot( container );
+				}
+
+				// Render using MiniCartSlotWrapper with slot-specific props
+				const wrapperElement = createElement( MiniCartSlotWrapper, {
+					slotComponent: ExperimentalOrderShippingPackages.Slot,
+					slotProps: {
+						components: {
+							ShippingRatesControlPackage,
+							LocalPickupSelect,
+						},
+						// stateless flag to collapse the shipping packages
+						collapsible: true,
+						// We're just using a generic banner, instead of the 2 ones
+						// that are used in the checkout block
+						// https://github.com/woocommerce/woocommerce/blob/9209a054e0de33f180070badaffd60889ef4b712/plugins/woocommerce/client/blocks/assets/js/blocks/checkout/inner-blocks/checkout-shipping-methods-block/block.tsx#L142
+						noResultsMessage: createElement( NoticeBanner, {
+							status: 'warning',
+							children:
+								'No shipping options are available for this address. Please verify the address is correct or try a different address.',
+						} ),
+						renderOption: renderShippingRatesControlOption,
+					},
+				} );
+
+				const pluginAreaElement = createElement( PluginArea, {
+					scope: 'woocommerce-checkout',
+				} );
+
+				const providerElement = createElement(
+					SlotFillProvider,
+					null,
+					createElement(
+						Fragment,
+						null,
+						wrapperElement,
+						pluginAreaElement
+					)
+				);
+
+				shippingPackagesSlotReactRoot.render( providerElement );
+			},
+			renderLocalPickupPackagesSlot() {
+				const container = document.querySelector(
+					'.wc-block-mini-cart__footer-local-pickup-packages-slot'
+				);
+
+				if (
+					! container ||
+					! ( window as any ).wp?.element?.createElement ||
+					! ( window as any ).wp?.element?.createRoot ||
+					! ( window as any ).wp?.plugins?.PluginArea ||
+					! ( window as any ).wc?.blocksCheckout
+						?.ExperimentalOrderLocalPickupPackages ||
+					! ( window as any ).wc?.blocksCheckout
+						?.MiniCartSlotWrapper ||
+					! ( window as any ).wc?.blocksCheckout?.SlotFillProvider ||
+					! ( window as any ).wc?.blocksCheckout?.renderPickupLocation
+				) {
+					console.warn(
+						'Mini Cart: Missing dependencies for rendering local pickup packages slot',
+						{
+							hasContainer: !! container,
+							hasCreateElement: !! ( window as any ).wp?.element
+								?.createElement,
+							hasCreateRoot: !! ( window as any ).wp?.element
+								?.createRoot,
+							hasPluginArea: !! ( window as any ).wp?.plugins
+								?.PluginArea,
+							hasLocalPickupPackages: !! ( window as any ).wc
+								?.blocksCheckout
+								?.ExperimentalOrderLocalPickupPackages,
+							hasMiniCartSlotWrapper: !! ( window as any ).wc
+								?.blocksCheckout?.MiniCartSlotWrapper,
+							hasSlotFillProvider: !! ( window as any ).wc
+								?.blocksCheckout?.SlotFillProvider,
+							renderPickupLocation: !! ( window as any ).wc
+								?.blocksCheckout?.renderPickupLocation,
+						}
+					);
+					return;
+				}
+
+				const { createElement, Fragment } = ( window as any ).wp
+					.element;
+				const { PluginArea } = ( window as any ).wp.plugins;
+				const {
+					ExperimentalOrderLocalPickupPackages,
+					MiniCartSlotWrapper,
+					SlotFillProvider,
+					LocalPickupSelect,
+					ShippingRatesControlPackage,
+					renderPickupLocation,
+				} = ( window as any ).wc.blocksCheckout;
+
+				// Create React root once and render the slot component
+				if ( ! localPickupPackagesSlotReactRoot ) {
+					localPickupPackagesSlotReactRoot = (
+						window as any
+					 ).wp.element.createRoot( container );
+				}
+
+				// Render using MiniCartSlotWrapper which handles cart data automatically
+				const wrapperElement = createElement( MiniCartSlotWrapper, {
+					slotComponent: ExperimentalOrderLocalPickupPackages.Slot,
+					slotProps: {
+						components: {
+							LocalPickupSelect,
+							ShippingRatesControlPackage,
+						},
+						renderPickupLocation: renderPickupLocation,
+					},
+				} );
+
+				// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
+				// This allows fills registered via registerPlugin to appear
+				const pluginAreaElement = createElement( PluginArea, {
+					scope: 'woocommerce-checkout',
+				} );
+
+				const providerElement = createElement(
+					SlotFillProvider,
+					null,
+					createElement(
+						Fragment,
+						null,
+						wrapperElement,
+						pluginAreaElement
+					)
+				);
+
+				localPickupPackagesSlotReactRoot.render( providerElement );
 			},
 		},
 	},

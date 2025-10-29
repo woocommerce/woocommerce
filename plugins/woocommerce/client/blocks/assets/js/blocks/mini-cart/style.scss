@@ -231,3 +231,11 @@ h2.wc-block-mini-cart__title {
 		}
 	}
 }
+
+// Skipe styles for the shipping packages and local pickup packages slots
+
+.wc-block-mini-cart__footer-debug {
+	font-size: 0.875em;
+	background-color: palegoldenrod;
+	padding: 5px;
+}

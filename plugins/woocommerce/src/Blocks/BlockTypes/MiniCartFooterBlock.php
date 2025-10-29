@@ -67,9 +67,45 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 				</div>
 			</div>
 			<div class="wc-block-mini-cart__footer-discounts-meta-slot" data-wp-init="callbacks.renderDiscountsMetaSlot"></div>
-			<div>
+			<div class="wc-block-mini-cart__footer-tabs">
+				<div class="wc-block-mini-cart__footer-tabs-header">
+			<button
+					class="wc-block-mini-cart__footer-tab-button"
+					data-tab="shipping"
+					data-wp-on--click="actions.switchTab"
+					data-wp-class--wc-block-mini-cart__footer-tab-button--active="state.isShippingTabActive"
+					data-wp-bind--disabled="state.isShippingTabActive">
+						<?php echo esc_html__( 'Shipping', 'woocommerce' ); ?>
+					</button>
+			<button
+					class="wc-block-mini-cart__footer-tab-button"
+					data-tab="local-pickup"
+					data-wp-on--click="actions.switchTab"
+					data-wp-class--wc-block-mini-cart__footer-tab-button--active="state.isLocalPickupTabActive"
+					data-wp-bind--disabled="state.isLocalPickupTabActive">
+						<?php echo esc_html__( 'Local pickup', 'woocommerce' ); ?>
+					</button>
+				</div>
+				<div class="wc-block-mini-cart__footer-tabs-content">
+					<div
+					class="wc-block-mini-cart__footer-tab-panel"
+					data-tab-panel="shipping"
+					data-wp-bind--hidden="state.isShippingPanelHidden">
+						<div class="wc-block-mini-cart__footer-shipping-packages-slot" data-wp-init="callbacks.renderShippingPackagesSlot"></div>
+					</div>
+					<div
+					class="wc-block-mini-cart__footer-tab-panel"
+					data-tab-panel="local-pickup"
+					data-wp-bind--hidden="state.isLocalPickupPanelHidden">
+						<div class="wc-block-mini-cart__footer-local-pickup-packages-slot" data-wp-init="callbacks.renderLocalPickupPackagesSlot"></div>
+					</div>
+				</div>
+			</div>
+			<div class="wc-block-mini-cart__footer-debug">
 				<span class="wc-block-components-totals-item__discount-label" data-wp-text="state.totalDiscountLabel"></span>
 				<span class="wc-block-components-totals-item__discount" data-wp-text="state.totalDiscount"></span>
+				<br />
+				<span class="wc-block-components-totals-item__shipping-method" data-wp-text="state.selectedShippingMethod"></span>
 				<br />
 			</div>
 
