@@ -591,10 +591,10 @@ class WC_Gateway_Paypal_Request {
 	private function get_paypal_order_items_subtotal( $order ) {
 		$total = 0;
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
-			$total += $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity();
+			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity() );
 		}
 
-		return $total;
+		return wc_remove_number_precision( $total );
 	}
 
 	/**
