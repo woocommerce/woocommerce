@@ -81,7 +81,13 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	public function request_catalog( $request ) {
 		$fields         = $this->sanitize_fields_arg( $request->get_param( 'fields' ) ?? array() );
 		$force_generate = $request->get_param( 'force_generate' ) ?? false;
-		$file_info      = $this->get_catalog_file_info( $fields );
+
+		// Use AsyncGenerator if the Product Feed plugin is available.
+		if ( $this->is_async_generator_available() ) {
+			return $this->request_catalog_async( $fields, $force_generate );
+		}
+
+		$file_info = $this->get_catalog_file_info( $fields );
 
 		if ( is_wp_error( $file_info ) ) {
 			return $file_info;
@@ -269,5 +275,73 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 		$fields = array_values( array_unique( array_map( 'strval', $fields ) ) );
 		sort( $fields, SORT_STRING );
 		return $fields;
+	}
+
+	/**
+	 * Check if AsyncGenerator from Product Feed plugin is available.
+	 *
+	 * @return bool True if AsyncGenerator is available, false otherwise.
+	 */
+	private function is_async_generator_available() {
+		return defined( 'WPFOAI_VERSION' ) && class_exists( '\Automattic\WooCommerce\ProductFeedForOpenAI\Integrations\POSCatalog\AsyncGenerator' );
+	}
+
+	/**
+	 * Request products catalog using AsyncGenerator (async processing).
+	 *
+	 * @param array $fields         Product/variation fields to include in the catalog.
+	 * @param bool  $force_generate Whether to force regenerate the catalog.
+	 * @return WP_Error|WP_REST_Response
+	 */
+	private function request_catalog_async( $fields, $force_generate ) {
+		try {
+			$plugin    = \Automattic\WooCommerce\ProductFeedForOpenAI\Core\Plugin::get_instance();
+			$generator = $plugin->get( \Automattic\WooCommerce\ProductFeedForOpenAI\Integrations\POSCatalog\AsyncGenerator::class );
+
+			$args = array( 'fields' => $fields );
+
+			$status = $force_generate
+				? $generator->force_regeneration( $args )
+				: $generator->get_status( $args );
+
+			// Map AsyncGenerator state to our API response format.
+			$response_status = 'pending';
+			switch ( $status['state'] ?? '' ) {
+				case 'scheduled':
+					$response_status = 'pending';
+					break;
+				case 'in_progress':
+					$response_status = 'processing';
+					break;
+				case 'completed':
+					$response_status = 'complete';
+					break;
+			}
+
+			$response_data = array(
+				'status'       => $response_status,
+				'download_url' => isset( $status['url'] ) ? $status['url'] : null,
+			);
+
+			// TODO: debug only, delete later
+			// Include progress information if available.
+			if ( isset( $status['progress'] ) ) {
+				$response_data['progress'] = $status['progress'];
+			}
+			if ( isset( $status['processed'] ) ) {
+				$response_data['processed'] = $status['processed'];
+			}
+			if ( isset( $status['total'] ) ) {
+				$response_data['total'] = $status['total'];
+			}
+
+			return rest_ensure_response( $response_data );
+		} catch ( \Exception $e ) {
+			return new WP_Error(
+				'async_generation_failed',
+				$e->getMessage(),
+				array( 'status' => 500 )
+			);
+		}
 	}
 }
