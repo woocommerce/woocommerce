@@ -194,6 +194,9 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 * @return array List of recommended payment methods for the given country.
 	 */
 	public function get_recommended_payment_methods( string $country_code = '' ) {
+		// Test stub does not vary by country.
+		unset( $country_code );
+
 		return $this->recommended_payment_methods;
 	}
 
@@ -259,6 +262,9 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 * @return array The provider links list.
 	 */
 	public function get_provider_links( string $country_code = '' ): array {
+		// Test stub does not vary by country.
+		unset( $country_code );
+
 		if ( isset( $this->provider_links ) ) {
 			return $this->provider_links;
 		}
