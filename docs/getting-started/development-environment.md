@@ -48,6 +48,8 @@ Below is a collection of tools to help you manage your environment that are not 
 
 Regardless of the tool you choose for managing your development environment, you should make sure it [meets the server recommendations](https://woocommerce.com/document/server-requirements/?utm_source=wooextdevguide) for WooCommerce as well as the [requirements for running WordPress](https://wordpress.org/about/requirements/).
 
+For development environments, we strongly recommend using PHP 8.3 or greater (not just the minimum 7.4+) to ensure you can test with the recommended versions and identify compatibility issues early.
+
 ## Add WooCommerce Core to your environment
 
 When developing for WooCommerce, it's helpful to install a development version of WooCommerce Core.
