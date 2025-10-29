@@ -1250,13 +1250,13 @@ class PaymentsProviders {
 				$gateway_details['image'] = $suggestion['image'];
 			}
 
-			if ( empty( $gateway_details['links'] ) ) {
+			if ( empty( $gateway_details['links'] ) && ! empty( $suggestion['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
 			}
-			if ( empty( $gateway_details['tags'] ) ) {
+			if ( empty( $gateway_details['tags'] ) && ! empty( $suggestion['tags'] ) ) {
 				$gateway_details['tags'] = $suggestion['tags'];
 			}
-			if ( empty( $gateway_details['plugin'] ) ) {
+			if ( empty( $gateway_details['plugin'] ) && ! empty( $suggestion['plugin'] ) ) {
 				$gateway_details['plugin'] = $suggestion['plugin'];
 			}
 			if ( empty( $gateway_details['_incentive'] ) && ! empty( $suggestion['_incentive'] ) ) {
