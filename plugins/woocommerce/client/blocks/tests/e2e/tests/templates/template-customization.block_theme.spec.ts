@@ -213,15 +213,9 @@ test.describe( 'Template customization', () => {
 				postType: testData.templateType,
 			} );
 
-			if ( testData.templateType === 'wp_template' ) {
-				await editor.revertTemplate( {
-					templateName: testData.templateName,
-				} );
-			} else {
-				await editor.revertTemplatePart( {
-					templateName: testData.templateName,
-				} );
-			}
+			await editor.revertTemplatePart( {
+				templateName: testData.templateName,
+			} );
 
 			await testData.visitPage( {
 				admin,
