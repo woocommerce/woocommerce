@@ -665,6 +665,14 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
+		// Make sure the country code is in the correct format.
+		if ( strlen( $country ) >= 3 ) {
+			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
+				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
+			}
+			$country = substr( $country, 0, WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH );
+		}
+
 		// Postal code is typically required, but not always. The create-order request
 		// will fail if it is missing for a country that requires it.
 		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
@@ -683,7 +691,7 @@ class WC_Gateway_Paypal_Request {
 				'admin_area_1'   => $this->limit_length( $state, WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
 				'admin_area_2'   => $this->limit_length( $city, WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
 				'postal_code'    => $this->limit_length( $postcode, WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
-				'country_code'   => $country,
+				'country_code'   => strtoupper( $country ),
 			),
 		);
 	}
