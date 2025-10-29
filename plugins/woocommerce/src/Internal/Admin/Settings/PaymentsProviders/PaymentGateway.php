@@ -250,6 +250,8 @@ class PaymentGateway {
 	 * @return array The provider links list.
 	 */
 	public function get_provider_links( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
+		$country_code = strtoupper( sanitize_text_field( $country_code ) ); // Expect ISO 3166-1 alpha-2.
+
 		$provider_links = array();
 
 		try {
@@ -276,14 +278,15 @@ class PaymentGateway {
 						if ( ! is_array( $link ) ) {
 							continue;
 						}
-						if ( empty( $link['_type'] ) || ! in_array( $link['_type'], $accepted_types, true ) ) {
+						$type = isset( $link['_type'] ) ? sanitize_key( (string) $link['_type'] ) : '';
+						if ( empty( $type ) || ! in_array( $type, $accepted_types, true ) ) {
 							continue;
 						}
 						if ( empty( $link['url'] ) || ! is_string( $link['url'] ) || ! wc_is_valid_url( $link['url'] ) ) {
 							continue;
 						}
 						$validated_links[] = array(
-							'_type' => $link['_type'],
+							'_type' => $type,
 							'url'   => esc_url( $link['url'] ),
 						);
 					}
