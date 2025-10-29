@@ -159,5 +159,66 @@ export function getFileChanges(
 		break;
 	}
 
+	// Third iteration: assign files to projects based on CI config patterns.
+	// This allows projects to claim files that match their CI config patterns,
+	// even if those files are in nested package directories.
+	const allNodes = [];
+	const queue = [ projectGraph ];
+	const visited: { [ name: string ]: boolean } = {};
+	while ( queue.length > 0 ) {
+		const node = queue.shift();
+		if ( ! node || visited[ node.name ] ) {
+			continue;
+		}
+		allNodes.push( node );
+		visited[ node.name ] = true;
+		queue.push( ...node.dependencies );
+	}
+
+	for ( const node of allNodes ) {
+		if ( ! node.ciConfig || ! node.path ) {
+			continue;
+		}
+
+		// Collect all change patterns from all jobs in this project
+		const changePatterns: RegExp[] = [];
+		for ( const job of node.ciConfig.jobs ) {
+			if ( job.changes ) {
+				changePatterns.push( ...job.changes );
+			}
+		}
+
+		if ( changePatterns.length === 0 ) {
+			continue;
+		}
+
+		// Check all changed files to see if any match this project's patterns
+		for ( const filePath of changedFilePaths ) {
+			// Skip files that don't start with this project's path
+			if ( ! filePath.startsWith( node.path + '/' ) ) {
+				continue;
+			}
+
+			const relativePath = filePath.slice(
+				node.path.length + Number( node.path !== '' )
+			);
+
+			// Check if this file matches any of the project's CI config patterns
+			const matchesPattern = changePatterns.some( ( pattern ) =>
+				pattern.test( relativePath )
+			);
+
+			if ( matchesPattern ) {
+				// Add this file to the project's changes if not already present
+				if ( ! changes[ node.name ] ) {
+					changes[ node.name ] = [];
+				}
+				if ( ! changes[ node.name ].includes( relativePath ) ) {
+					changes[ node.name ].push( relativePath );
+				}
+			}
+		}
+	}
+
 	return changes;
 }
