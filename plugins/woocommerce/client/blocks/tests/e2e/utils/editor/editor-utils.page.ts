@@ -275,6 +275,15 @@ export class Editor extends CoreEditor {
 					isOnlyCurrentEntityDirty,
 				}
 			);
+			// Since WP 6.9 custom templates require activation.
+			if ( this.wpCoreVersion >= 6.9 ) {
+				const activationButton = this.page.getByRole( 'button', {
+					name: 'Activate',
+				} );
+				if ( await activationButton.isVisible() ) {
+					await activationButton.click();
+				}
+			}
 		} catch ( error ) {
 			if (
 				! ( error instanceof Error ) ||
