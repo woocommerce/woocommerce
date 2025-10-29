@@ -7,23 +7,23 @@ namespace Automattic\WooCommerce\Internal\Caches;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Entity version keys cache class.
+ * Version strings generator/cache class.
  *
- * Provides a generic mechanism for caching version keys of mutable entities.
- * An "entity" is any item (object, array of data...) that can be uniquely
- * identified by a type and an ID, and whose data can change over time.
- * A "version key" is a unique identifier (UUID) that changes whenever the
- * entity data is modified, allowing efficient cache invalidation.
+ * Provides a generic mechanism for generating and caching unique version strings
+ * for any identifiable item. Each item is identified by a string ID, and has
+ * an associated version string (UUID) that can be regenerated to invalidate caches.
+ * This is useful for cache invalidation strategies where items change over time.
+ * The standard WordPress cache is used to store the version strings.
  */
 class VersionStringsGenerator {
 
 	/**
 	 * Cache group name.
 	 */
-	private const CACHE_GROUP = 'woocommerce_entity_version_keys';
+	private const CACHE_GROUP = 'woocommerce_version_strings';
 
 	/**
-	 * Should the entity version keys cache be used?
+	 * Should the version strings cache be used?
 	 *
 	 * @var bool|null
 	 */
@@ -48,9 +48,9 @@ class VersionStringsGenerator {
 	}
 
 	/**
-	 * Tells whether the entity version keys cache should be used or not.
+	 * Tells whether the version strings cache should be used or not.
 	 *
-	 * By default this will return true only if an external object cache is configured in WordPress,
+	 * This will return true only if an external object cache is configured in WordPress,
 	 * since otherwise the cached entries will only persist for the current request.
 	 *
 	 * @return bool
@@ -66,105 +66,118 @@ class VersionStringsGenerator {
 	}
 
 	/**
-	 * Get the current version key of an entity.
+	 * Get the current version string for an ID.
 	 *
-	 * @param string     $entity_type Entity type.
-	 * @param string|int $entity_id Entity ID.
-	 * @return string Entity version key.
-	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
+	 * If no version exists and $generate is true, a new version will be created.
+	 * If no version exists and $generate is false, null will be returned.
+	 *
+	 * @param string $id       The ID to get the version string for.
+	 * @param bool   $generate Whether to generate a new version if one doesn't exist. Default true.
+	 * @return string|null Version string, or null if not found and $generate is false.
+	 * @throws \InvalidArgumentException If id is invalid.
+	 *
+	 * @since 10.4.0
 	 */
-	public function get_entity_version( string $entity_type, $entity_id ): string {
-		$this->validate_input( $entity_type, $entity_id );
+	public function get_version( string $id, bool $generate = true ): ?string {
+		$this->validate_input( $id );
 
-		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+		$cache_key = $this->get_cache_key( $id );
 		$found     = false;
 		$version   = wp_cache_get( $cache_key, self::CACHE_GROUP, false, $found );
 
 		if ( ! $found ) {
-			$version = $this->regenerate_entity_version( $entity_type, $entity_id );
+			if ( ! $generate ) {
+				return null;
+			}
+			$version = $this->generate_version( $id );
 		} else {
 			// Refresh the cache lifetime.
-			$this->store_entity_version( $entity_type, $entity_id, $version );
+			$this->store_version( $id, $version );
 		}
 		return $version;
 	}
 
 	/**
-	 * Regenerate and store a new version key for an entity.
+	 * Generate and store a new version string for an ID.
+	 * The already existing version string, if any, will be replaced.
 	 *
-	 * @param string     $entity_type Entity type.
-	 * @param string|int $entity_id   Entity ID.
-	 * @return string The new entity version key.
-	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
+	 * @param string $id The ID to generate a version string for.
+	 * @return string The new version string.
+	 * @throws \InvalidArgumentException If id is invalid.
+	 *
+	 * @since 10.4.0
 	 */
-	public function regenerate_entity_version( string $entity_type, $entity_id ): string {
-		$this->validate_input( $entity_type, $entity_id );
+	public function generate_version( string $id ): string {
+		$this->validate_input( $id );
 
 		$version = wp_generate_uuid4();
-		$this->store_entity_version( $entity_type, $entity_id, $version );
+		$this->store_version( $id, $version );
 		return $version;
 	}
 
 	/**
-	 * Store the entity version key in cache with a filterable TTL.
+	 * Store the version string in cache with a filterable TTL.
 	 *
-	 * @param string     $entity_type Entity type.
-	 * @param string|int $entity_id   Entity ID.
-	 * @param string     $version     The version key to store.
+	 * @param string $id      The ID to store the version string for.
+	 * @param string $version The version string to store.
 	 * @return bool True on success, false on failure.
 	 */
-	protected function store_entity_version( string $entity_type, $entity_id, string $version ): bool {
-		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+	protected function store_version( string $id, string $version ): bool {
+		$cache_key = $this->get_cache_key( $id );
 
 		/**
-		 * Filter the TTL for entity version key cache.
+		 * Filter the TTL for version string cache.
 		 *
-		 * @param int        $ttl         Time to live in seconds. Default 1 day.
-		 * @param string     $entity_type The type of the entity.
-		 * @param string|int $entity_id   The ID of the entity.
+		 * @param int    $ttl Time to live in seconds. Default 1 day.
+		 * @param string $id  The ID.
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl = apply_filters( 'woocommerce_entity_version_key_ttl', DAY_IN_SECONDS, $entity_type, $entity_id );
+		$ttl = apply_filters( 'woocommerce_version_string_ttl', DAY_IN_SECONDS, $id );
 		$ttl = max( 0, (int) $ttl );
 
 		return wp_cache_set( $cache_key, $version, self::CACHE_GROUP, $ttl );
 	}
 
 	/**
-	 * Delete the version key of an entity by deleting its cached entry.
+	 * Delete the version string for an ID by deleting its cached entry.
 	 *
-	 * @param string     $entity_type Entity type.
-	 * @param string|int $entity_id   Entity ID.
+	 * @param string $id The ID to delete the version string for.
 	 * @return bool True on success, false on failure.
-	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
+	 * @throws \InvalidArgumentException If id is invalid.
+	 *
+	 * @since 10.4.0
 	 */
-	public function delete_entity_version( string $entity_type, $entity_id ): bool {
-		$this->validate_input( $entity_type, $entity_id );
+	public function delete_version( string $id ): bool {
+		$this->validate_input( $id );
 
-		$cache_key = "wc_entity_version_key_{$entity_type}_{$entity_id}";
+		$cache_key = $this->get_cache_key( $id );
 		return wp_cache_delete( $cache_key, self::CACHE_GROUP );
 	}
 
 	/**
-	 * Validate entity type and entity ID inputs.
+	 * Get the cache key for an ID.
 	 *
-	 * @param string     $entity_type Entity type.
-	 * @param string|int $entity_id   Entity ID.
-	 * @return void
-	 * @throws \InvalidArgumentException If entity_type or entity_id are invalid.
+	 * The ID is hashed to ensure a consistent key length and avoid issues
+	 * with special characters or very long IDs.
+	 *
+	 * @param string $id The ID to get the cache key for.
+	 * @return string The cache key.
 	 */
-	private function validate_input( string $entity_type, $entity_id ): void {
-		if ( '' === $entity_type ) {
-			throw new \InvalidArgumentException( 'Entity type cannot be empty.' );
-		}
+	private function get_cache_key( string $id ): string {
+		return 'wc_version_string_' . md5( $id );
+	}
 
-		if ( ! is_numeric( $entity_id ) && ! is_string( $entity_id ) ) {
-			throw new \InvalidArgumentException( 'Entity ID must be a number or a string.' );
-		}
-
-		if ( is_string( $entity_id ) && '' === $entity_id ) {
-			throw new \InvalidArgumentException( 'Entity ID cannot be an empty string.' );
+	/**
+	 * Validate ID input.
+	 *
+	 * @param string $id The ID to validate.
+	 * @return void
+	 * @throws \InvalidArgumentException If id is invalid.
+	 */
+	private function validate_input( string $id ): void {
+		if ( '' === $id ) {
+			throw new \InvalidArgumentException( 'ID cannot be empty.' );
 		}
 	}
 }
