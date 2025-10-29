@@ -308,9 +308,19 @@ class PaymentGateway {
 							continue;
 						}
 
-						$validated_links[] = array(
+						$url = sanitize_url( $link['url'] );
+
+						// Create a unique key for deduplication (type + URL).
+						$link_key = $type . '|' . $url;
+
+						// Skip if we already have this exact link.
+						if ( isset( $validated_links[ $link_key ] ) ) {
+							continue;
+						}
+
+						$validated_links[ $link_key ] = array(
 							'_type' => $type,
-							'url'   => sanitize_url( $link['url'] ),
+							'url'   => $url,
 						);
 					}
 				}
