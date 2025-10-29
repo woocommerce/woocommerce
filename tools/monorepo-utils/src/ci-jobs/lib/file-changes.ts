@@ -193,7 +193,10 @@ export function getFileChanges(
 				for ( const re of job.changes ) {
 					changePatterns.push(
 						re.global || re.sticky
-							? new RegExp( re.source, re.flags.replace( /[gy]/g, '' ) )
+							? new RegExp(
+									re.source,
+									re.flags.replace( /[gy]/g, '' )
+							  )
 							: re
 					);
 				}
