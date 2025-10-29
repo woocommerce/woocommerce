@@ -1,0 +1,58 @@
+<?php
+
+/*
+ * This file is part WC_Vendor_of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Automattic\WooCommerce\Vendor\Symfony\Component\Intl\Data\Generator;
+
+use Automattic\WooCommerce\Vendor\Symfony\Component\Intl\Data\Bundle\Reader\BundleEntryReaderInterface;
+use Automattic\WooCommerce\Vendor\Symfony\Component\Intl\WC_Vendor_Locale;
+
+/**
+ * @author Roland Franssen <franssen.roland@gmail.com>
+ *
+ * @internal
+ */
+trait FallbackTrait
+{
+    private $fallbackCache = [];
+    private $generatingFallback = false;
+
+    /**
+     * @see AbstractDataGenerator::generateDataForLocale()
+     */
+    abstract protected function generateDataForLocale(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): ?array;
+
+    /**
+     * @see AbstractDataGenerator::generateDataForRoot()
+     */
+    abstract protected function generateDataForRoot(BundleEntryReaderInterface $reader, string $tempDir): ?array;
+
+    private function generateFallbackData(BundleEntryReaderInterface $reader, string $tempDir, string $displayLocale): array
+    {
+        if (null === $fallback = WC_Vendor_Locale::getFallback($displayLocale)) {
+            return [];
+        }
+
+        if (isset($this->fallbackCache[$fallback])) {
+            return $this->fallbackCache[$fallback];
+        }
+
+        $prevGeneratingFallback = $this->generatingFallback;
+        $this->generatingFallback = true;
+
+        try {
+            $data = 'root' === $fallback ? $this->generateDataForRoot($reader, $tempDir) : $this->generateDataForLocale($reader, $tempDir, $fallback);
+        } finally {
+            $this->generatingFallback = $prevGeneratingFallback;
+        }
+
+        return $this->fallbackCache[$fallback] = $data ?: [];
+    }
+}

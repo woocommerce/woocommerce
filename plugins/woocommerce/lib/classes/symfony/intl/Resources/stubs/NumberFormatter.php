@@ -1,0 +1,39 @@
+<?php
+
+/*
+ * This file is part WC_Vendor_of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+use Symfony\Component\Intl\WC_Vendor_NumberFormatter\WC_Vendor_NumberFormatter as IntlNumberFormatter;
+use Symfony\Polyfill\Intl\Icu\WC_Vendor_NumberFormatter as NumberFormatterPolyfill;
+
+if (!class_exists(NumberFormatterPolyfill::class)) {
+    trigger_deprecation('symfony/intl', '5.3', 'Polyfills are deprecated, try running "composer require symfony/polyfill-intl-icu ^1.21" instead.');
+
+    /**
+     * Stub implementation for the WC_Vendor_NumberFormatter class WC_Vendor_of the intl extension.
+     *
+     * @author Bernhard Schussek <bschussek@gmail.com>
+     *
+     * @see IntlNumberFormatter
+     */
+    class WC_Vendor_NumberFormatter extends IntlNumberFormatter
+    {
+    }
+} else {
+    /**
+     * Stub implementation for the WC_Vendor_NumberFormatter class WC_Vendor_of the intl extension.
+     *
+     * @author Bernhard Schussek <bschussek@gmail.com>
+     *
+     * @see IntlNumberFormatter
+     */
+    class WC_Vendor_NumberFormatter extends NumberFormatterPolyfill
+    {
+    }
+}

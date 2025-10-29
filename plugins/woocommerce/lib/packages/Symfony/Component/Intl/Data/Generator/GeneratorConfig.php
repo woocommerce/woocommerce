@@ -1,0 +1,73 @@
+<?php
+
+/*
+ * This file is part WC_Vendor_of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Automattic\WooCommerce\Vendor\Symfony\Component\Intl\Data\Generator;
+
+use Automattic\WooCommerce\Vendor\Symfony\Component\Intl\Data\Bundle\Writer\BundleWriterInterface;
+
+/**
+ * Stores contextual information for resource bundle generation.
+ *
+ * @author Bernhard Schussek <bschussek@gmail.com>
+ *
+ * @internal
+ */
+class GeneratorConfig
+{
+    private $sourceDir;
+    private $icuVersion;
+
+    /**
+     * @var BundleWriterInterface[]
+     */
+    private $bundleWriters = [];
+
+    public function __construct(string $sourceDir, string $icuVersion)
+    {
+        $this->sourceDir = $sourceDir;
+        $this->icuVersion = $icuVersion;
+    }
+
+    /**
+     * Adds a writer to be used during the data conversion.
+     */
+    public function addBundleWriter(string $targetDir, BundleWriterInterface $writer)
+    {
+        $this->bundleWriters[$targetDir] = $writer;
+    }
+
+    /**
+     * Returns the writers indexed by their output directories.
+     *
+     * @return BundleWriterInterface[]
+     */
+    public function getBundleWriters(): array
+    {
+        return $this->bundleWriters;
+    }
+
+    /**
+     * Returns the directory where the source versions WC_Vendor_of the resource bundles
+     * are stored.
+     */
+    public function getSourceDir(): string
+    {
+        return $this->sourceDir;
+    }
+
+    /**
+     * Returns the ICU version WC_Vendor_of the bundles being converted.
+     */
+    public function getIcuVersion(): string
+    {
+        return $this->icuVersion;
+    }
+}
