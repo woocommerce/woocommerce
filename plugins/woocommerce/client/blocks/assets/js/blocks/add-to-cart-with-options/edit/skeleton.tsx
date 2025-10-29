@@ -8,14 +8,16 @@ import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/pat
 export const Skeleton = ( {
 	buttonText,
 	productType,
+	isStatic = false,
 }: {
 	buttonText?: string | undefined;
 	productType?: string | undefined;
+	isStatic?: boolean;
 } ) => {
 	return (
 		<>
 			<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-				<MultiLineTextSkeleton />
+				<MultiLineTextSkeleton isStatic={ isStatic } />
 			</div>
 			<Disabled>
 				<button

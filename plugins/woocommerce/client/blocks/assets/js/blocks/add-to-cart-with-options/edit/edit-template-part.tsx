@@ -99,7 +99,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 	if ( ! templatePartId || ! canEditTemplatePart ) {
 		return (
 			<div { ...blockProps }>
-				<Skeleton productType={ productType } />
+				<Skeleton productType={ productType } isStatic={ true } />
 			</div>
 		);
 	}
