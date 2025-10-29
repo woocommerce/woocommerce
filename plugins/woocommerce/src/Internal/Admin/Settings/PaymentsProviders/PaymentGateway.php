@@ -287,7 +287,7 @@ class PaymentGateway {
 						}
 						$validated_links[] = array(
 							'_type' => $type,
-							'url'   => esc_url( $link['url'] ),
+							'url'   => sanitize_url( $link['url'] ),
 						);
 					}
 				}
