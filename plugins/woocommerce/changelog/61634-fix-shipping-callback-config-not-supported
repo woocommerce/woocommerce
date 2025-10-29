@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes the SHIPPING_CALLBACK_CONFIG_NOT_SUPPORTED errors for PayPal Standard
