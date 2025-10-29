@@ -144,9 +144,13 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				'onboarding'  => array(
 					'type'                        => PaymentGateway::ONBOARDING_TYPE_EXTERNAL,
 					'state'                       => array(
+						'supported' => true,
 						'started'   => true,
 						'completed' => true,
 						'test_mode' => true,
+					),
+					'messages'                    => array(
+						'not_supported' => null,
 					),
 					'_links'                      => array(
 						'onboard' => array(
@@ -1047,5 +1051,205 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 			array(),
 			$this->sut->get_recommended_payment_methods( $fake_gateway )
 		);
+	}
+
+	/**
+	 * Test is_onboarding_supported returns null when gateway doesn't provide the method.
+	 */
+	public function test_is_onboarding_supported_returns_null_when_method_not_provided() {
+		// Arrange - Create a simple gateway without the is_onboarding_supported method.
+		$basic_gateway = new class() extends \WC_Payment_Gateway {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id = 'basic_gateway';
+			}
+		};
+
+		// Act.
+		$result = $this->sut->is_onboarding_supported( $basic_gateway, 'US' );
+
+		// Assert - should return null when the gateway doesn't provide the method.
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test is_onboarding_supported returns value from gateway method when provided.
+	 */
+	public function test_is_onboarding_supported_returns_gateway_value_when_provided() {
+		// Arrange - Create a mock gateway with is_onboarding_supported method.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_supported' => true,
+			)
+		);
+
+		// Act.
+		$result = $this->sut->is_onboarding_supported( $fake_gateway, 'US' );
+
+		// Assert - should return true when gateway provides true.
+		$this->assertTrue( $result );
+
+		// Test with false value.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_supported' => false,
+			)
+		);
+
+		// Act.
+		$result = $this->sut->is_onboarding_supported( $fake_gateway, 'XX' );
+
+		// Assert - should return false when gateway provides false.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test is_onboarding_supported handles string values correctly.
+	 */
+	public function test_is_onboarding_supported_handles_string_values() {
+		// Arrange - Test with 'yes' string value.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_supported' => 'yes',
+			)
+		);
+
+		// Act.
+		$result = $this->sut->is_onboarding_supported( $fake_gateway, 'US' );
+
+		// Assert - should convert 'yes' to true.
+		$this->assertTrue( $result );
+
+		// Test with 'no' string value.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_supported' => 'no',
+			)
+		);
+
+		// Act.
+		$result = $this->sut->is_onboarding_supported( $fake_gateway, 'US' );
+
+		// Assert - should convert 'no' to false.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message returns null when gateway doesn't provide the method.
+	 */
+	public function test_get_onboarding_not_supported_message_returns_null_when_method_not_provided() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+
+		// Act.
+		$result = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should return null when the gateway doesn't provide the method.
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message returns value from gateway method when provided.
+	 */
+	public function test_get_onboarding_not_supported_message_returns_gateway_value_when_provided() {
+		// Arrange - Create a mock gateway with get_onboarding_not_supported_message method.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_not_supported_message' => 'This gateway is not available in your country.',
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should return the message from the gateway.
+		$this->assertEquals( 'This gateway is not available in your country.', $result );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message sanitizes the message.
+	 */
+	public function test_get_onboarding_not_supported_message_sanitizes_message() {
+		// Arrange - Create a gateway with a message containing HTML/special characters.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_not_supported_message' => '  <script>alert("test")</script>This gateway is not available.  ',
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should sanitize and trim the message.
+		$this->assertStringNotContainsString( '<script>', $result );
+		$this->assertStringContainsString( 'This gateway is not available', $result );
+	}
+
+	/**
+	 * Test get_onboarding_not_supported_message returns null for empty or invalid values.
+	 */
+	public function test_get_onboarding_not_supported_message_returns_null_for_invalid_values() {
+		// Test with empty string.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_not_supported_message' => '',
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should return null for empty string.
+		$this->assertNull( $result );
+
+		// Test with non-string value.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_not_supported_message' => array( 'message' ),
+			)
+		);
+
+		// Act.
+		$result = $this->sut->get_onboarding_not_supported_message( $fake_gateway, 'XX' );
+
+		// Assert - should return null for non-string value.
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test get_details with unsupported onboarding country.
+	 */
+	public function test_get_details_with_unsupported_onboarding() {
+		// Arrange - Create a gateway that doesn't support onboarding for a specific country.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'onboarding_supported'             => false,
+				'onboarding_not_supported_message' => 'This gateway is not supported in your country.',
+			)
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_details( $fake_gateway, 0, 'XX' );
+
+		// Assert - should include the unsupported state and message.
+		$this->assertArrayHasKey( 'onboarding', $gateway_details );
+		$this->assertArrayHasKey( 'state', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'supported', $gateway_details['onboarding']['state'] );
+		$this->assertFalse( $gateway_details['onboarding']['state']['supported'] );
+
+		$this->assertArrayHasKey( 'messages', $gateway_details['onboarding'] );
+		$this->assertArrayHasKey( 'not_supported', $gateway_details['onboarding']['messages'] );
+		$this->assertEquals( 'This gateway is not supported in your country.', $gateway_details['onboarding']['messages']['not_supported'] );
 	}
 }

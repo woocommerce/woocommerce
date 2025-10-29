@@ -139,7 +139,7 @@ class WooPaymentsService {
 	}
 
 	/**
-	 * Get the onboarding details for the settings page.
+	 * Get the onboarding details for the Payments settings page.
 	 *
 	 * @param string      $location  The location for which we are onboarding.
 	 *                               This is an ISO 3166-1 alpha-2 country code.
@@ -156,7 +156,10 @@ class WooPaymentsService {
 
 		$source = $this->validate_onboarding_source( $source );
 
-		$onboarding_started = $this->provider->is_onboarding_started( $this->get_payment_gateway() );
+		$gateway = $this->get_payment_gateway();
+
+		$onboarding_supported = $this->provider->is_onboarding_supported( $gateway, $location ) ?? true;
+		$onboarding_started   = $this->provider->is_onboarding_started( $gateway );
 		if ( ! $onboarding_started && ! empty( $this->get_nox_profile_onboarding( $location ) ) ) {
 			// If the onboarding profile is stored, we consider the onboarding started.
 			$onboarding_started = true;
@@ -164,14 +167,18 @@ class WooPaymentsService {
 
 		return array(
 			// This state is high-level data, independent of the type of onboarding flow.
-			'state'   => array(
+			'state'    => array(
+				'supported' => $onboarding_supported,
 				'started'   => $onboarding_started,
-				'completed' => $this->provider->is_onboarding_completed( $this->get_payment_gateway() ),
-				'test_mode' => $this->provider->is_in_test_mode_onboarding( $this->get_payment_gateway() ),
-				'dev_mode'  => $this->provider->is_in_dev_mode( $this->get_payment_gateway() ),
+				'completed' => $this->provider->is_onboarding_completed( $gateway ),
+				'test_mode' => $this->provider->is_in_test_mode_onboarding( $gateway ),
+				'dev_mode'  => $this->provider->is_in_dev_mode( $gateway ),
 			),
-			'steps'   => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
-			'context' => array(
+			'messages' => array(
+				'not_supported' => ! $onboarding_supported ? $this->provider->get_onboarding_not_supported_message( $gateway, $location ) : null,
+			),
+			'steps'    => $this->get_onboarding_steps( $location, trailingslashit( $rest_path ) . 'step', $source ),
+			'context'  => array(
 				'urls' => array(
 					'overview_page' => $this->get_overview_page_url(),
 				),
@@ -2566,7 +2573,10 @@ class WooPaymentsService {
 		$fields = $response['data'];
 
 		// If there is no available_countries entry, add it.
-		if ( ! isset( $fields['available_countries'] ) && $this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+		if ( ! isset( $fields['available_countries'] ) &&
+			class_exists( '\WC_Payments_Utils' ) &&
+			$this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+
 			$fields['available_countries'] = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
 		}
 
