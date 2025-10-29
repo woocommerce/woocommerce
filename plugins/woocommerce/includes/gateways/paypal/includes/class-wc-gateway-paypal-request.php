@@ -675,10 +675,11 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Make sure the country code is in the correct format.
-		if ( strlen( $country ) >= 3 ) {
-			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $country ) >= $max_country_code_length ) {
+			if ( strlen( $country ) > $max_country_code_length ) { // Log if we get an unexpected country code length.
 				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
-				$country = substr( $country, 0, 3 );
+				$country = substr( $country, 0, $max_country_code_length ); // Truncate to expected maximum length.
 			}
 			$country = Countries::getAlpha2Code( $country );
 			if ( ! $country ) {
