@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
-use Automattic\WooCommerce\Internal\Caches\EntityVersionKeysCache;
+use Automattic\WooCommerce\Internal\Caches\VersionStringsGenerator;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for EntityVersionKeysCache.
+ * Tests for VersionStringsGenerator.
  */
-class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
+class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Cache group name.
@@ -20,7 +20,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	/**
 	 * The System Under Test.
 	 *
-	 * @var EntityVersionKeysCache
+	 * @var VersionStringsGenerator
 	 */
 	private $sut;
 
@@ -30,7 +30,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new EntityVersionKeysCache();
+		$this->sut = new VersionStringsGenerator();
 
 		// Flush the cache group before each test.
 		wp_cache_flush();
@@ -365,7 +365,7 @@ class EntityVersionKeysCacheTest extends WC_Unit_Test_Case {
 
 		// Create a test cache instance that captures the TTL.
 		$captured_ttl = null;
-		$cache        = new class( $captured_ttl ) extends EntityVersionKeysCache {
+		$cache        = new class( $captured_ttl ) extends VersionStringsGenerator {
 			/**
 			 * Cache storage.
 			 *

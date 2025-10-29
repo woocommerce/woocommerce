@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * A "version key" is a unique identifier (UUID) that changes whenever the
  * entity data is modified, allowing efficient cache invalidation.
  */
-class EntityVersionKeysCache {
+class VersionStringsGenerator {
 
 	/**
 	 * Cache group name.
