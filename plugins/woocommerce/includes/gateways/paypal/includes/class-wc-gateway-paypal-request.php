@@ -668,7 +668,7 @@ class WC_Gateway_Paypal_Request {
 
 		// Make sure the country code is in the correct format.
 		if ( strlen( $country ) >= 3 ) {
-			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length, but still try to handle it.
+			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
 				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
 				$country = substr( $country, 0, 3 );
 			}
