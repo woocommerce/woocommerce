@@ -246,7 +246,9 @@ class AddToCartWithOptions extends AbstractBlock {
 				array(
 					'products' => array(
 						$product->get_id() => array(
-							'type' => $product->get_type(),
+							'type'              => $product->get_type(),
+							'is_in_stock'       => $product->is_in_stock(),
+							'sold_individually' => $product->is_sold_individually(),
 						),
 					),
 				)
@@ -268,11 +270,10 @@ class AddToCartWithOptions extends AbstractBlock {
 					$context['quantity'][ $variation->get_id() ] = $default_quantity;
 
 					$variation_data = array(
-						'attributes' => $variation->get_variation_attributes(),
+						'attributes'        => $variation->get_variation_attributes(),
+						'is_in_stock'       => $variation->is_in_stock(),
+						'sold_individually' => $variation->is_sold_individually(),
 					);
-					if ( $variation->is_in_stock() ) {
-						$variation_data['is_in_stock'] = true;
-					}
 
 					$variations_data[ $variation->get_id() ] = $variation_data;
 				}
@@ -298,10 +299,12 @@ class AddToCartWithOptions extends AbstractBlock {
 						$child_product_quantity_constraints = Utils::get_product_quantity_constraints( $child_product );
 
 						$children_product_data[ $child_product_id ] = array(
-							'min'  => $child_product_quantity_constraints['min'],
-							'max'  => $child_product_quantity_constraints['max'],
-							'step' => $child_product_quantity_constraints['step'],
-							'type' => $child_product->get_type(),
+							'min'               => $child_product_quantity_constraints['min'],
+							'max'               => $child_product_quantity_constraints['max'],
+							'step'              => $child_product_quantity_constraints['step'],
+							'type'              => $child_product->get_type(),
+							'is_in_stock'       => $child_product->is_in_stock(),
+							'sold_individually' => $child_product->is_sold_individually(),
 						);
 					}
 				}
