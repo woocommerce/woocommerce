@@ -681,7 +681,7 @@ class WC_Gateway_Paypal_Request {
 				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
 				$country = substr( $country, 0, $max_country_code_length ); // Truncate to expected maximum length.
 			}
-			$country = Countries::getAlpha2Code( $country );
+			$country = Countries::getAlpha2Code( strtolower( $country ) );
 			if ( ! $country ) {
 				WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code: %s', $country ), 'error' );
 				return null;
