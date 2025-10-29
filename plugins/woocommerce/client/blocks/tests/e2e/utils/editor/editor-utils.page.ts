@@ -157,7 +157,11 @@ export class Editor extends CoreEditor {
 
 	// Since WP 6.9 templates (and only templates) are handled differently due to template activation
 	// and require different flow to be reverted.
-	async revertTemplateSiceWP69( { templateName }: { templateName: string } ) {
+	async revertTemplateSinceWP69( {
+		templateName,
+	}: {
+		templateName: string;
+	} ) {
 		await this.page
 			.getByRole( 'button', { name: 'Created templates' } )
 			.click();
@@ -214,13 +218,14 @@ export class Editor extends CoreEditor {
 	}
 
 	async revertTemplatePart( { templateName }: { templateName: string } ) {
-		// Template parts are handl
+		// Template parts are handled the same before and after WP 6.9 which
+		// introduced template activation.
 		await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
 	}
 
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		if ( this.wpCoreVersion >= 6.9 ) {
-			await this.revertTemplateSiceWP69( { templateName } );
+			await this.revertTemplateSinceWP69( { templateName } );
 		} else {
 			await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
 		}
