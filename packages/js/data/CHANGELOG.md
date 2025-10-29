@@ -237,7 +237,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Upgrade TypeScript to 5.1.6 [#39531]
 -   Minor - Update totalCount in crud store to avoid unnecessary requests. [#40343]
 -   Minor - Add tracks for plugin actions and handle plugin error properly [#37261]
--    - Remove `Product` `date_on_sale_from` and `date_on_sale_to` properties. Use `date_on_sale_from_gmt` and `date_on_sale_to_gmt` instead. [#35096]
+-   Remove `Product` `date_on_sale_from` and `date_on_sale_to` properties. Use `date_on_sale_from_gmt` and `date_on_sale_to_gmt` instead. [#35096]
 
 ## [4.1.0](https://www.npmjs.com/package/@woocommerce/data/v/4.1.0) - 2022-07-08 
 
@@ -253,7 +253,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [4.0.0](https://www.npmjs.com/package/@woocommerce/data/v/4.0.0) - 2022-06-14 
 
--    - Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
+-   Remove `PaymentMethodsState` type. Use `Plugin` instead. #32683
 -   Minor - Add create product actions in products data store #33278
 -   Minor - Add new orders data store, for retrieving orders data. #33063
 -   Minor - Add update product actions to product data store #33282
