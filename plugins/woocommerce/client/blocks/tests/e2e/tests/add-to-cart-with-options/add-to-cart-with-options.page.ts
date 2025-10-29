@@ -39,7 +39,9 @@ class AddToCartWithOptionsPage {
 		);
 
 		await addToCartWithOptionsBlock
-			.locator( '.components-spinner' )
+			.locator(
+				'.components-spinner, .wc-block-components-skeleton__element:not(.wc-block-components-skeleton__element--static)'
+			)
 			.waitFor( {
 				state: 'hidden',
 			} );
