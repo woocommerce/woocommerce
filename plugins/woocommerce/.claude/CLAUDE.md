@@ -33,6 +33,9 @@ This document provides Claude Code with essential information about working with
 ## Coding style
 
 - Prefer the null coalescing operator instead of executing `isset` before accessing an array item that might not exist. For example, use `if ( 34 === ( $foo['bar'] ?? null ) )` instead of `if ( isset( $foo['bar'] ) && 34 === $foo['bar'] )`.
+- When using `call_user_func_array()`, always use positional arguments (numerically indexed array) instead of named/associative arrays for the arguments parameter. The function uses array values in order and ignores keys, so named keys are misleading.
+    - **Wrong**: `call_user_func_array( array( $obj, 'method' ), array( 'country_code' => $code ) )`
+    - **Correct**: `call_user_func_array( array( $obj, 'method' ), array( $code ) )`
 
 
 ## Running Tests
