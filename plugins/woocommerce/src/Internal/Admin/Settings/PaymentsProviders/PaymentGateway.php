@@ -293,13 +293,15 @@ class PaymentGateway {
 						if ( ! is_array( $link ) ) {
 							continue;
 						}
-						$type = isset( $link['_type'] ) ? sanitize_key( (string) $link['_type'] ) : '';
+
+						$type = ( isset( $link['_type'] ) && is_scalar( $link['_type'] ) ) ? sanitize_key( (string) $link['_type'] ) : '';
 						if ( empty( $type ) || ! in_array( $type, $accepted_types, true ) ) {
 							continue;
 						}
 						if ( empty( $link['url'] ) || ! is_string( $link['url'] ) || ! wc_is_valid_url( $link['url'] ) ) {
 							continue;
 						}
+
 						$validated_links[] = array(
 							'_type' => $type,
 							'url'   => sanitize_url( $link['url'] ),
