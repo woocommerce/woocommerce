@@ -590,4 +590,139 @@ class WC_Tests_CRUD_Data extends WC_Unit_Test_Case {
 		$this->assertEquals( 2, $new_data['prop2']['subprop2'] );
 		$this->assertEquals( 3, $new_data['prop2']['subprop3'] );
 	}
+
+	/**
+	 * Test that __clone() properly clones meta_data objects.
+	 */
+	public function test_clone_meta_data_objects() {
+		$object = $this->create_test_post();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_meta_key_2', 'val2', true );
+		$object->save_meta_data();
+
+		// Clone the object.
+		$cloned_object = clone $object;
+
+		// Get meta data from both objects.
+		$original_meta = $object->get_meta_data();
+		$cloned_meta   = $cloned_object->get_meta_data();
+
+		// Verify that the meta data arrays have the same count.
+		$this->assertCount( count( $original_meta ), $cloned_meta );
+
+		// Verify that the meta data objects are different instances (not shared references).
+		foreach ( $original_meta as $index => $meta ) {
+			$this->assertNotSame( $meta, $cloned_meta[ $index ], 'Meta data objects should not be the same instance after cloning' );
+			$this->assertEquals( $meta->id, $cloned_meta[ $index ]->id, 'Meta Ids should match' );
+			$this->assertEquals( $meta->key, $cloned_meta[ $index ]->key, 'Meta keys should match' );
+			$this->assertEquals( $meta->value, $cloned_meta[ $index ]->value, 'Meta values should match' );
+		}
+
+		// Modify cloned meta and verify original is unchanged.
+		$cloned_meta[0]->value = 'modified_value';
+		$original_meta_after   = $object->get_meta_data();
+		$this->assertNotEquals( 'modified_value', $original_meta_after[0]->value, 'Modifying cloned meta should not affect original' );
+	}
+
+	/**
+	 * Test that set_id() resets meta IDs when changing from non-zero ID.
+	 */
+	public function test_set_id_resets_meta_ids() {
+		$object = $this->create_test_post();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->add_meta_data( 'test_meta_key_2', 'val2', true );
+		$object->save_meta_data();
+
+		// Verify meta has IDs after saving.
+		$meta_before = $object->get_meta_data();
+		$this->assertNotEmpty( $meta_before[0]->id, 'Meta should have an ID after saving' );
+		$this->assertNotEmpty( $meta_before[1]->id, 'Meta should have an ID after saving' );
+
+		$original_object_id = $object->get_id();
+
+		// Change the object ID.
+		$object->set_id( 999 );
+
+		// Verify meta IDs have been reset to null.
+		$meta_after = $object->get_meta_data();
+		$this->assertNull( $meta_after[0]->id, 'Meta ID should be null after set_id() with non-zero original ID' );
+		$this->assertNull( $meta_after[1]->id, 'Meta ID should be null after set_id() with non-zero original ID' );
+
+		// Verify meta keys and values are preserved.
+		$this->assertEquals( 'test_meta_key', $meta_after[0]->key );
+		$this->assertEquals( 'val1', $meta_after[0]->value );
+		$this->assertEquals( 'test_meta_key_2', $meta_after[1]->key );
+		$this->assertEquals( 'val2', $meta_after[1]->value );
+
+		// Verify that saving the object with a replaced ID doesn't steal the underlying data from the original object.
+		$object->save_meta_data();
+
+		$original_object = new WC_Mock_WC_Data();
+		$original_object->set_id( $original_object_id );
+		$original_object->read_meta_data();
+		$this->assertEquals( 'val1', $original_object->get_meta( 'test_meta_key' ), 'Original Object should keep its saved meta data' );
+		$this->assertEquals( 'val2', $original_object->get_meta( 'test_meta_key_2' ), 'Original Object should keep its saved meta data' );
+	}
+
+	/**
+	 * Test that set_id() does not reset meta IDs when setting to same ID.
+	 */
+	public function test_set_id_does_not_reset_when_same_id() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->save_meta_data();
+
+		// Get original meta ID.
+		$meta_before      = $object->get_meta_data();
+		$original_meta_id = $meta_before[0]->id;
+
+		// Set ID to the same value.
+		$object->set_id( $object_id );
+
+		// Verify meta ID has not been reset.
+		$meta_after = $object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $meta_after[0]->id, 'Meta ID should not be reset when setting to same ID' );
+	}
+
+	/**
+	 * Test clone and set_id interaction - cloned object should get new meta IDs when saved.
+	 */
+	public function test_clone_and_set_id_interaction() {
+		$object    = $this->create_test_post();
+		$object_id = $object->get_id();
+		$object->add_meta_data( 'test_meta_key', 'val1', true );
+		$object->save_meta_data();
+
+		// Get original meta ID.
+		$original_meta    = $object->get_meta_data();
+		$original_meta_id = $original_meta[0]->id;
+
+		// Clone the object.
+		$cloned_object = clone $object;
+
+		// Verify cloned object has the same meta ID initially (because it's a clone).
+		$cloned_meta = $cloned_object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $cloned_meta[0]->id, 'Cloned object should have same meta ID initially' );
+
+		// Set a new ID on the cloned object.
+		$cloned_object->set_id( 0 ); // Set to 0 to create new object.
+		$cloned_object->save();
+
+		// Verify the cloned object now has a different ID.
+		$this->assertNotEquals( $object_id, $cloned_object->get_id(), 'Cloned object should have different ID after save' );
+
+		// Save meta data for the cloned object.
+		$cloned_object->save_meta_data();
+
+		// Verify the cloned object's meta has a new ID.
+		$cloned_meta_after = $cloned_object->get_meta_data();
+		$this->assertNotEmpty( $cloned_meta_after[0]->id, 'Cloned object meta should have an ID after save' );
+		$this->assertNotEquals( $original_meta_id, $cloned_meta_after[0]->id, 'Cloned object meta should have different ID than original' );
+
+		// Verify original object's meta is unchanged.
+		$object->read_meta_data( true );
+		$original_meta_after = $object->get_meta_data();
+		$this->assertEquals( $original_meta_id, $original_meta_after[0]->id, 'Original object meta ID should be unchanged' );
+	}
 }
