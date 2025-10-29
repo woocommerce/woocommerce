@@ -59,6 +59,13 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $plugin_file = 'fake-plugin-slug/fake-plugin-file';
 
 	/**
+	 * The provider links list.
+	 *
+	 * @var array
+	 */
+	public $provider_links = array();
+
+	/**
 	 * The recommended payment methods list.
 	 *
 	 * @var array
@@ -242,5 +249,20 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 */
 	public function is_in_test_mode_onboarding() {
 		return $this->test_mode_onboarding;
+	}
+
+	/**
+	 * Get the provider links list.
+	 *
+	 * @param string $country_code Optional. The country code for which the providers are being requested.
+	 *
+	 * @return array The provider links list.
+	 */
+	public function get_provider_links( string $country_code = '' ): array {
+		if ( isset( $this->provider_links ) ) {
+			return $this->provider_links;
+		}
+
+		return array();
 	}
 }
