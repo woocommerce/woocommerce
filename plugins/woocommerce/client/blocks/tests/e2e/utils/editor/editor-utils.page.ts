@@ -155,6 +155,8 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
+	// Since WP 6.9 templates (and only templates) are handled differently due to template activation
+	// and require different flow to be reverted.
 	async revertTemplateSiceWP69( { templateName }: { templateName: string } ) {
 		await this.page
 			.getByRole( 'button', { name: 'Created templates' } )
@@ -174,7 +176,13 @@ export class Editor extends CoreEditor {
 		await this.page.getByText( 'moved to the trash.' ).first().waitFor();
 	}
 
-	async revertTemplateTillWP69( { templateName }: { templateName: string } ) {
+	// This is the "old" flow of reverting templates but also universal flow of
+	// reverting template parts that were not impacted by template activation.
+	async revertTemplatePartOrTemplateTillWP68( {
+		templateName,
+	}: {
+		templateName: string;
+	} ) {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
@@ -205,11 +213,16 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
+	async revertTemplatePart( { templateName }: { templateName: string } ) {
+		// Template parts are handl
+		await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
+	}
+
 	async revertTemplate( { templateName }: { templateName: string } ) {
 		if ( this.wpCoreVersion >= 6.9 ) {
 			await this.revertTemplateSiceWP69( { templateName } );
 		} else {
-			await this.revertTemplateTillWP69( { templateName } );
+			await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
 		}
 	}
 
