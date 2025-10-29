@@ -384,6 +384,16 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
+		$src_locale = get_locale();
+		// If the locale is longer than PayPal's string limit (10).
+		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
+			// Keep only the main language and region parts.
+			$locale_parts = explode( '_', $src_locale );
+			if ( count( $locale_parts ) >= 2 ) {
+				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
+			}
+		}
+
 		$params = array(
 			'intent'         => $this->get_paypal_order_intent(),
 			'payment_source' => array(
@@ -396,7 +406,7 @@ class WC_Gateway_Paypal_Request {
 						// Customer redirected here on cancellation.
 						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                => str_replace( '_', '-', get_locale() ),
+						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
@@ -416,7 +426,14 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
-		if ( WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING !== $shipping_preference ) {
+		if ( ! in_array(
+			$shipping_preference,
+			array(
+				WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING,
+				WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS,
+			),
+			true
+		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
 				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
@@ -622,6 +639,14 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
+		// Make sure the country code is in the correct format.
+		if ( strlen( $country ) >= 3 ) {
+			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
+				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
+			}
+			$country = substr( $country, 0, WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH );
+		}
+
 		// Postal code is typically required, but not always. The create-order request
 		// will fail if it is missing for a country that requires it.
 		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
@@ -640,7 +665,7 @@ class WC_Gateway_Paypal_Request {
 				'admin_area_1'   => $this->limit_length( $state, WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
 				'admin_area_2'   => $this->limit_length( $city, WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
 				'postal_code'    => $this->limit_length( $postcode, WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
-				'country_code'   => $country,
+				'country_code'   => strtoupper( $country ),
 			),
 		);
 	}
