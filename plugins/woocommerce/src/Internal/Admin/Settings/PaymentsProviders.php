@@ -86,9 +86,9 @@ class PaymentsProviders {
 	 * These are hints for the UI to determine if and how to display the link.
 	 */
 	public const LINK_TYPE_SUPPORT = 'support';
-	public const LINK_TYPE_DOCS = 'documentation';
-	public const LINK_TYPE_ABOUT = 'about';
-	public const LINK_TYPE_TERMS = 'terms';
+	public const LINK_TYPE_DOCS    = 'documentation';
+	public const LINK_TYPE_ABOUT   = 'about';
+	public const LINK_TYPE_TERMS   = 'terms';
 	public const LINK_TYPE_PRICING = 'pricing';
 
 	/**
