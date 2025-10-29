@@ -69,11 +69,11 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 	 */
 	public function provide_test_country_requires_postal_code() {
 		return array(
-			'empty' => array(
+			'empty'            => array(
 				'country'  => '',
 				'expected' => false,
 			),
-			'invalid' => array(
+			'invalid'          => array(
 				'country'  => 'XX',
 				'expected' => false,
 			),
@@ -81,7 +81,7 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 				'country'  => 'IE',
 				'expected' => false,
 			),
-			'requires' => array(
+			'requires'         => array(
 				'country'  => 'US',
 				'expected' => true,
 			),
