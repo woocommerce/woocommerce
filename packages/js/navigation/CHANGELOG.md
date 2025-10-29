@@ -64,6 +64,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update dependency `history` to ^5.3.0
 -   Patch - Standardize lint scripts: add lint:fix
 -   Patch - Update dependency history to ^5.3.0
--    - Upgraded react-router-dom to v6, which itself causes breaking changes. This upgrade will require consumers to also upgrade their react-router-dom to v6. #33156
+-   Upgraded react-router-dom to v6, which itself causes breaking changes. This upgrade will require consumers to also upgrade their react-router-dom to v6. #33156
 
 [See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/navigation/CHANGELOG.md).
