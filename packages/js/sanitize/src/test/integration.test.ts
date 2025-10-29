@@ -42,4 +42,3 @@ describe( 'sanitizeHTML integration tests', () => {
 		expect( result ).toContain( 'Link' );
 	} );
 } );
-
