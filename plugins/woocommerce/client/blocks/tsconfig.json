@@ -10,7 +10,8 @@
 		"./assets/js/blocks/mini-cart/mini-cart-contents/inner-blocks/**/block.json",
 		"./storybook/**/*",
 		"./tests/integration/**/*",
-		"./tests/js/**/*"
+		"./tests/js/**/*",
+		"./packages/prices/index.js"
 	],
 	"exclude": [
 		"./storybook/build",

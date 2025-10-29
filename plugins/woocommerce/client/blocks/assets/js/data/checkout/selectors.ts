@@ -5,6 +5,7 @@ import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
 import type { AddressFormType } from '@woocommerce/settings';
+import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -12,7 +13,6 @@ import type { AddressFormType } from '@woocommerce/settings';
 import { STATUS } from './constants';
 import { CheckoutState } from './default-state';
 import { STORE_KEY as cartStoreKey } from '../cart/constants';
-import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 export const getCustomerId = ( state: CheckoutState ) => {
 	return state.customerId;

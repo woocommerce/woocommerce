@@ -10,13 +10,13 @@ import {
 	deriveSelectedShippingRates,
 } from '@woocommerce/base-utils';
 import isShallowEqual from '@wordpress/is-shallow-equal';
+import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
 import { useStoreEvents } from '../use-store-events';
 import type { ShippingData } from './types';
-import { SHIPPING_METHOD_SELECTOR_ENABLED } from '@woocommerce/block-settings';
 
 export const useShippingData = (): ShippingData => {
 	const {
