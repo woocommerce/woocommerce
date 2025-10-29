@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types=1 );
+
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
@@ -11,8 +13,8 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for `country_requires_city`.
 	 *
-	 * @param string $country ISO 3166-1 alpha-2 country code.
-	 * @param bool $expected  Expected result.
+	 * @param string $country  ISO 3166-1 alpha-2 country code.
+	 * @param bool   $expected Expected result.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_country_requires_city
@@ -50,8 +52,8 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 	/**
 	 * Tests for `country_requires_postal_code`.
 	 *
-	 * @param string $country ISO 3166-1 alpha-2 country code.
-	 * @param bool $expected  Expected result.
+	 * @param string $country  ISO 3166-1 alpha-2 country code.
+	 * @param bool   $expected Expected result.
 	 * @return void
 	 *
 	 * @dataProvider provide_test_country_requires_postal_code
