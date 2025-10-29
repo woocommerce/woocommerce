@@ -5,7 +5,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
-import { CommandMenu } from '@wordpress/commands';
+import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor,
@@ -57,9 +57,7 @@ export function InnerEditor( {
 		'post-only'
 	);
 
-	// isFullScreenForced – comes from settings and cannot be changed by the user
-	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
-	const { post, template, isFullscreenEnabled } = useSelect(
+	const { post, template } = useSelect(
 		( select ) => {
 			const { getEntityRecord } = select( coreStore );
 			const { getEditedPostTemplate } = select( storeName );
@@ -74,12 +72,21 @@ export function InnerEditor( {
 						? getEditedPostTemplate( postObject.template )
 						: null,
 				post: postObject,
-				isFullscreenEnabled:
-					select( storeName ).isFeatureActive( 'fullscreenMode' ),
 			};
 		},
 		[ currentPost.postType, currentPost.postId ]
 	);
+
+	// isFullScreenForced – comes from settings and cannot be changed by the user
+	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
+	const { isFullscreenEnabled, allCommands } = useSelect( ( select ) => {
+		return {
+			isFullscreenEnabled:
+				select( storeName ).isFeatureActive( 'fullscreenMode' ),
+			allCommands: select( commandsStore ).getCommands(),
+		};
+	}, [] );
+
 	const { isFullScreenForced, displaySendEmailButton } = settings;
 
 	// @ts-expect-error Type is missing in @types/wordpress__editor
@@ -124,12 +131,14 @@ export function InnerEditor( {
 	}
 
 	recordEventOnce( 'editor_layout_loaded' );
-
 	return (
 		<SlotFillProvider>
 			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
-				<CommandMenu />
+				{ /* The CommandMenu is not needed if the commands are registered. The CommandMenu can be removed after we drop support for WP 6.8. */ }
+				{ ( ! allCommands || allCommands.length === 0 ) && (
+					<CommandMenu />
+				) }
 				<Editor
 					postId={ currentPost.postId }
 					postType={ currentPost.postType }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the Command palette is functional in WordPress 6.9 beta and above.
