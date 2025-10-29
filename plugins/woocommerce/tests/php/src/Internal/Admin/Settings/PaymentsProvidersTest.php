@@ -5505,6 +5505,118 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that provider link types with mixed case are normalized to lowercase.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_normalize_mixed_case_types(): void {
+		// Arrange - Create a fake gateway that provides links with mixed-case types.
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => 'Documentation', // Mixed case - should normalize to 'documentation'.
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => 'SUPPORT', // All caps - should normalize to 'support'.
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						'_type' => 'aBOut', // Random mixed - should normalize to 'about'.
+						'url'   => 'https://example.com/about',
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 3, $gateway_details['links'], 'Should have 3 valid links' );
+
+		// Verify all types are normalized to lowercase.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL should match' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/support', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_ABOUT, $gateway_details['links'][2]['_type'], 'Third link type should be normalized to lowercase' );
+		$this->assertSame( 'https://example.com/about', $gateway_details['links'][2]['url'], 'Third link URL should match' );
+	}
+
+	/**
+	 * Test that provider links with disallowed URL schemes are filtered out.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_filter_disallowed_url_schemes(): void {
+		// Arrange - Create a fake gateway with various URL schemes.
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs', // Valid HTTPS URL.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'javascript:alert(1)', // Disallowed scheme - XSS attempt.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'data:text/html,<script>alert(1)</script>', // Disallowed scheme.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'http://example.com/pricing', // Valid HTTP URL.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'vbscript:msgbox(1)', // Disallowed scheme.
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 2, $gateway_details['links'], 'Should have 2 valid links (3 malicious links filtered out)' );
+
+		// Verify only the valid HTTP/HTTPS links are included.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL should be HTTPS' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_PRICING, $gateway_details['links'][1]['_type'], 'Second link should be pricing' );
+		$this->assertSame( 'http://example.com/pricing', $gateway_details['links'][1]['url'], 'Second link URL should be HTTP' );
+
+		// Verify that no javascript:, data:, or vbscript: URLs made it through.
+		foreach ( $gateway_details['links'] as $link ) {
+			$this->assertStringNotContainsString( 'javascript:', $link['url'], 'No javascript: URLs should be present' );
+			$this->assertStringNotContainsString( 'data:', $link['url'], 'No data: URLs should be present' );
+			$this->assertStringNotContainsString( 'vbscript:', $link['url'], 'No vbscript: URLs should be present' );
+		}
+	}
+
+	/**
 	 * Load the WC core PayPal gateway but not enable it.
 	 *
 	 * @return void
