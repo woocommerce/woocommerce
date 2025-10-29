@@ -4,6 +4,7 @@ export { default as ExperimentalOrderMeta } from './order-meta';
 export { default as ExperimentalDiscountsMeta } from './discounts-meta';
 export { default as ExperimentalOrderShippingPackages } from './order-shipping-packages';
 export { default as ExperimentalOrderLocalPickupPackages } from './order-local-pickup-packages';
+export { default as MiniCartSlotWrapper } from './mini-cart-slot-wrapper';
 export { default as Panel } from '../../components/panel';
 export { default as Button } from '../../components/button';
 export { default as Label } from './label';

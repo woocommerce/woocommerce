@@ -949,6 +949,8 @@ store(
 					! ( window as any ).wp?.plugins?.PluginArea ||
 					! ( window as any ).wc?.blocksCheckout
 						?.ExperimentalDiscountsMeta ||
+					! ( window as any ).wc?.blocksCheckout
+						?.MiniCartSlotWrapper ||
 					! ( window as any ).wc?.blocksCheckout?.SlotFillProvider
 				) {
 					console.warn(
@@ -963,6 +965,8 @@ store(
 								?.PluginArea,
 							hasDiscountsMeta: !! ( window as any ).wc
 								?.blocksCheckout?.ExperimentalDiscountsMeta,
+							hasMiniCartSlotWrapper: !! ( window as any ).wc
+								?.blocksCheckout?.MiniCartSlotWrapper,
 							hasSlotFillProvider: !! ( window as any ).wc
 								?.blocksCheckout?.SlotFillProvider,
 						}
@@ -973,115 +977,45 @@ store(
 				const { createElement, Fragment } = ( window as any ).wp
 					.element;
 				const { PluginArea } = ( window as any ).wp.plugins;
-				const { ExperimentalDiscountsMeta, SlotFillProvider } = (
-					window as any
-				 ).wc.blocksCheckout;
+				const {
+					ExperimentalDiscountsMeta,
+					MiniCartSlotWrapper,
+					SlotFillProvider,
+				} = ( window as any ).wc.blocksCheckout;
 
 				// Create React root once and render the slot component
-				// We need to use createElement instead of calling the component as a function
-				// and wrap it in SlotFillProvider for the slot/fill context
 				if ( ! discountsSlotReactRoot ) {
 					discountsSlotReactRoot = (
 						window as any
 					 ).wp.element.createRoot( container );
 				}
 
-				// Create render function that can be called from watch callback
-				discountsSlotRenderFn = () => {
-					// Transform Interactivity API cart format to match StoreCart format
-					// move this to a getter in the WooCommerce store
-					const transformedCart = {
-						cartCoupons: woocommerceState.cart.coupons || [],
-						cartItems: woocommerceState.cart.items || [],
-						cartItemsCount: woocommerceState.cart.itemsCount || 0,
-						cartItemsWeight: woocommerceState.cart.itemsWeight || 0,
-						cartTotals: woocommerceState.cart.totals || {},
-						cartFees: woocommerceState.cart.fees || [],
-						cartNeedsShipping:
-							woocommerceState.cart.needsShipping ?? true,
-						cartNeedsPayment:
-							woocommerceState.cart.needsPayment ?? false,
-						cartHasCalculatedShipping:
-							woocommerceState.cart.hasCalculatedShipping ??
-							false,
-						shippingAddress:
-							woocommerceState.cart.shippingAddress || {},
-						billingAddress:
-							woocommerceState.cart.billingAddress || {},
-						shippingRates:
-							woocommerceState.cart.shippingRates || [],
-						crossSellsProducts:
-							woocommerceState.cart.crossSells || [],
-						cartErrors: woocommerceState.cart.errors || [],
-						extensions: woocommerceState.cart.extensions || {},
-						paymentMethods:
-							woocommerceState.cart.paymentMethods || [],
-						paymentRequirements:
-							woocommerceState.cart.paymentRequirements || [],
-						...woocommerceState.cart,
-					};
+				// Render using MiniCartSlotWrapper which handles cart data automatically
+				const wrapperElement = createElement( MiniCartSlotWrapper, {
+					slotComponent: ExperimentalDiscountsMeta.Slot,
+					slotProps: {
+						context: 'woocommerce/mini-cart',
+					},
+				} );
 
-					const slotElement = createElement(
-						ExperimentalDiscountsMeta.Slot,
-						{
-							extensions: woocommerceState.cart.extensions,
-							cart: transformedCart,
-							context: 'woocommerce/mini-cart',
-						}
-					);
+				// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
+				// This allows fills registered via registerPlugin to appear
+				const pluginAreaElement = createElement( PluginArea, {
+					scope: 'woocommerce-checkout',
+				} );
 
-					// Add PluginArea with scope 'woocommerce-checkout' to render registered plugins
-					// This allows fills registered via registerPlugin to appear
-					const pluginAreaElement = createElement( PluginArea, {
-						scope: 'woocommerce-checkout',
-					} );
-
-					// Wrap both the slot and PluginArea in SlotFillProvider so fills can be registered
-					const providerElement = createElement(
-						SlotFillProvider,
+				const providerElement = createElement(
+					SlotFillProvider,
+					null,
+					createElement(
+						Fragment,
 						null,
-						createElement(
-							Fragment,
-							null,
-							slotElement,
-							pluginAreaElement
-						)
-					);
+						wrapperElement,
+						pluginAreaElement
+					)
+				);
 
-					console.log(
-						'Mini Cart: Rendering discount slot with cart:',
-						woocommerceState.cart
-					);
-					console.log(
-						'Mini Cart: PluginArea will render plugins with scope "woocommerce-checkout"'
-					);
-					discountsSlotReactRoot.render( providerElement );
-				};
-
-				// Initial render
-				discountsSlotRenderFn();
-			},
-
-			// Log registered plugins for debugging
-
-			watchCartForSlotUpdate() {
-				// Access cart properties to make this callback reactive to cart changes
-				// When any of these properties change, this callback will run again
-				// woocommerceState is accessed the same way as in state getters above
-				const { coupons, items, totals } = woocommerceState.cart;
-
-				// Trigger re-render when cart changes
-				if ( discountsSlotRenderFn ) {
-					console.log(
-						'Mini Cart: Cart changed via data-wp-watch, re-rendering slot',
-						{
-							couponsCount: ( coupons as any[] )?.length,
-							itemsCount: ( items as any[] )?.length,
-							totalPrice: ( totals as any )?.total_price,
-						}
-					);
-					discountsSlotRenderFn();
-				}
+				discountsSlotReactRoot.render( providerElement );
 			},
 		},
 	},
