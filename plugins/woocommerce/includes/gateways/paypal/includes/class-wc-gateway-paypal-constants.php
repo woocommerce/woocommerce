@@ -63,6 +63,7 @@ class WC_Gateway_Paypal_Constants {
 	const PAYPAL_STATE_MAX_LENGTH           = 300;
 	const PAYPAL_CITY_MAX_LENGTH            = 120;
 	const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
+	const PAYPAL_LOCALE_MAX_LENGTH          = 10;
 
 	/**
 	 * Supported payment sources.

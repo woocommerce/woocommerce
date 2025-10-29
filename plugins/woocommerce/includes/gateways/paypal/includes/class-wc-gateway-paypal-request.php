@@ -410,6 +410,16 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
+		$src_locale = get_locale();
+		// If the locale is longer than PayPal's string limit (10).
+		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
+			// Keep only the main language and region parts.
+			$locale_parts = explode( '_', $src_locale );
+			if ( count( $locale_parts ) >= 2 ) {
+				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
+			}
+		}
+
 		$params = array(
 			'intent'         => $this->get_paypal_order_intent(),
 			'payment_source' => array(
@@ -422,7 +432,7 @@ class WC_Gateway_Paypal_Request {
 						// Customer redirected here on cancellation.
 						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                => str_replace( '_', '-', get_locale() ),
+						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
