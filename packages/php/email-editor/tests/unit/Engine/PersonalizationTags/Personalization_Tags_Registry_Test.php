@@ -150,7 +150,42 @@ class PersonalizationTagsRegistryTest extends TestCase {
 		$this->assertArrayHasKey( '[tag-2]', $all_tags );
 	}
 
+	/**
+	 * Unregister a tag and ensure it's removed.
+	 */
+	public function testUnregisterTag(): void {
+		$callback = function () {
+			return 'Value';
+		};
 
+		// Register a tag.
+		$this->registry->register( new Personalization_Tag( 'tag1', '[tag-1]', 'Category 1', $callback ) );
+
+		// Verify the tag is registered.
+		$this->assertNotNull( $this->registry->get_by_token( '[tag-1]' ) );
+
+		// Unregister the tag.
+		$unregistered_tag = $this->registry->unregister( '[tag-1]' );
+
+		// Assert the unregistered tag is returned.
+		$this->assertNotNull( $unregistered_tag );
+		$this->assertSame( 'tag1', $unregistered_tag->get_name() );
+		$this->assertSame( '[tag-1]', $unregistered_tag->get_token() );
+
+		// Verify the tag is no longer in the registry.
+		$this->assertNull( $this->registry->get_by_token( '[tag-1]' ) );
+	}
+
+	/**
+	 * Try to unregister a tag that doesn't exist.
+	 */
+	public function testUnregisterNonexistentTag(): void {
+		// Attempt to unregister a tag that was never registered.
+		$result = $this->registry->unregister( '[nonexistent]' );
+
+		// Assert that null is returned.
+		$this->assertNull( $result );
+	}
 
 	/**
 	 * Initialize the registry and apply a filter.
