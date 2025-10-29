@@ -280,10 +280,10 @@ class PaymentGateway {
 			if ( method_exists( $payment_gateway, 'get_provider_links' ) &&
 				is_callable( array( $payment_gateway, 'get_provider_links' ) ) ) {
 
-				$provider_links = call_user_func_array(
-					array( $payment_gateway, 'get_provider_links' ),
-					array( $country_code ),
-				);
+					$provider_links = call_user_func(
+						array( $payment_gateway, 'get_provider_links' ),
+						$country_code
+					);
 
 				// Validate and normalize the links list.
 				$accepted_types  = array(
