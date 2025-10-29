@@ -162,16 +162,16 @@ export function getFileChanges(
 	// Third iteration: assign files to projects based on CI config patterns.
 	// This allows projects to claim files that match their CI config patterns,
 	// even if those files are in nested package directories.
-	const allNodes = [];
-	const queue = [ projectGraph ];
-	const visited: { [ name: string ]: boolean } = {};
+	const allNodes: ProjectNode[] = [];
+	const queue: ProjectNode[] = [ projectGraph ];
+	const visited = new Set< string >();
 	while ( queue.length > 0 ) {
 		const node = queue.shift();
-		if ( ! node || visited[ node.name ] ) {
+		if ( ! node || visited.has( node.name ) ) {
 			continue;
 		}
 		allNodes.push( node );
-		visited[ node.name ] = true;
+		visited.add( node.name );
 		queue.push( ...node.dependencies );
 	}
 

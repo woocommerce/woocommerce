@@ -150,16 +150,19 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 		// Files should be assigned to both projects:
 		// - block-library gets files in its path (both test and src files)
 		// - plugin gets files matching its CI config pattern (test files only)
-		expect( fileChanges ).toMatchObject( {
-			'@woocommerce/plugin-woocommerce': [
-				'changelog/fix-123',
-				'client/blocks/tests/e2e/test.spec.ts',
-			],
-			'@woocommerce/block-library': [
-				'tests/e2e/test.spec.ts',
-				'src/block.tsx',
-			],
-		} );
+		expect( fileChanges ).not.toBe( true );
+		if ( fileChanges !== true ) {
+			expect( fileChanges ).toMatchObject( {
+				'@woocommerce/plugin-woocommerce': [
+					'changelog/fix-123',
+					'client/blocks/tests/e2e/test.spec.ts',
+				],
+				'@woocommerce/block-library': [
+					'tests/e2e/test.spec.ts',
+					'src/block.tsx',
+				],
+			} );
+		}
 	} );
 
 	it( 'should not assign files to projects if CI config pattern does not match', () => {
@@ -202,15 +205,18 @@ plugins/woocommerce/client/blocks/assets/style.scss`;
 		);
 
 		// Only block-library should get the files since they don't match plugin's CI patterns
-		expect( fileChanges ).toMatchObject( {
-			'@woocommerce/block-library': [
-				'src/block.tsx',
-				'assets/style.scss',
-			],
-		} );
-		expect(
-			fileChanges[ '@woocommerce/plugin-woocommerce' ]
-		).toBeUndefined();
+		expect( fileChanges ).not.toBe( true );
+		if ( fileChanges !== true ) {
+			expect( fileChanges ).toMatchObject( {
+				'@woocommerce/block-library': [
+					'src/block.tsx',
+					'assets/style.scss',
+				],
+			} );
+			expect(
+				fileChanges[ '@woocommerce/plugin-woocommerce' ]
+			).toBeUndefined();
+		}
 	} );
 
 	it( 'should handle multiple CI config patterns from different jobs', () => {
@@ -263,16 +269,19 @@ plugins/woocommerce/client/blocks/src/block.tsx`;
 		);
 
 		// Plugin should get both e2e and unit test files
-		expect( fileChanges ).toMatchObject( {
-			'@woocommerce/plugin-woocommerce': [
-				'client/blocks/tests/e2e/test.spec.ts',
-				'client/blocks/tests/unit/test.spec.ts',
-			],
-			'@woocommerce/block-library': [
-				'tests/e2e/test.spec.ts',
-				'tests/unit/test.spec.ts',
-				'src/block.tsx',
-			],
-		} );
+		expect( fileChanges ).not.toBe( true );
+		if ( fileChanges !== true ) {
+			expect( fileChanges ).toMatchObject( {
+				'@woocommerce/plugin-woocommerce': [
+					'client/blocks/tests/e2e/test.spec.ts',
+					'client/blocks/tests/unit/test.spec.ts',
+				],
+				'@woocommerce/block-library': [
+					'tests/e2e/test.spec.ts',
+					'tests/unit/test.spec.ts',
+					'src/block.tsx',
+				],
+			} );
+		}
 	} );
 } );
