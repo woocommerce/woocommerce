@@ -416,7 +416,7 @@ class WC_Gateway_Paypal_Request {
 		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
 			// Keep only the main language and region parts.
 			$locale_parts = explode( '_', $src_locale );
-			if ( count( $locale_parts ) >= 2 ) {
+			if ( count( $locale_parts ) > 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
 			}
 		}
