@@ -725,7 +725,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Convert to alpha-2 code.
-		return Countries::getAlpha2Code( strtolower( $country_code ) );
+		return IntlCountries::getAlpha2Code( strtolower( $country_code ) );
 	}
 
 	/**
