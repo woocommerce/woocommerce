@@ -56,7 +56,6 @@
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
-		"changelog": "composer install --quiet && composer exec -- changelogger",
 		"dev": "wp-scripts start",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
