@@ -66,7 +66,12 @@ test.describe( 'Single Product template', () => {
 		await admin.visitSiteEditor( {
 			postType: testData.templateType,
 		} );
-		await editor.revertTemplate( { templateName: testData.templateName } );
+		// Templates added via "New template" display the path as the name since WP 6.9.
+		const templateName =
+			wpCoreVersion >= 6.9
+				? testData.templatePath
+				: testData.templateName;
+		await editor.revertTemplate( { templateName } );
 		await page.goto( testData.permalink );
 
 		// Verify the edits are no longer visible.
