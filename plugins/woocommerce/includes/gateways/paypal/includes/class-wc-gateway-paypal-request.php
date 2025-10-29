@@ -712,33 +712,37 @@ class WC_Gateway_Paypal_Request {
 	 * @return string|null
 	 */
 	private function normalize_paypal_order_shipping_country_code( $country_code ) {
-		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
-		if ( strlen( $country_code ) < $max_country_code_length ) {
-			if ( ! IntlCountries::exists( $country_code ) ) {
-				WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $country_code ) );
+		// Normalize to uppercase.
+		$code = strtoupper( trim( (string) $country_code ) );
+
+		// Check if it's a valid alpha-2 code.
+		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
+			if ( ! IntlCountries::exists( $code ) ) {
+				WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
 				return null;
 			}
 
 			// Country code is already in alpha-2 format.
-			return $country_code;
+			return $code;
 		}
 
-		// Log if we get an unexpected country code length.
-		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country_code ), $country_code ) );
+		// Log when we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
 
 		// Truncate to expected maximum length.
-		if ( strlen( $country_code ) > $max_country_code_length ) {
-			$country_code = substr( $country_code, 0, $max_country_code_length );
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $code ) > $max_country_code_length ) {
+			$code = substr( $code, 0, $max_country_code_length );
 		}
 
 		// Check if it's a valid alpha-3 code.
-		if ( ! IntlCountries::alpha3CodeExists( $country_code ) ) {
-			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $country_code ) );
+		if ( ! IntlCountries::alpha3CodeExists( $code ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
 			return null;
 		}
 
 		// Convert to alpha-2 code.
-		return IntlCountries::getAlpha2Code( $country_code );
+		return IntlCountries::getAlpha2Code( $code );
 	}
 
 	/**
