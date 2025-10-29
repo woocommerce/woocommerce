@@ -405,6 +405,8 @@ class WC_Gateway_Paypal_Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
+	 *
+	 * @throws Exception If the order items cannot be built.
 	 */
 	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
@@ -424,7 +426,7 @@ class WC_Gateway_Paypal_Request {
 		if ( empty( $order_items ) ) {
 			// If we cannot build order items (e.g., negative item amounts),
 			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order items for order ID: ' . $order->get_id() );
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
 		}
 
 		$params = array(
