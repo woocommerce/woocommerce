@@ -41,6 +41,13 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	protected $store_admin_id;
 
 	/**
+	 * The previous store currency value to restore in tearDown.
+	 *
+	 * @var string|null
+	 */
+	private $prev_currency;
+
+	/**
 	 * Set up test.
 	 */
 	public function setUp(): void {
@@ -48,6 +55,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 
 		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $this->store_admin_id );
+
+		// Save the current currency to restore in tearDown.
+		$this->prev_currency = get_option( 'woocommerce_currency', null );
 
 		$this->mock_extension_suggestions = $this->getMockBuilder( ExtensionSuggestions::class )
 			->disableOriginalConstructor()
@@ -67,6 +77,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 		if ( isset( $this->sut ) ) {
 			$this->sut->reset_memo();
+		}
+
+		// Restore the previous currency to prevent test leakage.
+		if ( null !== $this->prev_currency ) {
+			update_option( 'woocommerce_currency', $this->prev_currency );
 		}
 
 		parent::tearDown();
@@ -5667,6 +5682,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	 */
 	private function unload_core_paypal_pg() {
 		delete_option( 'woocommerce_paypal_settings' );
+		delete_option( 'woocommerce_currency' );
 
 		$this->sut->reset_memo();
 	}
