@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<psalm>
+    <projectFiles>
+        <file name="woocommerce.php"/>
+    </projectFiles>
+<plugins><pluginClass xmlns="https://getpsalm.org/schema/config" class="PsalmWordPress\Plugin"/></plugins></psalm>

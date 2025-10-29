@@ -67,6 +67,7 @@
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
 		"szepeviktor/phpstan-wordpress": "*",
+		"vimeo/psalm": "*",
 		"woocommerce/monorepo-plugin": "*",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
