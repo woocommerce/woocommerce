@@ -5632,6 +5632,79 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that provider links are deduplicated by type and URL combination.
+	 *
+	 * @return void
+	 */
+	public function test_provider_links_deduplicate_by_type_and_url(): void {
+		// Arrange - Create a fake gateway with duplicate links (same type + URL).
+		$fake_gateway = new FakePaymentGateway(
+			'test_gateway',
+			array(
+				'enabled'        => true,
+				'method_title'   => 'Test Gateway',
+				'plugin_slug'    => 'test-plugin',
+				'plugin_file'    => 'test-plugin/test-plugin',
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs', // Exact duplicate - should be removed.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/other-docs', // Same type, different URL - should be kept.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/docs', // Different type, same URL as first - should be kept.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support', // Exact duplicate - should be removed.
+					),
+				),
+			),
+		);
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_base_details( $fake_gateway, 0 );
+
+		// Assert.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 4, $gateway_details['links'], 'Should have 4 unique links (2 duplicates removed)' );
+
+		// Verify the deduplicated links are in the expected order (first occurrence kept).
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][0]['url'], 'First link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][1]['_type'], 'Second link should be docs with different URL' );
+		$this->assertSame( 'https://example.com/other-docs', $gateway_details['links'][1]['url'], 'Second link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][2]['_type'], 'Third link should be support with same URL as first docs' );
+		$this->assertSame( 'https://example.com/docs', $gateway_details['links'][2]['url'], 'Third link URL' );
+
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][3]['_type'], 'Fourth link should be support' );
+		$this->assertSame( 'https://example.com/support', $gateway_details['links'][3]['url'], 'Fourth link URL' );
+
+		// Additional verification - ensure we don't have any duplicate type+URL combinations.
+		$seen_combinations = array();
+		foreach ( $gateway_details['links'] as $link ) {
+			$combination = $link['_type'] . '|' . $link['url'];
+			$this->assertArrayNotHasKey( $combination, $seen_combinations, 'Each type+URL combination should be unique' );
+			$seen_combinations[ $combination ] = true;
+		}
+	}
+
+	/**
 	 * Load the WC core PayPal gateway but not enable it.
 	 *
 	 * @return void
