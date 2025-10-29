@@ -281,7 +281,11 @@ export class Editor extends CoreEditor {
 					name: 'Activate',
 				} );
 				if ( await activationButton.isVisible() ) {
+					const activationMessage = this.page
+						.getByLabel( 'Editor content' )
+						.getByText( 'Template activated.' );
 					await activationButton.click();
+					await activationMessage.waitFor();
 				}
 			}
 		} catch ( error ) {
