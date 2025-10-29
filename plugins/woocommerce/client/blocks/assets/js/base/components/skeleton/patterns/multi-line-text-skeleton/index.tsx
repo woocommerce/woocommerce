@@ -3,13 +3,13 @@
  */
 import { Skeleton } from '../..';
 
-interface ProductShortDescriptionSkeletonProps {
+interface MultiLineTextSkeletonProps {
 	isStatic?: boolean;
 }
 
-export const ProductShortDescriptionSkeleton = ( {
+export const MultiLineTextSkeleton = ( {
 	isStatic = false,
-}: ProductShortDescriptionSkeletonProps ) => {
+}: MultiLineTextSkeletonProps ) => {
 	return (
 		<div className="wc-block-components-skeleton">
 			<Skeleton height="16px" isStatic={ isStatic } />
