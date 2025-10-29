@@ -642,7 +642,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -663,7 +663,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -684,7 +684,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -705,7 +705,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -726,7 +726,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -841,7 +841,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -862,7 +862,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -883,7 +883,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -904,7 +904,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -925,7 +925,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -978,7 +978,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -999,7 +999,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1020,7 +1020,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1041,7 +1041,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1062,7 +1062,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1129,7 +1129,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -1150,7 +1150,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1171,7 +1171,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1192,7 +1192,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1213,7 +1213,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1268,7 +1268,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => null,
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url1',
 					),
 				),
@@ -1289,7 +1289,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 2',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url2',
 					),
 				),
@@ -1310,7 +1310,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 3',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url3',
 					),
 				),
@@ -1331,7 +1331,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 4',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url4',
 					),
 				),
@@ -1352,7 +1352,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'short_description' => 'short description 5',
 				'links'             => array(
 					array(
-						'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 						'url'   => 'url5',
 					),
 				),
@@ -1425,7 +1425,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1474,7 +1474,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1533,7 +1533,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1599,7 +1599,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1678,7 +1678,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1738,7 +1738,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1803,7 +1803,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1873,7 +1873,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),
@@ -1940,7 +1940,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			'short_description' => null,
 			'links'             => array(
 				array(
-					'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+					'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 					'url'   => 'url1',
 				),
 			),

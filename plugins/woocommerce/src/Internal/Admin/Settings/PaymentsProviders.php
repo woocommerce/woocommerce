@@ -80,6 +80,17 @@ class PaymentsProviders {
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
 
+	/*
+	 * The provider link types.
+	 *
+	 * These are hints for the UI to determine if and how to display the link.
+	 */
+	public const LINK_TYPE_SUPPORT = 'support';
+	public const LINK_TYPE_DOCS = 'documentation';
+	public const LINK_TYPE_ABOUT = 'about';
+	public const LINK_TYPE_TERMS = 'terms';
+	public const LINK_TYPE_PRICING = 'pricing';
+
 	/**
 	 * The map of gateway IDs to their respective provider classes.
 	 *
@@ -1264,7 +1275,7 @@ class PaymentsProviders {
 				if ( is_array( $plugin_data ) && ! empty( $plugin_data['PluginURI'] ) ) {
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => esc_url( $plugin_data['PluginURI'] ),
 						),
 					);
@@ -1274,7 +1285,7 @@ class PaymentsProviders {
 					// Fallback to constructing the WPORG plugin URI from the normalized plugin slug.
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => 'https://wordpress.org/plugins/' . $normalized_plugin_slug,
 						),
 					);
