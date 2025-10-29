@@ -171,6 +171,7 @@ export class Editor extends CoreEditor {
 		await this.page
 			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
 			.click();
+		await this.page.getByText( 'moved to the trash.' ).first().waitFor();
 	}
 
 	async revertTemplateTillWP69( { templateName }: { templateName: string } ) {
