@@ -57,6 +57,21 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		// Reset gateways/hooks and controller memo between tests.
+		remove_all_actions( 'wc_payment_gateways_initialized' );
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
+		if ( isset( $this->sut ) ) {
+			$this->sut->reset_memo();
+		}
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test getting payment gateways.
 	 */
 	public function test_get_payment_gateways_with_core_gateways() {
@@ -82,7 +97,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		);
 
 		// Clean up.
-		$this->sut->reset_memo();
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -807,8 +822,14 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	 */
 	public function test_get_payment_gateway_details_does_not_override_excluded_gateway_titles() {
 		// Arrange.
-		$plugin_slug  = 'woocommerce-gateway-paypal';
-		$fake_gateway = new FakePaymentGateway(
+		$plugin_slug   = 'woocommerce-gateway-paypal';
+		$gateway_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://paypal-gateway.com/docs',
+			),
+		);
+		$fake_gateway  = new FakePaymentGateway(
 			'ppcp-gateway',
 			array(
 				'enabled'            => true,
@@ -818,6 +839,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'method_description' => '',
 				'plugin_slug'        => $plugin_slug,
 				'plugin_file'        => 'woocommerce-gateway-paypal/woocommerce-gateway-paypal.php',
+				'provider_links'     => $gateway_links,
 			),
 		);
 
@@ -833,6 +855,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'slug'  => $plugin_slug,
 			),
 			'icon'        => 'http://example.com/paypal-icon.png',
+			'links'       => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://suggestion.com/support',
+				),
+			),
 		);
 
 		$this->mock_extension_suggestions
@@ -847,6 +875,12 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert that title and description are NOT overridden for excluded gateways.
 		$this->assertSame( 'PayPal Gateway Original Method Title', $gateway_details['title'], 'Title should NOT be overridden for PayPal full-stack' );
 		$this->assertSame( 'PayPal gateway original description', $gateway_details['description'], 'Description should NOT be overridden for PayPal full-stack' );
+
+		// Assert that gateway's own links are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertCount( 1, $gateway_details['links'], 'Should have 1 link from gateway, not suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'Link type should be from gateway' );
+		$this->assertSame( 'https://paypal-gateway.com/docs', $gateway_details['links'][0]['url'], 'Link URL should be from gateway, not suggestion' );
 
 		// But icon should still be filled in from suggestion.
 		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
@@ -877,6 +911,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Assert.
 		// The PayPal gateway is a core gateway, so the slug is 'woocommerce'.
 		$this->assertSame( 'woocommerce', $slug );
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -1236,6 +1273,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'suggestion2', $suggestions['preferred'][1]['id'] );
 		// The rest are in the other list, ordered by priority.
 		$this->assertSame( array( 'suggestion3', 'suggestion4', 'suggestion5' ), array_column( $suggestions['other'], 'id' ) );
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -1524,6 +1564,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// The rest are in the other list, ordered by priority.
 		$this->assertCount( 3, $suggestions['other'] );
 		$this->assertSame( array( 'suggestion1', 'suggestion2', 'suggestion4' ), array_column( $suggestions['other'], 'id' ) );
+
+		// Clean up.
+		delete_user_meta( $this->store_admin_id, Payments::PAYMENTS_NOX_PROFILE_KEY );
 	}
 
 	/**
@@ -1665,6 +1708,9 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'suggestion3', $suggestions['other'][0]['id'] );
 		// Suggestion4 is not present because a suggestion with the same plugin slug is already present (preferred APM).
 		// Suggestion5 is not present because a suggestion with the same plugin slug is already present (preferred PSP).
+
+		// Clean up.
+		$this->unload_core_paypal_pg();
 	}
 
 	/**
@@ -2287,7 +2333,7 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->expectExceptionMessage( 'Invalid suggestion ID.' );
 
 		// Act.
-		$result = $this->sut->hide_extension_suggestion( $suggestion_id );
+		$this->sut->hide_extension_suggestion( $suggestion_id );
 	}
 
 	/**
@@ -2350,9 +2396,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			$expect_option_update ? 'Expected order map option to BE updated but it was not.' : 'Expected order map option to NOT BE updated but it was.'
 		);
 		$this->assertSame( $expected_order_map, get_option( PaymentsProviders::PROVIDERS_ORDER_OPTION ) );
-
-		// Clean up.
-		$this->unmock_payment_gateways();
 	}
 
 	/**
@@ -2384,9 +2427,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $expected_gateway_ids, $actual_gateway_ids );
-
-		// Clean up.
-		$this->unmock_payment_gateways();
 	}
 
 	/**
@@ -2575,17 +2615,6 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 			);
 		}
 
-		WC()->payment_gateways()->init();
-
-		$this->sut->reset_memo();
-	}
-
-	/**
-	 * Unmock the payment gateways.
-	 */
-	protected function unmock_payment_gateways() {
-		remove_all_actions( 'wc_payment_gateways_initialized' );
-		WC()->payment_gateways()->payment_gateways = array();
 		WC()->payment_gateways()->init();
 
 		$this->sut->reset_memo();
@@ -5517,6 +5546,15 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		WC()->payment_gateways()->init();
 
 		// Reset the controller memo to pick up the new gateway details.
+		$this->sut->reset_memo();
+	}
+
+	/**
+	 * Cleanup the core PayPal gateway.
+	 */
+	private function unload_core_paypal_pg() {
+		delete_option( 'woocommerce_paypal_settings' );
+
 		$this->sut->reset_memo();
 	}
 }
