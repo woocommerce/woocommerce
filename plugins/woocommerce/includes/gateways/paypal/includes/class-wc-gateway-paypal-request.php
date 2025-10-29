@@ -675,9 +675,10 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Make sure the country code is in the correct format.
-		$country = $this->normalize_paypal_order_shipping_country_code( $country );
+		$raw_country = $country;
+		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
 		if ( ! $country ) {
-			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code: %s', $country ), 'error' );
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
 			return null;
 		}
 
