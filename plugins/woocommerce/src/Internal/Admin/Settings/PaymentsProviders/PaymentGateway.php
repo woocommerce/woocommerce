@@ -55,6 +55,7 @@ class PaymentGateway {
 			'description' => $this->get_description( $gateway ),
 			'icon'        => $this->get_icon( $gateway ),
 			'supports'    => $this->get_supports_list( $gateway ),
+			'links'       => $this->get_provider_links( $gateway, $country_code ),
 			'state'       => array(
 				'enabled'           => $this->is_enabled( $gateway ),
 				'account_connected' => $this->is_account_connected( $gateway ),
@@ -218,6 +219,93 @@ class PaymentGateway {
 
 		// Ensure the list contains unique values and re-indexed.
 		return array_values( array_unique( $sanitized_list ) );
+	}
+
+	/**
+	 * Get the provider links list.
+	 *
+	 * These are contextual, in general external links aimed to help the user learn more about the payment provider and
+	 * reach out for help.
+	 *
+	 * Each link is an associative array with '_type' and 'url' keys.
+	 * The type is a string indicating the type of link, e.g., 'documentation', 'support', 'pricing', etc.
+	 * The only accepted types are the ones documented in the PaymentsProviders::LINK_TYPE_* constants.
+	 *
+	 * Example:
+	 *   array(
+	 *     array(
+	 *       '_type' => 'documentation',
+	 *       'url'   => 'https://example.com/docs',
+	 *     ),
+	 *     array(
+	 *       '_type' => 'support',
+	 *       'url'   => 'https://example.com/support',
+	 *     ),
+	 *   );
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which the providers are being requested.
+	 *                                            This is an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return array The provider links list.
+	 */
+	public function get_provider_links( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
+		$provider_links = array();
+
+		try {
+			// Try to get the links list from the payment gateway if it provides such method.
+			if ( method_exists( $payment_gateway, 'get_provider_links' ) &&
+				is_callable( array( $payment_gateway, 'get_provider_links' ) ) ) {
+
+				$provider_links = call_user_func_array(
+					array( $payment_gateway, 'get_provider_links' ),
+					array( $country_code ),
+				);
+
+				// Validate and normalize the links list.
+				$accepted_types  = array(
+					PaymentsProviders::LINK_TYPE_ABOUT,
+					PaymentsProviders::LINK_TYPE_DOCS,
+					PaymentsProviders::LINK_TYPE_SUPPORT,
+					PaymentsProviders::LINK_TYPE_PRICING,
+					PaymentsProviders::LINK_TYPE_TERMS,
+				);
+				$validated_links = array();
+				if ( is_array( $provider_links ) ) {
+					foreach ( $provider_links as $link ) {
+						if ( ! is_array( $link ) ) {
+							continue;
+						}
+						if ( empty( $link['_type'] ) || ! in_array( $link['_type'], $accepted_types, true ) ) {
+							continue;
+						}
+						if ( empty( $link['url'] ) || ! is_string( $link['url'] ) || ! wc_is_valid_url( $link['url'] ) ) {
+							continue;
+						}
+						$validated_links[] = array(
+							'_type' => $link['_type'],
+							'url'   => esc_url( $link['url'] ),
+						);
+					}
+				}
+
+				$provider_links = array_values( $validated_links );
+			}
+		} catch ( Throwable $e ) {
+			// Do nothing but log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->debug(
+				'Failed to get provider links: ' . $e->getMessage(),
+				array(
+					'gateway'   => $payment_gateway->id,
+					'source'    => 'settings-payments',
+					'exception' => $e,
+				)
+			);
+
+			return array();
+		}
+
+		return $provider_links;
 	}
 
 	/**
@@ -743,7 +831,8 @@ class PaymentGateway {
 	 */
 	public function get_recommended_payment_methods( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): array {
 		// Bail if the payment gateway does not implement the method.
-		if ( ! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
+		if ( ! method_exists( $payment_gateway, 'get_recommended_payment_methods' ) ||
+			! is_callable( array( $payment_gateway, 'get_recommended_payment_methods' ) ) ) {
 			return array();
 		}
 
@@ -751,7 +840,7 @@ class PaymentGateway {
 			// Get the "raw" recommended payment methods from the payment gateway.
 			$recommended_pms = call_user_func_array(
 				array( $payment_gateway, 'get_recommended_payment_methods' ),
-				array( 'country_code' => $country_code ),
+				array( $country_code ),
 			);
 			if ( ! is_array( $recommended_pms ) ) {
 				// Bail if the recommended payment methods are not an array.
