@@ -1,4 +1,4 @@
 Significance: major
 Type: update
 
-Remove WC_Data::clone override and clear meta_ids when updating the entity ID of an object.
+Update WC_Data meta_data IDs with WC_Data::set_id() instead of during ::__clone().

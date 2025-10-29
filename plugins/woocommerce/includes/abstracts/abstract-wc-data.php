@@ -152,6 +152,19 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * When the object is cloned, make sure meta is cloned correctly.
+	 *
+	 * @since 3.0.2
+	 */
+	public function __clone() {
+		if ( ! empty( $this->meta_data ) ) {
+			foreach ( $this->meta_data as $array_key => $meta ) {
+				$this->meta_data[ $array_key ] = clone $meta;
+			}
+		}
+	}
+
+	/**
 	 * Get the data store.
 	 *
 	 * @since  3.0.0
@@ -728,12 +741,10 @@ abstract class WC_Data {
 
 		if ( 0 !== $this->id && ! empty( $this->meta_data ) ) {
 			/**
-			 * Clone meta data objects to prevent shared references between the original
-			 * and new entity. Reset meta IDs to null so they're saved as new database
+			 * Reset meta IDs to null so they're saved as new database
 			 * records rather than updating the original object's meta.
 			 */
 			foreach ( $this->meta_data as $array_key => $meta ) {
-				$this->meta_data[ $array_key ] = clone $meta;
 				if ( ! empty( $meta->id ) ) {
 					$this->meta_data[ $array_key ]->id = null;
 				}
