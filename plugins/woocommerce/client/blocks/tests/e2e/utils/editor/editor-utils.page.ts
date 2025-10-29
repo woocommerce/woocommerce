@@ -156,6 +156,9 @@ export class Editor extends CoreEditor {
 	}
 
 	async revertTemplateSiceWP69( { templateName }: { templateName: string } ) {
+		await this.page
+			.getByRole( 'button', { name: 'Created templates' } )
+			.click();
 		await this.searchTemplate( { templateName } );
 
 		await this.page
@@ -163,9 +166,8 @@ export class Editor extends CoreEditor {
 			.first()
 			.click();
 		await this.page
-			.getByRole( 'menuitem', { name: /Move to trash/ } )
+			.getByRole( 'menuitem', { name: /Trash|Move to trash/ } )
 			.click();
-
 		await this.page
 			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
 			.click();
