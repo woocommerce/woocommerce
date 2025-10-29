@@ -719,6 +719,7 @@ class WC_Gateway_Paypal_Request {
 				return null;
 			}
 
+			// Country code is already in alpha-2 format.
 			return $country_code;
 		}
 
@@ -730,8 +731,14 @@ class WC_Gateway_Paypal_Request {
 			$country_code = substr( $country_code, 0, $max_country_code_length );
 		}
 
+		// Check if it's a valid alpha-3 code.
+		if ( ! IntlCountries::alpha3CodeExists( $country_code ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $country_code ) );
+			return null;
+		}
+
 		// Convert to alpha-2 code.
-		return IntlCountries::getAlpha2Code( strtolower( $country_code ) );
+		return IntlCountries::getAlpha2Code( $country_code );
 	}
 
 	/**
