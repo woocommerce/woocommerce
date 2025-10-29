@@ -574,10 +574,7 @@ class WC_Gateway_Paypal_Request {
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
-					'value'         => wc_format_decimal(
-						'fee' === $item->get_type() ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
-						wc_get_price_decimals()
-					),
+					'value'         => wc_format_decimal( $this->get_paypal_order_item_amount( $order, $item ), wc_get_price_decimals() ),
 				),
 			);
 		}
@@ -593,15 +590,26 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_order_items_subtotal( $order ) {
 		$total = 0;
-		foreach ( $order->get_items() as $item ) {
-			$total += (float) $item->get_subtotal();
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity(), false );
 		}
 
-		foreach ( $order->get_items( 'fee' ) as $fee ) {
-			$total += (float) $fee->get_amount();
-		}
+		return wc_remove_number_precision( $total );
+	}
 
-		return $total;
+	/**
+	 * Get the amount for a specific order item.
+	 *
+	 * @param WC_Order      $order Order object.
+	 * @param WC_Order_Item $item Order item.
+	 * @return float
+	 */
+	private function get_paypal_order_item_amount( $order, $item ) {
+		return (float) (
+			'fee' === $item->get_type()
+				? $item->get_amount()
+				: $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false )
+		);
 	}
 
 	/**
