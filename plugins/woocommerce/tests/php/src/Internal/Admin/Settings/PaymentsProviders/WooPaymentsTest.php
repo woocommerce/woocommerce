@@ -48,6 +48,15 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test.
+	 */
+	public function tearDown(): void {
+		wc_get_container()->reset_replacement( WooPaymentsRestController::class );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test get_details.
 	 */
 	public function test_get_details() {
@@ -132,6 +141,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 				'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim…',
 				'icon'        => 'https://example.com/icon.png',
 				'supports'    => array( 'products', 'something', 'bogus' ),
+				'links'       => array(),
 				'state'       => array(
 					'enabled'           => true,
 					'account_connected' => true,

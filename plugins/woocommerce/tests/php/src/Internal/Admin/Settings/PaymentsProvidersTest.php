@@ -401,6 +401,41 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 				'method_description'          => '',
 				'plugin_slug'                 => 'woocommerce-payments',
 				'plugin_file'                 => 'woocommerce-payments/woocommerce-payments.php',
+				'provider_links'              => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://woocommerce.com/docs/woocommerce-payments/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://woocommerce.com/my-account/create-a-ticket/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://woocommerce.com/terms-conditions/',
+					),
+					// Invalid link entries to test validation. These should be filtered out.
+					array(
+						// Missing '_type' field.
+						'url' => 'https://example.com/missing-type/',
+					),
+					array(
+						// Missing 'url' field.
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+					),
+					array(
+						'_type' => '',
+						'url'   => 'https://example.com/empty-type/',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => '',
+					),
+					// Invalid link, not an array at all.
+					'not_an_array',
+					// Invalid link with no data.
+					array(),
+				),
 				'recommended_payment_methods' => array(
 					// Basic PM.
 					array(
@@ -463,6 +498,27 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'Accept payments with WooPayments.', $gateway_details['description'] );
 		$this->assertArrayHasKey( 'supports', $gateway_details, 'Gateway `supports` entry is missing' );
 		$this->assertIsList( $gateway_details['supports'], 'Gateway `supports` entry is not a list' );
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway `links` entry is missing' );
+		$this->assertIsArray( $gateway_details['links'], 'Gateway `links` entry is not an array' );
+		$this->assertCount( 3, $gateway_details['links'], 'Gateway `links` should have 3 entries' );
+
+		// Validate each link has the required structure.
+		foreach ( $gateway_details['links'] as $link ) {
+			$this->assertIsArray( $link, 'Each link entry should be an array' );
+			$this->assertArrayHasKey( '_type', $link, 'Link entry should have `_type` field' );
+			$this->assertArrayHasKey( 'url', $link, 'Link entry should have `url` field' );
+			$this->assertNotEmpty( $link['_type'], 'Link `_type` should not be empty' );
+			$this->assertNotEmpty( $link['url'], 'Link `url` should not be empty' );
+		}
+
+		// Validate the specific link types and URLs.
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be DOCS type' );
+		$this->assertSame( 'https://woocommerce.com/docs/woocommerce-payments/', $gateway_details['links'][0]['url'], 'First link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link should be SUPPORT type' );
+		$this->assertSame( 'https://woocommerce.com/my-account/create-a-ticket/', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_TERMS, $gateway_details['links'][2]['_type'], 'Third link should be TERMS type' );
+		$this->assertSame( 'https://woocommerce.com/terms-conditions/', $gateway_details['links'][2]['url'], 'Third link URL should match' );
+
 		$this->assertArrayHasKey( 'state', $gateway_details, 'Gateway `state` entry is missing' );
 		$this->assertArrayHasKey( 'enabled', $gateway_details['state'], 'Gateway `state[enabled]` entry is missing' );
 		$this->assertTrue( $gateway_details['state']['enabled'], 'Gateway `state[enabled]` entry is not true' );
@@ -573,6 +629,232 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Clean up.
 		delete_option( 'mollie-payments-for-woocommerce_test_mode_enabled' );
 		delete_option( 'mollie-payments-for-woocommerce_test_api_key' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details fills in suggestion details.
+	 */
+	public function test_get_payment_gateway_details_fills_in_suggestion_details() {
+		// Arrange.
+		$plugin_slug  = 'woocommerce-gateway-stripe';
+		$fake_gateway = new FakePaymentGateway(
+			'stripe',
+			array(
+				'enabled'            => true,
+				'title'              => 'Basic Gateway Title',
+				'method_title'       => 'Basic Gateway Method Title',
+				'description'        => 'Basic gateway description',
+				'method_description' => '',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
+			),
+		);
+
+		// Mock a suggestion with rich details.
+		$suggestion = array(
+			'id'                => 'stripe',
+			'_priority'         => 1,
+			'_type'             => ExtensionSuggestions::TYPE_PSP,
+			'title'             => 'Stripe - Suggestion Title',
+			'description'       => 'Stripe - Suggestion Description',
+			'plugin'            => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'              => 'http://example.com/stripe-icon.png',
+			'image'             => 'http://example.com/stripe-image.png',
+			'short_description' => 'Short description from suggestion',
+			'links'             => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+					'url'   => 'https://stripe.com/docs',
+				),
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://stripe.com/support',
+				),
+			),
+			'tags'              => array( 'recommended', 'popular' ),
+			'_incentive'        => array(
+				'description' => 'Special offer',
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that suggestion details are filled in.
+		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
+		$this->assertSame( 'stripe', $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
+
+		// Verify title and description are filled in from suggestion.
+		$this->assertSame( 'Stripe - Suggestion Title', $gateway_details['title'], 'Title should be filled from suggestion' );
+		$this->assertSame( 'Stripe - Suggestion Description', $gateway_details['description'], 'Description should be filled from suggestion' );
+
+		// Verify icon and image are filled in from suggestion.
+		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
+		$this->assertSame( 'http://example.com/stripe-icon.png', $gateway_details['icon'], 'Icon should be filled from suggestion' );
+		$this->assertArrayHasKey( 'image', $gateway_details, 'Gateway details should have image' );
+		$this->assertSame( 'http://example.com/stripe-image.png', $gateway_details['image'], 'Image should be filled from suggestion' );
+
+		// Verify links are filled in from suggestion.
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertIsArray( $gateway_details['links'], 'Links should be an array' );
+		$this->assertCount( 2, $gateway_details['links'], 'Should have 2 links from suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'First link should be DOCS type' );
+		$this->assertSame( 'https://stripe.com/docs', $gateway_details['links'][0]['url'], 'First link URL should match' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_SUPPORT, $gateway_details['links'][1]['_type'], 'Second link should be SUPPORT type' );
+		$this->assertSame( 'https://stripe.com/support', $gateway_details['links'][1]['url'], 'Second link URL should match' );
+
+		// Verify tags are filled in from suggestion.
+		$this->assertArrayHasKey( 'tags', $gateway_details, 'Gateway details should have tags' );
+		$this->assertIsArray( $gateway_details['tags'], 'Tags should be an array' );
+		$this->assertCount( 2, $gateway_details['tags'], 'Should have 2 tags from suggestion' );
+		$this->assertContains( 'recommended', $gateway_details['tags'], 'Tags should contain recommended' );
+		$this->assertContains( 'popular', $gateway_details['tags'], 'Tags should contain popular' );
+
+		// Verify incentive is filled in from suggestion.
+		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
+		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
+		$this->assertSame( 'Special offer', $gateway_details['_incentive']['description'], 'Incentive description should match' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details does not override gateway details with those from the suggestion
+	 * when they exist.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_existing_details_with_suggestion_ones() {
+		// Arrange.
+		$plugin_slug   = 'woocommerce-gateway-stripe';
+		$gateway_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://gateway.com/docs',
+			),
+		);
+		$fake_gateway  = new FakePaymentGateway(
+			'stripe',
+			array(
+				'enabled'        => true,
+				'plugin_slug'    => $plugin_slug,
+				'plugin_file'    => 'woocommerce-gateway-stripe/woocommerce-gateway-stripe.php',
+				'provider_links' => $gateway_links,
+			),
+		);
+
+		// Mock a suggestion with different links, plugin slug, tags, and incentive.
+		$suggestion = array(
+			'id'         => 'stripe',
+			'_priority'  => 1,
+			'_type'      => ExtensionSuggestions::TYPE_PSP,
+			'title'      => 'Stripe',
+			'plugin'     => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => 'different-plugin-slug',
+			),
+			'links'      => array(
+				array(
+					'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+					'url'   => 'https://suggestion.com/support',
+				),
+			),
+			'tags'       => array( 'suggested-tag' ),
+			'_incentive' => array(
+				'description' => 'Suggestion incentive',
+			),
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that gateway's own links are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'links', $gateway_details, 'Gateway details should have links' );
+		$this->assertCount( 1, $gateway_details['links'], 'Should have 1 link from gateway, not suggestion' );
+		$this->assertSame( PaymentsProviders::LINK_TYPE_DOCS, $gateway_details['links'][0]['_type'], 'Link type should be from gateway' );
+		$this->assertSame( 'https://gateway.com/docs', $gateway_details['links'][0]['url'], 'Link URL should be from gateway, not suggestion' );
+
+		// Assert that gateway's plugin details are preserved (not overridden by suggestion).
+		$this->assertArrayHasKey( 'plugin', $gateway_details, 'Gateway details should have plugin' );
+		$this->assertArrayHasKey( 'slug', $gateway_details['plugin'], 'Plugin should have slug' );
+		$this->assertSame( $plugin_slug, $gateway_details['plugin']['slug'], 'Plugin slug should be from gateway, not suggestion' );
+
+		// Assert that tags are filled from suggestion since gateway doesn't provide them.
+		$this->assertArrayHasKey( 'tags', $gateway_details, 'Gateway details should have tags' );
+		$this->assertIsArray( $gateway_details['tags'], 'Tags should be an array' );
+		$this->assertCount( 1, $gateway_details['tags'], 'Should have 1 tag from suggestion' );
+		$this->assertContains( 'suggested-tag', $gateway_details['tags'], 'Tags should contain suggested tag' );
+
+		// Assert that _incentive is filled from suggestion since gateway doesn't provide it.
+		$this->assertArrayHasKey( '_incentive', $gateway_details, 'Gateway details should have _incentive' );
+		$this->assertIsArray( $gateway_details['_incentive'], '_incentive should be an array' );
+		$this->assertSame( 'Suggestion incentive', $gateway_details['_incentive']['description'], 'Incentive description should be from suggestion' );
+	}
+
+	/**
+	 * Test that get_payment_gateway_details does not override title for excluded gateways.
+	 */
+	public function test_get_payment_gateway_details_does_not_override_excluded_gateway_titles() {
+		// Arrange.
+		$plugin_slug  = 'woocommerce-gateway-paypal';
+		$fake_gateway = new FakePaymentGateway(
+			'ppcp-gateway',
+			array(
+				'enabled'            => true,
+				'title'              => 'PayPal Gateway Original Title',
+				'method_title'       => 'PayPal Gateway Original Method Title',
+				'description'        => 'PayPal gateway original description',
+				'method_description' => '',
+				'plugin_slug'        => $plugin_slug,
+				'plugin_file'        => 'woocommerce-gateway-paypal/woocommerce-gateway-paypal.php',
+			),
+		);
+
+		// Mock a PayPal full-stack suggestion (which is in the exclusion list).
+		$suggestion = array(
+			'id'          => ExtensionSuggestions::PAYPAL_FULL_STACK,
+			'_priority'   => 1,
+			'_type'       => ExtensionSuggestions::TYPE_PSP,
+			'title'       => 'PayPal - Suggestion Title (Should Not Override)',
+			'description' => 'PayPal - Suggestion Description (Should Not Override)',
+			'plugin'      => array(
+				'_type' => ExtensionSuggestions::PLUGIN_TYPE_WPORG,
+				'slug'  => $plugin_slug,
+			),
+			'icon'        => 'http://example.com/paypal-icon.png',
+		);
+
+		$this->mock_extension_suggestions
+			->expects( $this->once() )
+			->method( 'get_by_plugin_slug' )
+			->with( $plugin_slug )
+			->willReturn( $suggestion );
+
+		// Act.
+		$gateway_details = $this->sut->get_payment_gateway_details( $fake_gateway, 0, 'US' );
+
+		// Assert that title and description are NOT overridden for excluded gateways.
+		$this->assertSame( 'PayPal Gateway Original Method Title', $gateway_details['title'], 'Title should NOT be overridden for PayPal full-stack' );
+		$this->assertSame( 'PayPal gateway original description', $gateway_details['description'], 'Description should NOT be overridden for PayPal full-stack' );
+
+		// But icon should still be filled in from suggestion.
+		$this->assertArrayHasKey( 'icon', $gateway_details, 'Gateway details should have icon' );
+		$this->assertSame( 'http://example.com/paypal-icon.png', $gateway_details['icon'], 'Icon should be filled from suggestion' );
+
+		// And suggestion ID should be attached.
+		$this->assertArrayHasKey( '_suggestion_id', $gateway_details, 'Gateway details should have _suggestion_id' );
+		$this->assertSame( ExtensionSuggestions::PAYPAL_FULL_STACK, $gateway_details['_suggestion_id'], 'Suggestion ID should match' );
 	}
 
 	/**
