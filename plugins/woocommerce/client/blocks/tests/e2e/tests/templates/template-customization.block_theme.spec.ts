@@ -63,9 +63,15 @@ test.describe( 'Template customization', () => {
 			await admin.visitSiteEditor( {
 				postType: testData.templateType,
 			} );
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
+			if ( testData.templateType === 'wp_template' ) {
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
+				} );
+			} else {
+				await editor.revertTemplatePart( {
+					templateName: testData.templateName,
+				} );
+			}
 			await testData.visitPage( {
 				admin,
 				editor,
@@ -115,9 +121,17 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
-				await editor.revertTemplate( {
-					templateName: testData.fallbackTemplate?.templateName || '',
-				} );
+				if ( testData.templateType === 'wp_template' ) {
+					await editor.revertTemplate( {
+						templateName:
+							testData.fallbackTemplate?.templateName || '',
+					} );
+				} else {
+					await editor.revertTemplatePart( {
+						templateName:
+							testData.fallbackTemplate?.templateName || '',
+					} );
+				}
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -205,9 +219,15 @@ test.describe( 'Template customization', () => {
 				postType: testData.templateType,
 			} );
 
-			await editor.revertTemplate( {
-				templateName: testData.templateName,
-			} );
+			if ( testData.templateType === 'wp_template' ) {
+				await editor.revertTemplate( {
+					templateName: testData.templateName,
+				} );
+			} else {
+				await editor.revertTemplatePart( {
+					templateName: testData.templateName,
+				} );
+			}
 
 			await testData.visitPage( {
 				admin,
