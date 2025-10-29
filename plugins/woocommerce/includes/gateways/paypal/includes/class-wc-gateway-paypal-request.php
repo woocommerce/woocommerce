@@ -675,17 +675,10 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Make sure the country code is in the correct format.
-		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
-		if ( strlen( $country ) >= $max_country_code_length ) {
-			WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
-			if ( strlen( $country ) > $max_country_code_length ) { // Log if we get an unexpected country code length.
-				$country = substr( $country, 0, $max_country_code_length ); // Truncate to expected maximum length.
-			}
-			$country = Countries::getAlpha2Code( strtolower( $country ) );
-			if ( ! $country ) {
-				WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code: %s', $country ), 'error' );
-				return null;
-			}
+		$country = $this->normalize_paypal_order_shipping_country_code( $country );
+		if ( ! $country ) {
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code: %s', $country ), 'error' );
+			return null;
 		}
 
 		// Postal code is typically required, but not always. The create-order request
@@ -709,6 +702,30 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Normalize PayPal order shipping country code.
+	 *
+	 * @param string $country_code Country code to normalize.
+	 * @return string|null
+	 */
+	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $country_code ) < $max_country_code_length ) {
+			return $country_code;
+		}
+
+		// Log if we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country_code ), $country_code ) );
+
+		// Truncate to expected maximum length.
+		if ( strlen( $country_code ) > $max_country_code_length ) {
+			$country_code = substr( $country_code, 0, $max_country_code_length );
+		}
+
+		// Convert to alpha-2 code.
+		return Countries::getAlpha2Code( strtolower( $country_code ) );
 	}
 
 	/**
