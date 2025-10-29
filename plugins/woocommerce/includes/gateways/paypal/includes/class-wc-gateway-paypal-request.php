@@ -578,7 +578,7 @@ class WC_Gateway_Paypal_Request {
 			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
 			if ( $item_amount < 0 ) {
 				// PayPal does not accept negative item amounts.
-				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ) );
+				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ), 'error' );
 				return array();
 			}
 
