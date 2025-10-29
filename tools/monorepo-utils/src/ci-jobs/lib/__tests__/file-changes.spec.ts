@@ -12,6 +12,10 @@ import { JobType } from '../config';
 jest.mock( 'node:child_process' );
 
 describe( 'File Changes', () => {
+	afterEach( () => {
+		jest.resetAllMocks();
+	} );
+
 	describe( 'getFileChanges', () => {
 		it( 'should associate git changes with projects', () => {
 			jest.mocked( execSync ).mockImplementation( ( command ) => {

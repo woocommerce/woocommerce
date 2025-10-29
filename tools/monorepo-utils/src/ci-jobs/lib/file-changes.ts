@@ -181,10 +181,22 @@ export function getFileChanges(
 		}
 
 		// Collect all change patterns from all jobs in this project
+		const jobs = node.ciConfig.jobs ?? [];
+		if ( jobs.length === 0 ) {
+			continue;
+		}
+
 		const changePatterns: RegExp[] = [];
-		for ( const job of node.ciConfig.jobs ) {
+		for ( const job of jobs ) {
 			if ( job.changes ) {
-				changePatterns.push( ...job.changes );
+				// Normalize flags: drop stateful g/y to avoid lastIndex side effects.
+				for ( const re of job.changes ) {
+					changePatterns.push(
+						re.global || re.sticky
+							? new RegExp( re.source, re.flags.replace( /[gy]/g, '' ) )
+							: re
+					);
+				}
 			}
 		}
 
@@ -204,9 +216,11 @@ export function getFileChanges(
 			);
 
 			// Check if this file matches any of the project's CI config patterns
-			const matchesPattern = changePatterns.some( ( pattern ) =>
-				pattern.test( relativePath )
-			);
+			const matchesPattern = changePatterns.some( ( pattern ) => {
+				// Defensive: prevent stateful regex from skipping matches
+				pattern.lastIndex = 0;
+				return pattern.test( relativePath );
+			} );
 
 			if ( matchesPattern ) {
 				// Add this file to the project's changes if not already present
