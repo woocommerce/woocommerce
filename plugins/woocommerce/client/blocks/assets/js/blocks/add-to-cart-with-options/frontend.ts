@@ -9,9 +9,9 @@ import type {
 	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/product-context';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -46,8 +46,8 @@ const { state: wooState } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productContextState } = store< ProductDataStore >(
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
@@ -137,6 +137,7 @@ export type AddToCartWithOptionsStore = {
 		noticeIds: string[];
 		validationErrors: AddToCartError[];
 		isFormValid: boolean;
+		selectedVariationId: number | null;
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
@@ -161,6 +162,9 @@ const { actions, state } = store<
 	{
 		state: {
 			noticeIds: [],
+
+			selectedVariationId: null,
+
 			get validationErrors(): Array< AddToCartError > {
 				const context = getContext< Context >();
 
@@ -170,27 +174,36 @@ const { actions, state } = store<
 
 				return [];
 			},
+
 			get isFormValid(): boolean {
 				return state.validationErrors.length === 0;
 			},
+
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
-
 				return productData?.is_in_stock ?? true;
 			},
+
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
 				return context.quantity || {};
 			},
+
+			get inputQuantity() {
+				const { quantity } = getContext< Context >();
+				return quantity?.[ productContextState.currentProductId ] || 0;
+			},
+
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
+
 			get productData() {
 				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData(
-					productDataState.productId,
+					productContextState.currentProductId,
 					selectedAttributes
 				);
 			},
@@ -226,6 +239,7 @@ const { actions, state } = store<
 					} );
 				}
 			},
+
 			setQuantity( productId: number, value: number ) {
 				const context = getContext< Context >();
 				const { products } = getConfig(
@@ -255,6 +269,7 @@ const { actions, state } = store<
 					actions.validateQuantity( productId, value );
 				}
 			},
+
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
 
@@ -262,6 +277,7 @@ const { actions, state } = store<
 
 				return error.code;
 			},
+
 			clearErrors: ( group?: string ): void => {
 				const { validationErrors } = state;
 
@@ -279,6 +295,7 @@ const { actions, state } = store<
 					validationErrors.length = 0;
 				}
 			},
+
 			*addToCart() {
 				// Todo: Use the module exports instead of `store()` once the
 				// woocommerce store is public.
@@ -287,9 +304,10 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				const id =
-					productDataState.variationId || productDataState.productId;
+					state.selectedVariationId ||
+					productContextState.currentProductId;
 
-				const productType = productDataState.variationId
+				const productType = state.selectedVariationId
 					? 'variation'
 					: getProductData( id, selectedAttributes )?.type;
 
@@ -327,6 +345,7 @@ const { actions, state } = store<
 					}
 				);
 			},
+
 			*handleSubmit( event: SubmitEvent ) {
 				event.preventDefault();
 

@@ -3,7 +3,7 @@
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -55,7 +55,7 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 );
 
 const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );

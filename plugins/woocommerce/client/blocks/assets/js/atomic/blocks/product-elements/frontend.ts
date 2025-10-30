@@ -7,8 +7,8 @@ import {
 	getContext,
 	getConfig,
 } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/product-context';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
 import type {
 	ProductData,
 	WooCommerceConfig,
@@ -20,7 +20,7 @@ const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
 const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );

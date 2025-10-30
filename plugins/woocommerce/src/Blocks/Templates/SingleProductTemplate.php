@@ -88,11 +88,10 @@ class SingleProductTemplate extends AbstractTemplate {
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
 				wp_interactivity_state(
-					'woocommerce/product-data',
+					'woocommerce/product-context',
 					array(
 						'templateState' => array(
-							'productId'   => $product->get_id(),
-							'variationId' => null,
+							'currentProductId' => $product->get_id(),
 						),
 					)
 				);

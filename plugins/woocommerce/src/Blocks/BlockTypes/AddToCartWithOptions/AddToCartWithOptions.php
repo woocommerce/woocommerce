@@ -565,7 +565,7 @@ class AddToCartWithOptions extends AbstractBlock {
 					<input type="hidden" name="product_id" value="' . esc_attr( $product_id ) . '" />
 					<input type="hidden"
 						name="variation_id"
-						data-wp-bind--value="woocommerce/product-data::state.variationId"
+						data-wp-bind--value="state.variationId"
 					/>
 				</div>';
 			}

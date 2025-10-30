@@ -8,7 +8,7 @@ import {
 	withScope,
 	getConfig,
 } from '@wordpress/interactivity';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -165,7 +165,7 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 };
 
 const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+	'woocommerce/product-context',
 	{},
 	{ lock: universalLock }
 );
