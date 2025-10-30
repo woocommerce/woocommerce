@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
 use WC_Order;
@@ -192,6 +193,14 @@ class Analytics {
 	 * @return array Filtered debug tool registrations.
 	 */
 	public function register_regenerate_order_fulfillment_status_tool( $debug_tools ) {
+		// Check if the fulfillments feature is enabled.
+		$container           = wc_get_container();
+		$features_controller = $container->get( FeaturesController::class );
+
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
+			return $debug_tools;
+		}
+
 		// If the order fulfillment status has already been regenerated, don't register the tool again.
 		if ( true === (bool) get_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' ) ) {
 			return $debug_tools;
