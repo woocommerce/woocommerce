@@ -418,7 +418,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 						'type'              => 'text',
 						'default'           => '',
 						// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
-						'sanitize_callback' => function ( $value ) {
+						'sanitize_callback' => function () {
 							// Always throw exception to simulate validation failure.
 							throw new \Exception( 'Simulated validation error' );
 						},
