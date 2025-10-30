@@ -121,10 +121,16 @@ export class Editor extends CoreEditor {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		// Wait for the search to finish.
-		await expect(
-			this.page.getByRole( 'button', { name: 'Reset Search' } )
-		).toBeVisible();
-		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+		if ( this.wpCoreVersion >= 6.9 ) {
+			await this.page.waitForURL(
+				new RegExp( `search=${ encodeURIComponent( templateName ) }` )
+			);
+		} else {
+			await expect(
+				this.page.getByRole( 'button', { name: 'Reset Search' } )
+			).toBeVisible();
+			await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
+		}
 	}
 
 	/**
@@ -149,7 +155,38 @@ export class Editor extends CoreEditor {
 			.waitFor();
 	}
 
-	async revertTemplate( { templateName }: { templateName: string } ) {
+	// Since WP 6.9 templates (and only templates) are handled differently due to template activation
+	// and require different flow to be reverted.
+	async revertTemplateSinceWP69( {
+		templateName,
+	}: {
+		templateName: string;
+	} ) {
+		await this.page
+			.getByRole( 'button', { name: 'Created templates' } )
+			.click();
+		await this.searchTemplate( { templateName } );
+
+		await this.page
+			.getByRole( 'button', { name: 'Actions' } )
+			.first()
+			.click();
+		await this.page
+			.getByRole( 'menuitem', { name: /Trash|Move to trash/ } )
+			.click();
+		await this.page
+			.getByRole( 'button', { name: /Reset|Delete|Trash/ } )
+			.click();
+		await this.page.getByText( 'moved to the trash.' ).first().waitFor();
+	}
+
+	// This is the "old" flow of reverting templates but also universal flow of
+	// reverting template parts that were not impacted by template activation.
+	async revertTemplatePartOrTemplateTillWP68( {
+		templateName,
+	}: {
+		templateName: string;
+	} ) {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
@@ -178,6 +215,20 @@ export class Editor extends CoreEditor {
 			.getByLabel( 'Dismiss this notice' )
 			.getByText( /reset|deleted/ )
 			.waitFor();
+	}
+
+	async revertTemplatePart( { templateName }: { templateName: string } ) {
+		// Template parts are handled the same before and after WP 6.9 which
+		// introduced template activation.
+		await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
+	}
+
+	async revertTemplate( { templateName }: { templateName: string } ) {
+		if ( this.wpCoreVersion >= 6.9 ) {
+			await this.revertTemplateSinceWP69( { templateName } );
+		} else {
+			await this.revertTemplatePartOrTemplateTillWP68( { templateName } );
+		}
 	}
 
 	async createTemplate( { templateName }: { templateName: string } ) {
@@ -245,6 +296,19 @@ export class Editor extends CoreEditor {
 					isOnlyCurrentEntityDirty,
 				}
 			);
+			// Since WP 6.9 custom templates require activation.
+			if ( this.wpCoreVersion >= 6.9 ) {
+				const activationButton = this.page.getByRole( 'button', {
+					name: 'Activate',
+				} );
+				if ( await activationButton.isVisible() ) {
+					const activationMessage = this.page
+						.getByLabel( 'Editor content' )
+						.getByText( 'Template activated.' );
+					await activationButton.click();
+					await activationMessage.waitFor();
+				}
+			}
 		} catch ( error ) {
 			if (
 				! ( error instanceof Error ) ||

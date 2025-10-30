@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add type validation for fontSize and textColor attributes in Typography_Preprocessor to prevent errors from third-party blocks with incompatible attribute types
