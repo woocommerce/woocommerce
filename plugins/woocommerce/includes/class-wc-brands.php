@@ -265,7 +265,7 @@ class WC_Brands {
 		}
 
 		// Check if any brand shortcodes are present in the content.
-		if ( $post && isset( $post->post_content ) ) {
+		if ( $post && ! empty( $post->post_content ) ) {
 			$brand_shortcodes = array(
 				'brand_products',
 				'product_brand',
