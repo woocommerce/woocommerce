@@ -414,10 +414,11 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 			public function get_instance_form_fields() {
 				return array(
 					'title' => array(
-						'title'    => 'Title',
-						'type'     => 'text',
-						'default'  => '',
-						'sanitize_callback' => function( $value ) {
+						'title'             => 'Title',
+						'type'              => 'text',
+						'default'           => '',
+						// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+						'sanitize_callback' => function ( $value ) {
 							// Always throw exception to simulate validation failure.
 							throw new \Exception( 'Simulated validation error' );
 						},
