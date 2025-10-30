@@ -110,7 +110,7 @@ class PTKPatternsStore {
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
 
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) || ( is_numeric( $last_request ) && ! $this->is_older_than_one_day( $last_request ) ) ) {
+		if ( ( is_numeric( $last_request ) && ! $this->is_older_than_one_day( $last_request ) ) || call_user_func( $has_scheduled_action, $action ) ) {
 			return;
 		}
 
