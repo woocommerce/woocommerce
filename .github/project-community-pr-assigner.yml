@@ -61,7 +61,7 @@
   - Flux
 
 "packages/js/email-editor/**/*":
-  - Ballade 
+  - Ballade
 
 "packages/php/email-editor/**/*":
   - Ballade
