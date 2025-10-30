@@ -282,7 +282,7 @@ class WC_Brands {
 		}
 
 		// Check if any brand widgets are active.
-		if ( is_active_widget( false, false, 'woocommerce_brand_description' ) ||
+		if ( is_active_widget( false, false, 'wc_brands_brand_description' ) ||
 			is_active_widget( false, false, 'woocommerce_brand_nav' ) ||
 			is_active_widget( false, false, 'woocommerce_brand_thumbnails' ) ) {
 			return true;
