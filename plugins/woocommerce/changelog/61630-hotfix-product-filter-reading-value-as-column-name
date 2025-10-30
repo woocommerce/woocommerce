@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fixes malformed SQL query to obtain product counts associated with an attribute when using a custom attribute as a Product Filter, causing the filters to not appear on the frontend and silently fail.
+Product Filters: add support for databases using ANSI_QUOTES
