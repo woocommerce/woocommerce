@@ -253,8 +253,10 @@ class Analytics {
 			}
 		}
 
-		// Check if an action is already scheduled.
-		if ( function_exists( 'as_has_scheduled_action' ) && as_has_scheduled_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION ) ) {
+		// Check if an action is already scheduled or in progress.
+		$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+		if ( ( function_exists( 'as_has_scheduled_action' ) && as_has_scheduled_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION ) )
+			|| ( false !== $progress && 'running' === $progress['status'] ) ) {
 			return __( 'Order fulfillment status regeneration is already in progress.', 'woocommerce' );
 		}
 
@@ -359,10 +361,9 @@ class Analytics {
 				as_schedule_single_action( time() + 1, self::REGENERATE_FULFILLMENT_STATUS_ACTION, array( 'page' => $page + 1 ) );
 			}
 		} else {
-			// This was the last batch, mark as complete.
+			// This was the last batch, mark as complete and cleanup.
 			update_option( 'woocommerce_analytics_order_fulfillment_status_regenerated', true, false );
-			$progress['status'] = 'completed';
-			set_transient( 'woocommerce_analytics_fulfillment_status_progress', $progress, DAY_IN_SECONDS );
+			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
 		}
 	}
 
