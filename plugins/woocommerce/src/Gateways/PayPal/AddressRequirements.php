@@ -342,7 +342,7 @@ class AddressRequirements {
 	 * @param string $country_code The ISO 3166-1 alpha-2 country code.
 	 * @return bool
 	 */
-	public static function country_requires_postal_code( $country_code ) {
+	public static function country_requires_postal_code( string $country_code ) {
 		return in_array( strtoupper( $country_code ), self::COUNTRIES_REQUIRING_POSTAL_CODE, true );
 	}
 }
