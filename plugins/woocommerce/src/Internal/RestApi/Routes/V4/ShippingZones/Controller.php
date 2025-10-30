@@ -206,11 +206,10 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		$zone = new WC_Shipping_Zone( null );
 
-		$result = $zone->update_from_api_request( $request->get_params() );
-		if ( is_wp_error( $result ) ) {
-			return $result;
+		$zone = $this->shipping_service->create_shipping_zone($request->get_params());
+		if ( is_wp_error( $zone ) ) {
+			return $zone;
 		}
 
 		// Verify zone was created successfully.
@@ -287,7 +286,7 @@ class Controller extends AbstractController {
 		}
 
 		// Update zone from request.
-		$result = $zone->update_from_api_request( $request->get_params() );
+		$result = $this->shipping_service->update_shipping_zone($zone, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
