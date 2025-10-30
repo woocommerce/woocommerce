@@ -99,10 +99,10 @@ class ShippingServiceTest extends WC_Unit_Test_Case {
 		// Should include our 2 zones + Rest of the World.
 		$this->assertGreaterThanOrEqual( 3, count( $zones ) );
 
-		// Extract zone IDs (handle both 'zone_id' and 'id' keys).
+		// Extract zone IDs.
 		$zone_ids = array();
 		foreach ( $zones as $zone_data ) {
-			$zone_ids[] = $zone_data['zone_id'] ?? $zone_data['id'];
+			$zone_ids[] = $zone_data['zone_id'];
 		}
 
 		$this->assertContains( $zone1->get_id(), $zone_ids );
@@ -143,10 +143,10 @@ class ShippingServiceTest extends WC_Unit_Test_Case {
 
 		$zones = $this->service->get_sorted_shipping_zones();
 
-		// Extract zone IDs (handle both 'zone_id' and 'id' keys).
+		// Extract zone IDs.
 		$zone_ids = array();
 		foreach ( $zones as $zone_data ) {
-			$zone_ids[] = $zone_data['zone_id'] ?? $zone_data['id'];
+			$zone_ids[] = $zone_data['zone_id'];
 		}
 
 		// Rest of the World (ID 0) should be included in the list.

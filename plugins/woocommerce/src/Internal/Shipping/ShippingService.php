@@ -27,8 +27,12 @@ class ShippingService {
 		$zones             = WC_Shipping_Zones::get_zones();
 		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
 
-		// Add "Rest of the World" zone at the end.
-		$zones[0] = $rest_of_the_world->get_data();
+		// Add "Rest of the World" zone at the end with same structure as get_zones().
+		$rest_data                            = $rest_of_the_world->get_data();
+		$rest_data['zone_id']                 = $rest_of_the_world->get_id();
+		$rest_data['formatted_zone_location'] = array();
+		$rest_data['shipping_methods']        = $rest_of_the_world->get_shipping_methods( false, 'admin' );
+		$zones[0]                             = $rest_data;
 
 		// Sort zones by order.
 		uasort(
