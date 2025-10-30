@@ -60,9 +60,11 @@ class WC_Gateway_Paypal_Constants {
 	const PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH = 127;
 	const PAYPAL_INVOICE_ID_MAX_LENGTH      = 127;
 	const PAYPAL_ADDRESS_LINE_MAX_LENGTH    = 300;
+	const PAYPAL_COUNTRY_CODE_LENGTH        = 2;
 	const PAYPAL_STATE_MAX_LENGTH           = 300;
 	const PAYPAL_CITY_MAX_LENGTH            = 120;
 	const PAYPAL_POSTAL_CODE_MAX_LENGTH     = 60;
+	const PAYPAL_LOCALE_MAX_LENGTH          = 10;
 
 	/**
 	 * Supported payment sources.
