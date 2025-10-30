@@ -259,6 +259,10 @@ store< MiniCart >(
 
 			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
 				if ( state.isOpen ) {
+					if ( e.key === 'Escape' ) {
+						miniCartActions.closeDrawer();
+					}
+
 					// Trap focus if it is an overlay (main menu).
 					if ( e.key === 'Tab' ) {
 						const { ref } = getElement();
