@@ -792,9 +792,6 @@
 						}
 					},
 					"events": [
-						"pull_request",
-						"nightly-checks",
-						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
 					"report": {

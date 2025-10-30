@@ -92,7 +92,7 @@ test.describe( 'Template part customization', () => {
 			await admin.visitSiteEditor( {
 				postType: 'wp_template_part',
 			} );
-			await editor.revertTemplate( {
+			await editor.revertTemplatePart( {
 				templateName,
 			} );
 			await testUtils.openMiniCart();
@@ -161,7 +161,7 @@ test.describe( 'Template part customization', () => {
 				postType: 'wp_template_part',
 			} );
 
-			await editor.revertTemplate( {
+			await editor.revertTemplatePart( {
 				templateName,
 			} );
 

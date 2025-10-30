@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 /**
  * Internal dependencies
  */
-import { initializeTrustedTypesPolicy } from './trusted-types-policy';
+import { getTrustedTypesPolicy } from './trusted-types-policy';
 
 /**
  * Default allowed HTML tags for basic sanitization.
@@ -55,13 +55,20 @@ export function sanitizeHTML( html: string, config?: SanitizeConfig ): string {
 	const allowedTags = config?.tags || DEFAULT_ALLOWED_TAGS;
 	const allowedAttr = config?.attr || DEFAULT_ALLOWED_ATTR;
 
-	return DOMPurify.sanitize( html, {
+	const policy = getTrustedTypesPolicy();
+
+	const purifyConfig: DOMPurify.Config = {
 		ALLOWED_TAGS: [ ...allowedTags ],
 		ALLOWED_ATTR: [ ...allowedAttr ],
-	} );
+		...( policy && { TRUSTED_TYPES_POLICY: policy } ),
+	};
+
+	const result = DOMPurify.sanitize( html, purifyConfig );
+
+	return typeof result === 'string' ? result : String( result );
 }
 
-// Initialize trusted types policy when the module is loaded.
-initializeTrustedTypesPolicy();
-
+/**
+ * The name of the trusted types policy.
+ */
 export { TRUSTED_POLICY_NAME } from './trusted-types-policy';
