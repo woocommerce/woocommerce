@@ -780,4 +780,30 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			)
 		);
 	}
+
+	/**
+	 * Add fulfillment_status column to wc_order_stats table.
+	 *
+	 * @return bool|string True on success, error message string on failure.
+	 */
+	public static function add_fulfillment_status_column() {
+		if ( self::has_fulfillment_status_column() ) {
+			return true;
+		}
+
+		global $wpdb;
+
+		$result = $wpdb->query(
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			"ALTER TABLE {$wpdb->prefix}wc_order_stats
+			ADD COLUMN fulfillment_status VARCHAR(50) DEFAULT NULL,
+			ADD INDEX fulfillment_status (fulfillment_status)"
+		);
+
+		if ( false === $result ) {
+			return $wpdb->last_error ? $wpdb->last_error : __( 'Unknown database error occurred while adding fulfillment_status column.', 'woocommerce' );
+		}
+
+		return true;
+	}
 }
