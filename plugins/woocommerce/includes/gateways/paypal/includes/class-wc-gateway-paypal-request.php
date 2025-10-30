@@ -733,7 +733,7 @@ class WC_Gateway_Paypal_Request {
 	 * @param string $country_code Country code to normalize.
 	 * @return string|null
 	 *
-	 * @throws Exception If the ISO3166 library fails.
+	 * @throws \Exception If the ISO3166 library fails.
 	 */
 	private function normalize_paypal_order_shipping_country_code( $country_code ) {
 		// Normalize to uppercase.
