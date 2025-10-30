@@ -653,6 +653,8 @@ class MiniCart extends AbstractBlock {
 			data-wp-router-region='{ "id": "woocommerce/mini-cart-overlay", "attachTo": "body" }'
 			data-wp-key="wc-mini-cart-overlay"
 			data-wp-on--click="actions.overlayCloseDrawer"
+			data-wp-on--keydown="actions.handleOverlayKeydown"
+			data-wp-watch="callbacks.focusFirstElement"
 			data-wp-bind--class="state.drawerOverlayClass"
 		>
 			<div

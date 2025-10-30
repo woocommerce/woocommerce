@@ -8,6 +8,7 @@ import {
 	getElement,
 	useLayoutEffect,
 	useRef,
+	withSyncEvent,
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
@@ -86,10 +87,12 @@ type MiniCart = {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
+		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
 	};
 	callbacks: {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
+		focusFirstElement: () => void;
 	};
 };
 
@@ -115,6 +118,23 @@ const trimWords = ( html: string, maxWords = 15 ): string => {
 	}
 	return words.slice( 0, maxWords ).join( ' ' ) + '…';
 };
+
+const focusableSelectors = `
+	a[href],
+	input:not([disabled]):not([type="hidden"]):not([aria-hidden]),
+	select:not([disabled]):not([aria-hidden]),
+	textarea:not([disabled]):not([aria-hidden]),
+	button:not([disabled]):not([aria-hidden]),
+	[contenteditable],
+	[tabindex]:not([tabindex^="-"])
+`;
+
+const getFocusableElements = ( container: HTMLElement | null ) =>
+	container
+		? Array.from(
+				container!.querySelectorAll< HTMLElement >( focusableSelectors )
+		  ).filter( ( el ) => el.offsetParent !== null )
+		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
 	'woocommerce',
@@ -233,9 +253,39 @@ store< MiniCart >(
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
-					state.isOpen = false;
+					miniCartActions.closeDrawer();
 				}
 			},
+
+			handleOverlayKeydown: withSyncEvent( ( e: KeyboardEvent ) => {
+				if ( state.isOpen ) {
+					// Trap focus if it is an overlay (main menu).
+					if ( e.key === 'Tab' ) {
+						const { ref } = getElement();
+						const focusableElements = getFocusableElements( ref );
+						if (
+							e.shiftKey &&
+							document.activeElement === focusableElements?.[ 0 ]
+						) {
+							// Focus last element when shift+tab in the first one.
+							e.preventDefault();
+							focusableElements[
+								focusableElements.length - 1
+							]?.focus();
+						} else if (
+							! e.shiftKey &&
+							document.activeElement ===
+								focusableElements?.[
+									focusableElements.length - 1
+								]
+						) {
+							// Focus first element when tab in the last one.
+							e.preventDefault();
+							focusableElements?.[ 0 ]?.focus();
+						}
+					}
+				}
+			} ),
 		},
 
 		callbacks: {
@@ -306,6 +356,14 @@ store< MiniCart >(
 						overflow: '',
 						paddingRight: 0,
 					} );
+				}
+			},
+
+			focusFirstElement() {
+				if ( state.isOpen ) {
+					const { ref } = getElement();
+					// Focus first element when the minicart is opened.
+					getFocusableElements( ref )[ 0 ]?.focus();
 				}
 			},
 		},
