@@ -8,7 +8,7 @@ namespace Automattic\WooCommerce\Gateways\PayPal;
  * Class AddressRequirements
  *
  * This helper class checks country-specific address requirements.
- * This was built based on https://developer.paypal.com/api/rest/reference/orders/v2/country-address-requirements/
+ * This was built based on {@see https://developer.paypal.com/api/rest/reference/orders/v2/country-address-requirements/}
  */
 class AddressRequirements {
 	/**
