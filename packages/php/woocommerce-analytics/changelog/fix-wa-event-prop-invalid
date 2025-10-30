@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Fix improved data handling due to invalid prop name

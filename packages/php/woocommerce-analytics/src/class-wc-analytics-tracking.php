@@ -228,7 +228,31 @@ class WC_Analytics_Tracking extends WC_Tracks {
 			)
 			: array();
 
-		return array_merge( $properties, $required_properties );
+		$all_properties = array_merge( $properties, $required_properties );
+
+		// Convert array values to a comma-separated string and URL-encode them to ensure compatibility with JavaScript's encodeURIComponent() for pixel URL transmission.
+		foreach ( $all_properties as $key => $value ) {
+			if ( ! is_array( $value ) ) {
+				continue;
+			}
+
+			if ( empty( $value ) ) {
+				$all_properties[ $key ] = '';
+				continue;
+			}
+
+			$is_indexed_array = array_keys( $value ) === range( 0, count( $value ) - 1 );
+			if ( $is_indexed_array ) {
+				$value_string           = implode( ',', $value );
+				$all_properties[ $key ] = rawurlencode( $value_string );
+				continue;
+			}
+
+			// Serialize non-indexed arrays to JSON strings.
+			$all_properties[ $key ] = wp_json_encode( $value );
+		}
+
+		return $all_properties;
 	}
 
 	/**
