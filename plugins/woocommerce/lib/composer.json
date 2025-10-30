@@ -9,8 +9,7 @@
 	"require-dev": {
 		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1",
-		"pelago/emogrifier": "7.3.0",
-		"symfony/intl": "^5.4.47"
+		"pelago/emogrifier": "7.3.0"
 	},
 	"config": {
 		"platform": {
@@ -32,8 +31,7 @@
 			"packages": [
 				"psr/container",
 				"mobiledetect/mobiledetectlib",
-				"pelago/emogrifier",
-				"symfony/intl"
+				"pelago/emogrifier"
 			],
 			"excluded_packages": [
 			],
