@@ -31,6 +31,12 @@ class WC_Product_Factory {
 			return false;
 		}
 
+		static $products = array();
+
+		if ( isset( $products[ $product_id ] ) ) {
+			return clone $products[ $product_id ];
+		}
+
 		$product_type = self::get_product_type( $product_id );
 
 		// Backwards compatibility.
@@ -45,7 +51,8 @@ class WC_Product_Factory {
 		$classname = self::get_product_classname( $product_id, $product_type );
 
 		try {
-			return new $classname( $product_id, $deprecated );
+			$products[$product_id] = new $classname( $product_id, $deprecated );
+			return clone $products[$product_id];
 		} catch ( Exception $e ) {
 			return false;
 		}

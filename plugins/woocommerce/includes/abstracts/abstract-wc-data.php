@@ -157,6 +157,7 @@ abstract class WC_Data {
 	 * @since 3.0.2
 	 */
 	public function __clone() {
+		$this->maybe_read_meta_data();
 		if ( ! empty( $this->meta_data ) ) {
 			foreach ( $this->meta_data as $array_key => $meta ) {
 				$this->meta_data[ $array_key ] = clone $meta;
