@@ -424,7 +424,7 @@ class WC_Gateway_Paypal_Request {
 
 		$order_items = $this->get_paypal_order_items( $order );
 		if ( empty( $order_items ) ) {
-			// If we cannot build order items (e.g., negative item amounts),
+			// If we cannot build order items (e.g. negative item amounts),
 			// we should not proceed with the create-order request.
 			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
 		}
