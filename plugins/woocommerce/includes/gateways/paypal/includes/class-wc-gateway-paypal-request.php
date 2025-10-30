@@ -405,6 +405,8 @@ class WC_Gateway_Paypal_Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
+	 *
+	 * @throws Exception If the order items cannot be built.
 	 */
 	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
@@ -418,6 +420,13 @@ class WC_Gateway_Paypal_Request {
 			if ( count( $locale_parts ) >= 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
 			}
+		}
+
+		$order_items = $this->get_paypal_order_items( $order );
+		if ( empty( $order_items ) ) {
+			// If we cannot build order items (e.g. negative item amounts),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
 		}
 
 		$params = array(
@@ -444,7 +453,7 @@ class WC_Gateway_Paypal_Request {
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
-					'items'      => $this->get_paypal_order_items( $order ),
+					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
 					),
@@ -568,13 +577,20 @@ class WC_Gateway_Paypal_Request {
 		$items = array();
 
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
+			if ( 'line_item' === $item->get_type() && $item_amount < 0 ) {
+				// PayPal does not accept negative item amounts (for line items).
+				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ), 'error' );
+				return array();
+			}
+
 			$items[] = array(
 				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
-					'value'         => wc_format_decimal( $this->get_paypal_order_item_amount( $order, $item ), wc_get_price_decimals() ),
+					'value'         => wc_format_decimal( $item_amount, wc_get_price_decimals() ),
 				),
 			);
 		}
