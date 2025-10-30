@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove unneeded scheduled action check when determining whether to fetch block patterns.
