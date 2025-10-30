@@ -27,7 +27,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 
 		$this->sut = wc_get_container()->get( VersionStringGenerator::class );
 
-		// Flush the cache group before each test.
 		wp_cache_flush();
 	}
 
@@ -80,8 +79,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox get_version returns the existing version if it exists.
 	 */
 	public function test_get_version_returns_existing() {
-		// Pre-populate cache with a known version.
-
 		$expected_version = 'existing-version-uuid';
 		$cache_key        = 'wc_version_string_' . md5( 'custom-id-456' );
 		wp_cache_set( $cache_key, $expected_version, $this->get_cache_group() );
@@ -95,8 +92,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox get_version refreshes the TTL of the existing version.
 	 */
 	public function test_get_version_refreshes_ttl() {
-		// Pre-populate cache with a known version.
-
 		$expected_version = 'existing-version-uuid';
 		$cache_key        = 'wc_version_string_' . md5( 'custom-id-789' );
 		wp_cache_set( $cache_key, $expected_version, $this->get_cache_group() );
@@ -118,7 +113,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $version, 'Should return null when version does not exist and generate is false' );
 
-		// Verify no cache entry was created.
 		$cache_key    = 'wc_version_string_' . md5( 'nonexistent-id' );
 		$cached_value = wp_cache_get( $cache_key, $this->get_cache_group() );
 		$this->assertFalse( $cached_value, 'No cache entry should be created when generate is false' );
@@ -133,7 +127,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $version, 'Should generate version by default' );
 		$this->assertIsString( $version, 'Generated version should be a string' );
 
-		// Verify cache entry was created.
 		$cache_key    = 'wc_version_string_' . md5( 'auto-generate-id' );
 		$cached_value = wp_cache_get( $cache_key, $this->get_cache_group() );
 		$this->assertNotFalse( $cached_value, 'Cache entry should be created' );
@@ -149,8 +142,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $version, 'Version should not be empty' );
 		$this->assertIsString( $version, 'Version should be a string' );
 
-		// Verify cache entry was created.
-
 		$cache_key    = 'wc_version_string_' . md5( 'new-id-111' );
 		$cached_value = wp_cache_get( $cache_key, $this->get_cache_group() );
 		$this->assertNotFalse( $cached_value, 'Cache entry should be created' );
@@ -161,8 +152,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox generate_version changes the version of an already versioned ID.
 	 */
 	public function test_generate_version_updates_existing() {
-		// Pre-populate cache with a known version.
-
 		$old_version = 'old-version-uuid';
 		$cache_key   = 'wc_version_string_' . md5( 'updated-id-222' );
 		wp_cache_set( $cache_key, $old_version, $this->get_cache_group() );
@@ -180,8 +169,6 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox delete_version removes the cached entry for an already versioned ID.
 	 */
 	public function test_delete_version_removes_existing() {
-		// Pre-populate cache with a known version.
-
 		$cache_key = 'wc_version_string_' . md5( 'forgotten-id-333' );
 		wp_cache_set( $cache_key, 'version-to-forget', $this->get_cache_group() );
 
@@ -267,14 +254,10 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 	 * @testdox Numeric-looking string IDs are treated as strings.
 	 */
 	public function test_numeric_string_ids() {
-		// Test with a numeric string ID.
-
 		$version1 = $this->sut->get_version( '123' );
 		$version2 = $this->sut->get_version( '123' );
 
 		$this->assertEquals( $version1, $version2, 'Numeric string "123" should have consistent version' );
-
-		// Modifying should affect the same ID.
 
 		$this->sut->generate_version( '123' );
 		$new_version = $this->sut->get_version( '123' );
@@ -326,13 +309,10 @@ class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		// Generate a version which will apply the filter.
 		$this->sut->generate_version( 'test-id-123' );
 
-		// Verify the filter was called with the default TTL.
 		$this->assertEquals( DAY_IN_SECONDS, $captured_ttl, 'Filter should receive default TTL' );
 
-		// Verify the version was stored (if TTL handling works, the cache operation succeeds).
 		$version = $this->sut->get_version( 'test-id-123', false );
 		$this->assertNotNull( $version, 'Version should be stored even with negative TTL converted to 0' );
 	}
