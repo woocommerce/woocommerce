@@ -1,0 +1,29 @@
+name: Claude PR Audit
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - run: npm install
+      
+      - name: Audit merged PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          prs=$(gh pr list --state merged --limit 50 --json number,mergedAt | \
+            jq -c '[.[] | select(.mergedAt | fromdateiso8601 > (now - 86400))]')
+          
+          echo "$prs" | jq -r '.[].number' | while read pr_num; do
+            node audit-pr.js "$pr_num"
+          done
