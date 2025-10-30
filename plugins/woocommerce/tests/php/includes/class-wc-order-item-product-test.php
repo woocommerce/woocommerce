@@ -269,5 +269,4 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		WC_Helper_Product::delete_product( $product_without_cogs->get_id() );
 	}
-
 }
