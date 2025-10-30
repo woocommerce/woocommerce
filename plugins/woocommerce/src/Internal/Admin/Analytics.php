@@ -213,7 +213,7 @@ class Analytics {
 		$description = __( 'This tool will regenerate the order fulfillment status for all orders and update the Analytics data.', 'woocommerce' );
 
 		if ( false !== $progress && 'running' === $progress['status'] ) {
-			$is_running = true;
+			$is_running  = true;
 			$button_text = __( 'In progress...', 'woocommerce' );
 			$description = sprintf(
 				/* translators: 1: processed count, 2: total count */
@@ -305,7 +305,7 @@ class Analytics {
 		$offset = ( $page - 1 ) * $per_page;
 
 		// Get distinct order IDs from the fulfillments table.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_ids = $wpdb->get_col(
 			$wpdb->prepare(
 				"SELECT DISTINCT entity_id
@@ -376,7 +376,7 @@ class Analytics {
 		global $wpdb;
 		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$total = $wpdb->get_var(
 			"SELECT COUNT(DISTINCT entity_id)
 			FROM {$fulfillments_table}
