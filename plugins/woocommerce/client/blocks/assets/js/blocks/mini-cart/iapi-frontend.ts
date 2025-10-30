@@ -82,6 +82,7 @@ type MiniCart = {
 		drawerTabIndex: string | null;
 		buttonAriaLabel: string;
 		shouldShowTaxLabel: boolean;
+		miniCartButtonRef: HTMLElement | null;
 	};
 	actions: {
 		openDrawer: () => void;
@@ -93,6 +94,7 @@ type MiniCart = {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 		focusFirstElement: () => void;
+		saveMiniCartButtonRef: () => void;
 	};
 };
 
@@ -248,6 +250,7 @@ store< MiniCart >(
 
 			closeDrawer() {
 				state.isOpen = false;
+				state.miniCartButtonRef?.focus();
 			},
 
 			overlayCloseDrawer( e: MouseEvent ) {
@@ -369,6 +372,11 @@ store< MiniCart >(
 					// Focus first element when the minicart is opened.
 					getFocusableElements( ref )[ 0 ]?.focus();
 				}
+			},
+
+			saveMiniCartButtonRef() {
+				const { ref } = getElement();
+				state.miniCartButtonRef = ref;
 			},
 		},
 	},
