@@ -19,10 +19,11 @@ import type { Attributes } from './';
 const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 	const { setAttributes } = props;
 
-	const quantitySelectorStyleClass =
-		props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input
-			? 'wc-block-add-to-cart-form--input'
-			: 'wc-block-add-to-cart-form--stepper';
+	const quantitySelectorStyleClass = `wc-block-add-to-cart-form--${
+        props.attributes.quantitySelectorStyle || QuantitySelectorStyle.Input
+    }`;
+
+	console.debug('AddToCartFormEdit render with quantitySelectorStyle:', props.attributes.quantitySelectorStyle);
 
 	const blockProps = useBlockProps( {
 		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
@@ -58,8 +59,8 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 					<div className="wc-block-editor-add-to-cart-form-container">
 						<MultiLineTextSkeleton isStatic={ true } />
 						<Disabled>
-							{ props.attributes.quantitySelectorStyle ===
-								QuantitySelectorStyle.Input && (
+							{ ( props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Input ||
+								props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Hidden ) && (
 								<>
 									<div className="quantity">
 										<input
@@ -78,7 +79,7 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
 													  }
 													: {}
 											}
-											type="number"
+											type={ props.attributes.quantitySelectorStyle === QuantitySelectorStyle.Hidden ? 'hidden' : 'number' }
 											value="1"
 											className="input-text qty text"
 											readOnly

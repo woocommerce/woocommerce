@@ -30,6 +30,10 @@
 		.quantity {
 			display: inline-flex;
 			align-items: stretch;
+
+			&.wc-block-components-quantity-selector--hidden {
+				display: none;
+			}
 		}
 
 		> *:not(.quantity) {

@@ -18,6 +18,7 @@ import {
 export enum QuantitySelectorStyle {
 	Input = 'input',
 	Stepper = 'stepper',
+	Hidden = 'hidden',
 }
 
 type AddToCartFormSettingsProps = {
@@ -68,6 +69,10 @@ export const AddToCartFormSettings = ( {
 					<ToggleGroupControlOption
 						label={ __( 'Stepper', 'woocommerce' ) }
 						value={ QuantitySelectorStyle.Stepper }
+					/>
+					<ToggleGroupControlOption
+						label={ __( 'Hidden', 'woocommerce' ) }
+						value={ QuantitySelectorStyle.Hidden }
 					/>
 				</ToggleGroupControl>
 			</PanelBody>

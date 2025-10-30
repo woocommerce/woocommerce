@@ -11,6 +11,23 @@
 	"supports": {
 		"interactivity": true
 	},
+	"styles": [
+		{
+			"name": "input",
+			"label": "Input",
+			"isDefault": false
+		},
+		{
+			"name": "stepper",
+			"label": "Stepper",
+			"isDefault": true
+		},
+		{
+			"name": "hidden",
+			"label": "Hidden",
+			"isDefault": false
+		}
+	],
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"style": "file:../woocommerce/add-to-cart-with-options-quantity-selector-style.css",
 	"viewScriptModule": "woocommerce/add-to-cart-with-options-quantity-selector"

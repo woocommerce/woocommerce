@@ -68,6 +68,29 @@ class AddToCartForm extends AbstractBlock {
 	}
 
 	/**
+	 * Switch the input to type="hidden".
+	 *
+	 * @param string $product_html The Add to Cart form HTML.
+	 *
+	 * @return string The Add to Cart form HTML with classes added.
+	 */
+	private function hide_input( $product_html ) {
+		$html = new \WP_HTML_Tag_Processor( $product_html );
+
+		// Add classes to the form.
+		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
+			$html->add_class( 'wc-block-components-quantity-selector--hidden' );
+		}
+
+		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
+		while ( $html->next_tag( array( 'class_name' => 'qty' ) ) ) {
+			$html->set_attribute( 'type', 'hidden' );
+		}
+
+		return $html->get_updated_html();
+	}
+
+	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
 	 * @param string $product_html Add to Cart form HTML.
@@ -180,7 +203,7 @@ class AddToCartForm extends AbstractBlock {
 		$managing_stock               = $product->managing_stock();
 		$stock_quantity               = $product->get_stock_quantity();
 
-		$should_hide_quantity_selector = $product->is_sold_individually() || Utils::is_min_max_quantity_same( $product ) || ( $managing_stock && $stock_quantity <= 1 );
+		$should_hide_quantity_selector = 'hidden' === $attributes['quantitySelectorStyle'] || $product->is_sold_individually() || Utils::is_min_max_quantity_same( $product ) || ( $managing_stock && $stock_quantity <= 1 );
 
 		/**
 		 * The stepper buttons don't show when the product is sold individually or stock quantity is less or equal to 1 because the quantity input field is hidden.
@@ -224,6 +247,7 @@ class AddToCartForm extends AbstractBlock {
 		}
 
 		$product_name = $product->get_name();
+		$product_html = $should_hide_quantity_selector ? $this->hide_input( $product_html ) : $product_html;
 		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
 
 		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;

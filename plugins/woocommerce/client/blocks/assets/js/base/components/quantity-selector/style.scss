@@ -11,6 +11,10 @@
 	}
 }
 
+.wc-block-components-quantity-selector--hidden {
+	display: none;
+}
+
 .wc-block-components-quantity-selector {
 	border-radius: $universal-border-radius;
 	// needed so that buttons fill the container.

@@ -6,7 +6,7 @@
 	"attributes": {
 		"quantitySelectorStyle": {
 			"type": "string",
-			"enum": [ "input", "stepper" ],
+			"enum": [ "input", "stepper", "hidden" ],
 			"default": "input"
 		}
 	},
