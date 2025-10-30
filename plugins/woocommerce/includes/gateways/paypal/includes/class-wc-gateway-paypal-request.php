@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressR
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
-use Automattic\WooCommerce\Vendor\Symfony\Component\Intl\Countries as IntlCountries;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -736,17 +735,24 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function normalize_paypal_order_shipping_country_code( $country_code ) {
 		// Normalize to uppercase.
-		$code = strtoupper( trim( (string) $country_code ) );
+		$code    = strtoupper( trim( (string) $country_code ) );
+		$iso3166 = new Automattic\WooCommerce\Vendor\League\ISO3166\ISO3166();
 
 		// Check if it's a valid alpha-2 code.
 		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
-			if ( ! IntlCountries::exists( $code ) ) {
-				WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
-				return null;
+			try {
+				$data = $iso3166->alpha2( $code );
+				if ( ! isset( $data['alpha2'] ) ) {
+					throw new \Exception( 'Alpha-2 country code not found.' );
+				}
+
+				// Country code is already in alpha-2 format.
+				return $code;
+			} catch ( \Exception $e ) {
+				WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s. Exception message: %s', $code, $e->getMessage() ) );
 			}
 
-			// Country code is already in alpha-2 format.
-			return $code;
+			return null;
 		}
 
 		// Log when we get an unexpected country code length.
@@ -759,13 +765,19 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check if it's a valid alpha-3 code.
-		if ( ! IntlCountries::alpha3CodeExists( $code ) ) {
-			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
-			return null;
+		try {
+			$data = $iso3166->alpha3( $code );
+			if ( ! isset( $data['alpha2'] ) ) {
+				throw new \Exception( 'Alpha-2 country code not found for alpha-3 code.' );
+			}
+
+			// Return the alpha-2 code.
+			return $data['alpha2'];
+		} catch ( \Exception $e ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s. Exception message: %s', $code, $e->getMessage() ) );
 		}
 
-		// Convert to alpha-2 code.
-		return IntlCountries::getAlpha2Code( $code );
+		return null;
 	}
 
 	/**
