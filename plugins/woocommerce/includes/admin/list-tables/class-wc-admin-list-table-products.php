@@ -111,9 +111,9 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 	 */
 	public function define_sortable_columns( $columns ) {
 		$custom = array(
-			'price' => 'price',
-			'sku'   => 'sku',
-			'name'  => 'title',
+			'price'            => 'price',
+			'sku'              => 'sku',
+			'name'             => 'title',
 			'global_unique_id' => 'global_unique_id',
 		);
 
