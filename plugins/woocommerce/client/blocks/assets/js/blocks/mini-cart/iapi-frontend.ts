@@ -82,10 +82,12 @@ type MiniCart = {
 		buttonAriaLabel: string;
 		shouldShowTaxLabel: boolean;
 	};
-	callbacks: {
+	actions: {
 		openDrawer: () => void;
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
+	};
+	callbacks: {
 		setupEventListeners: () => void;
 		disableScrollingOnBody: () => void;
 	};
@@ -120,7 +122,7 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const { state: miniCartState, callbacks } = store< MiniCart >(
+const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
 	{},
 	{ lock: true }
@@ -215,6 +217,27 @@ store< MiniCart >(
 			},
 		},
 
+		actions: {
+			openDrawer() {
+				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
+					window.location.href = checkoutUrl;
+					return;
+				}
+				state.isOpen = true;
+			},
+
+			closeDrawer() {
+				state.isOpen = false;
+			},
+
+			overlayCloseDrawer( e: MouseEvent ) {
+				// Only close the drawer if the overlay itself was clicked.
+				if ( e.target === e.currentTarget ) {
+					state.isOpen = false;
+				}
+			},
+		},
+
 		callbacks: {
 			*setupEventListeners() {
 				// eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -245,7 +268,7 @@ store< MiniCart >(
 				if ( addToCartBehaviour === 'open_drawer' ) {
 					document.body.addEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 				}
 
@@ -260,32 +283,13 @@ store< MiniCart >(
 					);
 					document.body.removeEventListener(
 						'wc-blocks_added_to_cart',
-						callbacks.openDrawer
+						miniCartActions.openDrawer
 					);
 					if ( 'jQuery' in window ) {
 						removeJQueryAddedToCartEvent();
 						removeJQueryRemovedFromCartEvent();
 					}
 				};
-			},
-
-			openDrawer() {
-				if ( onCartClickBehaviour === 'navigate_to_checkout' ) {
-					window.location.href = checkoutUrl;
-					return;
-				}
-				state.isOpen = true;
-			},
-
-			closeDrawer() {
-				state.isOpen = false;
-			},
-
-			overlayCloseDrawer( e: MouseEvent ) {
-				// Only close the drawer if the overlay itself was clicked.
-				if ( e.target === e.currentTarget ) {
-					state.isOpen = false;
-				}
 			},
 
 			disableScrollingOnBody() {
