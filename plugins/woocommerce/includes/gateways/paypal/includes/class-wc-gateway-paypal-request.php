@@ -702,12 +702,12 @@ class WC_Gateway_Paypal_Request {
 		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// TODO: The container call can be removed once we migrate this class to the `src` folder.
 		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
-		if ( $address_requirements->country_requires_city( $country ) && empty( $city ) ) {
+		if ( empty( $city ) && $address_requirements->country_requires_city( $country ) ) {
 			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
-		if ( $address_requirements->country_requires_postal_code( $country ) && empty( $postcode ) ) {
+		if ( empty( $postcode ) && $address_requirements->country_requires_postal_code( $country ) ) {
 			WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
 			return null;
 		}
