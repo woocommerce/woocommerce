@@ -973,17 +973,23 @@ function getOrCreateRoot( rootVar: any, container: Element ): any {
 /**
  * Helper function to render a slot with standard SlotFillProvider structure.
  *
- * @param {any}    root          - The React root to render into.
- * @param {any}    slotComponent - The slot component to render.
- * @param {any}    slotProps     - Props to pass to the slot component.
- * @param {string} scope         - The plugin area scope (default: 'woocommerce-checkout').
+ * @param {Object} params                     - The parameters object.
+ * @param {any}    params.root                - The React root to render into.
+ * @param {any}    params.slotComponent       - The slot component to render.
+ * @param {any}    params.slotProps           - Props to pass to the slot component.
+ * @param {string} params.pluginAreaScope     - The plugin area scope (default: 'woocommerce-checkout').
  */
-function renderSlotWithProvider(
-	root: any,
-	slotComponent: any,
-	slotProps: any,
-	scope: string = 'woocommerce-checkout'
-): void {
+function renderSlotWithProvider( {
+	root,
+	slotComponent,
+	slotProps,
+	pluginAreaScope = 'woocommerce-checkout',
+}: {
+	root: any;
+	slotComponent: any;
+	slotProps: any;
+	pluginAreaScope?: string;
+} ): void {
 	const { createElement, Fragment } = ( window as any ).wp.element;
 	const { PluginArea } = ( window as any ).wp.plugins;
 	const { MiniCartSlotWrapper, SlotFillProvider } = ( window as any ).wc
@@ -994,7 +1000,9 @@ function renderSlotWithProvider(
 		slotProps,
 	} );
 
-	const pluginAreaElement = createElement( PluginArea, { scope } );
+	const pluginAreaElement = createElement( PluginArea, {
+		scope: pluginAreaScope,
+	} );
 
 	const providerElement = createElement(
 		SlotFillProvider,
@@ -1091,20 +1099,25 @@ const { state: footerState } = store(
 					container
 				);
 
-				renderSlotWithProvider(
-					discountsSlotReactRoot,
-					ExperimentalDiscountsMeta.Slot,
-					{
+				renderSlotWithProvider( {
+					root: discountsSlotReactRoot,
+					slotComponent: ExperimentalDiscountsMeta.Slot,
+					slotProps: {
 						context: 'woocommerce/mini-cart',
-					}
-				);
+					},
+				} );
 			},
 			renderShippingPackagesSlot() {
 				const container = document.querySelector(
 					'.wc-block-mini-cart__footer-shipping-packages-slot'
 				);
 
-				if ( ! checkBaseDependencies( container, 'shipping packages slot' ) ) {
+				if (
+					! checkBaseDependencies(
+						container,
+						'shipping packages slot'
+					)
+				) {
 					return;
 				}
 
@@ -1119,10 +1132,14 @@ const { state: footerState } = store(
 					console.warn(
 						'Mini Cart: Missing components for shipping packages slot',
 						{
-							hasShippingPackages: !! blocksCheckout?.ExperimentalOrderShippingPackages,
-							hasShippingRatesControlPackage: !! blocksCheckout?.ShippingRatesControlPackage,
-							hasLocalPickupSelect: !! blocksCheckout?.LocalPickupSelect,
-							hasRenderShippingRatesControlOption: !! blocksCheckout?.renderShippingRatesControlOption,
+							hasShippingPackages:
+								!! blocksCheckout?.ExperimentalOrderShippingPackages,
+							hasShippingRatesControlPackage:
+								!! blocksCheckout?.ShippingRatesControlPackage,
+							hasLocalPickupSelect:
+								!! blocksCheckout?.LocalPickupSelect,
+							hasRenderShippingRatesControlOption:
+								!! blocksCheckout?.renderShippingRatesControlOption,
 							hasNoticeBanner: !! blocksCheckout?.NoticeBanner,
 						}
 					);
@@ -1144,10 +1161,10 @@ const { state: footerState } = store(
 
 				const { createElement } = ( window as any ).wp.element;
 
-				renderSlotWithProvider(
-					shippingPackagesSlotReactRoot,
-					ExperimentalOrderShippingPackages.Slot,
-					{
+				renderSlotWithProvider( {
+					root: shippingPackagesSlotReactRoot,
+					slotComponent: ExperimentalOrderShippingPackages.Slot,
+					slotProps: {
 						components: {
 							ShippingRatesControlPackage,
 							LocalPickupSelect,
@@ -1159,15 +1176,20 @@ const { state: footerState } = store(
 								'No shipping options are available for this address. Please verify the address is correct or try a different address.',
 						} ),
 						renderOption: renderShippingRatesControlOption,
-					}
-				);
+					},
+				} );
 			},
 			renderLocalPickupPackagesSlot() {
 				const container = document.querySelector(
 					'.wc-block-mini-cart__footer-local-pickup-packages-slot'
 				);
 
-				if ( ! checkBaseDependencies( container, 'local pickup packages slot' ) ) {
+				if (
+					! checkBaseDependencies(
+						container,
+						'local pickup packages slot'
+					)
+				) {
 					return;
 				}
 
@@ -1181,10 +1203,14 @@ const { state: footerState } = store(
 					console.warn(
 						'Mini Cart: Missing components for local pickup packages slot',
 						{
-							hasLocalPickupPackages: !! blocksCheckout?.ExperimentalOrderLocalPickupPackages,
-							hasLocalPickupSelect: !! blocksCheckout?.LocalPickupSelect,
-							hasShippingRatesControlPackage: !! blocksCheckout?.ShippingRatesControlPackage,
-							hasRenderPickupLocation: !! blocksCheckout?.renderPickupLocation,
+							hasLocalPickupPackages:
+								!! blocksCheckout?.ExperimentalOrderLocalPickupPackages,
+							hasLocalPickupSelect:
+								!! blocksCheckout?.LocalPickupSelect,
+							hasShippingRatesControlPackage:
+								!! blocksCheckout?.ShippingRatesControlPackage,
+							hasRenderPickupLocation:
+								!! blocksCheckout?.renderPickupLocation,
 						}
 					);
 					return;
@@ -1202,17 +1228,17 @@ const { state: footerState } = store(
 					container
 				);
 
-				renderSlotWithProvider(
-					localPickupPackagesSlotReactRoot,
-					ExperimentalOrderLocalPickupPackages.Slot,
-					{
+				renderSlotWithProvider( {
+					root: localPickupPackagesSlotReactRoot,
+					slotComponent: ExperimentalOrderLocalPickupPackages.Slot,
+					slotProps: {
 						components: {
 							LocalPickupSelect,
 							ShippingRatesControlPackage,
 						},
 						renderPickupLocation: renderPickupLocation,
-					}
-				);
+					},
+				} );
 			},
 		},
 	},
