@@ -70,6 +70,7 @@ class PageController {
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( $this, 'remove_app_entry_page_menu_item' ), 20 );
+		add_action( 'admin_init', array( $this, 'redirect_payment_tasks_to_settings' ) );
 	}
 
 	/**
@@ -611,5 +612,31 @@ class PageController {
 	 */
 	public static function is_modern_settings_page() {
 		return self::is_settings_page() && Features::is_enabled( 'settings' );
+	}
+
+	/**
+	 * Redirect payment tasks to the settings page.
+	 *
+	 * Redirects both 'payments' and 'woocommerce-payments' tasks to the checkout settings page.
+	 */
+	public function redirect_payment_tasks_to_settings() {
+		// phpcs:disable WordPress.Security.NonceVerification
+		if (
+			! isset( $_GET['page'] ) ||
+			'wc-admin' !== $_GET['page'] ||
+			! isset( $_GET['task'] )
+		) {
+			return;
+		}
+
+		$task = sanitize_text_field( wp_unslash( $_GET['task'] ) );
+
+		// Redirect both payment tasks to the settings page.
+		if ( in_array( $task, array( 'payments', 'woocommerce-payments' ), true ) ) {
+			$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+		// phpcs:enable WordPress.Security.NonceVerification
 	}
 }
