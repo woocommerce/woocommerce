@@ -66,7 +66,7 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	public $recommended_payment_methods = array();
 
 	/**
-	 * Whether or not this gateway still requires setup to function.
+	 * Whether this gateway still requires setup to function.
 	 *
 	 * @var bool
 	 */
@@ -94,6 +94,20 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 * @var bool
 	 */
 	public $account_connected = true;
+
+	/**
+	 * The onboarding supported flag.
+	 *
+	 * @var bool
+	 */
+	public $onboarding_supported = true;
+
+	/**
+	 * The onboarding not supported message.
+	 *
+	 * @var string|null
+	 */
+	public $onboarding_not_supported_message = null;
 
 	/**
 	 * The onboarding started flag.
@@ -145,7 +159,7 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	}
 
 	/**
-	 * Return whether or not this gateway still requires setup to function.
+	 * Return whether this gateway still requires setup to function.
 	 *
 	 * @return bool
 	 */
@@ -215,6 +229,26 @@ class FakePaymentGateway extends \WC_Payment_Gateway {
 	 */
 	public function is_account_connected() {
 		return $this->account_connected;
+	}
+
+	/**
+	 * Check if the gateway supports onboarding.
+	 *
+	 * @param string $country_code Optional. The country code for which to check.
+	 * @return bool True if the gateway supports onboarding, false otherwise.
+	 */
+	public function is_onboarding_supported( $country_code = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $this->onboarding_supported;
+	}
+
+	/**
+	 * Get the onboarding not supported message.
+	 *
+	 * @param string $country_code Optional. The country code for which to get the message.
+	 * @return string The onboarding not supported message.
+	 */
+	public function get_onboarding_not_supported_message( $country_code = '' ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+		return $this->onboarding_not_supported_message;
 	}
 
 	/**

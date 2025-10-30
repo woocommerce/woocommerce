@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add unregister method to Personalization_Tags_Registry
