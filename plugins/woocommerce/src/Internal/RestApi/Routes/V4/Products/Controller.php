@@ -135,6 +135,51 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
+	 * Override the get_item permissions so that published products are
+	 * available to users without the 'read_private_posts' capability.
+	 * This is required for the Product block in the editor, see:
+	 * https://github.com/woocommerce/woocommerce/pull/61470
+	 *
+	 * @param WP_REST_Request $request Request data.
+	 * @return bool|WP_Error
+	 */
+	public function get_item_permissions_check( $request ) {
+		$object = $this->get_object( (int) $request['id'] );
+
+		if ( $object && 0 !== $object->get_id() ) {
+			if ( 'product' !== $object->post_type && 'product_variation' !== $object->post_type ) {
+				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+			}
+
+			$cap = 'publish' === $object->get_status() ? 'read' : 'read_private_posts';
+
+			$post_type_object = get_post_type_object( 'product' );
+			$permission       = false;
+			$object_id        = $object->get_id();
+			if ( $post_type_object instanceof \WP_Post_Type ) {
+				$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+			}
+
+			/**
+			* Filter the permission to view a product.
+			*
+			* @since 10.4.0
+			* @param bool $permission The permission to view a product.
+			* @param string $cap The capability to check.
+			* @param int $object_id The ID of the product.
+			* @param string $post_type The post type of the product.
+			*/
+			$permission = apply_filters( 'woocommerce_rest_check_permissions', $permission, 'read', $object_id, 'product' );
+
+			if ( ! $permission ) {
+				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			}
+		}
+
+		return true;
+	}
+
+	/**
 	 * Duplicate a product and returns the duplicated product.
 	 * The product status is set to "draft" and the name includes a "(copy)" at the end by default.
 	 *

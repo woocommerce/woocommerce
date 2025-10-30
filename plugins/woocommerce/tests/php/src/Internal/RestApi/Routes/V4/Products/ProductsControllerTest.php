@@ -2026,4 +2026,53 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( '', $data['min_price'] );
 		$this->assertEquals( '', $data['max_price'] );
 	}
+
+	/**
+	 * Test that published products are viewable by subscribers.
+	 */
+	public function test_get_published_product_as_subscriber_is_viewable() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Published Product',
+				'status' => ProductStatus::PUBLISH,
+			)
+		);
+
+		$subscriber = $this->factory->user->create(
+			array(
+				'role' => 'subscriber',
+			)
+		);
+		wp_set_current_user( $subscriber );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test that draft products are not viewable by subscribers (no read_private_posts).
+	 */
+	public function test_get_draft_product_as_subscriber_is_forbidden() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Draft Product',
+				'status' => ProductStatus::DRAFT,
+			)
+		);
+
+		$subscriber = $this->factory->user->create(
+			array(
+				'role' => 'subscriber',
+			)
+		);
+		wp_set_current_user( $subscriber );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
 }
