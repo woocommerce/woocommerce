@@ -55,31 +55,6 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
-	}
-
-	/**
-	 * Add warnings for deprecated script handles.
-	 */
-	public static function add_legacy_script_warnings() {
-		$scripts = self::get_scripts();
-
-		foreach ( $scripts as $handle => $script ) {
-			if ( ! isset( $script['legacy_handle'] ) ) {
-				continue;
-			}
-
-			$exists = wp_script_is( $script['legacy_handle'] );
-
-			if ( $exists ) {
-				wc_deprecated_argument(
-					'wp_enqueue_script',
-					'10.3.0',
-					/* translators: %1$s: new script handle, %2$s: previous script handle */
-					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
-				);
-			}
-		}
 	}
 
 	/**
@@ -305,7 +280,7 @@ class WC_Frontend_Scripts {
 				'version'       => '2.7.0-wc.' . $version,
 				'legacy_handle' => 'jquery-blockui',
 			),
-			'wc-jquery-cookie'           => array( // deprecated.
+			'wc-jquery-cookie'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.4.1-wc.' . $version,
@@ -387,17 +362,19 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$scripts['wc-address-autocomplete-common'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
-			'deps'    => array(),
-			'version' => $version,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$scripts['wc-address-autocomplete-common'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+				'deps'    => array(),
+				'version' => $version,
+			);
 
-		$scripts['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
-			'version' => $version,
-		);
+			$scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
+				'version' => $version,
+			);
+		}
 
 		return $scripts;
 	}
@@ -450,12 +427,14 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$register_styles['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
-			'deps'    => array(),
-			'version' => $version,
-			'has_rtl' => false,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
 
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
@@ -497,14 +476,16 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-checkout' );
 		}
 
-		$address_provider_service = wc_get_container()->get( AddressProviderController::class );
-		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
-			$registered_providers = $address_provider_service->get_providers();
-			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
-				// Always enqueue the common module if providers are registered.
-				self::enqueue_script( 'wc-address-autocomplete-common' );
-				self::enqueue_script( 'wc-address-autocomplete' );
-				self::enqueue_style( 'wc-address-autocomplete' );
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+				$registered_providers = $address_provider_service->get_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					// Always enqueue the common module if providers are registered.
+					self::enqueue_script( 'wc-address-autocomplete-common' );
+					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
+				}
 			}
 		}
 

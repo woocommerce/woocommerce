@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unifies how order items total amount is calculated for PayPal Standard purchases

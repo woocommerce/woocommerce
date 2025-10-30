@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes the locale code sent when creating a PayPal Standard order, limiting it to two characters.
