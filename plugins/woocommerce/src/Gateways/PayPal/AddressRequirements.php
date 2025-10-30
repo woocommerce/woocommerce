@@ -12,6 +12,13 @@ namespace Automattic\WooCommerce\Gateways\PayPal;
  */
 class AddressRequirements {
 	/**
+	 * The single instance of the class.
+	 *
+	 * @var AddressRequirements
+	 */
+	protected static $instance = null;
+
+	/**
 	 * Countries that require a city in the address.
 	 *
 	 * @var array
@@ -326,12 +333,24 @@ class AddressRequirements {
 	);
 
 	/**
+	 * Get class instance.
+	 *
+	 * @return AddressRequirements Instance.
+	 */
+	final public static function instance() {
+		if ( null === static::$instance ) {
+			static::$instance = new static();
+		}
+		return static::$instance;
+	}
+
+	/**
 	 * Check if a country requires a city in the address.
 	 *
 	 * @param string $country_code The ISO 3166-1 alpha-2 country code.
 	 * @return bool
 	 */
-	public static function country_requires_city( string $country_code ) {
+	public function country_requires_city( string $country_code ) {
 		return in_array( strtoupper( $country_code ), self::COUNTRIES_REQUIRING_CITY, true );
 	}
 
@@ -341,7 +360,7 @@ class AddressRequirements {
 	 * @param string $country_code The ISO 3166-1 alpha-2 country code.
 	 * @return bool
 	 */
-	public static function country_requires_postal_code( string $country_code ) {
+	public function country_requires_postal_code( string $country_code ) {
 		return in_array( strtoupper( $country_code ), self::COUNTRIES_REQUIRING_POSTAL_CODE, true );
 	}
 }

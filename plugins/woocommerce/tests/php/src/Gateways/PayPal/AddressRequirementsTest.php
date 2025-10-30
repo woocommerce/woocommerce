@@ -20,7 +20,8 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_country_requires_city
 	 */
 	public function test_country_requires_city( $country, $expected ) {
-		$this->assertSame( $expected, PayPalAddressRequirements::country_requires_city( $country ) );
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
+		$this->assertSame( $expected, $address_requirements->country_requires_city( $country ) );
 	}
 
 	/**
@@ -59,7 +60,8 @@ class AddressRequirementsTest extends \WC_Unit_Test_Case {
 	 * @dataProvider provide_test_country_requires_postal_code
 	 */
 	public function test_country_requires_postal_code( $country, $expected ) {
-		$this->assertSame( $expected, PayPalAddressRequirements::country_requires_postal_code( $country ) );
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
+		$this->assertSame( $expected, $address_requirements->country_requires_postal_code( $country ) );
 	}
 
 	/**
