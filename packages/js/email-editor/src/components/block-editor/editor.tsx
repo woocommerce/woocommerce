@@ -6,6 +6,7 @@ import { useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, Spinner } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
+import { PluginArea } from '@wordpress/plugins';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor,
@@ -171,6 +172,7 @@ export function InnerEditor( {
 					{ displaySendEmailButton && <PublishSave /> }
 					<EditorNotices />
 					<BlockCompatibilityWarnings />
+					<PluginArea scope="woocommerce-email-editor" />
 				</Editor>
 			</ErrorBoundary>
 		</SlotFillProvider>
