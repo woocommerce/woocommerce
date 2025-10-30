@@ -411,8 +411,8 @@ class HandlerRegistry {
 		$location = $collection_args['productCollectionLocation'] ?? array();
 
 		if ( $request ) {
-			$user_id    = $request->get_param( 'userId' );
-			$user_email = $request->get_param( 'userEmail' );
+			$user_id    = $request->get_param( 'userId' ) ? absint( $request->get_param( 'userId' ) ) : null;
+			$user_email = $request->get_param( 'userEmail' ) ? sanitize_email( $request->get_param( 'userEmail' ) ) : null;
 			if ( $user_id || $user_email ) {
 				$cart_ids = CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
 				if ( ! empty( $cart_ids ) ) {
@@ -433,8 +433,8 @@ class HandlerRegistry {
 		}
 
 		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
-			$user_id    = $location['sourceData']['userId'] ?? null;
-			$user_email = $location['sourceData']['userEmail'] ?? null;
+			$user_id    = isset( $location['sourceData']['userId'] ) ? absint( $location['sourceData']['userId'] ) : null;
+			$user_email = isset( $location['sourceData']['userEmail'] ) ? sanitize_email( $location['sourceData']['userEmail'] ) : null;
 			if ( $user_id || $user_email ) {
 				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
 			}
