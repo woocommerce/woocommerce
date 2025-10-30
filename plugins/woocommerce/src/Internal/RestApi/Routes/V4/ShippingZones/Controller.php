@@ -43,6 +43,11 @@ class Controller extends AbstractController {
 	 */
 	protected $item_schema;
 
+	/**
+	 * Shipping service instance.
+	 *
+	 * @var ShippingService
+	 */
 	protected $shipping_service;
 
 	/**
@@ -57,7 +62,7 @@ class Controller extends AbstractController {
 	 * @internal
 	 */
 	final public function init( ShippingZoneSchema $zone_schema ) {
-		$this->item_schema = $zone_schema;
+		$this->item_schema      = $zone_schema;
 		$this->shipping_service = new ShippingService();
 	}
 
@@ -190,7 +195,6 @@ class Controller extends AbstractController {
 
 		// GET requests require 'read' permission, all others require 'edit'.
 		$permission_type = ( WP_REST_Server::READABLE === $method ) ? 'read' : 'edit';
-		return true;
 
 		if ( ! wc_rest_check_manager_permissions( 'settings', $permission_type ) ) {
 			return $this->get_authentication_error_by_method( $method );
@@ -207,7 +211,7 @@ class Controller extends AbstractController {
 	 */
 	public function create_item( $request ) {
 
-		$zone = $this->shipping_service->create_shipping_zone($request->get_params());
+		$zone = $this->shipping_service->create_shipping_zone( $request->get_params() );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
@@ -286,7 +290,7 @@ class Controller extends AbstractController {
 		}
 
 		// Update zone from request.
-		$result = $this->shipping_service->update_shipping_zone($zone, $request->get_params() );
+		$result = $this->shipping_service->update_shipping_zone( $zone, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

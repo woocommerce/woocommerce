@@ -17,6 +17,11 @@ use WC_Cache_Helper;
  */
 class ShippingService {
 
+	/**
+	 * Get all shipping zones sorted by order.
+	 *
+	 * @return array Array of shipping zones sorted by zone_order.
+	 */
 	public function get_sorted_shipping_zones() {
 		// Get all zones including "Rest of the World".
 		$zones             = WC_Shipping_Zones::get_zones();
@@ -225,8 +230,7 @@ class ShippingService {
 	 * This method can be used by any API version (v2, v3, v4) for consistent behavior.
 	 *
 	 * @since 9.4.0
-	 * @param \WC_Shipping_Method $method Zone object that contains this method.
-	 * @param \WC_Shipping_Zone   $zone Zone object that contains this method.
+	 * @param \WC_Shipping_Method $method Shipping method instance.
 	 * @param int                 $instance_id Method instance ID.
 	 * @param array               $data Request data containing 'settings', 'enabled', and/or 'order'.
 	 * @return true|\WP_Error True on success, WP_Error on validation failure.
@@ -259,7 +263,7 @@ class ShippingService {
 			return true;
 		}
 
-		// Single UPDATE query for both fields
+		// Single UPDATE query for both fields.
 		$result = $wpdb->update(
 			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
 			$updates,

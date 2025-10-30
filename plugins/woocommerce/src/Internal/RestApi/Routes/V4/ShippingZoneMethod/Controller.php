@@ -38,6 +38,11 @@ class Controller extends AbstractController {
 	 */
 	protected $method_schema;
 
+	/**
+	 * Shipping service instance.
+	 *
+	 * @var ShippingService
+	 */
 	protected $shipping_service;
 
 	/**
@@ -54,8 +59,8 @@ class Controller extends AbstractController {
 	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
 	 */
 	final public function init( ShippingMethodSchema $method_schema ) {
-		$this->method_schema = $method_schema;
-		$this->shipping_service=new ShippingService();
+		$this->method_schema    = $method_schema;
+		$this->shipping_service = new ShippingService();
 	}
 
 	/**
@@ -94,7 +99,6 @@ class Controller extends AbstractController {
 	 * @return true|WP_Error True if the request has permission, WP_Error otherwise.
 	 */
 	public function check_permissions( $request ) {
-		return true;
 		if ( ! wc_shipping_enabled() ) {
 			return new WP_Error(
 				'rest_shipping_disabled',
@@ -143,7 +147,7 @@ class Controller extends AbstractController {
 		}
 
 		// Update method settings, enabled status, and order.
-		$result = $this->shipping_service->update_shipping_zone_method($method, $instance_id, $request->get_params() );
+		$result = $this->shipping_service->update_shipping_zone_method( $method, $instance_id, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			// Delete the method instance to rollback the creation.
 			// This ensures a failed POST would not leave an orphaned method.
@@ -151,9 +155,8 @@ class Controller extends AbstractController {
 			return $result;
 		}
 
-		// Reload the data
+		// Reload the data.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
-
 
 		$request['zone_id'] = $zone->get_id();
 		$response           = $this->prepare_item_for_response( $method, $request );
