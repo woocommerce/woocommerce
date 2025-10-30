@@ -19,7 +19,7 @@
 // container with `verticalAlignment: stretch` (that's the default in WC core
 // templates), the quantity selector will stretch to the height of the container.
 :where(.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector) {
-	height: 100% !important;
+	height: 100%;
 }
 
 :where(.wc-block-add-to-cart-with-options__quantity-selector),
