@@ -401,11 +401,11 @@ class HandlerRegistry {
 
 	/**
 	 * Get cart product IDs from various sources.
-	 * Handles loading cart products from location context, request params, or current session.
+	 * Handles loading cart products from location context or request params.
 	 *
 	 * @param array                 $collection_args Collection arguments with location context.
 	 * @param \WP_REST_Request|null $request         Optional REST request for editor context.
-	 * @return array<int> The product IDs from the cart.
+	 * @return array<int> The product IDs from the cart. Returns recent products for preview in editor context only.
 	 */
 	private function get_cart_product_ids( $collection_args, $request = null ) {
 		$location = $collection_args['productCollectionLocation'] ?? array();
@@ -414,8 +414,22 @@ class HandlerRegistry {
 			$user_id    = $request->get_param( 'userId' );
 			$user_email = $request->get_param( 'userEmail' );
 			if ( $user_id || $user_email ) {
-				return CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+				$cart_ids = CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $user_email );
+				if ( ! empty( $cart_ids ) ) {
+					return $cart_ids;
+				}
 			}
+			// In editor context (REST request), show sample products for preview when cart is empty.
+			$recent_product_ids = wc_get_products(
+				array(
+					'status'  => 'publish',
+					'orderby' => 'date',
+					'order'   => 'DESC',
+					'limit'   => 3,
+					'return'  => 'ids',
+				)
+			);
+			return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
 		}
 
 		if ( isset( $location['type'] ) && 'cart' === $location['type'] ) {
@@ -426,15 +440,7 @@ class HandlerRegistry {
 			}
 		}
 
-		$recent_product_ids = wc_get_products(
-			array(
-				'status'  => 'publish',
-				'orderby' => 'date',
-				'order'   => 'DESC',
-				'limit'   => 3,
-				'return'  => 'ids',
-			)
-		);
-		return ! empty( $recent_product_ids ) ? $recent_product_ids : array();
+		// In frontend/email context, return empty array when no cart is found.
+		return array();
 	}
 }

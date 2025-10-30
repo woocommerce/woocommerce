@@ -507,8 +507,13 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			return $cart_product_ids;
 		}
 
-		// Fallback: Get sample products for preview.
-		return $this->get_sample_product_ids();
+		// For preview emails, show sample products so users can see what the email will look like.
+		if ( $rendering_context->get( 'is_user_preview', false ) ) {
+			return $this->get_sample_product_ids_for_preview();
+		}
+
+		// For real emails with empty cart, return -1 to ensure no products are shown.
+		return array( -1 );
 	}
 
 	/**
@@ -559,11 +564,12 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	}
 
 	/**
-	 * Get sample product IDs for preview.
+	 * Get sample product IDs for preview emails.
+	 * This ensures that preview emails show representative content even when the cart is empty.
 	 *
 	 * @return array Array of sample product IDs.
 	 */
-	private function get_sample_product_ids(): array {
+	private function get_sample_product_ids_for_preview(): array {
 		$query = new WP_Query(
 			array(
 				'post_type'      => 'product',
@@ -575,7 +581,6 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			)
 		);
 
-		// When 'fields' => 'ids', WP_Query returns an array of integers directly.
 		if ( ! empty( $query->posts ) && is_array( $query->posts ) ) {
 			return array_map(
 				static function ( $id ) {
