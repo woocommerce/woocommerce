@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingMethodSchema;
+use Automattic\WooCommerce\Internal\Shipping\ShippingService;
 use WC_Shipping_Zone;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -21,6 +22,11 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 	private ShippingMethodSchema $schema;
 
 	/**
+	 * @var ShippingService
+	 */
+	private ShippingService $shipping_service;
+
+	/**
 	 * Created shipping zones for cleanup.
 	 *
 	 * @var array
@@ -33,7 +39,8 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->schema = new ShippingMethodSchema();
+		$this->schema           = new ShippingMethodSchema();
+		$this->shipping_service = new ShippingService();
 	}
 
 	/**
@@ -155,9 +162,9 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$this->assertNotNull( $method );
 
-		// Update method settings using the new API method.
-		$result = $method->update_from_api_request(
-			$zone,
+		// Update method settings using ShippingService.
+		$result = $this->shipping_service->update_shipping_zone_method(
+			$method,
 			$instance_id,
 			array(
 				'enabled'  => true,
@@ -202,8 +209,8 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$flat_rate_id = $zone->add_shipping_method( 'flat_rate' );
 		$flat_rate    = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
 
-		$result = $flat_rate->update_from_api_request(
-			$zone,
+		$result = $this->shipping_service->update_shipping_zone_method(
+			$flat_rate,
 			$flat_rate_id,
 			array(
 				'settings' => array(
@@ -283,8 +290,8 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$instance_id = $zone->add_shipping_method( 'free_shipping' );
 
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$result = $method->update_from_api_request(
-			$zone,
+		$result = $this->shipping_service->update_shipping_zone_method(
+			$method,
 			$instance_id,
 			array(
 				'settings' => array(
