@@ -407,17 +407,21 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 			}
 
 			/**
-			 * Update instance settings from API.
+			 * Get instance form fields with validation that always fails.
 			 *
-			 * @param array $settings Settings array.
-			 * @return \WP_Error Always returns error to simulate validation failure.
+			 * @return array
 			 */
-			public function update_instance_settings_from_api( $settings ) {
-				// Always return an error to simulate validation failure.
-				return new \WP_Error(
-					'woocommerce_rest_shipping_method_invalid_setting',
-					'Simulated validation error',
-					array( 'status' => 400 )
+			public function get_instance_form_fields() {
+				return array(
+					'title' => array(
+						'title'    => 'Title',
+						'type'     => 'text',
+						'default'  => '',
+						'sanitize_callback' => function( $value ) {
+							// Always throw exception to simulate validation failure.
+							throw new \Exception( 'Simulated validation error' );
+						},
+					),
 				);
 			}
 		};
