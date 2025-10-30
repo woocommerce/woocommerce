@@ -211,9 +211,9 @@ class ShippingService {
 		 *
 		 * @since 9.4.0
 		 * @param array                $instance_settings Instance settings.
-		 * @param WC_Shipping_Method   $this              Shipping method instance.
+		 * @param WC_Shipping_Method   $method            Shipping method instance.
 		 */
-		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $this );
+		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method );
 		$result            = update_option( $method->get_instance_option_key(), $filtered_settings );
 
 		if ( $result ) {
