@@ -784,6 +784,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -791,9 +792,6 @@
 						}
 					},
 					"events": [
-						"pull_request",
-						"nightly-checks",
-						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
 					"report": {
@@ -821,6 +819,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
