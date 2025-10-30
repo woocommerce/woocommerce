@@ -699,7 +699,9 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Validate required fields based on country-specific address requirements.
-		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance(); // TODO: The container call can be removed once we migrate this class to the `src` folder.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: The container call can be removed once we migrate this class to the `src` folder.
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
 		if ( $address_requirements->country_requires_city( $country ) && empty( $city ) ) {
 			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
 			return null;
