@@ -260,11 +260,8 @@ class WC_Brands {
 		}
 
 		// Should load on single product pages that have brands assigned.
-		if ( is_singular( 'product' ) && $post ) {
-			$terms = get_the_terms( $post->ID, 'product_brand' );
-			if ( ! empty( $terms ) && ! is_wp_error( $terms ) ) {
-				return true;
-			}
+		if ( is_singular( 'product' ) && has_term( '', 'product_brand' ) ) {
+			return true;
 		}
 
 		// Check if any brand shortcodes are present in the content.
