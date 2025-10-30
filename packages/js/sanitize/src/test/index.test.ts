@@ -10,9 +10,7 @@ import {
 	sanitizeHTML,
 	DEFAULT_ALLOWED_TAGS,
 	DEFAULT_ALLOWED_ATTR,
-	TRUSTED_POLICY_NAME,
 } from '../index';
-import { initializeTrustedTypesPolicy } from '../trusted-types-policy';
 
 // Mock DOMPurify for testing
 jest.mock( 'dompurify' );
@@ -163,34 +161,10 @@ describe( 'sanitizeHTML', () => {
 } );
 
 describe( 'trusted types policy', () => {
-	const mockCreatePolicy = jest.fn();
-	const mockSetConfig = jest.fn();
-
-	beforeEach( () => {
-		jest.clearAllMocks();
-
-		// Mock window.trustedTypes
-		Object.defineProperty( window, 'trustedTypes', {
-			value: {
-				createPolicy: mockCreatePolicy,
-			},
-			writable: true,
-		} );
-
-		// Mock DOMPurify.setConfig
-		( DOMPurify.setConfig as jest.Mock ) = mockSetConfig;
-	} );
-
-	afterEach( () => {
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
-	} );
-
-	test( 'should export TRUSTED_POLICY_NAME constant', () => {
-		expect( TRUSTED_POLICY_NAME ).toBe( 'woocommerce-sanitize' );
-	} );
-
-	test( 'should create trusted types policy when window.trustedTypes is available', () => {
+	test( 'should create trusted types policy when window.trustedTypes is available', async () => {
+		const mockCreatePolicy = jest.fn();
 		const mockPolicy = {
+			name: 'woocommerce-sanitize',
 			createHTML: jest.fn( ( str: string ) => str ),
 			createScript: jest.fn( ( str: string ) => str ),
 			createScriptURL: jest.fn( ( str: string ) => str ),
@@ -198,22 +172,76 @@ describe( 'trusted types policy', () => {
 
 		mockCreatePolicy.mockReturnValue( mockPolicy );
 
-		initializeTrustedTypesPolicy();
-
-		expect( mockCreatePolicy ).toHaveBeenCalledWith( TRUSTED_POLICY_NAME, {
-			createHTML: expect.any( Function ),
-			createScriptURL: expect.any( Function ),
+		Object.defineProperty( window, 'trustedTypes', {
+			value: {
+				createPolicy: mockCreatePolicy,
+			},
+			writable: true,
+			configurable: true,
 		} );
 
-		expect( mockSetConfig ).toHaveBeenCalledWith( {
-			TRUSTED_TYPES_POLICY: mockPolicy,
-		} );
+		jest.resetModules();
+
+		const { getTrustedTypesPolicy } = await import(
+			'../trusted-types-policy'
+		);
+		const policy = getTrustedTypesPolicy();
+
+		expect( policy ).toBe( mockPolicy );
+		expect( mockCreatePolicy ).toHaveBeenCalledWith(
+			'woocommerce-sanitize',
+			{
+				createHTML: expect.any( Function ),
+				createScriptURL: expect.any( Function ),
+			}
+		);
+
+		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 	} );
 
-	test( 'should handle case when window.trustedTypes is not available', () => {
+	test( 'should cache the policy instance and not create it multiple times', async () => {
+		const mockCreatePolicy = jest.fn();
+		const mockPolicy = {
+			name: 'woocommerce-sanitize',
+			createHTML: jest.fn( ( str: string ) => str ),
+			createScript: jest.fn( ( str: string ) => str ),
+			createScriptURL: jest.fn( ( str: string ) => str ),
+		};
+
+		mockCreatePolicy.mockReturnValue( mockPolicy );
+
+		Object.defineProperty( window, 'trustedTypes', {
+			value: {
+				createPolicy: mockCreatePolicy,
+			},
+			writable: true,
+			configurable: true,
+		} );
+
+		jest.resetModules();
+
+		const { getTrustedTypesPolicy } = await import(
+			'../trusted-types-policy'
+		);
+		const policy1 = getTrustedTypesPolicy();
+		const policy2 = getTrustedTypesPolicy();
+
+		expect( policy1 ).toBe( policy2 );
+		expect( mockCreatePolicy ).toHaveBeenCalledTimes( 1 );
+
+		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
+	} );
+
+	test( 'should handle case when window.trustedTypes is not available', async () => {
 		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 
-		// Should not throw an error
-		expect( () => initializeTrustedTypesPolicy() ).not.toThrow();
+		jest.resetModules();
+
+		const { getTrustedTypesPolicy } = await import(
+			'../trusted-types-policy'
+		);
+		const policy = getTrustedTypesPolicy();
+
+		expect( policy ).toBeNull();
 	} );
 } );
