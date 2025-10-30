@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Internal\Caches;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Version strings generator/cache class.
+ * Version string generator/cache class.
  *
  * Provides a generic mechanism for generating and caching unique version strings
  * for any identifiable item. Each item is identified by a string ID, and has
@@ -15,7 +15,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * This is useful for cache invalidation strategies where items change over time.
  * The standard WordPress cache is used to store the version strings.
  */
-class VersionStringsGenerator {
+class VersionStringGenerator {
 
 	/**
 	 * Cache group name.
@@ -23,11 +23,11 @@ class VersionStringsGenerator {
 	private const CACHE_GROUP = 'woocommerce_version_strings';
 
 	/**
-	 * Should the version strings cache be used?
+	 * Can the version string cache be used?
 	 *
 	 * @var bool|null
 	 */
-	private ?bool $should_use = null;
+	private ?bool $can_use = null;
 
 	/**
 	 * Legacy proxy instance.
@@ -48,21 +48,21 @@ class VersionStringsGenerator {
 	}
 
 	/**
-	 * Tells whether the version strings cache should be used or not.
+	 * Tells whether the version string cache can be used or not.
 	 *
 	 * This will return true only if an external object cache is configured in WordPress,
 	 * since otherwise the cached entries will only persist for the current request.
 	 *
 	 * @return bool
 	 */
-	public function should_use(): bool {
-		if ( ! is_null( $this->should_use ) ) {
-			return $this->should_use;
+	public function can_use(): bool {
+		if ( ! is_null( $this->can_use ) ) {
+			return $this->can_use;
 		}
 
-		$this->should_use = is_null( $this->legacy_proxy ) ? false : ( $this->legacy_proxy->call_function( 'wp_using_ext_object_cache' ) ?? false );
+		$this->can_use = $this->legacy_proxy->call_function( 'wp_using_ext_object_cache' ) ?? false;
 
-		return $this->should_use;
+		return $this->can_use;
 	}
 
 	/**
@@ -133,7 +133,7 @@ class VersionStringsGenerator {
 		 *
 		 * @since 10.4.0
 		 */
-		$ttl = apply_filters( 'woocommerce_version_string_ttl', DAY_IN_SECONDS, $id );
+		$ttl = apply_filters( 'woocommerce_version_string_generator_ttl', DAY_IN_SECONDS, $id );
 		$ttl = max( 0, (int) $ttl );
 
 		return wp_cache_set( $cache_key, $version, self::CACHE_GROUP, $ttl );

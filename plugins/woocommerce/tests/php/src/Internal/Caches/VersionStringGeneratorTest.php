@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
-use Automattic\WooCommerce\Internal\Caches\VersionStringsGenerator;
+use Automattic\WooCommerce\Internal\Caches\VersionStringGenerator;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for VersionStringsGenerator.
+ * Tests for VersionStringGenerator.
  */
-class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
+class VersionStringGeneratorTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var VersionStringsGenerator
+	 * @var VersionStringGenerator
 	 */
 	private $sut;
 
@@ -25,7 +25,7 @@ class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = wc_get_container()->get( VersionStringsGenerator::class );
+		$this->sut = wc_get_container()->get( VersionStringGenerator::class );
 
 		// Flush the cache group before each test.
 		wp_cache_flush();
@@ -35,7 +35,7 @@ class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
-		remove_all_filters( 'woocommerce_version_string_ttl' );
+		remove_all_filters( 'woocommerce_version_string_generator_ttl' );
 		$this->sut = null;
 		parent::tearDown();
 	}
@@ -52,13 +52,13 @@ class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox should_use caches the result and returns the same value on subsequent calls.
+	 * @testdox can_use caches the result and returns the same value on subsequent calls.
 	 */
-	public function test_should_use_is_cached() {
-		$result1 = $this->sut->should_use();
-		$result2 = $this->sut->should_use();
+	public function test_can_use_is_cached() {
+		$result1 = $this->sut->can_use();
+		$result2 = $this->sut->can_use();
 
-		$this->assertEquals( $result1, $result2, 'should_use should return the same value on subsequent calls' );
+		$this->assertEquals( $result1, $result2, 'can_use should return the same value on subsequent calls' );
 	}
 
 	/**
@@ -202,14 +202,14 @@ class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox woocommerce_version_string_ttl filter works correctly.
+	 * @testdox woocommerce_version_string_generator_ttl filter works correctly.
 	 */
 	public function test_cached_version_ttl_filter() {
 		$custom_ttl   = 7200; // 2 hours.
 		$filter_calls = array();
 
 		add_filter(
-			'woocommerce_version_string_ttl',
+			'woocommerce_version_string_generator_ttl',
 			function ( $ttl, $id ) use ( $custom_ttl, &$filter_calls ) {
 				$filter_calls[] = array(
 					'ttl' => $ttl,
@@ -319,7 +319,7 @@ class VersionStringsGeneratorTest extends WC_Unit_Test_Case {
 		$captured_ttl = null;
 
 		add_filter(
-			'woocommerce_version_string_ttl',
+			'woocommerce_version_string_generator_ttl',
 			function ( $ttl ) use ( &$captured_ttl ) {
 				$captured_ttl = $ttl; // Capture the default TTL passed to filter.
 				return -100; // Return negative value to test conversion.
