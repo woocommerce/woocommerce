@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQu
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
@@ -6501,5 +6503,126 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
+	}
+
+	/**
+	 * Test that migration updates fulfillment status for orders with fulfillments.
+	 *
+	 * Creates 5 orders where only 3 have fulfillments, then runs migration
+	 * and verifies the correct orders are updated.
+	 */
+	public function test_regenerate_order_fulfillment_status_updates_orders_with_fulfillments() {
+		global $wpdb;
+
+		// Enable fulfillments feature.
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+		$controller->register();
+		$controller->initialize_fulfillments();
+
+		// Arrange: Reset migration state.
+		delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+		delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+
+		// Ensure column exists.
+		OrdersStatsDataStore::add_fulfillment_status_column();
+
+		// Disable background processing.
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Create 5 orders.
+		$order_1 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+		$order_2 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+		$order_3 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+		$order_4 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+		$order_5 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin_import_orders' );
+
+		// Add fulfillments for only orders 0, 1, 2.
+		$this->add_fulfillment_to_order( $order_1, 'fulfilled', $product );
+		$this->add_fulfillment_to_order( $order_2, 'partially_fulfilled', $product );
+		$this->add_fulfillment_to_order( $order_3, 'unfulfilled', $product );
+		// Orders 3 and 4 have no fulfillments.
+
+		// Initialize migration.
+		$analytics = Analytics::get_instance();
+		$result    = $analytics->run_regenerate_order_fulfillment_status_tool();
+
+		do_action( Analytics::REGENERATE_FULFILLMENT_STATUS_ACTION, 1 );
+
+		// Verify it was scheduled.
+		$this->assertStringContainsString( 'scheduled', $result );
+
+		// Assert: Verify orders with fulfillments are updated.
+		// Fetch all fulfillment statuses in a single query.
+		$statuses = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_id, fulfillment_status
+				FROM {$wpdb->prefix}wc_order_stats
+				WHERE order_id IN (%d, %d, %d, %d, %d)
+				ORDER BY order_id ASC",
+				$order_1->get_id(),
+				$order_2->get_id(),
+				$order_3->get_id(),
+				$order_4->get_id(),
+				$order_5->get_id()
+			),
+			OBJECT_K
+		);
+
+		// Verify orders with fulfillments.
+		$this->assertEquals( 'fulfilled', $statuses[ $order_1->get_id() ]->fulfillment_status, 'Order 1 should have fulfilled status' );
+		$this->assertEquals( 'partially_fulfilled', $statuses[ $order_2->get_id() ]->fulfillment_status, 'Order 2 should have partially_fulfilled status' );
+		$this->assertEquals( 'unfulfilled', $statuses[ $order_3->get_id() ]->fulfillment_status, 'Order 3 should have unfulfilled status' );
+
+		// Verify orders without fulfillments remain NULL.
+		$this->assertNull( $statuses[ $order_4->get_id() ]->fulfillment_status, 'Order 4 should have NULL fulfillment_status' );
+		$this->assertNull( $statuses[ $order_5->get_id() ]->fulfillment_status, 'Order 5 should have NULL fulfillment_status' );
+
+		// Verify completion.
+		$regenerated = get_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+		$this->assertTrue( (bool) $regenerated, 'Migration should be marked as completed' );
+
+		// Verify transient cleanup.
+		$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+		$this->assertFalse( $progress, 'Progress transient should be deleted after completion' );
+
+		// Cleanup.
+		delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+	}
+
+	/**
+	 * Helper: Add fulfillment record and set order fulfillment status.
+	 *
+	 * This directly inserts into the fulfillments table and sets the order meta
+	 * to simulate what the fulfillments system would do in production.
+	 *
+	 * @param WC_Order    $order_id Order ID.
+	 * @param string $fulfillment_status Fulfillment status (fulfilled, partially_fulfilled, unfulfilled).
+	 */
+	private function add_fulfillment_to_order( $order, $fulfillment_status, $product ) {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => $product->get_id(),
+					'qty'     => 4,
+				),
+			)
+		);
+		$fulfillment->set_status( $fulfillment_status );
+		$fulfillment->save();
+
+		$order->update_meta_data( '_fulfillment_status', $fulfillment_status );
+		$order->save();
+
+		return $fulfillment;
 	}
 }
