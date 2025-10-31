@@ -23,6 +23,43 @@ describe( 'sanitizeHTML', () => {
 		( DOMPurify.sanitize as jest.Mock ) = mockSanitize;
 	} );
 
+	afterEach( () => {
+		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
+	} );
+
+	test( 'should handle no-op trusted type policy creation errors', () => {
+		const mockCreatePolicy = jest.fn();
+
+		mockCreatePolicy.mockImplementation( () => {
+			throw new Error( 'Creation failed' );
+		} );
+
+		Object.defineProperty( window, 'trustedTypes', {
+			value: {
+				createPolicy: mockCreatePolicy,
+			},
+			writable: true,
+			configurable: true,
+		} );
+
+		const html =
+			'<a href="#" target="_blank" onclick="alert(1)">Link</a><script>alert("xss")</script>';
+		const expectedResult = '<a href="#" target="_blank">Link</a>';
+
+		mockSanitize.mockReturnValue( expectedResult );
+
+		let result = '';
+		expect( () => {
+			result = sanitizeHTML( html );
+		} ).not.toThrow();
+
+		expect( result ).toBe( expectedResult );
+		expect( mockSanitize ).toHaveBeenCalledWith( html, {
+			ALLOWED_TAGS: [ ...DEFAULT_ALLOWED_TAGS ],
+			ALLOWED_ATTR: [ ...DEFAULT_ALLOWED_ATTR ],
+		} );
+	} );
+
 	describe( 'basic sanitization', () => {
 		test( 'should sanitize HTML with default allowed tags and attributes', () => {
 			const html =

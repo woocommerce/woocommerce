@@ -1,15 +1,8 @@
 describe( 'getTrustedTypesPolicy', () => {
-	test( 'should create trusted types policy when window.trustedTypes is available', async () => {
-		const mockCreatePolicy = jest.fn();
-		const mockPolicy = {
-			name: 'woocommerce-sanitize',
-			createHTML: jest.fn( ( str: string ) => str ),
-			createScript: jest.fn( ( str: string ) => str ),
-			createScriptURL: jest.fn( ( str: string ) => str ),
-		};
+	let mockCreatePolicy: jest.Mock;
 
-		mockCreatePolicy.mockReturnValue( mockPolicy );
-
+	beforeEach( () => {
+		mockCreatePolicy = jest.fn();
 		Object.defineProperty( window, 'trustedTypes', {
 			value: {
 				createPolicy: mockCreatePolicy,
@@ -17,8 +10,21 @@ describe( 'getTrustedTypesPolicy', () => {
 			writable: true,
 			configurable: true,
 		} );
+	} );
 
+	afterEach( () => {
 		jest.resetModules();
+		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
+	} );
+
+	test( 'should create trusted types policy when window.trustedTypes is available', async () => {
+		const mockPolicy = {
+			name: 'woocommerce-sanitize',
+			createHTML: jest.fn( ( str: string ) => str ),
+			createScript: jest.fn( ( str: string ) => str ),
+			createScriptURL: jest.fn( ( str: string ) => str ),
+		};
+		mockCreatePolicy.mockReturnValue( mockPolicy );
 
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
@@ -33,30 +39,16 @@ describe( 'getTrustedTypesPolicy', () => {
 				createScriptURL: expect.any( Function ),
 			}
 		);
-
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 	} );
 
 	test( 'should cache the policy instance and not create it multiple times', async () => {
-		const mockCreatePolicy = jest.fn();
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
 			createHTML: jest.fn( ( str: string ) => str ),
 			createScript: jest.fn( ( str: string ) => str ),
 			createScriptURL: jest.fn( ( str: string ) => str ),
 		};
-
 		mockCreatePolicy.mockReturnValue( mockPolicy );
-
-		Object.defineProperty( window, 'trustedTypes', {
-			value: {
-				createPolicy: mockCreatePolicy,
-			},
-			writable: true,
-			configurable: true,
-		} );
-
-		jest.resetModules();
 
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
@@ -66,14 +58,23 @@ describe( 'getTrustedTypesPolicy', () => {
 
 		expect( policy1 ).toBe( policy2 );
 		expect( mockCreatePolicy ).toHaveBeenCalledTimes( 1 );
-
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 	} );
 
 	test( 'should handle case when window.trustedTypes is not available', async () => {
 		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 
-		jest.resetModules();
+		const { getTrustedTypesPolicy } = await import(
+			'../trusted-types-policy'
+		);
+		const policy = getTrustedTypesPolicy();
+
+		expect( policy ).toBeNull();
+	} );
+
+	test( 'should handle policy creation errors', async () => {
+		mockCreatePolicy.mockImplementation( () => {
+			throw new Error( 'Creation failed' );
+		} );
 
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
@@ -97,26 +98,16 @@ describe( 'getTrustedTypesPolicy', () => {
 			createScriptURL: jest.fn(),
 		};
 
-		const mockCreatePolicy = jest.fn( ( name, config ) => {
+		mockCreatePolicy.mockImplementation( ( name, config ) => {
 			// Capture the createHTML function that was passed
 			mockPolicy.createHTML = config.createHTML;
 			return mockPolicy;
-		} );
-
-		Object.defineProperty( window, 'trustedTypes', {
-			value: {
-				createPolicy: mockCreatePolicy,
-			},
-			writable: true,
-			configurable: true,
 		} );
 
 		// Mock the sanitize module
 		jest.doMock( '../sanitize', () => ( {
 			sanitizeHTML: mockSanitizeHTML,
 		} ) );
-
-		jest.resetModules();
 
 		const { getTrustedTypesPolicy } = await import(
 			'../trusted-types-policy'
@@ -131,8 +122,6 @@ describe( 'getTrustedTypesPolicy', () => {
 		expect( mockSanitizeHTML ).toHaveBeenCalledWith( testInput );
 		expect( result ).toBe( 'sanitized: ' + testInput );
 
-		// Cleanup
 		jest.dontMock( '../sanitize' );
-		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 	} );
 } );
