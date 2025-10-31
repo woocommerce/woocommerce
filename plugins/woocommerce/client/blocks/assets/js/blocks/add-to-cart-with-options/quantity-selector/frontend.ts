@@ -187,20 +187,13 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const {
-					productData: parentProductData,
-					childProductData,
-					selectedAttributes,
-				} = addToCartWithOptionsStore.state;
+				const { productData: parentProductData, childProductData } =
+					addToCartWithOptionsStore.state;
 				let min = 1;
 
 				if ( ! parentProductData ) {
 					return;
 				}
-
-				// const { currentProductId } = getContext(
-				// 	'woocommerce/product-context'
-				// );
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
