@@ -441,7 +441,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should be scheduled' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'fetch_patterns action should be scheduled' );
 	}
 
 	/**
