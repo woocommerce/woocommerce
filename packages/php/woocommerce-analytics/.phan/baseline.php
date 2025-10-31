@@ -9,12 +9,10 @@
  */
 return [
     // # Issue statistics:
-    // PhanPluginRedundantAssignment : 4 occurrences
     // PhanTypeSuspiciousNonTraversableForeach : 1 occurrence
 
     // Currently, file_suppressions and directory_suppressions are the only supported suppressions
     'file_suppressions' => [
-        'src/class-universal.php' => ['PhanPluginRedundantAssignment'],
         'src/class-woo-analytics-trait.php' => ['PhanTypeSuspiciousNonTraversableForeach'],
     ],
     // 'directory_suppressions' => ['src/directory_name' => ['PhanIssueName1', 'PhanIssueName2']] can be manually added if needed.

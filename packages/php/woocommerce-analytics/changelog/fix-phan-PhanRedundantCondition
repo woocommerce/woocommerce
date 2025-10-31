@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Phan: Address PhanRedundantCondition, PhanRedundantArrayValuesCall, and PhanPluginRedundantAssignment violations.
