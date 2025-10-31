@@ -27,19 +27,19 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 		return array(
 			'empty'   => array(
 				'country code'    => '',
-				'expected result' => null
+				'expected result' => null,
 			),
 			'integer' => array(
 				'country code'    => 123,
-				'expected result' => null
+				'expected result' => null,
 			),
 			'invalid' => array(
 				'country code'    => 'invalid',
-				'expected result' => null
+				'expected result' => null,
 			),
 			'valid'   => array(
 				'country code'    => 'USA',
-				'expected result' => 'US'
+				'expected result' => 'US',
 			),
 		);
 	}
