@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -697,11 +698,17 @@ class WC_Gateway_Paypal_Request {
 			$country = substr( $country, 0, WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH );
 		}
 
-		// Postal code is typically required, but not always. The create-order request
-		// will fail if it is missing for a country that requires it.
-		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
-		// we will assume that postal code is not required.
-		if ( empty( $postcode ) && ( empty( $full_name ) || empty( $address_line_1 ) ) ) {
+		// Validate required fields based on country-specific address requirements.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: The container call can be removed once we migrate this class to the `src` folder.
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
+		if ( empty( $city ) && $address_requirements->country_requires_city( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
+			return null;
+		}
+
+		if ( empty( $postcode ) && $address_requirements->country_requires_postal_code( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
