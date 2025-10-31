@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent autocomplete scripts loading if the setting is disabled
