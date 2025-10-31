@@ -23,8 +23,6 @@ const AddToCartFormEdit = ( props: BlockEditProps< Attributes > ) => {
         props.attributes.quantitySelectorStyle || QuantitySelectorStyle.Input
     }`;
 
-	console.debug('AddToCartFormEdit render with quantitySelectorStyle:', props.attributes.quantitySelectorStyle);
-
 	const blockProps = useBlockProps( {
 		className: `wc-block-add-to-cart-form ${ quantitySelectorStyleClass }`,
 	} );
