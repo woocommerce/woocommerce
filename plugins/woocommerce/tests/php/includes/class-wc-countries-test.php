@@ -6,24 +6,24 @@ declare( strict_types=1 );
  */
 class WC_Countries_Test extends \WC_Unit_Test_Case {
 	/**
-	 * Tests for `get_alpha_2`.
+	 * Tests for `get_country_from_alpha_3_code`.
 	 *
 	 * @param mixed $country_code Country code to test.
 	 * @param mixed $expected     Expected result.
 	 * @return void
 	 *
-	 * @dataProvider provide_test_get_alpha_2
+	 * @dataProvider provide_test_get_country_from_alpha_3_code
 	 */
-	public function test_get_alpha_2( $country_code, $expected ) {
-		$this->assertEquals( $expected, wc()->countries->get_alpha_2( $country_code ) );
+	public function test_get_country_from_alpha_3_code( $country_code, $expected ) {
+		$this->assertEquals( $expected, wc()->countries->get_country_from_alpha_3_code( $country_code ) );
 	}
 
 	/**
-	 * Provider for `test_get_alpha_2`.
+	 * Provider for `test_get_country_from_alpha_3_code`.
 	 *
 	 * @return array
 	 */
-	public function provide_test_get_alpha_2() {
+	public function provide_test_get_country_from_alpha_3_code() {
 		return array(
 			'empty'   => array(
 				'country code'    => '',

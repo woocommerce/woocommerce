@@ -757,7 +757,7 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Check if it's a valid alpha-3 code.
-		$alpha2 = wc()->countries->get_alpha_2( $code );
+		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
 		if ( null === $alpha2 ) {
 			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
 		}
