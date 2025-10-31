@@ -327,27 +327,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
-			// When we set the quantity without user interaction, we should dispatch a change event.
-			dispatchChangeEvent() {
-				const { ref } = getElement();
-
-				if ( ! ( ref instanceof HTMLInputElement ) ) {
-					return;
-				}
-
-				const { quantity } = getContext< Context >();
-				const { productData } = state;
-
-				if ( productData ) {
-					const currentQuantity = quantity?.[ productData.id ];
-					const inputQuantity = ref?.valueAsNumber;
-
-					if ( inputQuantity !== currentQuantity ) {
-						console.log( 'dispatchChangeEvent', ref );
-						dispatchChangeEvent( ref );
-					}
-				}
-			},
 			// Quantity constraints might change dynamically when switching
 			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
@@ -382,7 +361,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					) {
 						actions.setQuantity(
 							productContextState.currentProductId,
-							newValue
+							newValue,
+							ref
 						);
 					}
 				}

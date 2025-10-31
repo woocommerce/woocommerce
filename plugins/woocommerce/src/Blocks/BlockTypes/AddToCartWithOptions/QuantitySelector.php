@@ -164,7 +164,7 @@ class QuantitySelector extends AbstractBlock {
 			$input_attributes['data-wp-bind--max']                     = 'woocommerce/add-to-cart-with-options::state.productData.max';
 			$input_attributes['data-wp-bind--step']                    = 'woocommerce/add-to-cart-with-options::state.productData.step';
 			$input_attributes['data-wp-watch']                         = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
-			$input_attributes['data-wp-watch---dispatch-change-event'] = 'woocommerce/add-to-cart-with-options::callbacks.dispatchChangeEvent';
+			$input_attributes['data-wp-watch---dispatch-change-event'] = 'woocommerce/add-to-cart-with-options::callbacks.maybeDispatchChangeEvent';
 			$input_attributes['data-wp-bind--value']                   = 'woocommerce/add-to-cart-with-options::state.inputQuantity';
 		}
 
