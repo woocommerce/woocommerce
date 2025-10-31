@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the unused package class from the email editor and add the LICENSE file for prefixed third-party packages to the build output.
