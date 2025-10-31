@@ -7,6 +7,8 @@
  * @package WooCommerce\Tests\Internal\Admin\Settings\Mocks
  */
 
+namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks;
+
 declare( strict_types=1 );
 
 if ( ! class_exists( 'WC_Payments_Utils' ) ) {
