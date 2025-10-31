@@ -46,10 +46,7 @@ class PTKPatternsStore {
 			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
-
-			add_action( 'action_scheduler_ensure_recurring_actions', array( $this,
-				'ensure_recurring_fetch_patterns_if_enabled'
-			) );
+			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled'	) );
 
 			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
 			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
@@ -111,10 +108,7 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) ) {
+		if ( as_has_scheduled_action( $action ) ) {
 			return;
 		}
 
