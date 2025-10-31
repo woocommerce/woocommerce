@@ -14,7 +14,7 @@
 	"main": "build/index.js",
 	"scripts": {
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
-		"composer": "XDEBUG_MODE=off composer",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "eslint --ext=js,ts,tsx src",
 		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
 		"test": "jest --passWithNoTests",
