@@ -284,15 +284,11 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Verify URL was built successfully.
 		$this->assertNotEmpty( $url );
+		$this->assertStringContainsString( 'block-a%2Cblock-b%2Cblock-c', $url );
 
 		// Parse the query string.
 		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['query'], $query_params );
-
-		// Verify indexed array became comma-separated string.
-		$this->assertArrayHasKey( 'blocks', $query_params );
-		$this->assertEquals( 'block-a%2Cblock-b%2Cblock-c', $query_params['blocks'] );
-
 		// Verify no bracket notation in URL (parse_str would create array values if brackets were present).
 		foreach ( $query_params as $key => $value ) {
 			$this->assertIsNotArray( $value, "Property '$key' should not be an array after parse_str (indicates bracket notation in URL)" );
@@ -321,16 +317,9 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Parse the query string.
 		$parsed_url = wp_parse_url( $url );
+		$this->assertStringContainsString( 'options=%7B%22enabled%22%3Atrue%2C%22count%22%3A5%2C%22name%22%3A%22test%22%7D', $url );
+
 		parse_str( $parsed_url['query'], $query_params );
-
-		// Verify associative array became JSON string.
-		$this->assertArrayHasKey( 'options', $query_params );
-		$decoded = json_decode( $query_params['options'], true );
-		$this->assertIsArray( $decoded );
-		$this->assertEquals( true, $decoded['enabled'] );
-		$this->assertEquals( 5, $decoded['count'] );
-		$this->assertEquals( 'test', $decoded['name'] );
-
 		// Verify no bracket notation in URL (parse_str would create array values if brackets were present).
 		foreach ( $query_params as $key => $value ) {
 			$this->assertIsNotArray( $value, "Property '$key' should not be an array after parse_str (indicates bracket notation in URL)" );
@@ -387,19 +376,11 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Verify URL was built successfully.
 		$this->assertNotEmpty( $url );
+		$this->assertStringContainsString( 'items=%5B%7B%22id%22%3A1%2C%22name%22%3A%22Item+1%22%7D%2C%7B%22id%22%3A2%2C%22name%22%3A%22Item+2%22%7D%5D', $url );
 
 		// Parse the query string.
 		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['query'], $query_params );
-
-		// Nested array should be JSON-encoded (indexed array of assoc arrays).
-		$this->assertArrayHasKey( 'items', $query_params );
-		$decoded = json_decode( $query_params['items'], true );
-		$this->assertIsArray( $decoded );
-		$this->assertCount( 2, $decoded );
-		$this->assertEquals( 1, $decoded[0]['id'] );
-		$this->assertEquals( 'Item 1', $decoded[0]['name'] );
-
 		// Verify no bracket notation in URL (parse_str would create array values if brackets were present).
 		foreach ( $query_params as $key => $value ) {
 			$this->assertIsNotArray( $value, "Property '$key' should not be an array after parse_str (indicates bracket notation in URL)" );
@@ -421,15 +402,11 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Verify URL was built successfully.
 		$this->assertNotEmpty( $url );
+		$this->assertStringContainsString( 'tags=tag1%2Ctag%2Cwith%2Ccommas%2Ctag3', $url );
 
 		// Parse the query string.
 		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['query'], $query_params );
-
-		// Verify it's comma-separated (commas in values preserved).
-		$this->assertArrayHasKey( 'tags', $query_params );
-		$this->assertEquals( 'tag1%2Ctag%2Cwith%2Ccommas%2Ctag3', $query_params['tags'] );
-
 		// Verify no bracket notation in URL (parse_str would create array values if brackets were present).
 		foreach ( $query_params as $key => $value ) {
 			$this->assertIsNotArray( $value, "Property '$key' should not be an array after parse_str (indicates bracket notation in URL)" );
@@ -492,17 +469,14 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 
 		// Verify URL was built successfully.
 		$this->assertNotEmpty( $url );
+		$this->assertStringContainsString( 'blocks=block-a%2Cblock-b', $url );
+		$this->assertStringContainsString( 'settings=%7B%22enabled%22%3Atrue%7D', $url );
+		$this->assertStringContainsString( 'empty=', $url );
+		$this->assertStringContainsString( 'normal=regular_value', $url );
 
 		// Parse the query string.
 		$parsed_url = wp_parse_url( $url );
 		parse_str( $parsed_url['query'], $query_params );
-
-		// Verify each array was converted appropriately.
-		$this->assertEquals( 'block-a%2Cblock-b', $query_params['blocks'] );
-		$this->assertJson( $query_params['settings'] );
-		$this->assertEquals( '', $query_params['empty'] );
-		$this->assertEquals( 'regular_value', $query_params['normal'] );
-
 		// Verify no bracket notation in URL (parse_str would create array values if brackets were present).
 		foreach ( $query_params as $key => $value ) {
 			$this->assertIsNotArray( $value, "Property '$key' should not be an array after parse_str (indicates bracket notation in URL)" );

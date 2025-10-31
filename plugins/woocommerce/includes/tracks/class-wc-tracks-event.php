@@ -170,8 +170,7 @@ class WC_Tracks_Event {
 
 			if ( $is_indexed_array && $has_scalar_only ) {
 				// Indexed arrays with scalar values: join as comma string.
-				$value_string  = implode( ',', array_map( 'strval', $value ) );
-				$props[ $key ] = rawurlencode( $value_string );
+				$props[ $key ] = implode( ',', array_map( 'strval', $value ) );
 				continue;
 			}
 
