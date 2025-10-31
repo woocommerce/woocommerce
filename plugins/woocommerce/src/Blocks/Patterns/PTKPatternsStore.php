@@ -46,7 +46,7 @@ class PTKPatternsStore {
 			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
-			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled'	) );
+			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
 			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
 			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
