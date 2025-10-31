@@ -90,6 +90,27 @@ class WC_Countries {
 	}
 
 	/**
+	 * Searches for a valid ISO 3166-1 alpha-2 code using the provided alpha-3 code.
+	 *
+	 * @since 10.3.0
+	 * @param string $country_code The alpha-3 country code to search for.
+	 * @return string|null The alpha-2 country code, or null if not found.
+	 */
+	public function get_alpha_2( $country_code ) {
+		try {
+			$data = ( new Automattic\WooCommerce\Vendor\League\ISO3166\ISO3166() )->alpha3( $country_code );
+			if ( ! isset( $data['alpha2'] ) ) {
+				throw new \Exception( 'Alpha-2 country code not found for alpha-3 code.' );
+			}
+
+			// Return the alpha-2 code.
+			return $data['alpha2'];
+		} catch ( \Exception ) {
+			return null;
+		}
+	}
+
+	/**
 	 * Get all continents.
 	 *
 	 * @return array
