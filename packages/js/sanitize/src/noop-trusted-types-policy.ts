@@ -18,13 +18,22 @@ export function getNoopTrustedTypesPolicy(): TrustedTypePolicy | null {
 		return null;
 	}
 
-	noopPolicyInstance = window.trustedTypes.createPolicy(
-		'woocommerce-sanitize-noop',
-		{
-			createHTML: ( input: string ): string => input,
-			createScriptURL: ( input: string ): string => input,
-		}
-	) as TrustedTypePolicy;
+	try {
+		noopPolicyInstance = window.trustedTypes.createPolicy(
+			'woocommerce-sanitize-noop',
+			{
+				createHTML: ( input: string ): string => input,
+				createScriptURL: ( input: string ): string => input,
+			}
+		) as TrustedTypePolicy;
+	} catch ( error ) {
+		noopPolicyInstance = null;
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Failed to create "woocommerce-sanitize-noop" trusted type policy:',
+			error
+		);
+	}
 
 	return noopPolicyInstance;
 }

@@ -28,10 +28,22 @@ export function getTrustedTypesPolicy(): TrustedTypePolicy | null {
 		return null;
 	}
 
-	policyInstance = window.trustedTypes.createPolicy( 'woocommerce-sanitize', {
-		createHTML: ( input: string ): string => sanitizeHTML( input ),
-		createScriptURL: ( input: string ): string => input,
-	} ) as TrustedTypePolicy;
+	try {
+		policyInstance = window.trustedTypes.createPolicy(
+			'woocommerce-sanitize',
+			{
+				createHTML: ( input: string ): string => sanitizeHTML( input ),
+				createScriptURL: ( input: string ): string => input,
+			}
+		) as TrustedTypePolicy;
+	} catch ( error ) {
+		policyInstance = null;
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Failed to create "woocommerce-sanitize" trusted type policy:',
+			error
+		);
+	}
 
 	return policyInstance;
 }
