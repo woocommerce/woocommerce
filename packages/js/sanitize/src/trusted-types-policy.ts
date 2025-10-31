@@ -1,7 +1,15 @@
 /**
  * External dependencies
  */
-import DOMPurify from 'dompurify';
+import type DOMPurify from 'dompurify';
+
+/**
+ * Extract the TrustedTypesPolicy type from DOMPurify's Config.
+ * This ensures our policy type matches exactly what DOMPurify expects.
+ */
+export type TrustedTypesPolicy = NonNullable<
+	DOMPurify.Config[ 'TRUSTED_TYPES_POLICY' ]
+>;
 
 // Extend Window interface to include trustedTypes
 declare global {
@@ -10,23 +18,14 @@ declare global {
 			createPolicy: (
 				name: string,
 				rules: {
-					createHTML?: ( string: string ) => string;
-					createScript?: ( string: string ) => string;
-					createScriptURL?: ( string: string ) => string;
+					createHTML?: ( input: string ) => string;
+					createScript?: ( input: string ) => string;
+					createScriptURL?: ( input: string ) => string;
 				}
-			) => TrustedTypePolicy;
-			defaultPolicy?: TrustedTypePolicy;
+			) => TrustedTypesPolicy;
+			defaultPolicy?: TrustedTypesPolicy;
 		};
 	}
-}
-
-/**
- * TrustedTypePolicy interface.
- */
-interface TrustedTypePolicy {
-	createHTML: ( string: string ) => string;
-	createScript: ( string: string ) => string;
-	createScriptURL: ( string: string ) => string;
 }
 
 /**
@@ -35,37 +34,29 @@ interface TrustedTypePolicy {
 export const TRUSTED_POLICY_NAME = 'woocommerce-sanitize';
 
 /**
- * Create a trusted types policy for DOMPurify.
- *
- * @return TrustedTypePolicy object.
+ * Cached policy instance to ensure it's only created once.
  */
-function createPolicy(): TrustedTypePolicy | null {
+let policyInstance: TrustedTypesPolicy | null | undefined;
+
+/**
+ * Get or create a trusted types policy for DOMPurify.
+ *
+ * @return TrustedTypesPolicy object or null if not supported.
+ */
+export function getTrustedTypesPolicy(): TrustedTypesPolicy | null {
+	if ( policyInstance !== undefined ) {
+		return policyInstance;
+	}
+
 	if ( ! window || ! window.trustedTypes ) {
+		policyInstance = null;
 		return null;
 	}
 
-	const policy = window.trustedTypes.createPolicy( TRUSTED_POLICY_NAME, {
+	policyInstance = window.trustedTypes.createPolicy( TRUSTED_POLICY_NAME, {
 		createHTML: ( string: string ) => string,
 		createScriptURL: ( url ) => url,
 	} );
 
-	return policy;
-}
-
-/**
- * Initialize the trusted types policy for DOMPurify.
- * This should be called early in the application lifecycle.
- */
-export function initializeTrustedTypesPolicy(): void {
-	const policy = createPolicy();
-
-	if ( ! policy ) {
-		return;
-	}
-
-	// Set this as the policy for DOMPurify
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	( DOMPurify.setConfig as any )( {
-		TRUSTED_TYPES_POLICY: policy,
-	} );
+	return policyInstance;
 }
