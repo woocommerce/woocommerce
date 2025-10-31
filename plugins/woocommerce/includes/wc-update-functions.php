@@ -3127,12 +3127,13 @@ function wc_update_1030_add_comments_date_type_index() {
 }
 
 /**
- * Remove the option last_fetch_patterns_request.
- * This option tracked the last time patterns were fetched from the PTK API.
+ * Clean up the old last_fetch_patterns_request option and non-grouped actions after migration to using the `action_scheduler_ensure_recurring_actions` hook.
+ *
  * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
  *
  * @return void
  */
-function wc_update_1040_remove_last_fetch_patterns_request_option() {
+function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
 	delete_option( 'last_fetch_patterns_request' );
+	as_unschedule_all_actions( 'fetch_patterns' );
 }

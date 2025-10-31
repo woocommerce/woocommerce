@@ -108,11 +108,11 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		if ( as_has_scheduled_action( $action ) ) {
+		if ( as_has_scheduled_action( $action, array(), 'woocommerce' ) ) {
 			return;
 		}
 
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action, array(), 'woocommerce' );
 	}
 
 	/**
@@ -188,7 +188,7 @@ class PTKPatternsStore {
 		delete_option( self::OPTION_NAME );
 
 		// Unschedule any existing fetch_patterns actions.
-		as_unschedule_all_actions( 'fetch_patterns' );
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
 	}
 
 	/**

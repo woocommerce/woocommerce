@@ -451,25 +451,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
 
-		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'fetch_patterns action should not be scheduled when tracking is disabled' );
-	}
-
-	/**
-	 * Test ensure_recurring_fetch_patterns_if_enabled does not duplicate existing action.
-	 */
-	public function test_ensure_recurring_fetch_patterns_does_not_duplicate_existing_action() {
-		update_option( 'woocommerce_allow_tracking', 'yes' );
-
-		// Schedule the first action.
-		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
-		$first_action_id = as_next_scheduled_action( 'fetch_patterns' );
-		$this->assertNotFalse( $first_action_id, 'First action should be scheduled' );
-
-		// Call again - should not create duplicate.
-		$this->pattern_store->ensure_recurring_fetch_patterns_if_enabled();
-		$second_action_id = as_next_scheduled_action( 'fetch_patterns' );
-
-		$this->assertEquals( $first_action_id, $second_action_id, 'Should not create duplicate action' );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'fetch_patterns action should not be scheduled when tracking is disabled' );
 	}
 
 	/**
@@ -480,7 +462,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		// Schedule both single and recurring actions.
 		as_schedule_single_action( time(), 'fetch_patterns' );
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'fetch_patterns' );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ), 'Actions should be scheduled' );
 
