@@ -11,8 +11,7 @@ use WP_Upgrader;
  * @internal
  */
 class PTKPatternsStore {
-	const OPTION_NAME                             = 'ptk_patterns';
-	const LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME = 'last_fetch_patterns_request';
+	const OPTION_NAME = 'ptk_patterns';
 
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
@@ -47,6 +46,10 @@ class PTKPatternsStore {
 			add_action( 'update_option_woocommerce_allow_tracking', array( $this, 'flush_or_fetch_patterns' ), 10, 2 );
 			add_action( 'deactivated_plugin', array( $this, 'flush_cached_patterns' ), 10, 2 );
 			add_action( 'upgrader_process_complete', array( $this, 'fetch_patterns_on_plugin_update' ), 10, 2 );
+
+			add_action( 'action_scheduler_ensure_recurring_actions', array( $this,
+				'ensure_recurring_fetch_patterns_if_enabled'
+			) );
 
 			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
 			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
@@ -88,14 +91,17 @@ class PTKPatternsStore {
 	}
 
 	/**
-	 * Check if the last request was more than one day ago.
+	 * Ensure a recurring fetch patterns action is scheduled.
+	 * This is called by the `action_scheduler_ensure_recurring_actions` hook.
 	 *
-	 * @param int $last_request The last request time.
-	 * @return bool
+	 * @return void
 	 */
-	private function is_older_than_one_day( $last_request ) {
-		$current_time = time();
-		return abs( $last_request - $current_time ) > DAY_IN_SECONDS;
+	public function ensure_recurring_fetch_patterns_if_enabled() {
+		if ( ! $this->allowed_tracking_is_enabled() ) {
+			return;
+		}
+
+		$this->schedule_action_if_not_pending( 'fetch_patterns' );
 	}
 
 	/**
@@ -105,17 +111,14 @@ class PTKPatternsStore {
 	 * @return void
 	 */
 	private function schedule_action_if_not_pending( $action ) {
-		$last_request = get_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME );
 		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
 		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-
 		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action ) || ( is_numeric( $last_request ) && ! $this->is_older_than_one_day( $last_request ) ) ) {
+		if ( call_user_func( $has_scheduled_action, $action ) ) {
 			return;
 		}
 
-		as_schedule_single_action( time(), $action );
-		update_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME, time(), false );
+		as_schedule_recurring_action( time(), DAY_IN_SECONDS, $action );
 	}
 
 	/**
@@ -126,7 +129,7 @@ class PTKPatternsStore {
 	public function get_patterns() {
 		$patterns = get_option( self::OPTION_NAME );
 
-		// Only if the transient is not set, we schedule fetching the patterns from the PTK.
+		// If the current data doesn't exist or is invalid, schedule fetching the patterns from the PTK.
 		if ( false === $patterns || ! $this->ptk_client->is_valid_schema( $patterns ) ) {
 			$this->schedule_fetch_patterns();
 			return array();
@@ -189,7 +192,9 @@ class PTKPatternsStore {
 	 */
 	public function flush_cached_patterns() {
 		delete_option( self::OPTION_NAME );
-		delete_option( self::LAST_FETCH_PATTERNS_REQUEST_OPTION_NAME );
+
+		// Unschedule any existing fetch_patterns actions.
+		as_unschedule_all_actions( 'fetch_patterns' );
 	}
 
 	/**
@@ -201,8 +206,6 @@ class PTKPatternsStore {
 		if ( ! $this->allowed_tracking_is_enabled() ) {
 			return;
 		}
-
-		$this->flush_cached_patterns();
 
 		$patterns = $this->ptk_client->fetch_patterns(
 			array(

@@ -247,4 +247,22 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertTrue( true );
 		}
 	}
+
+	/**
+	 * Test wc_update_1040_remove_last_fetch_patterns_request_option removes the obsolete option.
+	 *
+	 * @return void
+	 */
+	public function test_wc_update_1040_remove_last_fetch_patterns_request_option() {
+		// Set up the option that should be removed.
+		add_option( 'last_fetch_patterns_request', time() );
+		$this->assertNotFalse( get_option( 'last_fetch_patterns_request' ), 'Option should exist before update' );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		wc_update_1040_remove_last_fetch_patterns_request_option();
+
+		// Verify the option was removed.
+		$this->assertFalse( get_option( 'last_fetch_patterns_request' ), 'Option should be removed after update' );
+	}
 }

@@ -3125,3 +3125,14 @@ function wc_update_1030_add_comments_date_type_index() {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 	}
 }
+
+/**
+ * Remove the option last_fetch_patterns_request.
+ * This option tracked the last time patterns were fetched from the PTK API.
+ * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
+ *
+ * @return void
+ */
+function wc_update_1040_remove_last_fetch_patterns_request_option() {
+	delete_option( 'last_fetch_patterns_request' );
+}
