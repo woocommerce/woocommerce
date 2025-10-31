@@ -93,9 +93,9 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
             # No PRs by automated tools should remain open.
-            count=$( gh pr list --search "is:open author:app/github-actions" --limit 1 --json number | jq length )
+            count=$( gh pr list --search "is:open label:Release" --limit 1 --json number | jq length )
             if (( count > 0 )); then
-                echo "::error::Pre-build verification: there are automated PRs by 'github-actions' still open."
+                echo "::error::Pre-build verification: there are release PRs still open."
                 exit 1
             fi
 
