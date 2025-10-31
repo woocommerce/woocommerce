@@ -327,6 +327,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
+			// When we set the quantity without user interaction, we should dispatch a change event.
 			dispatchChangeEvent() {
 				const { ref } = getElement();
 
@@ -336,8 +337,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { quantity } = getContext< Context >();
 				const { productData } = state;
-
-				// console.log( 'ayo wat', quantity, productData );
 
 				if ( productData ) {
 					const currentQuantity = quantity?.[ productData.id ];
@@ -366,9 +365,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { quantity } = getContext< Context >();
 				const { productData } = state;
 
-				console.log( 'set to 0 expect dispatchChangeEvent' );
-				actions.setQuantity( productContextState.currentProductId, 0 );
-
 				if ( productData ) {
 					const currentValue = quantity?.[ productData.id ];
 					const { min, max } = productData;
@@ -388,9 +384,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							productContextState.currentProductId,
 							newValue
 						);
-
-						// ref.value = newValue.toString();
-						// dispatchChangeEvent( ref );
 					}
 				}
 			},
