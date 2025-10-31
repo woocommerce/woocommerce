@@ -34,26 +34,6 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	const DAILY_SALT_OPTION = 'woocommerce_analytics_daily_salt';
 
 	/**
-	 * Allowed ClickHouse events.
-	 *
-	 * @var array
-	 */
-	const ALLOWED_CH_EVENTS = array(
-		'woocommerceanalytics_session_started',
-		'woocommerceanalytics_session_engagement',
-		'woocommerceanalytics_product_view',
-		'woocommerceanalytics_cart_view',
-		'woocommerceanalytics_add_to_cart',
-		'woocommerceanalytics_remove_from_cart',
-		'woocommerceanalytics_checkout_view',
-		'woocommerceanalytics_product_checkout',
-		'woocommerceanalytics_product_purchase',
-		'woocommerceanalytics_order_confirmation_view',
-		'woocommerceanalytics_search',
-		'woocommerceanalytics_page_view',
-	);
-
-	/**
 	 * Event queue.
 	 *
 	 * @var array
@@ -105,7 +85,7 @@ class WC_Analytics_Tracking extends WC_Tracks {
 
 		// Record ClickHouse event, if applicable.
 		$ch_error = null;
-		if ( self::should_send_to_clickhouse( $prefixed_event_name ) ) {
+		if ( Features::is_clickhouse_enabled() ) {
 			$properties['ch'] = 1;
 			$ch_result        = self::record_ch_event( $properties );
 			if ( is_wp_error( $ch_result ) ) {
@@ -380,17 +360,6 @@ class WC_Analytics_Tracking extends WC_Tracks {
 			);
 		}
 		return self::$cached_visitor_id;
-	}
-
-	/**
-	 * Check if the event should be sent to ClickHouse
-	 *
-	 * @param string $event The event name.
-	 * @return bool True if it should be sent to ClickHouse
-	 */
-	private static function should_send_to_clickhouse( $event ) {
-		return Features::is_clickhouse_enabled() &&
-			in_array( $event, self::ALLOWED_CH_EVENTS, true );
 	}
 
 	/**

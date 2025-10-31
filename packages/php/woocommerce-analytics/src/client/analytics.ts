@@ -7,7 +7,7 @@ import debugFactory from 'debug';
  */
 import { ApiClient } from './api-client';
 import { consentManager } from './consent';
-import { EVENT_NAME_REGEX, EVENT_PREFIX, CLICK_HOUSE_EVENTS } from './constants';
+import { EVENT_NAME_REGEX, EVENT_PREFIX } from './constants';
 import SessionManager from './session-manager';
 import { getCookie, generateRandomToken } from './utils';
 import type { AnalyticsConfig } from './types/shared';
@@ -159,7 +159,7 @@ export class Analytics {
 			return;
 		}
 
-		if ( this.features.ch && CLICK_HOUSE_EVENTS.includes( event ) ) {
+		if ( this.features.ch ) {
 			eventProperties.ch = 1;
 		} else {
 			delete eventProperties.ch;

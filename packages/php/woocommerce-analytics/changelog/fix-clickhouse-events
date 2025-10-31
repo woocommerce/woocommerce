@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Send all events to clickhouse
