@@ -170,11 +170,6 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.3.3 2025-10-24 =
-
-**WooCommerce**
-
-* Dev - Add in deprecated script warnings and backwards compatibility for 3PDs [#61599](https://github.com/woocommerce/woocommerce/pull/61599)
-
+= 10.3.4 2025-10-24 =
 
 [See changelog for all versions](https://raw.githubusercontent.com/woocommerce/woocommerce/trunk/changelog.txt).
