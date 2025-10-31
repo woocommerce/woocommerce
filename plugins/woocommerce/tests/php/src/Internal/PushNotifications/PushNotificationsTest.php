@@ -106,6 +106,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * enablement check.
 	 */
 	public function test_it_logs_error_when_jetpack_connection_check_throws_exception() {
+		// phpcs:disable Squiz.Commenting
 		$fake_logger = new class() {
 			public $errors = array();
 
@@ -116,6 +117,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 				);
 			}
 		};
+		// phpcs:enable Squiz.Commenting
 
 		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $fake_logger ) );
 		$this->set_up_features_controller_mock( true );
