@@ -53,12 +53,10 @@ describe( 'sanitizeHTML integration tests', () => {
 				name: string,
 				config: {
 					createHTML: ( s: string ) => string;
-					createScriptURL: ( s: string ) => string;
 				}
 			) => ( {
 				name,
 				createHTML: config.createHTML,
-				createScriptURL: config.createScriptURL,
 			} )
 		);
 

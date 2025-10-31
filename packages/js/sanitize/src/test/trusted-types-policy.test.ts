@@ -21,8 +21,6 @@ describe( 'getTrustedTypesPolicy', () => {
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
 			createHTML: jest.fn( ( str: string ) => str ),
-			createScript: jest.fn( ( str: string ) => str ),
-			createScriptURL: jest.fn( ( str: string ) => str ),
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
 
@@ -36,7 +34,6 @@ describe( 'getTrustedTypesPolicy', () => {
 			'woocommerce-sanitize',
 			{
 				createHTML: expect.any( Function ),
-				createScriptURL: expect.any( Function ),
 			}
 		);
 	} );
@@ -45,8 +42,6 @@ describe( 'getTrustedTypesPolicy', () => {
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
 			createHTML: jest.fn( ( str: string ) => str ),
-			createScript: jest.fn( ( str: string ) => str ),
-			createScriptURL: jest.fn( ( str: string ) => str ),
 		};
 		mockCreatePolicy.mockReturnValue( mockPolicy );
 
@@ -94,8 +89,6 @@ describe( 'getTrustedTypesPolicy', () => {
 		const mockPolicy = {
 			name: 'woocommerce-sanitize',
 			createHTML: jest.fn(),
-			createScript: jest.fn(),
-			createScriptURL: jest.fn(),
 		};
 
 		mockCreatePolicy.mockImplementation( ( name, config ) => {

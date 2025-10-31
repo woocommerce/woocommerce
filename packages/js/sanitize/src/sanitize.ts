@@ -111,7 +111,7 @@ export function sanitizeHTML< T extends SanitizeReturnKind = 'string' >(
 	// creating its internal policy and emitting warnings with multiple instances.
 	const ttNoopPolicy = getNoopTrustedTypesPolicy();
 	if ( ttNoopPolicy ) {
-		purifyConfig.TRUSTED_TYPES_POLICY = ttNoopPolicy;
+		purifyConfig.TRUSTED_TYPES_POLICY = ttNoopPolicy as TrustedTypePolicy;
 	}
 
 	// Only pass a single RETURN_* flag if a non-string return type is requested
