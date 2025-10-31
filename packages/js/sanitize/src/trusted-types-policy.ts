@@ -23,7 +23,7 @@ export function getTrustedTypesPolicy(): TrustedTypePolicy | null {
 		return policyInstance;
 	}
 
-	if ( ! window || ! window.trustedTypes ) {
+	if ( typeof window === 'undefined' || ! window.trustedTypes ) {
 		policyInstance = null;
 		return null;
 	}

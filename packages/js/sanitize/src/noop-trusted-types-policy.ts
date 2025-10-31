@@ -13,7 +13,7 @@ export function getNoopTrustedTypesPolicy(): TrustedTypePolicy | null {
 		return noopPolicyInstance;
 	}
 
-	if ( ! window || ! window.trustedTypes ) {
+	if ( typeof window === 'undefined' || ! window.trustedTypes ) {
 		noopPolicyInstance = null;
 		return null;
 	}
