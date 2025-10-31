@@ -2,6 +2,12 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
+
+-   Patch - Add type validation for fontSize and textColor attributes in Typography_Preprocessor to prevent errors from third-party blocks with incompatible attribute types [#61687]
+-   Patch - Remove the unused package class from the email editor and add the LICENSE file for prefixed third-party packages to the build output. [#61673]
+-   Minor - Add unregister method to Personalization_Tags_Registry [#61679]
+
 ## [1.8.1](https://github.com/woocommerce/email-editor/releases/tag/1.8.1) - 2025-10-27 
 
 -   Patch - Refactor personalization tags fetching to use core entities [#61467]

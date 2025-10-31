@@ -23,3 +23,11 @@ when:
     assign:
       teams:
         - flux
+  - author:
+      teamIs:
+        - ballade
+      ignore:
+        nameIs:
+    assign:
+      teams:
+        - ballade
