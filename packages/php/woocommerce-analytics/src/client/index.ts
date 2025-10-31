@@ -3,6 +3,7 @@
 /**
  * Internal dependencies
  */
+import './public-path';
 import { consentManager } from './consent';
 
 jQuery( () => {

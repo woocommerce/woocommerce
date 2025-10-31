@@ -10,6 +10,7 @@ declare global {
 			features: Record< string, boolean >;
 			pages: Record< string, boolean >;
 			breadcrumbs?: string[];
+			assets_url: string;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;

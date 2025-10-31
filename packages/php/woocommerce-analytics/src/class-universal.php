@@ -83,6 +83,9 @@ class Universal {
 				window.wcAnalytics = window.wcAnalytics || {};
 				const wcAnalytics = window.wcAnalytics;
 
+				// Set the assets URL for webpack to find the split assets.
+				wcAnalytics.assets_url = '<?php echo esc_url( plugins_url( '../build/', __DIR__ . '/class-woocommerce-analytics.php' ) ); ?>';
+
 				// Set common properties for all events.
 				wcAnalytics.commonProps = <?php echo wp_json_encode( $common_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); ?>;
 
