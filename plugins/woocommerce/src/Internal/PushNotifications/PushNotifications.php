@@ -73,15 +73,14 @@ class PushNotifications {
 		try {
 			$proxy = wc_get_container()->get( LegacyProxy::class );
 
-			if (
+			$this->enabled = (
 				class_exists( JetpackConnectionManager::class )
 				&& $proxy->get_instance_of( JetpackConnectionManager::class )->is_connected()
-			) {
-				$this->enabled = true;
-			} else {
-				$this->enabled = false;
-			}
+			);
 		} catch ( Exception $e ) {
+			$logger = wc_get_container()->get( LegacyProxy::class )->call_function( 'wc_get_logger' );
+			$logger->error( 'Error determining if PushNotifications feature should be enabled: ' . $e->getMessage() );
+
 			$this->enabled = false;
 		}
 

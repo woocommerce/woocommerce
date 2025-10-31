@@ -8,6 +8,7 @@ use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Unit_Test_Case;
 
@@ -101,12 +102,48 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests that errors are logged when exception is thrown during
+	 * enablement check.
+	 */
+	public function test_it_logs_error_when_jetpack_connection_check_throws_exception() {
+		$fake_logger = new class() {
+			public $errors = array();
+
+			public function error( $message, $data = array() ) {
+				$this->errors[] = array(
+					'message' => $message,
+					'data'    => $data,
+				);
+			}
+		};
+
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $fake_logger ) );
+		$this->set_up_features_controller_mock( true );
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willThrowException( new Exception( 'Connection check failed' ) );
+
+		$push_notifications = new PushNotifications();
+		$result             = $push_notifications->should_be_enabled();
+
+		$this->assertFalse( $result, 'Should be disabled when exception is thrown' );
+		$this->assertCount( 1, $fake_logger->errors, 'Should have logged exactly one error' );
+		$this->assertStringContainsString( 'Connection check failed', $fake_logger->errors[0]['message'] );
+
+		$this->assertStringContainsString(
+			'Error determining if PushNotifications feature should be enabled',
+			$fake_logger->errors[0]['message']
+		);
+	}
+
+	/**
 	 * @testdox Tests that enablement state is cached within an instance.
 	 */
 	public function test_it_caches_enablement_state_correctly() {
-		/**
-		 * First instance with Jetpack disconnected - should return false.
-		 */
+		// First instance with Jetpack disconnected - should return false.
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 		$this->jetpack_connection_manager_mock
 			->expects( $this->once() )
@@ -117,14 +154,10 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should be disabled when Jetpack is not connected' );
 
-		/**
-		 * Second call should return cached false without calling is_connected again.
-		 */
+		// Second call should return cached false without calling is_connected again.
 		$this->assertFalse( $push_notifications->should_be_enabled(), 'Should return cached false value' );
 
-		/**
-		 * Create a new instance with Jetpack connected.
-		 */
+		// Create a new instance with Jetpack connected.
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 		$this->jetpack_connection_manager_mock
 			->expects( $this->once() )
@@ -133,14 +166,10 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 
 		$push_notifications_2 = new PushNotifications();
 
-		/**
-		 * Should now return true with the new instance.
-		 */
+		// Should now return true with the new instance.
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should be enabled with new instance when Jetpack connected' );
 
-		/**
-		 * Subsequent call should return cached true.
-		 */
+		// Subsequent call should return cached true.
 		$this->assertTrue( $push_notifications_2->should_be_enabled(), 'Should return cached true value' );
 	}
 
@@ -160,9 +189,6 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 			->method( 'feature_is_enabled' )
 			->willReturnCallback(
 				function ( $feature_id ) use ( $feature_enabled ) {
-					/**
-					 * Return the specified value for push_notifications, false for all others.
-					 */
 					return PushNotifications::FEATURE_NAME === $feature_id ? $feature_enabled : false;
 				}
 			);
