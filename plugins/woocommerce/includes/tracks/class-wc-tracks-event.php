@@ -175,7 +175,8 @@ class WC_Tracks_Event {
 			}
 
 			// Associative arrays or nested arrays become JSON strings.
-			$props[ $key ] = wp_json_encode( $value, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES );
+			$encoded = wp_json_encode( $value, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES );
+			$props[ $key ] = ( false === $encoded ) ? '' : $encoded;
 		}
 
 		return $is_object ? (object) $props : $props;
