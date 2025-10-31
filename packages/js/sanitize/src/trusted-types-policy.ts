@@ -1,49 +1,24 @@
 /**
  * External dependencies
  */
-import type DOMPurify from 'dompurify';
+import type { TrustedTypePolicy } from 'trusted-types';
 
 /**
- * Extract the TrustedTypesPolicy type from DOMPurify's Config.
- * This ensures our policy type matches exactly what DOMPurify expects.
+ * Internal dependencies
  */
-export type TrustedTypesPolicy = NonNullable<
-	DOMPurify.Config[ 'TRUSTED_TYPES_POLICY' ]
->;
-
-// Extend Window interface to include trustedTypes
-declare global {
-	interface Window {
-		trustedTypes?: {
-			createPolicy: (
-				name: string,
-				rules: {
-					createHTML?: ( input: string ) => string;
-					createScript?: ( input: string ) => string;
-					createScriptURL?: ( input: string ) => string;
-				}
-			) => TrustedTypesPolicy;
-			defaultPolicy?: TrustedTypesPolicy;
-		};
-	}
-}
-
-/**
- * The name of the trusted types policy.
- */
-export const TRUSTED_POLICY_NAME = 'woocommerce-sanitize';
+import { sanitizeHTML } from './sanitize';
 
 /**
  * Cached policy instance to ensure it's only created once.
  */
-let policyInstance: TrustedTypesPolicy | null | undefined;
+let policyInstance: TrustedTypePolicy | null | undefined;
 
 /**
  * Get or create a trusted types policy for DOMPurify.
  *
- * @return TrustedTypesPolicy object or null if not supported.
+ * @return TrustedTypePolicy object or null if not supported.
  */
-export function getTrustedTypesPolicy(): TrustedTypesPolicy | null {
+export function getTrustedTypesPolicy(): TrustedTypePolicy | null {
 	if ( policyInstance !== undefined ) {
 		return policyInstance;
 	}
@@ -53,10 +28,10 @@ export function getTrustedTypesPolicy(): TrustedTypesPolicy | null {
 		return null;
 	}
 
-	policyInstance = window.trustedTypes.createPolicy( TRUSTED_POLICY_NAME, {
-		createHTML: ( string: string ) => string,
-		createScriptURL: ( url ) => url,
-	} );
+	policyInstance = window.trustedTypes.createPolicy( 'woocommerce-sanitize', {
+		createHTML: ( input: string ): string => sanitizeHTML( input ),
+		createScriptURL: ( input: string ): string => input,
+	} ) as TrustedTypePolicy;
 
 	return policyInstance;
 }
