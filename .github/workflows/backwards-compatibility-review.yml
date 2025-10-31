@@ -10,12 +10,13 @@ concurrency:
 
 jobs:
   review-with-tracking:
-    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
+      issues: write
+      id-token: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -23,7 +24,6 @@ jobs:
           fetch-depth: 0
 
       - name: PR Review with Progress Tracking
-        if: ${{ secrets.ANTHROPIC_API_KEY != '' }}
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -42,10 +42,7 @@ jobs:
 
             Output format (strict):
             - Summary: Overall risk [None|Low|Medium|High] and a 2 to 4 sentence rationale.
-            - Findings: For each item → [Severity: Low|Medium|High] file:line — what changed, how it breaks, affected integrators, likelihood, mitigation/replacement, and a short example when relevant.
-            - Deprecations Needed: list items that require deprecation with proposed replacement API and `@deprecated` notes (or `_deprecated_*` / `wc_deprecated_*`).
             - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
-            - Communication: changelog entry, labels, docs/migration-guide updates, outreach to extension developers.
             - Confidence: a percentage and one-sentence justification.
 
             Scope to analyze:
