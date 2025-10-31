@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Blocks\Patterns;
 
@@ -29,11 +30,11 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 
 		// Clean up any existing actions before each test.
-		as_unschedule_all_actions( 'fetch_patterns' );
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
 
 		$this->ptk_client    = $this->createMock( PTKClient::class );
 		$this->pattern_store = new PTKPatternsStore( $this->ptk_client );
@@ -44,9 +45,9 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 	 *
 	 * @return void
 	 */
-	protected function tearDown(): void {
+	public function tearDown(): void {
 		// Unschedule all fetch_patterns actions to avoid test pollution.
-		as_unschedule_all_actions( 'fetch_patterns' );
+		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
 
 		// Clean up options.
 		delete_option( PTKPatternsStore::OPTION_NAME );
@@ -132,14 +133,14 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( PTKPatternsStore::OPTION_NAME, $expected_patterns, false );
 
 		// Schedule an action so we can verify it gets unscheduled.
-		as_schedule_single_action( time(), 'fetch_patterns' );
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ) );
+		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ) );
 
 		$this->pattern_store->flush_cached_patterns();
 
 		$patterns = get_option( PTKPatternsStore::OPTION_NAME );
 		$this->assertFalse( $patterns );
-		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'All fetch_patterns actions should be unscheduled' );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'All fetch_patterns actions should be unscheduled' );
 	}
 
 	/**
@@ -196,7 +197,7 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 
 		$this->pattern_store->flush_or_fetch_patterns();
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ) );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ) );
 	}
 
 	/**
@@ -461,13 +462,13 @@ class PTKPatternsStoreTest extends \WP_UnitTestCase {
 		update_option( 'woocommerce_allow_tracking', 'yes' );
 
 		// Schedule both single and recurring actions.
-		as_schedule_single_action( time(), 'fetch_patterns' );
+		as_schedule_single_action( time(), 'fetch_patterns', array(), 'woocommerce' );
 		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'fetch_patterns', array(), 'woocommerce' );
 
-		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns' ), 'Actions should be scheduled' );
+		$this->assertTrue( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'Actions should be scheduled' );
 
 		$this->pattern_store->flush_cached_patterns();
 
-		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns' ), 'All fetch_patterns actions should be unscheduled after flush' );
+		$this->assertFalse( as_has_scheduled_action( 'fetch_patterns', array(), 'woocommerce' ), 'All fetch_patterns actions should be unscheduled after flush' );
 	}
 }
