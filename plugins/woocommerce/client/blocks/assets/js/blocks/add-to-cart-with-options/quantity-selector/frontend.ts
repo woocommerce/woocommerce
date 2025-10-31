@@ -225,10 +225,11 @@ store< QuantitySelectorStore >(
 						0,
 						event.target
 					);
-					// if ( Number.isNaN( event.target.valueAsNumber ) ) {
-					// 	event.target.value = '';
-					// }
-					// dispatchChangeEvent( event.target );
+
+					// This is an edge case where displayed value ('') doesn't represent internal state (0).
+					if ( Number.isNaN( event.target.valueAsNumber ) ) {
+						event.target.value = '';
+					}
 					return;
 				}
 
