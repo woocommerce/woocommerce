@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Attempts to identify the PayPal two-letter country code from a three-letter code using the `league/iso3166` composer package, and applies minor additional fixes

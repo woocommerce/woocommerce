@@ -1020,6 +1020,8 @@ function wc_get_image_size( $image_size ) {
 function wc_enqueue_js( $code ) {
 	global $wc_queued_js;
 
+	wc_deprecated_function( 'wc_enqueue_js', '10.4.0', 'wp_add_inline_script' );
+
 	if ( empty( $wc_queued_js ) ) {
 		$wc_queued_js = '';
 	}
