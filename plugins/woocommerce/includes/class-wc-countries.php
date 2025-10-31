@@ -105,7 +105,7 @@ class WC_Countries {
 
 			// Return the alpha-2 code.
 			return $data['alpha2'];
-		} catch ( \Exception ) {
+		} catch ( \Exception $e ) {
 			return null;
 		}
 	}
