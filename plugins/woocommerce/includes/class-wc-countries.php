@@ -95,6 +95,8 @@ class WC_Countries {
 	 * @since 10.3.0
 	 * @param string $country_code The alpha-3 country code to search for.
 	 * @return string|null The alpha-2 country code, or null if not found.
+	 *
+	 * @throws \Exception If an error occurs while looking up the country code.
 	 */
 	public function get_country_from_alpha_3_code( $country_code ) {
 		// Validate input.
