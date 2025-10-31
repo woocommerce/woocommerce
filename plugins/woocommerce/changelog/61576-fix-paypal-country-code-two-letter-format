@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sets the country code sent to PayPal when using PayPal Standard to the expected two-letter format

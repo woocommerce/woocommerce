@@ -12,7 +12,6 @@ project.properties
 *.sublime-project
 *.sublime-workspace
 .sublimelinterrc
-**/.claude/**/*.local.*
 
 # Grunt
 none
@@ -111,6 +110,9 @@ changes.json
 /artifacts
 /plugins/*/artifacts
 /tools/*/artifacts
+
+# Claude related files
+**/.claude/**/*.local.*
 
 # Cursor related files
 .cursorignore
