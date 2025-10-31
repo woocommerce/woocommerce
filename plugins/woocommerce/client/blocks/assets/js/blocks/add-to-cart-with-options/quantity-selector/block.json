@@ -21,11 +21,6 @@
 			"name": "stepper",
 			"label": "Stepper",
 			"isDefault": true
-		},
-		{
-			"name": "hidden",
-			"label": "Hidden",
-			"isDefault": false
 		}
 	],
 	"$schema": "https://schemas.wp.org/trunk/block.json",
