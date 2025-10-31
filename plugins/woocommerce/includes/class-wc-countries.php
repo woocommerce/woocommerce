@@ -97,6 +97,11 @@ class WC_Countries {
 	 * @return string|null The alpha-2 country code, or null if not found.
 	 */
 	public function get_alpha_2( $country_code ) {
+		// Validate input.
+		if ( empty( $country_code ) || ! is_string( $country_code ) ) {
+			return null;
+		}
+
 		try {
 			$data = ( new Automattic\WooCommerce\Vendor\League\ISO3166\ISO3166() )->alpha3( $country_code );
 			if ( ! isset( $data['alpha2'] ) ) {
