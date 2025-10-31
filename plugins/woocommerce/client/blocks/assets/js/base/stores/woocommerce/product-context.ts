@@ -20,12 +20,12 @@ const productDataStore = store< {
 	{
 		state: {
 			get currentProductId(): number {
-				const context = getContext< Context >(
-					'woocommerce/single-product'
+				const productContext = getContext< Context >(
+					'woocommerce/product-context'
 				);
 
 				return (
-					context?.currentProductId ??
+					productContext?.currentProductId ??
 					productDataStore?.state?.templateState?.currentProductId
 				);
 			},

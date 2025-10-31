@@ -213,7 +213,13 @@ const { actions, state } = store<
 
 			get inputQuantity() {
 				const { quantity } = getContext< Context >();
-				return quantity?.[ productContextState.currentProductId ] || 0;
+
+				// For quantity the child product ID overrides the parent.
+				const { childProductId, currentProductId } = getContext(
+					'woocommerce/product-context'
+				);
+
+				return quantity?.[ childProductId ?? currentProductId ] || 0;
 			},
 
 			get selectedAttributes(): SelectedAttributes[] {
@@ -228,6 +234,16 @@ const { actions, state } = store<
 					productContextState.currentProductId,
 					selectedAttributes
 				);
+			},
+
+			get childProductData() {
+				const { selectedAttributes } = getContext< Context >();
+
+				const { childProductId } = getContext(
+					'woocommerce/product-context'
+				);
+
+				return getProductData( childProductId, selectedAttributes );
 			},
 		},
 		actions: {

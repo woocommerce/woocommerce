@@ -10,7 +10,6 @@ import type { HTMLElementEvent } from '@woocommerce/types';
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
-import { state } from '@wordpress/interactivity-router/src';
 
 export type Context = {
 	productId: number;
@@ -67,7 +66,7 @@ store< QuantitySelectorStore >(
 				// Note: in grouped products, `productData` will be the parent product.
 				// We handle grouped products decrease differently because we
 				// allow setting the quantity to 0.
-				const { productData, quantity } =
+				const { productData, inputQuantity } =
 					addToCartWithOptionsStore.state;
 
 				if ( ! productData ) {
@@ -75,36 +74,26 @@ store< QuantitySelectorStore >(
 				}
 
 				if ( productData.type === 'grouped' ) {
-					const { productId } = getContext< Context >();
-
-					return quantity[ productId ] > 0;
+					return inputQuantity > 0;
 				}
 
-				const { id, min, step } = productData;
+				const { min, step } = productData;
 
-				const currentQuantity = quantity[ id ] || 0;
+				const currentQuantity = inputQuantity || 0;
 
 				return currentQuantity - step >= min;
 			},
 			get allowsIncrease() {
-				const { quantity, selectedAttributes } =
+				const { productData, inputQuantity } =
 					addToCartWithOptionsStore.state;
 
-				const { productId } = getContext< Context >();
-
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
-
-				if ( ! productObject ) {
+				if ( ! productData ) {
 					return true;
 				}
 
-				const { id, max, step } = productObject;
+				const { max, step } = productData;
 
-				const currentQuantity = quantity[ id ] || 0;
-
+				const currentQuantity = inputQuantity || 0;
 				return currentQuantity + step <= max;
 			},
 		},
@@ -121,26 +110,27 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { productId } = getContext< Context >();
-				const { selectedAttributes } = addToCartWithOptionsStore.state;
+				const { productData: parentProductData, childProductData } =
+					addToCartWithOptionsStore.state;
 
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
+				const productObject =
+					parentProductData?.type === 'grouped'
+						? childProductData
+						: parentProductData;
 
 				let newValue = currentValue + 1;
+
 				if ( productObject ) {
 					const { max, min, step } = productObject;
 					newValue = currentValue + step;
 					newValue = Math.max( min, Math.min( max, newValue ) );
-				}
 
-				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
-					newValue,
-					inputElement
-				);
+					addToCartWithOptionsStore.actions.setQuantity(
+						productObject.id,
+						newValue,
+						inputElement
+					);
+				}
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -154,20 +144,13 @@ store< QuantitySelectorStore >(
 
 				const currentValue = Number( inputElement.value ) || 0;
 
-				const { productId } = getContext< Context >();
-				const { productData, selectedAttributes } =
+				const { productData: parentProductData, childProductData } =
 					addToCartWithOptionsStore.state;
 
-				const parentProductObject = productData;
-
-				let productObject = parentProductObject;
-
-				if ( parentProductObject?.type === 'grouped' ) {
-					productObject = getProductData(
-						productId,
-						selectedAttributes
-					);
-				}
+				const productObject =
+					parentProductData?.type === 'grouped'
+						? childProductData
+						: parentProductData;
 
 				let newValue = currentValue - 1;
 
@@ -178,7 +161,7 @@ store< QuantitySelectorStore >(
 					if ( newValue < min ) {
 						// In grouped product children, we allow decreasing the value
 						// down to 0, even if the minimum value is greater than 0.
-						if ( parentProductObject?.type === 'grouped' ) {
+						if ( parentProductData?.type === 'grouped' ) {
 							if ( currentValue > min ) {
 								newValue = min;
 							} else {
@@ -192,7 +175,7 @@ store< QuantitySelectorStore >(
 
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						productObject.id,
 						newValue,
 						inputElement
 					);
@@ -204,24 +187,29 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { productData, selectedAttributes } =
-					addToCartWithOptionsStore.state;
+				const {
+					productData: parentProductData,
+					childProductData,
+					selectedAttributes,
+				} = addToCartWithOptionsStore.state;
 				let min = 1;
 
-				if ( ! productData ) {
+				if ( ! parentProductData ) {
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				// const { currentProductId } = getContext(
+				// 	'woocommerce/product-context'
+				// );
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
 					( Number.isNaN( event.target.valueAsNumber ) ||
 						event.target.valueAsNumber === 0 ) &&
-					productData.type === 'grouped'
+					parentProductData.type === 'grouped'
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						childProductData.id,
 						0,
 						event.target
 					);
@@ -233,16 +221,13 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const childProductData =
-					productData.type === 'grouped'
-						? getProductData( productId, selectedAttributes )
-						: productData;
+				const currentProduct = childProductData ?? parentProductData;
 
-				if ( ! childProductData ) {
+				if ( ! currentProduct ) {
 					return;
 				}
 
-				min = childProductData.min;
+				min = currentProduct.min;
 
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
@@ -260,7 +245,7 @@ store< QuantitySelectorStore >(
 						: null;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					currentProduct.id,
 					newValue,
 					refForDispatch
 				);

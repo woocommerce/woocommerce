@@ -15,7 +15,6 @@ import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-c
  * Internal dependencies
  */
 import { getProductData } from '../frontend';
-import { dispatchChangeEvent } from '../quantity-selector/frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,

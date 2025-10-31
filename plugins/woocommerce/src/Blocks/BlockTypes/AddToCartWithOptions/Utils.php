@@ -72,6 +72,7 @@ class Utils {
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
 			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
+			$processor->set_attribute( 'data-wp-bind--value', 'woocommerce/add-to-cart-with-options::state.inputQuantity' );
 
 			foreach ( $input_attributes as $attribute => $value ) {
 				$processor->set_attribute( $attribute, $value );
@@ -91,10 +92,11 @@ class Utils {
 
 		$context_attribute = wp_interactivity_data_wp_context(
 			array(
-				'productId' => $child_product_id || ! $product instanceof \WC_Product ?
+				'childProductId' => $child_product_id || ! $product instanceof \WC_Product ?
 					$child_product_id :
 					$product->get_id(),
-			)
+			),
+			'woocommerce/product-context'
 		);
 
 		return sprintf(
