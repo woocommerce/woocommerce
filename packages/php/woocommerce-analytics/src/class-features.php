@@ -43,6 +43,6 @@ class Features {
 		 *
 		 * @param bool $enabled Whether ClickHouse event tracking is enabled.
 		 */
-		return apply_filters( 'woocommerce_analytics_clickhouse_enabled', false );
+		return apply_filters( 'woocommerce_analytics_clickhouse_enabled', true );
 	}
 }
