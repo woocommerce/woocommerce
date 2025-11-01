@@ -69,7 +69,6 @@ class DefaultFreeExtensions {
 				'title'   => __( 'Grow your store', 'woocommerce' ),
 				'plugins' => array(
 					self::get_plugin( 'google-listings-and-ads:alt' ),
-					self::get_plugin( 'multichannel-by-cedcommerce' ),
 					self::get_plugin( 'tiktok-for-business' ),
 					self::get_plugin( 'pinterest-for-woocommerce:alt' ),
 					self::get_plugin( 'facebook-for-woocommerce:alt' ),
