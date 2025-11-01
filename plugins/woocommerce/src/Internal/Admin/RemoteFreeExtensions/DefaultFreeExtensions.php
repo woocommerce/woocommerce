@@ -136,18 +136,6 @@ class DefaultFreeExtensions {
 				'manage_url'     => 'admin.php?page=wc-admin&path=%2Fgoogle%2Fstart',
 				'is_built_by_wc' => true,
 			),
-			'multichannel-by-cedcommerce'   => array(
-				'name'             => __( 'Multichannel for WooCommerce', 'woocommerce' ),
-				'description'      => __( 'Sync your sales data across platforms and manage everything from a unified dashboard.', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/onboarding/multichannel.webp', WC_PLUGIN_FILE ),
-				'manage_url'       => 'admin.php?page=sales_channel',
-				'is_built_by_wc'   => false,
-				'install_external' => true,
-				'learn_more_link'  => 'https://woocommerce.com/products/multichannel-by-cedcommerce-ebay-amazon-walmart-etsy-integration/?utm_source=marketing_task&utm_medium=product',
-				'tags'             => array(
-					'marketplace',
-				),
-			),
 			'facebook-for-woocommerce'      => array(
 				'name'           => __( 'Facebook for WooCommerce', 'woocommerce' ),
 				'description'    => __( 'List products and create ads on Facebook and Instagram with <a href="https://woocommerce.com/products/facebook/">Facebook for WooCommerce</a>', 'woocommerce' ),
