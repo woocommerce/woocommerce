@@ -171,6 +171,12 @@ class RestAbilityFactory {
 							'type'        => 'integer',
 							'description' => __( 'Unique identifier for the parent product', 'woocommerce' ),
 						);
+						if ( ! isset( $schema['required'] ) ) {
+							$schema['required'] = array();
+						}
+						if ( ! in_array( 'product_id', $schema['required'], true ) ) {
+							$schema['required'][] = 'product_id';
+						}
 					}
 
 					if ( isset( $schema['properties']['create']['type'] ) && 'array' === $schema['properties']['create']['type'] ) {
