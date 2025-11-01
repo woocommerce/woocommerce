@@ -89,7 +89,7 @@ class AbilitiesRestBridge {
 						'id'          => 'woocommerce/product-variations-create',
 						'operation'   => 'create',
 						'label'       => __( 'Create Product Variation', 'woocommerce' ),
-						'description' => __( 'Create a new product variation with name, price, description,and other attributes.', 'woocommerce' ),
+						'description' => __( 'Create a new product variation with name, price, description, and other attributes.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/product-variations-update',
