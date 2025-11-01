@@ -740,7 +740,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			 * @since 10.3.0
 			 */
 			$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_Simple', ProductType::SIMPLE, 'product', 0 );
-			$product   = new $classname();
+
+			if ( ! class_exists( $classname ) ) {
+				$classname = 'WC_Product_Simple';
+			}
+
+			$product = new $classname();
 		}
 
 		if ( ProductType::VARIATION === $product->get_type() ) {

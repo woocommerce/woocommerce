@@ -203,6 +203,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			 * @since 10.3.0
 			 */
 			$classname = apply_filters( 'woocommerce_product_class', 'WC_Product_Variation', ProductType::VARIATION, 'product_variation', 0 );
+
+			if ( ! class_exists( $classname ) ) {
+				$classname = 'WC_Product_Variation';
+			}
+
 			$variation = new $classname();
 		}
 
