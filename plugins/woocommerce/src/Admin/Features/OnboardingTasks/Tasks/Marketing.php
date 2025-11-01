@@ -16,23 +16,6 @@ class Marketing extends Task {
 	 */
 	public function __construct( $task_list ) {
 		parent::__construct( $task_list );
-
-		add_action( 'activated_plugin', array( $this, 'on_activated_plugin' ), 10, 1 );
-	}
-
-	/**
-	 * Mark the task as complete when related plugins are activated.
-	 */
-	public function on_activated_plugin( $plugin ) {
-		$plugin_basename = basename( plugin_basename( $plugin ), '.php' );
-
-		if ( $plugin_basename === 'multichannel-by-cedcommerce' &&
-			$this->task_list->visible &&
-			! $this->task_list->is_hidden() &&
-			! $this->is_complete()
-		) {
-			$this->mark_actioned();
-		}
 	}
 
 	/**
