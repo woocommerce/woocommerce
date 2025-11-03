@@ -329,18 +329,6 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'download_url' => isset( $status['url'] ) ? $status['url'] : null,
 			);
 
-			// TODO: debug only, delete later
-			// Include progress information if available.
-			if ( isset( $status['progress'] ) ) {
-				$response_data['progress'] = $status['progress'];
-			}
-			if ( isset( $status['processed'] ) ) {
-				$response_data['processed'] = $status['processed'];
-			}
-			if ( isset( $status['total'] ) ) {
-				$response_data['total'] = $status['total'];
-			}
-
 			return rest_ensure_response( $response_data );
 		} catch ( \Exception $e ) {
 			return new WP_Error(
