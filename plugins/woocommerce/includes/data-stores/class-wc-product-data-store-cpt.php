@@ -2357,8 +2357,9 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$query = new WP_Query( $args );
 		}
 
-		if ( isset( $query_vars['return'] ) && 'objects' === $query_vars['return'] && ! empty( $query->posts ) ) {
-			// Prime caches before grabbing objects.
+		// Prime post caches before instantiating products to reduce queries.
+		// Skip only when explicitly returning IDs (no product instantiation occurs).
+		if ( ! empty( $query->posts ) && ( ! isset( $query_vars['return'] ) || 'ids' !== $query_vars['return'] ) ) {
 			update_post_caches( $query->posts, array( 'product', 'product_variation' ) );
 		}
 

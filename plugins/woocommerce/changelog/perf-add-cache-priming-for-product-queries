@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fix cache priming condition to prevent N+1 queries in product query scenarios
