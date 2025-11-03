@@ -705,6 +705,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return true;
 		}
 
+		// Update the option to indicate that the column does not exist.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'no', false );
 		return false;
 	}
 
