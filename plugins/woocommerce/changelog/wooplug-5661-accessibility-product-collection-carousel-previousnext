@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection: make sure next/prev arrows are visible on a +400% browser zoom
