@@ -45,7 +45,7 @@ jobs:
             - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
             - Confidence: a percentage and one-sentence justification.
 
-            Scope to analyze:
+            Scope to analyze (but not limited to):
             - PHP: public/protected API signature/visibility changes; default param or type-hint changes; thrown exceptions; removed/renamed hooks (`do_action`, `apply_filters`); template changes under `templates/**`; REST params/response shapes; DB/schema/options changes; global constants/vars; composer constraints.
             - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; REST schemas; data-store selectors/actions; settings/options keys.
             - Ecosystem impact: payment gateways, popular Woo extensions (Subscriptions/Bookings/Memberships), themes customizing templates, custom checkout flows.
