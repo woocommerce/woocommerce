@@ -85,6 +85,9 @@ async function setup() {
 
 describe( 'Product block', () => {
 	it( 'should render inner blocks for users without edit permissions', async () => {
+		// The V4 of this endpoint will return product data to authors,
+		// see https://github.com/woocommerce/woocommerce/pull/61718.
+		// However, V3 didn't, that's why we need this test.
 		server.use(
 			http.get( '/wc/v3/products/:id', () => {
 				return HttpResponse.json( '', { status: 403 } );
