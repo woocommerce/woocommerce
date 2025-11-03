@@ -652,7 +652,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get number of items sold among all orders.
 	 *
-	 * @param array $order WC_Order object.
+	 * @param WC_Order $order WC_Order object.
 	 * @return int
 	 */
 	protected static function get_num_items_sold( $order ) {
@@ -669,7 +669,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Get the net amount from an order without shipping, tax, or refunds.
 	 *
-	 * @param array $order WC_Order object.
+	 * @param WC_Order $order WC_Order object.
 	 * @return float
 	 */
 	protected static function get_net_total( $order ) {
@@ -711,7 +711,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Check to see if an order's customer has made previous orders or not
 	 *
-	 * @param array     $order WC_Order object.
+	 * @param WC_Order     $order WC_Order object.
 	 * @param int|false $customer_id Customer ID. Optional.
 	 * @return bool
 	 */
