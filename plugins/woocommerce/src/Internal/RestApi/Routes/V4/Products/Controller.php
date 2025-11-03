@@ -169,7 +169,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 			* @param int $object_id The ID of the product.
 			* @param string $post_type The post type of the product.
 			*/
-			$permission = apply_filters( 'woocommerce_rest_check_permissions', $permission, 'read', $object_id, 'product' );
+			$permission = apply_filters( 'woocommerce_rest_check_permissions', $permission, 'read', $object_id, $object->post_type );
 
 			if ( ! $permission ) {
 				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
