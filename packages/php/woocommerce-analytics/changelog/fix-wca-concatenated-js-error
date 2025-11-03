@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Set dynamic WebPack public path for split assets
