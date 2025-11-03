@@ -683,7 +683,29 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return boolean
 	 */
 	public static function has_fulfillment_status_column() {
-		return 'yes' === get_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'no' );
+		$column_status = get_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS );
+
+		if ( ! empty( $column_status) ) {
+			return 'yes' === $column_status;
+		}
+
+		global $wpdb;
+
+		$table_name    = self::get_db_table_name();
+		$column_exists = $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+				'fulfillment_status'
+			)
+		);
+
+		if ( ! empty( $column_exists ) ) {
+			update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
+			return true;
+		}
+
+		return false;
 	}
 
 	/**
