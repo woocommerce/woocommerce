@@ -685,7 +685,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function has_fulfillment_status_column() {
 		$column_status = get_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS );
 
-		if ( ! empty( $column_status) ) {
+		if ( ! empty( $column_status ) ) {
 			return 'yes' === $column_status;
 		}
 
