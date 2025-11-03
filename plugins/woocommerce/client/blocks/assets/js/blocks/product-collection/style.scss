@@ -4,11 +4,16 @@
 	}
 
 	&:has(.is-product-collection-layout-carousel) {
+		// Hide navigation buttons on mobile phones (small touch screens), but keep them
+		// visible on tablets and desktop (even when zoomed).
+		// Combines screen size check with device capability detection.
 		@include breakpoint("<600px") {
-			// This rule is overriding a `display: flex` from WordPress core, that's
-			// why it needs a higher specificity.
-			:where(.wc-block-next-previous-buttons.wc-block-next-previous-buttons) {
-				display: none;
+			@media (hover: none) and (pointer: coarse) {
+				// This rule is overriding a `display: flex` from WordPress core, that's
+				// why it needs a higher specificity.
+				:where(.wc-block-next-previous-buttons.wc-block-next-previous-buttons) {
+					display: none;
+				}
 			}
 		}
 	}
