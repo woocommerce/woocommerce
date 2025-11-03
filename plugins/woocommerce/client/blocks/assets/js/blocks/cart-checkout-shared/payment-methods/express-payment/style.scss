@@ -92,6 +92,7 @@ $border-width: 1px;
 		@include font-regular-locked;
 		@include reset-box;
 		word-break: break-word;
+		font-weight: 400;
 
 		flex-grow: 0;
 		transform: translateY(-50%);
@@ -152,7 +153,7 @@ $border-width: 1px;
 	align-items: center;
 	text-align: center;
 	padding: 0;
-	margin: $gap 0 30px;
+	margin: $gap 0 $gap-large;
 
 	&::before {
 		margin-right: 10px;
