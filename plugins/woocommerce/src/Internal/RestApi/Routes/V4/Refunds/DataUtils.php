@@ -40,6 +40,9 @@ class DataUtils {
 		$prepared_line_items = array();
 
 		foreach ( $line_items as $line_item ) {
+			if ( ! isset( $line_item['line_item_id'], $line_item['quantity'], $line_item['refund_total'] ) ) {
+				continue;
+			}
 			$prepared_line_items[ $line_item['line_item_id'] ] = array(
 				'qty'          => $line_item['quantity'],
 				'refund_total' => $line_item['refund_total'],
@@ -60,6 +63,9 @@ class DataUtils {
 		$prepared_taxes = array();
 
 		foreach ( $line_item_taxes as $line_item_tax ) {
+			if ( ! isset( $line_item_tax['id'], $line_item_tax['refund_total'] ) ) {
+				continue;
+			}
 			$prepared_taxes[ $line_item_tax['id'] ] = $line_item_tax['refund_total'];
 		}
 
