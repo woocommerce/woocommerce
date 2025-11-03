@@ -711,7 +711,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Check to see if an order's customer has made previous orders or not
 	 *
-	 * @param WC_Order     $order WC_Order object.
+	 * @param WC_Order  $order WC_Order object.
 	 * @param int|false $customer_id Customer ID. Optional.
 	 * @return bool
 	 */
