@@ -1,6 +1,50 @@
 <?xml version="1.0"?>
-<psalm>
+<psalm
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorLevel="2"
+    autoloader="vendor/autoload_packages.php"
+    resolveFromConfigFile="true"
+    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    allFunctionsGlobal="true"
+    allConstantsGlobal="true"
+    phpVersion="8.2"
+    cacheDirectory="./build/psalm-cache"
+    reportMixedIssues="false"
+>
     <projectFiles>
-        <file name="woocommerce.php"/>
+        <ignoreFiles>
+            <directory name="vendor"/>
+            <directory name="tests"/>
+            <directory name="node_modules"/>
+            <directory name="build"/>
+            <directory name="packages"/>
+            <directory name="lib"/>
+            <directory name="includes/legacy"/>
+            <directory name="includes/libraries"/>
+        </ignoreFiles>
     </projectFiles>
-<plugins><pluginClass xmlns="https://getpsalm.org/schema/config" class="PsalmWordPress\Plugin"/></plugins></psalm>
+
+    <plugins>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+        <pluginClass class="PsalmWordPress\Plugin">
+        <requireAllParams value="false" />
+        </pluginClass>
+    </plugins>
+
+    <issueHandlers>
+        <!-- WordPress often uses mixed types -->
+        <MixedArgument errorLevel="info"/>
+        <MixedAssignment errorLevel="info"/>
+        <MixedArrayAccess errorLevel="info"/>
+        <MixedArrayOffset errorLevel="info"/>
+        <MixedPropertyFetch errorLevel="info"/>
+        <MixedMethodCall errorLevel="info"/>
+        
+        <!-- WordPress global variables -->
+        <UndefinedGlobalVariable errorLevel="info"/>
+        <PossiblyUndefinedGlobalVariable errorLevel="info"/>
+    </issueHandlers>
+</psalm>

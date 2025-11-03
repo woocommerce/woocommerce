@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<psalm
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorLevel="2"
+    resolveFromConfigFile="true"
+    findUnusedBaselineEntry="false"
+    findUnusedCode="false"
+    phpVersion="7.4"
+    cacheDirectory="./build/psalm-cache"
+    reportMixedIssues="false"
+>
+    <projectFiles>
+        <directory name="src" />
+        <file name="woocommerce.php" />
+        <directory name="./includes" />
+        <ignoreFiles>
+            <directory name="vendor" />
+            <directory name="tests" />
+            <directory name="node_modules" />
+            <directory name="build" />
+            <directory name="packages" />
+            <directory name="lib" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <plugins>
+        <pluginClass class="Psalm\PhpUnitPlugin\Plugin"/>
+    </plugins>
+    <issueHandlers>
+        <!-- Allow echo in templates -->
+        <ForbiddenCode>
+            <errorLevel type="suppress">
+                <directory name="templates" />
+            </errorLevel>
+        </ForbiddenCode>
+        
+        <!-- WordPress often uses mixed types -->
+        <MixedArgument errorLevel="info" />
+        <MixedAssignment errorLevel="info" />
+        <MixedArrayAccess errorLevel="info" />
+        <MixedArrayOffset errorLevel="info" />
+        
+        <!-- WordPress global functions -->
+        <UndefinedGlobalVariable errorLevel="info" />
+        
+        <!-- Common WordPress patterns -->
+        <PossiblyUndefinedGlobalVariable errorLevel="info" />
+    </issueHandlers> 
+</psalm>
+
+    
