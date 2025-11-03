@@ -1,4 +1,5 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
+<?php
+declare( strict_types=1 );
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
