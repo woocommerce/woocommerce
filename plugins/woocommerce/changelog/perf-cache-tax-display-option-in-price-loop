@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Cache tax display option to avoid repeated get_option() calls in variation price loop
