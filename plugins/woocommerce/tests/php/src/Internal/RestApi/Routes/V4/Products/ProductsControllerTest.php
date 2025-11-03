@@ -2028,9 +2028,33 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that published products are viewable by subscribers.
+	 * Test that published products are viewable by authors.
 	 */
-	public function test_get_published_product_as_subscriber_is_viewable() {
+	public function test_get_published_product_as_author_is_viewable() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Published Product',
+				'status' => ProductStatus::PUBLISH,
+			)
+		);
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test that published products are hidden from subscribers.
+	 */
+	public function test_get_published_product_as_subscriber_is_forbidden() {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -2048,13 +2072,14 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
 
-		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
 	}
 
 	/**
-	 * Test that draft products are not viewable by subscribers (no read_private_posts).
+	 * Test that draft products are hidden from authors.
 	 */
-	public function test_get_draft_product_as_subscriber_is_forbidden() {
+	public function test_get_draft_product_as_author_is_forbidden() {
 		$product = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -2063,12 +2088,38 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$subscriber = $this->factory->user->create(
+		$author = $this->factory->user->create(
 			array(
-				'role' => 'subscriber',
+				'role' => 'author',
 			)
 		);
-		wp_set_current_user( $subscriber );
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 403, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Test that password-protected products are hidden from authors.
+	 */
+	public function test_get_password_protected_product_as_author_is_forbidden() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Password Protected Product',
+				'status'        => ProductStatus::PUBLISH,
+				'post_password' => 'test',
+			)
+		);
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
 
