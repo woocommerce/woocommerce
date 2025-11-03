@@ -1076,21 +1076,30 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		global $wpdb;
 		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
 
-		// Create customers.
+		// Create customers with different order counts.
 		$customer1 = $this->create_test_customer(
 			array(
 				'email'    => 'orders1@example.com',
 				'username' => 'orders1',
 			)
 		);
-		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 1 );
+		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 5 );
 
-		$this->create_test_customer(
+		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orders2@example.com',
 				'username' => 'orders2',
 			)
 		);
+		update_user_meta( $customer2->get_id(), 'wc_order_count_' . $site_specific_key, 2 );
+
+		$customer3 = $this->create_test_customer(
+			array(
+				'email'    => 'orders3@example.com',
+				'username' => 'orders3',
+			)
+		);
+		// customer3 has 0 orders (default value)
 
 		// Test ordering by orders_count ascending.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
@@ -1101,10 +1110,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_data = $response->get_data();
 
-		$this->assertCount( 2, $response_data );
-		// Customer2 should come first (0 orders), then customer1 (1 order).
+		$this->assertCount( 3, $response_data );
+		// Customer3 should come first (0 orders), then customer2 (2 orders), then customer1 (5 orders).
 		$this->assertEquals( 0, $response_data[0]['orders_count'] );
-		$this->assertEquals( 1, $response_data[1]['orders_count'] );
+		$this->assertEquals( 2, $response_data[1]['orders_count'] );
+		$this->assertEquals( 5, $response_data[2]['orders_count'] );
 
 		// Test ordering by orders_count descending.
 		$request->set_param( 'order', 'desc' );
@@ -1113,10 +1123,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_data = $response->get_data();
 
-		$this->assertCount( 2, $response_data );
-		// Customer1 should come first (1 order), then customer2 (0 orders).
-		$this->assertEquals( 1, $response_data[0]['orders_count'] );
-		$this->assertEquals( 0, $response_data[1]['orders_count'] );
+		$this->assertCount( 3, $response_data );
+		// Customer1 should come first (5 orders), then customer2 (2 orders), then customer3 (0 orders).
+		$this->assertEquals( 5, $response_data[0]['orders_count'] );
+		$this->assertEquals( 2, $response_data[1]['orders_count'] );
+		$this->assertEquals( 0, $response_data[2]['orders_count'] );
 	}
 
 	/**
