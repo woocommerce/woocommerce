@@ -2,6 +2,7 @@
 	@include reset-box();
 	@include font-large-locked;
 	word-break: break-word;
+	font-weight: 500;
 }
 
 // Extra class for specificity to overwrite editor styles.

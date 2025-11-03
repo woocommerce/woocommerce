@@ -29,7 +29,7 @@
 
 	.wc-blocks-components-select__select {
 		@include reset-typography();
-		@include font-regular-locked;
+		@include font-button-locked;
 		border-radius: $universal-border-radius;
 		width: 100%;
 		appearance: none;
@@ -38,8 +38,7 @@
 		border: 1px solid $universal-border-strong;
 		box-sizing: border-box;
 
-		// Top padding = $gap-smaller + line-height of the label
-		padding: calc($gap-smaller + 16px) $gap-small $gap-smaller;
+		padding: $gap-large - 3px $gap-smaller + 1px $gap-smaller;
 
 		// We are hardcoding the height to reserve space for a wider border that
 		// we apply for focused state. Without it, when focusing the input its
@@ -47,11 +46,14 @@
 		// height = font line-height + vertical padding + focused top/bottom border
 		// Don't worry, this calculation won't be performed at runtime, SCSS
 		// is transforming it into a singular value during build time.
-		height: calc(20px + 16px * 2 + 1.5px * 2);
+		height: calc(15px + 16px * 2 + 1.5px * 2);
 
 		&:focus {
 			border-color: currentColor;
 			border-width: 1.5px;
+			// original padding - border size
+			padding-left: $gap-smaller + 0.5px;
+			padding-top: $gap-large - 3.5px;
 		}
 
 		.has-dark-controls & {
@@ -71,11 +73,9 @@
 		@include reset-typography();
 		@include font-small-locked;
 		position: absolute;
-		// 1px (border) + padding of the input
-		top: 1px + $gap-smaller;
-		left: 1px + $gap-small;
+		top: $gap-smallest * 1.5;
+		left: $gap-smaller * 1.25;
 
-		color: $universal-body-low-emphasis;
 		z-index: 1;
 		margin: 0;
 		overflow: hidden;

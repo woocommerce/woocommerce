@@ -7,7 +7,7 @@
 	border: none;
 	padding: 0;
 	background: none;
-	margin: 0 0 $gap-larger 0;
+	margin: 0 0 $gap-large 0;
 
 	.wc-block-components-text-input:first-of-type,
 	.wc-block-components-country-input {
@@ -43,7 +43,7 @@
 }
 
 .wc-block-checkout__contact-fields .wc-block-components-checkout-step__heading {
-	margin-top: em($gap-smaller);
+	margin-top: 0;
 }
 
 .wc-block-components-checkout-step__heading {

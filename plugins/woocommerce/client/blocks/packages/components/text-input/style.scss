@@ -13,15 +13,12 @@
 	label {
 		@include reset-color();
 		@include reset-typography();
-		@include font-regular-locked;
+		@include font-button-locked;
 		position: absolute;
 		transform: translateY(-50%);
-		// 1px (border) + padding of the input
-		left: calc($gap-small + 1px);
-		// 1px (border) + padding of the input + half the height of the label itself
-		top: calc(1px + $gap + 10px);
+		left: $gap-smaller * 1.25;
+		top: 25px;
 		transform-origin: top left;
-		color: $universal-body-low-emphasis;
 		transition: all 200ms ease;
 		margin: 0;
 		overflow: hidden;
@@ -62,7 +59,7 @@
 		// height = font line-height + vertical padding + focused top/bottom border
 		// Don't worry, this calculation won't be performed at runtime, SCSS
 		// is transforming it into a singular value during build time.
-		height: calc(20px + 16px * 2 + 1.5px * 2);
+		height: calc(15px + 16px * 2 + 1.5px * 2);
 
 		&:focus {
 			background-color: $input-background-light;
@@ -101,17 +98,19 @@
 	&.is-active input[type="number"],
 	&.is-active input[type="password"],
 	&.is-active input[type="email"] {
-		// Top padding = $gap-smaller + line-height of the label
-		padding: calc($gap-smaller + 16px) $gap-small $gap-smaller;
+		padding: $gap-large $gap-smaller + 1px $gap-smaller;
+
+		&:focus {
+			padding-top: $gap-large + 0.5px;
+			padding-left: $gap-smaller + 0.5px;
+		}
 	}
 
 	&.is-active label,
 	input:-webkit-autofill + label {
-		// Base font-size is 14px; 0.8571 * 14px = 12px (regular size font changes
-		// to small one). We use scale transform as we can animate it.
-		transform: scale(0.8571);
-		// 1px (border) + padding of the input when label + value displayed
-		top: 1px + $gap-smaller;
+		// We use scale transform as we can animate it.
+		transform: scale(0.82);
+		top: $gap-smaller * 0.75;
 	}
 
 	// For phones we're increasing the font-size of the input to 16px to avoid
