@@ -602,10 +602,7 @@ class PaymentGateway {
 			if ( method_exists( $payment_gateway, 'get_onboarding_not_supported_message' ) &&
 				is_callable( array( $payment_gateway, 'get_onboarding_not_supported_message' ) ) ) {
 
-				$message = call_user_func_array(
-					array( $payment_gateway, 'get_onboarding_not_supported_message' ),
-					array( $country_code ),
-				);
+				$message = call_user_func( array( $payment_gateway, 'get_onboarding_not_supported_message' ), $country_code, );
 				if ( is_string( $message ) && ! empty( $message ) ) {
 					return sanitize_textarea_field( trim( $message ) );
 				}
@@ -964,10 +961,7 @@ class PaymentGateway {
 
 		try {
 			// Get the "raw" recommended payment methods from the payment gateway.
-			$recommended_pms = call_user_func_array(
-				array( $payment_gateway, 'get_recommended_payment_methods' ),
-				array( $country_code ),
-			);
+			$recommended_pms = call_user_func( array( $payment_gateway, 'get_recommended_payment_methods' ), $country_code );
 			if ( ! is_array( $recommended_pms ) ) {
 				// Bail if the recommended payment methods are not an array.
 				return array();
