@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Define attribute defaults array once instead of recreating on every loop iteration

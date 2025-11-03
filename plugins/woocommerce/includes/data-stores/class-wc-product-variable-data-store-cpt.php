@@ -37,18 +37,17 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		if ( ! empty( $meta_attributes ) && is_array( $meta_attributes ) ) {
 			$attributes   = array();
 			$force_update = false;
+			$defaults     = array(
+				'name'         => '',
+				'value'        => '',
+				'position'     => 0,
+				'is_visible'   => 0,
+				'is_variation' => 0,
+				'is_taxonomy'  => 0,
+			);
+
 			foreach ( $meta_attributes as $meta_attribute_key => $meta_attribute_value ) {
-				$meta_value = array_merge(
-					array(
-						'name'         => '',
-						'value'        => '',
-						'position'     => 0,
-						'is_visible'   => 0,
-						'is_variation' => 0,
-						'is_taxonomy'  => 0,
-					),
-					(array) $meta_attribute_value
-				);
+				$meta_value = array_merge( $defaults, (array) $meta_attribute_value );
 
 				// Maintain data integrity. 4.9 changed sanitization functions - update the values here so variations function correctly.
 				if ( $meta_value['is_variation'] && strstr( $meta_value['name'], '/' ) && sanitize_title( $meta_value['name'] ) !== $meta_attribute_key ) {
