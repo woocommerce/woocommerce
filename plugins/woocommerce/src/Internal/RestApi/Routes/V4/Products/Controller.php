@@ -153,7 +153,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 			}
 
 			$object_id        = $object->get_id();
-			$post_type_object = get_post_type_object( 'product' );
+			$post_type_object = get_post_type_object( $object->post_type );
 			$permission       = false;
 
 			if ( $post_type_object instanceof \WP_Post_Type ) {
