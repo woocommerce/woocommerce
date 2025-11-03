@@ -333,7 +333,11 @@ class WC_Query {
 		if ( $this->is_showing_page_on_front( $q ) ) {
 
 			// Fix for endpoints on the homepage.
-			if ( ! $this->page_on_front_is( $q->get( 'page_id' ) ) ) {
+			$current_page_id = absint( $q->get( 'page_id' ) );
+			if ( ! $current_page_id ) {
+				$current_page_id = get_queried_object_id();
+			}
+			if ( ! $this->page_on_front_is( $current_page_id ) ) {
 				$_query = wp_parse_args( $q->query );
 				if ( ! empty( $_query ) && array_intersect( array_keys( $_query ), array_keys( $this->get_query_vars() ) ) ) {
 					$q->is_page     = true;
@@ -374,7 +378,23 @@ class WC_Query {
 		}
 
 		// Special check for shops with the PRODUCT POST TYPE ARCHIVE on front.
-		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && absint( $q->get( 'page_id' ) ) === wc_get_page_id( 'shop' ) ) {
+		$shop_id = wc_get_page_id( 'shop' );
+		$page_id = absint( $q->get( 'page_id' ) );
+
+		// Fallback 1: Check queried object ID if page_id not set.
+		if ( ! $page_id ) {
+			$page_id = get_queried_object_id();
+		}
+
+		// Fallback 2: Slug comparison when page_id still not resolved.
+		if ( ! $page_id && $q->get( 'pagename' ) ) {
+			$shop_page = get_post( $shop_id );
+			if ( $shop_page && $shop_page->post_name === $q->get( 'pagename' ) ) {
+				$page_id = $shop_id;
+			}
+		}
+
+		if ( wc_current_theme_supports_woocommerce_or_fse() && $q->is_page() && 'page' === get_option( 'show_on_front' ) && $page_id === $shop_id ) {
 			// This is a front-page shop.
 			$q->set( 'post_type', 'product' );
 			$q->set( 'page_id', '' );
