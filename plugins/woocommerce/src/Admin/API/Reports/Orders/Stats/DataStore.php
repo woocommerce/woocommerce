@@ -25,7 +25,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	use StatsDataStoreTrait;
 
 	/**
-	 * Option name to store status of the wc_order_stats table has a column `fulfillment_status`
+	 * Option name to store whether the wc_order_stats table has a column `fulfillment_status`
 	 *
 	 * @var string
 	 */
@@ -678,7 +678,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
-	 * If the wc_order_stats table has the fulfillment_status column.
+	 * Check if the wc_order_stats table has the fulfillment_status column.
 	 *
 	 * @return boolean
 	 */

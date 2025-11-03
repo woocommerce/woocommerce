@@ -1236,7 +1236,7 @@ class WC_Install {
 	/**
 	 * Get the wc_order_stats table schema.
 	 *
-	 * @since x.x.x
+	 * @since 10.4.0
 	 * @param string $collate Database collation.
 	 * @return string SQL schema for wc_order_stats table.
 	 */
