@@ -6551,6 +6551,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$analytics = Analytics::get_instance();
 		$result    = $analytics->run_regenerate_order_fulfillment_status_tool();
 
+		/**
+		 * Run the action for action scheduler processing.
+		 *
+		 * @since 10.4.0
+		 */
 		do_action( Analytics::REGENERATE_FULFILLMENT_STATUS_ACTION, 1 );
 
 		// Verify it was scheduled.
@@ -6601,8 +6606,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 * This directly inserts into the fulfillments table and sets the order meta
 	 * to simulate what the fulfillments system would do in production.
 	 *
-	 * @param WC_Order    $order_id Order ID.
-	 * @param string $fulfillment_status Fulfillment status (fulfilled, partially_fulfilled, unfulfilled).
+	 * @param WC_Order   $order Order object.
+	 * @param string     $fulfillment_status Fulfillment status (fulfilled, partially_fulfilled, unfulfilled).
+	 * @param WC_Product $product Product to add to the fulfillment.
+	 *
+	 * @return Fulfillment The created fulfillment object.
 	 */
 	private function add_fulfillment_to_order( $order, $fulfillment_status, $product ) {
 		$fulfillment = new Fulfillment();

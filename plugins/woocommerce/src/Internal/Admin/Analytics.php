@@ -305,15 +305,10 @@ class Analytics {
 		$offset = ( $page - 1 ) * $per_page;
 
 		// Get distinct order IDs from the fulfillments table.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$order_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				"SELECT DISTINCT entity_id
-				FROM {$fulfillments_table}
-				WHERE entity_type = 'WC_Order'
-				AND date_deleted IS NULL
-				ORDER BY entity_id ASC
-				LIMIT %d OFFSET %d",
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare( 
+				"SELECT DISTINCT entity_id FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL ORDER BY entity_id ASC LIMIT %d OFFSET %d",
 				$per_page,
 				$offset
 			)
@@ -378,10 +373,7 @@ class Analytics {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$total = $wpdb->get_var(
-			"SELECT COUNT(DISTINCT entity_id)
-			FROM {$fulfillments_table}
-			WHERE entity_type = 'WC_Order'
-			AND date_deleted IS NULL"
+			"SELECT COUNT(DISTINCT entity_id) FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL"
 		);
 
 		return (int) $total;
