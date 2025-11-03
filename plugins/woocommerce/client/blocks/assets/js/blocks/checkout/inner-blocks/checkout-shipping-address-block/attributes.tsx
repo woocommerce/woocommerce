@@ -12,7 +12,7 @@ export default {
 	...formStepAttributes( {
 		defaultTitle: __( 'Shipping address', 'woocommerce' ),
 		defaultDescription: __(
-			'Enter the address where you want your order delivered.',
+			'',
 			'woocommerce'
 		),
 	} ),
