@@ -25,11 +25,6 @@ const ProductMetadata = ( {
 }: ProductMetadataProps ): JSX.Element => {
 	return (
 		<div className="wc-block-components-product-metadata">
-			<ProductSummary
-				className="wc-block-components-product-metadata__description"
-				shortDescription={ shortDescription }
-				fullDescription={ fullDescription }
-			/>
 			<ProductDetails details={ itemData } />
 			<ProductDetails
 				details={ variation.map( ( { attribute = '', value } ) => ( {
