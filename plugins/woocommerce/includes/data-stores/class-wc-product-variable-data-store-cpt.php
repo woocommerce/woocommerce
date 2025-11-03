@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Utilities\CallbackUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -485,8 +486,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return string
 	 */
 	protected function get_price_hash( &$product, $for_display = false ) {
-		global $wp_filter;
-
 		$price_hash = array( false );
 
 		if ( $for_display && wc_tax_enabled() ) {
@@ -500,12 +499,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
 
 		foreach ( $filter_names as $filter_name ) {
-			if ( ! empty( $wp_filter[ $filter_name ] ) ) {
-				$price_hash[ $filter_name ] = array();
-
-				foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
-					$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
-				}
+			$signatures = CallbackUtil::get_hook_callback_signatures( $filter_name );
+			if ( ! empty( $signatures ) ) {
+				$price_hash[ $filter_name ] = $signatures;
 			}
 		}
 
