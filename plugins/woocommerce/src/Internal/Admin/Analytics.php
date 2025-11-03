@@ -306,8 +306,8 @@ class Analytics {
 
 		// Get distinct order IDs from the fulfillments table.
 		$order_ids = $wpdb->get_col(
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare( 
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
 				"SELECT DISTINCT entity_id FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL ORDER BY entity_id ASC LIMIT %d OFFSET %d",
 				$per_page,
 				$offset
@@ -371,8 +371,8 @@ class Analytics {
 		global $wpdb;
 		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$total = $wpdb->get_var(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
 			"SELECT COUNT(DISTINCT entity_id) FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL"
 		);
 
