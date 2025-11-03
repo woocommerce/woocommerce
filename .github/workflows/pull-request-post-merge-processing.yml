@@ -26,7 +26,7 @@ jobs:
                     --silent \
                     --fail \
                     --header 'Authorization: bearer ${{ secrets.GITHUB_TOKEN }}' \
-                    --header 'User-Agent: GitHub action to set the milestone for a pull request' \
+                    --header 'User-Agent: GitHub action for post-merge pull request processing' \
                     --header 'Accept: application/vnd.github.v3.raw' \
                     --output $script \
                     --location "$GITHUB_API_URL/repos/${{ github.repository }}/contents/.github/workflows/scripts/$script?ref=${{ github.event.pull_request.base.ref }}"
