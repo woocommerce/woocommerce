@@ -6541,7 +6541,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin_import_orders' );
 
-		// Add fulfillments for only orders 1, 2, 3.  
+		// Add fulfillments for only orders 1, 2, 3.
 		$this->add_fulfillment_to_order( $order_1, 'fulfilled', $product );
 		$this->add_fulfillment_to_order( $order_2, 'partially_fulfilled', $product );
 		$this->add_fulfillment_to_order( $order_3, 'unfulfilled', $product );
