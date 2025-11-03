@@ -70,8 +70,15 @@ class WC_Product_Grouped_Data_Store_CPT extends WC_Product_Data_Store_CPT implem
 	 * @param WC_Product $product Product object.
 	 */
 	protected function update_prices_from_children( &$product ) {
+		$child_ids    = $product->get_children( 'edit' );
 		$child_prices = array();
-		foreach ( $product->get_children( 'edit' ) as $child_id ) {
+
+		// Prime caches for all child products at once to reduce queries.
+		if ( is_callable( '_prime_post_caches' ) && ! empty( $child_ids ) ) {
+			_prime_post_caches( $child_ids );
+		}
+
+		foreach ( $child_ids as $child_id ) {
 			$child = wc_get_product( $child_id );
 			if ( $child ) {
 				$child_prices[] = $child->get_price( 'edit' );

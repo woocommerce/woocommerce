@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Prime caches before fetching child products in grouped product price calculations
