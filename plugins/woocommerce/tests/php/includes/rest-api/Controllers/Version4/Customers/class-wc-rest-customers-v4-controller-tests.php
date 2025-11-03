@@ -1099,7 +1099,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'username' => 'orders3',
 			)
 		);
-		// customer3 has 0 orders (default value)
+		// customer3 has 0 orders (default value).
 
 		// Test ordering by orders_count ascending.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
