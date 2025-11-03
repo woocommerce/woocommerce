@@ -135,8 +135,9 @@ class Controller extends WC_REST_Products_V2_Controller {
 	}
 
 	/**
-	 * Override the get_item permissions so that published products are
-	 * available to users without the 'read_private_posts' capability.
+	 * Override the get_item permissions so that published products which are
+	 * not password-protected are available to users without the
+	 * 'read_private_posts' capability but can edit posts.
 	 * This is required for the Product block in the editor, see:
 	 * https://github.com/woocommerce/woocommerce/pull/61470
 	 *
@@ -151,18 +152,20 @@ class Controller extends WC_REST_Products_V2_Controller {
 				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 
-			$object_id = $object->get_id();
-
-			if ( post_password_required( $object_id ) ) {
-				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
-			}
-
-			$cap = 'publish' === $object->get_status() ? 'read' : 'read_private_posts';
-
+			$object_id        = $object->get_id();
 			$post_type_object = get_post_type_object( 'product' );
 			$permission       = false;
+
 			if ( $post_type_object instanceof \WP_Post_Type ) {
-				$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+				// These are the default permissions inherited from
+				// `WC_REST_Products_V2_Controller`.
+				$permission = current_user_can( $post_type_object->cap->read_private_posts, $object_id );
+
+				// We add an especial case when the post is published, not
+				// password-protected and the user has post edit capabilities.
+				if ( ! $permission && 'publish' === $object->get_status() && ! post_password_required( $object_id ) ) {
+					$permission = current_user_can( 'edit_posts' ) && current_user_can( $post_type_object->cap->read, $object_id );
+				}
 			}
 
 			/**
