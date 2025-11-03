@@ -404,13 +404,13 @@ class PaymentsProviders {
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $gateway_id ] = new $provider_class();
+		$this->instances[ $gateway_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $gateway_id ];
 	}
@@ -454,13 +454,13 @@ class PaymentsProviders {
 		// If the gateway ID is not mapped to a provider class, return the generic provider.
 		if ( is_null( $provider_class ) ) {
 			if ( ! isset( $this->instances['generic'] ) ) {
-				$this->instances['generic'] = new PaymentGateway();
+				$this->instances['generic'] = new PaymentGateway( $this->proxy );
 			}
 
 			return $this->instances['generic'];
 		}
 
-		$this->instances[ $pes_id ] = new $provider_class();
+		$this->instances[ $pes_id ] = new $provider_class( $this->proxy );
 
 		return $this->instances[ $pes_id ];
 	}

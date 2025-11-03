@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Throwable;
 use WC_HTTPS;
 use WC_Payment_Gateway;
@@ -35,6 +36,22 @@ class PaymentGateway {
 	// Payment method categories to inform the UI about grouping or the emphasis of payment methods.
 	const PAYMENT_METHOD_CATEGORY_PRIMARY   = 'primary';
 	const PAYMENT_METHOD_CATEGORY_SECONDARY = 'secondary';
+
+	/**
+	 * The LegacyProxy instance.
+	 *
+	 * @var LegacyProxy
+	 */
+	protected LegacyProxy $proxy;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param LegacyProxy $proxy The LegacyProxy instance.
+	 */
+	public function __construct( LegacyProxy $proxy ) {
+		$this->proxy = $proxy;
+	}
 
 	/**
 	 * Extract the payment gateway provider details from the object.
