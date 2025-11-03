@@ -148,7 +148,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		if ( $object && 0 !== $object->get_id() ) {
 			if ( 'product' !== $object->post_type && 'product_variation' !== $object->post_type ) {
-				return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 
 			$cap = 'publish' === $object->get_status() ? 'read' : 'read_private_posts';
