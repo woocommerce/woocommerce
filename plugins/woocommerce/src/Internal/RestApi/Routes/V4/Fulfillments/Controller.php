@@ -1,7 +1,7 @@
 <?php
 /**
  * Order Fulfillments REST Controller for API Version 4
- * 
+ *
  * Handles route registration, permissions, CRUD operations, and schema definition.
  * This is a completely independent base controller for WooCommerce API v4.
  * Unlike previous versions, this does not inherit from v3, v2, or v1 controllers.
@@ -367,7 +367,7 @@ class Controller extends AbstractController {
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
 		// This method is required by AbstractController but not used in our implementation
-		// since we delegate to OrderFulfillmentsRestController
+		// since we delegate to OrderFulfillmentsRestController.
 		return array();
 	}
 
