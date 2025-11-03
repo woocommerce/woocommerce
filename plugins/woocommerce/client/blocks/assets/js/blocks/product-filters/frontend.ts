@@ -204,7 +204,10 @@ const productFiltersStore = {
 			}
 
 			for ( const key in state.params ) {
-				searchParams.set( key, state.params[ key ] );
+				searchParams.set(
+					key,
+					decodeURIComponent( state.params[ key ] )
+				);
 			}
 
 			if ( window.location.href === url.href ) {
