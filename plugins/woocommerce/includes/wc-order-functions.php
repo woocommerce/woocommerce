@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -851,7 +852,7 @@ function wc_restock_refunded_items( $order, $refunded_line_items ) {
 		 */
 		$restock_note = apply_filters( 'woocommerce_refund_restock_note', $restock_note, $old_stock, $new_stock, $order, $product );
 
-		$order->add_order_note( $restock_note );
+		$order->add_order_note( $restock_note, false, false, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 
 		$item->save();
 
@@ -921,7 +922,7 @@ function wc_order_fully_refunded( $order_id ) {
 	);
 	wc_restore_locale();
 
-	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ) );
+	$order->add_order_note( __( 'Order status set to refunded. To return funds to the customer you will need to issue a refund through your payment gateway.', 'woocommerce' ), false, false, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 }
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 

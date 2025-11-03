@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
+import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/patterns/multi-line-text-skeleton';
 import {
 	BlockControls,
 	InspectorControls,
@@ -18,6 +18,7 @@ import { useProduct } from '@woocommerce/entities';
  */
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
+import { UpgradeProductImageGallery } from '../components/upgrade-product-image-gallery';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
 import type { Attributes } from '../types';
@@ -51,6 +52,7 @@ const AddToCartOptionsEdit = (
 	return (
 		<>
 			<InspectorControls>
+				<UpgradeProductImageGallery />
 				<DowngradeNotice blockClientId={ props?.clientId } />
 			</InspectorControls>
 			<BlockControls>
@@ -63,7 +65,7 @@ const AddToCartOptionsEdit = (
 			) : (
 				<div { ...blockProps }>
 					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<ProductShortDescriptionSkeleton />
+						<MultiLineTextSkeleton isStatic={ true } />
 					</div>
 					<Disabled>
 						<button

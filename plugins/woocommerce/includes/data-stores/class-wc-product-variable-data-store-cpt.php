@@ -266,15 +266,15 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @since  3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
-
 		/**
 		 * Transient name for storing prices for this product (note: Max transient length is 45)
 		 *
 		 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 		 */
-		$transient_name    = 'wc_var_prices_' . $product->get_id();
-		$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
-		$price_hash        = $this->get_price_hash( $product, $for_display );
+		$transient_name      = 'wc_var_prices_' . $product->get_id();
+		$transient_version   = WC_Cache_Helper::get_transient_version( 'product' );
+		$price_hash          = $this->get_price_hash( $product, $for_display );
+		$opposite_price_hash = $this->taxes_influence_price( $product ) ? null : $this->get_price_hash( $product, ! $for_display );
 
 		/**
 		 * $this->prices_array is an array of values which may have been modified from what is stored in transients - this may not match $transient_cached_prices_array.
@@ -289,7 +289,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
-			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ) {
+			// Check also the opposite price hash as it may have changed (see get_price_hash).
+			if ( empty( $transient_cached_prices_array[ $price_hash ] ) ||
+				( ( $opposite_price_hash !== $price_hash ) && empty( $transient_cached_prices_array[ $opposite_price_hash ] ) ) ) {
 				$prices_array = array(
 					'price'         => array(),
 					'regular_price' => array(),
@@ -373,13 +375,45 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, wc_get_price_decimals() );
 						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, wc_get_price_decimals() );
 
-						$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
+						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
+							$original_prices_array = $prices_array;
+
+							/**
+							 * Filter the variation prices array before storing in transient cache.
+							 *
+							 * This filter allows developers to modify the variation prices array for each variation
+							 * during the price calculation process. It's called for each variation individually
+							 * and can be used to add custom pricing data or modify existing prices.
+							 *
+							 * @since 3.6.0
+							 *
+							 * @param array        $prices_array The prices array being built. Contains 'price', 'regular_price', and 'sale_price' keys.
+							 * @param WC_Product   $variation    The variation product object.
+							 * @param bool         $for_display  Whether prices are for display (with tax adjustments) or for calculations.
+							 */
+							$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
+							if ( $opposite_price_hash ) {
+								// In principle, we know that prices for display and not for display are the same ones,
+								// but code hooking on woocommerce_variation_prices_array could make this different
+								// so we need to check.
+								$prices_array_hash = md5( wp_json_encode( $prices_array ) );
+								// phpcs:ignore WooCommerce.Commenting.CommentHooks
+								$opposite_prices_array      = apply_filters( 'woocommerce_variation_prices_array', $original_prices_array, $variation, ! $for_display );
+								$opposite_prices_array_hash = md5( wp_json_encode( $opposite_prices_array ) );
+								if ( $opposite_prices_array_hash !== $prices_array_hash ) {
+									$opposite_price_hash = null;
+								}
+							}
+						}
 					}
 				}
 
 				// Add all pricing data to the transient array.
 				foreach ( $prices_array as $key => $values ) {
 					$transient_cached_prices_array[ $price_hash ][ $key ] = $values;
+					if ( ! is_null( $opposite_price_hash ) && $opposite_price_hash !== $price_hash ) {
+						$transient_cached_prices_array[ $opposite_price_hash ][ $key ] = $values;
+					}
 				}
 
 				// Validate the prices data before storing it in the transient.
@@ -389,12 +423,55 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			}
 
 			/**
-			 * Give plugins one last chance to filter the variation prices array which has been generated and store locally to the class.
-			 * This value may differ from the transient cache. It is filtered once before storing locally.
+			 * Filters the variation prices array for a variable product.
+			 *
+			 * This filter gives plugins one last chance to modify the variation prices array which has been
+			 * generated and will be stored locally to the class. This value may differ from the transient cache.
+			 * It is filtered once before storing locally.
+			 *
+			 * @since 3.0.0
+			 *
+			 * @param array      $prices_array {
+			 *     Associative array of variation prices indexed by variation ID.
+			 *
+			 *     @type array $price         Array of active prices (variation_id => price).
+			 *     @type array $regular_price Array of regular prices (variation_id => price).
+			 *     @type array $sale_price    Array of sale prices (variation_id => price).
+			 * }
+			 * @param WC_Product $product      The variable product object.
+			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
 			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
+			if ( ! is_null( $opposite_price_hash ) && $opposite_price_hash !== $price_hash ) {
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks
+				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
+			}
 		}
 		return $this->prices_array[ $price_hash ];
+	}
+
+	/**
+	 * Check if the prices for a product will be different with or without taxes.
+	 *
+	 * @param WC_Product $product Product to check.
+	 * @return bool True if the prices will be different with or without taxes.
+	 *
+	 * @since 10.4.0
+	 */
+	protected function taxes_influence_price( $product ): bool {
+		if ( ! $product->is_taxable() ) {
+			return false;
+		}
+
+		if ( empty( WC_Tax::get_rates( $product->get_tax_class() ) ) ) {
+			return false;
+		}
+
+		if ( ! empty( WC()->customer ) && WC()->customer->get_is_vat_exempt() ) {
+			return false;
+		}
+
+		return true;
 	}
 
 	/**

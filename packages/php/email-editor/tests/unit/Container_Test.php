@@ -72,4 +72,17 @@ class Container_Test extends TestCase { // phpcs:ignore
 
 		$container->get( Simple_Service::class );
 	}
+
+	/**
+	 * Test that deserialization is prevented for security reasons.
+	 */
+	public function testUnserializeThrowsException(): void {
+		$container = new Container();
+
+		// Attempt to deserialize should throw an exception.
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Deserialization of Container is not allowed for security reasons.' );
+
+		$container->__unserialize( array() );
+	}
 }

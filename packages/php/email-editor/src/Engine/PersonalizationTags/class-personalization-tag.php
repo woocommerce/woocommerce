@@ -117,6 +117,17 @@ class Personalization_Tag {
 	}
 
 	/**
+	 * Prevents deserialization of this class to avoid callback replacement attacks.
+	 *
+	 * @param array $data The serialized data.
+	 * @return void
+	 * @throws \Exception Always throws an exception to prevent deserialization.
+	 */
+	public function __unserialize( array $data ): void {
+		throw new \Exception( 'Deserialization of Personalization_Tag is not allowed for security reasons.' );
+	}
+
+	/**
 	 * Returns the name of the personalization tag.
 	 *
 	 * @return string
@@ -168,6 +179,15 @@ class Personalization_Tag {
 	 */
 	public function get_post_types(): array {
 		return $this->post_types;
+	}
+
+	/**
+	 * Returns the callback function of the personalization tag.
+	 *
+	 * @return callable
+	 */
+	public function get_callback(): callable {
+		return $this->callback;
 	}
 
 	/**

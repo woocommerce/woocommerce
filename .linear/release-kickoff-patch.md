@@ -76,6 +76,10 @@ The following details are copied from the official [Building and Publishing guid
     - If the version was marked as stable in Step 1 above, check "Set as the latest release."
     - If the version was not marked as stable in Step 1 above, do not set as the latest release.
 
+### Step 3: Merge follow-up PRs
+
+- [ ] **Action:** Merge the "Update changelog.txt after {RELEASE_VERSION}.{PATCH_VERSION}" PR that is automatically created once the release tag is published on GitHub.
+
 ## Post Release Monitoring
 
 For all RC and stable releases, the release lead should continue to monitor for any bugs directly related to the latest version. Monitoring should continue for 3 days after a major release and 1 day for a point release.

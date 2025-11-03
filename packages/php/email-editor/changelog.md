@@ -2,6 +2,27 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.9.0](https://github.com/woocommerce/email-editor/releases/tag/1.9.0) - 2025-10-31 
+
+-   Patch - Add type validation for fontSize and textColor attributes in Typography_Preprocessor to prevent errors from third-party blocks with incompatible attribute types [#61687]
+-   Patch - Remove the unused package class from the email editor and add the LICENSE file for prefixed third-party packages to the build output. [#61673]
+-   Minor - Add unregister method to Personalization_Tags_Registry [#61679]
+
+## [1.8.1](https://github.com/woocommerce/email-editor/releases/tag/1.8.1) - 2025-10-27 
+
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+
+## [1.8.0](https://github.com/woocommerce/email-editor/releases/tag/1.8.0) - 2025-10-09 
+
+-   Patch - Allow fetching core blocks' styles in the editor's iframe for blocks that support emails [#61306]
+-   Patch - Fix an error where group blocks with margin styles were causing the editor to crash. [#61309]
+-   Patch - Fixed image block link removal. [#61329]
+-   Patch - Fixed type errors caused by passing int to Styles_Helper::parse_value. [#61339]
+-   Patch - Prevent callback replacement attacks via __unserialize() [#61335]
+-   Patch - Add CssInliner library and ensure packages are prefixed to prevent package conflicts. [#61210]
+-   Patch - Angle brackets are now encoded in hex when rendered in a `<script>` tag via `json_encode()`. [#61245]
+-   Minor - Add email rendering instructions for the woocommerce/product-collection block. [#60941]
+
 ## [1.7.0](https://github.com/woocommerce/email-editor/releases/tag/1.7.0) - 2025-09-26 
 
 -   Patch - Fix Fatal error when reading site styles for some themes [#60967]

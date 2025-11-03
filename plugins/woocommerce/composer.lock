@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "53c42f18fe293e387384c28fe2212d3c",
+    "content-hash": "c433f2e0744104f73ad290380d910d2d",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -371,16 +371,16 @@
         },
         {
             "name": "automattic/jetpack-connection",
-            "version": "v6.18.10",
+            "version": "v6.18.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-connection.git",
-                "reference": "cf14008d6862cfd4196b4d8f44413d252f37b57e"
+                "reference": "93e62b17d40f510a427061ba1f71df6669a22aa4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/cf14008d6862cfd4196b4d8f44413d252f37b57e",
-                "reference": "cf14008d6862cfd4196b4d8f44413d252f37b57e",
+                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/93e62b17d40f510a427061ba1f71df6669a22aa4",
+                "reference": "93e62b17d40f510a427061ba1f71df6669a22aa4",
                 "shasum": ""
             },
             "require": {
@@ -441,9 +441,9 @@
             ],
             "description": "Everything needed to connect to the Jetpack infrastructure",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.18.10"
+                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.18.11"
             },
-            "time": "2025-09-22T06:37:09+00:00"
+            "time": "2025-09-29T07:01:42+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -1178,11 +1178,11 @@
         },
         {
             "name": "woocommerce/email-editor",
-            "version": "1.7.0",
+            "version": "1.9.0",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/email-editor",
-                "reference": "cb8f68b660212b31f99ce847b8b423e3f4163210"
+                "reference": "00969be174af096de73e723cf4793e39a1e71114"
             },
             "require": {
                 "php": ">=7.4"
@@ -1262,16 +1262,16 @@
         },
         {
             "name": "wordpress/abilities-api",
-            "version": "v0.1.1",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/abilities-api.git",
-                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf"
+                "reference": "a6805fbc3a59b510b1b342d7dadcf8f93333f547"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/21af812bc2dc3677aa71b3a6875dc5407a477adf",
-                "reference": "21af812bc2dc3677aa71b3a6875dc5407a477adf",
+                "url": "https://api.github.com/repos/WordPress/abilities-api/zipball/a6805fbc3a59b510b1b342d7dadcf8f93333f547",
+                "reference": "a6805fbc3a59b510b1b342d7dadcf8f93333f547",
                 "shasum": ""
             },
             "require": {
@@ -1280,7 +1280,6 @@
             "require-dev": {
                 "automattic/vipwpcs": "^3.0",
                 "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
-                "php-coveralls/php-coveralls": "^2.5",
                 "phpcompatibility/php-compatibility": "10.x-dev as 9.99.99",
                 "phpcompatibility/phpcompatibility-wp": "^2.1",
                 "phpstan/extension-installer": "^1.3",
@@ -1309,7 +1308,23 @@
                     "includes/bootstrap.php"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "scripts": {
+                "format": [
+                    "phpcbf"
+                ],
+                "lint": [
+                    "phpcs"
+                ],
+                "phpstan": [
+                    "phpstan analyse --memory-limit=1G"
+                ],
+                "test": [
+                    "phpunit --strict-coverage"
+                ],
+                "test-multisite": [
+                    "WP_MULTISITE=1 phpunit --exclude-group=ms-excluded"
+                ]
+            },
             "license": [
                 "GPL-2.0-or-later"
             ],
@@ -1332,7 +1347,7 @@
                 "issues": "https://github.com/WordPress/abilities-api/issues",
                 "source": "https://github.com/WordPress/abilities-api"
             },
-            "time": "2025-09-05T07:28:21+00:00"
+            "time": "2025-10-17T06:54:28+00:00"
         },
         {
             "name": "wordpress/mcp-adapter",
@@ -5254,7 +5269,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-trunk",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

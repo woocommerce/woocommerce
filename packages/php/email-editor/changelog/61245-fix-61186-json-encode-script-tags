@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Angle brackets are now encoded in hex when rendered in a `<script>` tag via `json_encode()`.

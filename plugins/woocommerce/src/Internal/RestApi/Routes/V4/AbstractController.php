@@ -35,6 +35,7 @@ abstract class AbstractController extends WP_REST_Controller {
 	const RESOURCE_EXISTS     = 'resource_exists';
 	const CANNOT_CREATE       = 'cannot_create';
 	const CANNOT_DELETE       = 'cannot_delete';
+	const CANNOT_UPDATE       = 'cannot_update';
 	const CANNOT_TRASH        = 'cannot_trash';
 	const TRASH_NOT_SUPPORTED = 'trash_not_supported';
 
@@ -291,6 +292,7 @@ abstract class AbstractController extends WP_REST_Controller {
 			self::RESOURCE_EXISTS     => __( 'Resource already exists.', 'woocommerce' ),
 			self::CANNOT_CREATE       => __( 'Cannot create resource.', 'woocommerce' ),
 			self::CANNOT_DELETE       => __( 'Cannot delete resource.', 'woocommerce' ),
+			self::CANNOT_UPDATE       => __( 'Cannot update resource.', 'woocommerce' ),
 			self::CANNOT_TRASH        => __( 'Cannot trash resource.', 'woocommerce' ),
 			self::TRASH_NOT_SUPPORTED => __( 'Trash not supported.', 'woocommerce' ),
 		);
@@ -299,6 +301,7 @@ abstract class AbstractController extends WP_REST_Controller {
 			self::RESOURCE_EXISTS     => WP_Http::BAD_REQUEST,
 			self::CANNOT_CREATE       => WP_Http::INTERNAL_SERVER_ERROR,
 			self::CANNOT_DELETE       => WP_Http::INTERNAL_SERVER_ERROR,
+			self::CANNOT_UPDATE       => WP_Http::INTERNAL_SERVER_ERROR,
 			self::CANNOT_TRASH        => WP_Http::GONE,
 			self::TRASH_NOT_SUPPORTED => WP_Http::NOT_IMPLEMENTED,
 		);

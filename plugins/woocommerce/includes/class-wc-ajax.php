@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\TaxesController;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -1108,7 +1109,7 @@ class WC_AJAX {
 			}
 
 			/* translators: %s item name. */
-			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true );
+			$order->add_order_note( sprintf( __( 'Added line items: %s', 'woocommerce' ), implode( ', ', $order_notes ) ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 
 			do_action( 'woocommerce_ajax_order_items_added', $added_items, $order );
 
@@ -1333,7 +1334,7 @@ class WC_AJAX {
 			$code = wc_format_coupon_code( wp_unslash( $coupon ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			if ( $order->remove_coupon( $code ) ) {
 				// translators: %s coupon code.
-				$order->add_order_note( esc_html( sprintf( __( 'Coupon removed: "%s".', 'woocommerce' ), $code ) ), 0, true );
+				$order->add_order_note( esc_html( sprintf( __( 'Coupon removed: "%s".', 'woocommerce' ), $code ) ), 0, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 			}
 			$order->calculate_taxes( $calculate_tax_args );
 			$order->calculate_totals( false );
@@ -1417,10 +1418,10 @@ class WC_AJAX {
 
 						if ( $changed_stock && ! is_wp_error( $changed_stock ) ) {
 							/* translators: %1$s: item name %2$s: stock change */
-							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true );
+							$order->add_order_note( sprintf( __( 'Deleted %1$s and adjusted stock (%2$s)', 'woocommerce' ), $item->get_name(), $changed_stock['from'] . '&rarr;' . $changed_stock['to'] ), false, true, array( 'note_group' => OrderNoteGroup::PRODUCT_STOCK ) );
 						} else {
 							/* translators: %s item name. */
-							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true );
+							$order->add_order_note( sprintf( __( 'Deleted %s', 'woocommerce' ), $item->get_name() ), false, true, array( 'note_group' => OrderNoteGroup::ORDER_UPDATE ) );
 						}
 					}
 
