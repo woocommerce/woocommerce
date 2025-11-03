@@ -121,6 +121,7 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 				'description' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim…',
 				'icon'        => 'https://example.com/icon.png',
 				'supports'    => array( 'products', 'something', 'bogus' ),
+				'links'       => array(),
 				'state'       => array(
 					'enabled'           => true,
 					'account_connected' => true,
@@ -928,6 +929,731 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 		// Test with wrong type.
 		$fake_gateway = new FakePaymentGateway( 'gateway1', array( 'plugin_file' => false ) );
 		$this->assertEquals( '', $this->sut->get_plugin_file( $fake_gateway ) );
+	}
+
+	/**
+	 * Test get_provider_links with valid links.
+	 */
+	public function test_get_provider_links_with_valid_links() {
+		// Arrange - Test all accepted link types.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'https://example.com/about',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => 'https://example.com/pricing',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 'https://example.com/terms',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway, 'US' );
+
+		// Assert.
+		$this->assertCount( 5, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_ABOUT, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/about', $links[0]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $links[1]['_type'] );
+		$this->assertEquals( 'https://example.com/docs', $links[1]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $links[2]['_type'] );
+		$this->assertEquals( 'https://example.com/support', $links[2]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_PRICING, $links[3]['_type'] );
+		$this->assertEquals( 'https://example.com/pricing', $links[3]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_TERMS, $links[4]['_type'] );
+		$this->assertEquals( 'https://example.com/terms', $links[4]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links without provider_links set.
+	 */
+	public function test_get_provider_links_without_provider_links() {
+		// Arrange - Create a gateway without provider_links set.
+		$fake_gateway = new FakePaymentGateway( 'gateway1', array() );
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert.
+		$this->assertEquals( array(), $links );
+	}
+
+	/**
+	 * Test get_provider_links when the method is not defined on the gateway.
+	 */
+	public function test_get_provider_links_when_method_not_defined() {
+		// Arrange - Create a mock gateway without the get_provider_links method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->getMock();
+
+		// Set the id property that might be used in error logging.
+		$gateway->id = 'test_gateway';
+
+		// Act.
+		$links = $this->sut->get_provider_links( $gateway );
+
+		// Assert - Should return empty array when method doesn't exist.
+		$this->assertEquals( array(), $links );
+	}
+
+	/**
+	 * Test that when a gateway implements get_provider_links, the method gets called and returned links are used.
+	 */
+	public function test_get_provider_links_method_is_called_and_links_are_used() {
+		// Arrange - Create a mock gateway with the get_provider_links method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'get_provider_links' ) )
+			->getMock();
+
+		// Set the id property that might be used in error logging.
+		$gateway->id = 'test_gateway';
+
+		// Expected links to be returned by the mock.
+		$expected_links = array(
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+				'url'   => 'https://example.com/documentation',
+			),
+			array(
+				'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+				'url'   => 'https://example.com/support-page',
+			),
+		);
+
+		// Expect the get_provider_links method to be called once with the country code 'US'.
+		$gateway->expects( $this->once() )
+			->method( 'get_provider_links' )
+			->with( 'US' )
+			->willReturn( $expected_links );
+
+		// Act.
+		$links = $this->sut->get_provider_links( $gateway, 'US' );
+
+		// Assert - Verify the links returned match what the gateway method provided.
+		$this->assertCount( 2, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/documentation', $links[0]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $links[1]['_type'] );
+		$this->assertEquals( 'https://example.com/support-page', $links[1]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links with invalid link types.
+	 */
+	public function test_get_provider_links_with_invalid_types() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => 'invalid_type',
+						'url'   => 'https://example.com/invalid',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+					array(
+						// Missing _type.
+						'url' => 'https://example.com/no-type',
+					),
+					array(
+						'_type' => '', // Empty type.
+						'url'   => 'https://example.com/empty-type',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert - Only the valid one should remain.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/support', $links[0]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links with invalid URLs.
+	 */
+	public function test_get_provider_links_with_invalid_urls() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
+						'url'   => 'not_a_valid_url',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						// Missing url.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_PRICING,
+						'url'   => '', // Empty URL.
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_TERMS,
+						'url'   => 123, // Wrong type.
+					),
+				),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert - Only the valid one should remain.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/docs', $links[0]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links with non-array items.
+	 */
+	public function test_get_provider_links_with_non_array_items() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					'not_an_array',
+					123,
+					true,
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+					null,
+				),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert - Only the valid one should remain.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $links[0]['_type'] );
+		$this->assertEquals( 'https://example.com/support', $links[0]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links with non-array return value.
+	 */
+	public function test_get_provider_links_with_non_array_return() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => 'not_an_array',
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert.
+		$this->assertEquals( array(), $links );
+	}
+
+	/**
+	 * Test get_provider_links with empty array.
+	 */
+	public function test_get_provider_links_with_empty_array() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert.
+		$this->assertEquals( array(), $links );
+	}
+
+	/**
+	 * Test get_provider_links URL sanitization.
+	 */
+	public function test_get_provider_links_url_sanitization() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support?param=value&special=<script>alert("xss")</script>',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$links = $this->sut->get_provider_links( $fake_gateway );
+
+		// Assert - URL should be escaped.
+		$this->assertCount( 1, $links );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $links[0]['_type'] );
+		$this->assertStringContainsString( 'https://example.com/support', $links[0]['url'] );
+		$this->assertStringNotContainsString( '<script>', $links[0]['url'] );
+	}
+
+	/**
+	 * Test get_provider_links includes in get_details.
+	 */
+	public function test_get_provider_links_in_get_details() {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			'gateway1',
+			array(
+				'plugin_slug'    => 'test-gateway',
+				'plugin_file'    => 'test-gateway/test-gateway.php',
+				'provider_links' => array(
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_DOCS,
+						'url'   => 'https://example.com/docs',
+					),
+					array(
+						'_type' => PaymentsProviders::LINK_TYPE_SUPPORT,
+						'url'   => 'https://example.com/support',
+					),
+				),
+			)
+		);
+
+		// Act.
+		$details = $this->sut->get_details( $fake_gateway );
+
+		// Assert - Links should be included.
+		$this->assertArrayHasKey( 'links', $details );
+		$this->assertCount( 2, $details['links'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_DOCS, $details['links'][0]['_type'] );
+		$this->assertEquals( 'https://example.com/docs', $details['links'][0]['url'] );
+		$this->assertEquals( PaymentsProviders::LINK_TYPE_SUPPORT, $details['links'][1]['_type'] );
+		$this->assertEquals( 'https://example.com/support', $details['links'][1]['url'] );
+	}
+
+	/**
+	 * Test that when a gateway implements needs_setup(), the method gets called and returned value is used.
+	 */
+	public function test_needs_setup_method_is_called() {
+		// Arrange - Create a mock gateway with the needs_setup method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->onlyMethods( array( 'needs_setup' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the needs_setup method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'needs_setup' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->needs_setup( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_test_mode(), the method gets called and returned value is used.
+	 */
+	public function test_is_test_mode_method_is_called() {
+		// Arrange - Create a mock gateway with the is_test_mode method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_test_mode' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_test_mode method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_test_mode' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_test_mode( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_in_test_mode(), the method gets called and returned value is used.
+	 */
+	public function test_is_in_test_mode_method_is_called() {
+		// Arrange - Create a mock gateway with the is_in_test_mode method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_in_test_mode' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_in_test_mode method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_in_test_mode' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_test_mode( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_dev_mode(), the method gets called and returned value is used.
+	 */
+	public function test_is_dev_mode_method_is_called() {
+		// Arrange - Create a mock gateway with the is_dev_mode method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_dev_mode' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_dev_mode method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_dev_mode' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_dev_mode( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_in_dev_mode(), the method gets called and returned value is used.
+	 */
+	public function test_is_in_dev_mode_method_is_called() {
+		// Arrange - Create a mock gateway with the is_in_dev_mode method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_in_dev_mode' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_in_dev_mode method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_in_dev_mode' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_dev_mode( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_account_connected(), the method gets called and returned value is used.
+	 */
+	public function test_is_account_connected_method_is_called() {
+		// Arrange - Create a mock gateway with the is_account_connected method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_account_connected' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_account_connected method to be called once and return false.
+		$gateway->expects( $this->once() )
+			->method( 'is_account_connected' )
+			->willReturn( false );
+
+		// Act.
+		$result = $this->sut->is_account_connected( $gateway );
+
+		// Assert.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_connected(), the method gets called and returned value is used.
+	 */
+	public function test_is_connected_method_is_called() {
+		// Arrange - Create a mock gateway with the is_connected method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_connected' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_connected method to be called once and return false.
+		$gateway->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+		// Act.
+		$result = $this->sut->is_account_connected( $gateway );
+
+		// Assert.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_onboarding_started(), the method gets called and returned value is used.
+	 */
+	public function test_is_onboarding_started_method_is_called() {
+		// Arrange - Create a mock gateway with the is_onboarding_started method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_onboarding_started' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_onboarding_started method to be called once and return false.
+		$gateway->expects( $this->once() )
+			->method( 'is_onboarding_started' )
+			->willReturn( false );
+
+		// Act.
+		$result = $this->sut->is_onboarding_started( $gateway );
+
+		// Assert.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_onboarding_completed(), the method gets called and returned value is used.
+	 */
+	public function test_is_onboarding_completed_method_is_called() {
+		// Arrange - Create a mock gateway with both methods for onboarding.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_onboarding_started', 'is_onboarding_completed' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect is_onboarding_started to return true (prerequisite).
+		$gateway->expects( $this->once() )
+			->method( 'is_onboarding_started' )
+			->willReturn( true );
+
+		// Expect the is_onboarding_completed method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_onboarding_completed' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_onboarding_completed( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_account_partially_onboarded(), the method gets called and returned value is used.
+	 */
+	public function test_is_account_partially_onboarded_method_is_called() {
+		// Arrange - Create a mock gateway with the is_account_partially_onboarded method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_onboarding_started', 'is_account_partially_onboarded' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect is_onboarding_started to return true (prerequisite).
+		$gateway->expects( $this->once() )
+			->method( 'is_onboarding_started' )
+			->willReturn( true );
+
+		// Expect the is_account_partially_onboarded method to be called once and return true.
+		// When partially onboarded, is_onboarding_completed should return false (inverted).
+		$gateway->expects( $this->once() )
+			->method( 'is_account_partially_onboarded' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_onboarding_completed( $gateway );
+
+		// Assert - Should be false because partially onboarded.
+		$this->assertFalse( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_test_mode_onboarding(), the method gets called and returned value is used.
+	 */
+	public function test_is_test_mode_onboarding_method_is_called() {
+		// Arrange - Create a mock gateway with the is_test_mode_onboarding method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_test_mode_onboarding' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_test_mode_onboarding method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_test_mode_onboarding' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_test_mode_onboarding( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements is_in_test_mode_onboarding(), the method gets called and returned value is used.
+	 */
+	public function test_is_in_test_mode_onboarding_method_is_called() {
+		// Arrange - Create a mock gateway with the is_in_test_mode_onboarding method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'is_in_test_mode_onboarding' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the is_in_test_mode_onboarding method to be called once and return true.
+		$gateway->expects( $this->once() )
+			->method( 'is_in_test_mode_onboarding' )
+			->willReturn( true );
+
+		// Act.
+		$result = $this->sut->is_in_test_mode_onboarding( $gateway );
+
+		// Assert.
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * Test that when a gateway implements get_settings_url(), the method gets called and returned URL is used.
+	 */
+	public function test_get_settings_url_method_is_called() {
+		// Arrange - Create a mock gateway with the get_settings_url method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'get_settings_url' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the get_settings_url method to be called once and return a valid URL.
+		$gateway->expects( $this->once() )
+			->method( 'get_settings_url' )
+			->willReturn( 'https://example.com/gateway-settings' );
+
+		// Act.
+		$result = $this->sut->get_settings_url( $gateway );
+
+		// Assert - Should return the URL with the 'from' parameter added.
+		$this->assertStringContainsString( 'https://example.com/gateway-settings', $result );
+		$this->assertStringContainsString( 'from=' . Payments::FROM_PAYMENTS_SETTINGS, $result );
+	}
+
+	/**
+	 * Test that when a gateway implements get_connection_url(), the method gets called and returned URL is used.
+	 */
+	public function test_get_connection_url_method_is_called() {
+		// Arrange - Create a mock gateway with the get_connection_url method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'get_connection_url' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expect the get_connection_url method to be called once with a return URL parameter.
+		$gateway->expects( $this->once() )
+			->method( 'get_connection_url' )
+			->with( $this->stringContains( 'admin.php?page=wc-settings' ) )
+			->willReturn( 'https://example.com/onboard' );
+
+		// Act.
+		$result = $this->sut->get_onboarding_url( $gateway );
+
+		// Assert.
+		$this->assertEquals( 'https://example.com/onboard', $result );
+	}
+
+	/**
+	 * Test that when a gateway implements get_recommended_payment_methods(), the method gets called and returned data is used.
+	 */
+	public function test_get_recommended_payment_methods_method_is_called() {
+		// Arrange - Create a mock gateway with the get_recommended_payment_methods method.
+		$gateway = $this->getMockBuilder( 'WC_Payment_Gateway' )
+			->disableOriginalConstructor()
+			->addMethods( array( 'get_recommended_payment_methods' ) )
+			->getMock();
+
+		$gateway->id = 'test_gateway';
+
+		// Expected payment methods to be returned by the mock.
+		$expected_methods = array(
+			array(
+				'id'    => 'card',
+				'title' => 'Credit Card',
+			),
+			array(
+				'id'    => 'bank_transfer',
+				'title' => 'Bank Transfer',
+			),
+		);
+
+		// Expect the get_recommended_payment_methods method to be called once with country code 'GB'.
+		$gateway->expects( $this->once() )
+			->method( 'get_recommended_payment_methods' )
+			->with( 'GB' )
+			->willReturn( $expected_methods );
+
+		// Act.
+		$result = $this->sut->get_recommended_payment_methods( $gateway, 'GB' );
+
+		// Assert - Verify the methods returned are properly processed.
+		$this->assertCount( 2, $result );
+		$this->assertEquals( 'card', $result[0]['id'] );
+		$this->assertEquals( 'Credit Card', $result[0]['title'] );
+		$this->assertEquals( 'bank_transfer', $result[1]['id'] );
+		$this->assertEquals( 'Bank Transfer', $result[1]['title'] );
 	}
 
 	/**
