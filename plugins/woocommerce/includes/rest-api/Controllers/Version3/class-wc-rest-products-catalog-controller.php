@@ -342,14 +342,14 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 					return new WP_Error(
 						'async_generation_failed',
 						/* translators: %s: The unknown state value returned by the catalog async generator */
-						sprintf( __( 'Unknown state: %s', 'woocommerce' ), $status['state'] ),
+						sprintf( __( 'Unknown state: %s', 'woocommerce' ), is_scalar( $status['state'] ) ? $status['state'] : gettype( $status['state'] ) ),
 						array( 'status' => 500 )
 					);
 			}
 
 			$response_data = array(
 				'status'       => $response_status,
-				'download_url' => isset( $status['url'] ) ? $status['url'] : null,
+				'download_url' => ( isset( $status['url'] ) && is_string( $status['url'] ) && '' !== $status['url'] ) ? $status['url'] : null,
 			);
 
 			return rest_ensure_response( $response_data );
