@@ -54,7 +54,7 @@ class DataUtils {
 	}
 
 	/**
-	 * Convert line itemtaxes (schema format) to internal format. This keys arrays by tax ID and has some different naming
+	 * Convert line item taxes (schema format) to internal format. This keys arrays by tax ID and has some different naming
 	 *
 	 * @param array $line_item_taxes The taxes to convert.
 	 * @return array The converted taxes.
@@ -139,8 +139,8 @@ class DataUtils {
 				return new WP_Error(
 					'invalid_refund_amount',
 					sprintf(
-						/* translators: %s: tax total */
-						__( 'Refund total cannot be greater than the line item tax total (%s).', 'woocommerce' ),
+						/* translators: %s: item total */
+						__( 'Refund total cannot be greater than the line item total (%s).', 'woocommerce' ),
 						$item->get_total()
 					)
 				);
@@ -153,6 +153,9 @@ class DataUtils {
 					$allowed_tax_ids = array_keys( $item_taxes['total'] ?? array() );
 
 					foreach ( $line_item['refund_tax'] as $refund_tax ) {
+						if ( ! isset( $refund_tax['id'], $refund_tax['refund_total'] ) ) {
+							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ) );
+						}
 						$tax_id           = $refund_tax['id'];
 						$tax_refund_total = $refund_tax['refund_total'];
 
