@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection: improve next/prev arrows aria-labels to avoid using sensory information
