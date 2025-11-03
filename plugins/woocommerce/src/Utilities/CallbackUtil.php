@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Utilities;
 /**
  * Utility class for working with WordPress hooks and callbacks.
  *
- * @since 10.5.0
+ * @since 10.4.0
  */
 final class CallbackUtil {
 
@@ -19,7 +19,7 @@ final class CallbackUtil {
 	 * @param callable|mixed $callback A PHP callback.
 	 * @return string Normalized callback signature.
 	 *
-	 * @since 10.5.0
+	 * @since 10.4.0
 	 */
 	public static function get_callback_signature( $callback ): string {
 		if ( is_string( $callback ) ) {
@@ -62,7 +62,7 @@ final class CallbackUtil {
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
 	 *
-	 * @since 10.5.0
+	 * @since 10.4.0
 	 */
 	public static function get_hook_callback_signatures( string $hook_name ): array {
 		global $wp_filter;
