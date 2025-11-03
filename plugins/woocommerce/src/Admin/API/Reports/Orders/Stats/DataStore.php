@@ -804,6 +804,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return $wpdb->last_error ? $wpdb->last_error : __( 'Unknown database error occurred while adding fulfillment_status column.', 'woocommerce' );
 		}
 
+		// Update the option to indicate that the column has been added.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'yes', false );
+
 		return true;
 	}
 }
