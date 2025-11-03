@@ -174,8 +174,8 @@ class DataUtils {
 					}
 				}
 			}
-
-			return true;
 		}
+
+		return true;
 	}
 }
