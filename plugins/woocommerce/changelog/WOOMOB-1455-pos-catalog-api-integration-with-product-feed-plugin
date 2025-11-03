@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Update the feature-flagged `POST /products/catalog` endpoint to integrate with async product feed generation from the `WooCommerce Product Feed for OpenAI` plugin when installed and active.
