@@ -295,14 +295,37 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 	 */
 	private function request_catalog_async( $fields, $force_generate ) {
 		try {
-			$plugin    = \Automattic\WooCommerce\ProductFeedForOpenAI\Core\Plugin::get_instance();
+			$plugin = \Automattic\WooCommerce\ProductFeedForOpenAI\Core\Plugin::get_instance();
+			if ( ! $plugin ) {
+				return new WP_Error(
+					'async_generation_unavailable',
+					__( 'Product Feed plugin instance unavailable.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
+			}
+
 			$generator = $plugin->get( \Automattic\WooCommerce\ProductFeedForOpenAI\Integrations\POSCatalog\AsyncGenerator::class );
+			if ( ! $generator ) {
+				return new WP_Error(
+					'async_generation_unavailable',
+					__( 'Catalog async generator unavailable.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
+			}
 
 			$args = array( 'fields' => $fields );
 
 			$status = $force_generate
 				? $generator->force_regeneration( $args )
 				: $generator->get_status( $args );
+
+			if ( ! is_array( $status ) ) {
+				return new WP_Error(
+					'async_generation_failed',
+					__( 'Invalid response from catalog async generator.', 'woocommerce' ),
+					array( 'status' => 500 )
+				);
+			}
 
 			// Map AsyncGenerator state to catalog API generation status.
 			switch ( $status['state'] ?? '' ) {
