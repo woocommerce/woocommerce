@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Validate cart item quantity before product instantiation in cart session loading

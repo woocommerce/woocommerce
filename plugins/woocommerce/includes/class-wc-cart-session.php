@@ -143,9 +143,13 @@ final class WC_Cart_Session {
 				continue;
 			}
 
+			if ( ! isset( $values['quantity'] ) || 0 >= $values['quantity'] ) {
+				continue;
+			}
+
 			$product = wc_get_product( $values['variation_id'] ? $values['variation_id'] : $values['product_id'] );
 
-			if ( empty( $product ) || ! $product->exists() || 0 >= $values['quantity'] ) {
+			if ( empty( $product ) || ! $product->exists() ) {
 				continue;
 			}
 
