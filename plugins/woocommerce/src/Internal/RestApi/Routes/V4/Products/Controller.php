@@ -151,11 +151,16 @@ class Controller extends WC_REST_Products_V2_Controller {
 				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 			}
 
+			$object_id = $object->get_id();
+
+			if ( post_password_required( $object_id ) ) {
+				return new WP_Error( 'woocommerce_rest_cannot_view', __( 'Sorry, you cannot view this resource.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			}
+
 			$cap = 'publish' === $object->get_status() ? 'read' : 'read_private_posts';
 
 			$post_type_object = get_post_type_object( 'product' );
 			$permission       = false;
-			$object_id        = $object->get_id();
 			if ( $post_type_object instanceof \WP_Post_Type ) {
 				$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
 			}
