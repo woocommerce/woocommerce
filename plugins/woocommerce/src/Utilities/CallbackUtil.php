@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Utilities;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * Utility class for working with WordPress hooks and callbacks.
  *
@@ -59,6 +61,9 @@ final class CallbackUtil {
 	 * with the specified hook name, organized by priority. This is useful
 	 * for generating cache keys or comparing hook state.
 	 *
+	 * Note: Closure signatures use spl_object_hash(), which will differ
+	 * between requests.
+	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
 	 *
@@ -71,13 +76,43 @@ final class CallbackUtil {
 			return array();
 		}
 
-		// Note that $wp_filter is already keyed by priority and array_map preserves associative keys.
-		return array_map(
-			fn( $priority_callbacks ) => array_map(
-				fn( $callback_data ) => self::get_callback_signature( $callback_data['function'] ),
-				array_values( $priority_callbacks )
-			),
-			$wp_filter[ $hook_name ]->callbacks
+		// phpcs:disable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+
+		if ( ! is_object( $wp_filter[ $hook_name ] ) || ! is_array( $wp_filter[ $hook_name ]->callbacks ?? null ) ) {
+			return array( 0 => array( serialize( $wp_filter[ $hook_name ] ) ) );
+		}
+
+		$result = array();
+
+		foreach ( $wp_filter[ $hook_name ]->callbacks as $priority => $priority_callbacks ) {
+			$result[ $priority ] = self::is_valid_wp_filter_priority_entry( $priority, $priority_callbacks )
+				? array_map(
+					fn( $callback_data ) => self::get_callback_signature( $callback_data['function'] ),
+					array_values( $priority_callbacks )
+				)
+				: array( serialize( $priority_callbacks ) );
+		}
+
+		// phpcs:enable WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize
+
+		return $result;
+	}
+
+	/**
+	 * Validate that a priority entry in $wp_filter has the expected structure.
+	 *
+	 * @param mixed $priority The priority key.
+	 * @param mixed $priority_callbacks The priority callbacks to validate.
+	 * @return bool True if valid, false otherwise.
+	 */
+	private static function is_valid_wp_filter_priority_entry( $priority, $priority_callbacks ): bool {
+		if ( ! is_int( $priority ) || ! is_array( $priority_callbacks ) || empty( $priority_callbacks ) ) {
+			return false;
+		}
+
+		return ArrayUtil::array_all(
+			$priority_callbacks,
+			fn( $callback_data ) => is_array( $callback_data ) && isset( $callback_data['function'] )
 		);
 	}
 }
