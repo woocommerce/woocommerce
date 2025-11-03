@@ -172,7 +172,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				'status'       => array(
 					'description' => __( 'Products catalog generation status.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'pending', 'processing', 'complete', 'failed' ),
+					'enum'        => array( 'pending', 'processing', 'complete' ),
 				),
 				'download_url' => array(
 					'description' => __( 'Products catalog file URL. Null when catalog is not ready.', 'woocommerce' ),
@@ -304,8 +304,7 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				? $generator->force_regeneration( $args )
 				: $generator->get_status( $args );
 
-			// Map AsyncGenerator state to our API response format.
-			$response_status = 'pending';
+			// Map AsyncGenerator state to catalog API generation status.
 			switch ( $status['state'] ?? '' ) {
 				case 'scheduled':
 					$response_status = 'pending';
@@ -316,6 +315,13 @@ class WC_REST_Products_Catalog_Controller extends WC_REST_Controller {
 				case 'completed':
 					$response_status = 'complete';
 					break;
+				default:
+					return new WP_Error(
+						'async_generation_failed',
+						/* translators: %s: The unknown state value returned by the catalog async generator */
+						sprintf( __( 'Unknown state: %s', 'woocommerce' ), $status['state'] ),
+						array( 'status' => 500 )
+					);
 			}
 
 			$response_data = array(
