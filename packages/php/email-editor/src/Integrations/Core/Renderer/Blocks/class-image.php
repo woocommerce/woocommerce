@@ -32,10 +32,11 @@ class Image extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		$image_url = $parsed_html['imageUrl'];
-		$image     = $parsed_html['image'];
-		$caption   = $parsed_html['caption'];
-		$class     = $parsed_html['class'];
+		$image_url       = $parsed_html['imageUrl'];
+		$image           = $parsed_html['image'];
+		$caption         = $parsed_html['caption'];
+		$class           = $parsed_html['class'];
+		$anchor_tag_href = $parsed_html['anchor_tag_href'];
 
 		$parsed_block = $this->add_image_size_when_missing( $parsed_block, $image_url );
 		$image        = $this->add_image_dimensions( $image, $parsed_block );
@@ -43,7 +44,7 @@ class Image extends Abstract_Block_Renderer {
 		$image_with_wrapper = str_replace(
 			array( '{image_content}', '{caption_content}' ),
 			array( $image, $caption ),
-			$this->get_block_wrapper( $parsed_block, $rendering_context, $caption )
+			$this->get_block_wrapper( $parsed_block, $rendering_context, $caption, $anchor_tag_href )
 		);
 
 		$image_with_wrapper = $this->apply_rounded_style( $image_with_wrapper, $parsed_block );
@@ -211,8 +212,9 @@ class Image extends Abstract_Block_Renderer {
 	 * @param array             $parsed_block Parsed block.
 	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @param string|null       $caption Caption.
+	 * @param string|null       $anchor_tag_href Anchor tag href.
 	 */
-	private function get_block_wrapper( array $parsed_block, Rendering_Context $rendering_context, ?string $caption ): string {
+	private function get_block_wrapper( array $parsed_block, Rendering_Context $rendering_context, ?string $caption, ?string $anchor_tag_href ): string {
 		$styles = array(
 			'border-collapse' => 'collapse',
 			'border-spacing'  => '0px',
@@ -271,7 +273,15 @@ class Image extends Abstract_Block_Renderer {
 			'style' => 'overflow: hidden;',
 		);
 
-		$image_html    = Table_Wrapper_Helper::render_table_wrapper( '{image_content}', $image_table_attrs, $image_cell_attrs );
+		$image_content = '{image_content}';
+		if ( $anchor_tag_href ) {
+			$image_content = sprintf(
+				'<a href="%s" rel="noopener nofollow" target="_blank">%s</a>',
+				esc_url( $anchor_tag_href ),
+				'{image_content}'
+			);
+		}
+		$image_html    = Table_Wrapper_Helper::render_table_wrapper( $image_content, $image_table_attrs, $image_cell_attrs );
 		$inner_content = $image_html . $caption_html;
 
 		return Table_Wrapper_Helper::render_table_wrapper( $inner_content, $table_attrs, $cell_attrs );
@@ -322,7 +332,7 @@ class Image extends Abstract_Block_Renderer {
 	 * Parse block content to get image URL, image HTML and caption HTML.
 	 *
 	 * @param string $block_content Block content.
-	 * @return array{imageUrl: string, image: string, caption: string, class: string}|null
+	 * @return array{imageUrl: string, image: string, caption: string, class: string, anchor_tag_href: string}|null
 	 */
 	private function parse_block_content( string $block_content ): ?array {
 		// If block's image is not set, we don't need to parse the content.
@@ -349,11 +359,15 @@ class Image extends Abstract_Block_Renderer {
 		$figcaption_html = $figcaption ? $dom_helper->get_outer_html( $figcaption ) : '';
 		$figcaption_html = str_replace( array( '<figcaption', '</figcaption>' ), array( '<span', '</span>' ), $figcaption_html );
 
+		$anchor_tag      = $dom_helper->find_element( 'a' );
+		$anchor_tag_href = $anchor_tag ? $dom_helper->get_attribute_value( $anchor_tag, 'href' ) : '';
+
 		return array(
-			'imageUrl' => $image_src ? $image_src : '',
-			'image'    => $this->cleanup_image_html( $image_html ),
-			'caption'  => $figcaption_html ? $figcaption_html : '',
-			'class'    => $image_class ? $image_class : '',
+			'imageUrl'        => $image_src ? $image_src : '',
+			'image'           => $this->cleanup_image_html( $image_html ),
+			'caption'         => $figcaption_html ? $figcaption_html : '',
+			'class'           => $image_class ? $image_class : '',
+			'anchor_tag_href' => $anchor_tag_href ? $anchor_tag_href : '',
 		);
 	}
 

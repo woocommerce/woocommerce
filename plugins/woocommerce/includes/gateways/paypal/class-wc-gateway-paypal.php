@@ -174,7 +174,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		if ( $this->testmode ) {
 			/* translators: %s: Link to PayPal sandbox testing guide page */
-			$this->description .= ' ' . sprintf( __( 'SANDBOX ENABLED. You can use sandbox testing accounts only. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/docs/classic/lifecycle/ug_sandbox/' );
+			$this->description .= '<br>' . sprintf( __( '<strong>Sandbox mode enabled</strong>. Only sandbox test accounts can be used. See the <a href="%s">PayPal Sandbox Testing Guide</a> for more details.', 'woocommerce' ), 'https://developer.paypal.com/tools/sandbox/' );
 			$this->description  = trim( $this->description );
 		}
 
@@ -326,7 +326,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,
@@ -701,7 +701,15 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	public function capture_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
 
-		if ( $this->should_use_orders_v2() ) {
+		// Bail if the order is not a PayPal order.
+		if ( self::ID !== $order->get_payment_method() ) {
+			return;
+		}
+
+		// If the order is authorized via legacy API, the '_paypal_status' meta will be 'pending'.
+		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
+
+		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
 			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
@@ -709,7 +717,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			return;
 		}
 
-		if ( self::ID === $order->get_payment_method() && 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
+		if ( 'pending' === $order->get_meta( '_paypal_status', true ) && $order->get_transaction_id() ) {
 			$this->init_api();
 			$result = WC_Gateway_Paypal_API_Handler::do_capture( $order );
 
@@ -919,7 +927,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		 */
 		$use_orders_v2 = apply_filters(
 			'woocommerce_paypal_use_orders_v2',
-			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible() && WC_Gateway_Paypal_Helper::is_orders_v2_feature_flag_enabled()
+			WC_Gateway_Paypal_Helper::is_orders_v2_migration_eligible()
 		);
 
 		// If the conditions are met, but there is an override to not use Orders v2,

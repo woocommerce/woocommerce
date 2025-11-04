@@ -100,15 +100,28 @@ class WC_Brands {
 
 		$product_terms = get_the_terms( $product_id, 'product_brand' );
 
-		if ( $product_terms ) {
-			$product_brands = array();
-
-			foreach ( $product_terms as $term ) {
-				$product_brands[ $term->term_id ] = $term->parent;
-			}
-
-			_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), false, false );
+		if ( ! $product_terms ) {
+			return;
 		}
+
+		if ( wp_defer_term_counting() ) {
+			// When deferring term counts, we're using the built in handling of `wp_update_term_count()` to deal with the deferring
+			// and, though, this will cause both the standard and stock based counts to be rerun, it is still more efficient
+			// in cases where deferred term counting was warranted.
+			$product_terms = get_the_terms( $product_id, 'product_brand' );
+			if ( is_array( $product_terms ) ) {
+				wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_brand' );
+			}
+			return;
+		}
+
+		$product_brands = array();
+
+		foreach ( $product_terms as $term ) {
+			$product_brands[ $term->term_id ] = $term->parent;
+		}
+
+		_wc_term_recount( $product_brands, get_taxonomy( 'product_brand' ), false, false );
 	}
 
 	/**
@@ -224,8 +237,65 @@ class WC_Brands {
 	 * Enqueues styles.
 	 */
 	public function styles() {
+		if ( ! $this->should_load_brands_styles() ) {
+			return;
+		}
+
 		$version = Constants::get_constant( 'WC_VERSION' );
 		wp_enqueue_style( 'brands-styles', WC()->plugin_url() . '/assets/css/brands.css', array(), $version );
+	}
+
+	/**
+	 * Determines if brands styles should be loaded on the current page.
+	 *
+	 * @since 10.4.0
+	 * @return bool
+	 */
+	private function should_load_brands_styles() {
+		global $post;
+
+		// Should load on brand taxonomy archive pages.
+		if ( is_tax( 'product_brand' ) ) {
+			return true;
+		}
+
+		// Should load on single product pages that have brands assigned.
+		if ( is_singular( 'product' ) && has_term( '', 'product_brand' ) ) {
+			return true;
+		}
+
+		// Check if any brand shortcodes are present in the content.
+		if ( $post && ! empty( $post->post_content ) ) {
+			$brand_shortcodes = array(
+				'brand_products',
+				'product_brand',
+				'product_brand_list',
+				'product_brand_thumbnails',
+				'product_brand_thumbnails_description',
+			);
+
+			foreach ( $brand_shortcodes as $shortcode ) {
+				if ( has_shortcode( $post->post_content, $shortcode ) ) {
+					return true;
+				}
+			}
+		}
+
+		// Check if any brand widgets are active.
+		if ( is_active_widget( false, false, 'wc_brands_brand_description' ) ||
+			is_active_widget( false, false, 'woocommerce_brand_nav' ) ||
+			is_active_widget( false, false, 'wc_brands_brand_thumbnails' ) ) {
+			return true;
+		}
+
+		/**
+		 * Filter whether brands styles should be loaded.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $should_load Whether to load brands styles.
+		 */
+		return apply_filters( 'woocommerce_should_load_brands_styles', false );
 	}
 
 	/**

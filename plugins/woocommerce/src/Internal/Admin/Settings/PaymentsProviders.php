@@ -35,6 +35,7 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WCCore;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions as ExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WC_Payment_Gateway;
 use WC_Gateway_BACS;
@@ -79,6 +80,17 @@ class PaymentsProviders {
 	public const CATEGORY_BNPL             = 'bnpl';
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
+
+	/*
+	 * The provider link types.
+	 *
+	 * These are hints for the UI to determine if and how to display the link.
+	 */
+	public const LINK_TYPE_SUPPORT = 'support';
+	public const LINK_TYPE_DOCS    = 'documentation';
+	public const LINK_TYPE_ABOUT   = 'about';
+	public const LINK_TYPE_TERMS   = 'terms';
+	public const LINK_TYPE_PRICING = 'pricing';
 
 	/**
 	 * The map of gateway IDs to their respective provider classes.
@@ -195,14 +207,23 @@ class PaymentsProviders {
 	private ExtensionSuggestions $extension_suggestions;
 
 	/**
+	 * The LegacyProxy instance.
+	 *
+	 * @var LegacyProxy
+	 */
+	private LegacyProxy $proxy;
+
+	/**
 	 * Initialize the class instance.
 	 *
 	 * @param ExtensionSuggestions $payment_extension_suggestions The payment extension suggestions service.
+	 * @param LegacyProxy          $proxy                         The LegacyProxy instance.
 	 *
 	 * @internal
 	 */
-	final public function init( ExtensionSuggestions $payment_extension_suggestions ): void {
+	final public function init( ExtensionSuggestions $payment_extension_suggestions, LegacyProxy $proxy ): void {
 		$this->extension_suggestions = $payment_extension_suggestions;
+		$this->proxy                 = $proxy;
 	}
 
 	/**
@@ -1239,13 +1260,13 @@ class PaymentsProviders {
 				$gateway_details['image'] = $suggestion['image'];
 			}
 
-			if ( empty( $gateway_details['links'] ) ) {
+			if ( empty( $gateway_details['links'] ) && ! empty( $suggestion['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
 			}
-			if ( empty( $gateway_details['tags'] ) ) {
+			if ( empty( $gateway_details['tags'] ) && ! empty( $suggestion['tags'] ) ) {
 				$gateway_details['tags'] = $suggestion['tags'];
 			}
-			if ( empty( $gateway_details['plugin'] ) ) {
+			if ( empty( $gateway_details['plugin'] ) && ! empty( $suggestion['plugin'] ) ) {
 				$gateway_details['plugin'] = $suggestion['plugin'];
 			}
 			if ( empty( $gateway_details['_incentive'] ) && ! empty( $suggestion['_incentive'] ) ) {
@@ -1257,14 +1278,14 @@ class PaymentsProviders {
 		}
 
 		// Get the gateway's corresponding plugin details.
-		$plugin_data = PluginsHelper::get_plugin_data( $plugin_slug );
+		$plugin_data = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_data', $plugin_slug );
 		if ( ! empty( $plugin_data ) ) {
 			// If there are no links, try to get them from the plugin data.
 			if ( empty( $gateway_details['links'] ) ) {
 				if ( is_array( $plugin_data ) && ! empty( $plugin_data['PluginURI'] ) ) {
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => esc_url( $plugin_data['PluginURI'] ),
 						),
 					);
@@ -1274,7 +1295,7 @@ class PaymentsProviders {
 					// Fallback to constructing the WPORG plugin URI from the normalized plugin slug.
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => 'https://wordpress.org/plugins/' . $normalized_plugin_slug,
 						),
 					);
@@ -1345,12 +1366,12 @@ class PaymentsProviders {
 			// This way we handle cases where there are multiple variations installed and one is active.
 			$found = false;
 			foreach ( $plugin_slug_variations as $plugin_slug ) {
-				if ( PluginsHelper::is_plugin_active( $plugin_slug ) ) {
+				if ( $this->proxy->call_static( PluginsHelper::class, 'is_plugin_active', $plugin_slug ) ) {
 					$found                                    = true;
 					$extension_suggestion['plugin']['status'] = self::EXTENSION_ACTIVE;
 					// Make sure we put in the actual slug and file path that we found.
 					$extension_suggestion['plugin']['slug'] = $plugin_slug;
-					$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+					$extension_suggestion['plugin']['file'] = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_path_from_slug', $plugin_slug );
 					// Sanity check.
 					if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
 						$extension_suggestion['plugin']['file'] = '';
@@ -1363,11 +1384,11 @@ class PaymentsProviders {
 			}
 			if ( ! $found ) {
 				foreach ( $plugin_slug_variations as $plugin_slug ) {
-					if ( PluginsHelper::is_plugin_installed( $plugin_slug ) ) {
+					if ( $this->proxy->call_static( PluginsHelper::class, 'is_plugin_installed', $plugin_slug ) ) {
 						$extension_suggestion['plugin']['status'] = self::EXTENSION_INSTALLED;
 						// Make sure we put in the actual slug and file path that we found.
 						$extension_suggestion['plugin']['slug'] = $plugin_slug;
-						$extension_suggestion['plugin']['file'] = PluginsHelper::get_plugin_path_from_slug( $plugin_slug );
+						$extension_suggestion['plugin']['file'] = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_path_from_slug', $plugin_slug );
 						// Sanity check.
 						if ( ! is_string( $extension_suggestion['plugin']['file'] ) ) {
 							$extension_suggestion['plugin']['file'] = '';

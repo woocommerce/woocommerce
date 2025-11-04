@@ -16,7 +16,7 @@
 		"@types/wordpress__block-editor": "11.5.16",
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"@wordpress/env": "10.17.0",
+		"@wordpress/env": "10.32.0",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/scripts": "^19.2.4",
 		"eslint": "^8.55.0",

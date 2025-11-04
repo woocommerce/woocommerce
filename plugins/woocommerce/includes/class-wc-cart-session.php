@@ -86,6 +86,8 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
+
+		add_action( 'template_redirect', array( $this, 'clean_up_removed_cart_contents' ) );
 	}
 
 	/**
@@ -416,14 +418,14 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
-		if ( empty( $cart ) ) {
-			$this->remove_draft_order();
-		}
 		if ( ! $this->cart_has_shippable_products() ) {
 			$wc_session->set( 'shipping_method_counts', null );
 			$wc_session->set( 'previous_shipping_methods', null );
 			$wc_session->set( 'chosen_shipping_methods', null );
 			$this->remove_shipping_for_package_from_session();
+		}
+		if ( empty( $cart ) ) {
+			$wc_session->set( 'store_api_draft_order', null );
 		}
 
 		/**
@@ -660,31 +662,16 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Remove the draft order from the session and delete it.
-	 */
-	private function remove_draft_order() {
-		$wc_session = WC()->session;
-
-		$draft_order = $wc_session->get( 'store_api_draft_order' );
-		if ( ! $draft_order ) {
-			return;
-		}
-
-		$order = wc_get_order( $draft_order );
-		if ( $order ) {
-			$order->delete( true );
-		}
-
-		WC()->session->set( 'store_api_draft_order', null );
-	}
-
-	/**
 	 * Remove shipping data for all packages from session.
 	 *
 	 * @return void
 	 */
 	private function remove_shipping_for_package_from_session() {
 		$wc_session = WC()->session;
+
+		if ( ! is_a( $wc_session, 'WC_Session_Handler' ) ) {
+			return;
+		}
 
 		foreach ( array_keys( $wc_session->get_session_data() ) as $key ) {
 			if ( 0 === strpos( $key, 'shipping_for_package_' ) ) {
@@ -705,5 +692,26 @@ final class WC_Cart_Session {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Removes items from the removed cart contents on next user initiated request.
+	 *
+	 * @return bool True if expired items should be removed, false otherwise.
+	 */
+	public function clean_up_removed_cart_contents() {
+		// Limit to page requests initiated by the user.
+		$is_page = is_singular() || is_archive() || is_search();
+		if ( is_404() || ! $is_page ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['undo_item'] ) ) {
+			return;
+		}
+
+		WC()->session->set( 'removed_cart_contents', null );
+		$this->cart->set_removed_cart_contents( array() );
 	}
 }

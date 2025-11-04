@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: order metadata being deleted when order logs were deleted

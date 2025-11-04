@@ -79,6 +79,57 @@ class WC_Tests_Shipping_Zones extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: WC_Shipping_Zones::get_shipping_method loads enabled and method_order from database
+	 */
+	public function test_get_shipping_method_loads_enabled_and_order() {
+		$zone        = WC_Shipping_Zones::get_zone_by( 'zone_id', 1 );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Set enabled to false and order to 5 in database.
+		global $wpdb;
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+			array(
+				'is_enabled'   => 0,
+				'method_order' => 5,
+			),
+			array( 'instance_id' => $instance_id ),
+			array( '%d', '%d' ),
+			array( '%d' )
+		);
+
+		// Fetch the shipping method.
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		// Assert enabled is correctly loaded as 'no' from database.
+		$this->assertEquals( 'no', $shipping_method->enabled, 'Enabled property should be loaded from database' );
+
+		// Assert method_order is correctly loaded.
+		$this->assertEquals( 5, $shipping_method->method_order, 'Method order should be loaded from database' );
+
+		// Now set enabled to true and order to 3.
+		$wpdb->update(
+			$wpdb->prefix . 'woocommerce_shipping_zone_methods',
+			array(
+				'is_enabled'   => 1,
+				'method_order' => 3,
+			),
+			array( 'instance_id' => $instance_id ),
+			array( '%d', '%d' ),
+			array( '%d' )
+		);
+
+		// Fetch again.
+		$shipping_method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		// Assert enabled is correctly loaded as 'yes' from database.
+		$this->assertEquals( 'yes', $shipping_method->enabled, 'Enabled property should reflect database state' );
+
+		// Assert method_order is correctly loaded.
+		$this->assertEquals( 3, $shipping_method->method_order, 'Method order should reflect database state' );
+	}
+
+	/**
 	 * Test: WC_Shipping_Zones::delete_zone
 	 */
 	public function test_delete_zone() {

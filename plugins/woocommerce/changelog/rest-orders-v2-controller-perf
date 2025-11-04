@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+WC_REST_Orders_V2_Controller: Call get_product less often
