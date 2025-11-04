@@ -103,6 +103,7 @@ export function getFileChanges(
 			encoding: 'utf8',
 		} );
 	} catch ( error ) {
+		// eslint-disable-next-line no-console
 		console.error( 'GitHub CLI Error: ' + error.stderr );
 		return true;
 	}
