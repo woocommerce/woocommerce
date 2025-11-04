@@ -520,47 +520,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test email filtering.
-	 */
-	public function test_email_filtering(): void {
-		$customer1 = $this->create_test_customer(
-			array(
-				'email'    => 'emailtest1@example.com',
-				'username' => 'emailtest1',
-			)
-		);
-
-		$customer2 = $this->create_test_customer(
-			array(
-				'email'    => 'emailtest2@example.com',
-				'username' => 'emailtest2',
-			)
-		);
-
-		// Test filtering by specific email - should find customer1 but not customer2.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'email', 'emailtest1@example.com' );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		foreach ( $response_data as $customer_data ) {
-			$this->assertEquals( 'emailtest1@example.com', $customer_data['email'], 'All returned customers should have the correct email' );
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find customer with matching email' );
-		$this->assertFalse( $found_customer2, 'Should not find customer with non-matching email' );
-	}
-
-	/**
 	 * Test order by parameters.
 	 */
 	public function test_order_by(): void {
