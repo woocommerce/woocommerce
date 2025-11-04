@@ -1833,10 +1833,10 @@ class WC_Helper {
 	 */
 	public static function get_subscriptions() {
 		$cache_key = '_woocommerce_helper_subscriptions';
-		// $data      = get_transient( $cache_key );
-		// if ( false !== $data ) {
-		// 	return $data;
-		// }
+		$data      = get_transient( $cache_key );
+		if ( false !== $data ) {
+			return $data;
+		}
 
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
