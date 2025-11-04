@@ -14,8 +14,7 @@
 .wc-block-components-quantity-selector {
 	border: 1px solid $universal-translucent-border-color;
 	border-radius: $universal-border-radius;
-	// needed so that buttons fill the container.
-	box-sizing: content-box;
+	box-sizing: border-box;
 	display: flex;
 	margin: 0 0 0.25em 0;
 	position: relative;
