@@ -26,7 +26,7 @@ if [ -z "$NODE_ENV" ]; then
 fi
 pnpm --filter='@woocommerce/plugin-woocommerce' build || exit "$?"
 echo "Cleaning up PHP dependencies..."
-composer install --no-dev --quiet --optimize-autoloader || exit "$?"
+composer install --no-dev --quiet || exit "$?"
 echo "Run makepot..."
 pnpm --filter=@woocommerce/plugin-woocommerce makepot || exit "$?"
 echo "Syncing files..."
