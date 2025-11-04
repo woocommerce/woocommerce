@@ -156,7 +156,10 @@ export type AddToCartWithOptionsStore = {
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
 		productData: NormalizedProductData | NormalizedVariationData | null;
-		childProductData: NormalizedProductData | NormalizedVariationData | null;
+		childProductData:
+			| NormalizedProductData
+			| NormalizedVariationData
+			| null;
 		activeProduct: NormalizedProductData | NormalizedVariationData | null;
 		isGroupedProduct: boolean;
 		minQuantity: number;
@@ -217,9 +220,9 @@ const { actions, state } = store<
 
 				// For quantity the child product ID overrides the parent.
 				const { childProductId, currentProductId } =
-				getContext< ProductContext >(
-				  'woocommerce/product-context'
-				);
+					getContext< ProductContext >(
+						'woocommerce/product-context'
+					);
 
 				return quantity?.[ childProductId ?? currentProductId ] || 0;
 			},
@@ -242,7 +245,7 @@ const { actions, state } = store<
 				const { selectedAttributes } = getContext< Context >();
 
 				const { childProductId } = getContext< ProductContext >(
-				'woocommerce/product-context'
+					'woocommerce/product-context'
 				);
 
 				return getProductData( childProductId, selectedAttributes );

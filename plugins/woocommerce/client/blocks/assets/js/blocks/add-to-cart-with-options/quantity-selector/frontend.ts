@@ -8,7 +8,6 @@ import type { HTMLElementEvent } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
 
 export type Context = {
@@ -161,8 +160,12 @@ store< QuantitySelectorStore >(
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { activeProduct, isGroupedProduct, minQuantity, inputQuantity } =
-					addToCartWithOptionsStore.state;
+				const {
+					activeProduct,
+					isGroupedProduct,
+					minQuantity,
+					inputQuantity,
+				} = addToCartWithOptionsStore.state;
 
 				if ( ! activeProduct ) {
 					return;
@@ -193,9 +196,8 @@ store< QuantitySelectorStore >(
 					: event.target.valueAsNumber;
 
 				// Only dispatch change if value actually changed
-				const refForDispatch = newValue !== inputQuantity
-					? event.target
-					: null;
+				const refForDispatch =
+					newValue !== inputQuantity ? event.target : null;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					activeProduct.id,
