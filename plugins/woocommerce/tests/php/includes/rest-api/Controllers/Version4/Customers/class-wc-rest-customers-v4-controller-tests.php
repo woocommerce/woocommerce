@@ -654,6 +654,13 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Should have at least 2 customers on first page.
 		$this->assertGreaterThanOrEqual( 2, count( $response_data ) );
 
+		// Verify pagination headers.
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers, 'Response should include X-WP-Total header' );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers, 'Response should include X-WP-TotalPages header' );
+		$this->assertEquals( 5, $headers['X-WP-Total'], 'Total should be 5 customers' );
+		$this->assertEquals( 3, $headers['X-WP-TotalPages'], 'Should have 3 pages with 2 per page' );
+
 		// Test second page.
 		$request->set_param( 'page', 2 );
 		$response = $this->server->dispatch( $request );
@@ -663,6 +670,13 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Should have customers on second page.
 		$this->assertGreaterThanOrEqual( 0, count( $response_data ) );
+
+		// Verify pagination headers on second page.
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'X-WP-Total', $headers, 'Response should include X-WP-Total header on page 2' );
+		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers, 'Response should include X-WP-TotalPages header on page 2' );
+		$this->assertEquals( 5, $headers['X-WP-Total'], 'Total should be 5 customers' );
+		$this->assertEquals( 3, $headers['X-WP-TotalPages'], 'Should have 3 pages with 2 per page' );
 	}
 
 	/**
