@@ -7,7 +7,11 @@ use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\PaymentGateway;
 use Automattic\WooCommerce\Internal\Admin\Suggestions\PaymentsExtensionSuggestions;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
+use PHPUnit\Framework\MockObject\MockObject;
 use stdClass;
 use WC_Unit_Test_Case;
 
@@ -17,6 +21,11 @@ use WC_Unit_Test_Case;
  * @class PaymentGateway
  */
 class PaymentGatewayTest extends WC_Unit_Test_Case {
+
+	/**
+	 * @var MockableLegacyProxy|MockObject
+	 */
+	protected $mockable_proxy;
 
 	/**
 	 * @var PaymentGateway
@@ -36,7 +45,16 @@ class PaymentGatewayTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new PaymentGateway();
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
+
+		$this->sut = new PaymentGateway( $this->mockable_proxy );
 	}
 
 	/**
