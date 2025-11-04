@@ -12,6 +12,7 @@
 /playwright-report/
 /storybook/
 /tests/
+/test-results/
 /vendor/*/*/tests
 /packages/*/tests
 /packages/*/changelog
