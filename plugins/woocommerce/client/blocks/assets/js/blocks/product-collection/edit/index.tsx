@@ -21,11 +21,15 @@ import CollectionSelectionModal from './collection-selection-modal';
 import { useProductCollectionUIState } from '../utils';
 import ProductPicker from './ProductPicker';
 import { useTracksLocation } from '../tracks-utils';
+import { useRegisterEmailCollections } from '../hooks/use-register-email-collections';
 
 const Edit = ( props: ProductCollectionEditComponentProps ) => {
 	const { clientId, attributes, context } = props;
 	const location = useGetLocation( context, clientId );
 	const tracksLocation = useTracksLocation( context.templateSlug );
+
+	// Register email-only collections when in email editor
+	useRegisterEmailCollections();
 
 	const [ isSelectionModalOpen, setIsSelectionModalOpen ] = useState( false );
 	const hasInnerBlocks = useSelect(

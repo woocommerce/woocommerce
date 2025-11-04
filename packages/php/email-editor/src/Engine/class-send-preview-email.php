@@ -86,6 +86,9 @@ class Send_Preview_Email {
 		$subject  = $post->post_title;
 		$language = get_bloginfo( 'language' );
 
+		// Add filter to set preview context for block renderers.
+		add_filter( 'woocommerce_email_editor_rendering_email_context', array( $this, 'add_preview_context' ) );
+
 		$rendered_data = $this->renderer->render(
 			$post,
 			$subject,
@@ -93,9 +96,26 @@ class Send_Preview_Email {
 			$language
 		);
 
+		// Remove filter after rendering.
+		remove_filter( 'woocommerce_email_editor_rendering_email_context', array( $this, 'add_preview_context' ) );
+
 		$rendered_data = apply_filters( 'woocommerce_email_editor_send_preview_email_rendered_data', $rendered_data );
 
 		return $this->set_personalize_content( $rendered_data['html'] );
+	}
+
+	/**
+	 * Add preview context to email rendering.
+	 *
+	 * This filter callback adds the is_user_preview flag and current user information
+	 * to the rendering context, allowing block renderers to show appropriate preview content.
+	 *
+	 * @param array $email_context Email context data.
+	 * @return array Modified email context with preview flag.
+	 */
+	public function add_preview_context( $email_context ): array {
+		$email_context['is_user_preview'] = true;
+		return $email_context;
 	}
 
 	/**
