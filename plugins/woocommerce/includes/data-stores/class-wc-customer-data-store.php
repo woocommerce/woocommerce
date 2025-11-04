@@ -702,6 +702,22 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$customers[] = new \WC_Customer( $user->ID );
 		}
 
+		// Sort by include order if specified.
+		if ( 'include' === $orderby_key && ! empty( $args['include'] ) ) {
+			$include_ids = array_map( 'intval', (array) $args['include'] );
+			// Create lookup array for position.
+			$position_map = array_flip( $include_ids );
+			// Sort customers by their position in the include array.
+			usort(
+				$customers,
+				function ( $a, $b ) use ( $position_map ) {
+					$pos_a = $position_map[ $a->get_id() ] ?? PHP_INT_MAX;
+					$pos_b = $position_map[ $b->get_id() ] ?? PHP_INT_MAX;
+					return $pos_a <=> $pos_b;
+				}
+			);
+		}
+
 		return (object) array(
 			'customers'     => $customers,
 			'total'         => $wp_user_query->total_users,
