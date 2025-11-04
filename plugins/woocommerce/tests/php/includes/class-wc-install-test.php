@@ -365,7 +365,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Mock has_fulfillment_status_column to return false (column does not exist).
 		$supply_column_status = function () {
-			return false;
+			return 'no';
 		};
 
 		add_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
@@ -411,7 +411,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 		// Mock has_fulfillment_status_column to return true (column exists).
 		$supply_column_status = function () {
-			return true;
+			return 'yes';
 		};
 
 		add_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
