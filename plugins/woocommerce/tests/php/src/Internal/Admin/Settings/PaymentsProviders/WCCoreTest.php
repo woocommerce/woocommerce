@@ -33,6 +33,54 @@ class WCCoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for core gateway IDs.
+	 *
+	 * @return array<string, array<string, string>>
+	 */
+	public function provider_core_gateway_ids(): array {
+		return array(
+			'BACS'   => array( 'gateway_id' => WC_Gateway_BACS::ID ),
+			'Cheque' => array( 'gateway_id' => WC_Gateway_Cheque::ID ),
+			'COD'    => array( 'gateway_id' => WC_Gateway_COD::ID ),
+			'PayPal' => array( 'gateway_id' => WC_Gateway_Paypal::ID ),
+		);
+	}
+
+	/**
+	 * Test get_plugin_details returns empty file path to prevent deactivation.
+	 *
+	 * @dataProvider provider_core_gateway_ids
+	 *
+	 * @param string $gateway_id The gateway ID to test.
+	 */
+	public function test_get_plugin_details_prevents_deactivation( string $gateway_id ) {
+		// Arrange.
+		$fake_gateway = new FakePaymentGateway(
+			$gateway_id,
+			array(
+				'enabled'            => true,
+				'plugin_slug'        => 'woocommerce',
+				'plugin_file'        => 'woocommerce/woocommerce.php',
+				'method_title'       => 'Test Gateway',
+				'method_description' => 'Test gateway description.',
+			),
+		);
+
+		// Act.
+		$plugin_details = $this->sut->get_plugin_details( $fake_gateway );
+
+		// Assert - Core gateways should have empty file path to prevent deactivation.
+		$this->assertIsArray( $plugin_details );
+		$this->assertArrayHasKey( 'file', $plugin_details );
+		$this->assertSame( '', $plugin_details['file'], "Gateway $gateway_id should have empty file path for the plugin details." );
+
+		// Assert - Other expected keys should still be present.
+		$this->assertArrayHasKey( '_type', $plugin_details );
+		$this->assertArrayHasKey( 'slug', $plugin_details );
+		$this->assertArrayHasKey( 'status', $plugin_details );
+	}
+
+	/**
 	 * Test get_icon.
 	 */
 	public function test_get_icon() {

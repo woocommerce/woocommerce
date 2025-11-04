@@ -81,6 +81,17 @@ class PaymentsProviders {
 	public const CATEGORY_CRYPTO           = 'crypto';
 	public const CATEGORY_PSP              = 'psp';
 
+	/*
+	 * The provider link types.
+	 *
+	 * These are hints for the UI to determine if and how to display the link.
+	 */
+	public const LINK_TYPE_SUPPORT = 'support';
+	public const LINK_TYPE_DOCS    = 'documentation';
+	public const LINK_TYPE_ABOUT   = 'about';
+	public const LINK_TYPE_TERMS   = 'terms';
+	public const LINK_TYPE_PRICING = 'pricing';
+
 	/**
 	 * The map of gateway IDs to their respective provider classes.
 	 *
@@ -1249,13 +1260,13 @@ class PaymentsProviders {
 				$gateway_details['image'] = $suggestion['image'];
 			}
 
-			if ( empty( $gateway_details['links'] ) ) {
+			if ( empty( $gateway_details['links'] ) && ! empty( $suggestion['links'] ) ) {
 				$gateway_details['links'] = $suggestion['links'];
 			}
-			if ( empty( $gateway_details['tags'] ) ) {
+			if ( empty( $gateway_details['tags'] ) && ! empty( $suggestion['tags'] ) ) {
 				$gateway_details['tags'] = $suggestion['tags'];
 			}
-			if ( empty( $gateway_details['plugin'] ) ) {
+			if ( empty( $gateway_details['plugin'] ) && ! empty( $suggestion['plugin'] ) ) {
 				$gateway_details['plugin'] = $suggestion['plugin'];
 			}
 			if ( empty( $gateway_details['_incentive'] ) && ! empty( $suggestion['_incentive'] ) ) {
@@ -1274,7 +1285,7 @@ class PaymentsProviders {
 				if ( is_array( $plugin_data ) && ! empty( $plugin_data['PluginURI'] ) ) {
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => esc_url( $plugin_data['PluginURI'] ),
 						),
 					);
@@ -1284,7 +1295,7 @@ class PaymentsProviders {
 					// Fallback to constructing the WPORG plugin URI from the normalized plugin slug.
 					$gateway_details['links'] = array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => self::LINK_TYPE_ABOUT,
 							'url'   => 'https://wordpress.org/plugins/' . $normalized_plugin_slug,
 						),
 					);

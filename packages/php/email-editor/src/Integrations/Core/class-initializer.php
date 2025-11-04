@@ -25,6 +25,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Image;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Block;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\List_Item;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Media_Text;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Post_Content;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Quote;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Video;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Social_Link;
@@ -129,9 +130,10 @@ class Initializer {
 	/**
 	 * Configure block settings for email editor support and rendering.
 	 *
-	 * This method handles two types of blocks:
+	 * This method handles three types of blocks:
 	 * 1. Editor-available blocks: Set supports.email = true and render_email_callback
 	 * 2. Render-only blocks: Only set render_email_callback (not available in editor)
+	 * 3. Special blocks: Custom handling (e.g., core/post-content stateless renderer)
 	 *
 	 * @param array $settings Block settings.
 	 * @return array Modified block settings.
@@ -146,6 +148,14 @@ class Initializer {
 		// Set rendering callback for render-only blocks (without enabling in editor).
 		if ( in_array( $settings['name'], self::RENDER_ONLY_BLOCK_TYPES, true ) ) {
 			$settings['render_email_callback'] = array( $this, 'render_block' );
+		}
+
+		// Special handling for core/post-content to use stateless renderer.
+		// This prevents issues with WordPress's static $seen_ids array when rendering
+		// multiple emails in a single request (e.g., MailPoet batch processing).
+		if ( 'core/post-content' === $settings['name'] ) {
+			$post_content_renderer       = new Post_Content();
+			$settings['render_callback'] = array( $post_content_renderer, 'render_stateless' );
 		}
 
 		return $settings;
