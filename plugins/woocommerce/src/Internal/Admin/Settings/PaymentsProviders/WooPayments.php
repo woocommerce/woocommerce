@@ -281,7 +281,9 @@ class WooPayments extends PaymentGateway {
 			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
 
 			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
+
 				return $woopayments_mode->is_test();
 			}
 		}
@@ -304,7 +306,9 @@ class WooPayments extends PaymentGateway {
 			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
 
 			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_dev' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
+
 				return $woopayments_mode->is_dev();
 			}
 		}
@@ -390,7 +394,9 @@ class WooPayments extends PaymentGateway {
 			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
 
 			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
-			if ( $this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test_mode_onboarding' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+
 				return $woopayments_mode->is_test_mode_onboarding();
 			}
 		}
@@ -420,8 +426,8 @@ class WooPayments extends PaymentGateway {
 
 		// Default URL params to set, regardless if they exist.
 		$params = array(
-			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
-			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
+			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
+			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
 			'redirect_to_settings_page' => 'true',
 		);
 
@@ -576,6 +582,7 @@ class WooPayments extends PaymentGateway {
 			$woopayments_container = $this->proxy->call_function( '\wcpay_get_container' );
 			$account_service       = $woopayments_container->get( '\WC_Payments_Account' );
 			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
 				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
 
 				$account_status = $account_service->get_account_status_data();
@@ -604,6 +611,7 @@ class WooPayments extends PaymentGateway {
 			$woopayments_container = $this->proxy->call_function( '\wcpay_get_container' );
 			$account_service       = $woopayments_container->get( '\WC_Payments_Account' );
 			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
 				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
 
 				$account_status = $account_service->get_account_status_data();
