@@ -1450,9 +1450,9 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						return true;
 					}
 
-					// Other classes don't exist by default.
-					// Replace/reregister with specific logic in tests if needed.
-					return false;
+					// For other classes, delegate to PHP's native class_exists()
+					// so tests mirror runtime reality.
+					return \class_exists( $class_name );
 				},
 				'method_exists'       => function ( $object_or_class, $method_name ) {
 					if ( is_object( $object_or_class ) && $object_or_class === $this->mock_woopayments_mode ) {
@@ -1485,9 +1485,9 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 							}
 						}
 					}
-					// Other methods don't exist by default.
-					// Replace/reregister with specific logic in tests if needed.
-					return false;
+					// For other methods, delegate to PHP's native method_exists()
+					// so tests mirror runtime reality.
+					return \method_exists( $object_or_class, $method_name );
 				},
 				'is_callable'         => function () {
 					if ( func_num_args() > 0 ) {
@@ -1514,15 +1514,14 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 								return true;
 							}
-
-							// No other global functions or static methods are callable by default.
-							// Replace/reregister with specific logic in tests if needed.
-							return false;
 						}
+
+						// For other callables, delegate to PHP's native is_callable()
+						// so tests mirror runtime reality.
+						return \is_callable( $callable );
 					}
 
-					// Other functions or methods are not callable by default.
-					// Replace/reregister with specific logic in tests if needed.
+					// No arguments provided.
 					return false;
 				},
 				'wcpay_get_container' => function () {
