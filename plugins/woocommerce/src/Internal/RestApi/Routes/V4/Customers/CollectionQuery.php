@@ -171,7 +171,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'orderby'  => $query_args['orderby'] ?? 'user_registered',
 			'per_page' => $query_args['number'] ?? 10,
 			'search'   => $query_args['search'] ?? '',
-			'role'     => $request['role'] ?? 'customer',
+			'role'     => $query_args['role'] ?? 'customer',
 			'include'  => $query_args['include'] ?? array(),
 			'exclude'  => $query_args['exclude'] ?? array(),
 		);
