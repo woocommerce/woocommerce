@@ -261,9 +261,6 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 	protected function render_experimental_iapi_product_details_markup( $property ) {
 		$context = array( 'dataProperty' => $property );
 
-		// Variations have a `raw_attribute` property on attributes, but non-variations have `key` property.
-		$each_key = 'variation' === $property ? 'raw_attribute' : 'key';
-
 		// If the property is item_data, so not a variation, we need to skip the text directive.
 		$is_item_data = 'item_data' === $context['dataProperty'];
 
@@ -283,7 +280,7 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		>
 			<template
 				data-wp-each--item-data="state.cartItem.<?php echo esc_attr( $property ); ?>"
-				data-wp-each-key="context.itemData.<?php echo esc_attr( $each_key ); ?>"
+				data-wp-each-key="state.cartItemDataKey"
 			>
 				<?php echo $this->render_experimental_iapi_product_details_item_markup( 'li', $is_item_data ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			</template>
