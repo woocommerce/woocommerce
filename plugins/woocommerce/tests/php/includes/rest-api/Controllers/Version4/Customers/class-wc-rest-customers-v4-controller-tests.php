@@ -680,6 +680,64 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test edge case: invalid per_page values should fall back to default.
+	 */
+	public function test_invalid_per_page_values(): void {
+		// Create test customers.
+		for ( $i = 1; $i <= 12; $i++ ) {
+			$this->create_test_customer(
+				array(
+					'email'    => "perpage{$i}@example.com",
+					'username' => "perpage{$i}",
+				)
+			);
+		}
+
+		// Test with number = 0 should fall back to default (10).
+		// Use filter to inject invalid value into query args.
+		add_filter(
+			'woocommerce_customer_query_args',
+			function ( $query_args ) {
+				$query_args['number'] = 0;
+				return $query_args;
+			}
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return default per_page (10), not 0.
+		$this->assertEquals( 10, count( $response_data ), 'number=0 should fall back to default (10)' );
+
+		// Remove filter for next test.
+		remove_all_filters( 'woocommerce_customer_query_args' );
+
+		// Test with number = -5 should fall back to default (10).
+		add_filter(
+			'woocommerce_customer_query_args',
+			function ( $query_args ) {
+				$query_args['number'] = -5;
+				return $query_args;
+			}
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return default per_page (10), not 0.
+		$this->assertEquals( 10, count( $response_data ), 'number=-5 should fall back to default (10)' );
+
+		// Clean up filter.
+		remove_all_filters( 'woocommerce_customer_query_args' );
+	}
+
+	/**
 	 * Test edge case: invalid customer ID.
 	 */
 	public function test_invalid_customer_id(): void {
