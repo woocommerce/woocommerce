@@ -200,38 +200,30 @@ const { actions, state } = store<
 
 				return [];
 			},
-
 			get isFormValid(): boolean {
 				return state.validationErrors.length === 0;
 			},
-
 			get allowsAddingToCart(): boolean {
 				const { productData } = state;
 				return productData?.is_in_stock ?? true;
 			},
-
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
 				return context.quantity || {};
 			},
-
 			get inputQuantity() {
 				const { quantity } = getContext< Context >();
 
 				// For quantity the child product ID overrides the parent.
 				const { childProductId, currentProductId } =
-					getContext< ProductContext >(
-						'woocommerce/product-context'
-					);
+					productContextState;
 
 				return quantity?.[ childProductId ?? currentProductId ] || 0;
 			},
-
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
 			},
-
 			get productData() {
 				const { selectedAttributes } = getContext< Context >();
 
@@ -240,17 +232,15 @@ const { actions, state } = store<
 					selectedAttributes
 				);
 			},
-
 			get childProductData() {
 				const { selectedAttributes } = getContext< Context >();
-
-				const { childProductId } = getContext< ProductContext >(
-					'woocommerce/product-context'
-				);
+				const { childProductId } = productContextState;
+				if ( ! childProductId ) {
+					return null;
+				}
 
 				return getProductData( childProductId, selectedAttributes );
 			},
-
 			get activeProduct() {
 				const { productData, childProductData } = state;
 
@@ -260,11 +250,9 @@ const { actions, state } = store<
 
 				return productData;
 			},
-
-			get isGroupedProduct() {
+			get isGroupedProduct(): boolean {
 				return state.productData?.type === 'grouped';
 			},
-
 			get minQuantity() {
 				const { isGroupedProduct, activeProduct } = state;
 
@@ -274,6 +262,13 @@ const { actions, state } = store<
 				}
 
 				return activeProduct?.min ?? 1;
+			},
+			get quantityContext() {
+				const { currentProductId } = productContextState;
+				return {
+					currentProductId, // Which product's quantity to update
+					product: state.activeProduct, // Product data for min/max/step constraints
+				};
 			},
 		},
 		actions: {

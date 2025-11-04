@@ -100,20 +100,21 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-				const { activeProduct } = addToCartWithOptionsStore.state;
+				const { currentProductId, product } =
+					addToCartWithOptionsStore.state.quantityContext;
 
-				if ( ! activeProduct ) {
+				if ( ! product ) {
 					return;
 				}
 
-				const { id, max, min, step } = activeProduct;
+				const { max, min, step } = product;
 				const newValue = Math.max(
 					min,
 					Math.min( max, currentValue + step )
 				);
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					id,
+					currentProductId,
 					newValue,
 					inputElement
 				);
@@ -136,7 +137,8 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { id, min, step } = activeProduct;
+				const { productId } = getContext< Context >();
+				const { min, step } = activeProduct;
 				let newValue = currentValue - step;
 
 				// Enforce minimum
@@ -151,7 +153,7 @@ store< QuantitySelectorStore >(
 
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						id,
+						productId,
 						newValue,
 						inputElement
 					);
@@ -171,6 +173,7 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
+				const { productId } = getContext< Context >();
 				const isInvalidOrZero =
 					Number.isNaN( event.target.valueAsNumber ) ||
 					event.target.valueAsNumber === 0;
@@ -178,7 +181,7 @@ store< QuantitySelectorStore >(
 				// Grouped products: reset to 0 (empty) for invalid/zero inputs
 				if ( isInvalidOrZero && isGroupedProduct ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						activeProduct.id,
+						productId,
 						0,
 						event.target
 					);
@@ -200,7 +203,7 @@ store< QuantitySelectorStore >(
 					newValue !== inputQuantity ? event.target : null;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					activeProduct.id,
+					productId,
 					newValue,
 					refForDispatch
 				);
