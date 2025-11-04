@@ -1,6 +1,12 @@
 .wp-block-woocommerce-product-collection {
+	margin-bottom: $gap-large * 1.25;
+
 	.wc-block-components-product-stock-indicator {
 		text-align: center;
+	}
+
+	h2.wp-block-heading {
+		@include font-regular-locked;
 	}
 
 	&:has(.is-product-collection-layout-carousel) {
