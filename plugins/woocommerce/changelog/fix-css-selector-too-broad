@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Fixed CSS selector too broad for payment method block on checkout.

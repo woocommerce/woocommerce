@@ -573,7 +573,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'status', $offline_pms_group['plugin'], 'Provider (offline payment methods group) `plugin[status]` entry is missing' );
 		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $offline_pms_group['plugin']['status'] );
 
-		// Assert that the PayPal gateway is returned as enabled.
+		// Assert that the PayPal Standard gateway is returned as enabled.
 		$provider = $data['providers'][3];
 		$this->assertTrue( $provider['state']['enabled'] );
 		// Assert that the PayPal gateway has all the details.
@@ -587,9 +587,13 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsList( $provider['supports'], 'Provider (gateway) `supports` entry is not a list' );
 		$this->assertArrayHasKey( 'plugin', $provider, 'Provider (gateway) `plugin` entry is missing' );
 		$this->assertArrayHasKey( '_type', $provider['plugin'], 'Provider (gateway) `plugin[_type]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_TYPE_WPORG, $provider['plugin']['_type'], 'PayPal Standard gateway `plugin[_type]` entry is not `' . PaymentsProviders::EXTENSION_TYPE_WPORG . '`' );
 		$this->assertArrayHasKey( 'slug', $provider['plugin'], 'Provider (gateway) `plugin[slug]` entry is missing' );
+		$this->assertSame( 'woocommerce', $provider['plugin']['slug'] );
 		$this->assertArrayHasKey( 'file', $provider['plugin'], 'Provider (gateway) `plugin[file]` entry is missing' );
+		$this->assertSame( '', $provider['plugin']['file'] ); // Always empty since it's part of WooCommerce core and we don't want to allow deactivation.
 		$this->assertArrayHasKey( 'status', $provider['plugin'], 'Provider (gateway) `plugin[status]` entry is missing' );
+		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $provider['plugin']['status'], 'PayPal Standard gateway `plugin[status]` entry is not `' . PaymentsProviders::EXTENSION_ACTIVE . '`' );
 		$this->assertArrayHasKey( 'links', $provider, 'Provider (gateway) `links` entry is missing' );
 		$this->assertCount( 1, $provider['links'] );
 		$this->assertArrayHasKey( 'state', $provider, 'Provider (gateway) `state` entry is missing' );
@@ -630,7 +634,7 @@ class PaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'slug', $offline_pm['plugin'], 'Offline payment method `plugin[slug]` entry is missing' );
 		$this->assertSame( 'woocommerce', $offline_pm['plugin']['slug'] );
 		$this->assertArrayHasKey( 'file', $offline_pm['plugin'], 'Offline payment method `plugin[file]` entry is missing' );
-		$this->assertSame( 'woocommerce/woocommerce', $offline_pm['plugin']['file'] ); // Skips the .php extension.
+		$this->assertSame( '', $offline_pm['plugin']['file'] ); // Always empty since it's part of WooCommerce core and we don't want to allow deactivation.
 		$this->assertArrayHasKey( 'status', $offline_pm['plugin'], 'Offline payment method `plugin[status]` entry is missing' );
 		$this->assertSame( PaymentsProviders::EXTENSION_ACTIVE, $offline_pm['plugin']['status'] );
 		$this->assertArrayHasKey( 'management', $offline_pm, 'Offline payment method `management` entry is missing' );
