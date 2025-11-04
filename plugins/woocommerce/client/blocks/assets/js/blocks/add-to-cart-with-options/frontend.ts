@@ -10,7 +10,10 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-context';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
+import type {
+	ProductDataStore,
+	Context as ProductContext,
+} from '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -153,6 +156,10 @@ export type AddToCartWithOptionsStore = {
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
 		productData: NormalizedProductData | NormalizedVariationData | null;
+		childProductData: NormalizedProductData | NormalizedVariationData | null;
+		activeProduct: NormalizedProductData | NormalizedVariationData | null;
+		isGroupedProduct: boolean;
+		minQuantity: number;
 		inputQuantity: number;
 	};
 	actions: {
@@ -209,8 +216,9 @@ const { actions, state } = store<
 				const { quantity } = getContext< Context >();
 
 				// For quantity the child product ID overrides the parent.
-				const { childProductId, currentProductId } = getContext(
-					'woocommerce/product-context'
+				const { childProductId, currentProductId } =
+				getContext< ProductContext >(
+				  'woocommerce/product-context'
 				);
 
 				return quantity?.[ childProductId ?? currentProductId ] || 0;
@@ -233,11 +241,36 @@ const { actions, state } = store<
 			get childProductData() {
 				const { selectedAttributes } = getContext< Context >();
 
-				const { childProductId } = getContext(
-					'woocommerce/product-context'
+				const { childProductId } = getContext< ProductContext >(
+				'woocommerce/product-context'
 				);
 
 				return getProductData( childProductId, selectedAttributes );
+			},
+
+			get activeProduct() {
+				const { productData, childProductData } = state;
+
+				if ( productData?.type === 'grouped' && childProductData ) {
+					return childProductData;
+				}
+
+				return productData;
+			},
+
+			get isGroupedProduct() {
+				return state.productData?.type === 'grouped';
+			},
+
+			get minQuantity() {
+				const { isGroupedProduct, activeProduct } = state;
+
+				// Grouped products can go to 0
+				if ( isGroupedProduct ) {
+					return 0;
+				}
+
+				return activeProduct?.min ?? 1;
 			},
 		},
 		actions: {

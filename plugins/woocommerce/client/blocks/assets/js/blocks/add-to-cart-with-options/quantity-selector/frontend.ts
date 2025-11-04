@@ -63,37 +63,29 @@ store< QuantitySelectorStore >(
 				);
 			},
 			get allowsDecrease() {
-				// Note: in grouped products, `productData` will be the parent product.
-				// We handle grouped products decrease differently because we
-				// allow setting the quantity to 0.
-				const { productData, inputQuantity } =
+				const { activeProduct, inputQuantity, minQuantity } =
 					addToCartWithOptionsStore.state;
 
-				if ( ! productData ) {
+				if ( ! activeProduct ) {
 					return true;
 				}
 
-				if ( productData.type === 'grouped' ) {
-					return inputQuantity > 0;
-				}
-
-				const { min, step } = productData;
-
+				const { step } = activeProduct;
 				const currentQuantity = inputQuantity || 0;
 
-				return currentQuantity - step >= min;
+				return currentQuantity - step >= minQuantity;
 			},
 			get allowsIncrease() {
-				const { productData, inputQuantity } =
+				const { activeProduct, inputQuantity } =
 					addToCartWithOptionsStore.state;
 
-				if ( ! productData ) {
+				if ( ! activeProduct ) {
 					return true;
 				}
 
-				const { max, step } = productData;
-
+				const { max, step } = activeProduct;
 				const currentQuantity = inputQuantity || 0;
+
 				return currentQuantity + step <= max;
 			},
 		},
@@ -109,28 +101,23 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
+				const { activeProduct } = addToCartWithOptionsStore.state;
 
-				const { productData: parentProductData, childProductData } =
-					addToCartWithOptionsStore.state;
-
-				const productObject =
-					parentProductData?.type === 'grouped'
-						? childProductData
-						: parentProductData;
-
-				let newValue = currentValue + 1;
-
-				if ( productObject ) {
-					const { max, min, step } = productObject;
-					newValue = currentValue + step;
-					newValue = Math.max( min, Math.min( max, newValue ) );
-
-					addToCartWithOptionsStore.actions.setQuantity(
-						productObject.id,
-						newValue,
-						inputElement
-					);
+				if ( ! activeProduct ) {
+					return;
 				}
+
+				const { id, max, min, step } = activeProduct;
+				const newValue = Math.max(
+					min,
+					Math.min( max, currentValue + step )
+				);
+
+				addToCartWithOptionsStore.actions.setQuantity(
+					id,
+					newValue,
+					inputElement
+				);
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -143,102 +130,75 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-
-				const { productData: parentProductData, childProductData } =
+				const { activeProduct, isGroupedProduct, minQuantity } =
 					addToCartWithOptionsStore.state;
 
-				const productObject =
-					parentProductData?.type === 'grouped'
-						? childProductData
-						: parentProductData;
+				if ( ! activeProduct ) {
+					return;
+				}
 
-				let newValue = currentValue - 1;
+				const { id, min, step } = activeProduct;
+				let newValue = currentValue - step;
 
-				if ( productObject ) {
-					const { min, step } = productObject;
-					newValue = currentValue - step;
-
-					if ( newValue < min ) {
-						// In grouped product children, we allow decreasing the value
-						// down to 0, even if the minimum value is greater than 0.
-						if ( parentProductData?.type === 'grouped' ) {
-							if ( currentValue > min ) {
-								newValue = min;
-							} else {
-								newValue = 0;
-							}
-						} else {
-							newValue = min;
-						}
+				// Enforce minimum
+				if ( newValue < minQuantity ) {
+					// Grouped products: allow stepping down to min, then to 0
+					if ( isGroupedProduct ) {
+						newValue = currentValue > min ? min : 0;
+					} else {
+						newValue = minQuantity;
 					}
 				}
 
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productObject.id,
+						id,
 						newValue,
 						inputElement
 					);
 				}
 			},
-			// We need to listen to blur events instead of change events because
-			// the change event isn't triggered in invalid numbers (ie: writing
-			// letters) if the current value is already invalid or an empty string.
 			handleQuantityBlur: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
-				const { productData: parentProductData, childProductData } =
+				const { activeProduct, isGroupedProduct, minQuantity, inputQuantity } =
 					addToCartWithOptionsStore.state;
-				let min = 1;
 
-				if ( ! parentProductData ) {
+				if ( ! activeProduct ) {
 					return;
 				}
 
-				// In grouped products, we reset invalid inputs to ''.
-				if (
-					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
-					parentProductData.type === 'grouped'
-				) {
+				const isInvalidOrZero =
+					Number.isNaN( event.target.valueAsNumber ) ||
+					event.target.valueAsNumber === 0;
+
+				// Grouped products: reset to 0 (empty) for invalid/zero inputs
+				if ( isInvalidOrZero && isGroupedProduct ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						childProductData.id,
+						activeProduct.id,
 						0,
 						event.target
 					);
 
-					// This is an edge case where displayed value ('') doesn't represent internal state (0).
+					// Keep display as empty string for NaN
 					if ( Number.isNaN( event.target.valueAsNumber ) ) {
 						event.target.value = '';
 					}
 					return;
 				}
 
-				const currentProduct = childProductData ?? parentProductData;
+				// Other products: reset to minimum for invalid/zero inputs
+				const newValue = isInvalidOrZero
+					? minQuantity
+					: event.target.valueAsNumber;
 
-				if ( ! currentProduct ) {
-					return;
-				}
-
-				min = currentProduct.min;
-
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
-				const newValue =
-					Number.isFinite( event.target.valueAsNumber ) &&
-					event.target.valueAsNumber > 0
-						? event.target.valueAsNumber
-						: min;
-
-				// We must reset the quantity to force a value update, but if it's the same as the current value,
-				// we don't need to dispatch a change event.
-				const refForDispatch =
-					newValue !== addToCartWithOptionsStore.state.inputQuantity
-						? event.target
-						: null;
+				// Only dispatch change if value actually changed
+				const refForDispatch = newValue !== inputQuantity
+					? event.target
+					: null;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					currentProduct.id,
+					activeProduct.id,
 					newValue,
 					refForDispatch
 				);
@@ -254,7 +214,8 @@ store< QuantitySelectorStore >(
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					element.ref.checked ? 1 : 0
+					element.ref.checked ? 1 : 0,
+					null
 				);
 			},
 		},

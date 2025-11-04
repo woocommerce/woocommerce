@@ -5,6 +5,7 @@ import { getContext, store } from '@wordpress/interactivity';
 
 type ProductRef = {
 	currentProductId: number;
+	childProductId?: number;
 };
 
 export type Context = ProductRef;
