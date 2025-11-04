@@ -10,10 +10,7 @@ import type {
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-context';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type {
-	ProductDataStore,
-	Context as ProductContext,
-} from '@woocommerce/stores/woocommerce/product-context';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-context';
 
 /**
  * Internal dependencies
@@ -233,11 +230,11 @@ const { actions, state } = store<
 				);
 			},
 			get childProductData() {
-				const { selectedAttributes } = getContext< Context >();
 				const { childProductId } = productContextState;
 				if ( ! childProductId ) {
 					return null;
 				}
+				const { selectedAttributes } = getContext< Context >();
 
 				return getProductData( childProductId, selectedAttributes );
 			},
