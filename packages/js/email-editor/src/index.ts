@@ -69,7 +69,7 @@ export {
 	 * Optionally includes recent email posts.
 	 *
 	 * @param {string}  customEmailContent - Optional custom email content for previews. Pass 'swap' to exclude recent posts
-	 * @param {boolean} includeRecentPosts - Whether to include recent email posts (default: true)
+	 * @param {boolean} includeRecentPosts - Whether to include recent email posts (default: true). Recent posts are only included when this is true AND customEmailContent is not 'swap'
 	 * @return [TemplatePreview[], TemplatePreview[], boolean] Tuple of template previews, recent post previews, and whether recent posts exist
 	 *
 	 * @example
