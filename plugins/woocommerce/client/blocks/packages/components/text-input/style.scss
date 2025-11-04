@@ -13,7 +13,7 @@
 	label {
 		@include reset-color();
 		@include reset-typography();
-		@include font-button-locked;
+		@include font-regular-locked;
 		position: absolute;
 		transform: translateY(-50%);
 		left: $gap-smaller * 1.25;
@@ -101,7 +101,7 @@
 		padding: $gap-large $gap-smaller + 1px $gap-smaller;
 
 		&:focus {
-			padding-top: $gap-large + 0.5px;
+			padding-top: $gap-large;
 			padding-left: $gap-smaller + 0.5px;
 		}
 	}

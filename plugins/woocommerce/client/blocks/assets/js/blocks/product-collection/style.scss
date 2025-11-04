@@ -6,7 +6,7 @@
 	}
 
 	h2.wp-block-heading {
-		@include font-button-locked;
+		@include font-regular-locked;
 	}
 
 	&:has(.is-product-collection-layout-carousel) {

@@ -19,23 +19,18 @@ $fontSizes: (
 }
 
 @mixin font-large-locked {
-	font-size: 22px;
+	font-size: var(--wp--preset--font-size--medium, 22px);
 	line-height: 27px;
 }
 
 @mixin font-regular-locked {
-	font-size: 14px;
+	font-size: var(--wp--preset--font-size--small, 14px);
 	line-height: 20px;
 }
 
 @mixin font-small-locked {
 	font-size: 13px;
 	line-height: 16px;
-}
-
-@mixin font-button-locked {
-	font-size: 16px;
-	line-height: 22px;
 }
 
 // We're treating mobile inputs as a special case, increasing the font-size to

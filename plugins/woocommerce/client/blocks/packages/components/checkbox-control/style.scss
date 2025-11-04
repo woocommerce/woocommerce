@@ -15,7 +15,7 @@
 	}
 
 	label {
-		@include font-button-locked;
+		font-size: var(--wp--preset--font-size--small, 14px);
 		line-height: $gap * 1.25;
 		align-items: flex-start;
 		display: inline-flex;

@@ -45,7 +45,7 @@ table.wc-block-cart-items {
 			margin: 0;
 		}
 		.wc-block-cart-item__prices {
-			@include font-button-locked;
+			@include font-regular-locked;
 		}
 
 		.wc-block-cart-item__quantity {
@@ -66,7 +66,7 @@ table.wc-block-cart-items {
 			}
 		}
 		.wc-block-components-product-name {
-			@include font-button-locked;
+			@include font-regular-locked;
 			display: block;
 			max-width: max-content;
 			line-height: 1.4;
@@ -75,7 +75,7 @@ table.wc-block-cart-items {
 			}
 		}
 		.wc-block-cart-item__total {
-			@include font-button-locked;
+			@include font-regular-locked;
 			text-align: right;
 			line-height: 1.8;
 		}
