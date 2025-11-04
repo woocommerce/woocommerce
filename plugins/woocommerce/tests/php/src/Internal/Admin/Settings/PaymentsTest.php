@@ -289,7 +289,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => null,
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url1',
 						),
 					),
@@ -310,7 +310,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => 'short description 2',
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url2',
 						),
 					),
@@ -333,7 +333,7 @@ class PaymentsTest extends WC_Unit_Test_Case {
 					'short_description' => 'short description 5',
 					'links'             => array(
 						array(
-							'_type' => ExtensionSuggestions::LINK_TYPE_ABOUT,
+							'_type' => PaymentsProviders::LINK_TYPE_ABOUT,
 							'url'   => 'url5',
 						),
 					),

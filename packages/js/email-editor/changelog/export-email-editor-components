@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Export the personalization tags RichTextWithButton component and other email editor methods.

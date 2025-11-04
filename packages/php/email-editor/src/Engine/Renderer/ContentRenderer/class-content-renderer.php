@@ -169,7 +169,29 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		$context = new Rendering_Context( $this->theme_controller->get_theme() );
+		/**
+		 * Filter the email-specific context data passed to block renderers.
+		 *
+		 * This allows email sending systems to provide context data such as user ID,
+		 * email address, order information, etc., that can be used by blocks during rendering.
+		 *
+		 * Blocks that need cart product information can derive it from the user_id or recipient_email
+		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $email_context {
+		 *     Email-specific context data.
+		 *
+		 *     @type int    $user_id         The ID of the user receiving the email.
+		 *     @type string $recipient_email The recipient's email address.
+		 *     @type int    $order_id        The order ID (for order-related emails).
+		 *     @type string $email_type      The type of email being rendered.
+		 * }
+		 */
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
+
+		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
 		try {
@@ -208,7 +230,7 @@ class Content_Renderer {
 		$this->backup_template_content = $_wp_current_template_content;
 		$this->backup_template_id      = $_wp_current_template_id;
 		$this->backup_query            = $wp_query;
-		$this->backup_post             = $email_post;
+		$this->backup_post             = $post;
 
 		$_wp_current_template_id      = $template->id;
 		$_wp_current_template_content = $template->content;

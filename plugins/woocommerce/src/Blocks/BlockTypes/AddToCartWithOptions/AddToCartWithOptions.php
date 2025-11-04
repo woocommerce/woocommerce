@@ -145,7 +145,8 @@ class AddToCartWithOptions extends AbstractBlock {
 			return '';
 		}
 
-		$product_type = $product->get_type();
+		// For variations, we display the simple product form.
+		$product_type = ProductType::VARIATION === $product->get_type() ? ProductType::SIMPLE : $product->get_type();
 
 		$slug = $product_type . '-product-add-to-cart-with-options';
 
@@ -288,9 +289,21 @@ class AddToCartWithOptions extends AbstractBlock {
 						),
 					)
 				);
-			}
+			} elseif ( $product->is_type( ProductType::VARIATION ) ) {
+				$variation_attributes = $product->get_variation_attributes();
+				$formatted_attributes = array_map(
+					function ( $key, $value ) {
+						return [
+							'attribute' => $key,
+							'value'     => $value,
+						];
+					},
+					array_keys( $variation_attributes ),
+					$variation_attributes
+				);
 
-			if ( $product->is_type( ProductType::GROUPED ) ) {
+				$context['selectedAttributes'] = $formatted_attributes;
+			} elseif ( $product->is_type( ProductType::GROUPED ) ) {
 				// Add context for purchasable child products.
 				$children_product_data = array();
 				foreach ( $product->get_children() as $child_product_id ) {
@@ -608,7 +621,7 @@ class AddToCartWithOptions extends AbstractBlock {
 				 *
 				 * @since 9.9.0
 				 */
-				do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
+				do_action( 'woocommerce_' . $product_type . '_add_to_cart' );
 				add_action( 'woocommerce_' . $product_type . '_add_to_cart', $add_to_cart_fn, 30 );
 			}
 
@@ -625,7 +638,7 @@ class AddToCartWithOptions extends AbstractBlock {
 			 *
 			 * @since 9.7.0
 			 */
-			do_action( 'woocommerce_' . $product->get_type() . '_add_to_cart' );
+			do_action( 'woocommerce_' . $product_type . '_add_to_cart' );
 
 			$wrapper_attributes = array(
 				'class' => $classes,
