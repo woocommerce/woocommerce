@@ -7,6 +7,9 @@ use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
 use WC_REST_Unit_Test_Case;
+use WC_Helper_Order;
+use WC_Order;
+use WP_REST_Request;
 
 /**
  * Fulfillments Controller test class
