@@ -21,7 +21,7 @@
 /packages/email-editor/tasks
 /e2e/
 babel.config.js
-composer.*
+# Do not exclude composer.* files. They will be cleaned up separately.
 contributors.html
 docker-compose.yaml
 Dockerfile
