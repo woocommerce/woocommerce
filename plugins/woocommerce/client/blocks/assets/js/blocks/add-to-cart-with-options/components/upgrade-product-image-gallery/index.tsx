@@ -35,7 +35,7 @@ export const UpgradeProductImageGallery = () => {
 	}
 
 	const notice = __(
-		'This template contains the classic Product Image Gallery block which is not compatible with the Add to Cart + Options block. Switch to the new Product Gallery block for a better experience.',
+		'This template contains the classic Product Image Gallery block which is not compatible with the Add to Cart + Options block. Switch to the new Product Gallery block for a better experience. You can always switch back.',
 		'woocommerce'
 	);
 
