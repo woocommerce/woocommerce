@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\API\Reports\StatsDataStoreTrait;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Order;
 
 /**
@@ -557,7 +558,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		);
 
 		$order_fulfillment_status = '';
-		if ( true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
+		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
 			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
 			$data['fulfillment_status'] = ( 'no_fulfillments' !== $order_fulfillment_status ) ? $order_fulfillment_status : null;
 			$format[]                   = '%s';
@@ -705,6 +706,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return true;
 		}
 
+		// Update the option to indicate that the column does not exist.
+		update_option( self::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, 'no', false );
 		return false;
 	}
 

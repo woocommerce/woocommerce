@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
@@ -1243,7 +1244,10 @@ class WC_Install {
 	private static function get_order_stats_table_schema( $collate ) {
 		global $wpdb;
 
-		$is_new_install = self::is_new_install();
+		$should_have_fulfillment_column = self::is_new_install();
+		if ( false === $should_have_fulfillment_column ) {
+			$should_have_fulfillment_column = OrdersStatsDataStore::has_fulfillment_status_column();
+		}
 
 		return "CREATE TABLE {$wpdb->prefix}wc_order_stats (
 	order_id bigint(20) unsigned NOT NULL,
@@ -1260,13 +1264,13 @@ class WC_Install {
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
 	customer_id bigint(20) unsigned NOT NULL" .
-		( $is_new_install ? ',
+		( $should_have_fulfillment_column ? ',
 	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
 	KEY date_created (date_created),
 	KEY customer_id (customer_id),
 	KEY status (status)' .
-		( $is_new_install ? ',
+		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
 	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
 ) $collate;";
