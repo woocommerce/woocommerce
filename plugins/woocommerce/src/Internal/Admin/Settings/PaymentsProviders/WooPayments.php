@@ -277,10 +277,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', '\WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
 			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test' ) &&
 				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
 
@@ -302,10 +302,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', '\WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
 			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_dev' ) &&
 				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
 
@@ -390,10 +390,10 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( $this->proxy->call_function( 'class_exists', '\WC_Payments' ) &&
-			$this->proxy->call_function( 'is_callable', '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = $this->proxy->call_static( '\WC_Payments', 'mode' );
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
 			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test_mode_onboarding' ) &&
 				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
 
@@ -416,10 +416,10 @@ class WooPayments extends PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( $this->proxy->call_function( 'class_exists', '\WC_Payments_Account' ) &&
-			$this->proxy->call_function( 'is_callable', '\WC_Payments_Account::get_connect_url' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments_Account::get_connect_url' ) ) {
 
-			$connect_url = $this->proxy->call_static( '\WC_Payments_Account', 'get_connect_url' );
+			$connect_url = $this->proxy->call_static( 'WC_Payments_Account', 'get_connect_url' );
 		} else {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
@@ -576,11 +576,11 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a test account, false otherwise.
 	 */
 	private function has_test_account(): bool {
-		if ( $this->proxy->call_function( 'function_exists', '\wcpay_get_container' ) &&
-			$this->proxy->call_function( 'class_exists', '\WC_Payments_Account' ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
 
-			$woopayments_container = $this->proxy->call_function( '\wcpay_get_container' );
-			$account_service       = $woopayments_container->get( '\WC_Payments_Account' );
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
 			if ( ! empty( $account_service ) &&
 				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
 				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
@@ -605,11 +605,11 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a sandbox account, false otherwise.
 	 */
 	private function has_sandbox_account(): bool {
-		if ( $this->proxy->call_function( 'function_exists', '\wcpay_get_container' ) &&
-			$this->proxy->call_function( 'class_exists', '\WC_Payments_Account' ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
 
-			$woopayments_container = $this->proxy->call_function( '\wcpay_get_container' );
-			$account_service       = $woopayments_container->get( '\WC_Payments_Account' );
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
 			if ( ! empty( $account_service ) &&
 				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
 				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
@@ -632,10 +632,10 @@ class WooPayments extends PaymentGateway {
 	 */
 	private function get_supported_country_codes(): ?array {
 		try {
-			if ( $this->proxy->call_function( 'class_exists', '\WC_Payments_Utils' ) &&
-				$this->proxy->call_function( 'is_callable', '\WC_Payments_Utils::supported_countries' ) ) {
+			if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Utils' ) &&
+				$this->proxy->call_function( 'is_callable', 'WC_Payments_Utils::supported_countries' ) ) {
 
-				$supported_country_codes = $this->proxy->call_static( '\WC_Payments_Utils', 'supported_countries' );
+				$supported_country_codes = $this->proxy->call_static( 'WC_Payments_Utils', 'supported_countries' );
 				if ( is_array( $supported_country_codes ) ) {
 					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
 				}
