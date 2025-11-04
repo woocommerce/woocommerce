@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -274,5 +275,43 @@ class WC_Customer_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$actual_spent = $sut->get_total_spent( $customer_1 );
 
 		$this->assertEquals( '60.00', $actual_spent );
+	}
+
+	/**
+	 * @testdox query_customers with orderby=include returns customers in the order specified by the include array.
+	 */
+	public function test_query_customers_orderby_include() {
+		// Create test customers.
+		$customer1 = CustomerHelper::create_customer( 'user1', 'pass1', 'user1@example.com' );
+		$customer2 = CustomerHelper::create_customer( 'user2', 'pass2', 'user2@example.com' );
+		$customer3 = CustomerHelper::create_customer( 'user3', 'pass3', 'user3@example.com' );
+
+		$sut = new WC_Customer_Data_Store();
+
+		// Test ordering by include array: 3, 1, 2.
+		$args   = array(
+			'orderby' => 'include',
+			'order'   => 'asc',
+			'include' => array( $customer3->get_id(), $customer1->get_id(), $customer2->get_id() ),
+		);
+		$result = $sut->query_customers( $args );
+
+		$this->assertCount( 3, $result->customers, 'Should return 3 customers' );
+		$this->assertEquals( $customer3->get_id(), $result->customers[0]->get_id(), 'First customer should be customer3' );
+		$this->assertEquals( $customer1->get_id(), $result->customers[1]->get_id(), 'Second customer should be customer1' );
+		$this->assertEquals( $customer2->get_id(), $result->customers[2]->get_id(), 'Third customer should be customer2' );
+
+		// Test ordering by include array with order=desc should reverse it.
+		$args   = array(
+			'orderby' => 'include',
+			'order'   => 'desc',
+			'include' => array( $customer1->get_id(), $customer2->get_id(), $customer3->get_id() ),
+		);
+		$result = $sut->query_customers( $args );
+
+		$this->assertCount( 3, $result->customers, 'Should return 3 customers' );
+		$this->assertEquals( $customer3->get_id(), $result->customers[0]->get_id(), 'First customer should be customer3 (reversed)' );
+		$this->assertEquals( $customer2->get_id(), $result->customers[1]->get_id(), 'Second customer should be customer2 (reversed)' );
+		$this->assertEquals( $customer1->get_id(), $result->customers[2]->get_id(), 'Third customer should be customer1 (reversed)' );
 	}
 }
