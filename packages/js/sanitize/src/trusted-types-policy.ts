@@ -1,62 +1,56 @@
 /**
  * External dependencies
  */
-import type DOMPurify from 'dompurify';
+import type { TrustedTypePolicy } from 'trusted-types';
 
 /**
- * Extract the TrustedTypesPolicy type from DOMPurify's Config.
- * This ensures our policy type matches exactly what DOMPurify expects.
+ * Internal dependencies
  */
-export type TrustedTypesPolicy = NonNullable<
-	DOMPurify.Config[ 'TRUSTED_TYPES_POLICY' ]
+import { sanitizeHTML } from './sanitize';
+
+/**
+ * The type for our trusted types policy.
+ */
+export type WooCommerceSanitizePolicyType = Pick<
+	TrustedTypePolicy,
+	'name' | 'createHTML'
 >;
-
-// Extend Window interface to include trustedTypes
-declare global {
-	interface Window {
-		trustedTypes?: {
-			createPolicy: (
-				name: string,
-				rules: {
-					createHTML?: ( input: string ) => string;
-					createScript?: ( input: string ) => string;
-					createScriptURL?: ( input: string ) => string;
-				}
-			) => TrustedTypesPolicy;
-			defaultPolicy?: TrustedTypesPolicy;
-		};
-	}
-}
-
-/**
- * The name of the trusted types policy.
- */
-export const TRUSTED_POLICY_NAME = 'woocommerce-sanitize';
 
 /**
  * Cached policy instance to ensure it's only created once.
  */
-let policyInstance: TrustedTypesPolicy | null | undefined;
+let policyInstance: WooCommerceSanitizePolicyType | null | undefined;
 
 /**
  * Get or create a trusted types policy for DOMPurify.
  *
- * @return TrustedTypesPolicy object or null if not supported.
+ * @return TrustedTypePolicy object or null if not supported.
  */
-export function getTrustedTypesPolicy(): TrustedTypesPolicy | null {
+export function getTrustedTypesPolicy(): WooCommerceSanitizePolicyType | null {
 	if ( policyInstance !== undefined ) {
 		return policyInstance;
 	}
 
-	if ( ! window || ! window.trustedTypes ) {
+	if ( typeof window === 'undefined' || ! window.trustedTypes ) {
 		policyInstance = null;
 		return null;
 	}
 
-	policyInstance = window.trustedTypes.createPolicy( TRUSTED_POLICY_NAME, {
-		createHTML: ( string: string ) => string,
-		createScriptURL: ( url ) => url,
-	} );
+	try {
+		policyInstance = window.trustedTypes.createPolicy(
+			'woocommerce-sanitize',
+			{
+				createHTML: ( input: string ): string => sanitizeHTML( input ),
+			}
+		);
+	} catch ( error ) {
+		policyInstance = null;
+		// eslint-disable-next-line no-console
+		console.warn(
+			'Failed to create "woocommerce-sanitize" trusted type policy:',
+			error
+		);
+	}
 
 	return policyInstance;
 }

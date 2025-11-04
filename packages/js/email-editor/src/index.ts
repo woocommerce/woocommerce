@@ -76,4 +76,175 @@ export type {
 	EmailEditorUrls,
 } from './store/types';
 
+/**
+ * A modal component for sending test emails from the email editor.
+ *
+ * This component provides a user interface for sending preview emails to test
+ * email templates before they are used in production. It includes email validation,
+ * sending status feedback, error handling, and success confirmation.
+ *
+ * The component is typically used within the email editor's preview functionality
+ * and integrates with the WordPress editor's preview system.
+ *
+ * @example
+ * ```jsx
+ * import { SendPreviewEmail } from '@woocommerce/email-editor';
+ *
+ * // The component manages its own modal state through the email editor store
+ * <SendPreviewEmail />
+ * ```
+ *
+ * Features:
+ * - Email address validation
+ * - Real-time sending status updates
+ * - Error message display with retry capability
+ * - Success confirmation with visual feedback
+ * - Keyboard accessibility (Enter to send)
+ * - Event tracking for analytics
+ *
+ * @since 1.0.0
+ */
 export { SendPreviewEmail } from './components/preview';
+
+/**
+ * A rich text input component with personalization tags support.
+ *
+ * This component provides a WordPress RichText editor enhanced with a button
+ * that allows users to insert personalization tags (like customer name, order details, etc.)
+ * into email content. The component handles tag insertion, validation, and proper
+ * HTML comment formatting for personalization tags.
+ *
+ * @example
+ * ```jsx
+ * import { RichTextWithButton } from '@woocommerce/email-editor';
+ *
+ * <RichTextWithButton
+ *   label="Email Subject"
+ *   placeholder="Enter email subject..."
+ *   attributeName="subject"
+ *   attributeValue={currentSubject}
+ *   updateProperty={(name, value) => setEmailProperty(name, value)}
+ *   help="Use personalization tags to customize the subject for each customer"
+ * />
+ * ```
+ *
+ * @param props                - Component properties
+ * @param props.label          - The label text displayed above the input field
+ * @param props.labelSuffix    - Optional additional content to display after the label
+ * @param props.help           - Optional help text displayed below the input field
+ * @param props.placeholder    - Placeholder text shown when the input is empty
+ * @param props.attributeName  - The name of the attribute being edited (used for tracking and updates)
+ * @param props.attributeValue - The current value of the rich text content
+ * @param props.updateProperty - Callback function to update the property value when content changes
+ *
+ * @since 1.0.0
+ */
+export { RichTextWithButton } from './components/personalization-tags/rich-text-with-button';
+
+/**
+ * Event tracking utilities for the email editor.
+ *
+ * These functions provide analytics and usage tracking capabilities for the email editor.
+ * All events are prefixed with 'email_editor_events_' and can be disabled via configuration.
+ *
+ * @see {@link https://github.com/woocommerce/woocommerce/blob/0bed6cbba7e599c6535b777f6dc1e0009b05cb08/packages/js/email-editor/src/telemetry-tracking.md} for more information on the event tracking system.
+ *
+ * @example
+ * ```jsx
+ * import { recordEvent, recordEventOnce, isEventTrackingEnabled } from '@woocommerce/email-editor';
+ *
+ * // Record a user action
+ * recordEvent('button_clicked', { buttonType: 'save', location: 'toolbar' });
+ *
+ * // Record an event only once per session
+ * recordEventOnce('editor_loaded', { postType: 'email' });
+ *
+ * // Check if tracking is enabled before expensive operations
+ * if (isEventTrackingEnabled()) {
+ *   // Perform tracking-related work
+ * }
+ * ```
+ *
+ * @since 1.0.0
+ */
+export {
+	/**
+	 * Records an event with optional data for analytics tracking.
+	 *
+	 * Events are automatically prefixed with 'email_editor_events_' and dispatched
+	 * to the global event system. Only records events when tracking is enabled.
+	 *
+	 * @param name - The event name in snake_case format (e.g., 'button_clicked')
+	 * @param data - Optional event data as a JSON-serializable object
+	 *
+	 * @example
+	 * ```js
+	 * recordEvent('personalization_tag_inserted', {
+	 *   tagType: 'customer_name',
+	 *   location: 'subject_line'
+	 * });
+	 * ```
+	 */
+	recordEvent,
+
+	/**
+	 * Records an event only once per session, preventing duplicate tracking.
+	 *
+	 * Useful for events that should only be tracked once, such as page loads,
+	 * feature discoveries, or one-time user actions. Uses a cache based on
+	 * event name and data to determine uniqueness.
+	 *
+	 * @param name - The event name in snake_case format
+	 * @param data - Optional event data as a JSON-serializable object
+	 *
+	 * @example
+	 * ```js
+	 * recordEventOnce('email_editor_first_load', {
+	 *   userType: 'admin',
+	 *   emailType: 'order_confirmation'
+	 * });
+	 * ```
+	 */
+	recordEventOnce,
+
+	/**
+	 * A debounced version of recordEvent that waits 700ms before recording.
+	 *
+	 * Prevents excessive event recording for rapid user actions like typing,
+	 * scrolling, or mouse movements. The 700ms delay accounts for average
+	 * human reaction time plus additional buffer for user interactions.
+	 *
+	 * @param name - The event name in snake_case format
+	 * @param data - Optional event data as a JSON-serializable object
+	 *
+	 * @example
+	 * ```js
+	 * // This will only record once even if called multiple times rapidly
+	 * debouncedRecordEvent('content_typed', {
+	 *   fieldName: 'email_body',
+	 *   contentLength: content.length
+	 * });
+	 * ```
+	 */
+	debouncedRecordEvent,
+
+	/**
+	 * Checks whether event tracking is currently enabled.
+	 *
+	 * Returns true if the global tracking configuration allows event recording.
+	 * Use this to conditionally perform expensive tracking-related operations
+	 * or to provide different user experiences based on tracking preferences.
+	 *
+	 * @return {boolean} True if event tracking is enabled, false otherwise
+	 *
+	 * @example
+	 * ```js
+	 * if (isEventTrackingEnabled()) {
+	 *   // Perform analytics-related work
+	 *   const userBehaviorData = collectDetailedMetrics();
+	 *   recordEvent('detailed_metrics_collected', userBehaviorData);
+	 * }
+	 * ```
+	 */
+	isEventTrackingEnabled,
+} from './events';
