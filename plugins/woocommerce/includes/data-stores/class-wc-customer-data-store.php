@@ -709,7 +709,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		$query_args = apply_filters( 'woocommerce_customer_query_args', $query_args, $args );
 
 		// Ensure number is positive.
-		$query_args['number'] = absint( intval( $query_args['number'] ) <= 0 ? $defaults['per_page']: $query_args['number'] );
+		$query_args['number'] = absint( intval( $query_args['number'] ) <= 0 ? $defaults['per_page'] : $query_args['number'] );
 
 		$wp_user_query = new \WP_User_Query( $query_args );
 
