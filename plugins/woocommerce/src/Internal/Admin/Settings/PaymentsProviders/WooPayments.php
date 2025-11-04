@@ -246,24 +246,6 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
-	 * Get the current state of the store's WPCOM/Jetpack connection.
-	 *
-	 * @return array The store's WPCOM/Jetpack connection state.
-	 */
-	private function get_wpcom_connection_state(): array {
-		$wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
-		$is_connected             = $wpcom_connection_manager->is_connected();
-		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
-
-		return array(
-			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
-			'wpcom_is_store_connected'     => $is_connected,
-			'wpcom_has_connected_owner'    => $has_connected_owner,
-			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
-		);
-	}
-
-	/**
 	 * Check if the payment gateway needs setup.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
@@ -668,5 +650,42 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the current state of the store's WPCOM/Jetpack connection.
+	 *
+	 * @return array The store's WPCOM/Jetpack connection state.
+	 */
+	private function get_wpcom_connection_state(): array {
+		try {
+			$wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
+		} catch ( \Throwable $e ) {
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WPCOM/Jetpack Connection Manager instance: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+
+			// Assume no connection.
+			return array(
+				'wpcom_has_working_connection' => false,
+				'wpcom_is_store_connected'     => false,
+				'wpcom_has_connected_owner'    => false,
+				'wpcom_is_connection_owner'    => false,
+			);
+		}
+
+		$is_connected             = $wpcom_connection_manager->is_connected();
+		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
+
+		return array(
+			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+			'wpcom_is_store_connected'     => $is_connected,
+			'wpcom_has_connected_owner'    => $has_connected_owner,
+			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+		);
 	}
 }
