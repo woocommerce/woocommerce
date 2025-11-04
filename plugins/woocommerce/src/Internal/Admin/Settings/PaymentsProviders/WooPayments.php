@@ -444,8 +444,8 @@ class WooPayments extends PaymentGateway {
 
 		// Default URL params to set, regardless if they exist.
 		$params = array(
-			'from'                      => Constants::is_defined( '\WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? Constants::get_constant( \WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS ) : 'WCADMIN_PAYMENT_SETTINGS',
-			'source'                    => Constants::is_defined( '\WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? Constants::get_constant( \WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE ) : 'wcadmin-settings-page',
+			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
+			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
 			'redirect_to_settings_page' => 'true',
 		);
 
