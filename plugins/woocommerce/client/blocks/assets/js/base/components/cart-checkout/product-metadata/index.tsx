@@ -7,7 +7,6 @@ import { ProductResponseItemData, CartVariationItem } from '@woocommerce/types';
  * Internal dependencies
  */
 import ProductDetails from '../product-details';
-import ProductSummary from '../product-summary';
 import './style.scss';
 
 interface ProductMetadataProps {
@@ -18,8 +17,6 @@ interface ProductMetadataProps {
 }
 
 const ProductMetadata = ( {
-	shortDescription = '',
-	fullDescription = '',
 	itemData = [],
 	variation = [],
 }: ProductMetadataProps ): JSX.Element => {
