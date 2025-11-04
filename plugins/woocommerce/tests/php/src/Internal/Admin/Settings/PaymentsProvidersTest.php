@@ -456,18 +456,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Act.
 		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
 
-		// Assert.
-		$this->assertInstanceOf(
-			PaymentGateway::class,
-			$provider,
-			'Should return generic PaymentGateway instance when no mapping found'
-		);
-
-		// Verify it's the generic provider, not a specific subclass.
+		// Assert - Verify it's the generic provider, not a specific subclass.
 		$this->assertSame(
 			PaymentGateway::class,
 			get_class( $provider ),
-			'Should return base PaymentGateway class, not a subclass'
+			'Should return generic PaymentGateway instance when no mapping found'
 		);
 	}
 
@@ -510,18 +503,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Act.
 		$provider = $this->sut->get_payment_gateway_provider_instance( 'invalid_gateway' );
 
-		// Assert - Should return the generic provider as a fallback.
-		$this->assertInstanceOf(
-			PaymentGateway::class,
-			$provider,
-			'Should return generic PaymentGateway instance for invalid provider class'
-		);
-
-		// Verify it's the generic provider, not a specific subclass.
+		// Assert - Verify it's the generic provider, not a specific subclass.
 		$this->assertSame(
 			PaymentGateway::class,
 			get_class( $provider ),
-			'Should return base PaymentGateway class, not a subclass'
+			'Should return generic PaymentGateway instance for invalid provider class'
 		);
 	}
 
@@ -553,18 +539,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Act.
 		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
 
-		// Assert.
+		// Assert - Verify it's the generic provider, not a specific subclass.
 		$this->assertSame(
 			PaymentGateway::class,
 			get_class( $provider ),
 			'Should return generic PaymentGateway instance when no mapping found'
-		);
-
-		// Verify it's the generic provider, not a specific subclass.
-		$this->assertSame(
-			PaymentGateway::class,
-			get_class( $provider ),
-			'Should return base PaymentGateway class, not a subclass'
 		);
 	}
 
@@ -607,18 +586,11 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 		// Act.
 		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( 'invalid_pes' );
 
-		// Assert - Should return the generic provider as a fallback.
+		// Assert - Verify it's the generic provider, not a specific subclass.
 		$this->assertSame(
 			PaymentGateway::class,
 			get_class( $provider ),
 			'Should return generic PaymentGateway instance for invalid provider class'
-		);
-
-		// Verify it's the generic provider, not a specific subclass.
-		$this->assertSame(
-			PaymentGateway::class,
-			get_class( $provider ),
-			'Should return base PaymentGateway class, not a subclass'
 		);
 	}
 
