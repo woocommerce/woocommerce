@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
 import { Disabled } from '@wordpress/components';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
+import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/patterns/multi-line-text-skeleton';
 import {
 	BlockControls,
 	InspectorControls,
@@ -65,7 +65,7 @@ const AddToCartOptionsEdit = (
 			) : (
 				<div { ...blockProps }>
 					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<ProductShortDescriptionSkeleton />
+						<MultiLineTextSkeleton isStatic={ true } />
 					</div>
 					<Disabled>
 						<button
