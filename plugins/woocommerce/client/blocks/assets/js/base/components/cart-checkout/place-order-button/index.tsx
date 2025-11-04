@@ -22,15 +22,17 @@ import './style.scss';
 
 interface PlaceOrderButtonProps {
 	label: React.ReactNode;
+	fullWidth?: boolean;
 	showPrice?: boolean;
 	priceSeparator?: string;
 }
 
 const PlaceOrderButton = ( {
 	label,
+	fullWidth = false,
 	showPrice = false,
 	priceSeparator = '·',
-}: PlaceOrderButtonProps ) => {
+}: PlaceOrderButtonProps ): JSX.Element => {
 	const {
 		onSubmit,
 		isCalculating,
@@ -46,6 +48,10 @@ const PlaceOrderButton = ( {
 		<Button
 			className={ clsx(
 				'wc-block-components-checkout-place-order-button',
+				{
+					'wc-block-components-checkout-place-order-button--full-width':
+						fullWidth,
+				},
 				{
 					'wc-block-components-checkout-place-order-button--loading':
 						waitingForProcessing || waitingForRedirect,
