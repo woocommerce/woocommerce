@@ -1454,6 +1454,41 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					// Replace/reregister with specific logic in tests if needed.
 					return false;
 				},
+				'method_exists'        => function ( $object_or_class, $method_name ) {
+					if ( is_object( $object_or_class ) && $object_or_class === $this->mock_woopayments_mode ) {
+						if ( in_array( $method_name, array( 'is_test', 'is_test_mode_onboarding', 'is_dev' ), true ) ) {
+							return true;
+						}
+					}
+
+					if ( is_object( $object_or_class ) && $object_or_class === $this->mock_woopayments_account_service ) {
+						if ( in_array( $method_name, array( 'get_account_status_data' ), true ) ) {
+							return true;
+						}
+					}
+					if ( is_string( $object_or_class ) ) {
+						if ( $object_or_class === '\WC_Payments' ) {
+							if ( in_array( $method_name, array( 'mode' ), true ) ) {
+								return true;
+							}
+						}
+
+						if ( $object_or_class === '\WC_Payments_Account' ) {
+							if ( in_array( $method_name, array( 'get_connect_url' ), true ) ) {
+								return true;
+							}
+						}
+
+						if ( $object_or_class === '\WC_Payments_Utils' ) {
+							if ( in_array( $method_name, array( 'supported_countries' ), true ) ) {
+								return true;
+							}
+						}
+					}
+					// Other methods don't exist by default.
+					// Replace/reregister with specific logic in tests if needed.
+					return false;
+				},
 				'is_callable'          => function () {
 					if ( func_num_args() > 0 ) {
 						$callable = func_get_arg( 0 );
