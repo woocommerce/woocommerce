@@ -48,7 +48,7 @@ Display the price of a product.
 
 -	**Name:** woocommerce/product-price
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
@@ -158,7 +158,7 @@ Display a short description about a product.
 
 -	**Name:** woocommerce/product-summary
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
 -	**Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
@@ -603,6 +603,28 @@ Enable customers to change the sorting order of the products.
 -	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
 -	**Attributes:** fontSize, useLabel
 
+## Product Category Description - woocommerce/category-description
+
+Displays the current category description.
+
+-	**Name:** woocommerce/category-description
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+-	**Attributes:** textAlign
+
+## Product Category Title - woocommerce/category-title
+
+Displays the current category title and lets permitted users edit it.
+
+-	**Name:** woocommerce/category-title
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+-	**Attributes:** isLink, level, linkTarget, rel, textAlign
+
 ## Checkout - woocommerce/checkout
 
 Display a checkout form so your customers can submit orders.
@@ -919,8 +941,8 @@ Visually highlight a product category and encourage prompt action.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), ariaLabel, color (background, text), interactivity (clientNavigation), spacing (padding), ~~html~~
--	**Attributes:** alt, categoryId, contentAlign, dimRatio, editMode, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, showDesc
+-	**Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
+-	**Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
 
 ## Featured Product - woocommerce/featured-product
 
@@ -930,8 +952,8 @@ Highlight a product or variation.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), ariaLabel, color (background, text), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
--	**Attributes:** alt, contentAlign, dimRatio, editMode, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId, showDesc, showPrice
+-	**Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
+-	**Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
 
 ## Filter Block - woocommerce/filter-wrapper
 
