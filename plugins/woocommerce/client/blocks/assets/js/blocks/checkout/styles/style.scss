@@ -28,7 +28,9 @@
 	.wc-block-checkout__login-prompt {
 		float: right;
 		margin-top: -$gap-large;
-		@include font-size(regular);
+		font-weight: 400;
+		line-height: $gap * 1.25;
+		@include font-button-locked;
 	}
 	.wc-block-checkout__create-account {
 		margin-top: $gap !important;
