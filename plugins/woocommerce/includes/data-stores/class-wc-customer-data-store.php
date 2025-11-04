@@ -632,7 +632,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'orderby'  => 'registered_date',
 			'per_page' => 10,
 			'page'     => 1,
-			'offset'   => 0,
 			'search'   => '',
 			'email'    => '',
 			'role'     => 'customer',
@@ -648,12 +647,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
 			'include' => array_map( 'absint', (array) $args['include'] ),
 		);
-
-		if ( ! empty( $args['offset'] ) ) {
-			$query_args['offset'] = $args['offset'];
-		} else {
-			$query_args['offset'] = ( $args['page'] - 1 ) * $query_args['number'];
-		}
 
 		if ( ! empty( $args['search'] ) ) {
 			$search                       = sanitize_text_field( $args['search'] );

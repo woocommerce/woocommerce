@@ -70,12 +70,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'default'           => array(),
 				'sanitize_callback' => 'wp_parse_id_list',
 			),
-			'offset'   => array(
-				'description'       => __( 'Offset the result set by a specific number of items.', 'woocommerce' ),
-				'type'              => 'integer',
-				'sanitize_callback' => 'absint',
-				'validate_callback' => 'rest_validate_request_arg',
-			),
 			'order'    => array(
 				'description'       => __( 'Order sort attribute ascending or descending.', 'woocommerce' ),
 				'type'              => 'string',
@@ -132,12 +126,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		$prepared_args['order']   = $request['order'];
 		$prepared_args['number']  = $request['per_page'];
 
-		if ( ! empty( $request['offset'] ) ) {
-			$prepared_args['offset'] = $request['offset'];
-		} else {
-			$prepared_args['offset'] = ( $request['page'] - 1 ) * $prepared_args['number'];
-		}
-
 		$orderby_possibles = array(
 			'id'              => 'ID',
 			'name'            => 'display_name',
@@ -191,7 +179,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'order'    => $query_args['order'] ?? 'asc',
 			'orderby'  => $query_args['orderby'] ?? 'user_registered',
 			'per_page' => $query_args['number'] ?? 10,
-			'offset'   => $query_args['offset'] ?? 0,
 			'search'   => $query_args['search'] ?? '',
 			'email'    => $request['email'] ?? '',
 			'role'     => $request['role'] ?? 'customer',
