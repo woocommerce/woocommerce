@@ -243,6 +243,18 @@ class CustomerSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
+			'last_active'        => array(
+				'description' => __( "When the customer was last active in the site's timezone.", 'woocommerce' ),
+				'type'        => 'date-time',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
+			'last_active_gmt'    => array(
+				'description' => __( 'When the customer was last active, as GMT.', 'woocommerce' ),
+				'type'        => 'date-time',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
 		);
 
 		return $schema;
@@ -280,6 +292,8 @@ class CustomerSchema extends AbstractSchema {
 			'orders_count'       => $item->get_order_count(),
 			'total_spent'        => $item->get_total_spent(),
 			'avatar_url'         => $item->get_avatar_url(),
+			'last_active'        => wc_rest_prepare_date_response( $item->get_meta( 'wc_last_active' ), false ),
+			'last_active_gmt'    => wc_rest_prepare_date_response( $item->get_meta( 'wc_last_active' ) ),
 		);
 
 		// Filter fields if specified.
