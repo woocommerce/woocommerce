@@ -88,16 +88,12 @@ class QuantitySelector extends AbstractBlock {
 
 		// The quantity input might be hidden if the min and max quantities
 		// returned by `woocommerce_quantity_input_args` are the same.
-		$has_visible_input = AddToCartWithOptionsUtils::has_visible_quantity_input( $product_html );
-		if ( ! $has_visible_input ) {
-			$product = $previous_product;
-
-			return '';
+		$has_visible_quantity_input = AddToCartWithOptionsUtils::has_visible_quantity_input( $product_html );
+		if ( $has_visible_quantity_input ) {
+			$product_name = $product->get_name();
+			$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
+			$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
 		}
-
-		$product_name = $product->get_name();
-		$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
-		$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
@@ -107,6 +103,7 @@ class QuantitySelector extends AbstractBlock {
 				array(
 					'wp-block-add-to-cart-with-options-quantity-selector wc-block-add-to-cart-with-options__quantity-selector',
 					esc_attr( $classes_and_styles['classes'] ),
+					$has_visible_quantity_input ? '' : 'wc-block-add-to-cart-with-options__quantity-selector--hidden',
 				)
 			)
 		);
