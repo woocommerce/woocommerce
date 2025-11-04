@@ -366,7 +366,7 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the gateway.
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_gateways_providers_class_map[ $gateway_id ] ) ) {
@@ -431,7 +431,7 @@ class PaymentsProviders {
 		/**
 		 * The provider class for the payment extension suggestion (PES).
 		 *
-		 * @var PaymentGateway|null $provider_class
+		 * @var class-string<PaymentGateway>|null $provider_class
 		 */
 		$provider_class = null;
 		if ( isset( $this->payment_extension_suggestions_providers_class_map[ $pes_id ] ) ) {
