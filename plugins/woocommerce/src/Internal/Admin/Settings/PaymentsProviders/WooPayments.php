@@ -418,12 +418,6 @@ class WooPayments extends PaymentGateway {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
 
-		$query = wp_parse_url( $connect_url, PHP_URL_QUERY );
-		// We expect the URL to have a query string. Bail if it doesn't.
-		if ( empty( $query ) ) {
-			return $connect_url;
-		}
-
 		// Default URL params to set, regardless if they exist.
 		$params = array(
 			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
