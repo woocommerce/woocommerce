@@ -92,15 +92,6 @@
 		}
 	}
 
-	// For phones we're increasing the font-size of the input to 16px to avoid
-	// mobile Safari auto-zooming on the input (16px is the minimum font-size
-	// required to disable this behavior).
-	@include breakpoint("<480px") {
-		.wc-blocks-components-select__select {
-			@include font-for-mobile-inputs-locked;
-		}
-	}
-
 	.wc-blocks-components-select__expand {
 		position: absolute;
 		transform: translate(0%, -50%);
