@@ -20,9 +20,9 @@ defined( 'ABSPATH' ) || exit;
 class RestAbilityFactory {
 
 	/**
-	 * Register abilities for a REST controller based on configuration.
+	 * Register abilities for a REST controller based on unified configuration.
 	 *
-	 * @param array $config Controller configuration containing controller class and abilities array.
+	 * @param array $config Controller configuration with operations array.
 	 */
 	public static function register_controller_abilities( array $config ): void {
 		$controller_class = $config['controller'];
@@ -33,36 +33,64 @@ class RestAbilityFactory {
 
 		$controller = new $controller_class();
 
-		foreach ( $config['abilities'] as $ability_config ) {
-			self::register_single_ability( $controller, $ability_config, $config['route'] );
-		}
+		self::register_unified_ability( $controller, $config );
 	}
 
 	/**
-	 * Register a single ability.
+	 * Register a unified ability that supports multiple operations via action parameter.
 	 *
 	 * @param object $controller REST controller instance.
-	 * @param array  $ability_config Ability configuration array.
-	 * @param string $route REST route for this controller.
+	 * @param array  $config Unified configuration array.
 	 */
-	private static function register_single_ability( $controller, array $ability_config, string $route ): void {
+	private static function register_unified_ability( $controller, array $config ): void {
 		// Only proceed if wp_register_ability function exists.
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			return;
 		}
 
+		$operations = $config['operations'];
+		$route      = $config['route'];
+
 		try {
+			// Build unified input schema with action discriminator.
+			$input_schema = self::get_unified_input_schema( $controller, $operations );
+
+			// Build unified output schema (uses first operation's schema as base).
+			$output_schema = self::get_output_schema( $controller, $operations[0] );
+
 			$ability_args = array(
-				'label'               => $ability_config['label'],
-				'description'         => $ability_config['description'],
+				'label'               => $config['label'],
+				'description'         => $config['description'],
 				'category'            => 'woocommerce-rest',
-				'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
-				'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
-				'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
-					return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
+				'input_schema'        => $input_schema,
+				'output_schema'       => $output_schema,
+				'execute_callback'    => function ( $input ) use ( $controller, $operations, $route ) {
+					// Extract and validate action parameter.
+					$action = $input['action'] ?? null;
+
+					if ( ! $action || ! in_array( $action, $operations, true ) ) {
+						return new \WP_Error(
+							'invalid_action',
+							sprintf(
+								/* translators: %s: Valid actions list */
+								__( 'Invalid action. Must be one of: %s', 'woocommerce' ),
+								implode( ', ', $operations )
+							),
+							array( 'status' => 400 )
+						);
+					}
+
+					// Remove action from input before passing to operation handler.
+					unset( $input['action'] );
+
+					// Execute using existing operation handler.
+					return self::execute_operation( $controller, $action, $input, $route );
 				},
-				'permission_callback' => function () use ( $controller, $ability_config ) {
-					return self::check_permission( $controller, $ability_config['operation'] );
+				'permission_callback' => function () use ( $controller, $operations ) {
+					// Check permission for the least privileged operation (GET/list).
+					// The execute_callback will route to REST API which enforces proper permissions.
+					$check_operation = in_array( 'list', $operations, true ) ? 'list' : $operations[0];
+					return self::check_permission( $controller, $check_operation );
 				},
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
@@ -70,23 +98,58 @@ class RestAbilityFactory {
 				),
 			);
 
-			// Add readonly annotation for GET operations (list and get).
-			if ( in_array( $ability_config['operation'], array( 'list', 'get' ), true ) ) {
-				$ability_args['meta']['annotations'] = array(
-					'readonly' => true,
-				);
-			}
-
-			wp_register_ability( $ability_config['id'], $ability_args );
+			wp_register_ability( $config['id'], $ability_args );
 		} catch ( \Throwable $e ) {
 			// Log the error for debugging but don't break the registration of other abilities.
 			if ( function_exists( 'wc_get_logger' ) ) {
 				wc_get_logger()->error(
-					"Failed to register ability {$ability_config['id']}: " . $e->getMessage(),
+					"Failed to register unified ability {$config['id']}: " . $e->getMessage(),
 					array( 'source' => 'woocommerce-rest-abilities' )
 				);
 			}
 		}
+	}
+
+	/**
+	 * Build unified input schema for multiple operations with action discriminator.
+	 *
+	 * Merges schemas from all operations into a single schema. Only the action parameter
+	 * is required at the schema level; the REST API will validate operation-specific
+	 * required fields when the request is dispatched.
+	 *
+	 * @param object $controller REST controller instance.
+	 * @param array  $operations Array of operation names (list, get, create, update, delete).
+	 * @return array Unified input schema with action parameter.
+	 */
+	private static function get_unified_input_schema( $controller, array $operations ): array {
+		$merged_properties = array();
+
+		// Add action parameter as required discriminator.
+		$merged_properties['action'] = array(
+			'type'        => 'string',
+			'description' => __( 'The operation to perform', 'woocommerce' ),
+			'enum'        => $operations,
+		);
+
+		// Merge all operation schemas into a single properties object.
+		foreach ( $operations as $operation ) {
+			$operation_schema = self::get_schema_for_operation( $controller, $operation );
+
+			if ( isset( $operation_schema['properties'] ) ) {
+				$merged_properties = array_merge( $merged_properties, $operation_schema['properties'] );
+			}
+		}
+
+		// Build the unified schema.
+		// Note: Only 'action' is required at schema level. The REST API validates
+		// operation-specific requirements (e.g., 'id' for get/update/delete) when
+		// the request is dispatched. This approach is necessary because MCP doesn't
+		// support conditional schemas (allOf/oneOf/anyOf) at the top level.
+		return array(
+			'type'       => 'object',
+			'properties' => $merged_properties,
+			'required'   => array( 'action' ),
+		);
 	}
 
 	/**

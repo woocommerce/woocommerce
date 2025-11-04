@@ -153,8 +153,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					'woocommerce/products-list',
-					'woocommerce/orders-get',
+					'woocommerce/products',
+					'woocommerce/orders',
 					'other-plugin/custom-action',
 					'another/namespace/action',
 				)
@@ -168,8 +168,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			'woocommerce/products-list',
-			'woocommerce/orders-get',
+			'woocommerce/products',
+			'woocommerce/orders',
 		);
 
 		$this->assertEquals( $expected, $result, 'Should only return woocommerce namespaced abilities' );
@@ -184,7 +184,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					'woocommerce/products-list',
+					'woocommerce/products',
 					'custom-plugin/special-action',
 					'other-plugin/normal-action',
 				)
@@ -211,7 +211,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			'woocommerce/products-list',
+			'woocommerce/products',
 			'custom-plugin/special-action',
 		);
 
@@ -294,9 +294,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->willReturn(
 				array(
 					'other-plugin/action-1',
-					'woocommerce/products-list',
+					'woocommerce/products',
 					'another-namespace/action-2',
-					'woocommerce/orders-get',
+					'woocommerce/orders',
 				)
 			);
 
@@ -311,8 +311,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering' );
 		$this->assertEquals(
 			array(
-				'woocommerce/products-list',
-				'woocommerce/orders-get',
+				'woocommerce/products',
+				'woocommerce/orders',
 			),
 			array_values( $result ),
 			'Should maintain correct values after re-indexing'
