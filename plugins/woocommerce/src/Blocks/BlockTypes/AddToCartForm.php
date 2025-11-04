@@ -223,10 +223,17 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$product_name = $product->get_name();
-		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+		// The quantity input might be hidden if the min and max quantities
+		// returned by `woocommerce_quantity_input_args` are the same.
+		$has_visible_input = Utils::has_visible_input( $product_html );
+		if ( $has_visible_input ) {
+			$product_name = $product->get_name();
+			$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+			$product_html = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
+		} else {
+			$is_stepper_style = false;
+		}
 
-		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';

@@ -64,6 +64,7 @@ class QuantitySelector extends AbstractBlock {
 
 		if ( AddToCartWithOptionsUtils::is_min_max_quantity_same( $product ) ) {
 			$product = $previous_product;
+
 			return '';
 		}
 
@@ -85,8 +86,16 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_html = ob_get_clean();
 
-		$product_name = $product->get_name();
+		// The quantity input might be hidden if the min and max quantities
+		// returned by `woocommerce_quantity_input_args` are the same.
+		$has_visible_input = AddToCartWithOptionsUtils::has_visible_input( $product_html );
+		if ( ! $has_visible_input ) {
+			$product = $previous_product;
 
+			return '';
+		}
+
+		$product_name = $product->get_name();
 		$product_html = AddToCartWithOptionsUtils::add_quantity_steppers( $product_html, $product_name );
 		$product_html = AddToCartWithOptionsUtils::add_quantity_stepper_classes( $product_html );
 
