@@ -34,13 +34,13 @@ export const UpgradeNotice = ( {
 } ) => {
 	const notice = createInterpolateElement(
 		__(
-			'Gain access to more customization options when you upgrade to the <strongText />.',
+			'Upgrade to the <strongText /> to gain access to more customization options.',
 			'woocommerce'
 		),
 		{
 			strongText: (
 				<strong>
-					{ __( `blockified experience`, 'woocommerce' ) }
+					{ __( `Product Gallery block`, 'woocommerce' ) }
 				</strong>
 			),
 		}
