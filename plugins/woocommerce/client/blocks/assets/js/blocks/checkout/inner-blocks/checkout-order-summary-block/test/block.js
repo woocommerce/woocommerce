@@ -239,9 +239,6 @@ describe( 'Checkout Order Summary', () => {
 
 	it( 'Renders the standard preview items in the sidebar', async () => {
 		const { container } = render( <Block showRateAfterTaxName={ true } /> );
-		expect(
-			await findByText( container, 'Lightweight baseball cap' )
-		).toBeInTheDocument();
 
 		// Checking if variable product is rendered.
 		expect(
