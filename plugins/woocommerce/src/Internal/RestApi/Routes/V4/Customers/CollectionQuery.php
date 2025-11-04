@@ -94,15 +94,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'sanitize_callback' => 'sanitize_key',
 				'validate_callback' => 'rest_validate_request_arg',
 			),
-			'email'    => array(
-				'description'       => __( 'Limit result set to resources with a specific email.', 'woocommerce' ),
-				'type'              => 'string',
-				'format'            => 'email',
-				'sanitize_callback' => 'sanitize_email',
-				'validate_callback' => function ( $value ) {
-					return is_email( $value );
-				},
-			),
 			'role'     => array(
 				'description'       => __( 'Limit result set to resources with a specific role.', 'woocommerce' ),
 				'type'              => 'string',
@@ -180,7 +171,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'orderby'  => $query_args['orderby'] ?? 'user_registered',
 			'per_page' => $query_args['number'] ?? 10,
 			'search'   => $query_args['search'] ?? '',
-			'email'    => $request['email'] ?? '',
 			'role'     => $request['role'] ?? 'customer',
 			'include'  => $query_args['include'] ?? array(),
 			'exclude'  => $query_args['exclude'] ?? array(),
