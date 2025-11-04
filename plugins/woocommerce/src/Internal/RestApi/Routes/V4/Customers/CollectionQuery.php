@@ -199,22 +199,11 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'exclude'  => $query_args['exclude'] ?? array(),
 		);
 
-		$data_store = \WC_Data_Store::load( 'customer' );
-		$users      = $data_store->query_customers( $method_args );
-
-		$per_page = (int) $query_args['number'];
-
-		$query_args['fields'] = 'ID';
-
-		$total_users = ( new WP_User_Query( $query_args ) )->get_total();
-		if ( $total_users < 1 ) {
-			unset( $query_args['number'] );
-			unset( $query_args['offset'] );
-			$count_query = new WP_User_Query( $query_args );
-			$total_users = $count_query->get_total();
-		}
-
-		$max_pages = ceil( $total_users / $per_page );
+		$data_store             = \WC_Data_Store::load( 'customer' );
+		$customer_query_results = $data_store->query_customers( $method_args );
+		$users                  = $customer_query_results->customers;
+		$total_users            = $customer_query_results->total;
+		$max_pages              = $customer_query_results->max_num_pages;
 
 		return array(
 			'results' => $users,

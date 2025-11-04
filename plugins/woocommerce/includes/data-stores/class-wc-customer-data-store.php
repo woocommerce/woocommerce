@@ -621,7 +621,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 	 * Query customers ordered by allowed fields.
 	 *
 	 * @param array $args Query arguments.
-	 * @return WC_Customer[] Array of customers in the requested order.
+	 * @return object Object containing customers in the requested order, total, and max_num_pages.
 	 */
 	public function query_customers( array $args = array() ) {
 		global $wpdb;
@@ -708,6 +708,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		 */
 		$query_args = apply_filters( 'woocommerce_customer_query_args', $query_args, $args );
 
+		// Ensure number is positive.
+		$query_args['number'] = absint( intval( $query_args['number'] ) <= 0 ? $defaults['per_page']: $query_args['number'] );
+
 		$wp_user_query = new \WP_User_Query( $query_args );
 
 		$customers = array();
@@ -715,6 +718,11 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			$customers[] = new \WC_Customer( $user->ID );
 		}
 
-		return $customers;
+		return (object) array(
+			'customers'     => $customers,
+			'total'         => $wp_user_query->total_users,
+			// Query args 'number' is always > 0 due to absint above.
+			'max_num_pages' => ceil( $wp_user_query->total_users / $query_args['number'] ),
+		);
 	}
 }
