@@ -680,8 +680,8 @@ class WooPayments extends PaymentGateway {
 			);
 		}
 
-		$is_connected             = $wpcom_connection_manager->is_connected();
-		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
+		$is_connected        = $wpcom_connection_manager->is_connected();
+		$has_connected_owner = $wpcom_connection_manager->has_connected_owner();
 
 		return array(
 			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,

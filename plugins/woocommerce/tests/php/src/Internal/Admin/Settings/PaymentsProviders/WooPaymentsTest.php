@@ -1429,7 +1429,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						return 'https://example.com/wp-admin/woopayments/connect-url?existing=param';
 					},
 				),
-				PluginsHelper::class   => array(
+				PluginsHelper::class  => array(
 					'get_plugin_data' => function ( $plugin_file ) {
 						if ( 'woocommerce-payments/woocommerce-payments.php' === $plugin_file ) {
 							return array(
@@ -1445,7 +1445,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 
 		$this->mockable_proxy->register_function_mocks(
 			array(
-				'class_exists'         => function ( $class_name ) {
+				'class_exists'        => function ( $class_name ) {
 					if ( in_array( $class_name, array( 'WC_Payments', 'WC_Payments_Account', 'WC_Payments_Utils' ), true ) ) {
 						return true;
 					}
@@ -1454,7 +1454,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					// Replace/reregister with specific logic in tests if needed.
 					return false;
 				},
-				'method_exists'        => function ( $object_or_class, $method_name ) {
+				'method_exists'       => function ( $object_or_class, $method_name ) {
 					if ( is_object( $object_or_class ) && $object_or_class === $this->mock_woopayments_mode ) {
 						if ( in_array( $method_name, array( 'is_test', 'is_test_mode_onboarding', 'is_dev' ), true ) ) {
 							return true;
@@ -1467,19 +1467,19 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 						}
 					}
 					if ( is_string( $object_or_class ) ) {
-						if ( $object_or_class === 'WC_Payments' ) {
+						if ( 'WC_Payments' === $object_or_class ) {
 							if ( in_array( $method_name, array( 'mode' ), true ) ) {
 								return true;
 							}
 						}
 
-						if ( $object_or_class === 'WC_Payments_Account' ) {
+						if ( 'WC_Payments_Account' === $object_or_class ) {
 							if ( in_array( $method_name, array( 'get_connect_url' ), true ) ) {
 								return true;
 							}
 						}
 
-						if ( $object_or_class === 'WC_Payments_Utils' ) {
+						if ( 'WC_Payments_Utils' === $object_or_class ) {
 							if ( in_array( $method_name, array( 'supported_countries' ), true ) ) {
 								return true;
 							}
@@ -1489,7 +1489,7 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 					// Replace/reregister with specific logic in tests if needed.
 					return false;
 				},
-				'is_callable'          => function () {
+				'is_callable'         => function () {
 					if ( func_num_args() > 0 ) {
 						$callable = func_get_arg( 0 );
 						if ( is_array( $callable ) && count( $callable ) === 2 ) {
@@ -1508,7 +1508,8 @@ class WooPaymentsTest extends WC_Unit_Test_Case {
 							if ( in_array(
 								$callable,
 								array( 'WC_Payments::mode', 'WC_Payments_Account::get_connect_url', 'WC_Payments_Utils::supported_countries' ),
-								true )
+								true
+							)
 							) {
 
 								return true;
