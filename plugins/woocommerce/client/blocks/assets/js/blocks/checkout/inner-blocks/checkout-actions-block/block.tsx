@@ -11,6 +11,7 @@ import { useCheckoutSubmit } from '@woocommerce/base-context/hooks';
 import { noticeContexts } from '@woocommerce/base-context';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
+import { CART_URL } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
@@ -46,6 +47,10 @@ const Block = ( {
 			defaultPlaceOrderButtonLabel,
 	} );
 
+	const cartHref = getSetting( 'page-' + cartPageId, false );
+	const cartLink = cartHref || CART_URL;
+	const shouldShowReturnToCart = cartLink && showReturnToCart;
+
 	const showPrice = className?.includes( 'is-style-with-price' ) || false;
 
 	return (
@@ -57,19 +62,17 @@ const Block = ( {
 			<div
 				className={ clsx( 'wc-block-checkout__actions_row', {
 					'wc-block-checkout__actions_row--justify-flex-end':
-						! showReturnToCart,
+						! shouldShowReturnToCart,
 				} ) }
 			>
-				{ showReturnToCart && (
-					<ReturnToCartButton
-						href={ getSetting( 'page-' + cartPageId, false ) }
-					>
+				{ shouldShowReturnToCart && (
+					<ReturnToCartButton href={ cartLink }>
 						{ returnToCartButtonLabel }
 					</ReturnToCartButton>
 				) }
 				<PlaceOrderButton
 					label={ label }
-					fullWidth={ ! showReturnToCart }
+					fullWidth={ ! shouldShowReturnToCart }
 					showPrice={ showPrice }
 					priceSeparator={ priceSeparator }
 				/>

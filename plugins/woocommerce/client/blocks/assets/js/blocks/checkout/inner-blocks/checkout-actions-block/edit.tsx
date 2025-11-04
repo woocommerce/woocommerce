@@ -145,6 +145,7 @@ export const Edit = ( {
 								} }
 							/>
 						}
+						fullWidth={ ! showReturnToCart }
 						showPrice={ showPrice }
 						priceSeparator={ attributes.priceSeparator }
 					/>
