@@ -88,7 +88,7 @@ class QuantitySelector extends AbstractBlock {
 
 		// The quantity input might be hidden if the min and max quantities
 		// returned by `woocommerce_quantity_input_args` are the same.
-		$has_visible_input = AddToCartWithOptionsUtils::has_visible_input( $product_html );
+		$has_visible_input = AddToCartWithOptionsUtils::has_visible_quantity_input( $product_html );
 		if ( ! $has_visible_input ) {
 			$product = $previous_product;
 

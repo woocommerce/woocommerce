@@ -12,16 +12,20 @@ use WP_Block;
  */
 class Utils {
 	/**
-	 * Check if the HTML content has a visible input.
+	 * Check if the HTML content has a visible quantity input.
 	 *
 	 * @param string $html_content The HTML content.
 	 * @return bool True if the HTML content has a visible input, false otherwise.
 	 */
-	public static function has_visible_input( $html_content ) {
+	public static function has_visible_quantity_input( $html_content ) {
 		$processor = new \WP_HTML_Tag_Processor( $html_content );
 
 		while ( $processor->next_tag() ) {
-			if ( $processor->get_tag() === 'INPUT' && $processor->get_attribute( 'type' ) !== 'hidden' ) {
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
 				return true;
 			}
 		}
