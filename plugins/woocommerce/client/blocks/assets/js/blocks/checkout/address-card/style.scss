@@ -1,7 +1,7 @@
 .wc-block-components-address-card {
+	@include font-regular-locked;
 	border: 1px solid $universal-border-light;
-	@include font-size(regular);
-	padding: em($gap);
+	padding: $gap;
 	margin: 0;
 	border-radius: $universal-border-radius;
 	display: flex;
@@ -13,39 +13,35 @@
 	}
 
 	address {
-		margin: 0;
+		display: flex;
+		flex-direction: column;
+		gap: $gap-smallest;
 		font-style: normal;
+		margin: 0;
 
 		.wc-block-components-address-card__address-section {
-			display: block;
-			margin: 0 0 2px 0;
-			span {
-				display: inline-block;
-				padding: 0 4px 0 0;
-				&::after {
-					content: ", ";
-				}
-				&:last-child::after {
-					content: "";
-				}
+			&--primary {
+				font-weight: 500;
 			}
-			&:last-child {
-				margin-bottom: 0;
-			}
-			&:first-child {
-				font-weight: bold;
+
+			&--secondary {
+				color: $universal-body-low-emphasis;
+
+				.has-dark-controls & {
+					color: $input-placeholder-dark;
+				}
 			}
 		}
 	}
 }
 .wc-block-components-address-card__edit {
+	@include font-regular-locked;
 	background-color: transparent;
 	border: 0;
 	color: inherit;
 	cursor: pointer;
 	font-family: inherit;
 	margin: 0 0 0 auto;
-	@include font-size(small);
 
 	&:hover {
 		text-decoration: underline;
