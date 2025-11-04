@@ -25,7 +25,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
 		// Create a query for the Product Collection block.
-		$query = $this->prepare_and_execute_query( $parsed_block );
+		$query = $this->prepare_and_execute_query( $parsed_block, $rendering_context );
 
 		$content = '';
 
@@ -148,10 +148,11 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	/**
 	 * Prepare and execute a query for the Product Collection block using the original QueryBuilder.
 	 *
-	 * @param array $parsed_block Parsed block data.
+	 * @param array             $parsed_block Parsed block data.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return WP_Query
 	 */
-	private function prepare_and_execute_query( array $parsed_block ): WP_Query {
+	private function prepare_and_execute_query( array $parsed_block, Rendering_Context $rendering_context ): WP_Query {
 		$collection  = $parsed_block['attrs']['collection'] ?? '';
 		$query_attrs = $parsed_block['attrs']['query'] ?? array();
 
@@ -248,8 +249,8 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 			$query_args['tax_query'] = array_merge( $query_args['tax_query'], $attribute_queries ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 		}
 
-		// Handle special collections: upsells, cross-sells, related.
-		$product_ids_to_include = $this->get_collection_specific_product_ids( $collection, $parsed_block );
+		// Handle special collections: upsells, cross-sells, related, cart-contents.
+		$product_ids_to_include = $this->get_collection_specific_product_ids( $collection, $parsed_block, $rendering_context );
 		if ( ! empty( $product_ids_to_include ) ) {
 			$query_args['post__in'] = $product_ids_to_include;
 		}
@@ -342,13 +343,14 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	}
 
 	/**
-	 * Get specific product IDs for collection types that need them (upsell, cross-sell, related).
+	 * Get specific product IDs for collection types that need them (upsell, cross-sell, related, cart-contents).
 	 *
-	 * @param string $collection Collection type.
-	 * @param array  $parsed_block Parsed block data.
+	 * @param string            $collection Collection type.
+	 * @param array             $parsed_block Parsed block data.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array Array of product IDs or empty array.
 	 */
-	private function get_collection_specific_product_ids( string $collection, array $parsed_block ): array {
+	private function get_collection_specific_product_ids( string $collection, array $parsed_block, Rendering_Context $rendering_context ): array {
 		switch ( $collection ) {
 			case 'woocommerce/product-collection/upsells':
 				return $this->get_upsell_product_ids( $parsed_block );
@@ -358,6 +360,9 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			case 'woocommerce/product-collection/related':
 				return $this->get_related_product_ids( $parsed_block );
+
+			case 'woocommerce/product-collection/cart-contents':
+				return $this->get_cart_contents_product_ids( $parsed_block, $rendering_context );
 
 			default:
 				return array();
@@ -485,6 +490,107 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// This could be extended based on email type (order confirmation, etc.).
 
 		return $product_references;
+	}
+
+	/**
+	 * Get cart contents product IDs for email rendering.
+	 *
+	 * @param array             $parsed_block Parsed block data.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array Array of cart product IDs or sample products for preview.
+	 */
+	private function get_cart_contents_product_ids( array $parsed_block, Rendering_Context $rendering_context ): array {
+		// Try to get cart product IDs from the user's cart using user ID or email.
+		$cart_product_ids = $this->get_user_cart_product_ids_from_context( $rendering_context );
+
+		if ( ! empty( $cart_product_ids ) ) {
+			return $cart_product_ids;
+		}
+
+		// For preview emails, show sample products so users can see what the email will look like.
+		if ( $rendering_context->get( 'is_user_preview', false ) ) {
+			return $this->get_sample_product_ids_for_preview();
+		}
+
+		// For real emails with empty cart, return -1 to ensure no products are shown.
+		return array( -1 );
+	}
+
+	/**
+	 * Get cart product IDs from rendering context using user ID or email.
+	 *
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return array Array of product IDs from the user's cart.
+	 */
+	private function get_user_cart_product_ids_from_context( Rendering_Context $rendering_context ): array {
+		$user_id = $rendering_context->get_user_id();
+		$email   = $rendering_context->get_recipient_email();
+
+		// Use shared utility if available (WooCommerce 10.4+).
+		if ( class_exists( '\Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils' ) &&
+			method_exists( '\Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils', 'get_cart_product_ids_for_user' ) ) {
+			// @phpstan-ignore-next-line - Method exists in newer WooCommerce versions.
+			return \Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils::get_cart_product_ids_for_user( $user_id, $email );
+		}
+
+		// Fallback: Get user ID from email if needed, then fetch cart.
+		if ( ! $user_id && $email ) {
+			$user = get_user_by( 'email', $email );
+			if ( $user ) {
+				$user_id = $user->ID;
+			}
+		}
+
+		if ( ! $user_id ) {
+			return array();
+		}
+
+		// Fallback implementation for older WooCommerce versions.
+		$cart_data = get_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id(), true );
+
+		if ( ! is_array( $cart_data ) || empty( $cart_data ) || ! isset( $cart_data['cart'] ) || ! is_array( $cart_data['cart'] ) ) {
+			return array();
+		}
+
+		$product_ids = array();
+
+		foreach ( $cart_data['cart'] as $cart_item ) {
+			if ( is_array( $cart_item ) && isset( $cart_item['product_id'] ) && is_numeric( $cart_item['product_id'] ) ) {
+				$product_ids[] = (int) $cart_item['product_id'];
+			}
+		}
+
+		return array_unique( $product_ids );
+	}
+
+	/**
+	 * Get sample product IDs for preview emails.
+	 * This ensures that preview emails show representative content even when the cart is empty.
+	 *
+	 * @return array Array of sample product IDs.
+	 */
+	private function get_sample_product_ids_for_preview(): array {
+		$query = new WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => 3,
+				'orderby'        => 'date',
+				'order'          => 'DESC',
+				'fields'         => 'ids',
+			)
+		);
+
+		if ( ! empty( $query->posts ) && is_array( $query->posts ) ) {
+			return array_map(
+				static function ( $id ) {
+					return is_numeric( $id ) ? (int) $id : 0;
+				},
+				$query->posts
+			);
+		}
+
+		return array( -1 );
 	}
 
 	/**

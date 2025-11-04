@@ -27,14 +27,9 @@ class Columns extends Abstract_Block_Renderer {
 	 * @return string
 	 */
 	protected function render_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
-		$content = '';
-		foreach ( $parsed_block['innerBlocks'] ?? array() as $block ) {
-			$content .= render_block( $block );
-		}
-
 		return str_replace(
 			'{columns_content}',
-			$content,
+			$this->get_inner_content( $block_content ),
 			$this->getBlockWrapper( $block_content, $parsed_block, $rendering_context )
 		);
 	}
