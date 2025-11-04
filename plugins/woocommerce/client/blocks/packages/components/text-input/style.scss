@@ -13,7 +13,8 @@
 	label {
 		@include reset-color();
 		@include reset-typography();
-		@include font-regular-locked;
+		font-size: 16px;
+		line-height: 22px;
 		position: absolute;
 		transform: translateY(-50%);
 		left: $gap-smaller * 1.25;
