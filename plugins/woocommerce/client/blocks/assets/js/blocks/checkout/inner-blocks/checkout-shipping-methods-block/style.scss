@@ -14,5 +14,6 @@
 		color: color-mix(in srgb, currentColor 66%, transparent);
 		text-align: center;
 		margin: 0;
+		border-radius: $universal-border-radius;
 	}
 }
