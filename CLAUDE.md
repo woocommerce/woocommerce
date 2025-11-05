@@ -16,15 +16,7 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 - Getting oriented in the project
 - Understanding overall architecture
-- Finding the right skill or sub-documentation
-
-**Use Skills (in `.ai/skills/`) when:**
-
-- Writing or modifying backend PHP code → `woocommerce-backend-dev`
-- Running tests or linting → `woocommerce-dev-cycle`
-- Writing UI text → `woocommerce-copy-guidelines`
-- Reviewing pull requests → `woocommerce-code-review`
-- Creating or editing markdown files → `woocommerce-markdown`
+- Finding the right documentation or skill
 
 **Use other CLAUDE.md files when:**
 
@@ -33,15 +25,13 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 ## Available Skills
 
-The `.ai/skills/` directory contains procedural knowledge:
+The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
 - **`woocommerce-backend-dev`** - Backend PHP conventions (classes, methods, hooks, DI, testing)
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
 - **`woocommerce-markdown`** - Markdown writing and editing guidelines
-
-Skills provide detailed HOW-TO instructions. This doc provides project context.
 
 **CRITICAL:** After reading a skill, check if a personal skill override file exists at
 `~/.ai/skills/{skill-name}-personal/SKILL.md` and apply it too. For example, for the
@@ -126,20 +116,6 @@ pnpm lint:php:fix -- path/to/file.php
 ```
 
 For complete command reference and workflows, see `woocommerce-dev-cycle` skill.
-
-### Finding Information
-
-**Backend code conventions?** → `woocommerce-backend-dev` skill
-
-**Testing procedures?** → `woocommerce-dev-cycle` skill
-
-**UI text guidelines?** → `woocommerce-copy-guidelines` skill
-
-**Markdown writing?** → `woocommerce-markdown` skill
-
-**React development?** → `client/admin/CLAUDE.md`
-
-**Project structure?** → This document
 
 ## Monorepo Context
 
