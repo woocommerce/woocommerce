@@ -133,10 +133,8 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
 		}
 
-		// Filter by role.
-		if ( 'all' !== $request['role'] ) {
-			$prepared_args['role'] = $request['role'];
-		}
+		// Always pass role through (datastore handles 'all' vs 'customer').
+		$prepared_args['role'] = $request['role'];
 
 		/**
 		 * Filter arguments, before passing to WP_User_Query, when querying users via the REST API.

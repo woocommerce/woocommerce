@@ -738,6 +738,70 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that role=all returns users of all roles, not just customers.
+	 */
+	public function test_role_all_returns_all_roles(): void {
+		// Create a customer with a unique name.
+		$customer = $this->create_test_customer(
+			array(
+				'email'      => 'jonny.customer@example.com',
+				'username'   => 'jonny_customer',
+				'first_name' => 'Jonny',
+				'last_name'  => 'Customer',
+			)
+		);
+
+		// Create an admin user with a similar name.
+		$admin_id = wp_insert_user(
+			array(
+				'user_login' => 'jonny_admin',
+				'user_email' => 'jonny.admin@example.com',
+				'user_pass'  => 'password',
+				'first_name' => 'Jonny',
+				'last_name'  => 'Admin',
+				'role'       => 'administrator',
+			)
+		);
+
+		// Test with role=all and search for "jonny" - should return both.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'role', 'all' );
+		$request->set_param( 'search', 'jonny' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should return both the customer and the admin.
+		$this->assertCount( 2, $response_data, 'role=all should return both customer and admin users' );
+
+		$returned_ids = array_map(
+			function ( $user ) {
+				return $user['id'];
+			},
+			$response_data
+		);
+
+		$this->assertContains( $customer->get_id(), $returned_ids, 'Should include customer user' );
+		$this->assertContains( $admin_id, $returned_ids, 'Should include admin user' );
+
+		// Test with role=customer (default) - should only return customer.
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
+		$request->set_param( 'search', 'jonny' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		// Should only return the customer.
+		$this->assertCount( 1, $response_data, 'role=customer should return only customer users' );
+		$this->assertEquals( $customer->get_id(), $response_data[0]['id'], 'Should be the customer user' );
+
+		// Clean up.
+		wp_delete_user( $admin_id );
+	}
+
+	/**
 	 * Test edge case: invalid customer ID.
 	 */
 	public function test_invalid_customer_id(): void {
