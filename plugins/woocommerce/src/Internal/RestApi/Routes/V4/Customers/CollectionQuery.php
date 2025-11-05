@@ -133,12 +133,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			$prepared_args['search'] = '*' . $prepared_args['search'] . '*';
 		}
 
-		// Filter by email.
-		if ( ! empty( $request['email'] ) ) {
-			$prepared_args['search']         = $request['email'];
-			$prepared_args['search_columns'] = array( 'user_email' );
-		}
-
 		// Filter by role.
 		if ( 'all' !== $request['role'] ) {
 			$prepared_args['role'] = $request['role'];
