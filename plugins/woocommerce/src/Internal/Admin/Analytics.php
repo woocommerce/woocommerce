@@ -342,9 +342,14 @@ class Analytics {
 				array( '%d' )
 			);
 
-			if ( false !== $result ) {
-				++$updated_count;
+			if ( false === $result ) {
+				wc_get_logger()->error(
+					sprintf( 'Failed to update fulfillment status for order #%d', $order_id ),
+					array( 'source' => 'woocommerce-analytics' )
+				);
 			}
+
+			++$updated_count;
 		}
 
 		// Update progress.
