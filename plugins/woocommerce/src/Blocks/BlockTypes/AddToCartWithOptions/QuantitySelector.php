@@ -86,8 +86,7 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_html = ob_get_clean();
 
-		// The quantity input might be hidden if the min and max quantities
-		// returned by `woocommerce_quantity_input_args` are the same.
+		// If the quantity input is hidden, don't render the stepper buttons and styles.
 		$has_visible_quantity_input = AddToCartWithOptionsUtils::has_visible_quantity_input( $product_html );
 		if ( $has_visible_quantity_input ) {
 			$product_name = $product->get_name();
