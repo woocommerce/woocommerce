@@ -6603,6 +6603,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
 			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+			as_unschedule_all_actions( Analytics::REGENERATE_FULFILLMENT_STATUS_ACTION, null, '' );
 
 			if ( null === $prev_fulfillments_opt ) {
 				delete_option( 'woocommerce_feature_fulfillments_enabled' );
