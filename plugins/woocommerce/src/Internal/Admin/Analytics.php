@@ -254,9 +254,9 @@ class Analytics {
 		}
 
 		// Check if an action is already scheduled or in progress.
-		$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		if ( ( function_exists( 'as_has_scheduled_action' ) && as_has_scheduled_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION ) )
-			|| ( false !== $progress && 'running' === $progress['status'] ) ) {
+		$progress       = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+		$progress_state = ( false !== $progress && is_array( $progress ) && isset( $progress['status'] ) ) ? $progress['status'] : null;  
+		if ( ( as_has_scheduled_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION ) ) || 'running' === $progress_state ) {
 			return __( 'Order fulfillment status regeneration is already in progress.', 'woocommerce' );
 		}
 
