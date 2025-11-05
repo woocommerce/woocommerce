@@ -802,6 +802,33 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Customers without wc_last_active meta should return null for last_active fields.
+	 */
+	public function test_last_active_null_when_not_set(): void {
+		// Create a customer without setting wc_last_active meta.
+		$customer = $this->create_test_customer(
+			array(
+				'email'    => 'inactive@example.com',
+				'username' => 'inactive_customer',
+			)
+		);
+
+		// Verify the meta doesn't exist or is empty.
+		$this->assertEmpty( $customer->get_meta( 'wc_last_active' ) );
+
+		// Fetch via REST API.
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		// last_active and last_active_gmt should be null, not a current timestamp.
+		$this->assertNull( $data['last_active'], 'last_active should be null when wc_last_active meta is not set' );
+		$this->assertNull( $data['last_active_gmt'], 'last_active_gmt should be null when wc_last_active meta is not set' );
+	}
+
+	/**
 	 * Test edge case: invalid customer ID.
 	 */
 	public function test_invalid_customer_id(): void {
