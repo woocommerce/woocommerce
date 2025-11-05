@@ -18,7 +18,6 @@ use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Throwable;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
-use WooCommerce\Admin\Experimental_Abtest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -189,7 +188,7 @@ class WooPayments extends PaymentGateway {
 
 			// Switch to the native in-context onboarding type if the WooPayments extension its version is compatible.
 			// We need to put back the '.php' extension to construct the plugin filename.
-			$plugin_data = PluginsHelper::get_plugin_data( $extension_suggestion['plugin']['file'] . '.php' );
+			$plugin_data = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_data', $extension_suggestion['plugin']['file'] . '.php' );
 			if ( $plugin_data && ! empty( $plugin_data['Version'] ) &&
 				version_compare( $plugin_data['Version'], PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '>=' ) ) {
 
@@ -247,24 +246,6 @@ class WooPayments extends PaymentGateway {
 	}
 
 	/**
-	 * Get the current state of the store's WPCOM/Jetpack connection.
-	 *
-	 * @return array The store's WPCOM/Jetpack connection state.
-	 */
-	private function get_wpcom_connection_state(): array {
-		$wpcom_connection_manager = new WPCOM_Connection_Manager( 'woocommerce' );
-		$is_connected             = $wpcom_connection_manager->is_connected();
-		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
-
-		return array(
-			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
-			'wpcom_is_store_connected'     => $is_connected,
-			'wpcom_has_connected_owner'    => $has_connected_owner,
-			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
-		);
-	}
-
-	/**
 	 * Check if the payment gateway needs setup.
 	 *
 	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
@@ -296,11 +277,13 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_test' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
+
 				return $woopayments_mode->is_test();
 			}
 		}
@@ -319,11 +302,13 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_dev' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_dev' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
+
 				return $woopayments_mode->is_dev();
 			}
 		}
@@ -405,11 +390,13 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test_mode_onboarding' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+
 				return $woopayments_mode->is_test_mode_onboarding();
 			}
 		}
@@ -429,22 +416,18 @@ class WooPayments extends PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( class_exists( '\WC_Payments_Account' ) && is_callable( '\WC_Payments_Account::get_connect_url' ) ) {
-			$connect_url = \WC_Payments_Account::get_connect_url();
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments_Account::get_connect_url' ) ) {
+
+			$connect_url = $this->proxy->call_static( 'WC_Payments_Account', 'get_connect_url' );
 		} else {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
 
-		$query = wp_parse_url( $connect_url, PHP_URL_QUERY );
-		// We expect the URL to have a query string. Bail if it doesn't.
-		if ( empty( $query ) ) {
-			return $connect_url;
-		}
-
 		// Default URL params to set, regardless if they exist.
 		$params = array(
-			'from'                      => defined( '\WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? \WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS : 'WCADMIN_PAYMENT_SETTINGS',
-			'source'                    => defined( '\WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? \WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE : 'wcadmin-settings-page',
+			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
+			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
 			'redirect_to_settings_page' => 'true',
 		);
 
@@ -493,30 +476,6 @@ class WooPayments extends PaymentGateway {
 			$this->has_orders()
 		) {
 			$live_onboarding = true;
-		}
-
-		// We run an experiment to determine the efficiency of test-account-first onboarding vs straight-to-live onboarding.
-		// If the experiment is active and the store is in the treatment group, we will force live onboarding.
-		// Otherwise, we will do test-account-first onboarding (control group).
-		// Stores that are determined by our routing logic that they should do straight-to-live onboarding
-		// will not be affected by the experiment.
-		if ( ! $live_onboarding ) {
-			$transient_key = 'wc_experiment_failure_woocommerce_payment_settings_onboarding_2025_v1';
-
-			// Try to get cached result first.
-			$cached_result = get_transient( $transient_key );
-
-			// If we have a cache entry that indicates an error, don't enforce anything. Just let the routing logic decide.
-			if ( 'error' !== $cached_result ) {
-				try {
-					if ( Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_onboarding_2025_v1' ) ) {
-						$live_onboarding = true;
-					}
-				} catch ( \Exception $e ) {
-					// If the experiment fails, set a transient to avoid repeated failures.
-					set_transient( $transient_key, 'error', HOUR_IN_SECONDS );
-				}
-			}
 		}
 
 		// If we are doing live onboarding, we don't need to add more to the URL.
@@ -617,9 +576,15 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a test account, false otherwise.
 	 */
 	private function has_test_account(): bool {
-		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
-			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
-			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
+
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
+			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
+				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
+
 				$account_status = $account_service->get_account_status_data();
 
 				return ! empty( $account_status['testDrive'] );
@@ -640,9 +605,15 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a sandbox account, false otherwise.
 	 */
 	private function has_sandbox_account(): bool {
-		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
-			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
-			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
+
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
+			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
+				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
+
 				$account_status = $account_service->get_account_status_data();
 
 				return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
@@ -661,10 +632,10 @@ class WooPayments extends PaymentGateway {
 	 */
 	private function get_supported_country_codes(): ?array {
 		try {
-			if ( class_exists( '\WC_Payments_Utils' ) &&
-				is_callable( '\WC_Payments_Utils::supported_countries' ) ) {
+			if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Utils' ) &&
+				$this->proxy->call_function( 'is_callable', 'WC_Payments_Utils::supported_countries' ) ) {
 
-				$supported_country_codes = \WC_Payments_Utils::supported_countries();
+				$supported_country_codes = $this->proxy->call_static( 'WC_Payments_Utils', 'supported_countries' );
 				if ( is_array( $supported_country_codes ) ) {
 					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
 				}
@@ -681,5 +652,42 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Get the current state of the store's WPCOM/Jetpack connection.
+	 *
+	 * @return array The store's WPCOM/Jetpack connection state.
+	 */
+	private function get_wpcom_connection_state(): array {
+		try {
+			$wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
+		} catch ( \Throwable $e ) {
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WPCOM/Jetpack Connection Manager instance: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+
+			// Assume no connection.
+			return array(
+				'wpcom_has_working_connection' => false,
+				'wpcom_is_store_connected'     => false,
+				'wpcom_has_connected_owner'    => false,
+				'wpcom_is_connection_owner'    => false,
+			);
+		}
+
+		$is_connected        = $wpcom_connection_manager->is_connected();
+		$has_connected_owner = $wpcom_connection_manager->has_connected_owner();
+
+		return array(
+			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+			'wpcom_is_store_connected'     => $is_connected,
+			'wpcom_has_connected_owner'    => $has_connected_owner,
+			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+		);
 	}
 }
