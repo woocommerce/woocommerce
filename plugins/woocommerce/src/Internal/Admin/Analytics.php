@@ -290,6 +290,7 @@ class Analytics {
 	 */
 	public function process_regenerate_order_fulfillment_status_batch( $page = 1 ) {
 		global $wpdb;
+		$page               = max( 1, absint( $page ) );
 		$per_page           = 100;
 		$order_stats_table  = $wpdb->prefix . 'wc_order_stats';
 		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
