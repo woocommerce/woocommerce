@@ -84,7 +84,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 				'default'           => 'name',
 				'enum'              => array(
 					'id',
-					'include',
 					'name',
 					'registered_date',
 					'order_count',
@@ -120,7 +119,6 @@ final class CollectionQuery extends AbstractCollectionQuery {
 
 		$orderby_possibles = array(
 			'id'              => 'ID',
-			'include'         => 'include',
 			'name'            => 'display_name',
 			'registered_date' => 'user_registered',
 			'order_count'     => 'wc_order_count',
