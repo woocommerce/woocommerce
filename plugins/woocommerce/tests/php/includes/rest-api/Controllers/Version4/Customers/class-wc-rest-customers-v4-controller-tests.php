@@ -555,79 +555,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test include and exclude parameters.
-	 */
-	public function test_include_exclude_filtering(): void {
-		$customer1 = $this->create_test_customer();
-		$customer2 = $this->create_test_customer(
-			array(
-				'email'    => 'customer2@example.com',
-				'username' => 'customer2',
-			)
-		);
-		$customer3 = $this->create_test_customer(
-			array(
-				'email'    => 'customer3@example.com',
-				'username' => 'customer3',
-			)
-		);
-
-		// Test include parameter - should only return specified customers.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'include', array( $customer1->get_id(), $customer3->get_id() ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$this->assertCount( 2, $response_data );
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		$found_customer3 = false;
-		foreach ( $response_data as $customer_data ) {
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-			if ( $customer_data['id'] === $customer3->get_id() ) {
-				$found_customer3 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find included customer1' );
-		$this->assertFalse( $found_customer2, 'Should not find excluded customer2' );
-		$this->assertTrue( $found_customer3, 'Should find included customer3' );
-
-		// Test exclude parameter - should exclude specified customers.
-		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
-		$request->set_param( 'exclude', array( $customer2->get_id() ) );
-		$response = $this->server->dispatch( $request );
-
-		$this->assertEquals( 200, $response->get_status() );
-		$response_data = $response->get_data();
-
-		$found_customer1 = false;
-		$found_customer2 = false;
-		$found_customer3 = false;
-		foreach ( $response_data as $customer_data ) {
-			if ( $customer_data['id'] === $customer1->get_id() ) {
-				$found_customer1 = true;
-			}
-			if ( $customer_data['id'] === $customer2->get_id() ) {
-				$found_customer2 = true;
-			}
-			if ( $customer_data['id'] === $customer3->get_id() ) {
-				$found_customer3 = true;
-			}
-		}
-		$this->assertTrue( $found_customer1, 'Should find non-excluded customer1' );
-		$this->assertFalse( $found_customer2, 'Should not find excluded customer2' );
-		$this->assertTrue( $found_customer3, 'Should find non-excluded customer3' );
-	}
-
-	/**
 	 * Test pagination.
 	 */
 	public function test_pagination(): void {
@@ -1102,7 +1029,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
 		$request->set_param( 'orderby', 'id' );
 		$request->set_param( 'order', 'asc' );
-		$request->set_param( 'include', array( $customer1->get_id(), $customer2->get_id() ) );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
@@ -1170,7 +1096,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
 		$request->set_param( 'orderby', 'name' );
 		$request->set_param( 'order', 'asc' );
-		$request->set_param( 'include', array( $customer1->get_id(), $customer2->get_id() ) );
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
