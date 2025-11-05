@@ -161,7 +161,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				// `WC_REST_Products_V2_Controller`.
 				$permission = current_user_can( $post_type_object->cap->read_private_posts, $object_id );
 
-				// We add an especial case when the post is published, not
+				// We add an special case when the post is published, not
 				// password-protected and the user has post edit capabilities.
 				if ( ! $permission && 'publish' === $object->get_status() && ! post_password_required( $object_id ) ) {
 					$permission = current_user_can( 'edit_posts' ) && current_user_can( $post_type_object->cap->read, $object_id );
