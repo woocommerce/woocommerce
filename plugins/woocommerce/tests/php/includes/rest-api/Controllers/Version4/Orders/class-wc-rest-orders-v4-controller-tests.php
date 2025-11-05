@@ -923,8 +923,6 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$request->set_param( 'force', true );
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 204, $response->get_status() );
-
-		$order->delete( true );
 	}
 
 	/**
