@@ -212,7 +212,7 @@ class Analytics {
 		$button_text = __( 'Regenerate', 'woocommerce' );
 		$description = __( 'This tool will regenerate the order fulfillment status for all orders and update the Analytics data.', 'woocommerce' );
 
-		if ( false !== $progress && 'running' === $progress['status'] ) {
+		if ( false !== $progress && is_array( $progress ) && isset( $progress['status'], $progress['processed'], $progress['total'] ) && 'running' === $progress['status'] ) {
 			$is_running  = true;
 			$button_text = __( 'In progress...', 'woocommerce' );
 			$description = sprintf(
