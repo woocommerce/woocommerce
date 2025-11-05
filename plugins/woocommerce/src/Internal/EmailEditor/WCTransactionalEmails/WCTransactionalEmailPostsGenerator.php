@@ -248,7 +248,7 @@ class WCTransactionalEmailPostsGenerator {
 	 * @throws \Exception When post creation fails.
 	 */
 	private function generate_single_template( $email_type, $email_data ) {
-		$post_data     = array(
+		$post_data = array(
 			'post_type'    => Integration::EMAIL_POST_TYPE,
 			'post_status'  => 'publish',
 			'post_name'    => $email_type,
