@@ -47,6 +47,7 @@ export type QuantitySelectorStore = {
 		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
+		inputQuantity: number;
 	};
 	actions: {
 		increaseQuantity: (
@@ -126,7 +127,9 @@ store< QuantitySelectorStore >(
 			get inputQuantity(): number {
 				const { productId } = getContext< Context >();
 
-				return addToCartWithOptionsStore.quantity?.[ productId ] || 0;
+				return (
+					addToCartWithOptionsStore.state.quantity?.[ productId ] || 0
+				);
 			},
 		},
 		actions: {
@@ -161,7 +164,6 @@ store< QuantitySelectorStore >(
 					productId,
 					newValue
 				);
-				// inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			},
 			decreaseQuantity: (
@@ -237,7 +239,7 @@ store< QuantitySelectorStore >(
 
 				const { productId } = getContext< Context >();
 
-				// In grouped products, we reset invalid inputs to ''.
+				// In grouped products, we reset invalid inputs to 0.
 				if (
 					( Number.isNaN( event.target.valueAsNumber ) ||
 						event.target.valueAsNumber === 0 ) &&
@@ -247,9 +249,6 @@ store< QuantitySelectorStore >(
 						productId,
 						0
 					);
-					if ( Number.isNaN( event.target.valueAsNumber ) ) {
-						event.target.value = '';
-					}
 					dispatchChangeEvent( event.target );
 					return;
 				}

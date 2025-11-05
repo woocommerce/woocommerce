@@ -362,7 +362,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							newValue
 						);
 
-						ref.value = newValue.toString();
 						dispatchChangeEvent( ref );
 					}
 				}
