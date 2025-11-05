@@ -244,17 +244,14 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				// In other product types, we reset inputs to `min` if they are
-				// 0 or NaN.
-				let newValue =
+				let newValue;
+				if (
 					Number.isFinite( event.target.valueAsNumber ) &&
-					event.target.valueAsNumber > 0
-						? event.target.valueAsNumber
-						: min;
-
-				// Reset to 0 if allowed and `min` is not met.
-				if ( allowZero && newValue < min ) {
-					newValue = 0;
+					event.target.valueAsNumber >= min
+				) {
+					newValue = event.target.valueAsNumber;
+				} else {
+					newValue = allowZero ? 0 : min;
 				}
 
 				addToCartWithOptionsStore.actions.setQuantity(
