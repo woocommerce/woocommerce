@@ -325,6 +325,7 @@ class Analytics {
 		foreach ( $order_ids as $order_id ) {
 			$order = wc_get_order( $order_id );
 			if ( ! $order || ! $order instanceof WC_Order ) {
+				++$updated_count; // Increment the updated count even if the order is not found.
 				continue;
 			}
 
