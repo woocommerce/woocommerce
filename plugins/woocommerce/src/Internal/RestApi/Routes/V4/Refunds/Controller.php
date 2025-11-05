@@ -204,7 +204,7 @@ class Controller extends AbstractController {
 				'href' => rest_url( sprintf( '/%s/orders/%d', $this->namespace, $item->get_parent_id() ) ),
 			),
 			'refunded_by' => array(
-				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $refund->get_refunded_by() ) ),
+				'href'       => rest_url( sprintf( '/wp/v2/users/%d', $item->get_refunded_by() ) ),
 				'embeddable' => true,
 			),
 		);
