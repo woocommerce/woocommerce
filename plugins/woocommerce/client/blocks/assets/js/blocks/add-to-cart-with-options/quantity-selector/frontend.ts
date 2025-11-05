@@ -123,6 +123,11 @@ store< QuantitySelectorStore >(
 
 				return currentQuantity + step <= max;
 			},
+			get inputQuantity(): number {
+				const { productId } = getContext< Context >();
+
+				return addToCartWithOptionsStore.quantity?.[ productId ] || 0;
+			},
 		},
 		actions: {
 			increaseQuantity: (
@@ -156,7 +161,7 @@ store< QuantitySelectorStore >(
 					productId,
 					newValue
 				);
-				inputElement.value = newValue.toString();
+				// inputElement.value = newValue.toString();
 				dispatchChangeEvent( inputElement );
 			},
 			decreaseQuantity: (
@@ -213,7 +218,6 @@ store< QuantitySelectorStore >(
 						newValue
 					);
 
-					inputElement.value = newValue.toString();
 					dispatchChangeEvent( inputElement );
 				}
 			},
@@ -273,7 +277,7 @@ store< QuantitySelectorStore >(
 					productId,
 					newValue
 				);
-				event.target.value = newValue.toString();
+
 				dispatchChangeEvent( event.target );
 			},
 			handleQuantityCheckboxChange: () => {

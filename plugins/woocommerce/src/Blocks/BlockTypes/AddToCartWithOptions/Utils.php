@@ -72,7 +72,7 @@ class Utils {
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
 			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
-
+			$processor->set_attribute( 'data-wp-bind--value', 'woocommerce/add-to-cart-with-options-quantity-selector::state.inputQuantity' );
 			foreach ( $input_attributes as $attribute => $value ) {
 				$processor->set_attribute( $attribute, $value );
 			}
