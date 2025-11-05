@@ -35,14 +35,13 @@
 
 	// Extra label for specificity needed in the editor.
 	input.wc-block-components-quantity-selector__input {
-		@include font-size(regular);
+		@include font-regular-locked;
 		appearance: textfield;
 		background: transparent;
 		border: 0;
 		box-shadow: none;
 		color: currentColor;
 		flex: 1 1 auto;
-		font-weight: 600;
 		line-height: 1;
 		margin: 0;
 		min-width: 40px;

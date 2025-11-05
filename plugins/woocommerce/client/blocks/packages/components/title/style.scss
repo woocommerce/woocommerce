@@ -1,22 +1,26 @@
+@mixin title {
+	@include reset-box();
+	@include font-large-locked;
+	word-break: break-word;
+	font-weight: 500;
+}
+
 // Extra class for specificity to overwrite editor styles.
 .wc-block-components-title.wc-block-components-title {
-	@include reset-box();
-	@include font-size(large);
-	word-break: break-word;
+	@include title;
 
 	textarea {
 		letter-spacing: inherit;
 		text-transform: inherit;
 		font-weight: inherit;
 		font-style: inherit;
+		line-height: 1.3;
 	}
 }
 
 // For Twenty Twenty we need to increase specificity a bit more.
 .theme-twentytwenty {
 	.wc-block-components-title.wc-block-components-title {
-		@include reset-box();
-		@include font-size(large);
-		word-break: break-word;
+		@include title;
 	}
 }
