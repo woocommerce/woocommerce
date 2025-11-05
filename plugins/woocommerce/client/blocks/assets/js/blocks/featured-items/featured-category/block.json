@@ -29,15 +29,14 @@
 			"color": true,
 			"radius": true,
 			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"width": true
+			},
 			"__experimentalSkipSerialization": true
 		}
 	},
-	"allowedBlocks": [
-		"woocommerce/category-title",
-		"woocommerce/category-description",
-		"core/heading",
-		"core/buttons"
-	],
 	"attributes": {
 		"alt": {
 			"type": "string",

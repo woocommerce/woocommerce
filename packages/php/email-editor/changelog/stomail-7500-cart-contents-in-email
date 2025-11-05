@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Extend Rendering_Context with email-specific context support (user_id, order_id, recipient_email), add woocommerce_email_editor_rendering_email_context filter

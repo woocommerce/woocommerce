@@ -90,15 +90,29 @@ class BlockEmailRenderer {
 	 */
 	private function render_block_email( \WP_Post $email_post, string $woo_content, \WC_Email $wc_email ): ?string {
 		try {
+			// Set email context before rendering so blocks can access it.
+			$filter_callback = function ( $context = array() ) use ( $wc_email ) {
+				return array_merge( $context, $this->build_email_context( $wc_email ) );
+			};
+			add_filter( 'woocommerce_email_editor_rendering_email_context', $filter_callback, 10, 1 );
+
 			$subject             = $wc_email->get_subject(); // We will get subject from $email_post after we add it to the editor.
 			$preheader           = $wc_email->get_preheader();
 			$rendered_email_data = $this->renderer->render( $email_post, $subject, $preheader, 'en' );
 			$personalized_email  = $this->personalizer->personalize_content( $rendered_email_data['html'] );
 			$rendered_email      = str_replace( self::WOO_EMAIL_CONTENT_PLACEHOLDER, $woo_content, $personalized_email );
+
+			// Remove the filter after rendering to prevent context leakage.
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $filter_callback );
+
 			add_filter( 'woocommerce_email_styles', array( $this->woo_content_processor, 'prepare_css' ), 10, 2 );
 			return $rendered_email;
 		} catch ( \Exception $e ) {
 			wc_caught_exception( $e, __METHOD__, array( $email_post, $woo_content, $wc_email ) );
+			// Remove the filter in case of exception.
+			if ( isset( $filter_callback ) ) {
+				remove_filter( 'woocommerce_email_editor_rendering_email_context', $filter_callback );
+			}
 			return null;
 		}
 	}
@@ -111,5 +125,33 @@ class BlockEmailRenderer {
 	 */
 	private function get_email_post_by_wc_email( \WC_Email $email ): ?\WP_Post {
 		return $this->template_manager->get_email_post( $email->id );
+	}
+
+	/**
+	 * Build email context from WC_Email object.
+	 *
+	 * Extracts relevant context data from the WC_Email object that can be used
+	 * by blocks during rendering, such as user ID, email address, order information, etc.
+	 *
+	 * Blocks that need cart product information can derive it from the user_id or email
+	 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+	 *
+	 * @param \WC_Email $wc_email WooCommerce email object.
+	 * @return array Email context data.
+	 */
+	private function build_email_context( \WC_Email $wc_email ): array {
+		$recipient_raw = $wc_email->get_recipient();
+		$emails        = array_values( array_filter( array_map( 'sanitize_email', array_map( 'trim', explode( ',', $recipient_raw ) ) ) ) );
+		$context       = array(
+			'recipient_email' => $emails[0] ?? null,
+		);
+
+		// Extract order-related context if the email object is an order.
+		if ( isset( $wc_email->object ) && $wc_email->object instanceof \WC_Order ) {
+			$order              = $wc_email->object;
+			$context['user_id'] = $order->get_customer_id();
+		}
+
+		return $context;
 	}
 }

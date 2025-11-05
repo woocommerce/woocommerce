@@ -68,9 +68,10 @@ class FilesystemUtil {
 	 * @since 9.3.0
 	 *
 	 * @param string $path Directory to create.
+	 * @param bool   $allow_file_access Whether to allow file access while preventing directory listing. Default false (deny all access).
 	 * @throws \Exception In case of error.
 	 */
-	public static function mkdir_p_not_indexable( string $path ): void {
+	public static function mkdir_p_not_indexable( string $path, bool $allow_file_access = false ): void {
 		$wp_fs = self::get_wp_filesystem();
 
 		if ( $wp_fs->is_dir( $path ) ) {
@@ -81,8 +82,10 @@ class FilesystemUtil {
 			throw new \Exception( esc_html( sprintf( 'Could not create directory: %s.', wp_basename( $path ) ) ) );
 		}
 
+		$htaccess_content = $allow_file_access ? 'Options -Indexes' : 'deny from all';
+
 		$files = array(
-			'.htaccess'  => 'deny from all',
+			'.htaccess'  => $htaccess_content,
 			'index.html' => '',
 		);
 

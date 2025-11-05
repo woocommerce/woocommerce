@@ -2,6 +2,21 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.1) - 2025-11-04 
+
+-   Patch - Export the personalization tags RichTextWithButton component and other email editor methods. [#61748]
+
+## [1.2.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.0) - 2025-10-31 
+
+-   Patch - Ensure the Command palette is functional in WordPress 6.9 beta and above. [#61672]
+-   Minor - Add 'woocommerce-email-editor' plugin area [#61666]
+
+## [1.1.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.3) - 2025-10-27 
+
+-   Patch - Fix for email preview to fit into the container in the preview column [#61442]
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+-   Patch - Add support for a custom back button component [#61535]
+
 ## [1.1.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.2) - 2025-10-09 
 
 -   Patch - Export hook isEmailEditor from the package. [#60941]

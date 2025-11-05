@@ -14,7 +14,6 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
-import Dinero from 'dinero.js';
 
 /**
  * Internal dependencies
@@ -51,6 +50,18 @@ const { itemsInCartTextTemplate } = getConfig(
 	'woocommerce/mini-cart-title-items-counter-block'
 );
 
+type ScalePriceArgs = {
+	price: number;
+	inputDecimals: number;
+	outputDecimals?: number;
+};
+
+const scalePrice = ( {
+	price,
+	inputDecimals,
+	outputDecimals = 0,
+}: ScalePriceArgs ) => price * Math.pow( 10, outputDecimals - inputDecimals );
+
 // Inject style tags for badge styles based on background colors of the document.
 setStyles();
 
@@ -85,11 +96,14 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
-	name?: string;
-	value?: string;
+	raw_attribute?: string | undefined;
+	key?: string | undefined;
+	value?: string | undefined;
 	className?: string;
 	hidden?: boolean;
-};
+	display?: string;
+	attribute?: string;
+} & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -296,6 +310,30 @@ store< MiniCart >(
 	{ lock: universalLock }
 );
 
+function itemDataInnerHTML( field: 'name' | 'value' ) {
+	const { ref } = getElement();
+
+	if ( ! ref ) {
+		return;
+	}
+
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
+	const dataAttr = cartItemState.cartItemDataAttr as
+		| CartItemDataAttr
+		| { hidden: boolean };
+
+	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+		return;
+	}
+
+	if ( field in dataAttr ) {
+		const value = dataAttr[ field as keyof typeof dataAttr ];
+		if ( typeof value === 'string' && value ) {
+			ref.innerHTML = trimWords( value );
+		}
+	}
+}
+
 const { state: cartItemState } = store(
 	'woocommerce/mini-cart-products-table-block',
 	{
@@ -305,47 +343,32 @@ const { state: cartItemState } = store(
 			// state.cartItem to get the cart item.
 			get cartItem() {
 				const {
-					cartItem: { id },
+					cartItem: { key },
 				} = getContext< CartItemContext >( 'woocommerce' );
 
-				const cartItem =
-					woocommerceState.cart.items.find(
-						( item ) => item.id === id
-					) || ( {} as CartItem );
+				const cartItem = ( woocommerceState.cart.items.find(
+					( item ) => item.key === key
+				) || {} ) as CartItem;
 
-				return {
-					variation: [],
-					item_data: [],
-					...cartItem,
-				};
+				cartItem.variation = cartItem.variation || [];
+				cartItem.item_data = cartItem.item_data || [];
+
+				return cartItem;
 			},
 
 			get currency(): Currency {
 				return normalizeCurrencyResponse(
 					woocommerceState.cart.totals,
-					currency
+					currency as Currency
 				);
 			},
 
 			get cartItemDiscount(): string {
-				const { prices } = cartItemState.cartItem;
+				const { extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountSingle =
-					regularAmountSingle.subtract( purchaseAmountSingle );
-
-				const discountPrice = saleAmountSingle
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const discountPrice =
+					cartItemState.regularAmountSingle -
+					cartItemState.purchaseAmountSingle;
 
 				const price = formatPriceWithCurrency(
 					discountPrice,
@@ -364,7 +387,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -380,25 +403,12 @@ const { state: cartItemState } = store(
 			},
 
 			get lineItemDiscount(): string {
-				const { quantity, prices } = cartItemState.cartItem;
+				const { quantity, extensions } = cartItemState.cartItem;
 
-				const regularAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.regular_price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const purchaseAmountSingle = Dinero( {
-					amount: parseInt( prices.raw_prices.price, 10 ),
-					precision: prices.raw_prices.precision,
-				} );
-
-				const saleAmountLineItem = regularAmountSingle
-					.subtract( purchaseAmountSingle )
-					.multiply( quantity );
-
-				const totalLineItemDiscount = saleAmountLineItem
-					.convertPrecision( cartItemState.currency.minorUnit )
-					.getAmount();
+				const totalLineItemDiscount =
+					( cartItemState.regularAmountSingle -
+						cartItemState.purchaseAmountSingle ) *
+					quantity;
 
 				const price = formatPriceWithCurrency(
 					totalLineItemDiscount,
@@ -417,7 +427,7 @@ const { state: cartItemState } = store(
 							{
 								filterName: 'saleBadgePriceFormat',
 								defaultValue: '<price/>',
-								extensions: cartItemState.cartItem.extensions,
+								extensions,
 								arg: {
 									context: 'cart',
 									cartItem: cartItemState.cartItem,
@@ -433,9 +443,10 @@ const { state: cartItemState } = store(
 			},
 
 			get cartItemHasDiscount(): boolean {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
 				return (
-					cartItemState.cartItem.prices.regular_price !==
-					cartItemState.cartItem.prices.price
+					parseInt( rawPrices.regular_price, 10 ) >
+					parseInt( rawPrices.price, 10 )
 				);
 			},
 
@@ -519,10 +530,37 @@ const { state: cartItemState } = store(
 			},
 
 			get priceWithoutDiscount(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const priceWithoutDiscount = scalePrice( {
+					price: parseInt( rawPrices.regular_price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.regular_price, 10 ),
+					priceWithoutDiscount,
 					cartItemState.currency
 				);
+			},
+
+			get regularAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.regular_price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+			},
+
+			get purchaseAmountSingle(): number {
+				const { prices } = cartItemState.cartItem;
+
+				return scalePrice( {
+					price: parseInt( prices.raw_prices.price, 10 ),
+					inputDecimals: prices.raw_prices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
 			},
 
 			get beforeItemPrice(): string | null {
@@ -578,8 +616,15 @@ const { state: cartItemState } = store(
 			},
 
 			get itemPrice(): string {
+				const { raw_prices: rawPrices } = cartItemState.cartItem.prices;
+				const itemPrice = scalePrice( {
+					price: parseInt( rawPrices.price, 10 ),
+					inputDecimals: rawPrices.precision,
+					outputDecimals: cartItemState.currency.minorUnit,
+				} );
+
 				return formatPriceWithCurrency(
-					parseInt( cartItemState.cartItem.prices.price, 10 ),
+					itemPrice,
 					cartItemState.currency
 				);
 			},
@@ -674,15 +719,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | null {
+			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
 				const { itemData, dataProperty } = getContext< {
-					itemData: {
-						key: string;
-						attribute: string;
-						name: string;
-						value: string;
-						hidden: string;
-					};
+					itemData: CartItemDataAttr;
 					dataProperty: DataProperty;
 				} >();
 
@@ -694,26 +733,63 @@ const { state: cartItemState } = store(
 					return { hidden: true };
 				}
 
-				const dataItemAttrKey =
+				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
+				const rawName =
 					dataItemAttr.key ||
 					dataItemAttr.attribute ||
-					dataItemAttr.name;
+					dataItemAttr.name ||
+					'';
+
+				// Extract value - prefer 'display' over 'value' for item_data if available
+				const rawValue =
+					dataItemAttr.display || dataItemAttr.value || '';
 
 				// Decode entities.
 				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = dataItemAttrKey + ':';
+				nameTxt.innerHTML = rawName;
 				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = dataItemAttr.value;
+				valueTxt.innerHTML = rawValue;
 
 				return {
 					name: nameTxt.value,
 					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ dataItemAttrKey
+					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /[\s_]+/g, '-' )
+						.replace( /<[^>]*>/g, '' )
+						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
 					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
+			},
+
+			// Used to index cart item data attributes for wp-each-key.
+			get cartItemDataKey(): string {
+				const { itemData, dataProperty } = getContext< {
+					itemData: CartItemDataAttr;
+					dataProperty: DataProperty;
+				} >();
+
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return '';
+				}
+
+				let name = '';
+				let value = '';
+
+				if ( dataProperty === 'variation' ) {
+					// For variations use raw_attribute as name and value as value
+					name = dataItemAttr.raw_attribute || '';
+					value = dataItemAttr.value || '';
+				} else {
+					// For item_data, use key/name and display/value
+					name = dataItemAttr.key || dataItemAttr.name || '';
+					value = dataItemAttr.display || dataItemAttr.value || '';
+				}
+
+				return `${ name }:${ value }`;
 			},
 
 			get itemDataHasMultipleAttributes(): boolean {
@@ -780,6 +856,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -801,6 +878,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity + multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -818,6 +896,7 @@ const { state: cartItemState } = store(
 				);
 				yield actions.addCartItem( {
 					id: cartItemState.cartItem.id,
+					key: cartItemState.cartItem.key,
 					quantity: cartItemState.cartItem.quantity - multipleOf,
 					variation,
 					type: cartItemState.cartItem.type,
@@ -850,6 +929,14 @@ const { state: cartItemState } = store(
 					}
 				}
 			},
+
+			itemDataNameInnerHTML() {
+				itemDataInnerHTML( 'name' );
+			},
+			itemDataValueInnerHTML() {
+				itemDataInnerHTML( 'value' );
+			},
+
 			filterCartItemClass() {
 				// TODO: Add deprecation notice urging to replace with a `data-wp-class` directive.
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -866,9 +953,11 @@ const { state: cartItemState } = store(
 						const { ref } = getElement();
 
 						// Remove previously applied classes.
-						ref!.classList.remove(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.remove(
+								...previouslyAppliedClasses.current
+							);
+						}
 
 						const newClassesString = applyCheckoutFilter( {
 							filterName: 'cartItemClass',
@@ -885,9 +974,11 @@ const { state: cartItemState } = store(
 						previouslyAppliedClasses.current = newClassesString
 							.split( ' ' )
 							.filter( Boolean );
-						ref!.classList.add(
-							...previouslyAppliedClasses.current
-						);
+						if ( ref ) {
+							ref.classList.add(
+								...previouslyAppliedClasses.current
+							);
+						}
 					}
 				} );
 			},

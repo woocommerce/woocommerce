@@ -4,13 +4,13 @@
 import { store, getContext, getElement } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/product-data';
 import type { HTMLElementEvent } from '@woocommerce/types';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 /**
  * Internal dependencies
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
+import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 export type Context = {
 	productId: number;
@@ -52,6 +52,7 @@ export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 
 export type QuantitySelectorStore = {
 	state: {
+		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 	};
@@ -75,7 +76,21 @@ store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
+			get allowsQuantityChange(): boolean {
+				const { productData } = addToCartWithOptionsStore.state;
+
+				if ( ! productData ) {
+					return true;
+				}
+
+				return (
+					productData.is_in_stock && ! productData.sold_individually
+				);
+			},
 			get allowsDecrease() {
+				// Note: in grouped products, `productData` will be the parent product.
+				// We handle grouped products decrease differently because we
+				// allow setting the quantity to 0.
 				const { quantity, selectedAttributes } =
 					addToCartWithOptionsStore.state;
 
@@ -165,7 +180,6 @@ store< QuantitySelectorStore >(
 				}
 
 				const currentValue = Number( inputElement.value ) || 0;
-
 				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
 
@@ -204,7 +218,7 @@ store< QuantitySelectorStore >(
 			) => {
 				const { allowZero, productId } = getContext< Context >();
 				const { selectedAttributes } = addToCartWithOptionsStore.state;
-				
+
 				const productObject = getProductData(
 					productId,
 					selectedAttributes
