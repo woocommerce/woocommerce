@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Consilidate MCP tools to reduce context usage.
