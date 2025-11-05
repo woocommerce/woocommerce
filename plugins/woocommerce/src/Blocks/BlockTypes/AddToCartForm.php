@@ -226,10 +226,10 @@ class AddToCartForm extends AbstractBlock {
 		// The quantity input might be hidden if the min and max quantities
 		// returned by `woocommerce_quantity_input_args` are the same.
 		$has_visible_input = Utils::has_visible_quantity_input( $product_html );
-		if ( $has_visible_input ) {
+		if ( $has_visible_input && $is_stepper_style) {
 			$product_name = $product->get_name();
-			$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
-			$product_html = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
+			$product_html = $this->add_steppers( $product_html, $product_name );
+			$product_html = $this->add_stepper_classes_to_add_to_cart_form_input( $product_html );
 		} else {
 			$is_stepper_style = false;
 		}
