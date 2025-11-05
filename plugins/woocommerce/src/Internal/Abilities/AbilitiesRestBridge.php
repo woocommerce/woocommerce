@@ -40,11 +40,11 @@ class AbilitiesRestBridge {
 			),
 			array(
 				'id'          => 'woocommerce/orders',
-				'operations'  => array( 'list', 'get', 'create', 'update' ),
+				'operations'  => array( 'list', 'get', 'create', 'update', 'delete' ),
 				'controller'  => \WC_REST_Orders_Controller::class,
 				'route'       => '/wc/v3/orders',
 				'label'       => __( 'Manage orders', 'woocommerce' ),
-				'description' => __( 'Manage WooCommerce orders. Use action parameter to list, get, create, or update orders.', 'woocommerce' ),
+				'description' => __( 'Manage WooCommerce orders. Use action parameter to list, get, create, update, or delete orders.', 'woocommerce' ),
 			),
 		);
 	}
