@@ -31,6 +31,13 @@ class EmailsSettingsSchema extends AbstractSchema {
 	const IDENTIFIER = 'emails_settings';
 
 	/**
+	 * This fields support personalization tags and need to be unwrapped before returning to the client.
+	 *
+	 * @var array
+	 */
+	const FIELDS_SUPPORTING_PERSONALIZATION_TAGS = array( 'subject', 'preheader' );
+
+	/**
 	 * Return all properties for the item schema.
 	 *
 	 * @return array
@@ -233,6 +240,11 @@ class EmailsSettingsSchema extends AbstractSchema {
 			$default = $this->get_field_default_value( $email, $id, $field );
 			$value   = $email->get_option( $id, $default );
 
+			// Unwrap personalization tags if the field supports them.
+			if ( in_array( $id, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
+				$value = $this->unwrap_woocommerce_tags( $value );
+			}
+
 			// Convert checkbox to boolean for API.
 			if ( 'checkbox' === $field_type ) {
 				$value = ( 'yes' === $value );
@@ -277,6 +289,30 @@ class EmailsSettingsSchema extends AbstractSchema {
 				return $field['default'] ?? ( $field['placeholder'] ?? '' );
 		}
 	}
+
+	/**
+	 * Remove HTML comment wrappers from WooCommerce tags.
+	 *
+	 * Converts tags from <!--[woocommerce/tag-name]--> back to [woocommerce/tag-name],
+	 * <!--[mailpoet/tag-name]--> back to [mailpoet/tag-name], or
+	 * <!--[ciab/tag-name]--> back to [ciab/tag-name]
+	 *
+	 * This is required because the email editor personalization tags are wrapped in HTML comment wrappers.
+	 * We need to remove the tags to make editing easier for the end-users and also because the tags are not well formatted in the current DataForm implementation.
+	 *
+	 * @param string $value The value to unwrap.
+	 * @return string The unwrapped value.
+	 */
+	private function unwrap_woocommerce_tags( $value ) {
+		if ( ! is_string( $value ) ) {
+			return $value;
+		}
+
+		// Remove HTML comment wrappers from WooCommerce tags.
+		$unwrapped_value = preg_replace( '/<!--(\[(?:woocommerce|mailpoet|ciab)\/[^\]]+\])-->/i', '$1', $value );
+		return $unwrapped_value;
+	}
+
 	/**
 	 * Get grouped settings structure with field metadata.
 	 *
@@ -344,6 +380,14 @@ class EmailsSettingsSchema extends AbstractSchema {
 
 			// Sanitize by type.
 			$sanitized = $this->sanitize_field_value( $field_type, $value );
+
+			// Sanitize Personalization tags
+			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
+				// check if the subject has a value like [woocommerce/customer-first-name] or [mailpoet/...] or [ciab/...], if so, replace with <!--tagName-->
+				// this is required for the email editor personalization.
+				// Use negative lookbehind and lookahead to avoid double-wrapping already wrapped tags.
+				$sanitized = preg_replace( '/(?<!<!--)(\[(?:woocommerce|mailpoet|ciab)\/[^\]]+\])(?!-->)/i', '<!--$1-->', $value );
+			}
 
 			// Validate.
 			$validation = $this->validate_field_value( $fieldId, $sanitized, $field );
