@@ -31,6 +31,7 @@ Follow WooCommerce project conventions when adding or modifying backend PHP code
 ## Version Information
 
 To determine the next WooCommerce version number for `@since` annotations:
+
 - Read the `$version` property in `includes/class-woocommerce.php` **on the trunk branch**
 - Remove the `-dev` suffix if present
 - Example: If trunk shows `10.4.0-dev`, use `@since 10.4.0`

@@ -3,6 +3,7 @@
 ## Project Overview
 
 WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
+
 - **Backend**: PHP in `plugins/woocommerce/` (PSR-4, WordPress standards)
 - **Admin Client**: React/TypeScript in `client/admin/`
 - **Payment Settings**: Specialized module in `client/admin/client/settings-payments/`
@@ -63,6 +64,7 @@ plugins/woocommerce/
 ### Key Architectural Concepts
 
 **Modern vs Legacy Code:**
+
 - `src/` - Modern PHP with dependency injection, PSR-4 autoloading
 - `includes/` - Legacy WordPress patterns, modify only when necessary
 
@@ -104,7 +106,7 @@ For detailed test commands, see `woocommerce-dev-cycle` skill.
 
 ### Most Common Commands
 
-```bash
+```sh
 # Run specific test class
 pnpm test:php:env -- --filter TestClassName
 
@@ -128,6 +130,7 @@ For complete command reference and workflows, see `woocommerce-dev-cycle` skill.
 ## Monorepo Context
 
 This is part of the WooCommerce monorepo:
+
 - Multiple packages managed with pnpm workspaces
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages

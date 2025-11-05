@@ -275,9 +275,9 @@ public function process_payment( $order_id ) {
    - File docblock order (PSR-12)
    - Unused closure parameters (add `unset()`)
 
-4. **Manually fix remaining issues**
+4. **Address remaining issues manually**
 
-5. **Verify clean:**
+5. **Verify the output is clean:**
    ```bash
    pnpm lint:php -- path/to/file.php
    ```

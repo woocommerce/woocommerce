@@ -14,6 +14,7 @@
 Write self-explanatory code. Use comments sparingly - only for non-obvious insights.
 
 **Good - Code explains itself:**
+
 ```php
 if ( $order->is_draft() && $user->can_delete_drafts() ) {
     $order->delete();

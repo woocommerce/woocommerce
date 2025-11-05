@@ -29,7 +29,7 @@ The standard development workflow:
 ## Key Principles
 
 - Always run tests after making changes to verify functionality
-- Use specific test filters to run only relevant tests during development
-- Only fix linting errors for code in your current branch
+- Use specific test filters to run relevant tests during development
+- Fix linting errors solely for code in your current branch
 - Test failures provide detailed output showing expected vs actual values
 - The test environment handles WordPress/WooCommerce setup automatically

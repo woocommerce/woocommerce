@@ -6,9 +6,9 @@
 - [Method Visibility](#method-visibility)
 - [Static Methods](#static-methods)
 - [Docblock Requirements](#docblock-requirements)
-  - [Public, Protected Methods, and Hooks](#public-protected-methods-and-hooks)
-  - [Private Methods and Internal Callbacks](#private-methods-and-internal-callbacks)
-  - [@internal Annotation Placement](#internal-annotation-placement)
+    - [Public, Protected Methods, and Hooks](#public-protected-methods-and-hooks)
+    - [Private Methods and Internal Callbacks](#private-methods-and-internal-callbacks)
+    - [@internal Annotation Placement](#internal-annotation-placement)
 - [Hook Docblocks](#hook-docblocks)
 
 ## Naming Conventions
@@ -16,6 +16,7 @@
 Use snake_case for methods, variables, and hooks (not camelCase or PascalCase).
 
 **Examples:**
+
 ```php
 // Correct
 public function calculate_order_total() { }
@@ -31,6 +32,7 @@ New class methods should be `private` by default.
 **Use `public`** only if the method will be called from outside the class.
 
 **Examples:**
+
 ```php
 class OrderProcessor {
     // Default: private for internal helpers
@@ -49,6 +51,7 @@ class OrderProcessor {
 Pure methods (output depends only on inputs, no external dependencies) must be `static`.
 
 **Examples of pure methods (should be static):**
+
 ```php
 // Mathematical calculations
 public static function calculate_percentage( float $amount, float $percent ) {
@@ -67,6 +70,7 @@ public static function normalize_address( array $address ) {
 ```
 
 **Examples of non-pure methods (should NOT be static):**
+
 ```php
 // Depends on database
 public function get_order_total( int $order_id ) { }

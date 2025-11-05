@@ -3,9 +3,9 @@
 ## Table of Contents
 
 - [Preventing Accidental Data Loss](#preventing-accidental-data-loss)
-  - [Validation Before Deletion](#validation-before-deletion)
-  - [Consider Race Conditions](#consider-race-conditions)
-  - [Session-Based Operations](#session-based-operations)
+    - [Validation Before Deletion](#validation-before-deletion)
+    - [Consider Race Conditions](#consider-race-conditions)
+    - [Session-Based Operations](#session-based-operations)
 - [When in Doubt, Ask](#when-in-doubt-ask)
 - [Security Checklist for Data Operations](#security-checklist-for-data-operations)
 - [Common Pitfalls to Avoid](#common-pitfalls-to-avoid)

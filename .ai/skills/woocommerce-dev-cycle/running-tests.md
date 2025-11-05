@@ -188,7 +188,7 @@ Test failures provide:
 
 ## Test Configuration
 
-Test configuration file: `phpunit.xml`
+Test configuration file: `plugins/woocommerce/phpunit.xml`
 
 This file contains:
 - Test suite definitions

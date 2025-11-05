@@ -191,7 +191,7 @@ Before committing your changes:
 - [ ] Run `pnpm run lint:php:fix` if issues found
 - [ ] Run `pnpm run lint:changes:branch:js` if you modified JS files
 - [ ] Review all automatic fixes with `git diff`
-- [ ] Manually fix any remaining issues that can't be auto-fixed
+- [ ] Address any remaining issues that can't be auto-fixed
 - [ ] Run tests to ensure fixes didn't break functionality
 
 ## Integration with Development Cycle
@@ -252,7 +252,7 @@ pnpm run lint:php
 **Solution:**
 1. Review the automatic fixes: `git diff`
 2. If fixes are incorrect, revert: `git checkout -- path/to/file.php`
-3. Manually fix the issues instead
+3. Address the issues manually instead
 
 ## Notes
 
