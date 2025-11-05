@@ -15,6 +15,8 @@ use Exception;
  * WC Push Notifications
  *
  * Class for setting up the WooCommerce-driven push notifications.
+ *
+ * @since 10.4.0
  */
 class PushNotifications {
 	/**
@@ -43,6 +45,8 @@ class PushNotifications {
 	 * Loads the push notifications class.
 	 *
 	 * @return void
+	 *
+	 * @since 10.4.0
 	 */
 	public function register(): void {
 		if ( ! $this->should_be_enabled() ) {
@@ -59,6 +63,8 @@ class PushNotifications {
 	 * request.
 	 *
 	 * @return bool
+	 *
+	 * @since 10.4.0
 	 */
 	public function should_be_enabled(): bool {
 		if ( null !== $this->enabled ) {
