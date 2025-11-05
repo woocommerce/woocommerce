@@ -28,7 +28,7 @@ Display a call to action button which either adds the product to the cart, or li
 -	**Category:** woocommerce-product-elements
 -   **Ancestor:** woocommerce/all-products, woocommerce/single-product, core/post-template, woocommerce/product-template
 -   **Parent:** 
--	**Supports:** align (full, wide), color (background, text, ~~link~~), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+-	**Supports:** align (full, wide), color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, textAlign, width
 
 ## Product Image - woocommerce/product-image
@@ -39,7 +39,7 @@ Display the main product image.
 -	**Category:** woocommerce-product-elements
 -   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
--	**Supports:** dimensions (aspectRatio), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~html~~
+-	**Supports:** dimensions (aspectRatio), email, interactivity (clientNavigation), spacing (margin, padding), typography (fontSize), ~~html~~
 -	**Attributes:** aspectRatio, height, imageSizing, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, productId, saleBadgeAlign, scale, showProductLink, showSaleBadge, width
 
 ## Product Price - woocommerce/product-price
@@ -48,9 +48,9 @@ Display the price of a product.
 
 -	**Name:** woocommerce/product-price
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
--	**Supports:** color (background, text, ~~link~~), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
+-	**Supports:** color (background, text, ~~link~~), email, interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId, textAlign
 
 ## Product Image Gallery - woocommerce/product-image-gallery
@@ -127,7 +127,7 @@ Displays an on-sale badge if the product is on-sale.
 -	**Category:** woocommerce-product-elements
 -   **Ancestor:** woocommerce/single-product, woocommerce/product-template, core/post-template, woocommerce/product-gallery
 -   **Parent:** 
--	**Supports:** align, color (background, gradients, text, ~~link~~), interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
+-	**Supports:** align, color (background, gradients, text, ~~link~~), email, interactivity (clientNavigation), spacing (margin), typography (fontSize, lineHeight), ~~html~~
 -	**Attributes:** isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, productId
 
 ## Product SKU - woocommerce/product-sku
@@ -150,7 +150,7 @@ Let shoppers know when products are out of stock or on backorder. This block is 
 -   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, text), interactivity, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~
--	**Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop
+-	**Attributes:** isDescendantOfAllProducts
 
 ## Product Summary - woocommerce/product-summary
 
@@ -158,7 +158,7 @@ Display a short description about a product.
 
 -	**Name:** woocommerce/product-summary
 -	**Category:** woocommerce-product-elements
--   **Ancestor:** woocommerce/all-products, woocommerce/single-product, woocommerce/product-template, core/post-template
+-   **Ancestor:** woocommerce/all-products, woocommerce/featured-product, woocommerce/single-product, woocommerce/product-template, core/post-template
 -   **Parent:** 
 -	**Supports:** color (background, link, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, lineHeight, textAlign)
 -	**Attributes:** isDescendantOfAllProducts, isDescendentOfQueryLoop, isDescendentOfSingleProductBlock, isDescendentOfSingleProductTemplate, linkText, productId, showDescriptionIfEmpty, showLink, summaryLength
@@ -402,7 +402,7 @@ Shows the Cross-Sells products.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** woocommerce/cart-cross-sells-block
--	**Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
+-	**Supports:** email, ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
 -	**Attributes:** columns, lock
 
 ## Express Checkout - woocommerce/cart-express-payment-block
@@ -602,6 +602,28 @@ Enable customers to change the sorting order of the products.
 -   **Parent:** 
 -	**Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
 -	**Attributes:** fontSize, useLabel
+
+## Product Category Description - woocommerce/category-description
+
+Displays the current category description.
+
+-	**Name:** woocommerce/category-description
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+-	**Attributes:** textAlign
+
+## Product Category Title - woocommerce/category-title
+
+Displays the current category title and lets permitted users edit it.
+
+-	**Name:** woocommerce/category-title
+-	**Category:** woocommerce
+-   **Ancestor:** 
+-   **Parent:** 
+-	**Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+-	**Attributes:** isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout
 
@@ -919,8 +941,8 @@ Visually highlight a product category and encourage prompt action.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), ariaLabel, color (background, text), interactivity (clientNavigation), spacing (padding), ~~html~~
--	**Attributes:** alt, categoryId, contentAlign, dimRatio, editMode, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory, showDesc
+-	**Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), spacing (padding), ~~html~~
+-	**Attributes:** alt, categoryId, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewCategory
 
 ## Featured Product - woocommerce/featured-product
 
@@ -930,8 +952,8 @@ Highlight a product or variation.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), ariaLabel, color (background, text), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
--	**Attributes:** alt, contentAlign, dimRatio, editMode, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId, showDesc, showPrice
+-	**Supports:** align (full, wide), ariaLabel, color (background, text), filter (duotone), interactivity (clientNavigation), multiple, spacing (padding), ~~html~~
+-	**Attributes:** alt, contentAlign, dimRatio, focalPoint, hasParallax, imageFit, isRepeated, linkText, mediaId, mediaSrc, minHeight, overlayColor, overlayGradient, previewProduct, productId
 
 ## Filter Block - woocommerce/filter-wrapper
 
@@ -1337,7 +1359,7 @@ Display a collection of products from your store.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), anchor, interactivity, ~~html~~
+-	**Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
 -	**Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
@@ -1348,7 +1370,7 @@ The contents of this block will display when there are no products found.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/product-collection
 -   **Parent:** 
--	**Supports:** align, color (background, gradients, link, text), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
+-	**Supports:** align, color (background, gradients, link, text), email, interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~, ~~reusable~~
 -	**Attributes:** 
 
 ## Product Description - woocommerce/product-description
@@ -1516,7 +1538,7 @@ Enable customers to filter the product collection by selecting one or more taxon
 -	**Supports:** color (text, ~~background~~), interactivity, spacing (blockGap, margin, padding), typography (fontSize, lineHeight)
 -	**Attributes:** displayStyle, hideEmpty, isPreview, showCounts, sortOrder, taxonomy
 
-## Product Gallery (Beta) - woocommerce/product-gallery
+## Product Gallery - woocommerce/product-gallery
 
 Showcase your products relevant images and media.
 
@@ -1524,7 +1546,7 @@ Showcase your products relevant images and media.
 -	**Category:** woocommerce
 -   **Ancestor:** woocommerce/single-product
 -   **Parent:** 
--	**Supports:** align, interactivity, layout (allowEditing, allowOrientation, default, ~~allowJustification~~)
+-	**Supports:** align, email, interactivity, layout (allowEditing, allowOrientation, default, ~~allowJustification~~)
 -	**Attributes:** fullScreenOnClick, hoverZoom
 
 ## Large Image - woocommerce/product-gallery-large-image
@@ -1744,7 +1766,7 @@ Contains the block elements used to render a product.
 -	**Category:** woocommerce
 -   **Ancestor:** 
 -   **Parent:** 
--	**Supports:** align (full, wide), anchor, color (background, gradients, link, text), interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+-	**Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 -	**Attributes:** 
 
 ## Top Rated Products - woocommerce/product-top-rated

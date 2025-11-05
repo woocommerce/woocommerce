@@ -96,8 +96,9 @@ type CartItemContext = {
 };
 
 type CartItemDataAttr = {
+	raw_attribute?: string | undefined;
 	key?: string | undefined;
-	value: string;
+	value?: string | undefined;
 	className?: string;
 	hidden?: boolean;
 	display?: string;
@@ -759,6 +760,36 @@ const { state: cartItemState } = store(
 						.toLowerCase() }`,
 					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
+			},
+
+			// Used to index cart item data attributes for wp-each-key.
+			get cartItemDataKey(): string {
+				const { itemData, dataProperty } = getContext< {
+					itemData: CartItemDataAttr;
+					dataProperty: DataProperty;
+				} >();
+
+				const dataItemAttr =
+					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+
+				if ( ! dataItemAttr ) {
+					return '';
+				}
+
+				let name = '';
+				let value = '';
+
+				if ( dataProperty === 'variation' ) {
+					// For variations use raw_attribute as name and value as value
+					name = dataItemAttr.raw_attribute || '';
+					value = dataItemAttr.value || '';
+				} else {
+					// For item_data, use key/name and display/value
+					name = dataItemAttr.key || dataItemAttr.name || '';
+					value = dataItemAttr.display || dataItemAttr.value || '';
+				}
+
+				return `${ name }:${ value }`;
 			},
 
 			get itemDataHasMultipleAttributes(): boolean {
