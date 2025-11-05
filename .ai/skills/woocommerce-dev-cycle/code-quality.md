@@ -41,6 +41,7 @@ pnpm run lint:php:fix
 ```
 
 This command:
+
 - Automatically fixes code style violations where possible
 - Applies WordPress Coding Standards formatting
 - Modifies files in place
@@ -74,6 +75,7 @@ pnpm run lint:changes:branch:js
 ```
 
 This command:
+
 - Checks only JavaScript/TypeScript files changed in your current branch
 - Identifies code style and potential issues
 - Does not modify files
@@ -85,6 +87,7 @@ For detailed JavaScript/TypeScript linting configuration and patterns, see `clie
 Always lint markdown files after making changes. See [markdown-linting.md](markdown-linting.md) for complete details.
 
 **Quick commands:**
+
 ```bash
 # Auto-fix most issues
 markdownlint --fix path/to/file.md
@@ -102,6 +105,7 @@ markdownlint path/to/file.md
 Do not fix linting errors in unrelated code unless specifically asked to do so.
 
 **Why?**
+
 - Keeps pull requests focused on the actual changes
 - Avoids merge conflicts with other branches
 - Makes code review easier
@@ -138,7 +142,7 @@ git commit -m "Your commit message"
 
 ### PHP CodeSniffer Output
 
-```
+```text
 FILE: /path/to/file.php
 ----------------------------------------------------------------------
 FOUND 2 ERRORS AFFECTING 2 LINES
@@ -151,12 +155,14 @@ FOUND 2 ERRORS AFFECTING 2 LINES
 ```
 
 **Legend:**
+
 - `[x]` - Can be fixed automatically with phpcbf/lint:php:fix
 - `[ ]` - Requires manual fixing
 
 ### Common PHP Issues
 
 1. **Spacing issues** - Usually auto-fixable
+
    ```php
    // Wrong
    if($condition){
@@ -166,6 +172,7 @@ FOUND 2 ERRORS AFFECTING 2 LINES
    ```
 
 2. **Naming conventions** - Requires manual fix
+
    ```php
    // Wrong
    $orderID
@@ -175,6 +182,7 @@ FOUND 2 ERRORS AFFECTING 2 LINES
    ```
 
 3. **Yoda conditions** - Requires manual fix
+
    ```php
    // Wrong
    if ( $value === 'active' )
@@ -228,6 +236,7 @@ pnpm run lint:js        # JavaScript linting only
 **Problem:** Command fails with "command not found"
 
 **Solution:** Install dependencies:
+
 ```bash
 pnpm install
 ```
@@ -237,6 +246,7 @@ pnpm install
 **Problem:** Linting reports issues in files you didn't change
 
 **Solution:** Make sure you're using the branch-specific commands:
+
 ```bash
 # Good - only checks your changes
 pnpm run lint:changes:branch:php
@@ -250,6 +260,7 @@ pnpm run lint:php
 **Problem:** Git conflicts after running lint:php:fix
 
 **Solution:**
+
 1. Review the automatic fixes: `git diff`
 2. If fixes are incorrect, revert: `git checkout -- path/to/file.php`
 3. Address the issues manually instead

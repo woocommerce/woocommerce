@@ -21,6 +21,7 @@ Examples: `src/Internal/Traits/Foobar.php`, `src/Internal/Utils/DataParser.php`
 Only when the prompt refers to a "public" class should the file go in `src` but not in `Internal`.
 
 **Example:**
+
 - "Add a public Traits/Foobar class" → `src/Traits/Foobar.php`
 
 ### Working with `includes/` Directory
@@ -37,6 +38,7 @@ Modify existing code only. Add new classes/methods here only when using `src/` w
 - Root namespace for the `src` directory is `Automattic\WooCommerce`
 
 **Examples:**
+
 ```php
 // User says: "create a data parser class"
 // You create: DataParser.php
@@ -50,10 +52,12 @@ class DataParser {
 ## Namespace and Import Conventions
 
 When referencing a namespaced class:
+
 1. Always add a `use` statement with the fully qualified class name at the beginning of the file
 2. Reference the short class name throughout the code
 
 **Good:**
+
 ```php
 use Automattic\WooCommerce\Internal\Utils\Foobar;
 
@@ -62,6 +66,7 @@ $instance = $container->get( Foobar::class );
 ```
 
 **Avoid:**
+
 ```php
 // No use statement, using fully qualified name:
 $instance = $container->get( \Automattic\WooCommerce\Internal\Utils\Foobar::class );

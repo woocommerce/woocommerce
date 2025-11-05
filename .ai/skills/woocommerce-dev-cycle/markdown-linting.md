@@ -107,6 +107,7 @@ Use UTF-8 box-drawing characters, not spaces, tabs, or ASCII art:
 **NEVER use Edit tool after `markdownlint --fix`** if the file contains directory trees.
 
 **Always check file encoding first:**
+
 ```bash
 file path/to/file.md
 # Should show: "UTF-8 text" or "ASCII text"
@@ -130,6 +131,7 @@ file file.md
 ### Adding Language Specs to Code Blocks
 
 **Before:**
+
 ````markdown
 ```
 pnpm test:php:env
@@ -137,6 +139,7 @@ pnpm test:php:env
 ````
 
 **After:**
+
 ````markdown
 ```bash
 pnpm test:php:env
@@ -144,6 +147,7 @@ pnpm test:php:env
 ````
 
 Common language specs:
+
 - `bash` - Shell commands
 - `php` - PHP code
 - `javascript` or `js` - JavaScript
@@ -154,11 +158,13 @@ Common language specs:
 ### Breaking Long Lines
 
 **Before:**
+
 ```markdown
 This is a very long line that exceeds the 80 character limit and needs to be broken into multiple lines for better readability.
 ```
 
 **After:**
+
 ```markdown
 This is a very long line that exceeds the 80 character limit and needs to be
 broken into multiple lines for better readability.
@@ -167,16 +173,18 @@ broken into multiple lines for better readability.
 ### Blank Lines Around Code Blocks
 
 **Before:**
-```markdown
+
+````markdown
 Some text here
 ```bash
 command here
 ```
 More text
-```
+````
 
 **After:**
-```markdown
+
+````markdown
 Some text here
 
 ```bash
@@ -184,7 +192,7 @@ command here
 ```
 
 More text
-```
+````
 
 ## Notes
 

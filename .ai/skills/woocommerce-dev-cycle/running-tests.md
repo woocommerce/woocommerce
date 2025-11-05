@@ -3,8 +3,8 @@
 ## Table of Contents
 
 - [PHP Unit Tests](#php-unit-tests)
-  - [Basic Test Commands](#basic-test-commands)
-  - [Examples](#examples)
+    - [Basic Test Commands](#basic-test-commands)
+    - [Examples](#examples)
 - [Common Test Commands](#common-test-commands)
 - [Test Environment](#test-environment)
 - [Troubleshooting Tests](#troubleshooting-tests)
@@ -115,7 +115,7 @@ wp-env start
 
 ### Successful Test Run
 
-```
+```text
 PHPUnit 9.6.24
 
 ..................................................  50 / 100 ( 50%)
@@ -128,7 +128,7 @@ OK (100 tests, 250 assertions)
 
 ### Failed Test
 
-```
+```text
 PHPUnit 9.6.24
 
 .....F.................................................  50 / 100 ( 50%)
@@ -151,6 +151,7 @@ Tests: 100, Assertions: 250, Failures: 1.
 ### Understanding Failures
 
 Test failures provide:
+
 - **Which test failed:** Test class and method name
 - **Test data:** Data set used (if using data providers)
 - **Expected vs actual:** What was expected and what was received
@@ -161,16 +162,19 @@ Test failures provide:
 ### During Development
 
 1. **Run specific tests** for the code you're changing:
+
    ```bash
    pnpm run test:php:env -- --filter YourTestClass
    ```
 
 2. **Use verbose mode** when debugging:
+
    ```bash
    pnpm run test:php:env -- --verbose --filter YourTestClass
    ```
 
 3. **Stop on first failure** to focus on one issue at a time:
+
    ```bash
    pnpm run test:php:env -- --stop-on-failure --filter YourTestClass
    ```
@@ -178,6 +182,7 @@ Test failures provide:
 ### Before Committing
 
 1. **Run all affected tests:**
+
    ```bash
    pnpm run test:php:env -- tests/php/src/Internal/YourFeature/
    ```
@@ -191,6 +196,7 @@ Test failures provide:
 Test configuration file: `plugins/woocommerce/phpunit.xml`
 
 This file contains:
+
 - Test suite definitions
 - Bootstrap files
 - Coverage settings
@@ -229,6 +235,7 @@ pnpm test:js -- --coverage
 For detailed Jest configuration and testing patterns, see `client/admin/CLAUDE.md`.
 
 Common issues:
+
 - **Tests not found**: Ensure you're in the `client/admin` directory
 - **Module resolution errors**: Run `pnpm install` in the `client/admin` directory
 - **Cache issues**: Try `pnpm test:js -- --clearCache`

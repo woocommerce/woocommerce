@@ -47,6 +47,7 @@ Sentence case has specific exceptions where capitalization is required:
 Always capitalize proper nouns (names of specific products, services, or brands):
 
 **Correct:**
+
 - "Connect with WooPayments"
 - "Import from WordPress"
 - "Sync with Stripe"
@@ -57,6 +58,7 @@ Always capitalize proper nouns (names of specific products, services, or brands)
 Always capitalize acronyms:
 
 **Correct:**
+
 - "Configure API settings"
 - "Enter URL"
 - "Set up SSL certificate"
@@ -67,6 +69,7 @@ Always capitalize acronyms:
 Always use the official capitalization for brand names:
 
 **Correct:**
+
 - "PayPal"
 - "WooCommerce"
 - "WordPress"
@@ -76,7 +79,7 @@ Always use the official capitalization for brand names:
 
 ### Buttons
 
-```
+```text
 ✅ Correct:
 - "Save changes"
 - "Add product"
@@ -92,7 +95,7 @@ Always use the official capitalization for brand names:
 
 ### Labels
 
-```
+```text
 ✅ Correct:
 - "Payment method"
 - "Shipping address"
@@ -108,7 +111,7 @@ Always use the official capitalization for brand names:
 
 ### Menu Items
 
-```
+```text
 ✅ Correct:
 - "Settings"
 - "Payment gateways"
@@ -124,7 +127,7 @@ Always use the official capitalization for brand names:
 
 ### Headings
 
-```
+```text
 ✅ Correct:
 - "Payment settings"
 - "Configure your store"
@@ -138,7 +141,7 @@ Always use the official capitalization for brand names:
 
 ### Messages and Notifications
 
-```
+```text
 ✅ Correct:
 - "Settings saved successfully"
 - "Unable to connect to payment provider"

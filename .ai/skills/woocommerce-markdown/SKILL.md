@@ -27,6 +27,7 @@ The project uses markdownlint with these specific rules (from `.markdownlint.jso
 - **MD031**: Fenced code blocks must be surrounded by blank lines
 - **MD032**: Lists must be surrounded by blank lines
 - **MD033**: HTML allowed for `<video>` elements only
+- **MD036**: Emphasis (bold/italic) should not be used as headings - use proper heading tags
 - **MD040**: Fenced code blocks should specify language
 - **MD047**: Files must end with a single newline
 
@@ -253,6 +254,24 @@ Some text
 
 - List item
 ````
+
+### MD036: Emphasis as heading
+
+**Problem:**
+
+```markdown
+**Example: Using bold as a heading**
+
+Some content here
+```
+
+**Fix:**
+
+```markdown
+#### Example: Using a proper heading
+
+Some content here
+```
 
 ### MD040: Code needs language
 

@@ -18,7 +18,8 @@ Always verify entity state before deletion/modification to prevent accidental da
 
 Always verify the state of the entity before deleting or modifying it.
 
-**Example: Deleting a draft order**
+#### Example: Deleting a draft order
+
 ```php
 // GOOD: Verify order status before deletion
 public function delete_draft_order( int $order_id ) {
@@ -47,7 +48,8 @@ public function delete_draft_order( int $order_id ) {
 
 Think about whether race conditions could occur that might affect the wrong data.
 
-**Example: User-specific data deletion**
+#### Example: User-specific data deletion
+
 ```php
 // GOOD: Verify ownership before deletion
 public function delete_user_cart_item( int $item_id, int $user_id ) {
@@ -76,7 +78,8 @@ public function delete_user_cart_item( int $item_id, int $user_id ) {
 
 For session-based operations (like cart or checkout), verify session ownership.
 
-**Example: Clearing checkout data**
+#### Example: Clearing checkout data
+
 ```php
 // GOOD: Verify session ownership
 public function clear_checkout_data( int $session_id ) {
@@ -93,6 +96,7 @@ public function clear_checkout_data( int $session_id ) {
 ## When in Doubt, Ask
 
 If unsure about data operations, ask for clarification about:
+
 - Required state/ownership verifications
 - Soft delete vs hard delete requirements
 - Protected states that prevent deletion
@@ -113,6 +117,7 @@ Before implementing code that modifies or deletes data:
 ## Common Pitfalls to Avoid
 
 ### 1. Trusting User Input
+
 ```php
 // BAD
 $order_id = $_POST['order_id'];
@@ -127,6 +132,7 @@ if ( ! current_user_can( 'delete_order', $order_id ) ) {
 ```
 
 ### 2. Batch Operations Without Verification
+
 ```php
 // BAD: Deletes all without verification
 foreach ( $order_ids as $order_id ) {
@@ -143,6 +149,7 @@ foreach ( $order_ids as $order_id ) {
 ```
 
 ### 3. Ignoring Return Values
+
 ```php
 // BAD: Doesn't check if operation succeeded
 $order->delete( true );

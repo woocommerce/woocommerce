@@ -5,6 +5,7 @@
 Name hook callback methods: `handle_{hook_name}` with `@internal` annotation.
 
 **Examples:**
+
 ```php
 /**
  * Handle the woocommerce_init hook.
@@ -30,6 +31,7 @@ public function handle_woocommerce_before_checkout( $checkout ) {
 ## Hook Docblocks
 
 If you modify a line that fires a hook without a docblock:
+
 1. Add docblock with description and `@param` tags
 2. Use `git log -S "hook_name"` to find when it was introduced
 3. Add `@since` annotation with that version
@@ -49,13 +51,15 @@ do_action( 'woocommerce_order_processed', $order_id, $order_data );
 ## Hook Documentation Requirements
 
 All hooks must have docblocks that include:
+
 - Description of when the hook fires
 - `@param` tags for each parameter passed to the hook
 - `@since` annotation with the version number (last line, with blank line before)
-  - For new hooks: Use the version from `includes/class-woocommerce.php` on trunk, removing `-dev` suffix
-  - For existing hooks: Use `git log -S "hook_name"` to find when it was introduced
+    - For new hooks: Use the version from `includes/class-woocommerce.php` on trunk, removing `-dev` suffix
+    - For existing hooks: Use `git log -S "hook_name"` to find when it was introduced
 
 **Action hook example:**
+
 ```php
 /**
  * Fires after a product is saved.
@@ -69,6 +73,7 @@ do_action( 'woocommerce_product_saved', $product_id, $product );
 ```
 
 **Filter hook example:**
+
 ```php
 /**
  * Filters the product price before display.

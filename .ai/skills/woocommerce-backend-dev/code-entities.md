@@ -95,12 +95,14 @@ Add concise docblocks to all hooks and methods. One line is ideal.
 Must include a `@since` annotation with the next WooCommerce version number.
 
 The `@since` annotation must be:
+
 - The last line in the docblock
 - Preceded by a blank comment line
 - Use the version from `includes/class-woocommerce.php` on trunk, removing the `-dev` suffix
   (e.g., if trunk shows `10.4.0-dev`, use `@since 10.4.0`)
 
 **Good - Concise:**
+
 ```php
 /**
  * Process the order and update status.
@@ -123,6 +125,7 @@ do_action( 'woocommerce_order_processed', $order_id );
 ```
 
 **Avoid - Over-explained:**
+
 ```php
 /**
  * This method processes the order by validating the order data,
@@ -141,10 +144,12 @@ For hooks, aim for a single descriptive line whenever possible.
 ### Private Methods and Internal Callbacks
 
 Do NOT require a `@since` annotation if they are:
+
 - Private methods
 - Internal callbacks (marked with `@internal`)
 
 **Example:**
+
 ```php
 /**
  * Internal helper to validate order items.
@@ -158,11 +163,13 @@ private function validate_items( array $items ) { }
 ### @internal Annotation Placement
 
 When an `@internal` annotation is added, it must be:
+
 - Placed after the method description
 - Placed before the arguments list
 - Have a blank comment line before and after
 
 **Example:**
+
 ```php
 /**
  * Handle the woocommerce_init hook.

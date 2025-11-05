@@ -22,6 +22,7 @@ if ( $order->is_draft() && $user->can_delete_drafts() ) {
 ```
 
 **Avoid - Over-commented:**
+
 ```php
 // Check if order is draft
 if ( $order->is_draft() ) {
@@ -34,16 +35,19 @@ if ( $order->is_draft() ) {
 ```
 
 **When to add comments:**
+
 - Unusual decisions, workarounds, or non-obvious business logic
 - Performance considerations
 
 **When NOT to add comments:**
+
 - Explaining what code does (code should be self-explanatory)
 - Restating the obvious
 
 ## WordPress Coding Standards
 
 Follow [WordPress Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/php/):
+
 - **Yoda conditions**: `'true' === $value` not `$value === 'true'`
 - **Spacing**: Spaces around operators, inside parentheses
 - **Braces**: Opening on same line, closing on new line
@@ -54,6 +58,7 @@ Follow [WordPress Coding Standards](https://developer.wordpress.org/coding-stand
 Use `??` instead of `isset` checks for array access.
 
 **Good:**
+
 ```php
 if ( 34 === ( $foo['bar'] ?? null ) ) {
     // ...
@@ -63,6 +68,7 @@ $value = $options['setting'] ?? 'default';
 ```
 
 **Avoid:**
+
 ```php
 if ( isset( $foo['bar'] ) && 34 === $foo['bar'] ) {
     // ...
@@ -80,6 +86,7 @@ if ( isset( $options['setting'] ) ) {
 Prefer the ternary operator over if-else statements for simple conditional returns or assignments, except for very complex cases.
 
 **Good:**
+
 ```php
 return $condition ? $true_value : $false_value;
 
@@ -89,6 +96,7 @@ $price = $has_discount ? $product->get_sale_price() : $product->get_regular_pric
 ```
 
 **Avoid:**
+
 ```php
 if ( $condition ) {
     return $true_value;
@@ -122,12 +130,14 @@ When using `call_user_func_array()`, always use **positional arguments** (numeri
 The function uses array values in order and ignores keys, so named keys are misleading.
 
 **Correct:**
+
 ```php
 call_user_func_array( array( $obj, 'method' ), array( $code ) );
 call_user_func_array( array( $obj, 'process' ), array( $id, $status, $data ) );
 ```
 
 **Wrong:**
+
 ```php
 call_user_func_array( array( $obj, 'method' ), array( 'country_code' => $code ) );
 call_user_func_array( array( $obj, 'process' ), array( 'order_id' => $id, 'status' => $status ) );

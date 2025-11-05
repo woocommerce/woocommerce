@@ -261,11 +261,13 @@ public function process_payment( $order_id ) {
 ## Workflow for Fixing PHP Linting Issues
 
 1. **Run linting on changed files:**
+
    ```bash
    pnpm lint:php:changes
    ```
 
 2. **Auto-fix what you can:**
+
    ```bash
    pnpm lint:php:fix -- path/to/file.php
    ```
@@ -278,6 +280,7 @@ public function process_payment( $order_id ) {
 4. **Address remaining issues manually**
 
 5. **Verify the output is clean:**
+
    ```bash
    pnpm lint:php -- path/to/file.php
    ```

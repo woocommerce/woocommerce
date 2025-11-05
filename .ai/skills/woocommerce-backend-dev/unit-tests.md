@@ -37,6 +37,7 @@ private $sut;
 When adding or modifying a unit test method, the part of the docblock that describes the test must be prepended with `@testdox`. End the comment with `.` for compliance with linting rules.
 
 **Example:**
+
 ```php
 /**
  * @testdox Should return true when order is valid.
@@ -58,6 +59,7 @@ public function test_throws_exception_for_negative_order_id() {
 **Avoid over-commenting tests.** Test names and assertion messages should explain intent.
 
 **Good - Self-explanatory:**
+
 ```php
 /**
  * @testdox Should return true when order status is draft.
@@ -72,6 +74,7 @@ public function test_returns_true_for_draft_orders() {
 ```
 
 **Avoid - Over-commented:**
+
 ```php
 /**
  * @testdox Should return true when order status is draft.
@@ -89,6 +92,7 @@ public function test_returns_true_for_draft_orders() {
 ```
 
 **Avoid - Arrange/Act/Assert comments:**
+
 ```php
 // Don't add these structural comments
 // Arrange
@@ -104,6 +108,7 @@ $this->assertTrue( $result );
 Use blank lines for visual separation instead. The test structure should be self-evident.
 
 **When comments ARE useful in tests:**
+
 - Explaining complex test setup: `// Simulate race condition by...`
 - Documenting known issues: `// Workaround for WordPress core bug #12345`
 - Clarifying business rules: `// Payment processor requires 24h hold`
