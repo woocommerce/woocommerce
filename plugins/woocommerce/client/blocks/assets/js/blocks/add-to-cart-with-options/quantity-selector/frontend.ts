@@ -189,7 +189,7 @@ store< QuantitySelectorStore >(
 				if ( productObject ) {
 					const { max, min, step } = productObject;
 					newValue = currentValue - step;
-					if ( allowZero && newValue < min ) {
+					if ( allowZero && newValue < min && currentValue === min ) {
 						newValue = 0;
 					} else {
 						newValue = Math.min( max, Math.max( min, newValue ) );
