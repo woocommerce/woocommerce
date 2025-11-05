@@ -276,8 +276,10 @@ class Controller extends AbstractController {
 
 		switch ( $setting_type ) {
 			case 'text':
-			case 'textarea':
 				return sanitize_text_field( $value );
+
+			case 'textarea':
+				return sanitize_textarea_field( $value );
 
 			case 'number':
 				if ( ! is_numeric( $value ) ) {
