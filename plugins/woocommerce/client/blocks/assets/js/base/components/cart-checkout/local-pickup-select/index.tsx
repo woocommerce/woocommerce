@@ -24,7 +24,7 @@ import './style.scss';
 
 interface LocalPickupSelectProps {
 	title?: string | undefined;
-	packageData: PackageData;
+	packageData?: PackageData;
 	showItems?: boolean;
 	selectedOption: string;
 	pickupLocations: CartShippingPackageShippingRate[];
@@ -40,7 +40,7 @@ interface LocalPickupSelectProps {
  */
 export const LocalPickupSelect = ( {
 	title,
-	packageData,
+	packageData = undefined,
 	showItems,
 	selectedOption,
 	pickupLocations,
@@ -66,7 +66,7 @@ export const LocalPickupSelect = ( {
 	let header = multiplePackages && title && <div>{ title }</div>;
 
 	// packageData was added in version 10.4
-	if ( ( multiplePackages && packageData ) || shouldShowItems ) {
+	if ( ( multiplePackages || shouldShowItems ) && packageData ) {
 		header = (
 			<div className="wc-block-components-shipping-rates-control__package-header">
 				<div
