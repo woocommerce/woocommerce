@@ -247,7 +247,7 @@ store< QuantitySelectorStore >(
 				let newValue;
 				if (
 					Number.isFinite( event.target.valueAsNumber ) &&
-					event.target.valueAsNumber >= min
+					event.target.valueAsNumber > 0
 				) {
 					newValue = event.target.valueAsNumber;
 				} else {
