@@ -216,7 +216,7 @@ class Controller extends AbstractController {
 				'embeddable' => true,
 			),
 			'refunds'         => array(
-				'href'       => rest_url( sprintf( '/%s/orders/%d/refunds', $this->namespace, $item->get_id() ) ),
+				'href'       => rest_url( sprintf( '/%s/refunds?order_id=%d', $this->namespace, $item->get_id() ) ),
 				'embeddable' => true,
 			),
 		);
