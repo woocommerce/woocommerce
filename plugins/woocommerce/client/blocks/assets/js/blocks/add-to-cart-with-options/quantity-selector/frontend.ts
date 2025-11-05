@@ -10,7 +10,6 @@ import type { HTMLElementEvent } from '@woocommerce/types';
  */
 import { getProductData } from '../frontend';
 import type { AddToCartWithOptionsStore } from '../frontend';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 
 export type Context = {
 	productId: number;
@@ -23,12 +22,6 @@ const universalLock =
 
 const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
-	{},
-	{ lock: universalLock }
-);
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
 	{},
 	{ lock: universalLock }
 );
@@ -232,9 +225,9 @@ store< QuantitySelectorStore >(
 
 				// In grouped products, we reset invalid inputs to ''.
 				if (
+					allowZero &&
 					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
-					productId !== productDataState.productId
+						event.target.valueAsNumber === 0 )
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
