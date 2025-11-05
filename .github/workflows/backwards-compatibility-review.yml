@@ -23,6 +23,44 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Minimize previous BC review comments
+        run: |
+          # Get node IDs for previous BC reviews (GraphQL IDs required for minimizeComment)
+          gh api graphql -f query='
+            query($owner: String!, $repo: String!, $pr: Int!) {
+              repository(owner: $owner, name: $repo) {
+                pullRequest(number: $pr) {
+                  comments(first: 100) {
+                    nodes {
+                      id
+                      author { login }
+                      body
+                    }
+                  }
+                }
+              }
+            }' -f owner="${{ github.repository_owner }}" \
+               -f repo="${{ github.event.repository.name }}" \
+               -F pr=${{ github.event.pull_request.number }} \
+            --jq '.data.repository.pullRequest.comments.nodes[]
+                  | select(.author.login == "claude")
+                  | select(.body | contains("Backwards Compatibility Review"))
+                  | .id' \
+          | while read -r node_id; do
+              # Minimize each comment with OUTDATED classifier
+              gh api graphql -f query='
+                mutation($id: ID!) {
+                  minimizeComment(input: {
+                    subjectId: $id
+                    classifier: OUTDATED
+                  }) {
+                    clientMutationId
+                  }
+                }' -f id="$node_id" || true
+            done
+        env:
+          GH_TOKEN: ${{ github.token }}
+
       - name: PR Review with Progress Tracking
         uses: anthropics/claude-code-action@v1
         with:
