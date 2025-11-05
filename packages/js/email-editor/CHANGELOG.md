@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.1) - 2025-11-04 
+
+-   Patch - Export the personalization tags RichTextWithButton component and other email editor methods. [#61748]
+
 ## [1.2.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.0) - 2025-10-31 
 
 -   Patch - Ensure the Command palette is functional in WordPress 6.9 beta and above. [#61672]

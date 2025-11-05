@@ -411,6 +411,190 @@ class PaymentsProvidersTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test getting payment gateway provider instance returns specific provider.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_specific_provider() {
+		// Arrange - woocommerce_payments is mapped to WooPayments provider.
+		$gateway_id = 'woocommerce_payments';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\WooPayments::class,
+			$provider,
+			'Should return specific WooPayments provider instance'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns specific provider with wildcard match.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_specific_provider_with_wildcard() {
+		// Arrange - stripe_* pattern matches stripe_ideal, and should return Stripe provider.
+		$gateway_id = 'stripe_ideal';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\Stripe::class,
+			$provider,
+			'Should return Stripe provider for wildcard match'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns generic provider when no mapping exists.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_generic_provider_when_no_mapping() {
+		// Arrange - Use a gateway ID that has no mapping.
+		$gateway_id = 'unknown_gateway_id';
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance when no mapping found'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns cached instance.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_cached_instance() {
+		// Arrange.
+		$gateway_id = 'woocommerce_payments';
+
+		// Act - Get provider instance twice.
+		$provider1 = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+		$provider2 = $this->sut->get_payment_gateway_provider_instance( $gateway_id );
+
+		// Assert - Should return the same instance (cached).
+		$this->assertSame(
+			$provider1,
+			$provider2,
+			'Should return same cached instance for same gateway ID'
+		);
+	}
+
+	/**
+	 * Test getting payment gateway provider instance returns generic provider for invalid provider class.
+	 */
+	public function test_get_payment_gateway_provider_instance_returns_generic_provider_for_invalid_provider_class() {
+		// Arrange - Use reflection to inject an invalid provider class mapping.
+		$reflection = new \ReflectionClass( $this->sut );
+		$property   = $reflection->getProperty( 'payment_gateways_providers_class_map' );
+		$property->setAccessible( true );
+
+		// Get current map and add invalid mapping.
+		$current_map                    = $property->getValue( $this->sut );
+		$current_map['invalid_gateway'] = \stdClass::class; // stdClass does not extend PaymentGateway.
+		$property->setValue( $this->sut, $current_map );
+
+		// Expect the wc_doing_it_wrong notice.
+		$this->setExpectedIncorrectUsage( PaymentsProviders::class . '::get_payment_gateway_provider_instance' );
+
+		// Act.
+		$provider = $this->sut->get_payment_gateway_provider_instance( 'invalid_gateway' );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance for invalid provider class'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns specific provider.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_specific_provider() {
+		// Arrange - woopayments PES ID is mapped to WooPayments provider.
+		$pes_id = ExtensionSuggestions::WOOPAYMENTS;
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert.
+		$this->assertInstanceOf(
+			PaymentsProviders\WooPayments::class,
+			$provider,
+			'Should return specific WooPayments provider instance'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns generic provider when no mapping exists.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_generic_provider_when_no_mapping() {
+		// Arrange - Use a PES ID that has no mapping.
+		$pes_id = 'unknown_pes_id';
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance when no mapping found'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns cached instance.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_cached_instance() {
+		// Arrange.
+		$pes_id = ExtensionSuggestions::WOOPAYMENTS;
+
+		// Act - Get provider instance twice.
+		$provider1 = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+		$provider2 = $this->sut->get_payment_extension_suggestion_provider_instance( $pes_id );
+
+		// Assert - Should return the same instance (cached).
+		$this->assertSame(
+			$provider1,
+			$provider2,
+			'Should return same cached instance for same PES ID'
+		);
+	}
+
+	/**
+	 * Test getting payment extension suggestion provider instance returns generic provider for invalid provider class.
+	 */
+	public function test_get_payment_extension_suggestion_provider_instance_returns_generic_provider_for_invalid_provider_class() {
+		// Arrange - Use reflection to inject an invalid provider class mapping.
+		$reflection = new \ReflectionClass( $this->sut );
+		$property   = $reflection->getProperty( 'payment_extension_suggestions_providers_class_map' );
+		$property->setAccessible( true );
+
+		// Get current map and add invalid mapping.
+		$current_map                = $property->getValue( $this->sut );
+		$current_map['invalid_pes'] = \stdClass::class; // stdClass does not extend PaymentGateway.
+		$property->setValue( $this->sut, $current_map );
+
+		// Expect the wc_doing_it_wrong notice.
+		$this->setExpectedIncorrectUsage( PaymentsProviders::class . '::get_payment_extension_suggestion_provider_instance' );
+
+		// Act.
+		$provider = $this->sut->get_payment_extension_suggestion_provider_instance( 'invalid_pes' );
+
+		// Assert - Verify it's the generic provider, not a specific subclass.
+		$this->assertSame(
+			PaymentGateway::class,
+			get_class( $provider ),
+			'Should return generic PaymentGateway instance for invalid provider class'
+		);
+	}
+
+	/**
 	 * Test getting payment gateway base details.
 	 */
 	public function test_get_payment_gateway_base_details() {
