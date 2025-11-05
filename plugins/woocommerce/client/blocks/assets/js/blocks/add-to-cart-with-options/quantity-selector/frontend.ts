@@ -102,7 +102,10 @@ store< QuantitySelectorStore >(
 
 				const currentQuantity = quantity[ id ] || 0;
 
-				return allowZero || currentQuantity - step >= min;
+				return (
+					( allowZero && currentQuantity > 0 ) ||
+					currentQuantity - step >= min
+				);
 			},
 			get allowsIncrease() {
 				const { quantity, selectedAttributes } =
