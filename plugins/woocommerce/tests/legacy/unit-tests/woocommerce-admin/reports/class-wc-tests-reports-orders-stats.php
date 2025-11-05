@@ -6515,6 +6515,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		// Enable fulfillments feature.
+		$prev_fulfillments_opt = get_option( 'woocommerce_feature_fulfillments_enabled', null );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
 		$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
 		$controller->register();
@@ -6598,6 +6599,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Cleanup.
 		delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+		update_option( 'woocommerce_feature_fulfillments_enabled', $prev_fulfillments_opt );
 	}
 
 	/**
