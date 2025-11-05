@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+[Experimental] iAPI Add To Cart with Options Block - refactor quantity selection to avoid imperative DOM manipulation.
