@@ -34,7 +34,7 @@ export const UpgradeNotice = ( {
 } ) => {
 	const notice = createInterpolateElement(
 		__(
-			'Upgrade to the <strongText /> to gain access to more customization options. You can always switch back.',
+			'Upgrade to the <strongText /> for more flexibility.',
 			'woocommerce'
 		),
 		{
@@ -46,10 +46,7 @@ export const UpgradeNotice = ( {
 		}
 	);
 
-	const buttonLabel = __(
-		'Upgrade to the new Product Gallery block',
-		'woocommerce'
-	);
+	const buttonLabel = __( 'Use the Product Gallery block', 'woocommerce' );
 
 	return (
 		<UpgradeDowngradeNotice
