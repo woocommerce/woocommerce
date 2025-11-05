@@ -93,6 +93,12 @@ class EmailsSettingsSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
+			'is_manual'  => array(
+				'description' => __( 'Whether this is sent only manually.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => self::VIEW_EDIT_CONTEXT,
+				'readonly'    => true,
+			),
 			'values'             => array(
 				'description'          => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
 				'type'                 => 'object',
@@ -200,6 +206,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 			'email_group'        => $email->email_group ?? '',
 			'email_group_title'  => method_exists( $email, 'get_email_group_title' ) ? $email->get_email_group_title() : '',
 			'is_customer_email'  => method_exists( $email, 'is_customer_email' ) ? $email->is_customer_email() : false,
+			'is_manual'          => method_exists( $email, 'is_manual' ) ? $email->is_manual() : false,
 			'values'             => $this->get_values( $email ),
 			'groups'             => $this->get_groups( $email ),
 		);
