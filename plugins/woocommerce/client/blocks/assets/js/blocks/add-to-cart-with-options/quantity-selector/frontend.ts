@@ -137,7 +137,8 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const { currentProductId } =
+					addToCartWithOptionsStore.state.quantityContext;
 				const { min, step } = activeProduct;
 				let newValue = currentValue - step;
 
@@ -153,7 +154,7 @@ store< QuantitySelectorStore >(
 
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						currentProductId,
 						newValue,
 						inputElement
 					);
