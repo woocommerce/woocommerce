@@ -173,7 +173,9 @@ store< QuantitySelectorStore >(
 					return;
 				}
 
-				const { productId } = getContext< Context >();
+				const { currentProductId } =
+					addToCartWithOptionsStore.state.quantityContext;
+
 				const isInvalidOrZero =
 					Number.isNaN( event.target.valueAsNumber ) ||
 					event.target.valueAsNumber === 0;
@@ -181,7 +183,7 @@ store< QuantitySelectorStore >(
 				// Grouped products: reset to 0 (empty) for invalid/zero inputs
 				if ( isInvalidOrZero && isGroupedProduct ) {
 					addToCartWithOptionsStore.actions.setQuantity(
-						productId,
+						currentProductId,
 						0,
 						event.target
 					);
@@ -203,7 +205,7 @@ store< QuantitySelectorStore >(
 					newValue !== inputQuantity ? event.target : null;
 
 				addToCartWithOptionsStore.actions.setQuantity(
-					productId,
+					currentProductId,
 					newValue,
 					refForDispatch
 				);
