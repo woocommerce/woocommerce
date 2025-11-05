@@ -692,13 +692,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		global $wpdb;
 
-		$table_name    = self::get_db_table_name();
+		$table_name = self::get_db_table_name();
 
 		// Check if the table exists.
 		$table_exists = $wpdb->get_var(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-				"SHOW TABLES LIKE %s",
+				'SHOW TABLES LIKE %s',
 				$table_name
 			)
 		);
