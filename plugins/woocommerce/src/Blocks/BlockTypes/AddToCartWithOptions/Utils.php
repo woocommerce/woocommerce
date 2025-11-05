@@ -60,7 +60,11 @@ class Utils {
 	 * @param string $quantity_html The quantity HTML.
 	 * @param array  $wrapper_attributes Optional wrapper attributes.
 	 * @param array  $input_attributes Optional input attributes.
-	 * @param array  $context Optional context, ex child product ID.
+	 * @param array  $context {
+	 *     Optional context for quantity input.
+	 *     @type int  $productId  Product ID for context-specific behavior.
+	 *     @type bool $allowZero  Whether to allow zero quantity.
+	 * }
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
