@@ -12,10 +12,7 @@ import { defaultShippingText, defaultLocalPickupText } from './constants';
 export default {
 	...formStepAttributes( {
 		defaultTitle: __( 'Delivery', 'woocommerce' ),
-		defaultDescription: __(
-			'Select how you would like to receive your order.',
-			'woocommerce'
-		),
+		defaultDescription: '',
 	} ),
 	className: {
 		type: 'string',

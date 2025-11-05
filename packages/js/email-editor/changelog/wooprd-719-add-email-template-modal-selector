@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add setEmailPostType action and export email editor hooks and utilities for template previews and styling
