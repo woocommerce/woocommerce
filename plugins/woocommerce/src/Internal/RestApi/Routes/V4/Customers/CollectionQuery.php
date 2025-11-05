@@ -116,6 +116,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 		$prepared_args['include'] = $request['include'];
 		$prepared_args['order']   = $request['order'];
 		$prepared_args['number']  = $request['per_page'];
+		$prepared_args['page']    = max( 1, intval( $request['page'] ) );
 
 		$orderby_possibles = array(
 			'id'              => 'ID',
@@ -175,6 +176,7 @@ final class CollectionQuery extends AbstractCollectionQuery {
 			'role'     => $query_args['role'] ?? 'customer',
 			'include'  => $query_args['include'] ?? array(),
 			'exclude'  => $query_args['exclude'] ?? array(),
+			'page'     => $query_args['page'] ?? 1,
 		);
 
 		$data_store             = \WC_Data_Store::load( 'customer' );
