@@ -8,7 +8,10 @@ import { Label } from '@woocommerce/blocks-components';
 /**
  * Internal dependencies
  */
-import type { PackageData, PackageItem } from './types';
+import type {
+	PackageData,
+	PackageItem,
+} from '../shipping-rates-control-package/types';
 
 export const PackageItems = ( {
 	packageData,

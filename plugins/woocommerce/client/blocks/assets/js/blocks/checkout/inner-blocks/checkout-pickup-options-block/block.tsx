@@ -215,6 +215,7 @@ const Block = () => {
 			<ExperimentalOrderLocalPickupPackages>
 				<LocalPickupSelect
 					title={ shippingRates[ 0 ].name }
+					packageData={ shippingRates[ 0 ] }
 					selectedOption={ selectedOption ?? '' }
 					renderPickupLocation={ renderPickupLocation }
 					pickupLocations={ pickupLocations }

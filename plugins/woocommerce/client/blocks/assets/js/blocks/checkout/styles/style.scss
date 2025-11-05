@@ -10,8 +10,10 @@
 		top: -96px;
 	}
 	.wc-block-components-shipping-rates-control__package {
-		border-bottom: 0;
-		margin: 0 0 1em;
+		margin: 0 0 $gap;
+		display: flex;
+		flex-direction: column;
+		gap: $gap-small;
 
 		&:last-child {
 			margin-bottom: 0;

@@ -31,6 +31,7 @@
 	.wc-block-components-radio-control,
 	.wc-block-components-radio-control__option-layout {
 		padding-bottom: 0;
+		width: 100%;
 	}
 
 	.wc-block-components-radio-control
@@ -39,12 +40,24 @@
 	}
 }
 
-.wc-block-components-shipping-rates-control__package-header {
-	margin: 0 0 $gap-small;
+.wc-block-components-shipping-rates-control__package-container {
+	display: flex;
+    width: 100%;
+    justify-content: space-between;
 
-	&:last-child {
-		margin-bottom: 0;
+	.wc-block-components-shipping-rates-control__package-thumbnails {
+		display: flex;
+        gap: $gap-smallest;
+		align-items: center;
+
+		&:first-child {
+			margin-left: $gap-smallest;
+		}
 	}
+}
+
+.wc-block-components-shipping-rates-control__package-header:last-child {
+	margin-bottom: 0;
 }
 
 @include cart-checkout-large-container {
