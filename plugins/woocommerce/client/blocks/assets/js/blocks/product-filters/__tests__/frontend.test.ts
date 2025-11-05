@@ -55,12 +55,14 @@ describe( 'product filters interactivity store', () => {
 	[
 		{
 			description: 'unicode value',
-			label: 'Café',
-			value: 'caf%C3%A9',
+			label: 'Աուդիոգիրք',
+			value: '%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
 			// The canonical result keeps the single encoding for the original unicode value.
 			// Without the explicit decode step the percent signs would be encoded again,
-			// producing `caf%25C3%25A9` instead of the intended `caf%C3%A9`.
-			expectedUrl: 'https://example.com/shop/?color=caf%C3%A9',
+			// producing `%25D4%25B1%25D5%25B8%25D6%2582%25D5%25A4%25D5%25AB%25D5%25B8%25D5%25A3%25D5%25AB%25D6%2580%25D6%2584`
+			// instead of the intended `%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84`.
+			expectedUrl:
+				'https://example.com/shop/?color=%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
 		},
 		{
 			description: 'latin value',
@@ -68,96 +70,123 @@ describe( 'product filters interactivity store', () => {
 			value: 'blue',
 			expectedUrl: 'https://example.com/shop/?color=blue',
 		},
-	].forEach( ( { description, label, value, expectedUrl } ) => {
-		it( `Test URL encoding before navigation: ${ description }`, () => {
-			if ( ! mockRegisteredStore ) {
-				throw new Error( 'Product filters store was not registered.' );
-			}
-
-			const originalLocation = window.location;
-
-			const locationMock = {
-				href: 'https://example.com/shop/?existing=1',
-			};
-
-			delete ( window as unknown as Record< string, unknown > ).location;
-			Object.defineProperty( window, 'location', {
-				value: locationMock,
-				writable: true,
-				configurable: true,
-			} );
-
-			const canonicalUrl = 'https://example.com/shop/';
-
-			const context = {
-				isOverlayOpened: false,
-				params: {
-					color: value,
-				},
-				activeFilters: [],
-				item: {
-					type: 'attribute/color',
-					label,
-					value,
-					selected: true,
-					count: 1,
-					attributeQueryType: 'or' as const,
-				},
-				activeLabelTemplate: '{{label}}',
-				filterType: 'attribute/color',
-			};
-
-			mockGetContext.mockReturnValue( context );
-			mockGetServerContext.mockReturnValue( context );
-
-			mockGetConfig.mockImplementation( ( key: string ) => {
-				if ( key === 'woocommerce/product-filters' ) {
-					return {
-						canonicalUrl,
-						isProductArchive: true,
-					};
+		{
+			description: 'malformed encoded value',
+			label: 'Invalid',
+			value: '%E0%A4%A',
+			expectedUrl: 'https://example.com/shop/?color=%25E0%25A4%25A',
+			expectConsoleWarn: true,
+		},
+	].forEach(
+		( {
+			description,
+			label,
+			value,
+			expectedUrl,
+			expectConsoleWarn = false,
+		} ) => {
+			it( `Test URL encoding before navigation: ${ description }`, () => {
+				if ( ! mockRegisteredStore ) {
+					throw new Error(
+						'Product filters store was not registered.'
+					);
 				}
-				if ( key === 'woocommerce' ) {
-					return {
-						isBlockTheme: true,
-						needsRefreshForInteractivityAPI: false,
-					};
-				}
-				return {};
-			} );
 
-			Object.defineProperty( mockRegisteredStore.state, 'params', {
-				get: () => ( {
-					color: value,
-				} ),
-			} );
+				const originalLocation = window.location;
 
-			const routerNavigate = jest.fn();
+				const locationMock = {
+					href: 'https://example.com/shop/?existing=1',
+				};
 
-			try {
-				const iterator = mockRegisteredStore.actions.navigate();
-
-				const firstYield = iterator.next();
-				expect( firstYield.done ).toBe( false );
-
-				iterator.next( {
-					actions: {
-						navigate: routerNavigate,
-					},
-				} );
-
-				expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
-				const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
-				const result = new URL( navigatedUrl );
-
-				expect( result.toString() ).toBe( expectedUrl );
-			} finally {
+				delete ( window as unknown as Record< string, unknown > )
+					.location;
 				Object.defineProperty( window, 'location', {
-					value: originalLocation,
+					value: locationMock,
 					writable: true,
 					configurable: true,
 				} );
-			}
-		} );
-	} );
+
+				const canonicalUrl = 'https://example.com/shop/';
+
+				const context = {
+					isOverlayOpened: false,
+					params: {
+						color: value,
+					},
+					activeFilters: [],
+					item: {
+						type: 'attribute/color',
+						label,
+						value,
+						selected: true,
+						count: 1,
+						attributeQueryType: 'or' as const,
+					},
+					activeLabelTemplate: '{{label}}',
+					filterType: 'attribute/color',
+				};
+
+				mockGetContext.mockReturnValue( context );
+				mockGetServerContext.mockReturnValue( context );
+
+				mockGetConfig.mockImplementation( ( key: string ) => {
+					if ( key === 'woocommerce/product-filters' ) {
+						return {
+							canonicalUrl,
+							isProductArchive: true,
+						};
+					}
+					if ( key === 'woocommerce' ) {
+						return {
+							isBlockTheme: true,
+							needsRefreshForInteractivityAPI: false,
+						};
+					}
+					return {};
+				} );
+
+				Object.defineProperty( mockRegisteredStore.state, 'params', {
+					get: () => ( {
+						color: value,
+					} ),
+				} );
+
+				const routerNavigate = jest.fn();
+				const consoleWarnSpy = jest
+					.spyOn( console, 'warn' )
+					.mockImplementation( () => {} );
+
+				try {
+					const iterator = mockRegisteredStore.actions.navigate();
+
+					const firstYield = iterator.next();
+					expect( firstYield.done ).toBe( false );
+
+					iterator.next( {
+						actions: {
+							navigate: routerNavigate,
+						},
+					} );
+
+					expect( routerNavigate ).toHaveBeenCalledTimes( 1 );
+					const [ navigatedUrl ] = routerNavigate.mock.calls[ 0 ];
+					const result = new URL( navigatedUrl );
+
+					expect( result.toString() ).toBe( expectedUrl );
+
+					expect( consoleWarnSpy ).toHaveBeenCalledTimes(
+						expectConsoleWarn ? 1 : 0
+					);
+				} finally {
+					consoleWarnSpy.mockRestore();
+
+					Object.defineProperty( window, 'location', {
+						value: originalLocation,
+						writable: true,
+						configurable: true,
+					} );
+				}
+			} );
+		}
+	);
 } );
