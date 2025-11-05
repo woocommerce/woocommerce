@@ -336,7 +336,7 @@ class PageController {
 			'admin_init',
 			function() use ( $order_types ) {
 				foreach ( $order_types as $order_type ) {
-					remove_submenu_page( 'woocommerce', 'edit.php?post_type=' . $order_type );
+					remove_menu_page( 'edit.php?post_type=' . $order_type );
 				}
 			}
 		);
