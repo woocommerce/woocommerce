@@ -345,7 +345,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		// Cleanup.
 		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'woocommerce_feature_fulfillments_enabled', $supply_feature_enabled );
+		remove_filter( 'pre_option_woocommerce_feature_fulfillments_enabled', $supply_feature_enabled );
 	}
 
 	/**
