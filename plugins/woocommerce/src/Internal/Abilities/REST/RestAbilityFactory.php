@@ -131,12 +131,27 @@ class RestAbilityFactory {
 			'enum'        => $operations,
 		);
 
-		// Merge all operation schemas into a single properties object.
+		// Smart merge: Combine operation schemas intelligently.
+		// For parameters that appear in multiple operations, merge enums rather than overwrite.
 		foreach ( $operations as $operation ) {
 			$operation_schema = self::get_schema_for_operation( $controller, $operation );
 
-			if ( isset( $operation_schema['properties'] ) ) {
-				$merged_properties = array_merge( $merged_properties, $operation_schema['properties'] );
+			if ( ! isset( $operation_schema['properties'] ) ) {
+				continue;
+			}
+
+			foreach ( $operation_schema['properties'] as $param_name => $param_schema ) {
+				if ( ! isset( $merged_properties[ $param_name ] ) ) {
+					// New parameter - add it.
+					$merged_properties[ $param_name ] = $param_schema;
+				} else {
+					// Parameter exists - smart merge.
+					$merged_properties[ $param_name ] = self::smart_merge_parameter(
+						$merged_properties[ $param_name ],
+						$param_schema,
+						$param_name
+					);
+				}
 			}
 		}
 
@@ -150,6 +165,69 @@ class RestAbilityFactory {
 			'properties' => $merged_properties,
 			'required'   => array( 'action' ),
 		);
+	}
+
+	/**
+	 * Smart merge two parameter schemas.
+	 *
+	 * When a parameter appears in multiple operations, intelligently combine them:
+	 * - Merge enums (union of all values)
+	 * - Keep first type, description, default
+	 * - Preserve all unique enum values from both schemas
+	 * - Handle cross-location enum merging (items.enum vs top-level enum)
+	 *
+	 * @param array $existing Existing parameter schema.
+	 * @param array $incoming New parameter schema to merge in.
+	 * @return array Merged parameter schema.
+	 */
+	private static function smart_merge_parameter( array $existing, array $incoming ): array {
+		// Simple union merge: Keep all unique enum values.
+		// For now, use permissive validation (accepts any value from any operation).
+		// REST API will enforce operation-specific validation.
+		$merged = $existing;
+
+		// Collect all enum values from both top-level and items locations.
+		$all_enum_values = array();
+
+		// Collect from existing schema.
+		if ( isset( $existing['enum'] ) ) {
+			$all_enum_values = array_merge( $all_enum_values, $existing['enum'] );
+		}
+		if ( isset( $existing['items']['enum'] ) ) {
+			$all_enum_values = array_merge( $all_enum_values, $existing['items']['enum'] );
+		}
+
+		// Collect from incoming schema.
+		if ( isset( $incoming['enum'] ) ) {
+			$all_enum_values = array_merge( $all_enum_values, $incoming['enum'] );
+		}
+		if ( isset( $incoming['items']['enum'] ) ) {
+			$all_enum_values = array_merge( $all_enum_values, $incoming['items']['enum'] );
+		}
+
+		// If we collected any enum values, deduplicate and add to merged schema.
+		if ( ! empty( $all_enum_values ) ) {
+			$unique_enums = array_values( array_unique( $all_enum_values ) );
+
+			// Place merged enums in the same location(s) as existing schema.
+			if ( isset( $existing['enum'] ) ) {
+				$merged['enum'] = $unique_enums;
+			}
+			if ( isset( $existing['items']['enum'] ) ) {
+				$merged['items']['enum'] = $unique_enums;
+			}
+
+			// If existing had neither but incoming has one, use incoming's location.
+			if ( ! isset( $existing['enum'] ) && ! isset( $existing['items']['enum'] ) ) {
+				if ( isset( $incoming['enum'] ) ) {
+					$merged['enum'] = $unique_enums;
+				} elseif ( isset( $incoming['items']['enum'] ) ) {
+					$merged['items']['enum'] = $unique_enums;
+				}
+			}
+		}
+
+		return $merged;
 	}
 
 	/**

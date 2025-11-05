@@ -456,6 +456,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 				'enum' => array_merge( array( 'any', OrderStatus::TRASH ), $this->get_order_statuses() ),
 			),
 			'validate_callback' => 'rest_validate_request_arg',
+			'sanitize_callback' => 'wp_parse_list',
 		);
 
 		$params['created_via'] = array(
