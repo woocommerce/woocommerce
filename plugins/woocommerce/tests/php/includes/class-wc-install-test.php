@@ -379,7 +379,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$schema                 = $get_order_stats_schema->call( new \WC_Install(), '' );
 
 		// Assert that the schema includes fulfillment_status column.
-		$this->assertStringNotContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should NOT include fulfillment_status column for new installations without fulfillments feature enabled.' ); 
+		$this->assertStringNotContainsString( 'fulfillment_status varchar(50) DEFAULT NULL,', $schema, 'Schema should NOT include fulfillment_status column for new installations without fulfillments feature enabled.' );
 
 		// Assert that the schema includes fulfillment_status index.
 		$this->assertStringNotContainsString( 'KEY fulfillment_status (fulfillment_status),', $schema, 'Schema should NOT include fulfillment_status index for new installations without fulfillments feature enabled.' );
