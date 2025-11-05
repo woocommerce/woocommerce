@@ -299,7 +299,7 @@ class Analytics {
 		// Get progress.
 		$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
 		if ( false === $progress ) {
-			// Progress transient expired or was deleted, stop processing.
+			wc_get_logger()->error( 'Order fulfillment status regeneration stopped: progress transient expired or was deleted.', array( 'source' => 'woocommerce-analytics' ) );
 			return;
 		}
 
