@@ -186,6 +186,15 @@ class RestAbilityFactory {
 		// REST API will enforce operation-specific validation.
 		$merged = $existing;
 
+		// Merge types (support both scalar and array).
+		$existing_types = isset( $merged['type'] ) ? (array) $merged['type'] : array();
+		$incoming_types = isset( $incoming['type'] ) ? (array) $incoming['type'] : array();
+		$merged_types   = array_values( array_unique( array_merge( $existing_types, $incoming_types ) ) );
+
+		if ( ! empty( $merged_types ) ) {
+			$merged['type'] = 1 === count( $merged_types ) ? $merged_types[0] : $merged_types;
+		}
+
 		// Collect all enum values from both top-level and items locations.
 		$all_enum_values = array();
 
@@ -225,6 +234,11 @@ class RestAbilityFactory {
 					$merged['items']['enum'] = $unique_enums;
 				}
 			}
+		}
+
+		// Clean up items if array type is not in merged types.
+		if ( isset( $merged['items'] ) && ! in_array( 'array', (array) $merged['type'], true ) ) {
+			unset( $merged['items'] );
 		}
 
 		return $merged;
