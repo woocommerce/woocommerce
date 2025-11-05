@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\Config\OrdersConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ProductsConfig;
 use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 
@@ -26,26 +28,18 @@ class AbilitiesRestBridge {
 	 * Each configuration defines a single unified ability that supports multiple operations
 	 * via an 'action' parameter (list, get, create, update, delete).
 	 *
+	 * Configurations are loaded from separate config classes for clarity and maintainability.
+	 * Each config class defines:
+	 * - Operations supported
+	 * - Controller class
+	 * - Allowed parameters (for MCP context optimization)
+	 *
 	 * @return array Controller configurations.
 	 */
 	private static function get_configurations(): array {
 		return array(
-			array(
-				'id'          => 'woocommerce/products',
-				'operations'  => array( 'list', 'get', 'create', 'update', 'delete' ),
-				'controller'  => \WC_REST_Products_Controller::class,
-				'route'       => '/wc/v3/products',
-				'label'       => __( 'Manage products', 'woocommerce' ),
-				'description' => __( 'Manage WooCommerce products. Use action parameter to list, get, create, update, or delete products.', 'woocommerce' ),
-			),
-			array(
-				'id'          => 'woocommerce/orders',
-				'operations'  => array( 'list', 'get', 'create', 'update', 'delete' ),
-				'controller'  => \WC_REST_Orders_Controller::class,
-				'route'       => '/wc/v3/orders',
-				'label'       => __( 'Manage orders', 'woocommerce' ),
-				'description' => __( 'Manage WooCommerce orders. Use action parameter to list, get, create, update, or delete orders.', 'woocommerce' ),
-			),
+			ProductsConfig::get_config(),
+			OrdersConfig::get_config(),
 		);
 	}
 

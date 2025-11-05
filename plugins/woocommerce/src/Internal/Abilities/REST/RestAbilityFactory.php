@@ -52,8 +52,11 @@ class RestAbilityFactory {
 		$route      = $config['route'];
 
 		try {
+			// Get allowed parameters from config (for context optimization).
+			$allowed_parameters = $config['allowed_parameters'] ?? array();
+
 			// Build unified input schema with action discriminator.
-			$input_schema = self::get_unified_input_schema( $controller, $operations );
+			$input_schema = self::get_unified_input_schema( $controller, $operations, $allowed_parameters );
 
 			// Build unified output schema (uses first operation's schema as base).
 			$output_schema = self::get_output_schema( $controller, $operations[0] );
@@ -119,9 +122,10 @@ class RestAbilityFactory {
 	 *
 	 * @param object $controller REST controller instance.
 	 * @param array  $operations Array of operation names (list, get, create, update, delete).
+	 * @param array  $allowed_parameters Optional array of parameter names to include (for context optimization).
 	 * @return array Unified input schema with action parameter.
 	 */
-	private static function get_unified_input_schema( $controller, array $operations ): array {
+	private static function get_unified_input_schema( $controller, array $operations, array $allowed_parameters = array() ): array {
 		$merged_properties = array();
 
 		// Add action parameter as required discriminator.
@@ -134,6 +138,25 @@ class RestAbilityFactory {
 		// Smart merge: Combine operation schemas intelligently.
 		// For parameters that appear in multiple operations, merge enums rather than overwrite.
 		foreach ( $operations as $operation ) {
+			/**
+			 * Filter allowed parameters for REST MCP tool schema per operation.
+			 *
+			 * Allows customization of which parameters are exposed in the MCP tool schema
+			 * for context optimization. Empty array means all parameters are allowed.
+			 *
+			 * @since 10.4.0
+			 *
+			 * @param array  $allowed_parameters Array of parameter names to include. Empty array means all parameters.
+			 * @param string $operation The operation name (list, get, create, update, delete).
+			 * @param string $controller_class The REST controller class name.
+			 */
+			$filtered_allowed_parameters = apply_filters(
+				'woocommerce_rest_mcp_allowed_parameters',
+				$allowed_parameters,
+				$operation,
+				get_class( $controller )
+			);
+
 			$operation_schema = self::get_schema_for_operation( $controller, $operation );
 
 			if ( ! isset( $operation_schema['properties'] ) ) {
@@ -141,6 +164,11 @@ class RestAbilityFactory {
 			}
 
 			foreach ( $operation_schema['properties'] as $param_name => $param_schema ) {
+				// Skip parameters not in allowed list (if allowlist is configured).
+				if ( ! empty( $filtered_allowed_parameters ) && ! in_array( $param_name, $filtered_allowed_parameters, true ) ) {
+					continue;
+				}
+
 				if ( ! isset( $merged_properties[ $param_name ] ) ) {
 					// New parameter - add it.
 					$merged_properties[ $param_name ] = $param_schema;
