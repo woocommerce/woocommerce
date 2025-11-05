@@ -23,7 +23,6 @@ const ProductMetadata = ( {
 	itemData = [],
 	variation = [],
 }: ProductMetadataProps ): JSX.Element => {
-	console.log( shortDescription );
 	return (
 		<div className="wc-block-components-product-metadata">
 			<ProductSummary
