@@ -13,17 +13,21 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 ### Which Documentation to Use?
 
 **Use this doc when:**
+
 - Getting oriented in the project
 - Understanding overall architecture
 - Finding the right skill or sub-documentation
 
 **Use Skills (in `.ai/skills/`) when:**
+
 - Writing or modifying backend PHP code → `woocommerce-backend-dev`
 - Running tests or linting → `woocommerce-dev-cycle`
 - Writing UI text → `woocommerce-copy-guidelines`
 - Reviewing pull requests → `woocommerce-code-review`
+- Creating or editing markdown files → `woocommerce-markdown`
 
 **Use other CLAUDE.md files when:**
+
 - React/TypeScript development → `client/admin/CLAUDE.md`
 - Payment gateway UI → `client/admin/client/settings-payments/CLAUDE.md`
 
@@ -35,6 +39,7 @@ The `.ai/skills/` directory contains procedural knowledge:
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
 - **`woocommerce-code-review`** - Code review standards and critical violations to flag
+- **`woocommerce-markdown`** - Markdown writing and editing guidelines
 
 Skills provide detailed HOW-TO instructions. This doc provides project context.
 
@@ -47,7 +52,7 @@ Skills provide detailed HOW-TO instructions. This doc provides project context.
 
 ### Directory Structure
 
-```
+```text
 plugins/woocommerce/
 ├── src/                    # Modern PHP code (PSR-4, DI container)
 │   ├── Internal/           # Internal classes (default location)
@@ -69,14 +74,17 @@ plugins/woocommerce/
 - `includes/` - Legacy WordPress patterns, modify only when necessary
 
 **Namespace:**
+
 - Root namespace: `Automattic\WooCommerce`
 - Internal classes: `Automattic\WooCommerce\Internal\*`
 
 **Dependency Injection:**
+
 - Classes in `src/` use DI container (`$container->get()`)
 - Dependencies injected via `init()` method
 
 **Version Management:**
+
 - Current version in `includes/class-woocommerce.php` → `$version` property
 - Used for `@since` annotations (remove `-dev` suffix)
 
@@ -122,9 +130,15 @@ For complete command reference and workflows, see `woocommerce-dev-cycle` skill.
 ### Finding Information
 
 **Backend code conventions?** → `woocommerce-backend-dev` skill
+
 **Testing procedures?** → `woocommerce-dev-cycle` skill
+
 **UI text guidelines?** → `woocommerce-copy-guidelines` skill
+
+**Markdown writing?** → `woocommerce-markdown` skill
+
 **React development?** → `client/admin/CLAUDE.md`
+
 **Project structure?** → This document
 
 ## Monorepo Context
