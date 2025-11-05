@@ -6514,9 +6514,11 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	public function test_regenerate_order_fulfillment_status_updates_orders_with_fulfillments() {
 		global $wpdb;
 
+		// Reset analytics lookup tables for a clean slate.
+		WC_Helper_Reports::reset_stats_dbs();
+
 		$prev_fulfillments_opt = get_option( 'woocommerce_feature_fulfillments_enabled', null );
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
-		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
 
 		try {
 			// Enable fulfillments feature.
@@ -6540,7 +6542,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$order_4 = WC_Helper_Order::create_order( get_current_user_id(), $product );
 			$order_5 = WC_Helper_Order::create_order( get_current_user_id(), $product );
 
-			WC_Helper_Queue::run_all_pending( 'wc-admin_import_orders' );
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
 			// Add fulfillments for only orders 1, 2, 3.
 			$this->add_fulfillment_to_order( $order_1, 'fulfilled', $product );
@@ -6598,8 +6600,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		} finally {
 			// Cleanup.
 			delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
-			remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
 
 			if ( null === $prev_fulfillments_opt ) {
 				delete_option( 'woocommerce_feature_fulfillments_enabled' );
