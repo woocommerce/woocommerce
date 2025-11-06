@@ -132,12 +132,19 @@ class ProductCacheInvalidator implements CacheInvalidatorInterface {
 	/**
 	 * Handle post deletion.
 	 *
-	 * @param int      $post_id The post ID.
-	 * @param \WP_Post $post The post object.
+	 * @param int           $post_id The post ID.
+	 * @param \WP_Post|null $post The post object, or null if not provided.
 	 *
 	 * @return void
 	 */
-	public function on_post_deleted( int $post_id, $post ): void {
+	public function on_post_deleted( int $post_id, $post = null ): void {
+		if ( null === $post ) {
+			$post = get_post( $post_id );
+			if ( ! $post ) {
+				return;
+			}
+		}
+
 		if ( ! in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			return;
 		}
