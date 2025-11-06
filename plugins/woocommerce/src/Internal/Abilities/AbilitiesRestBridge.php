@@ -61,11 +61,22 @@ class AbilitiesRestBridge {
 	 * Register all configured abilities.
 	 */
 	public static function register_abilities(): void {
-		// Only register abilities if this is an MCP endpoint request.
+		/**
+		 * Filters whether to bypass the MCP request check when registering abilities.
+		 *
+		 * Allows abilities to be registered outside of MCP requests (e.g., for settings display).
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool $bypass_check Whether to bypass the MCP request check. Default false.
+		 */
+		$bypass_check = apply_filters( 'woocommerce_mcp_bypass_request_check', false );
+
+		// Only register abilities if this is an MCP endpoint request or check is bypassed.
 		// We check here (on abilities_api_init action) rather than earlier
 		// because REST request detection requires the WordPress REST infrastructure
 		// to be fully initialized.
-		if ( ! MCPAdapterProvider::is_mcp_request() ) {
+		if ( ! $bypass_check && ! MCPAdapterProvider::is_mcp_request() ) {
 			return;
 		}
 

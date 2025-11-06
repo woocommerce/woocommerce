@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add UI to control which MCP tools are enabled via checkboxes in settings.

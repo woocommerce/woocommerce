@@ -107,7 +107,23 @@ class MCPAdapterProvider {
 	 */
 	public function initialize_mcp_server( $adapter ): void {
 		// Get filtered abilities for MCP server.
-		$abilities_ids = $this->get_woocommerce_mcp_abilities();
+		$abilities_ids = self::get_woocommerce_mcp_abilities();
+
+		// Filter abilities based on user settings (enabled/disabled checkboxes).
+		$abilities_ids = array_filter(
+			$abilities_ids,
+			function ( $ability_id ) {
+				$tool_name    = str_replace( 'woocommerce/', '', $ability_id );
+				$option_name  = 'woocommerce_mcp_tool_' . $tool_name . '_enabled';
+				$tool_enabled = get_option( $option_name, 'yes' );
+
+				// Only include if tool is enabled (default is 'yes').
+				return ( 'yes' === $tool_enabled );
+			}
+		);
+
+		// Re-index array after filtering.
+		$abilities_ids = array_values( $abilities_ids );
 
 		// Bail if no abilities are available.
 		if ( empty( $abilities_ids ) ) {
@@ -158,7 +174,7 @@ class MCPAdapterProvider {
 	 *
 	 * @return array Array of ability IDs for MCP server.
 	 */
-	private function get_woocommerce_mcp_abilities(): array {
+	public static function get_woocommerce_mcp_abilities(): array {
 		// Get all abilities from the registry.
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
 		$all_abilities_ids  = $abilities_registry->get_abilities_ids();

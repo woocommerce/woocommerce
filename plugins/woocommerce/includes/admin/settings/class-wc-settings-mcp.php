@@ -8,6 +8,8 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesRestBridge;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -15,6 +17,37 @@ defined( 'ABSPATH' ) || exit;
  * Settings class for MCP (Model Context Protocol).
  */
 class WC_Settings_MCP {
+
+	/**
+	 * Get available MCP tools from the abilities registry.
+	 *
+	 * @return array Array of MCP tools with their metadata.
+	 */
+	private static function get_available_mcp_tools(): array {
+		// Check if abilities API is available.
+		if ( ! function_exists( 'wp_get_abilities' ) ) {
+			return array();
+		}
+
+		// Bypass MCP request check for settings display.
+		add_filter( 'woocommerce_mcp_bypass_request_check', '__return_true' );
+
+		// Get available MCP ability IDs (single source of truth).
+		// This triggers wp_get_abilities() which fires the hook that calls register_abilities().
+		$ability_ids = MCPAdapterProvider::get_woocommerce_mcp_abilities();
+
+		// Get full ability data for each ID.
+		$all_abilities = wp_get_abilities();
+		$mcp_tools     = array();
+
+		foreach ( $ability_ids as $ability_id ) {
+			if ( isset( $all_abilities[ $ability_id ] ) ) {
+				$mcp_tools[ $ability_id ] = $all_abilities[ $ability_id ];
+			}
+		}
+
+		return $mcp_tools;
+	}
 
 	/**
 	 * Get MCP settings array.
@@ -58,6 +91,39 @@ class WC_Settings_MCP {
 				'type' => 'sectionend',
 				'id'   => 'mcp_options',
 			),
+
+			array(
+				'title' => __( 'MCP tools', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => __( 'Select which MCP tools are available to AI assistants. All tools are enabled by default.', 'woocommerce' ),
+				'id'    => 'mcp_tools_options',
+			),
+		);
+
+		// Add dynamic tool checkboxes.
+		$mcp_tools = self::get_available_mcp_tools();
+		foreach ( $mcp_tools as $tool_id => $tool_data ) {
+			$tool_name = str_replace( 'woocommerce/', '', $tool_id );
+			$label     = method_exists( $tool_data, 'get_label' ) ? $tool_data->get_label() : ucfirst( $tool_name );
+			$desc      = method_exists( $tool_data, 'get_description' ) ? $tool_data->get_description() : '';
+
+			$settings[] = array(
+				'title'    => $label,
+				'desc'     => sprintf(
+					/* translators: %s: Tool description */
+					__( 'Enable %s', 'woocommerce' ),
+					strtolower( $label )
+				),
+				'id'       => 'woocommerce_mcp_tool_' . $tool_name . '_enabled',
+				'default'  => 'yes',
+				'type'     => 'checkbox',
+				'desc_tip' => $desc,
+			);
+		}
+
+		$settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'mcp_tools_options',
 		);
 
 		/**
