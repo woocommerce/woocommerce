@@ -669,6 +669,80 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test get_parsed_data with brands.
+	 *
+	 * @since 10.3.5
+	 */
+	public function test_get_parsed_data_brands() {
+		// Set admin user to allow term creation.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$args = array(
+			'mapping' => $this->get_csv_mapped_items(),
+			'parse'   => true,
+		);
+
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
+
+		// Expected brand strings for each product from CSV.
+		// Note: Hierarchical terms store only the leaf name, not the full path.
+		$expected_brands = array(
+			array( 'TopBrand', 'KidCakes' ),                  // Woo Logo: "TopBrand, TopBrand > KidCakes"
+			array( 'Slice', 'TopBrand' ),                     // Woo Album #1: "TopBrand > Slice, TopBrand"
+			array( 'Another Brand' ),                         // WooCommerce Product CSV Suite: "Another Brand"
+			array( 'TopBrand', 'KidCakes' ),                  // Ship Your Idea: "TopBrand, TopBrand > KidCakes"
+			array(),                                          // Variation 1
+			array(),                                          // Variation 2
+			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice"
+		);
+
+		$parsed_data = $importer->get_parsed_data();
+
+		// Verify that each product in parsed_data has the correct brand_ids assigned.
+		foreach ( $parsed_data as $index => $data ) {
+			// Get the expected brand term IDs for this product.
+			$expected_brand_ids = array();
+			foreach ( $expected_brands[ $index ] as $brand_name ) {
+				$brand = get_term_by( 'name', $brand_name, 'product_brand' );
+				if ( $brand && ! is_wp_error( $brand ) ) {
+					$expected_brand_ids[] = $brand->term_id;
+				}
+			}
+
+			// Get actual brand IDs from parsed data.
+			$actual_brand_ids = isset( $data[ 'brand_ids' ] ) ? $data[ 'brand_ids' ] : array();
+
+			// Sort both arrays for consistent comparison.
+			sort( $expected_brand_ids );
+			sort( $actual_brand_ids );
+
+			$this->assertEquals(
+				$expected_brand_ids,
+				$actual_brand_ids,
+				sprintf( 'Product at index %d should have correct brand_ids', $index )
+			);
+		}
+
+		// Verify hierarchical relationships.
+		$topbrand      = get_term_by( 'name', 'TopBrand', 'product_brand' );
+		$kidcakes      = get_term_by( 'name', 'KidCakes', 'product_brand' );
+		$slice         = get_term_by( 'name', 'Slice', 'product_brand' );
+		$another_brand = get_term_by( 'name', 'Another Brand', 'product_brand' );
+
+		// Assert that terms exist.
+		$this->assertNotFalse( $topbrand, 'TopBrand term should exist' );
+		$this->assertNotFalse( $kidcakes, 'KidCakes term should exist' );
+		$this->assertNotFalse( $slice, 'Slice term should exist' );
+		$this->assertNotFalse( $another_brand, 'Another Brand term should exist' );
+
+		// Assert hierarchical relationships: KidCakes and Slice should be children of TopBrand.
+		$this->assertEquals( 0, $topbrand->parent, 'TopBrand should be a top-level term' );
+		$this->assertEquals( $topbrand->term_id, $kidcakes->parent, 'KidCakes should be a child of TopBrand' );
+		$this->assertEquals( $topbrand->term_id, $slice->parent, 'Slice should be a child of TopBrand' );
+		$this->assertEquals( 0, $another_brand->parent, 'Another Brand should be a top-level term' );
+	}
+
+	/**
 	 * Provides a mocked response for all images that are imported together with the products.
 	 * This way it is not necessary to perform a regular request to an external server which would
 	 * significantly slow down the tests.
