@@ -352,9 +352,9 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Custom extract_entity_ids method can be overridden.
+	 * @testdox Custom extract_entity_ids_from_response method can be overridden.
 	 */
-	public function test_custom_extract_entity_ids_override() {
+	public function test_custom_extract_entity_ids_from_response_override() {
 		$custom_controller = new class() extends WP_REST_Controller {
 			// phpcs:disable Squiz.Commenting
 			use RestApiCache;
@@ -367,13 +367,13 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->initialize_rest_api_cache();
 			}
 
-			protected function get_default_entity_type(): ?string {
+			protected function get_default_response_entity_type(): ?string {
 				return 'product';
 			}
 
-			protected function extract_entity_ids( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
+			protected function extract_entity_ids_from_response( array $response_data, WP_REST_Request $request, ?string $endpoint_id = null ): array {
 				$this->custom_extractor_called = true;
-				return isset( $data['product_id'] ) ? array( $data['product_id'] ) : array();
+				return isset( $response_data['product_id'] ) ? array( $response_data['product_id'] ) : array();
 			}
 
 			public function register_routes() {
@@ -587,31 +587,33 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				);
 			}
 
-			private function register_multi_method_route() {
-				register_rest_route(
-					$this->namespace,
-					'/' . $this->rest_base . '/multi_method',
-					array(
-						'methods'             => array( 'GET', 'POST' ),
-						'callback'            => $this->with_cache(
-							function ( $request ) {
-								$method = $request->get_method();
-								return new WP_REST_Response(
-									array(
-										'id'     => 'GET' === $method ? 10 : 20,
-										'method' => $method,
-									),
-									200
-								);
-							}
-						),
-						'permission_callback' => '__return_true',
-					)
-				);
-			}
 
-			protected function get_default_entity_type(): ?string {
-				return $this->default_entity_type;
+		private function register_multi_method_route() {
+			register_rest_route(
+				$this->namespace,
+				'/' . $this->rest_base . '/multi_method',
+				array(
+					'methods'             => array( 'GET', 'POST' ),
+					'callback'            => $this->with_cache(
+						function ( $request ) {
+							$method = $request->get_method();
+							return new WP_REST_Response(
+								array(
+									'id'     => 'GET' === $method ? 10 : 20,
+									'method' => $method,
+								),
+								200
+							);
+						}
+					),
+					'permission_callback' => '__return_true',
+				)
+			);
+		}
+
+		protected function get_default_response_entity_type(): ?string {
+			return $this->default_entity_type;
+		}
 			}
 
 			protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool {
