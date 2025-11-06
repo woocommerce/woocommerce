@@ -38,6 +38,15 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
+		// Initialize brands admin to register import/export hooks (if available).
+		$brands_file = $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
+		if ( file_exists( $brands_file ) ) {
+			require_once $brands_file;
+			if ( class_exists( 'WC_Admin_Brands' ) ) {
+				WC_Admin_Brands::instance();
+			}
+		}
+
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
@@ -711,6 +720,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 			// Get actual brand IDs from parsed data.
 			$actual_brand_ids = isset( $data['brand_ids'] ) ? $data['brand_ids'] : array();
+
+			// Ensure it's an array (handle cases where it might be a string).
+			if ( ! is_array( $actual_brand_ids ) ) {
+				$actual_brand_ids = array();
+			}
 
 			// Sort both arrays for consistent comparison.
 			sort( $expected_brand_ids );
