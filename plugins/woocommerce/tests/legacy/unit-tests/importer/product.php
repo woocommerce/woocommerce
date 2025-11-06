@@ -687,13 +687,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Expected brand strings for each product from CSV.
 		// Note: Hierarchical terms store only the leaf name, not the full path.
 		$expected_brands = array(
-			array( 'TopBrand', 'KidCakes' ),                  // Woo Logo: "TopBrand, TopBrand > KidCakes"
-			array( 'Slice', 'TopBrand' ),                     // Woo Album #1: "TopBrand > Slice, TopBrand"
-			array( 'Another Brand' ),                         // WooCommerce Product CSV Suite: "Another Brand"
-			array( 'TopBrand', 'KidCakes' ),                  // Ship Your Idea: "TopBrand, TopBrand > KidCakes"
-			array(),                                          // Variation 1
-			array(),                                          // Variation 2
-			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice"
+			array( 'TopBrand', 'KidCakes' ),                  // Woo Logo: "TopBrand, TopBrand > KidCakes".
+			array( 'Slice', 'TopBrand' ),                     // Woo Album #1: "TopBrand > Slice, TopBrand".
+			array( 'Another Brand' ),                         // WooCommerce Product CSV Suite: "Another Brand".
+			array( 'TopBrand', 'KidCakes' ),                  // Ship Your Idea: "TopBrand, TopBrand > KidCakes".
+			array(),                                          // Variation 1: No brands.
+			array(),                                          // Variation 2: No brands.
+			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice".
 		);
 
 		$parsed_data = $importer->get_parsed_data();
@@ -710,7 +710,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			}
 
 			// Get actual brand IDs from parsed data.
-			$actual_brand_ids = isset( $data[ 'brand_ids' ] ) ? $data[ 'brand_ids' ] : array();
+			$actual_brand_ids = isset( $data['brand_ids'] ) ? $data['brand_ids'] : array();
 
 			// Sort both arrays for consistent comparison.
 			sort( $expected_brand_ids );
