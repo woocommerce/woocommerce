@@ -2,38 +2,38 @@
 /**
  * Order Fulfillments REST Controller for API Version 4
  *
+ * Handles route registration, permissions, CRUD operations, and schema definition.
  * This is a completely independent base controller for WooCommerce API v4.
  * Unlike previous versions, this does not inherit from v3, v2, or v1 controllers.
  *
- * @class   WC_REST_Fulfillments_V4_Controller
  * @package WooCommerce\RestApi
  */
 
-declare(strict_types=1);
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments;
+
+defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\Admin\Settings\Exceptions\ApiException;
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Fulfillments\OrderFulfillmentsRestController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use WP_Http;
+use WP_Error;
+use WC_Order;
+use WP_REST_Request;
+use WP_REST_Response;
+use WP_REST_Server;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
 /**
- * WooCommerce REST API Version 4 Fulfillments Controller
- *
- * @package WooCommerce\RestApi
- * @extends WC_REST_V4_Controller
- * @version 4.0.0
+ * Fulfillments Controller.
  */
-class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
-	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v4';
-
+class Controller extends AbstractController {
 	/**
 	 * Route base.
 	 *
@@ -69,14 +69,14 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 			$this->rest_base,
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_fulfillments' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
 					'args'                => $this->get_args_for_get_fulfillments(),
 					'schema'              => $this->get_schema_for_get_fulfillments(),
 				),
 				array(
-					'methods'             => \WP_REST_Server::CREATABLE,
+					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
 					'args'                => $this->get_args_for_create_fulfillment(),
@@ -91,21 +91,21 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 			$this->rest_base . '/(?P<fulfillment_id>[\d]+)',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
 					'args'                => $this->get_args_for_get_fulfillment(),
 					'schema'              => $this->get_schema_for_get_fulfillment(),
 				),
 				array(
-					'methods'             => \WP_REST_Server::EDITABLE,
+					'methods'             => WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'update_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
 					'args'                => $this->get_args_for_update_fulfillment(),
 					'schema'              => $this->get_schema_for_update_fulfillment(),
 				),
 				array(
-					'methods'             => \WP_REST_Server::DELETABLE,
+					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'delete_fulfillment' ),
 					'permission_callback' => array( $this, 'check_permission_for_fulfillments' ),
 					'args'                => $this->get_args_for_delete_fulfillment(),
@@ -195,7 +195,7 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 			);
 		}
 
-		if ( $fulfillment->get_entity_type() !== \WC_Order::class ) {
+		if ( $fulfillment->get_entity_type() !== WC_Order::class ) {
 			return $this->prepare_error_response(
 				'woocommerce_rest_invalid_entity_type',
 				__( 'The entity type must be "order".', 'woocommerce' ),
@@ -226,7 +226,7 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 			);
 		}
 
-		if ( $fulfillment->get_entity_type() !== \WC_Order::class ) {
+		if ( $fulfillment->get_entity_type() !== WC_Order::class ) {
 			return $this->prepare_error_response(
 				'woocommerce_rest_invalid_entity_type',
 				__( 'The entity type must be "order".', 'woocommerce' ),
@@ -253,16 +253,15 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 		return $this->order_fulfillments_controller->delete_fulfillment( $request );
 	}
 
-
 	/**
 	 * Permission check for REST API endpoints, given the request method.
 	 * For all fulfillments methods that have an order_id, we need to be sure the user has permission to view the order.
 	 * For all other methods, we check if the user is logged in as admin and has the required capability.
 	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
-	 * @return bool|\WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
+	 * @return bool|WP_Error True if the current user has the capability, otherwise an "Unauthorized" error or False if no error is available for the request method.
 	 *
-	 * @throws \WP_Error If the URL contains an order, but the order does not exist.
+	 * @throws WP_Error If the URL contains an order, but the order does not exist.
 	 */
 	public function check_permission_for_fulfillments( WP_REST_Request $request ) {
 		// Fetch the order first if there's an order_id in the request.
@@ -283,13 +282,13 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 					$order_id    = (int) $fulfillment->get_entity_id();
 					$order       = wc_get_order( $order_id );
 				} catch ( ApiException $ex ) {
-					return new \WP_Error(
+					return new WP_Error(
 						$ex->getErrorCode(),
 						$ex->getMessage(),
 						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
 					);
 				} catch ( \Exception $e ) {
-					return new \WP_Error(
+					return new WP_Error(
 						'woocommerce_rest_fulfillment_invalid_id',
 						$e->getMessage(),
 						array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
@@ -301,8 +300,8 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 		// If there's no order_id in the request, try to get it from the request body.
 		$body_params = $request->get_json_params();
 		if ( ! $order && isset( $body_params['entity_id'] ) && isset( $body_params['entity_type'] ) ) {
-			if ( \WC_Order::class !== $body_params['entity_type'] ) {
-				return new \WP_Error(
+			if ( WC_Order::class !== $body_params['entity_type'] ) {
+				return new WP_Error(
 					'woocommerce_rest_invalid_entity_type',
 					esc_html__( 'The entity type must be "order".', 'woocommerce' ),
 					array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
@@ -315,7 +314,7 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 
 		// If there's still no order, return an error.
 		if ( ! $order ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'woocommerce_rest_order_id_required',
 				esc_html__( 'The order ID is required.', 'woocommerce' ),
 				array( 'status' => esc_attr( WP_Http::BAD_REQUEST ) )
@@ -338,48 +337,38 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 		// Return an error related to the request method.
 		$error_information = $this->get_authentication_error_by_method( $request->get_method() );
 
-		if ( is_null( $error_information ) ) {
+		if ( false === $error_information ) {
 			return false;
 		}
 
-		return new \WP_Error(
-			$error_information['code'],
-			$error_information['message'],
-			array( 'status' => rest_authorization_required_code() )
+		return $error_information;
+	}
+
+	/**
+	 * Get the schema for the fulfillment resource.
+	 *
+	 * @return array The schema for the fulfillment resource.
+	 */
+	protected function get_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'fulfillment',
+			'type'       => 'object',
+			'properties' => $this->get_read_schema_for_fulfillment(),
 		);
 	}
 
 	/**
-	 * Returns an authentication error message for a given HTTP verb.
+	 * Get the item response for a fulfillment.
 	 *
-	 * @param string $method HTTP method.
-	 * @return array|null Error information on success, null otherwise.
+	 * @param mixed           $item    The fulfillment item.
+	 * @param WP_REST_Request $request The request object.
+	 * @return array The item response.
 	 */
-	protected function get_authentication_error_by_method( string $method ) {
-		$errors = array(
-			'GET'    => array(
-				'code'    => 'woocommerce_rest_cannot_view',
-				'message' => __( 'Sorry, you cannot view resources.', 'woocommerce' ),
-			),
-			'POST'   => array(
-				'code'    => 'woocommerce_rest_cannot_create',
-				'message' => __( 'Sorry, you cannot create resources.', 'woocommerce' ),
-			),
-			'PUT'    => array(
-				'code'    => 'woocommerce_rest_cannot_update',
-				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
-			),
-			'PATCH'  => array(
-				'code'    => 'woocommerce_rest_cannot_update',
-				'message' => __( 'Sorry, you cannot update resources.', 'woocommerce' ),
-			),
-			'DELETE' => array(
-				'code'    => 'woocommerce_rest_cannot_delete',
-				'message' => __( 'Sorry, you cannot delete resources.', 'woocommerce' ),
-			),
-		);
-
-		return $errors[ $method ] ?? null;
+	protected function get_item_response( $item, WP_REST_Request $request ): array {
+		// This method is required by AbstractController but not used in our implementation
+		// since we delegate to OrderFulfillmentsRestController.
+		return array();
 	}
 
 	/**
@@ -404,7 +393,11 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_schema_for_get_fulfillments(): array {
-		$schema          = $this->get_base_schema();
+		$schema          = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'base',
+			'type'    => 'object',
+		);
 		$schema['title'] = __( 'Get fulfillments response.', 'woocommerce' );
 		$schema['type']  = 'array';
 		$schema['items'] = array(
@@ -429,7 +422,11 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_schema_for_create_fulfillment(): array {
-		$schema               = $this->get_base_schema();
+		$schema               = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'base',
+			'type'    => 'object',
+		);
 		$schema['title']      = __( 'Create fulfillment response.', 'woocommerce' );
 		$schema['properties'] = $this->get_read_schema_for_fulfillment();
 		return $schema;
@@ -457,7 +454,11 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_schema_for_get_fulfillment(): array {
-		$schema               = $this->get_base_schema();
+		$schema               = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'base',
+			'type'    => 'object',
+		);
 		$schema['title']      = __( 'Get fulfillment response.', 'woocommerce' );
 		$schema['properties'] = $this->get_read_schema_for_fulfillment();
 
@@ -479,7 +480,11 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_schema_for_update_fulfillment(): array {
-		$schema               = $this->get_base_schema();
+		$schema               = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'base',
+			'type'    => 'object',
+		);
 		$schema['title']      = __( 'Update fulfillment response.', 'woocommerce' );
 		$schema['type']       = 'object';
 		$schema['properties'] = $this->get_read_schema_for_fulfillment();
@@ -516,7 +521,11 @@ class WC_REST_Fulfillments_V4_Controller extends WC_REST_V4_Controller {
 	 * @return array
 	 */
 	private function get_schema_for_delete_fulfillment(): array {
-		$schema               = $this->get_base_schema();
+		$schema               = array(
+			'$schema' => 'http://json-schema.org/draft-04/schema#',
+			'title'   => 'base',
+			'type'    => 'object',
+		);
 		$schema['title']      = __( 'Delete fulfillment response.', 'woocommerce' );
 		$schema['properties'] = array(
 			'message' => array(
