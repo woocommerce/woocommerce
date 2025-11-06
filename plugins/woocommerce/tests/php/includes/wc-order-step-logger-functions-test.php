@@ -5,8 +5,8 @@
  * @package WooCommerce\Tests\Functions
  */
 
+declare(strict_types=1);
 use Automattic\Jetpack\Constants;
-
 /**
  * Class WC_Order_Step_Logger_Functions_Test
  */
@@ -52,7 +52,7 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 			if ( ! empty( $files ) ) {
 				foreach ( $files as $file ) {
 					if ( is_file( $file ) ) {
-						unlink( $file );
+						wp_delete_file( $file );
 					}
 				}
 			}
@@ -154,6 +154,7 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		// Verify that the log file contains the expected messages.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- The file is created in this function and only read to verify contents in the test.
 		$log_content = file_get_contents( $log_files[0] );
 		$this->assertStringContainsString( 'Test message - should be logged', $log_content );
 		$this->assertStringContainsString( 'Another step - should be logged', $log_content );
