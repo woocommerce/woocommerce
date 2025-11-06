@@ -41,6 +41,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"format": "prettier --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"format:check": "prettier --check 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/' && pnpm format:check && pnpm lint:lang:style",
