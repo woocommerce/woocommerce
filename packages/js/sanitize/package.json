@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "WooCommerce HTML sanitization utilities.",
 	"main": "build/index.js",
-	"module": "build/index.js",
+	"module": "build-module/index.js",
 	"types": "build-types/index.d.ts",
 	"files": [
 		"build",
