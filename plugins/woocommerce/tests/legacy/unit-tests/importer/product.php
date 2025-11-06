@@ -685,7 +685,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 10.3.5
 	 */
 	public function test_get_parsed_data_brands() {
-		$this->markTestSkipped( 'I don\'t understand why this tests passes locally but fails on CI.' );
 
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -717,6 +716,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			$expected_brand_ids = array();
 			foreach ( $expected_brands[ $index ] as $brand_name ) {
 				$brand = get_term_by( 'name', $brand_name, 'product_brand' );
+				if($brand_name === 'TopBrand') {
+					var_dump($brand);
+				}
 				if ( $brand && ! is_wp_error( $brand ) ) {
 					$expected_brand_ids[] = $brand->term_id;
 				}
@@ -746,6 +748,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$kidcakes      = get_term_by( 'name', 'KidCakes', 'product_brand' );
 		$slice         = get_term_by( 'name', 'Slice', 'product_brand' );
 		$another_brand = get_term_by( 'name', 'Another Brand', 'product_brand' );
+
+		var_dump($topbrand);
 
 		// Assert that terms exist.
 		$this->assertNotFalse( $topbrand, 'TopBrand term should exist' );
