@@ -320,6 +320,7 @@ function itemDataInnerHTML( field: 'name' | 'value' ) {
 		return;
 	}
 
+	// eslint-disable-next-line @typescript-eslint/no-use-before-define
 	const dataAttr = cartItemState.cartItemDataAttr;
 
 	if ( ! dataAttr ) {
