@@ -754,7 +754,7 @@ class WC_Brands_Admin {
 			$total  = count( $_terms );
 
 			foreach ( $_terms as $index => $_term ) {
-				// Don't allow users without capabilities to create new categories.
+				// Don't allow users without capabilities to create new brands.
 				if ( ! current_user_can( 'manage_product_terms' ) ) {
 					break;
 				}
