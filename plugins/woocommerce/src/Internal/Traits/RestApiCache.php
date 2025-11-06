@@ -219,15 +219,20 @@ trait RestApiCache {
 	 * Only caches responses with 2xx status codes. Always adds the X-WC-Cache header
 	 * with value MISS if the response was cached, or SKIP if it was not cached.
 	 *
-	 * @param WP_REST_Request            $request       The request object.
-	 * @param WP_REST_Response|\WP_Error $response      The response to potentially cache.
-	 * @param array                      $cached_config Caching configuration from build_cache_config().
+	 * Supports both WP_REST_Response objects and raw data (which will be wrapped in a response object).
+	 * Error objects are returned as-is without caching.
+	 *
+	 * @param WP_REST_Request                         $request       The request object.
+	 * @param WP_REST_Response|\WP_Error|array|object $response      The response to potentially cache.
+	 * @param array                                   $cached_config Caching configuration from build_cache_config().
 	 * @return WP_REST_Response|\WP_Error The response with appropriate cache headers.
 	 */
 	private function maybe_cache_response( WP_REST_Request $request, $response, array $cached_config ) {
-		if ( ! ( $response instanceof WP_REST_Response ) ) {
+		if ( is_wp_error( $response ) ) {
 			return $response;
 		}
+
+		$response = rest_ensure_response( $response );
 
 		$cached = false;
 

@@ -271,6 +271,23 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that controllers can return raw arrays without wrapping in WP_REST_Response.
+	 */
+	public function test_raw_array_responses_are_cached() {
+		$response1 = $this->query_endpoint( 'raw_array_response' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertInstanceOf( WP_REST_Response::class, $response1 );
+		$this->assertSame( 200, $response1->get_status() );
+		$this->assertIsArray( $response1->get_data() );
+		$this->assertArrayHasKey( 'id', $response1->get_data() );
+		$this->assertSame( 42, $response1->get_data()['id'] );
+
+		$response2 = $this->query_endpoint( 'raw_array_response' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+		$this->assertEquals( $response1->get_data(), $response2->get_data() );
+	}
+
+	/**
 	 * Query an endpoint and return the response.
 	 *
 	 * @param string     $endpoint_name Endpoint name.
@@ -350,18 +367,24 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'multiple_entities' );
 				$this->register_cached_route( 'custom_entity_type', array( 'entity_type' => 'custom_thing' ) );
 				$this->register_cached_route( 'non_array_response', array( 'entity_type' => 'custom_thing' ), true );
+				$this->register_cached_route( 'raw_array_response', array(), false, true );
 			}
 
-			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false ) {
+			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false, bool $raw_response = false ) {
 				register_rest_route(
 					$this->namespace,
 					'/' . $this->rest_base . '/' . $endpoint,
 					array(
 						'methods'             => 'GET',
 						'callback'            => $this->with_cache(
-							fn( $request ) => $non_array_request ?
-								$this->handle_non_array_request( $request ) :
-								$this->handle_request( $endpoint, $request ),
+							function ( $request ) use ( $endpoint, $non_array_request, $raw_response ) {
+								if ( $raw_response ) {
+									return $this->handle_raw_array_request( $endpoint, $request );
+								}
+								return $non_array_request ?
+									$this->handle_non_array_request( $request ) :
+									$this->handle_request( $endpoint, $request );
+							},
 							$cache_args
 						),
 						'permission_callback' => '__return_true',
@@ -375,6 +398,13 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 
 			private function handle_request( string $endpoint, WP_REST_Request $request ) {
 				return new WP_REST_Response( $this->responses[ $endpoint ], 200 );
+			}
+
+			private function handle_raw_array_request( string $endpoint, WP_REST_Request $request ) {
+				return array(
+					'id'   => 42,
+					'name' => 'Raw Array Item',
+				);
 			}
 
 			private function handle_non_array_request( WP_REST_Request $request ) {
