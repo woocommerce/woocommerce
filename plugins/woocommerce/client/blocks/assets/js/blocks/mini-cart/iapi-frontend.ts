@@ -95,15 +95,18 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-type CartItemDataAttr = {
+type ItemData = {
 	raw_attribute?: string | undefined;
-	key?: string | undefined;
 	value?: string | undefined;
-	className?: string;
-	hidden?: boolean;
 	display?: string;
 	attribute?: string;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
+
+type CartItemDataAttr = {
+	value: string;
+	name: string;
+	className: string;
+};
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -317,19 +320,17 @@ function itemDataInnerHTML( field: 'name' | 'value' ) {
 		return;
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	const dataAttr = cartItemState.cartItemDataAttr as
-		| CartItemDataAttr
-		| { hidden: boolean };
+	const dataAttr = cartItemState.cartItemDataAttr;
 
-	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+	if ( ! dataAttr ) {
 		return;
 	}
 
 	if ( field in dataAttr ) {
 		const value = dataAttr[ field as keyof typeof dataAttr ];
+		const separator = field === 'name' ? ':' : '';
 		if ( typeof value === 'string' && value ) {
-			ref.innerHTML = trimWords( value );
+			ref.innerHTML = trimWords( value ) + separator;
 		}
 	}
 }
@@ -719,9 +720,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
+			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
@@ -730,7 +731,7 @@ const { state: cartItemState } = store(
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 				if ( ! dataItemAttr ) {
-					return { hidden: true };
+					return null;
 				}
 
 				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
@@ -758,14 +759,35 @@ const { state: cartItemState } = store(
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: dataItemAttr.hidden === '1' ? true : false,
 				};
+			},
+
+			get cartItemDataAttrHidden(): boolean {
+				return cartItemState.cartItemDataAttr === null;
+			},
+
+			get cartItemDataAttrClassName(): string {
+				return cartItemState.cartItemDataAttr?.className || '';
+			},
+
+			get cartItemDataAttrValue(): string {
+				return cartItemState.cartItemDataAttr?.value || '';
+			},
+
+			get cartItemVariationName(): string {
+				const dataAttr = cartItemState.cartItemDataAttr;
+
+				if ( ! dataAttr ) {
+					return '';
+				}
+
+				return dataAttr.name + ':';
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
 			get cartItemDataKey(): string {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
