@@ -111,6 +111,9 @@ trait RestApiCache {
 	 * @param callable $callback The original endpoint callback.
 	 * @param array    $config   Caching configuration:
 	 *                           - entity_type: string (falls back to get_default_entity_type()).
+	 *                           - vary_by_user: bool (defaults to response_cache_vary_by_user()).
+	 *                           - endpoint_id: string|null (optional friendly identifier for the endpoint).
+	 *                           - cache_ttl: int (defaults to get_cache_ttl()).
 	 * @return callable Wrapped callback.
 	 */
 	protected function with_cache( callable $callback, array $config = array() ): callable {
@@ -193,10 +196,12 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request The request object.
 	 * @param array           $config  Raw configuration array passed to with_cache.
-	 * @return array|null Normalized cache config with keys: entity_type, cache_key. Returns null if entity type is not available.
+	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, cache_key. Returns null if entity type is not available.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
-		$entity_type = $config['entity_type'] ?? $this->get_default_entity_type();
+		$endpoint_id  = $config['endpoint_id'] ?? null;
+		$entity_type  = $config['entity_type'] ?? $this->get_default_entity_type();
+		$vary_by_user = $config['vary_by_user'] ?? $this->response_cache_vary_by_user( $request, $endpoint_id );
 
 		if ( ! $entity_type ) {
 			wc_get_container()->get( LegacyProxy::class )->call_function(
@@ -209,8 +214,11 @@ trait RestApiCache {
 		}
 
 		return array(
-			'entity_type' => $entity_type,
-			'cache_key'   => $this->get_cache_key( $request, $entity_type ),
+			'endpoint_id'  => $endpoint_id,
+			'entity_type'  => $entity_type,
+			'vary_by_user' => $vary_by_user,
+			'cache_ttl'    => $config['cache_ttl'] ?? $this->get_cache_ttl( $request, $endpoint_id ),
+			'cache_key'    => $this->get_cache_key( $request, $entity_type, $vary_by_user, $endpoint_id ),
 		);
 	}
 
@@ -240,14 +248,15 @@ trait RestApiCache {
 		$status = $response->get_status();
 		if ( $status >= 200 && $status <= 299 ) {
 			$data       = $response->get_data();
-			$entity_ids = is_array( $data ) ? $this->extract_entity_ids( $data ) : array();
+			$entity_ids = is_array( $data ) ? $this->extract_entity_ids( $data, $request, $cached_config['endpoint_id'] ) : array();
 
 			$this->store_cached_response(
 				$cached_config['cache_key'],
 				$data,
 				$status,
 				$cached_config['entity_type'],
-				$entity_ids
+				$entity_ids,
+				$cached_config['cache_ttl']
 			);
 
 			$cached = true;
@@ -270,16 +279,52 @@ trait RestApiCache {
 	}
 
 	/**
+	 * Whether the response cache should vary by user.
+	 *
+	 * When true, each user gets their own cached version of the response.
+	 * When false, the same cached response is shared across all users.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('vary_by_user' key).
+	 *
+	 * @param WP_REST_Request $request     The request object.
+	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+	 * @return bool True to make cache user-specific, false otherwise.
+	 */
+	protected function response_cache_vary_by_user( WP_REST_Request $request, ?string $endpoint_id = null ): bool { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return true;
+	}
+
+	/**
+	 * Get the cache TTL (time to live) for cached responses.
+	 *
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('cache_ttl' key).
+	 *
+	 * @param WP_REST_Request $request     The request object.
+	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
+	 * @return int Cache TTL in seconds.
+	 */
+	protected function get_cache_ttl( WP_REST_Request $request, ?string $endpoint_id = null ): int { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return HOUR_IN_SECONDS;
+	}
+
+	/**
 	 * Extract entity IDs from response data.
 	 *
 	 * This implementation assumes the response is either:
 	 * - An array with an 'id' field (single item)
 	 * - An array of arrays each having an 'id' field (collection)
 	 *
-	 * @param array $data Response data.
+	 * This can be customized per-endpoint via the config array
+	 * passed to with_cache() ('extract_entity_ids' key).
+	 *
+	 * @param array           $data        Response data.
+	 * @param WP_REST_Request $request     The request object.
+	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
 	 * @return array Array of entity IDs.
 	 */
-	private function extract_entity_ids( array $data ): array {
+	protected function extract_entity_ids( array $data, WP_REST_Request $request, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$ids = array();
 
 		if ( isset( $data[0] ) && is_array( $data[0] ) ) {
@@ -301,35 +346,67 @@ trait RestApiCache {
 	/**
 	 * Get cache key information that uniquely identifies a request.
 	 *
-	 * @param WP_REST_Request $request The request object.
+	 * @param WP_REST_Request $request      The request object.
+	 * @param bool            $vary_by_user Whether to include user ID in cache key.
+	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return array Array of cache key information parts.
 	 */
-	private function get_cache_key_info( WP_REST_Request $request ): array {
+	protected function get_cache_key_info( WP_REST_Request $request, bool $vary_by_user = false, ?string $endpoint_id = null ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
 		$request_query_params = $request->get_query_params();
 		if ( is_array( $request_query_params ) ) {
 			ksort( $request_query_params );
 		}
 
-		$user_id = wc_get_container()->get( LegacyProxy::class )->call_function( 'get_current_user_id' );
-
-		return array(
+		$cache_key_parts = array(
 			$request->get_route(),
 			$request->get_method(),
 			wp_json_encode( $request_query_params ),
-			"user_{$user_id}",
 		);
+
+		if ( $vary_by_user ) {
+			$user_id           = wc_get_container()->get( LegacyProxy::class )->call_function( 'get_current_user_id' );
+			$cache_key_parts[] = "user_{$user_id}";
+		}
+
+		return $cache_key_parts;
 	}
 
 	/**
 	 * Generate a cache key for a given request.
 	 *
-	 * @param WP_REST_Request $request     The request object.
-	 * @param string          $entity_type The entity type.
+	 * @param WP_REST_Request $request      The request object.
+	 * @param string          $entity_type  The entity type.
+	 * @param bool            $vary_by_user Whether to include user ID in cache key.
+	 * @param string|null     $endpoint_id  Optional friendly identifier for the endpoint.
 	 * @return string Cache key.
 	 */
-	private function get_cache_key( WP_REST_Request $request, string $entity_type ): string {
-		$cache_key_parts = $this->get_cache_key_info( $request );
-		$request_hash    = md5( implode( '-', $cache_key_parts ) );
+	private function get_cache_key( WP_REST_Request $request, string $entity_type, bool $vary_by_user = false, ?string $endpoint_id = null ): string {
+		$cache_key_parts = $this->get_cache_key_info( $request, $vary_by_user, $endpoint_id );
+
+		/**
+		 * Filter the information used to generate the cache key for a REST API request.
+		 *
+		 * Allows customization of what uniquely identifies a request for caching purposes.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param array           $cache_key_parts Array of cache key information parts.
+		 * @param WP_REST_Request $request         The request object.
+		 * @param bool            $vary_by_user    Whether user ID is included in cache key.
+		 * @param string|null     $endpoint_id     Optional friendly identifier for the endpoint.
+		 * @param object          $controller      The controller instance.
+		 * @return array Filtered cache key information parts.
+		 */
+		$cache_key_parts = apply_filters(
+			'woocommerce_rest_api_cache_key_info',
+			$cache_key_parts,
+			$request,
+			$vary_by_user,
+			$endpoint_id,
+			$this
+		);
+
+		$request_hash = md5( implode( '-', $cache_key_parts ) );
 		return "wc_rest_api_cache_{$entity_type}-{$request_hash}";
 	}
 
@@ -342,6 +419,7 @@ trait RestApiCache {
 	private function get_cached_response( array $cached_config ): ?WP_REST_Response {
 		$cache_key   = $cached_config['cache_key'];
 		$entity_type = $cached_config['entity_type'];
+		$cache_ttl   = $cached_config['cache_ttl'];
 
 		$found  = false;
 		$cached = wp_cache_get( $cache_key, self::$cache_group, false, $found );
@@ -351,7 +429,7 @@ trait RestApiCache {
 		}
 
 		$current_time    = wc_get_container()->get( LegacyProxy::class )->call_function( 'time' );
-		$expiration_time = $cached['created_at'] + self::$cache_ttl;
+		$expiration_time = $cached['created_at'] + $cache_ttl;
 		if ( $current_time >= $expiration_time ) {
 			wp_cache_delete( $cache_key, self::$cache_group );
 			return null;
@@ -380,8 +458,9 @@ trait RestApiCache {
 	 * @param int    $status_code The HTTP status code of the response.
 	 * @param string $entity_type The entity type.
 	 * @param array  $entity_ids  Array of entity IDs in the response.
+	 * @param int    $cache_ttl   Cache TTL in seconds.
 	 */
-	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids ): void {
+	private function store_cached_response( string $cache_key, $data, int $status_code, string $entity_type, array $entity_ids, int $cache_ttl ): void {
 		$entity_versions = array();
 		foreach ( $entity_ids as $entity_id ) {
 			$version_id = "{$entity_type}_{$entity_id}";
@@ -401,6 +480,6 @@ trait RestApiCache {
 			$cache_data['status_code'] = $status_code;
 		}
 
-		wp_cache_set( $cache_key, $cache_data, self::$cache_group, self::$cache_ttl );
+		wp_cache_set( $cache_key, $cache_data, self::$cache_group, $cache_ttl );
 	}
 }
