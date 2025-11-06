@@ -439,7 +439,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	public function test_country_field_single_country() {
 		// Mock WC()->countries to return only one country
 		$mock_countries = $this->getMockBuilder( 'WC_Countries' )
-			->setMethods( array( 'get_allowed_countries' ) )
+			->onlyMethods( array( 'get_allowed_countries' ) )
 			->getMock();
 
 		$mock_countries->method( 'get_allowed_countries' )
@@ -479,7 +479,7 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	public function test_country_field_multiple_countries() {
 		// Mock WC()->countries to return multiple countries
 		$mock_countries = $this->getMockBuilder( 'WC_Countries' )
-			->setMethods( array( 'get_allowed_countries' ) )
+			->onlyMethods( array( 'get_allowed_countries' ) )
 			->getMock();
 
 		$mock_countries->method( 'get_allowed_countries' )
