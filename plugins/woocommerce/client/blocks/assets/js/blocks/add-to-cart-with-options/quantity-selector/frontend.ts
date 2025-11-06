@@ -30,9 +30,12 @@ export type QuantitySelectorStore = {
 		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
-		inputQuantity: number;
+		inputQuantity: '' | number;
 	};
 	actions: {
+		storeDraftValue: (
+			event: HTMLElementEvent< HTMLInputElement >
+		) => void;
 		increaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
@@ -48,7 +51,7 @@ export type QuantitySelectorStore = {
 	};
 };
 
-const { state } = store< QuantitySelectorStore >(
+store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
@@ -107,7 +110,7 @@ const { state } = store< QuantitySelectorStore >(
 
 				return currentQuantity + step <= max;
 			},
-			get inputQuantity(): number {
+			get inputQuantity() {
 				const { productId } = getContext< Context >();
 
 				return (
