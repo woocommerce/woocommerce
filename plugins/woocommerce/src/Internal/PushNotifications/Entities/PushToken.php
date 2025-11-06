@@ -168,7 +168,10 @@ class PushToken {
 		}
 
 		if ( strlen( $token ) > self::MAX_TOKEN_LENGTH ) {
-			throw new InvalidArgumentException( 'Token exceeds maximum length.' );
+			throw new InvalidArgumentException(
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				sprintf( 'Token exceeds maximum length of %s.', self::MAX_TOKEN_LENGTH )
+			);
 		}
 
 		$this->token = $token;
@@ -295,15 +298,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function can_be_created(): bool {
-		return ! $this->get_id()
-			&& $this->get_user_id()
-			&& $this->get_token()
-			&& $this->get_platform()
-			&& $this->get_origin()
-			&& (
-				$this->get_device_uuid()
-				|| $this->get_platform() === self::PLATFORM_BROWSER
-			);
+		return ! $this->get_id() && $this->has_required_parameters();
 	}
 
 	/**
@@ -314,15 +309,7 @@ class PushToken {
 	 * @since 10.4.0
 	 */
 	public function can_be_updated(): bool {
-		return $this->get_id()
-			&& $this->get_user_id()
-			&& $this->get_token()
-			&& $this->get_platform()
-			&& $this->get_origin()
-			&& (
-				$this->get_device_uuid()
-				|| $this->get_platform() === self::PLATFORM_BROWSER
-			);
+		return $this->get_id() && $this->has_required_parameters();
 	}
 
 	/**
@@ -345,5 +332,23 @@ class PushToken {
 	 */
 	public function can_be_deleted(): bool {
 		return (bool) $this->get_id();
+	}
+
+	/**
+	 * Determines whether all the required non-ID parameters are filled.
+	 *
+	 * @return bool
+	 *
+	 * @since 10.4.0
+	 */
+	private function has_required_parameters(): bool {
+		return $this->get_user_id()
+			&& $this->get_token()
+			&& $this->get_platform()
+			&& $this->get_origin()
+			&& (
+				$this->get_device_uuid()
+				|| $this->get_platform() === self::PLATFORM_BROWSER
+			);
 	}
 }

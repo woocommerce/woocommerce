@@ -469,7 +469,7 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$long_token = str_repeat( 'A', PushToken::MAX_TOKEN_LENGTH + 1 );
 
 		$this->expectException( InvalidArgumentException::class );
-		$this->expectExceptionMessage( 'Token exceeds maximum length.' );
+		$this->expectExceptionMessage( 'Token exceeds maximum length of 4096.' );
 
 		$push_token->set_token( $long_token );
 	}
@@ -492,6 +492,16 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$push_token->set_device_uuid( '   ' );
 
 		$this->assertNull( $push_token->get_device_uuid() );
+	}
+
+	/**
+	 * @testdox Tests device UUID trims whitespace.
+	 */
+	public function test_it_trims_whitespace_from_device_uuid() {
+		$push_token = new PushToken();
+		$push_token->set_device_uuid( '  test_uuid  ' );
+
+		$this->assertEquals( 'test_uuid', $push_token->get_device_uuid() );
 	}
 
 	/**
