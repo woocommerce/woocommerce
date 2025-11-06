@@ -57,6 +57,7 @@ export const Edit = ( {
 			<InspectorControls>
 				<PanelBody title={ __( 'Options', 'woocommerce' ) }>
 					<ToggleControl
+						__nextHasNoMarginBottom
 						label={ __(
 							'Show a "Return to Cart" link',
 							'woocommerce'
