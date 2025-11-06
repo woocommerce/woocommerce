@@ -2,11 +2,16 @@
 	margin: 0;
 	max-width: 100%;
 
-	// Fix content jump for address forms when using select as first input
+	// This margin is aligned with text-input margin-top, making it positioned
+	// correctly when two are placed next to each other.
+	// Please don't change unless you plan to apply the same change
+	// in text-input/style.scss
 	.wc-blocks-components-select {
-		margin-top: $gap;
+		margin-top: $gap-small;
 	}
 
+	// No need for this margin in default country select, which sits at the top
+	// of the form
 	.wc-block-components-address-form__country {
 		.wc-blocks-components-select {
 			margin-top: 0;
@@ -25,7 +30,7 @@
 			display: flex;
 			flex-wrap: wrap;
 			justify-content: space-between;
-			gap: 0 calc(#{$gap-smaller} * 2); // Required for spacing especially when using flex-grow
+			gap: 0 $gap-small; // Required for spacing especially when using flex-grow
 
 			.wc-block-components-text-input,
 			.wc-block-components-state-input,
@@ -79,14 +84,13 @@
 }
 
 .wc-block-components-address-form__address_2-toggle {
+	@include font-regular-locked;
 	display: inline-block;
 	background: none;
 	border: none;
 	color: inherit;
 	cursor: pointer;
-	font-family: inherit;
-	font-size: inherit;
-	margin-top: $gap;
+	margin-top: $gap-small;
 	text-align: left;
 	width: 100%;
 
