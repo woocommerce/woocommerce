@@ -63,13 +63,6 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Implements CacheInvalidatorInterface.
-	 */
-	public function test_implements_interface() {
-		$this->assertInstanceOf( CacheInvalidatorInterface::class, $this->sut );
-	}
-
-	/**
 	 * @testdox Creating a new product fires create operation.
 	 */
 	public function test_product_creation() {
@@ -135,11 +128,31 @@ class ProductCacheInvalidatorTest extends \WC_Unit_Test_Case {
 		$variations     = $parent_product->get_children();
 
 		// Should have create event for parent + create events for each variation + update events for parent for each variation.
-		// With 2 variations: 1 parent create + (2 variation creates + 2 parent updates) = 5 events.
-		$this->assertGreaterThanOrEqual( 3, count( $this->captured_actions ) );
+		// With N variations: 1 parent create + (N variation creates + N parent updates) = (2N + 1) events.
+		$expected_min_events = 1 + ( count( $variations ) * 2 );
+		$this->assertGreaterThanOrEqual( $expected_min_events, count( $this->captured_actions ), 'Should have at least one parent create plus two events per variation (variation create + parent update)' );
 
+		$parent_create_events = array_filter(
+			$this->captured_actions,
+			function ( $action ) use ( $parent_product ) {
+				return $action['product_id'] === $parent_product->get_id()
+					&& $action['operation'] === CacheInvalidatorInterface::OPERATION_CREATE;
+			}
+		);
+		$this->assertNotEmpty( $parent_create_events, 'Parent product should have a CREATE event' );
 		$this->assertEquals( $parent_product->get_id(), $this->captured_actions[0]['product_id'] );
 		$this->assertEquals( CacheInvalidatorInterface::OPERATION_CREATE, $this->captured_actions[0]['operation'] );
+
+		foreach ( $variations as $variation_id ) {
+			$variation_create_events = array_filter(
+				$this->captured_actions,
+				function ( $action ) use ( $variation_id ) {
+					return $action['product_id'] === $variation_id
+						&& $action['operation'] === CacheInvalidatorInterface::OPERATION_CREATE;
+				}
+			);
+			$this->assertNotEmpty( $variation_create_events, "Variation {$variation_id} should have a CREATE event" );
+		}
 	}
 
 	/**
