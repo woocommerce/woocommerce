@@ -715,7 +715,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				name: 'T-Shirt',
 			} );
 
-			await expect( quantityInput ).toHaveValue( '' );
+			await expect( quantityInput ).toHaveValue( '0' );
 			const increaseQuantityButton = page.getByLabel(
 				'Increase quantity of T-Shirt'
 			);
