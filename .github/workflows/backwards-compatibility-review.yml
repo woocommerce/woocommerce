@@ -41,13 +41,20 @@ jobs:
             - At most ONE inline comment per (file, line, topic). Merge points into a single comment.
             - Before creating a comment, query existing comments on this PR and SKIP if one with same (file, line, topic) exists.
 
-            INLINE COMMENT TEMPLATE (exact)
+            INLINE COMMENT TEMPLATE (use exactly with blank lines between sections)
+            ```
             [BC-REVIEW] Impact: {Fatal|High|Medium|Low}
+
             Topic: {StrictTypes|SignatureChange|HookContract|TemplateContract|RESTContract|ScriptHandle|DBSchema|ExceptionBehavior|Other}
-            Evidence: path/to/file.php:L123 (add more file:line as needed)
-            Why breaking: <1-3 sentences>
-            Migration: <specific code or steps>
-            Deprecation: <version plan, shim, notices>
+
+            **Evidence:** path/to/file.php:L123 (add more file:line as needed)
+
+            **Why breaking:** <1-3 sentences>
+
+            **Migration:** <specific code or steps>
+
+            **Deprecation:** <version plan, shim, notices>
+            ```
 
             ANALYSIS BOUNDARIES
             Include:
