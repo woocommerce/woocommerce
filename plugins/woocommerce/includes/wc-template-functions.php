@@ -3093,7 +3093,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 					$field .= '<strong>' . current( array_values( $countries ) ) . '</strong>';
 
 					$field .= '<input type="hidden" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . current( array_keys( $countries ) ) . '" ' . implode( ' ', $custom_attributes ) . ' class="country_to_state" readonly="readonly" />';
-
 					$is_hidden_field = true;
 
 				} else {
@@ -3185,7 +3184,6 @@ if ( ! function_exists( 'woocommerce_form_field' ) ) {
 				break;
 			case 'hidden':
 				$field .= '<input type="' . esc_attr( $args['type'] ) . '" class="input-hidden ' . esc_attr( implode( ' ', $args['input_class'] ) ) . '" name="' . esc_attr( $key ) . '" id="' . esc_attr( $args['id'] ) . '" value="' . esc_attr( $value ) . '" ' . implode( ' ', $custom_attributes ) . ' />';
-
 				$is_hidden_field = true;
 
 				break;
