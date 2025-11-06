@@ -24,6 +24,10 @@ export const getVariant = (
  * Checks if there are any children that are blocks.
  */
 export const hasChildren = ( children ): boolean => {
+	if ( ! children ) {
+		return false;
+	}
+
 	return children.some( ( child ) => {
 		if ( Array.isArray( child ) ) {
 			return hasChildren( child );
