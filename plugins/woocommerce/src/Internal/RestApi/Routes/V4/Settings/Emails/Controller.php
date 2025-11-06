@@ -157,13 +157,11 @@ class Controller extends AbstractController {
 
 			foreach ( $emails as $email ) {
 				$item = $this->schema->get_item_response( $email, $request );
-
 				// Filter by post_id if provided.
 				$post_id = $request->get_param( 'post_id' );
-				if ( $post_id && $item['post_id'] !== (int) $post_id ) {
+				if ( $post_id && (int) $item['post_id'] !== (int) $post_id ) {
 					continue;
 				}
-
 				$items[] = $item;
 			}
 
