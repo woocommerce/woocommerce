@@ -1,78 +1,33 @@
 .wc-block-checkout__actions {
+	margin-bottom: $gap-larger;
+
 	.wc-block-checkout__actions_row {
+		@include font-regular-locked;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		gap: $gap-smaller;
 
-		.wc-block-components-checkout-place-order-button {
-			width: 50%;
-			padding: 1em;
-			height: auto;
-
-			&--full-width {
-				width: 100%;
-			}
-
-			// Hides labels when the spinner is shown.
-			&--loading {
-				.wc-block-components-button__text {
-					visibility: hidden;
-				}
-				.wc-block-components-spinner,
-				.wc-block-components-checkout-place-order-button__icon {
-					visibility: visible;
-				}
-			}
-
-			.wc-block-components-checkout-place-order-button__text {
-				display: flex;
-				align-items: center;
-			}
-
-			.wc-block-components-checkout-place-order-button__separator {
-				margin: 0 20px;
-			}
-
-			.wc-block-components-button__text {
-				> svg {
-					fill: $white;
-					vertical-align: top;
-					position: absolute;
-					top: 50%;
-					left: 50%;
-					transform: translate(-50%, -50%);
-				}
-			}
+		&--justify-flex-end {
+			justify-content: flex-end;
 		}
-	}
-}
 
-@include cart-checkout-large-container {
-	.wc-block-checkout__actions {
-		padding: 0 0 $gap-largest 0;
-	}
-}
-
-@include cart-checkout-small-container {
-	.wc-block-checkout__actions {
-		padding-top: $gap-larger;
+		.wc-block-components-checkout-place-order-button--full-width {
+			width: 100%;
+		}
 	}
 }
 
 @include cart-checkout-mobile-container {
 	.wc-block-checkout__actions {
-		padding-top: $gap-larger;
-
 		.wc-block-checkout__actions_row {
 			flex-direction: column-reverse;
+			justify-content: center;
+			gap: $gap;
 		}
 
 		.wc-block-components-checkout-place-order-button {
 			width: 100%;
-		}
-
-		.wc-block-components-checkout-return-to-cart-button {
-			margin: $gap auto;
 		}
 	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent core-provided payment gateways from showing deactivation actions on the Payments settings page.

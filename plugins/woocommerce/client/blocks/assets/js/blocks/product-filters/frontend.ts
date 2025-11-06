@@ -204,7 +204,23 @@ const productFiltersStore = {
 			}
 
 			for ( const key in state.params ) {
-				searchParams.set( key, state.params[ key ] );
+				const value = state.params[ key ];
+				let decodedValue = value;
+
+				try {
+					decodedValue = decodeURIComponent( value );
+				} catch ( error ) {
+					if ( error instanceof URIError ) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'woocommerce/product-filters: Failed to decode filter parameter',
+							key,
+							error
+						);
+					}
+				}
+
+				searchParams.set( key, decodedValue );
 			}
 
 			if ( window.location.href === url.href ) {

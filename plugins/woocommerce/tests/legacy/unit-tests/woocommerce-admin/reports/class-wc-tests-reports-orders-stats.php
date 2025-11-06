@@ -26,6 +26,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$db_version = strstr( WC()->version, '-', true );
 		$db_version = $db_version ? $db_version : WC()->version;
 		update_option( 'woocommerce_db_version', $db_version );
+
+		delete_option( OrdersStatsDataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS );
 	}
 
 	/**
