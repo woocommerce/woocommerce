@@ -9,8 +9,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Schema;
 
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
+use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use WC_Email;
 use WP_Error;
 use WP_REST_Request;
@@ -36,6 +38,24 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 * @var array
 	 */
 	const FIELDS_SUPPORTING_PERSONALIZATION_TAGS = array( 'subject', 'preheader' );
+
+	/**
+	 * Personalization tags registry.
+	 *
+	 * @var Personalization_Tags_Registry|null
+	 */
+	private $personalization_tags_registry;
+
+	/**
+	 * Cached array of personalization tag prefixes.
+	 *
+	 * @var array|null
+	 */
+	private $cached_prefixes = null;
+
+	public function init() {
+		$this->personalization_tags_registry = Email_Editor_Container::container()->get( Personalization_Tags_Registry::class );
+	}
 
 	/**
 	 * Return all properties for the item schema.
@@ -298,11 +318,10 @@ class EmailsSettingsSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Remove HTML comment wrappers from WooCommerce tags.
+	 * Remove HTML comment wrappers from personalization tags.
 	 *
-	 * Converts tags from <!--[woocommerce/tag-name]--> back to [woocommerce/tag-name],
-	 * <!--[mailpoet/tag-name]--> back to [mailpoet/tag-name], or
-	 * <!--[ciab/tag-name]--> back to [ciab/tag-name]
+	 * Converts tags from <!--[prefix/tag-name]--> back to [prefix/tag-name] for all registered prefixes.
+	 * For example: <!--[woocommerce/customer-name]--> becomes [woocommerce/customer-name].
 	 *
 	 * This is required because the email editor personalization tags are wrapped in HTML comment wrappers.
 	 * We need to remove the tags to make editing easier for the end-users and also because the tags are not well formatted in the current DataForm implementation.
@@ -315,8 +334,20 @@ class EmailsSettingsSchema extends AbstractSchema {
 			return $value;
 		}
 
-		// Remove HTML comment wrappers from WooCommerce tags.
-		$unwrapped_value = preg_replace( '/<!--(\[(?:woocommerce|mailpoet|ciab)\/[^\]]+\])-->/i', '$1', $value );
+		// Get all registered prefixes dynamically.
+		$prefixes = $this->get_personalization_tag_prefixes();
+
+		// If no prefixes, return the value unchanged.
+		if ( empty( $prefixes ) ) {
+			return $value;
+		}
+
+		// Escape prefixes for use in regex and join with |.
+		$escaped_prefixes = array_map( 'preg_quote', $prefixes );
+		$prefixes_pattern = implode( '|', $escaped_prefixes );
+
+		// Remove HTML comment wrappers from personalization tags.
+		$unwrapped_value = preg_replace( '/<!--(\[(?:' . $prefixes_pattern . ')\/[^\]]+\])-->/i', '$1', $value );
 		return $unwrapped_value;
 	}
 
@@ -388,12 +419,21 @@ class EmailsSettingsSchema extends AbstractSchema {
 			// Sanitize by type.
 			$sanitized = $this->sanitize_field_value( $field_type, $value );
 
-			// Sanitize Personalization tags
+			// Sanitize Personalization tags.
 			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
-				// check if the subject has a value like [woocommerce/customer-first-name] or [mailpoet/...] or [ciab/...], if so, replace with <!--tagName-->
-				// this is required for the email editor personalization.
+				// Wrap personalization tags in HTML comments for the email editor.
+				// This is required for the email editor personalization.
 				// Use negative lookbehind and lookahead to avoid double-wrapping already wrapped tags.
-				$sanitized = preg_replace( '/(?<!<!--)(\[(?:woocommerce|mailpoet|ciab)\/[^\]]+\])(?!-->)/i', '<!--$1-->', $value );
+				$prefixes = $this->get_personalization_tag_prefixes();
+
+				if ( ! empty( $prefixes ) ) {
+					// Escape prefixes for use in regex and join with |.
+					$escaped_prefixes = array_map( 'preg_quote', $prefixes );
+					$prefixes_pattern = implode( '|', $escaped_prefixes );
+
+					// Wrap tags that aren't already wrapped.
+					$sanitized = preg_replace( '/(?<!<!--)(\[(?:' . $prefixes_pattern . ')\/[^\]]+\])(?!-->)/i', '<!--$1-->', $value );
+				}
 			}
 
 			// Validate.
@@ -513,5 +553,42 @@ class EmailsSettingsSchema extends AbstractSchema {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get all unique prefixes from registered personalization tags.
+	 *
+	 * Extracts the prefix part (before the /) from all registered personalization tags.
+	 * For example, from [woocommerce/customer-name] it extracts 'woocommerce'.
+	 * Results are cached to avoid repeated processing.
+	 *
+	 * @return array Array of unique prefixes, escaped for use in regex patterns.
+	 */
+	private function get_personalization_tag_prefixes(): array {
+		if ( null === $this->personalization_tags_registry ) {
+			return array();
+		}
+
+		// Return cached prefixes if available.
+		if ( null !== $this->cached_prefixes ) {
+			return $this->cached_prefixes;
+		}
+
+		$prefixes = array();
+		$tags     = $this->personalization_tags_registry->get_all();
+
+		foreach ( $tags as $tag ) {
+			$token = $tag->get_token(); // E.g., [woocommerce/customer-name].
+
+			// Extract the prefix from the token (the part before the /).
+			// Remove brackets and get the part before /.
+			if ( preg_match( '/^\[([^\/\]]+)\//', $token, $matches ) ) {
+				$prefixes[ $matches[1] ] = true; // Use array key to ensure uniqueness.
+			}
+		}
+
+		// Convert to array of values and cache.
+		$this->cached_prefixes = array_keys( $prefixes );
+		return $this->cached_prefixes;
 	}
 }
