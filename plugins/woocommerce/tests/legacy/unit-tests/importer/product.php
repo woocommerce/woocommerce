@@ -40,14 +40,10 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Initialize brands classes to register import/export hooks.
 		require_once $bootstrap->plugin_dir . '/includes/class-wc-brands.php';
-		$this->brands_class = new WC_Brands();
-		WC_Brands::init_taxonomy();
-
 		require_once $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
-		$this->brands_admin = new WC_Brands_Admin();
 
-
-
+		WC_Brands::init_taxonomy();
+		new WC_Brands_Admin();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
@@ -685,10 +681,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 10.3.5
 	 */
 	public function test_get_parsed_data_brands() {
-		// Skip test if brands feature is not available.
-		if ( ! class_exists( 'WC_Brands' ) || ! class_exists( 'WC_Brands_Admin' ) ) {
-			$this->markTestSkipped( 'Brands feature is not yet available.' );
-		}
 
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
@@ -710,7 +702,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice".
 		);
 
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
+		$importer    = new WC_Product_CSV_Importer( $this->csv_file, $args );
 		$parsed_data = $importer->get_parsed_data();
 
 		// Verify that each product in parsed_data has the correct brand_ids assigned.
