@@ -25,23 +25,6 @@ const addToCartWithOptionsStore = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-/**
- * Manually dispatches a 'change' event on the quantity input element.
- *
- * When users click the plus/minus stepper buttons, no 'change' event is fired
- * since there is no direct interaction with the input. However, some extensions
- * rely on the change event to detect quantity changes. This function ensures
- * those extensions continue working by programmatically dispatching the event.
- *
- * @see https://github.com/woocommerce/woocommerce/issues/53031
- *
- * @param inputElement - The quantity input element to dispatch the event on.
- */
-export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
-	const event = new Event( 'change', { bubbles: true } );
-	inputElement.dispatchEvent( event );
-};
-
 export type QuantitySelectorStore = {
 	state: {
 		allowsQuantityChange: boolean;
@@ -65,7 +48,7 @@ export type QuantitySelectorStore = {
 	};
 };
 
-store< QuantitySelectorStore >(
+const { state } = store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
@@ -128,11 +111,27 @@ store< QuantitySelectorStore >(
 				const { productId } = getContext< Context >();
 
 				return (
-					addToCartWithOptionsStore.state.quantity?.[ productId ] || 0
+					addToCartWithOptionsStore.state.draftQuantity ??
+					( addToCartWithOptionsStore.state.quantity?.[ productId ] ||
+						0 )
 				);
 			},
 		},
 		actions: {
+			// Hold a draft value in state to allow a non-committed intermediate state of the input.
+			storeDraftValue: (
+				event: HTMLElementEvent< HTMLInputElement >
+			) => {
+				if (
+					isNaN( Number( event.target.value ) ) ||
+					event.target.value === ''
+				) {
+					addToCartWithOptionsStore.state.draftQuantity = '';
+				} else {
+					addToCartWithOptionsStore.state.draftQuantity =
+						Number( event.target.value ) || 0;
+				}
+			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
@@ -162,9 +161,9 @@ store< QuantitySelectorStore >(
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					newValue
+					newValue,
+					inputElement
 				);
-				dispatchChangeEvent( inputElement );
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -217,10 +216,9 @@ store< QuantitySelectorStore >(
 				if ( newValue !== currentValue ) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
-						newValue
+						newValue,
+						inputElement
 					);
-
-					dispatchChangeEvent( inputElement );
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -247,9 +245,9 @@ store< QuantitySelectorStore >(
 				) {
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
-						0
+						0,
+						event.target
 					);
-					dispatchChangeEvent( event.target );
 					return;
 				}
 
@@ -274,10 +272,9 @@ store< QuantitySelectorStore >(
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
-					newValue
+					newValue,
+					event.target
 				);
-
-				dispatchChangeEvent( event.target );
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();

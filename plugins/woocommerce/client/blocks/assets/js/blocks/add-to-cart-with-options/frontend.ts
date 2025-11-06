@@ -35,6 +35,23 @@ export type AddToCartError = {
 	message: string;
 };
 
+/**
+ * Manually dispatches a 'change' event on the quantity input element.
+ *
+ * When users click the plus/minus stepper buttons, no 'change' event is fired
+ * since there is no direct interaction with the input. However, some extensions
+ * rely on the change event to detect quantity changes. This function ensures
+ * those extensions continue working by programmatically dispatching the event.
+ *
+ * @see https://github.com/woocommerce/woocommerce/issues/53031
+ *
+ * @param inputElement - The quantity input element to dispatch the event on.
+ */
+export const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
+	const event = new Event( 'change', { bubbles: true } );
+	inputElement.dispatchEvent( event );
+};
+
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -135,10 +152,15 @@ export type AddToCartWithOptionsStore = {
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
 		productData: NormalizedProductData | NormalizedVariationData | null;
+		draftQuantity: '' | number | undefined;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
-		setQuantity: ( productId: number, value: number ) => void;
+		setQuantity: (
+			productId: number,
+			value: number,
+			changeTarget?: HTMLInputElement
+		) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: () => void;
@@ -154,6 +176,7 @@ const { actions, state } = store<
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
+			draftQuantity: undefined,
 			noticeIds: [],
 			get validationErrors(): Array< AddToCartError > {
 				const context = getContext< Context >();
@@ -220,7 +243,11 @@ const { actions, state } = store<
 					} );
 				}
 			},
-			setQuantity( productId: number, value: number ) {
+			setQuantity(
+				productId: number,
+				value: number,
+				changeTarget?: HTMLInputElement
+			) {
 				const context = getContext< Context >();
 				const { products } = getConfig(
 					'woocommerce'
@@ -248,6 +275,13 @@ const { actions, state } = store<
 				} else {
 					actions.validateQuantity( productId, value );
 				}
+
+				if ( changeTarget ) {
+					dispatchChangeEvent( changeTarget );
+				}
+
+				// Clear the draft quantity.
+				state.draftQuantity = undefined;
 			},
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
