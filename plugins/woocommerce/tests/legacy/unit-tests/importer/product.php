@@ -38,14 +38,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
-		// Initialize brands admin to register import/export hooks (if available).
-		$brands_file = $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
-		if ( file_exists( $brands_file ) ) {
-			require_once $brands_file;
-			if ( class_exists( 'WC_Admin_Brands' ) ) {
-				WC_Admin_Brands::instance();
-			}
-		}
+		require_once WC_ABSPATH . '/includes/admin/class-wc-admin-brands.php';
+		require_once WC_ABSPATH . '/includes/class-wc-brands.php';
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
