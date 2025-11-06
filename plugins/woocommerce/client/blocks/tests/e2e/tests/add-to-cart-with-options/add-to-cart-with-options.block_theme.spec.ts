@@ -679,9 +679,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to min value in variable products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -780,9 +783,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
