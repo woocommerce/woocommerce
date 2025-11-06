@@ -65,6 +65,10 @@
 		"dms/phpunit-arraysubset-asserts": "^0.4.0",
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
+		"phan/phan": "5.5.1",
+		"php-stubs/wordpress-stubs": ">=6.7",
+		"php-stubs/wordpress-tests-stubs": ">=6.7",
+		"php-stubs/wp-cli-stubs": "^2.10",
 		"phpunit/phpunit": "^9.6",
 		"sebastian/comparator": "^4.0",
 		"spatie/phpunit-watcher": "^1.23",
@@ -141,6 +145,9 @@
 		],
 		"phpcbf": [
 			"phpcbf -p"
+		],
+		"phan": [
+			"phan --allow-polyfill-parser"
 		],
 		"makepot-audit": [
 			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,assets,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"

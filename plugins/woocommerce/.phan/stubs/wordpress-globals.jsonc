@@ -1,0 +1,31 @@
+// Global variable definitions for WordPress. Manually maintained. This isn't meant to be a complete list, just what we need.
+//
+// Where possible we should use accessor functions or filters rather than direct reference to globals.
+//
+// If https://github.com/phan/phan/issues/856 gets fixed, we should consider switching to that where reasonable.
+{
+	"action": "string",
+	"blog_id": "int",
+	"content_width": "?int",
+	"current_screen": "\\WP_Screen",
+	"current_user": "\\WP_User",
+	"menu": "array{string,string,string,string,string,string,string}[]",
+	"pagenow": "string",
+	"post": "\\WP_Post",
+	"submenu": "array<string,array{string,string,string,string,4?:string}[]>",
+	"wpdb": "\\wpdb",
+	"wp": "\\WP",
+	"wp_embed": "\\WP_Embed",
+	"wp_filesystem": "\\WP_Filesystem_Base|null",
+	"wp_filter": "array<string,\\WP_Hook|array<int,array{accepted_args:int,function:callable}[]>>",
+	"wp_rest_server": "\\WP_REST_Server",
+	"wp_rewrite": "\\WP_Rewrite",
+	"wp_scripts": "\\WP_Scripts",
+	"wp_styles": "\\WP_Styles",
+	"wp_the_query": "\\WP_Query",
+	"wp_query": "\\WP_Query",
+	"wp_version": "string",
+	"woocommerce": "\\WooCommerce",
+	"product": "\\WC_Product"
+}
+
