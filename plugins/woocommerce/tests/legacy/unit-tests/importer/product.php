@@ -39,9 +39,15 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
 		// Initialize brands admin to register import/export hooks (if available).
-		require_once WC_ABSPATH . '/includes/admin/class-wc-admin-brands.php';
-		require_once WC_ABSPATH . '/includes/class-wc-brands.php';
-		WC_Brands::init_taxonomy();
+		require_once $bootstrap->plugin_dir . '/includes/class-wc-brands.php';
+
+
+
+		if ( class_exists( 'WC_Brands' ) ) {
+			WC_Brands::init_taxonomy();
+		}
+
+
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
@@ -679,8 +685,11 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 10.3.5
 	 */
 	public function test_get_parsed_data_brands() {
+		// Skip test if brands feature is not available.
+		if ( ! class_exists( 'WC_Brands' ) ) {
+			$this->markTestSkipped( 'Brands feature is not yet available.' );
+		}
 
-		WC_Brands::init_taxonomy();
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
@@ -702,7 +711,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		);
 
 		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
-		$import = $importer->import();
 		$parsed_data = $importer->get_parsed_data();
 
 		// Verify that each product in parsed_data has the correct brand_ids assigned.
@@ -711,9 +719,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			$expected_brand_ids = array();
 			foreach ( $expected_brands[ $index ] as $brand_name ) {
 				$brand = get_term_by( 'name', $brand_name, 'product_brand' );
-				if($brand_name === 'TopBrand') {
-					var_dump($brand);
-				}
 				if ( $brand && ! is_wp_error( $brand ) ) {
 					$expected_brand_ids[] = $brand->term_id;
 				}
@@ -743,8 +748,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		$kidcakes      = get_term_by( 'name', 'KidCakes', 'product_brand' );
 		$slice         = get_term_by( 'name', 'Slice', 'product_brand' );
 		$another_brand = get_term_by( 'name', 'Another Brand', 'product_brand' );
-
-		var_dump($topbrand);
 
 		// Assert that terms exist.
 		$this->assertNotFalse( $topbrand, 'TopBrand term should exist' );
