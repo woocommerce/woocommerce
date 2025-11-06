@@ -411,4 +411,108 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 		$this->assertStringContainsString( 'aria-label="Page 0"', $output );
 	}
+
+	/**
+	 * Test that hidden field with label does not have "for" attribute.
+	 */
+	public function test_hidden_field_with_label() {
+		$actual_html = woocommerce_form_field(
+			'test_hidden',
+			array(
+				'type'   => 'hidden',
+				'id'     => 'test_hidden_field',
+				'label'  => 'Test Label',
+				'return' => true,
+			),
+			'test value'
+		);
+
+		// Should contain label without "for" attribute
+		$this->assertStringContainsString( '<label class="">', $actual_html );
+		$this->assertStringNotContainsString( 'for=', $actual_html );
+		$this->assertStringContainsString( 'Test Label', $actual_html );
+	}
+
+	/**
+	 * Test that country field with one country does not have "for" attribute.
+	 */
+	public function test_country_field_single_country() {
+		// Mock WC()->countries to return only one country
+		$mock_countries = $this->getMockBuilder( 'WC_Countries' )
+			->setMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn( array( 'US' => 'United States' ) );
+
+		// Store original countries object
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object
+		WC()->countries = $original_countries;
+
+		// Should contain label without "for" attribute
+		$this->assertStringContainsString( '<label class="">', $actual_html );
+		$this->assertStringNotContainsString( 'for=', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain hidden input
+		$this->assertStringContainsString( 'type="hidden"', $actual_html );
+		// Should display the country name
+		$this->assertStringContainsString( '<strong>United States</strong>', $actual_html );
+	}
+
+	/**
+	 * Test that country field with multiple countries has "for" attribute.
+	 */
+	public function test_country_field_multiple_countries() {
+		// Mock WC()->countries to return multiple countries
+		$mock_countries = $this->getMockBuilder( 'WC_Countries' )
+			->setMethods( array( 'get_allowed_countries' ) )
+			->getMock();
+
+		$mock_countries->method( 'get_allowed_countries' )
+			->willReturn(
+				array(
+					'US' => 'United States',
+					'CA' => 'Canada',
+				)
+			);
+
+		// Store original countries object
+		$original_countries = WC()->countries;
+		WC()->countries     = $mock_countries;
+
+		$actual_html = woocommerce_form_field(
+			'billing_country',
+			array(
+				'type'   => 'country',
+				'id'     => 'billing_country',
+				'label'  => 'Country / Region',
+				'return' => true,
+			),
+			'US'
+		);
+
+		// Restore original countries object
+		WC()->countries = $original_countries;
+
+		// Should contain label with "for" attribute
+		$this->assertStringContainsString( 'for="billing_country"', $actual_html );
+		$this->assertStringContainsString( 'Country / Region', $actual_html );
+		// Should contain select dropdown
+		$this->assertStringContainsString( '<select', $actual_html );
+		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
+	}
 }
