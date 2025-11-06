@@ -2,19 +2,22 @@
 /**
  * Email Settings V4 controller unit tests.
  *
- * @package WooCommerce\RestApi\UnitTests
- * @since   4.0.0
+ * @package WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\Email
  */
 
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Settings\Email;
+
+use WC_REST_Unit_Test_Case;
+use WP_REST_Request;
+
 /**
- * Email Settings V4 controller unit tests.
+ * Tests for the Email Settings REST API controller.
  *
- * @package WooCommerce\RestApi\UnitTests
- * @since   4.0.0
+ * @class EmailSettingsControllerTest
  */
-class WC_REST_Email_Settings_V4_Controller_Test extends WC_REST_Unit_Test_Case {
+class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * User ID.
