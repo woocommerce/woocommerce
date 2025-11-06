@@ -10,96 +10,61 @@ concurrency:
 
 jobs:
   review-with-tracking:
+    if: github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
       contents: read
       pull-requests: write
-      issues: write
       id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
-      - name: Minimize previous BC review comments
-        run: |
-          # Get node IDs for previous BC reviews (GraphQL IDs required for minimizeComment)
-          gh api graphql -f query='
-            query($owner: String!, $repo: String!, $pr: Int!) {
-              repository(owner: $owner, name: $repo) {
-                pullRequest(number: $pr) {
-                  comments(first: 100) {
-                    nodes {
-                      id
-                      author { login }
-                      body
-                    }
-                  }
-                }
-              }
-            }' -f owner="${{ github.repository_owner }}" \
-               -f repo="${{ github.event.repository.name }}" \
-               -F pr=${{ github.event.pull_request.number }} \
-            --jq '.data.repository.pullRequest.comments.nodes[]
-                  | select(.author.login == "claude")
-                  | select(.body | contains("Backwards Compatibility Review"))
-                  | .id' \
-          | while read -r node_id; do
-              # Minimize each comment with OUTDATED classifier
-              gh api graphql -f query='
-                mutation($id: ID!) {
-                  minimizeComment(input: {
-                    subjectId: $id
-                    classifier: OUTDATED
-                  }) {
-                    clientMutationId
-                  }
-                }' -f id="$node_id" || true
-            done
-        env:
-          GH_TOKEN: ${{ github.token }}
-
-      - name: PR Review with Progress Tracking
+      - name: PR Review with Progress Tracking (inline-only)
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-
-          # Enable progress tracking
-          track_progress: true
-
-          # Your custom review instructions
           prompt: |
+            [BC-REVIEW] WooCommerce/WordPress Backwards Compatibility
+
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR: #${{ github.event.pull_request.number }}
 
-            PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
+            OBJECTIVE
+            Identify ONLY backwards compatibility risks and missing deprecations across PHP, JS/Blocks, REST, templates, and data contracts.
 
-            Only report on BC risks and required deprecations. Ignore styling, formatting, comments, and pure test/doc changes unless they mask a BC concern.
+            OUTPUT RULES
+            - At most ONE inline comment per (file, line, topic). Merge points into a single comment.
+            - Before creating a comment, query existing comments on this PR and SKIP if one with same (file, line, topic) exists.
 
-            Output format (strict):
-            - Summary: Overall risk [None|Low|Medium|High] and a 2 to 4 sentence rationale.
-            - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
-            - Confidence: a percentage and one-sentence justification.
+            INLINE COMMENT TEMPLATE (exact)
+            [BC-REVIEW] Impact: {Fatal|High|Medium|Low}
+            Topic: {StrictTypes|SignatureChange|HookContract|TemplateContract|RESTContract|ScriptHandle|DBSchema|ExceptionBehavior|Other}
+            Evidence: path/to/file.php:L123 (add more file:line as needed)
+            Why breaking: <1-3 sentences>
+            Migration: <specific code or steps>
+            Deprecation: <version plan, shim, notices>
 
-            Scope to analyze (but not limited to):
-            - PHP: public/protected API signature/visibility changes; default param or type-hint changes; thrown exceptions; removed/renamed hooks (`do_action`, `apply_filters`); template changes under `templates/**`; REST params/response shapes; DB/schema/options changes; global constants/vars; composer constraints.
-            - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; REST schemas; data-store selectors/actions; settings/options keys.
-            - Ecosystem impact: payment gateways, popular Woo extensions (Subscriptions/Bookings/Memberships), themes customizing templates, custom checkout flows.
+            ANALYSIS BOUNDARIES
+            Include:
+              - PHP: public/protected signature or visibility changes; default param changes; return/param type-hints; adding `declare(strict_types=1)` to existing files; thrown exception class changes; removed/renamed hooks (`do_action`, `apply_filters`); `templates/**` contract changes; REST route/param/response changes; DB/schema/options; globals/constants; composer constraints.
+              - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; `wp.data` selectors/actions; REST schemas; settings/option keys.
+            Exclude:
+              - `vendor/**`, `node_modules/**`, `build/**`, `dist/**`, `**/*.min.*`, `**/*.map`, translations `**/*.po` `**/*.mo`, images/binaries, generated artifacts.
 
-            Method:
-            - Prefer exact citations with file:line for every item (from the diff and repo).
-            - Provide mitigation or migration guidance for each breaking/deprecation.
-            - If uncertain, state what evidence is missing and rate likelihood.
-            - Use inline comments for line-specific concerns and one top-level summary comment.
+            METHOD
+            - Cite exact `file:line` for every claim (from the PR diff and repository state).
+            - For each risky change propose: non-breaking approach, shim, and staged deprecation timeline.
+            - Do not duplicate an existing equivalent "[BC-REVIEW]" inline comment on the same line/context.
+            - For each potential comment:
+              1) Call: gh api "repos/${REPO}/pulls/${PR}/comments?per_page=100" --paginate
+              2) If a comment exists where body contains "[BC-REVIEW]" AND "Topic: <same>" AND matches file+line, SKIP posting.
+            - Otherwise post a single merged comment for that file+line+topic.
 
-            Ignore/limit noise and cost:
-            - Exclude generated/binary/third-party content (e.g., `vendor/**`, `node_modules/**`, `build/**`, `dist/**`, `*.min.*`, translations `*.mo`/`*.po`).
-            - Focus on files changed in this PR and related API touch points.
+          claude_args: >
+            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*)"
 
-            If no BC issues are found, explicitly state: "No breaking changes detected" and explain why, including deprecation sufficiency and ecosystem considerations.
-
-          # Tools for comprehensive PR review
-          claude_args: |
-            --allowedTools "mcp__github_inline_comment__create_inline_comment,Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh api:*),Bash(git show:*),Bash(git diff:*),Bash(git ls-files:*),Bash(git grep:*),Bash(rg *)"
