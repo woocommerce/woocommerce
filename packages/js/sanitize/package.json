@@ -5,6 +5,12 @@
 	"main": "build/index.js",
 	"module": "build/index.js",
 	"types": "build-types/index.d.ts",
+	"files": [
+		"build",
+		"build-module",
+		"build-style",
+		"build-types"
+	],
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/woocommerce/woocommerce.git",
