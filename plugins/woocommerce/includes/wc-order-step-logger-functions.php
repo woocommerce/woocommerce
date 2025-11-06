@@ -69,7 +69,7 @@ function wc_log_order_step( string $message, ?array $context = null, bool $final
 
 		if ( ! $logger ) {
 			// Use a static logger instance to avoid unnecessary instantiations.
-			$logger = new WC_Logger( null, WC_Log_Levels::DEBUG );
+			$logger = new WC_Logger();
 		}
 
 		if ( ! is_null( error_get_last() ) ) {
