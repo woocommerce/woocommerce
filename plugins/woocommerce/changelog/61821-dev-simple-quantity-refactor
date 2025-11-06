@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+[Experimental] Add to Cart + Options: improve quantity selection by removing imperative DOM manipulation.
