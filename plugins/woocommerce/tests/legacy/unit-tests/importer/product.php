@@ -41,6 +41,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		// Initialize brands admin to register import/export hooks (if available).
 		require_once WC_ABSPATH . '/includes/admin/class-wc-admin-brands.php';
 		require_once WC_ABSPATH . '/includes/class-wc-brands.php';
+		WC_Brands::init_taxonomy();
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
@@ -680,7 +681,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	public function test_get_parsed_data_brands() {
 
 		WC_Brands::init_taxonomy();
-
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
 
@@ -688,8 +688,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'mapping' => $this->get_csv_mapped_items(),
 			'parse'   => true,
 		);
-
-		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
 
 		// Expected brand strings for each product from CSV.
 		// Note: Hierarchical terms store only the leaf name, not the full path.
@@ -703,6 +701,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice".
 		);
 
+		$importer = new WC_Product_CSV_Importer( $this->csv_file, $args );
+		$import = $importer->import();
 		$parsed_data = $importer->get_parsed_data();
 
 		// Verify that each product in parsed_data has the correct brand_ids assigned.
