@@ -7,6 +7,7 @@
 
 declare(strict_types=1);
 
+use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -405,10 +406,29 @@ class WC_Gateway_Paypal_Request {
 	 * @param string   $payment_source The payment source.
 	 * @param array    $js_sdk_params Extra parameters for a PayPal JS SDK (Buttons) request.
 	 * @return array
+	 *
+	 * @throws Exception If the order items cannot be built.
 	 */
 	private function get_paypal_create_order_request_params( $order, $payment_source, $js_sdk_params ) {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
+
+		$src_locale = get_locale();
+		// If the locale is longer than PayPal's string limit (10).
+		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
+			// Keep only the main language and region parts.
+			$locale_parts = explode( '_', $src_locale );
+			if ( count( $locale_parts ) > 2 ) {
+				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
+			}
+		}
+
+		$order_items = $this->get_paypal_order_items( $order );
+		if ( empty( $order_items ) ) {
+			// If we cannot build order items (e.g. negative item amounts),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
+		}
 
 		$params = array(
 			'intent'         => $this->get_paypal_order_intent(),
@@ -422,7 +442,7 @@ class WC_Gateway_Paypal_Request {
 						// Customer redirected here on cancellation.
 						'cancel_url'            => esc_url_raw( $order->get_cancel_order_url_raw() ),
 						// Convert WordPress locale format (e.g., 'en_US') to PayPal's expected format (e.g., 'en-US').
-						'locale'                => str_replace( '_', '-', get_locale() ),
+						'locale'                => str_replace( '_', '-', $src_locale ),
 						'app_switch_preference' => array(
 							'launch_paypal_app' => true,
 						),
@@ -434,7 +454,7 @@ class WC_Gateway_Paypal_Request {
 					'custom_id'  => $this->get_paypal_order_custom_id( $order ),
 					'amount'     => $this->get_paypal_order_purchase_unit_amount( $order ),
 					'invoice_id' => $this->limit_length( $this->gateway->get_option( 'invoice_prefix' ) . $order->get_order_number(), WC_Gateway_Paypal_Constants::PAYPAL_INVOICE_ID_MAX_LENGTH ),
-					'items'      => $this->get_paypal_order_items( $order ),
+					'items'      => $order_items,
 					'payee'      => array(
 						'email_address' => $payee_email,
 					),
@@ -442,7 +462,14 @@ class WC_Gateway_Paypal_Request {
 			),
 		);
 
-		if ( WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING !== $shipping_preference ) {
+		if ( ! in_array(
+			$shipping_preference,
+			array(
+				WC_Gateway_Paypal_Constants::SHIPPING_NO_SHIPPING,
+				WC_Gateway_Paypal_Constants::SHIPPING_SET_PROVIDED_ADDRESS,
+			),
+			true
+		) ) {
 			$params['payment_source'][ $payment_source ]['experience_context']['order_update_callback_config'] = array(
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
 				'callback_url'    => esc_url_raw( rest_url( 'wc/v3/paypal-standard/update-shipping' ) ),
@@ -551,16 +578,20 @@ class WC_Gateway_Paypal_Request {
 		$items = array();
 
 		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$item_amount = $this->get_paypal_order_item_amount( $order, $item );
+			if ( 'line_item' === $item->get_type() && $item_amount < 0 ) {
+				// PayPal does not accept negative item amounts (for line items).
+				WC_Gateway_Paypal::log( sprintf( 'Order item with negative amount for PayPal order items. Order ID: %d, Item ID: %d, Amount: %f', $order->get_id(), $item->get_id(), $item_amount ), 'error' );
+				return array();
+			}
+
 			$items[] = array(
 				'name'        => $this->limit_length( $item->get_name(), WC_Gateway_Paypal_Constants::PAYPAL_ORDER_ITEM_NAME_MAX_LENGTH ),
 				'quantity'    => $item->get_quantity(),
 				'unit_amount' => array(
 					'currency_code' => $order->get_currency(),
 					// Use the subtotal before discounts.
-					'value'         => wc_format_decimal(
-						'fee' === $item->get_type() ? $item->get_amount() : $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false ),
-						wc_get_price_decimals()
-					),
+					'value'         => wc_format_decimal( $item_amount, wc_get_price_decimals() ),
 				),
 			);
 		}
@@ -576,15 +607,26 @@ class WC_Gateway_Paypal_Request {
 	 */
 	private function get_paypal_order_items_subtotal( $order ) {
 		$total = 0;
-		foreach ( $order->get_items() as $item ) {
-			$total += (float) $item->get_subtotal();
+		foreach ( $order->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$total += wc_add_number_precision( $this->get_paypal_order_item_amount( $order, $item ) * $item->get_quantity(), false );
 		}
 
-		foreach ( $order->get_items( 'fee' ) as $fee ) {
-			$total += (float) $fee->get_amount();
-		}
+		return wc_remove_number_precision( $total );
+	}
 
-		return $total;
+	/**
+	 * Get the amount for a specific order item.
+	 *
+	 * @param WC_Order      $order Order object.
+	 * @param WC_Order_Item $item Order item.
+	 * @return float
+	 */
+	private function get_paypal_order_item_amount( $order, $item ) {
+		return (float) (
+			'fee' === $item->get_type()
+				? $item->get_amount()
+				: $order->get_item_subtotal( $item, $include_tax = false, $rounding_enabled = false )
+		);
 	}
 
 	/**
@@ -648,11 +690,25 @@ class WC_Gateway_Paypal_Request {
 			return null;
 		}
 
-		// Postal code is typically required, but not always. The create-order request
-		// will fail if it is missing for a country that requires it.
-		// As a simple heuristic, if the postal code is not set, but name and address_line_1 are,
-		// we will assume that postal code is not required.
-		if ( empty( $postcode ) && ( empty( $full_name ) || empty( $address_line_1 ) ) ) {
+		// Make sure the country code is in the correct format.
+		$raw_country = $country;
+		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
+		if ( ! $country ) {
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
+			return null;
+		}
+
+		// Validate required fields based on country-specific address requirements.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: The container call can be removed once we migrate this class to the `src` folder.
+		$address_requirements = wc_get_container()->get( PayPalAddressRequirements::class )::instance();
+		if ( empty( $city ) && $address_requirements->country_requires_city( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'City is required for country: %s', $country ), 'error' );
+			return null;
+		}
+
+		if ( empty( $postcode ) && $address_requirements->country_requires_postal_code( $country ) ) {
+			WC_Gateway_Paypal::log( sprintf( 'Postal code is required for country: %s', $country ), 'error' );
 			return null;
 		}
 
@@ -666,9 +722,47 @@ class WC_Gateway_Paypal_Request {
 				'admin_area_1'   => $this->limit_length( $state, WC_Gateway_Paypal_Constants::PAYPAL_STATE_MAX_LENGTH ),
 				'admin_area_2'   => $this->limit_length( $city, WC_Gateway_Paypal_Constants::PAYPAL_CITY_MAX_LENGTH ),
 				'postal_code'    => $this->limit_length( $postcode, WC_Gateway_Paypal_Constants::PAYPAL_POSTAL_CODE_MAX_LENGTH ),
-				'country_code'   => $country,
+				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Normalize PayPal order shipping country code.
+	 *
+	 * @param string $country_code Country code to normalize.
+	 * @return string|null
+	 */
+	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+		// Normalize to uppercase.
+		$code = strtoupper( trim( (string) $country_code ) );
+
+		// Check if it's a valid alpha-2 code.
+		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
+			if ( WC()->countries->country_exists( $code ) ) {
+				return $code;
+			}
+
+			WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
+			return null;
+		}
+
+		// Log when we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
+
+		// Truncate to the expected maximum length (3).
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $code ) > $max_country_code_length ) {
+			$code = substr( $code, 0, $max_country_code_length );
+		}
+
+		// Check if it's a valid alpha-3 code.
+		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
+		if ( null === $alpha2 ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+		}
+
+		return $alpha2;
 	}
 
 	/**
