@@ -518,7 +518,7 @@ class FeaturesController {
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
 				'description'                  => $this->get_mcp_integration_description(),
 				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
+				'disable_ui'                   => true,
 				'is_experimental'              => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_legacy'                    => false,

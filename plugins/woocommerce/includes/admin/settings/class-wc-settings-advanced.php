@@ -9,6 +9,9 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
+// Include MCP settings class.
+require_once __DIR__ . '/class-wc-settings-mcp.php';
+
 /**
  * Settings for API.
  */
@@ -50,6 +53,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			'keys'            => __( 'REST API', 'woocommerce' ),
 			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
 			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
+			'mcp'             => __( 'MCP', 'woocommerce' ),
 			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
 		);
 
@@ -437,6 +441,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_settings_rest_api', $settings );
+	}
+
+	/**
+	 * Get settings for the MCP section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_mcp_section() {
+		return WC_Settings_MCP::get_settings();
 	}
 
 	/**
