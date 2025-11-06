@@ -39,10 +39,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
 		// Initialize brands admin to register import/export hooks (if available).
-		require_once $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
-		require_once $bootstrap->plugin_dir . '/includes/class-wc-brands.php';
-		WC_Admin_Brands::instance();
-		WC_Brands::instance();
+		require_once WC_ABSPATH . '/includes/admin/class-wc-admin-brands.php';
+		require_once WC_ABSPATH . '/includes/class-wc-brands.php';
 
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
@@ -680,6 +678,8 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 	 * @since 10.3.5
 	 */
 	public function test_get_parsed_data_brands() {
+
+		WC_Brands::init_taxonomy();
 
 		// Set admin user to allow term creation.
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
