@@ -88,6 +88,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Regular price'           => 'regular_price',
 			'Categories'              => 'category_ids',
 			'Tags'                    => 'tag_ids',
+			'Brands'                  => 'brand_ids',
 			'Shipping class'          => 'shipping_class_id',
 			'Images'                  => 'images',
 			'Download limit'          => 'download_limit',
@@ -255,6 +256,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'20',
 				'Clothing, Clothing > T-shirts',
 				'',
+				'TopBrand, TopBrand > KidCakes',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_front.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_back.jpg',
 				'',
@@ -303,6 +305,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'5',
 				'Music > Albums, Music',
 				'Woo',
+				'TopBrand > Slice, TopBrand',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_flat.jpg',
 				'10',
@@ -659,7 +662,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Remove fields that depends on product ID or term ID.
 		foreach ( $parsed_data as &$data ) {
-			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'] );
+			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'], $data['brand_ids'] );
 		}
 
 		$this->assertEquals( $items, $parsed_data );
