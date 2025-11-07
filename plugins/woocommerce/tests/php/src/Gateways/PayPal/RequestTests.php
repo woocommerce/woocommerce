@@ -310,6 +310,31 @@ class RequestTests extends \WC_Unit_Test_Case {
 		$order->set_total( $total );
 		$order->save();
 
+		// Remove existing items to start fresh.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$item_qty = 4;
+
+		$item = new \WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => $item_qty,
+				'subtotal' => $product->get_price() * $item_qty,
+				'total'    => $product->get_price() * $item_qty,
+			)
+		);
+		$item->save();
+
+		$order->add_item( $item );
+		$order->save();
+
 		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
 
 		$actual = $request->get_paypal_order_purchase_unit_amount( $order );
@@ -326,10 +351,6 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_test_get_paypal_order_purchase_unit_amount(): array {
-		// TODO: Workaround for GitHub Actions. We still don't know why this is needed.
-		// When running tests locally, this is not needed.
-		$total_diff = 5.22;
-
 		return array(
 			'test 1' => array(
 				'cart tax'       => 10,
@@ -342,7 +363,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => (string) 40.00 - $total_diff,
+							'value'         => '40.00',
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -370,7 +391,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => (string) 40.00 - $total_diff,
+							'value'         => '40.00',
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -398,7 +419,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => (string) 40.00 - $total_diff,
+							'value'         => '40.00',
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
@@ -426,7 +447,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 					'breakdown'     => array(
 						'item_total' => array(
 							'currency_code' => 'USD',
-							'value'         => (string) 40.00 - $total_diff,
+							'value'         => '40.00',
 						),
 						'shipping'   => array(
 							'currency_code' => 'USD',
