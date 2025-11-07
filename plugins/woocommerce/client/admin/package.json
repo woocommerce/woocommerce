@@ -18,6 +18,7 @@
 		"build:project:bundle": "wireit",
 		"build:project:feature-config": "php ../../bin/generate-feature-config.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"example": "webpack --config docs/examples/extensions/examples.config.js",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
@@ -220,7 +221,7 @@
 		"webpack-cli": "5.1.x",
 		"webpack-dev-server": "4.15.x",
 		"webpack-fix-style-only-entries": "^0.6.1",
-		"webpack-rtl-plugin": "2.0.x",
+		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
 	"peerDependencies": {

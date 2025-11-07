@@ -124,7 +124,7 @@
 		"webpack": "5.97.x",
 		"webpack-cli": "5.1.x",
 		"webpack-remove-empty-scripts": "1.0.x",
-		"webpack-rtl-plugin": "2.0.x",
+		"@automattic/webpack-rtl-plugin": "6.0.x",
 		"wireit": "0.14.12"
 	},
 	"scripts": {
@@ -134,6 +134,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",

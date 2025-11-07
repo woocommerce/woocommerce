@@ -63,17 +63,26 @@ class Controller extends AbstractController {
 	protected $update_utils;
 
 	/**
+	 * Action controller class.
+	 *
+	 * @var ActionController
+	 */
+	protected $action_controller;
+
+	/**
 	 * Initialize the controller.
 	 *
-	 * @param OrderSchema     $item_schema Order schema class.
-	 * @param CollectionQuery $query_utils Query utils class.
-	 * @param UpdateUtils     $update_utils Update utils class.
+	 * @param OrderSchema      $item_schema Order schema class.
+	 * @param CollectionQuery  $query_utils Query utils class.
+	 * @param UpdateUtils      $update_utils Update utils class.
+	 * @param ActionController $action_controller Action controller class.
 	 * @internal
 	 */
-	final public function init( OrderSchema $item_schema, CollectionQuery $query_utils, UpdateUtils $update_utils ) {
-		$this->item_schema      = $item_schema;
-		$this->collection_query = $query_utils;
-		$this->update_utils     = $update_utils;
+	final public function init( OrderSchema $item_schema, CollectionQuery $query_utils, UpdateUtils $update_utils, ActionController $action_controller ) {
+		$this->item_schema       = $item_schema;
+		$this->collection_query  = $query_utils;
+		$this->update_utils      = $update_utils;
+		$this->action_controller = $action_controller;
 	}
 
 	/**
@@ -94,6 +103,23 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * List of args for endpoints. These may alter how data is returned or formatted. Extended by routes.
+	 *
+	 * @return array
+	 */
+	protected function get_endpoint_args(): array {
+		return array(
+			'num_decimals' => array(
+				'default'           => wc_get_price_decimals(),
+				'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+		);
+	}
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -102,6 +128,7 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => $this->get_endpoint_args(),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -112,16 +139,7 @@ class Controller extends AbstractController {
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'create_item' ),
 					'permission_callback' => array( $this, 'create_item_permissions_check' ),
-					'args'                => array_merge(
-						$this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
-						array(
-							'set_paid' => array(
-								'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'default'     => false,
-							),
-						)
-					),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::CREATABLE ),
 				),
 			)
 		);
@@ -131,10 +149,13 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
+				'args'   => array_merge(
+					$this->get_endpoint_args(),
+					array(
+						'id' => array(
+							'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+							'type'        => 'integer',
+						),
 					),
 				),
 				array(
@@ -151,13 +172,7 @@ class Controller extends AbstractController {
 					'permission_callback' => array( $this, 'update_item_permissions_check' ),
 					'args'                => array_merge(
 						$this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
-						array(
-							'set_paid' => array(
-								'description' => __( 'Define if the order is paid. It will set the status to processing and reduce stock items.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'default'     => false,
-							),
-						)
+						$this->action_controller->get_endpoint_args_for_actions(),
 					),
 				),
 				array(
@@ -282,7 +297,7 @@ class Controller extends AbstractController {
 			$order->set_created_via( ! empty( $request['created_via'] ) ? sanitize_text_field( wp_unslash( $request['created_via'] ) ) : 'rest-api' );
 			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
 
-			$this->update_utils->update_order_from_request( $order, $request, true );
+			$this->update_utils->update_order_from_request( $order, $request );
 			$this->update_additional_fields_for_object( $order, $request );
 
 			/**
@@ -339,8 +354,9 @@ class Controller extends AbstractController {
 		}
 
 		try {
-			$this->update_utils->update_order_from_request( $order, $request, false );
+			$this->update_utils->update_order_from_request( $order, $request );
 			$this->update_additional_fields_for_object( $order, $request );
+			$this->action_controller->run_actions( $order, $request );
 
 			/**
 			 * Fires after a single object is updated via the REST API.
@@ -375,13 +391,14 @@ class Controller extends AbstractController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-
-		$force    = (bool) $request['force'];
-		$response = $this->prepare_item_for_response( $order, $request );
+		$force = (bool) $request['force'];
 
 		if ( $force ) {
-			$result = $order->delete( true );
+			$result   = $order->delete( true );
+			$response = new WP_REST_Response( null, 204 );
 		} else {
+			$response = $this->prepare_item_for_response( $order, $request );
+
 			/**
 			 * Filter whether an object is trashable.
 			 *

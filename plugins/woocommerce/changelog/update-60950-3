@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Remove cart contents session on next user initiated request

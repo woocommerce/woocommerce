@@ -52,22 +52,32 @@ class RestAbilityFactory {
 		}
 
 		try {
-			wp_register_ability(
-				$ability_config['id'],
-				array(
-					'label'               => $ability_config['label'],
-					'description'         => $ability_config['description'],
-					'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
-					'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
-					'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
-						return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
-					},
-					'permission_callback' => function () use ( $controller, $ability_config ) {
-						return self::check_permission( $controller, $ability_config['operation'] );
-					},
-					'ability_class'       => RestAbility::class,
-				)
+			$ability_args = array(
+				'label'               => $ability_config['label'],
+				'description'         => $ability_config['description'],
+				'category'            => 'woocommerce-rest',
+				'input_schema'        => self::get_schema_for_operation( $controller, $ability_config['operation'] ),
+				'output_schema'       => self::get_output_schema( $controller, $ability_config['operation'] ),
+				'execute_callback'    => function ( $input ) use ( $controller, $ability_config, $route ) {
+					return self::execute_operation( $controller, $ability_config['operation'], $input, $route );
+				},
+				'permission_callback' => function () use ( $controller, $ability_config ) {
+					return self::check_permission( $controller, $ability_config['operation'] );
+				},
+				'ability_class'       => RestAbility::class,
+				'meta'                => array(
+					'show_in_rest' => true,
+				),
 			);
+
+			// Add readonly annotation for GET operations (list and get).
+			if ( in_array( $ability_config['operation'], array( 'list', 'get' ), true ) ) {
+				$ability_args['meta']['annotations'] = array(
+					'readonly' => true,
+				);
+			}
+
+			wp_register_ability( $ability_config['id'], $ability_args );
 		} catch ( \Throwable $e ) {
 			// Log the error for debugging but don't break the registration of other abilities.
 			if ( function_exists( 'wc_get_logger' ) ) {
