@@ -550,7 +550,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( colorGreenOption ).toBeDisabled();
 	} );
-	//this test is flaky
+
 	test( 'respects quantity constraints', async ( {
 		page,
 		pageObject,
