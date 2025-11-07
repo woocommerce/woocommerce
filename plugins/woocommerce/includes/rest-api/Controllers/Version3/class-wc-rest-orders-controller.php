@@ -348,8 +348,14 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 			if ( in_array( $status, $this->get_order_statuses(), true ) ) {
 				$args['post_status'][] = 'wc-' . $status;
 			} elseif ( 'any' === $status ) {
-				// Set status to "any" and short-circuit out.
-				$args['post_status'] = 'any';
+				// When querying for 'any' status, filter to only include statuses that should be visible.
+				// This matches WordPress core's WP_Query behavior and the Admin Orders ListTable behavior.
+				// Internal statuses (like 'checkout-draft') are excluded by checking 'show_in_admin_all_list'.
+				$visible_statuses = array_intersect(
+					array_keys( wc_get_order_statuses() ),
+					get_post_stati( array( 'show_in_admin_all_list' => true ), 'names' )
+				);
+				$args['post_status'] = array_values( $visible_statuses );
 				break;
 			} else {
 				$args['post_status'][] = $status;
