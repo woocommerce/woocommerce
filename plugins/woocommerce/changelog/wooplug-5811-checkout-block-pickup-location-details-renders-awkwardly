@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent delay/jarring rendering of pickup location in checkout block.
