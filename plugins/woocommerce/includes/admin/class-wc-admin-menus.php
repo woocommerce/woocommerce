@@ -313,6 +313,16 @@ class WC_Admin_Menus {
 	 * @return array
 	 */
 	public function menu_order( $menu_order ) {
+		global $submenu;
+
+		// Find and unset the woocommerce submenu item.
+		foreach ( $submenu['woocommerce'] as $key => $submenu_item ) {
+			if ( $submenu_item[2] === 'woocommerce' ) {
+				unset( $submenu['woocommerce'][ $key ] );
+				break;
+			}
+		}
+
 		// Check HPOS status to determine Orders menu URL.
 		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
 		$orders_url      = $is_hpos_enabled ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
