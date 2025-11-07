@@ -43,7 +43,6 @@ class WC_Admin_Menus {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'setup_orders_top_level_menu' ), 10 );
-		add_action( 'admin_menu', array( $this, 'menu_order_count' ), 11 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
@@ -250,37 +249,6 @@ class WC_Admin_Menus {
 	}
 
 	/**
-	 * Adds the order processing count to the menu.
-	 */
-	public function menu_order_count() {
-		global $submenu, $menu;
-
-		if ( isset( $submenu['woocommerce'] ) ) {
-			// Remove 'WooCommerce' sub menu item.
-			unset( $submenu['woocommerce'][0] );
-		}
-
-		// Add count if user has access.
-		if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
-			$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
-
-			if ( $order_count ) {
-				// Check HPOS status to determine Orders menu URL.
-				$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
-				$orders_url      = $is_hpos_enabled ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
-
-				// Add badge to top-level Orders menu item.
-				foreach ( $menu as $key => $menu_item ) {
-					if ( isset( $menu_item[2] ) && $menu_item[2] === $orders_url ) {
-						$menu[ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	/**
 	 * Get the HTML for an order count badge.
 	 *
 	 * @param int $count The number of orders.
@@ -308,9 +276,18 @@ class WC_Admin_Menus {
 				// Find Orders by slug (not translatable label).
 				// For HPOS: 'wc-orders', for non-HPOS: 'edit.php?post_type=shop_order'.
 				if ( isset( $item[2] ) && ( $item[2] === $orders_url || 0 === strpos( $item[2], 'wc-orders' ) ) ) {
+					// Calculate order count badge if applicable.
+					$menu_title = $item[0];
+					if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+						$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
+						if ( $order_count ) {
+							$menu_title .= $this->get_order_count_badge( $order_count );
+						}
+					}
+
 					// Add a top-level menu item that just redirects to the submenu.
 					$menu[] = array(
-						$item[0],                     // Menu title from submenu.
+						$menu_title,                  // Menu title from submenu with badge.
 						$item[1],                     // Capability from submenu.
 						$orders_url,                  // Full URL to submenu page.
 						$item[0],                     // Page title.
