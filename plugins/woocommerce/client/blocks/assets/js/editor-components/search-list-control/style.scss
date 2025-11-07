@@ -306,4 +306,9 @@
 	li:last-child .woocommerce-search-list__item {
 		border-bottom: none;
 	}
+
+	.woocommerce-search-list__load-more {
+		margin-left: $gap * 2;
+		padding: .5em 0 1em;
+	}
 }

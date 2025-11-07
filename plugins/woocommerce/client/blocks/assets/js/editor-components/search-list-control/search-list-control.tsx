@@ -46,6 +46,8 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		selected,
 		renderItem,
 		depth = 0,
+		onLoadMoreChildren,
+		totalChildren,
 		onSelect,
 		instanceId,
 		isSingle,
@@ -61,16 +63,18 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 	return (
 		<>
 			{ list.map( ( item ) => {
+				const childrenCount = item.children?.length ?? 0;
 				const isSelected =
-					item.children?.length && ! isSingle
-						? item.children.every( ( { id } ) =>
+					childrenCount && ! isSingle
+						? item.children?.every( ( { id } ) =>
 								selected.find(
 									( selectedItem ) => selectedItem.id === id
 								)
 						  )
 						: !! selected.find( ( { id } ) => id === item.id );
-				const isExpanded =
-					item.children?.length && expandedPanelId === item.id;
+				const isExpanded = childrenCount && expandedPanelId === item.id;
+				const totalChildrenForItem =
+					totalChildren?.[ item.id ] ?? Number.MAX_SAFE_INTEGER;
 
 				return (
 					<Fragment key={ item.id }>
@@ -88,11 +92,29 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 							} ) }
 						</li>
 						{ isExpanded ? (
-							<ListItems
-								{ ...props }
-								list={ item.children as SearchListItemProps[] }
-								depth={ depth + 1 }
-							/>
+							<>
+								<ListItems
+									{ ...props }
+									list={
+										item.children as SearchListItemProps[]
+									}
+									depth={ depth + 1 }
+								/>
+								{ onLoadMoreChildren &&
+								childrenCount < totalChildrenForItem ? (
+									<li>
+										<Button
+											className="woocommerce-search-list__load-more"
+											variant="link"
+											onClick={ () =>
+												onLoadMoreChildren()
+											}
+										>
+											{ __( 'Load more', 'woocommerce' ) }
+										</Button>
+									</li>
+								) : null }
+							</>
 						) : null }
 					</Fragment>
 				);
@@ -156,7 +178,14 @@ const ListItemsContainer = < T extends object = object >( {
 	useExpandedPanelId,
 	...props
 }: SearchListItemsContainerProps< T > ) => {
-	const { messages, renderItem, selected, isSingle } = props;
+	const {
+		messages,
+		renderItem,
+		selected,
+		isSingle,
+		onLoadMoreChildren,
+		totalChildren,
+	} = props;
 	const renderItemCallback = renderItem || defaultRenderListItem;
 
 	if ( filteredList.length === 0 ) {
@@ -182,6 +211,8 @@ const ListItemsContainer = < T extends object = object >( {
 				list={ filteredList }
 				selected={ selected }
 				renderItem={ renderItemCallback }
+				onLoadMoreChildren={ onLoadMoreChildren }
+				totalChildren={ totalChildren }
 				onSelect={ onSelect }
 				instanceId={ instanceId }
 				isSingle={ isSingle }

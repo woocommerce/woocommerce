@@ -7,6 +7,10 @@ import { Require } from '@woocommerce/types';
 interface ItemProps< T extends object = object > {
 	// Depth, non-zero if the list is hierarchical.
 	depth?: number;
+	// Callback for loading more children.
+	onLoadMoreChildren?: () => void;
+	// The total number of children.
+	totalChildren?: { [ key: string ]: number | null };
 	// Callback for selecting the item.
 	onSelect: (
 		item: SearchListItem< T > | SearchListItem< T >[]
