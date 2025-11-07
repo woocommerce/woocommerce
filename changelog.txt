@@ -1,5 +1,44 @@
 == Changelog ==
 
+= 10.3.4 2025-10-31 =
+
+**WooCommerce**
+
+* Fix - Attempts to identify the PayPal two-letter country code from a three-letter code using the `league/iso3166` composer package, and applies minor additional fixes [#61741](https://github.com/woocommerce/woocommerce/pull/61741)
+* Fix - Fixes the locale code sent when creating a PayPal Standard order, limiting it to two characters. [#61688](https://github.com/woocommerce/woocommerce/pull/61688)
+* Fix - Fixes the SHIPPING_CALLBACK_CONFIG_NOT_SUPPORTED errors for PayPal Standard [#61689](https://github.com/woocommerce/woocommerce/pull/61689)
+* Fix - Improves how the city and postal code field requirements are defined based on the official PayPal address requirements table for the Orders V2 API. [#61724](https://github.com/woocommerce/woocommerce/pull/61724)
+* Fix - Prevent autocomplete scripts loading if the setting is disabled [#61684](https://github.com/woocommerce/woocommerce/pull/61684)
+* Fix - Properly handling PayPal order items with negative amounts. [#61719](https://github.com/woocommerce/woocommerce/pull/61719)
+* Fix - Sets the country code sent to PayPal when using PayPal Standard to the expected two-letter format [#61691](https://github.com/woocommerce/woocommerce/pull/61691)
+* Fix - Unifies how order items total amount is calculated for PayPal Standard purchases [#61692](https://github.com/woocommerce/woocommerce/pull/61692)
+* Dev - Remove deprecation notices from legacy script handles [#61693](https://github.com/woocommerce/woocommerce/pull/61693)
+
+
+= 10.3.3 2025-10-24 =
+
+**WooCommerce**
+
+* Dev - Add in deprecated script warnings and backwards compatibility for 3PDs [#61599](https://github.com/woocommerce/woocommerce/pull/61599)
+
+
+= 10.3.2 2025-10-23 =
+
+**WooCommerce**
+
+* Fix - Race condition where orders may be deleted from the database [#61582](https://github.com/woocommerce/woocommerce/pull/61582)
+* Fix - Resolve PayPal order creation failures caused by a mismatch between the total and breakdown amounts. [#61586](https://github.com/woocommerce/woocommerce/pull/61586)
+* Tweak - Fixes a typo copy on Autocomplete setting tooltip [#61577](https://github.com/woocommerce/woocommerce/pull/61577)
+
+
+= 10.3.1 2025-10-23 =
+
+**WooCommerce**
+
+* Fix - Check the get_session_data method exists on the session object [#61561](https://github.com/woocommerce/woocommerce/pull/61561)
+* Fix - Check the payment method ID before sending a request to capture a PayPal payment. [#61564](https://github.com/woocommerce/woocommerce/pull/61564)
+
+
 = 10.3.0 2025-10-22 =
 
 **WooCommerce**

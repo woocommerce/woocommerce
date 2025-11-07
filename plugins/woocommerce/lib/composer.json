@@ -9,7 +9,8 @@
 	"require-dev": {
 		"mobiledetect/mobiledetectlib": "^3.74",
 		"psr/container": "^1.1",
-		"pelago/emogrifier": "7.3.0"
+		"pelago/emogrifier": "7.3.0",
+		"league/iso3166": "^4.3.3"
 	},
 	"config": {
 		"platform": {
@@ -31,7 +32,8 @@
 			"packages": [
 				"psr/container",
 				"mobiledetect/mobiledetectlib",
-				"pelago/emogrifier"
+				"pelago/emogrifier",
+				"league/iso3166"
 			],
 			"excluded_packages": [
 			],

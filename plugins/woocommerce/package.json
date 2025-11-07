@@ -23,6 +23,7 @@
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
 		"env:dev": "pnpm wp-env start --update",
 		"env:down": "pnpm wp-env stop",
@@ -784,6 +785,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
@@ -791,9 +793,6 @@
 						}
 					},
 					"events": [
-						"pull_request",
-						"nightly-checks",
-						"release-checks",
 						"blocks-e2e-wp-pre-release"
 					],
 					"report": {
@@ -821,6 +820,7 @@
 					"changes": [
 						"client/blocks/tests/e2e/**"
 					],
+					"onlyForDependencies": [],
 					"testEnv": {
 						"start": "env:start:blocks",
 						"config": {
