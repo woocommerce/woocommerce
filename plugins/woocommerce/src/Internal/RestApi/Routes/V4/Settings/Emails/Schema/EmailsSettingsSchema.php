@@ -53,7 +53,12 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 */
 	private $cached_prefixes = null;
 
-	public function init() {
+	/**
+	 * Initialize the schema with dependencies.
+	 *
+	 * @internal This method is not intended to be used externally.
+	 */
+	final public function init() {
 		$this->personalization_tags_registry = Email_Editor_Container::container()->get( Personalization_Tags_Registry::class );
 	}
 
@@ -64,62 +69,62 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		return array(
-			'id'                 => array(
+			'id'                => array(
 				'description' => __( 'Email template ID.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'title'              => array(
+			'title'             => array(
 				'description' => __( 'Email title.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'description'        => array(
+			'description'       => array(
 				'description' => __( 'Email description.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'post_id'            => array(
+			'post_id'           => array(
 				'description' => __( 'Template post ID.', 'woocommerce' ),
 				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'link'               => array(
+			'link'              => array(
 				'description' => __( 'Link to template editor.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'email_group'        => array(
+			'email_group'       => array(
 				'description' => __( 'Email group identifier.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'email_group_title'  => array(
+			'email_group_title' => array(
 				'description' => __( 'Email group title.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'is_customer_email'  => array(
+			'is_customer_email' => array(
 				'description' => __( 'Whether this is a customer email.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'is_manual'  => array(
+			'is_manual'         => array(
 				'description' => __( 'Whether this is sent only manually.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
-			'values'             => array(
+			'values'            => array(
 				'description'          => __( 'Flat key-value mapping of all setting field values.', 'woocommerce' ),
 				'type'                 => 'object',
 				'context'              => self::VIEW_EDIT_CONTEXT,
@@ -128,7 +133,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 					'type'        => array( 'string', 'number', 'array', 'boolean' ),
 				),
 			),
-			'groups'             => array(
+			'groups'            => array(
 				'description'          => __( 'Collection of setting groups.', 'woocommerce' ),
 				'type'                 => 'object',
 				'context'              => self::VIEW_EDIT_CONTEXT,
@@ -216,21 +221,21 @@ class EmailsSettingsSchema extends AbstractSchema {
 		$email_post_manager = WCTransactionalEmailPostsManager::get_instance();
 		$post_id            = $email_post_manager->get_email_template_post_id( $email->id ?? '' );
 		// Convert false to null, ensure int otherwise.
-		$post_id            = $post_id ? (int) $post_id : null;
+		$post_id = $post_id ? (int) $post_id : null;
 
 		$email->init_form_fields();
 		$response = array(
-			'id'                 => $email->id ?? '',
-			'title'              => $email->title ?? '',
-			'description'        => $email->description ?? '',
-			'post_id'            => $post_id,
-			'link'               => get_permalink( $post_id ),
-			'email_group'        => $email->email_group ?? '',
-			'email_group_title'  => method_exists( $email, 'get_email_group_title' ) ? $email->get_email_group_title() : '',
-			'is_customer_email'  => method_exists( $email, 'is_customer_email' ) ? $email->is_customer_email() : false,
-			'is_manual'          => method_exists( $email, 'is_manual' ) ? $email->is_manual() : false,
-			'values'             => $this->get_values( $email ),
-			'groups'             => $this->get_groups( $email ),
+			'id'                => $email->id ?? '',
+			'title'             => $email->title ?? '',
+			'description'       => $email->description ?? '',
+			'post_id'           => $post_id,
+			'link'              => get_permalink( $post_id ),
+			'email_group'       => $email->email_group ?? '',
+			'email_group_title' => method_exists( $email, 'get_email_group_title' ) ? $email->get_email_group_title() : '',
+			'is_customer_email' => method_exists( $email, 'is_customer_email' ) ? $email->is_customer_email() : false,
+			'is_manual'         => method_exists( $email, 'is_manual' ) ? $email->is_manual() : false,
+			'values'            => $this->get_values( $email ),
+			'groups'            => $this->get_groups( $email ),
 		);
 
 		if ( ! empty( $include_fields ) ) {
@@ -247,7 +252,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 * @return array
 	 */
 	private function get_values( WC_Email $email ): array {
-		$values = array();
+		$values      = array();
 		$form_fields = $email->get_form_fields();
 
 		if ( ! is_array( $form_fields ) ) {
@@ -265,7 +270,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
-			// Get saved value an fallback to default
+			// Get saved value an fallback to default.
 			$default = $this->get_field_default_value( $email, $id, $field );
 			$value   = $email->get_option( $id, $default );
 
@@ -289,9 +294,9 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 * Prepare the default value for a field.
 	 * We use special methods for well known core fields and use fallback to default value if no special method is available.
 	 *
-	 * @param WC_Email $email Email instance.
-	 * @param string $id Field ID.
-	 * @param array $field Field definition.
+	 * @param WC_Email $email  Email instance.
+	 * @param string   $id     Field ID.
+	 * @param array    $field  Field definition.
 	 * @return mixed The default value for the field.
 	 */
 	private function get_field_default_value( WC_Email $email, string $id, array $field ) {
@@ -358,7 +363,8 @@ class EmailsSettingsSchema extends AbstractSchema {
 	 * This is required for the email editor personalization.
 	 * Use negative lookbehind and lookahead to avoid double-wrapping already wrapped tags.
 	 *
-	 * @param mixed $value
+	 * @param mixed $value The value to wrap.
+	 * @return mixed The wrapped value.
 	 */
 	private function wrap_woocommerce_tags( $value ) {
 		if ( ! is_string( $value ) ) {
@@ -405,7 +411,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 			$field_schema = array(
 				'id'    => $id,
 				'label' => $field['title'] ?? $id,
-				'type'  => $field_type ,
+				'type'  => $field_type,
 				'desc'  => $field['description'] ?? '',
 			);
 
@@ -435,17 +441,17 @@ class EmailsSettingsSchema extends AbstractSchema {
 		$email->init_form_fields();
 		$validated = array();
 
-		foreach ( $values as $fieldId => $value ) {
+		foreach ( $values as $field_id => $value ) {
 			// Only allow valid form fields.
-			if ( ! isset( $email->form_fields[ $fieldId ] ) ) {
+			if ( ! isset( $email->form_fields[ $field_id ] ) ) {
 				continue;
 			}
 
-			$field      = $email->form_fields[ $fieldId ];
+			$field      = $email->form_fields[ $field_id ];
 			$field_type = $field['type'] ?? 'text';
 
 			// Unwrap personalization tags if the field supports them to make sure we don't strip them in the sanitization process.
-			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
+			if ( in_array( $field_id, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
 				$value = $this->unwrap_woocommerce_tags( $value );
 			}
 
@@ -453,17 +459,17 @@ class EmailsSettingsSchema extends AbstractSchema {
 			$sanitized = $this->sanitize_field_value( $field_type, $value );
 
 			// Sanitize Personalization tags. Wrap them in HTML comments for the email editor.
-			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
+			if ( in_array( $field_id, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
 				$sanitized = $this->wrap_woocommerce_tags( $sanitized );
 			}
 
 			// Validate.
-			$validation = $this->validate_field_value( $fieldId, $sanitized, $field );
+			$validation = $this->validate_field_value( $field_id, $sanitized, $field );
 			if ( is_wp_error( $validation ) ) {
 				return $validation;
 			}
 
-			$validated[ $fieldId ] = $sanitized;
+			$validated[ $field_id ] = $sanitized;
 		}
 
 		return $validated;
