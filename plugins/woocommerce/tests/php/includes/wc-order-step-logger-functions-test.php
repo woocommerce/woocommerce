@@ -13,6 +13,13 @@ use Automattic\Jetpack\Constants;
 class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Original REQUEST_METHOD value to restore after tests.
+	 *
+	 * @var string|null
+	 */
+	private $original_request_method;
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -21,8 +28,10 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 		// Clean up any previous log files.
 		$this->clean_up_log_files();
 
-		// Reset the static variables in wc_log_order_step by creating a mock request.
-		$_SERVER['REQUEST_METHOD'] = 'POST';
+		// Save the original REQUEST_METHOD and set it to POST for the test.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test setup, not user input.
+		$this->original_request_method = $_SERVER['REQUEST_METHOD'] ?? null;
+		$_SERVER['REQUEST_METHOD']     = 'POST';
 	}
 
 	/**
@@ -37,6 +46,13 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 
 		// Reset logging settings.
 		delete_option( 'woocommerce_logs_level_threshold' );
+
+		// Restore the original REQUEST_METHOD.
+		if ( null === $this->original_request_method ) {
+			unset( $_SERVER['REQUEST_METHOD'] );
+		} else {
+			$_SERVER['REQUEST_METHOD'] = $this->original_request_method;
+		}
 
 		parent::tearDown();
 	}
