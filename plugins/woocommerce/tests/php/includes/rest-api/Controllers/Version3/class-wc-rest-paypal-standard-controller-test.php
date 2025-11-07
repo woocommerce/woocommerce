@@ -54,12 +54,6 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 			$this->markTestIncomplete( 'Test for successful shipping update not yet implemented.' );
 		}
 
-		// Mock shipping packages.
-		$filter_shipping_packages = function () use ( $shipping_option ) {
-			return $shipping_option;
-		};
-		add_filter( 'woocommerce_shipping_packages', $filter_shipping_packages );
-
 		$request = new WP_REST_Request( 'POST', '/wc/v3/paypal-standard/update-shipping' );
 		$request->set_body_params(
 			array(
@@ -86,7 +80,6 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				}
 			}
 		}
-		remove_filter( 'woocommerce_shipping_packages', $filter_shipping_packages );
 
 		$this->assertEquals( $expected_status, $response->get_status() );
 		$this->assertEquals( $expected_response, $response->get_data() );
@@ -98,12 +91,12 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 	 * @return array
 	 */
 	public function provide_test_process_shipping_callback(): array {
-		$order = WC_Helper_Order::create_order();
+		$order = new WC_Order(); // Not using `WC_Helper_Order::create_order()` here to avoid adding shipping rates.
 		$order->save();
 		$order->update_meta_data( '_paypal_order_id', '94N960803Z669244Y' );
 		$order->save_meta_data();
 
-		$order_mismatch = WC_Helper_Order::create_order();
+		$order_mismatch = new WC_Order();
 		$order_mismatch->save();
 		$order_mismatch->update_meta_data( '_paypal_order_id', '84M859702Y558133X' );
 		$order_mismatch->save_meta_data();
