@@ -84,7 +84,7 @@ class EmailsSettingsSchema extends AbstractSchema {
 			),
 			'post_id'            => array(
 				'description' => __( 'Template post ID.', 'woocommerce' ),
-				'type'        => 'integer',
+				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_CONTEXT,
 				'readonly'    => true,
 			),
@@ -215,6 +215,8 @@ class EmailsSettingsSchema extends AbstractSchema {
 		// Get template post ID.
 		$email_post_manager = WCTransactionalEmailPostsManager::get_instance();
 		$post_id            = $email_post_manager->get_email_template_post_id( $email->id ?? '' );
+		// Convert false to null, ensure int otherwise.
+		$post_id            = $post_id ? (int) $post_id : null;
 
 		$email->init_form_fields();
 		$response = array(
@@ -352,6 +354,32 @@ class EmailsSettingsSchema extends AbstractSchema {
 	}
 
 	/**
+	 * Wrap personalization tags in HTML comments for the email editor.
+	 * This is required for the email editor personalization.
+	 * Use negative lookbehind and lookahead to avoid double-wrapping already wrapped tags.
+	 *
+	 * @param mixed $value
+	 */
+	private function wrap_woocommerce_tags( $value ) {
+		if ( ! is_string( $value ) ) {
+			return $value;
+		}
+
+		$prefixes = $this->get_personalization_tag_prefixes();
+
+		if ( empty( $prefixes ) ) {
+			return $value;
+		}
+
+		// Escape prefixes for use in regex and join with |.
+		$escaped_prefixes = array_map( 'preg_quote', $prefixes );
+		$prefixes_pattern = implode( '|', $escaped_prefixes );
+
+		// Wrap tags that aren't already wrapped.
+		return preg_replace( '/(?<!<!--)(\[(?:' . $prefixes_pattern . ')\/[^\]]+\])(?!-->)/i', '<!--$1-->', $value );
+	}
+
+	/**
 	 * Get grouped settings structure with field metadata.
 	 *
 	 * @param WC_Email $email Email instance.
@@ -416,24 +444,17 @@ class EmailsSettingsSchema extends AbstractSchema {
 			$field      = $email->form_fields[ $fieldId ];
 			$field_type = $field['type'] ?? 'text';
 
+			// Unwrap personalization tags if the field supports them to make sure we don't strip them in the sanitization process.
+			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
+				$value = $this->unwrap_woocommerce_tags( $value );
+			}
+
 			// Sanitize by type.
 			$sanitized = $this->sanitize_field_value( $field_type, $value );
 
-			// Sanitize Personalization tags.
+			// Sanitize Personalization tags. Wrap them in HTML comments for the email editor.
 			if ( in_array( $fieldId, self::FIELDS_SUPPORTING_PERSONALIZATION_TAGS, true ) ) {
-				// Wrap personalization tags in HTML comments for the email editor.
-				// This is required for the email editor personalization.
-				// Use negative lookbehind and lookahead to avoid double-wrapping already wrapped tags.
-				$prefixes = $this->get_personalization_tag_prefixes();
-
-				if ( ! empty( $prefixes ) ) {
-					// Escape prefixes for use in regex and join with |.
-					$escaped_prefixes = array_map( 'preg_quote', $prefixes );
-					$prefixes_pattern = implode( '|', $escaped_prefixes );
-
-					// Wrap tags that aren't already wrapped.
-					$sanitized = preg_replace( '/(?<!<!--)(\[(?:' . $prefixes_pattern . ')\/[^\]]+\])(?!-->)/i', '<!--$1-->', $value );
-				}
+				$sanitized = $this->wrap_woocommerce_tags( $sanitized );
 			}
 
 			// Validate.
