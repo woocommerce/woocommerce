@@ -168,21 +168,21 @@
         },
         {
             "name": "automattic/jetpack-assets",
-            "version": "v4.3.9",
+            "version": "v4.3.11",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-assets.git",
-                "reference": "674695eace949a5c7ac5a1ab1ba6587f04c24cb1"
+                "reference": "02b14206e6f0713aea9c79af55b67422eaa17c39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-assets/zipball/674695eace949a5c7ac5a1ab1ba6587f04c24cb1",
-                "reference": "674695eace949a5c7ac5a1ab1ba6587f04c24cb1",
+                "url": "https://api.github.com/repos/Automattic/jetpack-assets/zipball/02b14206e6f0713aea9c79af55b67422eaa17c39",
+                "reference": "02b14206e6f0713aea9c79af55b67422eaa17c39",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-constants": "^3.0.8",
-                "automattic/jetpack-status": "^6.0.4",
+                "automattic/jetpack-status": "^6.1.0",
                 "php": ">=7.2"
             },
             "require-dev": {
@@ -221,9 +221,9 @@
             ],
             "description": "Asset management utilities for Jetpack ecosystem packages",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-assets/tree/v4.3.9"
+                "source": "https://github.com/Automattic/jetpack-assets/tree/v4.3.11"
             },
-            "time": "2025-09-22T06:36:55+00:00"
+            "time": "2025-10-28T15:48:18+00:00"
         },
         {
             "name": "automattic/jetpack-autoloader",
@@ -371,26 +371,26 @@
         },
         {
             "name": "automattic/jetpack-connection",
-            "version": "v6.18.11",
+            "version": "v6.19.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-connection.git",
-                "reference": "93e62b17d40f510a427061ba1f71df6669a22aa4"
+                "reference": "74ac48945c6de0283fd1f4a52324a17d5e9c0b43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/93e62b17d40f510a427061ba1f71df6669a22aa4",
-                "reference": "93e62b17d40f510a427061ba1f71df6669a22aa4",
+                "url": "https://api.github.com/repos/Automattic/jetpack-connection/zipball/74ac48945c6de0283fd1f4a52324a17d5e9c0b43",
+                "reference": "74ac48945c6de0283fd1f4a52324a17d5e9c0b43",
                 "shasum": ""
             },
             "require": {
                 "automattic/jetpack-a8c-mc-stats": "^3.0.5",
                 "automattic/jetpack-admin-ui": "^0.5.11",
-                "automattic/jetpack-assets": "^4.3.9",
+                "automattic/jetpack-assets": "^4.3.11",
                 "automattic/jetpack-constants": "^3.0.8",
                 "automattic/jetpack-redirect": "^3.0.9",
                 "automattic/jetpack-roles": "^3.0.8",
-                "automattic/jetpack-status": "^6.0.4",
+                "automattic/jetpack-status": "^6.1.0",
                 "php": ">=7.2"
             },
             "require-dev": {
@@ -409,7 +409,7 @@
                 "textdomain": "jetpack-connection",
                 "mirror-repo": "Automattic/jetpack-connection",
                 "branch-alias": {
-                    "dev-trunk": "6.18.x-dev"
+                    "dev-trunk": "6.19.x-dev"
                 },
                 "changelogger": {
                     "link-template": "https://github.com/Automattic/jetpack-connection/compare/v${old}...v${new}"
@@ -441,9 +441,9 @@
             ],
             "description": "Everything needed to connect to the Jetpack infrastructure",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.18.11"
+                "source": "https://github.com/Automattic/jetpack-connection/tree/v6.19.2"
             },
-            "time": "2025-09-29T07:01:42+00:00"
+            "time": "2025-10-28T15:48:33+00:00"
         },
         {
             "name": "automattic/jetpack-constants",
@@ -604,16 +604,16 @@
         },
         {
             "name": "automattic/jetpack-status",
-            "version": "v6.0.4",
+            "version": "v6.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Automattic/jetpack-status.git",
-                "reference": "6eefeeed590f248bc7b11aa12b12ab93e288bcd3"
+                "reference": "7dbcfff7f1005611a3d27e3553df9389c658b3a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Automattic/jetpack-status/zipball/6eefeeed590f248bc7b11aa12b12ab93e288bcd3",
-                "reference": "6eefeeed590f248bc7b11aa12b12ab93e288bcd3",
+                "url": "https://api.github.com/repos/Automattic/jetpack-status/zipball/7dbcfff7f1005611a3d27e3553df9389c658b3a8",
+                "reference": "7dbcfff7f1005611a3d27e3553df9389c658b3a8",
                 "shasum": ""
             },
             "require": {
@@ -621,7 +621,7 @@
                 "php": ">=7.2"
             },
             "require-dev": {
-                "automattic/jetpack-changelogger": "^6.0.6",
+                "automattic/jetpack-changelogger": "^6.0.7",
                 "automattic/jetpack-connection": "@dev",
                 "automattic/jetpack-ip": "^0.4.10",
                 "automattic/jetpack-plans": "@dev",
@@ -637,7 +637,7 @@
                 "autotagger": true,
                 "mirror-repo": "Automattic/jetpack-status",
                 "branch-alias": {
-                    "dev-trunk": "6.0.x-dev"
+                    "dev-trunk": "6.1.x-dev"
                 },
                 "changelogger": {
                     "link-template": "https://github.com/Automattic/jetpack-status/compare/v${old}...v${new}"
@@ -660,9 +660,9 @@
             ],
             "description": "Used to retrieve information about the current status of Jetpack and the site overall.",
             "support": {
-                "source": "https://github.com/Automattic/jetpack-status/tree/v6.0.4"
+                "source": "https://github.com/Automattic/jetpack-status/tree/v6.1.0"
             },
-            "time": "2025-09-08T17:51:46+00:00"
+            "time": "2025-10-13T20:12:54+00:00"
         },
         {
             "name": "composer/installers",
@@ -880,21 +880,21 @@
         },
         {
             "name": "opis/json-schema",
-            "version": "2.4.1",
+            "version": "2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/json-schema.git",
-                "reference": "712827751c62b465daae6e725bf0cf5ffbf965e1"
+                "reference": "8458763e0dd0b6baa310e04f1829fc73da4e8c8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/json-schema/zipball/712827751c62b465daae6e725bf0cf5ffbf965e1",
-                "reference": "712827751c62b465daae6e725bf0cf5ffbf965e1",
+                "url": "https://api.github.com/repos/opis/json-schema/zipball/8458763e0dd0b6baa310e04f1829fc73da4e8c8a",
+                "reference": "8458763e0dd0b6baa310e04f1829fc73da4e8c8a",
                 "shasum": ""
             },
             "require": {
                 "ext-json": "*",
-                "opis/string": "^2.0",
+                "opis/string": "^2.1",
                 "opis/uri": "^1.0",
                 "php": "^7.4 || ^8.0"
             },
@@ -939,22 +939,22 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/json-schema/issues",
-                "source": "https://github.com/opis/json-schema/tree/2.4.1"
+                "source": "https://github.com/opis/json-schema/tree/2.6.0"
             },
-            "time": "2024-12-30T20:20:21+00:00"
+            "time": "2025-10-17T12:46:48+00:00"
         },
         {
             "name": "opis/string",
-            "version": "2.0.2",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/opis/string.git",
-                "reference": "ba0b9607b9809462b0e28a11e4881a8d77431feb"
+                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/opis/string/zipball/ba0b9607b9809462b0e28a11e4881a8d77431feb",
-                "reference": "ba0b9607b9809462b0e28a11e4881a8d77431feb",
+                "url": "https://api.github.com/repos/opis/string/zipball/3e4d2aaff518ac518530b89bb26ed40f4503635e",
+                "reference": "3e4d2aaff518ac518530b89bb26ed40f4503635e",
                 "shasum": ""
             },
             "require": {
@@ -1001,9 +1001,9 @@
             ],
             "support": {
                 "issues": "https://github.com/opis/string/issues",
-                "source": "https://github.com/opis/string/tree/2.0.2"
+                "source": "https://github.com/opis/string/tree/2.1.0"
             },
-            "time": "2024-12-30T21:43:22+00:00"
+            "time": "2025-10-17T12:38:41+00:00"
         },
         {
             "name": "opis/uri",
@@ -1368,6 +1368,7 @@
             },
             "require-dev": {
                 "automattic/vipwpcs": "^3.0",
+                "php-stubs/wp-cli-stubs": "^2.12",
                 "phpcompatibility/php-compatibility": "10.x-dev as 9.99.99",
                 "phpcompatibility/phpcompatibility-wp": "^2.1",
                 "phpstan/extension-installer": "^1.3",
@@ -1441,7 +1442,7 @@
                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
                 "source": "https://github.com/wordpress/mcp-adapter"
             },
-            "time": "2025-09-12T10:52:00+00:00"
+            "time": "2025-10-30T20:39:26+00:00"
         }
     ],
     "packages-dev": [
@@ -2251,16 +2252,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v5.6.1",
+            "version": "v5.6.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "f103601b29efebd7ff4a1ca7b3eeea9e3336a2a2"
+                "reference": "3a454ca033b9e06b63282ce19562e892747449bb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/f103601b29efebd7ff4a1ca7b3eeea9e3336a2a2",
-                "reference": "f103601b29efebd7ff4a1ca7b3eeea9e3336a2a2",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/3a454ca033b9e06b63282ce19562e892747449bb",
+                "reference": "3a454ca033b9e06b63282ce19562e892747449bb",
                 "shasum": ""
             },
             "require": {
@@ -2303,9 +2304,9 @@
             ],
             "support": {
                 "issues": "https://github.com/nikic/PHP-Parser/issues",
-                "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.1"
+                "source": "https://github.com/nikic/PHP-Parser/tree/v5.6.2"
             },
-            "time": "2025-08-13T20:13:15+00:00"
+            "time": "2025-10-21T19:32:17+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -5269,7 +5270,7 @@
         },
         {
             "name": "woocommerce/monorepo-plugin",
-            "version": "dev-main",
+            "version": "dev-fix/support-composer-update",
             "dist": {
                 "type": "path",
                 "url": "../../packages/php/monorepo-plugin",

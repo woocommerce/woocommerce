@@ -6,7 +6,6 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 	ProductData,
-	VariationData,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/product-data';
@@ -56,51 +55,46 @@ export const getProductData = (
 	id: number,
 	selectedAttributes: SelectedAttributes[]
 ): NormalizedProductData | NormalizedVariationData | null => {
-	let productId = id;
-	let productData;
-
 	const { products } = getConfig( 'woocommerce' ) as WooCommerceConfig;
 
-	let type: ProductData[ 'type' ] | 'variation' = 'simple';
-	if ( selectedAttributes && selectedAttributes.length > 0 ) {
-		if ( ! products || ! products[ id ] ) {
-			return null;
-		}
-		const variations = products[ id ].variations;
-		const matchedVariation = getMatchedVariation(
-			variations,
-			selectedAttributes
-		);
-		if ( matchedVariation?.variation_id ) {
-			productId = matchedVariation.variation_id;
-			productData = products?.[ id ]?.variations?.[
-				matchedVariation?.variation_id
-			] as VariationData;
-			type = 'variation';
-		}
-	} else {
-		productData = products?.[ productId ] as ProductData;
-		type = productData?.type;
-	}
-
-	if ( typeof productData !== 'object' || productData === null ) {
+	if ( ! products || ! products[ id ] ) {
 		return null;
 	}
 
-	const min = typeof productData.min === 'number' ? productData.min : 1;
+	let product = {
+		id,
+		...products[ id ],
+	} as ProductData & { id: number };
+
+	if (
+		product.type === 'variable' &&
+		selectedAttributes &&
+		selectedAttributes.length > 0
+	) {
+		const matchedVariation = getMatchedVariation(
+			product.variations,
+			selectedAttributes
+		);
+		if ( matchedVariation ) {
+			product = {
+				...matchedVariation,
+				id: matchedVariation.variation_id,
+				type: 'variation',
+			};
+		}
+	}
+
+	const min = typeof product.min === 'number' ? product.min : 1;
 	const max =
-		typeof productData.max === 'number' && productData.max >= 1
-			? productData.max
-			: Infinity;
-	const step = productData.step || 1;
+		typeof product.max === 'number' ? Math.max( product.max, 0 ) : Infinity;
+	const step =
+		typeof product.step === 'number' && product.step > 0 ? product.step : 1;
 
 	return {
-		id: productId,
-		...productData,
+		...product,
 		min,
 		max,
 		step,
-		type,
 	};
 };
 
