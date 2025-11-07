@@ -1,10 +1,8 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
+<?php
+declare( strict_types=1 );
 
-use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as OrderNotesController;
 
 /**
