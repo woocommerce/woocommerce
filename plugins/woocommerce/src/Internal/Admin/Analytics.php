@@ -234,8 +234,7 @@ class Analytics {
 
 		$updated = $wpdb->query(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-			"UPDATE {$order_stats_table} os
-			INNER JOIN {$order_meta_table} om ON os.order_id = om.order_id
+			"UPDATE {$order_stats_table} os INNER JOIN {$order_meta_table} om ON os.order_id = om.order_id
 			SET os.fulfillment_status = CASE
 				WHEN om.meta_value = 'no_fulfillments' THEN NULL
 				ELSE om.meta_value
