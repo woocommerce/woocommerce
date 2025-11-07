@@ -39,10 +39,11 @@ class WC_Admin_Menus {
 	public function __construct() {
 		// Add menus.
 		add_action( 'admin_menu', array( $this, 'menu_highlight' ) );
-		add_action( 'admin_menu', array( $this, 'menu_order_count' ) );
 		add_action( 'admin_menu', array( $this, 'maybe_add_new_product_management_experience' ) );
 		add_action( 'admin_menu', array( $this, 'admin_menu' ), 9 );
 		add_action( 'admin_menu', array( $this, 'orders_menu' ), 9 );
+		add_action( 'admin_menu', array( $this, 'setup_orders_top_level_menu' ), 10 );
+		add_action( 'admin_menu', array( $this, 'menu_order_count' ), 11 );
 		add_action( 'admin_menu', array( $this, 'reports_menu' ), 20 );
 		add_action( 'admin_menu', array( $this, 'settings_menu' ), 50 );
 		add_action( 'admin_menu', array( $this, 'status_menu' ), 60 );
@@ -252,23 +253,77 @@ class WC_Admin_Menus {
 	 * Adds the order processing count to the menu.
 	 */
 	public function menu_order_count() {
-		global $submenu;
+		global $submenu, $menu;
 
 		if ( isset( $submenu['woocommerce'] ) ) {
 			// Remove 'WooCommerce' sub menu item.
 			unset( $submenu['woocommerce'][0] );
+		}
 
-			// Add count if user has access.
-			if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
-				$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
+		// Add count if user has access.
+		if ( apply_filters( 'woocommerce_include_processing_order_count_in_menu', true ) && current_user_can( 'edit_others_shop_orders' ) ) {
+			$order_count = apply_filters( 'woocommerce_menu_order_count', wc_processing_order_count() );
 
-				if ( $order_count ) {
-					foreach ( $submenu['woocommerce'] as $key => $menu_item ) {
-						if ( 0 === strpos( $menu_item[0], _x( 'Orders', 'Admin menu name', 'woocommerce' ) ) ) {
-							$submenu['woocommerce'][ $key ][0] .= ' <span class="awaiting-mod update-plugins count-' . esc_attr( $order_count ) . '"><span class="processing-count">' . number_format_i18n( $order_count ) . '</span></span>'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-							break;
-						}
+			if ( $order_count ) {
+				// Check HPOS status to determine Orders menu URL.
+				$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+				$orders_url      = $is_hpos_enabled ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
+
+				// Add badge to top-level Orders menu item.
+				foreach ( $menu as $key => $menu_item ) {
+					if ( isset( $menu_item[2] ) && $menu_item[2] === $orders_url ) {
+						$menu[ $key ][0] .= $this->get_order_count_badge( $order_count ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+						break;
 					}
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get the HTML for an order count badge.
+	 *
+	 * @param int $count The number of orders.
+	 * @return string The badge HTML.
+	 */
+	private function get_order_count_badge( $count ) {
+		return ' <span class="awaiting-mod update-plugins count-' . esc_attr( $count ) . '"><span class="processing-count">' . number_format_i18n( $count ) . '</span></span>';
+	}
+
+	/**
+	 * Setup Orders as a top-level menu item.
+	 * Creates a "cloak" menu that points to the real submenu page.
+	 */
+	public function setup_orders_top_level_menu() {
+		global $menu, $submenu;
+
+		// Check HPOS status to determine Orders menu URL.
+		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+		$orders_url      = $is_hpos_enabled ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
+
+		// Create a "cloak" top-level menu that points to the real submenu item.
+		// In both HPOS and non-HPOS modes, Orders appears as a submenu under WooCommerce.
+		if ( isset( $submenu['woocommerce'] ) ) {
+			foreach ( $submenu['woocommerce'] as $key => $item ) {
+				// Find Orders by slug (not translatable label).
+				// For HPOS: 'wc-orders', for non-HPOS: 'edit.php?post_type=shop_order'.
+				if ( isset( $item[2] ) && ( $item[2] === $orders_url || 0 === strpos( $item[2], 'wc-orders' ) ) ) {
+					// Add a top-level menu item that just redirects to the submenu.
+					$menu[] = array(
+						$item[0],                     // Menu title from submenu.
+						$item[1],                     // Capability from submenu.
+						$orders_url,                  // Full URL to submenu page.
+						$item[0],                     // Page title.
+						'menu-top menu-icon-generic', // CSS class.
+						'',                           // ID.
+						'dashicons-text-page',        // Icon.
+						'56',                         // Position.
+					);
+
+					// Hide the submenu item under WooCommerce.
+					$this->hide_submenu_element( $key, 'woocommerce', $item );
+
+					break;
 				}
 			}
 		}
@@ -281,30 +336,34 @@ class WC_Admin_Menus {
 	 * @return array
 	 */
 	public function menu_order( $menu_order ) {
-		// Initialize our custom order array.
+		// Check HPOS status to determine Orders menu URL.
+		$is_hpos_enabled = wc_get_container()->get( CustomOrdersTableController::class )->custom_orders_table_usage_is_enabled();
+		$orders_url      = $is_hpos_enabled ? 'admin.php?page=wc-orders' : 'edit.php?post_type=shop_order';
+
+		// Initialize custom order array.
 		$woocommerce_menu_order = array();
 
-		// Get the index of our custom separator.
+		// Get indices.
 		$woocommerce_separator = array_search( 'separator-woocommerce', $menu_order, true );
+		$woocommerce_product   = array_search( 'edit.php?post_type=product', $menu_order, true );
+		$woocommerce_orders    = array_search( $orders_url, $menu_order, true );
 
-		// Get index of product menu.
-		$woocommerce_product = array_search( 'edit.php?post_type=product', $menu_order, true );
-
-		// Loop through menu order and do some rearranging.
+		// Loop through menu order and rearrange.
 		foreach ( $menu_order as $index => $item ) {
-
 			if ( 'woocommerce' === $item ) {
 				$woocommerce_menu_order[] = 'separator-woocommerce';
 				$woocommerce_menu_order[] = $item;
+				$woocommerce_menu_order[] = $orders_url;
 				$woocommerce_menu_order[] = 'edit.php?post_type=product';
+
 				unset( $menu_order[ $woocommerce_separator ] );
 				unset( $menu_order[ $woocommerce_product ] );
-			} elseif ( ! in_array( $item, array( 'separator-woocommerce' ), true ) ) {
+				unset( $menu_order[ $woocommerce_orders ] );
+			} elseif ( ! in_array( $item, array( 'separator-woocommerce', 'edit.php?post_type=product', $orders_url ), true ) ) {
 				$woocommerce_menu_order[] = $item;
 			}
 		}
 
-		// Return order.
 		return $woocommerce_menu_order;
 	}
 
