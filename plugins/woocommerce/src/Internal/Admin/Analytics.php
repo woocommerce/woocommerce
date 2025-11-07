@@ -238,7 +238,7 @@ class Analytics {
 			$order_meta_table  = OrdersTableDataStore::get_meta_table_name();
 			$order_meta_column = 'order_id';
 		} else {
-			$order_meta_table = $wpdb->postmeta;
+			$order_meta_table  = $wpdb->postmeta;
 			$order_meta_column = 'post_id';
 		}
 
