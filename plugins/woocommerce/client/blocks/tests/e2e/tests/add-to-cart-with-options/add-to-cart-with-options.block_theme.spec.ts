@@ -38,11 +38,10 @@ const test = base.extend< {
 
 let wordPressVersion: number;
 
-test.beforeAll( async () => {
-	wordPressVersion = await getInstalledWordPressVersion();
-} );
-
 test.describe( 'Add to Cart + Options Block', () => {
+	test.beforeAll( async () => {
+		wordPressVersion = await getInstalledWordPressVersion();
+	} );
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,

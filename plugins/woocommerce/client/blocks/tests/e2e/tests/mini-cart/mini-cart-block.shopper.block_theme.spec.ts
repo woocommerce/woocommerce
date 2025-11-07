@@ -29,11 +29,11 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 
 let wordPressVersion: number;
 
-test.beforeAll( async () => {
-	wordPressVersion = await getInstalledWordPressVersion();
-} );
-
 test.describe( 'Shopper → Notices', () => {
+	test.beforeAll( async () => {
+		wordPressVersion = await getInstalledWordPressVersion();
+	} );
+
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
 		page,
 		editor,
