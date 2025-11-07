@@ -39,8 +39,10 @@ const test = base.extend< {
 let wordPressVersion: number;
 
 test.describe( 'Add to Cart + Options Block', () => {
-	test.beforeAll( async () => {
-		wordPressVersion = await getInstalledWordPressVersion();
+	test.beforeEach( async () => {
+		if ( ! wordPressVersion ) {
+			wordPressVersion = await getInstalledWordPressVersion();
+		}
 	} );
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
@@ -66,6 +68,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -103,6 +106,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		productGalleryPageObject,
 		editor,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -291,6 +295,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -817,6 +822,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -934,6 +940,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -954,6 +961,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -983,6 +991,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -1008,6 +1017,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'

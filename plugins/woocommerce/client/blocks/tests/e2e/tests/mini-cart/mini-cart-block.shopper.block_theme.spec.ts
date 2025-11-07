@@ -30,8 +30,10 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 let wordPressVersion: number;
 
 test.describe( 'Shopper → Notices', () => {
-	test.beforeAll( async () => {
-		wordPressVersion = await getInstalledWordPressVersion();
+	test.beforeEach( async () => {
+		if ( ! wordPressVersion ) {
+			wordPressVersion = await getInstalledWordPressVersion();
+		}
 	} );
 
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
@@ -40,6 +42,7 @@ test.describe( 'Shopper → Notices', () => {
 		admin,
 		productCollectionPage,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
@@ -182,6 +185,7 @@ test.describe( 'Shopper → Tax', () => {
 		frontendUtils,
 		page,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wordPressVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
