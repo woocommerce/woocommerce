@@ -943,6 +943,26 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
+	test( 'allows adding variations to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock(
+			'hoodie',
+			'hoodie-blue-yes'
+		);
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
@@ -979,17 +999,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeHidden();
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the blockified Product Gallery',
+				name: 'Upgrade to the Product Gallery block',
 			} )
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeVisible();
 	} );
 } );

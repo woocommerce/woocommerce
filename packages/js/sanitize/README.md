@@ -9,10 +9,6 @@ WooCommerce HTML sanitization utilities using DOMPurify with trusted types suppo
 - **Configurable**: Supports custom allowed tags and attributes
 - **TypeScript Support**: Full TypeScript definitions included
 
-## Installation
-
-This package is part of the WooCommerce monorepo and is automatically available to other packages.
-
 ## Usage
 
 ### Basic HTML Sanitization
@@ -54,50 +50,32 @@ const customSanitized = sanitizeHTML(
 );
 ```
 
-## API Reference
+### Selecting the return type
 
-### Functions
+By default, `sanitizeHTML` returns a string. You can opt into other DOMPurify return modes with the `returnType` option:
 
-#### `sanitizeHTML(html: string, config?: SanitizeConfig): string`
+```ts
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
-Sanitizes HTML content using default allowed tags and attributes.
+// Return an HTMLBodyElement
+const bodyEl = sanitizeHTML('<p>Hi</p>', { returnType: 'HTMLBodyElement' });
 
-#### `initializeTrustedTypesPolicy(): void`
-
-Manually initialize the trusted types policy (usually called automatically).
-
-### Constants
-
-#### `DEFAULT_ALLOWED_TAGS`
-
-Default array of allowed HTML tags for basic sanitization.
-
-#### `DEFAULT_ALLOWED_ATTR`
-
-Default array of allowed HTML attributes for basic sanitization.
-
-### Types
-
-#### `SanitizeConfig`
-
-```typescript
-interface SanitizeConfig {
-  tags?: readonly string[];
-  attr?: readonly string[];
-}
+// Return a DocumentFragment
+const fragment = sanitizeHTML('<p>Hi</p>', { returnType: 'DocumentFragment' });
 ```
 
 ## Trusted Types
 
 This package automatically configures a trusted types policy named `woocommerce-sanitize` to avoid conflicts with DOMPurify's default policy. The policy is initialized when the module is loaded.
 
-## Security
+```ts
+import { getTrustedTypesPolicy } from '@woocommerce/sanitize';
 
-- All HTML content is sanitized using DOMPurify
-- XSS attacks are prevented by removing dangerous content
-- Trusted types are used when available for additional security
-- Configurable allowlists for tags and attributes
+const policy = getTrustedTypesPolicy();
+if (policy) {
+  const trustedHTML = policy.createHTML('<p>Content</p>');
+  element.innerHTML = trustedHTML; // Safe in Trusted Types environments
+}
+```
 
-## Contributing
-
-This package follows the same contribution guidelines as the main WooCommerce repository. 
+The policy automatically sanitizes HTML using the same rules as `sanitizeHTML()`.
