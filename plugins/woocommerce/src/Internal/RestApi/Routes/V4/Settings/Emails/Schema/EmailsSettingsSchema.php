@@ -223,13 +223,19 @@ class EmailsSettingsSchema extends AbstractSchema {
 		// Convert false to null, ensure int otherwise.
 		$post_id = $post_id ? (int) $post_id : null;
 
+		$link = '';
+		if ( $post_id ) {
+			$permalink = get_permalink( $post_id );
+			$link      = is_string( $permalink ) ? $permalink : '';
+		}
+
 		$email->init_form_fields();
 		$response = array(
 			'id'                => $email->id ?? '',
 			'title'             => $email->title ?? '',
 			'description'       => $email->description ?? '',
 			'post_id'           => $post_id,
-			'link'              => get_permalink( $post_id ),
+			'link'              => $link,
 			'email_group'       => $email->email_group ?? '',
 			'email_group_title' => method_exists( $email, 'get_email_group_title' ) ? $email->get_email_group_title() : '',
 			'is_customer_email' => method_exists( $email, 'is_customer_email' ) ? $email->is_customer_email() : false,

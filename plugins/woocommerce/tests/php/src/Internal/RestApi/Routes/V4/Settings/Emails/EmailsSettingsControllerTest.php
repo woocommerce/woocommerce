@@ -81,6 +81,7 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_admin_features', $this->feature_filter );
 
 		// Enable block email editor feature.
+		$this->prev_options['woocommerce_feature_block_email_editor_enabled'] = get_option( 'woocommerce_feature_block_email_editor_enabled', null );
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 
 		parent::setUp();
