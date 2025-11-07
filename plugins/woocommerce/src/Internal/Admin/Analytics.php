@@ -8,9 +8,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
-use WC_Order;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -24,11 +22,6 @@ class Analytics {
 	 * Clear cache tool identifier.
 	 */
 	const CACHE_TOOL_ID = 'clear_woocommerce_analytics_cache';
-
-	/**
-	 * Action Scheduler hook name for regenerating order fulfillment status.
-	 */
-	const REGENERATE_FULFILLMENT_STATUS_ACTION = 'woocommerce_analytics_regenerate_order_fulfillment_status';
 
 	/**
 	 * Class instance.
@@ -70,7 +63,6 @@ class Analytics {
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
-		add_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION, array( $this, 'process_regenerate_order_fulfillment_status_batch' ) );
 	}
 
 	/**
@@ -206,40 +198,24 @@ class Analytics {
 			return $debug_tools;
 		}
 
-		// Check if regeneration is currently in progress.
-		$progress    = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		$is_running  = false;
-		$button_text = __( 'Regenerate', 'woocommerce' );
-		$description = __( 'This tool will regenerate the order fulfillment status for all orders and update the Analytics data.', 'woocommerce' );
-
-		if ( false !== $progress && is_array( $progress ) && isset( $progress['status'], $progress['processed'], $progress['total'] ) && 'running' === $progress['status'] ) {
-			$is_running  = true;
-			$button_text = __( 'In progress...', 'woocommerce' );
-			$description = sprintf(
-				/* translators: 1: processed count, 2: total count */
-				__( 'Regeneration is currently in progress. Processed %1$d of %2$d orders.', 'woocommerce' ),
-				$progress['processed'],
-				$progress['total']
-			);
-		}
-
 		$debug_tools['regenerate_order_fulfillment_status'] = array(
 			'name'     => __( 'Regenerate order fulfillment status for Analytics', 'woocommerce' ),
-			'button'   => $button_text,
-			'desc'     => $description,
+			'button'   => __( 'Regenerate', 'woocommerce' ),
+			'desc'     => __( 'This tool will regenerate the order fulfillment status for all orders and update the Analytics data using a direct SQL query.', 'woocommerce' ),
 			'callback' => array( $this, 'run_regenerate_order_fulfillment_status_tool' ),
-			'disabled' => $is_running,
 		);
 
 		return $debug_tools;
 	}
 
 	/**
-	 * Schedule the regeneration of order fulfillment status via Action Scheduler.
+	 * Regenerate order fulfillment status directly using SQL.
 	 *
 	 * @return string Success message or error message.
 	 */
 	public function run_regenerate_order_fulfillment_status_tool() {
+		global $wpdb;
+
 		// Check if the column exists, create it if not.
 		if ( ! OrderStatsDataStore::has_fulfillment_status_column() ) {
 			$create_column_result = OrderStatsDataStore::add_fulfillment_status_column();
@@ -253,137 +229,32 @@ class Analytics {
 			}
 		}
 
-		// Check if an action is already scheduled or in progress.
-		$progress       = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		$progress_state = ( false !== $progress && is_array( $progress ) && isset( $progress['status'] ) ) ? $progress['status'] : null;
-		if ( ( as_has_scheduled_action( self::REGENERATE_FULFILLMENT_STATUS_ACTION ) ) || 'running' === $progress_state ) {
-			return __( 'Order fulfillment status regeneration is already in progress.', 'woocommerce' );
-		}
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+		$order_meta_table  = $wpdb->prefix . 'wc_orders_meta';
 
-		// Initialize progress tracking.
-		delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		set_transient(
-			'woocommerce_analytics_fulfillment_status_progress',
-			array(
-				'processed' => 0,
-				'total'     => $this->get_total_orders_with_fulfillments(),
-				'page'      => 1,
-				'status'    => 'running',
-			),
-			DAY_IN_SECONDS
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$updated = $wpdb->query(
+			"UPDATE {$order_stats_table} os
+			INNER JOIN {$order_meta_table} om ON os.order_id = om.order_id
+			SET os.fulfillment_status = CASE
+				WHEN om.meta_value = 'no_fulfillments' THEN NULL
+				ELSE om.meta_value
+			END
+			WHERE om.meta_key = '_fulfillment_status'"
 		);
 
-		// Schedule the first batch.
-		if ( function_exists( 'as_schedule_single_action' ) ) {
-			as_schedule_single_action( time(), self::REGENERATE_FULFILLMENT_STATUS_ACTION, array( 'page' => 1 ) );
-			return __( 'Order fulfillment status regeneration has been scheduled and will run in the background.', 'woocommerce' );
+		if ( false === $updated ) {
+			return __( 'Failed to update order fulfillment status. Please check the database logs for errors.', 'woocommerce' );
 		}
 
-		return __( 'Action Scheduler is not available. Please ensure WooCommerce is properly installed.', 'woocommerce' );
-	}
+		// Mark as completed.
+		update_option( 'woocommerce_analytics_order_fulfillment_status_regenerated', true, false );
 
-	/**
-	 * Process a batch of orders for fulfillment status regeneration.
-	 *
-	 * @param int $page The current page/batch number to process.
-	 * @return void
-	 */
-	public function process_regenerate_order_fulfillment_status_batch( $page = 1 ) {
-		global $wpdb;
-		$page               = max( 1, absint( $page ) );
-		$per_page           = 100;
-		$order_stats_table  = $wpdb->prefix . 'wc_order_stats';
-		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
-		$updated_count      = 0;
-
-		// Get progress.
-		$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		if ( false === $progress ) {
-			wc_get_logger()->error( 'Order fulfillment status regeneration stopped: progress transient expired or was deleted.', array( 'source' => 'woocommerce-analytics' ) );
-			return;
-		}
-
-		$offset = ( $page - 1 ) * $per_page;
-
-		// Get distinct order IDs from the fulfillments table.
-		$order_ids = $wpdb->get_col(
-			$wpdb->prepare(
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-				"SELECT DISTINCT entity_id FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL ORDER BY entity_id ASC LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			)
+		return sprintf(
+			/* translators: %d: number of orders updated */
+			__( 'Successfully updated fulfillment status for %d orders.', 'woocommerce' ),
+			$updated
 		);
-
-		if ( empty( $order_ids ) ) {
-			// No more orders to process, mark as complete.
-			update_option( 'woocommerce_analytics_order_fulfillment_status_regenerated', true, false );
-			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-			return;
-		}
-
-		foreach ( $order_ids as $order_id ) {
-			$order = wc_get_order( $order_id );
-			if ( ! $order || ! $order instanceof WC_Order ) {
-				++$updated_count; // Increment the updated count even if the order is not found.
-				continue;
-			}
-
-			// Get the fulfillment status from order meta.
-			$fulfillment_status = FulfillmentUtils::get_order_fulfillment_status( $order );
-
-			// Update the wc_order_stats table.
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-			$result = $wpdb->update(
-				$order_stats_table,
-				array( 'fulfillment_status' => ( 'no_fulfillments' !== $fulfillment_status ) ? $fulfillment_status : null ),
-				array( 'order_id' => $order_id ),
-				array( '%s' ),
-				array( '%d' )
-			);
-
-			if ( false === $result ) {
-				wc_get_logger()->error(
-					sprintf( 'Failed to update fulfillment status for order #%d', $order_id ),
-					array( 'source' => 'woocommerce-analytics' )
-				);
-			}
-
-			++$updated_count;
-		}
-
-		// Update progress.
-		$progress['processed'] += $updated_count;
-		$progress['page']       = $page;
-		set_transient( 'woocommerce_analytics_fulfillment_status_progress', $progress, DAY_IN_SECONDS );
-
-		// Schedule next batch if there are more orders to process.
-		if ( count( $order_ids ) === $per_page ) {
-			if ( function_exists( 'as_schedule_single_action' ) ) {
-				as_schedule_single_action( time() + 1, self::REGENERATE_FULFILLMENT_STATUS_ACTION, array( 'page' => $page + 1 ) );
-			}
-		} else {
-			// This was the last batch, mark as complete and cleanup.
-			update_option( 'woocommerce_analytics_order_fulfillment_status_regenerated', true, false );
-			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-		}
-	}
-
-	/**
-	 * Get the total number of orders with fulfillments.
-	 *
-	 * @return int Total number of orders with fulfillments.
-	 */
-	private function get_total_orders_with_fulfillments() {
-		global $wpdb;
-		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
-
-		$total = $wpdb->get_var(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-			"SELECT COUNT(DISTINCT entity_id) FROM {$fulfillments_table} WHERE entity_type = 'WC_Order' AND date_deleted IS NULL"
-		);
-
-		return (int) $total;
 	}
 
 	/**
