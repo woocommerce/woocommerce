@@ -6550,19 +6550,8 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$this->add_fulfillment_to_order( $order_3, 'unfulfilled', $product );
 			// Orders 4 and 5 have no fulfillments.
 
-			// Initialize migration.
-			$analytics = Analytics::get_instance();
-			$result    = $analytics->run_regenerate_order_fulfillment_status_tool();
-
-			/**
-			 * Run the action for action scheduler processing.
-			 *
-			 * @since 10.4.0
-			 */
-			do_action( Analytics::REGENERATE_FULFILLMENT_STATUS_ACTION, 1 );
-
-			// Verify it was scheduled.
-			$this->assertStringContainsString( 'scheduled', $result );
+			// Run the migration tool.
+			Analytics::get_instance()->run_regenerate_order_fulfillment_status_tool();
 
 			// Assert: Verify orders with fulfillments are updated.
 			// Fetch all fulfillment statuses in a single query.
@@ -6603,7 +6592,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
 			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
-			as_unschedule_all_actions( Analytics::REGENERATE_FULFILLMENT_STATUS_ACTION, null, '' );
 
 			if ( null === $prev_fulfillments_opt ) {
 				delete_option( 'woocommerce_feature_fulfillments_enabled' );
