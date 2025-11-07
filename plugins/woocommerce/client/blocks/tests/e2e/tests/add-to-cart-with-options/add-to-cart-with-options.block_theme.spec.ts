@@ -9,7 +9,6 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 import config from '../../../../../admin/config/core.json';
-import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -36,14 +35,7 @@ const test = base.extend< {
 	},
 } );
 
-let wordPressVersion: number;
-
 test.describe( 'Add to Cart + Options Block', () => {
-	test.beforeEach( async () => {
-		if ( ! wordPressVersion ) {
-			wordPressVersion = await getInstalledWordPressVersion();
-		}
-	} );
 	test( 'allows switching to 3rd-party product types', async ( {
 		pageObject,
 		editor,
@@ -67,10 +59,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -105,10 +98,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -294,10 +288,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -821,10 +816,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -939,10 +935,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -960,10 +957,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -990,10 +988,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variations to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -1016,10 +1015,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 

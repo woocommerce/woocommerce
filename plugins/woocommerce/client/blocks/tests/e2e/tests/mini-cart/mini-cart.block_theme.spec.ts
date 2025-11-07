@@ -7,7 +7,6 @@ import { test, expect, BlockData } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -19,15 +18,7 @@ const blockData: BlockData = {
 	},
 };
 
-let wordPressVersion: number;
-
 test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async () => {
-		if ( ! wordPressVersion ) {
-			wordPressVersion = await getInstalledWordPressVersion();
-		}
-	} );
-
 	const checkMiniCartTitle = async ( page, itemCount ) => {
 		try {
 			// iAPI Mini Cart.
@@ -106,10 +97,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -125,10 +117,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
-		// eslint-disable-next-line jest/no-conditional-in-test
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -147,10 +140,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -169,10 +163,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -187,10 +182,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -228,10 +224,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -254,10 +251,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -298,10 +296,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -324,10 +323,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
@@ -342,10 +342,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
 		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 

@@ -7,7 +7,6 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import ProductCollectionPage from './product-collection.page';
-import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -24,10 +23,10 @@ test.describe( 'Product Page: error notices', () => {
 	test( 'displays error notice when attempting to add product beyond stock limit', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
-		const wordPressVersion = await getInstalledWordPressVersion();
 		test.skip(
-			wordPressVersion <= 6.7,
+			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
 		);
 
