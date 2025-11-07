@@ -70,7 +70,8 @@ const getPickupDetails = (
 
 const renderPickupLocation = (
 	option: CartShippingPackageShippingRate,
-	packageCount: number
+	packageCount: number,
+	isSelectedInClient = false
 ): RadioControlOptionType => {
 	const priceWithTaxes = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( option.price, 10 ) + parseInt( option.taxes, 10 )
@@ -78,8 +79,6 @@ const renderPickupLocation = (
 	const location = getPickupLocation( option );
 	const address = getPickupAddress( option );
 	const details = getPickupDetails( option );
-
-	const isSelected = option?.selected;
 
 	// Default to showing "free" as the secondary label. Price checks below will update it if needed.
 	let secondaryLabel = <em>{ __( 'free', 'woocommerce' ) }</em>;
@@ -134,7 +133,7 @@ const renderPickupLocation = (
 			</>
 		) : undefined,
 		secondaryDescription:
-			isSelected && details ? (
+			isSelectedInClient && details ? (
 				<ReadMore maxLines={ 2 }>
 					{ decodeEntities( details ) }
 				</ReadMore>
