@@ -63,15 +63,9 @@ test.describe( 'Template customization', () => {
 			await admin.visitSiteEditor( {
 				postType: testData.templateType,
 			} );
-			if ( testData.templateType === 'wp_template' ) {
-				await editor.revertTemplate( {
-					templateName: testData.templateName,
-				} );
-			} else {
-				await editor.revertTemplatePart( {
-					templateName: testData.templateName,
-				} );
-			}
+			await editor.revertTemplate( {
+				templateName: testData.templateName,
+			} );
 			await testData.visitPage( {
 				admin,
 				editor,
@@ -121,11 +115,9 @@ test.describe( 'Template customization', () => {
 				await admin.visitSiteEditor( {
 					postType: testData.templateType,
 				} );
-
 				await editor.revertTemplate( {
 					templateName: testData.fallbackTemplate?.templateName || '',
 				} );
-
 				await testData.visitPage( {
 					admin,
 					editor,
@@ -141,9 +133,7 @@ test.describe( 'Template customization', () => {
 	} );
 
 	const testToRun = CUSTOMIZABLE_WC_TEMPLATES.filter(
-		( data ) =>
-			data.canBeOverriddenByThemes &&
-			data.templateType === 'wp_template_part'
+		( data ) => data.canBeOverriddenByThemes
 	);
 
 	for ( const testData of testToRun ) {
@@ -213,7 +203,7 @@ test.describe( 'Template customization', () => {
 				postType: testData.templateType,
 			} );
 
-			await editor.revertTemplatePart( {
+			await editor.revertTemplate( {
 				templateName: testData.templateName,
 			} );
 
