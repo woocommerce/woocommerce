@@ -232,8 +232,8 @@ class Analytics {
 		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
 		$order_meta_table  = $wpdb->prefix . 'wc_orders_meta';
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$updated = $wpdb->query(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
 			"UPDATE {$order_stats_table} os
 			INNER JOIN {$order_meta_table} om ON os.order_id = om.order_id
 			SET os.fulfillment_status = CASE
