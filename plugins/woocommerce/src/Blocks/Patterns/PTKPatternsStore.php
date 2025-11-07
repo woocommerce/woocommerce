@@ -13,6 +13,11 @@ use WP_Upgrader;
 class PTKPatternsStore {
 	const OPTION_NAME = 'ptk_patterns';
 
+	/**
+	 * Hook and action name used to trigger fetching patterns.
+	 */
+	const FETCH_PATTERNS_ACTION = 'fetch_patterns';
+
 	const CATEGORY_MAPPING = array(
 		'testimonials' => 'reviews',
 	);
@@ -49,7 +54,7 @@ class PTKPatternsStore {
 			add_action( 'action_scheduler_ensure_recurring_actions', array( $this, 'ensure_recurring_fetch_patterns_if_enabled' ) );
 
 			// This is the scheduled action that takes care of flushing and re-fetching the patterns from the PTK API.
-			add_action( 'fetch_patterns', array( $this, 'fetch_patterns' ) );
+			add_action( self::FETCH_PATTERNS_ACTION, array( $this, 'fetch_patterns' ) );
 		}
 	}
 
@@ -76,12 +81,12 @@ class PTKPatternsStore {
 	 */
 	private function schedule_fetch_patterns() {
 		if ( did_action( 'action_scheduler_init' ) ) {
-			$this->schedule_action_if_not_pending( 'fetch_patterns' );
+			$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 		} else {
 			add_action(
 				'action_scheduler_init',
 				function () {
-					$this->schedule_action_if_not_pending( 'fetch_patterns' );
+					$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 				}
 			);
 		}
@@ -98,7 +103,7 @@ class PTKPatternsStore {
 			return;
 		}
 
-		$this->schedule_action_if_not_pending( 'fetch_patterns' );
+		$this->schedule_action_if_not_pending( self::FETCH_PATTERNS_ACTION );
 	}
 
 	/**
@@ -188,7 +193,7 @@ class PTKPatternsStore {
 		delete_option( self::OPTION_NAME );
 
 		// Unschedule any existing fetch_patterns actions.
-		as_unschedule_all_actions( 'fetch_patterns', array(), 'woocommerce' );
+		as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
 	}
 
 	/**
