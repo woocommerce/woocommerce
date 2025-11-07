@@ -9,6 +9,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
 import config from '../../../../../admin/config/core.json';
+import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -33,6 +34,12 @@ const test = base.extend< {
 		} );
 		await use( pageObject );
 	},
+} );
+
+let wordPressVersion: number;
+
+test.beforeAll( async () => {
+	wordPressVersion = await getInstalledWordPressVersion();
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
@@ -60,6 +67,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -92,6 +104,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		productGalleryPageObject,
 		editor,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -275,6 +292,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -529,7 +551,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( colorGreenOption ).toBeDisabled();
 	} );
-
+	//this test is flaky
 	test( 'respects quantity constraints', async ( {
 		page,
 		pageObject,
@@ -796,6 +818,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -908,6 +935,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -923,6 +955,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -947,6 +984,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock(
 			'hoodie',
 			'hoodie-blue-yes'
@@ -967,6 +1009,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(

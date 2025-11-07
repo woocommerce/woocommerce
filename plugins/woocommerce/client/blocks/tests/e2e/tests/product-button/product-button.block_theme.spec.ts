@@ -7,6 +7,7 @@ import { expect, test } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { blockData, handleAddToCartAjaxSetting } from './utils';
+import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { frontendUtils } ) => {
@@ -34,6 +35,12 @@ test.describe( `${ blockData.name } Block`, () => {
 		frontendUtils,
 		page,
 	} ) => {
+		const wordPressVersion = await getInstalledWordPressVersion();
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		const blocks = await frontendUtils.getBlockByName( blockData.slug );
 		const block = blocks.first();
 

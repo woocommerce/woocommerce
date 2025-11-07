@@ -14,6 +14,7 @@ import { getTestTranslation } from '../../utils/get-test-translation';
 import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
 import config from '../../../../../admin/config/core.json';
+import { getInstalledWordPressVersion } from '../../../../../../tests/e2e-pw/utils/wordpress';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	productCollectionPage: async ( { page, admin, editor }, use ) => {
@@ -26,6 +27,12 @@ const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
 	},
 } );
 
+let wordPressVersion: number;
+
+test.beforeAll( async () => {
+	wordPressVersion = await getInstalledWordPressVersion();
+} );
+
 test.describe( 'Shopper → Notices', () => {
 	test( 'Shopper can add item to cart, and will not see a notice in the mini cart', async ( {
 		page,
@@ -33,6 +40,10 @@ test.describe( 'Shopper → Notices', () => {
 		admin,
 		productCollectionPage,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
 		const checkMiniCartTitle = async ( itemCount: number ) => {
 			try {
 				// iAPI Mini Cart.
@@ -171,6 +182,10 @@ test.describe( 'Shopper → Tax', () => {
 		frontendUtils,
 		page,
 	} ) => {
+		test.skip(
+			wordPressVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
