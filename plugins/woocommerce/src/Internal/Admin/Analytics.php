@@ -6,9 +6,11 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -230,16 +232,29 @@ class Analytics {
 		}
 
 		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
-		$order_meta_table  = $wpdb->prefix . 'wc_orders_meta';
 
+		// If HPOS is enabled, use the wc_orders_meta table, else use wp_postmeta.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_meta_table  = OrdersTableDataStore::get_meta_table_name();
+			$order_meta_column = 'order_id';
+		} else {
+			$order_meta_table = $wpdb->postmeta;
+			$order_meta_column = 'post_id';
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$updated = $wpdb->query(
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
-			"UPDATE {$order_stats_table} os INNER JOIN {$order_meta_table} om ON os.order_id = om.order_id
-			SET os.fulfillment_status = CASE
-				WHEN om.meta_value = 'no_fulfillments' THEN NULL
-				ELSE om.meta_value
-			END
-			WHERE om.meta_key = '_fulfillment_status'"
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+				"UPDATE {$order_stats_table} os INNER JOIN {$order_meta_table} om ON os.order_id = om.{$order_meta_column}
+				SET os.fulfillment_status = CASE
+					WHEN om.meta_value = %s THEN NULL
+					ELSE om.meta_value
+				END
+				WHERE om.meta_key = %s",
+				'no_fulfillments',
+				'_fulfillment_status'
+			)
 		);
 
 		if ( false === $updated ) {
