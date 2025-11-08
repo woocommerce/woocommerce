@@ -103,7 +103,7 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 
 		// Act - Use reflection to access private method.
 		$reflection = new \ReflectionClass( $this->block );
-		$method     = $reflection->getMethod( 'get_total_items_description' );
+		$method     = $reflection->getMethod( 'get_totals_item_description' );
 		$method->setAccessible( true );
 		$result = $method->invoke( $this->block );
 
