@@ -177,6 +177,12 @@ class WC_REST_Setting_Options_V2_Controller extends WC_REST_Controller {
 			$option_key = $setting['option_key'];
 			$setting    = $this->filter_setting( $setting );
 			$default    = isset( $setting['default'] ) ? $setting['default'] : '';
+
+			if ( in_array( $setting['type'] ?? '', array( 'title', 'sectionend' ), true ) ) {
+				$filtered_settings[] = $setting;
+				continue;
+			}
+
 			// Get the option value.
 			if ( is_array( $option_key ) ) {
 				$option           = get_option( $option_key[0] );
