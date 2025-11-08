@@ -17,7 +17,7 @@ import { PaymentEventsProvider } from '@woocommerce/base-context';
 /**
  * Internal dependencies
  */
-import { getTotalItemsDescription } from '../utils';
+import { getTotalsItemDescription } from '../utils';
 import './editor.scss';
 
 const PaymentMethodIconsElement = (): JSX.Element => {
@@ -50,7 +50,7 @@ export const Edit = (): JSX.Element => {
 					currency={ getCurrencyFromPriceResponse( cartTotals ) }
 					label={ __( 'Subtotal', 'woocommerce' ) }
 					value={ subTotal }
-					description={ getTotalItemsDescription() }
+					description={ getTotalsItemDescription() }
 				/>
 				<div className="wc-block-mini-cart__footer-actions">
 					<InnerBlocks template={ TEMPLATE } />
