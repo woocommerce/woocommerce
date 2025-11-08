@@ -15,6 +15,16 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	protected $block_name = 'mini-cart-footer-block';
 
 	/**
+	 * Enqueue frontend data.
+	 *
+	 * @param array $attributes Block attributes.
+	 */
+	protected function enqueue_data( array $attributes = array() ) {
+		parent::enqueue_data( $attributes );
+		$this->asset_data_registry->add( 'miniCartFooterDescription', $this->get_total_items_description() );
+	}
+
+	/**
 	 * Render experimental iAPI powered Mini-Cart Footer block.
 	 *
 	 * @param array    $attributes Block attributes.
