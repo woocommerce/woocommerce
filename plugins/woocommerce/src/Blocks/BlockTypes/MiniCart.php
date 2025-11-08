@@ -239,6 +239,9 @@ class MiniCart extends AbstractBlock {
 			'displayCartPricesIncludingTax',
 			$this->display_cart_prices_including_tax
 		);
+		$this->asset_data_registry->add( 'taxesEnabled', wc_tax_enabled() );
+		$this->asset_data_registry->add( 'couponsEnabled', wc_coupons_enabled() );
+		$this->asset_data_registry->add( 'shippingEnabled', wc_shipping_enabled() );
 
 		$template_part_edit_uri = '';
 
