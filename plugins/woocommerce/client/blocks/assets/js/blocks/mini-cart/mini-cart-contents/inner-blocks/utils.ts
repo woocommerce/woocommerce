@@ -38,6 +38,6 @@ export const hasChildren = ( children ): boolean => {
  *
  * @return {string} The description text for the total items.
  */
-export const getTotalItemsDescription = (): string => {
+export const getTotalsItemDescription = (): string => {
 	return getSetting( 'miniCartFooterDescription', '' );
 };
