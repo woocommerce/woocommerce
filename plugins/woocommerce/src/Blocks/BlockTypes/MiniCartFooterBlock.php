@@ -108,9 +108,9 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	 * @return string The description text for the total items, or empty string if none are enabled.
 	 */
 	private function get_total_items_description() {
-		$taxes_enabled     = wc_tax_enabled();
-		$shipping_enabled  = wc_shipping_enabled();
-		$coupons_enabled   = wc_coupons_enabled();
+		$taxes_enabled    = wc_tax_enabled();
+		$shipping_enabled = wc_shipping_enabled();
+		$coupons_enabled  = wc_coupons_enabled();
 
 		// All three enabled.
 		if ( $taxes_enabled && $shipping_enabled && $coupons_enabled ) {
@@ -136,7 +136,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			);
 		}
 
-		// Taxes + discounts
+		// Taxes + discounts.
 		if ( $taxes_enabled && $coupons_enabled ) {
 			return __(
 				'Taxes and discounts calculated at checkout.',
