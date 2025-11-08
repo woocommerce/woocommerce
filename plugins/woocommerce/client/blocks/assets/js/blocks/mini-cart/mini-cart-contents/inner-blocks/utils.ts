@@ -34,9 +34,9 @@ export const hasChildren = ( children ): boolean => {
 };
 
 /**
- * Gets the total items description text from PHP-computed setting.
+ * Gets the totals item description text from PHP-computed setting.
  *
- * @return {string} The description text for the total items.
+ * @return {string} The description text for the totals item.
  */
 export const getTotalsItemDescription = (): string => {
 	return getSetting( 'miniCartFooterDescription', '' );
