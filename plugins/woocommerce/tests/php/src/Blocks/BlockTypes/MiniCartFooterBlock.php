@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 /**
  * Tests for the MiniCartFooterBlock block type.
  *
- * @since $VID:$
+ * @since 10.4.0
  */
 class MiniCartFooterBlock extends \WP_UnitTestCase {
 
