@@ -110,9 +110,9 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	private function get_total_items_description() {
 		$taxes_enabled     = wc_tax_enabled();
 		$shipping_enabled  = wc_shipping_enabled();
-		$coupons_enabled = wc_coupons_enabled();
+		$coupons_enabled   = wc_coupons_enabled();
 
-		// All three enabled
+		// All three enabled.
 		if ( $taxes_enabled && $shipping_enabled && $coupons_enabled ) {
 			return __(
 				'Shipping, taxes, and discounts calculated at checkout.',
@@ -120,7 +120,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			);
 		}
 
-		// Shipping + taxes
+		// Shipping + taxes.
 		if ( $shipping_enabled && $taxes_enabled ) {
 			return __(
 				'Shipping and taxes calculated at checkout.',
@@ -128,7 +128,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			);
 		}
 
-		// Shipping + discounts
+		// Shipping + discounts.
 		if ( $shipping_enabled && $coupons_enabled ) {
 			return __(
 				'Shipping and discounts calculated at checkout.',
@@ -144,22 +144,22 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			);
 		}
 
-		// Only shipping
+		// Only shipping.
 		if ( $shipping_enabled ) {
 			return __( 'Shipping calculated at checkout.', 'woocommerce' );
 		}
 
-		// Only taxes
+		// Only taxes.
 		if ( $taxes_enabled ) {
 			return __( 'Taxes calculated at checkout.', 'woocommerce' );
 		}
 
-		// Only discounts
+		// Only discounts.
 		if ( $coupons_enabled ) {
 			return __( 'Discounts calculated at checkout.', 'woocommerce' );
 		}
 
-		// None enabled
+		// None enabled.
 		return '';
 	}
 
