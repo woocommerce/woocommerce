@@ -107,7 +107,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	 *
 	 * @return string The description text for the total items, or empty string if none are enabled.
 	 */
-	private function get_total_items_description() {
+	private function get_totals_item_description() {
 		$taxes_enabled    = wc_tax_enabled();
 		$shipping_enabled = wc_shipping_enabled();
 		$coupons_enabled  = wc_coupons_enabled();
