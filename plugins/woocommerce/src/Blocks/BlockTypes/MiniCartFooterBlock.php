@@ -21,7 +21,10 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
-		$this->asset_data_registry->add( 'miniCartFooterDescription', $this->get_total_items_description() );
+		$description = $this->get_totals_item_description();
+		if ( ! empty( $description ) ) {
+			$this->asset_data_registry->add( 'miniCartFooterDescription', $description );
+		}
 	}
 
 	/**
@@ -37,7 +40,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		$cart                             = $this->get_cart_instance();
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
-		$other_costs_label                = $this->get_total_items_description();
+		$other_costs_label                = $this->get_totals_item_description();
 		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
