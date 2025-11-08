@@ -15,9 +15,11 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	protected $block_name = 'mini-cart-footer-block';
 
 	/**
-	 * Enqueue frontend data.
+	 * Data passed through from server to client for block.
 	 *
-	 * @param array $attributes Block attributes.
+	 * @param array $attributes  Any attributes that currently are available from the block.
+	 *                           Note, this will be empty in the editor context when the block is
+	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
