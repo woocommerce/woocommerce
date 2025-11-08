@@ -27,7 +27,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		$cart                             = $this->get_cart_instance();
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
-		$other_costs_label                = __( 'Shipping, taxes, and discounts calculated at checkout.', 'woocommerce' );
+		$other_costs_label                = $this->get_total_items_description();
 		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
@@ -90,6 +90,67 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Computes the total items description text based on which settings are enabled.
+	 *
+	 * @return string The description text for the total items, or empty string if none are enabled.
+	 */
+	private function get_total_items_description() {
+		$taxes_enabled     = wc_tax_enabled();
+		$shipping_enabled  = wc_shipping_enabled();
+		$coupons_enabled = wc_coupons_enabled();
+
+		// All three enabled
+		if ( $taxes_enabled && $shipping_enabled && $coupons_enabled ) {
+			return __(
+				'Shipping, taxes, and discounts calculated at checkout.',
+				'woocommerce'
+			);
+		}
+
+		// Shipping + taxes
+		if ( $shipping_enabled && $taxes_enabled ) {
+			return __(
+				'Shipping and taxes calculated at checkout.',
+				'woocommerce'
+			);
+		}
+
+		// Shipping + discounts
+		if ( $shipping_enabled && $coupons_enabled ) {
+			return __(
+				'Shipping and discounts calculated at checkout.',
+				'woocommerce'
+			);
+		}
+
+		// Taxes + discounts
+		if ( $taxes_enabled && $coupons_enabled ) {
+			return __(
+				'Taxes and discounts calculated at checkout.',
+				'woocommerce'
+			);
+		}
+
+		// Only shipping
+		if ( $shipping_enabled ) {
+			return __( 'Shipping calculated at checkout.', 'woocommerce' );
+		}
+
+		// Only taxes
+		if ( $taxes_enabled ) {
+			return __( 'Taxes calculated at checkout.', 'woocommerce' );
+		}
+
+		// Only discounts
+		if ( $coupons_enabled ) {
+			return __( 'Discounts calculated at checkout.', 'woocommerce' );
+		}
+
+		// None enabled
+		return '';
 	}
 
 	/**
