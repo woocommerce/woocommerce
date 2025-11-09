@@ -68,7 +68,9 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 
 		// Clear cart.
-		WC()->cart->empty_cart();
+		if ( WC()->cart ) {
+			WC()->cart->empty_cart();
+		}
 
 		// Clean up created products.
 		foreach ( $this->created_products as $product_id ) {
@@ -78,6 +80,10 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		// Clean up tax rates.
 		$this->clean_up_tax_rates();
+
+		// Clear test tax rates.
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates WHERE tax_rate_country = 'US'" );
 
 		// Reset tax settings.
 		delete_option( 'woocommerce_shipping_tax_class' );
@@ -151,6 +157,70 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$this->created_products[] = $product->get_id();
 
 		return $product;
+	}
+
+	/**
+	 * Create a test tax rate.
+	 *
+	 * @param string $tax_class Tax class slug.
+	 * @param float  $rate Tax rate percentage.
+	 * @return int Tax rate ID.
+	 */
+	private function create_test_tax_rate( $tax_class, $rate ) {
+		return WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => $rate,
+				'tax_rate_name'     => $tax_class . ' Rate',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 0,
+				'tax_rate_class'    => $tax_class,
+			)
+		);
+	}
+
+	/**
+	 * Set up a test cart with specific items and tax rates.
+	 *
+	 * @param array $items Array of items with 'price' and 'tax_class' keys.
+	 * @return void
+	 */
+	private function setup_test_cart( $items ) {
+		// Clear existing cart.
+		WC()->cart->empty_cart();
+
+		// Set tax calculation to billing address.
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+
+		// Create test tax rates.
+		$tax_rates = array();
+		foreach ( $items as $item ) {
+			if ( ! isset( $tax_rates[ $item['tax_class'] ] ) ) {
+				$rate = isset( $item['rate'] ) ? $item['rate'] : 10;
+				$tax_rates[ $item['tax_class'] ] = $this->create_test_tax_rate( $item['tax_class'], $rate );
+			}
+		}
+
+		// Create products and add to cart.
+		foreach ( $items as $item ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( $item['price'] );
+			$product->set_tax_class( $item['tax_class'] );
+			$product->set_tax_status( 'taxable' );
+			$product->save();
+
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+		}
+
+		// Set customer to taxable location.
+		WC()->customer->set_billing_country( 'US' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		// Calculate cart totals to populate tax data.
+		WC()->cart->calculate_totals();
 	}
 
 	/**
