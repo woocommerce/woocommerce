@@ -619,7 +619,8 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		$result = $method->invoke( null );
 
-		$this->assertEquals( '', $result );
+		// Empty cart returns null (no data), not empty string (which means standard class).
+		$this->assertNull( $result );
 	}
 
 	/**
