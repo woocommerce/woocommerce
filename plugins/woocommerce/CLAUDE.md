@@ -401,6 +401,127 @@ payment extension suggestions:
   `src/Internal/Admin/Suggestions/PaymentsExtensionSuggestions.php`
 - When adding new countries, update both data providers in test file
 
+## Shipping Tax Calculation Methods
+
+WooCommerce supports multiple methods for calculating shipping tax to
+accommodate different VAT compliance requirements:
+
+### Available Methods
+
+| Method | Setting Value | Description | Use Case |
+|--------|---------------|-------------|----------|
+| **Based on cart items** | `inherit` | Standard priority logic | Default behavior |
+| **Highest rate in cart** | `highest_rate` | Applies highest percentage | Conservative compliance |
+| **Highest tax amount** | `highest_amount` | Uses "predominant rate" | Dutch/EU VAT compliance |
+
+**Setting location:** WooCommerce > Settings > Tax > Tax options >
+Shipping tax class
+
+### Implementation Details
+
+**Core logic:** `includes/class-wc-tax.php`
+
+| Method | Line | Purpose |
+|--------|------|---------|
+| `get_shipping_tax_rates()` | 569 | Entry point - routes to calculation method |
+| `get_shipping_tax_class_from_cart_items()` | 621 | Handles method routing & filter |
+| `get_shipping_tax_class_by_highest_rate()` | 712 | Highest percentage calculation |
+| `get_shipping_tax_class_by_highest_amount()` | 768 | Predominant rate calculation |
+
+**Settings UI:** `includes/admin/settings/views/settings-tax.php` (line 45)
+
+**Test coverage:** `tests/php/includes/class-wc-tax-test.php`
+
+### Method Behavior
+
+**Highest Rate (`highest_rate`):**
+
+- Scans all product tax rates in cart
+- Returns tax class with highest percentage
+- Example: Cart has 9% and 21% rates → shipping uses 21%
+
+**Highest Amount (`highest_amount`):**
+
+- Calculates total tax collected per tax class
+- Returns tax class that collected most tax
+- Example: €115 at 9% + €55 at 21% → shipping uses 9% (€115 > €55)
+- **Dutch VAT requirement:** Apply shipping tax at "predominant rate"
+
+**Based on cart items (`inherit`):**
+
+- Legacy behavior (backward compatible)
+- Standard tax class takes priority
+- Falls back to first class in settings order
+
+### Testing
+
+```bash
+# Run all shipping tax tests
+pnpm test:php:env -- --filter WC_Tax_Test
+
+# Test specific calculation method
+pnpm test:php:env -- --filter test_get_shipping_tax_class_by_highest_rate
+pnpm test:php:env -- --filter test_get_shipping_tax_class_by_highest_amount
+
+# Test Dutch VAT scenarios
+pnpm test:php:env -- --filter test_get_shipping_tax_class_by_highest_amount_dutch
+```
+
+**Test scenarios covered:**
+
+- Basic calculations (different rates/amounts)
+- Edge cases (empty cart, ties, non-taxable items)
+- Multiple items per tax class
+- Backward compatibility with `inherit` method
+
+### Extensibility
+
+Developers can override or extend the calculation using the filter:
+
+```php
+add_filter( 'woocommerce_shipping_tax_class_calculation', function( $tax_class, $method, $cart ) {
+    // Override for specific method
+    if ( 'highest_amount' === $method ) {
+        // Custom logic - e.g., regional requirements
+        return 'custom-tax-class';
+    }
+
+    // Or add new method support
+    if ( 'custom_method' === $method ) {
+        return calculate_custom_tax_class( $cart );
+    }
+
+    return $tax_class;
+}, 10, 3 );
+```
+
+**Filter parameters:**
+
+- `$tax_class` (string|null) - Calculated tax class slug
+- `$method` (string) - Calculation method (`inherit`, `highest_rate`, `highest_amount`)
+- `$cart` (WC_Cart) - Cart object with current items
+
+### Common Issues
+
+**Settings not showing new options:**
+
+- Clear cache (browser/server)
+- Verify file: `includes/admin/settings/views/settings-tax.php`
+- Check line 53-56 for dropdown options
+
+**Incorrect tax applied to shipping:**
+
+- Ensure `woocommerce_shipping_tax_class` option is set correctly
+- Verify cart items have tax classes assigned
+- Check that tax rates exist for all cart item tax classes
+- Run `WC()->cart->calculate_totals()` before checking rates
+
+**Tests failing:**
+
+- Use helper: `setup_test_cart()` to create consistent test data
+- Ensure tax rates created with `tax_rate_shipping => 1`
+- Remember: empty cart returns `null`, not empty string
+
 ## File Structure
 
 Key directories for testing:
