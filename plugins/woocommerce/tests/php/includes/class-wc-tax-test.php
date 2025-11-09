@@ -199,7 +199,7 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$tax_rates = array();
 		foreach ( $items as $item ) {
 			if ( ! isset( $tax_rates[ $item['tax_class'] ] ) ) {
-				$rate = isset( $item['rate'] ) ? $item['rate'] : 10;
+				$rate                            = isset( $item['rate'] ) ? $item['rate'] : 10;
 				$tax_rates[ $item['tax_class'] ] = $this->create_test_tax_rate( $item['tax_class'], $rate );
 			}
 		}
@@ -703,8 +703,8 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	 * @since X.X.X
 	 */
 	public function test_get_shipping_tax_class_by_highest_amount_dutch_scenario_1() {
-		// To get €45 tax at 9%: price = 45 / 0.09 = €500
-		// To get €65 tax at 21%: price = 65 / 0.21 = €309.52
+		// To get €45 tax at 9%: price = 45 / 0.09 = €500.
+		// To get €65 tax at 21%: price = 65 / 0.21 = €309.52.
 		$this->setup_test_cart(
 			array(
 				array(
@@ -739,8 +739,8 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 	 * @since X.X.X
 	 */
 	public function test_get_shipping_tax_class_by_highest_amount_dutch_scenario_2() {
-		// To get €115 tax at 9%: price = 115 / 0.09 = €1277.78
-		// To get €55 tax at 21%: price = 55 / 0.21 = €261.90
+		// To get €115 tax at 9%: price = 115 / 0.09 = €1277.78.
+		// To get €55 tax at 21%: price = 55 / 0.21 = €261.90.
 		$this->setup_test_cart(
 			array(
 				array(
