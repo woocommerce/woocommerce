@@ -622,10 +622,23 @@ class WC_Tax {
 		// Route to specific calculation method.
 		switch ( $method ) {
 			case 'highest_rate':
-				return self::get_shipping_tax_class_by_highest_rate();
+				$tax_class = self::get_shipping_tax_class_by_highest_rate();
+				/**
+				 * Filter the calculated shipping tax class.
+				 *
+				 * Allows developers to override or extend the shipping tax class calculation.
+				 *
+				 * @since X.X.X
+				 * @param string|null $tax_class The calculated tax class slug.
+				 * @param string      $method    The calculation method used ('inherit', 'highest_rate', 'highest_amount').
+				 * @param WC_Cart     $cart      The cart object.
+				 */
+				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
 
 			case 'highest_amount':
-				return self::get_shipping_tax_class_by_highest_amount();
+				$tax_class = self::get_shipping_tax_class_by_highest_amount();
+				/** This filter is documented above. */
+				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
 
 			case 'inherit':
 			default:
@@ -638,24 +651,32 @@ class WC_Tax {
 
 		// Check if cart has items before proceeding.
 		if ( ! $cart->get_cart() ) {
-			return $standard_tax_class;
+			$tax_class = $standard_tax_class;
+			/** This filter is documented earlier in this function. */
+			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
 		}
 
 		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
 
 		// No tax classes = no taxable items.
 		if ( empty( $cart_tax_classes ) ) {
-			return null;
+			$tax_class = null;
+			/** This filter is documented earlier in this function. */
+			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
 		}
 
 		// Standard tax class takes priority over any other tax class.
 		if ( in_array( $standard_tax_class, $cart_tax_classes, true ) ) {
-			return $standard_tax_class;
+			$tax_class = $standard_tax_class;
+			/** This filter is documented earlier in this function. */
+			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
 		}
 
 		// If only one tax class, use it directly.
 		if ( 1 === count( $cart_tax_classes ) ) {
-			return reset( $cart_tax_classes );
+			$tax_class = reset( $cart_tax_classes );
+			/** This filter is documented earlier in this function. */
+			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
 		}
 
 		// For multiple classes, use the first one found using the order defined in settings.
@@ -666,12 +687,17 @@ class WC_Tax {
 
 		foreach ( $tax_class_slugs as $tax_class_slug ) {
 			if ( in_array( $tax_class_slug, $cart_tax_classes, true ) ) {
-				return $tax_class_slug;
+				$tax_class = $tax_class_slug;
+				/** This filter is documented earlier in this function. */
+				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
 			}
 		}
 
 		// Default to standard tax class if nothing else matches.
-		return $standard_tax_class;
+		$tax_class = $standard_tax_class;
+
+		/** This filter is documented earlier in this function. */
+		return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
 	}
 
 	/**
