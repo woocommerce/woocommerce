@@ -662,13 +662,13 @@ class WC_Tax {
 	 * with the highest percentage rate.
 	 *
 	 * @since X.X.X
-	 * @return string|null The tax class slug with highest rate, null if no taxable items, or empty string for standard.
+	 * @return string|null The tax class slug with highest rate, empty string for standard rate, or null if cart is empty or no taxable items.
 	 */
 	private static function get_shipping_tax_class_by_highest_rate() {
 		$cart = WC()->cart;
 
 		if ( ! $cart->get_cart() ) {
-			return '';
+			return null;
 		}
 
 		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
@@ -677,18 +677,18 @@ class WC_Tax {
 			return null;
 		}
 
+		$location = self::get_tax_location();
+
+		if ( 4 !== count( $location ) ) {
+			return '';
+		}
+
+		list( $country, $state, $postcode, $city ) = $location;
+
 		$highest_rate      = 0;
 		$highest_tax_class = '';
 
 		foreach ( $cart_tax_classes as $tax_class ) {
-			$location = self::get_tax_location( $tax_class );
-
-			if ( 4 !== count( $location ) ) {
-				continue;
-			}
-
-			list( $country, $state, $postcode, $city ) = $location;
-
 			$rates = self::find_rates(
 				array(
 					'country'   => $country,
