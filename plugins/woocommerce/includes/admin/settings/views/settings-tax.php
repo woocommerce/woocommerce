@@ -44,13 +44,17 @@ $settings = array(
 
 	'shipping-tax-class' => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
-		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
+		'desc'     => __( 'Control how tax is calculated on shipping. "Based on cart items" uses standard rate priority. "Highest rate in cart" applies the highest percentage. "Highest tax amount" uses the rate that collected the most tax (recommended for EU/NL compliance).', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
 		'css'      => 'min-width:150px;',
 		'default'  => 'inherit',
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
-		'options'  => array( 'inherit' => __( 'Shipping tax class based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options(),
+		'options'  => array(
+			'inherit'        => __( 'Based on cart items', 'woocommerce' ),
+			'highest_rate'   => __( 'Highest rate in cart', 'woocommerce' ),
+			'highest_amount' => __( 'Highest tax amount', 'woocommerce' ),
+		) + wc_get_product_tax_class_options(),
 		'desc_tip' => true,
 	),
 
