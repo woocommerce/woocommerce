@@ -765,4 +765,115 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Reduced-rate class (9%) collected more tax (€115 > €55).
 		$this->assertEquals( 'reduced-rate', $result );
 	}
+
+	/**
+	 * Test highest amount method with tie.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_amount_tie() {
+		// Both classes collect same amount of tax.
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 10,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 10,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_amount' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Should return one of them (arsort is stable, returns first).
+		$this->assertTrue( in_array( $result, array( '', 'reduced-rate' ), true ) );
+	}
+
+	/**
+	 * Test highest amount method with mixed taxable and non-taxable items.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_amount_mixed() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		// Add a non-taxable product.
+		$non_taxable = WC_Helper_Product::create_simple_product();
+		$non_taxable->set_regular_price( 500 );
+		$non_taxable->set_tax_status( 'none' );
+		$non_taxable->save();
+		WC()->cart->add_to_cart( $non_taxable->get_id(), 1 );
+
+		// Recalculate.
+		WC()->cart->calculate_totals();
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_amount' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Should return standard class (only taxable item).
+		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test highest amount method with multiple items per class.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_amount_multiple_items() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_amount' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Reduced-rate: 3 * €100 * 9% = €27
+		// Standard: 1 * €100 * 21% = €21
+		// Reduced-rate collected more.
+		$this->assertEquals( 'reduced-rate', $result );
+	}
 }
