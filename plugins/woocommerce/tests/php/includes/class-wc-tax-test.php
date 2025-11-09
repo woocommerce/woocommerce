@@ -604,4 +604,92 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Standard class (21%) has highest rate.
 		$this->assertEquals( '', $result );
 	}
+
+	/**
+	 * Test highest rate method with empty cart.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_rate_empty_cart() {
+		WC()->cart->empty_cart();
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_rate' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test highest rate method with non-taxable items.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_rate_no_taxable() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 0,
+				),
+			)
+		);
+
+		// Set all products to non-taxable.
+		foreach ( WC()->cart->get_cart() as $cart_item ) {
+			$product = $cart_item['data'];
+			$product->set_tax_status( 'none' );
+			$product->save();
+		}
+
+		// Recalculate.
+		WC()->cart->calculate_totals();
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_rate' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		$this->assertNull( $result );
+	}
+
+	/**
+	 * Test highest rate method with three rates.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_rate_three_rates() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 50,
+					'tax_class' => 'zero-rate',
+					'rate'      => 0,
+				),
+				array(
+					'price'     => 50,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 50,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_rate' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Standard (21%) is highest.
+		$this->assertEquals( '', $result );
+	}
 }
