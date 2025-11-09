@@ -611,9 +611,24 @@ class WC_Tax {
 	 * Standard tax class takes priority, followed by the first non-standard class
 	 * found in the configured tax class hierarchy.
 	 *
+	 * @param string $method Calculation method: 'inherit', 'highest_rate', or 'highest_amount'.
 	 * @return string|null The shipping tax class slug, or null if no taxable items are found.
 	 */
-	private static function get_shipping_tax_class_from_cart_items() {
+	private static function get_shipping_tax_class_from_cart_items( $method = 'inherit' ) {
+		// Route to specific calculation method.
+		switch ( $method ) {
+			case 'highest_rate':
+				return self::get_shipping_tax_class_by_highest_rate();
+
+			case 'highest_amount':
+				return self::get_shipping_tax_class_by_highest_amount();
+
+			case 'inherit':
+			default:
+				// Continue with existing logic below.
+				break;
+		}
+
 		$standard_tax_class = '';
 		$cart               = WC()->cart;
 

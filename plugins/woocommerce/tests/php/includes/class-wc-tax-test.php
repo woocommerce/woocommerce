@@ -876,4 +876,42 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Reduced-rate collected more.
 		$this->assertEquals( 'reduced-rate', $result );
 	}
+
+	/**
+	 * Test get_shipping_tax_class_from_cart_items routes to correct method.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_from_cart_items_routing() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_from_cart_items' );
+		$method->setAccessible( true );
+
+		// Test 'highest_rate' method.
+		$result = $method->invoke( null, 'highest_rate' );
+		$this->assertEquals( '', $result, 'highest_rate should return standard (21%)' );
+
+		// Test 'highest_amount' method.
+		$result = $method->invoke( null, 'highest_amount' );
+		$this->assertEquals( '', $result, 'highest_amount should return standard (21%)' );
+
+		// Test 'inherit' method (default behavior).
+		$result = $method->invoke( null, 'inherit' );
+		$this->assertEquals( '', $result, 'inherit should return standard (priority logic)' );
+	}
 }
