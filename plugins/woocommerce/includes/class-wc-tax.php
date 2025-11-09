@@ -656,6 +656,61 @@ class WC_Tax {
 	}
 
 	/**
+	 * Get the shipping tax class based on the highest tax rate in the cart.
+	 *
+	 * Scans all tax rates for products in the cart and returns the tax class
+	 * with the highest percentage rate.
+	 *
+	 * @since X.X.X
+	 * @return string|null The tax class slug with highest rate, null if no taxable items, or empty string for standard.
+	 */
+	private static function get_shipping_tax_class_by_highest_rate() {
+		$cart = WC()->cart;
+
+		if ( ! $cart->get_cart() ) {
+			return '';
+		}
+
+		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
+
+		if ( empty( $cart_tax_classes ) ) {
+			return null;
+		}
+
+		$highest_rate      = 0;
+		$highest_tax_class = '';
+
+		foreach ( $cart_tax_classes as $tax_class ) {
+			$location = self::get_tax_location( $tax_class );
+
+			if ( 4 !== count( $location ) ) {
+				continue;
+			}
+
+			list( $country, $state, $postcode, $city ) = $location;
+
+			$rates = self::find_rates(
+				array(
+					'country'   => $country,
+					'state'     => $state,
+					'postcode'  => $postcode,
+					'city'      => $city,
+					'tax_class' => $tax_class,
+				)
+			);
+
+			foreach ( $rates as $rate ) {
+				if ( (float) $rate['rate'] > $highest_rate ) {
+					$highest_rate      = (float) $rate['rate'];
+					$highest_tax_class = $tax_class;
+				}
+			}
+		}
+
+		return $highest_tax_class;
+	}
+
+	/**
 	 * Return true/false depending on if a rate is a compound rate.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.

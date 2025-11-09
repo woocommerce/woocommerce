@@ -572,4 +572,36 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Should return the first tax class found in the hierarchy (reduced-rate comes before zero-rate).
 		$this->assertEquals( 'reduced-rate', $result );
 	}
+
+	/**
+	 * Test get_shipping_tax_class_by_highest_rate with different rates.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_rate_basic() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		// Use reflection to call private method.
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_rate' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Standard class (21%) has highest rate.
+		$this->assertEquals( '', $result );
+	}
 }
