@@ -957,4 +957,67 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$first_rate = reset( $rates );
 		$this->assertEquals( 9, $first_rate['rate'], 'Should use 9% rate' );
 	}
+
+	/**
+	 * Test that 'inherit' method maintains backward compatibility.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_backward_compatibility_inherit() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		update_option( 'woocommerce_shipping_tax_class', 'inherit' );
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertNotEmpty( $rates );
+		$first_rate = reset( $rates );
+
+		// Inherit should use standard class (priority behavior).
+		$this->assertEquals( 21, $first_rate['rate'] );
+	}
+
+	/**
+	 * Test that explicit tax class setting still works.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_backward_compatibility_explicit_class() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		// Set explicit tax class.
+		update_option( 'woocommerce_shipping_tax_class', 'reduced-rate' );
+		$rates = WC_Tax::get_shipping_tax_rates();
+
+		$this->assertNotEmpty( $rates );
+		$first_rate = reset( $rates );
+
+		// Should use reduced-rate regardless of cart contents.
+		$this->assertEquals( 9, $first_rate['rate'] );
+	}
 }
