@@ -914,4 +914,47 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		$result = $method->invoke( null, 'inherit' );
 		$this->assertEquals( '', $result, 'inherit should return standard (priority logic)' );
 	}
+
+	/**
+	 * Test get_shipping_tax_rates with new calculation methods.
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_rates_new_methods() {
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 100,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 100,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		// Test with 'highest_rate' setting.
+		update_option( 'woocommerce_shipping_tax_class', 'highest_rate' );
+		$rates = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates, 'Should return rates for highest_rate' );
+		$first_rate = reset( $rates );
+		$this->assertEquals( 21, $first_rate['rate'], 'Should use 21% rate' );
+
+		// Test with 'highest_amount' setting.
+		update_option( 'woocommerce_shipping_tax_class', 'highest_amount' );
+		$rates = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates, 'Should return rates for highest_amount' );
+		$first_rate = reset( $rates );
+		$this->assertEquals( 21, $first_rate['rate'], 'Should use 21% rate' );
+
+		// Test with explicit tax class.
+		update_option( 'woocommerce_shipping_tax_class', 'reduced-rate' );
+		$rates = WC_Tax::get_shipping_tax_rates();
+		$this->assertNotEmpty( $rates, 'Should return rates for explicit class' );
+		$first_rate = reset( $rates );
+		$this->assertEquals( 9, $first_rate['rate'], 'Should use 9% rate' );
+	}
 }

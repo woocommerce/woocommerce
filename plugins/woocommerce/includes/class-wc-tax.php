@@ -570,13 +570,17 @@ class WC_Tax {
 		// See if we have an explicitly set shipping tax class.
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-		if ( 'inherit' !== $shipping_tax_class ) {
+		// Handle dynamic calculation methods.
+		if ( in_array( $shipping_tax_class, array( 'inherit', 'highest_rate', 'highest_amount' ), true ) ) {
+			$tax_class = self::get_shipping_tax_class_from_cart_items( $shipping_tax_class );
+		} elseif ( ! empty( $shipping_tax_class ) ) {
+			// Explicit tax class set.
 			$tax_class = $shipping_tax_class;
 		}
 
-		// If we don't have a shipping tax class yet, work out which one to use.
+		// If we still don't have a tax class, use default calculation.
 		if ( is_null( $tax_class ) ) {
-			$tax_class = self::get_shipping_tax_class_from_cart_items();
+			$tax_class = self::get_shipping_tax_class_from_cart_items( 'inherit' );
 		}
 
 		// If we still don't have a tax class, there must be no taxable items.
