@@ -693,4 +693,76 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 		// Standard (21%) is highest.
 		$this->assertEquals( '', $result );
 	}
+
+	/**
+	 * Test highest amount method - Dutch scenario 1.
+	 *
+	 * Cart: €45 tax at 9%, €65 tax at 21%
+	 * Expected: 21% class (higher tax amount)
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_amount_dutch_scenario_1() {
+		// To get €45 tax at 9%: price = 45 / 0.09 = €500
+		// To get €65 tax at 21%: price = 65 / 0.21 = €309.52
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 500,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 309.52,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_amount' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Standard class (21%) collected more tax (€65 > €45).
+		$this->assertEquals( '', $result );
+	}
+
+	/**
+	 * Test highest amount method - Dutch scenario 2.
+	 *
+	 * Cart: €115 tax at 9%, €55 tax at 21%
+	 * Expected: 9% class (higher tax amount despite lower rate)
+	 *
+	 * @since X.X.X
+	 */
+	public function test_get_shipping_tax_class_by_highest_amount_dutch_scenario_2() {
+		// To get €115 tax at 9%: price = 115 / 0.09 = €1277.78
+		// To get €55 tax at 21%: price = 55 / 0.21 = €261.90
+		$this->setup_test_cart(
+			array(
+				array(
+					'price'     => 1277.78,
+					'tax_class' => 'reduced-rate',
+					'rate'      => 9,
+				),
+				array(
+					'price'     => 261.90,
+					'tax_class' => '',
+					'rate'      => 21,
+				),
+			)
+		);
+
+		$reflection = new ReflectionClass( 'WC_Tax' );
+		$method     = $reflection->getMethod( 'get_shipping_tax_class_by_highest_amount' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( null );
+
+		// Reduced-rate class (9%) collected more tax (€115 > €55).
+		$this->assertEquals( 'reduced-rate', $result );
+	}
 }

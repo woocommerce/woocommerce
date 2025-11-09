@@ -711,6 +711,56 @@ class WC_Tax {
 	}
 
 	/**
+	 * Get the shipping tax class based on which rate collected the most tax.
+	 *
+	 * Calculates total tax collected per tax class and returns the class that
+	 * generated the highest tax amount. This is the "predominant rate" method
+	 * required by Dutch and some other EU VAT regulations.
+	 *
+	 * @since X.X.X
+	 * @return string|null The tax class slug that collected most tax, null if no taxable items, or empty string for standard.
+	 */
+	private static function get_shipping_tax_class_by_highest_amount() {
+		$cart = WC()->cart;
+
+		if ( ! $cart->get_cart() ) {
+			return '';
+		}
+
+		// Collect tax amounts by tax class.
+		$tax_amounts_by_class = array();
+
+		foreach ( $cart->get_cart() as $cart_item ) {
+			$product = $cart_item['data'];
+
+			if ( ! $product->is_taxable() ) {
+				continue;
+			}
+
+			$tax_class = $product->get_tax_class();
+
+			// Get line total tax (from already calculated cart taxes).
+			if ( isset( $cart_item['line_tax_data']['total'] ) && is_array( $cart_item['line_tax_data']['total'] ) ) {
+				$line_tax_total = array_sum( $cart_item['line_tax_data']['total'] );
+
+				if ( ! isset( $tax_amounts_by_class[ $tax_class ] ) ) {
+					$tax_amounts_by_class[ $tax_class ] = 0;
+				}
+
+				$tax_amounts_by_class[ $tax_class ] += $line_tax_total;
+			}
+		}
+
+		if ( empty( $tax_amounts_by_class ) ) {
+			return null;
+		}
+
+		// Find tax class with highest collected amount.
+		arsort( $tax_amounts_by_class, SORT_NUMERIC );
+		return key( $tax_amounts_by_class );
+	}
+
+	/**
 	 * Return true/false depending on if a rate is a compound rate.
 	 *
 	 * @param mixed $key_or_rate Tax rate ID, or the db row itself in object format.
