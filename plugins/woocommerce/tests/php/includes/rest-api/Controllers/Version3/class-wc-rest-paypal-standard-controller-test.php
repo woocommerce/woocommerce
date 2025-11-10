@@ -145,7 +145,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				'shipping option arg'  => array(),
 				'create shipping data' => false,
 				'PayPal order ID meta' => '',
-				'expected response' => array(
+				'expected response'    => array(
 					'name'    => 'UNPROCESSABLE_ENTITY',
 					'details' => array(
 						array( 'issue' => 'ADDRESS_ERROR' ),
@@ -159,7 +159,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				'shipping option arg'  => array(),
 				'create shipping data' => false,
 				'PayPal order ID meta' => '84M859702Y558133X',
-				'expected response' => array(
+				'expected response'    => array(
 					'name'    => 'UNPROCESSABLE_ENTITY',
 					'details' => array(
 						array(
@@ -175,7 +175,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				'shipping option arg'  => array(),
 				'create shipping data' => false,
 				'PayPal order ID meta' => '94N960803Z669244Y',
-				'expected response' => array(
+				'expected response'    => array(
 					'name'    => 'UNPROCESSABLE_ENTITY',
 					'details' => array(
 						array(
@@ -193,7 +193,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				),
 				'create shipping data' => true,
 				'PayPal order ID meta' => '94N960803Z669244Y',
-				'expected response' => array(
+				'expected response'    => array(
 					'id'             => '94N960803Z669244Y',
 					'purchase_units' => array(
 						array(
