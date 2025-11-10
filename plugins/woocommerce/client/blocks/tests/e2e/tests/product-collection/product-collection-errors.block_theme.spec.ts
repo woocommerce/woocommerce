@@ -25,6 +25,7 @@ test.describe( 'Product Page: error notices', () => {
 		pageObject,
 		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
 		test.skip(
 			wpCoreVersion <= 6.7,
 			'Skipping test as withSyncEvent is available starting from WordPress 6.8'

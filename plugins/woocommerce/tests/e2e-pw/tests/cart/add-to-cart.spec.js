@@ -98,6 +98,7 @@ test.describe(
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
 			async ( { page } ) => {
 				const wordPressVersion = await getInstalledWordPressVersion();
+				// eslint-disable-next-line playwright/no-skipped-test
 				test.skip(
 					wordPressVersion <= 6.7,
 					'Skipping test as withSyncEvent is available starting from WordPress 6.8'
