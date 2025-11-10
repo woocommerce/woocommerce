@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { getSetting } from '@woocommerce/settings';
 import { isObject } from '@woocommerce/types';
 
 type Variant = 'text' | 'contained' | 'outlined';
@@ -30,4 +31,13 @@ export const hasChildren = ( children ): boolean => {
 		}
 		return isObject( child ) && child.key !== null;
 	} );
+};
+
+/**
+ * Gets the totals item description text from PHP-computed setting.
+ *
+ * @return {string} The description text for the totals item.
+ */
+export const getTotalsItemDescription = (): string => {
+	return getSetting( 'miniCartFooterDescription', '' );
 };

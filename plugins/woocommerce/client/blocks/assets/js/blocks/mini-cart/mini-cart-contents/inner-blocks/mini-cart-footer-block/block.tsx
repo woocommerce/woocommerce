@@ -19,7 +19,7 @@ import clsx from 'clsx';
  */
 import CartButton from '../mini-cart-cart-button-block/block';
 import CheckoutButton from '../mini-cart-checkout-button-block/block';
-import { hasChildren } from '../utils';
+import { hasChildren, getTotalsItemDescription } from '../utils';
 
 const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
@@ -61,10 +61,7 @@ const Block = ( {
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
 				label={ __( 'Subtotal', 'woocommerce' ) }
 				value={ subTotal }
-				description={ __(
-					'Shipping, taxes, and discounts calculated at checkout.',
-					'woocommerce'
-				) }
+				description={ getTotalsItemDescription() }
 			/>
 			<div className="wc-block-mini-cart__footer-actions">
 				{ hasButtons ? (
