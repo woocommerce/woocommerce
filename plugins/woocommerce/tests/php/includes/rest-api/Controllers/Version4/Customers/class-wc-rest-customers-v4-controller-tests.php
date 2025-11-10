@@ -1486,7 +1486,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertCount( 3, $test_customers, 'Should have found all 3 test customers' );
 
 		// When ordered by ID ascending, verify they are in ID order.
-		$ids = array_column( $test_customers, 'id' );
+		$ids        = array_column( $test_customers, 'id' );
 		$sorted_ids = $ids;
 		sort( $sorted_ids );
 		$this->assertEquals( $sorted_ids, $ids, 'Customers should be ordered by ID ascending' );
