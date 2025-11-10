@@ -346,6 +346,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that is_mcp_request detects CLI requests correctly.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_mcp_request_detects_cli_requests() {
 		// Test CLI detection when WP_CLI is defined and command is mcp-adapter.
@@ -371,6 +374,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test that is_mcp_request returns false for non-mcp CLI commands.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_is_mcp_request_returns_false_for_other_cli_commands() {
 		// Test CLI detection when command is not mcp-adapter.
