@@ -272,18 +272,19 @@ class Controller extends AbstractController {
 		 * @param array           $query_args Query arguments for WC_Order_Query.
 		 * @param WP_REST_Request $request    The REST request object.
 		 * @param Controller      $controller The controller instance.
-		 * @since 10.3.0
+		 * @since 10.4.0
 		 */
-		$query_args = apply_filters(
+		$query_args = (array) apply_filters(
 			$this->get_hook_prefix() . 'collection_query_args',
-			array_merge(
-				$this->collection_query->get_query_args( $request ),
-				array(
-					'post_type' => $this->post_type,
-				)
-			),
+			$this->collection_query->get_query_args( $request ),
 			$request,
 			$this
+		);
+		$query_args = wp_parse_args(
+			$query_args,
+			array(
+				'post_type' => $this->post_type,
+			)
 		);
 		$results    = $this->collection_query->get_query_results( $query_args, $request );
 		$items      = array();
