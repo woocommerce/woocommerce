@@ -1463,36 +1463,32 @@ class CartController {
 				continue;
 			}
 
-			// Attribute labels e.g. Size.
-			$attribute_label           = wc_attribute_label( $attribute['name'] );
-			$lowercase_attribute_label = strtolower( $attribute_label );
-			if ( isset( $variation_data[ $attribute_label ] ) || isset( $variation_data[ $lowercase_attribute_label ] ) ) {
-
-				// Check both the original and lowercase attribute label.
-				$attribute_label = isset( $variation_data[ $attribute_label ] ) ? $attribute_label : $lowercase_attribute_label;
-
+			// Attribute slug e.g. pa_size.
+			$attribute_slug = sanitize_title( $attribute['name'] );
+			if ( isset( $variation_data[ $attribute_slug ] ) ) {
 				$return[ $variation_attribute_name ] =
 					$attribute['is_taxonomy']
 						?
-						sanitize_title( $variation_data[ $attribute_label ] )
+						sanitize_title( $variation_data[ $attribute_slug ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_label ] ),
+							wc_clean( $variation_data[ $attribute_slug ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
 				continue;
 			}
 
-			// Attribute slugs e.g. pa_size.
-			if ( isset( $variation_data[ $attribute['name'] ] ) ) {
+			// Attribute key e.g. size.
+			$attribute_key = str_replace( array( 'attribute_', 'pa_' ), '', $attribute_slug );
+			if ( isset( $variation_data[ $attribute_key ] ) ) {
 				$return[ $variation_attribute_name ] =
 					$attribute['is_taxonomy']
 						?
-						sanitize_title( $variation_data[ $attribute['name'] ] )
+						sanitize_title( $variation_data[ $attribute_key ] )
 						:
 						html_entity_decode(
-							wc_clean( $variation_data[ $attribute['name'] ] ),
+							wc_clean( $variation_data[ $attribute_key ] ),
 							ENT_QUOTES,
 							get_bloginfo( 'charset' )
 						);
