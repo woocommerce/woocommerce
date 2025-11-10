@@ -31,6 +31,7 @@ export type QuantitySelectorStore = {
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 		inputQuantity: '' | number;
+		draftQuantity: number | '' | undefined;
 	};
 	actions: {
 		storeDraftValue: (
@@ -51,10 +52,11 @@ export type QuantitySelectorStore = {
 	};
 };
 
-store< QuantitySelectorStore >(
+const { state } = store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
+			draftQuantity: null,
 			get allowsQuantityChange(): boolean {
 				const { productData } = addToCartWithOptionsStore.state;
 
@@ -114,7 +116,7 @@ store< QuantitySelectorStore >(
 				const { productId } = getContext< Context >();
 
 				return (
-					addToCartWithOptionsStore.state.draftQuantity ??
+					state.draftQuantity ??
 					( addToCartWithOptionsStore.state.quantity?.[ productId ] ||
 						0 )
 				);
@@ -129,10 +131,9 @@ store< QuantitySelectorStore >(
 					isNaN( Number( event.target.value ) ) ||
 					event.target.value === ''
 				) {
-					addToCartWithOptionsStore.state.draftQuantity = '';
+					state.draftQuantity = '';
 				} else {
-					addToCartWithOptionsStore.state.draftQuantity =
-						Number( event.target.value ) || 0;
+					state.draftQuantity = Number( event.target.value ) || 0;
 				}
 			},
 			increaseQuantity: (
@@ -167,6 +168,7 @@ store< QuantitySelectorStore >(
 					newValue,
 					inputElement
 				);
+				state.draftQuantity = null;
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -222,6 +224,7 @@ store< QuantitySelectorStore >(
 						newValue,
 						inputElement
 					);
+					state.draftQuantity = null;
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -251,6 +254,7 @@ store< QuantitySelectorStore >(
 						0,
 						event.target
 					);
+					state.draftQuantity = null;
 					return;
 				}
 
@@ -278,6 +282,7 @@ store< QuantitySelectorStore >(
 					newValue,
 					event.target
 				);
+				state.draftQuantity = null;
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -292,6 +297,7 @@ store< QuantitySelectorStore >(
 					productId,
 					element.ref.checked ? 1 : 0
 				);
+				state.draftQuantity = null;
 			},
 		},
 	},

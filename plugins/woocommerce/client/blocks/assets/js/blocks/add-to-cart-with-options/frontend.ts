@@ -152,7 +152,6 @@ export type AddToCartWithOptionsStore = {
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
 		productData: NormalizedProductData | NormalizedVariationData | null;
-		draftQuantity: '' | number | undefined;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -176,7 +175,6 @@ const { actions, state } = store<
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
-			draftQuantity: undefined,
 			noticeIds: [],
 			get validationErrors(): Array< AddToCartError > {
 				const context = getContext< Context >();
@@ -279,9 +277,6 @@ const { actions, state } = store<
 				if ( changeTarget ) {
 					dispatchChangeEvent( changeTarget );
 				}
-
-				// Clear the draft quantity.
-				state.draftQuantity = undefined;
 			},
 			addError: ( error: AddToCartError ): string => {
 				const { validationErrors } = state;
