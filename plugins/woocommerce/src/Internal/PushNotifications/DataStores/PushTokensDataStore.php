@@ -159,10 +159,6 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			true
 		);
 
-		if ( null === $push_token->get_device_uuid() ) {
-			delete_post_meta( $push_token->get_id(), 'device_uuid' );
-		}
-
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $result->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
@@ -176,7 +172,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	/**
 	 * Deletes a push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $args Not used, enforced by interface.
 	 * @return void
@@ -228,7 +224,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	/**
 	 * Add new piece of meta to the given push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing the meta key and value.
 	 * @return int|false Meta ID on success, false on failure.
@@ -262,7 +258,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	/**
 	 * Updates meta for the given push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing the meta key and value.
 	 * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
@@ -295,7 +291,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	/**
 	 * Deletes meta for the given push token.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @param array     $meta Array containing at least the meta key.
 	 * @return bool True on success, false on failure.
@@ -328,7 +324,7 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	 * per device, therefore if we already have one then we can update it to
 	 * avoid creating a duplicate.
 	 *
-	 * @since 10.4.0
+	 * @since 10.5.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return null|PushToken
 	 * @throws InvalidArgumentException If push token is missing data.
