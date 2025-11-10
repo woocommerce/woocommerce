@@ -8,16 +8,25 @@ import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/pat
 export const Skeleton = ( {
 	buttonText,
 	productType,
-	isStatic = false,
+	isLoading = true,
 }: {
 	buttonText?: string | undefined;
 	productType?: string | undefined;
-	isStatic?: boolean;
+	isLoading?: boolean;
 } ) => {
 	return (
-		<>
+		<div
+			aria-label={
+				isLoading
+					? __(
+							'Loading the Add to Cart + Options template part',
+							'woocommerce'
+					  )
+					: __( 'Add to Cart + Options form', 'woocommerce' )
+			}
+		>
 			<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-				<MultiLineTextSkeleton isStatic={ isStatic } />
+				<MultiLineTextSkeleton isStatic={ ! isLoading } />
 			</div>
 			<Disabled>
 				<button
@@ -28,6 +37,6 @@ export const Skeleton = ( {
 					{ buttonText || __( 'Add to cart', 'woocommerce' ) }
 				</button>
 			</Disabled>
-		</>
+		</div>
 	);
 };

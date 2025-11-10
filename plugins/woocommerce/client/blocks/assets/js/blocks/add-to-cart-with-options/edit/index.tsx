@@ -65,7 +65,7 @@ const AddToCartOptionsEdit = (
 					<Skeleton
 						buttonText={ product?.add_to_cart?.single_text }
 						productType={ productType }
-						isStatic={ true }
+						isLoading={ false }
 					/>
 				</div>
 			) }

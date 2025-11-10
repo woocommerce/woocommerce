@@ -9,6 +9,7 @@ import { readFileSync } from 'fs';
 import { join } from 'path';
 import { dispatch } from '@wordpress/data';
 import { productsStore } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -109,6 +110,19 @@ const handlers = [
 		return HttpResponse.json( mockProduct );
 	} ),
 
+	// Once `@wordpress/data` used in tests is updated to 6.7, this request will
+	// match the path in production: `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+	http.options( '/wp/v2/[object%20Object]', () => {
+		return HttpResponse.json(
+			{},
+			{
+				headers: {
+					allow: 'GET, POST, PUT, PATCH, DELETE',
+				},
+			}
+		);
+	} ),
+
 	http.get( '/wp/v2/template-parts/*', ( request ) => {
 		if (
 			request.params[ 0 ] ===
@@ -164,6 +178,7 @@ const server = setupServer( ...handlers );
 beforeAll( () => server.listen() );
 afterEach( () => {
 	dispatch( productsStore ).invalidateResolutionForStore();
+	dispatch( coreStore ).invalidateResolutionForStore();
 	server.resetHandlers();
 } );
 afterAll( () => server.close() );
@@ -199,79 +214,107 @@ const expectHasBlock = async ( blockName: string ) => {
 };
 
 describe( 'Add to Cart + Options block', () => {
-	it( 'should render inner blocks for simple and external products', async () => {
-		await setup();
-		await expectHasBlock( 'Add to Cart + Options (Beta)' );
+	describe( 'with a user with permissions', () => {
+		it( 'should render inner blocks for simple and external products', async () => {
+			await setup();
+			await expectHasBlock( 'Add to Cart + Options (Beta)' );
 
-		// Simple products.
-		await expectHasBlock( 'Product Stock Indicator' );
-		await expectHasBlock( 'Product Quantity (Beta)' );
-		await expectHasBlock( 'Add to Cart Button' );
+			// Simple products.
+			await expectHasBlock( 'Product Stock Indicator' );
+			await expectHasBlock( 'Product Quantity (Beta)' );
+			await expectHasBlock( 'Add to Cart Button' );
 
-		// External products.
-		await switchProductType( 'External/Affiliate product' );
+			// External products.
+			await switchProductType( 'External/Affiliate product' );
 
-		await waitFor( () => {
-			expect(
-				screen.queryByLabelText( 'Block: Product Stock Indicator' )
-			).not.toBeInTheDocument();
+			await waitFor( () => {
+				expect(
+					screen.queryByLabelText( 'Block: Product Stock Indicator' )
+				).not.toBeInTheDocument();
+			} );
+			await expectHasBlock( 'Add to Cart Button' );
 		} );
-		await expectHasBlock( 'Add to Cart Button' );
+
+		it( 'should render inner blocks for grouped products', async () => {
+			expect.hasAssertions();
+
+			await setup();
+			await expectHasBlock( 'Add to Cart + Options (Beta)' );
+
+			await switchProductType( 'Grouped product' );
+
+			await expectHasBlock( 'Grouped Product Selector (Beta)' );
+			await expectHasBlock( 'Grouped Product: Template (Beta)' );
+			await expectHasBlock( 'Grouped Product: Item Selector (Beta)' );
+			await expectHasBlock( 'Grouped Product: Item Label (Beta)' );
+			await expectHasBlock( 'Product Price' );
+			await expectHasBlock( 'Product Stock Indicator' );
+		} );
+
+		it( 'should render inner blocks for grouped products with no store products', async () => {
+			expect.hasAssertions();
+
+			server.use(
+				http.get( '/wc/v3/products', () => {
+					return HttpResponse.json( [] );
+				} )
+			);
+
+			await setup();
+			await expectHasBlock( 'Add to Cart + Options (Beta)' );
+
+			await switchProductType( 'Grouped product' );
+
+			await expectHasBlock( 'Grouped Product Selector (Beta)' );
+			await expectHasBlock( 'Grouped Product: Template (Beta)' );
+			await expectHasBlock( 'Grouped Product: Item Selector (Beta)' );
+			await expectHasBlock( 'Grouped Product: Item Label (Beta)' );
+			await expectHasBlock( 'Product Price' );
+			await expectHasBlock( 'Product Stock Indicator' );
+		} );
+
+		it( 'should render inner blocks for variable products', async () => {
+			expect.hasAssertions();
+
+			await setup();
+			await expectHasBlock( 'Add to Cart + Options (Beta)' );
+
+			await switchProductType( 'Variable product' );
+
+			await expectHasBlock( 'Variation Selector (Beta)' );
+			await expectHasBlock( 'Variation Selector: Attribute Name (Beta)' );
+			await expectHasBlock(
+				'Variation Selector: Attribute Options (Beta)'
+			);
+			await expectHasBlock( 'Variation Selector: Template (Beta)' );
+			await expectHasBlock( 'Variation Description (Beta)' );
+			await expectHasBlock( 'Product Stock Indicator' );
+			await expectHasBlock( 'Product Quantity (Beta)' );
+			await expectHasBlock( 'Add to Cart Button' );
+		} );
 	} );
 
-	it( 'should render inner blocks for grouped products', async () => {
-		expect.hasAssertions();
-
-		await setup();
-		await expectHasBlock( 'Add to Cart + Options (Beta)' );
-
-		await switchProductType( 'Grouped product' );
-
-		await expectHasBlock( 'Grouped Product Selector (Beta)' );
-		await expectHasBlock( 'Grouped Product: Template (Beta)' );
-		await expectHasBlock( 'Grouped Product: Item Selector (Beta)' );
-		await expectHasBlock( 'Grouped Product: Item Label (Beta)' );
-		await expectHasBlock( 'Product Price' );
-		await expectHasBlock( 'Product Stock Indicator' );
-	} );
-
-	it( 'should render inner blocks for grouped products with no store products', async () => {
-		expect.hasAssertions();
-
+	it( 'should render the placeholder with a user without permissions', async () => {
 		server.use(
-			http.get( '/wc/v3/products', () => {
-				return HttpResponse.json( [] );
+			// Once `@wordpress/data` used in tests is updated to 6.7, this request will
+			// match the path in production: `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+			http.options( '/wp/v2/[object%20Object]', () => {
+				return HttpResponse.json(
+					{},
+					{
+						headers: {
+							allow: 'GET',
+						},
+					}
+				);
 			} )
 		);
 
 		await setup();
 		await expectHasBlock( 'Add to Cart + Options (Beta)' );
 
-		await switchProductType( 'Grouped product' );
-
-		await expectHasBlock( 'Grouped Product Selector (Beta)' );
-		await expectHasBlock( 'Grouped Product: Template (Beta)' );
-		await expectHasBlock( 'Grouped Product: Item Selector (Beta)' );
-		await expectHasBlock( 'Grouped Product: Item Label (Beta)' );
-		await expectHasBlock( 'Product Price' );
-		await expectHasBlock( 'Product Stock Indicator' );
-	} );
-
-	it( 'should render inner blocks for variable products', async () => {
-		expect.hasAssertions();
-
-		await setup();
-		await expectHasBlock( 'Add to Cart + Options (Beta)' );
-
-		await switchProductType( 'Variable product' );
-
-		await expectHasBlock( 'Variation Selector (Beta)' );
-		await expectHasBlock( 'Variation Selector: Attribute Name (Beta)' );
-		await expectHasBlock( 'Variation Selector: Attribute Options (Beta)' );
-		await expectHasBlock( 'Variation Selector: Template (Beta)' );
-		await expectHasBlock( 'Variation Description (Beta)' );
-		await expectHasBlock( 'Product Stock Indicator' );
-		await expectHasBlock( 'Product Quantity (Beta)' );
-		await expectHasBlock( 'Add to Cart Button' );
+		expect(
+			screen.getByLabelText( 'Add to Cart + Options form' )
+		).toBeInTheDocument();
 	} );
 } );
