@@ -10,11 +10,9 @@ use WP_Error;
 use WP_Http;
 
 /**
- * A service class to manage shipping zones and their methods & locations.
- *
- * @internal
+ * A service class to manage shipping zones their locations.
  */
-class ShippingService {
+class ShippingZoneService {
 		/**
 		 * Get all shipping zones sorted by order.
 		 *

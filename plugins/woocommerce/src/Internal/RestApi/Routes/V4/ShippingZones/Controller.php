@@ -12,6 +12,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneService;
 use WP_REST_Server;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -19,7 +20,6 @@ use WP_Error;
 use WP_Http;
 use WC_Shipping_Zone;
 use WC_Shipping_Zones;
-use Automattic\WooCommerce\Internal\Shipping\ShippingService;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -46,7 +46,7 @@ class Controller extends AbstractController {
 	/**
 	 * Shipping service instance.
 	 *
-	 * @var ShippingService
+	 * @var ShippingZoneSchemaService
 	 */
 	protected $shipping_service;
 
@@ -63,7 +63,7 @@ class Controller extends AbstractController {
 	 */
 	final public function init( ShippingZoneSchema $zone_schema ) {
 		$this->item_schema      = $zone_schema;
-		$this->shipping_service = new ShippingService();
+		$this->shipping_service = new ShippingZoneService();
 	}
 
 	/**

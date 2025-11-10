@@ -2,15 +2,13 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Shipping;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
 use WP_Error;
 use WC_Cache_Helper;
 
 /**
- * A service class to manage shipping zones and their methods & locations.
- *
- * @internal
+ * A service class to manage shipping zones methods.
  */
 class ShippingZoneMethodService {
 

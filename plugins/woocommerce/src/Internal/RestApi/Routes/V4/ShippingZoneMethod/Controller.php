@@ -12,12 +12,12 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zones;
 use WP_Http;
 use WP_REST_Request;
 use WP_REST_Server;
 use WP_Error;
-use Automattic\WooCommerce\Internal\Shipping\ShippingService;
 
 /**
  * Shipping Zone Methods Controller class.
@@ -41,7 +41,7 @@ class Controller extends AbstractController {
 	/**
 	 * Shipping service instance.
 	 *
-	 * @var ShippingService
+	 * @var ShippingZoneMethodService
 	 */
 	protected $shipping_service;
 
@@ -60,7 +60,7 @@ class Controller extends AbstractController {
 	 */
 	final public function init( ShippingMethodSchema $method_schema ) {
 		$this->method_schema    = $method_schema;
-		$this->shipping_service = new ShippingService();
+		$this->shipping_service = new ShippingZoneMethodService();
 	}
 
 	/**
