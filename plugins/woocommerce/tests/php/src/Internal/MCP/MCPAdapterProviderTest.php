@@ -93,8 +93,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		remove_all_filters( 'mcp_validation_enabled' );
 
 		// Remove actions registered by the system under test.
-		remove_action( 'rest_api_init', array( $this->sut, 'maybe_initialize' ), 10 );
-		remove_action( 'mcp_adapter_init', array( $this->sut, 'initialize_mcp_server' ), 10 );
+		remove_action( 'mcp_adapter_init', array( $this->sut, 'maybe_initialize' ), 10 );
 
 		// Clean up feature flag options.
 		delete_option( 'woocommerce_feature_mcp_integration_enabled' );
@@ -109,7 +108,10 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Ensure MCP feature is disabled via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'no' );
 
-		$this->sut->maybe_initialize();
+		// Create a mock adapter.
+		$mock_adapter = $this->createMock( \stdClass::class );
+
+		$this->sut->maybe_initialize( $mock_adapter );
 
 		$this->assertFalse( $this->sut->is_initialized(), 'Should not initialize when feature flag is disabled' );
 	}
@@ -118,11 +120,18 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * Test that maybe_initialize respects feature flag when enabled.
 	 */
 	public function test_maybe_initialize_respects_feature_flag_enabled() {
-
 		// Enable MCP feature via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 
-		$this->sut->maybe_initialize();
+		// Mock abilities registry to return empty array to avoid server creation.
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn( array() );
+
+		// Create a mock adapter.
+		$mock_adapter = $this->createMock( \stdClass::class );
+
+		$this->sut->maybe_initialize( $mock_adapter );
 
 		$this->assertTrue( $this->sut->is_initialized(), 'Should initialize when feature flag is enabled' );
 	}
@@ -134,11 +143,19 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Enable MCP feature via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 
-		$this->sut->maybe_initialize();
+		// Mock abilities registry to return empty array to avoid server creation.
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn( array() );
+
+		// Create a mock adapter.
+		$mock_adapter = $this->createMock( \stdClass::class );
+
+		$this->sut->maybe_initialize( $mock_adapter );
 		$first_initialized = $this->sut->is_initialized();
 
 		// Try to initialize again.
-		$this->sut->maybe_initialize();
+		$this->sut->maybe_initialize( $mock_adapter );
 		$second_initialized = $this->sut->is_initialized();
 
 		$this->assertEquals( $first_initialized, $second_initialized, 'Should prevent double initialization' );
@@ -236,7 +253,15 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Enable MCP feature via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 
-		$this->sut->maybe_initialize();
+		// Mock abilities registry to return empty array to avoid server creation.
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn( array() );
+
+		// Create a mock adapter.
+		$mock_adapter = $this->createMock( \stdClass::class );
+
+		$this->sut->maybe_initialize( $mock_adapter );
 		$this->assertTrue( $this->sut->is_initialized(), 'Should track initialized state' );
 	}
 
@@ -316,6 +341,101 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			),
 			array_values( $result ),
 			'Should maintain correct values after re-indexing'
+		);
+	}
+
+	/**
+	 * Test that is_mcp_request detects CLI requests correctly.
+	 */
+	public function test_is_mcp_request_detects_cli_requests() {
+		// Test CLI detection when WP_CLI is defined and command is mcp-adapter.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// Mock $_SERVER['argv'] to simulate CLI command.
+		$original_argv = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', 'mcp-adapter', 'serve' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original $_SERVER['argv'].
+		if ( $original_argv !== null ) {
+			$_SERVER['argv'] = $original_argv;
+		} else {
+			unset( $_SERVER['argv'] );
+		}
+
+		$this->assertTrue( $result, 'Should detect CLI mcp-adapter requests' );
+	}
+
+	/**
+	 * Test that is_mcp_request returns false for non-mcp CLI commands.
+	 */
+	public function test_is_mcp_request_returns_false_for_other_cli_commands() {
+		// Test CLI detection when command is not mcp-adapter.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// Mock $_SERVER['argv'] to simulate different CLI command.
+		$original_argv = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', 'plugin', 'list' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original $_SERVER['argv'].
+		if ( $original_argv !== null ) {
+			$_SERVER['argv'] = $original_argv;
+		} else {
+			unset( $_SERVER['argv'] );
+		}
+
+		$this->assertFalse( $result, 'Should return false for non-mcp CLI commands' );
+	}
+
+	/**
+	 * Test that maybe_initialize calls initialize_mcp_server with adapter.
+	 */
+	public function test_maybe_initialize_calls_initialize_mcp_server() {
+		// Enable MCP feature via option.
+		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
+
+		// Mock abilities registry to return test abilities.
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn( array( 'woocommerce/test-ability' ) );
+
+		// Create a simple mock adapter object with create_server method.
+		$mock_adapter = new class {
+			public $create_server_called = false;
+			public function create_server() {
+				$this->create_server_called = true;
+			}
+		};
+
+		$this->sut->maybe_initialize( $mock_adapter );
+
+		$this->assertTrue( $this->sut->is_initialized(), 'Should be initialized after server creation' );
+		$this->assertTrue( $mock_adapter->create_server_called, 'Should call create_server on adapter' );
+	}
+
+	/**
+	 * Test that constructor registers mcp_adapter_init hook.
+	 */
+	public function test_constructor_registers_mcp_adapter_init_hook() {
+		// Create a new instance to test constructor.
+		$new_sut = new MCPAdapterProvider();
+
+		// Check that the hook is registered. has_action returns the priority (10) if the action exists, false otherwise.
+		$this->assertNotFalse(
+			has_action( 'mcp_adapter_init', array( $new_sut, 'maybe_initialize' ) ),
+			'Constructor should register mcp_adapter_init hook'
+		);
+		$this->assertEquals(
+			10,
+			has_action( 'mcp_adapter_init', array( $new_sut, 'maybe_initialize' ) ),
+			'Constructor should register mcp_adapter_init hook with priority 10'
 		);
 	}
 }
