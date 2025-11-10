@@ -1004,7 +1004,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the blockified Product Gallery',
+				name: 'Upgrade to the Product Gallery block',
 			} )
 			.click();
 
