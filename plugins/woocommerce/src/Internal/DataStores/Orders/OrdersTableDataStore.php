@@ -3148,6 +3148,15 @@ FROM $order_meta_table
 			$query_vars['meta_query'][] = FulfillmentUtils::get_order_fulfillment_status_meta_query( $query_vars['fulfillment_status'] );
 		}
 
+		/**
+		 * Filter the query args before executing the query.
+		 *
+		 * @param array $query_vars The query vars.
+		 * @return array
+		 * @since 10.4.0
+		 */
+		$query_vars = apply_filters( 'woocommerce_orders_table_datastore_get_orders_query', $query_vars, $this );
+
 		try {
 			$query = new OrdersTableQuery( $query_vars );
 		} catch ( \Exception $e ) {
