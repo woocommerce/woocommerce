@@ -101,6 +101,29 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the update method removes device_uuid meta when updating
+	 * it to null.
+	 */
+	public function test_it_removes_device_uuid_meta_when_updating_to_null() {
+		$data_store = new PushTokensDataStore();
+		$push_token = $this->create_test_push_token();
+
+		// Verify device_uuid exists initially.
+		$this->assertNotNull( $push_token->get_device_uuid() );
+		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$this->assertNotEmpty( $device_uuid );
+
+		// Convert to browser token (device_uuid becomes null).
+		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
+		$push_token->set_device_uuid( null );
+		$data_store->update( $push_token );
+
+		// Verify device_uuid meta is removed from database.
+		$device_uuid = get_post_meta( $push_token->get_id(), 'device_uuid', true );
+		$this->assertEmpty( $device_uuid );
+	}
+
+	/**
 	 * @testdox Tests the delete method of the push tokens data store.
 	 */
 	public function test_it_can_delete_push_token() {

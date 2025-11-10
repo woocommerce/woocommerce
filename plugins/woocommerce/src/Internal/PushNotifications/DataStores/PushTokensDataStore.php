@@ -152,6 +152,10 @@ class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 			true
 		);
 
+		if ( null === $push_token->get_device_uuid() ) {
+			delete_post_meta( $push_token->get_id(), 'device_uuid' );
+		}
+
 		if ( is_wp_error( $result ) ) {
 			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new Exception( $result->get_error_message(), WP_Http::INTERNAL_SERVER_ERROR );
