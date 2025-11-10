@@ -39,15 +39,17 @@ export const FormStepBlock = ( {
 	} );
 	return (
 		<div { ...blockProps }>
-			<FormStepHeading>
-				<PlainText
-					className={ '' }
-					value={ title }
-					onChange={ ( value ) => setAttributes( { title: value } ) }
-					style={ { backgroundColor: 'transparent' } }
-				/>
-			</FormStepHeading>
-			<div className="wc-block-components-checkout-step__container">
+			<div className="wc-block-components-checkout-step__heading-container">
+				<FormStepHeading>
+					<PlainText
+						className={ '' }
+						value={ title }
+						onChange={ ( value ) =>
+							setAttributes( { title: value } )
+						}
+						style={ { backgroundColor: 'transparent' } }
+					/>
+				</FormStepHeading>
 				<p className="wc-block-components-checkout-step__description">
 					<PlainText
 						className={
@@ -68,9 +70,9 @@ export const FormStepBlock = ( {
 						style={ { backgroundColor: 'transparent' } }
 					/>
 				</p>
-				<div className="wc-block-components-checkout-step__content">
-					{ children }
-				</div>
+			</div>
+			<div className="wc-block-components-checkout-step__content">
+				{ children }
 			</div>
 		</div>
 	);

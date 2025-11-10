@@ -44,20 +44,20 @@ export const UpgradeNotice = ( {
 } ) => {
 	const notice = createInterpolateElement(
 		__(
-			'Gain access to more customization options when you upgrade to the <strongText />.',
+			'Upgrade to the <strongText /> for more flexibility. You can switch back anytime.',
 			'woocommerce'
 		),
 		{
 			strongText: (
 				<strong>
-					{ __( `blockified experience`, 'woocommerce' ) }
+					{ __( `Add to Cart + Options block`, 'woocommerce' ) }
 				</strong>
 			),
 		}
 	);
 
 	const buttonLabel = __(
-		'Upgrade to the Add to Cart + Options block',
+		'Use the Add to Cart + Options block',
 		'woocommerce'
 	);
 

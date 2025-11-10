@@ -418,7 +418,7 @@ class WC_Gateway_Paypal_Request {
 		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
 			// Keep only the main language and region parts.
 			$locale_parts = explode( '_', $src_locale );
-			if ( count( $locale_parts ) >= 2 ) {
+			if ( count( $locale_parts ) > 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
 			}
 		}
@@ -691,11 +691,11 @@ class WC_Gateway_Paypal_Request {
 		}
 
 		// Make sure the country code is in the correct format.
-		if ( strlen( $country ) >= 3 ) {
-			if ( strlen( $country ) > 3 ) { // Log if we get an unexpected country code length.
-				WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $country ), $country ) );
-			}
-			$country = substr( $country, 0, WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH );
+		$raw_country = $country;
+		$country     = $this->normalize_paypal_order_shipping_country_code( $raw_country );
+		if ( ! $country ) {
+			WC_Gateway_Paypal::log( sprintf( 'Could not identify a correct country code. Raw value: %s', $raw_country ), 'error' );
+			return null;
 		}
 
 		// Validate required fields based on country-specific address requirements.
@@ -725,6 +725,44 @@ class WC_Gateway_Paypal_Request {
 				'country_code'   => strtoupper( $country ),
 			),
 		);
+	}
+
+	/**
+	 * Normalize PayPal order shipping country code.
+	 *
+	 * @param string $country_code Country code to normalize.
+	 * @return string|null
+	 */
+	private function normalize_paypal_order_shipping_country_code( $country_code ) {
+		// Normalize to uppercase.
+		$code = strtoupper( trim( (string) $country_code ) );
+
+		// Check if it's a valid alpha-2 code.
+		if ( strlen( $code ) === WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH ) {
+			if ( WC()->countries->country_exists( $code ) ) {
+				return $code;
+			}
+
+			WC_Gateway_Paypal::log( sprintf( 'Invalid country code: %s', $code ) );
+			return null;
+		}
+
+		// Log when we get an unexpected country code length.
+		WC_Gateway_Paypal::log( sprintf( 'Unexpected country code length (%d) for country: %s', strlen( $code ), $code ) );
+
+		// Truncate to the expected maximum length (3).
+		$max_country_code_length = WC_Gateway_Paypal_Constants::PAYPAL_COUNTRY_CODE_LENGTH + 1;
+		if ( strlen( $code ) > $max_country_code_length ) {
+			$code = substr( $code, 0, $max_country_code_length );
+		}
+
+		// Check if it's a valid alpha-3 code.
+		$alpha2 = wc()->countries->get_country_from_alpha_3_code( $code );
+		if ( null === $alpha2 ) {
+			WC_Gateway_Paypal::log( sprintf( 'Invalid alpha-3 country code: %s', $code ) );
+		}
+
+		return $alpha2;
 	}
 
 	/**

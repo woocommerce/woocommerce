@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { sanitizeHTML } from '../index';
+import { sanitizeHTML, getTrustedTypesPolicy } from '../index';
 
 /**
  * Integration tests using the real DOMPurify implementation.
@@ -40,5 +40,45 @@ describe( 'sanitizeHTML integration tests', () => {
 		expect( result ).toContain( '<h1>Title</h1>' );
 		expect( result ).toContain( '<p>Content</p>' );
 		expect( result ).toContain( 'Link' );
+	} );
+
+	test( 'should support Trusted Type Policy', () => {
+		const html =
+			'<p>Safe content</p><a href="#test">Link</a><script>alert("xss")</script><img src="x" onerror="alert(1)">';
+
+		// Provide a minimal Trusted Types factory so getTrustedTypesPolicy can create
+		// a policy in this test environment (JSDOM doesn't ship TT by default).
+		const mockCreatePolicy = jest.fn(
+			(
+				name: string,
+				config: {
+					createHTML: ( s: string ) => string;
+				}
+			) => ( {
+				name,
+				createHTML: config.createHTML,
+			} )
+		);
+
+		Object.defineProperty( window, 'trustedTypes', {
+			value: { createPolicy: mockCreatePolicy },
+			writable: true,
+			configurable: true,
+		} );
+
+		const ttp = getTrustedTypesPolicy();
+		expect( ttp ).not.toBeNull();
+
+		const result = ttp?.createHTML( html ) ?? '';
+
+		expect( result ).not.toContain( '<script>' );
+		expect( result ).not.toContain( 'alert("xss")' );
+		expect( result ).not.toContain( 'onerror' );
+
+		expect( result ).toContain( '<p>Safe content</p>' );
+		expect( result ).toContain( '<a href="#test">Link</a>' );
+
+		// Cleanup to avoid leaking TT into other tests
+		delete ( window as unknown as { trustedTypes?: unknown } ).trustedTypes;
 	} );
 } );
