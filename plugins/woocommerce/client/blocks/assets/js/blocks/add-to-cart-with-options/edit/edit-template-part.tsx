@@ -83,9 +83,22 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 
 	const { canEditTemplatePart, isLoading } = useSelect(
 		( select ) => {
-			const { hasFinishedResolution } = select( coreStore );
+			if ( ! templatePartId ) {
+				return {
+					canEditTemplatePart: false,
+					isLoading: false,
+				};
+			}
 
-			const hasResolvedEntity = hasFinishedResolution( 'canUser', [
+			const { canUser, hasFinishedResolution } = select( coreStore );
+
+			const canUserUpdate = canUser( 'update', {
+				kind: 'postType',
+				name: 'wp_template_part',
+				id: templatePartId,
+			} );
+
+			const isLoadingCanUserUpdate = ! hasFinishedResolution( 'canUser', [
 				'update',
 				{
 					kind: 'postType',
@@ -95,14 +108,8 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 			] );
 
 			return {
-				canEditTemplatePart:
-					templatePartId &&
-					select( coreStore ).canUser( 'update', {
-						kind: 'postType',
-						name: 'wp_template_part',
-						id: templatePartId,
-					} ),
-				isLoading: ! hasResolvedEntity,
+				canEditTemplatePart: canUserUpdate,
+				isLoading: isLoadingCanUserUpdate,
 			};
 		},
 		[ templatePartId ]

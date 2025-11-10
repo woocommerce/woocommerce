@@ -110,8 +110,9 @@ const handlers = [
 		return HttpResponse.json( mockProduct );
 	} ),
 
-	// Once `@wordpress/data` used in tests is updated to 6.7, this request will
-	// match the path in production: `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+	// Once the `@wordpress/data` package used in tests is updated to 6.7, this
+	// request will match the path in production:
+	// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
 	http.options( '/wp/v2/[object%20Object]', () => {
 		return HttpResponse.json(
 			{},
@@ -290,10 +291,11 @@ describe( 'Add to Cart + Options block', () => {
 		await expectHasBlock( 'Add to Cart Button' );
 	} );
 
-	it( 'should render the placeholder with a user without permissions', async () => {
+	it( 'should render the placeholder when viewed as a user without permissions to edit template parts', async () => {
 		server.use(
-			// Once `@wordpress/data` used in tests is updated to 6.7, this request will
-			// match the path in production: `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
+			// Once the `@wordpress/data` package used in tests is updated to 6.7,
+			// this request will match the path in production:
+			// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
 			http.options( '/wp/v2/[object%20Object]', () => {
 				return HttpResponse.json(
 					{},
