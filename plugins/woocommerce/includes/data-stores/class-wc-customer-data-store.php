@@ -640,7 +640,14 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 
 		$args        = wp_parse_args( $args, $defaults );
 		$orderby_key = $args['orderby'];
-		$query_args  = array(
+
+		// Set order parameter to asc/desc if somehow made it here without being caught earlier.
+		$args['order'] = strtolower( $args['order'] );
+		if ( ! in_array( $args['order'], array( 'asc', 'desc' ), true ) ) {
+			$args['order'] = 'asc';
+		}
+
+		$query_args = array(
 			'order'   => $args['order'],
 			'number'  => absint( $args['per_page'] ),
 			'exclude' => array_map( 'absint', (array) $args['exclude'] ),
