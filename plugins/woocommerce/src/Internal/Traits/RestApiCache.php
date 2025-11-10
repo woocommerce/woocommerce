@@ -21,11 +21,13 @@ use WP_REST_Response;
  *   so that when those entities change, the relevant cached responses become invalid.
  *   Modification of entity versions must be done externally by the code that modifies
  *   those entities (via calls to VersionStringGenerator::generate_version).
+ * - Various parameters (cached outputs TTL, entity type for a given response) can be configured
+ *   globally for the controller (via overriding protected methods).
+ *   or per-endpoint (via arguments passed to with_cache).
  * - Caching can be disabled for a given request by adding a '_skip_cache=true|1'
  *   to the query string.
  * - A X-WC-Cache HTTP header is added to responses to indicate cache status:
  *   HIT, MISS, or SKIP.
- * - Cached response TTL is fixed to one hour.
  *
  * Usage: Wrap endpoint callbacks with the `with_cache()` method when registering routes.
  *
@@ -54,12 +56,23 @@ use WP_REST_Response;
  *                     array(
  *                         // String, optional if get_default_response_entity_type() is overridden.
  *                         'entity_type' => 'product',
+ *                         // Optional int, defaults to the controller's get_ttl_for_cached_response().
+ *                         'cache_ttl'      => HOUR_IN_SECONDS,
+ *                         // Optional array, defaults to the controller's get_hooks_relevant_to_caching().
+ *                         'vary_by_user'   => true,
+ *                         // Optional, this will be passed to all the caching-related methods.
+ *                         'endpoint_id'    => 'get_product'
  *                     )
  *                 ),
  *             )
  *         );
  *     }
  * }
+ *
+ * Override these methods in your controller as needed:
+ * - get_default_response_entity_type(): Default entity type for endpoints without explicit config.
+ * - response_cache_vary_by_user(): Whether cache should be user-specific.
+ * - get_ttl_for_cached_response(): TTL for cached outputs in seconds.
  *
  * Cache invalidation happens when:
  * - Entity versions change (tracked via VersionStringGenerator).
