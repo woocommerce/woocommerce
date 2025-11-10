@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Updated MCP adapter to v0.3.0 and refactored initialization process. (Refs #61864)
