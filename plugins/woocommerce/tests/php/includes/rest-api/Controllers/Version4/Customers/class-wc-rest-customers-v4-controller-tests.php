@@ -6,9 +6,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CustomerSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\UpdateUtils;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
-use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+
 /**
  * Customers Controller tests for V4 REST API.
  *
