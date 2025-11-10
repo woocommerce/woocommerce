@@ -639,7 +639,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 		);
 
 		$args        = wp_parse_args( $args, $defaults );
-		$orderby_key = $args['orderby'] ?? 'user_registered';
+		$orderby_key = $args['orderby'];
 		$query_args  = array(
 			'order'   => $args['order'],
 			'number'  => absint( $args['per_page'] ),
