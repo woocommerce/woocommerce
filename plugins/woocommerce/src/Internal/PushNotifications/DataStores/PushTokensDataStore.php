@@ -13,13 +13,14 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Exception;
 use InvalidArgumentException;
 use WP_Http;
+use WC_Object_Data_Store_Interface;
 
 /**
  * Data store class for push tokens.
  *
  * @since 10.5.0
  */
-class PushTokensDataStore {
+class PushTokensDataStore implements WC_Object_Data_Store_Interface {
 	/**
 	 * Creates a post representing the push token.
 	 *
@@ -169,6 +170,35 @@ class PushTokensDataStore {
 	}
 
 	/**
+	 * Deletes a push token.
+	 *
+	 * @since 10.4.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @param array     $args Not used, enforced by interface.
+	 * @return void
+	 * @throws InvalidArgumentException If the token can't be deleted.
+	 * @throws Exception If the item to delete is not a push token.
+	 */
+	public function delete( &$push_token, $args = array() ) {
+		if ( ! $push_token->can_be_deleted() ) {
+			throw new InvalidArgumentException(
+				'Can\'t delete push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		$post = get_post( $push_token->get_id() );
+
+		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
+		}
+
+		wp_delete_post( $push_token->get_id(), true );
+	}
+
+	/**
 	 * Returns an array of post meta objects as key => value pairs.
 	 *
 	 * @since 10.5.0
@@ -189,5 +219,201 @@ class PushTokensDataStore {
 			static fn ( $meta ) => $meta[0] ?? $meta,
 			get_post_meta( $push_token->get_id() )
 		);
+	}
+
+	/**
+	 * Add new piece of meta to the given push token.
+	 *
+	 * @since 10.4.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @param array     $meta Array containing the meta key and value.
+	 * @return int|false Meta ID on success, false on failure.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
+	 */
+	public function add_meta( &$push_token, $meta ) {
+		if ( ! $push_token->can_be_read() ) {
+			throw new InvalidArgumentException(
+				'Can\'t add meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		if ( empty( $meta['meta_key'] ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t add meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		return add_post_meta(
+			$push_token->get_id(),
+			$meta['meta_key'],
+			$meta['meta_value'] ?? null,
+			true
+		);
+	}
+
+	/**
+	 * Updates meta for the given push token.
+	 *
+	 * @since 10.4.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @param array     $meta Array containing the meta key and value.
+	 * @return int|bool Meta ID if the key didn't exist, true on successful update, false on failure.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
+	 */
+	public function update_meta( &$push_token, $meta ) {
+		if ( ! $push_token->can_be_read() ) {
+			throw new InvalidArgumentException(
+				'Can\'t update meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		if ( empty( $meta['meta_key'] ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t update meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		return update_post_meta(
+			$push_token->get_id(),
+			$meta['meta_key'],
+			$meta['meta_value'] ?? null
+		);
+	}
+
+	/**
+	 * Deletes meta for the given push token.
+	 *
+	 * @since 10.4.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @param array     $meta Array containing at least the meta key.
+	 * @return bool True on success, false on failure.
+	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
+	 */
+	public function delete_meta( &$push_token, $meta ) {
+		if ( ! $push_token->can_be_read() ) {
+			throw new InvalidArgumentException(
+				'Can\'t delete meta for push token because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		if ( empty( $meta['meta_key'] ) ) {
+			throw new InvalidArgumentException(
+				'Can\'t delete meta for push token because the meta key was not provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		return delete_post_meta( $push_token->get_id(), $meta['meta_key'] );
+	}
+
+	/**
+	 * Find tokens for this user and platform that match either the token
+	 * or device UUID. We check the token value to avoid creating a duplicate.
+	 * We check the device UUID value because only one token should be issued
+	 * per device, therefore if we already have one then we can update it to
+	 * avoid creating a duplicate.
+	 *
+	 * @since 10.4.0
+	 * @param PushToken $push_token An instance of PushToken.
+	 * @return null|PushToken
+	 * @throws InvalidArgumentException If push token is missing data.
+	 */
+	public function get_by_token_or_device_id( &$push_token ): ?PushToken {
+		if (
+			! $push_token->get_user_id()
+			|| ! $push_token->get_platform()
+			|| ! $push_token->get_origin()
+		) {
+			throw new InvalidArgumentException(
+				'Can\'t retrieve push token using token or device UUID because the push token data provided is invalid.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		if ( ! $push_token->get_token() && ! $push_token->get_device_uuid() ) {
+			throw new InvalidArgumentException(
+				'Can\'t retrieve push token: token or device UUID must be provided.',
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				WP_Http::BAD_REQUEST
+			);
+		}
+
+		global $wpdb;
+
+		$device_uuid_condition = '';
+
+		$params = array(
+			PushToken::POST_TYPE,
+			$push_token->get_user_id(),
+			$push_token->get_platform(),
+			$push_token->get_origin(),
+			$push_token->get_token(),
+		);
+
+		if ( $push_token->get_device_uuid() ) {
+			$device_uuid_condition = 'OR device_uuid_meta.meta_value = %s';
+			$params[]              = $push_token->get_device_uuid();
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$push_token_data = $wpdb->get_row(
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$wpdb->prepare(
+				"SELECT
+					posts.ID,
+					posts.post_author,
+					platform_meta.meta_value as platform,
+					token_meta.meta_value as token,
+					device_uuid_meta.meta_value as device_uuid,
+					origin_meta.meta_value as origin
+				FROM {$wpdb->posts} AS posts
+				INNER JOIN {$wpdb->postmeta} AS platform_meta
+					ON posts.ID = platform_meta.post_id
+					AND platform_meta.meta_key = 'platform'
+				INNER JOIN {$wpdb->postmeta} AS token_meta
+					ON posts.ID = token_meta.post_id
+					AND token_meta.meta_key = 'token'
+				LEFT JOIN {$wpdb->postmeta} AS device_uuid_meta
+					ON posts.ID = device_uuid_meta.post_id
+					AND device_uuid_meta.meta_key = 'device_uuid'
+				INNER JOIN {$wpdb->postmeta} AS origin_meta
+					ON posts.ID = origin_meta.post_id
+					AND origin_meta.meta_key = 'origin'
+				WHERE posts.post_type = %s
+					AND posts.post_status = 'private'
+					AND posts.post_author = %d
+					AND platform_meta.meta_value = %s
+					AND origin_meta.meta_value = %s
+					AND (
+						token_meta.meta_value = %s
+						{$device_uuid_condition}
+					)
+				ORDER BY posts.ID DESC
+				LIMIT 1",
+				...$params
+			)
+		);
+
+		if ( ! $push_token_data ) {
+			return null;
+		}
+
+		$push_token->set_id( (int) $push_token_data->ID );
+		$push_token->set_token( $push_token_data->token );
+		$push_token->set_device_uuid( $push_token_data->device_uuid );
+
+		return $push_token;
 	}
 }
