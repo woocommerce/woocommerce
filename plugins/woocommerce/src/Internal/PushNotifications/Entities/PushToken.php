@@ -235,7 +235,7 @@ class PushToken {
 	}
 
 	/**
-	 * Sets the device UUID, normalize empty (non zero) values to null.
+	 * Sets the device UUID, normalize empty (non-null) values to null.
 	 *
 	 * @param string|null $device_uuid The UUID of the device that generated the token.
 	 *
