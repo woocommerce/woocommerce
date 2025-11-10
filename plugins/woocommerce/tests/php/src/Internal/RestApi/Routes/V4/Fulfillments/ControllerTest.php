@@ -1,20 +1,27 @@
 <?php
 declare(strict_types=1);
 
+namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Fulfillments;
+
 use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Tests\Internal\Fulfillments\Helpers\FulfillmentsHelper;
+use WC_REST_Unit_Test_Case;
+use WC_Helper_Order;
+use WC_Order;
+use WP_REST_Request;
 
 /**
- * WC_REST_Fulfillments_V4_Controller test class
+ * Fulfillments Controller test class
  */
-class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
+class ControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Controller instance
 	 *
-	 * @var WC_REST_Fulfillments_V4_Controller
+	 * @var FulfillmentsController
 	 */
-	private WC_REST_Fulfillments_V4_Controller $controller;
+	private FulfillmentsController $controller;
 
 	/**
 	 * Admin user for tests
@@ -69,7 +76,7 @@ class WC_REST_Fulfillments_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->controller = new WC_REST_Fulfillments_V4_Controller();
+		$this->controller = new FulfillmentsController();
 		$this->controller->register_routes();
 
 		$this->admin_user_id = $this->factory->user->create(

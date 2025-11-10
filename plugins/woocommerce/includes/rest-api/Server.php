@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMet
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -229,7 +230,7 @@ class Server {
 	 */
 	protected function get_v4_controllers() {
 		return array(
-			'fulfillments'              => 'WC_REST_Fulfillments_V4_Controller',
+			'fulfillments'              => FulfillmentsController::class,
 			'products'                  => ProductsController::class,
 			'customers'                 => CustomersController::class,
 			'order-notes'               => OrderNotesController::class,
