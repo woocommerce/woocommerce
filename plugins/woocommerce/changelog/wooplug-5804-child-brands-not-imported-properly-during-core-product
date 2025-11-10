@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fixes CSV import where hierarchical brands could not be imported.
