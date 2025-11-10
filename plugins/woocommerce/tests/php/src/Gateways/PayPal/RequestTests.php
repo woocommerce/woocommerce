@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Gateways\PayPal;
 
+use Automattic\WooCommerce\Gateways\PayPal\Constants as PayPalConstants;
 use Automattic\WooCommerce\Gateways\PayPal\Request as PayPalRequest;
 
 /**
@@ -77,39 +78,27 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 * Test that the create_paypal_order params are correct.
 	 */
 	public function test_create_paypal_order_params_are_correct() {
-		$this->markTestSkipped( 'This test is always failing in CI. The request to Jetpack is returning a 500 status code. Needs more investigation.' );
-
 		$order = \WC_Helper_Order::create_order();
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
 		$order->save();
 
-		add_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ), 10, 2 );
+		$request    = new PayPalRequest( new \WC_Gateway_Paypal() );
+		$reflection = new \ReflectionClass( $request );
+		$method     = $reflection->getMethod( 'get_paypal_create_order_request_params' );
+		$method->setAccessible( true );
 
-		$request = new PayPalRequest( new \WC_Gateway_Paypal() );
-		$actual  = $request->create_paypal_order( $order );
+		$order_payload = $method->invoke(
+			$request,
+			$order,
+			PayPalConstants::PAYMENT_SOURCE_PAYPAL,
+			array(
+				'is_js_sdk_flow'            => true,
+				'app_switch_request_origin' => '',
+			)
+		);
 
-		// Clean up the filter.
-		remove_filter( 'pre_http_request', array( $this, 'check_create_paypal_order_params' ) );
-
-		$this->assertNotNull( $actual );
-	}
-
-	/**
-	 * Check that the create_paypal_order params are correct.
-	 *
-	 * @param bool  $value      Original value.
-	 * @param array $parsed_args Parsed arguments.
-	 *
-	 * @return array Return a 200 response.
-	 */
-	public function check_create_paypal_order_params( $value, $parsed_args ) {
-		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
-		$this->assertEquals( 'POST', $parsed_args['method'] );
-		$body = json_decode( $parsed_args['body'], true );
-		$this->assertArrayHasKey( 'order', $body );
-		$order_payload = $body['order'];
 		$this->assertEquals( 'CAPTURE', $order_payload['intent'] );
 
 		$purchase_unit = $order_payload['purchase_units'][0];
@@ -139,8 +128,6 @@ class RequestTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'order_key', $custom_id );
 		$this->assertArrayHasKey( 'site_url', $custom_id );
 		$this->assertArrayHasKey( 'site_id', $custom_id );
-
-		return $this->create_paypal_order_success( $value, $parsed_args );
 	}
 
 	/**
