@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\OrderNotes\Controller as O
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller as ShippingZoneMethodController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Controller as OrdersController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Products\Controller as SettingsProductsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\PaymentGateways\Controller as PaymentGatewaysController;
@@ -23,6 +24,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMet
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
 
 /**
@@ -229,13 +231,14 @@ class Server {
 	 */
 	protected function get_v4_controllers() {
 		return array(
-			'fulfillments'              => 'WC_REST_Fulfillments_V4_Controller',
+			'fulfillments'              => FulfillmentsController::class,
 			'products'                  => ProductsController::class,
 			'customers'                 => CustomersController::class,
 			'order-notes'               => OrderNotesController::class,
 			'shipping-zones'            => ShippingZonesController::class,
 			'shipping-zone-method'      => ShippingZoneMethodController::class,
 			'orders'                    => OrdersController::class,
+			'refunds'                   => RefundsController::class,
 			'offline-payment-methods'   => OfflinePaymentMethodsController::class,
 			'settings-general'          => GeneralSettingsController::class,
 			'settings-email'            => EmailSettingsController::class,

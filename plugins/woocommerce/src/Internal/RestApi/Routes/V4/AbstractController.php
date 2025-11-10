@@ -80,6 +80,15 @@ abstract class AbstractController extends WP_REST_Controller {
 	}
 
 	/**
+	 * List of args for endpoints. These may alter how data is returned or formatted. Extended by routes.
+	 *
+	 * @return array
+	 */
+	protected function get_endpoint_args(): array {
+		return array();
+	}
+
+	/**
 	 * Add default context collection params and filter the result. This does not inherit from
 	 * WP_REST_Controller::get_collection_params because some endpoints do not paginate results.
 	 *

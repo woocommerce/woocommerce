@@ -1,4 +1,5 @@
-<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration
+<?php
+declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CustomerSchema;

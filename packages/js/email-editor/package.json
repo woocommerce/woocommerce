@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/email-editor",
-	"version": "1.2.1",
+	"version": "1.3.0",
 	"description": "Gutenberg based email editor that is used in WooCommerce emails.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -41,6 +41,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"format": "prettier --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"format:check": "prettier --check 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/' && pnpm format:check && pnpm lint:lang:style",
