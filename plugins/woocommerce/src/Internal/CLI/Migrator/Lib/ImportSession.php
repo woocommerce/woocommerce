@@ -671,4 +671,23 @@ class ImportSession {
 		// requires an addslashes() call to preserve them.
 		update_post_meta( $this->post_id, 'importer_cursor', addslashes( $cursor ) );
 	}
+
+	/**
+	 * Save the original command arguments for session resumption.
+	 *
+	 * @param array $args The original command arguments
+	 */
+	public function set_original_arguments( array $args ) {
+		update_post_meta( $this->post_id, 'original_arguments', $args );
+	}
+
+	/**
+	 * Get the original command arguments for session resumption.
+	 *
+	 * @return array|null The original arguments or null if not found
+	 */
+	public function get_original_arguments() {
+		$args = get_post_meta( $this->post_id, 'original_arguments', true );
+		return ( is_array( $args ) && ! empty( $args ) ) ? $args : null;
+	}
 }
