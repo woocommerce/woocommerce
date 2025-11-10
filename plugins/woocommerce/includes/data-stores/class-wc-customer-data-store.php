@@ -675,6 +675,9 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 				$query_args['orderby']  = 'meta_value_num';
 				break;
 			case 'user_registered':
+			case 'registered_date':
+				$query_args['orderby'] = 'user_registered';
+				break;
 			default:
 				$query_args['orderby'] = 'user_registered';
 				break;
