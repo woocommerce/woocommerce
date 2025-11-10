@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\MCP\Transport;
 
-use WP\MCP\Transport\Http\RestTransport;
+use WP\MCP\Transport\HttpTransport;
 use WP\MCP\Transport\Infrastructure\McpTransportContext;
 use WP_REST_Request;
 use WP_Error;
@@ -17,10 +17,10 @@ defined( 'ABSPATH' ) || exit;
 /**
  * WooCommerce MCP REST Transport class.
  *
- * Extends the base RestTransport with standalone WooCommerce REST API key authentication.
+ * Extends the base HttpTransport with standalone WooCommerce REST API key authentication.
  * Uses X-MCP-API-Key header with consumer_key:consumer_secret format.
  */
-class WooCommerceRestTransport extends RestTransport {
+class WooCommerceRestTransport extends HttpTransport {
 
 	/**
 	 * Current MCP user's API key permissions.
@@ -42,12 +42,15 @@ class WooCommerceRestTransport extends RestTransport {
 	}
 
 	/**
-	 * Validate request using WooCommerce REST API authentication.
+	 * Check if the user has permission to access the MCP API.
 	 *
-	 * @param WP_REST_Request|null $request The REST request object.
+	 * Validates request using WooCommerce REST API authentication.
+	 * Extends parent method with WooCommerce-specific API key authentication.
+	 *
+	 * @param \WP_REST_Request $request The REST request object.
 	 * @return bool|\WP_Error True if allowed, WP_Error if not.
 	 */
-	public function check_permission( $request = null ) {
+	public function check_permission( \WP_REST_Request $request ) {
 		return $this->validate_request( $request );
 	}
 
