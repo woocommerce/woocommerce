@@ -18,6 +18,19 @@ import {
 jest.mock( '@woocommerce/base-context/hooks' );
 
 describe( 'LocalPickupSelect', () => {
+	const renderPickupLocationMock = jest
+		.fn()
+		.mockImplementation(
+			( location, pickupLocationsCount, isSelectedInClient ) => {
+				return {
+					value: `${ location.rate_id }`,
+					onChange: jest.fn(),
+					label: `${ location.name }`,
+					description: `${ location.description }`,
+				};
+			}
+		);
+
 	const defaultPackageData = generateShippingPackage( {
 		packageId: 0,
 		shippingRates: [],
