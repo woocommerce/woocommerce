@@ -139,7 +139,7 @@ class RequestTests extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey('site_url', $custom_id);
 			$this->assertArrayHasKey('site_id', $custom_id);
 		} catch ( \Exception $e ) {
-			$this->fail( 'create_paypal_order params are incorrect: ' . $e->getMessage() . ' ' . $e->getFile() . ':' . $e->getLine() );
+			$this->fail( 'create_paypal_order params are incorrect: ' . $e->getMessage() . ' ' . wp_json_encode( $parsed_args ) );
 		}
 
 		return $this->create_paypal_order_success( $value, $parsed_args );
