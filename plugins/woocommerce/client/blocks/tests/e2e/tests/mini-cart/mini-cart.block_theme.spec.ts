@@ -97,7 +97,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -110,7 +117,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -126,7 +140,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await miniCartUtils.openMiniCart();
 
@@ -142,7 +163,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await page.click( 'text=Add to cart' );
 		await miniCartUtils.openMiniCart();
@@ -154,7 +182,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -189,7 +224,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -209,7 +251,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -247,7 +296,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -267,7 +323,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
@@ -279,7 +342,14 @@ test.describe( `${ blockData.name } Block`, () => {
 		page,
 		frontendUtils,
 		miniCartUtils,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();

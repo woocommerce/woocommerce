@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
@@ -1244,7 +1245,7 @@ class WC_Install {
 	private static function get_order_stats_table_schema( $collate ) {
 		global $wpdb;
 
-		$should_have_fulfillment_column = self::is_new_install();
+		$should_have_fulfillment_column = self::is_new_install() && FeaturesUtil::feature_is_enabled( 'fulfillments' );
 		if ( false === $should_have_fulfillment_column ) {
 			$should_have_fulfillment_column = OrdersStatsDataStore::has_fulfillment_status_column();
 		}
