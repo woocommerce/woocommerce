@@ -8,7 +8,7 @@ import { MultiLineTextSkeleton } from '@woocommerce/base-components/skeleton/pat
 export const Skeleton = ( {
 	buttonText,
 	productType,
-	isLoading = true,
+	isLoading = false,
 }: {
 	buttonText?: string | undefined;
 	productType?: string | undefined;

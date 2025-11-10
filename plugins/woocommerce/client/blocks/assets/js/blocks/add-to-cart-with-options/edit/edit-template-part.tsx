@@ -59,7 +59,7 @@ const TemplatePartInnerBlocks = ( {
 	if ( isLoading ) {
 		return (
 			<div { ...blockProps }>
-				<Skeleton productType={ productType } />
+				<Skeleton productType={ productType } isLoading={ true } />
 			</div>
 		);
 	}
@@ -81,8 +81,19 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 
 	const blockProps = useBlockProps();
 
-	const { canEditTemplatePart } = useSelect(
+	const { canEditTemplatePart, isLoading } = useSelect(
 		( select ) => {
+			const { hasFinishedResolution } = select( coreStore );
+
+			const hasResolvedEntity = hasFinishedResolution( 'canUser', [
+				'update',
+				{
+					kind: 'postType',
+					name: 'wp_template_part',
+					id: templatePartId,
+				},
+			] );
+
 			return {
 				canEditTemplatePart:
 					templatePartId &&
@@ -91,6 +102,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 						name: 'wp_template_part',
 						id: templatePartId,
 					} ),
+				isLoading: ! hasResolvedEntity,
 			};
 		},
 		[ templatePartId ]
@@ -99,7 +111,7 @@ export const AddToCartWithOptionsEditTemplatePart = ( {
 	if ( ! templatePartId || ! canEditTemplatePart ) {
 		return (
 			<div { ...blockProps }>
-				<Skeleton productType={ productType } isLoading={ false } />
+				<Skeleton productType={ productType } isLoading={ isLoading } />
 			</div>
 		);
 	}
