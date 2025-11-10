@@ -153,7 +153,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 				),
 				'expected status'      => 422,
 			),
-			'PayPal order ID mismatch' => array(
+			'PayPal order ID mismatch'  => array(
 				'PayPal order ID arg'  => '94N960803Z669244Y',
 				'valid custom ID arg'  => true,
 				'shipping option arg'  => array(),
