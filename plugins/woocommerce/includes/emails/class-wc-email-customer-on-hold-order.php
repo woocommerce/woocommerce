@@ -52,8 +52,8 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 				: __( 'This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Cancelled or Failed order status.', 'woocommerce' );
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Order on hold', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their order has been placed on hold.', 'woocommerce' );
+				$this->title       = __( 'Order on hold', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been placed on hold.', 'woocommerce' );
 			}
 		}
 

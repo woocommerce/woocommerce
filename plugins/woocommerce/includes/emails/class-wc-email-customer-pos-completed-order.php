@@ -56,8 +56,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Completed_Order', false ) ) :
 			$this->manual = true;
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'POS order complete', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their in-person (POS) order has been completed.', 'woocommerce' );
+				$this->title       = __( 'POS order complete', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their in-person (POS) order has been completed.', 'woocommerce' );
 			}
 		}
 

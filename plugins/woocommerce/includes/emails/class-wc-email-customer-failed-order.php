@@ -50,8 +50,8 @@ if ( ! class_exists( 'WC_Email_Customer_Failed_Order', false ) ) :
 				: __( 'Order failed emails are sent to customers when their orders are marked as failed.', 'woocommerce' );
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Order failed', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their order has failed.', 'woocommerce' );
+				$this->title       = __( 'Order failed', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has failed.', 'woocommerce' );
 			}
 		}
 

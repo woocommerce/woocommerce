@@ -67,8 +67,8 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 				: __( 'Order refunded emails are sent to customers when their orders are refunded.', 'woocommerce' );
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Order refunded', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their order has been partially or fully refunded.', 'woocommerce' );
+				$this->title       = __( 'Order refunded', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been partially or fully refunded.', 'woocommerce' );
 			}
 		}
 

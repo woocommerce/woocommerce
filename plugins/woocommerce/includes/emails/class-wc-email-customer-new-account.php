@@ -73,8 +73,8 @@ if ( ! class_exists( 'WC_Email_Customer_New_Account', false ) ) {
 
 			// Must be after parent's constructor which sets `block_email_editor_enabled` property.
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Account created', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their account has been created.', 'woocommerce' );
+				$this->title       = __( 'Account created', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their account has been created.', 'woocommerce' );
 			}
 		}
 

@@ -53,10 +53,9 @@ if ( ! class_exists( 'WC_Email_Customer_Cancelled_Order', false ) ) :
 				? __( 'Send an email to customers notifying them when their order has been cancelled', 'woocommerce' )
 				: __( 'Cancelled order emails are sent to customers when their orders have been marked cancelled (if they were previously processing or on-hold).', 'woocommerce' );
 
-
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Order cancelled', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their order has been cancelled.', 'woocommerce' );
+				$this->title       = __( 'Order cancelled', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been cancelled.', 'woocommerce' );
 			}
 		}
 

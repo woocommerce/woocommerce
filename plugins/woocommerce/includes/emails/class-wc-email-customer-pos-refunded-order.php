@@ -69,8 +69,8 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$this->register_refund_email_triggers();
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'POS order refunded', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when a full or partial refund has been issued for their in-person (POS) order.', 'woocommerce' );
+				$this->title       = __( 'POS order refunded', 'woocommerce' );
+				$this->description = __( 'Notifies customers when a full or partial refund has been issued for their in-person (POS) order.', 'woocommerce' );
 			}
 		}
 

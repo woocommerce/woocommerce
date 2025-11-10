@@ -54,8 +54,8 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 				: __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title          = __( 'Order confirmation', 'woocommerce' );
-				$this->description    = __( 'Notifies customers when their order has been received and is being processed.', 'woocommerce' );
+				$this->title       = __( 'Order confirmation', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been received and is being processed.', 'woocommerce' );
 			}
 		}
 

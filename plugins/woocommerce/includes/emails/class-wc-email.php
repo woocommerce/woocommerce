@@ -444,11 +444,11 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public function get_email_groups() {
 		$email_groups = array(
-			'accounts'         => __( 'Accounts', 'woocommerce' ),
-			'orders'           => __( 'Orders', 'woocommerce' ),
+			'accounts'      => __( 'Accounts', 'woocommerce' ),
+			'orders'        => __( 'Orders', 'woocommerce' ),
 			'order-updates' => __( 'Order updates', 'woocommerce' ),
 			'order-changes' => __( 'Order changes', 'woocommerce' ),
-			'payments'         => __( 'Payments', 'woocommerce' ),
+			'payments'      => __( 'Payments', 'woocommerce' ),
 		);
 
 		/**
