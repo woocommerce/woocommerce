@@ -443,5 +443,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			has_action( 'mcp_adapter_init', array( $new_sut, 'maybe_initialize' ) ),
 			'Constructor should register mcp_adapter_init hook with priority 10'
 		);
+
+		// Clean up: remove the hook registered by the new instance to prevent test isolation issues.
+		remove_action( 'mcp_adapter_init', array( $new_sut, 'maybe_initialize' ), 10 );
 	}
 }
