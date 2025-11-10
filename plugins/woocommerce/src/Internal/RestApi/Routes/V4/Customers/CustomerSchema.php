@@ -279,7 +279,7 @@ class CustomerSchema extends AbstractSchema {
 
 		// Normalize last active timestamp - treat empty string, '0', 0, or false as null.
 		$last_active = $item->get_meta( 'wc_last_active' );
-		$last_active = ( empty( $last_active ) || '0' === $last_active ) ? null : $last_active;
+		$last_active = empty( $last_active )  ? null : $last_active;
 
 		$formatted_data = array(
 			'id'                 => $item->get_id(),
