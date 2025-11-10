@@ -51,13 +51,13 @@ class MCPAdapterProvider {
 		 * MCP adapter registers on rest_api_init with priority 20000, so we initialize earlier.
 		 * This prevents unnecessary MCP initialization on favicon, cron, or admin requests.
 		 */
-		add_action( 'rest_api_init', array( $this, 'maybe_initialize' ), 10 );
+		add_action( 'mcp_adapter_init', array( $this, 'maybe_initialize' ), 10 );
 	}
 
 	/**
 	 * Check feature flag and initialize MCP adapter if enabled.
 	 */
-	public function maybe_initialize(): void {
+	public function maybe_initialize($adapter): void {
 		// Check if MCP integration feature is enabled.
 		if ( ! FeaturesUtil::feature_is_enabled( 'mcp_integration' ) ) {
 			return;
@@ -69,7 +69,7 @@ class MCPAdapterProvider {
 		}
 
 		$this->initialize_mcp_adapter();
-		$this->register_hooks();
+		$this->initialize_mcp_server($adapter);
 		$this->initialized = true;
 	}
 
@@ -93,14 +93,6 @@ class MCPAdapterProvider {
 	}
 
 	/**
-	 * Register WordPress hooks for MCP adapter.
-	 */
-	private function register_hooks(): void {
-		// Initialize MCP server when MCP adapter is ready.
-		add_action( 'mcp_adapter_init', array( $this, 'initialize_mcp_server' ) );
-	}
-
-	/**
 	 * Initialize MCP server.
 	 *
 	 * @param object $adapter MCP adapter instance.
@@ -113,15 +105,6 @@ class MCPAdapterProvider {
 		if ( empty( $abilities_ids ) ) {
 			return;
 		}
-
-		/*
-		 * Temporarily disable MCP validation during server creation.
-		 * Workaround for validator bug with union types (e.g., ["integer", "null"]).
-		 * This will be removed once the mcp-adapter validator bug is fixed.
-		 *
-		 * @see https://github.com/WordPress/mcp-adapter/issues/47
-		 */
-		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 
 		try {
 			// Create MCP server.
@@ -213,6 +196,15 @@ class MCPAdapterProvider {
 	 * @return bool True if this is an MCP endpoint request.
 	 */
 	public static function is_mcp_request(): bool {
+		// Check if this is a CLI request for MCP adapter (e.g., `wp mcp-adapter serve`).
+		if ( defined( 'WP_CLI' ) && constant( 'WP_CLI' ) ) {
+			// Check if the command is 'mcp-adapter'.
+			$cli_args = $_SERVER['argv'] ?? array();
+			if ( isset( $cli_args[1] ) && 'mcp-adapter' === $cli_args[1] ) {
+				return true;
+			}
+		}
+
 		// Check if this is a REST request.
 		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
 			return false;
