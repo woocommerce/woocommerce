@@ -999,17 +999,17 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeHidden();
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the blockified Product Gallery',
+				name: 'Upgrade to the Product Gallery block',
 			} )
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
 		).toBeVisible();
 	} );
 } );

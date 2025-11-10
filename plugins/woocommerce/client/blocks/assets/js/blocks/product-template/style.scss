@@ -96,6 +96,8 @@ $min-product-width: 150px;
 	position: relative; // Create new stacking context
 	container-type: inline-size;
 	container-name: carousel;
+	// Padding to prevent focus outline from being clipped (WCAG 2.4.13).
+	padding: 4px;
 
 	.wc-block-product {
 		scroll-snap-align: center;

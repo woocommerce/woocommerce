@@ -103,6 +103,23 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * List of args for endpoints. These may alter how data is returned or formatted. Extended by routes.
+	 *
+	 * @return array
+	 */
+	protected function get_endpoint_args(): array {
+		return array(
+			'num_decimals' => array(
+				'default'           => wc_get_price_decimals(),
+				'description'       => __( 'Number of decimal points to use in each resource.', 'woocommerce' ),
+				'type'              => 'integer',
+				'sanitize_callback' => 'absint',
+				'validate_callback' => 'rest_validate_request_arg',
+			),
+		);
+	}
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -111,6 +128,7 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base,
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => $this->get_endpoint_args(),
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_items' ),
@@ -131,10 +149,13 @@ class Controller extends AbstractController {
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				'schema' => array( $this, 'get_public_item_schema' ),
-				'args'   => array(
-					'id' => array(
-						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
-						'type'        => 'integer',
+				'args'   => array_merge(
+					$this->get_endpoint_args(),
+					array(
+						'id' => array(
+							'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+							'type'        => 'integer',
+						),
 					),
 				),
 				array(
@@ -370,13 +391,14 @@ class Controller extends AbstractController {
 		}
 
 		$request->set_param( 'context', 'edit' );
-
-		$force    = (bool) $request['force'];
-		$response = $this->prepare_item_for_response( $order, $request );
+		$force = (bool) $request['force'];
 
 		if ( $force ) {
-			$result = $order->delete( true );
+			$result   = $order->delete( true );
+			$response = new WP_REST_Response( null, 204 );
 		} else {
+			$response = $this->prepare_item_for_response( $order, $request );
+
 			/**
 			 * Filter whether an object is trashable.
 			 *
