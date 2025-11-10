@@ -17,6 +17,12 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 		 * Mock WC_REST_Paypal_Standard_Controller to override rebuild_cart_from_order method
 		 */
 		$controller = new class() extends WC_REST_Paypal_Standard_Controller {
+			/**
+			 * Rebuild the session cart.
+			 *
+			 * @param WC_Order $order The order object.
+			 * @return void
+			 */
 			private function rebuild_cart_from_order( $order ) {} // Override to avoid calling cart methods.
 		};
 
@@ -70,7 +76,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 			$purchase_units = array(
 				'custom_id' => wp_json_encode(
 					array(
-						'order_id' => $order->get_id(),
+						'order_id'  => $order->get_id(),
 						'order_key' => $order->get_order_key(),
 					),
 				),
@@ -131,7 +137,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 						array( 'issue' => 'ADDRESS_ERROR' ),
 					),
 				),
-				'expected status'   => 422,
+				'expected status'      => 422,
 			),
 			'unable to find order'      => array(
 				'PayPal order ID arg'  => '74L756601X447022W',
@@ -145,7 +151,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 						array( 'issue' => 'ADDRESS_ERROR' ),
 					),
 				),
-				'expected status'   => 422,
+				'expected status'      => 422,
 			),
 			'PayPal order ID mismatch' => array(
 				'PayPal order ID arg'  => '94N960803Z669244Y',
@@ -161,7 +167,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-				'expected status'   => 422,
+				'expected status'      => 422,
 			),
 			'no shipping options found' => array(
 				'PayPal order ID arg'  => '94N960803Z669244Y',
@@ -177,7 +183,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-				'expected status'   => 422,
+				'expected status'      => 422,
 			),
 			'successful update'         => array(
 				'PayPal order ID arg'  => '94N960803Z669244Y',
@@ -229,7 +235,7 @@ class WC_REST_Paypal_Standard_Controller_Test extends WC_REST_Unit_Test_Case {
 						),
 					),
 				),
-				'expected status'   => 200,
+				'expected status'      => 200,
 			),
 		);
 	}
