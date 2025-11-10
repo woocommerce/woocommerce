@@ -82,6 +82,30 @@ class RequestTests extends \WC_Unit_Test_Case {
 		$order->set_cart_tax( 10 );
 		$order->set_shipping_tax( 0 );
 		$order->set_total( 60 );
+
+		// Remove existing items to start fresh.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		$item_qty = 4;
+
+		$item = new \WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => $item_qty,
+				'subtotal' => $product->get_price() * $item_qty,
+				'total'    => $product->get_price() * $item_qty,
+			)
+		);
+		$item->save();
+
+		$order->add_item( $item );
 		$order->save();
 
 		$request    = new PayPalRequest( new \WC_Gateway_Paypal() );
