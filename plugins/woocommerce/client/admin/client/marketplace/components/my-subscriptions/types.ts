@@ -33,6 +33,7 @@ export type Subscription = {
 	is_installable: boolean;
 	is_shared: boolean;
 	owner_email: boolean;
+	has_changelog: boolean;
 };
 
 export interface SubscriptionLocal {

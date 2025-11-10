@@ -435,6 +435,10 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"node_modules/@woocommerce/sanitize/build",
+				"node_modules/@woocommerce/sanitize/build-module",
+				"node_modules/@woocommerce/sanitize/build-style",
+				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/email-editor/build",
 				"node_modules/@woocommerce/email-editor/build-module",
 				"node_modules/@woocommerce/email-editor/build-style",
