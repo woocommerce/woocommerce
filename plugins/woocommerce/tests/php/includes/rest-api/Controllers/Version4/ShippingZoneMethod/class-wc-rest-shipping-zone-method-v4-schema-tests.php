@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingMethodSchema;
-use Automattic\WooCommerce\Internal\Shipping\ShippingService;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zone;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
@@ -22,9 +22,9 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 	private ShippingMethodSchema $schema;
 
 	/**
-	 * @var ShippingService
+	 * @var ShippingZoneMethodService
 	 */
-	private ShippingService $shipping_service;
+	private ShippingZoneMethodService $shipping_service;
 
 	/**
 	 * Created shipping zones for cleanup.
@@ -40,7 +40,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->schema           = new ShippingMethodSchema();
-		$this->shipping_service = new ShippingService();
+		$this->shipping_service = new ShippingZoneMethodService();
 	}
 
 	/**
