@@ -67,9 +67,7 @@ test(
 	async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await test.step( 'Load the WC Admin page.', async () => {
-			await expect(
-				page.getByText( 'Customize your store' )
-			).toBeVisible();
+			await expect( page.getByText( 'Choose your theme' ) ).toBeVisible();
 			await expect( page.getByText( 'Store management' ) ).toBeHidden();
 		} );
 
