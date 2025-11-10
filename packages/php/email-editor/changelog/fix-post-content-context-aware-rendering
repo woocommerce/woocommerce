@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make Post_Content renderer context-aware to only apply stateless logic during email rendering, preventing conflicts with other plugins.
