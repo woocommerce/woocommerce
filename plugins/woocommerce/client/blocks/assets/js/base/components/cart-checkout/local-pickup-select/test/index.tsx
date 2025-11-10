@@ -11,18 +11,17 @@ import LocalPickupSelect from '..';
 import { generateShippingRate } from '../../../../../mocks/shipping-package';
 
 describe( 'LocalPickupSelect', () => {
-	const renderPickupLocationMock = jest
-		.fn()
-		.mockImplementation(
-			( location, pickupLocationsCount, isSelectedInClient ) => {
-				return {
-					value: `${ location.rate_id }`,
-					onChange: jest.fn(),
-					label: `${ location.name }`,
-					description: `${ location.description }`,
-				};
-			}
-		);
+	const renderPickupLocationMock = jest.fn().mockImplementation(
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		( location, pickupLocationsCount, isSelectedInClient ) => {
+			return {
+				value: `${ location.rate_id }`,
+				onChange: jest.fn(),
+				label: `${ location.name }`,
+				description: `${ location.description }`,
+			};
+		}
+	);
 	const TestComponent = ( {
 		onChange,
 	}: {
