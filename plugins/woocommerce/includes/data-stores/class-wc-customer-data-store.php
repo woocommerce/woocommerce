@@ -632,8 +632,6 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'orderby'  => 'registered_date',
 			'per_page' => 10,
 			'page'     => 1,
-			// Offset is needed because it's used by WP_User_Query to set the page. Offset can't be set in the URL, it is internal only.
-			'offset'   => 0,
 			'search'   => '',
 			'role'     => 'customer',
 			'include'  => array(),
@@ -649,11 +647,7 @@ class WC_Customer_Data_Store extends WC_Data_Store_WP implements WC_Customer_Dat
 			'include' => array_map( 'absint', (array) $args['include'] ),
 		);
 
-		if ( ! empty( $args['offset'] ) ) {
-			$query_args['offset'] = $args['offset'];
-		} else {
-			$query_args['offset'] = ( $args['page'] - 1 ) * $query_args['number'];
-		}
+		$query_args['offset'] = ( max( 1, intval( $args['page'] ) ) - 1 ) * $query_args['number'];
 
 		if ( ! empty( $args['search'] ) ) {
 			$search                       = sanitize_text_field( $args['search'] );
