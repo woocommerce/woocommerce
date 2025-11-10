@@ -33,14 +33,6 @@ test.describe( 'Single Product template', () => {
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();
 
-		if ( wpCoreVersion >= 6.9 ) {
-			await page
-				.getByRole( 'button', {
-					name: 'Product For a specific item',
-				} )
-				.click();
-		}
-
 		await page
 			.getByPlaceholder( 'Search products' )
 			.fill( testData.productName );
