@@ -103,40 +103,44 @@ class RequestTests extends \WC_Unit_Test_Case {
 	 * @return array Return a 200 response.
 	 */
 	public function check_create_paypal_order_params( $value, $parsed_args ) {
-		$this->assertEquals( 'application/json', $parsed_args['headers']['Content-Type'] );
-		$this->assertEquals( 'POST', $parsed_args['method'] );
-		$body = json_decode( $parsed_args['body'], true );
-		$this->assertArrayHasKey( 'order', $body );
-		$order_payload = $body['order'];
-		$this->assertEquals( 'CAPTURE', $order_payload['intent'] );
+		try {
+			$this->assertEquals('application/json', $parsed_args['headers']['Content-Type']);
+			$this->assertEquals('POST', $parsed_args['method']);
+			$body = json_decode($parsed_args['body'], true);
+			$this->assertArrayHasKey('order', $body);
+			$order_payload = $body['order'];
+			$this->assertEquals('CAPTURE', $order_payload['intent']);
 
-		$purchase_unit = $order_payload['purchase_units'][0];
-		$this->assertEquals( '60.00', $purchase_unit['amount']['value'] );
-		$this->assertEquals( 'USD', $purchase_unit['amount']['currency_code'] );
-		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['item_total']['currency_code'] );
-		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['shipping']['currency_code'] );
-		$this->assertEquals( 'USD', $purchase_unit['amount']['breakdown']['tax_total']['currency_code'] );
-		$this->assertEquals( '40.00', $purchase_unit['amount']['breakdown']['item_total']['value'] );
-		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['shipping']['value'] );
-		$this->assertEquals( '10.00', $purchase_unit['amount']['breakdown']['tax_total']['value'] );
+			$purchase_unit = $order_payload['purchase_units'][0];
+			$this->assertEquals('60.00', $purchase_unit['amount']['value']);
+			$this->assertEquals('USD', $purchase_unit['amount']['currency_code']);
+			$this->assertEquals('USD', $purchase_unit['amount']['breakdown']['item_total']['currency_code']);
+			$this->assertEquals('USD', $purchase_unit['amount']['breakdown']['shipping']['currency_code']);
+			$this->assertEquals('USD', $purchase_unit['amount']['breakdown']['tax_total']['currency_code']);
+			$this->assertEquals('40.00', $purchase_unit['amount']['breakdown']['item_total']['value']);
+			$this->assertEquals('10.00', $purchase_unit['amount']['breakdown']['shipping']['value']);
+			$this->assertEquals('10.00', $purchase_unit['amount']['breakdown']['tax_total']['value']);
 
-		$items = $purchase_unit['items'];
-		$this->assertEquals( 'Dummy Product', $items[0]['name'] );
-		$this->assertEquals( '4', $items[0]['quantity'] );
-		$this->assertEquals( '10.00', $items[0]['unit_amount']['value'] );
-		$this->assertEquals( 'USD', $items[0]['unit_amount']['currency_code'] );
+			$items = $purchase_unit['items'];
+			$this->assertEquals('Dummy Product', $items[0]['name']);
+			$this->assertEquals('4', $items[0]['quantity']);
+			$this->assertEquals('10.00', $items[0]['unit_amount']['value']);
+			$this->assertEquals('USD', $items[0]['unit_amount']['currency_code']);
 
-		$this->assertArrayHasKey( 'payment_source', $order_payload );
-		$this->assertArrayHasKey( 'paypal', $order_payload['payment_source'] );
-		$this->assertArrayHasKey( 'experience_context', $order_payload['payment_source']['paypal'] );
-		$this->assertArrayHasKey( 'return_url', $order_payload['payment_source']['paypal']['experience_context'] );
-		$this->assertArrayHasKey( 'cancel_url', $order_payload['payment_source']['paypal']['experience_context'] );
+			$this->assertArrayHasKey('payment_source', $order_payload);
+			$this->assertArrayHasKey('paypal', $order_payload['payment_source']);
+			$this->assertArrayHasKey('experience_context', $order_payload['payment_source']['paypal']);
+			$this->assertArrayHasKey('return_url', $order_payload['payment_source']['paypal']['experience_context']);
+			$this->assertArrayHasKey('cancel_url', $order_payload['payment_source']['paypal']['experience_context']);
 
-		$custom_id = json_decode( $order_payload['purchase_units'][0]['custom_id'], true );
-		$this->assertArrayHasKey( 'order_id', $custom_id );
-		$this->assertArrayHasKey( 'order_key', $custom_id );
-		$this->assertArrayHasKey( 'site_url', $custom_id );
-		$this->assertArrayHasKey( 'site_id', $custom_id );
+			$custom_id = json_decode($order_payload['purchase_units'][0]['custom_id'], true);
+			$this->assertArrayHasKey('order_id', $custom_id);
+			$this->assertArrayHasKey('order_key', $custom_id);
+			$this->assertArrayHasKey('site_url', $custom_id);
+			$this->assertArrayHasKey('site_id', $custom_id);
+		} catch ( \Exception $e ) {
+			$this->fail( 'create_paypal_order params are incorrect: ' . $e->getMessage() . ' ' . $e->getFile() . ':' . $e->getLine() );
+		}
 
 		return $this->create_paypal_order_success( $value, $parsed_args );
 	}
