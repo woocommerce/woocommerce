@@ -46,7 +46,7 @@ if ( ! class_exists( 'WC_Email_Customer_Refunded_Order', false ) ) :
 			$this->customer_email = true;
 			$this->id             = 'customer_refunded_order';
 			$this->title          = __( 'Refunded order', 'woocommerce' );
-			$this->email_group    = 'order-exceptions';
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-refunded-order.php';
 			$this->placeholders   = array(
