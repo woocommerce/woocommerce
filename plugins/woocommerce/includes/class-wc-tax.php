@@ -568,7 +568,7 @@ class WC_Tax {
 	 */
 	public static function get_shipping_tax_rates( $tax_class = null, $customer = null ) {
 		// See if we have an explicitly set shipping tax class.
-		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
+		$shipping_tax_class = trim( get_option( 'woocommerce_shipping_tax_class' ) );
 
 		// Handle dynamic calculation methods.
 		if ( in_array( $shipping_tax_class, array( 'inherit', 'highest_rate', 'highest_amount' ), true ) ) {
@@ -633,12 +633,28 @@ class WC_Tax {
 				 * @param string      $method    The calculation method used ('inherit', 'highest_rate', 'highest_amount').
 				 * @param WC_Cart     $cart      The cart object.
 				 */
-				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+				$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+				if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+					wc_get_logger()->warning(
+						'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+						array( 'source' => 'wc-tax' )
+					);
+					$filtered_tax_class = $tax_class;
+				}
+				return $filtered_tax_class;
 
 			case 'highest_amount':
 				$tax_class = self::get_shipping_tax_class_by_highest_amount();
 				/** This filter is documented above. */
-				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+				$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+				if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+					wc_get_logger()->warning(
+						'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+						array( 'source' => 'wc-tax' )
+					);
+					$filtered_tax_class = $tax_class;
+				}
+				return $filtered_tax_class;
 
 			case 'inherit':
 			default:
@@ -653,7 +669,15 @@ class WC_Tax {
 		if ( ! $cart->get_cart() ) {
 			$tax_class = $standard_tax_class;
 			/** This filter is documented earlier in this function. */
-			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+				wc_get_logger()->warning(
+					'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+					array( 'source' => 'wc-tax' )
+				);
+				$filtered_tax_class = $tax_class;
+			}
+			return $filtered_tax_class;
 		}
 
 		$cart_tax_classes = $cart->get_cart_item_tax_classes_for_shipping();
@@ -662,21 +686,45 @@ class WC_Tax {
 		if ( empty( $cart_tax_classes ) ) {
 			$tax_class = null;
 			/** This filter is documented earlier in this function. */
-			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+				wc_get_logger()->warning(
+					'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+					array( 'source' => 'wc-tax' )
+				);
+				$filtered_tax_class = $tax_class;
+			}
+			return $filtered_tax_class;
 		}
 
 		// Standard tax class takes priority over any other tax class.
 		if ( in_array( $standard_tax_class, $cart_tax_classes, true ) ) {
 			$tax_class = $standard_tax_class;
 			/** This filter is documented earlier in this function. */
-			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+				wc_get_logger()->warning(
+					'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+					array( 'source' => 'wc-tax' )
+				);
+				$filtered_tax_class = $tax_class;
+			}
+			return $filtered_tax_class;
 		}
 
 		// If only one tax class, use it directly.
 		if ( 1 === count( $cart_tax_classes ) ) {
 			$tax_class = reset( $cart_tax_classes );
 			/** This filter is documented earlier in this function. */
-			return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+			if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+				wc_get_logger()->warning(
+					'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+					array( 'source' => 'wc-tax' )
+				);
+				$filtered_tax_class = $tax_class;
+			}
+			return $filtered_tax_class;
 		}
 
 		// For multiple classes, use the first one found using the order defined in settings.
@@ -689,7 +737,15 @@ class WC_Tax {
 			if ( in_array( $tax_class_slug, $cart_tax_classes, true ) ) {
 				$tax_class = $tax_class_slug;
 				/** This filter is documented earlier in this function. */
-				return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+				$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, $cart );
+				if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+					wc_get_logger()->warning(
+						'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+						array( 'source' => 'wc-tax' )
+					);
+					$filtered_tax_class = $tax_class;
+				}
+				return $filtered_tax_class;
 			}
 		}
 
@@ -697,7 +753,15 @@ class WC_Tax {
 		$tax_class = $standard_tax_class;
 
 		/** This filter is documented earlier in this function. */
-		return apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+		$filtered_tax_class = apply_filters( 'woocommerce_shipping_tax_class_calculation', $tax_class, $method, WC()->cart );
+		if ( ! is_string( $filtered_tax_class ) && ! is_null( $filtered_tax_class ) ) {
+			wc_get_logger()->warning(
+				'Invalid return type from woocommerce_shipping_tax_class_calculation filter. Expected string|null, got ' . gettype( $filtered_tax_class ) . '. Reverting to calculated value.',
+				array( 'source' => 'wc-tax' )
+			);
+			$filtered_tax_class = $tax_class;
+		}
+		return $filtered_tax_class;
 	}
 
 	/**
@@ -801,7 +865,20 @@ class WC_Tax {
 		}
 
 		// Find tax class with highest collected amount.
-		arsort( $tax_amounts_by_class, SORT_NUMERIC );
+		// Use epsilon comparison to handle floating point precision issues.
+		// Values within 0.0001 are considered equal (ties).
+		$epsilon = 0.0001;
+		uasort(
+			$tax_amounts_by_class,
+			function ( $a, $b ) use ( $epsilon ) {
+				// Consider values within epsilon as equal.
+				if ( abs( $a - $b ) < $epsilon ) {
+					return 0;
+				}
+				// Sort descending (highest first).
+				return $b <=> $a;
+			}
+		);
 		return key( $tax_amounts_by_class );
 	}
 
