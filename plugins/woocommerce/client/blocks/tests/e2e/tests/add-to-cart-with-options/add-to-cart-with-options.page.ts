@@ -39,9 +39,13 @@ class AddToCartWithOptionsPage {
 		);
 
 		await addToCartWithOptionsBlock
-			.locator(
-				'.components-spinner, .wc-block-components-skeleton__element:not(.wc-block-components-skeleton__element--static)'
-			)
+			.getByLabel( 'Loading the Add to Cart + Options template part' )
+			.waitFor( {
+				state: 'hidden',
+			} );
+
+		await addToCartWithOptionsBlock
+			.locator( '.components-spinner' )
 			.waitFor( {
 				state: 'hidden',
 			} );
