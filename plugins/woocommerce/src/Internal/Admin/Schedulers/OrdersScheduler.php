@@ -69,7 +69,7 @@ class OrdersScheduler extends ImportScheduler {
 		\Automattic\WooCommerce\Admin\Overrides\Order::add_filters();
 		\Automattic\WooCommerce\Admin\Overrides\OrderRefund::add_filters();
 
-		if ( self::is_immediate_import_enabled()  ) {
+		if ( self::is_immediate_import_enabled() ) {
 			// Schedule import immediately on order create/update/delete.
 			add_action( 'woocommerce_update_order', array( __CLASS__, 'possibly_schedule_import' ) );
 			add_filter( 'woocommerce_create_order', array( __CLASS__, 'possibly_schedule_import' ) );
