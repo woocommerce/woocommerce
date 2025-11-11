@@ -31,7 +31,7 @@ export type QuantitySelectorStore = {
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 		inputQuantity: '' | number;
-		draftQuantity: number | '' | null;
+		draftQuantities: Record< number, number | '' | null >;
 	};
 	actions: {
 		storeDraftValue: (
@@ -56,7 +56,7 @@ const { state } = store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
-			draftQuantity: null,
+			draftQuantities: {},
 			get allowsQuantityChange(): boolean {
 				const { productData } = addToCartWithOptionsStore.state;
 
@@ -112,11 +112,11 @@ const { state } = store< QuantitySelectorStore >(
 
 				return currentQuantity + step <= max;
 			},
-			get inputQuantity() {
+			get inputQuantity(): number | '' {
 				const { productId } = getContext< Context >();
 
 				return (
-					state.draftQuantity ??
+					state.draftQuantities[ productId ] ??
 					( addToCartWithOptionsStore.state.quantity?.[ productId ] ||
 						0 )
 				);
@@ -127,13 +127,17 @@ const { state } = store< QuantitySelectorStore >(
 			storeDraftValue: (
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
+				const { productId } = getContext< Context >();
+
 				if (
 					isNaN( Number( event.target.value ) ) ||
 					event.target.value === ''
 				) {
-					state.draftQuantity = '';
+					state.draftQuantities[ productId ] = '';
 				} else {
-					state.draftQuantity = Number( event.target.value );
+					state.draftQuantities[ productId ] = Number(
+						event.target.value
+					);
 				}
 			},
 			increaseQuantity: (
@@ -168,7 +172,7 @@ const { state } = store< QuantitySelectorStore >(
 					newValue,
 					inputElement
 				);
-				state.draftQuantity = null;
+				delete state.draftQuantities[ productId ];
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -224,7 +228,7 @@ const { state } = store< QuantitySelectorStore >(
 						newValue,
 						inputElement
 					);
-					state.draftQuantity = null;
+					delete state.draftQuantities[ productId ];
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -254,7 +258,7 @@ const { state } = store< QuantitySelectorStore >(
 						0,
 						event.target
 					);
-					state.draftQuantity = null;
+					delete state.draftQuantities[ productId ];
 					return;
 				}
 
@@ -282,7 +286,7 @@ const { state } = store< QuantitySelectorStore >(
 					newValue,
 					event.target
 				);
-				state.draftQuantity = null;
+				delete state.draftQuantities[ productId ];
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -297,7 +301,7 @@ const { state } = store< QuantitySelectorStore >(
 					productId,
 					element.ref.checked ? 1 : 0
 				);
-				state.draftQuantity = null;
+				delete state.draftQuantities[ productId ];
 			},
 		},
 	},
