@@ -10,8 +10,6 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
-import { getTestTranslation } from '../../utils/get-test-translation';
-import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
