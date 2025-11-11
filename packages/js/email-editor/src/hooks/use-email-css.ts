@@ -54,11 +54,9 @@ export function useEmailCss() {
 		[ editorTheme, userTheme ]
 	);
 
-	// In the Gutenberg version 22.0+ the useGlobalStylesOutputWithConfig hook is not available.
+	// In the Gutenberg version 22.0+ the useGlobalStylesOutputWithConfig hook is not available and we return empty array.
 	// We keep this for now to support WP 6.9 and lower.
-	const [ styles ] = areExternalStylesSupported
-		? useGlobalStylesOutputWithConfig( mergedConfig )
-		: [ [] ];
+	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
 	let rootContainerStyles = '';
 	if ( layout && deviceType !== 'Mobile' ) {
@@ -85,12 +83,7 @@ export function useEmailCss() {
 			},
 			...( editorSettingsStyles ?? [] ),
 		];
-	}, [
-		styles,
-		editorSettingsStyles,
-		rootContainerStyles,
-		areExternalStylesSupported,
-	] );
+	}, [ styles, editorSettingsStyles, rootContainerStyles ] );
 
 	// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 	return [ finalStyles || EMPTY_ARRAY ];
