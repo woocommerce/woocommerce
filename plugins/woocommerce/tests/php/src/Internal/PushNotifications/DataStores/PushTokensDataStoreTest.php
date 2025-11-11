@@ -124,17 +124,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the delete method of the push tokens data store.
-	 */
-	public function test_it_can_delete_push_token() {
-		$data_store = new PushTokensDataStore();
-		$push_token = $this->create_test_push_token();
-		$data_store->delete( $push_token );
-
-		$this->assertNull( get_post( $push_token->get_id() ) );
-	}
-
-	/**
 	 * @testdox Tests the create method throws exception when push token data is
 	 * incomplete.
 	 */
@@ -183,6 +172,50 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$this->expectExceptionCode( 404 );
 
 		$data_store->read( $push_token );
+	}
+
+	/**
+	 * @testdox Tests the read method throws exception when the post exists but
+	 * is not the correct post type.
+	 */
+	public function test_it_throws_exception_when_reading_push_token_with_wrong_post_type() {
+		$data_store = new PushTokensDataStore();
+
+		// Create a regular post instead of a push_token.
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Post',
+				'post_type'   => 'post',
+				'post_status' => 'private',
+			)
+		);
+
+		$push_token = new PushToken();
+		$push_token->set_id( $post_id );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+		$this->expectExceptionCode( 404 );
+
+		$data_store->read( $push_token );
+	}
+
+	/**
+	 * @testdox Tests the update method throws exception when push token data is
+	 * incomplete.
+	 */
+	public function test_it_throws_exception_when_updating_push_token_with_incomplete_data() {
+		$data_store = new PushTokensDataStore();
+
+		$push_token = new PushToken();
+		$push_token->set_id( 1 );
+		$push_token->set_user_id( 1 );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'Can\'t update push token because the push token data provided is invalid.' );
+		$this->expectExceptionCode( 400 );
+
+		$data_store->update( $push_token );
 	}
 
 	/**

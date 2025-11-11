@@ -162,34 +162,6 @@ class PushTokensDataStore {
 	}
 
 	/**
-	 * Deletes a push token.
-	 *
-	 * @since 10.4.0
-	 * @param PushToken $push_token An instance of PushToken.
-	 * @return void
-	 * @throws InvalidArgumentException If the token can't be deleted.
-	 * @throws Exception If the item to delete is not a push token.
-	 */
-	public function delete( &$push_token ) {
-		if ( ! $push_token->can_be_deleted() ) {
-			throw new InvalidArgumentException(
-				'Can\'t delete push token because the push token data provided is invalid.',
-				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-				WP_Http::BAD_REQUEST
-			);
-		}
-
-		$post = get_post( $push_token->get_id() );
-
-		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
-		}
-
-		wp_delete_post( $push_token->get_id(), true );
-	}
-
-	/**
 	 * Returns an array of post meta objects as key => value pairs.
 	 *
 	 * @since 10.4.0
