@@ -9,6 +9,7 @@ import deepmerge from 'deepmerge';
  */
 import { EmailStyles, EmailTheme, storeName } from './index';
 import { unwrapCompressedPresetStyleVariable } from '../style-variables';
+import { areExternalStylesSupported } from '../private-apis';
 
 /**
  * Function to generate the root container styles based on the config.
@@ -45,6 +46,10 @@ const generateRootContainerStyles = ( config ) => {
  * @param config - The configuration object containing the global styles post id and email base theme.
  */
 export const initStoreOverrides = ( config ) => {
+	// If the active version of Gutenberg supports external styles being passed to Editor component, we don't need to override the store.
+	if ( areExternalStylesSupported ) {
+		return;
+	}
 	useData( ( registry ) => ( {
 		select( store ) {
 			const base = registry.select( store );
