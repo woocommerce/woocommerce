@@ -1260,7 +1260,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 
 		$this->assertEquals( 2, count( $response_data ) );
-		// Customer2 should come first (1 hour ago), then customer1 (30 minutes ago).
+		// Customer1 should come first (1 hour ago), then customer2 (30 minutes ago).
 		$this->assertEquals( $response_data[0]['id'], $customer1->get_id() );
 		$this->assertEquals( $response_data[1]['id'], $customer2->get_id() );
 
@@ -1272,7 +1272,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 
 		$this->assertCount( 2, $response_data );
-		// Customer1 should come first (30 minutes ago), then customer2 (1 hour ago).
+		// Customer2 should come first (30 minutes ago), then customer2 (1 hour ago).
 		$this->assertEquals( $response_data[0]['id'], $customer2->get_id() );
 		$this->assertEquals( $response_data[1]['id'], $customer1->get_id() );
 	}
