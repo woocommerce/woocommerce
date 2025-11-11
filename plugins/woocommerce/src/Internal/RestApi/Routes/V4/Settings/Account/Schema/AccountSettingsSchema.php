@@ -260,7 +260,7 @@ class AccountSettingsSchema extends AbstractSchema {
 	 */
 	private function normalize_field_type( string $wc_type ): string {
 		$type_map = array(
-			'single_select_page' => 'select',
+			'single_select_page'             => 'select',
 			'single_select_page_with_search' => 'select',
 		);
 

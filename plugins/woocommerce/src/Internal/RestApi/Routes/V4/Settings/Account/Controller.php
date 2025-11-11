@@ -269,7 +269,7 @@ class Controller extends AbstractController {
 	private function sanitize_setting_value( $setting_type, $value ) {
 		// Normalize WooCommerce setting types to REST API schema types.
 		$type_map     = array(
-			'single_select_page' => 'select',
+			'single_select_page'             => 'select',
 			'single_select_page_with_search' => 'select',
 		);
 		$setting_type = $type_map[ $setting_type ] ?? $setting_type;
