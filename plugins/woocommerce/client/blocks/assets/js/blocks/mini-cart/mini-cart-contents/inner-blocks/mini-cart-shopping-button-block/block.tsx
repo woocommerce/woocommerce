@@ -36,6 +36,11 @@ const Block = ( {
 	if ( ! SHOP_URL ) {
 		return null;
 	}
+	console.log( 'startShoppingButtonLabel', startShoppingButtonLabel );
+	console.log(
+		'defaultStartShoppingButtonLabel',
+		defaultStartShoppingButtonLabel
+	);
 
 	return (
 		<div className="wp-block-button has-text-align-center">
