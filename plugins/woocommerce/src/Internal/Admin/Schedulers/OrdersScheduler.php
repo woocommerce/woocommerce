@@ -288,6 +288,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @returns int The order id
 	 */
 	public static function possibly_schedule_import( $order_id ) {
+		if ( ! self::is_immediate_import_enabled() ) {
+			return $order_id;
+		}
+
 		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) && 'woocommerce_refund_created' !== current_filter() && 'woocommerce_schedule_import' !== current_filter() ) {
 			return $order_id;
 		}
