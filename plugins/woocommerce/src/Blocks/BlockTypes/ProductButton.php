@@ -74,8 +74,8 @@ class ProductButton extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		// The Product Button block uses the same classes as the GB core block
-		// because we want to inherit its styles. That's why we also need to
+		// This is work-around so the Product Button block inherits the styles
+		// of the core Button block. We render it with the same classes and
 		// enqueue its stylesheet.
 		wp_enqueue_style( 'wp-block-button' );
 
