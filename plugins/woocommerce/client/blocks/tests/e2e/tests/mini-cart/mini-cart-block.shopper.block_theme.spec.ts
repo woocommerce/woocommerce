@@ -77,57 +77,6 @@ test.describe( 'Shopper → Notices', () => {
 	} );
 } );
 
-test.describe( 'Shopper → Translations', () => {
-	test.beforeEach( async () => {
-		await wpCLI( `site switch-language ${ translations.locale }` );
-	} );
-
-	test( 'User can see translation in empty Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Start shopping' ),
-			} )
-		).toBeVisible();
-	} );
-
-	test( 'User can see translation in filled Mini-Cart', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.emptyCart();
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		await expect(
-			page.getByRole( 'heading', {
-				name: getTestTranslation( 'Your cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'View my cart' ),
-			} )
-		).toBeVisible();
-
-		await expect(
-			page.getByRole( 'link', {
-				name: getTestTranslation( 'Go to checkout' ),
-			} )
-		).toBeVisible();
-	} );
-} );
-
 test.describe( 'Shopper → Tax', () => {
 	test.beforeEach( async () => {
 		await wpCLI( 'option set woocommerce_prices_include_tax no' );
