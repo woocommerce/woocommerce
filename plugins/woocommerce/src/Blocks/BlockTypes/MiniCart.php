@@ -910,7 +910,7 @@ class MiniCart extends AbstractBlock {
 
 		$translations = array_filter( $translations );
 
-		return implode( '', $translations );
+		return implode( "\n", $translations );
 	}
 
 	/**
