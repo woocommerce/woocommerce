@@ -402,7 +402,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			$action_hook = self::get_action( 'process_pending_batch' );
 			as_unschedule_all_actions( $action_hook, array(), static::$group );
 
-			// Schedule an immediate catchup batch to process all orders up to now
+			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
 			self::schedule_action( 'process_pending_batch', array() );
 		} elseif ( 'yes' === $old_value && 'no' === $new_value ) {
