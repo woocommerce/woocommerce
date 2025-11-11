@@ -1,4 +1,43 @@
-import { use as useData } from '@wordpress/data';
+/**
+ * External dependencies
+ */
+import { use as useData, select } from '@wordpress/data';
+import deepmerge from 'deepmerge';
+
+/**
+ * Internal dependencies
+ */
+import { EmailStyles, EmailTheme, storeName } from './index';
+import { unwrapCompressedPresetStyleVariable } from '../style-variables';
+
+/**
+ * Function to generate the root container styles based on the config.
+ * As of Gutenberg 22.0 we can no longer override styles directly so we are sending additional dynamic CSS via theme's css property
+ */
+const generateRootContainerStyles = ( config ) => {
+	const layout = config.editorSettings?.__experimentalFeatures?.layout;
+	const baseTheme = config.theme;
+	const userTheme = select(
+		storeName
+	).getGlobalEmailStylesPost() as EmailTheme;
+	const userStyles = userTheme?.styles;
+	const mergedStyles = deepmerge.all( [
+		{},
+		baseTheme.styles,
+		userStyles,
+	] ) as EmailStyles;
+	let rootContainerStyles = `display:flow-root; max-width: ${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+	const padding = mergedStyles?.spacing?.padding;
+	if ( padding ) {
+		rootContainerStyles += `padding-left:${ unwrapCompressedPresetStyleVariable(
+			padding.left
+		) };`;
+		rootContainerStyles += `padding-right:${ unwrapCompressedPresetStyleVariable(
+			padding.right
+		) };`;
+	}
+	return `.is-root-container{ ${ rootContainerStyles } }`;
+};
 
 /**
  * We wrap the core store selectors to return the global styles post id and email base theme from the email editor config.
@@ -30,7 +69,14 @@ export const initStoreOverrides = ( config ) => {
 						if ( ! baseTheme ) {
 							return null;
 						}
-						return config.theme;
+						const theme = {
+							...config.theme,
+							styles: {
+								...config.theme.styles,
+								css: generateRootContainerStyles( config ),
+							},
+						};
+						return theme;
 					},
 				};
 			}
