@@ -1,0 +1,14 @@
+{
+  "description": "Default Claude Code settings for the WooCommerce repository",
+  "permissions": {
+    "allow": [
+      "Skill(woocommerce-backend-dev)",
+      "Skill(woocommerce-code-review)",
+      "Skill(woocommerce-copy-guidelines)",
+      "Skill(woocommerce-dev-cycle)",
+      "Skill(woocommerce-markdown)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

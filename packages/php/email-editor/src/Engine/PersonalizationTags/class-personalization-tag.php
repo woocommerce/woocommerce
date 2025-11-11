@@ -182,6 +182,15 @@ class Personalization_Tag {
 	}
 
 	/**
+	 * Returns the callback function of the personalization tag.
+	 *
+	 * @return callable
+	 */
+	public function get_callback(): callable {
+		return $this->callback;
+	}
+
+	/**
 	 * Executes the callback function for the personalization tag.
 	 *
 	 * @param mixed $context The context for the personalization tag.

@@ -11,7 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
-	title: 'Product Gallery (Beta)',
+	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -382,13 +382,14 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
+
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(
-			'Block: Product Gallery (Beta)'
+			'Block: Product Gallery'
 		);
 
 		await expect( productGalleryBlock ).toBeVisible();

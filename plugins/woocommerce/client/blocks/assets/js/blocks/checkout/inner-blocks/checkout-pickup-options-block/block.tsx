@@ -127,6 +127,8 @@ const renderPickupLocation = (
 				<Icon
 					icon={ mapMarker }
 					className="wc-block-editor-components-block-icon"
+					width={ 16 }
+					height={ 16 }
 				/>
 				{ decodeEntities( address ) }
 			</>

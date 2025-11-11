@@ -220,6 +220,18 @@ class OrderSchema extends AbstractSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
+			'refund_total'         => array(
+				'description' => __( 'Total refund amount for the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'refund_tax'           => array(
+				'description' => __( 'Total refund tax amount for the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
 			'prices_include_tax'   => array(
 				'description' => __( 'True the prices included tax during checkout.', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -631,6 +643,14 @@ class OrderSchema extends AbstractSchema {
 			'fulfillment_status'   => FulfillmentUtils::get_order_fulfillment_status( $order ),
 		);
 
+		if ( in_array( 'refund_total', $include_fields, true ) ) {
+			$data['refund_total'] = wc_format_decimal( $order->get_total_refunded(), $dp );
+		}
+
+		if ( in_array( 'refund_tax', $include_fields, true ) ) {
+			$data['refund_tax'] = wc_format_decimal( $order->get_total_tax_refunded(), $dp );
+		}
+
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			$line_items         = $order->get_items( 'line_item' );
 			$data['line_items'] = array();
@@ -672,7 +692,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'meta_data', $include_fields, true ) ) {
-			$filtered_meta_data = $this->filter_internal_meta_keys( $this->get_meta_data_for_response( $order->get_meta_data(), $request ) );
+			$filtered_meta_data = $this->filter_internal_meta_keys( $order->get_meta_data() );
 			$data['meta_data']  = array();
 			foreach ( $filtered_meta_data as $meta_item ) {
 				$data['meta_data'][] = array(
@@ -712,43 +732,6 @@ class OrderSchema extends AbstractSchema {
 				return ! in_array( $meta->key, $cpt_hidden_keys, true );
 			}
 		);
-		return array_values( $meta_data );
-	}
-
-	/**
-	 * Limit the contents of the meta_data property based on certain request parameters.
-	 *
-	 * Note that if both `include_meta` and `exclude_meta` are present in the request,
-	 * `include_meta` will take precedence.
-	 *
-	 * @param array            $meta_data All of the meta data for an object.
-	 * @param \WP_REST_Request $request   The request.
-	 *
-	 * @return array
-	 */
-	protected function get_meta_data_for_response( $meta_data, $request ) {
-		$include = (array) $request['include_meta'];
-		$exclude = (array) $request['exclude_meta'];
-
-		if ( ! empty( $include ) ) {
-			$meta_data = array_filter(
-				$meta_data,
-				function ( \WC_Meta_Data $item ) use ( $include ) {
-					$data = $item->get_data();
-					return in_array( $data['key'], $include, true );
-				}
-			);
-		} elseif ( ! empty( $exclude ) ) {
-			$meta_data = array_filter(
-				$meta_data,
-				function ( \WC_Meta_Data $item ) use ( $exclude ) {
-					$data = $item->get_data();
-					return ! in_array( $data['key'], $exclude, true );
-				}
-			);
-		}
-
-		// Ensure the array indexes are reset so it doesn't get converted to an object in JSON.
 		return array_values( $meta_data );
 	}
 }
