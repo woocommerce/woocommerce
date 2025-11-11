@@ -100,7 +100,21 @@ const appendScript = ( attributes: AppendScriptAttributesParam ): void => {
 	if ( typeof attributes.onerror === 'function' ) {
 		scriptElement.onerror = attributes.onerror;
 	}
-	document.body.appendChild( scriptElement );
+
+	// Wrap appendChild in try-catch to handle syntax errors in inline scripts.
+	// When a script element with malformed innerHTML (e.g., from translations with
+	// unescaped special characters) is appended to the DOM, the browser throws a
+	// SyntaxError during the appendChild operation.
+	try {
+		document.body.appendChild( scriptElement );
+	} catch ( error ) {
+		console.error(
+			`Failed to append script with id "${ attributes.id }". This may be due to malformed inline script content (e.g., from translations):`,
+			error
+		);
+		// Silently fail - the script won't be added, but the page will continue to function.
+		// This prevents the entire Mini-Cart from breaking due to a translation issue.
+	}
 };
 
 /**
