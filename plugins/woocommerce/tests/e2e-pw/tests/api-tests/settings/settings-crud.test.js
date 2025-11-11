@@ -1893,17 +1893,11 @@ test.describe.serial( 'Settings API tests: CRUD', () => {
 						} ),
 					] )
 				);
-				expect( responseJSON ).toEqual(
-					expect.arrayContaining( [
-						expect.objectContaining( {
-							id: 'woocommerce_analytics_enabled',
-							label: 'Analytics',
-							description: 'Enable WooCommerce Analytics',
-							type: 'checkbox',
-							default: 'yes',
-							value: 'yes',
-						} ),
-					] )
+				// New installs should not have Analytics settings available.
+				expect( responseJSON ).not.toContainEqual(
+					expect.objectContaining( {
+						id: 'woocommerce_analytics_enabled',
+					} )
 				);
 			} );
 		}
