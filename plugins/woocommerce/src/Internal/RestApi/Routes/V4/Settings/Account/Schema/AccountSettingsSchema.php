@@ -176,11 +176,6 @@ class AccountSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
-			// Skip title and sectionend types.
-			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
-				continue;
-			}
-
 			// Convert setting to field format.
 			if ( isset( $setting['id'] ) && $current_group ) {
 				$field = $this->transform_setting_to_field( $setting );
