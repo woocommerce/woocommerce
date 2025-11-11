@@ -292,7 +292,7 @@ class AccountSettingsSchema extends AbstractSchema {
 			case 'textarea':
 			case 'select':
 			default:
-				return is_string( $value ) ? (string) $value : (string) $value;
+				return (string) $value;
 		}
 	}
 }
