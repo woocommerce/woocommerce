@@ -30,8 +30,8 @@ export type QuantitySelectorStore = {
 		allowsQuantityChange: boolean;
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
-		inputQuantity: '' | number;
-		draftQuantities: Record< number, number | '' | null >;
+		inputQuantity: number | string | null;
+		draftQuantities: Record< number, number | string | null >;
 	};
 	actions: {
 		storeDraftValue: (
@@ -112,7 +112,7 @@ const { state } = store< QuantitySelectorStore >(
 
 				return currentQuantity + step <= max;
 			},
-			get inputQuantity(): number | '' {
+			get inputQuantity(): number | string | null {
 				const { productId } = getContext< Context >();
 
 				return (
@@ -128,17 +128,20 @@ const { state } = store< QuantitySelectorStore >(
 				event: HTMLElementEvent< HTMLInputElement >
 			) => {
 				const { productId } = getContext< Context >();
+				const { value } = event.target;
 
-				if (
-					isNaN( Number( event.target.value ) ) ||
-					event.target.value === ''
-				) {
+				if ( value === '' ) {
 					state.draftQuantities[ productId ] = '';
-				} else {
-					state.draftQuantities[ productId ] = Number(
-						event.target.value
-					);
+					return;
 				}
+
+				const numericValue = Number( value );
+
+				state.draftQuantities[ productId ] =
+					Number.isNaN( numericValue ) ||
+					String( numericValue ) !== value
+						? value
+						: numericValue;
 			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
