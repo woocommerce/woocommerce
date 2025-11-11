@@ -36,6 +36,13 @@ const { Editor, FullscreenMode, ViewMoreMenuGroup, BackButton } =
 	unlock( editorPrivateApis );
 
 /**
+ * Feature detection whether the active version of Gutenberg supports external styles being passed to Editor component.
+ * useGlobalStylesOutputWithConfig function was removed with this change.
+ */
+const areExternalStylesSupported =
+	useGlobalStylesOutputWithConfig !== undefined;
+
+/**
  * The registerEntityAction and unregisterEntityAction are used to register and unregister entity actions.
  * This is used in the move-to-trash.tsx file to modify the move to trash action.
  * Providing us with the ability to remove the default move to trash action and add a custom trash email post action.
@@ -53,4 +60,5 @@ export {
 	BackButton,
 	registerEntityAction,
 	unregisterEntityAction,
+	areExternalStylesSupported,
 };
