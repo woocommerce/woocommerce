@@ -664,26 +664,26 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Setting include_headers to null in endpoint config forces exclusion mode even when controller has default inclusion list.
+	 * @testdox Setting include_headers to false in endpoint config forces exclusion mode even when controller has default inclusion list.
 	 */
-	public function test_null_include_headers_overrides_controller_default() {
+	public function test_false_include_headers_forces_exclusion_mode() {
 		$this->sut->custom_include_headers = array( 'X-Header-One', 'X-Header-Two' );
 
-		$this->sut->endpoint_cache_config['test_null_override']['config'] = array(
-			'include_headers' => null,
+		$this->sut->endpoint_cache_config['test_false_override']['config'] = array(
+			'include_headers' => false,
 			'exclude_headers' => array( 'X-Header-Two' ),
 		);
 		$this->sut->reinitialize_cache();
 
 		$this->reset_rest_server();
 
-		$this->sut->response_headers['test_null_override'] = array(
+		$this->sut->response_headers['test_false_override'] = array(
 			'X-Header-One'   => 'value-one',
 			'X-Header-Two'   => 'value-two',
 			'X-Header-Three' => 'value-three',
 		);
 
-		$response1 = $this->query_endpoint( 'test_null_override' );
+		$response1 = $this->query_endpoint( 'test_false_override' );
 		$this->assertCacheHeader( $response1, 'MISS' );
 
 		$cache_keys   = $this->get_all_cache_keys();
@@ -695,7 +695,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'X-Header-Two', $cached_entry['headers'], 'X-Header-Two should be excluded (exclusion mode used)' );
 		$this->assertArrayHasKey( 'X-Header-Three', $cached_entry['headers'], 'X-Header-Three should be cached (not excluded)' );
 
-		$response2 = $this->query_endpoint( 'test_null_override' );
+		$response2 = $this->query_endpoint( 'test_false_override' );
 		$this->assertCacheHeader( $response2, 'HIT' );
 
 		$headers = $response2->get_headers();
@@ -704,7 +704,24 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'X-Header-Two', $headers );
 		$this->assertArrayHasKey( 'X-Header-Three', $headers );
 
-		$this->sut->custom_include_headers = null;
+		$this->sut->custom_include_headers = false;
+	}
+
+	/**
+	 * @testdox InvalidArgumentException is thrown when include_headers is not false or an array.
+	 */
+	public function test_invalid_include_headers_throws_exception() {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( 'include_headers must be either false or an array' );
+
+		$this->sut->endpoint_cache_config['invalid_headers']['config'] = array(
+			'include_headers' => 'invalid-string',
+		);
+		$this->sut->reinitialize_cache();
+
+		$this->reset_rest_server();
+
+		$this->query_endpoint( 'invalid_headers' );
 	}
 
 	/**
@@ -818,9 +835,13 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 					'id'   => 20,
 					'name' => 'Custom Config Product',
 				),
-				'test_null_override'     => array(
+				'test_false_override'    => array(
 					'id'   => 30,
-					'name' => 'Test Null Override Product',
+					'name' => 'Test False Override Product',
+				),
+				'invalid_headers'        => array(
+					'id'   => 40,
+					'name' => 'Invalid Headers Product',
 				),
 			);
 			public $default_entity_type    = 'product';
@@ -830,7 +851,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			public $controller_hooks       = array();
 			public $response_headers       = array();
 			public $custom_exclude_headers = array();
-			public $custom_include_headers = null;
+			public $custom_include_headers = false;
 			public $endpoint_cache_config  = array();
 
 			public function __construct() {
@@ -853,7 +874,8 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'with_controller_hooks' );
 				$this->register_cached_route( 'standard' );
 				$this->register_custom_config_route( 'custom_endpoint_config' );
-				$this->register_custom_config_route( 'test_null_override' );
+				$this->register_custom_config_route( 'test_false_override' );
+				$this->register_custom_config_route( 'invalid_headers' );
 			}
 
 			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false, bool $raw_response = false ) {
@@ -938,7 +960,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				return $this->controller_hooks;
 			}
 
-			protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ): ?array {
+			protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) {
 				return $this->custom_include_headers;
 			}
 

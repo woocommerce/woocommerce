@@ -84,7 +84,7 @@ use WP_REST_Response;
  * - response_cache_vary_by_user(): Whether cache should be user-specific.
  * - get_hooks_relevant_to_caching(): Hook names to track for cache invalidation.
  * - get_ttl_for_cached_response(): TTL for cached outputs in seconds.
- * - get_response_headers_to_include_in_caching(): Headers to include in cache (null = use exclusion mode).
+ * - get_response_headers_to_include_in_caching(): Headers to include in cache (false = use exclusion mode).
  * - get_response_headers_to_exclude_from_caching(): Headers to exclude from cache (when in exclusion mode).
  *
  * Cache invalidation happens when:
@@ -160,7 +160,7 @@ trait RestApiCache {
 	 *                           - endpoint_id: string|null (optional friendly identifier for the endpoint).
 	 *                           - cache_ttl: int (defaults to get_ttl_for_cached_response()).
 	 *                           - relevant_hooks: array (defaults to get_hooks_relevant_to_caching()).
-	 *                           - include_headers: array|null (defaults to get_response_headers_to_include_in_caching()).
+	 *                           - include_headers: array|false (defaults to get_response_headers_to_include_in_caching()).
 	 *                           - exclude_headers: array (defaults to get_response_headers_to_exclude_from_caching()).
 	 * @return callable Wrapped callback.
 	 */
@@ -245,6 +245,7 @@ trait RestApiCache {
 	 * @param WP_REST_Request $request The request object.
 	 * @param array           $config  Raw configuration array passed to with_cache.
 	 * @return array|null Normalized cache config with keys: endpoint_id, entity_type, vary_by_user, cache_ttl, relevant_hooks, include_headers, exclude_headers, cache_key. Returns null if entity type is not available.
+	 * @throws \InvalidArgumentException If include_headers is not false or an array.
 	 */
 	private function build_cache_config( WP_REST_Request $request, array $config ): ?array {
 		$endpoint_id  = $config['endpoint_id'] ?? null;
@@ -261,13 +262,20 @@ trait RestApiCache {
 			return null;
 		}
 
+		$include_headers = $config['include_headers'] ?? $this->get_response_headers_to_include_in_caching( $request, $endpoint_id );
+		if ( false !== $include_headers && ! is_array( $include_headers ) ) {
+			throw new \InvalidArgumentException(
+				'include_headers must be either false or an array, ' . gettype( $include_headers ) . ' given.' // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			);
+		}
+
 		return array(
 			'endpoint_id'     => $endpoint_id,
 			'entity_type'     => $entity_type,
 			'vary_by_user'    => $vary_by_user,
 			'cache_ttl'       => $config['cache_ttl'] ?? $this->get_ttl_for_cached_response( $request, $endpoint_id ),
 			'relevant_hooks'  => $config['relevant_hooks'] ?? $this->get_hooks_relevant_to_caching( $request, $endpoint_id ),
-			'include_headers' => array_key_exists( 'include_headers', $config ) ? $config['include_headers'] : $this->get_response_headers_to_include_in_caching( $request, $endpoint_id ),
+			'include_headers' => $include_headers,
 			'exclude_headers' => $config['exclude_headers'] ?? $this->get_response_headers_to_exclude_from_caching( $request, $endpoint_id ),
 			'cache_key'       => $this->get_key_for_cached_response( $request, $entity_type, $vary_by_user, $endpoint_id ),
 		);
@@ -394,9 +402,9 @@ trait RestApiCache {
 	/**
 	 * Get the names of response headers to include in caching.
 	 *
-	 * When this returns a non-null value, ONLY the headers whose names are returned
+	 * When this returns an array, ONLY the headers whose names are returned
 	 * will be included in the cache (subject to always-excluded headers).
-	 * When this returns null, all headers will be included except those returned
+	 * When this returns false, all headers will be included except those returned
 	 * by get_response_headers_to_exclude_from_caching().
 	 *
 	 * This can be customized per-endpoint via the config array
@@ -404,10 +412,10 @@ trait RestApiCache {
 	 *
 	 * @param WP_REST_Request $request     Request object.
 	 * @param string|null     $endpoint_id Optional friendly identifier for the endpoint.
-	 * @return array|null Array of header names to include (case-insensitive), or null to use exclusion logic.
+	 * @return array|false Array of header names to include (case-insensitive), or false to use exclusion logic.
 	 */
-	protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ): ?array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		return null;
+	protected function get_response_headers_to_include_in_caching( WP_REST_Request $request, ?string $endpoint_id = null ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		return false;
 	}
 
 	/**
@@ -417,7 +425,7 @@ trait RestApiCache {
 	 * always-excluded headers (X-WC-Cache, Set-Cookie, Date, Expires, Last-Modified,
 	 * Age, ETag, Cache-Control, Pragma).
 	 *
-	 * This is only used when get_response_headers_to_include_in_caching() returns null.
+	 * This is only used when get_response_headers_to_include_in_caching() returns false.
 	 *
 	 * This can be customized per-endpoint via the config array
 	 * passed to with_cache() ('exclude_headers' key).
@@ -467,23 +475,23 @@ trait RestApiCache {
 	 * Filter response headers to get only those that should be cached.
 	 *
 	 * The filtering process follows these steps:
-	 * 1. If $include_headers is non-null, only those headers are included (case-insensitive).
-	 *    If $include_headers is null, all headers are included except those in $exclude_headers.
+	 * 1. If $include_headers is an array, only those headers are included (case-insensitive).
+	 *    If $include_headers is false, all headers are included except those in $exclude_headers.
 	 * 2. Always-excluded headers (X-WC-Cache, Set-Cookie, Date, etc.) are removed.
 	 * 3. The woocommerce_rest_api_cached_headers filter is applied to the header names.
 	 * 4. Only headers in the filtered list are returned.
 	 *
 	 * @param array            $nominal_headers Response headers.
-	 * @param array|null       $include_headers Header names to include (null to use exclusion logic).
+	 * @param array|false      $include_headers Header names to include (false to use exclusion logic).
 	 * @param array            $exclude_headers Header names to exclude (case-insensitive).
 	 * @param WP_REST_Request  $request         The request object.
 	 * @param WP_REST_Response $response        The response object.
 	 * @param string|null      $endpoint_id     Optional friendly identifier for the endpoint.
 	 * @return array Filtered headers array.
 	 */
-	private function get_headers_to_cache( array $nominal_headers, ?array $include_headers, array $exclude_headers, WP_REST_Request $request, WP_REST_Response $response, ?string $endpoint_id ): array {
+	private function get_headers_to_cache( array $nominal_headers, $include_headers, array $exclude_headers, WP_REST_Request $request, WP_REST_Response $response, ?string $endpoint_id ): array {
 		// Step 1: Determine which headers to consider based on include/exclude.
-		if ( ! is_null( $include_headers ) ) {
+		if ( false !== $include_headers ) {
 			$include_headers_lowercase = array_map( 'strtolower', $include_headers );
 			$headers_to_cache          = array_filter(
 				$nominal_headers,
