@@ -166,12 +166,11 @@ class PushTokensDataStore {
 	 *
 	 * @since 10.4.0
 	 * @param PushToken $push_token An instance of PushToken.
-	 * @param array     $args Not used, enforced by interface.
 	 * @return void
 	 * @throws InvalidArgumentException If the token can't be deleted.
 	 * @throws Exception If the item to delete is not a push token.
 	 */
-	public function delete( &$push_token, $args = array() ) {
+	public function delete( &$push_token ) {
 		if ( ! $push_token->can_be_deleted() ) {
 			throw new InvalidArgumentException(
 				'Can\'t delete push token because the push token data provided is invalid.',
