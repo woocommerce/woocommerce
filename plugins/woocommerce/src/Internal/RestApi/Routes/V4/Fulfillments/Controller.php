@@ -113,6 +113,19 @@ class Controller extends AbstractController {
 				),
 			),
 		);
+
+		// Register the route for getting shipping providers.
+		register_rest_route(
+			$this->namespace,
+			$this->rest_base . '/providers',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_providers' ),
+					'permission_callback' => array( $this, 'check_permission_for_providers' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -721,5 +734,26 @@ class Controller extends AbstractController {
 			),
 			$data['status'] ?? WP_Http::BAD_REQUEST
 		);
+	}
+
+	/**
+	 * Get all shipping providers.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response
+	 */
+	public function get_providers( WP_REST_Request $request ): WP_REST_Response {
+		$providers = \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils::get_shipping_providers_object();
+		return new WP_REST_Response( $providers, WP_Http::OK );
+	}
+
+	/**
+	 * Check permissions for accessing shipping providers.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool
+	 */
+	public function check_permission_for_providers( WP_REST_Request $request ): bool {
+		return current_user_can( 'manage_woocommerce' );
 	}
 }
