@@ -32,7 +32,13 @@ test.describe( 'Shopper → Notices', () => {
 		editor,
 		admin,
 		productCollectionPage,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
 		const checkMiniCartTitle = async ( itemCount: number ) => {
 			try {
 				// iAPI Mini Cart.
@@ -170,7 +176,13 @@ test.describe( 'Shopper → Tax', () => {
 	test( 'User can see tax label and price including tax', async ( {
 		frontendUtils,
 		page,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
 		await frontendUtils.emptyCart();
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );

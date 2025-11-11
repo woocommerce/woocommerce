@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.3.0) - 2025-11-05 
+
+-   Minor - Add setEmailPostType action and export email editor hooks and utilities for template previews and styling [#61804]
+
 ## [1.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.1) - 2025-11-04 
 
 -   Patch - Export the personalization tags RichTextWithButton component and other email editor methods. [#61748]
