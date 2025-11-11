@@ -185,12 +185,23 @@ class WC_Helper_Subscriptions_API {
 		try {
 			$success = WC_Helper::activate_helper_subscription( $product_key );
 		} catch ( Exception $e ) {
-			wp_send_json_error(
-				array(
-					'message' => $e->getMessage(),
-				),
-				400
+			$error_data = array(
+				'message' => $e->getMessage(),
 			);
+
+			if ( $e instanceof WC_Data_Exception ) {
+				$error_data['code'] = $e->getErrorCode();
+				// Include extra data from the exception so the client can render contextual UI (e.g. maxed out sites list).
+				$error_data['data'] = $e->getErrorData();
+				$status_code        = (int) $e->getCode();
+				if ( 100 > $status_code || 599 < $status_code ) {
+					$status_code = 400;
+				}
+			} else {
+				$status_code = 400;
+			}
+
+			wp_send_json_error( $error_data, $status_code );
 		}
 		if ( $success ) {
 			wp_send_json_success(

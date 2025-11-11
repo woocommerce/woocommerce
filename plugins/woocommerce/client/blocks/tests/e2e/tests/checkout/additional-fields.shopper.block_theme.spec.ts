@@ -23,20 +23,20 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
 
-		test.beforeEach( async ( { requestUtils, frontendUtils } ) => {
+		test.beforeEach( async ( { requestUtils } ) => {
 			await requestUtils.activatePlugin(
 				'woocommerce-blocks-test-additional-checkout-fields'
 			);
-
-			await frontendUtils.goToShop();
-			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-			await frontendUtils.goToCheckout();
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -211,7 +211,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can change the values of fields multiple times and place the order', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -371,6 +376,10 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 			checkoutPageObject,
 			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -545,7 +554,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can see server-side validation errors', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -679,7 +693,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can see and edit submitted fields in my account area. Values are also sanitized and validated in my account area.', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();
@@ -945,7 +964,12 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 
 		test( 'Shopper can refresh the page, and not lose any entered data', async ( {
 			checkoutPageObject,
+			frontendUtils,
 		} ) => {
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+			await frontendUtils.goToCheckout();
+
 			await checkoutPageObject.editShippingDetails();
 			await checkoutPageObject.unsyncBillingWithShipping();
 			await checkoutPageObject.editBillingDetails();

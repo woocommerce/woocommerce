@@ -47,7 +47,7 @@ const TemplatePartInnerBlocks = ( {
 		value: blocks,
 		onInput,
 		onChange,
-		renderAppender: () =>
+		renderAppender:
 			! isLoading && blocks.length === 0
 				? InnerBlocks.ButtonBlockAppender
 				: null,

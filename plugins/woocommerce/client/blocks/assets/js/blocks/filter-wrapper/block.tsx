@@ -10,10 +10,10 @@ import './register-components';
 import { FilterBlockContext } from './context';
 
 type Props = {
-	children: JSX.Element[];
+	children: React.ReactNode;
 };
 
-const Block = ( { children }: Props ): JSX.Element => {
+const Block = ( { children }: Props ) => {
 	const wrapper = useRef( null );
 	return (
 		<div className="wc-blocks-filter-wrapper" ref={ wrapper }>

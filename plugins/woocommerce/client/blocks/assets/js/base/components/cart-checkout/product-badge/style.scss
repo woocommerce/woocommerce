@@ -7,4 +7,8 @@
 	padding: 0 0.66em;
 	text-transform: uppercase;
 	white-space: nowrap;
+
+	&[hidden] {
+		display: none;
+	}
 }

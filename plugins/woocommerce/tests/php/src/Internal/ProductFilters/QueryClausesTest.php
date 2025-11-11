@@ -182,4 +182,54 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 
 		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
 	}
+
+	/**
+	 * Test the product query with post clauses containing taxonomy clauses.
+	 *
+	 * @testWith ["product_cat", ["cat-1"]]
+	 *           ["product_cat", ["cat-2"]]
+	 *           ["product_cat", ["cat-1", "cat-2"]]
+	 *           ["product_tag", ["tag-1"]]
+	 *           ["product_tag", ["tag-2", "tag-3"]]
+	 *
+	 * @param string   $taxonomy Taxonomy name.
+	 * @param string[] $terms    Chosen terms' slug.
+	 */
+	public function test_taxonomy_clauses_with( $taxonomy, $terms ) {
+		$chosen_taxonomies = array(
+			$taxonomy => $terms,
+		);
+		$filter_callback   = function ( $args ) use ( $chosen_taxonomies ) {
+			return $this->sut->add_taxonomy_clauses( $args, $chosen_taxonomies );
+		};
+
+		add_filter( 'posts_clauses', $filter_callback );
+		$received_products_name = $this->get_data_from_products_array(
+			wc_get_products( array() )
+		);
+		remove_filter( 'posts_clauses', $filter_callback );
+
+		$expected_products_name = $this->get_data_from_products_array(
+			array_filter(
+				$this->products,
+				function ( \WC_Product $product ) use ( $chosen_taxonomies ) {
+					foreach ( $chosen_taxonomies as $taxonomy => $terms ) {
+						$product_terms = wp_get_post_terms( $product->get_id(), $taxonomy, array( 'fields' => 'slugs' ) );
+
+						if ( is_wp_error( $product_terms ) ) {
+							return false;
+						}
+
+						// Check if product has any of the requested terms (OR logic).
+						if ( empty( array_intersect( $terms, $product_terms ) ) ) {
+							return false;
+						}
+					}
+					return true;
+				}
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( $expected_products_name, $received_products_name );
+	}
 }

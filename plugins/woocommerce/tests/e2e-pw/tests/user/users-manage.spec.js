@@ -1,8 +1,12 @@
 /**
+ * External dependencies
+ */
+import { WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test as baseTest, expect } from '../../fixtures/fixtures';
-import { WP_API_PATH } from '../../utils/api-client';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { getFakeUser } from '../../utils/data';
 
@@ -25,7 +29,7 @@ const test = baseTest.extend( {
 			} );
 		} catch ( error ) {
 			// Accept 404 error as the user might have been deleted already in the test
-			if ( error.data?.data?.status !== 404 ) {
+			if ( error.status !== 404 ) {
 				throw error;
 			}
 		}

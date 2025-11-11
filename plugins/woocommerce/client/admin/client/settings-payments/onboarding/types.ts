@@ -53,6 +53,7 @@ export interface WooPaymentsProviderOnboardingStep {
 	order: number;
 	status?: 'not_started' | 'in_progress' | 'completed' | 'failed' | 'blocked';
 	dependencies?: string[];
+	subSteps?: WooPaymentsProviderOnboardingStep[];
 	actions?: {
 		save?: {
 			type?: string;
@@ -94,6 +95,14 @@ export interface WooPaymentsProviderOnboardingStep {
 			type?: string;
 			href?: string;
 		};
+		reset?: {
+			type?: string;
+			href?: string;
+		};
+		test_account_disable?: {
+			type?: string;
+			href?: string;
+		};
 	};
 	content?: ReactNode;
 	context?: {
@@ -114,7 +123,10 @@ export interface WooPaymentsProviderOnboardingStep {
 				status: 'completed' | 'not_started' | 'started';
 			}
 		>;
+		// True when a test (test-drive) account is connected.
 		has_test_account?: boolean;
+		// True when a sandbox (test-mode, non-test-drive) account is connected.
+		has_sandbox_account?: boolean;
 	};
 	errors?: {
 		message: string;
@@ -134,6 +146,7 @@ export interface OnboardingContextType {
 	};
 	isLoading: boolean;
 	currentStep: WooPaymentsProviderOnboardingStep | undefined;
+	currentTopLevelStep: WooPaymentsProviderOnboardingStep | undefined;
 	navigateToStep: ( stepKey: string ) => void;
 	navigateToNextStep: () => void;
 	getStepByKey: (
@@ -143,4 +156,17 @@ export interface OnboardingContextType {
 	closeModal: () => void;
 	justCompletedStepId: string | null;
 	setJustCompletedStepId: ( stepId: string ) => void;
+	sessionEntryPoint: string;
+	snackbar: {
+		show: boolean;
+		message: string;
+		className?: string;
+		duration?: number;
+	};
+	setSnackbar: ( snackbar: {
+		show: boolean;
+		message: string;
+		duration?: number;
+		className?: string;
+	} ) => void;
 }

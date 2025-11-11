@@ -5,13 +5,21 @@
 	}
 
 	.wc-block-components-totals-item__label {
-		font-weight: 700;
+		font-weight: 500;
 	}
 
 	.wc-block-components-totals-footer-item-tax {
 		margin-bottom: 0;
 		margin-top: 0;
-		font-weight: 700;
+		font-weight: 500;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		white-space: pre;
+
+		.wc-block-components-skeleton__element {
+			margin-left: 0.5em;
+		}
 	}
 
 	.wc-block-components-totals-footer-item-shipping {
@@ -20,6 +28,11 @@
 	}
 
 	.wc-block-components-totals-item__value {
-		font-weight: 700;
+		font-weight: 500;
+	}
+
+	.wc-block-components-totals-item__value,
+	.wc-block-components-totals-item__label {
+		@include font-large-locked;
 	}
 }

@@ -87,4 +87,23 @@ final class OrderStatus {
 	 * @var string
 	 */
 	public const DRAFT = 'draft';
+
+	/**
+	 * Checkout Draft orders are created when customers start the checkout process while the block version of the checkout is in place.
+	 *
+	 * @var string
+	 */
+	public const CHECKOUT_DRAFT = 'checkout-draft';
+
+	/**
+	 * Array of all the valid order statuses for a complete payment.
+	 *
+	 * @var string[]
+	 */
+	public const PAYMENT_COMPLETE_STATUSES = array(
+		self::ON_HOLD,
+		self::PENDING,
+		self::FAILED,
+		self::CANCELLED,
+	);
 }

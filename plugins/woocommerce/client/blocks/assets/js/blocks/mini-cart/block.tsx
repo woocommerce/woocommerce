@@ -37,6 +37,7 @@ import {
 	blockName,
 	attributes as miniCartContentsAttributes,
 } from './mini-cart-contents/attributes';
+import { metadata as miniCartContentsMetadata } from './mini-cart-contents/metadata';
 import { defaultColorItem } from './utils/defaults';
 
 type Props = BlockAttributes;
@@ -131,6 +132,11 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 					},
 					selector: '.wp-block-woocommerce-mini-cart-contents',
 					blockMap: getRegisteredBlockComponents( blockName ),
+					options: {
+						multiple:
+							miniCartContentsMetadata.supports?.multiple ??
+							false,
+					},
 				} );
 				rootRef.current = renderedBlock;
 			}

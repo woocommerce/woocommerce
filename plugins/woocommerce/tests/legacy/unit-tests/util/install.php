@@ -13,6 +13,24 @@
 class WC_Tests_Install extends WC_Unit_Test_Case {
 
 	/**
+	 * Restore test environment after class completion.
+	 */
+	public static function tearDownAfterClass(): void {
+		parent::tearDownAfterClass();
+
+		// Reinstall WooCommerce to ensure test environment is clean.
+		WC_Install::install();
+
+		// Reload capabilities after install, see https://core.trac.wordpress.org/ticket/28374.
+		if ( version_compare( $GLOBALS['wp_version'], '4.7', '<' ) ) {
+			$GLOBALS['wp_roles']->reinit();
+		} else {
+			$GLOBALS['wp_roles'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			wp_roles();
+		}
+	}
+
+	/**
 	 * Test check version.
 	 */
 	public function test_check_version() {
@@ -38,14 +56,8 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	/**
 	 * Test - install.
 	public function test_install() {
-		// clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
-		delete_transient( 'wc_installing' );
+		// Clean existing install first.
+		self::uninstall();
 
 		WC_Install::install();
 
@@ -100,12 +112,7 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 	 * Test - create roles.
 	 */
 	public function test_create_roles() {
-		// Clean existing install first.
-		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-			define( 'WP_UNINSTALL_PLUGIN', true );
-			define( 'WC_REMOVE_ALL_DATA', true );
-		}
-		include dirname( dirname( dirname( dirname( dirname( __FILE__ ) ) ) ) ) . '/uninstall.php';
+		self::uninstall();
 
 		WC_Install::create_roles();
 
@@ -172,4 +179,16 @@ class WC_Tests_Install extends WC_Unit_Test_Case {
 		$this->assertContains( 'some_table_name', WC_Install::get_tables() );
 	}
 
+	/**
+	 * Uninstall the plugin.
+	 */
+	private static function uninstall() {
+		if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
+			define( 'WP_UNINSTALL_PLUGIN', true );
+			define( 'WC_REMOVE_ALL_DATA', true );
+		}
+
+		include dirname( dirname( dirname( dirname( __DIR__ ) ) ) ) . '/uninstall.php';
+		delete_transient( 'wc_installing' );
+	}
 }

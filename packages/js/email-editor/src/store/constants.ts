@@ -1,7 +1,8 @@
 export const storeName = 'email-editor/editor';
 
-// these values are set once on a page load, so it's fine to keep them here.
-export const editorCurrentPostType =
-	window.WooCommerceEmailEditor.current_post_type;
-export const editorCurrentPostId =
-	window.WooCommerceEmailEditor.current_post_id;
+export const PERSONALIZATION_TAG_ENTITY = {
+	name: 'personalization_tag',
+	kind: 'root',
+	baseURL: '/woocommerce-email-editor/v1/personalization_tags',
+	key: 'token',
+};

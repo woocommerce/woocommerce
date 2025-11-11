@@ -1,7 +1,5 @@
 @import "../../../../base/components/quantity-selector/style";
 
-.wc-block-add-to-cart-with-options-grouped-product-item-selector {
-	.button {
-		display: inline-flex;
-	}
+:where(.wc-block-add-to-cart-with-options-grouped-product-item-selector .button) {
+	display: inline-flex;
 }

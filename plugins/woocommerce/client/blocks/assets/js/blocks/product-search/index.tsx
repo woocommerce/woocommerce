@@ -7,8 +7,6 @@ import { store as blockEditorStore, Warning } from '@wordpress/block-editor';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Icon, search } from '@wordpress/icons';
-import { getSettingWithCoercion } from '@woocommerce/settings';
-import { isBoolean } from '@woocommerce/types';
 import { Button } from '@wordpress/components';
 import type { Block as BlockType } from '@wordpress/blocks';
 import {
@@ -22,17 +20,9 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import './editor.scss';
 import { withProductSearchControls } from './inspector-controls';
 import Block from './block';
-import Edit from './edit';
 import { SEARCH_BLOCK_NAME, SEARCH_VARIATION_NAME } from './constants';
-
-const isBlockVariationAvailable = getSettingWithCoercion(
-	'isBlockVariationAvailable',
-	false,
-	isBoolean
-);
 
 const attributes = {
 	/**
@@ -139,7 +129,7 @@ registerBlockType( SEARCH_VARIATION_NAME, {
 	),
 	supports: {
 		align: [ 'wide', 'full' ],
-		inserter: ! isBlockVariationAvailable,
+		inserter: false,
 	},
 	attributes,
 	transforms: {
@@ -171,7 +161,7 @@ registerBlockType( SEARCH_VARIATION_NAME, {
 			},
 		},
 	],
-	edit: isBlockVariationAvailable ? DeprecatedBlockEdit : Edit,
+	edit: DeprecatedBlockEdit,
 	save() {
 		return null;
 	},
@@ -199,36 +189,30 @@ addFilter(
 	registerProductSearchNamespace
 );
 
-if ( isBlockVariationAvailable ) {
-	registerBlockVariation( 'core/search', {
-		name: SEARCH_VARIATION_NAME,
-		title: __( 'Product Search', 'woocommerce' ),
-		icon: {
-			src: (
-				<Icon
-					icon={ search }
-					className="wc-block-editor-components-block-icon"
-				/>
-			),
-		},
-		// @ts-ignore waiting for @types/wordpress__blocks update
-		isActive: ( blockAttributes, variationAttributes ) => {
-			return (
-				blockAttributes.query?.post_type ===
-				variationAttributes.query.post_type
-			);
-		},
-		category: 'woocommerce',
-		keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
-		description: __(
-			'A search box to allow customers to search for products by keyword.',
-			'woocommerce'
+registerBlockVariation( 'core/search', {
+	name: SEARCH_VARIATION_NAME,
+	title: __( 'Product Search', 'woocommerce' ),
+	icon: {
+		src: (
+			<Icon
+				icon={ search }
+				className="wc-block-editor-components-block-icon"
+			/>
 		),
-		attributes: PRODUCT_SEARCH_ATTRIBUTES,
-	} );
-	addFilter(
-		'editor.BlockEdit',
-		SEARCH_BLOCK_NAME,
-		withProductSearchControls
-	);
-}
+	},
+	// @ts-ignore waiting for @types/wordpress__blocks update
+	isActive: ( blockAttributes, variationAttributes ) => {
+		return (
+			blockAttributes.query?.post_type ===
+			variationAttributes.query.post_type
+		);
+	},
+	category: 'woocommerce',
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	description: __(
+		'A search box to allow customers to search for products by keyword.',
+		'woocommerce'
+	),
+	attributes: PRODUCT_SEARCH_ATTRIBUTES,
+} );
+addFilter( 'editor.BlockEdit', SEARCH_BLOCK_NAME, withProductSearchControls );

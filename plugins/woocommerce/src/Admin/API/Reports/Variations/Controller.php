@@ -391,8 +391,31 @@ class Controller extends GenericController implements ExportableInterface {
 	 * @return array Key value pair of Column ID => Row Value.
 	 */
 	public function prepare_item_for_export( $item ) {
+		$product_name = $item['extended_info']['name'];
+		/**
+		 * Filter the separator used in the product variation title.
+		 *
+		 * @since 10.2.0
+		 * @param string $separator The separator.
+		 * @param \WC_Product $product The product object.
+		 * @return string The separator.
+		*/
+		$separator = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
+		if ( ! empty( $item['extended_info']['attributes'] ) && strpos( $product_name, $separator ) === false ) {
+			$attributes = array();
+			foreach ( $item['extended_info']['attributes'] as $attribute ) {
+				if ( empty( $attribute['option'] ) ) {
+					// translators: %s: the attribute name.
+					$attributes[] = sprintf( __( 'Any %s', 'woocommerce' ), ucfirst( $attribute['name'] ) );
+				} else {
+					$attributes[] = $attribute['option'];
+				}
+			}
+			$product_name .= $separator . implode( ', ', $attributes );
+		}
+
 		$export_item = array(
-			'product_name' => $item['extended_info']['name'],
+			'product_name' => $product_name,
 			'sku'          => $item['extended_info']['sku'],
 			'items_sold'   => $item['items_sold'],
 			'net_revenue'  => self::csv_number_format( $item['net_revenue'] ),

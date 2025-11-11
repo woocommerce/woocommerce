@@ -294,14 +294,14 @@ export function* installAndActivatePlugins(
 			},
 		};
 
-		// If everything was a success and we both installed and activated, make the success message more informative.
+		// If everything was a success and we BOTH installed and activated, make the success message more informative.
 		if (
 			installations.success &&
 			Object.keys( installations.data.results ).length &&
 			activations.success &&
 			activations.data.activated.length
 		) {
-			// If only one plugin was installed, use the plugin details to create a more informative message.
+			// If only ONE plugin was installed, use the plugin details to create a more informative message.
 			if ( activations.data.activated.length === 1 ) {
 				const plugin_slug = activations.data.activated[ 0 ];
 				const plugin = activations.data.plugin_details?.[ plugin_slug ];
@@ -325,6 +325,28 @@ export function* installAndActivatePlugins(
 			} else {
 				response.message = __(
 					'Plugins were successfully installed and activated.',
+					'woocommerce'
+				);
+			}
+		} else if (
+			// If everything was a success, and we ONLY activated ONE plugin, make the success message more informative.
+			installations.success &&
+			! Object.keys( installations.data.results ).length &&
+			activations.success &&
+			activations.data.activated.length === 1
+		) {
+			const plugin_slug = activations.data.activated[ 0 ];
+			const plugin = activations.data.plugin_details?.[ plugin_slug ];
+
+			if ( plugin ) {
+				response.message = sprintf(
+					/* translators: %1$s: plugin name */
+					__( '%1$s was successfully activated.', 'woocommerce' ),
+					plugin.name
+				);
+			} else {
+				response.message = __(
+					'A plugin was successfully activated.',
 					'woocommerce'
 				);
 			}

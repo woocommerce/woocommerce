@@ -3,6 +3,11 @@
  */
 import * as iAPI from '@wordpress/interactivity';
 
+/**
+ * Internal dependencies
+ */
+import { decodeHtmlEntities } from '../../utils/html-entities';
+
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
@@ -30,6 +35,7 @@ function selectFilter() {
 
 	context.activeFilters = newActiveFilters;
 }
+
 function unselectFilter() {
 	const { item } = getContext< ProductFiltersContext >();
 	actions.removeActiveFiltersBy(
@@ -46,6 +52,9 @@ type FilterItem = {
 	count: number;
 	type: string;
 	attributeQueryType?: 'and' | 'or' | undefined;
+	id?: number;
+	parent?: number;
+	depth?: number;
 };
 
 export type ActiveFilterItem = Pick<
@@ -76,7 +85,11 @@ const productFiltersStore = {
 				params[ key ] = value;
 			}
 
+			const config = getConfig( BLOCK_NAME );
+			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
+
 			activeFilters.forEach( ( filter ) => {
+				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
 				if ( ! value ) return;
@@ -101,6 +114,12 @@ const productFiltersStore = {
 					params[ `query_type_${ slug }` ] =
 						filter.attributeQueryType || 'or';
 				}
+
+				if ( type.includes( 'taxonomy' ) ) {
+					const [ , taxonomy ] = type.split( '/' );
+					const paramKey = taxonomyParamsMap[ taxonomy ];
+					addParam( paramKey, value );
+				}
 			} );
 			return params;
 		},
@@ -115,6 +134,7 @@ const productFiltersStore = {
 				} )
 				.map( ( item ) => ( {
 					...item,
+					activeLabel: decodeHtmlEntities( item.activeLabel ),
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
@@ -184,7 +204,23 @@ const productFiltersStore = {
 			}
 
 			for ( const key in state.params ) {
-				searchParams.set( key, state.params[ key ] );
+				const value = state.params[ key ];
+				let decodedValue = value;
+
+				try {
+					decodedValue = decodeURIComponent( value );
+				} catch ( error ) {
+					if ( error instanceof URIError ) {
+						// eslint-disable-next-line no-console
+						console.warn(
+							'woocommerce/product-filters: Failed to decode filter parameter',
+							key,
+							error
+						);
+					}
+				}
+
+				searchParams.set( key, decodedValue );
 			}
 
 			if ( window.location.href === url.href ) {

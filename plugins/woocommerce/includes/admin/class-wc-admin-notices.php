@@ -9,7 +9,6 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -97,7 +96,20 @@ class WC_Admin_Notices {
 	 * Store the locally cached notices to DB.
 	 */
 	public static function store_notices() {
-		update_option( 'woocommerce_admin_notices', self::get_notices() );
+		$current_notices = self::get_notices();
+		$prev_notices    = get_option( 'woocommerce_admin_notices', array() );
+
+		// Store notices.
+		update_option( 'woocommerce_admin_notices', $current_notices );
+
+		// Clean up removed notices.
+		foreach ( array_diff( $prev_notices, $current_notices ) as $notice ) {
+			if ( isset( self::$core_notices[ $notice ] ) ) {
+				continue;
+			}
+
+			delete_option( 'woocommerce_admin_notice_' . $notice );
+		}
 	}
 
 	/**
@@ -215,8 +227,9 @@ class WC_Admin_Notices {
 	 * @param bool   $force_save Force saving inside this method instead of at the 'shutdown'.
 	 */
 	public static function remove_notice( $name, $force_save = false ) {
-		self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
-		delete_option( 'woocommerce_admin_notice_' . $name );
+		if ( self::has_notice( $name ) ) {
+			self::set_notices( array_diff( self::get_notices(), array( $name ) ) );
+		}
 
 		if ( $force_save ) {
 			// Adding early save to prevent more race conditions with notices.
@@ -470,7 +483,7 @@ class WC_Admin_Notices {
 		if ( $enabled ) {
 			include __DIR__ . '/views/html-notice-legacy-shipping.php';
 		} else {
-			self::remove_notice( 'template_files' );
+			self::remove_notice( 'legacy_shipping' );
 		}
 	}
 
@@ -479,7 +492,7 @@ class WC_Admin_Notices {
 	 */
 	public static function no_shipping_methods_notice() {
         // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( wc_shipping_enabled() && ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) ) {
+		if ( wc_shipping_enabled() && ( ! is_wc_admin_settings_page() || empty( $_GET['tab'] ) || 'shipping' !== $_GET['tab'] ) ) {
 			$product_count = wp_count_posts( 'product' );
 			$method_count  = wc_get_shipping_method_count();
 

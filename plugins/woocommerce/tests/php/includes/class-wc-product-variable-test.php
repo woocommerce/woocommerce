@@ -41,9 +41,9 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'has_available_variations' should return true when all variations are available.
+	 * @testdox 'has_purchasable_variations' should return true when all variations are purchasable.
 	 */
-	public function test_has_available_variations_returns_true_when_all_variations_are_available() {
+	public function test_has_purchasable_variations_returns_true_when_all_variations_are_purchasable() {
 
 		$product = WC_Helper_Product::create_variation_product();
 
@@ -51,15 +51,15 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( is_array( $variations[0] ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
 
-		$has_available_variations = $product->has_available_variations();
-		$this->assertIsBool( $has_available_variations );
-		$this->assertTrue( $has_available_variations );
+		$has_purchasable_variations = $product->has_purchasable_variations();
+		$this->assertIsBool( $has_purchasable_variations );
+		$this->assertTrue( $has_purchasable_variations );
 	}
 
 	/**
-	 * @testdox 'has_available_variations' returns true when some variations are available.
+	 * @testdox 'has_purchasable_variations' returns true when some variations are purchasable.
 	 */
-	public function test_has_available_variations_returns_true_when_some_variations_are_available() {
+	public function test_has_purchasable_variations_returns_true_when_some_variations_are_purchasable() {
 
 		$product = new WC_Product_Variable();
 
@@ -105,15 +105,15 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( is_array( $variations[0] ) );
 		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
 
-		$has_available_variations = $product->has_available_variations();
-		$this->assertIsBool( $has_available_variations );
-		$this->assertTrue( $has_available_variations );
+		$has_purchasable_variations = $product->has_purchasable_variations();
+		$this->assertIsBool( $has_purchasable_variations );
+		$this->assertTrue( $has_purchasable_variations );
 	}
 
 	/**
-	 * @testdox 'has_available_variations' returns false when all variations are not available.
+	 * @testdox 'has_purchasable_variations' returns false when all variations are not purchasable.
 	 */
-	public function test_has_available_variations_returns_false_when_all_variations_are_not_available() {
+	public function test_has_purchasable_variations_returns_false_when_all_variations_are_not_purchasable() {
 
 		$product = new WC_Product_Variable();
 
@@ -158,8 +158,8 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$variations = $product->get_available_variations( 'array' );
 		$this->assertTrue( empty( $variations ) );
 
-		$has_available_variations = $product->has_available_variations();
-		$this->assertIsBool( $has_available_variations );
-		$this->assertFalse( $has_available_variations );
+		$has_purchasable_variations = $product->has_purchasable_variations();
+		$this->assertIsBool( $has_purchasable_variations );
+		$this->assertFalse( $has_purchasable_variations );
 	}
 }

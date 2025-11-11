@@ -106,78 +106,29 @@ class EmailStyleSync implements RegisterHooksInterface {
 	 * Update email colors from theme colors.
 	 */
 	protected function update_email_colors() {
-		$colors = $this->get_theme_colors();
+		$colors = EmailColors::get_default_colors();
 		if ( empty( $colors ) ) {
 			return;
 		}
 
-		if ( ! empty( $colors['base_color'] ) ) {
-			update_option( 'woocommerce_email_base_color', $colors['base_color'] );
+		if ( ! empty( $colors['base'] ) ) {
+			update_option( 'woocommerce_email_base_color', $colors['base'] );
 		}
 
-		if ( ! empty( $colors['bg_color'] ) ) {
-			update_option( 'woocommerce_email_background_color', $colors['bg_color'] );
+		if ( ! empty( $colors['bg'] ) ) {
+			update_option( 'woocommerce_email_background_color', $colors['bg'] );
 		}
 
-		if ( ! empty( $colors['body_bg_color'] ) ) {
-			update_option( 'woocommerce_email_body_background_color', $colors['body_bg_color'] );
+		if ( ! empty( $colors['body_bg'] ) ) {
+			update_option( 'woocommerce_email_body_background_color', $colors['body_bg'] );
 		}
 
-		if ( ! empty( $colors['body_text_color'] ) ) {
-			update_option( 'woocommerce_email_text_color', $colors['body_text_color'] );
+		if ( ! empty( $colors['body_text'] ) ) {
+			update_option( 'woocommerce_email_text_color', $colors['body_text'] );
 		}
 
-		if ( ! empty( $colors['footer_text_color'] ) ) {
-			update_option( 'woocommerce_email_footer_text_color', $colors['footer_text_color'] );
+		if ( ! empty( $colors['footer_text'] ) ) {
+			update_option( 'woocommerce_email_footer_text_color', $colors['footer_text'] );
 		}
-	}
-
-	/**
-	 * Get theme colors from theme.json.
-	 *
-	 * @param array|null $override_styles Optional array of styles to override.
-	 * @return array Array of theme colors.
-	 */
-	protected function get_theme_colors( ?array $override_styles = null ) {
-		if ( ! function_exists( 'wp_get_global_styles' ) ) {
-			return array();
-		}
-
-		$global_styles = $override_styles ?: wp_get_global_styles( array(), array( 'transforms' => array( 'resolve-variables' ) ) );
-
-		$default_colors = EmailColors::get_default_colors();
-		$base_color_default = $default_colors['base_color_default'];
-		$bg_color_default = $default_colors['bg_color_default'];
-		$body_bg_color_default = $default_colors['body_bg_color_default'];
-		$body_text_color_default = $default_colors['body_text_color_default'];
-		$footer_text_color_default = $default_colors['footer_text_color_default'];
-
-		$base_color = ! empty( $global_styles['elements']['button']['color']['background'] )
-			? sanitize_hex_color( $global_styles['elements']['button']['color']['background'] )
-			: $base_color_default;
-
-		$bg_color = ! empty( $global_styles['color']['background'] )
-			? sanitize_hex_color( $global_styles['color']['background'] )
-			: $bg_color_default;
-
-		$body_bg_color = ! empty( $global_styles['color']['background'] )
-			? sanitize_hex_color( $global_styles['color']['background'] )
-			: $body_bg_color_default;
-
-		$body_text_color = ! empty( $global_styles['color']['text'] )
-			? sanitize_hex_color( $global_styles['color']['text'] )
-			: $body_text_color_default;
-
-		$footer_text_color = ! empty( $global_styles['elements']['caption']['color']['text'] )
-			? sanitize_hex_color( $global_styles['elements']['caption']['color']['text'] )
-			: $footer_text_color_default;
-
-		return array(
-			'base_color' => $base_color,
-			'bg_color' => $bg_color,
-			'body_bg_color' => $body_bg_color,
-			'body_text_color' => $body_text_color,
-			'footer_text_color' => $footer_text_color,
-		);
 	}
 }

@@ -247,3 +247,14 @@ export const getItemsPendingDelete = ( state: CartState ): string[] => {
 export const getProductsPendingAdd = ( state: CartState ): number[] => {
 	return state.productsPendingAdd;
 };
+
+/**
+ * Retrieves whether there are any pending cart operations (add, quantity update, or delete).
+ */
+export const hasPendingItemsOperations = ( state: CartState ): boolean => {
+	return (
+		state.productsPendingAdd.length > 0 ||
+		state.cartItemsPendingQuantity.length > 0 ||
+		state.cartItemsPendingDelete.length > 0
+	);
+};

@@ -12,10 +12,11 @@ import { SelectTemplateModal } from './select-modal';
 
 export function TemplateSelection() {
 	const [ templateSelected, setTemplateSelected ] = useState( false );
-	const { emailContentIsEmpty, emailHasEdits } = useSelect(
+	const { emailContentIsEmpty, emailHasEdits, postType } = useSelect(
 		( select ) => ( {
 			emailContentIsEmpty: select( storeName ).hasEmptyContent(),
 			emailHasEdits: select( storeName ).hasEdits(),
+			postType: select( storeName ).getEmailPostType(),
 		} ),
 		[]
 	);
@@ -26,6 +27,7 @@ export function TemplateSelection() {
 	return (
 		<SelectTemplateModal
 			onSelectCallback={ () => setTemplateSelected( true ) }
+			postType={ postType }
 		/>
 	);
 }

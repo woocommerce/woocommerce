@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Make Stock Indicator block show the stock status of variable products when stock is managed at the product level

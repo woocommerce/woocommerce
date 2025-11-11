@@ -5,13 +5,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings\PaymentsProviders
 
 use Automattic\Jetpack\Connection\Manager as WPCOM_Connection_Manager;
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsService;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController;
-use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Testing\Tools\DependencyManagement\MockableLegacyProxy;
+use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 use Automattic\WooCommerce\Tests\Internal\Admin\Settings\Mocks\FakePaymentGateway;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_REST_Unit_Test_Case;
@@ -54,6 +55,16 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	 * @var WPCOM_Connection_Manager|MockObject
 	 */
 	protected $mock_wpcom_connection_manager;
+
+	/**
+	 * @var object&MockObject
+	 */
+	protected $mock_account_service;
+
+	/**
+	 * @var FakePaymentGateway
+	 */
+	protected FakePaymentGateway $mock_gateway;
 
 	/**
 	 * The ID of the store admin user.
@@ -119,10 +130,15 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 
 		$this->current_time = 1234567890;
 
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+
 		// Arrange the version constant to meet the minimum requirements for the native in-context onboarding.
 		Constants::set_constant( 'WCPAY_VERSION_NUMBER', WooPaymentsService::EXTENSION_MINIMUM_VERSION );
-
-		$this->providers_service = wc_get_container()->get( PaymentsProviders::class );
 
 		$this->mock_wpcom_connection_manager = $this->getMockBuilder( WPCOM_Connection_Manager::class )
 													->onlyMethods(
@@ -135,17 +151,21 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 													)
 													->getMock();
 
-		$this->mockable_proxy = wc_get_container()->get( LegacyProxy::class );
+		$this->mockable_proxy = $container->get( LegacyProxy::class );
 		$this->mockable_proxy->register_class_mocks(
 			array(
 				WPCOM_Connection_Manager::class => $this->mock_wpcom_connection_manager,
 			)
 		);
+		// We have no way of knowing if the container has already resolved the mocked classes,
+		// so we need to reset all resolved instances.
+		$container->reset_all_resolved();
 
 		$this->mock_account_service = $this->getMockBuilder( \stdClass::class )
 											->addMethods( array( 'is_stripe_account_valid', 'get_account_status_data' ) )
 											->getMock();
 
+		// Use this instance to set different states depending on your specific test needs.
 		$this->mock_gateway = new FakePaymentGateway(
 			'woocommerce_payments',
 			array(
@@ -204,6 +224,27 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 						return $this->get_woopayments_supported_countries();
 					},
 				),
+				Utils::class           => array(
+					'get_wpcom_connection_authorization' => function ( string $return_url ) {
+						unset( $return_url ); // Avoid parameter not used PHPCS errors.
+						return array(
+							'success'      => true,
+							'errors'       => array(),
+							'color_scheme' => 'fresh',
+							'url'          => 'https://wordpress.com/auth?query=some_query',
+						);
+					},
+					'rest_endpoint_get_request'          => function ( string $endpoint, array $params = array() ) {
+						unset( $params ); // Avoid parameter not used PHPCS errors.
+						if ( '/wc/v3/payments/onboarding/fields' === $endpoint ) {
+							return array(
+								'data' => array(),
+							);
+						}
+
+						throw new \Exception( esc_html( 'GET endpoint response is not mocked: ' . $endpoint ) );
+					},
+				),
 			)
 		);
 
@@ -224,15 +265,6 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			),
 		);
 
-		// Reinitialize the controller with the mocked dependencies.
-		$this->woopayments_provider_service = new WooPaymentsService();
-		$this->woopayments_provider_service->init( $this->providers_service, $this->mockable_proxy );
-		$sut = new WooPaymentsRestController();
-		$sut->init( wc_get_container()->get( Payments::class ), $this->woopayments_provider_service );
-		$sut->register_routes( true );
-		// Replace the controller in the container so that it can be used during tests.
-		wc_get_container()->replace( WooPaymentsRestController::class, $sut );
-
 		$this->gateways_mock_ref = function ( \WC_Payment_Gateways $wc_payment_gateways ) {
 			$mock_gateways = array(
 				'woocommerce_payments' => $this->mock_gateway,
@@ -242,6 +274,14 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 				$wc_payment_gateways->payment_gateways[ $order++ ] = $fake_gateway;
 			}
 		};
+
+		$this->providers_service            = $container->get( PaymentsProviders::class );
+		$this->woopayments_provider_service = $container->get( WooPaymentsService::class );
+
+		// Register the REST controller routes again to make sure the dependency tree is using our mocks.
+		$sut = new WooPaymentsRestController();
+		$sut->init( $container->get( Payments::class ), $this->woopayments_provider_service );
+		$sut->register_routes( true );
 	}
 
 	/**
@@ -252,6 +292,19 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		delete_option( 'woocommerce_gateway_order' );
 
 		delete_option( WooPaymentsService::NOX_PROFILE_OPTION_KEY );
+		delete_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY );
+
+		$this->mockable_proxy->reset();
+
+		/**
+		 * TestingContainer instance.
+		 *
+		 * @var TestingContainer $container
+		 */
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -267,7 +320,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -291,7 +344,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'user_has_cap', $filter_callback );
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $country_code );
 		$response = $this->server->dispatch( $request );
 
@@ -341,7 +394,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', $country_code ); // Liechtenstein.
 
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -366,7 +419,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Arrange.
 
 		// Act.
-		$request = new WP_REST_Request( 'GET', self::ENDPOINT . '/onboarding' );
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding' );
 		$request->set_param( 'location', $location );
 		$response = $this->server->dispatch( $request );
 
@@ -474,8 +527,11 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 					$country_code => array(
 						'steps' => array(
 							$step_id => array(
-								'data' => array(
+								'data'     => array(
 									'payment_methods' => $request_params['payment_methods'],
+								),
+								'statuses' => array(
+									'started' => $this->current_time, // The step is auto-marked as started when saved.
 								),
 							),
 						),
@@ -604,7 +660,7 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test handling onboarding step check with invalid step.
 	 */
-	public function est_onboarding_step_check_with_invalid_step() {
+	public function test_onboarding_step_check_with_invalid_step() {
 		// Arrange.
 		$step_id      = 'invalid_step';
 		$country_code = 'US';
@@ -993,12 +1049,8 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		// Arrange the WPCOM connection.
 		// Make it not connected.
 		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
+			->expects( $this->atLeastOnce() )
 			->method( 'is_connected' )
-			->willReturn( false );
-		$this->mock_wpcom_connection_manager
-			->expects( $this->any() )
-			->method( 'has_connected_owner' )
 			->willReturn( false );
 		$this->mock_wpcom_connection_manager
 			->expects( $this->once() )
@@ -1074,9 +1126,9 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test disable test account.
+	 * Test disable test account when a test account is in use.
 	 */
-	public function test_disable_test_account() {
+	public function test_disable_test_account_with_test_account() {
 		// Arrange.
 		$location = 'US';
 		$from     = 'test-from';
@@ -1092,6 +1144,25 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 			->expects( $this->any() )
 			->method( 'has_connected_owner' )
 			->willReturn( true );
+
+		// Arrange the account.
+		$this->mock_gateway->account_connected = true;
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => true,
+					'isLive'           => false,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
 
 		// Intercept the request to our platform (proxied by the client).
 		$requested_urls = array();
@@ -1122,6 +1193,167 @@ class WooPaymentsRestControllerIntegrationTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'success', $data );
 		$this->assertTrue( $data['success'] );
+
+		// Assert that the onboarding is unlocked.
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
+
+		// Assert the test account step status.
+		$this->assertSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$this->woopayments_provider_service->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location )
+		);
+	}
+
+	/**
+	 * Test disable test account when a sandbox account is in use.
+	 */
+	public function test_disable_test_account_with_sandbox_account() {
+		// Arrange.
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
+
+		// Arrange the WPCOM connection.
+		// Make it connected to pass the step requirements.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the account.
+		$this->mock_gateway->account_connected = true;
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => false,
+					'isLive'           => false, // This is a sandbox account.
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Intercept the request to our platform (proxied by the client).
+		$requested_urls = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( $url ) use ( &$requested_urls ) {
+						$requested_urls[] = $url;
+
+						return array( 'success' => true );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/test_account/disable' );
+		$request->set_param( 'location', $location );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertContains( '/wc/v3/payments/onboarding/reset', $requested_urls );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+
+		// Assert that the onboarding is unlocked.
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
+
+		// Assert the test account step status.
+		$this->assertSame(
+			WooPaymentsService::ONBOARDING_STEP_STATUS_COMPLETED,
+			$this->woopayments_provider_service->get_onboarding_step_status( WooPaymentsService::ONBOARDING_STEP_TEST_ACCOUNT, $location )
+		);
+	}
+
+	/**
+	 * Test disable test account when a live account is in use.
+	 */
+	public function test_disable_test_account_with_live_account() {
+		// Arrange.
+		$location = 'US';
+		$from     = 'test-from';
+		$source   = 'test-source';
+
+		// Arrange the WPCOM connection.
+		// Make it connected to pass the step requirements.
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( true );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->any() )
+			->method( 'has_connected_owner' )
+			->willReturn( true );
+
+		// Arrange the account.
+		$this->mock_gateway->account_connected = true;
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'is_stripe_account_valid' )
+			->willReturn( true );
+		$this->mock_account_service
+			->expects( $this->any() )
+			->method( 'get_account_status_data' )
+			->willReturn(
+				array(
+					'status'           => 'complete',
+					'testDrive'        => false,
+					'isLive'           => true,
+					'paymentsEnabled'  => true,
+					'detailsSubmitted' => true,
+				)
+			);
+
+		// Intercept the request to our platform (proxied by the client).
+		$requested_urls = array();
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'rest_endpoint_post_request' => function ( $url ) use ( &$requested_urls ) {
+						$requested_urls[] = $url;
+
+						return array( 'success' => true );
+					},
+				),
+			)
+		);
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/test_account/disable' );
+		$request->set_param( 'location', $location );
+		$request->set_param( 'from', $from );
+		$request->set_param( 'source', $source );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertCount( 0, $requested_urls );
+
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'success', $data );
+		$this->assertTrue( $data['success'] );
+
+		// Assert that the onboarding is unlocked.
+		$this->assertSame( 0, (int) get_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY ) );
 
 		// Assert the test account step status.
 		$this->assertSame(

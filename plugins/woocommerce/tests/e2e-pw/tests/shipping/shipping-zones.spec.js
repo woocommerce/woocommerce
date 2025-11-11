@@ -2,13 +2,13 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );

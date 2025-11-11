@@ -1,4 +1,6 @@
 <?php
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks;
 
 use WC_Tax;
@@ -13,9 +15,7 @@ final class QueryFilters {
 	 *
 	 * @internal
 	 */
-	public function init() {
-		add_filter( 'posts_clauses', array( $this, 'main_query_filter' ), 10, 2 );
-	}
+	public function init() {}
 
 	/**
 	 * Filter the posts clauses of the main query to support global filters.
@@ -179,17 +179,19 @@ final class QueryFilters {
 		remove_filter( 'posts_clauses', array( $this, 'add_query_clauses' ), 10 );
 		remove_filter( 'posts_pre_query', '__return_empty_array' );
 
-		$attributes_to_count_sql = 'AND term_taxonomy.taxonomy IN ("' . esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) ) . '")';
-		$attribute_count_sql     = "
-			SELECT COUNT( DISTINCT posts.ID ) as term_count, terms.term_id as term_count_id
+		$attributes_to_count = esc_sql( wc_sanitize_taxonomy_name( $attribute_to_count ) );
+
+		$attribute_count_sql = "SELECT COUNT(DISTINCT posts.ID) as term_count, terms.term_id as term_count_id
 			FROM {$wpdb->posts} AS posts
 			INNER JOIN {$wpdb->term_relationships} AS term_relationships ON posts.ID = term_relationships.object_id
-			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy USING( term_taxonomy_id )
-			INNER JOIN {$wpdb->terms} AS terms USING( term_id )
+			INNER JOIN {$wpdb->term_taxonomy} AS term_taxonomy ON term_relationships.term_taxonomy_id = term_taxonomy.term_taxonomy_id
+			INNER JOIN {$wpdb->terms} AS terms ON term_taxonomy.term_id = terms.term_id
 			WHERE posts.ID IN ( {$product_query_sql} )
-			{$attributes_to_count_sql}
+			AND term_taxonomy.taxonomy IN ('{$attributes_to_count}')
+			AND posts.post_status = 'publish'
+			AND posts.post_type = 'product'
 			GROUP BY terms.term_id
-		";
+			ORDER BY terms.name ASC";
 
 		$results = $wpdb->get_results( $attribute_count_sql ); // phpcs:ignore
 
@@ -288,8 +290,8 @@ final class QueryFilters {
 			SELECT COUNT( DISTINCT posts.ID ) as status_count
 			FROM {$wpdb->posts} as posts
 			INNER JOIN {$wpdb->postmeta} as postmeta ON posts.ID = postmeta.post_id
-            AND postmeta.meta_key = '_stock_status'
-            AND postmeta.meta_value = '{$status}'
+			AND postmeta.meta_key = '_stock_status'
+			AND postmeta.meta_value = '{$status}'
 			WHERE posts.ID IN ( {$product_query_sql} )
 		";
 	}
@@ -427,7 +429,12 @@ final class QueryFilters {
 		$attribute_ids_for_and_filtering = array();
 
 		foreach ( $chosen_attributes as $taxonomy => $data ) {
-			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
+			$all_terms                  = get_terms(
+				array(
+					'taxonomy'   => $taxonomy,
+					'hide_empty' => false,
+				)
+			);
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
 			$term_ids_to_filter_by      = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 			$term_ids_to_filter_by      = array_map( 'absint', $term_ids_to_filter_by );

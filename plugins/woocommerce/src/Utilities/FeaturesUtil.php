@@ -55,15 +55,11 @@ class FeaturesUtil {
 	 * @return bool True on success, false on error (feature doesn't exist or not inside the required hook).
 	 */
 	public static function declare_compatibility( string $feature_id, string $plugin_file, bool $positive_compatibility = true ): bool {
-		$plugin_id = wc_get_container()->get( PluginUtil::class )->get_wp_plugin_id( $plugin_file );
-
-		if ( ! $plugin_id ) {
-			$logger = wc_get_logger();
-			$logger->error( "FeaturesUtil::declare_compatibility: {$plugin_file} is not a known WordPress plugin." );
-			return false;
-		}
-
-		return wc_get_container()->get( FeaturesController::class )->declare_compatibility( $feature_id, $plugin_id, $positive_compatibility );
+		return wc_get_container()->get( FeaturesController::class )->declare_compatibility(
+			$feature_id,
+			$plugin_file,
+			$positive_compatibility
+		);
 	}
 
 	/**

@@ -1,4 +1,4 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl */
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation, WCMaybeModifyDecimal */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
@@ -463,7 +463,7 @@
 					});
 				},
 				/**
-				 * The settings HTML is controlled and built by the settings api, so in order to refactor the 
+				 * The settings HTML is controlled and built by the settings api, so in order to refactor the
 				 * markup, it needs to be manipulated here.
 				 */
 				reformatSettingsHTML: function( html ) {
@@ -506,7 +506,17 @@
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
-						const value = priceInput.attr( 'value' );
+						let value = priceInput.attr( 'value' );
+						// Cost values are saved to the DB with thousands separators stripped and decimal separators converted to a dot.
+						// If value is not a formula, then we need to check for incorrect decimal separator in the value returned
+						// from the DB, and replace it with the correct one before passing it to the localiseMonetaryValue function.
+						// Note: Negative flat rate shipping cost numbers are not supported.
+						try {
+							value = WCMaybeModifyDecimal.maybeModifyDecimal( value, config );
+						} catch ( error ) {
+							// There was an error modifying the decimal, so we leave the original value as-is.
+							return;
+						}
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
@@ -569,8 +579,8 @@
 					// Wrap the html content in a div
 					const htmlContent = $( '<div>' + html + '</div>' );
 
-					// `<table class="form-table" />` elements added by the Settings API need to be removed. 
-					// Modern browsers won't interpret other table elements like `td` not in a `table`, so 
+					// `<table class="form-table" />` elements added by the Settings API need to be removed.
+					// Modern browsers won't interpret other table elements like `td` not in a `table`, so
 					// Removing the `table` is sufficient.
 					const innerTables = htmlContent.find( 'table.form-table' );
 					innerTables.each( ( i ) => {
@@ -608,13 +618,13 @@
 
 								// Avoid triggering a rerender here because we don't want to show the method
 								// in the table in case merchant doesn't finish flow.
-								
+
 								shippingMethodView.model.set( 'methods', response.data.methods );
 
 								// Close original modal
 								closeModal();
 							}
-							var instance_id = response.data.instance_id, 
+							var instance_id = response.data.instance_id,
 							    method      = response.data.methods[ instance_id ];
 
 							shippingMethodView.unblock();
@@ -642,7 +652,7 @@
 								shippingMethodView.model.trigger( 'change:methods' );
 								shippingMethodView.model.trigger( 'saved:methods' );
 							}
-		
+
 							$( document.body ).trigger( 'init_tooltips' );
 						}, 'json' );
 					}
@@ -650,8 +660,8 @@
 				// Free Shipping has hidden field elements depending on data values.
 				possiblyHideFreeShippingRequirements: function( data ) {
 					if ( Object.keys( data ).includes( 'woocommerce_free_shipping_requires' ) ) {
-						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null || 
-							data.woocommerce_free_shipping_requires === '' || 
+						const shouldHideRequirements = data.woocommerce_free_shipping_requires === null ||
+							data.woocommerce_free_shipping_requires === '' ||
 							data.woocommerce_free_shipping_requires === 'coupon';
 
 						const select = $( '#woocommerce_free_shipping_requires' );
@@ -678,6 +688,24 @@
 						event.data.view.possiblyAddShippingClassLink( event );
 						if ( window.wc.wcSettings.CURRENCY && window.wc.currency.localiseMonetaryValue ) {
 							const config = window.wc.wcSettings.CURRENCY;
+							$('.wc-shipping-modal-price').on( 'input', function() {
+								// When the user types, we validate the value.
+								const value = $(this).val();
+								$(this).removeClass( 'wc-shipping-invalid-price' );
+								$(this).siblings( 'span.wc-shipping-invalid-price-message' ).remove();
+								const modal = $( this ).parents( '.wc-backbone-modal-main' );
+								modal.find( '#btn-ok' ).removeAttr( 'disabled' );
+								modal.find( '.wc-shipping-method-add-class-costs').show();
+								if ( ! WCNumberValidation.isValidFormattedNumber( value, config ) ) {
+									$(this).addClass( 'wc-shipping-invalid-price' );
+									$('<span class="wc-shipping-zone-method-fields-help-text wc-shipping-invalid-price-message">'
+										+ shippingZoneMethodsLocalizeScript.strings.invalid_number_format
+										+ '</span>').insertAfter( this );
+									modal.find( '#btn-ok' ).attr( 'disabled', 'disabled' );
+									modal.find( '.wc-shipping-method-add-class-costs').hide();
+								}
+							});
+
 							$('.wc-shipping-modal-price').on('blur', function() {
 								const value = $(this).val();
 								const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );

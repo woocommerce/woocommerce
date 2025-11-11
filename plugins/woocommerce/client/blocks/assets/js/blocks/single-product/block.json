@@ -1,10 +1,10 @@
 {
 	"name": "woocommerce/single-product",
 	"icon": "info",
-	"title": "Single Product",
-	"description": "Display a single product.",
+	"title": "Product",
+	"description": "Display a single product of your choice with full control over its presentation.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce" ],
+	"keywords": [ "WooCommerce", "single product" ],
 	"supports": {
 		"interactivity": true,
 		"align": [ "wide", "full" ]

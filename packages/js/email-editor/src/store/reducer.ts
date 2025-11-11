@@ -10,36 +10,45 @@ export function reducer( state: State, action ): State {
 				...state,
 				preview: { ...state.preview, ...action.state },
 			};
-		case 'CHANGE_PERSONALIZATION_TAGS_STATE':
+		case 'SET_EMAIL_POST':
 			return {
 				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
-				},
+				...action.state,
 			};
-		case 'SET_PERSONALIZATION_TAGS':
+		case 'SET_CONTENT_VALIDATION':
 			return {
 				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					list: action.personalizationTags,
-				},
+				contentValidation: action.validation,
 			};
-		case 'SET_IS_FETCHING_PERSONALIZATION_TAGS':
+		case 'SET_EDITOR_SETTINGS':
 			return {
 				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
-				},
+				editorSettings: action.editorSettings,
 			};
-		case 'SET_PERSONALIZATION_TAGS_LIST':
+		case 'SET_EDITOR_THEME':
 			return {
 				...state,
-				personalizationTags: {
-					...state.personalizationTags,
-					...action.state,
+				theme: action.theme,
+			};
+		case 'SET_EDITOR_URLS':
+			return {
+				...state,
+				urls: { ...state.urls, ...action.urls },
+			};
+		case 'SET_EDITOR_CONFIG':
+			return {
+				...state,
+				editorSettings: action.config.editorSettings,
+				theme: action.config.theme,
+				urls: action.config.urls,
+				preview: {
+					...state.preview,
+					toEmail: action.config.userEmail,
+				},
+				styles: {
+					...state.styles,
+					globalStylesPostId:
+						action.config.globalStylesPostId ?? null,
 				},
 			};
 		default:

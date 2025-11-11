@@ -74,6 +74,21 @@
 	margin: 0;
 }
 
+/*
+ * Table block enhancements
+ */
+.wp-block-table figcaption {
+	/* Center-align table captions like core WordPress */
+	text-align: center;
+}
+
+/* Ensure bold formatting shows up in table cells and captions in the editor */
+.wp-block-table td strong,
+.wp-block-table th strong,
+.wp-block-table figcaption strong {
+	font-weight: bold;
+}
+
 .wp-block-image.alignleft,
 .wp-block-image.alignright {
 	margin-inline: 0 0;
@@ -94,9 +109,7 @@
  * This also overrides the default values in browsers for padding-inline-start
  */
 ul,
-ol,
-ul.has-background,
-ol.has-background {
+ol {
 	padding-left: 40px;
 }
 
@@ -178,4 +191,12 @@ ol.has-background {
 :where(.wp-block-social-links:not(.is-style-logos-only)) .wp-social-link-chain {
 	background-color:#000;
 	color:#fff;
-	}
+}
+
+/**
+ * Override the default overflow-x for the iframe in the editor.
+ * This is needed because we do want allow scrolling on small screens such as mobile devices.
+ */
+.block-editor-iframe__body {
+	overflow-x: auto;
+}

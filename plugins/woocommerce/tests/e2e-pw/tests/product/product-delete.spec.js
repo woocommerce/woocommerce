@@ -1,10 +1,17 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_API_PATH,
+	WC_ADMIN_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -26,7 +33,7 @@ const test = baseTest.extend( {
 		} catch ( error ) {
 			// Only throw if the error is not a 404 (product not found).
 			// This is expected if the product was already deleted by the test.
-			if ( error.data?.data?.status !== 404 ) {
+			if ( error.status !== 404 ) {
 				throw error;
 			}
 		}

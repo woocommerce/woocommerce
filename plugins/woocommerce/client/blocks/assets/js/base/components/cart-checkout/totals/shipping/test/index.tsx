@@ -20,7 +20,9 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 // Mock use select so we can override it when wc/store/checkout is accessed, but return the original select function if any other store is accessed.
-wpData.useSelect.mockImplementation(
+(
+	wpData.useSelect as jest.MockedFunction< typeof wpData.useSelect >
+ ).mockImplementation(
 	jest.fn().mockImplementation( ( passedMapSelect ) => {
 		const mockedSelect = jest.fn().mockImplementation( ( storeName ) => {
 			if ( storeName === 'wc/store/checkout' ) {
@@ -106,16 +108,25 @@ jest.mock( '@woocommerce/base-context/hooks', () => {
 		...jest.requireActual( '@woocommerce/base-context/hooks' ),
 		useShippingData: jest.fn(),
 		useStoreCart: jest.fn(),
+		useOrderSummaryLoadingState: jest.fn(),
 	};
 } );
 
-baseContextHooks.useShippingData.mockReturnValue( {
+(
+	baseContextHooks.useShippingData as jest.MockedFunction<
+		typeof baseContextHooks.useShippingData
+	>
+ ).mockReturnValue( {
 	needsShipping: true,
 	selectShippingRate: jest.fn(),
 	shippingRates,
 } );
 
-baseContextHooks.useStoreCart.mockReturnValue( {
+(
+	baseContextHooks.useStoreCart as jest.MockedFunction<
+		typeof baseContextHooks.useStoreCart
+	>
+ ).mockReturnValue( {
 	cartItems: mockPreviewCart.items,
 	cartTotals: mockPreviewCart.totals,
 	cartCoupons: mockPreviewCart.coupons,
@@ -128,9 +139,48 @@ baseContextHooks.useStoreCart.mockReturnValue( {
 	isLoadingRates: false,
 } );
 
+(
+	baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+		typeof baseContextHooks.useOrderSummaryLoadingState
+	>
+ ).mockReturnValue( {
+	isLoading: false,
+} );
+
 describe( 'TotalsShipping', () => {
+	it( 'shows skeleton when loading', () => {
+		// Set loading state to true
+		(
+			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+				typeof baseContextHooks.useOrderSummaryLoadingState
+			>
+		 ).mockReturnValue( {
+			isLoading: true,
+		} );
+
+		render(
+			<SlotFillProvider>
+				<TotalsShipping />
+			</SlotFillProvider>
+		);
+		expect( screen.getByText( 'Shipping' ) ).toBeInTheDocument();
+		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
+	} );
+
 	it( 'shows FREE if shipping cost is 0', () => {
-		baseContextHooks.useStoreCart.mockReturnValue( {
+		// Set loading state to false
+		(
+			baseContextHooks.useOrderSummaryLoadingState as jest.MockedFunction<
+				typeof baseContextHooks.useOrderSummaryLoadingState
+			>
+		 ).mockReturnValue( {
+			isLoading: false,
+		} );
+		(
+			baseContextHooks.useStoreCart as jest.MockedFunction<
+				typeof baseContextHooks.useStoreCart
+			>
+		 ).mockReturnValue( {
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,
@@ -154,7 +204,11 @@ describe( 'TotalsShipping', () => {
 		).toBeInTheDocument();
 		expect( screen.queryByText( '0.00' ) ).not.toBeInTheDocument();
 
-		baseContextHooks.useStoreCart.mockReturnValue( {
+		(
+			baseContextHooks.useStoreCart as jest.MockedFunction<
+				typeof baseContextHooks.useStoreCart
+			>
+		 ).mockReturnValue( {
 			...baseContextHooks.useStoreCart(),
 			shippingRates: [
 				...shippingRates,

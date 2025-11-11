@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix Undefined array key "product_ids" warning in get_expired_subscription_notice
-

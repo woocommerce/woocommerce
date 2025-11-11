@@ -32,13 +32,14 @@ test.describe( 'Single Product template', () => {
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();
+
 		await page
 			.getByPlaceholder( 'Search products' )
 			.fill( testData.productName );
 		await page
 			.getByRole( 'option', { name: testData.productName } )
 			.click();
-		await page.getByLabel( 'Fallback content' ).click();
+		await page.getByLabel( 'Close', { exact: true } ).click();
 
 		// Edit the template.
 		await editor.insertBlock( {

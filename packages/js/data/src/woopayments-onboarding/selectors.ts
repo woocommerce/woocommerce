@@ -9,7 +9,7 @@ export const getOnboardingData = (
 	// This is only used to get the onboarding data from the store,
 	// and is not used to determine the current step.
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	_source?: string | null
+	sessionEntryPoint?: string | null
 ): OnboardingState => state;
 
 export const isOnboardingDataRequestPending = (

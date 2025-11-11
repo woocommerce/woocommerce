@@ -1,6 +1,7 @@
 .wp-block-woocommerce-cart {
 	// Don't remove this, it marks the container for container queries used in inner blocks.
 	container-type: inline-size;
+	width: 100%;
 }
 
 .wc-block-cart {
@@ -21,15 +22,10 @@
 		margin: 0;
 	}
 
-	table.wc-block-cart-items,
-	table.wc-block-cart-items th,
-	table.wc-block-cart-items td {
-		margin: 0 0 $gap * 2.5;
-	}
-
 	.wp-block-woocommerce-cart-order-summary-block {
 		border-bottom: 1px solid $universal-border-light;
 		margin-bottom: $gap;
+		@include font-regular-locked;
 
 		.wc-block-components-totals-item,
 		.wc-block-components-panel,
@@ -45,7 +41,7 @@
 .wc-block-mini-cart__drawer.is-loading {
 	th span,
 	h2 span {
-		@include placeholder();
+		@include skeleton-animation();
 		@include force-content();
 		min-width: 84px;
 		display: inline-block;
@@ -56,10 +52,10 @@
 	.wc-block-components-product-price,
 	.wc-block-components-product-metadata,
 	.wc-block-components-quantity-selector {
-		@include placeholder();
+		@include skeleton-animation();
 	}
 	.wc-block-components-product-name {
-		@include placeholder();
+		@include skeleton-animation();
 		@include force-content();
 		min-width: 84px;
 		display: inline-block;
@@ -72,7 +68,7 @@
 		visibility: hidden;
 	}
 	.wc-block-cart-item__image > a {
-		@include placeholder();
+		@include skeleton-animation();
 		display: block;
 	}
 	.wc-block-components-product-price {
@@ -82,7 +78,7 @@
 		margin-top: 0.25em;
 	}
 	.wc-block-cart__sidebar .components-card {
-		@include placeholder();
+		@include skeleton-animation();
 		@include force-content();
 		min-height: 460px;
 	}
@@ -108,14 +104,11 @@
 	padding-top: 0;
 }
 
-@include cart-checkout-below-large {
+@include cart-checkout-below-large-container {
 	.wc-block-cart-item__total {
 		.wc-block-components-sale-badge {
 			display: none;
 		}
-	}
-	table.wc-block-cart-items {
-		margin: 0;
 	}
 
 	.wc-block-cart {
@@ -138,10 +131,10 @@
 
 		.wc-block-cart__totals-title {
 			@include text-heading();
-			@include font-size(smaller);
+			@include font-small-locked;
 			display: block;
 			font-weight: 700;
-			padding: $gap-smaller $gap $gap-smaller 0;
+			padding: $gap-smaller $gap $gap 0;
 			text-align: left;
 			text-transform: uppercase;
 		}
@@ -183,7 +176,8 @@
 	.wp-block-woocommerce-cart-line-items-block {
 		min-height: 15em;
 		display: block;
-		@include placeholder();
+		@include skeleton-animation();
+		@include skeleton-animation-fade();
 	}
 
 	.wp-block-woocommerce-cart-totals-block {
@@ -198,22 +192,24 @@
 	.wp-block-woocommerce-cart-express-payment-block,
 	.wp-block-woocommerce-proceed-to-checkout-block,
 	.wp-block-woocommerce-cart-accepted-payment-methods-block {
-		min-height: 3em;
+		min-height: 48px;
 		display: block;
-		@include placeholder();
+		@include skeleton-animation();
+		@include skeleton-animation-fade();
 		margin: 0 0 1em 0;
 	}
 
-	.wp-block-woocommerce-cart-order-summary-block {
-		height: 20em;
+	div.wp-block-woocommerce-cart-order-summary-block {
+		height: 200px;
+	}
+	div.wp-block-woocommerce-cart-order-summary-totals-block {
+		border-top: none;
 	}
 }
 
 // Skeleton is shown before mobile classes are appended.
-@media only screen and (max-width: 700px) {
+@include cart-checkout-below-large-container {
 	.wp-block-woocommerce-cart.is-loading {
-		padding-top: $gap;
-
 		.wp-block-woocommerce-filled-cart-block {
 			flex-direction: column;
 			margin: 0 auto $gap;

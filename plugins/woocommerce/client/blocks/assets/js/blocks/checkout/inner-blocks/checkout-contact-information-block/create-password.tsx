@@ -5,7 +5,7 @@ import PasswordStrengthMeter from '@woocommerce/base-components/cart-checkout/pa
 import { checkoutStore, validationStore } from '@woocommerce/block-data';
 import { ValidatedTextInput } from '@woocommerce/blocks-components';
 import { useDispatch, useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const CreatePassword = () => {
@@ -19,6 +19,30 @@ const CreatePassword = () => {
 	const { __internalSetCustomerPassword } = useDispatch( checkoutStore );
 	const { setValidationErrors, clearValidationError } =
 		useDispatch( validationStore );
+
+	useEffect( () => {
+		if ( ! customerPassword ) {
+			return;
+		}
+		if ( passwordStrength < 2 ) {
+			setValidationErrors( {
+				'account-password': {
+					message: __(
+						'Please create a stronger password',
+						'woocommerce'
+					),
+					hidden: true,
+				},
+			} );
+			return;
+		}
+		clearValidationError( 'account-password' );
+	}, [
+		clearValidationError,
+		customerPassword,
+		passwordStrength,
+		setValidationErrors,
+	] );
 
 	return (
 		<ValidatedTextInput
@@ -41,21 +65,7 @@ const CreatePassword = () => {
 							hidden: true,
 						},
 					} );
-					return;
 				}
-				if ( passwordStrength < 2 ) {
-					setValidationErrors( {
-						'account-password': {
-							message: __(
-								'Please create a stronger password',
-								'woocommerce'
-							),
-							hidden: true,
-						},
-					} );
-					return;
-				}
-				clearValidationError( 'account-password' );
 			} }
 			feedback={
 				<PasswordStrengthMeter

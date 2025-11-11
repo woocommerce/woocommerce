@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import {
@@ -8,7 +13,6 @@ import {
 	guestFile,
 } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
-import { WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	products: async ( { restApi }, use ) => {

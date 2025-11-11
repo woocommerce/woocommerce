@@ -41,7 +41,7 @@ test.describe( 'WooCommerce Email Settings List View', () => {
 		await expect( listViewLocator ).toBeVisible();
 
 		// Check that "New order" email type exists within the list view
-		await expect( listViewLocator.getByText( 'New order' ) ).toBeVisible();
+		await expect( listViewLocator.getByText( /New order/ ) ).toBeVisible();
 
 		// Check table columns
 		// Check that Title column exists

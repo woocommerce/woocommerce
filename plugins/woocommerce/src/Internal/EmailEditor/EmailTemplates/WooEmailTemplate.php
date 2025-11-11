@@ -45,10 +45,10 @@ class WooEmailTemplate {
 	 */
 	public function get_content(): string {
 		return '
-<!-- wp:group {"backgroundColor":"white","style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"layout":{"type":"constrained"}} -->
-<div class="wp-block-group has-white-background-color has-background" style="padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--20)"><!-- wp:image {"width":"130px","sizeSlug":"large"} -->
-<figure class="wp-block-image size-large is-resized"><img src="https://woocommerce.com/wp-content/uploads/2025/01/Logo-Primary.png" alt="Your Logo" style="width:130px"/></figure>
-<!-- /wp:image --></div>
+<!-- wp:group {"style":{"spacing":{"padding":{"top":"var:preset|spacing|10","bottom":"var:preset|spacing|10","left":"var:preset|spacing|20","right":"var:preset|spacing|20"}}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group" style="padding-top:var(--wp--preset--spacing--10);padding-right:var(--wp--preset--spacing--20);padding-bottom:var(--wp--preset--spacing--10);padding-left:var(--wp--preset--spacing--20)">
+' . $this->get_site_logo_or_title() . '
+</div>
 <!-- /wp:group -->
 
 <!-- wp:post-content {"lock":{"move":true,"remove":false},"layout":{"type":"default"}} /-->
@@ -59,5 +59,23 @@ class WooEmailTemplate {
 <!-- /wp:paragraph --></div>
 <!-- /wp:group -->
 		';
+	}
+
+	/**
+	 * Get the site logo or title.
+	 *
+	 * This is used to display the site logo or title in the email template.
+	 *
+	 * @return string HTML content for the site logo or title.
+	 */
+	private function get_site_logo_or_title(): string {
+		$custom_logo = get_custom_logo();
+
+		if ( ! empty( $custom_logo ) ) {
+			// Use Site logo if available.
+			return '<!-- wp:site-logo {"width":130, "isLink":false} /-->';
+		}
+
+		return '<!-- wp:site-title {"level":2} /-->';
 	}
 }

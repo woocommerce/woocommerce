@@ -1,9 +1,16 @@
 /**
+ * External dependencies
+ */
+import {
+	WC_ADMIN_API_PATH,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { WC_ADMIN_API_PATH, WC_API_PATH } from '../../utils/api-client';
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
@@ -61,7 +68,7 @@ test(
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await test.step( 'Load the WC Admin page.', async () => {
 			await expect(
-				page.getByText( 'Customize your store' )
+				page.getByRole( 'button', { name: 'Choose your theme' } )
 			).toBeVisible();
 			await expect( page.getByText( 'Store management' ) ).toBeHidden();
 		} );
@@ -96,7 +103,7 @@ test(
 		);
 		await nonSupportedWooPaymentsCountryPage
 			.locator( '.woocommerce-task-list__item' )
-			.filter( { hasText: 'Get paid' } )
+			.filter( { hasText: 'Set up payments' } )
 			.click();
 
 		await expect(
@@ -150,7 +157,7 @@ test( 'Can connect to WooCommerce.com', async ( { page } ) => {
 		await expect( page.url() ).toContain( 'wordpress.com/log-in' );
 		await expect(
 			page.getByRole( 'heading', {
-				name: 'Log in to your account',
+				name: 'Log in to Woo with WordPress.com',
 			} )
 		).toBeVisible( { timeout: 30000 } );
 	} );

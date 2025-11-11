@@ -1,11 +1,18 @@
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { test } from '../../../fixtures/block-editor-fixtures';
 import { helpers } from '../../../utils';
 import { tags, expect } from '../../../fixtures/fixtures';
-import { WC_API_PATH } from '../../../utils/api-client';
 import { clickOnTab } from '../../../utils/simple-products';
+import { skipTestsForDeprecatedFeature } from './helpers/skip-tests';
+
+skipTestsForDeprecatedFeature();
 
 const NEW_EDITOR_ADD_PRODUCT_URL =
 	'wp-admin/admin.php?page=wc-admin&path=%2Fadd-product';

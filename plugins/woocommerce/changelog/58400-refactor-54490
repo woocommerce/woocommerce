@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Refactor the useValidation hook. A deprecation warning will be shown when any part of the hook is accessed.

@@ -125,14 +125,25 @@ if ( ! function_exists( 'is_checkout' ) ) {
 if ( ! function_exists( 'is_checkout_pay_page' ) ) {
 
 	/**
-	 * Is_checkout_pay - Returns true when viewing the checkout's pay page.
+	 * Is_checkout_pay - Returns true when viewing the checkout's pay page (aka pay for order page).
 	 *
+	 * @param bool $use_query_params Whether to use query parameters to determine if this is the pay for order page.
 	 * @return bool
 	 */
-	function is_checkout_pay_page() {
+	function is_checkout_pay_page( bool $use_query_params = false ): bool {
 		global $wp;
 
-		return is_checkout() && ! empty( $wp->query_vars['order-pay'] );
+		// Use-case: attempt to identify the page based on global variables.
+		if ( ! empty( $wp->query_vars['order-pay'] ) && is_checkout() ) {
+			return true;
+		}
+
+		// Use-case: check for the presence of a specific query parameter when globals are not available.
+		if ( $use_query_params ) {
+			return isset( $_GET['pay_for_order'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		}
+
+		return false;
 	}
 }
 
@@ -278,6 +289,19 @@ if ( ! function_exists( 'is_lost_password_page' ) ) {
 		$page_id = wc_get_page_id( 'myaccount' );
 
 		return ( $page_id && is_page( $page_id ) && isset( $wp->query_vars['lost-password'] ) );
+	}
+}
+
+if ( ! function_exists( 'is_wc_admin_settings_page' ) ) {
+
+	/**
+	 * Is_wc_admin_settings_page - Returns true when viewing the admin settings page.
+	 *
+	 * @return bool
+	 */
+	function is_wc_admin_settings_page(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		return isset( $_REQUEST['page'] ) && 'wc-settings' === wp_unslash( $_REQUEST['page'] ) && is_admin();
 	}
 }
 

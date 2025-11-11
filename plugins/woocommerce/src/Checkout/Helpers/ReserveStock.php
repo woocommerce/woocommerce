@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Checkout\Helpers;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -43,9 +44,9 @@ final class ReserveStock {
 	 * Query for any existing holds on stock for this item.
 	 *
 	 * @param \WC_Product $product Product to get reserved stock for.
-	 * @param integer     $exclude_order_id Optional order to exclude from the results.
+	 * @param int         $exclude_order_id Optional order to exclude from the results.
 	 *
-	 * @return integer Amount of stock already reserved.
+	 * @return int|float Amount of stock already reserved.
 	 */
 	public function get_reserved_stock( $product, $exclude_order_id = 0 ) {
 		global $wpdb;
@@ -54,8 +55,10 @@ final class ReserveStock {
 			return 0;
 		}
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
-		return (int) $wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) );
+		return wc_stock_amount(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			$wpdb->get_var( $this->get_query_for_reserved_stock( $product->get_stock_managed_by_id(), $exclude_order_id ) )
+		);
 	}
 
 	/**
@@ -161,6 +164,11 @@ final class ReserveStock {
 					_x( 'Stock hold of %1$s minutes applied to: %2$s', 'held stock note', 'woocommerce' ),
 					$minutes,
 					'<br>' . implode( '<br>', $held_stock_notes )
+				),
+				false,
+				false,
+				array(
+					'note_group' => OrderNoteGroup::PRODUCT_STOCK,
 				)
 			);
 		}
@@ -238,8 +246,8 @@ final class ReserveStock {
 	/**
 	 * Returns query statement for getting reserved stock of a product.
 	 *
-	 * @param int     $product_id Product ID.
-	 * @param integer $exclude_order_id Optional order to exclude from the results.
+	 * @param int $product_id Product ID.
+	 * @param int $exclude_order_id Optional order to exclude from the results.
 	 * @return string|void Query statement.
 	 */
 	private function get_query_for_reserved_stock( $product_id, $exclude_order_id = 0 ) {

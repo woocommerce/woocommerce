@@ -1,5 +1,11 @@
-.editor-styles-wrapper ul.wc-block-product-template {
-	padding-left: 0;
-	margin-left: 0;
-	list-style: none;
+.editor-styles-wrapper {
+	.is-product-collection-layout-carousel {
+		overflow-x: hidden;
+	}
+
+	ul.wc-block-product-template {
+		padding-left: 0;
+		margin-left: 0;
+		list-style: none;
+	}
 }

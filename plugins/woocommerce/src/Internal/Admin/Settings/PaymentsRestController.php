@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Internal\Utilities\ArrayUtil;
 use Exception;
 use WP_Error;
 use WP_REST_Request;
@@ -11,6 +12,8 @@ use WP_REST_Response;
 
 /**
  * Controller for the REST endpoints to service the Payments settings page.
+ *
+ * @internal
  */
 class PaymentsRestController extends RestApiControllerBase {
 
@@ -77,7 +80,7 @@ class PaymentsRestController extends RestApiControllerBase {
 			'/' . $this->rest_base . '/providers',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => fn( $request ) => $this->run( $request, 'get_providers' ),
 					'validation_callback' => 'rest_validate_request_arg',
 					'permission_callback' => fn( $request ) => $this->check_permissions( $request ),
@@ -478,7 +481,8 @@ class PaymentsRestController extends RestApiControllerBase {
 	private function prepare_payment_providers_response( array $response ): array {
 		$response = $this->prepare_payment_providers_response_recursive( $response, $this->get_schema_for_get_payment_providers() );
 
-		$response['providers'] = $this->add_provider_links( $response['providers'] );
+		$response['providers']   = $this->add_provider_links( $response['providers'] );
+		$response['suggestions'] = $this->add_suggestion_links( $response['suggestions'] );
 
 		return $response;
 	}
@@ -492,9 +496,17 @@ class PaymentsRestController extends RestApiControllerBase {
 	 * @return mixed The prepared response item.
 	 */
 	private function prepare_payment_providers_response_recursive( $response_item, array $schema ) {
-		if ( is_null( $response_item ) ||
-			! array_key_exists( 'properties', $schema ) ||
+		if ( is_null( $response_item ) ) {
+			return null;
+		}
+
+		if ( ! array_key_exists( 'properties', $schema ) ||
 			! is_array( $schema['properties'] ) ) {
+
+			// Filter out null values for loosely defined schema types.
+			if ( is_array( $response_item ) ) {
+				return ArrayUtil::filter_null_values_recursive( $response_item );
+			}
 			return $response_item;
 		}
 
@@ -518,9 +530,7 @@ class PaymentsRestController extends RestApiControllerBase {
 		$prepared_response = array_merge( array_fill_keys( array_keys( $schema['properties'] ), null ), $prepared_response );
 
 		// Remove any null values from the response.
-		$prepared_response = array_filter( $prepared_response, fn( $value ) => ! is_null( $value ) );
-
-		return $prepared_response;
+		return ArrayUtil::filter_null_values_recursive( $prepared_response );
 	}
 
 	/**
@@ -562,6 +572,34 @@ class PaymentsRestController extends RestApiControllerBase {
 		}
 
 		return $providers;
+	}
+
+	/**
+	 * Add links to suggestions list items.
+	 *
+	 * @param array $suggestions The suggestions list.
+	 *
+	 * @return array The suggestions list with added links.
+	 */
+	private function add_suggestion_links( array $suggestions ): array {
+		foreach ( $suggestions as $key => $suggestion ) {
+			if ( empty( $suggestion['id'] ) ) {
+				continue;
+			}
+
+			if ( empty( $suggestion['_links'] ) ) {
+				$suggestions[ $key ]['_links'] = array();
+			}
+
+			$suggestions[ $key ]['_links']['attach'] = array(
+				'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/attach', $this->route_namespace, $this->rest_base, $suggestion['id'] ) ),
+			);
+			$suggestions[ $key ]['_links']['hide']   = array(
+				'href' => rest_url( sprintf( '/%s/%s/suggestion/%s/hide', $this->route_namespace, $this->rest_base, $suggestion['id'] ) ),
+			);
+		}
+
+		return $suggestions;
 	}
 
 	/**
@@ -844,12 +882,29 @@ class PaymentsRestController extends RestApiControllerBase {
 							'description' => esc_html__( 'The state of the onboarding process.', 'woocommerce' ),
 							'context'     => array( 'view', 'edit' ),
 						),
+						'messages'                    => array(
+							'type'                 => 'object',
+							'description'          => esc_html__( 'Various messages to possibly show the user.', 'woocommerce' ),
+							'context'              => array( 'view', 'edit' ),
+							'readonly'             => true,
+							'additionalProperties' => array(
+								'type'        => 'string',
+								'description' => esc_html__( 'Message to show the user.', 'woocommerce' ),
+								'readonly'    => true,
+							),
+						),
+						'steps'                       => array(
+							'type'        => 'array',
+							'description' => esc_html__( 'The onboarding steps in case this provider supports native in-context onboarding.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+						),
 						'_links'                      => array(
 							'type'       => 'object',
 							'context'    => array( 'view', 'edit' ),
 							'readonly'   => true,
 							'properties' => array(
-								'preload' => array(
+								'preload'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The onboarding preload link for the payment gateway.', 'woocommerce' ),
 									'context'     => array( 'view', 'edit' ),
@@ -863,7 +918,7 @@ class PaymentsRestController extends RestApiControllerBase {
 										),
 									),
 								),
-								'onboard' => array(
+								'onboard'              => array(
 									'type'        => 'object',
 									'description' => esc_html__( 'The start/continue onboarding link for the payment gateway.', 'woocommerce' ),
 									'context'     => array( 'view', 'edit' ),
@@ -872,6 +927,34 @@ class PaymentsRestController extends RestApiControllerBase {
 										'href' => array(
 											'type'        => 'string',
 											'description' => esc_html__( 'The URL to start/continue onboarding for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
+								'disable_test_account' => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The link to disable the test account for the payment gateway.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to POST to disable the test account for the payment gateway.', 'woocommerce' ),
+											'context'     => array( 'view', 'edit' ),
+											'readonly'    => true,
+										),
+									),
+								),
+								'reset'                => array(
+									'type'        => 'object',
+									'description' => esc_html__( 'The link to reset the provider state/account and restart the onboarding.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+									'properties'  => array(
+										'href' => array(
+											'type'        => 'string',
+											'description' => esc_html__( 'The URL to POST to for resetting the provider onboarding.', 'woocommerce' ),
 											'context'     => array( 'view', 'edit' ),
 											'readonly'    => true,
 										),
@@ -934,6 +1017,12 @@ class PaymentsRestController extends RestApiControllerBase {
 									),
 								),
 							),
+						),
+						'context'                     => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'Various contextual data for the onboarding process to use.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
 						),
 					),
 				),
@@ -1118,6 +1207,41 @@ class PaymentsRestController extends RestApiControllerBase {
 					'description' => esc_html__( 'The category of the suggestion.', 'woocommerce' ),
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
+				),
+				'_links'      => array(
+					'type'       => 'object',
+					'context'    => array( 'view', 'edit' ),
+					'readonly'   => true,
+					'properties' => array(
+						'attach' => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to mark the suggestion as attached. This should be called when an extension is installed.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to attach the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+						'hide'   => array(
+							'type'        => 'object',
+							'description' => esc_html__( 'The link to hide the suggestion.', 'woocommerce' ),
+							'context'     => array( 'view', 'edit' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'href' => array(
+									'type'        => 'string',
+									'description' => esc_html__( 'The URL to hide the suggestion.', 'woocommerce' ),
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+							),
+						),
+					),
 				),
 			),
 		);

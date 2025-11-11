@@ -341,6 +341,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				'no'                                  => __( 'No', 'woocommerce' ),
 				'default_zone_name'                   => __( 'Zone', 'woocommerce' ),
 				'delete_shipping_method_confirmation' => __( 'Are you sure you want to delete this shipping method?', 'woocommerce' ),
+				'invalid_number_format'               => __( 'Please enter a valid number.', 'woocommerce' ),
 			),
 		);
 

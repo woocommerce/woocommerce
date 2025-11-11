@@ -19,7 +19,6 @@ import Noninteractive from '@woocommerce/base-components/noninteractive';
 import { isSiteEditorPage } from '@woocommerce/utils';
 import type { ReactElement } from 'react';
 import { useRef } from '@wordpress/element';
-import { select } from '@wordpress/data';
 import { cartOutline, bag, bagAlt } from '@woocommerce/icons';
 import { Icon } from '@wordpress/icons';
 import { WC_BLOCKS_IMAGE_URL } from '@woocommerce/block-settings';
@@ -89,7 +88,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 		className: 'wc-block-mini-cart',
 	} );
 
-	const isSiteEditor = isSiteEditorPage( select( 'core/edit-site' ) );
+	const isSiteEditor = isSiteEditorPage();
 
 	const templatePartEditUri = getSetting(
 		'templatePartEditUri',
@@ -97,10 +96,11 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 	) as string;
 
 	// Apply Mini Cart quantity badge styles based on Site Editor's background and text colors.
+	// We need to set `span` in the selector so it has more specificity than the CSS.
 	useThemeColors(
 		'mini-cart-badge',
 		( { editorBackgroundColor, editorColor } ) => `
-			:where(.wc-block-mini-cart__badge) {
+			span:where(.wc-block-mini-cart__badge) {
 				color: ${ editorBackgroundColor };
 				background-color: ${ editorColor };
 			}

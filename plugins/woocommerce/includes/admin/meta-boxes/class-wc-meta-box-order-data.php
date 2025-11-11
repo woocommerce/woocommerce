@@ -214,70 +214,86 @@ class WC_Meta_Box_Order_Data {
 			<input name="post_title" type="hidden" value="<?php echo esc_attr( empty( $order->get_title() ) ? __( 'Order', 'woocommerce' ) : $order->get_title() ); ?>" />
 			<input name="post_status" type="hidden" value="<?php echo esc_attr( $order->get_status() ); ?>" />
 			<div id="order_data" class="panel woocommerce-order-data">
-				<h2 class="woocommerce-order-data__heading">
-					<?php
+				<div class="order_data_header">
+					<div class="order_data_header_column">
+						<h2 class="woocommerce-order-data__heading">
+							<?php
 
-					printf(
-						/* translators: 1: order type 2: order number */
-						esc_html__( '%1$s #%2$s details', 'woocommerce' ),
-						esc_html( $order_type_object->labels->singular_name ),
-						esc_html( $order->get_order_number() )
-					);
+							printf(
+								/* translators: 1: order type 2: order number */
+								esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+								esc_html( $order_type_object->labels->singular_name ),
+								esc_html( $order->get_order_number() )
+							);
 
-					?>
-				</h2>
-				<p class="woocommerce-order-data__meta order_number">
-					<?php
+							?>
+						</h2>
+						<p class="woocommerce-order-data__meta order_number">
+							<?php
 
-					$meta_list = array();
+							$meta_list = array();
 
-					if ( $payment_method && 'other' !== $payment_method ) {
-						$payment_method_string = sprintf(
-							/* translators: %s: payment method */
-							__( 'Payment via %s', 'woocommerce' ),
-							esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
-						);
+							if ( $payment_method && 'other' !== $payment_method ) {
+								$payment_method_string = sprintf(
+									/* translators: %s: payment method */
+									__( 'Payment via %s', 'woocommerce' ),
+									esc_html( isset( $payment_gateways[ $payment_method ] ) ? $payment_gateways[ $payment_method ]->get_title() : $payment_method )
+								);
 
-						$transaction_id = $order->get_transaction_id();
-						if ( $transaction_id ) {
+								$transaction_id = $order->get_transaction_id();
+								if ( $transaction_id ) {
 
-							$to_add = null;
-							if ( isset( $payment_gateways[ $payment_method ] ) ) {
-								$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
-								if ( $url ) {
-									$to_add .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+									$to_add = null;
+									if ( isset( $payment_gateways[ $payment_method ] ) ) {
+										$url = $payment_gateways[ $payment_method ]->get_transaction_url( $order );
+										if ( $url ) {
+											$to_add .= ' (<a href="' . esc_url( $url ) . '" target="_blank">' . esc_html( $transaction_id ) . '</a>)';
+										}
+									}
+
+									$to_add                 = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
+									$payment_method_string .= $to_add;
 								}
+
+								$meta_list[] = $payment_method_string;
 							}
 
-							$to_add                 = $to_add ?? ' (' . esc_html( $transaction_id ) . ')';
-							$payment_method_string .= $to_add;
-						}
+							if ( $order->get_date_paid() ) {
+								$meta_list[] = sprintf(
+									/* translators: 1: date 2: time */
+									__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
+									wc_format_datetime( $order->get_date_paid() ),
+									wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
+								);
+							}
 
-						$meta_list[] = $payment_method_string;
-					}
+							$ip_address = $order->get_customer_ip_address();
+							if ( $ip_address ) {
+								$meta_list[] = sprintf(
+									/* translators: %s: IP address */
+									__( 'Customer IP: %s', 'woocommerce' ),
+									'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
+								);
+							}
 
-					if ( $order->get_date_paid() ) {
-						$meta_list[] = sprintf(
-							/* translators: 1: date 2: time */
-							__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
-							wc_format_datetime( $order->get_date_paid() ),
-							wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
-						);
-					}
+							echo wp_kses_post( implode( '. ', $meta_list ) );
 
-					$ip_address = $order->get_customer_ip_address();
-					if ( $ip_address ) {
-						$meta_list[] = sprintf(
-							/* translators: %s: IP address */
-							__( 'Customer IP: %s', 'woocommerce' ),
-							'<span class="woocommerce-Order-customerIP">' . esc_html( $ip_address ) . '</span>'
-						);
-					}
-
-					echo wp_kses_post( implode( '. ', $meta_list ) );
-
-					?>
-				</p>
+							?>
+						</p>
+					</div>
+					<div class="order_data_header_column">
+						<?php
+							/**
+							 * Hook allowing extenders to render custom content
+							 * besides the Order header.
+							 *
+							 * @param $order WC_Order The order object being displayed.
+							 * @since 9.9.0
+							 */
+							do_action( 'woocommerce_admin_order_data_header_right', $order );
+						?>
+					</div>
+				</div>
 				<?php
 					/**
 					 * Hook allowing extenders to render custom content
@@ -367,7 +383,7 @@ class WC_Meta_Box_Order_Data {
 									$customer = new WC_Customer( $user_id );
 									/* translators: 1: user display name 2: user ID 3: user email */
 									$user_string = sprintf(
-										/* translators: 1: customer name, 2 customer id, 3: customer email */
+									/* translators: 1: customer name, 2 customer id, 3: customer email */
 										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
 										$customer->get_first_name() . ' ' . $customer->get_last_name(),
 										$customer->get_id(),
@@ -587,7 +603,7 @@ class WC_Meta_Box_Order_Data {
 								}
 
 								if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) && $order->get_customer_note() ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( $order->get_customer_note() ) ), array( 'br' => array() ) ) . '</p>';
+									echo '<p class="order_note"><strong>' . esc_html( __( 'Customer provided note:', 'woocommerce' ) ) . '</strong> ' . wp_kses( nl2br( esc_html( wc_wptexturize_order_note( $order->get_customer_note() ) ) ), array( 'br' => array() ) ) . '</p>';
 								}
 							}
 							?>

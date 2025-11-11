@@ -1,0 +1,341 @@
+name: 'Release: Generate Number of Commits and Contributors'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
+  workflow_call:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: 'The release version (in X.Y or X.Y.Z-beta.N formats) to generate the release summary for.'
+
+jobs:
+  extract-versions:
+    name: Extract release current and previous versions
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      current_version: ${{ steps.calculate-versions.outputs.current_version }}
+      previous_version: ${{ steps.calculate-versions.outputs.previous_version }}
+    steps:
+      - name: Ensure running from trunk branch
+        run: |
+          if [ "${{ github.ref }}" != "refs/heads/trunk" ] && [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "::error::This workflow should only run from trunk branch, currently running from ${{ github.ref }}."
+            exit 1
+          fi
+
+      - name: Extract version from the provided input version
+        id: version-from-input
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const currentVersion = '${{ inputs.version }}';
+            console.log(`Current version from input: ${currentVersion}`);
+
+            const versionMatch = currentVersion.match(/^(\d+)\.(\d+)(?:\.\d+)?(?:-(beta)\.(\d+))?$/);
+            if (!versionMatch) {
+              core.setFailed(`Version format must be 'x.y' or 'x.y.z-beta.N'. Provided: ${currentVersion}`);
+              process.exit(1);
+            }
+
+            const major = parseInt(versionMatch[1]);
+            const minor = parseInt(versionMatch[2]);
+            const prereleaseType = versionMatch[3] || '';
+            const prereleaseVersion = versionMatch[4] || '';
+
+            console.log(`Parsed version: major=${major}, minor=${minor}, prerelease_type=${prereleaseType}, prerelease_version=${prereleaseVersion}`);
+
+            core.setOutput('major', major);
+            core.setOutput('minor', minor);
+            core.setOutput('is_prerelease', prereleaseType !== '');
+
+      - name: Calculate current and previous version
+        id: calculate-versions
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const major = parseInt('${{ steps.version-from-input.outputs.major }}');
+            const minor = parseInt('${{ steps.version-from-input.outputs.minor }}');
+
+            let previousVersion;
+            if (minor > 0) {
+              previousVersion = `${major}.${minor - 1}`;
+            } else {
+              previousVersion = `${major - 1}.9`;
+            }
+
+            console.log(`Current version: ${major}.${minor}`);
+            console.log(`Previous version: ${previousVersion}`);
+
+            core.setOutput('current_version', `${major}.${minor}`);
+            core.setOutput('previous_version', previousVersion);
+
+      - name: Check the necessary branches exist
+        run: |
+          CURRENT_BRANCH="release/${{ steps.calculate-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="release/${{ steps.calculate-versions.outputs.previous_version }}"
+
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${CURRENT_BRANCH} > /dev/null; then
+            echo "::error::Branch '$CURRENT_BRANCH' for the ${{ steps.calculate-versions.outputs.current_version }} version does not exist."
+            exit 1
+          fi
+
+          if ! git ls-remote --exit-code --heads https://github.com/${GITHUB_REPOSITORY} ${PREVIOUS_BRANCH} > /dev/null; then
+            echo "::error::Branch '$PREVIOUS_BRANCH' for the ${{ steps.calculate-versions.outputs.previous_version }} version does not exist."
+            exit 1
+          fi
+
+  count-commits-and-contributors:
+    name: Count commits and contributors between releases
+    needs: extract-versions
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      commit_count: ${{ steps.count-commits.outputs.commit_count }}
+      contributor_count: ${{ steps.count-commits.outputs.contributor_count }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Count
+        id: count-commits
+        run: |
+          CURRENT_BRANCH="origin/release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="origin/release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          set +e  # Don't exit on error for the git command
+          COMMIT_COUNT=$(git rev-list --count ${CURRENT_BRANCH} ^${PREVIOUS_BRANCH} 2>&1)
+          COMMIT_EXIT_CODE=$?
+
+          CONTRIBUTOR_COUNT=$(git log --format='%ae' ${PREVIOUS_BRANCH}..${CURRENT_BRANCH} | sort -u | wc -l 2>&1)
+          CONTRIBUTOR_EXIT_CODE=$?
+          set -e  # Resume exit on error
+
+          if [ $COMMIT_EXIT_CODE -eq 0 ] && [ $CONTRIBUTOR_EXIT_CODE -eq 0 ]; then
+            echo "Found ${COMMIT_COUNT} commits and ${CONTRIBUTOR_COUNT} contributors in the ${{ needs.extract-versions.outputs.current_version }} release"
+            echo "commit_count=${COMMIT_COUNT}" >> $GITHUB_OUTPUT
+            echo "contributor_count=${CONTRIBUTOR_COUNT}" >> $GITHUB_OUTPUT
+          else
+            echo "Error counting commits: ${COMMIT_COUNT}"
+            exit 1
+          fi
+
+  generate-contributors-list:
+    name: Generate contributors list
+    needs: extract-versions
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      contributor_list_path: ${{ steps.generate-contributors-list.outputs.filepath }}
+      artifact_url: ${{ steps.output-artifact-url.outputs.artifact_url }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup PNPM
+        uses: pnpm/action-setup@a7487c7e89a18df4991f7f222e4898a00d66ddda # v4.1.0
+
+      - name: Setup Node
+        uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install prerequisites
+        working-directory: tools/release-posts
+        run: |
+          pnpm install
+
+      - name: Generate contributors list
+        id: generate-contributors-list
+        working-directory: tools/release-posts
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          CURRENT_BRANCH="release/${{ needs.extract-versions.outputs.current_version }}"
+          PREVIOUS_BRANCH="release/${{ needs.extract-versions.outputs.previous_version }}"
+
+          OUTPUT=$(pnpm run release-post contributors ${CURRENT_BRANCH} ${PREVIOUS_BRANCH})
+          echo "$OUTPUT"
+
+          HTML_FILE_PATH=$(echo "$OUTPUT" | grep "Contributors HTML generated at" | sed 's/.*Contributors HTML generated at //')
+          if [ -z "$HTML_FILE_PATH" ]; then
+            echo "Error: Could not find HTML file path in $OUTPUT"
+            exit 1
+          fi
+
+          echo "filepath=${HTML_FILE_PATH}" >> $GITHUB_OUTPUT
+
+      - name: Upload contributors HTML
+        id: artifact-upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: contributors-release-${{ needs.extract-versions.outputs.current_version }}
+          path: ${{ steps.generate-contributors-list.outputs.filepath }}
+
+      - name: Output artifact URL
+        id: output-artifact-url
+        run: |
+          ARTIFACT_URL=${{ steps.artifact-upload.outputs.artifact-url }}
+          echo "artifact_url=$ARTIFACT_URL" >> $GITHUB_OUTPUT
+
+  db-updates:
+    name: Check for database updates
+    needs: extract-versions
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      has_updates: ${{ steps.check-db-updates.outputs.has_updates }}
+      updates_list: ${{ steps.check-db-updates.outputs.updates_list }}
+      formatted_updates: ${{ steps.find-pr.outputs.formatted_updates }}
+    steps:
+      - name: Checkout utilities
+        uses: actions/checkout@v4
+        with:
+          ref: trunk
+          path: checkout-trunk
+          sparse-checkout: |
+            /.github/workflows/scripts/release-check-db-updates.js
+          sparse-checkout-cone-mode: false
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          ref: release/${{ needs.extract-versions.outputs.current_version }}
+          path: checkout-release
+          fetch-depth: 0
+
+      - name: Check for database updates
+        id: check-db-updates
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const fs = require('fs');
+            const { readDbUpdatesFromString } = require( './checkout-trunk/.github/workflows/scripts/release-check-db-updates' );
+            const path = 'checkout-release/plugins/woocommerce/includes/class-wc-install.php';
+            const version = '${{ needs.extract-versions.outputs.current_version }}';
+
+            console.log(`Checking for database updates for version: ${version}`);
+
+            try {
+              const fileContent = fs.readFileSync(path, 'utf8');
+              const dbUpdates   = readDbUpdatesFromString( fileContent );
+
+              if ( ! dbUpdates || 0 === dbUpdates.size ) {
+                console.log('Could not find `$db_updates` array in the file.');
+                core.setOutput('has_updates', 'false');
+                return;
+              }
+
+              // Group all db updates for this version.
+              const updates = [];
+
+              const fullVersion = version + '.0';
+              for ( const [ key, value ] of dbUpdates ) {
+                if ( key.replace( /-.*$/, '' ) !== fullVersion ) {
+                  continue;
+                }
+
+                updates.push( ...value );
+              }
+
+              if ( updates.length > 0 ) {
+                console.log( `✅ Found database updates for version ${version}` );
+
+                core.setOutput( 'has_updates', 'true' );
+                core.setOutput( 'updates_list', updates.join( ',' ) );
+              } else {
+                console.log( `⛔ No database updates found for version ${version}` );
+                core.setOutput( 'has_updates', 'false' );
+                core.setOutput( 'updates_list', '' );
+               }
+            } catch (error) {
+              core.setFailed(`Failed to check database updates: ${error.message}`);
+            }
+
+      - name: Find PRs for each database update
+        id: find-pr
+        if: ${{ steps.check-db-updates.outputs.has_updates == 'true' }}
+        run: |
+          FILE_PATH="plugins/woocommerce/includes/class-wc-install.php"
+          UPDATES="${{ steps.check-db-updates.outputs.updates_list }}"
+
+          cd checkout-release
+
+          echo "Searching for PRs that introduced database updates"
+
+          # Create a variable to build the formatted updates list
+          FORMATTED_UPDATES=""
+
+          # Convert comma-separated list to array
+          IFS=',' read -ra UPDATE_ARRAY <<< "$UPDATES"
+
+          for update_function in "${UPDATE_ARRAY[@]}"; do
+            # Clean up the function name (remove any extra whitespace)
+            update_function=$(echo "$update_function" | xargs)
+
+            echo "Searching for: $update_function"
+
+            # Use git blame to find which commit last modified the line with this function
+            commit_hash=$(git blame "$FILE_PATH" | grep "$update_function" | head -1 | cut -d' ' -f1)
+
+            if [ -n "$commit_hash" ] && [ "$commit_hash" != "00000000" ]; then
+              commit_message=$(git log --format="%s" -1 "$commit_hash")
+
+              echo "Found commit: $commit_hash"
+              echo "Commit message: $commit_message"
+
+              # Extract PR number from commit message
+              pr_number=$(echo "$commit_message" | grep -oE '\(#[0-9]+\)|#[0-9]+|PR #[0-9]+' | grep -oE '[0-9]+' | head -1)
+
+              if [ -n "$pr_number" ]; then
+                pr_url="https://github.com/${{ github.repository }}/pull/$pr_number"
+                echo "* \`$update_function\`, $pr_url"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$pr_url|PR #$pr_number>)\n"
+              else
+                # If no PR number found, link to the commit
+                commit_url="https://github.com/${{ github.repository }}/commit/$commit_hash"
+                echo "* \`$update_function\`, $commit_url"
+                FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\` (<$commit_url|Commit>)\n"
+              fi
+            else
+              echo "* \`$update_function\`, No commit or PR found"
+              FORMATTED_UPDATES="${FORMATTED_UPDATES}• \`$update_function\`: No PR information found\n"
+            fi
+            echo ""
+          done
+
+          # Set the formatted updates as output
+          echo "formatted_updates<<EOF" >> $GITHUB_OUTPUT
+          echo "$FORMATTED_UPDATES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  send-slack-notification:
+    name: Send Slack Notification
+    needs: [extract-versions, count-commits-and-contributors, generate-contributors-list, db-updates]
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    steps:
+      - name: Send Slack message
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_RELEASE_SLACK_NOTIFICATION_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :woo: *WooCommerce ${{ needs.extract-versions.outputs.current_version }} Release Summary*
+
+            📊 *Statistics:*
+            • Commits: ${{ needs.count-commits-and-contributors.outputs.commit_count }}
+            • Contributors: ${{ needs.count-commits-and-contributors.outputs.contributor_count }}
+            • <${{ needs.generate-contributors-list.outputs.artifact_url }}|Download Contributors List>
+
+            :database: *Database Updates:*
+            ${{ needs.db-updates.outputs.has_updates == 'true' && needs.db-updates.outputs.formatted_updates || 'This release does not include a database update.' }}
+
+            <!subteam^S086N376UTS> you can re-run this workflow <https://github.com/woocommerce/woocommerce/actions/workflows/release-commits-and-contributors.yml|here>

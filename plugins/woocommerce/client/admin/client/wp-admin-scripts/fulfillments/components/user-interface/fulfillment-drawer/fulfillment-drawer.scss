@@ -1,0 +1,129 @@
+.woocommerce-fulfillment-drawer {
+	position: fixed;
+	inset: 0;
+	top: 32px;
+	left: auto;
+	height: calc(100vh - 32px);
+	z-index: 9999;
+	width: calc(27.7778vw + 1px);
+	min-width: 401px;
+	max-width: 501px;
+	pointer-events: none;
+	overflow: hidden;
+	overscroll-behavior-y: none;
+
+	&__panel {
+		position: absolute;
+		right: 0;
+		top: 0;
+		width: 27.7778vw;
+		min-width: 400px;
+		max-width: 500px;
+		height: 100%;
+		background: #fff;
+		padding: 0;
+		pointer-events: auto;
+		border-left: 1px solid #ddd !important;
+		transform: translateX(100%);
+		transition: transform 0.3s ease-in-out;
+		overflow-y: auto;
+		scrollbar-gutter: stable;
+
+		&.is-open {
+			pointer-events: auto;
+			transition: transform 0.3s ease-in-out;
+			transform: translateX(0%);
+		}
+	}
+
+	&__header {
+		padding: 16px 20px;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		gap: 4px;
+		inset: 0;
+		bottom: auto;
+		background-color: #fff;
+		border-bottom: 1px solid #ddd;
+		z-index: 1;
+
+		&__title {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			flex-grow: 1;
+
+			h2 {
+				letter-spacing: 0%;
+				font-size: 15px;
+				line-height: 20px;
+				font-weight: 500;
+				color: #070707;
+				margin: 0;
+			}
+		}
+
+		&__close-button {
+			background: transparent;
+			border: 0 solid transparent;
+			cursor: pointer;
+			font-size: 20px;
+			line-height: 16px;
+			width: 16px;
+			height: 16px;
+			padding: 0;
+			font-weight: 200;
+		}
+
+		p {
+			font-size: 11px;
+			line-height: 16px;
+			font-weight: 400;
+			color: var(--wc-admin-subtext, #767676);
+			margin: 0;
+		}
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		height: fit-content;
+		overflow-y: auto;
+		overscroll-behavior: none;
+	}
+}
+
+.woocommerce-fulfillment-drawer__backdrop {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 9998;
+	background-color: #1e1e1e80;
+}
+
+@media screen and (max-width: 782px) {
+	.woocommerce-fulfillment-drawer {
+		top: 46px;
+		height: calc(100vh - 46px);
+		width: 100%;
+		min-width: 100%;
+		max-width: 100%;
+		&__panel {
+			width: 100%;
+			min-width: 100%;
+			max-width: 100%;
+		}
+		&__body {
+			height: calc(100% - 73px);
+		}
+	}
+
+	// Prevent scrolling of the body when the drawer is open.
+	body:has(.woocommerce-fulfillment-drawer__body) {
+		overflow: hidden;
+	}
+}

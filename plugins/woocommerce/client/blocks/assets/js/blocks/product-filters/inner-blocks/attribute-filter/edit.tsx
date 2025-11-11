@@ -33,6 +33,7 @@ import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem } from '../../types';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
+import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
 
@@ -88,34 +89,21 @@ const Edit = ( props: EditProps ) => {
 		if ( termIdHasProducts.length === 0 && hideEmpty ) {
 			setAttributeOptions( [] );
 		} else {
+			const filteredOptions = attributeTerms
+				.filter( ( term ) => {
+					if ( hideEmpty )
+						return termIdHasProducts.includes( term.id );
+					return true;
+				} )
+				.map( ( term, index ) => ( {
+					label: term.name,
+					value: term.id.toString(),
+					selected: index === 0,
+					count: term.count,
+				} ) );
+
 			setAttributeOptions(
-				attributeTerms
-					.filter( ( term ) => {
-						if ( hideEmpty )
-							return termIdHasProducts.includes( term.id );
-						return true;
-					} )
-					.sort( ( a, b ) => {
-						switch ( sortOrder ) {
-							case 'name-asc':
-								return a.name > b.name ? 1 : -1;
-							case 'name-desc':
-								return a.name < b.name ? 1 : -1;
-							case 'count-asc':
-								return a.count > b.count ? 1 : -1;
-							case 'count-desc':
-							default:
-								return a.count < b.count ? 1 : -1;
-						}
-					} )
-					.map( ( term, index ) => ( {
-						label: term.name,
-						ariaLabel: term.name,
-						value: term.id.toString(),
-						selected: index === 0,
-						count: term.count,
-						type: `attribute/${ attributeObject?.taxonomy }`,
-					} ) )
+				sortFilterOptions( filteredOptions, sortOrder )
 			);
 		}
 
@@ -128,6 +116,7 @@ const Edit = ( props: EditProps ) => {
 		hideEmpty,
 		isTermsLoading,
 		isFilterCountsLoading,
+		attributeObject,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Accept both wrapped and unwrapped JSON for Checkout additional fields.

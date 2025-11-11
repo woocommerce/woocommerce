@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQu
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\Admin\Analytics;
+use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
 
 /**
  * Class WC_Admin_Tests_Reports_Orders_Stats
@@ -22,6 +24,12 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	 */
 	public static function setUpBeforeClass(): void {
 		add_filter( 'woocommerce_analytics_report_should_use_cache', '__return_false' );
+
+		$db_version = strstr( WC()->version, '-', true );
+		$db_version = $db_version ? $db_version : WC()->version;
+		update_option( 'woocommerce_db_version', $db_version );
+
+		delete_option( OrdersStatsDataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS );
 	}
 
 	/**
@@ -82,7 +90,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'orders_count'        => 1,
 				'num_items_sold'      => 4,
 				'avg_items_per_order' => 4,
-				'avg_order_value'     => 68,
+				'avg_order_value'     => 80,
 				'total_sales'         => 85,
 				'gross_sales'         => 100,
 				'coupons'             => 20,
@@ -114,7 +122,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'orders_count'        => 1,
 						'num_items_sold'      => 4,
 						'avg_items_per_order' => 4,
-						'avg_order_value'     => 68,
+						'avg_order_value'     => 80,
 						'total_customers'     => 1,
 						'segments'            => array(),
 					),
@@ -133,14 +141,14 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'net_revenue'         => 68,
-				'avg_order_value'     => 68,
+				'avg_order_value'     => 80,
 				'orders_count'        => 1,
 				'avg_items_per_order' => 4,
 				'num_items_sold'      => 4,
 				'coupons'             => 20,
 				'coupons_count'       => 1,
 				'total_customers'     => 1,
-				'products'            => '1',
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -152,7 +160,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 					'date_end_gmt'   => $end_time,
 					'subtotals'      => array(
 						'net_revenue'         => 68,
-						'avg_order_value'     => 68,
+						'avg_order_value'     => 80,
 						'orders_count'        => 1,
 						'avg_items_per_order' => 4,
 						'num_items_sold'      => 4,
@@ -226,9 +234,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 2,
-				'num_items_sold'      => 8,
+				'num_items_sold'      => 4, // 4 items sold in completed order, non in failed and refunded.
 				'avg_items_per_order' => 4,
-				'avg_order_value'     => 50,
+				'avg_order_value'     => 75,
 				'total_sales'         => 100,
 				'gross_sales'         => 150,
 				'coupons'             => 0,
@@ -258,9 +266,9 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 50,
 						'orders_count'        => 2,
-						'num_items_sold'      => 8,
+						'num_items_sold'      => 4,
 						'avg_items_per_order' => 4,
-						'avg_order_value'     => 50,
+						'avg_order_value'     => 75,
 						'total_customers'     => 1,
 						'segments'            => array(),
 					),
@@ -372,12 +380,22 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		}
 
 		// Add a partial refund on the last order.
-		$refund = wc_create_refund(
-			array(
-				'amount'   => 10,
-				'order_id' => $order->get_id(),
-			)
-		);
+		foreach ( $order->get_items() as  $item_key => $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 
@@ -396,7 +414,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 0,
-				'num_items_sold'      => 0,
+				'num_items_sold'      => -4,
 				'avg_items_per_order' => 0,
 				'avg_order_value'     => 0,
 				'total_sales'         => -60,
@@ -408,7 +426,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -60,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -428,7 +446,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 60,
 						'orders_count'        => 0,
-						'num_items_sold'      => 0,
+						'num_items_sold'      => -4,
 						'avg_items_per_order' => 0,
 						'avg_order_value'     => 0,
 						'total_customers'     => 1,
@@ -522,7 +540,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -10,
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -567,7 +585,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$expected_stats = array(
 			'totals'    => array(
 				'orders_count'        => 0,
-				'num_items_sold'      => 0,
+				'num_items_sold'      => -4,
 				'avg_items_per_order' => 0,
 				'avg_order_value'     => 0,
 				'total_sales'         => -50,
@@ -579,7 +597,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 				'shipping'            => 0,
 				'net_revenue'         => -50,       // @todo - does this value make sense?
 				'total_customers'     => 1,
-				'products'            => 0,
+				'products'            => 1,
 				'segments'            => array(),
 			),
 			'intervals' => array(
@@ -599,7 +617,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 						'taxes'               => 0,
 						'refunds'             => 50,
 						'orders_count'        => 0,
-						'num_items_sold'      => 0,
+						'num_items_sold'      => -4,
 						'avg_items_per_order' => 0,
 						'avg_order_value'     => 0,
 						'total_customers'     => 1,
@@ -613,6 +631,215 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		);
 
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true ) );
+	}
+
+	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_old_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
+
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals = array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 8, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 20,
+			'shipping'            => 20,
+			'net_revenue'         => 10, // 50 + 100 - 100 - 20 - 20.
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals = array(
+			'orders_count'        => 0,
+			'num_items_sold'      => 0, // bug fixed by PR #58744.
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100, // bug fixed by PR #58744.
+			'taxes'               => 0,
+			'shipping'            => 0,
+			'net_revenue'         => -100,       // @todo - does this value make sense?
+			'total_customers'     => 1,
+			'products'            => 0, // bug fixed by PR #58744.
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+	}
+
+	/**
+	 * Test refund type filtering.
+	 */
+	public function test_populate_and_query_refunds_with_new_full_refund_data() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Populate all of the data.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order_types = array(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 50,
+			),
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'total'  => 100,
+			),
+		);
+
+		$time = time();
+
+		foreach ( $order_types as $order_type ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( $order_type['status'] );
+			$order->set_total( $order_type['total'] );
+			$order->set_date_created( $time );
+			$order->set_date_paid( $time );
+			$order->set_shipping_total( 10 );
+			$order->set_cart_tax( 10 );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		// Refund the order completely by changing the order status to refunded.
+		$order->set_status( OrderStatus::REFUNDED );
+		$order->save();
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new OrdersStatsDataStore();
+
+		$start_time = gmdate( 'Y-m-d H:00:00', $order->get_date_created()->getOffsetTimestamp() );
+		$end_time   = gmdate( 'Y-m-d H:59:59', strtotime( '+1 day', $order->get_date_created()->getOffsetTimestamp() ) );
+
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+		);
+		$expected_totals = array(
+			'orders_count'        => 2,
+			'num_items_sold'      => 4, // 4 per order.
+			'avg_items_per_order' => 4, // 8 / 2 orders.
+			'avg_order_value'     => 55, // 110 / 2 orders.
+			'total_sales'         => 50, // 50 + 100 - 100.
+			'gross_sales'         => 110, // 150 - 40 ( 10 + 10 + 10 + 10 ).
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => 10,
+			'shipping'            => 10,
+			'net_revenue'         => 30,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		// Query full refunds.
+		$args            = array(
+			'interval' => 'hour',
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'refunds'  => 'full',
+		);
+		$expected_totals = array(
+			'orders_count'        => 0,
+			'num_items_sold'      => -4,
+			'avg_items_per_order' => 0,
+			'avg_order_value'     => 0,
+			'total_sales'         => -100,
+			'gross_sales'         => 0,
+			'coupons'             => 0,
+			'coupons_count'       => 0,
+			'refunds'             => 100,
+			'taxes'               => -10,
+			'shipping'            => -10,
+			'net_revenue'         => -80,
+			'total_customers'     => 1,
+			'products'            => 1,
+			'segments'            => array(),
+		);
+
+		$this->assertEquals( $expected_totals, json_decode( wp_json_encode( $data_store->get_data( $args ) ), true )['totals'] );
+
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 	}
 
 	/**
@@ -656,7 +883,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			foreach ( $coupons as $amount => $coupon ) {
 				if ( $amount >= $order_number ) {
 					$order->apply_coupon( $coupon );
-					$applied_coupons++;
+					++$applied_coupons;
 					$applied_amount += $amount;
 				}
 			}
@@ -3799,7 +4026,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 			'page_no'   => 1,
 		);
 		$this->assertEquals( $expected_stats, json_decode( wp_json_encode( $data_store->get_data( $query_args ) ), true ), 'Query args: ' . $this->return_print_r( $query_args ) . "; query: {$wpdb->last_query}" );
-
 	}
 
 	/**
@@ -4668,7 +4894,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -4812,7 +5038,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -4967,7 +5193,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// Expected Intervals section construction.
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = 0; $i < $interval_count; $i ++ ) {
+		for ( $i = 0; $i < $interval_count; $i++ ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5457,7 +5683,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		// e.g. 20:30:51 -(minus 5 hours)- 15:30:51 means intervals 15:30:51--15:59:59, 16:00-16:59, 17, 18, 19, 20:00-20:30, i.e. 6 intervals
 		// also if this run exactly at 20:00 -(minus 5 hours)- 15:00, then intervals should be 15:00-15:59, 16, 17, 18, 19, 20:00-20:00.
 		$interval_count = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5638,7 +5864,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = $hour_offset + 1;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -5811,7 +6037,7 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		 */
 		$expected_intervals = array();
 		$interval_count     = 11;
-		for ( $i = $interval_count - 1; $i >= 0; $i -- ) {
+		for ( $i = $interval_count - 1; $i >= 0; $i-- ) {
 			if ( 0 === $i ) {
 				$date_start = new DateTime( $current_hour_end->format( 'Y-m-d H:00:00' ) );
 				$date_end   = $current_hour_end;
@@ -6168,7 +6394,6 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
-
 	}
 
 	/**
@@ -6278,5 +6503,135 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 		$actual_data = json_decode( wp_json_encode( $data_store->get_data( $query_args ) ) );
 		// It's still the same customer who ordered for the first time in this hour, they just placed 2 orders.
 		$this->assertEquals( 1, $actual_data->totals->total_customers );
+	}
+
+	/**
+	 * Test that migration updates fulfillment status for orders with fulfillments.
+	 *
+	 * Creates 5 orders where only 3 have fulfillments, then runs migration
+	 * and verifies the correct orders are updated.
+	 */
+	public function test_regenerate_order_fulfillment_status_updates_orders_with_fulfillments() {
+		global $wpdb;
+
+		// Reset analytics lookup tables for a clean slate.
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$prev_fulfillments_opt = get_option( 'woocommerce_feature_fulfillments_enabled', null );
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'yes' );
+
+		try {
+			// Enable fulfillments feature.
+			$controller = wc_get_container()->get( \Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class );
+			$controller->register();
+			$controller->initialize_fulfillments();
+
+			// Arrange: Reset migration state.
+			delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+
+			// Ensure column exists.
+			OrdersStatsDataStore::add_fulfillment_status_column();
+
+			$product = WC_Helper_Product::create_simple_product();
+
+			// Create 5 orders.
+			$order_1 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$order_2 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$order_3 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$order_4 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+			$order_5 = WC_Helper_Order::create_order( get_current_user_id(), $product );
+
+			WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+			// Add fulfillments for only orders 1, 2, 3.
+			$this->add_fulfillment_to_order( $order_1, 'fulfilled', $product );
+			$this->add_fulfillment_to_order( $order_2, 'partially_fulfilled', $product );
+			$this->add_fulfillment_to_order( $order_3, 'unfulfilled', $product );
+			// Orders 4 and 5 have no fulfillments.
+
+			// Run the migration tool.
+			Analytics::get_instance()->run_regenerate_order_fulfillment_status_tool();
+
+			// Assert: Verify orders with fulfillments are updated.
+			// Fetch all fulfillment statuses in a single query.
+			$statuses = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT order_id, fulfillment_status
+					FROM {$wpdb->prefix}wc_order_stats
+					WHERE order_id IN (%d, %d, %d, %d, %d)
+					ORDER BY order_id ASC",
+					$order_1->get_id(),
+					$order_2->get_id(),
+					$order_3->get_id(),
+					$order_4->get_id(),
+					$order_5->get_id()
+				),
+				OBJECT_K
+			);
+
+			// Verify orders with fulfillments.
+			$this->assertEquals( 'fulfilled', $statuses[ $order_1->get_id() ]->fulfillment_status, 'Order 1 should have fulfilled status' );
+			$this->assertEquals( 'partially_fulfilled', $statuses[ $order_2->get_id() ]->fulfillment_status, 'Order 2 should have partially_fulfilled status' );
+			$this->assertEquals( 'unfulfilled', $statuses[ $order_3->get_id() ]->fulfillment_status, 'Order 3 should have unfulfilled status' );
+
+			// Verify orders without fulfillments remain NULL.
+			$this->assertNull( $statuses[ $order_4->get_id() ]->fulfillment_status, 'Order 4 should have NULL fulfillment_status' );
+			$this->assertNull( $statuses[ $order_5->get_id() ]->fulfillment_status, 'Order 5 should have NULL fulfillment_status' );
+
+			// Verify completion.
+			$regenerated = get_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+			$this->assertTrue( (bool) $regenerated, 'Migration should be marked as completed' );
+
+			// Verify transient cleanup.
+			$progress = get_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+			$this->assertFalse( $progress, 'Progress transient should be deleted after completion' );
+		} finally {
+			// Cleanup.
+			delete_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' );
+			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillment_meta" );
+			$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_order_fulfillments" );
+			delete_transient( 'woocommerce_analytics_fulfillment_status_progress' );
+
+			if ( null === $prev_fulfillments_opt ) {
+				delete_option( 'woocommerce_feature_fulfillments_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_fulfillments_enabled', $prev_fulfillments_opt );
+			}
+		}
+	}
+
+	/**
+	 * Helper: Add fulfillment record and set order fulfillment status.
+	 *
+	 * This directly inserts into the fulfillments table and sets the order meta
+	 * to simulate what the fulfillments system would do in production.
+	 *
+	 * @param WC_Order   $order Order object.
+	 * @param string     $fulfillment_status Fulfillment status (fulfilled, partially_fulfilled, unfulfilled).
+	 * @param WC_Product $product Product to add to the fulfillment.
+	 *
+	 * @return Fulfillment The created fulfillment object.
+	 */
+	private function add_fulfillment_to_order( $order, $fulfillment_status, $product ) {
+		$fulfillment = new Fulfillment();
+		$fulfillment->set_entity_type( WC_Order::class );
+		$fulfillment->set_entity_id( (string) $order->get_id() );
+
+		$fulfillment->set_items(
+			array(
+				array(
+					'item_id' => $product->get_id(),
+					'qty'     => 4,
+				),
+			)
+		);
+		$fulfillment->set_status( $fulfillment_status );
+		$fulfillment->save();
+
+		$order->update_meta_data( '_fulfillment_status', $fulfillment_status );
+		$order->save();
+
+		return $fulfillment;
 	}
 }

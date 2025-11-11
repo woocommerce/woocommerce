@@ -49,7 +49,7 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-around;
-		gap: calc($gap-smaller + $gap-smallest / 2);
+		gap: calc($gap-smaller + ($gap-smallest / 2));
 	}
 
 	.woocommerce-task-shipping-recommendations_plugins-buttons {

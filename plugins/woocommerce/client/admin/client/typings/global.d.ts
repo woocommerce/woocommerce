@@ -42,9 +42,9 @@ declare global {
 				blueprint_max_step_size_bytes?: number;
 				onboarding?: {
 					profile?: {
-						industry?: number[]
-					}
-				}
+						industry?: number[];
+					};
+				};
 				siteVisibilitySettings: Record< string, string >;
 			};
 		};
@@ -80,7 +80,6 @@ declare global {
 			'shipping-setting-tour': boolean;
 			'launch-your-store': boolean;
 			blueprint: boolean;
-			'add-to-cart-with-options-stepper-layout': boolean;
 		};
 		wp: {
 			updates?: {
@@ -126,9 +125,9 @@ declare global {
 	namespace wp.media {
 		interface frame {
 			open(): void;
-			on(event: string, callback: Function): void;
+			on( event: string, callback: Function ): void;
 			state(): {
-				get(state: string): any;
+				get( state: string ): any;
 			};
 		}
 

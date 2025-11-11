@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Blockified Add to Cart with Options block: add "tabindex" and "aria-checked" attributes to variation option radio inputs.

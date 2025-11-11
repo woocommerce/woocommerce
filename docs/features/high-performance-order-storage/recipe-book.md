@@ -4,6 +4,7 @@ post_title: HPOS extension recipe book
 ---
 
 # HPOS extension recipe book
+
 ## What is High-Performance Order Storage (HPOS)?
 
 Up until recently, WooCommerce stored order-related data in the post and postmeta tables in the database as a custom WordPress post type, which allowed everyone working in the ecosystem to take advantage of extensive APIs provided by the WordPress core in managing orders as custom post types.

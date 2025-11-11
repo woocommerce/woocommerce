@@ -2713,7 +2713,7 @@ export const countryStateOptions = [
 	},
 	{
 		key: 'IN:LD',
-		label: 'India — Lakshadeep',
+		label: 'India — Lakshadweep',
 	},
 	{
 		key: 'IN:PY',

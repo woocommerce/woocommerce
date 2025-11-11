@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	</p>
 
 	<p class="submit">
-		<?php if ( empty( $_GET['page'] ) || empty( $_GET['tab'] ) || 'wc-settings' !== $_GET['page'] || 'shipping' !== $_GET['tab'] ) : ?>
+		<?php if ( ! is_wc_admin_settings_page() || empty( $_GET['tab'] ) || 'shipping' !== $_GET['tab'] ) : // phpcs:ignore WordPress.Security.NonceVerification.Recommended ?>
 			<a class="button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=wc-settings&tab=shipping' ) ); ?>">
 				<?php esc_html_e( 'Setup shipping zones', 'woocommerce' ); ?>
 			</a>

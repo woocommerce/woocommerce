@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { applyFilters } from '@wordpress/hooks';
+import { useMemo } from '@wordpress/element';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
 	ErrorBoundary,
@@ -27,19 +28,27 @@ const tracking = {
 	debouncedRecordEvent,
 };
 
-const SidebarExtensionComponent = applyFilters(
-	'woocommerce_email_editor_setting_sidebar_extension_component',
-	RichTextWithButton,
-	tracking
-) as () => JSX.Element;
-
-const EmailStatusComponent = applyFilters(
-	'woocommerce_email_editor_setting_sidebar_email_status_component',
-	() => null,
-	tracking
-) as () => JSX.Element;
-
 export function SettingsPanel() {
+	const SidebarExtensionComponent = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_setting_sidebar_extension_component',
+				RichTextWithButton,
+				tracking
+			) as () => JSX.Element,
+		[]
+	);
+
+	const EmailStatusComponent = useMemo(
+		() =>
+			applyFilters(
+				'woocommerce_email_editor_setting_sidebar_email_status_component',
+				() => null,
+				tracking
+			) as () => JSX.Element,
+		[]
+	);
+
 	return (
 		<PluginDocumentSettingPanel
 			name="email-settings-panel"

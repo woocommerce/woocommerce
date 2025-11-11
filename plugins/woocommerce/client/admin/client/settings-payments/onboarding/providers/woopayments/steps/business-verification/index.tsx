@@ -17,8 +17,11 @@ import { Stepper } from './components/stepper';
 import Step from './components/step';
 import { getMccFromIndustry, getComingSoonShareKey } from './utils';
 import './style.scss';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+
 export const BusinessVerificationStep: React.FC = () => {
-	const { currentStep, closeModal } = useOnboardingContext();
+	const { currentStep, closeModal, sessionEntryPoint } =
+		useOnboardingContext();
 
 	const initialData = {
 		business_name: window.wcSettings?.siteTitle,
@@ -34,8 +37,34 @@ export const BusinessVerificationStep: React.FC = () => {
 		...( currentStep?.context?.self_assessment ?? {} ),
 	};
 	const hasTestAccount = currentStep?.context?.has_test_account ?? false;
+	const hasSandboxAccount =
+		currentStep?.context?.has_sandbox_account ?? false;
 
-	const handleStepChange = () => window.scroll( 0, 0 );
+	// Only include the activate step if the user has:
+	// - a test OR;
+	// - a sandbox account and the business verification step is not started;
+	//   this is due to the fact that a sandbox account goes through the same onboarding flow as a live account,
+	//   but with test KYC data.
+	// The activate step can handle disabling the test or sandbox account and proceed to live onboarding.
+	const showActivateSubStep =
+		hasTestAccount ||
+		( hasSandboxAccount && currentStep?.status === 'not_started' );
+	const subStepsList = [
+		...( showActivateSubStep ? [ 'activate' ] : [] ),
+		'business',
+		'embedded',
+	];
+
+	// Find the first not completed sub-step.
+	const initialStep = subStepsList.find( ( stepId ) => {
+		return (
+			currentStep?.context?.sub_steps[ stepId ]?.status !== 'completed'
+		);
+	} );
+
+	const handleStepChange = () => {
+		window.scroll( 0, 0 );
+	};
 
 	return (
 		<div className="settings-payments-onboarding-modal__step-business-verification">
@@ -45,10 +74,38 @@ export const BusinessVerificationStep: React.FC = () => {
 					initialData={ initialData }
 				>
 					<Stepper
+						initialStep={ initialStep }
+						onStepView={ ( stepId ) => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_view',
+								{
+									step: currentStep?.id || 'unknown',
+									sub_step_id: stepId,
+									source: sessionEntryPoint,
+								}
+							);
+						} }
 						onStepChange={ handleStepChange }
-						onExit={ () => {} }
+						onExit={ () => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_exit',
+								{
+									step: currentStep?.id || 'unknown',
+									source: sessionEntryPoint,
+								}
+							);
+						} }
+						onComplete={ () => {
+							recordPaymentsOnboardingEvent(
+								'woopayments_onboarding_modal_step_complete',
+								{
+									step: currentStep?.id || 'unknown',
+									source: sessionEntryPoint,
+								}
+							);
+						} }
 					>
-						{ hasTestAccount && (
+						{ showActivateSubStep && (
 							<Step name="activate" showHeading={ false }>
 								<ActivatePayments />
 							</Step>

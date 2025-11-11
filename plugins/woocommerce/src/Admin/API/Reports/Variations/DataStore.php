@@ -320,14 +320,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function fill_deleted_product_name( array &$products ) {
 		global $wpdb;
-		$product_variation_ids = [];
+		$product_variation_ids = array();
 		// Find products with missing extended_info.name.
 		foreach ( $products as $key => $product ) {
 			if ( ! isset( $product['extended_info']['name'] ) ) {
-				$product_variation_ids[ $key ] = [
+				$product_variation_ids[ $key ] = array(
 					'product_id'   => $product['product_id'],
 					'variation_id' => $product['variation_id'],
-				];
+				);
 			}
 		}
 
@@ -338,7 +338,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$where_clauses = implode(
 			' or ',
 			array_map(
-				function( $ids ) {
+				function ( $ids ) {
 					return "(
 						product_lookup.product_id = {$ids['product_id']}
 						and
@@ -368,7 +368,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		// phpcs:ignore
 		$results = $wpdb->get_results( $query );
-		$index   = [];
+		$index   = array();
 		foreach ( $results as $result ) {
 			$index[ $result->product_id . '_' . $result->variation_id ] = $result->order_item_name;
 		}
@@ -486,7 +486,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				return $data;
 			}
 
-			$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count' ), true ) ) {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id, variation_id' );
+			} else {
+				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			}
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$variations_query = $this->subquery->get_query_statement();
 		}

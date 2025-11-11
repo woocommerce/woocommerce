@@ -34,11 +34,9 @@ type ConversionConfig = {
 
 export type BlockifiedTemplateConfig = {
 	// Description of the template, shown in the block placeholder.
-	getDescription: ( templateTitle: string, canConvert: boolean ) => string;
+	getDescription: ( templateTitle: string ) => string;
 	// Returns the skeleton HTML for the template, or can be left blank to use the default fallback image.
 	getSkeleton?: ( () => JSX.Element ) | undefined;
-	// Is conversion possible for the template?
-	isConversionPossible: () => boolean;
 	// If conversion is possible, returns the config for the template to be blockified.
 	blockifyConfig?: ConversionConfig | undefined;
 };

@@ -7,7 +7,7 @@ sidebar_label: Branding
 
 High-quality design is an important aspect of an online store, and that is driven by the theme design and content. The design of the theme should be simple, consistent, uncluttered, memorable, intuitive, efficient, and functional. When designing a new theme for WooCommerce special attention should be given to:
 
-### Layout
+## Layout
 
 The theme should be up to industry standards in terms of hierarchy, flow, content balance, and white space.
 
@@ -15,7 +15,7 @@ Theme authors must ensure that store pages (shop, product page, categories, cart
 
 The Theme is expected to be fully functional and optimized to be accessed on common device types such as laptops, tablets, and smartphones.
 
-### Typography
+## Typography
 
 The theme should provide elegant and legible font pairings that promote a comfortable reading experience.
 
@@ -25,11 +25,11 @@ The theme typography must consist of a small number of typefaces that complement
 
 Proper capitalization is used, avoiding all caps (with the exception of some UI elements such as buttons, tabs, etc).
 
-### Iconography
+## Iconography
 
 Icons used in the theme portray a direct meaning of the actions/situations they are representing and are used consistently regarding sizing positioning and color.
 
-### Color
+## Color
 
 The theme must follow a harmonious and consistent color scheme across UI elements and all pages. The color scheme should consist of small number of colors that contain:
 
@@ -39,7 +39,7 @@ The theme must follow a harmonious and consistent color scheme across UI element
 
 The color palette used in text and graphical UI components must be compliant with the [WCAG AA conformance level](https://www.w3.org/TR/WCAG20/#conformance) or above.
 
-### Patterns
+## Patterns
 
 The theme must employ a consistent set of patterns that are used across pages, such as:
 

@@ -9,6 +9,7 @@ declare(strict_types = 1);
 
 use Automattic\WooCommerce\EmailEditor\Container;
 use Automattic\WooCommerce\EmailEditor\Email_Css_Inliner;
+use Automattic\WooCommerce\EmailEditor\Engine\Assets_Manager;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Api_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
@@ -16,7 +17,6 @@ use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger;
 use Automattic\WooCommerce\EmailEditor\Engine\Patterns\Patterns;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Blocks_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Highlighting_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
@@ -35,6 +35,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates_Registry;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\User_Theme;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Engine\Site_Style_Sync_Controller;
 
 /**
  * Base class for MailPoet tests.
@@ -122,7 +123,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
-			\Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller::class,
+			Theme_Controller::class,
 			function () {
 				return new Theme_Controller();
 			}
@@ -212,6 +213,17 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Assets_Manager::class,
+			function ( $container ) {
+				return new Assets_Manager(
+					$container->get( Settings_Controller::class ),
+					$container->get( Theme_Controller::class ),
+					$container->get( User_Theme::class ),
+					$container->get( Email_Editor_Logger::class )
+				);
+			}
+		);
+		$container->set(
 			Process_Manager::class,
 			function ( $container ) {
 				return new Process_Manager(
@@ -227,20 +239,13 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
-			Blocks_Registry::class,
-			function () {
-				return new Blocks_Registry();
-			}
-		);
-		$container->set(
 			Content_Renderer::class,
 			function ( $container ) {
 				return new Content_Renderer(
 					$container->get( Process_Manager::class ),
-					$container->get( Blocks_Registry::class ),
-					$container->get( Settings_Controller::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Email_Editor_Logger::class ),
 				);
 			}
 		);
@@ -252,6 +257,7 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Templates::class ),
 					$container->get( Email_Css_Inliner::class ),
 					$container->get( Theme_Controller::class ),
+					$container->get( Personalization_Tags_Registry::class ),
 				);
 			}
 		);
@@ -289,6 +295,12 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 			}
 		);
 		$container->set(
+			Site_Style_Sync_Controller::class,
+			function () {
+				return new Site_Style_Sync_Controller();
+			}
+		);
+		$container->set(
 			Dependency_Check::class,
 			function () {
 				return new Dependency_Check();
@@ -303,7 +315,8 @@ abstract class Email_Editor_Integration_Test_Case extends \WP_UnitTestCase {
 					$container->get( Patterns::class ),
 					$container->get( Send_Preview_Email::class ),
 					$container->get( Personalization_Tags_Registry::class ),
-					$container->get( Email_Editor_Logger::class )
+					$container->get( Email_Editor_Logger::class ),
+					$container->get( Assets_Manager::class )
 				);
 			}
 		);

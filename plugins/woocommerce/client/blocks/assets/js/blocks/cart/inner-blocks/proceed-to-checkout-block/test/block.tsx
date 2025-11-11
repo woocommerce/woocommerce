@@ -7,6 +7,12 @@ import { registerCheckoutFilters } from '@woocommerce/blocks-checkout';
 import { useCartEventsContext } from '@woocommerce/base-context';
 import { useEffect } from '@wordpress/element';
 
+jest.mock( '@woocommerce/base-context/hooks', () => ( {
+	useStoreCart: jest.fn( () => ( {
+		cartIsLoading: false,
+		isLoadingRates: false,
+	} ) ),
+} ) );
 /**
  * Internal dependencies
  */

@@ -30,6 +30,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -50,10 +51,11 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@woocommerce/eslint-plugin": "workspace:*",
-		"babel-jest": "27.5.x",
+		"babel-jest": "29.5.x",
 		"eslint": "^8.55.0",
-		"jest": "27.5.x",
-		"jest-cli": "27.5.x",
+		"jest": "29.5.x",
+		"jest-cli": "29.5.x",
+		"jest-environment-jsdom": "29.5.x",
 		"resize-observer-polyfill": "1.5.1",
 		"rimraf": "5.0.5",
 		"ts-jest": "29.1.x",
@@ -81,7 +83,7 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json",
+			"command": "tsc --project tsconfig-cjs.json --noCheck",
 			"clean": "if-file-deleted",
 			"files": [
 				"tsconfig-cjs.json",
@@ -96,7 +98,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch",
+			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
 			"service": true
 		},
 		"build:project:esm": {

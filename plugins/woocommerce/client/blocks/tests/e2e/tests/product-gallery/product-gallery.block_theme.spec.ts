@@ -11,7 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
-	title: 'Product Gallery (Beta)',
+	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -347,7 +347,7 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 		} ) => {
 			await admin.createNewPost();
-			await editor.insertBlockUsingGlobalInserter( 'Single Product' );
+			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
 			const singleProductBlock = await editor.getBlockByName(
@@ -382,15 +382,67 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
+
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(
-			'Block: Product Gallery (Beta)'
+			'Block: Product Gallery'
 		);
 
 		await expect( productGalleryBlock ).toBeVisible();
+	} );
+
+	test( 'block has opinionated layout on mobile', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+
+		await page.setViewportSize( {
+			height: 667,
+			width: 390, // iPhone 12 Pro
+		} );
+
+		const galleryBlock = page.locator( '.wc-block-product-gallery' );
+		const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+			page: 'frontend',
+		} );
+		const navigationArrowsBlock =
+			await pageObject.getNextPreviousButtonsBlock( {
+				page: 'frontend',
+			} );
+
+		// Verifying mobile layout
+		// - Navigation arrows are hidden
+		await expect( navigationArrowsBlock ).toBeHidden();
+
+		// - Thumbnails are below large image
+		const galleryDirection = await galleryBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'flex-direction' )
+		);
+		expect( galleryDirection ).toBe( 'column' );
+		const thumbnailsOrder = await thumbnailsBlock.evaluate( ( el ) =>
+			window.getComputedStyle( el ).getPropertyValue( 'order' )
+		);
+		expect( thumbnailsOrder ).toBe( '1' );
+
+		// - Thumbnails container is horizontal
+		const thumbnailsDirection = await thumbnailsBlock
+			.locator( '.wc-block-product-gallery-thumbnails__scrollable' )
+			.evaluate( ( el ) =>
+				window
+					.getComputedStyle( el )
+					.getPropertyValue( 'flex-direction' )
+			);
+		expect( thumbnailsDirection ).toBe( 'row' );
 	} );
 } );

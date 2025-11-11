@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
@@ -1563,9 +1564,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * Test methods get_total_tax_refunded and get_total_shipping_refunded.
+	 * Test methods get_total_tax_refunded, get_total_shipping_refunded, and get_total_shipping_tax_refunded.
 	 */
-	public function test_get_total_tax_refunded_and_get_total_shipping_refunded() {
+	public function test_get_total_tax_refunded_and_get_total_shipping_refunded_and_get_total_shipping_tax_refunded() {
 		update_option( 'woocommerce_prices_include_tax', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
@@ -1629,6 +1630,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertEquals( 5, $order->get_data_store()->get_total_tax_refunded( $order ) );
 		$this->assertEquals( 10, $order->get_data_store()->get_total_shipping_refunded( $order ) );
+		$this->assertEquals( 3, $order->get_data_store()->get_total_shipping_tax_refunded( $order ) );
 	}
 
 	/**
@@ -2601,6 +2603,8 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 			// We have to clear the cache after a direct DB update.
 			$this->sut->clear_cached_data( array( $refund->get_id() ) );
+			$order_cache = wc_get_container()->get( OrderCache::class );
+			$order_cache->remove( $refund->get_id() );
 		} else {
 			$wpdb->update(
 				$wpdb->posts,
@@ -3404,7 +3408,11 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( 'Europe/Brussels', $meta_object_vars['timezone'] );
 
 		// Check that the log entry was created.
-		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `update_order_meta_from_object` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+		$serialized_meta_value = '"\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"';
+
+		$log_message = end( $fake_logger->warnings )['message'];
+		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
+		$this->assertStringContainsString( $serialized_meta_value, $log_message );
 
 		// Test deleting meta data containing an object of a non-existent class.
 		$meta_data = $this->sut->read_meta( $order );
@@ -3417,7 +3425,9 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertEquals( '', get_post_meta( $order->get_id(), $meta_key, true ) );
 
 		// Check that the log entry was created.
-		$this->assertEquals( 'encountered an order meta value of type __PHP_Incomplete_Class during `delete_meta` in order with ID ' . $order->get_id() . ': "\'O:11:"geoiprecord":14:{s:12:"country_code";s:2:"BE";s:13:"country_code3";s:3:"BEL";s:12:"country_name";s:7:"Belgium";s:6:"region";s:3:"BRU";s:4:"city";s:8:"Brussels";s:11:"postal_code";s:4:"1000";s:8:"latitude";d:50.8333;s:9:"longitude";d:4.3333;s:9:"area_code";N;s:8:"dma_code";N;s:10:"metro_code";N;s:14:"continent_code";s:2:"EU";s:11:"region_name";s:16:"Brussels Capital";s:8:"timezone";s:15:"Europe/Brussels";}\'"', end( $fake_logger->warnings )['message'] );
+		$log_message = end( $fake_logger->warnings )['message'];
+		$this->assertStringContainsString( 'encountered a post meta value of type __PHP_Incomplete_Class during', $log_message );
+		$this->assertStringContainsString( $serialized_meta_value, $log_message );
 	}
 
 	/**
@@ -3782,5 +3792,52 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order->add_meta_data( $meta_key, $meta_value, false );
 		$order->save_meta_data();
 		$this->assertEquals( $wpdb->get_var( $query ), 2 ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- query has already been prepared.
+	}
+
+	/**
+	 * @testdox Sync-on-read should update metadata as well.
+	 */
+	public function test_sync_on_read_updates_metadata() {
+		$this->toggle_cot_feature_and_usage( true );
+		$this->enable_cot_sync();
+
+		$order = OrderHelper::create_order();
+		$order->add_meta_data( 'foo', 'bar' );
+		$order->save();
+
+		// Update the meta data on the post.
+		update_post_meta( $order->get_id(), 'foo', 'baz' );
+
+		$fresh_order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 'baz', get_post_meta( $order->get_id(), 'foo', true ) );
+		$this->assertEquals( 'baz', $fresh_order->get_meta( 'foo', true, 'edit' ) );
+	}
+
+	/**
+	 * @testdox An order deleted from the posts table while sync was off is deleted from the orders table when sync runs.
+	 */
+	public function test_loading_order_deleted_from_posts_table() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( false );
+
+		// Create a synced order.
+		$this->enable_cot_sync();
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Temporarily disable sync and delete order from posts.
+		$this->disable_cot_sync();
+		$order->delete( true );
+
+		// Re-enable sync and attempt to read the order from the HPOS side.
+		$this->enable_cot_sync();
+
+		// Confirm that the order is deleted from HPOS when sync runs.
+		$this->assertEquals( true, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$sync = wc_get_container()->get( DataSynchronizer::class );
+		$sync->process_batch( array( $order_id ) );
+		$this->assertEquals( false, (bool) $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$this->sut::get_orders_table_name()} WHERE id = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 }

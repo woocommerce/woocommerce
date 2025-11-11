@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor\PersonalizationTags;
 
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tag;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\Orders\PointOfSaleOrderUtil;
 use Automattic\WooCommerce\Internal\Settings\PointOfSaleDefaultSettings;
 
@@ -34,6 +35,9 @@ class SiteTagsProvider extends AbstractTagProvider {
 					}
 					return htmlspecialchars_decode( get_bloginfo( 'name' ) );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 
@@ -45,6 +49,9 @@ class SiteTagsProvider extends AbstractTagProvider {
 				function (): string {
 					return get_bloginfo( 'url' );
 				},
+				array(),
+				null,
+				array( Integration::EMAIL_POST_TYPE ),
 			)
 		);
 	}

@@ -37,20 +37,9 @@ describe( 'Intro Banners', () => {
 						hasErrors: false,
 						errorStatus: undefined,
 						activeTheme: '',
-						themeData: {
-							themes: [],
-							_links: {
-								browse_all: {
-									href: '',
-								},
-							},
-						},
 						customizeStoreTaskCompleted: false,
 					},
 					themeConfiguration: {},
-					transitionalScreen: {
-						hasCompleteSurvey: false,
-					},
 					isFontLibraryAvailable: false,
 					isPTKPatternsAPIAvailable: false,
 					activeThemeHasMods: false,

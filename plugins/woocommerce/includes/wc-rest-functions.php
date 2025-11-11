@@ -240,7 +240,10 @@ function wc_rest_check_post_permissions( $post_type, $context = 'read', $object_
 	} else {
 		$cap              = $contexts[ $context ];
 		$post_type_object = get_post_type_object( $post_type );
-		$permission       = current_user_can( $post_type_object->cap->$cap, $object_id );
+		$permission       = false;
+		if ( $post_type_object instanceof WP_Post_Type ) {
+			$permission = current_user_can( $post_type_object->cap->$cap, $object_id );
+		}
 	}
 
 	return apply_filters( 'woocommerce_rest_check_permissions', $permission, $context, $object_id, $post_type );
@@ -423,6 +426,7 @@ function wc_rest_should_load_namespace( string $ns, string $rest_route = '' ): b
 		'wc/v1',
 		'wc/v2',
 		'wc/v3',
+		'wc/v4',
 		'wc-telemetry',
 		'wc-admin',
 		'wc-analytics',

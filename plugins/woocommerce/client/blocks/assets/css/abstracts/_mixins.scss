@@ -18,6 +18,29 @@ $fontSizes: (
 	font-size: map.get($fontSizes, $sizeName) * $multiplier;
 }
 
+@mixin font-large-locked {
+	font-size: var(--wp--preset--font-size--medium, 22px);
+	line-height: 27px;
+}
+
+@mixin font-regular-locked {
+	font-size: var(--wp--preset--font-size--small, 14px);
+	line-height: 20px;
+}
+
+@mixin font-small-locked {
+	font-size: 13px;
+	line-height: 16px;
+}
+
+// We're treating mobile inputs as a special case, increasing the font-size to
+// 16px to avoid mobile Safari auto-zooming when focusing on the input. The
+// minimum font-size to prevent this behavior is 16px. Please don't change it!
+@mixin font-for-mobile-inputs-locked {
+	font-size: 16px;
+	line-height: 20px;
+}
+
 @mixin spinner-animation() {
 	@keyframes spinner__animation {
 		0% {
@@ -242,27 +265,6 @@ $fontSizes: (
 	}
 }
 
-// Shows a border with the current color and a custom opacity. That can't be achieved
-// with normal border because `currentColor` doesn't allow tweaking the opacity, and
-// setting the opacity of the entire element would change the children's opacity too.
-@mixin with-translucent-border($border-width: 1px, $opacity: 0.3) {
-	position: relative;
-
-	&::after {
-		border-style: solid;
-		border-width: $border-width;
-		bottom: 0;
-		content: "";
-		display: block;
-		left: 0;
-		opacity: $opacity;
-		pointer-events: none;
-		position: absolute;
-		right: 0;
-		top: 0;
-	}
-}
-
 // Positions an element absolutely and stretches it over the container
 @mixin absolute-stretch() {
 	margin: 0;
@@ -306,7 +308,7 @@ $fontSizes: (
 	}
 }
 
-@mixin cart-checkout-below-large {
+@mixin cart-checkout-below-large-container {
 	@container (max-width: 699px) {
 		@content;
 	}
@@ -314,6 +316,12 @@ $fontSizes: (
 
 @mixin cart-checkout-medium-container {
 	@container (min-width: 520px) and (max-width: 699px) {
+		@content;
+	}
+}
+
+@mixin cart-checkout-below-medium-container {
+	@container (max-width: 519px) {
 		@content;
 	}
 }
@@ -327,5 +335,60 @@ $fontSizes: (
 @mixin cart-checkout-mobile-container {
 	@container (max-width: 399px) {
 		@content;
+	}
+}
+
+@mixin skeleton-animation() {
+	background: color-mix(in srgb, currentColor 5%, transparent);
+	border-radius: $universal-border-radius;
+	position: relative;
+	overflow: hidden;
+	border: none;
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		transform: translateX(-100%);
+		/* stylelint-disable declaration-colon-newline-after, function-parentheses-space-inside, function-comma-space-after */
+		background: linear-gradient(
+			90deg,
+			transparent 0%,
+			color-mix(in srgb, currentColor 5%, transparent) 50%,
+			transparent 100%
+		);
+		/* stylelint-enable */
+		animation: wc-skeleton-shimmer 1.25s infinite;
+
+		@media (prefers-reduced-motion: reduce) {
+			animation: none;
+		}
+	}
+
+	&--static {
+		&::after {
+			display: none;
+		}
+	}
+}
+
+@mixin skeleton-animation-fade() {
+	transition: background-color 0.2s ease;
+
+	&::after {
+		transition: background-color 0.2s ease;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		transition: background-color 0.2s ease;
+
+		&::after {
+			transition: background-color 0.2s ease;
+		}
+	}
+}
+
+@keyframes wc-skeleton-shimmer {
+	100% {
+		transform: translateX(100%);
 	}
 }

@@ -1,0 +1,36 @@
+name: Mirror a PHP package for releasing it on Packagist.org
+on:
+    workflow_dispatch:
+        inputs:
+            package:
+                description: 'Enter the package name as it specified in corresponding `package.json` file (e.g. `@woocommerce/email-editor-config`).'
+                required: true
+
+permissions: {}
+
+jobs:
+    mirror:
+        name: Prepare and mirror the package
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+        steps:
+            - name: Checkout monorepo
+              uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 #v4.2.2
+
+            - name: Setup WooCommerce Monorepo
+              uses: ./.github/actions/setup-woocommerce-monorepo
+
+            - name: Build package for mirroring
+              run: |
+                  pnpm --filter "${{ github.event.inputs.package }}" build:composer-package
+                  echo "mirror_dir=$( pnpm --filter ${{ github.event.inputs.package }} list --json | jq --compact-output '.[]' | jq --raw-output '( .path + "/build")' )" >> $GITHUB_ENV
+
+            - name: Push to mirror
+              uses: Automattic/action-push-to-mirrors@4dfc139699dff77d96af45b2aaf70888c8cd963d #v2.2.2
+              with:
+                  token: ${{ secrets.PR_ASSIGN_TOKEN }}
+                  username: woocommercebot
+                  working-directory: ${{ env.mirror_dir }}
+                  commit-message: 'Mirror package ${{ github.event.inputs.package }} from WooCommerce'
+              timeout-minutes: 5 # Normally should take up to 30 seconds

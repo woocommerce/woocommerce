@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fixed bug in wc_change_term_counts() that hid empty top level product categories

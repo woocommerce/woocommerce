@@ -15,7 +15,6 @@ import {
 import { optionsStore } from '@woocommerce/data';
 import { dispatch, resolveSelect } from '@wordpress/data';
 import { Spinner } from '@woocommerce/components';
-import { getAdminLink } from '@woocommerce/settings';
 import { PluginArea } from '@wordpress/plugins';
 import { accessTaskReferralStorage } from '@woocommerce/onboarding';
 
@@ -32,29 +31,26 @@ import {
 import { DesignWithoutAi } from './design-without-ai';
 
 import { AssemblerHub, events as assemblerHubEvents } from './assembler-hub';
-import {
-	events as transitionalEvents,
-	services as transitionalServices,
-	actions as transitionalActions,
-} from './transitional';
+import { services as transitionalServices } from './transitional';
 import { findComponentMeta } from '~/utils/xstate/find-component';
 import {
 	CustomizeStoreComponentMeta,
 	CustomizeStoreComponent,
 	customizeStoreStateMachineContext,
 } from './types';
-import { ThemeCard } from './intro/types';
 import './style.scss';
-import { navigateOrParent, attachParentListeners, isIframe } from './utils';
+import {
+	navigateOrParent,
+	attachParentListeners,
+	isIframe,
+	redirectToThemes,
+} from './utils';
 import useBodyClass from './hooks/use-body-class';
-import { isWooExpress } from '~/utils/is-woo-express';
 import { useXStateInspect } from '~/xstate';
-import { isFeatureEnabled } from '~/utils/features';
 
 export type customizeStoreStateMachineEvents =
 	| introEvents
 	| assemblerHubEvents
-	| transitionalEvents
 	| { type: 'EXTERNAL_URL_UPDATE' }
 	| { type: 'INSTALL_FONTS' }
 	| { type: 'NO_AI_FLOW_ERROR'; payload: { hasError: boolean } }
@@ -115,21 +111,6 @@ const goBack = () => {
 	redirectToWooHome();
 };
 
-const redirectToThemes = ( _context: customizeStoreStateMachineContext ) => {
-	if ( isWooExpress() ) {
-		window.location.href =
-			_context?.intro?.themeData?._links?.browse_all?.href ??
-			getAdminLink( 'themes.php' );
-	} else if ( isFeatureEnabled( 'marketplace' ) ) {
-		window.location.href = getAdminLink(
-			'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
-		);
-	} else {
-		window.location.href =
-			'https://woocommerce.com/product-category/themes/';
-	}
-};
-
 const markTaskComplete = async () => {
 	const currentTemplateId: string | undefined = await resolveSelect(
 		coreStore
@@ -180,7 +161,6 @@ export const machineActions = {
 
 export const customizeStoreStateMachineActions = {
 	...introActions,
-	...transitionalActions,
 	...machineActions,
 };
 
@@ -198,26 +178,12 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 	schema: {
 		context: {} as customizeStoreStateMachineContext,
 		events: {} as customizeStoreStateMachineEvents,
-		services: {} as {
-			fetchThemeCards: { data: ThemeCard[] };
-		},
 	},
 	context: {
 		intro: {
 			hasErrors: false,
-			themeData: {
-				themes: [] as ThemeCard[],
-				_links: {
-					browse_all: {
-						href: getAdminLink( 'themes.php' ),
-					},
-				},
-			},
 			activeTheme: '',
 			customizeStoreTaskCompleted: false,
-		},
-		transitionalScreen: {
-			hasCompleteSurvey: false,
 		},
 		isFontLibraryAvailable: null,
 		isPTKPatternsAPIAvailable: null,
@@ -307,7 +273,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 								onDone: {
 									target: 'success',
 									actions: [
-										'assignThemeData',
 										'assignActiveTheme',
 										'assignCustomizeStoreCompleted',
 										'assignCurrentThemeIsAiGenerated',
@@ -491,7 +456,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 						},
 						onDone: {
 							target: 'transitional',
-							actions: [ 'assignHasCompleteSurvey' ],
 						},
 					},
 				},
@@ -504,11 +468,6 @@ export const customizeStoreStateMachineDefinition = createMachine( {
 					],
 					meta: {
 						component: AssemblerHub,
-					},
-					on: {
-						COMPLETE_SURVEY: {
-							actions: 'completeSurvey',
-						},
 					},
 				},
 			},

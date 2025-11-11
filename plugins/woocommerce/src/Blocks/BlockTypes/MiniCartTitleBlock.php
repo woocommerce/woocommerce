@@ -38,16 +38,19 @@ class MiniCartTitleBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render_experimental_iapi_title_block( $attributes, $content, $block ) {
+		$wrapper_attributes = get_block_wrapper_attributes(
+			array(
+				'class' => 'wc-block-mini-cart__title',
+			)
+		);
 		ob_start();
 		?>
-		<div class="wp-block-woocommerce-mini-cart-title-block">
-			<h2 class="wc-block-mini-cart__title">
+			<h2 <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 				<?php
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					echo $content;
 				?>
 			</h2>
-		</div>
 		<?php
 		return ob_get_clean();
 	}

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add fallback for Navigator component to the email editor

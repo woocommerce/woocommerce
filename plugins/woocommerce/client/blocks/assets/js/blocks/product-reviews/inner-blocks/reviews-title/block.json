@@ -4,7 +4,7 @@
 	"name": "woocommerce/product-reviews-title",
 	"title": "Reviews Title",
 	"category": "woocommerce",
-	"ancestor": [ "woocommerce/blockified-product-reviews" ],
+	"ancestor": [ "woocommerce/product-reviews" ],
 	"description": "Displays a title with the number of reviews.",
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId", "postType" ],

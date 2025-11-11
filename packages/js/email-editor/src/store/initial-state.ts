@@ -1,30 +1,25 @@
 /**
  * Internal dependencies
  */
-import { editorCurrentPostId } from './constants';
 import { State } from './types';
-import { getEditorSettings, getEditorTheme, getUrls } from './settings';
 
 export function getInitialState(): State {
-	const postId = editorCurrentPostId;
 	return {
-		postId,
-		editorSettings: getEditorSettings(),
-		theme: getEditorTheme(),
+		editorSettings: undefined,
+		theme: undefined,
 		styles: {
-			globalStylesPostId:
-				window.WooCommerceEmailEditor.user_theme_post_id,
+			globalStylesPostId: null,
 		},
-		urls: getUrls(),
+		urls: {
+			back: '',
+			listings: '',
+		},
 		preview: {
-			toEmail: window.WooCommerceEmailEditor.current_wp_user_email,
+			toEmail: '',
 			isModalOpened: false,
 			isSendingPreviewEmail: false,
 			sendingPreviewStatus: null,
 		},
-		personalizationTags: {
-			list: [],
-			isFetching: false,
-		},
+		contentValidation: undefined,
 	};
 }

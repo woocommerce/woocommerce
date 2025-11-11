@@ -15,6 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * Payments settings controller class.
  *
  * Use this class for hooks and actions related to the Payments settings page.
+ *
+ * @internal
  */
 class PaymentsController {
 
@@ -170,7 +172,6 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 
@@ -263,7 +264,6 @@ class PaymentsController {
 				'Failed to get payment providers: ' . $e->getMessage(),
 				array(
 					'source' => 'settings-payments',
-					'error'  => $e,
 				)
 			);
 

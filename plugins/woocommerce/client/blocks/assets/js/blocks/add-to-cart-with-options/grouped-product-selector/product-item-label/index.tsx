@@ -7,6 +7,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 import type { BlockConfiguration } from '@wordpress/blocks';
 import { useProductDataContext } from '@woocommerce/shared-context';
 import { Spinner } from '@wordpress/components';
+import { isProductResponseItem } from '@woocommerce/entities';
 
 /**
  * Internal dependencies
@@ -19,7 +20,7 @@ registerBlockType( metadata.name, {
 		const blockProps = useBlockProps();
 		const { isLoading, product } = useProductDataContext();
 
-		if ( isLoading ) {
+		if ( isLoading || ! isProductResponseItem( product ) ) {
 			return <Spinner />;
 		}
 		return (

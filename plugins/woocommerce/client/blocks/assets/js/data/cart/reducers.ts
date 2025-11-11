@@ -11,6 +11,7 @@ import { defaultCartState, CartState } from './default-state';
 import { EMPTY_CART_ERRORS } from '../constants';
 import { setIsCustomerDataDirty } from './utils';
 import { persistenceLayer } from './persistence-layer';
+import { isEditor } from '../utils';
 
 /**
  * Reducer for receiving items related to the cart.
@@ -215,7 +216,7 @@ function withPersistenceLayer( cartReducer: Reducer< CartState > ) {
 	return ( state: CartState | undefined, action: AnyAction ): CartState => {
 		const nextState = cartReducer( state, action );
 
-		if ( nextState.cartData ) {
+		if ( nextState.cartData && ! isEditor() ) {
 			persistenceLayer.set( nextState.cartData );
 		}
 

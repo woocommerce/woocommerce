@@ -9,7 +9,8 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
-use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 
 /**
  * Integration test for Social_Links class
@@ -68,11 +69,11 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 	);
 
 	/**
-	 * Settings controller instance
+	 * Rendering context instance.
 	 *
-	 * @var Settings_Controller
+	 * @var Rendering_Context
 	 */
-	private $settings_controller;
+	private $rendering_context;
 
 	/**
 	 * Set up before each test
@@ -81,14 +82,15 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
 		$this->social_links_renderer = new Social_Links();
-		$this->settings_controller   = $this->di_container->get( Settings_Controller::class );
+		$theme_controller            = $this->di_container->get( Theme_Controller::class );
+		$this->rendering_context     = new Rendering_Context( $theme_controller->get_theme() );
 	}
 
 	/**
 	 * Test it renders social links content
 	 */
 	public function testItRendersSocialLinksContent(): void {
-		$rendered = $this->social_links_renderer->render( '', $this->parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $this->parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Facebook', $rendered );
 		$this->assertStringContainsString( 'Twitter', $rendered );
@@ -103,7 +105,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links                                      = $this->parsed_social_links;
 		$parsed_social_links['attrs']['iconBackgroundColorValue'] = '#720eec';
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'background-color:#720eec;', $rendered );
 	}
@@ -115,7 +117,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links                       = $this->parsed_social_links;
 		$parsed_social_links['attrs']['className'] = 'is-style-pill-shape';
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'padding-left:17px;', $rendered );
 		$this->assertStringContainsString( 'padding-right:17px;', $rendered );
@@ -136,7 +138,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 			$parsed_social_links                  = $this->parsed_social_links;
 			$parsed_social_links['attrs']['size'] = $size_class;
 
-			$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+			$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 			$this->checkValidHTML( $rendered );
 			$this->assertStringContainsString( "width=\"{$expected_size}\"", $rendered );
 			$this->assertStringContainsString( "height=\"{$expected_size}\"", $rendered );
@@ -152,7 +154,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links['innerBlocks'][0]['attrs']['url']     = 'test@example.com';
 		$parsed_social_links['innerBlocks'][0]['attrs']['label']   = 'My email';
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'mailto:', $rendered ); // HTML entities of test@example.com -> because of antispambot.
 		$this->assertStringContainsString( 'My email', $rendered );
@@ -165,7 +167,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links                                   = $this->parsed_social_links;
 		$parsed_social_links['innerBlocks'][0]['attrs']['url'] = 'example.com';
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'https://example.com', $rendered );
 	}
@@ -177,7 +179,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links                                   = $this->parsed_social_links;
 		$parsed_social_links['innerBlocks'][0]['attrs']['url'] = '#section';
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( '#section', $rendered );
 	}
@@ -189,7 +191,7 @@ class Social_Links_Test extends \Email_Editor_Integration_Test_Case {
 		$parsed_social_links                          = $this->parsed_social_links;
 		$parsed_social_links['attrs']['openInNewTab'] = true;
 
-		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->settings_controller );
+		$rendered = $this->social_links_renderer->render( '', $parsed_social_links, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'target="_blank"', $rendered );
 		$this->assertStringContainsString( 'rel="noopener nofollow"', $rendered );

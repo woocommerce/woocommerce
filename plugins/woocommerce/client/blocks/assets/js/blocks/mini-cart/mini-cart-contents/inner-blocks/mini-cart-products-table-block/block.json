@@ -10,7 +10,8 @@
 		"multiple": false,
 		"reusable": false,
 		"inserter": false,
-		"lock": false
+		"lock": false,
+		"interactivity": true
 	},
 	"attributes": {
 		"lock": {
@@ -21,9 +22,7 @@
 			}
 		}
 	},
-	"parent": [
-		"woocommerce/mini-cart-items-block"
-	],
+	"parent": [ "woocommerce/mini-cart-items-block" ],
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"$schema": "https://schemas.wp.org/trunk/block.json"

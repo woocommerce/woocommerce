@@ -33,9 +33,9 @@ export function useEmailCss() {
 				editorTheme: select( storeName ).getTheme(),
 				// @ts-expect-error There are no types for the experimental features settings.
 				// eslint-disable-next-line no-underscore-dangle
-				layout: editorSettings.__experimentalFeatures?.layout,
+				layout: editorSettings?.__experimentalFeatures?.layout,
 				deviceType: getDeviceType(),
-				editorSettingsStyles: editorSettings.styles,
+				editorSettingsStyles: editorSettings?.styles,
 			};
 		},
 		[]
@@ -55,7 +55,7 @@ export function useEmailCss() {
 
 	let rootContainerStyles = '';
 	if ( layout && deviceType !== 'Mobile' ) {
-		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+		rootContainerStyles = `display:flow-root; width:${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;max-width: 100%;`;
 	}
 	const padding = mergedConfig.styles?.spacing?.padding;
 	if ( padding ) {

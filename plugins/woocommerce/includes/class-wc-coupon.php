@@ -146,6 +146,24 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Returns all data for this object.
+	 *
+	 * @since  2.6.0
+	 * @return array
+	 */
+	public function get_data() {
+		$data = parent::get_data();
+		if ( '' === $data['minimum_amount'] ) {
+			$data['minimum_amount'] = '0';
+		}
+		if ( '' === $data['maximum_amount'] ) {
+			$data['maximum_amount'] = '0';
+		}
+		return $data;
+	}
+
+
+	/**
 	 * If the object has an ID, read using the data store.
 	 *
 	 * @since 3.4.1
@@ -400,20 +418,26 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_minimum_amount( $context = 'view' ) {
-		return $this->get_prop( 'minimum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'minimum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'minimum_amount', $context ) );
 	}
 	/**
 	 * Get maximum spend amount.
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
-	 * @return float
+	 * @return string
 	 */
 	public function get_maximum_amount( $context = 'view' ) {
-		return $this->get_prop( 'maximum_amount', $context );
+		if ( 'edit' !== $context && $this->get_prop( 'maximum_amount', $context ) === '' ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
 	}
 
 	/**
@@ -543,10 +567,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * @param string $discount_type Discount type.
 	 */
 	public function set_discount_type( $discount_type ) {
+		$this->set_discount_type_core( $discount_type, true );
+	}
+
+	/**
+	 * Set discount type, optionally disabling the type verification.
+	 *
+	 * @since 10.3.0
+	 * @param string $discount_type Discount type.
+	 * @param bool   $verify_discount_type Whether to verify if the discount type is valid.
+	 */
+	private function set_discount_type_core( $discount_type, bool $verify_discount_type ) {
 		if ( 'percent_product' === $discount_type ) {
 			$discount_type = 'percent'; // Backwards compatibility.
 		}
-		if ( ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
+		if ( $verify_discount_type && ! in_array( $discount_type, array_keys( wc_get_coupon_types() ), true ) ) {
 			$this->error( 'coupon_invalid_discount_type', __( 'Invalid discount type.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'discount_type', $discount_type );
@@ -556,7 +591,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set amount.
 	 *
 	 * @since 3.0.0
-	 * @param float $amount Amount.
+	 * @param float|string $amount Amount.
 	 */
 	public function set_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
@@ -565,11 +600,11 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$amount = 0;
 		}
 
-		if ( $amount < 0 ) {
+		if ( (float) $amount < 0 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
-		if ( 'percent' === $this->get_discount_type() && $amount > 100 ) {
+		if ( 'percent' === $this->get_discount_type() && (float) $amount > 100 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
@@ -720,7 +755,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the minimum spend amount.
 	 *
 	 * @since 3.0.0
-	 * @param float $amount Minimum amount.
+	 * @param float|string $amount Minimum amount.
 	 */
 	public function set_minimum_amount( $amount ) {
 		$this->set_prop( 'minimum_amount', wc_format_decimal( $amount ) );
@@ -730,10 +765,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * Set the maximum spend amount.
 	 *
 	 * @since 3.0.0
-	 * @param float $amount Maximum amount.
+	 * @param float|string $amount Maximum amount.
 	 */
 	public function set_maximum_amount( $amount ) {
-		if ( $amount && $this->get_minimum_amount() > $amount ) {
+		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
 			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
 		}
 
@@ -1267,7 +1302,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		$this->set_id( $info[0] ?? 0 );
 		$this->set_code( $info[1] ?? '' );
-		$this->set_discount_type( $info[2] ?? 'fixed_cart' );
+		$this->set_discount_type_core( $info[2] ?? 'fixed_cart', false );
 		$this->set_amount( $info[3] ?? 0 );
 		$this->set_free_shipping( $info[4] ?? false );
 	}

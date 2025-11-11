@@ -1,0 +1,17 @@
+---
+globs: **/*.php,**/*.js,**/*.jsx,**/*.tsx,**/*.ts
+alwaysApply: false
+---
+# Code Quality
+
+This rule provides guidance for best code quality practices and preventing bugs in WooCommerce.
+
+## Best Practices
+
+Don't trust that extension developers will follow the best practices, make sure that all code:
+
+- Guards against unexpected inputs.
+- Sanitizes and validates any potentially dangerous inputs.
+- Is backwards compatible.
+- Is readable and intuitive.
+- Has unit or E2E tests where applicable.

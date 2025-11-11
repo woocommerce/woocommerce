@@ -1,14 +1,17 @@
 /**
  * External dependencies
  */
-import { addAProductToCart } from '@woocommerce/e2e-utils-playwright';
+import {
+	addAProductToCart,
+	WC_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { tags, test } from '../../fixtures/fixtures';
-import { WC_API_PATH } from '../../utils/api-client';
+import { tags, test, expect } from '../../fixtures/fixtures';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 const productName = `Cart product test ${ Date.now() }`;
 const productPrice = '13.99';
@@ -87,6 +90,52 @@ test.describe(
 						value: 'yes',
 					}
 				);
+			}
+		);
+
+		test(
+			'should be able to navigate and remove item from mini cart using keyboard',
+			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
+			async ( { page } ) => {
+				const wordPressVersion = await getInstalledWordPressVersion();
+				// eslint-disable-next-line playwright/no-skipped-test
+				test.skip(
+					wordPressVersion <= 6.7,
+					'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+				);
+
+				await test.step( 'Add product to cart and open mini cart', async () => {
+					await addAProductToCart( page, productId );
+					const miniCartButton = page.locator(
+						'.wc-block-mini-cart__button'
+					);
+					await miniCartButton.click();
+					await expect(
+						page.locator( '.wc-block-mini-cart__drawer' )
+					).toBeVisible();
+				} );
+
+				await test.step( 'Verify and interact with remove button', async () => {
+					const removeButton = page.locator(
+						'.wc-block-cart-item__remove-link'
+					);
+					await expect( removeButton ).toBeVisible();
+					await removeButton.focus();
+					await page.keyboard.press( 'Space' );
+				} );
+
+				await test.step( 'Verify cart is empty', async () => {
+					await expect(
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
+					).toBeVisible();
+					await expect(
+						page.locator(
+							'.wc-block-mini-cart__empty-cart-wrapper'
+						)
+					).toContainText( 'Your cart is currently empty!' );
+				} );
 			}
 		);
 	}

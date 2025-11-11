@@ -9,7 +9,11 @@ import { execSync } from 'child_process';
  */
 import { Logger } from '../../../core/logger';
 import { cloneAuthenticatedRepo } from '../../../core/git';
-import { updateTrunkChangelog, updateReleaseBranchChangelogs } from './lib';
+import {
+	updateTrunkChangelog,
+	updateReleaseBranchChangelogs,
+	updateIntermediateBranches,
+} from './lib';
 import { Options } from './types';
 
 export const changelogCommand = new Command( 'changelog' )
@@ -34,7 +38,7 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
@@ -78,7 +82,8 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = branch || `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(
@@ -91,7 +96,12 @@ export const changelogCommand = new Command( 'changelog' )
 		await updateTrunkChangelog(
 			options,
 			tmpRepoPath,
-			releaseBranch,
+			releaseBranchChanges
+		);
+
+		await updateIntermediateBranches(
+			options,
+			tmpRepoPath,
 			releaseBranchChanges
 		);
 	} );

@@ -5,11 +5,6 @@ import { Button, Modal, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 
-/**
- * Internal dependencies
- */
-import './style.scss';
-
 const LinkModal = ( { onInsert, isOpened, closeCallback, tag } ) => {
 	const [ linkText, setLinkText ] = useState( __( 'Link', 'woocommerce' ) );
 	if ( ! isOpened ) {

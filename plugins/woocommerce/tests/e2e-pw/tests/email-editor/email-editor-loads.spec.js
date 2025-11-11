@@ -98,15 +98,15 @@ test.describe( 'WooCommerce Email Editor Core', () => {
 			page
 				.locator( 'iframe[name="editor-canvas"]' )
 				.contentFrame()
-				.getByText( 'Woo! You’ve received a new' )
+				.getByText( 'You’ve received a new' )
 		).toBeVisible();
 
 		await page
 			.locator( 'iframe[name="editor-canvas"]' )
 			.contentFrame()
-			.getByText( 'Woo! You’ve received a new' )
+			.getByText( 'You’ve received a new' )
 			.fill(
-				'Hello world from Woo plugin\nWoo! You’ve received a new order from [woocommerce/customer-full-name]'
+				'Hello world from Woo plugin\nYou’ve received a new order from [woocommerce/customer-full-name]'
 			);
 		await expect(
 			page.getByRole( 'button', { name: 'Save', exact: true } )

@@ -21,7 +21,8 @@ import {
 	createStorageUtils,
 } from '@woocommerce/onboarding';
 import { getAdminLink } from '@woocommerce/settings';
-import { __ } from '@wordpress/i18n';
+import { recordPaymentsOnboardingEvent } from '~/settings-payments/utils';
+import { wooPaymentsOnboardingSessionEntryLYS } from '~/settings-payments/constants';
 
 const SEVEN_DAYS_IN_SECONDS = 60 * 60 * 24 * 7;
 export const LYS_RECENTLY_ACTIONED_TASKS_KEY = 'lys_recently_actioned_tasks';
@@ -60,29 +61,6 @@ export const getLysTasklist = async () => {
 	] );
 
 	const recentlyActionedTasks = getRecentlyActionedTasks() ?? [];
-
-	// This is a special case for the payments task.
-	// We need to override the task completion status and title based on the additional data.
-	// This is because LYS and the Home screen share the same task list, but the completion logic is different.
-	tasklist[ 0 ].tasks.forEach( ( task: TaskType ) => {
-		if ( task.id === 'payments' ) {
-			let isComplete = false;
-
-			if (
-				// Store has other online gateways enabled and WooPayments is not onboarded.
-				( task.additionalData?.wooPaymentsHasOnlineGatewaysEnabled &&
-					! task.additionalData?.wooPaymentsIsOnboarded ) ||
-				// WooPayments is onboarded and not in test mode.
-				( task.additionalData?.wooPaymentsIsOnboarded &&
-					! task.additionalData?.wooPaymentsHasTestAccount )
-			) {
-				isComplete = true;
-			}
-
-			task.isComplete = isComplete;
-			task.title = __( 'Set up payments', 'woocommerce' );
-		}
-	} );
 
 	/**
 	 * Show tasks that fulfill all the following conditions:
@@ -144,16 +122,26 @@ export function taskClickedAction( event: {
 			// Use case 1: Merchant has no payment extensions installed, and their store is in a WooPayments-supported geo.
 			( ( ! wooPaymentsIsActive &&
 				! wooPaymentsHasOtherProvidersEnabled ) ||
-				// Use case 2: Merchant has the WooPayments extension installed but they have not completed setup.
+				// Use case 2: Merchant has the WooPayments extension installed, but they have not completed setup.
 				( wooPaymentsIsActive && ! wooPaymentsIsOnboarded ) ||
 				// Use case 3: Merchant has the WooPayments extension installed and configured with a test account.
 				( wooPaymentsIsActive && wooPaymentsHasTestAccount ) ||
-				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.)
+				// Use case 4: Merchant has multiple payment extensions installed but not set up, and the WooPayments extension is one of them.
 				( wooPaymentsIsActive &&
 					wooPaymentsHasOtherProvidersNeedSetup ) )
 		) {
+			// Record the "modal" being opened to keep consistency with the Payments Settings flow.
+			recordPaymentsOnboardingEvent(
+				'woopayments_onboarding_modal_opened',
+				{
+					from: 'lys_sidebar_task',
+					source: wooPaymentsOnboardingSessionEntryLYS,
+				}
+			);
+
 			return { type: 'SHOW_PAYMENTS' };
 		}
+		// Otherwise, we navigate to the task's action URL - this will generally be the Payments Settings page.
 	}
 
 	if ( event.task.actionUrl ) {

@@ -4,10 +4,12 @@
 import { debounce } from 'lodash';
 import { applyFilters } from '@wordpress/hooks';
 
-const isEventTrackingEnabled = applyFilters(
-	'woocommerce_email_editor_events_tracking_enabled',
-	false
-);
+const isEventTrackingEnabled = () => {
+	return applyFilters(
+		'woocommerce_email_editor_events_tracking_enabled',
+		false
+	) as boolean;
+};
 
 const EMAIL_STRING = 'email_editor_events';
 
@@ -20,7 +22,7 @@ const dispatcher = new EventTarget();
  * @param          data - extra properties - please use a valid JSON object
  */
 const recordEvent = ( name: string, data = {} ) => {
-	if ( ! isEventTrackingEnabled ) {
+	if ( ! isEventTrackingEnabled() ) {
 		return;
 	}
 
@@ -44,7 +46,7 @@ const recordEvent = ( name: string, data = {} ) => {
 const recordEventOnce = ( function () {
 	const cachedEventName = {};
 	return ( name: string, data = {} ) => {
-		if ( ! isEventTrackingEnabled ) {
+		if ( ! isEventTrackingEnabled() ) {
 			return;
 		}
 

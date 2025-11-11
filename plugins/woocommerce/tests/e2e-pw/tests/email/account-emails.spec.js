@@ -1,13 +1,17 @@
 /* eslint-disable playwright/expect-expect */
 
 /**
+ * External dependencies
+ */
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+
+/**
  * Internal dependencies
  */
 import { getFakeCustomer } from '../../utils/data';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expectEmail, expectEmailContent } from '../../utils/email';
-import { WC_API_PATH } from '../../utils/api-client';
 import { setFeatureEmailImprovementsFlag } from './helpers/set-email-improvements-feature-flag';
 
 const test = baseTest.extend( {

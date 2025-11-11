@@ -137,6 +137,7 @@ const test = base.extend<
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
+		await wpCLI( `db reset --yes` );
 		// Reset the database to the initial state via snapshot import.
 		await wpCLI( `db import ${ DB_EXPORT_FILE }` );
 	},

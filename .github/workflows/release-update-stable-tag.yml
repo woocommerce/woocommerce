@@ -1,0 +1,300 @@
+name: 'Release: Update stable tag'
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version (in X.Y.Z format)'
+        required: true
+        default: ''
+      confirm-update:
+        description: 'I confirm that I want to update the stable tag (this will update the SVN and GitHub stable tags).'
+        type: boolean
+        required: true
+        default: false
+      allow-revert:
+        description: 'Allow setting stable tag to a lower version (revert)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: release-wporg-svn
+
+jobs:
+  validate-release:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    outputs:
+      version: ${{ steps.extract-version.outputs.version }}
+      branch: ${{ steps.extract-version.outputs.branch }}
+      target-branches: ${{ steps.get-branches.outputs.branches }}
+    steps:
+      - name: Check confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
+            echo "::error::You must check the confirmation checkbox to proceed with the stable tag update"
+            exit 1
+          else
+            echo "✅ Confirmation received - proceeding with stable tag update"
+          fi
+
+      - name: Validate release version
+        id: extract-version
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        with:
+          script: |
+            const versionInput = '${{ github.event.inputs.version }}';
+
+            // Match X.Y.Z format
+            const versionMatch = versionInput.match(/^(\d+)\.(\d+)\.(\d+)$/);
+
+            if (versionMatch) {
+              const major = versionMatch[1];
+              const minor = versionMatch[2];
+              const majorMinor = `${major}.${minor}`;
+              const branch = `release/${majorMinor}`;
+
+              console.log(`Input version: ${versionInput}`);
+              console.log(`Major.minor version: ${majorMinor}`);
+              console.log(`Release branch: ${branch}`);
+              core.setOutput('version', versionInput);
+              core.setOutput('branch', branch);
+            } else {
+              core.setFailed(`Version ${versionInput} does not match the expected format (X.Y.Z)`);
+              process.exit(1);
+            }
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get trunk version
+        id: get-trunk-version
+        run: |
+          TRUNK_VERSION=$(awk '/Version:/ {print $3}' plugins/woocommerce/woocommerce.php | sed -E 's/^([0-9]+\.[0-9]+)\.[0-9]+.*/\1/' | sed 's/-.*//')
+          echo "Trunk version is $TRUNK_VERSION"
+          echo "trunk-version=$TRUNK_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get target branches for stable tag update
+        id: get-branches
+        uses: actions/github-script@v7
+        with:
+          script: |
+            function getNextVersion(version) {
+              const [major, minor] = version.split('.').map(Number);
+              return minor < 9
+                ? `${major}.${minor + 1}`
+                : `${major + 1}.0`;
+            }
+
+            const targetVersion = '${{ steps.extract-version.outputs.version }}';
+            const trunkVersion = '${{ steps.get-trunk-version.outputs.trunk-version }}';
+
+            console.log(`Target version: ${targetVersion}`);
+            console.log(`Trunk version: ${trunkVersion}`);
+
+            const [targetMajor, targetMinor] = targetVersion.split('.').map(Number);
+            const [trunkMajor, trunkMinor] = trunkVersion.split('.').map(Number);
+
+            if (targetMajor > trunkMajor || (targetMajor === trunkMajor && targetMinor > trunkMinor)) {
+              core.setFailed(`Target version ${targetVersion} is greater than trunk version ${trunkVersion}.`);
+              return;
+            }
+
+            const branches = ['trunk'];
+
+            let version = targetVersion.match(/^\d+\.\d+/)[0];
+
+            while ( version !== trunkVersion ) {
+              branches.push( `release/${ version }` );
+              version = getNextVersion( version );
+            }
+
+            console.log('Target branches:', branches);
+            core.setOutput('branches', JSON.stringify(branches));
+
+      - name: Verify release branch exists
+        run: |
+          RELEASE_BRANCH="${{ steps.extract-version.outputs.branch }}"
+          if ! git ls-remote --heads origin "$RELEASE_BRANCH" | grep -q "refs/heads/$RELEASE_BRANCH"; then
+            echo "::error::Release branch '$RELEASE_BRANCH' does not exist"
+            exit 1
+          else
+            echo "✅ Release branch '$RELEASE_BRANCH' exists"
+          fi
+
+      - name: Install SVN
+        run: sudo apt-get install -y subversion
+
+      - name: Verify SVN tag exists
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+        run: |
+          echo "🔄 Checking if SVN tag $TARGET_VERSION exists..."
+          if svn list "${{ secrets.WPORG_SVN_URL }}/tags/$TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive > /dev/null 2>&1; then
+            echo "✅ SVN tag '$TARGET_VERSION' exists"
+          else
+            echo "::error::SVN tag '$TARGET_VERSION' does not exist in the repository"
+            exit 1
+          fi
+
+      - name: Extract current stable tag
+        id: current-stable
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+        run: |
+          echo "🔄 Checking current stable tag in trunk's readme.txt..."
+          CURRENT_STABLE=$(svn cat "${{ secrets.WPORG_SVN_URL }}/trunk/readme.txt" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive | grep "^Stable tag:" | sed 's/^Stable tag: *//')
+
+          if [ -z "$CURRENT_STABLE" ]; then
+            echo "::error::Could not find stable tag line in trunk's readme.txt"
+            exit 1
+          fi
+
+          echo "📋 Current stable tag: $CURRENT_STABLE"
+          echo "📋 Target version: $TARGET_VERSION"
+          echo "current-stable=$CURRENT_STABLE" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        env:
+          TARGET_VERSION: ${{ steps.extract-version.outputs.version }}
+          CURRENT_STABLE: ${{ steps.current-stable.outputs.current-stable }}
+          ALLOW_REVERT: ${{ github.event.inputs.allow-revert }}
+        run: |
+          echo "📋 Current stable: $CURRENT_STABLE"
+          echo "📋 Target version: $TARGET_VERSION"
+
+          # Use PHP's version_compare function
+          COMPARISON=$(php -r "echo version_compare('$TARGET_VERSION', '$CURRENT_STABLE');")
+
+          if [ "$COMPARISON" = "0" ]; then
+            echo "::error::Stable tag is already set to $TARGET_VERSION. No update needed."
+            exit 1
+          elif [ "$COMPARISON" = "-1" ]; then
+            echo "⚠️ Warning: Target version ($TARGET_VERSION) is lower than current stable tag ($CURRENT_STABLE)"
+            if [ "$ALLOW_REVERT" != "true" ]; then
+              echo "::error::Cannot set stable tag to a lower version without explicit revert confirmation. Please check the 'Allow revert' checkbox if this is intentional."
+              exit 1
+            fi
+            echo "✅ Revert confirmed - proceeding with downgrade from '$CURRENT_STABLE' to '$TARGET_VERSION'"
+          else
+            echo "✅ Normal upgrade - updating from '$CURRENT_STABLE' to '$TARGET_VERSION'"
+          fi
+
+  update-wporg-stable-tag:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: validate-release
+    steps:
+      - name: Install SVN
+        run: sudo apt-get install -y subversion
+
+      - name: Update SVN stable tag
+        env:
+          TARGET_VERSION: ${{ needs.validate-release.outputs.version }}
+        run: |
+          echo "🔄 Checking out SVN trunk..."
+          svn checkout "${{ secrets.WPORG_SVN_URL }}/trunk" ./svn-trunk --depth files --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
+          cd ./svn-trunk
+
+          README_PATH="./readme.txt"
+
+          if [ ! -f "$README_PATH" ]; then
+            echo "::error::readme.txt not found at $README_PATH"
+            exit 1
+          fi
+
+          # Update the stable tag
+          sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
+
+          # Check if there are any changes
+          if svn diff --quiet; then
+            echo "::error::No changes detected - stable tag is already $TARGET_VERSION"
+            exit 1
+          else
+            echo "📤 Changes detected. Committing changes to SVN..."
+            svn commit -m "Setting stable tag to $TARGET_VERSION" --username "${{ secrets.WPORG_SVN_USERNAME }}" --password "${{ secrets.WPORG_SVN_PASSWORD }}" --non-interactive
+            echo "✅ Successfully committed stable tag update to $TARGET_VERSION"
+          fi
+
+  update-gh-stable-tag:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [validate-release, update-wporg-stable-tag]
+    strategy:
+      fail-fast: false
+      matrix:
+        branch: ${{ fromJSON(needs.validate-release.outputs.target-branches) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          sparse-checkout: |
+            plugins/woocommerce/readme.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+
+      - name: Update stable tag on ${{ matrix.branch }}
+        env:
+          TARGET_VERSION: ${{ needs.validate-release.outputs.version }}
+          BRANCH_NAME: ${{ matrix.branch }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔄 Processing branch: $BRANCH_NAME..."
+
+          if ! git checkout "$BRANCH_NAME" 2>/dev/null; then
+            echo "Branch $BRANCH_NAME does not exist - skipping"
+            exit 0
+          fi
+
+          README_PATH="plugins/woocommerce/readme.txt"
+
+          # Update the stable tag
+          sed -i "s/^Stable tag: .*/Stable tag: $TARGET_VERSION/" "$README_PATH"
+
+          echo "📝 Updated stable tag line on $BRANCH_NAME:"
+          grep "^Stable tag:" "$README_PATH" || echo "::error::Stable tag line not found"
+          echo "=========================="
+
+          # Check if file was actually modified
+          if git diff --quiet "$README_PATH"; then
+            echo "ℹ️ No changes needed on $BRANCH_NAME - stable tag is already $TARGET_VERSION"
+          else
+            echo "📤 Changes detected. Creating PR for $BRANCH_NAME..."
+
+            UPDATE_BRANCH="update/stable-tag-$TARGET_VERSION-$BRANCH_NAME-$(date +%s)"
+            git checkout -b "$UPDATE_BRANCH"
+            git add "$README_PATH"
+            git commit -m "Update stable tag to $TARGET_VERSION on $BRANCH_NAME"
+            git push origin "$UPDATE_BRANCH"
+
+            gh pr create \
+              --title "Update stable tag to $TARGET_VERSION ($BRANCH_NAME)" \
+              --body "This PR updates the stable tag to $TARGET_VERSION." \
+              --base "$BRANCH_NAME" \
+              --head "$UPDATE_BRANCH" \
+              --reviewer ${{ github.actor }}
+
+            echo "✅ Successfully created PR to update stable tag to $TARGET_VERSION on $BRANCH_NAME"
+          fi
+
+  notify-release:
+    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
+    if: ${{ github.event.inputs.allow-revert != 'true' }}
+    steps:
+      - name: 'Notify to announcements channel'
+        uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v 2.10.0
+        with:
+          slack-bot-user-oauth-access-token: ${{ secrets.CODE_FREEZE_BOT_TOKEN }}
+          slack-channel: ${{ secrets.WOO_ANNOUNCEMENTS_SLACK_CHANNEL }}
+          slack-optional-unfurl_links: false
+          slack-text: |
+            :woo-bounce: *<https://github.com/woocommerce/woocommerce/releases/tag/${{ github.event.inputs.version }}|WooCommerce ${{ github.event.inputs.version }}>* has been released! :rocket:
