@@ -1230,9 +1230,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test orderBy with last_active sorting.
 	 */
 	public function test_orderby_last_active(): void {
-		global $wpdb;
-		$site_specific_key = rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
-
 		// Create customers.
 		$customer1 = $this->create_test_customer(
 			array(
@@ -1272,7 +1269,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$response_data = $response->get_data();
 
 		$this->assertCount( 2, $response_data );
-		// Customer2 should come first (30 minutes ago), then customer2 (1 hour ago).
+		// Customer2 should come first (30 minutes ago), then customer1 (1 hour ago).
 		$this->assertEquals( $response_data[0]['id'], $customer2->get_id() );
 		$this->assertEquals( $response_data[1]['id'], $customer1->get_id() );
 	}
