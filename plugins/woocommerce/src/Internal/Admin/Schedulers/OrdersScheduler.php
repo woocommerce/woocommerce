@@ -79,7 +79,7 @@ class OrdersScheduler extends ImportScheduler {
 			// Schedule recurring batch processor.
 			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
 		}
-		// Watch for changes to the immediate import option
+		// Watch for changes to the immediate import option.
 		add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
 
 
