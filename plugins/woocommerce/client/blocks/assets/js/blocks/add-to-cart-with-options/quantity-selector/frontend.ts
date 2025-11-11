@@ -133,7 +133,7 @@ const { state } = store< QuantitySelectorStore >(
 				) {
 					state.draftQuantity = '';
 				} else {
-					state.draftQuantity = Number( event.target.value ) || 0;
+					state.draftQuantity = Number( event.target.value );
 				}
 			},
 			increaseQuantity: (
