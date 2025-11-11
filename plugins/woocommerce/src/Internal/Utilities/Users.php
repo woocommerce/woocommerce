@@ -160,16 +160,16 @@ class Users {
 	 * @param int    $user_id User ID.
 	 * @param string $key     Optional. The meta key to retrieve. By default, returns data for all keys.
 	 * @param bool   $single  Optional. Whether to return a single value. This parameter has no effect if `$key` is not
-	 *                        specified. Default false.
+	 *                        specified. Default true (WordPress's `get_user_meta()` defaults this to false).
 	 *
 	 * @return mixed An array of values if `$single` is false. The value of meta data field if `$single` is true.
 	 *               False for an invalid `$user_id` (non-numeric, zero, or negative value). An empty string if a valid
 	 *               but non-existing user ID is passed.
 	 */
-	public static function get_site_user_meta( int $user_id, string $key = '', bool $single = false ) {
+	public static function get_site_user_meta( int $user_id, string $key = '', bool $single = true ) {
 		global $wpdb;
 		$site_specific_key = $key . '_' . rtrim( $wpdb->get_blog_prefix( get_current_blog_id() ), '_' );
-		return get_user_meta( $user_id, $site_specific_key, true );
+		return get_user_meta( $user_id, $site_specific_key, $single );
 	}
 
 	/**
