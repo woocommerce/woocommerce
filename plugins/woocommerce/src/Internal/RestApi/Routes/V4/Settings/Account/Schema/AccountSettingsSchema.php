@@ -248,20 +248,7 @@ class AccountSettingsSchema extends AbstractSchema {
 	 * @return array Field options.
 	 */
 	private function get_field_options( string $field_id ): array {
-		$page_ids = array(
-			'woocommerce_myaccount_page_id',
-			'woocommerce_terms_page_id',
-		);
-
-		if ( in_array( $field_id, $page_ids, true ) ) {
-			$pages   = get_pages();
-			$options = array();
-			foreach ( $pages as $page ) {
-				$options[ $page->ID ] = $page->post_title;
-			}
-			return $options;
-		}
-
+		// No field has options for now.
 		return array();
 	}
 
