@@ -20,7 +20,7 @@ import '@wordpress/format-library'; // Enables text formatting capabilities
 import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
-import { createStore, storeName } from './store';
+import { createStore, storeName, initStoreOverrides } from './store';
 import { initHooks } from './editor-hooks';
 import { initTextHooks } from './text-hooks';
 import {
@@ -96,7 +96,7 @@ function Editor( {
 	);
 }
 
-function onInit() {
+function onInit(config) {
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -106,6 +106,7 @@ function onInit() {
 	initBlocks();
 	initHooks();
 	initTextHooks();
+	initStoreOverrides(config);
 }
 
 export function initialize( elementId: string ) {
@@ -128,7 +129,8 @@ export function initialize( elementId: string ) {
 		'woocommerce_email_editor_wrap_editor_component',
 		Editor
 	) as typeof Editor;
-	onInit();
+
+	onInit(getEditorConfigFromWindow());
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
@@ -166,7 +168,7 @@ export function ExperimentalEmailEditor( {
 
 	useLayoutEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
-		onInit();
+		onInit(config);
 
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
