@@ -780,7 +780,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+			await test.step( 'verify letters are reset to 0 in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
 				// to type letters directly in the input field in older/mobile browsers.
@@ -794,7 +794,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 						element.blur();
 					} );
 				} );
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 		} );
