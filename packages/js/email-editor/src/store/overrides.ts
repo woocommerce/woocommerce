@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { use as useData, select } from '@wordpress/data';
+import { use, select } from '@wordpress/data';
 import deepmerge from 'deepmerge';
 
 /**
@@ -43,6 +43,7 @@ const generateRootContainerStyles = ( config ) => {
 /**
  * We wrap the core store selectors to return the global styles post id and email base theme from the email editor config.
  * As of Gutenberg 22.0 we can no longer override styles directly via a prop see https://github.com/WordPress/gutenberg/pull/72681/files#diff-da0dfea2139990db95c1ff4cae9f222aef66ae8d3dafb6237953d0c98c63fb64
+ *
  * @param config - The configuration object containing the global styles post id and email base theme.
  */
 export const initStoreOverrides = ( config ) => {
@@ -50,7 +51,7 @@ export const initStoreOverrides = ( config ) => {
 	if ( areExternalStylesSupported ) {
 		return;
 	}
-	useData( ( registry ) => ( {
+	use( ( registry ) => ( {
 		select( store ) {
 			const base = registry.select( store );
 			if ( store.name === 'core' ) {
