@@ -598,14 +598,4 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 
 		return update_option( $this->get_instance_option_key(), apply_filters( 'woocommerce_shipping_' . $this->id . '_instance_settings_values', $this->instance_settings, $this ), 'yes' );
 	}
-
-	/**
-	 * Set shipping method enabled status.
-	 *
-	 * @param bool $enabled Whether the method is enabled.
-	 * @return void
-	 */
-	public function set_enabled( $enabled ) {
-		$this->enabled = wc_string_to_bool( $enabled ) ? 'yes' : 'no';
-	}
 }
