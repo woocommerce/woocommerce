@@ -287,12 +287,17 @@ class AccountSettingsSchema extends AbstractSchema {
 				}
 				return filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 			case 'multiselect':
-				return is_array( $value ) ? $value : array();
+				if ( ! is_array( $value ) ) {
+					return array();
+				}
+				return array_map( 'sanitize_text_field', $value );
 			case 'text':
+				return sanitize_text_field( $value );
 			case 'textarea':
+				return sanitize_textarea_field( $value );
 			case 'select':
 			default:
-				return (string) $value;
+				return sanitize_text_field( $value );
 		}
 	}
 }
