@@ -405,7 +405,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			// Schedule an immediate catchup batch to process all orders up to now
 			// This ensures no orders are missed during the transition.
 			self::schedule_action( 'process_pending_batch', array() );
-		} else if ( 'yes' === $old_value && 'no' === $new_value ) {
+		} elseif ( 'yes' === $old_value && 'no' === $new_value ) {
 			// Switching from immediate import to batch processing.
 			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
 			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', time() - MINUTE_IN_SECONDS ) );
