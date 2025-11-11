@@ -394,16 +394,17 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	public static function handle_immediate_import_option_change( $old_value, $new_value ) {
 		// If switching from batch processing to immediate import.
 		if ( 'no' === $old_value && 'yes' === $new_value ) {
-			// Schedule an immediate catchup batch to process all orders up to now.
-			// This ensures no orders are missed during the transition.
-			self::schedule_action( 'process_pending_batch', array() );
-
 			// Unschedule the recurring batch processor.
 			$action_hook = self::get_action( 'process_pending_batch' );
 			as_unschedule_all_actions( $action_hook, array(), static::$group );
+
+			// Schedule an immediate catchup batch to process all orders up to now
+			// This ensures no orders are missed during the transition.
+			self::schedule_action( 'process_pending_batch', array() );
 		} else if ( 'yes' === $old_value && 'no' === $new_value ) {
-			// Set the last processed order date to now with 10 seconds buffer to ensure no orders are missed.
-			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', time() - 10 ) );
+			// Switching from immediate import to batch processing.
+			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
+			update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, gmdate( 'Y-m-d H:i:s', time() - MINUTE_IN_SECONDS ) );
 			update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
 			// Schedule the recurring batch processor.
