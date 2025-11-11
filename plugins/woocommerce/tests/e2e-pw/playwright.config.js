@@ -42,7 +42,7 @@ const reporter = [
 		'playwright-ctrf-json-reporter',
 		{
 			outputDir: `${ TESTS_ROOT_PATH }/test-results`,
-			outputFile: 'ctrf-report.json',
+			outputFile: `ctrf-report-${ Date.now() }.json`,
 		},
 	],
 	[
