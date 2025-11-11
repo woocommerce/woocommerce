@@ -82,7 +82,6 @@ class OrdersScheduler extends ImportScheduler {
 		// Watch for changes to the immediate import option.
 		add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
 
-
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
 		ProductsDataStore::init();
