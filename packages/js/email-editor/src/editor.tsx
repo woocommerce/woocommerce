@@ -8,6 +8,7 @@ import {
 	useEffect,
 	useLayoutEffect,
 	useState,
+	useMemo,
 } from '@wordpress/element';
 import { applyFilters } from '@wordpress/hooks';
 import { store as editorStore } from '@wordpress/editor';
@@ -73,16 +74,19 @@ function Editor( {
 	const stylesContentRef = useFilterEditorContentStylesheets();
 	const mergedContentRef = useMergeRefs( [ stylesContentRef, contentRef ] );
 
+	// Set allowed blockTypes and isPreviewMode to the editor settings.
+	const editorSettings = useMemo(
+		() => ( {
+			...settings,
+			allowedBlockTypes: getAllowedBlockNames(),
+			isPreviewMode: isPreview,
+		} ),
+		[ settings, isPreview ]
+	);
+
 	if ( ! isInitialized ) {
 		return null;
 	}
-
-	// Set allowed blockTypes and isPreviewMode to the editor settings.
-	const editorSettings = {
-		...settings,
-		allowedBlockTypes: getAllowedBlockNames(),
-		isPreviewMode: isPreview,
-	};
 
 	return (
 		<StrictMode>
@@ -96,7 +100,7 @@ function Editor( {
 	);
 }
 
-function onInit(config) {
+function onInit( config ) {
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -106,7 +110,7 @@ function onInit(config) {
 	initBlocks();
 	initHooks();
 	initTextHooks();
-	initStoreOverrides(config);
+	initStoreOverrides( config );
 }
 
 export function initialize( elementId: string ) {
@@ -130,7 +134,7 @@ export function initialize( elementId: string ) {
 		Editor
 	) as typeof Editor;
 
-	onInit(getEditorConfigFromWindow());
+	onInit( getEditorConfigFromWindow() );
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
@@ -168,7 +172,7 @@ export function ExperimentalEmailEditor( {
 
 	useLayoutEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
-		onInit(config);
+		onInit( config );
 
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
