@@ -8,6 +8,7 @@
 declare(strict_types=1);
 
 use Automattic\WooCommerce\Gateways\PayPal\AddressRequirements as PayPalAddressRequirements;
+use Automattic\WooCommerce\Gateways\PayPal\CurrenciesSupported as PayPalCurrenciesSupported;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\Jetpack\Connection\Client as Jetpack_Connection_Client;
@@ -413,6 +414,21 @@ class WC_Gateway_Paypal_Request {
 		$payee_email         = sanitize_email( (string) $this->gateway->get_option( 'email' ) );
 		$shipping_preference = $this->get_paypal_shipping_preference( $order );
 
+		// Check if the order currency is supported by PayPal.
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
+		// TODO: The container call can be removed once we migrate this class to the `src` folder.
+		$currencies_supported = wc_get_container()->get( PayPalCurrenciesSupported::class )::instance();
+		if ( ! $currencies_supported->is_currency_supported( $order->get_currency() ) ) {
+			throw new Exception( 'Currency is not supported by PayPal. Order ID: ' . esc_html( $order->get_id() ) );
+		}
+
+		$order_items = $this->get_paypal_order_items( $order );
+		if ( empty( $order_items ) ) {
+			// If we cannot build order items (e.g. negative item amounts),
+			// we should not proceed with the create-order request.
+			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
+		}
+
 		$src_locale = get_locale();
 		// If the locale is longer than PayPal's string limit (10).
 		if ( strlen( $src_locale ) > WC_Gateway_Paypal_Constants::PAYPAL_LOCALE_MAX_LENGTH ) {
@@ -421,13 +437,6 @@ class WC_Gateway_Paypal_Request {
 			if ( count( $locale_parts ) > 2 ) {
 				$src_locale = $locale_parts[0] . '_' . $locale_parts[1];
 			}
-		}
-
-		$order_items = $this->get_paypal_order_items( $order );
-		if ( empty( $order_items ) ) {
-			// If we cannot build order items (e.g. negative item amounts),
-			// we should not proceed with the create-order request.
-			throw new Exception( 'Cannot build PayPal order items for order ID: ' . esc_html( $order->get_id() ) );
 		}
 
 		$params = array(
