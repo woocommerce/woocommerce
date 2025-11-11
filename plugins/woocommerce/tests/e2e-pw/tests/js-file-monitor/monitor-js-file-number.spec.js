@@ -13,11 +13,7 @@ const merchantPages = [
 	{
 		name: 'WC Dashboard',
 		url: 'wp-admin/admin.php?page=wc-admin',
-<<<<<<< HEAD
-		expectedCount: 80,
-=======
 		expectedCount: 83,
->>>>>>> de07c3b4d7 (e2e tests: update expected js count to pass for WP 6.9 (#61704))
 	},
 	{
 		name: 'Reports',
