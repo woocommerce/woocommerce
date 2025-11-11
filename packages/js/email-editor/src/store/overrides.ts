@@ -27,7 +27,8 @@ const generateRootContainerStyles = ( config ) => {
 		baseTheme.styles,
 		userStyles,
 	] ) as EmailStyles;
-	let rootContainerStyles = `display:flow-root; max-width: ${ layout?.contentSize }; margin: 0 auto;box-sizing: border-box;`;
+	const maxWidth = layout?.contentSize || '100%';
+	let rootContainerStyles = `display:flow-root; max-width: ${ maxWidth }; margin: 0 auto;box-sizing: border-box;`;
 	const padding = mergedStyles?.spacing?.padding;
 	if ( padding ) {
 		rootContainerStyles += `padding-left:${ unwrapCompressedPresetStyleVariable(

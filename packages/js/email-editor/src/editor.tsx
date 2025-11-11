@@ -37,11 +37,7 @@ import {
 } from './hooks';
 import { cleanupConfigurationChanges } from './config-tools';
 import { getEditorConfigFromWindow } from './store/settings';
-import {
-	EmailEditorSettings,
-	EmailTheme,
-	EmailEditorUrls,
-} from './store/types';
+import { EmailEditorConfig } from './store/types';
 
 function Editor( {
 	postId,
@@ -100,7 +96,7 @@ function Editor( {
 	);
 }
 
-function onInit( config ) {
+function onInit( config: EmailEditorConfig ) {
 	initEventCollector();
 	initStoreTracking();
 	initDomTracking();
@@ -160,22 +156,16 @@ export function ExperimentalEmailEditor( {
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
-	config?: {
-		editorSettings: EmailEditorSettings;
-		theme: EmailTheme;
-		urls: EmailEditorUrls;
-		userEmail: string;
-		globalStylesPostId?: number | null;
-	};
+	config?: EmailEditorConfig;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
 	useLayoutEffect( () => {
 		const backupEditorSettings = select( editorStore ).getEditorSettings();
-		onInit( config );
-
 		// Set configuration to store from window object for backward compatibility
 		const editorConfig = config || getEditorConfigFromWindow();
+		onInit( editorConfig );
+
 		dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings
