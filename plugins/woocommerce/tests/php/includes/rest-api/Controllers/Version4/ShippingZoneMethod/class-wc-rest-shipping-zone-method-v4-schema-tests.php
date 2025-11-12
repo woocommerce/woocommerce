@@ -163,7 +163,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$this->assertNotNull( $method );
 
 		// Update method settings using ShippingService.
-		$result = $this->shipping_service->update_shipping_zone_method(
+		$method = $this->shipping_service->update_shipping_zone_method(
 			$method,
 			$instance_id,
 			array(
@@ -174,10 +174,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( $result );
-
-		// Re-fetch the method to get updated data.
-		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$this->assertInstanceOf( \WC_Shipping_Method::class, $method );
 
 		$request  = new WP_REST_Request( 'GET' );
 		$response = $this->schema->get_item_response( $method, $request );
@@ -209,7 +206,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$flat_rate_id = $zone->add_shipping_method( 'flat_rate' );
 		$flat_rate    = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
 
-		$result = $this->shipping_service->update_shipping_zone_method(
+		$flat_rate = $this->shipping_service->update_shipping_zone_method(
 			$flat_rate,
 			$flat_rate_id,
 			array(
@@ -220,10 +217,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( $result );
-
-		// Re-fetch to get updated settings.
-		$flat_rate = \WC_Shipping_Zones::get_shipping_method( $flat_rate_id );
+		$this->assertInstanceOf( \WC_Shipping_Method::class, $flat_rate );
 
 		$reflection = new \ReflectionClass( $this->schema );
 		$method     = $reflection->getMethod( 'get_method_settings' );
@@ -290,7 +284,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 		$instance_id = $zone->add_shipping_method( 'free_shipping' );
 
 		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$result = $this->shipping_service->update_shipping_zone_method(
+		$method = $this->shipping_service->update_shipping_zone_method(
 			$method,
 			$instance_id,
 			array(
@@ -301,9 +295,7 @@ class WC_REST_Shipping_Zone_Method_V4_Schema_Tests extends WC_Unit_Test_Case {
 				),
 			)
 		);
-		$this->assertTrue( $result );
-
-		$method = \WC_Shipping_Zones::get_shipping_method( $instance_id );
+		$this->assertInstanceOf( \WC_Shipping_Method::class, $method );
 
 		$request  = new WP_REST_Request( 'GET' );
 		$response = $this->schema->get_item_response( $method, $request );
