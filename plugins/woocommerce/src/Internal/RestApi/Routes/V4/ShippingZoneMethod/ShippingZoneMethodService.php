@@ -108,27 +108,38 @@ class ShippingZoneMethodService {
 	public function update_shipping_zone_method( $method, $instance_id, $data, $zone_id = null ) {
 		global $wpdb;
 
-		$updates = array();
-		$formats = array();
+		$data = wp_parse_args(
+			$data,
+			array(
+				'settings' => null,
+				'enabled'  => null,
+				'order'    => null,
+			)
+		);
+
+		$updates         = array();
+		$formats         = array();
+		$enabled_changed = false;
 
 		// Update settings if present.
-		if ( isset( $data['settings'] ) ) {
+		if ( ! is_null( $data['settings'] ) ) {
 			$result = $this->update_shipping_method_settings( $method, $data['settings'] );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
 		}
 
-		if ( isset( $data['enabled'] ) ) {
-				$updates['is_enabled'] = wc_string_to_bool( $data['enabled'] ) ? 1 : 0;
-				$formats[]             = '%d';
-				$method->enabled       = wc_string_to_bool( $data['enabled'] ) ? 'yes' : 'no';
+		if ( ! is_null( $data['enabled'] ) ) {
+			$updates['is_enabled'] = wc_string_to_bool( $data['enabled'] ) ? 1 : 0;
+			$formats[]             = '%d';
+			$method->enabled       = wc_string_to_bool( $data['enabled'] ) ? 'yes' : 'no';
+			$enabled_changed       = true;
 		}
 
-		if ( isset( $data['order'] ) ) {
+		if ( ! is_null( $data['order'] ) ) {
 			$updates['method_order'] = absint( $data['order'] );
 			$formats[]               = '%d';
-				$method->method_order  = absint( $data['order'] );
+			$method->method_order    = absint( $data['order'] );
 		}
 
 		if ( empty( $updates ) ) {
@@ -151,7 +162,7 @@ class ShippingZoneMethodService {
 			);
 		}
 
-		if ( false !== $result && isset( $updates['is_enabled'] ) && null !== $zone_id ) {
+		if ( $enabled_changed && null !== $zone_id ) {
 			/**
 			 * Fires when a shipping method's enabled status is toggled.
 			 *

@@ -64,33 +64,27 @@ class ShippingZoneService {
 	 * @return WC_Shipping_Zone|WP_Error True on success, WP_Error on failure.
 	 */
 	public function update_shipping_zone( $zone, $params ) {
-		// Prevent updating "Rest of the World" zone name, order, or locations.
-		if ( 0 === $zone->get_id() ) {
-			if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
+		$params = wp_parse_args(
+			$params,
+			array(
+				'name'      => null,
+				'order'     => null,
+				'locations' => null,
+			)
+		);
+
+		$is_rest_of_world = 0 === $zone->get_id();
+
+		// Set zone name if provided.
+		if ( ! is_null( $params['name'] ) ) {
+			if ( $is_rest_of_world ) {
 				return new WP_Error(
 					'woocommerce_rest_cannot_edit_zone',
 					__( 'Cannot change name of "Rest of the World" zone.', 'woocommerce' ),
 					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
-			if ( isset( $params['order'] ) && ! is_null( $params['order'] ) ) {
-				return new WP_Error(
-					'woocommerce_rest_cannot_edit_zone',
-					__( 'Cannot change order of "Rest of the World" zone.', 'woocommerce' ),
-					array( 'status' => WP_Http::BAD_REQUEST )
-				);
-			}
-			if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
-				return new WP_Error(
-					'woocommerce_rest_cannot_edit_zone',
-					__( 'Cannot change locations of "Rest of the World" zone.', 'woocommerce' ),
-					array( 'status' => WP_Http::BAD_REQUEST )
-				);
-			}
-		}
 
-		// Set zone name if provided.
-		if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
 			$name = trim( $params['name'] );
 			if ( '' === $name ) {
 				return new WP_Error(
@@ -103,13 +97,27 @@ class ShippingZoneService {
 		}
 
 		// Set zone order if provided.
-		if ( isset( $params['order'] ) && ! is_null( $params['order'] ) ) {
+		if ( ! is_null( $params['order'] ) ) {
+			if ( $is_rest_of_world ) {
+				return new WP_Error(
+					'woocommerce_rest_cannot_edit_zone',
+					__( 'Cannot change order of "Rest of the World" zone.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
 			$zone->set_zone_order( $params['order'] );
 		}
 
 		// Set locations if provided.
 		$locations_being_cleared = false;
-		if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
+		if ( ! is_null( $params['locations'] ) ) {
+			if ( $is_rest_of_world ) {
+				return new WP_Error(
+					'woocommerce_rest_cannot_edit_zone',
+					__( 'Cannot change locations of "Rest of the World" zone.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			}
 			$raw_locations = $params['locations'];
 			$locations     = array();
 
