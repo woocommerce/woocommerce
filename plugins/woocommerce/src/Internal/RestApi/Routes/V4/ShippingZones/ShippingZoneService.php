@@ -152,7 +152,7 @@ class ShippingZoneService {
 				);
 			}
 
-			$locations_being_cleared = empty($locations);
+			$locations_being_cleared = empty( $locations );
 
 			$zone->set_locations( $locations );
 		}

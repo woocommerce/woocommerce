@@ -58,11 +58,12 @@ class Controller extends AbstractController {
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param ShippingZoneSchema $zone_schema Order schema class.
+	 * @param ShippingZoneSchema  $zone_schema           Order schema class.
+	 * @param ShippingZoneService $shipping_zone_service Service for shipping zone operations.
 	 * @internal
 	 */
 	final public function init( ShippingZoneSchema $zone_schema, ShippingZoneService $shipping_zone_service ) {
-		$this->item_schema      = $zone_schema;
+		$this->item_schema           = $zone_schema;
 		$this->shipping_zone_service = $shipping_zone_service;
 	}
 

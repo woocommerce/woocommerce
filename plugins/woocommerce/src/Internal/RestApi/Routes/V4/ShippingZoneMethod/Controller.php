@@ -56,10 +56,11 @@ class Controller extends AbstractController {
 	 * Initialize the controller with schema dependency injection.
 	 *
 	 * @internal
-	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
+	 * @param ShippingMethodSchema      $method_schema            Schema for shipping methods.
+	 * @param ShippingZoneMethodService $shipping_method_service Service for shipping method operations.
 	 */
 	final public function init( ShippingMethodSchema $method_schema, ShippingZoneMethodService $shipping_method_service ) {
-		$this->method_schema    = $method_schema;
+		$this->method_schema           = $method_schema;
 		$this->shipping_method_service = $shipping_method_service;
 	}
 
