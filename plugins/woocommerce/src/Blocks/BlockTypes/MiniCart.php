@@ -589,7 +589,7 @@ class MiniCart extends AbstractBlock {
 			}
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupEventListeners"
@@ -599,7 +599,7 @@ class MiniCart extends AbstractBlock {
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button 
+				<button
 					data-wp-on--click="callbacks.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
@@ -670,7 +670,7 @@ class MiniCart extends AbstractBlock {
 					</div>
 				</div>
 			</div>
-		</div>				
+		</div>
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );
@@ -910,7 +910,7 @@ class MiniCart extends AbstractBlock {
 
 		$translations = array_filter( $translations );
 
-		return implode( '', $translations );
+		return implode( "\n", $translations );
 	}
 
 	/**

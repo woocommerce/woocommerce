@@ -10,6 +10,8 @@ import {
 	REGULAR_PRICED_PRODUCT_NAME,
 	SIMPLE_PHYSICAL_PRODUCT_NAME,
 } from '../checkout/constants';
+import { getTestTranslation } from '../../utils/get-test-translation';
+import { translations } from '../../test-data/data/data';
 import ProductCollectionPage from '../product-collection/product-collection.page';
 
 const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
@@ -72,6 +74,57 @@ test.describe( 'Shopper → Notices', () => {
 					`The quantity of "${ SIMPLE_PHYSICAL_PRODUCT_NAME }" was`
 				)
 		).toBeHidden();
+	} );
+} );
+
+test.describe( 'Shopper → Translations', () => {
+	test.beforeEach( async () => {
+		await wpCLI( `site switch-language ${ translations.locale }` );
+	} );
+
+	test( 'User can see translation in empty Mini-Cart', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await miniCartUtils.openMiniCart();
+
+		await expect(
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'Start shopping' ),
+			} )
+		).toBeVisible();
+	} );
+
+	test( 'User can see translation in filled Mini-Cart', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		await frontendUtils.emptyCart();
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+		await miniCartUtils.openMiniCart();
+
+		await expect(
+			page.getByRole( 'heading', {
+				name: getTestTranslation( 'Your cart' ),
+			} )
+		).toBeVisible();
+
+		await expect(
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'View my cart' ),
+			} )
+		).toBeVisible();
+
+		await expect(
+			page.getByRole( 'link', {
+				name: getTestTranslation( 'Go to checkout' ),
+			} )
+		).toBeVisible();
 	} );
 } );
 
