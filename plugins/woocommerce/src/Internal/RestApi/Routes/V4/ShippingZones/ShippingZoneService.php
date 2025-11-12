@@ -42,10 +42,16 @@ class ShippingZoneService {
 	}
 
 	/**
-	 * Create a shipping zone from REST API request.
+	 * Create a new shipping zone.
 	 *
-	 * @param array $params Request parameters.
-	 * @return WC_Shipping_Zone|WP_Error True on success, WP_Error on failure.
+	 * @param array $params {
+	 *     Zone parameters.
+	 *
+	 *     @type string $name      Zone name.
+	 *     @type int    $order     Zone order for sorting.
+	 *     @type array  $locations Array of location objects with 'code' and 'type' keys.
+	 * }
+	 * @return WC_Shipping_Zone|WP_Error Zone object on success, WP_Error on failure.
 	 */
 	public function create_shipping_zone( $params ) {
 		$zone   = new WC_Shipping_Zone( null );
@@ -57,11 +63,19 @@ class ShippingZoneService {
 	}
 
 	/**
-	 * Update zone details from REST API request.
+	 * Update an existing shipping zone.
 	 *
-	 * @param WC_Shipping_Zone $zone zone to be updated.
-	 * @param array            $params Request parameters.
-	 * @return WC_Shipping_Zone|WP_Error True on success, WP_Error on failure.
+	 * @param WC_Shipping_Zone $zone   Zone object to update.
+	 * @param array            $params {
+	 *     Zone parameters to update. All parameters are optional.
+	 *
+	 *     @type string $name      Zone name. Cannot be changed for "Rest of the World" zone (ID 0).
+	 *     @type int    $order     Zone order for sorting. Cannot be changed for "Rest of the World" zone.
+	 *     @type array  $locations Array of location objects. Cannot be changed for "Rest of the World" zone.
+	 *                             Each location should have 'code' (string) and 'type' (string) keys.
+	 *                             Valid types: 'postcode', 'state', 'country', 'continent'.
+	 * }
+	 * @return WC_Shipping_Zone|WP_Error Updated zone object on success, WP_Error on failure.
 	 */
 	public function update_shipping_zone( $zone, $params ) {
 		$params = wp_parse_args(

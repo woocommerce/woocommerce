@@ -14,13 +14,15 @@ use WC_Shipping_Method;
 class ShippingZoneMethodService {
 
 	/**
-	 * Update settings of a shipping method from REST API request.
+	 * Update settings of a shipping method.
 	 *
-	 * This function handles validation and saving of shipping method settings from REST API requests.
+	 * Validates and saves shipping method settings. Settings vary by method type
+	 * (e.g., flat_rate has 'cost', free_shipping has 'requires' and 'min_amount').
 	 *
-	 * @param WC_Shipping_Method $method Zone object that contains this method.
-	 * @param array               $settings Settings to update (key-value pairs with clean field names, e.g., ['title' => 'Express', 'cost' => '10']).
-	 * @return WC_Shipping_Method|\WP_Error True on success, WP_Error on validation failure.
+	 * @param WC_Shipping_Method $method   Shipping method instance to update.
+	 * @param array              $settings Settings to update as key-value pairs (e.g., ['title' => 'Express', 'cost' => '10']).
+	 *                                     Available settings depend on the specific shipping method type.
+	 * @return WC_Shipping_Method|\WP_Error Updated method object on success, WP_Error on validation failure.
 	 */
 	public function update_shipping_method_settings( $method, $settings ) {
 		if ( ! is_array( $settings ) ) {
@@ -93,17 +95,23 @@ class ShippingZoneMethodService {
 	}
 
 	/**
-	 * Update shipping method from REST API request.
+	 * Update a shipping method's properties.
 	 *
-	 * Handles updating settings, enabled status, and order from REST API requests.
-	 * This method can be used by any API version (v2, v3, v4) for consistent behavior.
+	 * Updates settings, enabled status, and/or sort order for a shipping method instance.
 	 *
 	 * @since 9.4.0
-	 * @param WC_Shipping_Method  $method Shipping method instance.
-	 * @param int                 $instance_id Method instance ID.
-	 * @param array               $data Request data containing 'settings', 'enabled', and/or 'order'.
-	 * @param int                 $zone_id Zone ID (optional, required for firing status toggle hook).
-	 * @return WC_Shipping_Method|\WP_Error True on success, WP_Error on validation failure.
+	 *
+	 * @param WC_Shipping_Method $method      Shipping method instance to update.
+	 * @param int                $instance_id Method instance ID from the database.
+	 * @param array              $data        {
+	 *     Method properties to update. All parameters are optional.
+	 *
+	 *     @type array $settings Settings to update (key-value pairs). See update_shipping_method_settings().
+	 *     @type bool  $enabled  Whether the shipping method is enabled.
+	 *     @type int   $order    Sort order for displaying methods.
+	 * }
+	 * @param int|null           $zone_id    Zone ID. Optional, but required for firing the status toggle hook.
+	 * @return WC_Shipping_Method|\WP_Error Updated method object on success, WP_Error on failure.
 	 */
 	public function update_shipping_zone_method( $method, $instance_id, $data, $zone_id = null ) {
 		global $wpdb;
