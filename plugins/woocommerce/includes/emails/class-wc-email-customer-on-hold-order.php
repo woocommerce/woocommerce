@@ -30,7 +30,7 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			$this->id             = 'customer_on_hold_order';
 			$this->customer_email = true;
 			$this->title          = __( 'Order on-hold', 'woocommerce' );
-			$this->email_group    = 'order-exceptions';
+			$this->email_group    = 'order-changes';
 			$this->template_html  = 'emails/customer-on-hold-order.php';
 			$this->template_plain = 'emails/plain/customer-on-hold-order.php';
 			$this->placeholders   = array(
@@ -50,6 +50,11 @@ if ( ! class_exists( 'WC_Email_Customer_On_Hold_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Send an email to customers notifying them when their order has been placed on hold', 'woocommerce' )
 				: __( 'This is an order notification sent to customers containing order details after an order is placed on-hold from Pending, Cancelled or Failed order status.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order on hold', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been placed on hold.', 'woocommerce' );
+			}
 		}
 
 		/**
