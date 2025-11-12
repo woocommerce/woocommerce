@@ -50,8 +50,8 @@ const Block = ( {
 		: parseInt( cartTotals.total_items, 10 );
 
 	// If the block is hidden, then the children will be undefined.
-	// In this case, we return an empty fragment to prevent the fallback for the legacy template
-	if ( children === undefined ) {
+	// In this case, we return null to prevent the fallback for the legacy template
+	if ( ! children ) {
 		return null;
 	}
 
