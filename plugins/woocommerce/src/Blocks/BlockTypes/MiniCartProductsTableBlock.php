@@ -301,14 +301,14 @@ class MiniCartProductsTableBlock extends AbstractInnerBlock {
 		?>
 	<<?php echo tag_escape( $tag_name ); ?>
 		data-wp-bind--hidden="state.cartItemDataAttrHidden"
-		data-wp-bind--class="state.cartItemDataAttrClassName"
+		data-wp-bind--class="state.cartItemDataAttr.className"
 	>
 		<?php if ( $is_item_data ) : ?>
 			<span class="wc-block-components-product-details__name" data-wp-watch="callbacks.itemDataNameInnerHTML"></span>
 			<span class="wc-block-components-product-details__value" data-wp-watch="callbacks.itemDataValueInnerHTML"></span>
 		<?php else : ?>
-			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemVariationName"></span>
-			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttrValue"></span>
+			<span class="wc-block-components-product-details__name"  data-wp-text="state.cartItemDataAttr.name"></span>
+			<span class="wc-block-components-product-details__value" data-wp-text="state.cartItemDataAttr.value"></span>
 		<?php endif; ?>
 		</<?php echo tag_escape( $tag_name ); ?>>
 		<?php

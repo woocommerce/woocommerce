@@ -107,12 +107,14 @@ type ItemData = {
 	value?: string | undefined;
 	display?: string;
 	attribute?: string;
+	hidden?: boolean;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type CartItemDataAttr = {
 	value: string;
 	name: string;
 	className: string;
+	hidden: boolean;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -403,9 +405,8 @@ function itemDataInnerHTML( field: 'name' | 'value' ) {
 
 	if ( field in dataAttr ) {
 		const value = dataAttr[ field as keyof typeof dataAttr ];
-		const separator = field === 'name' ? ':' : '';
 		if ( typeof value === 'string' && value ) {
-			ref.innerHTML = trimWords( value ) + separator;
+			ref.innerHTML = trimWords( value );
 		}
 	}
 }
@@ -826,37 +827,25 @@ const { state: cartItemState } = store(
 				const valueTxt = document.createElement( 'textarea' );
 				valueTxt.innerHTML = rawValue;
 
+				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
+
 				return {
-					name: nameTxt.value,
+					name: processedName,
 					value: valueTxt.value,
 					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
+					hidden: !!dataItemAttr.hidden,
 				};
 			},
 
 			get cartItemDataAttrHidden(): boolean {
-				return cartItemState.cartItemDataAttr === null;
-			},
-
-			get cartItemDataAttrClassName(): string {
-				return cartItemState.cartItemDataAttr?.className || '';
-			},
-
-			get cartItemDataAttrValue(): string {
-				return cartItemState.cartItemDataAttr?.value || '';
-			},
-
-			get cartItemVariationName(): string {
-				const dataAttr = cartItemState.cartItemDataAttr;
-
-				if ( ! dataAttr ) {
-					return '';
-				}
-
-				return dataAttr.name + ':';
+				return (
+					cartItemState.cartItemDataAttr === null ||
+					!!cartItemState.cartItemDataAttr?.hidden
+				);
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
