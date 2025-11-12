@@ -158,4 +158,205 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		$this->assertEquals( '36.99', WC()->cart->get_total( 'edit' ) );
 		$this->assertEquals( '6.17', WC()->cart->get_total_tax() );
 	}
+
+	/**
+	 * Test cart totals when prices are entered inclusive of tax but no base tax rate exists.
+	 *
+	 * This test verifies the fix for WOOPLUG-5511 where cart totals were incorrectly inflated
+	 * when:
+	 * - Prices are entered inclusive of tax
+	 * - No base location tax rate exists (empty base rate array)
+	 * - Customer has a tax rate configured
+	 *
+	 * Before the fix, WC_Product::get_price_including_tax() would incorrectly apply the customer's
+	 * tax rate on top of the already tax-inclusive price, causing price inflation in the cart.
+	 *
+	 * Expected behavior:
+	 * - Cart subtotal should equal the product price (NOT inflated)
+	 * - No additional tax should be added on top of the inclusive price
+	 * - Calculations should work correctly with multiple quantities and different tax rates
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/WOOPLUG-5511
+	 */
+	public function test_cart_tax_inclusive_prices_with_no_base_rate_wooplug_5511() {
+		// Capture original settings to restore later.
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$original_default_country    = get_option( 'woocommerce_default_country' );
+		$original_billing_country    = WC()->customer->get_billing_country();
+		$original_shipping_country   = WC()->customer->get_shipping_country();
+
+		// Configure WooCommerce for tax-inclusive pricing.
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		// Set store base location to a country with NO configured tax rate.
+		// This simulates the bug scenario where the store has a base location
+		// but hasn't configured a tax rate for it (results in empty base rate array).
+		update_option( 'woocommerce_default_country', 'US:CA' );
+
+		// Create customer tax rate for Austria at 20%.
+		$customer_tax_rate_data = array(
+			'tax_rate_country'  => 'AT',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '20.0000',
+			'tax_rate_name'     => 'Austria VAT',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$customer_tax_rate_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+
+		// Set customer location to Austria (where we have a tax rate).
+		WC()->customer->set_billing_country( 'AT' );
+		WC()->customer->set_shipping_country( 'AT' );
+		WC()->customer->set_is_vat_exempt( false );
+
+		// Create a product with tax-inclusive price of 100.
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 100 ) );
+
+		// Empty cart and add product.
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Calculate cart totals.
+		WC()->cart->calculate_totals();
+
+		// ASSERTION 1: Cart subtotal should equal product price (NOT inflated to 120).
+		// Before the fix, this would incorrectly be 120 (100 * 1.20).
+		$this->assertEquals(
+			100,
+			WC()->cart->get_subtotal(),
+			'Cart subtotal should equal product price of 100, not be inflated by customer tax rate'
+		);
+
+		// ASSERTION 2: Cart total should also equal product price.
+		$this->assertEquals(
+			100,
+			WC()->cart->get_total( 'edit' ),
+			'Cart total should equal product price of 100'
+		);
+
+		// ASSERTION 3: Verify cart item price hasn't been inflated.
+		$cart_contents = WC()->cart->get_cart();
+		$cart_item     = reset( $cart_contents );
+		$this->assertEquals(
+			100,
+			$cart_item['line_total'],
+			'Cart item line total should equal product price of 100'
+		);
+
+		// Test with multiple quantities.
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 3 );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals(
+			300,
+			WC()->cart->get_subtotal(),
+			'Cart subtotal with qty=3 should be 300 (3 * 100), not inflated'
+		);
+
+		$this->assertEquals(
+			300,
+			WC()->cart->get_total( 'edit' ),
+			'Cart total with qty=3 should be 300'
+		);
+
+		// Test with a different tax rate (10%).
+		WC_Tax::_delete_tax_rate( $customer_tax_rate_id );
+		$customer_tax_rate_10_data = array(
+			'tax_rate_country'  => 'AT',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'Austria VAT 10%',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$customer_tax_rate_10_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_10_data );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals(
+			100,
+			WC()->cart->get_subtotal(),
+			'Cart subtotal should equal 100 even with 10% tax rate and no base rate'
+		);
+
+		// Test with a higher tax rate (25%).
+		WC_Tax::_delete_tax_rate( $customer_tax_rate_10_id );
+		$customer_tax_rate_25_data = array(
+			'tax_rate_country'  => 'AT',
+			'tax_rate_state'    => '',
+			'tax_rate'          => '25.0000',
+			'tax_rate_name'     => 'Austria VAT 25%',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$customer_tax_rate_25_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_25_data );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertEquals(
+			100,
+			WC()->cart->get_subtotal(),
+			'Cart subtotal should equal 100 even with 25% tax rate and no base rate'
+		);
+
+		// REGRESSION TEST: Verify correct behavior when base rate is present.
+		// This ensures the fix doesn't break the existing price adjustment logic.
+		$base_tax_rate_data = array(
+			'tax_rate_country'  => 'US',
+			'tax_rate_state'    => 'CA',
+			'tax_rate'          => '10.0000',
+			'tax_rate_name'     => 'Base Tax',
+			'tax_rate_priority' => '1',
+			'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1',
+			'tax_rate_order'    => '1',
+			'tax_rate_class'    => '',
+		);
+		$base_tax_rate_id   = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		// When base rate is 10% and customer rate is 25%:
+		// - Base price (excl. tax): 100 / 1.10 = 90.909090...
+		// - Customer price (incl. 25% tax): 90.909090... * 1.25 = 113.636363...
+		// - Rounded: 113.64
+		$this->assertEquals(
+			113.64,
+			round( WC()->cart->get_subtotal(), 2 ),
+			'Cart subtotal should be correctly adjusted when both base (10%) and customer (25%) rates exist'
+		);
+
+		// Clean up: Delete all tax rates and product.
+		WC_Tax::_delete_tax_rate( $base_tax_rate_id );
+		WC_Tax::_delete_tax_rate( $customer_tax_rate_25_id );
+		WC_Helper_Product::delete_product( $product->get_id() );
+
+		// Restore original settings and customer location.
+		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+		update_option( 'woocommerce_default_country', $original_default_country );
+		WC()->customer->set_billing_country( $original_billing_country );
+		WC()->customer->set_shipping_country( $original_shipping_country );
+
+		// Ensure cart is empty.
+		WC()->cart->empty_cart();
+	}
 }

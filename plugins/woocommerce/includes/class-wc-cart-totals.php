@@ -420,7 +420,9 @@ final class WC_Cart_Totals {
 	 */
 	protected function remove_item_base_taxes( $item ) {
 		if ( $item->price_includes_tax && $item->taxable ) {
-			if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
+			$filter_value = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+
+			if ( $filter_value ) {
 				$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 			} else {
 				/**
@@ -457,6 +459,12 @@ final class WC_Cart_Totals {
 			$base_tax_rates = WC_Tax::get_base_tax_rates( $item->product->get_tax_class( 'unfiltered' ) );
 
 			if ( $item->tax_rates !== $base_tax_rates ) {
+				// If no base tax rates exist, don't adjust the price - it's already correctly set as tax-inclusive.
+				// This prevents incorrectly adding customer taxes on top of the inclusive price.
+				if ( empty( $base_tax_rates ) ) {
+					return $item;
+				}
+
 				// Work out a new base price without the shop's base tax.
 				$taxes     = WC_Tax::calc_tax( $item->price, $base_tax_rates, true );
 				$new_taxes = WC_Tax::calc_tax( $item->price - array_sum( $taxes ), $item->tax_rates, false );
