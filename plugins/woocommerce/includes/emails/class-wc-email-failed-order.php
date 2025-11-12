@@ -53,6 +53,10 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->description = __( 'Notifies admins when an order that was processing or on hold has failed.', 'woocommerce' );
+			}
 		}
 
 		/**

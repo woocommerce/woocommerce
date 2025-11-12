@@ -52,6 +52,11 @@ if ( ! class_exists( 'WC_Email_Customer_Invoice', false ) ) :
 				: __( 'Order detail emails can be sent to customers containing their order information and payment links.', 'woocommerce' );
 
 			$this->manual = true;
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Payment request', 'woocommerce' );
+				$this->description = __( 'Manually send customers an email to review their order and complete payment.', 'woocommerce' );
+			}
 		}
 
 		/**
