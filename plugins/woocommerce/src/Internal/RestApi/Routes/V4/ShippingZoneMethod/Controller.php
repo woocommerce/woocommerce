@@ -155,9 +155,6 @@ class Controller extends AbstractController {
 			return $result;
 		}
 
-		// Reload the data.
-		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
-
 		$request['zone_id'] = $zone->get_id();
 		$response           = $this->prepare_item_for_response( $method, $request );
 		$response->set_status( 201 );

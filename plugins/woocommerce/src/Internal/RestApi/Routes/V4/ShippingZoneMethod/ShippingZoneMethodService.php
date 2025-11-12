@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
 use WP_Error;
 use WC_Cache_Helper;
+use WC_Shipping_Method;
 
 /**
  * A service class to manage shipping zones methods.
@@ -17,9 +18,9 @@ class ShippingZoneMethodService {
 	 *
 	 * This function handles validation and saving of shipping method settings from REST API requests.
 	 *
-	 * @param \WC_Shipping_Method $method Zone object that contains this method.
+	 * @param WC_Shipping_Method $method Zone object that contains this method.
 	 * @param array               $settings Settings to update (key-value pairs with clean field names, e.g., ['title' => 'Express', 'cost' => '10']).
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
+	 * @return WC_Shipping_Method|\WP_Error True on success, WP_Error on validation failure.
 	 */
 	public function update_shipping_method_settings( $method, $settings ) {
 		if ( ! is_array( $settings ) ) {
@@ -88,7 +89,7 @@ class ShippingZoneMethodService {
 			$method->instance_settings = $instance_settings;
 		}
 
-		return $result;
+		return $method;
 	}
 
 	/**
@@ -98,10 +99,10 @@ class ShippingZoneMethodService {
 	 * This method can be used by any API version (v2, v3, v4) for consistent behavior.
 	 *
 	 * @since 9.4.0
-	 * @param \WC_Shipping_Method $method Shipping method instance.
+	 * @param WC_Shipping_Method  $method Shipping method instance.
 	 * @param int                 $instance_id Method instance ID.
 	 * @param array               $data Request data containing 'settings', 'enabled', and/or 'order'.
-	 * @return true|\WP_Error True on success, WP_Error on validation failure.
+	 * @return WC_Shipping_Method|\WP_Error True on success, WP_Error on validation failure.
 	 */
 	public function update_shipping_zone_method( $method, $instance_id, $data ) {
 		global $wpdb;
@@ -120,15 +121,17 @@ class ShippingZoneMethodService {
 		if ( isset( $data['enabled'] ) ) {
 				$updates['is_enabled'] = wc_string_to_bool( $data['enabled'] ) ? 1 : 0;
 				$formats[]             = '%d';
+				$method = $data['enabled'];
 		}
 
 		if ( isset( $data['order'] ) ) {
 			$updates['method_order'] = absint( $data['order'] );
 			$formats[]               = '%d';
+				$method = $data['order'];
 		}
 
 		if ( empty( $updates ) ) {
-			return true;
+			return $method;
 		}
 
 		// Single UPDATE query for both fields.
@@ -148,6 +151,6 @@ class ShippingZoneMethodService {
 		}
 
 		WC_Cache_Helper::get_transient_version( 'shipping', true );
-		return true;
+		return $method;
 	}
 }
