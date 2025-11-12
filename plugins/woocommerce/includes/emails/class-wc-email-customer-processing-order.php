@@ -31,7 +31,7 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			$this->customer_email = true;
 
 			$this->title          = __( 'Processing order', 'woocommerce' );
-			$this->email_group    = 'order-processing';
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-processing-order.php';
 			$this->template_plain = 'emails/plain/customer-processing-order.php';
 			$this->placeholders   = array(
@@ -52,6 +52,11 @@ if ( ! class_exists( 'WC_Email_Customer_Processing_Order', false ) ) :
 			$this->description = $this->email_improvements_enabled
 				? __( 'Send an email to customers notifying them that their order is being processed', 'woocommerce' )
 				: __( 'This is an order notification sent to customers containing order details after payment.', 'woocommerce' );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'Order confirmation', 'woocommerce' );
+				$this->description = __( 'Notifies customers when their order has been received and is being processed.', 'woocommerce' );
+			}
 		}
 
 		/**
