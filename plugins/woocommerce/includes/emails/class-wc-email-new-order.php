@@ -61,6 +61,10 @@ if ( ! class_exists( 'WC_Email_New_Order' ) ) :
 
 			// Other settings.
 			$this->recipient = $this->get_option( 'recipient', get_option( 'admin_email' ) );
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->description = __( 'Notifies admins when a new order has been placed.', 'woocommerce' );
+			}
 		}
 
 		/**

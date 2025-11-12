@@ -370,7 +370,6 @@ test.describe( `${ blockData.name }`, () => {
 		editor,
 		pageObject,
 		page,
-		wpCoreVersion,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
 		await editor.saveSiteEditorEntities( {
@@ -382,13 +381,7 @@ test.describe( `${ blockData.name }`, () => {
 		await page.getByRole( 'button', { name: 'Index' } ).first().click();
 
 		// Go back to the Custom Single Product template.
-		if ( wpCoreVersion >= 6.9 ) {
-			await page
-				.getByRole( 'button', { name: 'Created templates' } )
-				.click();
-		} else {
-			await page.getByLabel( 'Open Navigation' ).click();
-		}
+		await page.getByLabel( 'Open Navigation' ).click();
 
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )

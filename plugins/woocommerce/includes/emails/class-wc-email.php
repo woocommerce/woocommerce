@@ -446,8 +446,10 @@ class WC_Email extends WC_Settings_API {
 		$email_groups = array(
 			'accounts'         => __( 'Accounts', 'woocommerce' ),
 			'orders'           => __( 'Orders', 'woocommerce' ),
-			'order-processing' => __( 'Order processing', 'woocommerce' ),
-			'order-exceptions' => __( 'Order exceptions', 'woocommerce' ),
+			'order-processing' => __( 'Order updates', 'woocommerce' ),  // @deprecated Please use 'order-updates' instead. Will be removed in 10.5.0.
+			'order-updates'    => __( 'Order updates', 'woocommerce' ),
+			'order-exceptions' => __( 'Order changes', 'woocommerce' ),  // @deprecated Please use 'order-changes' instead. Will be removed in 10.5.0.
+			'order-changes'    => __( 'Order changes', 'woocommerce' ),
 			'payments'         => __( 'Payments', 'woocommerce' ),
 		);
 
