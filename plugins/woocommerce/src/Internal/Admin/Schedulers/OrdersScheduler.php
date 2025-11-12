@@ -60,6 +60,13 @@ class OrdersScheduler extends ImportScheduler {
 	const IMMEDIATE_IMPORT_OPTION = 'woocommerce_analytics_immediate_import';
 
 	/**
+	 * Default value for the immediate import option.
+	 *
+	 * @var string
+	 */
+	const IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE = 'yes';
+
+	/**
 	 * Attach order lookup update hooks.
 	 *
 	 * @internal
@@ -80,7 +87,9 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'action_scheduler_ensure_recurring_actions', array( __CLASS__, 'schedule_recurring_batch_processor' ) );
 		}
 		// Watch for changes to the immediate import option.
+		add_action( 'add_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_added' ), 10, 2 );
 		add_action( 'update_option_' . self::IMMEDIATE_IMPORT_OPTION, array( __CLASS__, 'handle_immediate_import_option_change' ), 10, 2 );
+		add_action( 'delete_option', array( __CLASS__, 'handle_immediate_import_option_before_delete' ), 10, 1 );
 
 		OrdersStatsDataStore::init();
 		CouponsDataStore::init();
@@ -416,6 +425,42 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
+	 * Handle addition of the immediate import option.
+	 *
+	 * @internal
+	 * @param string $option_name The name of the option that was added.
+	 * @param string $value The value of the option that was added.
+	 *
+	 * @return void
+	 */
+	public static function handle_immediate_import_option_added( $option_name, $value ) {
+		if ( self::IMMEDIATE_IMPORT_OPTION !== $option_name ) {
+			return;
+		}
+
+		self::handle_immediate_import_option_change( self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE, $value );
+	}
+
+	/**
+	 * Handle deletion of the immediate import option.
+	 *
+	 * @internal
+	 * @param string $option_name The name of the option that was deleted.
+	 *
+	 * @return void
+	 */
+	public static function handle_immediate_import_option_before_delete( $option_name ) {
+		if ( self::IMMEDIATE_IMPORT_OPTION !== $option_name ) {
+			return;
+		}
+
+		self::handle_immediate_import_option_change(
+			get_option( self::IMMEDIATE_IMPORT_OPTION, self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE ),
+			self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE,
+		);
+	}
+
+	/**
 	 * Process pending orders in batch.
 	 *
 	 * This method queries for orders updated since the last cursor position
@@ -640,6 +685,6 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @return bool
 	 */
 	private static function is_immediate_import_enabled(): bool {
-		return 'no' !== get_option( self::IMMEDIATE_IMPORT_OPTION, 'yes' );
+		return 'no' !== get_option( self::IMMEDIATE_IMPORT_OPTION, self::IMMEDIATE_IMPORT_OPTION_DEFAULT_VALUE );
 	}
 }
