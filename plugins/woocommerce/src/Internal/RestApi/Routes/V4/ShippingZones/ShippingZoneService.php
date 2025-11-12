@@ -108,7 +108,7 @@ class ShippingZoneService {
 		}
 
 		// Set locations if provided.
-		$locations_being_cleared = true;
+		$locations_being_cleared = false;
 		if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
 			$raw_locations = $params['locations'];
 			$locations     = array();
@@ -135,6 +135,8 @@ class ShippingZoneService {
 					'type' => $type,
 				);
 			}
+
+			$locations_being_cleared = empty($locations);
 
 			$zone->set_locations( $locations );
 		}
