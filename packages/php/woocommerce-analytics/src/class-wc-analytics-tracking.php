@@ -41,6 +41,20 @@ class WC_Analytics_Tracking extends WC_Tracks {
 	protected static $event_queue = array();
 
 	/**
+	 * Batch pixel queue for batched requests.
+	 *
+	 * @var array
+	 */
+	private static $pixel_batch_queue = array();
+
+	/**
+	 * Whether the shutdown hook has been registered.
+	 *
+	 * @var bool
+	 */
+	private static $shutdown_hook_registered = false;
+
+	/**
 	 * Cached user IP address for the current request.
 	 *
 	 * @var string|null
@@ -138,7 +152,7 @@ class WC_Analytics_Tracking extends WC_Tracks {
 			return $event_obj->error;
 		}
 
-		return WC_Tracks_Client::record_event( $event_obj ); // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid @phan-suppress-current-line PhanTypeMismatchArgumentProbablyReal
+		return self::record_event_pixel( $event_obj );
 	}
 
 	/**
@@ -152,7 +166,112 @@ class WC_Analytics_Tracking extends WC_Tracks {
 		if ( is_wp_error( $event_obj->error ) ) {
 			return $event_obj->error;
 		}
-		return WC_Tracks_Client::record_event( $event_obj ); // phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid @phan-suppress-current-line PhanTypeMismatchArgumentProbablyReal
+
+		return self::record_event_pixel( $event_obj );
+	}
+
+	/**
+	 * Record an event pixel using batching.
+	 *
+	 * @param WC_Tracks_Event|WC_Analytics_Ch_Event $event The event object.
+	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
+	 */
+	private static function record_event_pixel( $event ) {
+		$pixel = $event->build_pixel_url();
+
+		if ( ! $pixel ) {
+			return new WP_Error( 'invalid_pixel', 'cannot generate tracks pixel for given input', 400 );
+		}
+
+		// Check if batching is supported.
+		$can_batch = ( class_exists( 'WpOrg\Requests\Requests' ) && method_exists( 'WpOrg\Requests\Requests', 'request_multiple' ) )
+			|| ( class_exists( 'Requests' ) && method_exists( 'Requests', 'request_multiple' ) );
+
+		if ( $can_batch ) {
+			// Queue the pixel and send on shutdown.
+			self::queue_pixel_for_batch( $pixel );
+		} else {
+			// Send immediately as batching is not supported.
+			// phpcs:ignore WordPress.NamingConventions.ValidFunctionName.MethodNameInvalid
+			// @phan-suppress-next-line PhanTypeMismatchArgument
+			return WC_Tracks_Client::record_event( $event );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Queue a pixel URL for batch sending.
+	 *
+	 * @param string $pixel The pixel URL to queue.
+	 */
+	private static function queue_pixel_for_batch( $pixel ) {
+		self::$pixel_batch_queue[] = $pixel;
+
+		// Register shutdown hook once.
+		if ( ! self::$shutdown_hook_registered ) {
+			add_action( 'shutdown', array( __CLASS__, 'send_batched_pixels' ), 20 );
+			self::$shutdown_hook_registered = true;
+		}
+	}
+
+	/**
+	 * Send all queued pixels using batched non-blocking requests.
+	 * This runs on the shutdown hook to batch all requests together.
+	 *
+	 * Uses Requests library's request_multiple() for true parallel batching via curl_multi.
+	 */
+	public static function send_batched_pixels() {
+		if ( empty( self::$pixel_batch_queue ) ) {
+			return;
+		}
+
+		// Add request timestamp and nocache to all pixels.
+		$pixels_to_send = array();
+		foreach ( self::$pixel_batch_queue as $pixel ) {
+			$pixels_to_send[] = WC_Tracks_Client::add_request_timestamp_and_nocache( $pixel );
+		}
+
+		// Send with Requests library for true parallel batching.
+		self::send_with_requests_multiple( $pixels_to_send );
+
+		// Clear the queue.
+		self::$pixel_batch_queue = array();
+	}
+
+	/**
+	 * Send pixels using Requests::request_multiple() for parallel non-blocking execution.
+	 * Uses blocking => false for true non-blocking behavior via curl_multi.
+	 *
+	 * @param array $pixels Array of pixel URLs to send.
+	 */
+	private static function send_with_requests_multiple( $pixels ) {
+		$requests = array();
+		$options  = array(
+			'blocking' => false, // Non-blocking mode - returns immediately.
+			'timeout'  => 1,
+		);
+
+		foreach ( $pixels as $pixel ) {
+			$requests[] = array(
+				'url'     => $pixel,
+				'headers' => array(),
+				'data'    => array(),
+				'type'    => 'GET',
+			);
+		}
+
+		try {
+			// Try modern namespaced version first.
+			if ( class_exists( 'WpOrg\Requests\Requests' ) ) {
+				\WpOrg\Requests\Requests::request_multiple( $requests, $options );
+			} elseif ( class_exists( 'Requests' ) ) {
+				\Requests::request_multiple( $requests, $options ); // phpcs:ignore PHPCompatibility.FunctionUse.RemovedFunctions.requestsDeprecated
+			}
+		} catch ( \Exception $e ) {
+			// Log error but don't break the site - tracking pixels should fail gracefully.
+			wc_get_logger()->error( 'WooCommerce Analytics: Batch pixel request failed - ' . $e->getMessage(), array( 'source' => 'woocommerce-analytics' ) );
+		}
 	}
 
 	/**
