@@ -176,6 +176,25 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cache keys differ based on HTTP method.
+	 */
+	public function test_cache_key_depends_on_http_method() {
+		$response1 = $this->query_endpoint( 'multi_method', null, 'GET' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+		$this->assertCount( 1, $this->get_all_cache_keys() );
+
+		$response2 = $this->query_endpoint( 'multi_method', null, 'POST' );
+		$this->assertCacheHeader( $response2, 'MISS' );
+		$this->assertCount( 2, $this->get_all_cache_keys() );
+
+		$response3 = $this->query_endpoint( 'multi_method', null, 'GET' );
+		$this->assertCacheHeader( $response3, 'HIT' );
+
+		$response4 = $this->query_endpoint( 'multi_method', null, 'POST' );
+		$this->assertCacheHeader( $response4, 'HIT' );
+	}
+
+	/**
 	 * @testdox Caching is skipped when _skip_cache parameter is set.
 	 * @testWith ["1"]
 	 *           ["true"]
@@ -290,11 +309,12 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Query an endpoint and return the response.
 	 *
-	 * @param string     $endpoint_name Endpoint name.
-	 * @param array|null $query_params  Optional query parameters.
+	 * @param string      $endpoint_name Endpoint name.
+	 * @param array|null  $query_params  Optional query parameters.
+	 * @param string|null $method        Optional HTTP method (default: GET).
 	 */
-	private function query_endpoint( $endpoint_name, $query_params = null ) {
-		$request = new WP_REST_Request( 'GET', "/wc/v3/rest_api_cache_test/{$endpoint_name}" );
+	private function query_endpoint( $endpoint_name, $query_params = null, $method = null ) {
+		$request = new WP_REST_Request( $method ?? 'GET', "/wc/v3/rest_api_cache_test/{$endpoint_name}" );
 		if ( ! is_null( $query_params ) ) {
 			$request->set_query_params( $query_params );
 		}
@@ -368,6 +388,7 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 				$this->register_cached_route( 'custom_entity_type', array( 'entity_type' => 'custom_thing' ) );
 				$this->register_cached_route( 'non_array_response', array( 'entity_type' => 'custom_thing' ), true );
 				$this->register_cached_route( 'raw_array_response', array(), false, true );
+				$this->register_multi_method_route();
 			}
 
 			private function register_cached_route( string $endpoint, array $cache_args = array(), bool $non_array_request = false, bool $raw_response = false ) {
@@ -386,6 +407,29 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 									$this->handle_request( $endpoint, $request );
 							},
 							$cache_args
+						),
+						'permission_callback' => '__return_true',
+					)
+				);
+			}
+
+			private function register_multi_method_route() {
+				register_rest_route(
+					$this->namespace,
+					'/' . $this->rest_base . '/multi_method',
+					array(
+						'methods'             => array( 'GET', 'POST' ),
+						'callback'            => $this->with_cache(
+							function ( $request ) {
+								$method = $request->get_method();
+								return new WP_REST_Response(
+									array(
+										'id'     => 'GET' === $method ? 10 : 20,
+										'method' => $method,
+									),
+									200
+								);
+							}
 						),
 						'permission_callback' => '__return_true',
 					)

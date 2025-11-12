@@ -14,7 +14,7 @@ use WP_REST_Response;
  * - The output of all the REST API endpoints whose callback declaration is wrapped
  *   in a call to 'with_cache' will be cached using wp_cache_* functions.
  * - For the purposes of caching, a request is uniquely identified by its route,
- *   query string, and user ID.
+ *   HTTP method, query string, and user ID.
  * - The VersionStringGenerator class is used to track versions of entities included
  *   in the responses (an "entity" is any object that is uniquely identified by type and id
  *   and contributes with information to be included in the response),
@@ -313,6 +313,7 @@ trait RestApiCache {
 
 		return array(
 			$request->get_route(),
+			$request->get_method(),
 			wp_json_encode( $request_query_params ),
 			"user_{$user_id}",
 		);
