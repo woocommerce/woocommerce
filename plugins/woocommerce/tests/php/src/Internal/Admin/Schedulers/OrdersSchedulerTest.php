@@ -59,13 +59,16 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		OrdersScheduler::schedule_recurring_batch_processor();
 
 		// Verify it's still the same scheduled time (not rescheduled).
-		$second_scheduled = as_get_scheduled_actions(array(
-			'hook' => $action_hook,
-			'args' => array(),
-			'group' => OrdersScheduler::$group,
-			'status' => 'pending',
-			'per_page' => 1,
-		), ARRAY_A );
+		$second_scheduled = as_get_scheduled_actions(
+			array(
+				'hook'     => $action_hook,
+				'args'     => array(),
+				'group'    => OrdersScheduler::$group,
+				'status'   => 'pending',
+				'per_page' => 1,
+			),
+			ARRAY_A
+		);
 		$this->assertCount( 1, $second_scheduled, 'Batch processor should be scheduled once' );
 	}
 
