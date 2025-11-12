@@ -403,7 +403,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 			// Schedule an immediate catchup batch to process all orders up to now.
 			// This ensures no orders are missed during the transition.
-			self::schedule_action( 'process_pending_batch', array() );
+			self::schedule_action( 'process_pending_batch', array( null, null) );
 		} elseif ( 'yes' === $old_value && 'no' === $new_value ) {
 			// Switching from immediate import to batch processing.
 			// Set the last processed order date to now with 1 minute buffer to ensure no orders are missed.
@@ -437,13 +437,15 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		}
 
 		// Load cursor position from options if not provided.
+		// If the cursor date is not provided, use the last 24 hours as the default since `action_scheduler_ensure_recurring_actions` runs daily so 24 hours is enough.
+		$default_cursor_date = gmdate( 'Y-m-d H:i:s', strtotime( '-24 hours' ) );
 		$cursor_date = $cursor_date ?? get_option( self::LAST_PROCESSED_ORDER_DATE_OPTION );
 		$cursor_id   = $cursor_id ?? (int) get_option( self::LAST_PROCESSED_ORDER_ID_OPTION, 0 );
 
 		// Validate cursor date.
 		if ( ! $cursor_date || ! strtotime( $cursor_date ) ) {
 			$logger->error( 'Invalid cursor date: ' . $cursor_date, $context );
-			$cursor_date = gmdate( 'Y-m-d H:i:s', strtotime( '-24 hours' ) ); // Fallback to the last 24 hours.
+			$cursor_date = $default_cursor_date;
 		}
 
 		$batch_size = self::get_batch_size( 'process_pending_batch' );
