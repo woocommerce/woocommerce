@@ -2,10 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.0.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.0.0) - 2025-11-12 
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.0.0) - 2025-11-12 
 
 -   Patch - Prevent crashes with Gutenberg 22.0 [#61925]
--   Major [ **BREAKING CHANGE** ] - Updated all PHP dependencies. [#61753]
+-   Minor [ **BREAKING CHANGE** ] - Updated all PHP dependencies. [#61753]
 
 ## [1.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.3.0) - 2025-11-05 
 
