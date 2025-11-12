@@ -478,8 +478,10 @@ trait RestApiCache {
 	 * 1. If $include_headers is an array, only those headers are included (case-insensitive).
 	 *    If $include_headers is false, all headers are included except those in $exclude_headers.
 	 * 2. Always-excluded headers (X-WC-Cache, Set-Cookie, Date, etc.) are removed.
-	 * 3. The woocommerce_rest_api_cached_headers filter is applied to the header names.
-	 * 4. Only headers in the filtered list are returned.
+	 * 3. The woocommerce_rest_api_cached_headers filter is applied, receiving both the candidate
+	 *    headers list and all available headers. This allows filters to both add and remove
+	 *    headers from the caching list.
+	 * 4. Only headers from the response that are in the filtered list are returned.
 	 *
 	 * @param array            $nominal_headers Response headers.
 	 * @param array|false      $include_headers Header names to include (false to use exclusion logic).
@@ -516,23 +518,26 @@ trait RestApiCache {
 		);
 
 		// Step 3: Apply filter to header names.
-		$header_names = array_keys( $headers_to_cache );
+		$cached_header_names = array_keys( $headers_to_cache );
+		$all_header_names    = array_keys( $nominal_headers );
 
 		/**
 		 * Filter the list of response header names to cache.
 		 *
 		 * @since 10.4.0
 		 *
-		 * @param array            $header_names List of header names to cache.
-		 * @param WP_REST_Request  $request      The request object.
-		 * @param WP_REST_Response $response     The response object.
-		 * @param string|null      $endpoint_id  Optional friendly identifier for the endpoint.
-		 * @param object           $controller   The controller instance.
+		 * @param array            $cached_header_names Candidate list of header names to cache.
+		 * @param array            $all_header_names    All header names available in the response.
+		 * @param WP_REST_Request  $request             The request object.
+		 * @param WP_REST_Response $response            The response object.
+		 * @param string|null      $endpoint_id         Optional friendly identifier for the endpoint.
+		 * @param object           $controller          The controller instance.
 		 * @return array Filtered list of header names to cache.
 		 */
 		$filtered_header_names = apply_filters(
 			'woocommerce_rest_api_cached_headers',
-			$header_names,
+			$cached_header_names,
+			$all_header_names,
 			$request,
 			$response,
 			$endpoint_id,
@@ -540,9 +545,10 @@ trait RestApiCache {
 		);
 
 		// Step 4: Return only the headers that are in the filtered list.
+		$filtered_header_names_lowercase = array_map( 'strtolower', $filtered_header_names );
 		return array_filter(
-			$headers_to_cache,
-			fn( $name ) => in_array( $name, $filtered_header_names, true ),
+			$nominal_headers,
+			fn( $name ) => in_array( strtolower( $name ), $filtered_header_names_lowercase, true ),
 			ARRAY_FILTER_USE_KEY
 		);
 	}

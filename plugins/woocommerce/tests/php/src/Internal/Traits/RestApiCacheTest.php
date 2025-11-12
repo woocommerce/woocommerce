@@ -633,10 +633,11 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 			'X-Header-Three' => 'value-three',
 		);
 
-		$filter_callback = function ( $header_names ) {
-			return array_values( array_filter( $header_names, fn( $name ) => 'X-Header-Two' !== $name ) );
+		$filter_callback = function ( $cached_header_names, $all_header_names, $request, $response, $endpoint_id, $controller ) {
+			unset( $all_header_names, $request, $response, $endpoint_id, $controller ); // Avoid parameter not used PHPCS errors.
+			return array_values( array_filter( $cached_header_names, fn( $name ) => 'X-Header-Two' !== $name ) );
 		};
-		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback );
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
 
 		$response1 = $this->query_endpoint( 'standard' );
 		$this->assertCacheHeader( $response1, 'MISS' );
@@ -660,7 +661,59 @@ class RestApiCacheTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'X-Header-Two', $headers, 'Filtered header should not be restored' );
 		$this->assertArrayHasKey( 'X-Header-Three', $headers );
 
-		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback );
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
+	}
+
+	/**
+	 * @testdox The woocommerce_rest_api_cached_headers filter can add headers using all_header_names parameter.
+	 */
+	public function test_filter_can_add_headers_from_all_headers() {
+		$this->sut->custom_include_headers = array( 'X-Header-One' );
+
+		$this->sut->response_headers['standard'] = array(
+			'X-Header-One'   => 'value-one',
+			'X-Header-Two'   => 'value-two',
+			'X-Header-Three' => 'value-three',
+		);
+
+		$filter_callback = function ( $cached_header_names, $all_header_names, $request, $response, $endpoint_id, $controller ) {
+			if ( in_array( 'X-Header-Two', $all_header_names, true ) ) {
+				$cached_header_names[] = 'X-Header-Two';
+			}
+			if ( in_array( 'X-Header-Three', $all_header_names, true ) ) {
+				$cached_header_names[] = 'X-Header-Three';
+			}
+			return $cached_header_names;
+		};
+		add_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10, 6 );
+
+		$response1 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response1, 'MISS' );
+
+		$cache_keys = $this->get_all_cache_keys();
+		$cache_key  = $cache_keys[0];
+
+		$cached_entry = wp_cache_get( $cache_key, self::CACHE_GROUP );
+
+		$this->assertArrayHasKey( 'headers', $cached_entry );
+		$this->assertArrayHasKey( 'X-Header-One', $cached_entry['headers'], 'X-Header-One should be cached (original)' );
+		$this->assertArrayHasKey( 'X-Header-Two', $cached_entry['headers'], 'X-Header-Two should be cached (added by filter)' );
+		$this->assertArrayHasKey( 'X-Header-Three', $cached_entry['headers'], 'X-Header-Three should be cached (added by filter)' );
+
+		$response2 = $this->query_endpoint( 'standard' );
+		$this->assertCacheHeader( $response2, 'HIT' );
+
+		$headers = $response2->get_headers();
+
+		$this->assertArrayHasKey( 'X-Header-One', $headers );
+		$this->assertEquals( 'value-one', $headers['X-Header-One'] );
+		$this->assertArrayHasKey( 'X-Header-Two', $headers );
+		$this->assertEquals( 'value-two', $headers['X-Header-Two'] );
+		$this->assertArrayHasKey( 'X-Header-Three', $headers );
+		$this->assertEquals( 'value-three', $headers['X-Header-Three'] );
+
+		remove_filter( 'woocommerce_rest_api_cached_headers', $filter_callback, 10 );
+		$this->sut->custom_include_headers = false;
 	}
 
 	/**
