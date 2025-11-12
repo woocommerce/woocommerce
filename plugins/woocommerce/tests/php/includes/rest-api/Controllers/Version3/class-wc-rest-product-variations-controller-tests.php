@@ -171,7 +171,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	 * properly saves the attributes.
 	 *
 	 * This test verifies the fix for issue #61791 where attributes with non-ASCII characters
-	 * (like Persian) were not saved when creating variations via REST API using attribute ID.
+	 * (like Persian) were not saved when creating variations via the REST API.
 	 * @see https://github.com/woocommerce/woocommerce/issues/61791
 	 */
 	public function test_create_variation_with_persian_attribute_by_id() {
@@ -213,7 +213,7 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 		$this->assertEquals( 'رنگ', $variation['attributes'][0]['name'], 'Variation should contain color attribute' );
 		$this->assertEquals( 'green', $variation['attributes'][0]['option'], 'Variation should contain color option green' );
 
-		// Verify the variation can be retrieved and still has attributes.
+		// Verify the variation can be retrieved and has the attribute data.
 		$get_request         = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations/' . $variation['id'] );
 		$get_response        = $this->server->dispatch( $get_request );
 		$retrieved_variation = $get_response->get_data();
