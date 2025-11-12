@@ -28,7 +28,7 @@ interface ExperimentalOrderLocalPickupPackagesProps {
 	renderPickupLocation: (
 		option: CartShippingPackageShippingRate,
 		packageCount: number,
-		isSelectedInClient: boolean
+		isSelectedInClient?: boolean
 	) => RadioControlOption;
 }
 const Slot = ( {
