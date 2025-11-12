@@ -61,10 +61,9 @@ class ShippingZoneService {
 	 *
 	 * @param WC_Shipping_Zone $zone zone to be updated.
 	 * @param array            $params Request parameters.
-	 * @return true|WP_Error True on success, WP_Error on failure.
+	 * @return WC_Shipping_Zone|WP_Error True on success, WP_Error on failure.
 	 */
 	public function update_shipping_zone( $zone, $params ) {
-
 		// Prevent updating "Rest of the World" zone name, order, or locations.
 		if ( 0 === $zone->get_id() ) {
 			if ( isset( $params['name'] ) && ! is_null( $params['name'] ) ) {
@@ -141,6 +140,6 @@ class ShippingZoneService {
 		// Save the zone.
 		$zone->save();
 
-		return true;
+		return $zone;
 	}
 }

@@ -294,10 +294,7 @@ class Controller extends AbstractController {
 			return $result;
 		}
 
-		// Reload zone to get fresh data after save.
-		$zone = WC_Shipping_Zones::get_zone_by( 'zone_id', $zone_id );
-
 		// Prepare response.
-		return rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
+		return rest_ensure_response( $this->prepare_item_for_response( $result, $request ) );
 	}
 }
