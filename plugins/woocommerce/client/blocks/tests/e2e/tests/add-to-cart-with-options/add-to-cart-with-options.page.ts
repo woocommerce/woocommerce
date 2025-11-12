@@ -74,7 +74,7 @@ class AddToCartWithOptionsPage {
 
 		await this.page
 			.getByRole( 'button', {
-				name: 'Upgrade to the Add to Cart + Options block',
+				name: 'Use the Add to Cart + Options block',
 			} )
 			.click();
 	}

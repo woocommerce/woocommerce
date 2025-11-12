@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure checkout/place order logger respects log level threshold

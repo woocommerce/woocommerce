@@ -27,12 +27,15 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 		// Create a query for the Product Collection block.
 		$query = $this->prepare_and_execute_query( $parsed_block, $rendering_context );
 
+		// Get collection type to pass to child blocks.
+		$collection_type = $parsed_block['attrs']['collection'] ?? '';
+
 		$content = '';
 
 		foreach ( $parsed_block['innerBlocks'] as $inner_block ) {
 			switch ( $inner_block['blockName'] ) {
 				case 'woocommerce/product-template':
-					$content .= $this->render_product_template( $inner_block, $query );
+					$content .= $this->render_product_template( $inner_block, $query, $collection_type );
 					break;
 				default:
 					$content .= render_block( $inner_block );
@@ -50,9 +53,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 *
 	 * @param array     $inner_block Inner block data.
 	 * @param \WP_Query $query WP_Query object.
+	 * @param string    $collection_type Collection type identifier.
 	 * @return string
 	 */
-	private function render_product_template( array $inner_block, \WP_Query $query ): string {
+	private function render_product_template( array $inner_block, \WP_Query $query, string $collection_type ): string {
 		if ( ! $query->have_posts() ) {
 			return $this->render_no_results_message();
 		}
@@ -72,22 +76,23 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				$posts
 			)
 		);
-		return $this->render_product_grid( $products, $inner_block );
+		return $this->render_product_grid( $products, $inner_block, $collection_type );
 	}
 
 	/**
 	 * Render product grid using HTML table structure for email compatibility.
 	 *
-	 * @param array $products Array of WC_Product objects.
-	 * @param array $inner_block Inner block data.
+	 * @param array  $products Array of WC_Product objects.
+	 * @param array  $inner_block Inner block data.
+	 * @param string $collection_type Collection type identifier.
 	 * @return string
 	 */
-	private function render_product_grid( array $products, array $inner_block ): string {
+	private function render_product_grid( array $products, array $inner_block, string $collection_type ): string {
 		// We start with supporting 1 product per row.
 		$content = '';
 		foreach ( $products as $product ) {
 			$content .= $this->add_spacer(
-				$this->render_product_content( $product, $inner_block ),
+				$this->render_product_content( $product, $inner_block, $collection_type ),
 				$inner_block['email_attrs'] ?? array()
 			);
 		}
@@ -100,9 +105,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 	 *
 	 * @param \WC_Product|null $product Product object.
 	 * @param array            $template_block Inner block data.
+	 * @param string           $collection_type Collection type identifier.
 	 * @return string
 	 */
-	private function render_product_content( ?\WC_Product $product, array $template_block ): string {
+	private function render_product_content( ?\WC_Product $product, array $template_block, string $collection_type ): string {
 		$content = '';
 
 		if ( ! $product ) {
@@ -115,9 +121,10 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 				case 'woocommerce/product-button':
 				case 'woocommerce/product-sale-badge':
 				case 'woocommerce/product-image':
-					$inner_block['context']           = $inner_block['context'] ?? array();
-					$inner_block['context']['postId'] = $product->get_id();
-					$content                         .= render_block( $inner_block );
+					$inner_block['context']               = $inner_block['context'] ?? array();
+					$inner_block['context']['postId']     = $product->get_id();
+					$inner_block['context']['collection'] = $collection_type;
+					$content                             .= render_block( $inner_block );
 					break;
 				case 'core/post-title':
 					global $post;
