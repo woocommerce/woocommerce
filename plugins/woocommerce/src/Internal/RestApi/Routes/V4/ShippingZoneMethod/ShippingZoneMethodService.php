@@ -121,13 +121,13 @@ class ShippingZoneMethodService {
 		if ( isset( $data['enabled'] ) ) {
 				$updates['is_enabled'] = wc_string_to_bool( $data['enabled'] ) ? 1 : 0;
 				$formats[]             = '%d';
-				$method = $data['enabled'];
+				$method->enabled       = wc_string_to_bool( $data['enabled'] ) ? 'yes' : 'no';
 		}
 
 		if ( isset( $data['order'] ) ) {
 			$updates['method_order'] = absint( $data['order'] );
 			$formats[]               = '%d';
-				$method = $data['order'];
+				$method->method_order  = absint( $data['order'] );
 		}
 
 		if ( empty( $updates ) ) {
