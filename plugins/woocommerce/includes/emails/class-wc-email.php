@@ -1190,6 +1190,9 @@ class WC_Email extends WC_Settings_API {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}
+		if ( $this->block_email_editor_enabled ) {
+			$this->form_fields['preheader'] = $this->get_preheader_field();
+		}
 	}
 
 	/**
@@ -1221,6 +1224,22 @@ class WC_Email extends WC_Settings_API {
 			/* translators: %s: admin email */
 			'description' => __( 'Enter Bcc recipients (comma-separated) for this email.', 'woocommerce' ),
 			'placeholder' => '',
+			'default'     => '',
+			'desc_tip'    => true,
+		);
+	}
+
+	/**
+	 * Get the preheader field definition.
+	 *
+	 * @return array
+	 */
+	protected function get_preheader_field() {
+		return array(
+			'title'       => __( 'Preheader', 'woocommerce' ),
+			'description' => __( 'Shown as a preview in the Inbox, next to the subject line. (Max 150 characters).', 'woocommerce' ),
+			'placeholder' => '',
+			'type'        => 'text',
 			'default'     => '',
 			'desc_tip'    => true,
 		);

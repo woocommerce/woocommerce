@@ -236,6 +236,9 @@ if ( ! class_exists( 'WC_Email_Failed_Order', false ) ) :
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
 			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
+			}
 		}
 	}
 
