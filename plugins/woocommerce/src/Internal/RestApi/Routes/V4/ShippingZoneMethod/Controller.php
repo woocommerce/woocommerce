@@ -67,7 +67,6 @@ class Controller extends AbstractController {
 	 * Register the routes for shipping zone methods.
 	 */
 	public function register_routes() {
-		// POST - Create shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -79,7 +78,6 @@ class Controller extends AbstractController {
 			)
 		);
 
-		// PUT - Update shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -121,36 +119,30 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		// Validate zone exists.
 		$zone = $this->validate_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Validate method type.
 		$method_validation = $this->validate_method_type( $request['method_id'] );
 		if ( is_wp_error( $method_validation ) ) {
 			return $method_validation;
 		}
 
-		// Add the shipping method to the zone.
 		$instance_id = $zone->add_shipping_method( $request['method_id'] );
 
 		if ( ! $instance_id ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Get the newly created method instance.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		if ( ! $method ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Update method settings, enabled status, and order.
 		$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 		if ( is_wp_error( $result ) ) {
-			// Delete the method instance to rollback the creation.
-			// This ensures a failed POST would not leave an orphaned method.
+			// Rollback: delete the method instance to prevent orphaned records.
 			$zone->delete_shipping_method( $instance_id );
 			return $result;
 		}
@@ -180,7 +172,6 @@ class Controller extends AbstractController {
 			return $zone;
 		}
 
-		// Update method settings, enabled status, and order if any updates provided.
 		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
 			$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 			if ( is_wp_error( $result ) ) {

@@ -209,13 +209,11 @@ class Controller extends AbstractController {
 	 * @return WP_Error|WP_REST_Response Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-
 		$zone = $this->shipping_zone_service->create_shipping_zone( $request->get_params() );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Verify zone was created successfully.
 		if ( 0 === $zone->get_id() ) {
 			return $this->get_route_error_response(
 				$this->get_error_prefix() . 'cannot_create',
@@ -224,7 +222,6 @@ class Controller extends AbstractController {
 			);
 		}
 
-		// Prepare response.
 		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 		$response->set_status( 201 );
 		$response->header( 'Location', rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $zone->get_id() ) ) );
@@ -282,19 +279,16 @@ class Controller extends AbstractController {
 	public function update_item( $request ) {
 		$zone_id = (int) $request['id'];
 
-		// Validate zone exists.
 		$zone = $this->validate_zone( $zone_id );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Update zone from request.
 		$result = $this->shipping_zone_service->update_shipping_zone( $zone, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}
 
-		// Prepare response.
 		return rest_ensure_response( $this->prepare_item_for_response( $result, $request ) );
 	}
 }

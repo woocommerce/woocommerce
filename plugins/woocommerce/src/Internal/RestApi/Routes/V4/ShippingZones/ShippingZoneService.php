@@ -19,18 +19,15 @@ class ShippingZoneService {
 		 * @return array Array of shipping zones sorted by zone_order.
 		 */
 	public function get_sorted_shipping_zones() {
-		// Get all zones including "Rest of the World".
 		$zones             = WC_Shipping_Zones::get_zones();
 		$rest_of_the_world = WC_Shipping_Zones::get_zone_by( 'zone_id', 0 );
 
-		// Add "Rest of the World" zone at the end with same structure as get_zones().
 		$rest_data                            = $rest_of_the_world->get_data();
 		$rest_data['zone_id']                 = $rest_of_the_world->get_id();
 		$rest_data['formatted_zone_location'] = array();
 		$rest_data['shipping_methods']        = $rest_of_the_world->get_shipping_methods( false, 'admin' );
 		$zones[0]                             = $rest_data;
 
-		// Sort zones by order.
 		uasort(
 			$zones,
 			function ( $a, $b ) {
@@ -89,7 +86,6 @@ class ShippingZoneService {
 
 		$is_rest_of_world = 0 === $zone->get_id();
 
-		// Set zone name if provided.
 		if ( ! is_null( $params['name'] ) ) {
 			if ( $is_rest_of_world ) {
 				return new WP_Error(
@@ -110,7 +106,6 @@ class ShippingZoneService {
 			$zone->set_zone_name( $name );
 		}
 
-		// Set zone order if provided.
 		if ( ! is_null( $params['order'] ) ) {
 			if ( $is_rest_of_world ) {
 				return new WP_Error(
@@ -122,7 +117,6 @@ class ShippingZoneService {
 			$zone->set_zone_order( $params['order'] );
 		}
 
-		// Set locations if provided.
 		$locations_being_cleared = false;
 		if ( ! is_null( $params['locations'] ) ) {
 			if ( $is_rest_of_world ) {
@@ -163,7 +157,6 @@ class ShippingZoneService {
 			$zone->set_locations( $locations );
 		}
 
-		// Save the zone.
 		$zone->save();
 
 		// WORKAROUND: WC_Data::apply_changes() uses array_replace_recursive() which doesn't

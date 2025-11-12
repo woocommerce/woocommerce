@@ -37,22 +37,10 @@ class ShippingZoneMethodService {
 		$instance_settings = $method->instance_settings;
 
 		/**
-		 * Key Transformation Explanation:
+		 * Transform setting keys to WooCommerce's expected format.
 		 *
-		 * The get_field_value() method (from WC_Settings_API) was designed for admin forms
-		 * where POST data has prefixed keys like 'woocommerce_flat_rate_1_title'.
-		 *
-		 * Internally, get_field_value() does this:
-		 *   $field_key = $this->get_field_key($key);  // e.g., 'woocommerce_flat_rate_1_title'
-		 *   $value = $post_data[$field_key];          // Looks for the PREFIXED key
-		 *
-		 * Since REST API sends clean JSON keys (e.g., 'title', 'cost'), we must transform
-		 * them to prefixed keys before passing to get_field_value(), or it will return null.
-		 *
-		 * Example:
-		 *   REST API sends: ['title' => 'Express']
-		 *   We transform to: ['woocommerce_flat_rate_1_title' => 'Express']
-		 *   Then get_field_value('title', ...) finds the value at 'woocommerce_flat_rate_1_title'
+		 * WC_Settings_API::get_field_value() expects prefixed keys (e.g., 'woocommerce_flat_rate_1_title').
+		 * Transform clean keys ('title') to prefixed keys before validation.
 		 */
 		$post_data = array();
 		foreach ( $settings as $key => $value ) {
@@ -60,7 +48,6 @@ class ShippingZoneMethodService {
 			$post_data[ $field_key ] = $value;
 		}
 
-		// Validate and sanitize each field using get_field_value().
 		$form_fields = $method->get_instance_form_fields();
 		foreach ( $settings as $key => $value ) {
 			if ( isset( $form_fields[ $key ] ) ) {
@@ -76,13 +63,12 @@ class ShippingZoneMethodService {
 			}
 		}
 
-		// Save to database.
 		/**
 		 * Filter the instance settings values before saving.
 		 *
 		 * @since 9.4.0
-		 * @param array                $instance_settings Instance settings.
-		 * @param WC_Shipping_Method   $method            Shipping method instance.
+		 * @param array              $instance_settings Instance settings.
+		 * @param WC_Shipping_Method $method            Shipping method instance.
 		 */
 		$filtered_settings = apply_filters( 'woocommerce_shipping_' . $method->id . '_instance_settings_values', $instance_settings, $method );
 		$result            = update_option( $method->get_instance_option_key(), $filtered_settings );
@@ -129,7 +115,6 @@ class ShippingZoneMethodService {
 		$formats         = array();
 		$enabled_changed = false;
 
-		// Update settings if present.
 		if ( ! is_null( $data['settings'] ) ) {
 			$result = $this->update_shipping_method_settings( $method, $data['settings'] );
 			if ( is_wp_error( $result ) ) {
@@ -154,7 +139,6 @@ class ShippingZoneMethodService {
 			return $method;
 		}
 
-		// Single UPDATE query for both fields.
 		$result = $wpdb->update(
 			"{$wpdb->prefix}woocommerce_shipping_zone_methods",
 			$updates,
