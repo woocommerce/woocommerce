@@ -102,9 +102,10 @@ class ShippingZoneMethodService {
 	 * @param WC_Shipping_Method  $method Shipping method instance.
 	 * @param int                 $instance_id Method instance ID.
 	 * @param array               $data Request data containing 'settings', 'enabled', and/or 'order'.
+	 * @param int                 $zone_id Zone ID (optional, required for firing status toggle hook).
 	 * @return WC_Shipping_Method|\WP_Error True on success, WP_Error on validation failure.
 	 */
-	public function update_shipping_zone_method( $method, $instance_id, $data ) {
+	public function update_shipping_zone_method( $method, $instance_id, $data, $zone_id = null ) {
 		global $wpdb;
 
 		$updates = array();
@@ -147,6 +148,25 @@ class ShippingZoneMethodService {
 			return new WP_Error(
 				'update_failed',
 				__( 'Could not update shipping method.', 'woocommerce' )
+			);
+		}
+
+		if ( false !== $result && isset( $updates['is_enabled'] ) && null !== $zone_id ) {
+			/**
+			 * Fires when a shipping method's enabled status is toggled.
+			 *
+			 * @since 3.0.0
+			 * @param int    $instance_id Instance ID of the shipping method.
+			 * @param string $method_id   Shipping method ID (e.g., 'flat_rate').
+			 * @param int    $zone_id     Zone ID.
+			 * @param bool   $is_enabled  Whether the method is enabled.
+			 */
+			do_action(
+				'woocommerce_shipping_zone_method_status_toggled',
+				$instance_id,
+				$method->id,
+				$zone_id,
+				(bool) $updates['is_enabled']
 			);
 		}
 
