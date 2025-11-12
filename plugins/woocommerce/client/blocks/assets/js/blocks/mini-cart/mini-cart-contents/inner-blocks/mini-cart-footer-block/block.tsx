@@ -31,7 +31,7 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 };
 
 interface Props {
-	children: JSX.Element | JSX.Element[];
+	children: JSX.Element[] | undefined;
 	className?: string;
 	cartButtonLabel: string;
 	checkoutButtonLabel: string;
