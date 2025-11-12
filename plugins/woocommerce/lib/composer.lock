@@ -4,11 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-<<<<<<< HEAD
-    "content-hash": "aa3579302b520cf69e7a766905d6a87b",
-=======
     "content-hash": "b49b67514848dfa15b0edddc31cfc196",
->>>>>>> 4b8f3c0715 (Retrieving two-letter country code from the three-letter code with league/iso3166 + additional fixes (#61678))
     "packages": [],
     "packages-dev": [
         {
