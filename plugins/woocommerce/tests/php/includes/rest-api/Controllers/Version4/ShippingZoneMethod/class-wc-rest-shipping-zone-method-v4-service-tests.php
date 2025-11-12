@@ -2,38 +2,31 @@
 /**
  * ShippingZoneMethodService tests.
  *
- * @package WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod
+ * @package WooCommerce\Tests\RestApi\Controllers\Version4\ShippingZoneMethod
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
-
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
-use WC_Shipping_Method;
-use WC_Shipping_Zone;
-use WC_Shipping_Zones;
-use WP_Error;
-use WC_Unit_Test_Case;
 
 /**
  * ShippingZoneMethodService test class.
  */
-class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
+class WC_REST_Shipping_Zone_Method_V4_Service_Tests extends WC_Unit_Test_Case {
 
 	/**
 	 * ShippingZoneMethodService instance.
 	 *
 	 * @var ShippingZoneMethodService
 	 */
-	private ShippingZoneMethodService $service;
+	private $service;
 
 	/**
 	 * Created shipping zones for cleanup.
 	 *
 	 * @var array
 	 */
-	private array $created_zones = array();
+	private $created_zones = array();
 
 	/**
 	 * Setup test case.
@@ -71,7 +64,7 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 	 * @param array  $locations Zone locations.
 	 * @return WC_Shipping_Zone
 	 */
-	private function create_zone( string $name = 'Test Zone', int $order = 0, array $locations = array() ): WC_Shipping_Zone {
+	private function create_zone( $name = 'Test Zone', $order = 0, $locations = array() ) {
 		$zone = new WC_Shipping_Zone();
 		$zone->set_zone_name( $name );
 		$zone->set_zone_order( $order );
@@ -155,7 +148,7 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$data = array( 'enabled' => false );
 
-		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
+		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data, $zone->get_id() );
 
 		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
 		$this->assertFalse( wc_string_to_bool( $result->enabled ) );
@@ -190,7 +183,7 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 			'order'   => 10,
 		);
 
-		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
+		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data, $zone->get_id() );
 
 		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
 		$this->assertFalse( wc_string_to_bool( $result->enabled ) );

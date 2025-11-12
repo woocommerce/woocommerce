@@ -2,37 +2,31 @@
 /**
  * ShippingZoneService tests.
  *
- * @package WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZones
+ * @package WooCommerce\Tests\RestApi\Controllers\Version4\ShippingZones
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZones;
-
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneService;
-use WC_Shipping_Zone;
-use WC_Shipping_Zones;
-use WP_Error;
-use WC_Unit_Test_Case;
 
 /**
  * ShippingZoneService test class.
  */
-class ShippingZoneServiceTest extends WC_Unit_Test_Case {
+class WC_REST_Shipping_Zones_V4_Service_Tests extends WC_Unit_Test_Case {
 
 	/**
 	 * ShippingZoneService instance.
 	 *
 	 * @var ShippingZoneService
 	 */
-	private ShippingZoneService $service;
+	private $service;
 
 	/**
 	 * Created shipping zones for cleanup.
 	 *
 	 * @var array
 	 */
-	private array $created_zones = array();
+	private $created_zones = array();
 
 	/**
 	 * Setup test case.
@@ -70,7 +64,7 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 	 * @param array  $locations Zone locations.
 	 * @return WC_Shipping_Zone
 	 */
-	private function create_zone( string $name = 'Test Zone', int $order = 0, array $locations = array() ): WC_Shipping_Zone {
+	private function create_zone( $name = 'Test Zone', $order = 0, $locations = array() ) {
 		$zone = new WC_Shipping_Zone();
 		$zone->set_zone_name( $name );
 		$zone->set_zone_order( $order );
