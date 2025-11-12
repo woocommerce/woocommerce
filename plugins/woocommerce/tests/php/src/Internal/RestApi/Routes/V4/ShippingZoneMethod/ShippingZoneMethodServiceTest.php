@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
+use WC_Shipping_Method;
 use WC_Shipping_Zone;
 use WC_Shipping_Zones;
 use WP_Error;
@@ -101,12 +102,9 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_method_settings( $method, $settings );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify settings were saved.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$this->assertEquals( 'Custom Flat Rate', $method_reloaded->get_option( 'title' ) );
-		$this->assertEquals( '15.50', $method_reloaded->get_option( 'cost' ) );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$this->assertEquals( 'Custom Flat Rate', $result->get_option( 'title' ) );
+		$this->assertEquals( '15.50', $result->get_option( 'cost' ) );
 	}
 
 	/**
@@ -138,11 +136,8 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_method_settings( $method, $settings );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify XSS was sanitized.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$title           = $method_reloaded->get_option( 'title' );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$title = $result->get_option( 'title' );
 		$this->assertStringNotContainsString( '<script>', $title );
 	}
 
@@ -162,11 +157,8 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify enabled status.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$this->assertFalse( wc_string_to_bool( $method_reloaded->enabled ) );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$this->assertFalse( wc_string_to_bool( $result->enabled ) );
 	}
 
 	/**
@@ -181,11 +173,8 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify order.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$this->assertEquals( 5, $method_reloaded->method_order );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$this->assertEquals( 5, $result->method_order );
 	}
 
 	/**
@@ -203,12 +192,9 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify both were updated.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$this->assertFalse( wc_string_to_bool( $method_reloaded->enabled ) );
-		$this->assertEquals( 10, $method_reloaded->method_order );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$this->assertFalse( wc_string_to_bool( $result->enabled ) );
+		$this->assertEquals( 10, $result->method_order );
 	}
 
 	/**
@@ -228,16 +214,13 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
 
-		$this->assertTrue( $result );
-
-		// Reload method to verify settings were updated.
-		$method_reloaded = WC_Shipping_Zones::get_shipping_method( $instance_id );
-		$this->assertEquals( 'Updated Title', $method_reloaded->get_option( 'title' ) );
-		$this->assertEquals( '20.00', $method_reloaded->get_option( 'cost' ) );
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
+		$this->assertEquals( 'Updated Title', $result->get_option( 'title' ) );
+		$this->assertEquals( '20.00', $result->get_option( 'cost' ) );
 	}
 
 	/**
-	 * Test update_shipping_zone_method with empty data returns true.
+	 * Test update_shipping_zone_method with empty data returns method object.
 	 */
 	public function test_update_shipping_zone_method_empty_data() {
 		$zone        = $this->create_zone( 'Test Zone' );
@@ -248,8 +231,8 @@ class ShippingZoneMethodServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone_method( $method, $instance_id, $data );
 
-		// Should return true without doing anything.
-		$this->assertTrue( $result );
+		// Should return method object without doing anything.
+		$this->assertInstanceOf( WC_Shipping_Method::class, $result );
 	}
 
 	/**

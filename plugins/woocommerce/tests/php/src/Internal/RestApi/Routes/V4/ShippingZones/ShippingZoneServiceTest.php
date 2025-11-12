@@ -272,11 +272,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify update.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$this->assertEquals( 'Updated Name', $zone_reloaded->get_zone_name() );
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$this->assertEquals( 'Updated Name', $result->get_zone_name() );
 	}
 
 	/**
@@ -288,11 +285,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify update.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$this->assertEquals( 10, $zone_reloaded->get_zone_order() );
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$this->assertEquals( 10, $result->get_zone_order() );
 	}
 
 	/**
@@ -315,11 +309,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify update.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$locations     = $zone_reloaded->get_zone_locations();
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$locations = $result->get_zone_locations();
 		$this->assertCount( 2, $locations );
 
 		$codes = array_map(
@@ -352,11 +343,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 		$params = array( 'locations' => array() );
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify locations were cleared.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$this->assertCount( 0, $zone_reloaded->get_zone_locations() );
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$this->assertCount( 0, $result->get_zone_locations() );
 	}
 
 	/**
@@ -388,11 +376,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify type was normalized.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$locations     = $zone_reloaded->get_zone_locations();
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$locations = $result->get_zone_locations();
 		$this->assertCount( 1, $locations );
 		$this->assertEquals( 'state', $locations[0]->type );
 	}
@@ -417,11 +402,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify only valid location was saved.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$locations     = $zone_reloaded->get_zone_locations();
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$locations = $result->get_zone_locations();
 		$this->assertCount( 1, $locations );
 		$this->assertEquals( 'CA', $locations[0]->code );
 	}
@@ -446,11 +428,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify only non-empty location was saved.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$locations     = $zone_reloaded->get_zone_locations();
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$locations = $result->get_zone_locations();
 		$this->assertCount( 1, $locations );
 		$this->assertEquals( 'US', $locations[0]->code );
 	}
@@ -468,11 +447,8 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
-		$this->assertTrue( $result );
-
-		// Reload zone to verify type defaulted to country.
-		$zone_reloaded = WC_Shipping_Zones::get_zone( $zone->get_id() );
-		$locations     = $zone_reloaded->get_zone_locations();
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
+		$locations = $result->get_zone_locations();
 		$this->assertCount( 1, $locations );
 		$this->assertEquals( 'country', $locations[0]->type );
 	}
@@ -544,6 +520,6 @@ class ShippingZoneServiceTest extends WC_Unit_Test_Case {
 		$result = $this->service->update_shipping_zone( $zone, $params );
 
 		// Should succeed because null values are ignored.
-		$this->assertTrue( $result );
+		$this->assertInstanceOf( WC_Shipping_Zone::class, $result );
 	}
 }
