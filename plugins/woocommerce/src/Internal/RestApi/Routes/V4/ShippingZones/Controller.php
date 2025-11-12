@@ -48,7 +48,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var ShippingZoneSchemaService
 	 */
-	protected $shipping_service;
+	protected $shipping_zone_service;
 
 	/**
 	 * Custom error constant for shipping-specific errors.
@@ -61,9 +61,9 @@ class Controller extends AbstractController {
 	 * @param ShippingZoneSchema $zone_schema Order schema class.
 	 * @internal
 	 */
-	final public function init( ShippingZoneSchema $zone_schema ) {
+	final public function init( ShippingZoneSchema $zone_schema, ShippingZoneService $shipping_zone_service ) {
 		$this->item_schema      = $zone_schema;
-		$this->shipping_service = new ShippingZoneService();
+		$this->shipping_zone_service = $shipping_zone_service;
 	}
 
 	/**
@@ -152,7 +152,7 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_items( $request ) {
-		$zones = $this->shipping_service->get_sorted_shipping_zones();
+		$zones = $this->shipping_zone_service->get_sorted_shipping_zones();
 
 		$items = array();
 		foreach ( $zones as $zone_data ) {
@@ -210,7 +210,7 @@ class Controller extends AbstractController {
 	 */
 	public function create_item( $request ) {
 
-		$zone = $this->shipping_service->create_shipping_zone( $request->get_params() );
+		$zone = $this->shipping_zone_service->create_shipping_zone( $request->get_params() );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
@@ -289,7 +289,7 @@ class Controller extends AbstractController {
 		}
 
 		// Update zone from request.
-		$result = $this->shipping_service->update_shipping_zone( $zone, $request->get_params() );
+		$result = $this->shipping_zone_service->update_shipping_zone( $zone, $request->get_params() );
 		if ( is_wp_error( $result ) ) {
 			return $result;
 		}

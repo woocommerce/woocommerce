@@ -43,7 +43,7 @@ class Controller extends AbstractController {
 	 *
 	 * @var ShippingZoneMethodService
 	 */
-	protected $shipping_service;
+	protected $shipping_method_service;
 
 	/**
 	 * Custom error constants for shipping-specific errors.
@@ -58,9 +58,9 @@ class Controller extends AbstractController {
 	 * @internal
 	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
 	 */
-	final public function init( ShippingMethodSchema $method_schema ) {
+	final public function init( ShippingMethodSchema $method_schema, ShippingZoneMethodService $shipping_method_service ) {
 		$this->method_schema    = $method_schema;
-		$this->shipping_service = new ShippingZoneMethodService();
+		$this->shipping_method_service = $shipping_method_service;
 	}
 
 	/**
