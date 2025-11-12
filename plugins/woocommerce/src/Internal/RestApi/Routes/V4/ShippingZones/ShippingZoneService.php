@@ -108,11 +108,13 @@ class ShippingZoneService {
 		}
 
 		// Set locations if provided.
+		$locations_being_cleared = true;
 		if ( isset( $params['locations'] ) && ! is_null( $params['locations'] ) ) {
 			$raw_locations = $params['locations'];
 			$locations     = array();
 
 			foreach ( (array) $raw_locations as $raw_location ) {
+				$locations_being_cleared = false;
 				if ( empty( $raw_location['code'] ) ) {
 					continue;
 				}
@@ -139,6 +141,13 @@ class ShippingZoneService {
 
 		// Save the zone.
 		$zone->save();
+
+		// WORKAROUND: WC_Data::apply_changes() uses array_replace_recursive() which doesn't
+		// properly clear array properties when set to empty arrays. After save(), get_zone_locations()
+		// returns stale cached data. Only reload when clearing locations to get accurate state.
+		if ( $locations_being_cleared ) {
+			$zone = WC_Shipping_Zones::get_zone( $zone->get_id() );
+		}
 
 		return $zone;
 	}
