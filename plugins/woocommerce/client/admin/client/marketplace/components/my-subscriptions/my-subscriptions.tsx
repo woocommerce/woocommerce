@@ -24,6 +24,7 @@ import Notices from './notices';
 import InstallModal from './table/actions/install-modal';
 import { connectUrl } from '../../utils/functions';
 import Notice from '../notice/notice';
+import MySubscriptionsAccount from './my-subscriptions-account';
 
 export default function MySubscriptions(): JSX.Element {
 	const { subscriptions, isLoading } = useContext( SubscriptionsContext );
@@ -163,6 +164,7 @@ export default function MySubscriptions(): JSX.Element {
 				<section className="woocommerce-marketplace__my-subscriptions__notices">
 					<Notices />
 				</section>
+				<MySubscriptionsAccount />
 				<section className="woocommerce-marketplace__my-subscriptions-section woocommerce-marketplace__my-subscriptions__installed">
 					<header className="woocommerce-marketplace__my-subscriptions__header">
 						<div className="woocommerce-marketplace__my-subscriptions__header-content">

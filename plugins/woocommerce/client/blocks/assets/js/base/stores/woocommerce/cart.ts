@@ -35,7 +35,7 @@ export type WooCommerceConfig = {
 export type SelectedAttributes = Omit< CartVariationItem, 'raw_attribute' >;
 
 export type OptimisticCartItem = {
-	key?: string;
+	key?: string | undefined;
 	id: number;
 	quantity: number;
 	variation?: CartVariationItem[];
@@ -48,7 +48,8 @@ export type ClientCartItem = Omit< OptimisticCartItem, 'variation' > & {
 
 export type VariationData = {
 	attributes: Record< string, string >;
-	is_in_stock?: boolean;
+	is_in_stock: boolean;
+	sold_individually: boolean;
 	price_html?: string;
 	image_id?: number;
 	availability?: string;
@@ -59,11 +60,12 @@ export type VariationData = {
 	min?: number;
 	max?: number;
 	step?: number;
-	sold_individually?: boolean;
 };
 
 export type ProductData = {
 	type: string;
+	is_in_stock: boolean;
+	sold_individually: boolean;
 	price_html?: string;
 	image_id?: number;
 	availability?: string;
@@ -304,7 +306,7 @@ const { state, actions } = store< Store >(
 			},
 
 			*addCartItem(
-				{ id, quantity, variation }: ClientCartItem,
+				{ id, key, quantity, variation }: ClientCartItem,
 				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
 			) {
 				let item = state.cart.items.find( ( cartItem ) => {
@@ -326,8 +328,8 @@ const { state, actions } = store< Store >(
 							variation
 						);
 					}
-
-					return id === cartItem.id;
+					// If no key is provided, rely on the id.
+					return key ? key === cartItem.key : id === cartItem.id;
 				} );
 				const endpoint = item ? 'update-item' : 'add-item';
 				const previousCart = JSON.stringify( state.cart );
@@ -349,7 +351,7 @@ const { state, actions } = store< Store >(
 					item = {
 						id,
 						quantity,
-						variation,
+						...( variation && { variation } ),
 					} as OptimisticCartItem;
 					quantityChanges.productsPendingAdd = [ id ];
 					state.cart.items.push( item );
@@ -456,7 +458,9 @@ const { state, actions } = store< Store >(
 						item = {
 							id: item.id,
 							quantity: item.quantity,
-							variation: item.variation,
+							...( item.variation && {
+								variation: item.variation,
+							} ),
 						} as OptimisticCartItem;
 						state.cart.items.push( item );
 						quantityChanges.productsPendingAdd =

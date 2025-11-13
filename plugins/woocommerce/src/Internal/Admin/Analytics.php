@@ -6,8 +6,11 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
  * Contains backend logic for the Analytics feature.
@@ -21,10 +24,6 @@ class Analytics {
 	 * Clear cache tool identifier.
 	 */
 	const CACHE_TOOL_ID = 'clear_woocommerce_analytics_cache';
-	/**
-	 * Full refund fix data tool identifier.
-	 */
-	const FULL_REFUND_FIX_DATA_TOOL_ID = 'fix_woocommerce_analytics_full_refund_data';
 
 	/**
 	 * Class instance.
@@ -65,7 +64,7 @@ class Analytics {
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
+		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 	}
 
 	/**
@@ -113,8 +112,14 @@ class Analytics {
 	 * @return array
 	 */
 	public function add_preload_endpoints( $endpoints ) {
-		$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
-		$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
+		$screen_id = ( function_exists( 'get_current_screen' ) && get_current_screen() ) ? get_current_screen()->id : '';
+
+		// Only preload endpoints on wc-admin pages.
+		if ( 'woocommerce_page_wc-admin' === $screen_id ) {
+			$endpoints['performanceIndicators'] = '/wc-analytics/reports/performance-indicators/allowed';
+			$endpoints['leaderboards']          = '/wc-analytics/leaderboards/allowed';
+		}
+
 		return $endpoints;
 	}
 
@@ -176,24 +181,94 @@ class Analytics {
 	}
 
 	/**
-	 * Register the full refund fix data tool on the WooCommerce > Status > Tools page.
+	 * Register the regenerate order fulfillment status tool on the WooCommerce > Status > Tools page.
 	 *
 	 * @param array $debug_tools Available debug tool registrations.
 	 * @return array Filtered debug tool registrations.
 	 */
-	public function register_full_refund_fix_data_tool( $debug_tools ) {
-		if ( OrderUtil::uses_new_full_refund_data() ) {
+	public function register_regenerate_order_fulfillment_status_tool( $debug_tools ) {
+		// Check if the fulfillments feature is enabled.
+		$container           = wc_get_container();
+		$features_controller = $container->get( FeaturesController::class );
+
+		if ( ! $features_controller->feature_is_enabled( 'fulfillments' ) ) {
 			return $debug_tools;
 		}
 
-		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
-			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
-			'button'   => __( 'Fix', 'woocommerce' ),
-			'desc'     => __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' ),
-			'callback' => array( $this, 'run_full_refund_fix_data_tool' ),
+		// If the order fulfillment status has already been regenerated, don't register the tool again.
+		if ( true === (bool) get_option( 'woocommerce_analytics_order_fulfillment_status_regenerated' ) ) {
+			return $debug_tools;
+		}
+
+		$debug_tools['regenerate_order_fulfillment_status'] = array(
+			'name'     => __( 'Regenerate order fulfillment status for Analytics', 'woocommerce' ),
+			'button'   => __( 'Regenerate', 'woocommerce' ),
+			'desc'     => __( 'This tool will regenerate the order fulfillment status for all orders and update the Analytics data using a direct SQL query.', 'woocommerce' ),
+			'callback' => array( $this, 'run_regenerate_order_fulfillment_status_tool' ),
 		);
 
 		return $debug_tools;
+	}
+
+	/**
+	 * Regenerate order fulfillment status directly using SQL.
+	 *
+	 * @return string Success message or error message.
+	 */
+	public function run_regenerate_order_fulfillment_status_tool() {
+		global $wpdb;
+
+		// Check if the column exists, create it if not.
+		if ( ! OrderStatsDataStore::has_fulfillment_status_column() ) {
+			$create_column_result = OrderStatsDataStore::add_fulfillment_status_column();
+
+			if ( true !== $create_column_result ) {
+				return sprintf(
+					/* translators: %s: error message */
+					__( 'Failed to create fulfillment status column: %s', 'woocommerce' ),
+					$create_column_result
+				);
+			}
+		}
+
+		$order_stats_table = $wpdb->prefix . 'wc_order_stats';
+
+		// If HPOS is enabled, use the wc_orders_meta table, else use wp_postmeta.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$order_meta_table  = OrdersTableDataStore::get_meta_table_name();
+			$order_meta_column = 'order_id';
+		} else {
+			$order_meta_table  = $wpdb->postmeta;
+			$order_meta_column = 'post_id';
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->query(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table and column names cannot be prepared.
+				"UPDATE {$order_stats_table} os INNER JOIN {$order_meta_table} om ON os.order_id = om.{$order_meta_column}
+				SET os.fulfillment_status = CASE
+					WHEN om.meta_value = %s THEN NULL
+					ELSE om.meta_value
+				END
+				WHERE om.meta_key = %s",
+				'no_fulfillments',
+				'_fulfillment_status'
+			)
+		);
+
+		if ( false === $updated ) {
+			return __( 'Failed to update order fulfillment status. Please check the database logs for errors.', 'woocommerce' );
+		}
+
+		// Mark as completed.
+		update_option( 'woocommerce_analytics_order_fulfillment_status_regenerated', true, false );
+
+		return sprintf(
+			/* translators: %d: number of orders updated */
+			__( 'Successfully updated fulfillment status for %d orders.', 'woocommerce' ),
+			$updated
+		);
 	}
 
 	/**
@@ -311,41 +386,5 @@ class Analytics {
 		Cache::invalidate();
 
 		return __( 'Analytics cache cleared.', 'woocommerce' );
-	}
-
-	/**
-	 * "Fix" full refund data by re-importing all the refunded historical data.
-	 */
-	public function run_full_refund_fix_data_tool() {
-		global $wpdb;
-
-		Cache::invalidate();
-
-		// Get every order ID where:
-		// 1. the total sales is less than 0, and
-		// 2. is not refunded shipping fee only, and
-		// 3. is not refunded tax fee only.
-		$refunded_orders = $wpdb->get_results(
-			"SELECT order_stats.order_id
-			FROM {$wpdb->prefix}wc_order_stats AS order_stats
-			WHERE order_stats.total_sales < 0 # Refunded orders
-				AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
-				AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
-		);
-
-		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-		if ( $refunded_orders ) {
-			foreach ( $refunded_orders as $refunded_order ) {
-				/**
-				 * Trigger an action to schedule the data import for old refunded order items.
-				 *
-				 * @param int $order_id The ID of the order to be synced.
-				 * @since 10.2.0
-				 */
-				do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
-			}
-		}
-
-		return __( 'Re-importing refunded orders, full refund data will be updated shortly.', 'woocommerce' );
 	}
 }

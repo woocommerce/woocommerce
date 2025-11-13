@@ -78,6 +78,7 @@ test.describe( 'Template customization', () => {
 				await editor.revertTemplate( {
 					templateName: testData.templateName,
 				} );
+
 				await testData.visitPage( {
 					admin,
 					editor,

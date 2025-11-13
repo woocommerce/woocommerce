@@ -63,24 +63,20 @@ class ProductPrice extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! empty( $content ) ) {
-			parent::register_block_type_assets();
-			$this->register_chunk_translations( [ $this->block_name ] );
-			return $content;
-		}
-
 		$post_id = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$product = wc_get_product( $post_id );
 
 		if ( $product ) {
-			$styles_and_classes            = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
-			$text_align_styles_and_classes = StyleAttributesUtils::get_text_align_class_and_style( $attributes );
+			$styles_and_classes = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 
 			$is_descendant_of_product_collection       = isset( $block->context['query']['isProductCollectionBlock'] );
 			$is_descendant_of_grouped_product_selector = isset( $block->context['isDescendantOfGroupedProductSelector'] );
 			$is_interactive                            = ! $is_descendant_of_product_collection && ! $is_descendant_of_grouped_product_selector && $product->is_type( ProductType::VARIABLE );
 
-			$wrapper_attributes     = array();
+			$wrapper_attributes     = array(
+				'style' => $styles_and_classes['styles'] ?? '',
+				'class' => $styles_and_classes['classes'] ?? '',
+			);
 			$interactive_attributes = '';
 			$context_directive      = '';
 
@@ -131,14 +127,11 @@ class ProductPrice extends AbstractBlock {
 			}
 
 			return sprintf(
-				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price %3$s %4$s" style="%5$s" %6$s>
-					%7$s
+				'<div %1$s %2$s><div class="wc-block-components-product-price wc-block-grid__product-price" %3$s>
+					%4$s
 				</div></div>',
 				get_block_wrapper_attributes( $wrapper_attributes ),
 				$context_directive,
-				esc_attr( $text_align_styles_and_classes['class'] ?? '' ),
-				esc_attr( $styles_and_classes['classes'] ),
-				esc_attr( $styles_and_classes['styles'] ?? '' ),
 				$interactive_attributes,
 				$product->get_price_html()
 			);

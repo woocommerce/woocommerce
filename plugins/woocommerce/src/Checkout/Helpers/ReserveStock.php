@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Checkout\Helpers;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -163,6 +164,11 @@ final class ReserveStock {
 					_x( 'Stock hold of %1$s minutes applied to: %2$s', 'held stock note', 'woocommerce' ),
 					$minutes,
 					'<br>' . implode( '<br>', $held_stock_notes )
+				),
+				false,
+				false,
+				array(
+					'note_group' => OrderNoteGroup::PRODUCT_STOCK,
 				)
 			);
 		}

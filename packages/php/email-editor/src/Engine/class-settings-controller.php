@@ -208,10 +208,6 @@ class Settings_Controller {
 				continue;
 			}
 
-			if ( strpos( $block->name, 'core/' ) !== false ) {
-				continue;
-			}
-
 			foreach ( $block->style_handles as $handle ) {
 				$allowed_iframe_style_handles[] = $handle . '-css';
 			}

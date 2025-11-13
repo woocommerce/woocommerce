@@ -8,6 +8,7 @@ import { test as base, expect, wpCLI } from '@woocommerce/e2e-utils';
  */
 import AddToCartWithOptionsPage from './add-to-cart-with-options.page';
 import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import config from '../../../../../admin/config/core.json';
 
 const test = base.extend< {
 	pageObject: AddToCartWithOptionsPage;
@@ -58,7 +59,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.updateSingleProductTemplate();
 
 		await editor.saveSiteEditorEntities( {
@@ -90,7 +98,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		const variationDescription =
 			'This is the output of the variation description';
 		// Set a variable product as having 100 in stock and one of its variations as being out of stock.
@@ -158,12 +173,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const colorRedOption = page.locator( 'label:has-text("Red")' );
+		// We use the Add to Cart + Options class to make sure we don't select
+		// the Add to Cart button from the Related Products block.
 		const addToCartButton = page
-			.getByRole( 'button', { name: 'Add to cart' } )
-			.first();
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.getByRole( 'button', { name: 'Add to cart' } );
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
+		const quantitySelector = page.getByLabel( 'Product quantity' );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
@@ -182,6 +200,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.click();
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeVisible();
+			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
 				page
@@ -198,6 +218,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect( addToCartButton ).not.toBeVisible();
+			await expect( quantitySelector ).not.toBeVisible();
 			await expect(
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
@@ -266,7 +288,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		// Make Hoodie with Logo to be sold individually.
 		const cliOutput = await wpCLI(
 			`post list --post_type=product --field=ID --name="Hoodie with Logo" --format=ids`
@@ -304,9 +333,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
-			const increaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const increaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await increaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -322,13 +353,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '2 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
-			const reduceQuantityButton = page.getByLabel(
-				'Reduce quantity of Beanie'
-			);
+			const reduceQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
+				)
+				.getByLabel( 'Reduce quantity of Beanie' );
 			await reduceQuantityButton.click();
 			await reduceQuantityButton.click();
 
@@ -361,6 +400,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await addToCartButton.click();
 
+			// Wait for the add to cart request to complete before proceeding.
+			// This prevents a race condition where the subsequent page.reload()
+			// could execute before the product is fully added to the cart.
+			const addToCartRequest = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+
 			await expect(
 				page.getByRole( 'button', {
 					name: 'Added to cart',
@@ -368,7 +414,18 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			await expect( page.getByLabel( '3 items in cart' ) ).toBeVisible();
+			// Wait for the API response to ensure the DB has been updated.
+			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 3'
+						: '3 items in cart'
+				)
+			).toBeVisible();
+
+			await addToCartRequest;
 		} );
 
 		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
@@ -382,9 +439,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await individuallySoldProductCheckbox.click();
 
 			// Try to add another product to cart again (it will succeed).
-			const beanieIncreaseQuantityButton = page.getByLabel(
-				'Increase quantity of Beanie'
-			);
+			const beanieIncreaseQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of Beanie' );
 			await beanieIncreaseQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
@@ -405,7 +464,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			).toBeVisible();
 			// Verify optimistic updates were applied, so the product that was
 			// successfully added to cart is counted.
-			await expect( page.getByLabel( '4 items in cart' ) ).toBeVisible();
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
 		} );
 	} );
 
@@ -751,7 +816,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 		page,
 		pageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await wpCLI( `option set woocommerce_enable_ajax_add_to_cart no` );
 
 		await pageObject.updateSingleProductTemplate();
@@ -863,7 +935,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding simple products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 't-shirt' );
 
 		const addToCartButton = page.getByRole( 'button', {
@@ -878,7 +957,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 	test( 'allows adding variable products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'hoodie' );
 
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
@@ -899,10 +985,44 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
+	test( 'allows adding variations to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+		wpCoreVersion,
+	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
+		await pageObject.createPostWithProductBlock(
+			'hoodie',
+			'hoodie-blue-yes'
+		);
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
+		wpCoreVersion,
 	} ) => {
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion <= 6.7,
+			'Skipping test as withSyncEvent is available starting from WordPress 6.8'
+		);
+
 		await pageObject.createPostWithProductBlock( 'logo-collection' );
 
 		const increaseQuantityButton = page.getByLabel(
@@ -919,6 +1039,33 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect(
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
+		).toBeVisible();
+	} );
+
+	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		const addToCartFormBlock = await editor.getBlockByName(
+			pageObject.BLOCK_SLUG
+		);
+		await editor.selectBlocks( addToCartFormBlock );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
+		).toBeHidden();
+
+		await page
+			.getByRole( 'button', {
+				name: 'Upgrade to the Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeVisible();
 	} );
 } );

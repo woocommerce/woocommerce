@@ -7,6 +7,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
@@ -15,6 +16,8 @@ use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificat
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
@@ -302,6 +305,12 @@ class WC_Install {
 		),
 		'10.2.0' => array(
 			'wc_update_1020_add_old_refunded_order_items_to_product_lookup_table',
+		),
+		'10.3.0' => array(
+			'wc_update_1030_add_comments_date_type_index',
+		),
+		'10.4.0' => array(
+			'wc_update_1040_add_idx_date_paid_status_parent',
 		),
 	);
 
@@ -1227,6 +1236,48 @@ class WC_Install {
 	}
 
 	/**
+	 * Get the wc_order_stats table schema.
+	 *
+	 * @since 10.4.0
+	 * @param string $collate Database collation.
+	 * @return string SQL schema for wc_order_stats table.
+	 */
+	private static function get_order_stats_table_schema( $collate ) {
+		global $wpdb;
+
+		$should_have_fulfillment_column = self::is_new_install() && FeaturesUtil::feature_is_enabled( 'fulfillments' );
+		if ( false === $should_have_fulfillment_column ) {
+			$should_have_fulfillment_column = OrdersStatsDataStore::has_fulfillment_status_column();
+		}
+
+		return "CREATE TABLE {$wpdb->prefix}wc_order_stats (
+	order_id bigint(20) unsigned NOT NULL,
+	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
+	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
+	date_paid datetime DEFAULT '0000-00-00 00:00:00',
+	date_completed datetime DEFAULT '0000-00-00 00:00:00',
+	num_items_sold int(11) DEFAULT 0 NOT NULL,
+	total_sales double DEFAULT 0 NOT NULL,
+	tax_total double DEFAULT 0 NOT NULL,
+	shipping_total double DEFAULT 0 NOT NULL,
+	net_total double DEFAULT 0 NOT NULL,
+	returning_customer tinyint(1) DEFAULT NULL,
+	status varchar(20) NOT NULL,
+	customer_id bigint(20) unsigned NOT NULL" .
+		( $should_have_fulfillment_column ? ',
+	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
+	PRIMARY KEY (order_id),
+	KEY date_created (date_created),
+	KEY customer_id (customer_id),
+	KEY status (status)' .
+		( $should_have_fulfillment_column ? ',
+	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+) $collate;";
+	}
+
+	/**
 	 * Delete obsolete notes.
 	 */
 	public static function delete_obsolete_notes() {
@@ -1644,12 +1695,19 @@ class WC_Install {
 
 		$db_delta_result = dbDelta( self::get_schema() );
 
-		$index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
+		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE column_name = 'comment_type' and key_name = 'woo_idx_comment_type'" );
 
-		if ( is_null( $index_exists ) ) {
+		if ( is_null( $comment_type_index_exists ) ) {
 			// Add an index to the field comment_type to improve the response time of the query
 			// used by WC_Comments::wp_count_comments() to get the number of comments by type.
 			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_type (comment_type)" );
+		}
+
+		$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
+
+		if ( is_null( $date_type_index_exists ) ) {
+			// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
+			$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
 		}
 
 		// Clear table caches.
@@ -1695,6 +1753,7 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
+		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -1710,6 +1769,7 @@ CREATE TABLE {$wpdb->prefix}woocommerce_sessions (
   session_value longtext NOT NULL,
   session_expiry bigint(20) unsigned NOT NULL,
   PRIMARY KEY  (session_id),
+  KEY session_expiry (session_expiry),
   UNIQUE KEY session_key (session_key)
 ) $collate;
 CREATE TABLE {$wpdb->prefix}woocommerce_api_keys (
@@ -1933,26 +1993,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	PRIMARY KEY (url_id),
 	KEY url (url($max_index_length))
 ) $collate;
-CREATE TABLE {$wpdb->prefix}wc_order_stats (
-	order_id bigint(20) unsigned NOT NULL,
-	parent_id bigint(20) unsigned DEFAULT 0 NOT NULL,
-	date_created datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_created_gmt datetime DEFAULT '0000-00-00 00:00:00' NOT NULL,
-	date_paid datetime DEFAULT '0000-00-00 00:00:00',
-	date_completed datetime DEFAULT '0000-00-00 00:00:00',
-	num_items_sold int(11) DEFAULT 0 NOT NULL,
-	total_sales double DEFAULT 0 NOT NULL,
-	tax_total double DEFAULT 0 NOT NULL,
-	shipping_total double DEFAULT 0 NOT NULL,
-	net_total double DEFAULT 0 NOT NULL,
-	returning_customer tinyint(1) DEFAULT NULL,
-	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL,
-	PRIMARY KEY (order_id),
-	KEY date_created (date_created),
-	KEY customer_id (customer_id),
-	KEY status (status)
-) $collate;
+$order_stats_table_schema
 CREATE TABLE {$wpdb->prefix}wc_order_product_lookup (
 	order_item_id bigint(20) unsigned NOT NULL,
 	order_id bigint(20) unsigned NOT NULL,
@@ -2724,7 +2765,7 @@ $stock_notifications_table_schema;
 	private static function set_paypal_standard_load_eligibility() {
 		// Initiating the payment gateways sets the flag.
 		if ( class_exists( 'WC_Gateway_Paypal' ) ) {
-			( new WC_Gateway_Paypal() )->should_load();
+			WC_Gateway_Paypal::get_instance()->should_load();
 		}
 	}
 

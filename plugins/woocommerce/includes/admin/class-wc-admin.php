@@ -298,12 +298,36 @@ class WC_Admin {
 					sprintf( '<strong>%s</strong>', esc_html__( 'WooCommerce', 'woocommerce' ) ),
 					'<a href="https://wordpress.org/support/plugin/woocommerce/reviews?rate=5#new-post" target="_blank" class="wc-rating-link" aria-label="' . esc_attr__( 'five star', 'woocommerce' ) . '" data-rated="' . esc_attr__( 'Thanks :)', 'woocommerce' ) . '">&#9733;&#9733;&#9733;&#9733;&#9733;</a>'
 				);
-				wc_enqueue_js(
-					"jQuery( 'a.wc-rating-link' ).on( 'click', function() {
-						jQuery.post( '" . WC()->ajax_url() . "', { action: 'woocommerce_rated' } );
-						jQuery( this ).parent().text( jQuery( this ).data( 'rated' ) );
-					});"
-				);
+
+				$script = "
+		            (function() {
+		                'use strict';
+		                var ratingLink = document.querySelector('a.wc-rating-link');
+		                if (ratingLink) {
+		                    ratingLink.addEventListener('click', function(e) {
+		                        var link = e.currentTarget;
+		                        var formData = new FormData();
+		                        formData.append('action', 'woocommerce_rated');
+		                        
+		                        fetch('" . esc_js( WC()->ajax_url() ) . "', {
+		                            method: 'POST',
+		                            body: formData,
+		                            credentials: 'same-origin'
+		                        });
+		                        
+		                        var parent = link.parentElement;
+		                        if (parent) {
+		                            parent.textContent = link.getAttribute('data-rated');
+		                        }
+		                    });
+		                }
+		            })();
+		            ";
+
+				$handle = 'wc-admin-footer-rating';
+				wp_register_script( $handle, '', array(), WC_VERSION, true );
+				wp_enqueue_script( $handle );
+				wp_add_inline_script( $handle, $script );
 			} else {
 				$footer_text = __( 'Thank you for selling with WooCommerce.', 'woocommerce' );
 			}
@@ -315,7 +339,7 @@ class WC_Admin {
 	/**
 	 * Update the footer version text.
 	 *
-	 * @since $VID:$
+	 * @since 10.2.0
 	 *
 	 * @param string $version The current version string.
 	 * @return string

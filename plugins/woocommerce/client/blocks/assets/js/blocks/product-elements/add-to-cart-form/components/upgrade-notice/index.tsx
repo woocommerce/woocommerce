@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { createInterpolateElement } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
 import { dispatch, select } from '@wordpress/data';
-import { UpgradeDowngradeNotice as Notice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
+import { UpgradeDowngradeNotice } from '@woocommerce/editor-components/upgrade-downgrade-notice';
 import { findBlock } from '@woocommerce/utils';
 import { createBlock } from '@wordpress/blocks';
 
@@ -44,20 +44,20 @@ export const UpgradeNotice = ( {
 } ) => {
 	const notice = createInterpolateElement(
 		__(
-			'Gain access to more customization options when you upgrade to the <strongText />.',
+			'Upgrade to the <strongText /> for more flexibility. You can switch back anytime.',
 			'woocommerce'
 		),
 		{
 			strongText: (
 				<strong>
-					{ __( `blockified experience`, 'woocommerce' ) }
+					{ __( `Add to Cart + Options block`, 'woocommerce' ) }
 				</strong>
 			),
 		}
 	);
 
 	const buttonLabel = __(
-		'Upgrade to the Add to Cart + Options block',
+		'Use the Add to Cart + Options block',
 		'woocommerce'
 	);
 
@@ -73,12 +73,12 @@ export const UpgradeNotice = ( {
 	};
 
 	return (
-		<Notice
+		<UpgradeDowngradeNotice
 			isDismissible={ false }
 			actionLabel={ buttonLabel }
 			onActionClick={ handleClick }
 		>
 			{ notice }
-		</Notice>
+		</UpgradeDowngradeNotice>
 	);
 };

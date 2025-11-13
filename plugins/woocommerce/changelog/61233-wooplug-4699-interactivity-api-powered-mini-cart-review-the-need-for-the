@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove `Dinero` dependency and use always `raw_prices`

@@ -19,6 +19,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Frontend scripts class.
+ *
+ * These scripts are enqueued in the frontend of the store.  The registered script handles in this class
+ * can be used to enqueue the scripts in the frontend by third party plugins and the handles will follow
+ * WooCommerce's L-1 support policy.  Scripts registered outside of this class do not guarantee support
+ * and can be removed in future versions of WooCommerce.
  */
 class WC_Frontend_Scripts {
 
@@ -50,31 +55,6 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
-		add_action( 'shutdown', array( __CLASS__, 'add_legacy_script_warnings' ) );
-	}
-
-	/**
-	 * Add warnings for deprecated script handles.
-	 */
-	public static function add_legacy_script_warnings() {
-		$scripts = self::get_scripts();
-
-		foreach ( $scripts as $handle => $script ) {
-			if ( ! isset( $script['legacy_handle'] ) ) {
-				continue;
-			}
-
-			$exists = wp_script_is( $script['legacy_handle'] );
-
-			if ( $exists ) {
-				wc_deprecated_argument(
-					'wp_enqueue_script',
-					'10.3.0',
-					/* translators: %1$s: new script handle, %2$s: previous script handle */
-					sprintf( __( 'Please use the new handle %1$s in place of the previous handle %2$s.', 'woocommerce' ), $handle, $script['legacy_handle'] )
-				);
-			}
-		}
 	}
 
 	/**
@@ -300,16 +280,17 @@ class WC_Frontend_Scripts {
 				'version'       => '2.7.0-wc.' . $version,
 				'legacy_handle' => 'jquery-blockui',
 			),
-			'wc-jquery-cookie'           => array( // deprecated.
+			'wc-jquery-cookie'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-cookie/jquery.cookie' . $suffix . '.js' ),
 				'deps'          => array( 'jquery' ),
 				'version'       => '1.4.1-wc.' . $version,
 				'legacy_handle' => 'jquery-cookie',
 			),
 			'wc-jquery-payment'          => array(
-				'src'     => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
-				'deps'    => array( 'jquery' ),
-				'version' => '3.0.0-wc.' . $version,
+				'src'           => self::get_asset_url( 'assets/js/jquery-payment/jquery.payment' . $suffix . '.js' ),
+				'deps'          => array( 'jquery' ),
+				'version'       => '3.0.0-wc.' . $version,
+				'legacy_handle' => 'jquery-payment',
 			),
 			'wc-jquery-tiptip'           => array(
 				'src'           => self::get_asset_url( 'assets/js/jquery-tiptip/jquery.tipTip' . $suffix . '.js' ),
@@ -381,11 +362,19 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$scripts['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
-			'deps'    => array( 'jquery', 'woocommerce', 'wc-dompurify' ),
-			'version' => $version,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$scripts['wc-address-autocomplete-common'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/utils/address-autocomplete-common' . $suffix . '.js' ),
+				'deps'    => array(),
+				'version' => $version,
+			);
+
+			$scripts['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/js/frontend/address-autocomplete' . $suffix . '.js' ),
+				'deps'    => array( 'wc-address-autocomplete-common', 'wc-dompurify' ),
+				'version' => $version,
+			);
+		}
 
 		return $scripts;
 	}
@@ -400,7 +389,7 @@ class WC_Frontend_Scripts {
 			self::register_script( $name, $props['src'], $props['deps'], $props['version'] );
 
 			if ( isset( $props['legacy_handle'] ) ) {
-				self::register_script( $props['legacy_handle'], $props['src'], $props['deps'], $props['version'] );
+				self::register_script( $props['legacy_handle'], false, array( $name ), $props['version'], true );
 			}
 		}
 	}
@@ -438,12 +427,14 @@ class WC_Frontend_Scripts {
 			),
 		);
 
-		$register_styles['wc-address-autocomplete'] = array(
-			'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
-			'deps'    => array(),
-			'version' => $version,
-			'has_rtl' => false,
-		);
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$register_styles['wc-address-autocomplete'] = array(
+				'src'     => self::get_asset_url( 'assets/css/address-autocomplete.css' ),
+				'deps'    => array(),
+				'version' => $version,
+				'has_rtl' => false,
+			);
+		}
 
 		foreach ( $register_styles as $name => $props ) {
 			self::register_style( $name, $props['src'], $props['deps'], $props['version'], 'all', $props['has_rtl'] );
@@ -485,12 +476,16 @@ class WC_Frontend_Scripts {
 			self::enqueue_script( 'wc-checkout' );
 		}
 
-		$address_provider_service = wc_get_container()->get( AddressProviderController::class );
-		if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
-			$registered_providers = $address_provider_service->get_providers();
-			if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
-				self::enqueue_script( 'wc-address-autocomplete' );
-				self::enqueue_style( 'wc-address-autocomplete' );
+		if ( wc_string_to_bool( get_option( 'woocommerce_address_autocomplete_enabled', 'no' ) ) === true ) {
+			$address_provider_service = wc_get_container()->get( AddressProviderController::class );
+			if ( $address_provider_service && method_exists( $address_provider_service, 'get_providers' ) ) {
+				$registered_providers = $address_provider_service->get_providers();
+				if ( is_array( $registered_providers ) && count( $registered_providers ) > 0 ) {
+					// Always enqueue the common module if providers are registered.
+					self::enqueue_script( 'wc-address-autocomplete-common' );
+					self::enqueue_script( 'wc-address-autocomplete' );
+					self::enqueue_style( 'wc-address-autocomplete' );
+				}
 			}
 		}
 
@@ -502,7 +497,7 @@ class WC_Frontend_Scripts {
 		}
 
 		// Load gallery scripts on product pages only if supported.
-		if ( is_product() || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
+		if ( ( is_product() && ! wp_is_block_theme() ) || ( ! empty( $post->post_content ) && strstr( $post->post_content, '[product_page' ) ) ) {
 			if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
 				self::enqueue_script( 'wc-zoom' );
 			}
@@ -658,7 +653,7 @@ class WC_Frontend_Scripts {
 					'i18n_checkout_error'       => sprintf( esc_attr__( 'There was an error processing your order. Please check for any charges in your payment method and review your <a href="%s">order history</a> before placing the order again.', 'woocommerce' ), esc_url( wc_get_account_endpoint_url( 'orders' ) ) ),
 				);
 				break;
-			case 'wc-address-autocomplete':
+			case 'wc-address-autocomplete-common':
 				$providers = array();
 				try {
 					$providers = wc_get_container()->get( AddressProviderController::class )->get_providers();
@@ -681,13 +676,14 @@ class WC_Frontend_Scripts {
 							},
 							$providers
 						),
+						JSON_HEX_TAG | JSON_UNESCAPED_SLASHES
 					),
 				);
 				break;
 			case 'wc-address-i18n':
 				$params = array(
-					'locale'             => wp_json_encode( WC()->countries->get_country_locale() ),
-					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors() ),
+					'locale'             => wp_json_encode( WC()->countries->get_country_locale(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
+					'locale_fields'      => wp_json_encode( WC()->countries->get_country_locale_field_selectors(), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_required_text' => esc_attr__( 'required', 'woocommerce' ),
 					'i18n_optional_text' => esc_html__( 'optional', 'woocommerce' ),
 				);
@@ -734,7 +730,7 @@ class WC_Frontend_Scripts {
 				break;
 			case 'wc-country-select':
 				$params = array(
-					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ) ),
+					'countries'                 => wp_json_encode( array_merge( WC()->countries->get_allowed_country_states(), WC()->countries->get_shipping_country_states() ), JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ),
 					'i18n_select_state_text'    => esc_attr__( 'Select an option&hellip;', 'woocommerce' ),
 					'i18n_no_matches'           => _x( 'No matches found', 'enhanced select', 'woocommerce' ),
 					'i18n_ajax_error'           => _x( 'Loading failed', 'enhanced select', 'woocommerce' ),

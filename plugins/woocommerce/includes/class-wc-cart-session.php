@@ -86,6 +86,8 @@ final class WC_Cart_Session {
 		add_action( 'woocommerce_add_to_cart', array( $this, 'maybe_set_cart_cookies' ) );
 		add_action( 'wp', array( $this, 'maybe_set_cart_cookies' ), 99 );
 		add_action( 'shutdown', array( $this, 'maybe_set_cart_cookies' ), 0 );
+
+		add_action( 'template_redirect', array( $this, 'clean_up_removed_cart_contents' ) );
 	}
 
 	/**
@@ -289,7 +291,7 @@ final class WC_Cart_Session {
 			WC()->session->set( 'cart', empty( $cart_for_session ) ? null : $cart_for_session );
 			$this->cart->calculate_totals();
 
-			if ( $merge_saved_cart ) {
+			if ( $merge_saved_cart || $update_cart_session ) {
 				$this->persistent_cart_update();
 			}
 		}
@@ -317,6 +319,10 @@ final class WC_Cart_Session {
 		$wc_session->set( 'removed_cart_contents', null );
 		$wc_session->set( 'order_awaiting_payment', null );
 		$wc_session->set( 'store_api_draft_order', null );
+		$wc_session->set( 'shipping_method_counts', null );
+		$wc_session->set( 'previous_shipping_methods', null );
+		$wc_session->set( 'chosen_shipping_methods', null );
+		$this->remove_shipping_for_package_from_session();
 	}
 
 	/**
@@ -412,8 +418,14 @@ final class WC_Cart_Session {
 		$wc_session->set( 'coupon_discount_totals', empty( $coupon_discount_totals ) ? null : $coupon_discount_totals );
 		$wc_session->set( 'coupon_discount_tax_totals', empty( $coupon_discount_tax_totals ) ? null : $coupon_discount_tax_totals );
 		$wc_session->set( 'removed_cart_contents', empty( $removed_cart_contents ) ? null : $removed_cart_contents );
+		if ( ! $this->cart_has_shippable_products() ) {
+			$wc_session->set( 'shipping_method_counts', null );
+			$wc_session->set( 'previous_shipping_methods', null );
+			$wc_session->set( 'chosen_shipping_methods', null );
+			$this->remove_shipping_for_package_from_session();
+		}
 		if ( empty( $cart ) ) {
-			$this->remove_draft_order();
+			$wc_session->set( 'store_api_draft_order', null );
 		}
 
 		/**
@@ -650,21 +662,56 @@ final class WC_Cart_Session {
 	}
 
 	/**
-	 * Remove the draft order from the session and delete it.
+	 * Remove shipping data for all packages from session.
+	 *
+	 * @return void
 	 */
-	private function remove_draft_order() {
+	private function remove_shipping_for_package_from_session() {
 		$wc_session = WC()->session;
 
-		$draft_order = $wc_session->get( 'store_api_draft_order' );
-		if ( ! $draft_order ) {
+		if ( ! is_a( $wc_session, 'WC_Session_Handler' ) ) {
 			return;
 		}
 
-		$order = wc_get_order( $draft_order );
-		if ( $order ) {
-			$order->delete( true );
+		foreach ( array_keys( $wc_session->get_session_data() ) as $key ) {
+			if ( 0 === strpos( $key, 'shipping_for_package_' ) ) {
+				$wc_session->set( $key, null );
+			}
+		}
+	}
+
+	/**
+	 * Check if the cart has shippable products.
+	 *
+	 * @return bool
+	 */
+	private function cart_has_shippable_products() {
+		foreach ( $this->cart->get_cart() as $cart_item ) {
+			if ( $cart_item['data']->needs_shipping() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Removes items from the removed cart contents on next user initiated request.
+	 *
+	 * @return bool True if expired items should be removed, false otherwise.
+	 */
+	public function clean_up_removed_cart_contents() {
+		// Limit to page requests initiated by the user.
+		$is_page = is_singular() || is_archive() || is_search();
+		if ( is_404() || ! $is_page ) {
+			return;
 		}
 
-		WC()->session->set( 'store_api_draft_order', null );
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		if ( isset( $_GET['undo_item'] ) ) {
+			return;
+		}
+
+		WC()->session->set( 'removed_cart_contents', null );
+		$this->cart->set_removed_cart_contents( array() );
 	}
 }

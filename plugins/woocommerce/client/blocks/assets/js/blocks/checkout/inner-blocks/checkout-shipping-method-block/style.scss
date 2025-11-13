@@ -27,7 +27,7 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 	gap: 0;
 	cursor: pointer;
 	position: relative; // Add this for pseudo-element positioning
-	padding: $gap-small;
+	padding: $gap-smaller $gap;
 	border-radius: $universal-border-radius;
 	border: 2px solid transparent;
 	background-color: transparent;
@@ -69,15 +69,14 @@ $component-background-hover: color-mix(in srgb, currentColor 12%, transparent);
 
 .wc-block-checkout__shipping-method-option-title {
 	@include reset-typography();
-	@include font-size(regular, 1rem);
-	font-weight: bold;
+	@include font-regular-locked;
 	line-height: 28px; // Match the icon size
 	text-wrap: balance;
 }
 
 .wc-block-checkout__shipping-method-option-price {
 	@include reset-typography();
-	@include font-size(small, 1rem);
+	@include font-small-locked;
 	flex-basis: 100%;
 	text-align: center;
 
