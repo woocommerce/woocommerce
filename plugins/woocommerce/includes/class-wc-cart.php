@@ -133,6 +133,11 @@ class WC_Cart extends WC_Legacy_Cart {
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_items' ), 1 );
 		add_action( 'woocommerce_check_cart_items', array( $this, 'check_cart_coupons' ), 1 );
 		add_action( 'woocommerce_after_checkout_validation', array( $this, 'check_customer_coupons' ), 1, 2 );
+
+		// Auto-apply coupons after cart changes (but not after coupon operations to avoid recursion).
+		add_action( 'woocommerce_add_to_cart', array( $this, 'auto_apply_coupons' ), 30, 0 );
+		add_action( 'woocommerce_cart_item_removed', array( $this, 'auto_apply_coupons' ), 30, 0 );
+		add_action( 'woocommerce_cart_item_restored', array( $this, 'auto_apply_coupons' ), 30, 0 );
 	}
 
 	/**
@@ -2035,6 +2040,100 @@ class WC_Cart extends WC_Legacy_Cart {
 		do_action( 'woocommerce_removed_coupon', $coupon_code );
 
 		return true;
+	}
+
+	/**
+	 * Auto-apply eligible coupons to the cart.
+	 *
+	 * Checks for coupons marked with auto-apply flag and automatically applies
+	 * or removes them based on their validity. Runs silently without notices.
+	 *
+	 * @since 10.4.0
+	 */
+	public function auto_apply_coupons() {
+		if ( $this->is_empty() ) {
+			return;
+		}
+
+		// Silence coupon notices for this operation only.
+		add_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
+		add_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
+
+		// Get all auto-apply coupon codes.
+		$auto_apply_codes = $this->get_auto_apply_coupon_codes();
+
+		foreach ( $auto_apply_codes as $code ) {
+			$coupon = new WC_Coupon( $code );
+
+			// Skip if coupon doesn't exist or isn't marked for auto-apply.
+			if ( ! $coupon->get_id() || ! $coupon->get_auto_apply() ) {
+				continue;
+			}
+
+			$is_valid = $coupon->is_valid();
+
+			// Remove if applied but no longer valid.
+			if ( $this->has_discount( $code ) && ! $is_valid ) {
+				$this->remove_coupon( $code );
+			}
+
+			// Apply if not applied but now valid.
+			if ( ! $this->has_discount( $code ) && $is_valid ) {
+				$this->apply_coupon( $code );
+			}
+		}
+
+		remove_filter( 'woocommerce_coupon_message', '__return_empty_string', PHP_INT_MAX );
+		remove_filter( 'woocommerce_coupon_error', '__return_empty_string', PHP_INT_MAX );
+	}
+
+	/**
+	 * Get auto-apply coupon codes.
+	 *
+	 * Retrieves all published coupon codes that have the auto-apply flag enabled.
+	 * Results are cached for performance.
+	 *
+	 * @since 10.4.0
+	 * @return array Array of auto-apply coupon codes.
+	 */
+	protected function get_auto_apply_coupon_codes() {
+		// Check cache first.
+		$cache_key = 'wc_auto_apply_coupon_codes';
+		$codes     = wp_cache_get( $cache_key, 'coupons' );
+
+		if ( false !== $codes ) {
+			return $codes;
+		}
+
+		global $wpdb;
+
+		// Query directly for coupon codes (post_title) instead of IDs.
+		// This avoids instantiating WC_Coupon objects unnecessarily.
+		$sql = "
+			SELECT p.post_title
+			FROM {$wpdb->posts} p
+			INNER JOIN {$wpdb->postmeta} pm
+				ON pm.post_id = p.ID
+			WHERE p.post_type = 'shop_coupon'
+				AND p.post_status = 'publish'
+				AND pm.meta_key = 'auto_apply'
+				AND pm.meta_value = 'yes'
+			ORDER BY p.post_date DESC
+		";
+
+		$codes = $wpdb->get_col( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( empty( $codes ) ) {
+			$codes = array();
+		}
+
+		// Normalize coupon codes (lowercase, trimmed).
+		$codes = array_map( 'wc_format_coupon_code', array_filter( $codes ) );
+
+		// Cache for 1 hour (or until invalidated on coupon save).
+		wp_cache_set( $cache_key, $codes, 'coupons', HOUR_IN_SECONDS );
+
+		return $codes;
 	}
 
 	/**
