@@ -46,16 +46,32 @@ class MCPAdapterProvider {
 	 * Constructor.
 	 */
 	public function __construct() {
+		// Early exit if MCP adapter class is not available.
+		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->warning(
+					'MCP adapter class not found. Skipping MCP initialization.',
+					array( 'source' => 'woocommerce-mcp' )
+				);
+			}
+			return;
+		}
+
+		// Initialize MCP adapter first to ensure mcp_adapter_init action will be fired.
+		// McpAdapter::instance() sets up the rest_api_init hook that eventually fires mcp_adapter_init.
+		\WP\MCP\Core\McpAdapter::instance();
+
 		/*
-		 * Hook into rest_api_init with priority 10 to initialize only on REST API requests.
-		 * MCP adapter registers on rest_api_init with priority 20000, so we initialize earlier.
-		 * This prevents unnecessary MCP initialization on favicon, cron, or admin requests.
+		 * Hook into mcp_adapter_init to create the WooCommerce MCP server.
+		 * This action is fired by McpAdapter::init() during rest_api_init at priority 15.
 		 */
 		add_action( 'mcp_adapter_init', array( $this, 'maybe_initialize' ), 10 );
 	}
 
 	/**
-	 * Check feature flag and initialize MCP adapter if enabled.
+	 * Check feature flag and initialize MCP server if enabled.
+	 *
+	 * @param object $adapter MCP adapter instance.
 	 */
 	public function maybe_initialize($adapter): void {
 		// Check if MCP integration feature is enabled.
@@ -68,28 +84,8 @@ class MCPAdapterProvider {
 			return;
 		}
 
-		$this->initialize_mcp_adapter();
 		$this->initialize_mcp_server($adapter);
 		$this->initialized = true;
-	}
-
-	/**
-	 * Initialize the MCP adapter.
-	 */
-	private function initialize_mcp_adapter(): void {
-		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer).
-		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->warning(
-					'MCP adapter class not found. Skipping MCP initialization.',
-					array( 'source' => 'woocommerce-mcp' )
-				);
-			}
-			return;
-		}
-
-		// Initialize the MCP adapter instance - this triggers the rest_api_init hook registration.
-		\WP\MCP\Core\McpAdapter::instance();
 	}
 
 	/**
