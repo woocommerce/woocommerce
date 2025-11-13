@@ -114,6 +114,24 @@ class Controller extends AbstractController {
 	}
 
 	/**
+	 * Get shipping zone by ID.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		return rest_ensure_response( $this->prepare_item_for_response( $method, $request ) );
+	}
+
+	/**
 	 * Create a shipping method.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
