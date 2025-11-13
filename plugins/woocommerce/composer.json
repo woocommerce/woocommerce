@@ -66,6 +66,7 @@
 		"johnkary/phpunit-speedtrap": "*",
 		"mockery/mockery": "1.6.6",
 		"phan/phan": "5.5.1",
+		"php-stubs/woocommerce-stubs": "^8.7",
 		"php-stubs/wordpress-stubs": ">=6.7",
 		"php-stubs/wordpress-tests-stubs": ">=6.7",
 		"php-stubs/wp-cli-stubs": "^2.10",

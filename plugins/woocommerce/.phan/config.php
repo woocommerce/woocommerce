@@ -17,17 +17,14 @@ $config = make_phan_config(
 	dirname( __DIR__ ),
 	array(
 		'directory_list'                  => array(
-			'.',
-			'vendor/automattic',
-			'vendor/composer',
-			'vendor/maxmind-db',
-			'vendor/opis',
-			'vendor/woocommerce',
-			'vendor/wordpress',
+			'src/',
+			'includes/',
+			// 'vendor/',
+		),
+		'file_list'                       => array(
+			'woocommerce.php',
 		),
 		'exclude_analysis_directory_list' => array(
-			'vendor/',
-			'.phan/',
 			'tests/',
 			'packages/',
 			'lib/',
@@ -47,6 +44,8 @@ $config = make_phan_config(
 		),
 	)
 );
+// error_log( print_r( $config, true ) );
+// exit;
 
 return $config;
 
