@@ -1064,7 +1064,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await editor.selectBlocks( addToCartFormBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeHidden();
 
 		await page
@@ -1074,7 +1074,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeVisible();
 	} );
 } );
