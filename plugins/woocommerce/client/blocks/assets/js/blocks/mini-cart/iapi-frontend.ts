@@ -107,7 +107,7 @@ type ItemData = {
 	value?: string | undefined;
 	display?: string;
 	attribute?: string;
-	hidden?: boolean | string;
+	hidden?: boolean | string | number;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type CartItemDataAttr = {
@@ -838,7 +838,11 @@ const { state: cartItemState } = store(
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: hiddenValue === true || hiddenValue === '1',
+					hidden:
+						hiddenValue === true ||
+						hiddenValue === 'true' ||
+						hiddenValue === '1' ||
+						hiddenValue === 1,
 				};
 			},
 
