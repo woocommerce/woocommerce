@@ -7,8 +7,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\Config\CouponsConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\CustomersConfig;
 use Automattic\WooCommerce\Internal\Abilities\Config\OrdersConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\PaymentGatewaysConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ProductAttributesConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ProductCategoriesConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ProductReviewsConfig;
 use Automattic\WooCommerce\Internal\Abilities\Config\ProductsConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ProductTagsConfig;
+use Automattic\WooCommerce\Internal\Abilities\Config\ShippingZonesConfig;
 use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 
@@ -38,8 +46,16 @@ class AbilitiesRestBridge {
 	 */
 	private static function get_configurations(): array {
 		return array(
-			ProductsConfig::get_config(),
+			CouponsConfig::get_config(),
+			CustomersConfig::get_config(),
 			OrdersConfig::get_config(),
+			PaymentGatewaysConfig::get_config(),
+			ProductAttributesConfig::get_config(),
+			ProductCategoriesConfig::get_config(),
+			ProductReviewsConfig::get_config(),
+			ProductsConfig::get_config(),
+			ProductTagsConfig::get_config(),
+			ShippingZonesConfig::get_config(),
 		);
 	}
 
