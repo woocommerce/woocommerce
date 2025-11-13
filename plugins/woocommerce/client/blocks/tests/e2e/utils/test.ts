@@ -130,9 +130,13 @@ const test = base.extend<
 		await use( page );
 
 		// Clear local storage after each test.
-		await page.evaluate( () => {
-			window.localStorage.clear();
-		} );
+		try {
+			await page.evaluate( () => {
+				window.localStorage.clear();
+			} );
+		} catch ( error ) {
+			// Ignore errors if page is already closed/navigated away
+		}
 
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
