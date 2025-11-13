@@ -94,8 +94,9 @@ class Utils {
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
 
-			// A child product ID indicates a grouped product.
-			$input_quantity = $child_product_id ? 0 : $product->get_min_purchase_quantity();
+			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
+			// A child product ID indicates a grouped product. If we can't find product or child product for "some reason" default to 1.
+			$input_quantity = $child_product_id ? 0 : $default_quantity;
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
