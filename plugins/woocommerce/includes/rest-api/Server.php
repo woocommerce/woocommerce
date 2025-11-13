@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\OfflinePaymentMet
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Controller as GeneralSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Email\Controller as EmailSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as TaxSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 
 /**
@@ -243,6 +244,7 @@ class Server {
 			'settings-email'            => EmailSettingsController::class,
 			'settings-products'         => SettingsProductsController::class,
 			'settings-payment-gateways' => PaymentGatewaysController::class,
+			'settings-tax'              => TaxSettingsController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);
