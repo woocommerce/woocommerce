@@ -265,27 +265,6 @@ $fontSizes: (
 	}
 }
 
-// Shows a border with the current color and a custom opacity. That can't be achieved
-// with normal border because `currentColor` doesn't allow tweaking the opacity, and
-// setting the opacity of the entire element would change the children's opacity too.
-@mixin with-translucent-border($border-width: 1px, $opacity: 0.3) {
-	position: relative;
-
-	&::after {
-		border-style: solid;
-		border-width: $border-width;
-		bottom: 0;
-		content: "";
-		display: block;
-		left: 0;
-		opacity: $opacity;
-		pointer-events: none;
-		position: absolute;
-		right: 0;
-		top: 0;
-	}
-}
-
 // Positions an element absolutely and stretches it over the container
 @mixin absolute-stretch() {
 	margin: 0;
