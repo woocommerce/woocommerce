@@ -15,10 +15,10 @@ interface LocalPickupSelectProps {
 	renderPickupLocation: (
 		location: CartShippingPackageShippingRate,
 		pickupLocationsCount: number,
-		// This arg signals that the rate is selected in the _client_ (not necessarily the selected shipping rate on the server, yet)
+		// This is the ID of the rate that is selected in the _client_ (not necessarily the selected shipping rate on the server, yet)
 		// If the server returns a cart with a different selected shipping rate, then after "receiving" the updated cart (`receiveCart`)
-		// this arg, `isSelectedInClient`, will be true for that rate, and the UI will update.
-		isSelectedInClient?: boolean
+		// this arg, `clientSelectedOption`, will change to be the ID for that rate, and the UI will update.
+		clientSelectedOption?: string
 	) => RadioControlOptionType;
 	packageCount: number;
 	onChange: ( value: string ) => void;
@@ -54,7 +54,7 @@ export const LocalPickupSelect = ( {
 					renderPickupLocation(
 						location,
 						packageCount,
-						selectedOption === location.rate_id
+						selectedOption
 					)
 				) }
 			/>

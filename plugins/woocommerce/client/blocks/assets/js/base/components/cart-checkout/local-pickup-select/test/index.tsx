@@ -96,16 +96,16 @@ describe( 'LocalPickupSelect', () => {
 			<LocalPickupSelect
 				title="Package 1"
 				onChange={ jest.fn() }
-				selectedOption="2"
+				selectedOption="store_2"
 				pickupLocations={ [
 					generateShippingRate( {
-						rateId: '1',
+						rateId: 'store_1',
 						name: 'Store 1',
 						instanceID: 1,
 						price: '0',
 					} ),
 					generateShippingRate( {
-						rateId: '2',
+						rateId: 'store_2',
 						name: 'Store 2',
 						instanceID: 1,
 						price: '0',
@@ -123,35 +123,35 @@ describe( 'LocalPickupSelect', () => {
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			1,
 			expect.objectContaining( {
-				rate_id: '1',
+				rate_id: 'store_1',
 				name: 'Store 1',
 			} ),
 			1, // packageCount
-			false // isSelectedInClient (location.rate_id '1' !== selectedOption '2')
+			'store_2' // gets the currently selected option.
 		);
 
 		// Second location: selected
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			2,
 			expect.objectContaining( {
-				rate_id: '2',
+				rate_id: 'store_2',
 				name: 'Store 2',
 			} ),
 			1, // packageCount
-			true // isSelectedInClient (location.rate_id '2' === selectedOption '2')
+			'store_2' // gets the currently selected option.
 		);
 	} );
 	it( 'Updates isSelectedInClient parameter when selection changes', () => {
 		renderPickupLocationMock.mockClear();
 		const pickupLocations = [
 			generateShippingRate( {
-				rateId: '1',
+				rateId: 'store_1',
 				name: 'Store 1',
 				instanceID: 1,
 				price: '0',
 			} ),
 			generateShippingRate( {
-				rateId: '2',
+				rateId: 'store_2',
 				name: 'Store 2',
 				instanceID: 1,
 				price: '0',
@@ -162,7 +162,7 @@ describe( 'LocalPickupSelect', () => {
 			<LocalPickupSelect
 				title="Package 1"
 				onChange={ jest.fn() }
-				selectedOption="1"
+				selectedOption="store_1"
 				pickupLocations={ pickupLocations }
 				packageCount={ 1 }
 				renderPickupLocation={ renderPickupLocationMock }
@@ -173,15 +173,15 @@ describe( 'LocalPickupSelect', () => {
 		expect( renderPickupLocationMock ).toHaveBeenCalledTimes( 2 );
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			1,
-			expect.objectContaining( { rate_id: '1' } ),
+			expect.objectContaining( { rate_id: 'store_1' } ),
 			1,
-			true // Store 1 is selected
+			'store_1' // Store 1 is selected
 		);
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			2,
-			expect.objectContaining( { rate_id: '2' } ),
+			expect.objectContaining( { rate_id: 'store_2' } ),
 			1,
-			false // Store 2 is not selected
+			'store_1' // Store 2 is not selected
 		);
 
 		// Clear mock and rerender with different selection
@@ -190,7 +190,7 @@ describe( 'LocalPickupSelect', () => {
 			<LocalPickupSelect
 				title="Package 1"
 				onChange={ jest.fn() }
-				selectedOption="2"
+				selectedOption="store_2"
 				pickupLocations={ pickupLocations }
 				packageCount={ 1 }
 				renderPickupLocation={ renderPickupLocationMock }
@@ -201,15 +201,15 @@ describe( 'LocalPickupSelect', () => {
 		expect( renderPickupLocationMock ).toHaveBeenCalledTimes( 2 );
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			1,
-			expect.objectContaining( { rate_id: '1' } ),
+			expect.objectContaining( { rate_id: 'store_1' } ),
 			1,
-			false // Store 1 is not selected
+			'store_2' // Store 1 is not selected
 		);
 		expect( renderPickupLocationMock ).toHaveBeenNthCalledWith(
 			2,
-			expect.objectContaining( { rate_id: '2' } ),
+			expect.objectContaining( { rate_id: 'store_2' } ),
 			1,
-			true // Store 2 is selected
+			'store_2' // Store 2 is selected
 		);
 	} );
 } );
