@@ -83,10 +83,24 @@ class Controller extends AbstractController {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
 				'methods'             => WP_REST_Server::EDITABLE,
 				'callback'            => array( $this, 'update_item' ),
 				'permission_callback' => array( $this, 'check_permissions' ),
 				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				)
 			)
 		);
 	}
@@ -114,7 +128,7 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Get shipping zone by ID.
+	 * Get shipping zone method by ID.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
