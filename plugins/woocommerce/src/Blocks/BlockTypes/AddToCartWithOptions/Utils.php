@@ -80,7 +80,7 @@ class Utils {
 	 * @param string   $quantity_html The quantity HTML.
 	 * @param array    $wrapper_attributes Optional wrapper attributes.
 	 * @param array    $input_attributes Optional input attributes.
-	 * @param int|null $child_product_id Optional child product ID.
+	 * @param int|null $child_product_id Optional child product ID. Used in the case of grouped products.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
@@ -94,7 +94,8 @@ class Utils {
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
 
-			$input_quantity = $product->is_type( ProductType::GROUPED ) ? 0 : $product->get_min_purchase_quantity();
+			// A child product ID indicates a grouped product.
+			$input_quantity = $child_product_id ? 0 : $product->get_min_purchase_quantity();
 
 			wp_interactivity_state(
 				'woocommerce/add-to-cart-with-options-quantity-selector',
