@@ -107,7 +107,7 @@ type ItemData = {
 	value?: string | undefined;
 	display?: string;
 	attribute?: string;
-	hidden?: boolean;
+	hidden?: boolean | string;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
 
 type CartItemDataAttr = {
@@ -828,6 +828,7 @@ const { state: cartItemState } = store(
 				valueTxt.innerHTML = rawValue;
 
 				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
+				const hiddenValue = dataItemAttr.hidden;
 
 				return {
 					name: processedName,
@@ -837,14 +838,14 @@ const { state: cartItemState } = store(
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: !!dataItemAttr.hidden,
+					hidden: hiddenValue === true || hiddenValue === '1',
 				};
 			},
 
 			get cartItemDataAttrHidden(): boolean {
 				return (
 					cartItemState.cartItemDataAttr === null ||
-					!!cartItemState.cartItemDataAttr?.hidden
+					!! cartItemState.cartItemDataAttr?.hidden
 				);
 			},
 
