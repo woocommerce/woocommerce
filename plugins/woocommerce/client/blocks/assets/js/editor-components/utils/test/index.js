@@ -74,4 +74,46 @@ describe( 'getProducts', () => {
 			} )
 		);
 	} );
+
+	test( 'large catalog: should paginate selected products when necessary', async () => {
+		blocksConfig.productCount = 500; // large catalog
+
+		apiFetch
+			.mockResolvedValueOnce( [
+				{ id: 1, name: 'shirt' },
+				{ id: 2, name: 'pants' },
+			] )
+			.mockResolvedValueOnce( [
+				{ id: 10, name: 'Special product' },
+				{ id: 11, name: 'Other product' },
+			] );
+
+		await getProducts( {
+			search: 'shirt',
+			selected: Array.from( { length: 101 }, ( _, i ) => i + 10 ),
+		} );
+
+		// Two requests will have been made, one for the main search and two for each selected product page.
+		expect( apiFetch ).toHaveBeenCalledTimes( 3 );
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: expect.stringContaining( 'exclude%5B0%5D=10' ),
+			} )
+		);
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: expect.stringContaining( 'include%5B0%5D=10' ),
+			} )
+		);
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: expect.stringContaining( 'page=1' ),
+			} )
+		);
+		expect( apiFetch ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				path: expect.stringContaining( 'page=2' ),
+			} )
+		);
+	} );
 } );
