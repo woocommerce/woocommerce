@@ -86,11 +86,23 @@ class Utils {
 	 */
 	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $child_product_id = null ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+		global $product;
+
 		if (
 			$processor->next_tag( 'input' ) &&
 			$processor->get_attribute( 'type' ) === 'number' &&
 			strpos( $processor->get_attribute( 'name' ), 'quantity' ) !== false
 		) {
+
+			$input_quantity = $product->is_type( ProductType::GROUPED ) ? 0 : $product->get_min_purchase_quantity();
+
+			wp_interactivity_state(
+				'woocommerce/add-to-cart-with-options-quantity-selector',
+				array(
+					'inputQuantity' => $input_quantity,
+				)
+			);
+
 			$processor->set_attribute( 'data-wp-on--blur', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.handleQuantityBlur' );
 			$processor->set_attribute( 'data-wp-bind--value', 'woocommerce/add-to-cart-with-options-quantity-selector::state.inputQuantity' );
 			$processor->set_attribute( 'data-wp-on--input', 'woocommerce/add-to-cart-with-options-quantity-selector::actions.storeDraftValue' );
@@ -107,8 +119,6 @@ class Utils {
 			),
 			$wrapper_attributes
 		);
-
-		global $product;
 
 		$context_attribute = wp_interactivity_data_wp_context(
 			array(
