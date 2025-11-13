@@ -110,8 +110,8 @@ const handlers = [
 		return HttpResponse.json( mockProduct );
 	} ),
 
-	// Once the `@wordpress/data` package used in tests is updated to 6.7, this
-	// request will match the path in production:
+	// @todo When updating the `@wordpress/data` package to 6.7 or later,
+	// this request will need to be updated to match the path in production:
 	// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
 	http.options( '/wp/v2/[object%20Object]', () => {
 		return HttpResponse.json(
@@ -293,8 +293,8 @@ describe( 'Add to Cart + Options block', () => {
 
 	it( 'should render the placeholder when viewed as a user without permissions to edit template parts', async () => {
 		server.use(
-			// Once the `@wordpress/data` package used in tests is updated to 6.7,
-			// this request will match the path in production:
+			// @todo When updating the `@wordpress/data` package to 6.7 or later,
+			// this request will need to be updated to match the path in production:
 			// `/wp/v2/template-parts/woocommerce/woocommerce//<template-part-slug>`.
 			http.options( '/wp/v2/[object%20Object]', () => {
 				return HttpResponse.json(
