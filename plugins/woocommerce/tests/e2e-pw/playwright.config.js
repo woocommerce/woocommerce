@@ -39,6 +39,13 @@ const reporter = [
 		},
 	],
 	[
+		'playwright-ctrf-json-reporter',
+		{
+			outputDir: `${ TESTS_ROOT_PATH }/test-results`,
+			outputFile: `ctrf-report-${ Date.now() }.json`,
+		},
+	],
+	[
 		`${ TESTS_ROOT_PATH }/reporters/environment-reporter.js`,
 		{ outputFolder: `${ TESTS_ROOT_PATH }/test-results/allure-results` },
 	],
