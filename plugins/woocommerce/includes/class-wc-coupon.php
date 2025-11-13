@@ -52,6 +52,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'email_restrictions'          => array(),
 		'used_by'                     => array(),
 		'virtual'                     => false,
+		'auto_apply'                  => false,
 	);
 
 	// Coupon message codes.
@@ -463,6 +464,17 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	}
 
 	/**
+	 * Get whether the coupon should be automatically applied.
+	 *
+	 * @since 10.4.0
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return bool
+	 */
+	public function get_auto_apply( $context = 'view' ) {
+		return $this->get_prop( 'auto_apply', $context );
+	}
+
+	/**
 	 * If the filter is added through the woocommerce_get_shop_coupon_data filter, it's virtual and not in the DB.
 	 *
 	 * @since 3.2.0
@@ -749,6 +761,16 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_exclude_sale_items( $exclude_sale_items ) {
 		$this->set_prop( 'exclude_sale_items', (bool) $exclude_sale_items );
+	}
+
+	/**
+	 * Set if this coupon should be automatically applied.
+	 *
+	 * @since 10.4.0
+	 * @param bool $auto_apply If should auto-apply.
+	 */
+	public function set_auto_apply( $auto_apply ) {
+		$this->set_prop( 'auto_apply', (bool) $auto_apply );
 	}
 
 	/**

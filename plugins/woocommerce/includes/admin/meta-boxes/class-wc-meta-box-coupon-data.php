@@ -110,6 +110,16 @@ class WC_Meta_Box_Coupon_Data {
 					);
 				}
 
+				// Auto apply.
+				woocommerce_wp_checkbox(
+					array(
+						'id'          => 'auto_apply',
+						'label'       => __( 'Apply coupon automatically', 'woocommerce' ),
+						'description' => __( 'Check this box to automatically apply this coupon to the cart when conditions are met. The coupon will be silently added or removed based on cart validation.', 'woocommerce' ),
+						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
+					)
+				);
+
 				// Expiry date.
 				$expiry_date = $coupon->get_date_expires( 'edit' ) ? $coupon->get_date_expires( 'edit' )->date( 'Y-m-d' ) : '';
 				woocommerce_wp_text_input(
@@ -386,6 +396,7 @@ class WC_Meta_Box_Coupon_Data {
 				'minimum_amount'              => wc_format_decimal( $_POST['minimum_amount'] ),
 				'maximum_amount'              => wc_format_decimal( $_POST['maximum_amount'] ),
 				'email_restrictions'          => array_filter( array_map( 'trim', explode( ',', wc_clean( $_POST['customer_email'] ) ) ) ),
+				'auto_apply'                  => isset( $_POST['auto_apply'] ),
 			)
 		);
 

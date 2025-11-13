@@ -49,6 +49,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 		'minimum_amount',
 		'maximum_amount',
 		'customer_email',
+		'auto_apply',
 		'_used_by',
 		'_edit_lock',
 		'_edit_last',
@@ -145,6 +146,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				'maximum_amount'              => get_post_meta( $coupon_id, 'maximum_amount', true ),
 				'email_restrictions'          => array_filter( (array) get_post_meta( $coupon_id, 'customer_email', true ) ),
 				'used_by'                     => array_filter( (array) get_post_meta( $coupon_id, '_used_by' ) ),
+				'auto_apply'                  => 'yes' === get_post_meta( $coupon_id, 'auto_apply', true ),
 			)
 		);
 		$coupon->read_meta_data();
@@ -282,6 +284,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			'minimum_amount'             => 'minimum_amount',
 			'maximum_amount'             => 'maximum_amount',
 			'customer_email'             => 'email_restrictions',
+			'auto_apply'                 => 'auto_apply',
 		);
 
 		$props_to_update = $this->get_props_to_update( $coupon, $meta_key_to_props );
@@ -292,6 +295,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				case 'individual_use':
 				case 'free_shipping':
 				case 'exclude_sale_items':
+				case 'auto_apply':
 					$value = wc_bool_to_string( $value );
 					break;
 				case 'product_ids':
