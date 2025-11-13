@@ -84,13 +84,10 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			<div class="wc-block-mini-cart__footer-actions">
 				<?php
 					if ( empty( $content ) ) {
+						$cart_button_block     = parse_blocks( '<!-- wp:woocommerce/mini-cart-cart-button-block /-->' )[0];
+						$checkout_button_block = parse_blocks( '<!-- wp:woocommerce/mini-cart-checkout-button-block /-->' )[0];
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-						echo render_block( [
-								'blockName' => 'woocommerce/mini-cart-cart-button-block',
-							] ) 
-							. render_block( [
-								'blockName' => 'woocommerce/mini-cart-checkout-button-block',
-							] );
+						echo render_block( $cart_button_block ) . render_block( $checkout_button_block );
 					} else {
 						// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 						echo $content;
