@@ -1,0 +1,5 @@
+Significance: minor
+Type: add
+
+Introduce a coupon code block with inspector search to insert existing WooCommerce coupons in email templates.
+
