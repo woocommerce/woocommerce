@@ -270,15 +270,8 @@ class WCAdminAssets {
 	private function modify_script_dependencies( $dependencies, $script ) {
 		switch ( $script ) {
 			case WC_ADMIN_APP:
-				// Remove wp-editor dependency if we're not on a customize store page since we don't use wp-editor in other pages.
-				$is_customize_store_page = (
-					PageController::is_admin_page() &&
-					isset( $_GET['path'] ) && // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-					str_starts_with( wc_clean( wp_unslash( $_GET['path'] ) ), '/customize-store' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-				);
-				if ( ! $is_customize_store_page ) {
-					$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
-				}
+				// Remove wp-editor dependency since we no longer use it in admin pages.
+				$dependencies = array_diff( $dependencies, array( 'wp-editor' ) );
 
 				// Remove product editor dependency from WC_ADMIN_APP when feature is disabled.
 				if ( ! FeaturesUtil::feature_is_enabled( 'product_block_editor' ) ) {
