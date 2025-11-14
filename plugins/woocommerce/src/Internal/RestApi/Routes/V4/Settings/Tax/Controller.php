@@ -241,6 +241,7 @@ class Controller extends AbstractController {
 			return true;
 		}
 
+		// phpcs:ignore Generic.Commenting.Todo.TaskFound
 		// @todo Fix ciab-next plugin's settings transformation.
 		// The ciab-next plugin filters 'woocommerce_tax_settings' and transforms options from the simple
 		// WooCommerce format to a structured format, also clearing out the 'title' field. This causes
