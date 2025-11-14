@@ -291,10 +291,9 @@ class AccountSettingsSchema extends AbstractSchema {
 					return array();
 				}
 				return array_map( 'sanitize_text_field', $value );
-			case 'text':
-				return sanitize_text_field( $value );
 			case 'textarea':
 				return sanitize_textarea_field( $value );
+			case 'text':	
 			case 'select':
 			default:
 				return sanitize_text_field( $value );
