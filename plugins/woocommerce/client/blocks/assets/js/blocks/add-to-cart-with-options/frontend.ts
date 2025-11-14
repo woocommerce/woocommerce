@@ -143,6 +143,11 @@ export const getNewQuantity = (
 	return currentQuantity + quantity;
 };
 
+type SetQuantityOptions = Partial< {
+	changeTarget: HTMLInputElement;
+	forceUpdate: boolean;
+} >;
+
 export type AddToCartWithOptionsStore = {
 	state: {
 		noticeIds: string[];
@@ -158,7 +163,7 @@ export type AddToCartWithOptionsStore = {
 		setQuantity: (
 			productId: number,
 			value: number,
-			changeTarget?: HTMLInputElement
+			options?: SetQuantityOptions
 		) => void;
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
@@ -195,7 +200,7 @@ const { actions, state } = store<
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
-				return context.quantity || {};
+				return context.quantity;
 			},
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
@@ -244,7 +249,7 @@ const { actions, state } = store<
 			setQuantity(
 				productId: number,
 				value: number,
-				changeTarget?: HTMLInputElement
+				options: SetQuantityOptions = {}
 			) {
 				const context = getContext< Context >();
 				const { products } = getConfig(
@@ -259,9 +264,26 @@ const { actions, state } = store<
 					const idsToUpdate = [ productId, ...variationIds ];
 
 					idsToUpdate.forEach( ( id ) => {
+						if ( options?.forceUpdate ) {
+							// Null the value first before setting the real value to ensure that
+							// a signal update happens.
+							context.quantity[ Number( id ) ] = null;
+						}
+
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
+					if ( options?.forceUpdate ) {
+						// Null the value first before setting the real value to ensure that
+						// a signal update happens.
+						context.quantity = {
+							...context.quantity,
+							[ productId ]: null,
+						};
+
+						console.log( context.quantity );
+					}
+
 					context.quantity = {
 						...context.quantity,
 						[ productId ]: value,
@@ -274,8 +296,8 @@ const { actions, state } = store<
 					actions.validateQuantity( productId, value );
 				}
 
-				if ( changeTarget ) {
-					dispatchChangeEvent( changeTarget );
+				if ( options?.changeTarget ) {
+					dispatchChangeEvent( options.changeTarget );
 				}
 			},
 			addError: ( error: AddToCartError ): string => {

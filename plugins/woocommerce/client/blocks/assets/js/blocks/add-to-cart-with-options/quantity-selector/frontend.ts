@@ -34,9 +34,6 @@ export type QuantitySelectorStore = {
 		draftQuantities: Record< number, number | string | null >;
 	};
 	actions: {
-		storeDraftValue: (
-			event: HTMLElementEvent< HTMLInputElement >
-		) => void;
 		increaseQuantity: (
 			event: HTMLElementEvent< HTMLButtonElement >
 		) => void;
@@ -56,7 +53,6 @@ const { state } = store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
-			draftQuantities: {},
 			get allowsQuantityChange(): boolean {
 				const { productData } = addToCartWithOptionsStore.state;
 
@@ -112,37 +108,13 @@ const { state } = store< QuantitySelectorStore >(
 
 				return currentQuantity + step <= max;
 			},
-			get inputQuantity(): number | string | null {
+			get inputQuantity(): number {
 				const { productId } = getContext< Context >();
 
-				return (
-					state.draftQuantities[ productId ] ??
-					( addToCartWithOptionsStore.state.quantity?.[ productId ] ||
-						0 )
-				);
+				return addToCartWithOptionsStore.state.quantity?.[ productId ];
 			},
 		},
 		actions: {
-			// Hold a draft value in state to allow a non-committed intermediate state of the input.
-			storeDraftValue: (
-				event: HTMLElementEvent< HTMLInputElement >
-			) => {
-				const { productId } = getContext< Context >();
-				const { value } = event.target;
-
-				if ( value === '' ) {
-					state.draftQuantities[ productId ] = '';
-					return;
-				}
-
-				const numericValue = Number( value );
-
-				state.draftQuantities[ productId ] =
-					Number.isNaN( numericValue ) ||
-					String( numericValue ) !== value
-						? value
-						: numericValue;
-			},
 			increaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
 			) => {
@@ -173,9 +145,8 @@ const { state } = store< QuantitySelectorStore >(
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue,
-					inputElement
+					{ changeTarget: inputElement }
 				);
-				delete state.draftQuantities[ productId ];
 			},
 			decreaseQuantity: (
 				event: HTMLElementEvent< HTMLButtonElement >
@@ -229,9 +200,8 @@ const { state } = store< QuantitySelectorStore >(
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						newValue,
-						inputElement
+						{ changeTarget: inputElement }
 					);
-					delete state.draftQuantities[ productId ];
 				}
 			},
 			// We need to listen to blur events instead of change events because
@@ -243,6 +213,8 @@ const { state } = store< QuantitySelectorStore >(
 				const { productData, selectedAttributes } =
 					addToCartWithOptionsStore.state;
 				let min = 1;
+
+				const isNaN = Number.isNaN( event.target.valueAsNumber );
 
 				if ( ! productData ) {
 					return;
@@ -256,12 +228,15 @@ const { state } = store< QuantitySelectorStore >(
 						event.target.valueAsNumber === 0 ) &&
 					productData.type === 'grouped'
 				) {
+					console.log( 'grouped forcing update: ', isNaN );
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						0,
-						event.target
+						{
+							changeTarget: event.target,
+							forceUpdate: isNaN,
+						}
 					);
-					delete state.draftQuantities[ productId ];
 					return;
 				}
 
@@ -287,9 +262,8 @@ const { state } = store< QuantitySelectorStore >(
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue,
-					event.target
+					{ changeTarget: event.target, forceUpdate: isNaN }
 				);
-				delete state.draftQuantities[ productId ];
 			},
 			handleQuantityCheckboxChange: () => {
 				const element = getElement();
@@ -304,7 +278,6 @@ const { state } = store< QuantitySelectorStore >(
 					productId,
 					element.ref.checked ? 1 : 0
 				);
-				delete state.draftQuantities[ productId ];
 			},
 		},
 	},
