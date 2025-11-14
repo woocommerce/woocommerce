@@ -35,36 +35,15 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		$this->initializer = $this->di_container->get( Initializer::class );
 		$this->initializer->initialize();
 
-		// Manually trigger block settings update for core/post-content
-		// This simulates what the block_type_metadata_settings filter does in Bootstrap.
+		// Manually swap the core/post-content render callback to simulate email rendering.
+		// In production, this is done by Content_Renderer::initialize() when rendering emails.
 		$registry   = \WP_Block_Type_Registry::get_instance();
 		$block_type = $registry->get_registered( 'core/post-content' );
 		if ( $block_type ) {
-			$settings                    = (array) $block_type;
-			$settings['name']            = 'core/post-content';
-			$updated_settings            = $this->initializer->update_block_settings( $settings );
-			$block_type->render_callback = $updated_settings['render_callback'] ?? null;
+			// Replace with our stateless renderer.
+			$post_content_renderer       = new Post_Content();
+			$block_type->render_callback = array( $post_content_renderer, 'render_stateless' );
 		}
-
-		// Simulate email rendering context by adding the email-specific filter.
-		// This ensures the Post_Content renderer uses its custom stateless logic instead
-		// of delegating to WordPress's default render_block_core_post_content().
-		// Use a passthrough function that maintains data fidelity.
-		add_filter(
-			'woocommerce_email_blocks_renderer_parsed_blocks',
-			function ( $parsed_blocks ) {
-				return $parsed_blocks;
-			}
-		);
-	}
-
-	/**
-	 * Tear down after each test
-	 */
-	public function tearDown(): void {
-		// Remove all hooks on the email rendering context filter.
-		remove_all_filters( 'woocommerce_email_blocks_renderer_parsed_blocks' );
-		parent::tearDown();
 	}
 
 	/**
@@ -282,55 +261,5 @@ class Post_Content_Test extends \Email_Editor_Integration_Test_Case {
 		// Clean up.
 		wp_delete_post( $post_id, true );
 		wp_delete_post( $original_post_id, true );
-	}
-
-	/**
-	 * Test that the renderer detects non-email context correctly.
-	 *
-	 * This ensures compatibility with other plugins (e.g., MailPoet) that render post content
-	 * outside of the email editor context. We verify that the context detection works,
-	 * even though WordPress's default renderer may not work in test environment.
-	 */
-	public function testItDetectsNonEmailContextCorrectly(): void {
-		// Remove all filters to simulate non-email context.
-		remove_all_filters( 'woocommerce_email_blocks_renderer_parsed_blocks' );
-
-		// Verify the email rendering filter is not present.
-		$this->assertFalse(
-			has_filter( 'woocommerce_email_blocks_renderer_parsed_blocks' ),
-			'Email rendering filter should not be present in non-email context'
-		);
-
-		// Create a test post.
-		$post_id = wp_insert_post(
-			array(
-				'post_title'   => 'Test Post Content',
-				'post_content' => '<!-- wp:paragraph --><p>This is regular post content.</p><!-- /wp:paragraph -->',
-				'post_status'  => 'publish',
-				'post_type'    => 'post',
-			)
-		);
-
-		$this->assertNotWPError( $post_id, 'Failed to create test post' );
-
-		// Get the block type and verify it has our custom renderer.
-		$registry   = \WP_Block_Type_Registry::get_instance();
-		$block_type = $registry->get_registered( 'core/post-content' );
-
-		$this->assertNotNull( $block_type, 'core/post-content block type should be registered' );
-		$this->assertIsCallable( $block_type->render_callback, 'Render callback should be callable' );
-		$this->assertIsArray( $block_type->render_callback, 'Render callback should be an array (object method)' );
-		$this->assertInstanceOf( Post_Content::class, $block_type->render_callback[0], 'Render callback should be from Post_Content class' );
-
-		// Verify that WordPress's default function exists for delegation.
-		$this->assertTrue(
-			function_exists( 'render_block_core_post_content' ),
-			'WordPress default render_block_core_post_content should exist for delegation'
-		);
-
-		// Clean up.
-		wp_delete_post( $post_id, true );
-
-		// Note: tearDown() will handle re-adding the filter for subsequent tests.
 	}
 }

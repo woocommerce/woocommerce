@@ -32,9 +32,9 @@ class Post_Content {
 	 * - Uses direct post content access instead of get_the_content()
 	 * - Properly backs up and restores global state
 	 *
-	 * IMPORTANT: This renderer only applies custom logic when rendering emails.
-	 * For regular WordPress post rendering (e.g., frontend, other plugins),
-	 * it delegates to WordPress's default render_block_core_post_content().
+	 * IMPORTANT: This method is only set as the render_callback during email rendering.
+	 * Outside of email rendering, the original callback is restored, so this method
+	 * will never be called in non-email contexts.
 	 *
 	 * @param array     $attributes Block attributes.
 	 * @param string    $content    Block content.
@@ -42,23 +42,7 @@ class Post_Content {
 	 * @return string Rendered post content HTML.
 	 */
 	public function render_stateless( $attributes, $content, $block ): string {
-		// Only use custom stateless logic when rendering emails.
-		// Check if we're in an email rendering context by checking for the
-		// 'woocommerce_email_blocks_renderer_parsed_blocks' filter which is only
-		// active during email rendering (added by Content_Renderer::initialize()).
-		$is_email_rendering = has_filter( 'woocommerce_email_blocks_renderer_parsed_blocks' ) !== false;
-
-		if ( ! $is_email_rendering ) {
-			// Not rendering an email - delegate to WordPress's default implementation
-			// to avoid breaking other plugins (e.g., MailPoet subscription forms).
-			if ( function_exists( 'render_block_core_post_content' ) ) {
-				return render_block_core_post_content( $attributes, $content, $block );
-			}
-			// Fallback if WordPress function doesn't exist (shouldn't happen).
-			return $content;
-		}
-
-		// We're rendering an email - use stateless logic.
+		// This method is only called during email rendering, so we always use stateless logic.
 		$post_id = $block->context['postId'] ?? null;
 
 		if ( ! $post_id ) {
