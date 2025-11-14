@@ -147,11 +147,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first.
-		$this->assertEquals(
-			200,
-			$response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
-		);
+		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
 
@@ -200,11 +196,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first.
-		$this->assertEquals(
-			200,
-			$response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
-		);
+		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
 
@@ -259,11 +251,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first.
-		$this->assertEquals(
-			200,
-			$response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
-		);
+		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
 
@@ -402,11 +390,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first.
-		$this->assertEquals(
-			200,
-			$response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
-		);
+		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
 
