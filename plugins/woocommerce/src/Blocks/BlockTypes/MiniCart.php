@@ -234,18 +234,9 @@ class MiniCart extends AbstractBlock {
 			 */
 			do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
 
-			// Register the React bridge script (for lazy loading), but don't enqueue it eagerly.
 			$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
 			$this->asset_api->register_script( 'wc-mini-cart-iapi-react-bridge', 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
-
-			// Enqueue the bridge's dependencies so they're available when the bridge is lazy-loaded.
-			// This ensures WordPress packages (like @wordpress/plugins) are loaded before the bridge needs them.
-			if ( isset( wp_scripts()->registered['wc-mini-cart-iapi-react-bridge'] ) ) {
-				$bridge_deps = wp_scripts()->registered['wc-mini-cart-iapi-react-bridge']->deps;
-				foreach ( $bridge_deps as $dep ) {
-					wp_enqueue_script( $dep );
-				}
-			}
+			wp_enqueue_script( 'wc-mini-cart-iapi-react-bridge' );
 
 			// Explicitly enqueue payment method scripts to ensure they register with wcBlocksRegistry.
 			// This is needed because payment gateways may not enqueue their scripts on non-cart/checkout pages.
@@ -607,18 +598,6 @@ class MiniCart extends AbstractBlock {
 				'productCountVisibility' => $product_count_visibility,
 			);
 
-			// Get the React bridge script URL for lazy loading.
-			$bridge_handle = 'wc-mini-cart-iapi-react-bridge';
-			$bridge_url    = '';
-			if ( isset( wp_scripts()->registered[ $bridge_handle ] ) ) {
-				$bridge_script = wp_scripts()->registered[ $bridge_handle ];
-				$bridge_url    = $bridge_script->src;
-				// Convert relative URLs to absolute URLs.
-				if ( $bridge_url && ! preg_match( '|^(https?:)?//|', $bridge_url ) ) {
-					$bridge_url = site_url( $bridge_url );
-				}
-			}
-
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
@@ -627,7 +606,6 @@ class MiniCart extends AbstractBlock {
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
-					'reactBridgeUrl'               => $bridge_url,
 				)
 			);
 

@@ -39,7 +39,6 @@ const miniCartConfig = getConfig( 'woocommerce/mini-cart' ) as {
 	checkoutUrl: string;
 	displayCartPriceIncludingTax: boolean;
 	buttonAriaLabelTemplate: string;
-	reactBridgeUrl?: string;
 };
 const {
 	addToCartBehaviour,
@@ -1087,66 +1086,7 @@ store(
 );
 
 /**
- * Lazy loads the React bridge script for express payment methods.
- * Only loads once, subsequent calls return immediately if already loaded.
- *
- * @return {Promise<void>} Resolves when bridge is loaded and available
- */
-function lazyLoadReactBridge(): Promise< void > {
-	// Check if already loaded
-	if ( ( window as any ).wc?.blocksCheckout?.MiniCartExpressPaymentWrapper ) {
-		return Promise.resolve();
-	}
-
-	// Check if we have a URL
-	const bridgeUrl = miniCartConfig.reactBridgeUrl;
-	if ( ! bridgeUrl ) {
-		return Promise.reject(
-			new Error( 'React bridge URL not configured' )
-		);
-	}
-
-	// Check if already loading (prevent duplicate loads)
-	if ( ( window as any ).__wcMiniCartBridgeLoading ) {
-		return ( window as any ).__wcMiniCartBridgeLoading;
-	}
-
-	// Create promise and cache it
-	const loadPromise = new Promise< void >( ( resolve, reject ) => {
-		const script = document.createElement( 'script' );
-		script.src = bridgeUrl;
-		script.async = true;
-
-		script.onload = () => {
-			// Verify the bridge actually loaded
-			if (
-				( window as any ).wc?.blocksCheckout
-					?.MiniCartExpressPaymentWrapper
-			) {
-				delete ( window as any ).__wcMiniCartBridgeLoading;
-				resolve();
-			} else {
-				reject(
-					new Error( 'Bridge loaded but components not found' )
-				);
-			}
-		};
-
-		script.onerror = () => {
-			delete ( window as any ).__wcMiniCartBridgeLoading;
-			reject( new Error( 'Failed to load React bridge script' ) );
-		};
-
-		document.head.appendChild( script );
-	} );
-
-	( window as any ).__wcMiniCartBridgeLoading = loadPromise;
-	return loadPromise;
-}
-
-/**
  * Helper function to check base dependencies required for express payment methods rendering.
- * Note: MiniCartExpressPaymentWrapper is lazy-loaded, so not checked here.
  *
  * @param {Element | null} container - The DOM container element for the slot.
  * @param {string}         debugName - Name for debugging/logging purposes.
@@ -1179,7 +1119,7 @@ function checkBaseDependencies(
 // Helper function to render Express Payment Methods React island
 store( 'woocommerce/mini-cart-footer-block', {
 	callbacks: {
-		*renderExpressPaymentMethodsIsland() {
+		renderExpressPaymentMethodsIsland() {
 			const debugName = 'express payment methods island';
 
 			// Check if any express payment methods are actually registered
@@ -1200,19 +1140,7 @@ store( 'woocommerce/mini-cart-footer-block', {
 				return;
 			}
 
-			// Lazy load the React bridge
-			try {
-				yield lazyLoadReactBridge();
-			} catch ( error ) {
-				// eslint-disable-next-line no-console
-				console.error(
-					'Mini Cart: Failed to load React bridge for express payments:',
-					error
-				);
-				return;
-			}
-
-			// Verify dependencies are available after lazy load
+			// Verify dependencies are available
 			const container = document.querySelector(
 				'.wc-block-mini-cart__express-checkout-slot'
 			);
@@ -1223,6 +1151,18 @@ store( 'woocommerce/mini-cart-footer-block', {
 					'express payment methods island'
 				)
 			) {
+				return;
+			}
+
+			// Check for MiniCartExpressPaymentWrapper
+			if (
+				! ( window as any ).wc?.blocksCheckout
+					?.MiniCartExpressPaymentWrapper
+			) {
+				// eslint-disable-next-line no-console
+				console.warn(
+					'Mini Cart: MiniCartExpressPaymentWrapper not available'
+				);
 				return;
 			}
 
