@@ -219,7 +219,181 @@ MARKDOWN
 	 * Register the get-my-order ability.
 	 */
 	private static function register_get_my_order(): void {
-		// TODO: Implement in Task 3
+		wp_register_ability(
+			'woocommerce/get-my-order',
+			array(
+				'label'               => __( 'Get My Order', 'woocommerce' ),
+				'description'         => __( 'Retrieve complete details for a specific order placed by the current logged-in customer.', 'woocommerce' ),
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'order_id' => array(
+							'type'        => 'integer',
+							'description' => 'The ID of the order to retrieve',
+							'minimum'     => 1,
+						),
+					),
+					'required'   => array( 'order_id' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'success' => array(
+							'type'        => 'boolean',
+							'description' => 'Whether the operation was successful',
+						),
+						'order'   => array(
+							'type'        => 'object',
+							'description' => 'Complete order details',
+							'properties'  => array(
+								'id'            => array( 'type' => 'integer' ),
+								'status'        => array( 'type' => 'string' ),
+								'total'         => array( 'type' => 'string' ),
+								'currency'      => array( 'type' => 'string' ),
+								'date_created'  => array( 'type' => 'string' ),
+								'date_paid'     => array( 'type' => 'string' ),
+								'line_items'    => array( 'type' => 'array' ),
+								'shipping'      => array( 'type' => 'object' ),
+								'billing'       => array( 'type' => 'object' ),
+								'customer_note' => array( 'type' => 'string' ),
+							),
+						),
+						'message' => array(
+							'type'        => 'string',
+							'description' => 'Status message or error description',
+						),
+					),
+					'required'   => array( 'success' ),
+				),
+				'execute_callback'    => function ( $input = null ) {
+					// Validate input.
+					if ( ! is_array( $input ) || empty( $input['order_id'] ) ) {
+						return array(
+							'success' => false,
+							'message' => __( 'Order ID is required.', 'woocommerce' ),
+						);
+					}
+
+					$order_id = (int) $input['order_id'];
+
+					// Validate customer ownership.
+					$validation = self::validate_customer_ownership( $order_id );
+					if ( ! $validation['valid'] ) {
+						return array(
+							'success' => false,
+							'message' => $validation['error'],
+						);
+					}
+
+					$order = $validation['order'];
+
+					try {
+						// Build line items array.
+						$line_items = array();
+						foreach ( $order->get_items() as $item_id => $item ) {
+							$product = $item->get_product();
+							$line_items[] = array(
+								'name'     => $item->get_name(),
+								'quantity' => $item->get_quantity(),
+								'total'    => $item->get_total(),
+								'sku'      => $product ? $product->get_sku() : '',
+							);
+						}
+
+						// Build shipping address.
+						$shipping = array(
+							'first_name' => $order->get_shipping_first_name(),
+							'last_name'  => $order->get_shipping_last_name(),
+							'address_1'  => $order->get_shipping_address_1(),
+							'address_2'  => $order->get_shipping_address_2(),
+							'city'       => $order->get_shipping_city(),
+							'state'      => $order->get_shipping_state(),
+							'postcode'   => $order->get_shipping_postcode(),
+							'country'    => $order->get_shipping_country(),
+						);
+
+						// Build billing address.
+						$billing = array(
+							'first_name' => $order->get_billing_first_name(),
+							'last_name'  => $order->get_billing_last_name(),
+							'email'      => $order->get_billing_email(),
+							'phone'      => $order->get_billing_phone(),
+							'address_1'  => $order->get_billing_address_1(),
+							'address_2'  => $order->get_billing_address_2(),
+							'city'       => $order->get_billing_city(),
+							'state'      => $order->get_billing_state(),
+							'postcode'   => $order->get_billing_postcode(),
+							'country'    => $order->get_billing_country(),
+						);
+
+						// Build order data.
+						$order_data = array(
+							'id'            => $order->get_id(),
+							'status'        => $order->get_status(),
+							'total'         => $order->get_total(),
+							'currency'      => $order->get_currency(),
+							'date_created'  => $order->get_date_created() ? $order->get_date_created()->date( 'Y-m-d H:i:s' ) : '',
+							'date_paid'     => $order->get_date_paid() ? $order->get_date_paid()->date( 'Y-m-d H:i:s' ) : '',
+							'line_items'    => $line_items,
+							'shipping'      => $shipping,
+							'billing'       => $billing,
+							'customer_note' => $order->get_customer_note(),
+						);
+
+						return array(
+							'success' => true,
+							'order'   => $order_data,
+							// translators: %d is the order ID.
+							'message' => sprintf( __( 'Order #%d retrieved successfully.', 'woocommerce' ), $order_id ),
+						);
+
+					} catch ( \Exception $e ) {
+						return array(
+							'success' => false,
+							// translators: %s is the error message.
+							'message' => sprintf( __( 'Error retrieving order: %s', 'woocommerce' ), $e->getMessage() ),
+						);
+					}
+				},
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
+				'category'            => 'woocommerce-rest',
+				'meta'                => array(
+					'show_in_rest' => true,
+					'instructions' => <<<'MARKDOWN'
+### Retrieving Customer Orders
+
+When customers ask about specific orders:
+1. Ask for order number if not provided
+2. Use this ability to fetch order details
+3. Present information based on what they asked
+
+**Common queries:**
+- "What's the status of my order?" → Focus on status and expected delivery
+- "What did I order?" → Focus on line items
+- "When will it arrive?" → Focus on shipping info
+- "How much did I pay?" → Focus on total and payment status
+
+**Order statuses explained (customer-friendly):**
+- pending → "We're waiting for your payment"
+- processing → "Payment received! We're preparing your order"
+- on-hold → "Your order is on hold (we'll contact you if needed)"
+- completed → "Your order has been delivered"
+- cancelled → "This order was cancelled"
+- refunded → "This order was refunded"
+- failed → "Payment failed (you can try again)"
+
+**Presenting order information:**
+- Use friendly, conversational language
+- Format dates in human-readable form
+- Explain status in customer-friendly terms
+- List items with quantities
+MARKDOWN
+					,
+				),
+			)
+		);
 	}
 
 	/**
