@@ -102,15 +102,20 @@ type CartItemContext = {
 	cartItem: CartItem;
 };
 
-type CartItemDataAttr = {
+type ItemData = {
 	raw_attribute?: string | undefined;
-	key?: string | undefined;
 	value?: string | undefined;
-	className?: string;
-	hidden?: boolean;
 	display?: string;
 	attribute?: string;
+	hidden?: boolean | string | number;
 } & ( { key: string; name?: never } | { key?: never; name: string } );
+
+type CartItemDataAttr = {
+	value: string;
+	name: string;
+	className: string;
+	hidden: boolean;
+};
 
 type DataProperty = 'item_data' | 'variation';
 
@@ -392,11 +397,9 @@ function itemDataInnerHTML( field: 'name' | 'value' ) {
 	}
 
 	// eslint-disable-next-line @typescript-eslint/no-use-before-define
-	const dataAttr = cartItemState.cartItemDataAttr as
-		| CartItemDataAttr
-		| { hidden: boolean };
+	const dataAttr = cartItemState.cartItemDataAttr;
 
-	if ( 'hidden' in dataAttr && dataAttr.hidden ) {
+	if ( ! dataAttr ) {
 		return;
 	}
 
@@ -793,9 +796,9 @@ const { state: cartItemState } = store(
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | { hidden: boolean } {
+			get cartItemDataAttr(): CartItemDataAttr | null {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
@@ -804,7 +807,7 @@ const { state: cartItemState } = store(
 					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
 
 				if ( ! dataItemAttr ) {
-					return { hidden: true };
+					return null;
 				}
 
 				// Extract name based on data type (variation uses 'attribute', item_data uses 'key' or 'name')
@@ -824,22 +827,36 @@ const { state: cartItemState } = store(
 				const valueTxt = document.createElement( 'textarea' );
 				valueTxt.innerHTML = rawValue;
 
+				const processedName = nameTxt.value ? nameTxt.value + ':' : '';
+				const hiddenValue = dataItemAttr.hidden;
+
 				return {
-					name: nameTxt.value,
+					name: processedName,
 					value: valueTxt.value,
 					className: `wc-block-components-product-details__${ nameTxt.value
 						.replace( /([a-z])([A-Z])/g, '$1-$2' )
 						.replace( /<[^>]*>/g, '' )
 						.replace( /[\s_&]+/g, '-' )
 						.toLowerCase() }`,
-					hidden: dataItemAttr.hidden === '1' ? true : false,
+					hidden:
+						hiddenValue === true ||
+						hiddenValue === 'true' ||
+						hiddenValue === '1' ||
+						hiddenValue === 1,
 				};
+			},
+
+			get cartItemDataAttrHidden(): boolean {
+				return (
+					cartItemState.cartItemDataAttr === null ||
+					!! cartItemState.cartItemDataAttr?.hidden
+				);
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
 			get cartItemDataKey(): string {
 				const { itemData, dataProperty } = getContext< {
-					itemData: CartItemDataAttr;
+					itemData: ItemData;
 					dataProperty: DataProperty;
 				} >();
 
