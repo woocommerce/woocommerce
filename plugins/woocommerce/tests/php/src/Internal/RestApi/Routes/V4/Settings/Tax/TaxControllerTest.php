@@ -146,7 +146,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_header( 'content-type', 'application/json' );
 		$response = $this->server->dispatch( $request );
 
-		// Assert - verify the request was successful first
+		// Assert - verify the request was successful first.
 		$this->assertEquals(
 			200,
 			$response->get_status(),
@@ -199,7 +199,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_header( 'content-type', 'application/json' );
 		$response = $this->server->dispatch( $request );
 
-		// Assert - verify the request was successful first
+		// Assert - verify the request was successful first.
 		$this->assertEquals(
 			200,
 			$response->get_status(),
@@ -594,7 +594,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		// Verify stored options are also sanitized.
 		foreach ( $malicious_payloads as $setting_key => $malicious_value ) {
 			$stored_value = get_option( $setting_key );
-			if ( $stored_value !== false ) {
+			if ( false !== $stored_value ) {
 				// HTML script tags should be removed in stored data.
 				$this->assertStringNotContainsString(
 					'<script>',
