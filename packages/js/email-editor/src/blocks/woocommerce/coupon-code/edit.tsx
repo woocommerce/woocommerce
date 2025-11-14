@@ -3,7 +3,12 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, ExternalLink, ComboboxControl, Spinner } from '@wordpress/components';
+import {
+	PanelBody,
+	ExternalLink,
+	ComboboxControl,
+	Spinner,
+} from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { useState, useEffect } from '@wordpress/element';
 import type { CSSProperties } from 'react';
@@ -145,7 +150,7 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	couponStyles.boxSizing = 'border-box';
 	couponStyles.textAlign = 'center';
 
-	const supportedAlignments: Array< CSSProperties['textAlign'] > = [
+	const supportedAlignments: Array< CSSProperties[ 'textAlign' ] > = [
 		'left',
 		'center',
 		'right',
@@ -155,9 +160,9 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	];
 	const alignAttribute = attributes.align as string | undefined;
 	const wrapperTextAlign = supportedAlignments.includes(
-		alignAttribute as CSSProperties['textAlign']
+		alignAttribute as CSSProperties[ 'textAlign' ]
 	)
-		? ( alignAttribute as CSSProperties['textAlign'] )
+		? ( alignAttribute as CSSProperties[ 'textAlign' ] )
 		: 'center';
 	const wrapperStyle: CSSProperties = {
 		textAlign: wrapperTextAlign,
@@ -170,7 +175,10 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	const wrapperClassTokens: string[] = [];
 
 	classTokens.forEach( ( token ) => {
-		if ( token.startsWith( 'has-' ) || token.startsWith( 'wp-elements-' ) ) {
+		if (
+			token.startsWith( 'has-' ) ||
+			token.startsWith( 'wp-elements-' )
+		) {
 			couponClassTokens.push( token );
 			return;
 		}
@@ -178,9 +186,13 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 	} );
 
 	const wrapperClassName =
-		wrapperClassTokens.length > 0 ? wrapperClassTokens.join( ' ' ) : undefined;
+		wrapperClassTokens.length > 0
+			? wrapperClassTokens.join( ' ' )
+			: undefined;
 	const couponClassName =
-		couponClassTokens.length > 0 ? couponClassTokens.join( ' ' ) : undefined;
+		couponClassTokens.length > 0
+			? couponClassTokens.join( ' ' )
+			: undefined;
 
 	return (
 		<>
@@ -190,13 +202,16 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 					initialOpen={ true }
 				>
 					<div style={ { marginBottom: '16px' } }>
-						<label
-							htmlFor="coupon-search"
-						>
+						<label htmlFor="coupon-search">
 							{ __( 'SELECT AN EXISTING COUPON', 'woocommerce' ) }
 						</label>
 						{ isLoading ? (
-							<div style={ { padding: '10px', textAlign: 'center' } }>
+							<div
+								style={ {
+									padding: '10px',
+									textAlign: 'center',
+								} }
+							>
 								<Spinner />
 							</div>
 						) : (
@@ -205,7 +220,9 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 								hideLabelFromVision
 								value={ couponCode }
 								onChange={ ( value ) => {
-									setAttributes( { couponCode: value || '' } );
+									setAttributes( {
+										couponCode: value || '',
+									} );
 								} }
 								onFilterValueChange={ ( value ) => {
 									setSearchValue( value );
