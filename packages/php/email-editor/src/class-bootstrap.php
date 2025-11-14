@@ -88,6 +88,10 @@ class Bootstrap {
 				10,
 				1
 			);
+			register_block_type( 'woocommerce/coupon-code', array(
+				'title'       => 'Coupon Code', 'woocommerce',
+				'render_email_callback' => array( $this->woocommerce_email_editor_integration, 'render_block' ),
+			) );
 		}
 	}
 
