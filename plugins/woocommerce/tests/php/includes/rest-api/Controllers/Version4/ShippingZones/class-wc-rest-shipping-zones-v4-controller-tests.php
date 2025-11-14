@@ -8,6 +8,8 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\Controller as ShippingZonesController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZones\ShippingZoneService;
 
 /**
  * Shipping Zones V4 Controller tests class.
@@ -68,7 +70,8 @@ class WC_REST_Shipping_Zones_V4_Controller_Tests extends WC_REST_Unit_Test_Case 
 		$this->enable_rest_api_v4_feature();
 		parent::setUp();
 		$this->endpoint = new ShippingZonesController();
-		$this->user     = $this->factory->user->create(
+		$this->endpoint->init( new ShippingZoneSchema(), new ShippingZoneService() );
+		$this->user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
