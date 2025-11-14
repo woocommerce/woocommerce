@@ -387,6 +387,8 @@ const entries = {
 		blocksComponents: './packages/components/index.ts',
 		'mini-cart-component':
 			'./assets/js/blocks/mini-cart/component-frontend.tsx',
+		'mini-cart-iapi-react-bridge':
+			'./assets/js/blocks/mini-cart/iapi-react-bridge.tsx',
 	},
 };
 

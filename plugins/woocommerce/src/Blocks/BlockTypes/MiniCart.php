@@ -91,6 +91,7 @@ class MiniCart extends AbstractBlock {
 		'woocommerce/mini-cart-footer-block',
 		'woocommerce/mini-cart-cart-button-block',
 		'woocommerce/mini-cart-checkout-button-block',
+		'woocommerce/mini-cart-express-checkout-block',
 		'woocommerce/empty-mini-cart-contents-block',
 		'woocommerce/mini-cart-shopping-button-block',
 	);
@@ -221,6 +222,47 @@ class MiniCart extends AbstractBlock {
 		}
 
 		parent::enqueue_data( $attributes );
+
+		// Enqueue payment methods for iAPI Mini Cart.
+		// The React bridge is now lazy-loaded client-side to optimize performance.
+		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
+			/**
+			 * Fires before mini-cart express payment scripts are enqueued.
+			 * This allows payment gateways to enqueue their express payment method scripts.
+			 *
+			 * @since 9.4.0
+			 */
+			do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_before' );
+
+			// Register the React bridge script (for lazy loading), but don't enqueue it eagerly.
+			$script_data = $this->asset_api->get_script_data( 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
+			$this->asset_api->register_script( 'wc-mini-cart-iapi-react-bridge', 'assets/client/blocks/mini-cart-iapi-react-bridge-frontend.js', array() );
+
+			// Enqueue the bridge's dependencies so they're available when the bridge is lazy-loaded.
+			// This ensures WordPress packages (like @wordpress/plugins) are loaded before the bridge needs them.
+			if ( isset( wp_scripts()->registered['wc-mini-cart-iapi-react-bridge'] ) ) {
+				$bridge_deps = wp_scripts()->registered['wc-mini-cart-iapi-react-bridge']->deps;
+				foreach ( $bridge_deps as $dep ) {
+					wp_enqueue_script( $dep );
+				}
+			}
+
+			// Explicitly enqueue payment method scripts to ensure they register with wcBlocksRegistry.
+			// This is needed because payment gateways may not enqueue their scripts on non-cart/checkout pages.
+			$payment_method_registry = Package::container()->get( PaymentMethodRegistry::class );
+			$payment_methods         = $payment_method_registry->get_all_active_payment_method_script_dependencies();
+
+			foreach ( $payment_methods as $payment_method ) {
+				wp_enqueue_script( $payment_method );
+			}
+
+			/**
+			 * Fires after mini-cart express payment scripts are enqueued.
+			 *
+			 * @since 9.4.0
+			 */
+			do_action( 'woocommerce_blocks_enqueue_cart_block_scripts_after' );
+		}
 
 		// Hydrate the following data depending on admin or frontend context.
 		if ( ! is_admin() && ! WC()->is_rest_api_request() ) {
@@ -565,6 +607,18 @@ class MiniCart extends AbstractBlock {
 				'productCountVisibility' => $product_count_visibility,
 			);
 
+			// Get the React bridge script URL for lazy loading.
+			$bridge_handle = 'wc-mini-cart-iapi-react-bridge';
+			$bridge_url    = '';
+			if ( isset( wp_scripts()->registered[ $bridge_handle ] ) ) {
+				$bridge_script = wp_scripts()->registered[ $bridge_handle ];
+				$bridge_url    = $bridge_script->src;
+				// Convert relative URLs to absolute URLs.
+				if ( $bridge_url && ! preg_match( '|^(https?:)?//|', $bridge_url ) ) {
+					$bridge_url = site_url( $bridge_url );
+				}
+			}
+
 			wp_interactivity_config(
 				$this->get_full_block_name(),
 				array(
@@ -573,6 +627,7 @@ class MiniCart extends AbstractBlock {
 					'onCartClickBehaviour'         => $on_cart_click_behaviour,
 					'checkoutUrl'                  => wc_get_checkout_url(),
 					'buttonAriaLabelTemplate'      => $button_aria_label_template,
+					'reactBridgeUrl'               => $bridge_url,
 				)
 			);
 
@@ -589,7 +644,7 @@ class MiniCart extends AbstractBlock {
 			}
 			ob_start();
 			?>
-		
+
 			<div
 				data-wp-interactive="woocommerce/mini-cart"
 				data-wp-init="callbacks.setupEventListeners"
@@ -600,7 +655,7 @@ class MiniCart extends AbstractBlock {
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button 
+				<button
 					data-wp-init="callbacks.saveMiniCartButtonRef"
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
@@ -674,7 +729,7 @@ class MiniCart extends AbstractBlock {
 					</div>
 				</div>
 			</div>
-		</div>				
+		</div>
 		<?php
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 		echo wp_interactivity_process_directives( ob_get_clean() );

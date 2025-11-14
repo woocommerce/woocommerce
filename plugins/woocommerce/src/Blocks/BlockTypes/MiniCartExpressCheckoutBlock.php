@@ -36,7 +36,7 @@ class MiniCartExpressCheckoutBlock extends AbstractInnerBlock {
 				<span><?php esc_html_e( 'Express Checkout', 'woocommerce' ); ?></span>
 			</div>
 			<!-- React island container: MiniCartExpressPaymentWrapper renders here via iAPI frontend -->
-			<div class="wc-block-mini-cart__express-checkout-slot"></div>
+			<div class="wc-block-mini-cart__express-checkout-slot" data-wp-init="callbacks.renderExpressPaymentMethodsIsland"></div>
 		</div>
 		<?php
 		return ob_get_clean();
