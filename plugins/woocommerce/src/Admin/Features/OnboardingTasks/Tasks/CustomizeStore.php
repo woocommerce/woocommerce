@@ -30,6 +30,10 @@ class CustomizeStore extends Task {
 		add_action( 'save_post_wp_template', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'save_post_wp_template_part', array( $this, 'mark_task_as_complete_block_theme' ), 10, 3 );
 		add_action( 'customize_save_after', array( $this, 'mark_task_as_complete_classic_theme' ) );
+
+		// Handle splash page actions.
+		add_action( 'admin_init', array( $this, 'handle_splash_page_actions' ) );
+		add_action( 'admin_menu', array( $this, 'register_splash_page' ) );
 	}
 
 	/**
@@ -120,7 +124,84 @@ class CustomizeStore extends Task {
 	 * @return string
 	 */
 	public function get_action_url() {
-		return admin_url( 'admin.php?page=wc-admin&path=%2Fcustomize-store' );
+		return admin_url( 'admin.php?page=wc-customize-store' );
+	}
+
+	/**
+	 * Handle splash page button actions.
+	 *
+	 * @return void
+	 */
+	public function handle_splash_page_actions() {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		if ( ! isset( $_GET['page'] ) || 'wc-customize-store' !== $_GET['page'] ) {
+			return;
+		}
+
+		// Handle button actions - mark task as complete and redirect.
+		if ( isset( $_GET['action'] ) ) {
+			$action = sanitize_text_field( wp_unslash( $_GET['action'] ) );
+
+			// Mark task as complete when either button is clicked.
+			update_option( 'woocommerce_admin_customize_store_completed', 'yes' );
+
+			if ( 'design' === $action ) {
+				// Redirect to site editor.
+				if ( wp_is_block_theme() ) {
+					wp_safe_redirect( admin_url( 'site-editor.php' ) );
+				} else {
+					wp_safe_redirect( admin_url( 'customize.php' ) );
+				}
+				exit;
+			} elseif ( 'marketplace' === $action ) {
+				// Redirect to marketplace/themes.
+				$marketplace_url = $this->get_marketplace_url();
+				wp_safe_redirect( $marketplace_url );
+				exit;
+			}
+		}
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+	}
+
+	/**
+	 * Get marketplace URL for themes.
+	 *
+	 * @return string
+	 */
+	private function get_marketplace_url() {
+		return admin_url( 'admin.php?page=wc-admin&tab=themes&path=%2Fextensions' );
+	}
+
+	/**
+	 * Register the splash page in admin menu.
+	 *
+	 * @return void
+	 */
+	public function register_splash_page() {
+		add_submenu_page(
+			null, // Hidden from menu.
+			__( 'Customize your store', 'woocommerce' ),
+			__( 'Customize your store', 'woocommerce' ),
+			'manage_woocommerce',
+			'wc-customize-store',
+			array( $this, 'render_splash_page' )
+		);
+	}
+
+	/**
+	 * Render the customize store splash page.
+	 *
+	 * @return void
+	 */
+	public function render_splash_page() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'woocommerce' ) );
+		}
+
+		$design_url   = add_query_arg( 'action', 'design', admin_url( 'admin.php?page=wc-customize-store' ) );
+		$marketplace_url = add_query_arg( 'action', 'marketplace', admin_url( 'admin.php?page=wc-customize-store' ) );
+
+		include __DIR__ . '/views/html-customize-store-splash.php';
 	}
 
 
