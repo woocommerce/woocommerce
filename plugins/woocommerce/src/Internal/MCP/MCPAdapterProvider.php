@@ -57,6 +57,13 @@ class MCPAdapterProvider {
 			return;
 		}
 
+		// Early exit if Abilities API is not loaded.
+		// The default MCP server requires wp_get_abilities() which may not exist
+		// in test contexts or if the Abilities API is not active.
+		if ( ! function_exists( 'wp_get_abilities' ) ) {
+			return;
+		}
+
 		// Initialize MCP adapter first to ensure mcp_adapter_init action will be fired.
 		// McpAdapter::instance() sets up the rest_api_init hook that eventually fires mcp_adapter_init.
 		\WP\MCP\Core\McpAdapter::instance();
