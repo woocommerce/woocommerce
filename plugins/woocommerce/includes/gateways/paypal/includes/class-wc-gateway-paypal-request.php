@@ -334,12 +334,23 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$paypal_debug_id = null;
+		if ( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Skipping capture. Order ID: ' . $order->get_id() );
+			return;
+		}
+
+		$paypal_debug_id  = null;
+		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+
+		if ( ! $authorization_id ) {
+			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment. Order ID: ' . $order->get_id() );
+			return;
+		}
 
 		try {
 			$request_body = array(
 				'test_mode'        => $this->gateway->testmode,
-				'authorization_id' => $order->get_transaction_id(),
+				'authorization_id' => $authorization_id,
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
