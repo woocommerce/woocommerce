@@ -322,31 +322,28 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
-		if ( ! $order || ! $order->get_transaction_id() ) {
-			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment.' );
+		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
+		$paypal_status    = $order->get_meta( '_paypal_status', true );
+
+		if ( ! $order || ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'Order ID not found to capture authorized payment.' );
 			return;
 		}
 
 		// Skip if the payment is already captured.
-		$paypal_status = $order->get_meta( '_paypal_status', true );
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is already captured. Skipping capture. Order ID: ' . $order->get_id() );
 			return;
 		}
 
-		if ( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Skipping capture. Order ID: ' . $order->get_id() );
+		// Skip if the payment is not authorized.
+		if ( ! $authorization_id || WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment.' );
 			return;
 		}
 
 		$paypal_debug_id  = null;
-		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
-		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
-
-		if ( ! $authorization_id ) {
-			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment. Order ID: ' . $order->get_id() );
-			return;
-		}
 
 		try {
 			$request_body = array(
