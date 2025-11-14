@@ -131,10 +131,10 @@
 
 		.wc-block-cart__totals-title {
 			@include text-heading();
-			@include font-small-locked;
+			@include font-regular-locked;
 			display: block;
-			font-weight: 700;
-			padding: $gap-smaller $gap $gap 0;
+			font-weight: 500;
+			padding: $gap-smaller $gap $gap-smaller * 1.25 0;
 			text-align: left;
 			text-transform: uppercase;
 		}
