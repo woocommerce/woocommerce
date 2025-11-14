@@ -96,7 +96,7 @@ class CustomerOrdersAbilities {
 								'properties' => array(
 									'id'           => array( 'type' => 'integer' ),
 									'status'       => array( 'type' => 'string' ),
-									'total'        => array( 'type' => 'string' ),
+									'total'        => array( 'type' => 'number' ),
 									'currency'     => array( 'type' => 'string' ),
 									'date_created' => array( 'type' => 'string' ),
 									'item_count'   => array( 'type' => 'integer' ),
@@ -140,18 +140,11 @@ class CustomerOrdersAbilities {
 					}
 
 					try {
-						// Get orders.
-						$orders = wc_get_orders( $args );
-
-						// Get total count for this customer (with status filter if applicable).
-						$count_args = array(
-							'customer_id' => $current_user_id,
-							'return'      => 'ids',
-						);
-						if ( ! empty( $status ) ) {
-							$count_args['status'] = 'wc-' . $status;
-						}
-						$total_orders = count( wc_get_orders( $count_args ) );
+						// Get orders with pagination info.
+						$args['paginate'] = true;
+						$results = wc_get_orders( $args );
+						$orders = $results->orders;
+						$total_orders = $results->total;
 
 						// Format orders for response.
 						$orders_data = array();
