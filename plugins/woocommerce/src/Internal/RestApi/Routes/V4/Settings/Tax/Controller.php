@@ -44,16 +44,16 @@ class Controller extends AbstractController {
 	 *
 	 * @var TaxSettingsSchema
 	 */
-	protected $schema;
+	protected $item_schema;
 
 	/**
 	 * Initialize the controller.
 	 *
-	 * @param TaxSettingsSchema $schema Schema class.
+	 * @param TaxSettingsSchema $item_schema Schema class.
 	 * @internal
 	 */
-	final public function init( TaxSettingsSchema $schema ) {
-		$this->schema = $schema;
+	final public function init( TaxSettingsSchema $item_schema ) {
+		$this->item_schema = $item_schema;
 	}
 
 	/**
@@ -133,18 +133,8 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function get_item( $request ) {
-		try {
-			$settings = $this->get_all_settings();
-		} catch ( \Exception $e ) {
-			return new WP_Error(
-				'woocommerce_rest_tax_settings_error',
-				$e->getMessage(),
-				array( 'status' => 500 )
-			);
-		}
-
-		$response = $this->get_item_response( $settings, $request );
-		return rest_ensure_response( $response );
+		$settings = $this->get_all_settings();
+		return $this->prepare_item_for_response( $settings, $request );
 	}
 
 	/**
@@ -371,7 +361,7 @@ class Controller extends AbstractController {
 	 */
 	private function get_all_settings(): array {
 		$settings_instance = $this->get_settings_tax_instance();
-		$settings          = $settings_instance->get_settings_for_section('');
+		$settings          = $settings_instance->get_settings_for_section( '' );
 
 		return $settings;
 	}
@@ -382,16 +372,7 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	public function get_schema(): array {
-		return $this->schema->get_item_schema();
-	}
-
-	/**
-	 * Get the item schema for the controller.
-	 *
-	 * @return array
-	 */
-	public function get_item_schema(): array {
-		return $this->get_schema();
+		return $this->item_schema->get_item_schema();
 	}
 
 	/**
@@ -402,16 +383,6 @@ class Controller extends AbstractController {
 	 * @return array
 	 */
 	protected function get_item_response( $item, WP_REST_Request $request ): array {
-		return $this->schema->get_item_response( $item, $request );
-	}
-
-	/**
-	 * Get the endpoint args for item schema.
-	 *
-	 * @param string $method HTTP method of the request.
-	 * @return array Endpoint arguments.
-	 */
-	public function get_endpoint_args_for_item_schema( $method = WP_REST_Server::CREATABLE ): array {
-		return rest_get_endpoint_args_for_schema( $this->get_item_schema(), $method );
+		return $this->item_schema->get_item_response( $item, $request );
 	}
 }
