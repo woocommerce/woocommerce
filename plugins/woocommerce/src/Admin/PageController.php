@@ -70,7 +70,8 @@ class PageController {
 
 		// priority is 20 to run after https://github.com/woocommerce/woocommerce/blob/a55ae325306fc2179149ba9b97e66f32f84fdd9c/includes/admin/class-wc-admin-menus.php#L165.
 		add_action( 'admin_head', array( $this, 'remove_app_entry_page_menu_item' ), 20 );
-		add_action( 'admin_init', array( $this, 'redirect_payment_tasks_to_settings' ) );
+		// Using low priority to run before other hooks.
+		add_action( 'admin_init', array( $this, 'maybe_redirect_payment_tasks_to_settings' ), 1 );
 	}
 
 	/**
@@ -617,26 +618,54 @@ class PageController {
 	/**
 	 * Redirect payment tasks to the settings page.
 	 *
-	 * Redirects both 'payments' and 'woocommerce-payments' tasks to the checkout settings page.
+	 * Redirects both 'payments' and 'woocommerce-payments' tasks to the Payments settings page,
+	 * when it is safe to do so in terms of backwards compatibility.
 	 */
-	public function redirect_payment_tasks_to_settings() {
-		// phpcs:disable WordPress.Security.NonceVerification
-		if (
-			! isset( $_GET['page'] ) ||
-			'wc-admin' !== $_GET['page'] ||
-			! isset( $_GET['task'] )
-		) {
+	public function maybe_redirect_payment_tasks_to_settings() {
+		// Bail if we are not in the WP admin or not on a WC admin page.
+		if ( ! is_admin() || ! self::is_admin_page() ) {
 			return;
 		}
 
-		$task = sanitize_text_field( wp_unslash( $_GET['task'] ) );
+		// Bail if we are not requesting a page for a WooCommerce task.
+		if ( empty( $_GET['task'] ) ) {
+			return;
+		}
 
-		// Redirect both payment tasks to the settings page.
-		if ( in_array( $task, array( 'payments', 'woocommerce-payments' ), true ) ) {
-			$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
+		// Get the current task ID.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$task_id = wc_clean( wp_unslash( $_GET['task'] ) );
+
+		// Bail if the task is not a payments task.
+		if ( ! in_array( $task_id, array( 'payments', 'woocommerce-payments' ), true ) ) {
+			return;
+		}
+
+		$redirect_url = admin_url( 'admin.php?page=wc-settings&tab=checkout&from=WCADMIN_PAYMENT_TASK' );
+
+		// The WooPayments task is always redirected to the settings page.
+		if ( 'woocommerce-payments' === $task_id ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
 		}
-		// phpcs:enable WordPress.Security.NonceVerification
+
+		// The generic payments task is only redirected if the request is a regular user request,
+		// not part of an onboarding flow or other special case.
+		$special_request_params = array(
+			'connection-return',
+			'_wpnonce',
+			'success',
+			'error',
+		);
+		foreach ( $special_request_params as $param ) {
+			// phpcs:ignore WordPress.Security.NonceVerification
+			if ( isset( $_GET[ $param ] ) ) {
+				return;
+			}
+		}
+
+		// If we reach this point, we can safely redirect to the settings page.
+		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 }
