@@ -15,8 +15,6 @@ import SidebarNavigationItem from '@wordpress/edit-site/build-module/components/
 import {
 	Button,
 	// @ts-ignore No types for this exist yet.
-	__unstableMotion as motion,
-	// @ts-ignore No types for this exist yet.
 	__experimentalItemGroup as ItemGroup,
 	// @ts-ignore No types for this exist yet.
 	__experimentalHeading as Heading,
@@ -90,7 +88,6 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 				props.className
 			) }
 		>
-			{/* SiteHub removed - CYS functionality removed */}
 			<SidebarContainer
 				title={ sidebarTitle }
 				description={ sidebarDescription }

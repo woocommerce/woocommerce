@@ -36,12 +36,7 @@ export const {
 );
 
 export const getLysTasklist = async () => {
-	const LYS_TASKS_WHITELIST = [
-		'products',
-		'payments',
-		'shipping',
-		'tax',
-	];
+	const LYS_TASKS_WHITELIST = [ 'products', 'payments', 'shipping', 'tax' ];
 
 	/**
 	 * This filter allows customizing the list of tasks to show in WooCommerce Launch Your Store feature.
