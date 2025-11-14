@@ -400,7 +400,189 @@ MARKDOWN
 	 * Register the update-my-order ability.
 	 */
 	private static function register_update_my_order(): void {
-		// TODO: Implement in Task 4
+		wp_register_ability(
+			'woocommerce/update-my-order',
+			array(
+				'label'               => __( 'Update My Order', 'woocommerce' ),
+				'description'         => __( 'Add notes or cancel orders placed by the current logged-in customer.', 'woocommerce' ),
+				'input_schema'        => array(
+					'type'       => 'object',
+					'properties' => array(
+						'order_id' => array(
+							'type'        => 'integer',
+							'description' => 'The ID of the order to update',
+							'minimum'     => 1,
+						),
+						'action'   => array(
+							'type'        => 'string',
+							'description' => 'Action to perform: add_note or cancel',
+							'enum'        => array( 'add_note', 'cancel' ),
+						),
+						'note'     => array(
+							'type'        => 'string',
+							'description' => 'Customer note to add (required when action is add_note)',
+						),
+					),
+					'required'   => array( 'order_id', 'action' ),
+				),
+				'output_schema'       => array(
+					'type'       => 'object',
+					'properties' => array(
+						'success' => array(
+							'type'        => 'boolean',
+							'description' => 'Whether the operation was successful',
+						),
+						'order'   => array(
+							'type'        => 'object',
+							'description' => 'Updated order data (same structure as get-my-order)',
+						),
+						'message' => array(
+							'type'        => 'string',
+							'description' => 'Status message or error description',
+						),
+					),
+					'required'   => array( 'success' ),
+				),
+				'execute_callback'    => function ( $input = null ) {
+					// Validate input.
+					if ( ! is_array( $input ) || empty( $input['order_id'] ) || empty( $input['action'] ) ) {
+						return array(
+							'success' => false,
+							'message' => __( 'Order ID and action are required.', 'woocommerce' ),
+						);
+					}
+
+					$order_id = (int) $input['order_id'];
+					$action   = sanitize_text_field( $input['action'] );
+
+					// Validate action.
+					if ( ! in_array( $action, array( 'add_note', 'cancel' ), true ) ) {
+						return array(
+							'success' => false,
+							'message' => __( 'Invalid action. Allowed actions: add_note, cancel.', 'woocommerce' ),
+						);
+					}
+
+					// Validate customer ownership.
+					$validation = self::validate_customer_ownership( $order_id );
+					if ( ! $validation['valid'] ) {
+						return array(
+							'success' => false,
+							'message' => $validation['error'],
+						);
+					}
+
+					$order = $validation['order'];
+
+					try {
+						if ( 'add_note' === $action ) {
+							// Validate note content.
+							if ( empty( $input['note'] ) ) {
+								return array(
+									'success' => false,
+									'message' => __( 'Note content is required when action is add_note.', 'woocommerce' ),
+								);
+							}
+
+							$note = sanitize_textarea_field( $input['note'] );
+
+							// Add customer note to order.
+							$order->add_order_note(
+								$note,
+								1, // is_customer_note = 1 (visible in My Account)
+								true // added_by_user
+							);
+
+							return array(
+								'success' => true,
+								// translators: %d is the order ID.
+								'message' => sprintf( __( 'Note added to order #%d successfully.', 'woocommerce' ), $order_id ),
+							);
+
+						} elseif ( 'cancel' === $action ) {
+							$order_status = $order->get_status();
+
+							// Check if order can be cancelled.
+							$cancellable_statuses = array( 'pending', 'on-hold' );
+
+							if ( in_array( $order_status, $cancellable_statuses, true ) ) {
+								// Auto-cancel eligible orders.
+								$order->update_status( 'cancelled', __( 'Order cancelled by customer via AI agent.', 'woocommerce' ) );
+
+								return array(
+									'success' => true,
+									// translators: %d is the order ID.
+									'message' => sprintf( __( 'Order #%d has been cancelled successfully.', 'woocommerce' ), $order_id ),
+								);
+							} else {
+								// For non-cancellable orders, add a note requesting cancellation.
+								$order->add_order_note(
+									__( 'Customer requested cancellation via AI agent.', 'woocommerce' ),
+									1, // is_customer_note = 1
+									true // added_by_user
+								);
+
+								return array(
+									'success' => true,
+									// translators: %d is the order ID.
+									'message' => sprintf( __( 'Cancellation request for order #%d has been submitted. Our team will review and contact you.', 'woocommerce' ), $order_id ),
+								);
+							}
+						}
+					} catch ( \Exception $e ) {
+						return array(
+							'success' => false,
+							// translators: %s is the error message.
+							'message' => sprintf( __( 'Error updating order: %s', 'woocommerce' ), $e->getMessage() ),
+						);
+					}
+				},
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
+				'category'            => 'woocommerce-rest',
+				'meta'                => array(
+					'show_in_rest' => true,
+					'instructions' => <<<'MARKDOWN'
+### Managing Customer Orders
+
+**Adding notes:**
+When customers want to add special instructions or communicate with the store:
+- Use action: 'add_note'
+- Notes are visible to store staff in the admin panel
+- Notes are also visible to the customer in their My Account area
+- Confirm note was added successfully
+
+**Example:**
+User: "Can you ask them to leave it at the side door?"
+Agent: [Calls update-my-order with action: 'add_note', note: 'Please leave package at side door']
+Agent: "I've added that note to your order. The store will see your request."
+
+**Cancelling orders:**
+When customers request cancellation:
+1. Check order status first (use get-my-order if needed)
+2. Auto-cancel logic:
+   - pending/on-hold → Automatically cancelled
+   - processing/completed/shipped → Cancellation request note added (requires store review)
+
+**Cancellation flow:**
+User: "Cancel my order #123"
+Agent: [Checks order status]
+
+**If pending/on-hold:**
+Agent: [Calls with action: 'cancel']
+Agent: "Your order #123 has been cancelled. You won't be charged."
+
+**If processing/completed:**
+Agent: [Calls with action: 'cancel' which adds a note]
+Agent: "Your order #123 is already being processed, so I've submitted a cancellation request to the store team. They'll review it and contact you shortly."
+
+**Key principle:** Always explain the outcome clearly and set proper expectations.
+MARKDOWN
+					,
+				),
+			)
+		);
 	}
 
 	/**
