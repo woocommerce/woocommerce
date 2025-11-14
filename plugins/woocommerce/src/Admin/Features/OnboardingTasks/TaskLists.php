@@ -111,8 +111,8 @@ class TaskLists {
 		$tasks = array(
 			'StoreDetails',
 			'Products',
-			'Appearance',
 			'Payments',
+			'CustomizeStore',
 			'Tax',
 			'Shipping',
 			'LaunchYourStore',
