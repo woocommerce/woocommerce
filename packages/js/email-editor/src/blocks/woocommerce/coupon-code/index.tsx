@@ -31,11 +31,16 @@ export function registerCouponCodeBlock() {
 			},
 			typography: {
 				fontSize: true,
-				lineHeight: true,
 			},
 			spacing: {
 				margin: true,
 				padding: true,
+			},
+			__experimentalBorder: {
+				color: true,
+				radius: true,
+				style: true,
+				width: true,
 			},
 		},
 		attributes: {

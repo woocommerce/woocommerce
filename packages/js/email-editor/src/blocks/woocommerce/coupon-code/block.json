@@ -15,12 +15,17 @@
 			"background": true
 		},
 		"typography": {
-			"fontSize": true,
-			"lineHeight": true
+			"fontSize": true
 		},
 		"spacing": {
 			"margin": true,
 			"padding": true
+		},
+		"__experimentalBorder": {
+			"color": true,
+			"radius": true,
+			"style": true,
+			"width": true
 		}
 	},
 	"attributes": {},
