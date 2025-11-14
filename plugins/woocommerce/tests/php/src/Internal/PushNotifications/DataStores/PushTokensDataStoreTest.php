@@ -252,7 +252,7 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$push_token->set_user_id( 1 );
 		$push_token->set_token( '{"endpoint":"https://example.com/push","keys":{"auth":"test","p256dh":"test"}}' );
 		$push_token->set_platform( PushToken::PLATFORM_BROWSER );
-		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$push_token->set_origin( PushToken::ORIGIN_BROWSER );
 
 		$data_store->create( $push_token );
 
