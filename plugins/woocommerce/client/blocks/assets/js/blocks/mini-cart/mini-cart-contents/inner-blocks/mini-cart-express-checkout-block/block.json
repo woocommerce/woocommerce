@@ -1,0 +1,29 @@
+{
+	"name": "woocommerce/mini-cart-express-checkout-block",
+	"version": "1.0.0",
+	"title": "Mini-Cart Express Checkout",
+	"description": "Block that displays express checkout options in the Mini-Cart.",
+	"category": "woocommerce",
+	"supports": {
+		"align": false,
+		"html": false,
+		"multiple": false,
+		"reusable": false,
+		"inserter": true,
+		"lock": false,
+		"interactivity": true
+	},
+	"attributes": {
+		"lock": {
+			"type": "object",
+			"default": {
+				"remove": false,
+				"move": false
+			}
+		}
+	},
+	"parent": [ "woocommerce/mini-cart-footer-block" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"$schema": "https://schemas.wp.org/trunk/block.json"
+}

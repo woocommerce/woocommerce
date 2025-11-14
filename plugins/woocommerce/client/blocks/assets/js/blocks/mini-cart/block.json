@@ -10,6 +10,7 @@
 	"supports": {
 		"html": false,
 		"multiple": false,
+		"interactivity": true,
 		"typography": {
 			"fontSize": true
 		},
@@ -18,6 +19,7 @@
 			"padding": true
 		}
 	},
+	"viewScriptModule": "woocommerce/mini-cart",
 	"example": {
 		"attributes": {
 			"isPreview": true,

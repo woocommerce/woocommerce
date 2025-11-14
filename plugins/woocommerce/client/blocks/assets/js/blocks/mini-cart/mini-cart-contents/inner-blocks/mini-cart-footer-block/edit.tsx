@@ -40,6 +40,7 @@ export const Edit = (): JSX.Element => {
 	const TEMPLATE = [
 		[ 'woocommerce/mini-cart-cart-button-block', {} ],
 		[ 'woocommerce/mini-cart-checkout-button-block', {} ],
+		[ 'woocommerce/mini-cart-express-checkout-block', {} ],
 	];
 
 	return (
