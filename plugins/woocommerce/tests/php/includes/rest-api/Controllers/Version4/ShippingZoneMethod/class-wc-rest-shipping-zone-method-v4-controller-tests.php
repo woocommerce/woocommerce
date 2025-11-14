@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\ShippingZoneMe
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\Controller;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingMethodSchema;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_REST_Unit_Test_Case;
 use WC_Shipping_Zone;
 use WP_Error;
@@ -50,7 +51,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$this->schema     = new ShippingMethodSchema();
 		$this->controller = new Controller();
-		$this->controller->init( $this->schema );
+		$this->controller->init( $this->schema, new ShippingZoneMethodService() );
 		$this->controller->register_routes();
 
 		// Ensure shipping is enabled for tests.
@@ -407,17 +408,22 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 			}
 
 			/**
-			 * Update instance settings from API.
+			 * Get instance form fields with validation that always fails.
 			 *
-			 * @param array $settings Settings array.
-			 * @return \WP_Error Always returns error to simulate validation failure.
+			 * @return array
 			 */
-			public function update_instance_settings_from_api( $settings ) {
-				// Always return an error to simulate validation failure.
-				return new \WP_Error(
-					'woocommerce_rest_shipping_method_invalid_setting',
-					'Simulated validation error',
-					array( 'status' => 400 )
+			public function get_instance_form_fields() {
+				return array(
+					'title' => array(
+						'title'             => 'Title',
+						'type'              => 'text',
+						'default'           => '',
+						// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.Found
+						'sanitize_callback' => function () {
+							// Always throw exception to simulate validation failure.
+							throw new \Exception( 'Simulated validation error' );
+						},
+					),
 				);
 			}
 		};

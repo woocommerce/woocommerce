@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\ShippingZoneMethod\ShippingZoneMethodService;
 use WC_Shipping_Zones;
 use WP_Http;
 use WP_REST_Request;
@@ -38,6 +39,13 @@ class Controller extends AbstractController {
 	protected $method_schema;
 
 	/**
+	 * Shipping service instance.
+	 *
+	 * @var ShippingZoneMethodService
+	 */
+	protected $shipping_method_service;
+
+	/**
 	 * Custom error constants for shipping-specific errors.
 	 */
 	const INVALID_ZONE_ID     = 'invalid_zone_id';
@@ -48,17 +56,18 @@ class Controller extends AbstractController {
 	 * Initialize the controller with schema dependency injection.
 	 *
 	 * @internal
-	 * @param ShippingMethodSchema $method_schema Schema for shipping methods.
+	 * @param ShippingMethodSchema      $method_schema            Schema for shipping methods.
+	 * @param ShippingZoneMethodService $shipping_method_service Service for shipping method operations.
 	 */
-	final public function init( ShippingMethodSchema $method_schema ) {
-		$this->method_schema = $method_schema;
+	final public function init( ShippingMethodSchema $method_schema, ShippingZoneMethodService $shipping_method_service ) {
+		$this->method_schema           = $method_schema;
+		$this->shipping_method_service = $shipping_method_service;
 	}
 
 	/**
 	 * Register the routes for shipping zone methods.
 	 */
 	public function register_routes() {
-		// POST - Create shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base,
@@ -70,7 +79,6 @@ class Controller extends AbstractController {
 			)
 		);
 
-		// PUT - Update shipping method.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
@@ -112,36 +120,30 @@ class Controller extends AbstractController {
 	 * @return WP_REST_Response|WP_Error Response object or WP_Error.
 	 */
 	public function create_item( $request ) {
-		// Validate zone exists.
 		$zone = $this->validate_zone( $request['zone_id'] );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Validate method type.
 		$method_validation = $this->validate_method_type( $request['method_id'] );
 		if ( is_wp_error( $method_validation ) ) {
 			return $method_validation;
 		}
 
-		// Add the shipping method to the zone.
 		$instance_id = $zone->add_shipping_method( $request['method_id'] );
 
 		if ( ! $instance_id ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Get the newly created method instance.
 		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		if ( ! $method ) {
 			return $this->get_route_error_by_code( self::CANNOT_CREATE );
 		}
 
-		// Update method settings, enabled status, and order.
-		$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+		$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 		if ( is_wp_error( $result ) ) {
-			// Delete the method instance to rollback the creation.
-			// This ensures a failed POST would not leave an orphaned method.
+			// Rollback: delete the method instance to prevent orphaned records.
 			$zone->delete_shipping_method( $instance_id );
 			return $result;
 		}
@@ -171,13 +173,11 @@ class Controller extends AbstractController {
 			return $zone;
 		}
 
-		// Update method settings, enabled status, and order if any updates provided.
 		if ( isset( $request['enabled'] ) || isset( $request['settings'] ) || isset( $request['order'] ) ) {
-			$result = $method->update_from_api_request( $zone, $instance_id, $request->get_params() );
+			$result = $this->shipping_method_service->update_shipping_zone_method( $method, $instance_id, $request->get_params(), $zone->get_id() );
 			if ( is_wp_error( $result ) ) {
 				return $result;
 			}
-			$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
 		}
 
 		$request['zone_id'] = $zone->get_id();
