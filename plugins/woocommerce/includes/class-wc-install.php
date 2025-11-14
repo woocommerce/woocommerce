@@ -311,6 +311,7 @@ class WC_Install {
 		),
 		'10.4.0' => array(
 			'wc_update_1040_add_idx_date_paid_status_parent',
+			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
 	);
 

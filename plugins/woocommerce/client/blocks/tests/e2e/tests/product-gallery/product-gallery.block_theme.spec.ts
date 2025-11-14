@@ -11,7 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
-	title: 'Product Gallery',
+	title: 'Product Gallery (Beta)',
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -389,7 +389,7 @@ test.describe( `${ blockData.name }`, () => {
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(
-			'Block: Product Gallery'
+			'Block: Product Gallery (Beta)'
 		);
 
 		await expect( productGalleryBlock ).toBeVisible();
