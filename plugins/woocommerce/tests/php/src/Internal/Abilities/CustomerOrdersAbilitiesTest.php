@@ -13,13 +13,6 @@ use Automattic\WooCommerce\Internal\Abilities\CustomerOrdersAbilities;
 class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 	/**
-	 * Array to track abilities registered during tests for cleanup.
-	 *
-	 * @var array
-	 */
-	private $registered_abilities = array();
-
-	/**
 	 * Action name for abilities API initialization.
 	 *
 	 * @var string
