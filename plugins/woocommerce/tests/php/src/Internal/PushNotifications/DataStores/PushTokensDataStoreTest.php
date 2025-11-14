@@ -219,6 +219,59 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the update method throws exception when push token does
+	 * not exist.
+	 */
+	public function test_it_throws_exception_when_updating_push_token_that_does_not_exist() {
+		$data_store = new PushTokensDataStore();
+
+		$push_token = new PushToken();
+		$push_token->set_id( 999999 );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_device_uuid( 'device-uuid' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+		$this->expectExceptionCode( 404 );
+
+		$data_store->update( $push_token );
+	}
+
+	/**
+	 * @testdox Tests the update method throws exception when the post exists
+	 * but is not the correct post type.
+	 */
+	public function test_it_throws_exception_when_updating_push_token_with_wrong_post_type() {
+		$data_store = new PushTokensDataStore();
+
+		// Create a regular post instead of a push_token.
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Test Post',
+				'post_type'   => 'post',
+				'post_status' => 'private',
+			)
+		);
+
+		$push_token = new PushToken();
+		$push_token->set_id( $post_id );
+		$push_token->set_user_id( 1 );
+		$push_token->set_token( 'test_token' );
+		$push_token->set_platform( PushToken::PLATFORM_IOS );
+		$push_token->set_device_uuid( 'device-uuid' );
+		$push_token->set_origin( PushToken::ORIGIN_WOOCOMMERCE_IOS );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Push token could not be found.' );
+		$this->expectExceptionCode( 404 );
+
+		$data_store->update( $push_token );
+	}
+
+	/**
 	 * @testdox Tests the read_meta method of the push tokens data store.
 	 */
 	public function test_it_can_read_meta() {

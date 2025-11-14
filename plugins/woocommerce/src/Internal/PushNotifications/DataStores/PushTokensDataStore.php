@@ -131,6 +131,13 @@ class PushTokensDataStore {
 			);
 		}
 
+		$post = get_post( $push_token->get_id() );
+
+		if ( ! $post || PushToken::POST_TYPE !== $post->post_type ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new Exception( 'Push token could not be found.', WP_Http::NOT_FOUND );
+		}
+
 		$result = wp_update_post(
 			array(
 				'ID'          => $push_token->get_id(),
@@ -167,7 +174,7 @@ class PushTokensDataStore {
 	 * @since 10.4.0
 	 * @param PushToken $push_token An instance of PushToken.
 	 * @return array
-	 * @throws InvalidArgumentException If the token can't be read or meta key not given.
+	 * @throws InvalidArgumentException If the token can't be read.
 	 */
 	public function read_meta( &$push_token ) {
 		if ( ! $push_token->can_be_read() ) {
