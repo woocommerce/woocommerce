@@ -51,8 +51,6 @@ export function useEmailCss() {
 		[ editorTheme, userTheme ]
 	);
 
-	// In the Gutenberg version 22.0+ the useGlobalStylesOutputWithConfig hook is not available and we return empty array.
-	// We keep this for now to support WP 6.9 and lower.
 	const [ styles ] = useGlobalStylesOutputWithConfig( mergedConfig );
 
 	let rootContainerStyles = '';
