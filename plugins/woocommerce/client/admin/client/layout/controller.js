@@ -68,10 +68,6 @@ const WCPaymentsWelcomePage = lazy( () =>
 	)
 );
 
-const CustomizeStore = lazy( () =>
-	import( /* webpackChunkName: "customize-store" */ '../customize-store' )
-);
-
 const LaunchStore = lazy( () =>
 	import( /* webpackChunkName: "launch-store" */ '../launch-your-store/hub' )
 );
@@ -273,25 +269,6 @@ export const getPages = ( reports = [] ) => {
 				...initialBreadcrumbs,
 				__( 'Profiler', 'woocommerce' ),
 			],
-			capability: 'manage_woocommerce',
-		} );
-	}
-
-	if ( window.wcAdminFeatures[ 'customize-store' ] ) {
-		pages.push( {
-			container: CustomizeStore,
-			path: '/customize-store/*',
-			breadcrumbs: [
-				...initialBreadcrumbs,
-				__( 'Customize Your Store', 'woocommerce' ),
-			],
-			layout: {
-				header: false,
-				footer: true,
-				showNotices: true,
-				showStoreAlerts: false,
-				showPluginArea: false,
-			},
 			capability: 'manage_woocommerce',
 		} );
 	}

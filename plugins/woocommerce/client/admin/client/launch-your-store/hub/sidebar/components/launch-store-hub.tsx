@@ -31,7 +31,6 @@ import {
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
 import { taskCompleteIcon } from './icons';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { CompletedTaskItem, IncompleteTaskItem } from '../tasklist';
 export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 	const {
@@ -91,18 +90,7 @@ export const LaunchYourStoreHubSidebar = ( props: SidebarComponentProps ) => {
 				props.className
 			) }
 		>
-			<motion.div
-				className="woocommerce-edit-site-layout__header-container"
-				animate={ 'view' }
-			>
-				<SiteHub
-					variants={ {
-						view: { x: 0 },
-					} }
-					isTransparent={ false }
-					className="woocommerce-edit-site-layout__hub"
-				/>
-			</motion.div>
+			{/* SiteHub removed - CYS functionality removed */}
 			<SidebarContainer
 				title={ sidebarTitle }
 				description={ sidebarDescription }

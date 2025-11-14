@@ -16,7 +16,6 @@ import {
  * Internal dependencies
  */
 import { getAdminSetting } from '~/utils/admin-settings';
-import ResizableFrame from '~/customize-store/assembler-hub/resizable-frame';
 import type { MainContentComponentProps } from '../xstate';
 import './site-preview.scss';
 
@@ -25,8 +24,6 @@ export const SitePreviewPage = ( props: MainContentComponentProps ) => {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const iframeRef = useRef< HTMLIFrameElement >( null );
 	const [ frameResizer, frameSize ] = useResizeObserver();
-	const [ isResizableFrameOversized, setIsResizableFrameOversized ] =
-		useState( false );
 
 	useEffect( () => {
 		const iframeContentWindow = iframeRef.current?.contentWindow;
@@ -67,17 +64,11 @@ export const SitePreviewPage = ( props: MainContentComponentProps ) => {
 					layout="position"
 					className="launch-store-preview-layout__canvas"
 				>
-					<ResizableFrame
-						isReady={ ! isLoading }
-						isHandleVisibleByDefault={ false }
-						isFullWidth={ false }
-						defaultSize={ {
+					<div
+						style={ {
 							width: frameSize.width - 24,
 							height: frameSize.height,
 						} }
-						isOversized={ isResizableFrameOversized }
-						setIsOversized={ setIsResizableFrameOversized }
-						innerContentStyle={ {} }
 					>
 						{ isLoading && (
 							<div className="launch-store-site-preview-site__loading-overlay">
@@ -92,7 +83,7 @@ export const SitePreviewPage = ( props: MainContentComponentProps ) => {
 							title={ __( 'Preview', 'woocommerce' ) }
 							onLoad={ () => setIsLoading( false ) }
 						/>
-					</ResizableFrame>
+					</div>
 				</motion.div>
 			) }
 		</div>

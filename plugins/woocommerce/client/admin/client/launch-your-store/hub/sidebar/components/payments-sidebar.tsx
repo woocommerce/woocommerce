@@ -23,7 +23,6 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { SidebarComponentProps } from '../xstate';
 import { SidebarContainer } from './sidebar-container';
-import { SiteHub } from '~/customize-store/assembler-hub/site-hub';
 import { taskIcons, taskCompleteIcon } from './icons';
 import { StepPlaceholder } from './step-placeholder';
 import { useSetUpPaymentsContext } from '~/launch-your-store/data/setup-payments-context';
@@ -134,18 +133,6 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 				props.className
 			) }
 		>
-			<motion.div
-				className="woocommerce-edit-site-layout__header-container"
-				animate={ 'view' }
-			>
-				<SiteHub
-					variants={ {
-						view: { x: 0 },
-					} }
-					isTransparent={ false }
-					className="woocommerce-edit-site-layout__hub"
-				/>
-			</motion.div>
 			<SidebarContainer
 				title={ sidebarTitle }
 				onMobileClose={ props.onMobileClose }
