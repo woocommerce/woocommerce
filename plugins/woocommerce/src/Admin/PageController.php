@@ -632,6 +632,11 @@ class PageController {
 			return;
 		}
 
+		// Only sufficiently capable users should be redirected.
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return;
+		}
+
 		// Get the current task ID.
 		// phpcs:ignore WordPress.Security.NonceVerification
 		$task_id = wc_clean( wp_unslash( $_GET['task'] ) );
