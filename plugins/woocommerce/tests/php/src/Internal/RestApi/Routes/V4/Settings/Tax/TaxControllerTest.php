@@ -365,7 +365,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( 'invalid_param', $data['code'] );
 		// The error message format changed to be more generic based on setting options.
 		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
-		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
+		$this->assertStringContainsString( 'woocommerce_tax_based_on', $data['message'] );
 	}
 
 	/**
@@ -504,7 +504,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( 'invalid_param', $data['code'] );
 		// The error message format changed to be more generic based on setting options.
 		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
-		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
+		$this->assertStringContainsString( 'woocommerce_tax_based_on', $data['message'] );
 	}
 
 	/**

@@ -241,7 +241,7 @@ class Controller extends AbstractController {
 			return true;
 		}
 
-		// TODO: Fix ciab-next plugin's settings transformation.
+		// @todo Fix ciab-next plugin's settings transformation.
 		// The ciab-next plugin filters 'woocommerce_tax_settings' and transforms options from the simple
 		// WooCommerce format to a structured format, also clearing out the 'title' field. This causes
 		// validation issues in the REST API. The plugin should preserve the original format or only
@@ -267,10 +267,13 @@ class Controller extends AbstractController {
 
 		$invalid_values = array_diff( $check_values, $allowed_values );
 		if ( ! empty( $invalid_values ) ) {
+			// Note: Using setting_id instead of setting_label because plugins can filter settings
+			// and clear the 'title' field (e.g., ciab-next), making the label unreliable.
+			// The setting_id is always present and provides a clear, machine-readable identifier.
 			return $this->get_route_error_response(
 				$this->get_error_prefix() . 'invalid_param',
 				sprintf(
-				/* translators: 1: Setting label/name, 2: Allowed values list. */
+				/* translators: 1: Setting ID, 2: Allowed values list. */
 					__( 'Invalid value for "%1$s". Allowed values: %2$s.', 'woocommerce' ),
 					$setting_id,
 					implode( ', ', $allowed_values )
