@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Fix issue where DateRangePicker was saving the wrong default range and triggering an error.
