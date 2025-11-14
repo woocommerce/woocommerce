@@ -83,8 +83,13 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			</div>
 			<div class="wc-block-mini-cart__footer-actions">
 				<?php
+				if ( empty( $content ) ) {
+					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+					echo do_blocks( '<!-- wp:woocommerce/mini-cart-cart-button-block /--><!-- wp:woocommerce/mini-cart-checkout-button-block /-->' );
+				} else {
 					// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 					echo $content;
+				}
 				?>
 			</div>
 		</div>
