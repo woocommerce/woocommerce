@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { test, expect, BlockData } from '@woocommerce/e2e-utils';
+import {
+	test,
+	expect,
+	BlockData,
+	BLOCK_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -20,7 +25,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 	test.describe( 'in FSE editor', () => {
 		test( 'can be inserted in FSE area', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//single-product`,
+				postId: `${ BLOCK_THEME_SLUG }//single-product`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );
@@ -35,7 +40,7 @@ test.describe( 'Merchant → Mini Cart', () => {
 
 		test( 'can only be inserted once', async ( { editor, admin } ) => {
 			await admin.visitSiteEditor( {
-				postId: `woocommerce/woocommerce//single-product`,
+				postId: `${ BLOCK_THEME_SLUG }//single-product`,
 				postType: 'wp_template',
 				canvas: 'edit',
 			} );

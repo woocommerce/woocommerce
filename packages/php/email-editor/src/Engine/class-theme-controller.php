@@ -118,7 +118,7 @@ class Theme_Controller {
 		foreach ( $styles as $key => $style_value ) {
 			if ( is_array( $style_value ) ) {
 				$styles[ $key ] = $this->recursive_extract_preset_variables( $style_value );
-			} elseif ( strpos( $style_value, 'var:preset|' ) === 0 ) {
+			} elseif ( is_string( $style_value ) && strpos( $style_value, 'var:preset|' ) === 0 ) {
 				/** @var string $style_value */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$styles[ $key ] = 'var(--wp--' . str_replace( '|', '--', str_replace( 'var:', '', $style_value ) ) . ')';
 			} else {

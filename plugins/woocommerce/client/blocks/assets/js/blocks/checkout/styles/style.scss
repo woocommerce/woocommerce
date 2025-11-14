@@ -4,6 +4,7 @@
 
 	// Don't remove this, it marks the container for container queries used in inner blocks.
 	container-type: inline-size;
+	width: 100%;
 
 	.with-scroll-to-top__scroll-point {
 		top: -96px;
@@ -15,18 +16,28 @@
 		&:last-child {
 			margin-bottom: 0;
 		}
+
+		.wc-block-components-radio-control
+			.wc-block-components-radio-control__input {
+			// We want it to stick to the top, since it has position: absolute we
+			// can position it to be aligned with the top padding value.
+			top: $gap;
+			transform: none;
+		}
 	}
 	.wc-block-checkout__login-prompt {
 		float: right;
 		margin-top: -$gap-large;
-		@include font-size(regular);
+		font-weight: 400;
+		line-height: $gap * 1.25;
+		@include font-regular-locked;
 	}
 	.wc-block-checkout__create-account {
-		margin-top: $gap-large !important;
+		margin-top: $gap !important;
 	}
 	.wc-block-checkout__guest-checkout-notice {
+		@include font-small-locked;
 		margin: $gap-smallest 0 0;
-		@include font-size(smaller);
 	}
 }
 
@@ -134,19 +145,6 @@
 		.wc-block-components-totals-coupon-link {
 			margin-left: $gap;
 			margin-right: $gap;
-		}
-	}
-}
-
-.wp-block-woocommerce-checkout.is-loading.is-fading {
-	div.wp-block-woocommerce-checkout-totals-block,
-	div.wp-block-woocommerce-checkout-fields-block {
-		> div {
-			background-color: transparent;
-
-			&::after {
-				background: transparent;
-			}
 		}
 	}
 }

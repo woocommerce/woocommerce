@@ -38,7 +38,7 @@ export const changelogCommand = new Command( 'changelog' )
 		false
 	)
 	.option(
-		'-o, --override <override>',
+		'-t, --override <override>',
 		"Time Override: The time to use in checking whether the action should run (default: 'now').",
 		'now'
 	)
@@ -82,7 +82,8 @@ export const changelogCommand = new Command( 'changelog' )
 			} );
 		}
 
-		const releaseBranch = branch || `release/${ version }`;
+		const releaseBranch =
+			branch || `release/${ version.replace( /\.\d+(-.*)?$/, '' ) }`;
 
 		// Update the release branch.
 		const releaseBranchChanges = await updateReleaseBranchChangelogs(

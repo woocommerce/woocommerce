@@ -30,7 +30,7 @@ $pattern_image       = plugins_url( 'assets/images/pattern-placeholders/man-pers
 			<div class="wp-block-buttons">
 				<!-- wp:button -->
 				<div class="wp-block-button">
-					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( get_permalink( wc_get_page_id( 'shop' ) ) ); ?>"><?php echo esc_html( $pattern_button ); ?></a>
+					<a class="wp-block-button__link wp-element-button" href="<?php echo esc_url( wc_get_page_permalink( 'shop' ) ); ?>"><?php echo esc_html( $pattern_button ); ?></a>
 				</div>
 				<!-- /wp:button -->
 			</div>

@@ -1,6 +1,6 @@
 # WooCommerce {RELEASE_VERSION}.{PATCH_VERSION}
 
-This issue tracks the progress of the a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. Patch version in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
+This issue tracks the progress of a single WooCommerce core plugin release iteration that covers the publishing of a single patch version. "Patch version" in this context refers to `z` in a version following `x.y.z` where `z` can be any of `0-99`, `0-rc.[0-99]`, or `0-beta.[0-99]`.
 
 ## Version being released {RELEASE_VERSION}.{PATCH_VERSION}
 
@@ -64,6 +64,7 @@ The following details are copied from the official [Building and Publishing guid
 - [ ] **Condition:** Only perform this step if:
     - The release is a stable release, and
     - No major issues were found during the release to staging.
+    - You have monitored the release following the ["Monitoring Deploys to WPCOM Atomic"](https://fieldguide.automattic.com/woocommerce-core-releases/woocommerce-core-releases-deploying-to-atomic-staging/#monitoring-deploys-atomic) guide for at least 4 hours for `.0` releases and at least 2 hours for other patch releases.
 - [ ] **Action:** Run the ["Release: Update stable tag" workflow](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) from `trunk`, set the version, and select the option to update the stable tag as part of the workflow input.
     - Review and merge the pull requests created (one for the release branch and trunk).
 
@@ -74,6 +75,10 @@ The following details are copied from the official [Building and Publishing guid
     - If releasing a dev, beta, or RC, check "Set as a pre-release."
     - If the version was marked as stable in Step 1 above, check "Set as the latest release."
     - If the version was not marked as stable in Step 1 above, do not set as the latest release.
+
+### Step 3: Merge follow-up PRs
+
+- [ ] **Action:** Merge the "Update changelog.txt after {RELEASE_VERSION}.{PATCH_VERSION}" PR that is automatically created once the release tag is published on GitHub.
 
 ## Post Release Monitoring
 

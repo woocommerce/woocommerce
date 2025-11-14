@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update pending jobs to run all groups in flaky batch queue tests

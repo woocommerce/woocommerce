@@ -67,6 +67,10 @@ const handlers = [
 		return HttpResponse.json( {} );
 	} ),
 
+	http.get( '/wp/v2/types', () => {
+		return HttpResponse.json( {} );
+	} ),
+
 	http.get( '/wc/store/v1/products/:id', () => {
 		return HttpResponse.json( {
 			id: 123,

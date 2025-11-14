@@ -2750,7 +2750,7 @@ function wc_update_890_update_connect_to_woocommerce_note() {
  * Shows an admin notice to inform the store owner that PayPal Standard has been disabled and suggests installing PayPal Payments.
  */
 function wc_update_890_update_paypal_standard_load_eligibility() {
-	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? new WC_Gateway_Paypal() : null;
+	$paypal = class_exists( 'WC_Gateway_Paypal' ) ? WC_Gateway_Paypal::get_instance() : null;
 
 	if ( ! $paypal ) {
 		return;
@@ -3021,6 +3021,45 @@ function wc_update_961_migrate_default_email_base_color() {
 }
 
 /**
+ * Add old refunded order items to the product_lookup_table.
+ */
+function wc_update_1020_add_old_refunded_order_items_to_product_lookup_table() {
+	global $wpdb;
+
+	// Get every order ID where:
+	// 1. the total sales is less than 0, and
+	// 2. is not refunded shipping fee only, and
+	// 3. is not refunded tax fee only.
+	$refunded_orders = $wpdb->get_results(
+		"SELECT order_stats.order_id, order_stats.num_items_sold
+		FROM {$wpdb->prefix}wc_order_stats AS order_stats
+		WHERE order_stats.total_sales < 0 # Refunded orders
+			AND order_stats.total_sales != order_stats.shipping_total # Exclude refunded orders that only include a shipping refund
+			AND order_stats.total_sales != order_stats.tax_total # Exclude refunded orders that only include a tax refund"
+	);
+
+	if ( $refunded_orders ) {
+		update_option( 'woocommerce_analytics_uses_old_full_refund_data', 'yes' );
+		foreach ( $refunded_orders as $refunded_order ) {
+			if ( intval( $refunded_order->num_items_sold ) === 0 ) {
+				$order = wc_get_order( $refunded_order->order_id );
+				if ( ! $order ) {
+					continue;
+				}
+				// If the refund order has no line items, mark it as a full refund in orders_meta table.
+				// In the above query we already excluded orders for refunded shipping and tax, so it's safe to assume that the refund order without items is a full refund.
+				// Note that the "full" refund here means it's created by changing the order status to "Refunded", not partially refund all the items in the order.
+				if ( empty( $order->get_items() ) ) {
+					wc_get_logger()->info( sprintf( 'Setting refund type to full for order_id: %s', $refunded_order->order_id ) );
+					$order->update_meta_data( '_refund_type', 'full' );
+					$order->save_meta_data();
+				}
+			}
+		}
+	}
+}
+
+/**
  * Remove the option woocommerce_order_attribution_install_banner_dismissed.
  * This data is now stored in the user meta table in the PR #55715.
  */
@@ -3068,4 +3107,33 @@ function wc_update_990_remove_email_notes() {
  */
 function wc_update_1000_remove_patterns_toolkit_transient() {
 	delete_transient( 'ptk_patterns' );
+}
+
+/**
+ * Add an index to (comment_date_gmt, comment_type, comment_approved, comment_post_ID)
+ * on the comments table to improve the admin query that gets the latest 25 comments
+ * while excluding reviews and internal notes.
+ *
+ * @return void
+ */
+function wc_update_1030_add_comments_date_type_index() {
+	global $wpdb;
+	$date_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_date_type'" );
+
+	if ( is_null( $date_type_index_exists ) ) {
+		// Improve performance of the admin comments query when fetching the latest 25 comments while excluding reviews and internal notes.
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} ADD INDEX woo_idx_comment_date_type (comment_date_gmt, comment_type, comment_approved, comment_post_ID)" );
+	}
+}
+
+/**
+ * Clean up the old last_fetch_patterns_request option and non-grouped actions after migration to using the `action_scheduler_ensure_recurring_actions` hook.
+ *
+ * In version 10.4.0, this functionality was replaced with Action Scheduler recurring actions.
+ *
+ * @return void
+ */
+function wc_update_1040_cleanup_legacy_ptk_patterns_fetching() {
+	delete_option( 'last_fetch_patterns_request' );
+	as_unschedule_all_actions( 'fetch_patterns' );
 }

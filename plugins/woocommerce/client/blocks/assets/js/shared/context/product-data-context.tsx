@@ -53,6 +53,7 @@ const defaultProductData: ProductResponseItem = {
 	sold_individually: false,
 	add_to_cart: {
 		text: 'Add to cart',
+		single_text: 'Add to cart',
 		description: 'Add to cart',
 		url: '',
 		minimum: 1,
@@ -107,7 +108,7 @@ export const useProductDataContext = (
 	const context = useContext( ProductDataContext );
 	const { isAdmin, product, isResolving } = props;
 
-	if ( ! isAdmin ) {
+	if ( ! isAdmin || ! product ) {
 		return context;
 	}
 

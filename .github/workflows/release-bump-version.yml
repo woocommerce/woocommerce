@@ -128,7 +128,7 @@ jobs:
           sed -i -E "s/Version: [0-9]+\.[0-9]+\.[0-9]+.*$/Version: $NEXT_VERSION/" woocommerce.php
 
           # Update changelog in readme.txt.
-          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+ (.*) =/= $NEXT_STABLE \1 =/" readme.txt
+          sed -i -E "s/^= [0-9]+\.[0-9]+\.[0-9]+(\-[a-z]+(\.[0-9]+)*)? (.*) =/= $NEXT_VERSION \3 =/" readme.txt
 
           if [[ "$CLEAR_CHANGELOG" == "true" ]]; then
             perl -i -p0e 's/(== Changelog ==.*= \d+\.\d+\.\d+.*=\n)(.*)(\n\[See changelog for all versions\].*)/$1$3/igs' readme.txt
@@ -141,7 +141,7 @@ jobs:
           done
 
           # Update $version property in class-woocommerce.php.
-          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+';/public \\\$version = '$NEXT_STABLE'\;/" includes/class-woocommerce.php
+          sed -i -E "s/public \\\$version = '[0-9]+\.[0-9]+\.[0-9]+.*';/public \\\$version = '$NEXT_VERSION'\;/" includes/class-woocommerce.php
 
           if git diff --quiet; then
             echo "::error::No changes to commit."
@@ -150,13 +150,13 @@ jobs:
 
       - name: Open PR with changes
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
         run: |
           branch_name="bump-wc-version-to-${{ steps.compute-new-version.outputs.nextVersion }}/${{ github.run_id }}"
 
           # Configure Git.
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "woocommercebot"
+          git config --global user.email "woocommercebot@users.noreply.github.com"
 
           # Push changes.
           git checkout -b ${branch_name}

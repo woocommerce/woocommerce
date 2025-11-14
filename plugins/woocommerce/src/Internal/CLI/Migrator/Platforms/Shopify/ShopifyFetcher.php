@@ -89,6 +89,10 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 								position
 								inventoryItem {
 									tracked
+									unitCost {
+										amount
+										currencyCode
+									}
 									measurement {
 										weight {
 											value
@@ -151,18 +155,20 @@ class ShopifyFetcher implements PlatformFetcherInterface {
 	private $shopify_client;
 
 	/**
-	 * Constructor.
+	 * Platform credentials.
+	 *
+	 * @var array
 	 */
-	public function __construct() {}
+	private array $credentials;
 
 	/**
-	 * Initialize the fetcher with dependencies.
+	 * Constructor.
 	 *
-	 * @internal
-	 * @param ShopifyClient $shopify_client The Shopify client.
+	 * @param array $credentials Platform credentials array.
 	 */
-	final public function init( ShopifyClient $shopify_client ): void {
-		$this->shopify_client = $shopify_client;
+	public function __construct( array $credentials ) {
+		$this->credentials    = $credentials;
+		$this->shopify_client = new ShopifyClient( $credentials );
 	}
 
 	/**

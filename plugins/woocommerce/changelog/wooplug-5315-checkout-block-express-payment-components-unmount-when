@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent skeleton display when an express payment method is active to avoid unmounting express buttons

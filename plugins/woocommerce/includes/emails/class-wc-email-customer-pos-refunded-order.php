@@ -49,6 +49,7 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			$this->customer_email = true;
 			$this->id             = 'customer_pos_refunded_order';
 			$this->title          = __( 'POS refunded order', 'woocommerce' );
+			$this->email_group    = 'payments';
 			$this->template_html  = 'emails/customer-pos-refunded-order.php';
 			$this->template_plain = 'emails/plain/customer-pos-refunded-order.php';
 			$this->placeholders   = array(
@@ -66,6 +67,11 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 
 			$this->disable_default_refund_emails_for_pos_orders();
 			$this->register_refund_email_triggers();
+
+			if ( $this->block_email_editor_enabled ) {
+				$this->title       = __( 'POS order refunded', 'woocommerce' );
+				$this->description = __( 'Notifies customers when a full or partial refund has been issued for their in-person (POS) order.', 'woocommerce' );
+			}
 		}
 
 		/**
@@ -369,6 +375,9 @@ if ( ! class_exists( 'WC_Email_Customer_POS_Refunded_Order', false ) ) :
 			if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
 				$this->form_fields['cc']  = $this->get_cc_field();
 				$this->form_fields['bcc'] = $this->get_bcc_field();
+			}
+			if ( $this->block_email_editor_enabled ) {
+				$this->form_fields['preheader'] = $this->get_preheader_field();
 			}
 		}
 

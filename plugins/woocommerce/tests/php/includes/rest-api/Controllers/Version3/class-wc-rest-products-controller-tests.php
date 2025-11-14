@@ -12,30 +12,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
-	 * Enable the experimental REST API feature.
+	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
+	 * @var mixed
 	 */
-	private function enable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features[] = 'experimental-wc-rest-api';
-				return $features;
-			}
-		);
-	}
-
-	/**
-	 * Disable the experimental REST API feature.
-	 */
-	private function disable_experimental_rest_api_feature() {
-		add_filter(
-			'woocommerce_admin_features',
-			function ( $features ) {
-				$features = array_diff( $features, array( 'experimental-wc-rest-api' ) );
-				return $features;
-			}
-		);
-	}
+	protected $original_hid_out_of_stock_value;
 
 	/**
 	 * Runs after each test.
@@ -43,6 +23,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
+		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -85,14 +66,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$grouped_product       = WC_Helper_Product::create_grouped_product();
-		$children_products_ids = $grouped_product->get_children();
-
-		foreach ( $children_products_ids as $child_product_id ) {
-			self::$products[] = wc_get_product( $child_product_id );
-		}
-		self::$products[] = $grouped_product;
-
 		foreach ( self::$products as $product ) {
 			$product->add_meta_data( 'test1', 'test1', true );
 			$product->add_meta_data( 'test2', 'test2', true );
@@ -123,15 +96,16 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
 	 * Get all expected fields.
 	 *
 	 * @param bool $with_cogs_enabled Ture to get the fields expected when the Cost of Goods Sold feature is enabled.
-	 * @param bool $with_experimental_rest_api True to get the fields expected when the experimental REST API feature is enabled.
 	 */
-	public function get_expected_response_fields( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function get_expected_response_fields( bool $with_cogs_enabled ) {
 		$fields = array(
 			'id',
 			'name',
@@ -209,11 +183,6 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			$fields[] = 'cost_of_goods_sold';
 		}
 
-		if ( $with_experimental_rest_api ) {
-			$fields[] = '__experimental_min_price';
-			$fields[] = '__experimental_max_price';
-		}
-
 		return $fields;
 	}
 
@@ -221,24 +190,17 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * Test that all expected response fields are present.
 	 * Note: This has fields hardcoded intentionally instead of fetching from schema to test for any bugs in schema result. Add new fields manually when added to schema.
 	 *
-	 * @testWith [true, true]
-	 *           [false, false]
+	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
-	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_product_api_get_all_fields( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_product_api_get_all_fields( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
 		}
 
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
-		} else {
-			$this->disable_experimental_rest_api_feature();
-		}
-
-		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 
 		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
@@ -272,22 +234,17 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	/**
 	 * Test that all fields are returned when requested one by one.
 	 *
-	 * @testWith [true, true]
-	 *           [false, false]
+	 * @testWith [true]
+	 *           [false]
 	 *
 	 * @param bool $with_cogs_enabled Ture test with the Cost of Goods Sold feature enabled.
-	 * @param bool $with_experimental_rest_api True to test with the experimental REST API feature enabled.
 	 */
-	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled, bool $with_experimental_rest_api ) {
+	public function test_products_get_each_field_one_by_one( bool $with_cogs_enabled ) {
 		if ( $with_cogs_enabled ) {
 			$this->enable_cogs_feature();
 		}
 
-		if ( $with_experimental_rest_api ) {
-			$this->enable_experimental_rest_api_feature();
-		}
-
-		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled, $with_experimental_rest_api );
+		$expected_response_fields = $this->get_expected_response_fields( $with_cogs_enabled );
 		$product                  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
 
 		foreach ( $expected_response_fields as $field ) {
@@ -469,7 +426,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( 4, $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -494,7 +451,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( 4, $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -519,7 +476,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( 4, $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -545,7 +502,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_data = $response->get_data();
-		$this->assertCount( 7, $response_data );
+		$this->assertCount( 4, $response_data );
 
 		foreach ( $response_data as $order ) {
 			$this->assertArrayHasKey( 'meta_data', $order );
@@ -1022,7 +979,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$response_products = $response->get_data();
 
-		$this->assertCount( 2, $response_products );
+		$this->assertCount( 1, $response_products );
 		$this->assertEquals( ProductType::GROUPED, $response_products[0]['type'] );
 	}
 
@@ -1046,10 +1003,10 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$response_products = $response->get_data();
-		$this->assertCount( 3, $response_products );
+		$this->assertCount( 2, $response_products );
 
 		$product_types = wp_list_pluck( $response_products, 'type' );
-		$this->assertEqualsCanonicalizing( array( ProductType::EXTERNAL, ProductType::GROUPED, ProductType::GROUPED ), $product_types );
+		$this->assertEqualsCanonicalizing( array( ProductType::EXTERNAL, ProductType::GROUPED ), $product_types );
 	}
 
 	/**
@@ -1933,34 +1890,159 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that grouped products return correct min_price and max_price values.
+	 * Test that batch create operations update term counts correctly.
 	 *
-	 * @return void
+	 * Verifies that when creating products via batch operations, the term counts
+	 * are properly updated when hide out of stock is disabled.
 	 */
-	public function test_grouped_product_min_max_price() {
-		$grouped_product = array_filter(
-			self::$products,
-			function ( $product ) {
-				return $product->get_type() === ProductType::GROUPED;
-			}
+	public function test_batch_create_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 1',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'instock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
 		);
-		$grouped_product = reset( $grouped_product );
+		$this->server->dispatch( $request );
 
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $grouped_product->get_id() ) );
-		$this->assertEquals( 200, $response->get_status() );
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before + 1, $count_after, 'Batch create should update term count.' );
+	}
 
-		$data = $response->get_data();
+	/**
+	 * Test that batch create obeys hide out of stock setting.
+	 *
+	 * Verifies that when creating out of stock products via batch operations,
+	 * the term counts are not increased when hide out of stock is enabled.
+	 */
+	public function test_batch_create_out_of_stock_obeys_hide_setting() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
 
-		$this->assertArrayHasKey( '__experimental_min_price', $data );
-		$this->assertArrayHasKey( '__experimental_max_price', $data );
-		$this->assertEquals( '1', $data['__experimental_min_price'] );
-		$this->assertEquals( '10', $data['__experimental_max_price'] );
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 2',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'outofstock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
 
-		$this->disable_experimental_rest_api_feature();
-		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $grouped_product->get_id() ) );
-		$this->assertEquals( 200, $response->get_status() );
-		$data = $response->get_data();
-		$this->assertArrayNotHasKey( '__experimental_min_price', $data );
-		$this->assertArrayNotHasKey( '__experimental_max_price', $data );
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before, $count_after, 'Out-of-stock products should not increment count with hide setting ON.' );
+	}
+
+	/**
+	 * Test that batch update of stock status affects term counts.
+	 *
+	 * Verifies that updating product stock status via batch operations properly
+	 * decrements term counts when hide out of stock is enabled.
+	 */
+	public function test_batch_update_stock_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'           => $product->get_id(),
+						'stock_status' => 'outofstock',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch update of product status affects term counts.
+	 *
+	 * Verifies that updating product status via batch operations properly
+	 * decrements term counts when products are changed to draft status.
+	 */
+	public function test_batch_update_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'     => $product->get_id(),
+						'status' => 'draft',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch delete operations update term counts.
+	 *
+	 * Verifies that when deleting products via batch operations, the term counts
+	 * are properly decremented immediately.
+	 */
+	public function test_batch_delete_product_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$delete_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$delete_request->set_body_params( array( 'delete' => array( $product->get_id() ) ) );
+		$this->server->dispatch( $delete_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
 	}
 }

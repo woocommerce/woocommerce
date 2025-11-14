@@ -2,6 +2,52 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.0.0) - 2025-11-12 
+
+-   Patch - Prevent crashes with Gutenberg 22.0 [#61925]
+-   Minor [ **BREAKING CHANGE** ] - Updated all PHP dependencies. [#61753]
+
+## [1.3.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.3.0) - 2025-11-05 
+
+-   Minor - Add setEmailPostType action and export email editor hooks and utilities for template previews and styling [#61804]
+
+## [1.2.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.1) - 2025-11-04 
+
+-   Patch - Export the personalization tags RichTextWithButton component and other email editor methods. [#61748]
+
+## [1.2.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.2.0) - 2025-10-31 
+
+-   Patch - Ensure the Command palette is functional in WordPress 6.9 beta and above. [#61672]
+-   Minor - Add 'woocommerce-email-editor' plugin area [#61666]
+
+## [1.1.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.3) - 2025-10-27 
+
+-   Patch - Fix for email preview to fit into the container in the preview column [#61442]
+-   Patch - Refactor personalization tags fetching to use core entities [#61467]
+-   Patch - Add support for a custom back button component [#61535]
+
+## [1.1.2](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.2) - 2025-10-09 
+
+-   Patch - Export hook isEmailEditor from the package. [#60941]
+
+## [1.1.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.1) - 2025-09-26 
+
+-   Patch - Allow passing editor configuration to ExperimentalEmailEditor via props [#60974]
+
+## [1.1.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.1.0) - 2025-09-09 
+
+-   Minor - Export `SendPreviewEmail` component and `createStore` [#60796]
+-   Minor - Bump jest package dependency to 29.5.x [#60324]
+-   Minor - Add support for contentRef property to the experimental editor component [#60821]
+-   Minor - Refactor usage of hooks and global Gutenberg functions to support preserving and restoring the original state [#60741]
+-   Patch - Display warning message when user clicks on "Preview in new tab" without saving the edited changes [#60307]
+
+## [1.0.4](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.4) - 2025-08-21 
+
+-   Patch - Filter unnecessary stylesheets from Editor iframe [#60354]
+-   Patch - Fix site logo not rendered properly. In the email editor if the site logo was in a group block the right alignment didn't work. [#60290]
+-   Patch - Ensure the email editor obtains and utilizes the site theme styles as part of its default values. [#60465]
+
 ## [1.0.3](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.0.3) - 2025-08-11 
 
 -   Patch - Fixed a possible infinite loading of templates when editing emails. [#60196]
@@ -56,7 +102,5 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Update email editor email preview, switch to template modal and style preview componets [#58078]
 -   Minor - Update telemetry tracking to restore events removed by refactoring components [#58294]
 -   Minor - Added email status toggle in the email editor sidebar. Added the ability to enable/disable transactional emails directly from the email editor [#57953]
--   Major [ **BREAKING CHANGE** ] - Refactor email editor to work on top of wordpress/editor Editor component [#57775]
--   Major [ **BREAKING CHANGE** ] - Refactor the package and its build to be prepared for publishing [#58874]
 
 [See legacy changelogs for previous versions](https://github.com/woocommerce/woocommerce/blob/68581955106947918d2b17607a01bdfdf22288a9/packages/js/email-editor/CHANGELOG.md).
