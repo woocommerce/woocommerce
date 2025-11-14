@@ -111,6 +111,39 @@ class CallbackUtilTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox `get_callback_signature` should produce closure signatures with file path and line numbers.
+	 */
+	public function test_get_callback_signature_closure_format() {
+		$closure = function () {
+			return 'test';
+		};
+
+		$signature = CallbackUtil::get_callback_signature( $closure );
+
+		$this->assertStringStartsWith( 'Closure@', $signature );
+		$this->assertStringContainsString( __FILE__, $signature );
+		$this->assertMatchesRegularExpression( '/:\d+-\d+$/', $signature );
+	}
+
+	/**
+	 * @testdox `get_callback_signature` should produce consistent signatures for the same closure code across invocations.
+	 */
+	public function test_get_callback_signature_closure_consistency() {
+		$get_closure = function () {
+			return function () {
+				return 'test';
+			};
+		};
+
+		$closure1   = $get_closure();
+		$closure2   = $get_closure();
+		$signature1 = CallbackUtil::get_callback_signature( $closure1 );
+		$signature2 = CallbackUtil::get_callback_signature( $closure2 );
+
+		$this->assertEquals( $signature1, $signature2 );
+	}
+
+	/**
 	 * @testdox `get_callback_signature` should return class name with __invoke for invokable objects.
 	 */
 	public function test_get_callback_signature_with_invokable_object() {

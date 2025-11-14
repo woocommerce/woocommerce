@@ -42,7 +42,11 @@ final class CallbackUtil {
 
 		if ( $callback instanceof \Closure ) {
 			// Closure.
-			return 'Closure@' . spl_object_hash( $callback );
+			try {
+				return self::get_closure_signature( $callback );
+			} catch ( \Exception $e ) {
+				return 'Closure@' . spl_object_hash( $callback );
+			}
 		}
 
 		if ( is_object( $callback ) ) {
@@ -61,8 +65,8 @@ final class CallbackUtil {
 	 * with the specified hook name, organized by priority. This is useful
 	 * for generating cache keys or comparing hook state.
 	 *
-	 * Note: Closure signatures use spl_object_hash(), which will differ
-	 * between requests.
+	 * Closure signatures are based on their file location and line numbers,
+	 * providing consistent hashes across requests for the same closure code.
 	 *
 	 * @param string $hook_name The name of the hook to inspect.
 	 * @return array<int, array<string>> Array of priority => array( signatures ),  empty if hook has no callbacks.
@@ -114,5 +118,25 @@ final class CallbackUtil {
 			$priority_callbacks,
 			fn( $callback_data ) => is_array( $callback_data ) && isset( $callback_data['function'] )
 		);
+	}
+
+	/**
+	 * Get a stable signature for a closure based on its file path and line numbers.
+	 *
+	 * @param \Closure $closure The closure to generate a signature for.
+	 * @return string Signature in the format 'Closure@filename:startLine-endLine'.
+	 * @throws \ReflectionException If reflection fails.
+	 */
+	private static function get_closure_signature( \Closure $closure ): string {
+		$reflection = new \ReflectionFunction( $closure );
+		$file       = $reflection->getFileName();
+		$start      = $reflection->getStartLine();
+		$end        = $reflection->getEndLine();
+
+		if ( false === $file || false === $start || false === $end ) {
+			throw new \ReflectionException( 'Unable to get closure location information' );
+		}
+
+		return sprintf( 'Closure@%s:%d-%d', $file, $start, $end );
 	}
 }
