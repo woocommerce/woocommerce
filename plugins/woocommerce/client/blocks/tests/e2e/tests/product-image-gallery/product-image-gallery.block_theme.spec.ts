@@ -113,17 +113,17 @@ test.describe( `${ blockData.name } editor`, () => {
 		await editor.selectBlocks( productImageGalleryBlock );
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeHidden();
 
 		await page
 			.getByRole( 'button', {
-				name: 'Upgrade to the new Product Gallery block',
+				name: 'Use the Product Gallery block',
 			} )
 			.click();
 
 		await expect(
-			editor.canvas.getByLabel( 'Block: Product Gallery' )
+			editor.canvas.getByLabel( 'Block: Product Gallery (Beta)' )
 		).toBeVisible();
 	} );
 } );

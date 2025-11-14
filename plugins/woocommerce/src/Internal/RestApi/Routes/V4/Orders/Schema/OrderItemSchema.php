@@ -167,7 +167,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'total'        => wc_format_decimal( $order_item->get_total(), $dp ),
 			'total_tax'    => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'        => $this->prepare_taxes( $order_item, $request ),
-			'meta_data'    => $this->filter_meta_data( $this->prepare_meta_data( $order_item ), $order_item, $request ),
+			'meta_data'    => $this->prepare_meta_data( $order_item ),
 		);
 
 		// Add COGS data.
@@ -177,31 +177,6 @@ class OrderItemSchema extends AbstractLineItemSchema {
 		}
 
 		return $data;
-	}
-
-	/**
-	 * Filter the meta data for the order item.
-	 *
-	 * @param array                 $meta_data Meta data.
-	 * @param WC_Order_Item_Product $order_item Order item instance.
-	 * @param WP_REST_Request       $request Request object.
-	 * @return array
-	 */
-	protected function filter_meta_data( array $meta_data, WC_Order_Item_Product $order_item, WP_REST_Request $request ) {
-		$product               = $order_item->get_product();
-		$item_name             = $order_item->get_name();
-		$filter_variation_meta = true === $request['order_item_display_meta'] && $product && $product->is_type( ProductType::VARIATION );
-		$return                = array();
-
-		foreach ( $meta_data as $meta ) {
-			// Filter out product variations.
-			if ( $filter_variation_meta && wc_is_attribute_in_product_name( $meta['display_value'], $item_name ) ) {
-				continue;
-			}
-			$return[] = $meta;
-		}
-
-		return $return;
 	}
 
 	/**
