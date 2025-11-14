@@ -100,11 +100,8 @@ class Controller extends AbstractController {
 	 */
 	public function get_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'read' ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Sorry, you are not allowed to access tax settings.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return $this->get_authentication_error_by_method( $request->get_method() );
+
 		}
 		return true;
 	}
@@ -117,11 +114,8 @@ class Controller extends AbstractController {
 	 */
 	public function update_item_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
-			return new WP_Error(
-				'rest_forbidden',
-				__( 'Sorry, you are not allowed to edit tax settings.', 'woocommerce' ),
-				array( 'status' => rest_authorization_required_code() )
-			);
+			return $this->get_authentication_error_by_method( $request->get_method() );
+
 		}
 		return true;
 	}
@@ -195,7 +189,7 @@ class Controller extends AbstractController {
 			$sanitized_value    = $this->sanitize_setting_value( $setting_type, $setting_value );
 
 			// Additional validation for specific settings.
-			$validation_result = $this->validate_setting_value( $setting_id, $sanitized_value );
+			$validation_result = $this->validate_setting_value( $setting_definition, $sanitized_value );
 			if ( is_wp_error( $validation_result ) ) {
 				return $validation_result;
 			}
@@ -235,58 +229,36 @@ class Controller extends AbstractController {
 	/**
 	 * Validate a setting value before updating.
 	 *
-	 * @param string $setting_id Setting ID.
-	 * @param mixed  $value      Setting value.
+	 * @param array $setting Setting definition.
+	 * @param mixed $value      Setting value.
 	 * @return bool|WP_Error True if valid, WP_Error if invalid.
 	 */
-	private function validate_setting_value( $setting_id, $value ) {
-		// Custom validation rules for specific tax settings.
-		switch ( $setting_id ) {
-			case 'woocommerce_prices_include_tax':
-				$valid_options = array( 'yes', 'no' );
-				if ( ! in_array( $value, $valid_options, true ) ) {
-					return $this->get_route_error_response(
-						$this->get_error_prefix() . 'invalid_param',
-						__( 'Invalid option for prices entered with tax. Must be either "yes" or "no".', 'woocommerce' ),
-						400
-					);
-				}
-				break;
+	private function validate_setting_value( $setting, $value ) {
+		$setting_id    = $setting['id'] ?? '';
+		$setting_label = $setting['title'] ?? $setting_id;
+		$options       = $setting['options'] ?? array();
 
-			case 'woocommerce_tax_based_on':
-				$valid_options = array( 'shipping', 'billing', 'base' );
-				if ( ! in_array( $value, $valid_options, true ) ) {
-					return $this->get_route_error_response(
-						$this->get_error_prefix() . 'invalid_param',
-						__( 'Invalid tax calculation base. Must be one of: shipping, billing, base.', 'woocommerce' ),
-						400
-					);
-				}
-				break;
+		if ( empty( $options ) ) {
+			return true;
+		}
 
-			case 'woocommerce_tax_round_at_subtotal':
-			case 'woocommerce_tax_display_shop':
-			case 'woocommerce_tax_display_cart':
-				// Boolean or string validation.
-				if ( ! is_bool( $value ) && ! in_array( $value, array( 'yes', 'no', 'incl', 'excl' ), true ) ) {
-					return $this->get_route_error_response(
-						$this->get_error_prefix() . 'invalid_param',
-						__( 'Invalid value for this setting.', 'woocommerce' ),
-						400
-					);
-				}
-				break;
+		$allowed_values = array_map( 'strval', array_keys( (array) $options ) );
 
-			case 'woocommerce_tax_total_display':
-				$valid_options = array( 'single', 'itemized' );
-				if ( ! in_array( $value, $valid_options, true ) ) {
-					return $this->get_route_error_response(
-						$this->get_error_prefix() . 'invalid_param',
-						__( 'Invalid tax total display option. Must be either "single" or "itemized".', 'woocommerce' ),
-						400
-					);
-				}
-				break;
+		// Normalize value to array for consistent validation
+		$check_values = is_array( $value ) ? array_map( 'strval', $value ) : array( (string) $value );
+
+		$invalid_values = array_diff( $check_values, $allowed_values );
+		if ( ! empty( $invalid_values ) ) {
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_param',
+				sprintf(
+				/* translators: 1: Setting label/name, 2: Allowed values list. */
+					__( 'Invalid value for "%1$s". Allowed values: %2$s.', 'woocommerce' ),
+					$setting_label,
+					implode( ', ', $allowed_values )
+				),
+				400
+			);
 		}
 
 		return true;
