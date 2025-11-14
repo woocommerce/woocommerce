@@ -529,6 +529,12 @@ MARKDOWN
 								);
 							}
 						}
+
+						// Fallback (should never reach here due to earlier validation).
+						return array(
+							'success' => false,
+							'message' => __( 'Invalid action.', 'woocommerce' ),
+						);
 					} catch ( \Exception $e ) {
 						return array(
 							'success' => false,
