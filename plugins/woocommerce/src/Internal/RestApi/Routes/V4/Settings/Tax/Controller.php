@@ -147,10 +147,10 @@ class Controller extends AbstractController {
 		$params = $request->get_json_params();
 
 		if ( ! is_array( $params ) || empty( $params ) ) {
-			return new WP_Error(
-				'rest_invalid_param',
+			return $this->get_route_error_response(
+				$this->get_error_prefix() . 'invalid_param',
 				__( 'Invalid or empty request body.', 'woocommerce' ),
-				array( 'status' => 400 )
+				400
 			);
 		}
 
@@ -246,10 +246,10 @@ class Controller extends AbstractController {
 			case 'woocommerce_prices_include_tax':
 				$valid_options = array( 'yes', 'no' );
 				if ( ! in_array( $value, $valid_options, true ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
+					return $this->get_route_error_response(
+						$this->get_error_prefix() . 'invalid_param',
 						__( 'Invalid option for prices entered with tax. Must be either "yes" or "no".', 'woocommerce' ),
-						array( 'status' => 400 )
+						400
 					);
 				}
 				break;
@@ -257,10 +257,10 @@ class Controller extends AbstractController {
 			case 'woocommerce_tax_based_on':
 				$valid_options = array( 'shipping', 'billing', 'base' );
 				if ( ! in_array( $value, $valid_options, true ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
+					return $this->get_route_error_response(
+						$this->get_error_prefix() . 'invalid_param',
 						__( 'Invalid tax calculation base. Must be one of: shipping, billing, base.', 'woocommerce' ),
-						array( 'status' => 400 )
+						400
 					);
 				}
 				break;
@@ -270,10 +270,10 @@ class Controller extends AbstractController {
 			case 'woocommerce_tax_display_cart':
 				// Boolean or string validation.
 				if ( ! is_bool( $value ) && ! in_array( $value, array( 'yes', 'no', 'incl', 'excl' ), true ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
+					return $this->get_route_error_response(
+						$this->get_error_prefix() . 'invalid_param',
 						__( 'Invalid value for this setting.', 'woocommerce' ),
-						array( 'status' => 400 )
+						400
 					);
 				}
 				break;
@@ -281,10 +281,10 @@ class Controller extends AbstractController {
 			case 'woocommerce_tax_total_display':
 				$valid_options = array( 'single', 'itemized' );
 				if ( ! in_array( $value, $valid_options, true ) ) {
-					return new WP_Error(
-						'rest_invalid_param',
+					return $this->get_route_error_response(
+						$this->get_error_prefix() . 'invalid_param',
 						__( 'Invalid tax total display option. Must be either "single" or "itemized".', 'woocommerce' ),
-						array( 'status' => 400 )
+						400
 					);
 				}
 				break;
