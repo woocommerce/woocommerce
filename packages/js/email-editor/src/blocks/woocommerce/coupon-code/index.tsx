@@ -19,7 +19,7 @@ export function registerCouponCodeBlock() {
 		apiVersion: 3,
 		title: 'Coupon Code',
 		category: 'woocommerce',
-		description: 'Display a coupon code in your email.',
+		description: 'Include a coupon code to entice recipients to make a purchase.',
 		icon,
 		supports: {
 			email: true,

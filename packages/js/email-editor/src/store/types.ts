@@ -184,6 +184,7 @@ export type EmailEditorUrls = {
 	back: string;
 	send?: string;
 	listings: string;
+	createCoupon?: string;
 };
 
 export type PersonalizationTag = {
