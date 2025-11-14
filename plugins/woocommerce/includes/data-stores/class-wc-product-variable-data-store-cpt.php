@@ -498,10 +498,40 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 		$filter_names = array( 'woocommerce_variation_prices_price', 'woocommerce_variation_prices_regular_price', 'woocommerce_variation_prices_sale_price' );
 
-		foreach ( $filter_names as $filter_name ) {
-			$signatures = CallbackUtil::get_hook_callback_signatures( $filter_name );
-			if ( ! empty( $signatures ) ) {
-				$price_hash[ $filter_name ] = $signatures;
+		/**
+		 * Filters whether to use the legacy callback serialization algorithm.
+		 *
+		 * By default, WooCommerce uses CallbackUtil to generate stable callback signatures
+		 * for price hash calculation. This filter allows reverting to the legacy behavior
+		 * of serializing the entire callback, which may be necessary for compatibility
+		 * with certain plugins or custom code.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param bool       $use_legacy  Whether to use legacy algorithm. Default false.
+		 * @param WC_Product $product     The product object.
+		 * @param bool       $for_display If taxes should be calculated or not.
+		 */
+		$use_legacy_algorithm = apply_filters( 'woocommerce_use_legacy_get_variations_price_hash', false, $product, $for_display );
+
+		if ( $use_legacy_algorithm ) {
+			global $wp_filter;
+
+			foreach ( $filter_names as $filter_name ) {
+				if ( ! empty( $wp_filter[ $filter_name ] ) ) {
+					$price_hash[ $filter_name ] = array();
+
+					foreach ( $wp_filter[ $filter_name ] as $priority => $callbacks ) {
+						$price_hash[ $filter_name ][] = array_values( wp_list_pluck( $callbacks, 'function' ) );
+					}
+				}
+			}
+		} else {
+			foreach ( $filter_names as $filter_name ) {
+				$signatures = CallbackUtil::get_hook_callback_signatures( $filter_name );
+				if ( ! empty( $signatures ) ) {
+					$price_hash[ $filter_name ] = $signatures;
+				}
 			}
 		}
 
