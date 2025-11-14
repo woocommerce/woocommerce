@@ -3,9 +3,10 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, ExternalLink, ComboboxControl } from '@wordpress/components';
+import { PanelBody, ExternalLink, ComboboxControl, Spinner } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useState } from '@wordpress/element';
+import { useState, useEffect } from '@wordpress/element';
+import apiFetch from '@wordpress/api-fetch';
 
 /**
  * Internal dependencies
@@ -13,14 +14,10 @@ import { useState } from '@wordpress/element';
 import type { BlockEditProps } from './types';
 import { storeName } from '../../../store/constants';
 
-// Mock coupon data - will be replaced with real data later
-const MOCK_COUPONS = [
-	{ value: '10-shampoo', label: '10-shampoo' },
-	{ value: '15-oils', label: '15-oils' },
-	{ value: '20-hair-cut', label: '20-hair-cut' },
-	{ value: '5-cart', label: '5-cart' },
-	{ value: '10-cart', label: '10-cart' },
-];
+interface Coupon {
+	id: number;
+	code: string;
+}
 
 /**
  * Edit component for the Coupon Code block.
@@ -34,6 +31,8 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 
 	const blockProps = useBlockProps();
 	const [ searchValue, setSearchValue ] = useState( '' );
+	const [ coupons, setCoupons ] = useState< Coupon[] >( [] );
+	const [ isLoading, setIsLoading ] = useState( true );
 
 	// Get the create coupon URL from the store
 	const { createCouponUrl } = useSelect( ( select ) => {
@@ -43,10 +42,36 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 		};
 	}, [] );
 
-	// Filter coupons based on search
-	const filteredCoupons = MOCK_COUPONS.filter( ( coupon ) =>
-		coupon.label.toLowerCase().includes( searchValue.toLowerCase() )
-	);
+	// Fetch coupons from WooCommerce API
+	useEffect( () => {
+		const fetchCoupons = async () => {
+			try {
+				setIsLoading( true );
+				const response = await apiFetch< Coupon[] >( {
+					path: '/wc/v3/coupons?per_page=100',
+				} );
+				setCoupons( response );
+			} catch ( error ) {
+				// eslint-disable-next-line no-console
+				console.error( 'Error fetching coupons:', error );
+				setCoupons( [] );
+			} finally {
+				setIsLoading( false );
+			}
+		};
+
+		fetchCoupons();
+	}, [] );
+
+	// Convert coupons to options format and filter based on search
+	const couponOptions = coupons
+		.map( ( coupon ) => ( {
+			value: coupon.code,
+			label: coupon.code,
+		} ) )
+		.filter( ( option ) =>
+			option.label.toLowerCase().includes( searchValue.toLowerCase() )
+		);
 
 	return (
 		<>
@@ -61,19 +86,25 @@ export function Edit( props: BlockEditProps ): JSX.Element {
 						>
 							{ __( 'SELECT AN EXISTING COUPON', 'woocommerce' ) }
 						</label>
-						<ComboboxControl
-							label={ __( 'Search coupons', 'woocommerce' ) }
-							hideLabelFromVision
-							value={ couponCode }
-							onChange={ ( value ) => {
-								setAttributes( { couponCode: value || '' } );
-							} }
-							onFilterValueChange={ ( value ) => {
-								setSearchValue( value );
-							} }
-							options={ filteredCoupons }
-							__nextHasNoMarginBottom
-						/>
+						{ isLoading ? (
+							<div style={ { padding: '10px', textAlign: 'center' } }>
+								<Spinner />
+							</div>
+						) : (
+							<ComboboxControl
+								label={ __( 'Search coupons', 'woocommerce' ) }
+								hideLabelFromVision
+								value={ couponCode }
+								onChange={ ( value ) => {
+									setAttributes( { couponCode: value || '' } );
+								} }
+								onFilterValueChange={ ( value ) => {
+									setSearchValue( value );
+								} }
+								options={ couponOptions }
+								__nextHasNoMarginBottom
+							/>
+						) }
 					</div>
 					{ createCouponUrl && (
 						<div>
