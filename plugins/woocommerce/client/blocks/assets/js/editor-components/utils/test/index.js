@@ -93,7 +93,7 @@ describe( 'getProducts', () => {
 			selected: Array.from( { length: 101 }, ( _, i ) => i + 10 ),
 		} );
 
-		// Two requests will have been made, one for the main search and two for each selected product page.
+		// Three requests will have been made, one for the main search and two for each selected product page.
 		expect( apiFetch ).toHaveBeenCalledTimes( 3 );
 		expect( apiFetch ).toHaveBeenCalledWith(
 			expect.objectContaining( {
