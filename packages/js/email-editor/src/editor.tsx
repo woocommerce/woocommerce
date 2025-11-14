@@ -21,7 +21,12 @@ import '@wordpress/format-library'; // Enables text formatting capabilities
 import { getAllowedBlockNames, initBlocks } from './blocks';
 import { initializeLayout } from './layouts/flex-email';
 import { InnerEditor } from './components/block-editor';
-import { createStore, storeName, initStoreOverrides } from './store';
+import {
+	createStore,
+	storeName,
+	initStoreOverrides,
+	deactivateStoreOverrides,
+} from './store';
 import { initTextHooks } from './text-hooks';
 import {
 	initEventCollector,
@@ -170,6 +175,7 @@ export function ExperimentalEmailEditor( {
 		return () => {
 			try {
 				cleanupConfigurationChanges();
+				deactivateStoreOverrides();
 			} finally {
 				dispatch( editorStore ).updateEditorSettings(
 					backupEditorSettings

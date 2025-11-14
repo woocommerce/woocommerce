@@ -2,14 +2,12 @@
  * External dependencies
  */
 import { use, select } from '@wordpress/data';
-import deepmerge from 'deepmerge';
 
 /**
  * Internal dependencies
  */
-import { EmailStyles, EmailTheme, storeName } from './index';
+import { EmailEditorConfig, EmailTheme, storeName } from './index';
 import { unwrapCompressedPresetStyleVariable } from '../style-variables';
-import { areExternalStylesSupported } from '../private-apis';
 
 /**
  * Function to generate the root container styles based on the config.
@@ -20,16 +18,12 @@ const generateRootContainerStyles = ( config ) => {
 	const baseTheme = config.theme;
 	const userTheme = select(
 		storeName
-	).getGlobalEmailStylesPost() as EmailTheme;
-	const userStyles = userTheme?.styles;
-	const mergedStyles = deepmerge.all( [
-		{},
-		baseTheme.styles,
-		userStyles,
-	] ) as EmailStyles;
+	).getGlobalEmailStylesPost() as unknown as EmailTheme;
 	const maxWidth = layout?.contentSize || '100%';
 	let rootContainerStyles = `display:flow-root; max-width: ${ maxWidth }; margin: 0 auto;box-sizing: border-box;`;
-	const padding = mergedStyles?.spacing?.padding;
+	const padding =
+		userTheme?.styles?.spacing?.padding ||
+		baseTheme.styles?.spacing?.padding;
 	if ( padding ) {
 		rootContainerStyles += `padding-left:${ unwrapCompressedPresetStyleVariable(
 			padding.left
@@ -41,6 +35,11 @@ const generateRootContainerStyles = ( config ) => {
 	return `.is-root-container{ ${ rootContainerStyles } }`;
 };
 
+// Global variables to track the active config, if the overrides were initialized and if the overrides are active
+let activeConfig: EmailEditorConfig | null = null;
+let overridesInitialized: boolean = false;
+let overridesActive: boolean = false;
+
 /**
  * We wrap the core store selectors to return the global styles post id and email base theme from the email editor config.
  * As of Gutenberg 22.0 we can no longer override styles directly via a prop see https://github.com/WordPress/gutenberg/pull/72681/files#diff-da0dfea2139990db95c1ff4cae9f222aef66ae8d3dafb6237953d0c98c63fb64
@@ -48,13 +47,25 @@ const generateRootContainerStyles = ( config ) => {
  * @param config - The configuration object containing the global styles post id and email base theme.
  */
 export const initStoreOverrides = ( config ) => {
-	// If the active version of Gutenberg supports external styles being passed to Editor component, we don't need to override the store.
-	if ( areExternalStylesSupported ) {
+	// Set the active config and mark the overrides as initialized and active
+	activeConfig = config;
+	overridesActive = true;
+	// Activate overrides only once
+	if ( overridesInitialized ) {
 		return;
 	}
+
+	overridesInitialized = true;
+	// Initialize the overrides by wrapping the core store selectors
 	use( ( registry ) => ( {
 		select( store ) {
 			const base = registry.select( store );
+
+			// When the overrides were deactivated we return the base selectors to avoid our effects
+			if ( ! overridesActive ) {
+				return base;
+			}
+
 			if ( store.name === 'core' ) {
 				return {
 					...base,
@@ -66,7 +77,7 @@ export const initStoreOverrides = ( config ) => {
 						if ( ! baseGlobalStylesId ) {
 							return null;
 						}
-						return config.globalStylesPostId;
+						return activeConfig.globalStylesPostId;
 					},
 					// Override the base function to return email base theme
 					__experimentalGetCurrentThemeBaseGlobalStyles() {
@@ -77,10 +88,12 @@ export const initStoreOverrides = ( config ) => {
 							return null;
 						}
 						const theme = {
-							...config.theme,
+							...activeConfig.theme,
 							styles: {
-								...config.theme.styles,
-								css: generateRootContainerStyles( config ),
+								...activeConfig.theme.styles,
+								css: generateRootContainerStyles(
+									activeConfig
+								),
 							},
 						};
 						return theme;
@@ -90,4 +103,12 @@ export const initStoreOverrides = ( config ) => {
 			return base;
 		},
 	} ) );
+};
+
+/**
+ * We cannot fully remove the overrides as they are used by the email editor to generate the CSS for the email editor content.
+ * However, we can deactivate them by setting the overridesActive flag to false.
+ */
+export const deactivateStoreOverrides = () => {
+	overridesActive = false;
 };
