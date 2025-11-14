@@ -234,9 +234,8 @@ class Controller extends AbstractController {
 	 * @return bool|WP_Error True if valid, WP_Error if invalid.
 	 */
 	private function validate_setting_value( $setting, $value ) {
-		$setting_id    = $setting['id'] ?? '';
-		$setting_label = $setting['title'] ?? $setting_id;
-		$options       = $setting['options'] ?? array();
+		$setting_id = $setting['id'] ?? '';
+		$options    = $setting['options'] ?? array();
 
 		if ( empty( $options ) ) {
 			return true;
@@ -254,7 +253,7 @@ class Controller extends AbstractController {
 				sprintf(
 				/* translators: 1: Setting label/name, 2: Allowed values list. */
 					__( 'Invalid value for "%1$s". Allowed values: %2$s.', 'woocommerce' ),
-					$setting_label,
+					$setting_id,
 					implode( ', ', $allowed_values )
 				),
 				400
