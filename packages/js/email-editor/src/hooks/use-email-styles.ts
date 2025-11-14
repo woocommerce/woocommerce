@@ -165,7 +165,7 @@ export const useEmailStyles = (): EmailStylesData => {
 		( newStyles ) => {
 			const newTheme = {
 				...userTheme,
-				styles: cleanupUserStyles( newStyles ),
+				styles: cleanupUserStyles( newStyles ) as EmailStyles,
 			};
 			updateUserTheme( newTheme );
 		},
@@ -198,7 +198,7 @@ export const useEmailStyles = (): EmailStylesData => {
 	return {
 		styles: mergedStyles,
 		userStyles: userTheme?.styles, // Styles defined by user
-		defaultStyles, // Default styles from editors theme.json
+		defaultStyles: defaultStyles, // Default styles from editors theme.json
 		updateStyleProp,
 		updateStyles,
 	};
