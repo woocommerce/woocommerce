@@ -628,6 +628,7 @@ class PageController {
 		}
 
 		// Bail if we are not requesting a page for a WooCommerce task.
+		// phpcs:ignore WordPress.Security.NonceVerification
 		if ( empty( $_GET['task'] ) ) {
 			return;
 		}
