@@ -48,8 +48,6 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function set_up() {
 		global $wp_actions;
 
-		parent::set_up();
-
 		// Detect WordPress 6.9+ for action names.
 		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
 		$this->abilities_init_action = $are_abilities_in_wp_core ? 'wp_abilities_api_init' : 'abilities_api_init';
@@ -61,6 +59,8 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				require $bootstrap_file;
 			}
 		}
+
+		parent::set_up();
 
 		// Set init action counter.
 		$wp_actions['init'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
