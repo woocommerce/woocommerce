@@ -652,10 +652,22 @@ class PageController {
 		// The generic payments task is only redirected if the request is a regular user request,
 		// not part of an onboarding flow or other special case.
 		$special_request_params = array(
+			// This is used by the legacy, Payments task-based suggestions onboarding flow.
+			// Nobody should be using this anymore, but just in case.
 			'connection-return',
-			'_wpnonce',
+			// This is used by the legacy, Payments task-based suggestions onboarding flow.
+			// Nobody should be using this anymore, but just in case.
+			'id',
+			// Some params for gateway IDs, just in case.
+			'gateway_id',
+			'gateway-id',
+			// Sometimes the gateway is referred to as 'method'. Stay clear of it.
+			'method',
+			// If there is a success or error param, better not redirect.
 			'success',
 			'error',
+			// If the URL is nonced, better not redirect.
+			'_wpnonce',
 		);
 		foreach ( $special_request_params as $param ) {
 			// phpcs:ignore WordPress.Security.NonceVerification
