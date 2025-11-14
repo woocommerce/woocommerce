@@ -365,4 +365,233 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
 		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
 	}
+
+	/**
+	 * Test that POST requests are accepted for updating tax settings (WP_REST_Server::EDITABLE).
+	 */
+	public function test_update_tax_settings_accepts_post() {
+		// Arrange.
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_prices_include_tax' => 'yes',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert - verify the request was successful first
+		$this->assertEquals( 200, $response->get_status(),
+			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export($response->get_data(), true)
+		);
+
+		$data = $response->get_data();
+
+		// Verify response structure.
+		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'id', $data );
+		$this->assertArrayHasKey( 'title', $data );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertArrayHasKey( 'values', $data );
+		$this->assertArrayHasKey( 'groups', $data );
+
+		// Verify that the setting was updated.
+		$this->assertArrayHasKey( 'woocommerce_prices_include_tax', $data['values'],
+			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		);
+		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
+		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
+
+		// Reset to original value.
+		update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
+	}
+
+	/**
+	 * Test updating tax settings with POST and invalid values.
+	 */
+	public function test_update_tax_settings_post_invalid_values() {
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_prices_include_tax' => 'invalid_value',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertStringContainsString( 'invalid_param', $data['code'] );
+	}
+
+	/**
+	 * Test updating tax settings with POST and non-existent setting ID.
+	 */
+	public function test_update_tax_settings_post_nonexistent_setting() {
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'nonexistent_setting' => 'some_value',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// Verify that the request succeeds but the nonexistent setting is not saved.
+		// The controller should ignore invalid setting IDs.
+		$this->assertSame( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test updating tax settings with POST and empty request body.
+	 */
+	public function test_update_tax_settings_post_empty_body() {
+		// Act.
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertStringContainsString( 'invalid_param', $data['code'] );
+		$this->assertStringContainsString( 'Invalid or empty request body', $data['message'] );
+	}
+
+	/**
+	 * Test updating tax settings with POST and invalid tax calculation base.
+	 */
+	public function test_update_tax_settings_post_invalid_tax_based_on() {
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => array(
+						'woocommerce_tax_based_on' => 'invalid_base',
+					),
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 400, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertStringContainsString( 'invalid_param', $data['code'] );
+		// The error message format changed to be more generic based on setting options
+		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
+		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
+	}
+
+	/**
+	 * Test sanitization of malicious payloads in tax settings values.
+	 */
+	public function test_update_tax_settings_sanitizes_malicious_payloads() {
+		// Arrange.
+		$original_suffix = get_option( 'woocommerce_price_display_suffix', '' );
+
+		// Test data with various malicious payloads using a text field that accepts any input.
+		$malicious_payloads = array(
+			'woocommerce_price_display_suffix' => '<script>alert("xss")</script> {price_including_tax} javascript:alert("xss") \' OR \'1\'=\'1 <img src=x onerror=alert("xss")>',
+		);
+
+		// Act.
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'values' => $malicious_payloads,
+				)
+			)
+		);
+		$request->set_header( 'content-type', 'application/json' );
+		$response = $this->server->dispatch( $request );
+
+		// Assert.
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+
+		// Verify response structure.
+		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'values', $data );
+
+		// Verify that HTML/script content is sanitized (sanitize_text_field removes HTML tags).
+		foreach ( $malicious_payloads as $setting_key => $malicious_value ) {
+			if ( isset( $data['values'][ $setting_key ] ) ) {
+				$sanitized_value = $data['values'][ $setting_key ];
+
+				// HTML script tags should be removed by sanitize_text_field.
+				$this->assertStringNotContainsString( '<script>', $sanitized_value,
+					"Script tags not sanitized in $setting_key"
+				);
+
+				// HTML img tags should be removed by sanitize_text_field.
+				$this->assertStringNotContainsString( '<img', $sanitized_value,
+					"Img tags not sanitized in $setting_key"
+				);
+
+				// Length should be reasonable.
+				$this->assertLessThanOrEqual( 1000, strlen( $sanitized_value ),
+					"Extreme length not handled properly in $setting_key"
+				);
+
+				// The sanitized value should contain the safe parts.
+				$this->assertStringContainsString( '{price_including_tax}', $sanitized_value,
+					"Safe content not preserved in $setting_key"
+				);
+			}
+		}
+
+		// Verify stored options are also sanitized.
+		foreach ( $malicious_payloads as $setting_key => $malicious_value ) {
+			$stored_value = get_option( $setting_key );
+			if ( $stored_value !== false ) {
+				// HTML script tags should be removed in stored data.
+				$this->assertStringNotContainsString( '<script>', $stored_value,
+					"Script tags not sanitized in stored $setting_key"
+				);
+
+				// HTML img tags should be removed in stored data.
+				$this->assertStringNotContainsString( '<img', $stored_value,
+					"Img tags not sanitized in stored $setting_key"
+				);
+
+				// Length should be reasonable in stored data.
+				$this->assertLessThanOrEqual( 1000, strlen( $stored_value ),
+					"Extreme length not handled properly in stored $setting_key"
+				);
+
+				// The sanitized value should contain the safe parts.
+				$this->assertStringContainsString( '{price_including_tax}', $stored_value,
+					"Safe content not preserved in stored $setting_key"
+				);
+			}
+		}
+
+		// Reset to original value.
+		update_option( 'woocommerce_price_display_suffix', $original_suffix );
+	}
 }
