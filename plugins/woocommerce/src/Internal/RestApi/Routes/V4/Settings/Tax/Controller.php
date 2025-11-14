@@ -229,8 +229,7 @@ class Controller extends AbstractController {
 		$settings = $this->get_all_settings();
 
 		// Return updated settings.
-		$response = $this->get_item_response( $settings, $request );
-		return rest_ensure_response( $response );
+		return $this->prepare_item_for_response( $settings, $request );
 	}
 
 	/**
