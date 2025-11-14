@@ -37,8 +37,8 @@ const generateRootContainerStyles = ( config ) => {
 
 // Global variables to track the active config, if the overrides were initialized and if the overrides are active
 let activeConfig: EmailEditorConfig | null = null;
-let overridesInitialized: boolean = false;
-let overridesActive: boolean = false;
+let overridesInitialized = false;
+let overridesActive = false;
 
 /**
  * We wrap the core store selectors to return the global styles post id and email base theme from the email editor config.

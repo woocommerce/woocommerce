@@ -3,7 +3,7 @@
  */
 import {
 	generateGlobalStyles,
-	GlobalStylesConfig,
+	type GlobalStylesConfig,
 } from '@wordpress/global-styles-engine';
 import { useMemo } from '@wordpress/element';
 import { store as blocksStore } from '@wordpress/blocks';

@@ -198,7 +198,7 @@ export const useEmailStyles = (): EmailStylesData => {
 	return {
 		styles: mergedStyles,
 		userStyles: userTheme?.styles, // Styles defined by user
-		defaultStyles: defaultStyles, // Default styles from editors theme.json
+		defaultStyles, // Default styles from editors theme.json
 		updateStyleProp,
 		updateStyles,
 	};
