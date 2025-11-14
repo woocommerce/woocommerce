@@ -244,7 +244,7 @@ class Controller extends AbstractController {
 
 		$allowed_values = array_map( 'strval', array_keys( (array) $options ) );
 
-		// Normalize value to array for consistent validation
+		// Normalize value to array for consistent validation.
 		$check_values = is_array( $value ) ? array_map( 'strval', $value ) : array( (string) $value );
 
 		$invalid_values = array_diff( $check_values, $allowed_values );

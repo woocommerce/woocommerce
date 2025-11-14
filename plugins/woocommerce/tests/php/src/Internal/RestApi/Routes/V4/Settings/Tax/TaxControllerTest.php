@@ -147,8 +147,10 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first
-		$this->assertEquals( 200, $response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export($response->get_data(), true)
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
 		);
 
 		$data = $response->get_data();
@@ -162,8 +164,10 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'groups', $data );
 
 		// Verify that the setting was updated.
-		$this->assertArrayHasKey( 'woocommerce_prices_include_tax', $data['values'],
-			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		$this->assertArrayHasKey(
+			'woocommerce_prices_include_tax',
+			$data['values'],
+			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode( ', ', array_keys( $data['values'] ) )
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
@@ -178,7 +182,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_update_multiple_tax_settings() {
 		// Arrange.
 		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax', 'no' );
-		$original_tax_based_on = get_option( 'woocommerce_tax_based_on', 'shipping' );
+		$original_tax_based_on       = get_option( 'woocommerce_tax_based_on', 'shipping' );
 
 		// Act.
 		$request = new WP_REST_Request( 'PUT', self::ENDPOINT );
@@ -187,7 +191,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 				array(
 					'values' => array(
 						'woocommerce_prices_include_tax' => 'yes',
-						'woocommerce_tax_based_on' => 'billing',
+						'woocommerce_tax_based_on'       => 'billing',
 					),
 				)
 			)
@@ -196,8 +200,10 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		// Assert - verify the request was successful first
-		$this->assertEquals( 200, $response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export($response->get_data(), true)
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
 		);
 
 		$data = $response->get_data();
@@ -211,11 +217,15 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'groups', $data );
 
 		// Verify both settings were updated.
-		$this->assertArrayHasKey( 'woocommerce_prices_include_tax', $data['values'],
-			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		$this->assertArrayHasKey(
+			'woocommerce_prices_include_tax',
+			$data['values'],
+			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode( ', ', array_keys( $data['values'] ) )
 		);
-		$this->assertArrayHasKey( 'woocommerce_tax_based_on', $data['values'],
-			'Expected setting "woocommerce_tax_based_on" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		$this->assertArrayHasKey(
+			'woocommerce_tax_based_on',
+			$data['values'],
+			'Expected setting "woocommerce_tax_based_on" not found in response values. Available keys: ' . implode( ', ', array_keys( $data['values'] ) )
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'billing', $data['values']['woocommerce_tax_based_on'] );
@@ -248,9 +258,11 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_header( 'content-type', 'application/json' );
 		$response = $this->server->dispatch( $request );
 
-		// Assert - verify the request was successful first
-		$this->assertEquals( 200, $response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export($response->get_data(), true)
+		// Assert - verify the request was successful first.
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
 		);
 
 		$data = $response->get_data();
@@ -264,8 +276,10 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'groups', $data );
 
 		// Verify the setting was updated.
-		$this->assertArrayHasKey( 'woocommerce_prices_include_tax', $data['values'],
-			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		$this->assertArrayHasKey(
+			'woocommerce_prices_include_tax',
+			$data['values'],
+			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode( ', ', array_keys( $data['values'] ) )
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
@@ -361,7 +375,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertStringContainsString( 'invalid_param', $data['code'] );
-		// The error message format changed to be more generic based on setting options
+		// The error message format changed to be more generic based on setting options.
 		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
 		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
 	}
@@ -387,9 +401,11 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$request->set_header( 'content-type', 'application/json' );
 		$response = $this->server->dispatch( $request );
 
-		// Assert - verify the request was successful first
-		$this->assertEquals( 200, $response->get_status(),
-			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export($response->get_data(), true)
+		// Assert - verify the request was successful first.
+		$this->assertEquals(
+			200,
+			$response->get_status(),
+			'Expected success status but got: ' . $response->get_status() . '. Response data: ' . var_export( $response->get_data(), true )
 		);
 
 		$data = $response->get_data();
@@ -403,8 +419,10 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'groups', $data );
 
 		// Verify that the setting was updated.
-		$this->assertArrayHasKey( 'woocommerce_prices_include_tax', $data['values'],
-			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode(', ', array_keys($data['values']))
+		$this->assertArrayHasKey(
+			'woocommerce_prices_include_tax',
+			$data['values'],
+			'Expected setting "woocommerce_prices_include_tax" not found in response values. Available keys: ' . implode( ', ', array_keys( $data['values'] ) )
 		);
 		$this->assertSame( 'yes', $data['values']['woocommerce_prices_include_tax'] );
 		$this->assertSame( 'yes', get_option( 'woocommerce_prices_include_tax' ) );
@@ -500,7 +518,7 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertStringContainsString( 'invalid_param', $data['code'] );
-		// The error message format changed to be more generic based on setting options
+		// The error message format changed to be more generic based on setting options.
 		$this->assertStringContainsString( 'Invalid value for', $data['message'] );
 		$this->assertStringContainsString( 'Calculate tax based on', $data['message'] );
 	}
@@ -544,22 +562,30 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 				$sanitized_value = $data['values'][ $setting_key ];
 
 				// HTML script tags should be removed by sanitize_text_field.
-				$this->assertStringNotContainsString( '<script>', $sanitized_value,
+				$this->assertStringNotContainsString(
+					'<script>',
+					$sanitized_value,
 					"Script tags not sanitized in $setting_key"
 				);
 
 				// HTML img tags should be removed by sanitize_text_field.
-				$this->assertStringNotContainsString( '<img', $sanitized_value,
+				$this->assertStringNotContainsString(
+					'<img',
+					$sanitized_value,
 					"Img tags not sanitized in $setting_key"
 				);
 
 				// Length should be reasonable.
-				$this->assertLessThanOrEqual( 1000, strlen( $sanitized_value ),
+				$this->assertLessThanOrEqual(
+					1000,
+					strlen( $sanitized_value ),
 					"Extreme length not handled properly in $setting_key"
 				);
 
 				// The sanitized value should contain the safe parts.
-				$this->assertStringContainsString( '{price_including_tax}', $sanitized_value,
+				$this->assertStringContainsString(
+					'{price_including_tax}',
+					$sanitized_value,
 					"Safe content not preserved in $setting_key"
 				);
 			}
@@ -570,22 +596,30 @@ class TaxControllerTest extends WC_REST_Unit_Test_Case {
 			$stored_value = get_option( $setting_key );
 			if ( $stored_value !== false ) {
 				// HTML script tags should be removed in stored data.
-				$this->assertStringNotContainsString( '<script>', $stored_value,
+				$this->assertStringNotContainsString(
+					'<script>',
+					$stored_value,
 					"Script tags not sanitized in stored $setting_key"
 				);
 
 				// HTML img tags should be removed in stored data.
-				$this->assertStringNotContainsString( '<img', $stored_value,
+				$this->assertStringNotContainsString(
+					'<img',
+					$stored_value,
 					"Img tags not sanitized in stored $setting_key"
 				);
 
 				// Length should be reasonable in stored data.
-				$this->assertLessThanOrEqual( 1000, strlen( $stored_value ),
+				$this->assertLessThanOrEqual(
+					1000,
+					strlen( $stored_value ),
 					"Extreme length not handled properly in stored $setting_key"
 				);
 
 				// The sanitized value should contain the safe parts.
-				$this->assertStringContainsString( '{price_including_tax}', $stored_value,
+				$this->assertStringContainsString(
+					'{price_including_tax}',
+					$stored_value,
 					"Safe content not preserved in stored $setting_key"
 				);
 			}
