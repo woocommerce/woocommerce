@@ -29,9 +29,9 @@ class Coupon_Code extends Abstract_Block_Renderer {
 		$attributes  = $parsed_block['attrs'] ?? array();
 		$coupon_code = $attributes['couponCode'] ?? '';
 
-		// Show placeholder if no coupon code is set.
+		// Do not render anything if no coupon code is set.
 		if ( empty( $coupon_code ) ) {
-			$coupon_code = 'Coupon Code block - No coupon selected';
+			return '';
 		}
 
 		$coupon_html = $this->build_coupon_html( $coupon_code, $attributes, $rendering_context );
@@ -71,10 +71,6 @@ class Coupon_Code extends Abstract_Block_Renderer {
 
 		$merged_styles = array_merge( $default_styles, $custom_styles['declarations'] ?? array() );
 		$style_attr    = \WP_Style_Engine::compile_css( $merged_styles, '' );
-
-		// Debug.
-		error_log( 'Coupon HTML - Code: ' . $coupon_code );
-		error_log( 'Coupon HTML - Style: ' . $style_attr );
 
 		return sprintf(
 			'<span class="woocommerce-coupon-code" style="%s">%s</span>',
