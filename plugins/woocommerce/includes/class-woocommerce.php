@@ -356,7 +356,8 @@ final class WooCommerce {
 		$container->get( EmailImprovements::class );
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
-		$container->get( MCPAdapterProvider::class );
+		// Temporarily disabled to test if MCP is causing COT test failures
+		// $container->get( MCPAdapterProvider::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
