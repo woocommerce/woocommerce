@@ -341,6 +341,7 @@ class WC_Gateway_Paypal_Request {
 
 		$paypal_debug_id  = null;
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 
 		if ( ! $authorization_id ) {
 			WC_Gateway_Paypal::log( 'PayPal authorization ID not found. Cannot capture payment. Order ID: ' . $order->get_id() );
@@ -351,6 +352,7 @@ class WC_Gateway_Paypal_Request {
 			$request_body = array(
 				'test_mode'        => $this->gateway->testmode,
 				'authorization_id' => $authorization_id,
+				'paypal_order_id'  => $paypal_order_id,
 			);
 			$response     = $this->send_wpcom_proxy_request( 'POST', self::WPCOM_PROXY_PAYMENT_CAPTURE_AUTH_ENDPOINT, $request_body );
 
