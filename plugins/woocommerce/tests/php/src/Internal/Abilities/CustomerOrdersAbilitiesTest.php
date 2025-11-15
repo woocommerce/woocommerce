@@ -52,18 +52,51 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
 		$this->abilities_init_action = $are_abilities_in_wp_core ? 'wp_abilities_api_init' : 'abilities_api_init';
 
-		// Ensure abilities API is loaded.
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $bootstrap_file ) ) {
-				require $bootstrap_file;
-			}
+	// Ensure abilities API is loaded.
+	if ( ! function_exists( 'wp_register_ability' ) ) {
+		// Load all required class files first.
+		$abilities_api_dir = __DIR__ . '/../../../../../vendor/wordpress/abilities-api/includes/abilities-api/';
+		if ( file_exists( $abilities_api_dir ) ) {
+			require_once $abilities_api_dir . 'class-wp-ability.php';
+			require_once $abilities_api_dir . 'class-wp-abilities-registry.php';
+			require_once $abilities_api_dir . 'class-wp-ability-category.php';
+			require_once $abilities_api_dir . 'class-wp-abilities-category-registry.php';
+		}
+		// Now load the functions file.
+		$abilities_functions_file = __DIR__ . '/../../../../../vendor/wordpress/abilities-api/includes/abilities-api.php';
+		if ( file_exists( $abilities_functions_file ) ) {
+			require_once $abilities_functions_file;
+		}
+	}
+
+		// Reset registries before each test to prevent "already registered" errors.
+		if ( class_exists( 'WP_Abilities_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Abilities_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
+		if ( class_exists( 'WP_Ability_Categories_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Ability_Categories_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
 		}
 
 		parent::set_up();
 
 		// Set init action counter.
 		$wp_actions['init'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		// Check if abilities are already registered (persists across tests).
+		$already_registered = wp_get_ability( 'woocommerce/list-my-orders' ) !== null;
+
+		if ( ! $already_registered ) {
+			// First test - register abilities using the action system.
+			add_action( $this->abilities_init_action, array( 'Automattic\WooCommerce\Internal\Abilities\CustomerOrdersAbilities', 'register_abilities' ) );
+			do_action( $this->abilities_init_action );
+		}
 
 		// Create test customer.
 		$this->customer_id = $this->factory->user->create(
@@ -73,11 +106,9 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		// Create test order for customer.
-		$this->order_id = \WC_Helper_Order::create_order( $this->customer_id );
-
-		// Register abilities for testing.
-		CustomerOrdersAbilities::init();
-		do_action( $this->abilities_init_action );
+		$order = \WC_Helper_Order::create_order( $this->customer_id );
+		$order->save();
+		$this->order_id = $order->get_id();
 	}
 
 	/**
@@ -99,6 +130,30 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 
+		// Remove all action hooks for abilities init.
+		remove_all_actions( $this->abilities_init_action );
+
+		// Reset action counters to allow init actions to fire again.
+		if ( isset( $wp_actions[ $this->abilities_init_action ] ) ) {
+			unset( $wp_actions[ $this->abilities_init_action ] );
+		}
+
+		// Reset abilities registry singleton to allow fresh abilities_api_init in next test.
+		if ( class_exists( 'WP_Abilities_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Abilities_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
+		// Reset category registry singleton.
+		if ( class_exists( 'WP_Ability_Categories_Registry' ) ) {
+			$reflection        = new \ReflectionClass( 'WP_Ability_Categories_Registry' );
+			$instance_property = $reflection->getProperty( 'instance' );
+			$instance_property->setAccessible( true );
+			$instance_property->setValue( null );
+		}
+
 		// Delete test order.
 		if ( $this->order_id ) {
 			wp_delete_post( $this->order_id, true );
@@ -112,11 +167,6 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Reset user.
 		wp_set_current_user( 0 );
 
-		// Reset action counters.
-		if ( isset( $wp_actions[ $this->abilities_init_action ] ) ) {
-			unset( $wp_actions[ $this->abilities_init_action ] );
-		}
-
 		parent::tear_down();
 	}
 
@@ -126,9 +176,9 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_abilities_are_registered() {
-		$list_ability   = wp_get_ability( 'woocommerce/list-my-orders' );
-		$get_ability    = wp_get_ability( 'woocommerce/get-my-order' );
-		$update_ability = wp_get_ability( 'woocommerce/update-my-order' );
+		$list_ability   = \wp_get_ability( 'woocommerce/list-my-orders' );
+		$get_ability    = \wp_get_ability( 'woocommerce/get-my-order' );
+		$update_ability = \wp_get_ability( 'woocommerce/update-my-order' );
 
 		$this->assertNotNull( $list_ability, 'list-my-orders ability should be registered' );
 		$this->assertNotNull( $get_ability, 'get-my-order ability should be registered' );
@@ -144,7 +194,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to customer.
 		wp_set_current_user( $this->customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/list-my-orders' );
+		$ability = \wp_get_ability( 'woocommerce/list-my-orders' );
 		$result  = $ability->execute( array() );
 
 		$this->assertTrue( $result['success'], 'list-my-orders should succeed' );
@@ -162,7 +212,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to customer.
 		wp_set_current_user( $this->customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/get-my-order' );
+		$ability = \wp_get_ability( 'woocommerce/get-my-order' );
 		$result  = $ability->execute( array( 'order_id' => $this->order_id ) );
 
 		$this->assertTrue( $result['success'], 'get-my-order should succeed' );
@@ -183,7 +233,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to other customer.
 		wp_set_current_user( $other_customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/get-my-order' );
+		$ability = \wp_get_ability( 'woocommerce/get-my-order' );
 		$result  = $ability->execute( array( 'order_id' => $this->order_id ) );
 
 		$this->assertFalse( $result['success'], 'get-my-order should fail for other customer' );
@@ -202,7 +252,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to customer.
 		wp_set_current_user( $this->customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/update-my-order' );
+		$ability = \wp_get_ability( 'woocommerce/update-my-order' );
 		$result  = $ability->execute(
 			array(
 				'order_id' => $this->order_id,
@@ -234,7 +284,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to customer.
 		wp_set_current_user( $this->customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/update-my-order' );
+		$ability = \wp_get_ability( 'woocommerce/update-my-order' );
 		$result  = $ability->execute(
 			array(
 				'order_id' => $this->order_id,
@@ -264,7 +314,7 @@ class CustomerOrdersAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		// Set current user to customer.
 		wp_set_current_user( $this->customer_id );
 
-		$ability = wp_get_ability( 'woocommerce/update-my-order' );
+		$ability = \wp_get_ability( 'woocommerce/update-my-order' );
 		$result  = $ability->execute(
 			array(
 				'order_id' => $this->order_id,
