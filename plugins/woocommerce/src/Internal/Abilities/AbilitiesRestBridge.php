@@ -64,6 +64,42 @@ class AbilitiesRestBridge {
 				),
 			),
 			array(
+				'controller' => \WC_REST_Product_Categories_Controller::class,
+				'route'      => '/wc/v3/products/categories',
+				'abilities'  => array(
+					array(
+						'id'          => 'woocommerce/product-categories-list',
+						'operation'   => 'list',
+						'label'       => __( 'List Product Categories', 'woocommerce' ),
+						'description' => __( 'Retrieve a paginated list of product categories.', 'woocommerce' ),
+					),
+					array(
+						'id'          => 'woocommerce/product-categories-get',
+						'operation'   => 'get',
+						'label'       => __( 'Get Product Category', 'woocommerce' ),
+						'description' => __( 'Retrieve detailed information about a single product category by ID, including name, slug, parent, description, and other attributes.', 'woocommerce' ),
+					),
+					array(
+						'id'          => 'woocommerce/product-categories-create',
+						'operation'   => 'create',
+						'label'       => __( 'Create Product Category', 'woocommerce' ),
+						'description' => __( 'Create a new product category with name, slug, parent, description, and other attributes.', 'woocommerce' ),
+					),
+					array(
+						'id'          => 'woocommerce/product-categories-update',
+						'operation'   => 'update',
+						'label'       => __( 'Update Product Category', 'woocommerce' ),
+						'description' => __( 'Update an existing product category by modifying its attributes such as name, slug, parent, description, or other attributes.', 'woocommerce' ),
+					),
+					array(
+						'id'          => 'woocommerce/product-categories-delete',
+						'operation'   => 'delete',
+						'label'       => __( 'Delete Product Category', 'woocommerce' ),
+						'description' => __( 'Permanently delete a product category from the store. This action cannot be undone.', 'woocommerce' ),
+					),
+				),
+			),
+			array(
 				'controller' => \WC_REST_Orders_Controller::class,
 				'route'      => '/wc/v3/orders',
 				'abilities'  => array(

@@ -138,7 +138,6 @@ class RestAbilityFactory {
 				break;
 
 			case 'get':
-			case 'delete':
 				// Only need ID.
 				return array(
 					'type'       => 'object',
@@ -150,6 +149,28 @@ class RestAbilityFactory {
 					),
 					'required'   => array( 'id' ),
 				);
+
+			case 'delete':
+				$schema = array(
+					'type'       => 'object',
+					'properties' => array(
+						'id' => array(
+							'type'        => 'integer',
+							'description' => __( 'Unique identifier for the resource', 'woocommerce' ),
+						),
+					),
+					'required'   => array( 'id' ),
+				);
+
+				if ( $controller instanceof \WC_REST_Product_Categories_Controller ) {
+					$schema['properties']['force'] = array(
+						'description' => __( 'Required to be true, as resource does not support trashing.', 'woocommerce' ),
+						'type'        => 'boolean',
+						'default'     => false,
+					);
+				}
+
+				return $schema;
 		}
 
 		// Fallback.
