@@ -11,6 +11,8 @@ use WC_Unit_Test_Case;
  * Unit tests for PageController redirect functionality.
  *
  * @covers \Automattic\WooCommerce\Admin\PageController
+ * @runTestsInSeparateProcesses
+ * @preserveGlobalState disabled
  */
 class PageControllerTest extends WC_Unit_Test_Case {
 	/**
@@ -65,9 +67,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->page_controller = PageController::get_instance();
 
 		// Set up admin environment.
+		// Safe to define WP_ADMIN here because @runTestsInSeparateProcesses isolates each test.
 		if ( ! defined( 'WP_ADMIN' ) ) {
 			define( 'WP_ADMIN', true );
 		}
+		set_current_screen( 'dashboard' );
 
 		// Start watching for redirects.
 		$this->redirected_to = '';
@@ -80,8 +84,6 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function tearDown(): void {
-		parent::tearDown();
-
 		// Remove redirect listener.
 		remove_filter( 'wp_redirect', array( $this, 'watch_and_anull_redirects' ) );
 
@@ -92,6 +94,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 		// Reset global state.
 		unset( $_GET['page'], $_GET['task'] );
+
+		// Reset screen to avoid affecting other tests.
+		set_current_screen( 'front' );
+
+		parent::tearDown();
 	}
 
 	/**
