@@ -97,6 +97,12 @@ class AbilitiesRestBridge {
 						'label'       => __( 'Delete Product Category', 'woocommerce' ),
 						'description' => __( 'Permanently delete a product category from the store. This action cannot be undone.', 'woocommerce' ),
 					),
+					array(
+						'id'          => 'woocommerce/product-categories-batch',
+						'operation'   => 'batch',
+						'label'       => __( 'Batch Create, Update and Delete Multiple Product Categories', 'woocommerce' ),
+						'description' => __( 'Create new product categories, update existing ones, and permanently delete others. Deleting product categories cannot be undone.', 'woocommerce' ),
+					),
 				),
 			),
 			array(
