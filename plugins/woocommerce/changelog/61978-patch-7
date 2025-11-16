@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove no-op closing tag to prevent calls to "default" policy if trusted types are required
