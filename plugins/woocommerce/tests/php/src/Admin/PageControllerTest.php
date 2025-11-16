@@ -57,9 +57,9 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Create test users with different capabilities.
-		$this->admin_user_id         = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$this->shop_manager_user_id  = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->customer_user_id      = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->admin_user_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->shop_manager_user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
+		$this->customer_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );
 
 		// Get PageController instance.
 		$this->page_controller = PageController::get_instance();
@@ -100,11 +100,11 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @param string $url Redirect location.
 	 *
 	 * @throws WPAjaxDieContinueException To prevent exit() from being called after redirect.
-	 * @return string
+	 * @return void
 	 */
 	public function watch_and_anull_redirects( string $url ) {
 		$this->redirected_to = $url;
-		// Throw exception to prevent exit() from being called after wp_safe_redirect()
+		// Throw exception to prevent exit() from being called after wp_safe_redirect().
 		throw new \WPAjaxDieContinueException();
 	}
 
@@ -129,6 +129,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 			$this->page_controller->maybe_redirect_payment_tasks_to_settings();
 		} catch ( \WPAjaxDieContinueException $e ) {
 			// Expected - this prevents exit() from killing the test.
+			unset( $e );
 		}
 	}
 
