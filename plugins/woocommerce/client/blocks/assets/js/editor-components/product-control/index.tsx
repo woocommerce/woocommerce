@@ -51,7 +51,7 @@ interface ProductControlProps {
 	 */
 	onLoadMoreVariations: () => void;
 	/**
-	 * The total number of varaitions.
+	 * The total number of variations.
 	 */
 	totalVariations: Record< string, number | null >;
 	/**
