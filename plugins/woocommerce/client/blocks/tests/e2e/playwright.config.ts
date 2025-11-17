@@ -35,13 +35,22 @@ const config: PlaywrightTestConfig = {
 					'junit',
 					{
 						outputFile: `${ __dirname }/artifacts/test-results/results.xml`,
+						stripANSIControlSequences: true,
+						includeProjectInTestName: true,
+					},
+				],
+				[
+					'playwright-ctrf-json-reporter',
+					{
+						outputDir: `${ __dirname }/artifacts/test-results`,
+						outputFile: `ctrf-report-${ Date.now() }.json`,
 					},
 				],
 		  ]
 		: 'list',
 	use: {
 		baseURL: BASE_URL,
-		screenshot: 'only-on-failure',
+		screenshot: { mode: 'only-on-failure', fullPage: true },
 		trace:
 			/^https?:\/\/localhost/.test( BASE_URL ) || ! CI
 				? 'retain-on-first-failure'

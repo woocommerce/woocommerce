@@ -120,7 +120,6 @@ export class Editor extends CoreEditor {
 	async searchTemplate( { templateName }: { templateName: string } ) {
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
-		// Wait for the search to finish.
 		await expect(
 			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();

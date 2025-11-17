@@ -245,6 +245,8 @@ jobs:
           LAST_FAILED_RUN: ${{ vars.LAST_FAILED_RUN }}
           GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PLUGIN_SLUG: ${{ inputs.refName == 'nightly' && 'woocommerce-trunk-nightly' || '' }} # required by test:plugincheck
+          PLAYWRIGHT_JUNIT_SUITE_NAME: 'WooCommerce Core'
+          PLAYWRIGHT_JUNIT_SUITE_ID: 'woocommerce-core'
         run: |
           lastRunFile="${{ steps.download-last-run-info.outputs.download-path }}/last-run__${{ strategy.job-index }}/.last-run.json"
           lastRunFileDest="$ARTIFACTS_PATH/.last-run.json"

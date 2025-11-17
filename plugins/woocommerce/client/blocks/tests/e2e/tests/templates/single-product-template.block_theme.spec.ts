@@ -32,6 +32,7 @@ test.describe( 'Single Product template', () => {
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();
+
 		await page
 			.getByPlaceholder( 'Search products' )
 			.fill( testData.productName );

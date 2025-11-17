@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix issue where translated placeholder string was used to format the date, causing formatting errors.

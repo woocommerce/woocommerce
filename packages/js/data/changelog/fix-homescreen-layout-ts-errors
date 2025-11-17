@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix withSettingsHydration and withCurrentUserHydration component types

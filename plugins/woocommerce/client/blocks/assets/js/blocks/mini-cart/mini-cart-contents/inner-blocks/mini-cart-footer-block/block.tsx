@@ -19,7 +19,7 @@ import clsx from 'clsx';
  */
 import CartButton from '../mini-cart-cart-button-block/block';
 import CheckoutButton from '../mini-cart-checkout-button-block/block';
-import { hasChildren } from '../utils';
+import { hasChildren, getTotalsItemDescription } from '../utils';
 
 const PaymentMethodIconsElement = (): JSX.Element => {
 	const { paymentMethods } = usePaymentMethods();
@@ -31,7 +31,7 @@ const PaymentMethodIconsElement = (): JSX.Element => {
 };
 
 interface Props {
-	children: JSX.Element | JSX.Element[];
+	children: JSX.Element[] | undefined;
 	className?: string;
 	cartButtonLabel: string;
 	checkoutButtonLabel: string;
@@ -42,12 +42,18 @@ const Block = ( {
 	className,
 	cartButtonLabel,
 	checkoutButtonLabel,
-}: Props ): JSX.Element => {
+}: Props ): JSX.Element | null => {
 	const { cartTotals } = useStoreCart();
 	const subTotal = getSetting( 'displayCartPricesIncludingTax', false )
 		? parseInt( cartTotals.total_items, 10 ) +
 		  parseInt( cartTotals.total_items_tax, 10 )
 		: parseInt( cartTotals.total_items, 10 );
+
+	// If the block is hidden, then the children will be undefined.
+	// In this case, we return null to prevent the fallback for the legacy template
+	if ( ! children ) {
+		return null;
+	}
 
 	// The `Cart` and `Checkout` buttons were converted to inner blocks, but we still need to render the buttons
 	// for themes that have the old `mini-cart.html` template. So we check if there are any inner blocks (buttons) and
@@ -61,10 +67,7 @@ const Block = ( {
 				currency={ getCurrencyFromPriceResponse( cartTotals ) }
 				label={ __( 'Subtotal', 'woocommerce' ) }
 				value={ subTotal }
-				description={ __(
-					'Shipping, taxes, and discounts calculated at checkout.',
-					'woocommerce'
-				) }
+				description={ getTotalsItemDescription() }
 			/>
 			<div className="wc-block-mini-cart__footer-actions">
 				{ hasButtons ? (

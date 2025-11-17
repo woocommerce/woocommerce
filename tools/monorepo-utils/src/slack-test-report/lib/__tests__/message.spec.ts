@@ -68,7 +68,7 @@ describe( 'createMessage', () => {
 							type: 'button',
 							text: {
 								type: 'plain_text',
-								text: 'Run',
+								text: 'View Run',
 							},
 							url: 'https://github.com/test/repo/actions/runs/456',
 						},
@@ -169,7 +169,7 @@ describe( 'createMessage', () => {
 			( block ) => block.type === 'actions'
 		);
 		const runButton = actionsBlock.elements.find(
-			( element ) => element.text.text === 'Run'
+			( element ) => element.text.text === 'View Run'
 		);
 
 		// Test URL without attempts
@@ -226,7 +226,7 @@ describe( 'createMessage', () => {
 							type: 'button',
 							text: {
 								type: 'plain_text',
-								text: 'Run',
+								text: 'View Run',
 							},
 							url: 'https://github.com/test/repo/actions/runs/456',
 						},
@@ -292,7 +292,7 @@ describe( 'createMessage', () => {
 							type: 'button',
 							text: {
 								type: 'plain_text',
-								text: 'Run',
+								text: 'View Run',
 							},
 							url: 'https://github.com/test/repo/actions/runs/456',
 						},
