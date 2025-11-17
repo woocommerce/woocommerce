@@ -330,7 +330,7 @@ class WC_Gateway_Paypal_Request {
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
 		if ( ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment.' );
+			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
@@ -343,18 +343,27 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
+		// If the authorization ID is not found, try to retrieve it from the PayPal order details as a fallback for backwards compatibility.
 		if ( ! $authorization_id ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment.' );
-			$data = $this->get_paypal_order_details( $paypal_order_id );
-			$authorization_id = $data['links'][0]['href'];
-			$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
-			$order->save();
+			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
+			$order_data         = $this->get_paypal_order_details( $paypal_order_id );
+			$authorization_data = $order_data['purchase_units'][0]['payments']['authorizations'][0] ?? null;
+
+			if ( ! $authorization_data && isset( $authorization_data['status'] ) && WC_Gateway_Paypal_Constants::STATUS_CAPTURED !== $authorization_data['status'] ) {
+				$authorization_id = $authorization_data['id'];
+				$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
+				$paypal_status = WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED;
+				$order->update_meta_data( '_paypal_status', $paypal_status );
+				$order->save();
+			} else {
+				WC_Gateway_Paypal::log( 'Authorization ID not found in PayPal order details. Order ID: ' . $order->get_id() );
+				return;
+			}
 		}
 
 		// Skip if the payment status is not authorized.
 		if ( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
-			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment.' );
+			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment. Order ID: ' . $order->get_id() );
 			return;
 		}
 
