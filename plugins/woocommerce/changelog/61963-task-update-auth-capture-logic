@@ -1,4 +1,4 @@
 Significance: patch
 Type: update
 
-Make capture later flow more secure to ensure the usage of correct authorization ID in PayPal Standard.
+Ensure PayPal Standard capture later flow uses the correct authorization ID.
