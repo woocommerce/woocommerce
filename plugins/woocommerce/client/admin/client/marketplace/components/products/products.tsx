@@ -25,7 +25,6 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { ThemeSwitchWarningModal } from '../theme-switch-warning-modal';
 
 interface ProductsProps {
 	categorySelector?: boolean;
@@ -57,29 +56,6 @@ export default function Products( props: ProductsProps ) {
 	const label = LABELS[ props.type ].label;
 	const query = useQuery();
 	const category = query?.category;
-	interface Theme {
-		stylesheet?: string;
-	}
-
-	const currentTheme = useSelect( ( select ) => {
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore
-		return select( 'core' ).getCurrentTheme() as Theme;
-	}, [] );
-	const isDefaultTheme = currentTheme?.stylesheet === 'twentytwentyfour';
-	const [ isModalOpen, setIsModalOpen ] = useState( false );
-	const customizeStoreDesignUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
-		page: 'wc-admin',
-		path: '/customize-store/design',
-	} );
-	const assemblerHubUrl = addQueryArgs( `${ ADMIN_URL }admin.php`, {
-		page: 'wc-admin',
-		path: '/customize-store/assembler-hub',
-	} );
-
-	const customizeStoreTask = useSelect( ( select ) => {
-		return select( onboardingStore ).getTask( 'customize-store' );
-	}, [] );
 
 	// Only show the "View all" button when on search but not showing a specific section of results.
 	const showAllButton = props.showAllButton ?? false;
@@ -147,31 +123,7 @@ export default function Products( props: ProductsProps ) {
 						<CategorySelector type={ props.type } />
 					) }
 				</div>
-				{ props.type === 'theme' && (
-					<Button
-						className="woocommerce-marketplace__customize-your-store-button"
-						variant="secondary"
-						text={ __( 'Design your own', 'woocommerce' ) }
-						onClick={ () => {
-							if ( ! isDefaultTheme ) {
-								setIsModalOpen( true );
-							} else if ( customizeStoreTask?.isComplete ) {
-								window.location.href = assemblerHubUrl;
-							} else {
-								window.location.href = customizeStoreDesignUrl;
-							}
-						} }
-					/>
-				) }
 			</nav>
-			{ isModalOpen && (
-				<ThemeSwitchWarningModal
-					setIsModalOpen={ setIsModalOpen }
-					redirectToCYSFlow={ () => {
-						window.location.href = customizeStoreDesignUrl;
-					} }
-				/>
-			) }
 			<ProductListContent
 				products={ products }
 				type={ props.type }
