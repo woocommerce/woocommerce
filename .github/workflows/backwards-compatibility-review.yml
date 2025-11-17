@@ -3,15 +3,86 @@ name: Backwards Compatibility PR Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to review'
+        required: true
+        type: number
 
 concurrency:
-  group: bc-review-${{ github.event.pull_request.number }}
+  group: bc-review-${{ github.event.pull_request.number || inputs.pr_number }}
   cancel-in-progress: true
 
 jobs:
+  fork-notice:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Post fork notice
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const reviewers = context.payload.pull_request.requested_reviewers || [];
+            const reviewerMentions = reviewers.map(r => `@${r.login}`).join(' ');
+            const mentionText = reviewerMentions ? `${reviewerMentions}\n\n` : '';
+
+            const body = `${mentionText}## Backwards Compatibility Review
+
+            This PR is from a forked repository, so the automated BC review cannot run (it requires repository secrets).
+
+            ### Manual Review with Claude
+
+            **⚠️ Important: Please post the BC review results as a comment on this PR before merging.**
+
+            Reviewers can perform a manual BC review using Claude Code or Claude.ai with this prompt:
+
+            \`\`\`
+            Please review this PR for backwards compatibility issues:
+            ${context.payload.pull_request.html_url}
+
+            PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
+
+            Only report on BC risks and required deprecations. Ignore styling, formatting, comments, and pure test/doc changes unless they mask a BC concern.
+
+            Output format (strict):
+            - Summary: Overall risk [None|Low|Medium|High] and a 2 to 4 sentence rationale.
+            - Testing Focus: targeted regression areas (e.g., checkout, gateways, subscriptions) with concrete steps.
+            - Confidence: a percentage and one-sentence justification.
+
+            Scope to analyze (but not limited to):
+            - PHP: public/protected API signature/visibility changes; default param or type-hint changes; thrown exceptions; removed/renamed hooks (\`do_action\`, \`apply_filters\`); template changes under \`templates/**\`; REST params/response shapes; DB/schema/options changes; global constants/vars; composer constraints.
+            - JS/Blocks: block names/attributes; script/style handle names, dependencies, and load order; REST schemas; data-store selectors/actions; settings/options keys.
+            - Ecosystem impact: payment gateways, popular Woo extensions (Subscriptions/Bookings/Memberships), themes customizing templates, custom checkout flows.
+
+            Method:
+            - Prefer exact citations with file:line for every item (from the diff and repo).
+            - Provide mitigation or migration guidance for each breaking/deprecation.
+            - If uncertain, state what evidence is missing and rate likelihood.
+
+            Ignore/limit noise:
+            - Exclude generated/binary/third-party content (e.g., \`vendor/**\`, \`node_modules/**\`, \`build/**\`, \`dist/**\`, \`*.min.*\`, translations \`*.mo\`/\`*.po\`).
+            - Focus on files changed in this PR and related API touch points.
+
+            If no BC issues are found, explicitly state: "No breaking changes detected" and explain why, including deprecation sufficiency and ecosystem considerations.
+            \`\`\`
+
+            After running the review, please **paste Claude's complete response as a comment on this PR** to document the BC analysis before merging.`;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
+              body: body
+            });
+
   review-with-tracking:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    # Run for PRs from same repository (not forks) OR manual workflow dispatch
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       pull-requests: write
@@ -37,7 +108,7 @@ jobs:
           # Your custom review instructions
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number }}
+            PR NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
 
             PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
 
