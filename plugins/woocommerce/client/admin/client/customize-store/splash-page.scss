@@ -1,0 +1,90 @@
+.woocommerce-customize-store-splash {
+	padding: 40px;
+	max-width: 1200px;
+	margin: 0 auto;
+
+	&__content {
+		display: flex;
+		gap: 40px;
+		align-items: flex-start;
+
+		@media (max-width: 960px) {
+			flex-direction: column;
+		}
+	}
+
+	&__left {
+		flex: 1;
+		min-width: 300px;
+
+		h1 {
+			font-size: 2em;
+			margin-bottom: 20px;
+			line-height: 1.2;
+		}
+
+		p {
+			font-size: 1.1em;
+			line-height: 1.6;
+			color: #50575e;
+		}
+	}
+
+	&__right {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
+
+	&__banner {
+		background: #fff;
+		border: 1px solid #dcdcde;
+		border-radius: 4px;
+		padding: 24px;
+
+		h2 {
+			margin-top: 0;
+			margin-bottom: 12px;
+			font-size: 1.3em;
+		}
+
+		p {
+			margin-bottom: 16px;
+			line-height: 1.5;
+		}
+
+		ul {
+			list-style: none;
+			padding: 0;
+			margin: 16px 0;
+
+			li {
+				padding-left: 24px;
+				margin-bottom: 8px;
+				position: relative;
+
+				&::before {
+					content: "✓";
+					position: absolute;
+					left: 0;
+					color: #2271b1;
+					font-weight: bold;
+				}
+			}
+		}
+
+		.components-button {
+			margin-top: 8px;
+		}
+	}
+
+	&__banner.design-your-own {
+		border-left: 4px solid #2271b1;
+	}
+
+	&__banner.pick-your-theme {
+		border-left: 4px solid #50575e;
+	}
+}
+
