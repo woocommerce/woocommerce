@@ -234,6 +234,7 @@ const ProductControl = (
 				selected.includes( Number( id ) )
 			) }
 			onChange={ onChange }
+			loadMoreChildrenText={ __( 'Load more variations', 'woocommerce' ) }
 			onLoadMoreChildren={ onLoadMoreVariations }
 			totalChildren={ totalVariations }
 			renderItem={ getRenderItemFunc() }

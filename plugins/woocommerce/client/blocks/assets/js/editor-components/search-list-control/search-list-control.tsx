@@ -46,6 +46,7 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 		selected,
 		renderItem,
 		depth = 0,
+		loadMoreChildrenText,
 		onLoadMoreChildren,
 		totalChildren,
 		onSelect,
@@ -111,10 +112,11 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 												onLoadMoreChildren()
 											}
 										>
-											{ __(
-												'Load more variations',
-												'woocommerce'
-											) }
+											{ loadMoreChildrenText ||
+												__(
+													'Load more',
+													'woocommerce'
+												) }
 										</button>
 									</li>
 								) : null }
@@ -187,6 +189,7 @@ const ListItemsContainer = < T extends object = object >( {
 		renderItem,
 		selected,
 		isSingle,
+		loadMoreChildrenText,
 		onLoadMoreChildren,
 		totalChildren,
 	} = props;
@@ -215,6 +218,7 @@ const ListItemsContainer = < T extends object = object >( {
 				list={ filteredList }
 				selected={ selected }
 				renderItem={ renderItemCallback }
+				loadMoreChildrenText={ loadMoreChildrenText }
 				onLoadMoreChildren={ onLoadMoreChildren }
 				totalChildren={ totalChildren }
 				onSelect={ onSelect }

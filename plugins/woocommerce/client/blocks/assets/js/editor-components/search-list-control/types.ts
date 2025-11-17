@@ -7,6 +7,8 @@ import { Require } from '@woocommerce/types';
 interface ItemProps< T extends object = object > {
 	// Depth, non-zero if the list is hierarchical.
 	depth?: number;
+	// Text to display for the load more button.
+	loadMoreChildrenText?: string;
 	// Callback for loading more children.
 	onLoadMoreChildren?: () => void;
 	// The total number of children.
@@ -123,6 +125,8 @@ export interface SearchListControlProps< T extends object = object > {
 	list: SearchListItem< T >[];
 	// Messages displayed or read to the user. Configure these to reflect your object type.
 	messages?: Partial< SearchListMessages >;
+	// Text to display for the load more button.
+	loadMoreChildrenText?: string;
 	// Callback for loading more children.
 	onLoadMoreChildren?: () => void;
 	// The total number of children.
