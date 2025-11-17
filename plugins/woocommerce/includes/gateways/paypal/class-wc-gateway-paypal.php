@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection_Manager;
+use Automattic\WooCommerce\Enums\OrderStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -698,9 +699,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 	 *
 	 * @param  int $order_id Order ID.
 	 */
-	public function capture_payment( $order_id ) {
-		$order = wc_get_order( $order_id );
-
+	public function capture_payment( $order_id, $order, $status_transition ) {
 		// Bail if the order is not a PayPal order.
 		if ( self::ID !== $order->get_payment_method() ) {
 			return;
@@ -710,6 +709,11 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 		$is_authorized_via_legacy_api = 'pending' === $order->get_meta( '_paypal_status', true );
 
 		if ( $this->should_use_orders_v2() && ! $is_authorized_via_legacy_api ) {
+			// Bail if the order is not transitioning from on-hold status.
+			if ( OrderStatus::ON_HOLD !== $status_transition['from'] ) {
+				return;
+			}
+	
 			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
