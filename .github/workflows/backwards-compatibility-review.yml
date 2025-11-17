@@ -29,14 +29,26 @@ jobs:
             console.log('Event name:', context.eventName);
             console.log('Context payload keys:', Object.keys(context.payload));
             console.log('Has pull_request:', !!context.payload.pull_request);
-            console.log('Issue number:', context.issue.number);
+            console.log('Issue number:', context.issue?.number);
+            console.log('Payload PR number:', context.payload.pull_request?.number);
 
-            // Fetch PR data to ensure we have all the info we need
-            const pr = context.payload.pull_request || await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            }).then(r => r.data);
+            // Get PR data - should always be available in pull_request events
+            let pr = context.payload.pull_request;
+
+            // If not available (shouldn't happen), try to fetch it
+            if (!pr) {
+              const prNumber = context.issue?.number || context.payload.number;
+              console.log('Attempting to fetch PR:', prNumber);
+              if (prNumber) {
+                pr = await github.rest.pulls.get({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber
+                }).then(r => r.data);
+              } else {
+                throw new Error('Cannot determine PR number from context');
+              }
+            }
 
             console.log('PR number:', pr.number);
             console.log('PR html_url:', pr.html_url);
