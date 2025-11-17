@@ -282,7 +282,9 @@ export const Block = ( props: Props ): JSX.Element | null => {
 						{ ...restProps }
 					/>
 				) }
-				<ParentComponent { ...( showProductLink && anchorProps ) }>
+				<ParentComponent
+					{ ...( ! isAdmin && showProductLink && anchorProps ) }
+				>
 					<Image
 						fallbackAlt={ decodeEntities( product.name ) }
 						image={ image }
