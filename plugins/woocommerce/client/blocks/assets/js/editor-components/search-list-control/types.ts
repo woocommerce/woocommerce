@@ -123,6 +123,10 @@ export interface SearchListControlProps< T extends object = object > {
 	list: SearchListItem< T >[];
 	// Messages displayed or read to the user. Configure these to reflect your object type.
 	messages?: Partial< SearchListMessages >;
+	// Callback for loading more children.
+	onLoadMoreChildren?: () => void;
+	// The total number of children.
+	totalChildren?: { [ key: string ]: number | null };
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
 	onChange: ( search: SearchListItem< T >[] ) => void;
 	// Callback fired when the search field is used.

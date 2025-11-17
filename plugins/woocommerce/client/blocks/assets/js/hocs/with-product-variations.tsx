@@ -235,7 +235,7 @@ const withProductVariations = createHigherOrderComponent(
 					<OriginalComponent
 						{ ...this.props }
 						error={ error || propsError }
-						onLoadMore={ () =>
+						onLoadMoreVariations={ () =>
 							this.loadVariations( {
 								offset,
 							} )

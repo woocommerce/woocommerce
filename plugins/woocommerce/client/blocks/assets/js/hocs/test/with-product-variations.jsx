@@ -14,7 +14,7 @@ import withProductVariations from '../with-product-variations';
 import * as mockBaseUtils from '../../base/utils/errors';
 
 jest.mock( '@woocommerce/editor-components/utils', () => ( {
-	getProductVariations: jest.fn(),
+	getProductVariationsWithTotal: jest.fn(),
 } ) );
 
 jest.mock( '../../base/utils/errors', () => ( {

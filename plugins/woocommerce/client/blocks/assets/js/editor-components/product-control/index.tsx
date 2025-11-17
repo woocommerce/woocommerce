@@ -49,7 +49,7 @@ interface ProductControlProps {
 	/**
 	 * Callback to load more variations.
 	 */
-	onLoadMore: () => void;
+	onLoadMoreVariations: () => void;
 	/**
 	 * The total number of varaitions.
 	 */
@@ -102,7 +102,7 @@ const ProductControl = (
 		isCompact = false,
 		isLoading,
 		onChange,
-		onLoadMore,
+		onLoadMoreVariations,
 		totalVariations,
 		onSearch,
 		products,
@@ -234,7 +234,7 @@ const ProductControl = (
 				selected.includes( Number( id ) )
 			) }
 			onChange={ onChange }
-			onLoadMoreChildren={ onLoadMore }
+			onLoadMoreChildren={ onLoadMoreVariations }
 			totalChildren={ totalVariations }
 			renderItem={ getRenderItemFunc() }
 			onSearch={ onSearch }
