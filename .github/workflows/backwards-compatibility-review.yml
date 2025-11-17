@@ -17,7 +17,8 @@ concurrency:
 jobs:
   fork-notice:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.head.repo.full_name != github.repository
+    # Run for forked PRs or workflow_dispatch (for testing)
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
     permissions:
       pull-requests: write
     steps:
@@ -31,19 +32,22 @@ jobs:
             console.log('Has pull_request:', !!context.payload.pull_request);
             console.log('Issue number:', context.issue?.number);
             console.log('Payload PR number:', context.payload.pull_request?.number);
+            console.log('Workflow inputs:', context.payload.inputs);
 
-            // Get PR data - should always be available in pull_request events
+            // Get PR data
             let pr = context.payload.pull_request;
 
-            // If not available (shouldn't happen), try to fetch it
+            // For workflow_dispatch or if PR not in payload, fetch it
             if (!pr) {
-              const prNumber = context.issue?.number || context.payload.number;
+              // Try to get PR number from workflow inputs or context
+              const prNumber = context.payload.inputs?.pr_number || context.issue?.number || context.payload.number;
               console.log('Attempting to fetch PR:', prNumber);
+
               if (prNumber) {
                 pr = await github.rest.pulls.get({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  pull_number: prNumber
+                  pull_number: parseInt(prNumber)
                 }).then(r => r.data);
               } else {
                 throw new Error('Cannot determine PR number from context');
