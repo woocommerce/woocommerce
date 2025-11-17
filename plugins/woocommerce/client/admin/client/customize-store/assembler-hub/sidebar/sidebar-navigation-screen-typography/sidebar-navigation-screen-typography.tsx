@@ -23,7 +23,7 @@ import { ADMIN_URL } from '~/utils/admin-settings';
 import { FontPairing } from '../global-styles';
 import { CustomizeStoreContext } from '../..';
 import { trackEvent } from '~/customize-store/tracking';
-import { enableTracking } from '~/customize-store/design-without-ai/services';
+import { enableTracking } from '../utils';
 
 export const SidebarNavigationScreenTypography = ( {
 	onNavigateBackClick,

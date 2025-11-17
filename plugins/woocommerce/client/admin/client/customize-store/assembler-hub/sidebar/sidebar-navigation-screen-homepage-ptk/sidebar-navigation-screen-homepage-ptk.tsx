@@ -41,7 +41,7 @@ import './style.scss';
 import { usePatterns } from '~/customize-store/assembler-hub/hooks/use-patterns';
 import { THEME_SLUG } from '~/customize-store/data/constants';
 import apiFetch from '@wordpress/api-fetch';
-import { enableTracking } from '~/customize-store/design-without-ai/services';
+import { enableTracking } from '../utils';
 
 const isActiveElement = ( path: string | undefined, category: string ) => {
 	if ( path?.includes( category ) ) {
