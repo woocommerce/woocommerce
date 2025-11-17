@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Make date handling within DateRange component more robust, for scenarious where a wrong moment date is used.

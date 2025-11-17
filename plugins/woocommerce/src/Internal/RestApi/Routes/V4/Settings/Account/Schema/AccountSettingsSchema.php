@@ -1,13 +1,13 @@
 <?php
 /**
- * GeneralSettingsSchema class.
+ * AccountSettingsSchema class.
  *
  * @package WooCommerce\RestApi
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema;
+namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Schema;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use WP_REST_Request;
@@ -15,15 +15,15 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * GeneralSettingsSchema class.
+ * AccountSettingsSchema class.
  */
-class GeneralSettingsSchema extends AbstractSchema {
+class AccountSettingsSchema extends AbstractSchema {
 	/**
 	 * The schema item identifier.
 	 *
 	 * @var string
 	 */
-	const IDENTIFIER = 'general_settings';
+	const IDENTIFIER = 'account_settings';
 
 	/**
 	 * Return all properties for the item schema.
@@ -117,7 +117,7 @@ class GeneralSettingsSchema extends AbstractSchema {
 				'type'    => array(
 					'description' => __( 'Setting field type.', 'woocommerce' ),
 					'type'        => 'string',
-					'enum'        => array( 'text', 'number', 'select', 'multiselect', 'checkbox' ),
+					'enum'        => array( 'text', 'textarea', 'number', 'select', 'multiselect', 'checkbox' ),
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
 				'options' => array(
@@ -135,7 +135,7 @@ class GeneralSettingsSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Get general settings data by transforming raw settings into REST API format.
+	 * Get account settings data by transforming raw settings into REST API format.
 	 *
 	 * @param mixed           $item             Raw settings array.
 	 * @param WP_REST_Request $request          Request object.
@@ -176,11 +176,6 @@ class GeneralSettingsSchema extends AbstractSchema {
 				continue;
 			}
 
-			// Skip title and sectionend types.
-			if ( in_array( $setting_type, array( 'title', 'sectionend' ), true ) ) {
-				continue;
-			}
-
 			// Convert setting to field format.
 			if ( isset( $setting['id'] ) && $current_group ) {
 				$field = $this->transform_setting_to_field( $setting );
@@ -204,9 +199,9 @@ class GeneralSettingsSchema extends AbstractSchema {
 		);
 
 		$response = array(
-			'id'          => 'general',
-			'title'       => __( 'General', 'woocommerce' ),
-			'description' => __( 'Set your store\'s address, visibility, currency, language, and timezone.', 'woocommerce' ),
+			'id'          => 'account',
+			'title'       => __( 'Accounts & Privacy', 'woocommerce' ),
+			'description' => __( 'Set options relating to customer accounts and data privacy.', 'woocommerce' ),
 			'values'      => $values,
 			'groups'      => $groups,
 		);
@@ -253,49 +248,7 @@ class GeneralSettingsSchema extends AbstractSchema {
 	 * @return array Field options.
 	 */
 	private function get_field_options( string $field_id ): array {
-		switch ( $field_id ) {
-			case 'woocommerce_currency':
-				if ( ! function_exists( 'get_woocommerce_currencies' ) || ! function_exists( 'get_woocommerce_currency_symbol' ) ) {
-					return array();
-				}
-
-				$currencies = get_woocommerce_currencies();
-				$options    = array();
-
-				foreach ( $currencies as $code => $name ) {
-					$label            = wp_specialchars_decode( (string) $name );
-					$symbol           = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
-					$options[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
-				}
-
-				return $options;
-
-			case 'woocommerce_default_country':
-			case 'woocommerce_specific_allowed_countries':
-			case 'woocommerce_specific_ship_to_countries':
-				if ( ! function_exists( 'WC' ) ) {
-					return array();
-				}
-
-				$countries = WC()->countries->get_countries();
-				$states    = WC()->countries->get_states();
-				$options   = array();
-
-				foreach ( $countries as $country_code => $country_name ) {
-					$country_states = $states[ $country_code ] ?? array();
-
-					if ( empty( $country_states ) ) {
-						$options[ $country_code ] = $country_name;
-					} else {
-						foreach ( $country_states as $state_code => $state_name ) {
-							$options[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-						}
-					}
-				}
-
-				return $options;
-		}
-
+		// No field has options for now.
 		return array();
 	}
 
@@ -307,8 +260,8 @@ class GeneralSettingsSchema extends AbstractSchema {
 	 */
 	private function normalize_field_type( string $wc_type ): string {
 		$type_map = array(
-			'single_select_country'  => 'select',
-			'multi_select_countries' => 'multiselect',
+			'single_select_page'             => 'select',
+			'single_select_page_with_search' => 'select',
 		);
 
 		return $type_map[ $wc_type ] ?? $wc_type;
@@ -338,10 +291,12 @@ class GeneralSettingsSchema extends AbstractSchema {
 					return array();
 				}
 				return array_map( 'sanitize_text_field', $value );
+			case 'textarea':
+				return sanitize_textarea_field( $value );
 			case 'text':
 			case 'select':
 			default:
-				return is_string( $value ) ? $value : (string) $value;
+				return sanitize_text_field( $value );
 		}
 	}
 }
