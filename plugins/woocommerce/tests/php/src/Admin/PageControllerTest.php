@@ -11,8 +11,6 @@ use WC_Unit_Test_Case;
  * Unit tests for PageController redirect functionality.
  *
  * @covers \Automattic\WooCommerce\Admin\PageController
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
 class PageControllerTest extends WC_Unit_Test_Case {
 	/**
@@ -67,10 +65,6 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->page_controller = PageController::get_instance();
 
 		// Set up admin environment.
-		// Safe to define WP_ADMIN here because @runTestsInSeparateProcesses isolates each test.
-		if ( ! defined( 'WP_ADMIN' ) ) {
-			define( 'WP_ADMIN', true );
-		}
 		set_current_screen( 'dashboard' );
 
 		// Start watching for redirects.
@@ -128,16 +122,26 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Trigger the redirect method and catch the exception to prevent exit().
+	 * Temporarily defines WP_ADMIN for this specific call only.
 	 *
 	 * @return void
 	 */
 	private function trigger_redirect_check(): void {
+		// Temporarily define WP_ADMIN if not already defined.
+		$was_defined = defined( 'WP_ADMIN' );
+		if ( ! $was_defined ) {
+			define( 'WP_ADMIN', true );
+		}
+
 		try {
 			$this->page_controller->maybe_redirect_payment_tasks_to_settings();
 		} catch ( \WPAjaxDieContinueException $e ) {
 			// Expected - this prevents exit() from killing the test.
 			unset( $e );
 		}
+
+		// Note: We cannot undefine WP_ADMIN as constants cannot be undefined in PHP.
+		// However, defining it once per test class should not affect other test classes.
 	}
 
 	/**
