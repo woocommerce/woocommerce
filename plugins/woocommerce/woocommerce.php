@@ -24,6 +24,8 @@ if ( ! defined( 'WC_PLUGIN_FILE' ) ) {
 require __DIR__ . '/src/Autoloader.php';
 require __DIR__ . '/src/Packages.php';
 
+// Make a change to open a PR from a fork.
+
 if ( ! \Automattic\WooCommerce\Autoloader::init() ) {
 	return;
 }
