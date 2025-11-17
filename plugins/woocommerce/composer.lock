@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c433f2e0744104f73ad290380d910d2d",
+    "content-hash": "e25de9ccfb8c86529a8560065c4e7d09",
     "packages": [
         {
             "name": "automattic/block-delimiter",
@@ -1351,16 +1351,16 @@
         },
         {
             "name": "wordpress/mcp-adapter",
-            "version": "dev-trunk",
+            "version": "v0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/WordPress/mcp-adapter.git",
-                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5"
+                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/7a2d22cff92328bc94f5b1648a66ae4273e949c5",
-                "reference": "7a2d22cff92328bc94f5b1648a66ae4273e949c5",
+                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/653ca8d95180b25809b1a1dc489d8305ec5beb63",
+                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63",
                 "shasum": ""
             },
             "require": {
@@ -1382,7 +1382,6 @@
                 "wpackagist-plugin/plugin-check": "^1.6",
                 "yoast/phpunit-polyfills": "^4.0"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "installer-paths": {
@@ -1442,7 +1441,7 @@
                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
                 "source": "https://github.com/wordpress/mcp-adapter"
             },
-            "time": "2025-10-30T20:39:26+00:00"
+            "time": "2025-11-06T14:56:51+00:00"
         }
     ],
     "packages-dev": [
@@ -5420,9 +5419,7 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": {
-        "wordpress/mcp-adapter": 20
-    },
+    "stability-flags": {},
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
