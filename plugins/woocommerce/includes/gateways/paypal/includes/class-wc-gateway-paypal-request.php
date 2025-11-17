@@ -322,12 +322,18 @@ class WC_Gateway_Paypal_Request {
 	 * @throws Exception If the PayPal payment capture fails.
 	 */
 	public function capture_authorized_payment( $order ) {
+		if ( ! $order ) {
+			WC_Gateway_Paypal::log( 'Order not found to capture authorized payment.' );
+			return;
+		}
+
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		$paypal_status    = $order->get_meta( '_paypal_status', true );
 
-		if ( ! $order || ! $paypal_order_id ) {
-			WC_Gateway_Paypal::log( 'Order ID not found to capture authorized payment.' );
+		// Skip if the PayPal Order ID is not found.
+		if ( ! $paypal_order_id ) {
+			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment.' );
 			return;
 		}
 
