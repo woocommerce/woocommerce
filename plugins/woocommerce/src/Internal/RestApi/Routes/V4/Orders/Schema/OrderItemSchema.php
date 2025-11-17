@@ -181,7 +181,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'total'           => wc_format_decimal( $order_item->get_total(), $dp ),
 			'total_tax'       => wc_format_decimal( $order_item->get_total_tax(), $dp ),
 			'taxes'           => $this->prepare_taxes( $order_item, $request ),
-			'meta_data'       => $this->filter_meta_data( $this->prepare_meta_data( $order_item ), $order_item, $request ),
+			'meta_data'       => $this->prepare_meta_data( $order_item ),
 			'currency'        => $order_item->get_order()->get_currency(),
 			'currency_symbol' => html_entity_decode( get_woocommerce_currency_symbol( $order_item->get_order()->get_currency() ), ENT_QUOTES ),
 		);
