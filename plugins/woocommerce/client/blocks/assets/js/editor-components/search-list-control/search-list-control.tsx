@@ -73,8 +73,10 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 						  )
 						: !! selected.find( ( { id } ) => id === item.id );
 				const isExpanded = childrenCount && expandedPanelId === item.id;
-				const totalChildrenForItem =
-					totalChildren?.[ item.id ] ?? Number.MAX_SAFE_INTEGER;
+				const totalChildrenForItem = totalChildren?.[ item.id ];
+				const hasMoreChildren =
+					typeof totalChildrenForItem === 'number' &&
+					childrenCount < totalChildrenForItem;
 
 				return (
 					<Fragment key={ item.id }>
@@ -100,8 +102,7 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 									}
 									depth={ depth + 1 }
 								/>
-								{ onLoadMoreChildren &&
-								childrenCount < totalChildrenForItem ? (
+								{ onLoadMoreChildren && hasMoreChildren ? (
 									<li>
 										<Button
 											className="woocommerce-search-list__load-more"
