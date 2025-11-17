@@ -3,22 +3,16 @@ name: Backwards Compatibility PR Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
-  workflow_dispatch:
-    inputs:
-      pr_number:
-        description: 'PR number to review'
-        required: true
-        type: number
 
 concurrency:
-  group: bc-review-${{ github.event.pull_request.number || inputs.pr_number }}
+  group: bc-review-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
   fork-notice:
     runs-on: ubuntu-latest
-    # Run for forked PRs or workflow_dispatch (for testing)
-    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository)
+    # Only run for PRs from forked repositories
+    if: github.event.pull_request.head.repo.full_name != github.repository
     permissions:
       pull-requests: write
     steps:
@@ -26,24 +20,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            // Get PR data
-            let pr = context.payload.pull_request;
-
-            // For workflow_dispatch or if PR not in payload, fetch it
-            if (!pr) {
-              const prNumber = context.payload.inputs?.pr_number || context.issue?.number || context.payload.number;
-
-              if (prNumber) {
-                pr = await github.rest.pulls.get({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: parseInt(prNumber)
-                }).then(r => r.data);
-              } else {
-                throw new Error('Cannot determine PR number from context');
-              }
-            }
-
+            const pr = context.payload.pull_request;
             const reviewers = pr.requested_reviewers || [];
             const reviewerMentions = reviewers.map(r => `@${r.login}`).join(' ');
             const mentionText = reviewerMentions ? `${reviewerMentions}\n\n` : '';
@@ -100,8 +77,8 @@ jobs:
   review-with-tracking:
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    # Run for PRs from same repository (not forks) OR manual workflow dispatch
-    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    # Only run for PRs from the same repository (not forks)
+    if: github.event.pull_request.head.repo.full_name == github.repository
     permissions:
       contents: read
       pull-requests: write
@@ -127,7 +104,7 @@ jobs:
           # Your custom review instructions
           prompt: |
             REPO: ${{ github.repository }}
-            PR NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+            PR NUMBER: ${{ github.event.pull_request.number }}
 
             PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
 
