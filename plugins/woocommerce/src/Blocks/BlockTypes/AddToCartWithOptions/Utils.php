@@ -95,7 +95,8 @@ class Utils {
 		) {
 
 			$default_quantity = $product instanceof \WC_Product ? $product->get_min_purchase_quantity() : 1;
-			// A child product ID indicates a grouped product. If we can't find product or child product for "some reason" default to 1.
+			// A child product ID indicates a grouped product, which should start at 0; otherwise fall back
+			// to the product min (or 1 if no product).
 			$input_quantity = $child_product_id ? 0 : $default_quantity;
 
 			wp_interactivity_state(
