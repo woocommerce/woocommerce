@@ -47,11 +47,22 @@ class MCPAdapterProvider {
 	 */
 	public function __construct() {
 		/*
-		 * Hook into rest_api_init with priority 10 to initialize only on REST API requests.
-		 * MCP adapter registers on rest_api_init with priority 20000, so we initialize earlier.
-		 * This prevents unnecessary MCP initialization on favicon, cron, or admin requests.
+		 * Initialize MCP adapter in both WP-CLI and REST API contexts.
+		 *
+		 * For WP-CLI: Hook into 'init' at priority 5 to ensure initialization
+		 * happens before the MCP adapter registers its CLI commands (priority 20).
+		 * This enables commands like 'wp mcp-adapter serve' to work properly.
+		 *
+		 * For REST: Hook into 'rest_api_init' with priority 10 to initialize only
+		 * on REST API requests. MCP adapter registers on rest_api_init with priority 20000,
+		 * so we initialize earlier. This prevents unnecessary MCP initialization on
+		 * favicon, cron, or admin requests.
 		 */
-		add_action( 'rest_api_init', array( $this, 'maybe_initialize' ), 10 );
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			add_action( 'init', array( $this, 'maybe_initialize' ), 5 );
+		} else {
+			add_action( 'rest_api_init', array( $this, 'maybe_initialize' ), 10 );
+		}
 	}
 
 	/**
@@ -213,6 +224,67 @@ class MCPAdapterProvider {
 	 * @return bool True if this is an MCP endpoint request.
 	 */
 	public static function is_mcp_request(): bool {
+		return self::is_mcp_cli_request() || self::is_mcp_rest_request();
+	}
+
+	/**
+	 * Check if the current request is a WP-CLI request for MCP adapter.
+	 *
+	 * Handles WP-CLI invocations like:
+	 * - `wp mcp-adapter serve`
+	 * - `wp --debug --user=1 mcp-adapter serve`
+	 * - `wp --path=/var/www --quiet -vvv mcp-adapter serve`
+	 *
+	 * @return bool True if this is a WP-CLI MCP adapter request.
+	 */
+	private static function is_mcp_cli_request(): bool {
+		// Check if this is a CLI request.
+		if ( ! defined( 'WP_CLI' ) || ! constant( 'WP_CLI' ) ) {
+			return false;
+		}
+
+		// Try to get the command from WP_CLI runner if available (strips global options).
+		if ( class_exists( 'WP_CLI' ) && method_exists( 'WP_CLI', 'get_runner' ) ) {
+			try {
+				$runner = \WP_CLI::get_runner();
+				if ( $runner && isset( $runner->arguments ) && is_array( $runner->arguments ) ) {
+					// Check if the first non-option argument is 'mcp-adapter'.
+					$first_arg = reset( $runner->arguments );
+					if ( 'mcp-adapter' === $first_arg ) {
+						return true;
+					}
+				}
+			} catch ( \Exception $e ) {
+				// If runner is not available or throws exception, fall through to argv check.
+				unset( $e );
+			}
+		}
+
+		// Fallback: scan $_SERVER['argv'] for the first non-flag token.
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- CLI arguments are safe in WP-CLI context.
+		$cli_args = $_SERVER['argv'] ?? array();
+		foreach ( $cli_args as $index => $arg ) {
+			// Skip the script name (first element).
+			if ( 0 === $index ) {
+				continue;
+			}
+			// Skip global flags (start with '--' or single dash options like '-vvv').
+			if ( str_starts_with( $arg, '--' ) || str_starts_with( $arg, '-' ) ) {
+				continue;
+			}
+			// First non-flag argument found - check if it's 'mcp-adapter'.
+			return 'mcp-adapter' === $arg;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if the current request is a REST API request for the MCP endpoint.
+	 *
+	 * @return bool True if this is a REST request to the MCP endpoint.
+	 */
+	private static function is_mcp_rest_request(): bool {
 		// Check if this is a REST request.
 		if ( ! defined( 'REST_REQUEST' ) || ! REST_REQUEST ) {
 			return false;

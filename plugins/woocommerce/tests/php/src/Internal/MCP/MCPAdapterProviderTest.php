@@ -318,4 +318,207 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			'Should maintain correct values after re-indexing'
 		);
 	}
+
+	/**
+	 * Test is_mcp_request() with simple WP-CLI command.
+	 */
+	public function test_is_mcp_request_simple_cli_command() {
+		// Simulate simple WP-CLI command: wp mcp-adapter serve.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', 'mcp-adapter', 'serve' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertTrue( $result, 'Should detect mcp-adapter command without flags' );
+	}
+
+	/**
+	 * Test is_mcp_request() with WP-CLI global flags before command.
+	 */
+	public function test_is_mcp_request_with_global_flags() {
+		// Simulate WP-CLI command with global flags: wp --debug --user=1 mcp-adapter serve.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', '--debug', '--user=1', 'mcp-adapter', 'serve' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertTrue( $result, 'Should detect mcp-adapter command after global flags' );
+	}
+
+	/**
+	 * Test is_mcp_request() with multiple WP-CLI flags.
+	 */
+	public function test_is_mcp_request_with_multiple_flags() {
+		// Simulate WP-CLI command with many flags: wp --path=/var/www --debug --quiet -vvv mcp-adapter serve.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', '--path=/var/www', '--debug', '--quiet', '-vvv', 'mcp-adapter', 'serve' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertTrue( $result, 'Should detect mcp-adapter command after multiple flags including single-dash options' );
+	}
+
+	/**
+	 * Test is_mcp_request() with non-mcp-adapter WP-CLI command.
+	 */
+	public function test_is_mcp_request_non_mcp_command() {
+		// Simulate non-MCP WP-CLI command: wp plugin list.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', 'plugin', 'list' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertFalse( $result, 'Should not detect non-mcp-adapter commands' );
+	}
+
+	/**
+	 * Test is_mcp_request() with non-mcp-adapter command after flags.
+	 */
+	public function test_is_mcp_request_non_mcp_command_with_flags() {
+		// Simulate non-MCP WP-CLI command with flags: wp --debug plugin list.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', '--debug', '--user=1', 'plugin', 'list' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertFalse( $result, 'Should not detect non-mcp-adapter commands even with flags' );
+	}
+
+	/**
+	 * Test is_mcp_request() with only flags (no command).
+	 */
+	public function test_is_mcp_request_only_flags() {
+		// Simulate WP-CLI invocation with only flags: wp --debug --user=1.
+		if ( ! defined( 'WP_CLI' ) ) {
+			define( 'WP_CLI', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating CLI args.
+		$original_argv   = $_SERVER['argv'] ?? null;
+		$_SERVER['argv'] = array( 'wp', '--debug', '--user=1' );
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original argv.
+		if ( null === $original_argv ) {
+			unset( $_SERVER['argv'] );
+		} else {
+			$_SERVER['argv'] = $original_argv;
+		}
+
+		$this->assertFalse( $result, 'Should return false when no command is present' );
+	}
+
+	/**
+	 * Test is_mcp_request() detects REST API MCP requests.
+	 */
+	public function test_is_mcp_request_rest_api() {
+		// Simulate REST API request to MCP endpoint.
+		// Even though WP_CLI constant is defined in test environment,
+		// this tests the REST detection path by ensuring REST_REQUEST is set
+		// and checking the REQUEST_URI.
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating REST request URI.
+		$original_uri           = $_SERVER['REQUEST_URI'] ?? null;
+		$_SERVER['REQUEST_URI'] = '/wp-json/woocommerce/mcp';
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original state.
+		if ( null === $original_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $original_uri;
+		}
+
+		$this->assertTrue( $result, 'Should detect MCP REST request' );
+	}
+
+	/**
+	 * Test is_mcp_request() returns false for non-MCP REST requests.
+	 */
+	public function test_is_mcp_request_rest_api_non_mcp() {
+		// Simulate REST API request to non-MCP endpoint.
+		if ( ! defined( 'REST_REQUEST' ) ) {
+			define( 'REST_REQUEST', true );
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized, WordPress.Security.ValidatedSanitizedInput.MissingUnslash -- Test code simulating REST request URI.
+		$original_uri           = $_SERVER['REQUEST_URI'] ?? null;
+		$_SERVER['REQUEST_URI'] = '/wp-json/wc/v3/products';
+
+		$result = MCPAdapterProvider::is_mcp_request();
+
+		// Restore original state.
+		if ( null === $original_uri ) {
+			unset( $_SERVER['REQUEST_URI'] );
+		} else {
+			$_SERVER['REQUEST_URI'] = $original_uri;
+		}
+
+		$this->assertFalse( $result, 'Should not detect non-MCP REST requests' );
+	}
 }
