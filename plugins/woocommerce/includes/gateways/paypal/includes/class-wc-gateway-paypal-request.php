@@ -327,15 +327,15 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
-		$paypal_status    = $order->get_meta( '_paypal_status', true );
-
-		// Skip if the PayPal Order ID is not found.
+		// Skip if the PayPal Order ID is not found. This means the order was not created via the Orders v2 API.
 		if ( ! $paypal_order_id ) {
 			WC_Gateway_Paypal::log( 'PayPal Order ID not found to capture authorized payment.' );
 			return;
 		}
+
+		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
+		$paypal_status    = $order->get_meta( '_paypal_status', true );
 
 		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
@@ -343,8 +343,17 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		// Skip if the payment is not authorized.
-		if ( ! $authorization_id || WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
+		// If the authorization ID is not found, try to retrieve it from the PayPal order details.
+		if ( ! $authorization_id ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment.' );
+			$data = $this->get_paypal_order_details( $paypal_order_id );
+			$authorization_id = $data['links'][0]['href'];
+			$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
+			$order->save();
+		}
+
+		// Skip if the payment status is not authorized.
+		if ( WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED !== $paypal_status ) {
 			WC_Gateway_Paypal::log( 'PayPal payment is not authorized. Cannot capture payment.' );
 			return;
 		}
