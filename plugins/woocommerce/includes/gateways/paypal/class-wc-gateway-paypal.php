@@ -181,8 +181,8 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 
 		// Actions.
 		add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
-		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ) );
-		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ) );
+		add_action( 'woocommerce_order_status_processing', array( $this, 'capture_payment' ), 10, 3 );
+		add_action( 'woocommerce_order_status_completed', array( $this, 'capture_payment' ), 10, 3 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 
 		if ( ! $this->is_valid_for_use() ) {
@@ -713,7 +713,7 @@ class WC_Gateway_Paypal extends WC_Payment_Gateway {
 			if ( OrderStatus::ON_HOLD !== $status_transition['from'] ) {
 				return;
 			}
-	
+
 			include_once __DIR__ . '/includes/class-wc-gateway-paypal-request.php';
 
 			$paypal_request = new WC_Gateway_Paypal_Request( $this );
