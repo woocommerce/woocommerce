@@ -2,15 +2,18 @@
  * External dependencies
  */
 import { useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, isRTL } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { chevronLeft } from '@wordpress/icons';
+import { chevronLeft, chevronRight } from '@wordpress/icons';
 import { getNewPath } from '@woocommerce/navigation';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { useFullScreen } from '~/utils';
+import { isWooExpress } from '~/utils/is-woo-express';
+import { isFeatureEnabled } from '~/utils/features';
 import './splash-page.scss';
 
 const CustomizeStoreController = () => {
@@ -24,30 +27,36 @@ const CustomizeStoreController = () => {
 	}, [] );
 
 	const handleDesignClick = () => {
-		// TODO: Redirect to editor and mark task complete
-		// For now, always redirect to site editor (will work for both block and classic themes)
-		window.location.href = '/wp-admin/site-editor.php';
+		window.location.href = getAdminLink( 'site-editor.php' );
 	};
 
 	const handleMarketplaceClick = () => {
-		// TODO: Redirect to marketplace and mark task complete
-		const marketplaceUrl =
-			'/wp-admin/admin.php?page=wc-admin&tab=themes&path=%2Fextensions';
-		window.location.href = marketplaceUrl;
+		// TODO: Mark task complete
+		// Redirect to themes marketplace using same logic as redirectToThemes
+		if ( isWooExpress() ) {
+			window.location.href = getAdminLink( 'themes.php' );
+		} else if ( isFeatureEnabled( 'marketplace' ) ) {
+			window.location.href = getAdminLink(
+				'admin.php?page=wc-admin&tab=themes&path=%2Fextensions'
+			);
+		} else {
+			window.location.href =
+				'https://woocommerce.com/product-category/themes/';
+		}
 	};
 
 	const handleBackClick = () => {
 		window.location.href = getNewPath( {}, '/', {} );
 	};
 
+	const icon = isRTL() ? chevronRight : chevronLeft;
+
 	return (
 		<div className="woocommerce-customize-store__container">
 			<div className="woocommerce-customize-store-container">
 				<div className="woocommerce-customize-store-sidebar">
 					<div className="woocommerce-customize-store-sidebar__title">
-						<button onClick={ handleBackClick }>
-							{ chevronLeft }
-						</button>
+						<button onClick={ handleBackClick }>{ icon }</button>
 						{ __( 'Customize your store', 'woocommerce' ) }
 					</div>
 					<p>

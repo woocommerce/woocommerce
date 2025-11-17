@@ -1,3 +1,25 @@
+.woocommerce-customize-store {
+	background-color: #fff;
+
+	#woocommerce-layout__primary {
+		margin: 0;
+		width: 100%;
+	}
+
+	.woocommerce-layout__main {
+		padding-right: 0;
+	}
+
+	.edit-site-site-icon__image {
+		background: transparent;
+		border-radius: 4px;
+		height: auto;
+		-o-object-fit: cover;
+		object-fit: cover;
+		width: 100%;
+	}
+}
+
 .woocommerce-customize-store__container {
 	display: flex;
 	flex-direction: column;
