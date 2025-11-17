@@ -334,6 +334,13 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
+		$capture_id = $order->get_meta( '_paypal_capture_id', true );
+		// Skip if the payment is already captured.
+		if ( $capture_id ) {
+			WC_Gateway_Paypal::log( 'PayPal payment is already captured. PayPal capture ID: ' . $capture_id . '. Order ID: ' . $order->get_id() );
+			return;
+		}
+
 		$paypal_status    = $order->get_meta( '_paypal_status', true );
 		// Skip if the payment is already captured.
 		if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED === $paypal_status || WC_Gateway_Paypal_Constants::STATUS_COMPLETED === $paypal_status ) {
