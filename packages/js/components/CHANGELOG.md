@@ -89,8 +89,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix typos in inline documentation [#48640]
 -   Minor - Fix typos in README.md files [#48569]
 -   Minor - Fix image gallery state conflict with external consumer state [#50181]
--    - Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection. [#54149]
--    - Updated declared dependencies to React 18 and Wordpress 6.6 [#53531]
+-   Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection. [#54149]
+-   Updated declared dependencies to React 18 and Wordpress 6.6 [#53531]
 
 ## [12.3.0](https://www.npmjs.com/package/@woocommerce/components/v/12.3.0) - 2024-04-26 
 
