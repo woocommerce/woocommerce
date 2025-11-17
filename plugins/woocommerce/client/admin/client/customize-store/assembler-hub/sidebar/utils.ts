@@ -2,6 +2,8 @@
  * External dependencies
  */
 import { BlockInstance } from '@wordpress/blocks';
+import { resolveSelect } from '@wordpress/data';
+import { optionsStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -31,4 +33,17 @@ export const findPatternByBlock = (
 			patternBlocks.attributes.className === block.attributes.className
 		);
 	} );
+};
+
+/**
+ * Stub function for enabling tracking - used by assembler-hub components
+ * This is a simplified version that just checks the tracking option
+ */
+export const enableTracking = async () => {
+	const allowTracking =
+		( await resolveSelect( optionsStore ).getOption(
+			'woocommerce_allow_tracking'
+		) ) === 'yes';
+
+	return allowTracking;
 };
