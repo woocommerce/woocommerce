@@ -41,8 +41,6 @@ import { LogoBlockContext } from './logo-block-context';
 import ResizableFrame from './resizable-frame';
 import { OnboardingTour, useOnboardingTour } from './onboarding-tour';
 import { HighlightedBlockContextProvider } from './context/highlighted-block-context';
-import { Transitional } from '../transitional';
-import { CustomizeStoreContext } from './';
 import { trackEvent } from '../tracking';
 import { SidebarNavigationExtraScreen } from './sidebar/navigation-extra-screen/sidebar-navigation-extra-screen';
 import './gutenberg-styles/layout.scss';
@@ -53,8 +51,6 @@ const ANIMATION_DURATION = 0.5;
 
 export const Layout = () => {
 	const [ logoBlockIds, setLogoBlockIds ] = useState< Array< string > >( [] );
-
-	const { currentState } = useContext( CustomizeStoreContext );
 
 	// This ensures the edited entity id and type are initialized properly.
 	useInitEditedEntityFromURL();
@@ -90,24 +86,6 @@ export const Layout = () => {
 	const { id: templateId, type: templateType } = template;
 
 	const editor = <Editor isLoading={ isEditorLoading } />;
-
-	if (
-		typeof currentState === 'object' &&
-		currentState.transitionalScreen === 'transitional'
-	) {
-		return (
-			// @ts-expect-error Types are not correct when kind is root and type is site.
-			<EntityProvider kind="root" type="site">
-				<EntityProvider
-					kind="postType"
-					type={ templateType }
-					id={ templateId }
-				>
-					<Transitional />
-				</EntityProvider>
-			</EntityProvider>
-		);
-	}
 
 	return (
 		// This causes the editor to re-render when the logo block ids change. Maybe we can find a better way to do this.

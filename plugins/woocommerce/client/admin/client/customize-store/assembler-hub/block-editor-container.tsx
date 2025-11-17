@@ -5,7 +5,7 @@ import { store as blockEditorStore } from '@wordpress/block-editor';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { useQuery } from '@woocommerce/navigation';
-import { useContext, useEffect, useMemo } from '@wordpress/element';
+import { useContext, useEffect } from '@wordpress/element';
 import { BlockInstance, createBlock } from '@wordpress/blocks';
 // @ts-expect-error No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -20,7 +20,6 @@ import { store as editSiteStore } from '@wordpress/edit-site/build-module/store'
 /**
  * Internal dependencies
  */
-import { CustomizeStoreContext } from './';
 import { BlockEditor } from './block-editor';
 import { HighlightedBlockContext } from './context/highlighted-block-context';
 import { useAddNoBlocksPlaceholder } from './hooks/block-placeholder/use-add-no-blocks-placeholder';
@@ -57,7 +56,6 @@ export const BlockEditorContainer = () => {
 	);
 
 	const urlParams = useQuery();
-	const { currentState } = useContext( CustomizeStoreContext );
 
 	const scrollDirection =
 		urlParams.path === '/customize-store/assembler-hub/footer'
@@ -172,20 +170,10 @@ export const BlockEditorContainer = () => {
 		updateBlockAttributes,
 	] );
 
-	const isScrollable = useMemo(
-		() =>
-			// Disable scrollable for transitional screen
-			! (
-				typeof currentState === 'object' &&
-				currentState.transitionalScreen === 'transitional'
-			),
-		[ currentState ]
-	);
-
 	return (
 		<BlockEditor
 			renderedBlocks={ blocks }
-			isScrollable={ isScrollable }
+			isScrollable={ true }
 			onChange={ onChange }
 			settings={ settings }
 			additionalStyles={ additionalStyles }
