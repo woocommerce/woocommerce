@@ -280,8 +280,6 @@ const { actions, state } = store<
 							...context.quantity,
 							[ productId ]: null,
 						};
-
-						console.log( context.quantity );
 					}
 
 					context.quantity = {

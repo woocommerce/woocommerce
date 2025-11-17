@@ -49,7 +49,7 @@ export type QuantitySelectorStore = {
 	};
 };
 
-const { state } = store< QuantitySelectorStore >(
+store< QuantitySelectorStore >(
 	'woocommerce/add-to-cart-with-options-quantity-selector',
 	{
 		state: {
@@ -214,27 +214,24 @@ const { state } = store< QuantitySelectorStore >(
 					addToCartWithOptionsStore.state;
 				let min = 1;
 
-				const isNaN = Number.isNaN( event.target.valueAsNumber );
-
 				if ( ! productData ) {
 					return;
 				}
 
+				const isValueNaN = Number.isNaN( event.target.valueAsNumber );
 				const { productId } = getContext< Context >();
 
 				// In grouped products, we reset invalid inputs to 0.
 				if (
-					( Number.isNaN( event.target.valueAsNumber ) ||
-						event.target.valueAsNumber === 0 ) &&
+					( isValueNaN || event.target.valueAsNumber === 0 ) &&
 					productData.type === 'grouped'
 				) {
-					console.log( 'grouped forcing update: ', isNaN );
 					addToCartWithOptionsStore.actions.setQuantity(
 						productId,
 						0,
 						{
 							changeTarget: event.target,
-							forceUpdate: isNaN,
+							forceUpdate: isValueNaN,
 						}
 					);
 					return;
@@ -254,15 +251,14 @@ const { state } = store< QuantitySelectorStore >(
 				// In other product types, we reset inputs to `min` if they are
 				// 0 or NaN.
 				const newValue =
-					Number.isFinite( event.target.valueAsNumber ) &&
-					event.target.valueAsNumber > 0
+					! isValueNaN && event.target.valueAsNumber > 0
 						? event.target.valueAsNumber
 						: min;
 
 				addToCartWithOptionsStore.actions.setQuantity(
 					productId,
 					newValue,
-					{ changeTarget: event.target, forceUpdate: isNaN }
+					{ changeTarget: event.target, forceUpdate: isValueNaN }
 				);
 			},
 			handleQuantityCheckboxChange: () => {
