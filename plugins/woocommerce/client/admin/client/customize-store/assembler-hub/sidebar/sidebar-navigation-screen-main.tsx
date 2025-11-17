@@ -34,7 +34,6 @@ import {
 	SidebarNavigationAnimationDirection,
 	SidebarNavigationContext,
 } from '../components/sidebar';
-import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 import { trackEvent } from '~/customize-store/tracking';
 import { redirectToThemes } from '~/customize-store/utils';
 
@@ -211,18 +210,11 @@ export const SidebarNavigationScreenMain = () => {
 							withChevron
 							icon={ home }
 							onClick={ () => {
-								const homepageUrl =
-									isFullComposabilityFeatureAndAPIAvailable()
-										? getNewPath(
-												{ customizing: true },
-												'/customize-store/assembler-hub/homepage/intro',
-												{}
-										  )
-										: getNewPath(
-												{ customizing: true },
-												'/customize-store/assembler-hub/homepage',
-												{}
-										  );
+								const homepageUrl = getNewPath(
+									{ customizing: true },
+									'/customize-store/assembler-hub/homepage',
+									{}
+								);
 
 								navigateTo( { url: homepageUrl } );
 								navigate(

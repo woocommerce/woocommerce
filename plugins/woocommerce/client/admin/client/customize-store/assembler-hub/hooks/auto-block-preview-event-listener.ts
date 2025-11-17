@@ -3,11 +3,6 @@
  */
 import { useEffect } from '@wordpress/element';
 
-/**
- * Internal dependencies
- */
-import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
-
 export const DISABLE_CLICK_CLASS = 'disable-click';
 
 export const ENABLE_CLICK_CLASS = 'enable-click';
@@ -405,41 +400,6 @@ export const useAddAutoBlockPreviewEventListenersAndObservers = (
 		);
 
 		observers.push( logoObserver );
-
-		if (
-			isFullComposabilityFeatureAndAPIAvailable() &&
-			! isPatternPreview
-		) {
-			const removeEventListenerHidePopover =
-				hidePopoverWhenMouseLeaveIframe( documentElement, {
-					hidePopover,
-					selectBlock,
-				} );
-
-			const removeEventListenersSelectedBlock = updateSelectedBlock(
-				documentElement,
-				{
-					selectBlock,
-					selectBlockOnHover,
-					getBlockParents,
-					setBlockEditingMode,
-					updatePopoverPosition,
-				}
-			);
-
-			const inertInnerBlockObserver =
-				addInertToAllInnerBlocks( documentElement );
-			observers.push( inertInnerBlockObserver );
-
-			const inertAssemblerPatternObserver = addInertToAssemblerPatterns(
-				documentElement,
-				query?.path
-			);
-			observers.push( inertAssemblerPatternObserver );
-
-			unsubscribeCallbacks.push( removeEventListenersSelectedBlock );
-			unsubscribeCallbacks.push( removeEventListenerHidePopover );
-		}
 
 		// Add event listener to the button which will insert a default pattern
 		// when there are no patterns inserted in the block preview.

@@ -27,7 +27,6 @@ import {
 	SidebarNavigationContext,
 } from '../components/sidebar';
 import { SidebarNavigationScreenLogo } from './sidebar-navigation-screen-logo';
-import { isFullComposabilityFeatureAndAPIAvailable } from '../utils/is-full-composability-enabled';
 import { SidebarNavigationScreenHomepagePTK } from './sidebar-navigation-screen-homepage-ptk/sidebar-navigation-screen-homepage-ptk';
 
 const getComponentByPathParams = (
@@ -70,21 +69,7 @@ const getComponentByPathParams = (
 		);
 	}
 
-	if (
-		isFullComposabilityFeatureAndAPIAvailable() &&
-		params?.includes( '/customize-store/assembler-hub/homepage' )
-	) {
-		return (
-			<SidebarNavigationScreenHomepagePTK
-				onNavigateBackClick={ onNavigateBackClick }
-			/>
-		);
-	}
-
-	if (
-		! isFullComposabilityFeatureAndAPIAvailable() &&
-		params === '/customize-store/assembler-hub/homepage'
-	) {
+	if ( params === '/customize-store/assembler-hub/homepage' ) {
 		return (
 			<SidebarNavigationScreenHomepage
 				onNavigateBackClick={ onNavigateBackClick }

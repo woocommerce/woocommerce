@@ -36,7 +36,6 @@ import { PopoverStatus, usePopoverHandler } from './hooks/use-popover-handler';
 import { useAddAutoBlockPreviewEventListenersAndObservers } from './hooks/auto-block-preview-event-listener';
 import { IsResizingContext } from './resizable-frame';
 import { SelectedBlockContext } from './context/selected-block-ref-context';
-import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { useInsertPatternByName } from './hooks/use-insert-pattern-by-name';
 
 const { Provider: DisabledProvider } = Disabled.Context;
@@ -235,9 +234,7 @@ function ScaledBlockPreview( {
 						scrolling={ isScrollable ? 'yes' : 'no' }
 						tabIndex={ -1 }
 						canEnableZoomOutView={ true }
-						readonly={
-							! isFullComposabilityFeatureAndAPIAvailable()
-						}
+						readonly={ true }
 						style={
 							autoScale
 								? {

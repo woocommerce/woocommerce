@@ -18,7 +18,6 @@ import {
 	ScaledBlockPreviewProps,
 } from './auto-block-preview';
 import { Toolbar } from './toolbar/toolbar';
-import { isFullComposabilityFeatureAndAPIAvailable } from './utils/is-full-composability-enabled';
 import { IsResizingContext } from './resizable-frame';
 import { SelectedBlockContextProvider } from './context/selected-block-ref-context';
 
@@ -41,8 +40,6 @@ export const BlockPreview = ( {
 } & Omit< ScaledBlockPreviewProps, 'containerWidth' > ) => {
 	const renderedBlocks = Array.isArray( blocks ) ? blocks : [ blocks ];
 
-	const isResizing = useContext( IsResizingContext );
-
 	return (
 		<>
 			<BlockEditorProvider
@@ -54,9 +51,6 @@ export const BlockPreview = ( {
 				useSubRegistry={ useSubRegistry }
 			>
 				<SelectedBlockContextProvider>
-					{ isFullComposabilityFeatureAndAPIAvailable() &&
-						! isPatternPreview &&
-						! isResizing && <Toolbar /> }
 					<AutoHeightBlockPreview
 						isPatternPreview={ isPatternPreview }
 						settings={ settings }
