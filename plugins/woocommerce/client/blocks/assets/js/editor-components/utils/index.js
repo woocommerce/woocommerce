@@ -220,9 +220,10 @@ export const getProductVariationsWithTotal = ( product, args = {} ) => {
 		parse: false,
 	} ).then( ( response ) => {
 		return response.json().then( ( data ) => {
+			const totalHeader = response.headers.get( 'x-wp-total' );
 			return {
 				variations: data,
-				total: response.headers.get( 'x-wp-total' ),
+				total: totalHeader ? Number( totalHeader ) : null,
 			};
 		} );
 	} );
