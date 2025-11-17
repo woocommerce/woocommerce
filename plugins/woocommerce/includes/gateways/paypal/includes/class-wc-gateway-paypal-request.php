@@ -406,6 +406,10 @@ class WC_Gateway_Paypal_Request {
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
 
+		if ( ! $paypal_order_id ) {
+			return null;
+		}
+
 		// If the authorization ID is not found, try to retrieve it from the PayPal order details as a fallback for backwards compatibility.
 		if ( ! $authorization_id ) {
 			WC_Gateway_Paypal::log( 'Authorization ID not found, trying to retrieve from PayPal order details as a fallback for backwards compatibility. Order ID: ' . $order->get_id() );
