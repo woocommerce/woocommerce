@@ -38,4 +38,7 @@
 
 	<!-- Skip the vendor-prefixed directories -->
 	<exclude-pattern>vendor-prefixed/*</exclude-pattern>
+
+	<!-- Skip the build directory -->
+	<exclude-pattern>build/*</exclude-pattern>
 </ruleset>

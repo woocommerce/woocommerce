@@ -99,7 +99,7 @@ class Send_Preview_Email {
 		// Remove filter after rendering.
 		remove_filter( 'woocommerce_email_editor_rendering_email_context', array( $this, 'add_preview_context' ) );
 
-		$rendered_data = apply_filters( 'woocommerce_email_editor_send_preview_email_rendered_data', $rendered_data );
+		$rendered_data = apply_filters( 'woocommerce_email_editor_send_preview_email_rendered_data', $rendered_data, $post );
 
 		return $this->set_personalize_content( $rendered_data['html'] );
 	}
