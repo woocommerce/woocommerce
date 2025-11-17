@@ -4,6 +4,8 @@
 import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { chevronLeft } from '@wordpress/icons';
+import { getNewPath } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -34,11 +36,20 @@ const CustomizeStoreController = () => {
 		window.location.href = marketplaceUrl;
 	};
 
+	const handleBackClick = () => {
+		window.location.href = getNewPath( {}, '/', {} );
+	};
+
 	return (
-		<div className="woocommerce-customize-store-splash">
-			<div className="woocommerce-customize-store-splash__content">
-				<div className="woocommerce-customize-store-splash__left">
-					<h1>{ __( 'Customize your store', 'woocommerce' ) }</h1>
+		<div className="woocommerce-customize-store__container">
+			<div className="woocommerce-customize-store-container">
+				<div className="woocommerce-customize-store-sidebar">
+					<div className="woocommerce-customize-store-sidebar__title">
+						<button onClick={ handleBackClick }>
+							{ chevronLeft }
+						</button>
+						{ __( 'Customize your store', 'woocommerce' ) }
+					</div>
 					<p>
 						{ __(
 							'Design a store that reflects your brand and business. Customize your active theme, select a professionally designed theme, or create a new look using our store designer.',
@@ -47,56 +58,77 @@ const CustomizeStoreController = () => {
 					</p>
 				</div>
 
-				<div className="woocommerce-customize-store-splash__right">
-					<div className="woocommerce-customize-store-splash__banner design-your-own">
-						<h2>{ __( 'Design Your Own', 'woocommerce' ) }</h2>
-						<p>
-							{ __(
-								'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style and much more',
-								'woocommerce'
-							) }
-						</p>
-						<Button variant="primary" onClick={ handleDesignClick }>
-							{ __( 'Start designing', 'woocommerce' ) }
-						</Button>
+				<div className="woocommerce-customize-store-main">
+					<div className="woocommerce-customize-store-banner no-ai-banner">
+						<div className="woocommerce-customize-store-banner-content">
+							<div className="banner-actions">
+								<h1>
+									{ __( 'Design your own', 'woocommerce' ) }
+								</h1>
+								<p>
+									{ __(
+										'Quickly create a beautiful store using our built-in store designer. Choose your layout, select a style, and much more.',
+										'woocommerce'
+									) }
+								</p>
+								<Button
+									variant="primary"
+									onClick={ handleDesignClick }
+								>
+									{ __( 'Start designing', 'woocommerce' ) }
+								</Button>
+							</div>
+						</div>
 					</div>
 
-					<div className="woocommerce-customize-store-splash__banner pick-your-theme">
-						<h2>
-							{ __( 'Pick your perfect theme', 'woocommerce' ) }
-						</h2>
-						<p>
-							{ __(
-								'Bring your vision to life - no coding required. Explore hundreds of free and paid ecommerce-optimised themes.',
-								'woocommerce'
-							) }
-						</p>
-						<ul>
-							<li>
-								{ __(
-									'Themes for every industry',
-									'woocommerce'
-								) }
-							</li>
-							<li>
-								{ __(
-									'Ready to use out of the box',
-									'woocommerce'
-								) }
-							</li>
-							<li>
-								{ __(
-									'30-day money-back guarantee',
-									'woocommerce'
-								) }
-							</li>
-						</ul>
-						<Button
-							variant="secondary"
-							onClick={ handleMarketplaceClick }
-						>
-							{ __( 'Browse the Marketplace', 'woocommerce' ) }
-						</Button>
+					<div className="woocommerce-customize-store-banner pick-your-theme-banner">
+						<div className="woocommerce-customize-store-banner-content">
+							<div className="banner-actions">
+								<h2>
+									{ __(
+										'Pick your perfect theme',
+										'woocommerce'
+									) }
+								</h2>
+								<div className="pick-your-theme-banner__content">
+									<p>
+										{ __(
+											'Bring your vision to life — no coding required. Explore hundreds of free and paid ecommerce-optimized themes.',
+											'woocommerce'
+										) }
+									</p>
+									<ul>
+										<li>
+											{ __(
+												'Themes for every industry',
+												'woocommerce'
+											) }
+										</li>
+										<li>
+											{ __(
+												'Ready to use out of the box',
+												'woocommerce'
+											) }
+										</li>
+										<li>
+											{ __(
+												'30-day money-back guarantee',
+												'woocommerce'
+											) }
+										</li>
+									</ul>
+								</div>
+								<Button
+									variant="primary"
+									onClick={ handleMarketplaceClick }
+								>
+									{ __(
+										'Browse the Marketplace',
+										'woocommerce'
+									) }
+								</Button>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
