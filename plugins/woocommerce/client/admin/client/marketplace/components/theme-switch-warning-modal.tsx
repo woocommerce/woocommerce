@@ -10,7 +10,6 @@ import { createInterpolateElement } from '@wordpress/element';
  * Internal dependencies
  */
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { trackEvent } from '../tracking';
 
 export const ThemeSwitchWarningModal = ( {
 	isNoAiFlow = true,
@@ -72,9 +71,6 @@ export const ThemeSwitchWarningModal = ( {
 				<Button
 					onClick={ () => {
 						setIsModalOpen( false );
-						trackEvent(
-							'customize_your_store_agree_to_theme_switch_click'
-						);
 						redirectToCYSFlow();
 					} }
 					variant="primary"

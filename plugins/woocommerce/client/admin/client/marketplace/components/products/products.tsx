@@ -25,7 +25,7 @@ import ProductLoader from '../product-loader/product-loader';
 import NoResults from '../product-list-content/no-results';
 import { Product, ProductType, SearchResultType } from '../product-list/types';
 import { ADMIN_URL } from '~/utils/admin-settings';
-import { ThemeSwitchWarningModal } from '~/customize-store/intro/warning-modals';
+import { ThemeSwitchWarningModal } from '../theme-switch-warning-modal';
 
 interface ProductsProps {
 	categorySelector?: boolean;
