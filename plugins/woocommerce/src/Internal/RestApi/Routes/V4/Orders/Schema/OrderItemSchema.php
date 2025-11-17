@@ -42,75 +42,75 @@ class OrderItemSchema extends AbstractLineItemSchema {
 	 */
 	public function get_item_schema_properties(): array {
 		$schema = array(
-			'id'           => array(
+			'id'              => array(
 				'description' => __( 'Item ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'name'         => array(
+			'name'            => array(
 				'description' => __( 'Item name.', 'woocommerce' ),
 				'type'        => array( 'string', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'image'        => array(
+			'image'           => array(
 				'description' => __( 'Line item image, if available.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'product_id'   => array(
+			'product_id'      => array(
 				'description' => __( 'Product or variation ID.', 'woocommerce' ),
 				'type'        => array( 'integer', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'product_data' => array(
+			'product_data'    => array(
 				'description' => __( 'Product data this item is linked to.', 'woocommerce' ),
 				'type'        => array( 'object', 'null' ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'properties'  => $this->get_product_data_schema(),
 			),
-			'quantity'     => array(
+			'quantity'        => array(
 				'description' => __( 'Quantity ordered.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'price'        => array(
+			'price'           => array(
 				'description' => __( 'Item price. Calculated as total / quantity.', 'woocommerce' ),
 				'type'        => 'number',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'tax_class'    => array(
+			'tax_class'       => array(
 				'description' => __( 'Tax class of product.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'subtotal'     => array(
+			'subtotal'        => array(
 				'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'subtotal_tax' => array(
+			'subtotal_tax'    => array(
 				'description' => __( 'Line subtotal tax (before discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'total'        => array(
+			'total'           => array(
 				'description' => __( 'Line total (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
-			'total_tax'    => array(
+			'total_tax'       => array(
 				'description' => __( 'Line total tax (after discounts).', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'taxes'        => $this->get_taxes_schema(),
-			'meta_data'    => $this->get_meta_data_schema(),
-			'currency'             => array(
+			'taxes'           => $this->get_taxes_schema(),
+			'meta_data'       => $this->get_meta_data_schema(),
+			'currency'        => array(
 				'description' => __( 'Currency the order item was created with, in ISO format.', 'woocommerce' ),
 				'type'        => 'string',
 				'default'     => get_woocommerce_currency(),
@@ -118,7 +118,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
 			),
-			'currency_symbol'      => array(
+			'currency_symbol' => array(
 				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
