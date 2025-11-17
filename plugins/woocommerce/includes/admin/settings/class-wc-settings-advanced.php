@@ -458,9 +458,9 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 
 		if ( ! $has_object_cache ) {
 			$settings[] = array(
-				'type'        => 'banner',
+				'type'        => 'notice',
 				'id'          => 'rest_api_cache_warning',
-				'banner_type' => 'warning',
+				'notice_type' => 'warning',
 				'text'        => sprintf(
 					/* translators: %1$s and %2$s are opening and closing <a> tags */
 					__( 'Backend caching requires a WordPress object cache plugin (Redis, Memcached, etc.) to be installed and active. %1$sLearn more about object caching%2$s.', 'woocommerce' ),

@@ -340,15 +340,15 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						echo '</td></tr>';
 						break;
 
-					// Banner notice.
-					case 'banner':
-						$banner_type = $value['banner_type'] ?? 'info';
-						$banner_text = $value['text'] ?? '';
+					// Notice.
+					case 'notice':
+						$notice_type = $value['notice_type'] ?? 'info';
+						$notice_text = $value['text'] ?? '';
 
 						?>
 						</table>
-						<div class="notice notice-<?php echo esc_attr( $banner_type ); ?> inline">
-							<p><?php echo wp_kses_post( $banner_text ); ?></p>
+						<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> inline">
+							<p><?php echo wp_kses_post( $notice_text ); ?></p>
 						</div>
 						<table class="form-table" role="presentation">
 						<?php
