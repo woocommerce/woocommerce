@@ -8,11 +8,11 @@ interface ItemProps< T extends object = object > {
 	// Depth, non-zero if the list is hierarchical.
 	depth?: number;
 	// Text to display for the load more button.
-	loadMoreChildrenText?: string;
+	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
-	onLoadMoreChildren?: () => void;
+	onLoadMoreChildren?: ( () => void ) | undefined;
 	// The total number of children.
-	totalChildren?: { [ key: string ]: number | null };
+	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback for selecting the item.
 	onSelect: (
 		item: SearchListItem< T > | SearchListItem< T >[]
@@ -126,11 +126,11 @@ export interface SearchListControlProps< T extends object = object > {
 	// Messages displayed or read to the user. Configure these to reflect your object type.
 	messages?: Partial< SearchListMessages >;
 	// Text to display for the load more button.
-	loadMoreChildrenText?: string;
+	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
-	onLoadMoreChildren?: () => void;
+	onLoadMoreChildren?: ( () => void ) | undefined;
 	// The total number of children.
-	totalChildren?: { [ key: string ]: number | null };
+	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
 	onChange: ( search: SearchListItem< T >[] ) => void;
 	// Callback fired when the search field is used.

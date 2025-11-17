@@ -45,15 +45,15 @@ interface ProductControlProps {
 	/**
 	 * The ID of the currently expanded product.
 	 */
-	expandedProduct: number | null;
+	expandedProduct?: number | null;
 	/**
 	 * Callback to load more variations.
 	 */
-	onLoadMoreVariations: () => void;
+	onLoadMoreVariations?: () => void;
 	/**
 	 * The total number of variations.
 	 */
-	totalVariations: Record< string, number | null >;
+	totalVariations?: Record< string, number | null >;
 	/**
 	 * Callback to search products by their name.
 	 */
@@ -234,9 +234,15 @@ const ProductControl = (
 				selected.includes( Number( id ) )
 			) }
 			onChange={ onChange }
-			loadMoreChildrenText={ __( 'Load more variations', 'woocommerce' ) }
-			onLoadMoreChildren={ onLoadMoreVariations }
-			totalChildren={ totalVariations }
+			loadMoreChildrenText={
+				showVariations
+					? __( 'Load more variations', 'woocommerce' )
+					: undefined
+			}
+			onLoadMoreChildren={
+				showVariations ? onLoadMoreVariations : undefined
+			}
+			totalChildren={ showVariations ? totalVariations : undefined }
 			renderItem={ getRenderItemFunc() }
 			onSearch={ onSearch }
 			messages={ {
