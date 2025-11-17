@@ -11,7 +11,8 @@ interface ItemProps< T extends object = object > {
 	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
 	onLoadMoreChildren?: ( () => void ) | undefined;
-	// The total number of children.
+	// Map of parent item IDs to their total number of children.
+	// Value is null when total is unknown, and 0 when known to have no children.
 	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback for selecting the item.
 	onSelect: (
@@ -129,7 +130,8 @@ export interface SearchListControlProps< T extends object = object > {
 	loadMoreChildrenText?: string | undefined;
 	// Callback for loading more children.
 	onLoadMoreChildren?: ( () => void ) | undefined;
-	// The total number of children.
+	// Map of parent item IDs to their total number of children.
+	// Value is null when total is unknown, and 0 when known to have no children.
 	totalChildren?: { [ key: string ]: number | null } | undefined;
 	// Callback fired when selected items change, whether added, cleared, or removed. Passed an array of item objects (as passed in via props.list).
 	onChange: ( search: SearchListItem< T >[] ) => void;
