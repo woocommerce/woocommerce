@@ -225,7 +225,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// ASSERTION 1: Cart subtotal (excl. tax) should be the base price.
-		// With 100 price inclusive of 20% tax: base = 100 / 1.20 = 83.33
+		// With 100 price inclusive of 20% tax: base = 100 / 1.20 = 83.33.
 		$this->assertEquals(
 			83.33,
 			round( WC()->cart->get_subtotal(), 2 ),
@@ -366,7 +366,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
-		$base_tax_rate_id = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
+		$base_tax_rate_id   = WC_Tax::_insert_tax_rate( $base_tax_rate_data );
 
 		// Create CUSTOMER tax rate for Austria (25%).
 		$customer_tax_rate_data = array(
@@ -380,7 +380,7 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 			'tax_rate_order'    => '1',
 			'tax_rate_class'    => '',
 		);
-		$customer_tax_rate_id = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
+		$customer_tax_rate_id   = WC_Tax::_insert_tax_rate( $customer_tax_rate_data );
 
 		// Set customer location to Austria.
 		WC()->customer->set_billing_country( 'AT' );
@@ -396,9 +396,9 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->calculate_totals();
 
 		// When base rate is 10% and customer rate is 25%:
-		// - Base price (excl. tax): 100 / 1.10 = 90.909090... = 90.91
-		// - Customer tax: 90.91 * 25% = 22.7275 = 22.73
-		// - Customer total: 90.91 + 22.73 = 113.64
+		// - Base price (excl. tax): 100 / 1.10 = 90.909090... = 90.91.
+		// - Customer tax: 90.91 * 25% = 22.7275 = 22.73.
+		// - Customer total: 90.91 + 22.73 = 113.64.
 
 		// ASSERTION 1: Subtotal should be the tax-exclusive base price.
 		$this->assertEquals(

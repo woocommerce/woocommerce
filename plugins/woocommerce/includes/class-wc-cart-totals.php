@@ -420,6 +420,12 @@ final class WC_Cart_Totals {
 	 */
 	protected function remove_item_base_taxes( $item ) {
 		if ( $item->price_includes_tax && $item->taxable ) {
+			/**
+			 * Filters whether to adjust prices for non-base locations.
+			 *
+			 * @since 10.4.0
+			 * @param bool $adjust_prices Whether to adjust prices for non-base locations. Default true.
+			 */
 			$filter_value = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
 
 			if ( $filter_value ) {
