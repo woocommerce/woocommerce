@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Improve email editor preview in new tab functionality by adding post context to the rendered data filter.
