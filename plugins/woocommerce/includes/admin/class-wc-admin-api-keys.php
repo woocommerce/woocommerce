@@ -24,17 +24,36 @@ class WC_Admin_API_Keys {
 
 	/**
 	 * Check if should allow save settings.
-	 * This prevents "Your settings have been saved." notices on the table list.
+	 * Allow saving when on the main keys page (for cache settings),
+	 * but not when creating/editing keys.
 	 *
 	 * @param  bool $allow If allow save settings.
 	 * @return bool
 	 */
 	public function allow_save_settings( $allow ) {
-		if ( ! isset( $_GET['create-key'], $_GET['edit-key'] ) ) { // WPCS: input var okay, CSRF ok.
+		// phpcs:ignore WordPress.Security.NonceVerification
+		if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
 			return false;
 		}
 
+		if ( isset( $_POST['save'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing
+			$this->save_cache_settings();
+		}
+
 		return $allow;
+	}
+
+	/**
+	 * Save cache settings.
+	 */
+	private function save_cache_settings() {
+		// phpcs:disable WordPress.Security
+		$backend_caching = 'yes' === ( $_POST['woocommerce_rest_api_enable_backend_caching'] ?? null ) ? 'yes' : 'no';
+		$cache_headers   = 'yes' === ( $_POST['woocommerce_rest_api_enable_cache_headers'] ?? null ) ? 'yes' : 'no';
+		// phpcs:enable WordPress.Security
+
+		update_option( 'woocommerce_rest_api_enable_backend_caching', $backend_caching );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', $cache_headers );
 	}
 
 	/**
@@ -50,10 +69,9 @@ class WC_Admin_API_Keys {
 	 * Page output.
 	 */
 	public static function page_output() {
-		// Hide the save button.
-		$GLOBALS['hide_save_button'] = true;
-
 		if ( isset( $_GET['create-key'] ) || isset( $_GET['edit-key'] ) ) {
+			$GLOBALS['hide_save_button'] = true;
+
 			$key_id   = isset( $_GET['edit-key'] ) ? absint( $_GET['edit-key'] ) : 0; // WPCS: input var okay, CSRF ok.
 			$key_data = self::get_key_data( $key_id );
 			$user_id  = (int) $key_data['user_id'];
@@ -64,8 +82,9 @@ class WC_Admin_API_Keys {
 				}
 			}
 
-			include dirname( __FILE__ ) . '/settings/views/html-keys-edit.php';
+			include __DIR__ . '/settings/views/html-keys-edit.php';
 		} else {
+			self::output_cache_settings();
 			self::table_list_output();
 		}
 	}
@@ -91,12 +110,23 @@ class WC_Admin_API_Keys {
 	}
 
 	/**
+	 * Output cache settings section.
+	 */
+	private static function output_cache_settings() {
+		// Get cache settings from WC_Settings_Advanced.
+		$settings_page  = new WC_Settings_Advanced();
+		$cache_settings = $settings_page->get_settings( 'keys' );
+
+		WC_Admin_Settings::output_fields( $cache_settings );
+	}
+
+	/**
 	 * Table list output.
 	 */
 	private static function table_list_output() {
 		global $wpdb, $keys_table_list;
 
-		echo '<h2 class="wc-table-list-header">' . esc_html__( 'REST API', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ) . '" class="page-title-action">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
+		echo '<h2 class="wc-table-list-header">' . esc_html__( 'REST API keys', 'woocommerce' ) . ' <a href="' . esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys&create-key=1' ) ) . '" class="page-title-action">' . esc_html__( 'Add key', 'woocommerce' ) . '</a></h2>';
 
 		// Get the API keys count.
 		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1;" );
@@ -247,7 +277,7 @@ class WC_Admin_API_Keys {
 			$result = $this->remove_key( $key_id );
 
 			if ( $result ) {
-				$qty++;
+				++$qty;
 			}
 		}
 
