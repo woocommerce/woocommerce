@@ -25,7 +25,24 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const reviewers = context.payload.pull_request?.requested_reviewers || [];
+            // Debug logging
+            console.log('Event name:', context.eventName);
+            console.log('Context payload keys:', Object.keys(context.payload));
+            console.log('Has pull_request:', !!context.payload.pull_request);
+            console.log('Issue number:', context.issue.number);
+
+            // Fetch PR data to ensure we have all the info we need
+            const pr = context.payload.pull_request || await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            }).then(r => r.data);
+
+            console.log('PR number:', pr.number);
+            console.log('PR html_url:', pr.html_url);
+            console.log('Requested reviewers count:', pr.requested_reviewers?.length || 0);
+
+            const reviewers = pr.requested_reviewers || [];
             const reviewerMentions = reviewers.map(r => `@${r.login}`).join(' ');
             const mentionText = reviewerMentions ? `${reviewerMentions}\n\n` : '';
 
@@ -41,7 +58,7 @@ jobs:
 
             \`\`\`
             Please review this PR for backwards compatibility issues:
-            ${context.payload.pull_request.html_url}
+            ${pr.html_url}
 
             PRIMARY OBJECTIVE: Backwards Compatibility (BC) Review for WooCommerce/WordPress
 
@@ -74,7 +91,7 @@ jobs:
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              issue_number: context.payload.pull_request.number,
+              issue_number: pr.number,
               body: body
             });
 
