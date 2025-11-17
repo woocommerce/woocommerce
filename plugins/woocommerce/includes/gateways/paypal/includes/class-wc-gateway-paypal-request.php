@@ -427,7 +427,7 @@ class WC_Gateway_Paypal_Request {
 				return null;
 			}
 
-			if ( $authorization_data && isset( $authorization_data['id'] )&& isset( $authorization_data['status'] ) ) {
+			if ( $authorization_data && isset( $authorization_data['id'], $authorization_data['status'] ) ) {
 				// If the payment is already captured, return null as there is no authorization ID that needs to be captured.
 				if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED !== $authorization_data['status']) {
 					return null;
