@@ -348,7 +348,7 @@ class WC_Gateway_Paypal_Request {
 			return;
 		}
 
-		$authorization_id = $this->get_authorization_id( $order );
+		$authorization_id = $this->get_authorization_id_for_capture( $order );
 		if ( ! $authorization_id ) {
 			WC_Gateway_Paypal::log( 'Authorization ID not found to capture authorized payment. Order ID: ' . $order->get_id() );
 			return;
@@ -402,7 +402,7 @@ class WC_Gateway_Paypal_Request {
 	 * @param WC_Order $order Order object.
 	 * @return string|null
 	 */
-	private function get_authorization_id( $order ) {
+	private function get_authorization_id_for_capture( $order ) {
 		$paypal_order_id  = $order->get_meta( '_paypal_order_id', true );
 		$authorization_id = $order->get_meta( '_paypal_authorization_id', true );
 
@@ -417,7 +417,11 @@ class WC_Gateway_Paypal_Request {
 			$order_data         = $this->get_paypal_order_details( $paypal_order_id );
 			$authorization_data = $order_data['purchase_units'][0]['payments']['authorizations'][0] ?? null;
 
-			if ( $authorization_data && isset( $authorization_data['status'] ) && WC_Gateway_Paypal_Constants::STATUS_CAPTURED !== $authorization_data['status'] ) {
+			if ( $authorization_data && isset( $authorization_data['id'] )&& isset( $authorization_data['status'] ) ) {
+				// If the payment is already captured, return null as there is no authorization ID that needs to be captured.
+				if ( WC_Gateway_Paypal_Constants::STATUS_CAPTURED !== $authorization_data['status']) {
+					return null;
+				}
 				$authorization_id = $authorization_data['id'];
 				$order->update_meta_data( '_paypal_authorization_id', $authorization_id );
 				$order->update_meta_data( '_paypal_status', WC_Gateway_Paypal_Constants::STATUS_AUTHORIZED );
