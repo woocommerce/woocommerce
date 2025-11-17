@@ -307,11 +307,17 @@
 		border-bottom: none;
 	}
 
-	// We use two classes to increase specificity to override the `width: 100%`
-	// rule added by WP core to buttons on mobile.
-	.woocommerce-search-list__load-more.woocommerce-search-list__load-more {
-		margin-left: $gap * 2;
-		padding: .5em 0 1em;
-		width: auto;
+	.woocommerce-search-list__item-load-more {
+		border: none;
+		color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+		cursor: pointer;
+		padding-left: calc($gap * 2 + 24px);
+		width: 100%;
+
+		@media screen and (max-width: 782px) {
+			box-sizing: content-box;
+			height: 25px;
+			padding-left: calc($gap * 2 + 33px);
+		}
 	}
 }
