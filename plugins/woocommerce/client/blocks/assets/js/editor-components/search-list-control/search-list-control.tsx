@@ -105,6 +105,7 @@ const ListItems = ( props: ListItemsProps ): JSX.Element | null => {
 								{ onLoadMoreChildren && hasMoreChildren ? (
 									<li>
 										<button
+											type="button"
 											className="woocommerce-search-list__item woocommerce-search-list__item-load-more"
 											onClick={ () =>
 												onLoadMoreChildren()
