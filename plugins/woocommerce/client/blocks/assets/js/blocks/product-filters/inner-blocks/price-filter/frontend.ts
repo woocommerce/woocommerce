@@ -25,9 +25,7 @@ const productFilterPriceStore = {
 	state: {
 		get minPrice() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
-			const { minRange } = getServerContext
-				? getServerContext< ProductFilterPriceContext >()
-				: getContext< ProductFilterPriceContext >();
+			const { minRange } = getContext< ProductFilterPriceContext >();
 			const priceFilter = activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
@@ -39,9 +37,7 @@ const productFilterPriceStore = {
 		},
 		get maxPrice() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
-			const { maxRange } = getServerContext
-				? getServerContext< ProductFilterPriceContext >()
-				: getContext< ProductFilterPriceContext >();
+			const { maxRange } = getContext< ProductFilterPriceContext >();
 			const priceFilter = activeFilters.find(
 				( filter ) => filter.type === 'price'
 			);
@@ -66,9 +62,8 @@ const productFilterPriceStore = {
 	},
 	actions: {
 		getActivePriceAndLabel( min: number, max: number ) {
-			const { minRange, maxRange } = getServerContext
-				? getServerContext< ProductFilterPriceContext >()
-				: getContext< ProductFilterPriceContext >();
+			const { minRange, maxRange } =
+				getContext< ProductFilterPriceContext >();
 			const { activePriceLabelTemplates } = getConfig();
 			if ( min && min > minRange && max && max < maxRange )
 				return {
@@ -113,9 +108,8 @@ const productFilterPriceStore = {
 			const context = getContext<
 				ProductFilterPriceContext & ProductFiltersContext
 			>();
-			const { minRange, maxRange } = getServerContext
-				? getServerContext< ProductFilterPriceContext >()
-				: getContext< ProductFilterPriceContext >();
+			const { minRange, maxRange } =
+				getContext< ProductFilterPriceContext >();
 			const price: Record< string, number > = {
 				min: state.minPrice,
 				max: state.maxPrice,
@@ -167,6 +161,18 @@ const productFilterPriceStore = {
 		setMaxPrice: ( e: HTMLElementEvent< HTMLInputElement > ) => {
 			const price = parseInt( e.target.value, 10 );
 			actions.setPrice( 'max', price );
+		},
+	},
+	callbacks: {
+		updatePriceServerContext: () => {
+			if ( ! getServerContext ) return;
+			const context = getContext<
+				ProductFilterPriceContext & ProductFiltersContext
+			>();
+			const serverContext =
+				getServerContext< ProductFilterPriceContext >();
+			context.minRange = serverContext.minRange;
+			context.maxRange = serverContext.maxRange;
 		},
 	},
 };

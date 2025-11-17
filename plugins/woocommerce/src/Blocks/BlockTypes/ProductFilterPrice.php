@@ -132,6 +132,7 @@ final class ProductFilterPrice extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP,
 			),
+			'data-wp-watch'       => 'callbacks.updatePriceServerContext',
 		);
 
 		wp_interactivity_config(
