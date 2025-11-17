@@ -31,7 +31,6 @@ export type QuantitySelectorStore = {
 		allowsDecrease: boolean;
 		allowsIncrease: boolean;
 		inputQuantity: number | string | null;
-		draftQuantities: Record< number, number | string | null >;
 	};
 	actions: {
 		increaseQuantity: (
