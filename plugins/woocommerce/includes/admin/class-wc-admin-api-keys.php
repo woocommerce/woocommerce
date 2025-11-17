@@ -47,13 +47,22 @@ class WC_Admin_API_Keys {
 	 * Save cache settings.
 	 */
 	private function save_cache_settings() {
-		// phpcs:disable WordPress.Security
-		$backend_caching = 'yes' === ( $_POST['woocommerce_rest_api_enable_backend_caching'] ?? null ) ? 'yes' : 'no';
-		$cache_headers   = 'yes' === ( $_POST['woocommerce_rest_api_enable_cache_headers'] ?? null ) ? 'yes' : 'no';
-		// phpcs:enable WordPress.Security
+		update_option( 'woocommerce_rest_api_enable_backend_caching', $this->yes_or_no( 'woocommerce_rest_api_enable_backend_caching' ) );
+		update_option( 'woocommerce_rest_api_enable_cache_headers', $this->yes_or_no( 'woocommerce_rest_api_enable_cache_headers' ) );
+	}
 
-		update_option( 'woocommerce_rest_api_enable_backend_caching', $backend_caching );
-		update_option( 'woocommerce_rest_api_enable_cache_headers', $cache_headers );
+	/**
+	 * Get "yes" or "no" string based on POST setting value.
+	 *
+	 * @param string $setting_name The setting name to check in $_POST.
+	 * @return string "yes" if the value is "1" or "yes", "no" otherwise.
+	 */
+	private function yes_or_no( $setting_name ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$value = isset( $_POST[ $setting_name ] ) ? sanitize_text_field( wp_unslash( $_POST[ $setting_name ] ) ) : null;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+		return '1' === $value || 'yes' === $value ? 'yes' : 'no';
 	}
 
 	/**
