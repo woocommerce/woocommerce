@@ -2,17 +2,10 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	createInterpolateElement,
-	useContext,
-	useState,
-} from '@wordpress/element';
+import { createInterpolateElement, useContext } from '@wordpress/element';
 import { getNewPath, navigateTo, useQuery } from '@woocommerce/navigation';
 import { Button } from '@wordpress/components';
 import clsx from 'clsx';
-import { addQueryArgs } from '@wordpress/url';
-import { useSelect } from '@wordpress/data';
-import { onboardingStore } from '@woocommerce/data';
 
 /**
  * Internal dependencies
