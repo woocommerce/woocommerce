@@ -25,7 +25,7 @@
 		"watch": "pnpm build --watch"
 	},
 	"dependencies": {
-		"@wordpress/api-fetch": "7.31.0",
+		"@wordpress/api-fetch": "7.35.0",
 		"debug": "4.4.3"
 	},
 	"devDependencies": {
@@ -35,7 +35,7 @@
 		"@jest/globals": "30.0.4",
 		"@types/jest": "30.0.0",
 		"@types/jquery": "3.5.33",
-		"@wordpress/browserslist-config": "6.31.0",
+		"@wordpress/browserslist-config": "6.35.0",
 		"jest": "30.0.4",
 		"jest-environment-jsdom": "30.0.4",
 		"typescript": "5.9.3",
