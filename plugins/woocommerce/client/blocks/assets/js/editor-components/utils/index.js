@@ -214,7 +214,7 @@ export const getProductVariationsWithTotal = ( product, args = {} ) => {
 			type: 'variation',
 			parent: product,
 			orderby: 'title',
-			per_page: 100,
+			per_page: 25,
 			...args,
 		} ),
 		parse: false,
