@@ -57,9 +57,7 @@ class WC_Brands {
 
 		add_filter( 'post_type_link', array( $this, 'post_type_link' ), 11, 2 );
 
-		if ( 'yes' === get_option( 'wc_brands_show_description' ) ) {
-			add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
-		}
+		add_action( 'woocommerce_archive_description', array( $this, 'brand_description' ) );
 
 		add_filter( 'woocommerce_product_query_tax_query', array( $this, 'update_product_query_tax_query' ), 10, 1 );
 
@@ -429,6 +427,10 @@ class WC_Brands {
 	 * Displays brand description.
 	 */
 	public function brand_description() {
+		if ( 'yes' !== get_option( 'wc_brands_show_description' ) ) {
+			return;
+		}
+
 		if ( ! is_tax( 'product_brand' ) ) {
 			return;
 		}
