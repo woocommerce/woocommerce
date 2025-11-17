@@ -18,7 +18,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 *
 	 * @var PageController
 	 */
-	private $page_controller;
+	private $sut;
 
 	/**
 	 * Admin user ID.
@@ -42,6 +42,13 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	private $customer_user_id;
 
 	/**
+	 * Backup object of $GLOBALS['current_screen'].
+	 *
+	 * @var object
+	 */
+	private $current_screen_backup;
+
+	/**
 	 * Holds the URL of the last attempted redirect.
 	 *
 	 * @var string
@@ -54,6 +61,13 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function setUp(): void {
+		// Mock screen.
+		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
+		$GLOBALS['current_screen']   = $this->get_screen_mock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		if ( ! did_action( 'current_screen' ) ) {
+			do_action( 'current_screen', $GLOBALS['current_screen'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		}
+
 		parent::setUp();
 
 		// Create test users with different capabilities.
@@ -61,11 +75,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->shop_manager_user_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->customer_user_id     = $this->factory->user->create( array( 'role' => 'customer' ) );
 
-		// Get PageController instance.
-		$this->page_controller = PageController::get_instance();
-
-		// Set up admin environment.
-		set_current_screen( 'dashboard' );
+		$this->sut = PageController::get_instance();
 
 		// Start watching for redirects.
 		$this->redirected_to = '';
@@ -87,10 +97,12 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		wp_delete_user( $this->customer_user_id );
 
 		// Reset global state.
-		unset( $_GET['page'], $_GET['task'] );
+		unset( $_GET['page'], $_GET['task'], $_GET['connection-return'] );
 
-		// Reset screen to avoid affecting other tests.
-		set_current_screen( 'front' );
+		// Restore screen backup.
+		if ( $this->current_screen_backup ) {
+			$GLOBALS['current_screen'] = $this->current_screen_backup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
 
 		parent::tearDown();
 	}
@@ -100,7 +112,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 *
 	 * @param string $url Redirect location.
 	 *
-	 * @throws WPAjaxDieContinueException To prevent exit() from being called after redirect.
+	 * @throws \WPAjaxDieContinueException To prevent exit() from being called after redirect.
 	 * @return void
 	 */
 	public function watch_and_anull_redirects( string $url ) {
@@ -127,21 +139,12 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	private function trigger_redirect_check(): void {
-		// Temporarily define WP_ADMIN if not already defined.
-		$was_defined = defined( 'WP_ADMIN' );
-		if ( ! $was_defined ) {
-			define( 'WP_ADMIN', true );
-		}
-
 		try {
-			$this->page_controller->maybe_redirect_payment_tasks_to_settings();
+			$this->sut->maybe_redirect_payment_tasks_to_settings();
 		} catch ( \WPAjaxDieContinueException $e ) {
 			// Expected - this prevents exit() from killing the test.
 			unset( $e );
 		}
-
-		// Note: We cannot undefine WP_ADMIN as constants cannot be undefined in PHP.
-		// However, defining it once per test class should not affect other test classes.
 	}
 
 	/**
@@ -527,5 +530,20 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 'wc-settings', $params['page'], 'Redirect should go to wc-settings page.' );
 		$this->assertEquals( 'checkout', $params['tab'], 'Redirect should go to checkout tab.' );
 		$this->assertEquals( 'WCADMIN_PAYMENT_TASK', $params['from'], 'Redirect should include from parameter.' );
+	}
+
+	/**
+	 * Returns an object mocking what we need from \WP_Screen.
+	 *
+	 * @return object
+	 */
+	private function get_screen_mock() {
+		$screen_mock = $this->getMockBuilder( \stdClass::class )->setMethods( array( 'in_admin', 'add_option' ) )->getMock();
+		$screen_mock->method( 'in_admin' )->willReturn( true );
+		foreach ( array( 'id', 'base', 'action', 'post_type' ) as $key ) {
+			$screen_mock->{$key} = '';
+		}
+
+		return $screen_mock;
 	}
 }
