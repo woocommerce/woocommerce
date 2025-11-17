@@ -14,7 +14,7 @@ import { getAdminLink } from '@woocommerce/settings';
 import { useFullScreen } from '~/utils';
 import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
-import './splash-page.scss';
+import './style.scss';
 
 const CustomizeStoreController = () => {
 	useFullScreen( [ 'woocommerce-customize-store' ] );
