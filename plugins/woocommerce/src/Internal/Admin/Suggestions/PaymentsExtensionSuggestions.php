@@ -2582,13 +2582,13 @@ class PaymentsExtensionSuggestions {
 			),
 		),
 		'ZA' => array(
-			self::PAYFAST => array(
+			self::PAYSTACK => array(
 				'_append' => array(
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 			),
 			self::PAYPAL_FULL_STACK,
-			self::PAYSTACK,
+			self::PAYFAST,
 			self::VISA,
 			self::PAYPAL_WALLET,
 		),
