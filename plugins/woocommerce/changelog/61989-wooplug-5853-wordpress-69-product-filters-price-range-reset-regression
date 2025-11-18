@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product filters price range reset regression in WordPress 6.9
