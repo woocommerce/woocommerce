@@ -313,6 +313,9 @@ class WC_Install {
 			'wc_update_1040_add_idx_date_paid_status_parent',
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
+		'10.5.0' => array(
+			'wc_update_1050_migrate_brand_permalink_setting',
+		),
 	);
 
 	/**
