@@ -83,10 +83,24 @@ class Controller extends AbstractController {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[\d]+)',
 			array(
-				'methods'             => WP_REST_Server::EDITABLE,
-				'callback'            => array( $this, 'update_item' ),
-				'permission_callback' => array( $this, 'check_permissions' ),
-				'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				'schema' => array( $this, 'get_public_item_schema' ),
+				'args'   => array(
+					'id' => array(
+						'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
+						'type'        => 'integer',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::EDITABLE,
+					'callback'            => array( $this, 'update_item' ),
+					'permission_callback' => array( $this, 'check_permissions' ),
+					'args'                => $this->get_endpoint_args_for_item_schema( WP_REST_Server::EDITABLE ),
+				),
 			)
 		);
 	}
@@ -111,6 +125,24 @@ class Controller extends AbstractController {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Get shipping zone method by ID.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function get_item( $request ) {
+		$instance_id = (int) $request['id'];
+
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
+		return rest_ensure_response( $this->prepare_item_for_response( $method, $request ) );
 	}
 
 	/**

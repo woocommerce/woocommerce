@@ -137,16 +137,28 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 	}
 
 	/**
+	 * Test GET endpoint route configuration.
+	 */
+	public function test_get_route_configuration() {
+		$routes = rest_get_server()->get_routes();
+		$route  = $routes['/wc/v4/shipping-zone-method/(?P<id>[\\d]+)'];
+
+		$this->assertEquals( 'GET', $route[0]['methods']['GET'] );
+		$this->assertEquals( array( $this->controller, 'get_item' ), $route[0]['callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[0]['permission_callback'] );
+	}
+
+	/**
 	 * Test PUT endpoint route configuration.
 	 */
 	public function test_put_route_configuration() {
 		$routes = rest_get_server()->get_routes();
 		$route  = $routes['/wc/v4/shipping-zone-method/(?P<id>[\\d]+)'];
 
-		$this->assertEquals( 'PUT', $route[0]['methods']['PUT'] );
-		$this->assertEquals( 'PATCH', $route[0]['methods']['PATCH'] );
-		$this->assertEquals( array( $this->controller, 'update_item' ), $route[0]['callback'] );
-		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[0]['permission_callback'] );
+		$this->assertEquals( 'PUT', $route[1]['methods']['PUT'] );
+		$this->assertEquals( 'PATCH', $route[1]['methods']['PATCH'] );
+		$this->assertEquals( array( $this->controller, 'update_item' ), $route[1]['callback'] );
+		$this->assertEquals( array( $this->controller, 'check_permissions' ), $route[1]['permission_callback'] );
 	}
 
 	/**
@@ -563,6 +575,139 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$this->assertNotInstanceOf( WP_Error::class, $response );
 		$this->assertEquals( 200, $response->get_status() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test get item with valid ID.
+	 */
+	public function test_get_item_success() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone( 'Test Zone' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $instance_id );
+		$request->set_param( 'id', $instance_id );
+		$response = $this->controller->get_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertIsArray( $data );
+		$this->assertArrayHasKey( 'instance_id', $data );
+		$this->assertArrayHasKey( 'method_id', $data );
+		$this->assertArrayHasKey( 'enabled', $data );
+		$this->assertArrayHasKey( 'settings', $data );
+		$this->assertSame( $instance_id, $data['instance_id'] );
+		$this->assertSame( 'flat_rate', $data['method_id'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test get item returns 404 for invalid ID.
+	 */
+	public function test_get_item_invalid_id() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$invalid_id = 99999;
+		$request    = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $invalid_id );
+		$request->set_param( 'id', $invalid_id );
+		$response = $this->controller->get_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+		$this->assertEquals( WP_Http::NOT_FOUND, $response->get_error_data()['status'] );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test get item returns 404 for deleted method.
+	 */
+	public function test_get_item_deleted_method() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone( 'Test Zone' );
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		// Delete the method.
+		$zone->delete_shipping_method( $instance_id );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $instance_id );
+		$request->set_param( 'id', $instance_id );
+		$response = $this->controller->get_item( $request );
+
+		$this->assertInstanceOf( WP_Error::class, $response );
+		$this->assertStringContainsString( 'invalid_id', $response->get_error_code() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test get item works with different shipping method types.
+	 */
+	public function test_get_item_different_method_types() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone = $this->create_shipping_zone( 'Test Zone' );
+
+		// Test with different method types.
+		$method_types = array( 'flat_rate', 'free_shipping', 'local_pickup' );
+
+		foreach ( $method_types as $method_type ) {
+			$instance_id = $zone->add_shipping_method( $method_type );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $instance_id );
+			$request->set_param( 'id', $instance_id );
+			$response = $this->controller->get_item( $request );
+
+			$this->assertNotInstanceOf( WP_Error::class, $response, "Failed for method type: {$method_type}" );
+			$this->assertEquals( 200, $response->get_status() );
+
+			$data = $response->get_data();
+			$this->assertArrayHasKey( 'method_id', $data );
+			$this->assertSame( $method_type, $data['method_id'], "Method type mismatch for: {$method_type}" );
+		}
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test get item returns method from correct zone.
+	 */
+	public function test_get_item_correct_zone() {
+		wp_set_current_user( self::$admin_user_id );
+
+		// Create multiple zones with methods.
+		$zone1        = $this->create_shipping_zone( 'Zone 1' );
+		$instance1_id = $zone1->add_shipping_method( 'flat_rate' );
+
+		$zone2        = $this->create_shipping_zone( 'Zone 2' );
+		$instance2_id = $zone2->add_shipping_method( 'free_shipping' );
+
+		// Test first method.
+		$request1 = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $instance1_id );
+		$request1->set_param( 'id', $instance1_id );
+		$response1 = $this->controller->get_item( $request1 );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response1 );
+		$data1 = $response1->get_data();
+		$this->assertSame( 'flat_rate', $data1['method_id'] );
+		$this->assertSame( $zone1->get_id(), $data1['zone_id'] );
+
+		// Test second method.
+		$request2 = new WP_REST_Request( 'GET', '/wc/v4/shipping-zone-method/' . $instance2_id );
+		$request2->set_param( 'id', $instance2_id );
+		$response2 = $this->controller->get_item( $request2 );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response2 );
+		$data2 = $response2->get_data();
+		$this->assertSame( 'free_shipping', $data2['method_id'] );
+		$this->assertSame( $zone2->get_id(), $data2['zone_id'] );
 
 		wp_set_current_user( 0 );
 	}
