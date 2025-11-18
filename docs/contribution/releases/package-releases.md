@@ -8,4 +8,4 @@ sidebar_position: 8
 
 The WooCommerce monorepo includes numerous JavaScript packages to support WooCommerce development, such as `@woocommerce/components`, distributed via NPM. This release process is managed via GitHub Actions.
 
-For the full documentation on how to release a JavScript, see the [package release tool documentation](https://github.com/woocommerce/woocommerce/tree/trunk/tools/package-release).
+For the full documentation on how to release a JavaScript package, see the [package release tool documentation](https://github.com/woocommerce/woocommerce/tree/trunk/tools/package-release).
