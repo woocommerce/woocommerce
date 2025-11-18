@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;

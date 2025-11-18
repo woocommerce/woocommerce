@@ -13,7 +13,7 @@ table.wc-block-cart-items {
 	width: 100%;
 
 	.wc-block-cart-items__header {
-		@include font-small-locked;
+		@include font-regular-locked;
 		text-transform: uppercase;
 
 		.wc-block-cart-items__header-image {
@@ -27,7 +27,7 @@ table.wc-block-cart-items {
 			text-align: right;
 		}
 		th {
-			font-weight: 700;
+			font-weight: 500;
 		}
 	}
 	.wc-block-cart-items__row {
@@ -163,7 +163,7 @@ table.wc-block-cart-items {
 			border-bottom: 1px solid $universal-border-light;
 
 			th {
-				padding: $gap-smaller $gap $gap 0;
+				padding: $gap-smaller $gap $gap-small 0;
 				white-space: nowrap;
 			}
 			td {

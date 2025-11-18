@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/components",
-	"version": "13.0.0",
+	"version": "13.1.0",
 	"description": "UI components for WooCommerce.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -283,6 +283,10 @@
 				"node_modules/@woocommerce/navigation/build",
 				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
+				"node_modules/@woocommerce/sanitize/build",
+				"node_modules/@woocommerce/sanitize/build-module",
+				"node_modules/@woocommerce/sanitize/build-style",
+				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
