@@ -123,5 +123,6 @@ class WC_Gateway_Paypal_Constants {
 		'CHF', // Swiss Franc.
 		'THB', // Thai Baht.
 		'USD', // United States Dollar.
+		'RUB', // Russian Ruble.
 	);
 }
