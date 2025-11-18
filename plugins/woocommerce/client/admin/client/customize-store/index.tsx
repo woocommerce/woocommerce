@@ -14,6 +14,7 @@ import {
 } from '@wordpress/components';
 import { getAdminLink } from '@woocommerce/settings';
 import { getNewPath } from '@woocommerce/navigation';
+import { recordEvent } from '@woocommerce/tracks';
 // @ts-ignore No types for this exist yet.
 import SidebarButton from '@wordpress/edit-site/build-module/components/sidebar-button';
 import { chevronRight, chevronLeft } from '@wordpress/icons';
@@ -26,7 +27,7 @@ import { isWooExpress } from '~/utils/is-woo-express';
 import { isFeatureEnabled } from '~/utils/features';
 import { SiteHub } from './assembler-hub/site-hub';
 import { OPTIONS_STORE_NAME } from '@woocommerce/data';
-import { useDispatch } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import banner1Shape from './assets/banner-1-shape.png';
 import banner2Shape from './assets/banner-2-shape.png';
 import banner1Icon from './assets/banner-1-icon.png';
@@ -37,6 +38,13 @@ const CustomizeStoreController = () => {
 	useFullScreen( [ 'woocommerce-customize-store' ] );
 
 	const { updateOptions } = useDispatch( OPTIONS_STORE_NAME );
+
+	const currentTheme = useSelect( ( select ) => {
+		// @ts-ignore
+		return select( 'core' ).getCurrentTheme();
+	}, [] );
+
+	const isBlockTheme = currentTheme?.is_block_theme;
 
 	useEffect( () => {
 		document.body.classList.add( 'woocommerce-customize-store' );
@@ -52,11 +60,18 @@ const CustomizeStoreController = () => {
 	};
 
 	const handleDesignClick = () => {
+		recordEvent( 'customize_your_store_intro_customize_click', {
+			theme_type: isBlockTheme ? 'block' : 'classic',
+		} );
 		markTaskComplete();
-		window.location.href = getAdminLink( 'site-editor.php' );
+		// Redirect to Site Editor for block themes, Customizer for classic themes
+		window.location.href = isBlockTheme
+			? getAdminLink( 'site-editor.php' )
+			: getAdminLink( 'customize.php?return=/wp-admin/themes.php' );
 	};
 
 	const handleMarketplaceClick = () => {
+		recordEvent( 'customize_your_store_intro_browse_all_themes_click' );
 		markTaskComplete();
 		// Redirect to themes marketplace using same logic as redirectToThemes
 		if ( isWooExpress() ) {
