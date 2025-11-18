@@ -232,22 +232,42 @@ class Controller extends AbstractController {
 	public function delete_item( $request ) {
 		$instance_id = (int) $request['id'];
 
+		// Get the method before deletion to return in response.
+		$method = WC_Shipping_Zones::get_shipping_method( $instance_id );
+		if ( ! $method ) {
+			return $this->get_route_error_by_code( self::INVALID_ID );
+		}
+
 		$zone = $this->validate_zone_by_method_instance( $instance_id );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
+		// Prepare response before deletion.
+		$request->set_param( 'context', 'view' );
+		$request['zone_id'] = $zone->get_id();
+		$response           = $this->prepare_item_for_response( $method, $request );
+
+		// Perform the deletion.
 		$result = $zone->delete_shipping_method( $instance_id );
 
 		if ( ! $result ) {
 			return $this->get_route_error_by_code( self::INVALID_ID );
 		}
 
-		return rest_ensure_response(
-			array(
-				'success' => true,
-			)
-		);
+		/**
+		 * Fires after a shipping zone method is deleted via the REST API.
+		 *
+		 * @since 10.5.0
+		 *
+		 * @param WC_Shipping_Method $method   The shipping zone method being deleted.
+		 * @param WC_Shipping_Zone   $zone     The shipping zone the method belonged to.
+		 * @param WP_REST_Response   $response The response data.
+		 * @param WP_REST_Request    $request  The request sent to the API.
+		 */
+		do_action( 'woocommerce_rest_delete_shipping_zone_method', $method, $zone, $response, $request );
+
+		return $response;
 	}
 
 	/**
