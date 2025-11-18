@@ -271,17 +271,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					// and are compatible with the possible variations
 					let valid_choices = [];
 					current_variation_selector.querySelectorAll( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).forEach( ( el ) => {
-						var name = '';
-						switch ( optionStyle ) {
-							case 'pills':
-								name = el.getAttribute( 'name' );
-								break;
-							case 'dropdown':
-								name = JSON.parse( el.dataset?.wpContext )[ 'name' ];
-								break;
-							default:
-								throw new Error( 'optionStyle not implemented!: ' + optionStyle );
-						}
+						const name = optionStyle === 'dropdown' ? JSON.parse( el.dataset?.wpContext )[ 'name' ] : el.getAttribute( 'name' );
 						if ( isAttributeValueValid( {
 							attributeName: name,
 							attributeValue: el.value,
