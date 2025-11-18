@@ -102,9 +102,24 @@ class CheckoutFields {
 	 */
 	public function init() {
 		add_filter( 'woocommerce_get_country_locale_default', array( $this, 'update_default_locale_with_fields' ) );
+		add_filter( 'woocommerce_get_country_locale_default', array( $this, 'move_country_to_top_of_checkout_form' ) );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_fields_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_fields_data' ) );
 		add_filter( 'woocommerce_customer_allowed_session_meta_keys', array( $this, 'add_session_meta_keys' ) );
+	}
+
+	/**
+	 * Move country field to the top of the checkout form. This is required because country has a default value of 40
+	 * meaning it comes after First name and last name.
+	 * As per design and for a better UX it should be at the top of the form.
+	 *
+	 * @param array $locale Locale data.
+	 */
+	public function move_country_to_top_of_checkout_form( $locale ) {
+		if ( isset( $locale['country'] ) && is_array( $locale['country'] ) ) {
+			$locale['country']['priority'] = 1;
+		}
+		return $locale;
 	}
 
 	/**
