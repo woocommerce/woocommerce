@@ -110,11 +110,15 @@ export const STATES = Object.fromEntries(
 	} )
 );
 
-export const COUNTRY_LOCALE = Object.fromEntries(
+const countryLocale = Object.fromEntries(
 	Object.keys( COUNTRIES ).map( ( countryCode ) => {
 		return [ countryCode, countryData[ countryCode ].locale || {} ];
 	} )
 );
+
+// Since "default" is not a country code, we add it separately - this is controlled by the `woocommerce_get_country_locale_default` hook.
+countryLocale.default = countryData?.default?.locale || {};
+export const COUNTRY_LOCALE = countryLocale;
 
 const defaultFieldsLocations: FieldsLocations = {
 	address: [
