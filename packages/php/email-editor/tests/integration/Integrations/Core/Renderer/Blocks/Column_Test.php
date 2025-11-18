@@ -73,7 +73,7 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it renders column content
 	 */
 	public function testItRendersColumnContent(): void {
-		$rendered = $this->column_renderer->render( '', $this->parsed_column, $this->rendering_context );
+		$rendered = $this->column_renderer->render( '<p>Column content</p>', $this->parsed_column, $this->rendering_context );
 		$this->checkValidHTML( $rendered );
 		$this->assertStringContainsString( 'Column content', $rendered );
 	}

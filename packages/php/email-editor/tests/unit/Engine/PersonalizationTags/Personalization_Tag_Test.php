@@ -40,6 +40,30 @@ class Personalization_Tag_Test extends TestCase {
 	}
 
 	/**
+	 * Test that the callback can be retrieved.
+	 */
+	public function testGetCallback(): void {
+		$callback = function ( $context, $args ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+			return 'callback result: ' . ( $context['value'] ?? 'default' );
+		};
+
+		$tag = new Personalization_Tag(
+			'Test Tag',
+			'test_token',
+			'Test Category',
+			$callback
+		);
+
+		// Get the callback and verify it's the same one.
+		$retrieved_callback = $tag->get_callback();
+		$this->assertSame( $callback, $retrieved_callback );
+
+		// Verify the callback can be executed.
+		$result = call_user_func( $retrieved_callback, array( 'value' => 'test' ), array() );
+		$this->assertSame( 'callback result: test', $result );
+	}
+
+	/**
 	 * Test that deserialization is prevented for security reasons.
 	 */
 	public function testUnserializeThrowsException(): void {

@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Eliminate hard-coded 'grouped' product handling in frontend of quantity selector block
