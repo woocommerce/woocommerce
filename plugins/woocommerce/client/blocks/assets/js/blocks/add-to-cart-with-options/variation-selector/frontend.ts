@@ -48,91 +48,6 @@ setStyles();
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-function attributesAutoselect( variation_selectors ) {
-	const { selectedAttributes } =
-		getContext< Context >();
-			// 'pill' is not actually a possible optionStyle value, pills are simply the default option, and they don't give a value to optionStyle
-	for ( const current_variation_selector of variation_selectors ) {
-		const optionStyle = current_variation_selector.dataset?.optionStyle || 'pills';
-		// Dropdown options or Pill inputs,
-		// that HAVE a value (Choose an Option has an empty value of ""),
-		// and are compatible with the possible variations
-		let valid_choices = [];
-		current_variation_selector.querySelectorAll( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).forEach( ( el ) => {
-			var name = '';
-			switch ( optionStyle ) {
-				case 'pills':
-					name = el.getAttribute( 'name' );
-					break;
-				case 'dropdown':
-					name = JSON.parse( el.dataset?.wpContext )[ 'name' ];
-					break;
-				default:
-					throw new Error( 'optionStyle not implemented!: ' + optionStyle );
-			}
-			if ( isAttributeValueValid( {
-				attributeName: name,
-				attributeValue: el.value,
-				selectedAttributes,
-			} ) ) {
-				valid_choices.push( el );
-			}
-		} );
-		if ( valid_choices.length === 1 ) {
-			// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
-			const valid_choice = valid_choices[0];
-			const selected = current_variation_selector.querySelectorAll( ':checked' );
-			if ( selected.length === 0 || selected[0].value !== valid_choice.value ) {
-				// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
-				inAutoselectScope = true;
-				let ev;
-				switch ( optionStyle ) {
-					case 'pills':
-						// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
-						valid_choice.classList.remove( 'disabled' )
-						valid_choice.removeAttribute( 'disabled' );
-						ev = new MouseEvent( 'click', { bubbles: true } );
-						valid_choice.dispatchEvent( ev );
-						break;
-					case 'dropdown':
-						const select = valid_choice.parentElement;
-						select.value = valid_choice.value;
-						ev = new Event( 'change' , { bubbles: true } );
-						select.dispatchEvent( ev );
-						break;
-					default:
-						throw new Error( 'optionStyle not implemented!: ' + optionStyle );
-				}
-				inAutoselectScope = false;
-			}
-		}
-	}
-}
-
-function attributesAutoselectOthers() {
-	const context = getContext< Context >();
-	const { id, autoselect } = context;
-	const variation_selectors = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
-		.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
-		.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
-
-	if ( autoselect && context.selectedValue ) {
-		let target_variation_selector;
-		variation_selectors.forEach( ( el ) => {
-			if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
-				target_variation_selector = el;
-			}
-		} );
-		let other_variation_selectors = [];
-		variation_selectors.forEach( ( el ) => {
-			if ( el !== target_variation_selector ) {
-				other_variation_selectors.push( el );
-			}
-		} );
-		attributesAutoselect( other_variation_selectors );
-	}
-}
-
 /**
  * Check if the attribute value is valid given the other selected attributes and
  * the available variations.
@@ -333,7 +248,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( inAutoselectScope ) {
 					// Avoid infinite recursion
 				} else {
-					attributesAutoselectOthers();
+					actions.autoselectOtherAttributes();
 				}
 			},
 			handleDropdownChange( event: ChangeEvent< HTMLSelectElement > ) {
@@ -343,7 +258,89 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				if ( inAutoselectScope ) {
 					// Avoid infinite recursion
 				} else {
-					attributesAutoselectOthers();
+					actions.autoselectOtherAttributes();
+				}
+			},
+			autoselectAttributes( variation_selectors ) {
+				const { selectedAttributes } = getContext< Context >();
+
+				for ( const current_variation_selector of variation_selectors ) {
+					const optionStyle = current_variation_selector.dataset?.optionStyle || 'pills';
+					// Dropdown options or Pill inputs,
+					// that HAVE a value (Choose an Option has an empty value of ""),
+					// and are compatible with the possible variations
+					let valid_choices = [];
+					current_variation_selector.querySelectorAll( 'option:not([value=""]), input.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:not([value=""])' ).forEach( ( el ) => {
+						var name = '';
+						switch ( optionStyle ) {
+							case 'pills':
+								name = el.getAttribute( 'name' );
+								break;
+							case 'dropdown':
+								name = JSON.parse( el.dataset?.wpContext )[ 'name' ];
+								break;
+							default:
+								throw new Error( 'optionStyle not implemented!: ' + optionStyle );
+						}
+						if ( isAttributeValueValid( {
+							attributeName: name,
+							attributeValue: el.value,
+							selectedAttributes,
+						} ) ) {
+							valid_choices.push( el );
+						}
+					} );
+					if ( valid_choices.length === 1 ) {
+						// Only 1 option (+ the "Choose an option" choice in case of dropdowns)
+						const valid_choice = valid_choices[0];
+						const selected = current_variation_selector.querySelectorAll( ':checked' );
+						if ( selected.length === 0 || selected[0].value !== valid_choice.value ) {
+							// No option selected, OR the selected value is not the same as the only valid one (for example if the selected value is "" (Choose an Option))
+							inAutoselectScope = true;
+							let ev;
+							switch ( optionStyle ) {
+								case 'pills':
+									// Manually enable the input, because we know it is valid and will be enabled by Wordpress's interactivity API anyways.
+									valid_choice.classList.remove( 'disabled' )
+									valid_choice.removeAttribute( 'disabled' );
+									ev = new MouseEvent( 'click', { bubbles: true } );
+									valid_choice.dispatchEvent( ev );
+									break;
+								case 'dropdown':
+									const select = valid_choice.parentElement;
+									select.value = valid_choice.value;
+									ev = new Event( 'change' , { bubbles: true } );
+									select.dispatchEvent( ev );
+									break;
+								default:
+									throw new Error( 'optionStyle not implemented!: ' + optionStyle );
+							}
+							inAutoselectScope = false;
+						}
+					}
+				}
+			},
+			autoselectOtherAttributes() {
+				const context = getContext< Context >();
+				const { id, autoselect } = context;
+				const variation_selectors = document.querySelector( `form.wc-block-add-to-cart-with-options .wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options:has(#${ id })` )
+					.closest( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector' )
+					.querySelectorAll( '.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options' );
+
+				if ( autoselect && context.selectedValue ) {
+					let target_variation_selector;
+					variation_selectors.forEach( ( el ) => {
+						if ( el.querySelector( `[name="${ context.name }"]` ) !== null ) {
+							target_variation_selector = el;
+						}
+					} );
+					let other_variation_selectors = [];
+					variation_selectors.forEach( ( el ) => {
+						if ( el !== target_variation_selector ) {
+							other_variation_selectors.push( el );
+						}
+					} );
+					actions.autoselectAttributes( other_variation_selectors );
 				}
 			},
 		},
@@ -363,7 +360,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 							target_variation_selector = el;
 						}
 					} );
-					attributesAutoselect( [ target_variation_selector ] );
+					actions.autoselectAttributes( [ target_variation_selector ] );
 				}
 			},
 			setSelectedVariationId: () => {
