@@ -147,7 +147,7 @@ trait RestApiCache {
 			return $response;
 		}
 
-		$cached_response = $this->get_cached_response( $request, $cached_config );
+		$cached_response = $this->get_cached_response( $cached_config );
 
 		if ( $cached_response ) {
 			$cached_response->header( 'X-WC-Cache', 'HIT' );
@@ -335,11 +335,10 @@ trait RestApiCache {
 	/**
 	 * Get a cached response, but only if it's valid (otherwise the cached response will be invalidated).
 	 *
-	 * @param WP_REST_Request $request       The request object.
-	 * @param array           $cached_config Built caching configuration from build_cache_config().
+	 * @param array $cached_config Built caching configuration from build_cache_config().
 	 * @return WP_REST_Response|null Cached response, or null if not available or has been invalidated.
 	 */
-	private function get_cached_response( WP_REST_Request $request, array $cached_config ): ?WP_REST_Response {
+	private function get_cached_response( array $cached_config ): ?WP_REST_Response {
 		$cache_key   = $cached_config['cache_key'];
 		$entity_type = $cached_config['entity_type'];
 
