@@ -1,3 +1,6 @@
+// Import shared sidebar layout styles
+@import "../shared/sidebar-layout.scss";
+
 .woocommerce-layout .woocommerce-layout__main {
 	@include breakpoint("<782px") {
 		padding-top: 0 !important;
@@ -44,9 +47,6 @@ body.woocommerce-customize-store.js.is-fullscreen-mode {
 		display: none;
 	}
 }
-
-// Import shared sidebar layout styles
-@import '../shared/sidebar-layout';
 
 // Splash page - uses shared sidebar layout
 .woocommerce-customize-store__container {
