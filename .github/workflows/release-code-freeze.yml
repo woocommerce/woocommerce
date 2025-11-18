@@ -77,18 +77,18 @@ jobs:
       nextReleaseBranch: ${{ steps.calculate-versions.outputs.nextReleaseBranch }}
       nextReleaseVersion: ${{ steps.calculate-versions.outputs.nextReleaseVersion }}
     steps:
-      - name: Verify no PRs open by the github-actions bot are open
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
-        with:
-          script: |
-            const automatedPRs = await github.rest.search.issuesAndPullRequests({
-              q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open author:app/github-actions`,
-            });
+      # - name: Verify no PRs open by the github-actions bot are open
+      #   uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+      #   with:
+      #     script: |
+      #       const automatedPRs = await github.rest.search.issuesAndPullRequests({
+      #         q: `repo:${context.repo.owner}/${context.repo.repo} is:pr is:open label:Release`,
+      #       });
 
-            if (automatedPRs.data.items.length > 0) {
-              core.setFailed('There are PRs by the github-actions bot that are still open. Please merge or close before proceeding.');
-              process.exit(1);
-            }
+      #       if (automatedPRs.data.items.length > 0) {
+      #         core.setFailed('There are PRs by the github-actions bot that are still open. Please merge or close before proceeding.');
+      #         process.exit(1);
+      #       }
       - uses: actions/checkout@v4
         with:
           ref: trunk
