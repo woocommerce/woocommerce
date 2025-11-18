@@ -68,7 +68,7 @@ test(
 		await page.goto( 'wp-admin/admin.php?page=wc-admin' );
 		await test.step( 'Load the WC Admin page.', async () => {
 			await expect(
-				page.getByRole( 'button', { name: 'Choose your theme' } )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeVisible();
 			await expect( page.getByText( 'Store management' ) ).toBeHidden();
 		} );
@@ -82,9 +82,7 @@ test(
 				.getByRole( 'button', { name: 'Hide setup list' } )
 				.click();
 			await expect(
-				page.getByRole( 'heading', {
-					name: 'Start customizing your store',
-				} )
+				page.getByRole( 'button', { name: 'Customize your store' } )
 			).toBeHidden();
 			await expect( page.getByText( 'Store management' ) ).toBeVisible();
 		} );
