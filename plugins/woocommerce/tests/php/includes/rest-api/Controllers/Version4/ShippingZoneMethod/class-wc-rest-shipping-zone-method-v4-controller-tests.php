@@ -916,7 +916,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 
 		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
 		$request->set_param( 'id', $instance_id );
-		// Don't set force parameter - should default to false
+		// Don't set force parameter - should default to false.
 
 		$response = $this->controller->delete_item( $request );
 
@@ -925,7 +925,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertEquals( 'Shipping methods do not support trashing.', $response->get_error_message() );
 		$this->assertEquals( 501, $response->get_error_data()['status'] );
 
-		// Verify the method was NOT deleted
+		// Verify the method was NOT deleted.
 		$method_after = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$this->assertNotFalse( $method_after, 'Method should not be deleted without force=true' );
 
@@ -952,7 +952,7 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertEquals( 'Shipping methods do not support trashing.', $response->get_error_message() );
 		$this->assertEquals( 501, $response->get_error_data()['status'] );
 
-		// Verify the method was NOT deleted
+		// Verify the method was NOT deleted.
 		$method_after = \WC_Shipping_Zones::get_shipping_method( $instance_id );
 		$this->assertNotFalse( $method_after, 'Method should not be deleted with force=false' );
 
