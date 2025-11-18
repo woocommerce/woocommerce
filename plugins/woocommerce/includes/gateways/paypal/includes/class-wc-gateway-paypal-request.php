@@ -772,6 +772,11 @@ class WC_Gateway_Paypal_Request {
 	 * @return string Normalized URL.
 	 */
 	private function normalize_url_for_paypal( $url ) {
+		// Replace encoded ampersand with actual ampersand.
+		// In some cases, the URL may contain encoded ampersand but PayPal expects the actual ampersand.
+		// PayPal request fails if the URL contains encoded ampersand.
+		$url = str_replace( '&#038;', '&', $url );
+
 		// If the URL is already the home URL, return it.
 		if ( strpos( $url, home_url() ) === 0 ) {
 			return $url;
