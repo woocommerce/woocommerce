@@ -253,6 +253,7 @@ class Controller extends AbstractController {
 		$force   = $request['force'];
 
 		// Shipping zones do not support trashing.
+		// This is done to ensure backward compatibility w/ v2/v3
 		if ( ! $force ) {
 			return new WP_Error(
 				'woocommerce_rest_trash_not_supported',
@@ -261,16 +262,13 @@ class Controller extends AbstractController {
 			);
 		}
 
-		// Validate the zone exists.
 		$zone = $this->validate_zone( $zone_id );
 		if ( is_wp_error( $zone ) ) {
 			return $zone;
 		}
 
-		// Prepare response before deletion.
 		$response = rest_ensure_response( $this->prepare_item_for_response( $zone, $request ) );
 
-		// Perform the deletion (delete_zone returns void).
 		WC_Shipping_Zones::delete_zone( $zone_id );
 
 		return $response;
