@@ -689,6 +689,10 @@ class OrdersTableQuery {
 	private function sanitize_status(): void {
 		$valid_statuses = array_keys( wc_get_order_statuses() );
 
+		if ( empty( $this->args['status'] ) ) {
+			$this->args['status'] = array();
+		}
+
 		if ( ! is_array( $this->args['status'] ) ) {
 			$this->args['status'] = array( $this->args['status'] );
 		}
