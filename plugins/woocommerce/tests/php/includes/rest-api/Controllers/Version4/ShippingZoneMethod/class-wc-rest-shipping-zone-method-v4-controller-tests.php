@@ -792,8 +792,15 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 		$this->assertEquals( 200, $response->get_status() );
 
 		$data = $response->get_data();
-		$this->assertArrayHasKey( 'success', $data );
-		$this->assertTrue( $data['success'] );
+		// Verify response contains full method object (not just success flag).
+		$this->assertArrayHasKey( 'instance_id', $data );
+		$this->assertArrayHasKey( 'zone_id', $data );
+		$this->assertArrayHasKey( 'method_id', $data );
+		$this->assertArrayHasKey( 'enabled', $data );
+		$this->assertArrayHasKey( 'settings', $data );
+		$this->assertEquals( $instance_id, $data['instance_id'] );
+		$this->assertEquals( 'flat_rate', $data['method_id'] );
+		$this->assertEquals( $zone->get_id(), $data['zone_id'] );
 
 		// Verify the method was actually deleted.
 		$methods_after = $zone->get_shipping_methods( false );
@@ -847,8 +854,48 @@ class WC_REST_Shipping_Zone_Method_V4_Controller_Tests extends WC_REST_Unit_Test
 			$this->assertEquals( 200, $response->get_status() );
 
 			$data = $response->get_data();
-			$this->assertTrue( $data['success'], "Delete did not return success for method type: {$method_type}" );
+			$this->assertArrayHasKey( 'method_id', $data, "Response missing method_id for method type: {$method_type}" );
+			$this->assertEquals( $method_type, $data['method_id'], "Method type mismatch for: {$method_type}" );
 		}
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test that woocommerce_rest_delete_shipping_zone_method action hook is fired.
+	 */
+	public function test_delete_item_fires_action_hook() {
+		wp_set_current_user( self::$admin_user_id );
+
+		$zone        = $this->create_shipping_zone();
+		$instance_id = $zone->add_shipping_method( 'flat_rate' );
+
+		$hook_fired  = false;
+		$hook_method = null;
+		$hook_zone   = null;
+
+		// Add hook listener.
+		add_action(
+			'woocommerce_rest_delete_shipping_zone_method',
+			function ( $method, $zone, $response, $request ) use ( &$hook_fired, &$hook_method, &$hook_zone ) {
+				$hook_fired  = true;
+				$hook_method = $method;
+				$hook_zone   = $zone;
+			},
+			10,
+			4
+		);
+
+		$request = new WP_REST_Request( 'DELETE', "/wc/v4/shipping-zone-method/{$instance_id}" );
+		$request->set_param( 'id', $instance_id );
+
+		$response = $this->controller->delete_item( $request );
+
+		$this->assertTrue( $hook_fired, 'woocommerce_rest_delete_shipping_zone_method action hook was not fired' );
+		$this->assertNotNull( $hook_method, 'Hook did not receive method parameter' );
+		$this->assertNotNull( $hook_zone, 'Hook did not receive zone parameter' );
+		$this->assertEquals( $instance_id, $hook_method->instance_id, 'Hook received wrong method' );
+		$this->assertEquals( $zone->get_id(), $hook_zone->get_id(), 'Hook received wrong zone' );
 
 		wp_set_current_user( 0 );
 	}
