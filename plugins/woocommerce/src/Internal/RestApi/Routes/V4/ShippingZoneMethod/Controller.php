@@ -223,7 +223,7 @@ class Controller extends AbstractController {
 	}
 
 	/**
-	 * Delte shipping zone method by ID.
+	 * Delete shipping zone method by ID.
 	 *
 	 * @param WP_REST_Request $request Full details about the request.
 	 * @return WP_REST_Response|WP_Error
