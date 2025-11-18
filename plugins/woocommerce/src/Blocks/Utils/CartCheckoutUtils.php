@@ -363,6 +363,12 @@ class CartCheckoutUtils {
 			);
 		}
 
+		if ( isset( $country_locales['default'] ) && is_array( $country_locales['default'] ) ) {
+			$country_data['default'] = array(
+					'locale' => $country_locales['default'],
+			);
+		}
+
 		return $country_data;
 	}
 
