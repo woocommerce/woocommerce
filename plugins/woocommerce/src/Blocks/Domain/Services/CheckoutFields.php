@@ -677,7 +677,7 @@ class CheckoutFields {
 	 * @return array An array of fields.
 	 */
 	public function get_core_fields() {
-		return [
+		$blocks_defined_core_fields = [
 			'email'      => [
 				'label'          => __( 'Email address', 'woocommerce' ),
 				'optionalLabel'  => __(
@@ -812,6 +812,11 @@ class CheckoutFields {
 				'index'          => 100,
 			],
 		];
+
+		// Merge the "default" country locale with our defined core fields here, we're not using the default locale alone
+		//because it could have fields removed, so merging it with this list ensures we have the full set of fields.
+		$default_core_locale = isset( WC()->countries->locale['default'] ) ? WC()->countries->locale['default'] : [];
+		return wc_array_overlay( $blocks_defined_core_fields, $default_core_locale );
 	}
 
 	/**
