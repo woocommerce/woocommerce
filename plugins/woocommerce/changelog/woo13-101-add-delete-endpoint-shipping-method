@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add DELETE endpoint for shipping zone methods in REST API v4.
